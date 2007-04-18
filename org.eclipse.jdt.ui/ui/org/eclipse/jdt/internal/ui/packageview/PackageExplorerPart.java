@@ -1407,7 +1407,13 @@ public class PackageExplorerPart extends ViewPart
         if (workingSetGroup != null) {
 		    IWorkingSet workingSet= workingSetGroup.getWorkingSet();  	    
 		    if (workingSetGroup.isFiltered(getVisibleParent(element), element)) {
-		        String message= Messages.format(PackagesMessages.PackageExplorer_notFound, workingSet.getLabel());  
+		    	String message;
+		    	if (element instanceof IJavaElement) {
+		    		String elementLabel= JavaElementLabels.getElementLabel((IJavaElement)element, JavaElementLabels.ALL_DEFAULT);
+		    		message= Messages.format(PackagesMessages.PackageExplorerPart_notFoundSepcific, new String[] {elementLabel, workingSet.getLabel()});
+		    	} else {
+		    		message= Messages.format(PackagesMessages.PackageExplorer_notFound, workingSet.getLabel());  		    		
+		    	}
 		        if (MessageDialog.openQuestion(getSite().getShell(), PackagesMessages.PackageExplorer_filteredDialog_title, message)) { 
 		            workingSetGroup.setWorkingSet(null, true);		
 		            if (revealElementOrParent(element))
@@ -1422,7 +1428,13 @@ public class PackageExplorerPart extends ViewPart
         String[] currentFilters= filterGroup.internalGetEnabledFilterIds(); 
         String[] newFilters= filterGroup.removeFiltersFor(getVisibleParent(element), element, getTreeViewer().getContentProvider()); 
         if (currentFilters.length > newFilters.length) {
-            String message= PackagesMessages.PackageExplorer_removeFilters; 
+        	String message;
+        	if (element instanceof IJavaElement) {
+	    		String elementLabel= JavaElementLabels.getElementLabel((IJavaElement)element, JavaElementLabels.ALL_DEFAULT);
+	    		message= Messages.format(PackagesMessages.PackageExplorerPart_removeFiltersSpecific, elementLabel);
+	    	} else {
+	    		message= PackagesMessages.PackageExplorer_removeFilters;  		    		
+	    	}
             if (MessageDialog.openQuestion(getSite().getShell(), PackagesMessages.PackageExplorer_filteredDialog_title, message)) { 
                 filterGroup.setFilters(newFilters);		
                 if (revealElementOrParent(element))
@@ -1542,6 +1554,20 @@ public class PackageExplorerPart extends ViewPart
 				fWorkingSetModel= new WorkingSetModel(null);
 			}
 		});
+	}
+	
+
+	/**
+	 * @return the selected working set to filter if in root mode {@link ViewActionGroup#SHOW_PROJECTS}
+	 */
+	public IWorkingSet getFilterWorkingSet() {
+		if (!showProjects())
+			return null;
+		
+		if (fActionSet == null)
+			return null;
+		
+		return fActionSet.getWorkingSetActionGroup().getFilterGroup().getWorkingSet();
 	}
 
 	public WorkingSetModel getWorkingSetModel() {

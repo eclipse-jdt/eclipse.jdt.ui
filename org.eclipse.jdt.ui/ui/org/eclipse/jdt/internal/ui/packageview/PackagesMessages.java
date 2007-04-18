@@ -57,6 +57,8 @@ public final class PackagesMessages extends NLS {
 	public static String OpenResource_error_messageArgs;
 	public static String OpenResource_error_messageProblems;
 	public static String OpenResource_error_title;
+	public static String PackageExplorerPart_notFoundSepcific;
+	public static String PackageExplorerPart_removeFiltersSpecific;
 	public static String Sorter_expectPackage;
 	public static String ShowLibraries_hideReferencedLibs;
 	public static String ShowLibraries_showReferencedLibs;

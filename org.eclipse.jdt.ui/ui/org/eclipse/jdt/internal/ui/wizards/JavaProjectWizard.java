@@ -11,9 +11,6 @@
 package org.eclipse.jdt.internal.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -28,6 +25,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreePath;
 
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 
@@ -38,8 +36,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
-import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
+import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
 
 public class JavaProjectWizard extends NewElementWizard implements IExecutableExtension {
     
@@ -79,38 +77,25 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 	public boolean performFinish() {
 		boolean res= super.performFinish();
 		if (res) {
+			IJavaElement newElement= getCreatedElement();
+			
 			IWorkingSet[] workingSets= fFirstPage.getWorkingSets();
 			for (int i= 0; i < workingSets.length; i++) {
 				IWorkingSet workingSet= workingSets[i];
 				IAdaptable[] elements= workingSet.getElements();
 				IAdaptable[] newElements= new IAdaptable[elements.length + 1];
 				System.arraycopy(elements, 0, newElements, 0, elements.length);
-				IJavaElement element= getCreatedElement();
-				newElements[newElements.length - 1]= element;
-				workingSet.setElements(newElements);
-			}
-			
-			PackageExplorerPart explorerPart= PackageExplorerPart.getFromActivePerspective();
-			if (explorerPart != null && workingSets.length > 0) {
-				WorkingSetModel workingSetModel= explorerPart.getWorkingSetModel();
-				HashSet active= new HashSet(Arrays.asList(workingSetModel.getActiveWorkingSets()));
-				
-				boolean hasChange= false;
-				for (int j= 0; j < workingSets.length; j++) {
-					IWorkingSet workingSet= workingSets[j];
-					if (!active.contains(workingSet)) {
-						active.add(workingSet);
-						hasChange= true;
-					}
-				}
-				
-				if (hasChange) {
-					workingSetModel.setActiveWorkingSets((IWorkingSet[])active.toArray(new IWorkingSet[active.size()]));
-				}
+				newElements[newElements.length - 1]= newElement;
+				workingSet.setElements(workingSet.adaptElements(newElements));
 			}
 			
 			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
-	 		selectAndReveal(fSecondPage.getJavaProject().getProject());
+			PackageExplorerPart activePackageExplorer= getActivePackageExplorer();
+			if (activePackageExplorer == null) {
+				selectAndReveal(fSecondPage.getJavaProject().getProject());				
+			} else {
+				activePackageExplorer.tryToReveal(newElement);
+			}
 		}
 		return res;
 	}
@@ -167,47 +152,61 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 			if (isValidWorkingSet((IWorkingSet)candidate))
 				return new IWorkingSet[] {(IWorkingSet)candidate};
 		} else {
-			PackageExplorerPart explorerPart= PackageExplorerPart.getFromActivePerspective();
+			PackageExplorerPart explorerPart= getActivePackageExplorer();
 			if (explorerPart == null)
 				return null;
 			
-			WorkingSetModel workingSetModel= explorerPart.getWorkingSetModel();
-			if (workingSetModel == null)
-				return null;
-			
-			IWorkingSet[] activeWorkingSets= workingSetModel.getActiveWorkingSets();
-
-			ArrayList result= new ArrayList();
-			for (int i= 0; i < activeWorkingSets.length; i++) {
-				IWorkingSet workingSet= activeWorkingSets[i];
-				if (contains(workingSet, candidate)) {
-					if (isValidWorkingSet(workingSet))
-						result.add(workingSet);
-				}
+			if (explorerPart.getRootMode() == ViewActionGroup.SHOW_PROJECTS) {				
+				//Get active filter
+				IWorkingSet filterWorkingSet= explorerPart.getFilterWorkingSet();
+				if (filterWorkingSet == null)
+					return null;
+				
+				if (!isValidWorkingSet(filterWorkingSet))
+					return null;
+				
+				return new IWorkingSet[] {filterWorkingSet};
+			} else if (explorerPart.getRootMode() == ViewActionGroup.SHOW_WORKING_SETS) {
+				//If we have been gone into a working set return the working set
+				Object input= explorerPart.getViewPartInput();
+				if (!(input instanceof IWorkingSet))
+					return null;
+				
+				IWorkingSet workingSet= (IWorkingSet)input;
+				if (!isValidWorkingSet(workingSet))
+					return null;
+				
+				return new IWorkingSet[] {workingSet};
 			}
-			if (result.size() == 0)
-				return null;
-			
-			return (IWorkingSet[])result.toArray(new IWorkingSet[result.size()]);
 		}
 		
 		return null;
 	}
 
+	private PackageExplorerPart getActivePackageExplorer() {
+		PackageExplorerPart explorerPart= PackageExplorerPart.getFromActivePerspective();
+		if (explorerPart == null)
+			return null;
+		
+		IWorkbenchPage activePage= explorerPart.getViewSite().getWorkbenchWindow().getActivePage();
+		if (activePage == null)
+			return null;
+		
+		if (activePage.getActivePart() != explorerPart)
+			return null;
+		
+		return explorerPart;
+	}
+
 	private boolean isValidWorkingSet(IWorkingSet workingSet) {
-		if (OthersWorkingSetUpdater.ID.equals(workingSet.getId()))
+		String id= workingSet.getId();	
+		if (!JavaWorkingSetUpdater.ID.equals(id) && !"org.eclipse.ui.resourceWorkingSetPage".equals(id)) //$NON-NLS-1$
+			return false;
+		
+		if (workingSet.isAggregateWorkingSet())
 			return false;
 		
 		return true;
-	}
-
-	private boolean contains(IWorkingSet workingSet, Object candidate) {
-		IAdaptable[] elements= workingSet.getElements();
-		for (int i= 0; i < elements.length; i++) {
-			if (candidate.equals(elements[i]))
-				return true;
-		}
-		return false;
 	}
         
 }
