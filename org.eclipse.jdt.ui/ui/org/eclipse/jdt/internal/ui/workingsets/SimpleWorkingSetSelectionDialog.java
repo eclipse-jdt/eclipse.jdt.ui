@@ -122,6 +122,8 @@ public class SimpleWorkingSetSelectionDialog extends SelectionDialog {
 	public SimpleWorkingSetSelectionDialog(Shell shell, IWorkingSet[] workingSet, String[] workingSetIDs) {
 		super(shell);
 		setTitle(WorkingSetMessages.SimpleWorkingSetSelectionDialog_SimpleSelectWorkingSetDialog_title);
+		setHelpAvailable(false);
+		setShellStyle(getShellStyle() | SWT.RESIZE);
 		fWorkingSet= workingSet;
 		fWorkingSetIDs= workingSetIDs;
 	}

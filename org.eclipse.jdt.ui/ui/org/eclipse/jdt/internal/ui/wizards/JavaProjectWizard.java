@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -77,25 +78,32 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 	public boolean performFinish() {
 		boolean res= super.performFinish();
 		if (res) {
-			IJavaElement newElement= getCreatedElement();
+			final IJavaElement newElement= getCreatedElement();
 			
 			IWorkingSet[] workingSets= fFirstPage.getWorkingSets();
 			for (int i= 0; i < workingSets.length; i++) {
 				IWorkingSet workingSet= workingSets[i];
-				IAdaptable[] elements= workingSet.getElements();
-				IAdaptable[] newElements= new IAdaptable[elements.length + 1];
-				System.arraycopy(elements, 0, newElements, 0, elements.length);
-				newElements[newElements.length - 1]= newElement;
-				workingSet.setElements(workingSet.adaptElements(newElements));
+				IAdaptable[] adaptedNewElements= workingSet.adaptElements(new IAdaptable[] {newElement});
+				if (adaptedNewElements.length == 1) {
+					IAdaptable[] elements= workingSet.getElements();
+					IAdaptable[] newElements= new IAdaptable[elements.length + 1];
+					System.arraycopy(elements, 0, newElements, 0, elements.length);
+					newElements[newElements.length - 1]= adaptedNewElements[0];
+					workingSet.setElements(newElements);
+				}
 			}
 			
 			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
-			PackageExplorerPart activePackageExplorer= getActivePackageExplorer();
-			if (activePackageExplorer == null) {
-				selectAndReveal(fSecondPage.getJavaProject().getProject());				
-			} else {
-				activePackageExplorer.tryToReveal(newElement);
-			}
+			selectAndReveal(fSecondPage.getJavaProject().getProject());				
+			
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					PackageExplorerPart activePackageExplorer= getActivePackageExplorer();
+					if (activePackageExplorer != null) {
+						activePackageExplorer.tryToReveal(newElement);
+					}
+				}
+			});
 		}
 		return res;
 	}
@@ -130,6 +138,41 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 	}
 	
 	private IWorkingSet[] getWorkingSets(IStructuredSelection selection) {
+		IWorkingSet selected= getSelectedWorkingSet(selection);
+		if (selected != null)
+			return new IWorkingSet[] {selected};
+		
+		PackageExplorerPart explorerPart= getActivePackageExplorer();
+		if (explorerPart == null)
+			return null;
+		
+		if (explorerPart.getRootMode() == ViewActionGroup.SHOW_PROJECTS) {				
+			//Get active filter
+			IWorkingSet filterWorkingSet= explorerPart.getFilterWorkingSet();
+			if (filterWorkingSet == null)
+				return null;
+			
+			if (!isValidWorkingSet(filterWorkingSet))
+				return null;
+			
+			return new IWorkingSet[] {filterWorkingSet};
+		} else if (explorerPart.getRootMode() == ViewActionGroup.SHOW_WORKING_SETS) {
+			//If we have been gone into a working set return the working set
+			Object input= explorerPart.getViewPartInput();
+			if (!(input instanceof IWorkingSet))
+				return null;
+			
+			IWorkingSet workingSet= (IWorkingSet)input;
+			if (!isValidWorkingSet(workingSet))
+				return null;
+			
+			return new IWorkingSet[] {workingSet};
+		}
+		
+		return null;
+	}
+
+	private IWorkingSet getSelectedWorkingSet(IStructuredSelection selection) {
 		if (!(selection instanceof ITreeSelection))
 			return null;
 		
@@ -148,39 +191,14 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 			return null;
 
 		Object candidate= path.getSegment(0);
-		if (candidate instanceof IWorkingSet) {
-			if (isValidWorkingSet((IWorkingSet)candidate))
-				return new IWorkingSet[] {(IWorkingSet)candidate};
-		} else {
-			PackageExplorerPart explorerPart= getActivePackageExplorer();
-			if (explorerPart == null)
-				return null;
+		if (!(candidate instanceof IWorkingSet))
+			return null;
 			
-			if (explorerPart.getRootMode() == ViewActionGroup.SHOW_PROJECTS) {				
-				//Get active filter
-				IWorkingSet filterWorkingSet= explorerPart.getFilterWorkingSet();
-				if (filterWorkingSet == null)
-					return null;
-				
-				if (!isValidWorkingSet(filterWorkingSet))
-					return null;
-				
-				return new IWorkingSet[] {filterWorkingSet};
-			} else if (explorerPart.getRootMode() == ViewActionGroup.SHOW_WORKING_SETS) {
-				//If we have been gone into a working set return the working set
-				Object input= explorerPart.getViewPartInput();
-				if (!(input instanceof IWorkingSet))
-					return null;
-				
-				IWorkingSet workingSet= (IWorkingSet)input;
-				if (!isValidWorkingSet(workingSet))
-					return null;
-				
-				return new IWorkingSet[] {workingSet};
-			}
-		}
+		IWorkingSet result= (IWorkingSet)candidate;
+		if (!isValidWorkingSet(result))
+			return null;
 		
-		return null;
+		return result;
 	}
 
 	private PackageExplorerPart getActivePackageExplorer() {
@@ -208,5 +226,5 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 		
 		return true;
 	}
-        
+	
 }
