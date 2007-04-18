@@ -43,10 +43,10 @@ public class CutAction extends SelectionDispatchAction{
 
 	private CopyToClipboardAction fCopyToClipboardAction;
 
-	public CutAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction) {
+	public CutAction(IWorkbenchSite site, Clipboard clipboard) {
 		super(site);
 		setText(ReorgMessages.CutAction_text); 
-		fCopyToClipboardAction= new CopyToClipboardAction(site, clipboard, pasteAction);
+		fCopyToClipboardAction= new CopyToClipboardAction(site, clipboard);
 
 		ISharedImages workbenchImages= JavaPlugin.getDefault().getWorkbench().getSharedImages();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_CUT_DISABLED));

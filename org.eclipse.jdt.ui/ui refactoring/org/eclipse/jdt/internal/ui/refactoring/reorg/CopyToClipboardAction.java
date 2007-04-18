@@ -61,16 +61,14 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class CopyToClipboardAction extends SelectionDispatchAction{
 
 	private final Clipboard fClipboard;
-	private SelectionDispatchAction fPasteAction;//may be null
 	private boolean fAutoRepeatOnFailure= false;
 
-	public CopyToClipboardAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction) {
+	public CopyToClipboardAction(IWorkbenchSite site, Clipboard clipboard) {
 		super(site);
 		setText(ReorgMessages.CopyToClipboardAction_0); 
 		setDescription(ReorgMessages.CopyToClipboardAction_1); 
 		Assert.isNotNull(clipboard);
 		fClipboard= clipboard;
-		fPasteAction= pasteAction;
 		ISharedImages workbenchImages= getWorkbenchSharedImages();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY_DISABLED));
 		setImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
@@ -126,11 +124,6 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 
 	private void doRun(IResource[] resources, IJavaElement[] javaElements) throws CoreException {
 		new ClipboardCopier(resources, javaElements, fClipboard, getShell(), fAutoRepeatOnFailure).copyToClipboard();
-
-		// update the enablement of the paste action
-		// workaround since the clipboard does not support callbacks				
-		if (fPasteAction != null && fPasteAction.getSelection() != null)
-			fPasteAction.update(fPasteAction.getSelection());
 	}
 
 	private boolean canEnable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {

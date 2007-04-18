@@ -84,13 +84,13 @@ public class CCPActionGroup extends ActionGroup {
 		fPasteAction= new PasteAction(fSite, fClipboard);
 		fPasteAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.PASTE);
 		
-		fCopyAction= new CopyToClipboardAction(fSite, fClipboard, fPasteAction);
+		fCopyAction= new CopyToClipboardAction(fSite, fClipboard);
 		fCopyAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.COPY);
 		
-		fCopyQualifiedNameAction= new CopyQualifiedNameAction(fSite, fPasteAction);
+		fCopyQualifiedNameAction= new CopyQualifiedNameAction(fSite);
 		fCopyQualifiedNameAction.setActionDefinitionId(CopyQualifiedNameAction.ACTION_DEFINITION_ID);
 		
-		fCutAction= new CutAction(fSite, fClipboard, fPasteAction);
+		fCutAction= new CutAction(fSite, fClipboard);
 		fCutAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.CUT);
 		
 		fDeleteAction= new DeleteAction(fSite);

@@ -2310,7 +2310,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		action= new ClipboardOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "Editor.Paste.", this, ITextOperationTarget.PASTE); //$NON-NLS-1$
 		setAction(ITextEditorActionConstants.PASTE, action);
 		
-		action= new CopyQualifiedNameAction(this, getAction(ITextEditorActionConstants.PASTE));
+		action= new CopyQualifiedNameAction(this);
 		setAction(IJavaEditorActionConstants.COPY_QUALIFIED_NAME, action);
 	}
 	
