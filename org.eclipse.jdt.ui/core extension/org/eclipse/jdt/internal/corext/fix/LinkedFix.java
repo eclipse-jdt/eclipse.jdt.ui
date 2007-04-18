@@ -44,7 +44,7 @@ public class LinkedFix extends AbstractFix {
 	private final LinkedProposalModel fLinkedProposalModel;
 
 	protected LinkedFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewrites) {
-		super(name, compilationUnit, null);
+		super(name, compilationUnit, fixRewrites);
 		fCompilationUnit= compilationUnit;
 		fFixRewrites= fixRewrites;
 		fLinkedProposalModel= new LinkedProposalModel();
