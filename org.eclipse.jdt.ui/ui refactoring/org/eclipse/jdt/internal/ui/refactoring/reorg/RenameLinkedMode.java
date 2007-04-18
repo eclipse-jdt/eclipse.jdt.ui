@@ -125,6 +125,7 @@ public class RenameLinkedMode {
 
 	private RenameInformationPopup fInfoPopup;
 	
+	private boolean fOriginalSaved;
 	private Point fOriginalSelection;
 	private String fOriginalName;
 
@@ -133,6 +134,7 @@ public class RenameLinkedMode {
 	private LinkedPositionGroup fLinkedPositionGroup;
 	private final FocusEditingSupport fFocusEditingSupport;
 	private boolean fShowPreview;
+
 
 	public RenameLinkedMode(IJavaElement element, CompilationUnitEditor editor) {
 		fEditor= editor;
@@ -161,6 +163,8 @@ public class RenameLinkedMode {
 			fgActiveLinkedMode.startFullDialog();
 			return;
 		}
+		
+		fOriginalSaved= ! fEditor.isDirty();
 		
 		ISourceViewer viewer= fEditor.getViewer();
 		IDocument document= viewer.getDocument();
@@ -384,6 +388,9 @@ public class RenameLinkedMode {
 							} catch (BadLocationException e) {
 								throw new InvocationTargetException(e);
 							}
+						}
+						if (fOriginalSaved) {
+							fEditor.doSave(monitor); // started saved -> end saved
 						}
 					}
 				});
