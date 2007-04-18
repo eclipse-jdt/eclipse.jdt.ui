@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Tree;
@@ -104,7 +105,81 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		fResourceToItemsMapper.clearMap();
 		super.unmapAllElements();
 	}
-
+	
+	
+	// ---------------- filter sessions ----------------------------
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.StructuredViewer#addFilter(org.eclipse.jface.viewers.ViewerFilter)
+	 */
+	public void addFilter(ViewerFilter filter) {
+		if (filter instanceof JavaViewerFilter) {
+			((JavaViewerFilter) filter).filteringStart();
+		}
+		super.addFilter(filter);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.StructuredViewer#removeFilter(org.eclipse.jface.viewers.ViewerFilter)
+	 */
+	public void removeFilter(ViewerFilter filter) {
+		super.removeFilter(filter);
+		if (filter instanceof JavaViewerFilter) {
+			((JavaViewerFilter) filter).filteringEnd();
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.StructuredViewer#setFilters(org.eclipse.jface.viewers.ViewerFilter[])
+	 */
+	public void setFilters(ViewerFilter[] filters) {
+		ViewerFilter[] oldFilters= getFilters();
+		for (int i= 0; i < filters.length; i++) {
+			ViewerFilter curr= filters[i];
+			if (curr instanceof JavaViewerFilter && !findAndRemove(oldFilters, curr)) {
+				((JavaViewerFilter) curr).filteringStart();
+			}
+		}
+    	endFilterSessions(oldFilters);
+		super.setFilters(filters);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.StructuredViewer#resetFilters()
+	 */
+	public void resetFilters() {
+    	endFilterSessions(getFilters());
+		super.resetFilters();
+	}
+	
+	private boolean findAndRemove(ViewerFilter[] filters, ViewerFilter filter) {
+		for (int i= 0; i < filters.length; i++) {
+			if (filters[i] == filter) {
+				filters[i]= null;
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private void endFilterSessions(ViewerFilter[] filters) {
+		for (int i= 0; i < filters.length; i++) {
+			ViewerFilter curr= filters[i];
+			if (curr instanceof JavaViewerFilter) {
+				((JavaViewerFilter) curr).filteringEnd();
+			}
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.StructuredViewer#handleDispose(org.eclipse.swt.events.DisposeEvent)
+	 */
+    protected void handleDispose(DisposeEvent event) {
+    	endFilterSessions(getFilters());
+    	super.handleDispose(event);
+    }
+    
+	
 	/*
 	 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
 	 */
@@ -142,6 +217,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	/**
 	 * Answers whether this viewer can ignore label provider changes resulting from
 	 * marker changes in annotation models
+	 * @return return <code>true</code> if annotation model marker changes can be ignored
 	 */
 	private boolean canIgnoreChangesFromAnnotionModel() {
 		Object contentProvider= getContentProvider();
@@ -165,90 +241,64 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	public boolean isExpandable(Object parent) {
 		if (hasFilters() && evaluateExpandableWithFilters(parent)) {
 			// workaround for 65762
-			Object[] children= getRawChildren(parent);
-			if (children.length > 0) {
-				ViewerFilter[] filters= getFilters();
-				for (int i = 0; i < children.length; i++) {
-					if (!isFiltered(children[i], parent, filters)) {
-						return true;
-					}
-				}
-			}
-			return false;
+			return hasFilteredChildren(parent);
 		}
 		return super.isExpandable(parent);
 	}
 	
     protected final boolean hasFilteredChildren(Object parent) {
-		Object[] children = getRawChildren(parent);
-		if (children.length == 0) {
-			return false;
-		}
-		if (!hasFilters()) {
-			return children.length > 0;
-		}
-		ViewerFilter[] filters = getFilters();
-
-		for (int i = 0; i < children.length; i++) {
-			Object object = children[i];
-			if (!isFiltered(object, parent, filters)) {
-				return true;
-			}
-		}
-		return false;
+		Object[] rawChildren= getRawChildren(parent);
+		return containsNonFiltered(rawChildren, parent);
     }
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.AbstractTreeViewer#getFilteredChildren(java.lang.Object)
 	 */
 	protected final Object[] getFilteredChildren(Object parent) {
-		Object[] children = getRawChildren(parent);
-		if (!hasFilters()) {
-			return children;
-		}
-		List list = new ArrayList();
-		ViewerFilter[] filters = getFilters();
-		for (int i= 0; i < filters.length; i++) {
-			if (filters[i] instanceof JavaViewerFilter) {
-				((JavaViewerFilter) filters[i]).filteringStart();
-			}
-		}
-		try {
-			for (int i = 0; i < children.length; i++) {
-				Object object = children[i];
-				if (!isFiltered(object, parent, filters)) {
-					list.add(object);
-				}
-			}
-			return list.toArray();
-		} finally {
-			for (int i= 0; i < filters.length; i++) {
-				if (filters[i] instanceof JavaViewerFilter) {
-					((JavaViewerFilter) filters[i]).filteringEnd();
-				}
-			}
-		}
+		return filter(getRawChildren(parent), parent);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object[])
-	 */
-	protected final Object[] filter(Object[] elements) {
-		ViewerFilter[] filters= getFilters();
-		if (filters == null || filters.length == 0)
+	private Object[] filter(Object[] elements, Object parent) {
+		if (!hasFilters() || elements.length == 0) {
 			return elements;
-		
-		ArrayList filtered= new ArrayList(elements.length);
-		Object root= getRoot();
-		for (int i= 0; i < elements.length; i++) {
-			Object curr= elements[i];
-			if (!isFiltered(curr, root, filters))
-				filtered.add(curr);
 		}
-		return filtered.toArray();
+		List list= new ArrayList(elements.length);
+		ViewerFilter[] filters = getFilters();
+		for (int i = 0; i < elements.length; i++) {
+			Object object = elements[i];
+			if (!isFiltered(object, parent, filters)) {
+				list.add(object);
+			}
+		}
+		return list.toArray();
 	}
 	
+	private boolean containsNonFiltered(Object[] elements, Object parent) {
+		if (elements.length == 0) {
+			return false;
+		}
+		if (!hasFilters()) {
+			return true;
+		}
+		ViewerFilter[] filters = getFilters();
+		for (int i = 0; i < elements.length; i++) {
+			Object object = elements[i];
+			if (!isFiltered(object, parent, filters)) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
+	/**
+	 * All element filter tests must go through this method.
+	 * Can be overridden by subclasses.
+	 * 
+	 * @param object the object to filter
+	 * @param parent the parent
+	 * @param filters the filters to apply
+	 * @return true if the element is filtered
+	 */
 	protected boolean isFiltered(Object object, Object parent, ViewerFilter[] filters) {
 		for (int i = 0; i < filters.length; i++) {
 			ViewerFilter filter = filters[i];
@@ -258,8 +308,25 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		return false;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object[])
+	 */
+	protected final Object[] filter(Object[] elements) {
+		return filter(elements, getRoot());
+	}
+	
 	protected Object[] addAditionalProblemParents(Object[] elements) {
 		return elements;
+	}
+	
+	/**
+	 * Public method to test if a element is filtered by the views active filters
+	 * @param object the element to test for
+	 * @param parent the parent element
+	 * @return return <code>true if the element is filtered</code>
+	 */
+	public boolean isFiltered(Object object, Object parent) {
+		return isFiltered(object, parent, getFilters());
 	}
 }
 

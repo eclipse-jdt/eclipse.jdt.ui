@@ -15,9 +15,13 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -33,10 +37,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaViewerFilter;
  * Working set filter for Java viewers.
  */
 public class WorkingSetFilter extends JavaViewerFilter {
-
-	private IWorkingSet fWorkingSet= null;
-	
-	private WorkingSetCompareEntry[] fCachedCompareEntries;
 	
 	private static class WorkingSetCompareEntry {
 		private IPath fResourcePath;
@@ -120,6 +120,18 @@ public class WorkingSetFilter extends JavaViewerFilter {
 		}
 	}
 	
+	private IWorkingSet fWorkingSet;
+	
+	private WorkingSetCompareEntry[] fCachedCompareEntries;
+	private IPropertyChangeListener fPropertyListener;
+	
+	public WorkingSetFilter() {
+		fWorkingSet= null;
+		fCachedCompareEntries= null;
+		
+		fPropertyListener= null;
+	}
+	
 	/**
 	 * Returns the working set which is used by this filter.
 	 * 
@@ -135,27 +147,53 @@ public class WorkingSetFilter extends JavaViewerFilter {
 	 * @param workingSet the working set
 	 */
 	public void setWorkingSet(IWorkingSet workingSet) {
-		fWorkingSet= workingSet;
+		if (fWorkingSet != workingSet) {
+			fWorkingSet= workingSet;
+			updateCache();
+		}
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.filters.JavaViewerFilter#filteringStart()
+	 * @see org.eclipse.jdt.internal.ui.filters.JavaViewerFilter#initFilter()
 	 */
-	public void filteringStart() {
+	protected void initFilter() {
+		if (fPropertyListener == null) {
+			fPropertyListener= new IPropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent event) {
+					if  (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(event.getProperty())) {
+						IWorkingSet newWorkingSet= (IWorkingSet) event.getNewValue();
+						if (newWorkingSet.equals(fWorkingSet)) {
+							updateCache();
+						}
+					}
+				}
+			};
+			PlatformUI.getWorkbench().getWorkingSetManager().addPropertyChangeListener(fPropertyListener);
+		}
+		updateCache();
+	}
+
+	/* package */ final void updateCache() {
 		if (fWorkingSet != null) {
 			IAdaptable[] elements= fWorkingSet.getElements();
 			fCachedCompareEntries= new WorkingSetCompareEntry[elements.length];
 			for (int i= 0; i < elements.length; i++) {
 				fCachedCompareEntries[i]= new WorkingSetCompareEntry(elements[i]);
 			}
+		} else {
+			fCachedCompareEntries= null;
 		}
 	}
-
+	
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.filters.JavaViewerFilter#filteringEnd()
+	 * @see org.eclipse.jdt.internal.ui.filters.JavaViewerFilter#freeFilter()
 	 */
-	public void filteringEnd() {
+	protected void freeFilter() {
 		fCachedCompareEntries= null;
+		if (fPropertyListener != null) {
+			PlatformUI.getWorkbench().getWorkingSetManager().removePropertyChangeListener(fPropertyListener);
+			fPropertyListener= null;
+		}
 	}
 	
 	/*
