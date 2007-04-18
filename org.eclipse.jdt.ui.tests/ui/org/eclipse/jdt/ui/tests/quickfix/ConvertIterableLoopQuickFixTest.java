@@ -370,6 +370,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test;\r\n");
 		buf.append("import java.util.Collection;\r\n");
+		buf.append("import java.util.Iterator;\r\n");
 		buf.append("public class A {\r\n");
 		buf.append("	public A() {\r\n");
 		buf.append("		Collection<Collection<String>> cc= null;\r\n");
@@ -448,6 +449,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test;\r\n");
 		buf.append("import java.util.Collection;\r\n");
+		buf.append("import java.util.Iterator;\r\n");
 		buf.append("public class A {\r\n");
 		buf.append("	public A() {\r\n");
 		buf.append("		Collection<Collection<String>> cc= null;\r\n");
@@ -727,5 +729,44 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		fetchConvertingProposal(buf, cu);
 		
 		assertNull(fConvertLoopProposal);
+	}
+	
+	public void testBug176502() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(List<String> l) {\n");
+		buf.append("        for (Iterator<String> iterator = l.iterator(); iterator.hasNext();) {\n");
+		buf.append("            new Vector<String>();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit unit= pack.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		List proposals= fetchConvertingProposal(buf, unit);
+		
+		assertNotNull(fConvertLoopProposal);
+		
+		assertCorrectLabels(proposals);
+		
+		String preview= getPreviewContent(fConvertLoopProposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(List<String> l) {\n");
+		buf.append("        for (String string : l) {\n");
+		buf.append("            new Vector<String>();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview, expected);
 	}
 }

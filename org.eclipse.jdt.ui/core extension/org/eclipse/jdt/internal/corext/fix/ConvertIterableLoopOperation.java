@@ -230,8 +230,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		final AST ast= cuRewrite.getAST();
 		final ASTRewrite astRewrite= cuRewrite.getASTRewrite();
 		final ImportRewrite importRewrite= cuRewrite.getImportRewrite();
-		
-		final ImportRemover remover= new ImportRemover(getJavaProject(), (CompilationUnit)getForStatement().getRoot());
+		final ImportRemover remover= cuRewrite.getImportRemover();
 		
 		fEnhancedForLoop= ast.newEnhancedForStatement();
 		String[] names= getVariableNameProposals();
@@ -312,7 +311,6 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		pg.addPosition(astRewrite.track(simple), true);
 		declaration.setName(simple);
 		final ITypeBinding iterable= getIterableType(fIterator.getType());
-		final ImportRewrite imports= importRewrite;
 		declaration.setType(importType(iterable, getForStatement(), importRewrite, getRoot()));
 		if (fMakeFinal) {
 			ModifierRewrite.create(astRewrite, declaration).setModifiers(Modifier.FINAL, 0, group);
@@ -320,8 +318,16 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		remover.registerAddedImport(iterable.getQualifiedName());
 		fEnhancedForLoop.setParameter(declaration);
 		fEnhancedForLoop.setExpression(getExpression(astRewrite));
-		remover.registerRemovedNode(getForStatement());
-		remover.applyRemoves(imports);
+		
+		remover.registerRemovedNode(getForStatement().getExpression());
+		for (Iterator iterator= getForStatement().initializers().iterator(); iterator.hasNext();) {
+			ASTNode node= (ASTNode)iterator.next();
+			remover.registerRemovedNode(node);			
+		}
+		for (Iterator iterator= getForStatement().updaters().iterator(); iterator.hasNext();) {
+			ASTNode node= (ASTNode)iterator.next();
+			remover.registerRemovedNode(node);						
+		}
 		
 		return fEnhancedForLoop;
 	}
