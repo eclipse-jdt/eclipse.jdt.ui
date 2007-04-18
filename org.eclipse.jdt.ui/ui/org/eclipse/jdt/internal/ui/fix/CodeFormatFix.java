@@ -80,14 +80,21 @@ public class CodeFormatFix implements IFix {
 					
 					int lineStart= region.getOffset();
 					int lineExclusiveEnd= lineStart + region.getLength();
-					int j= lineExclusiveEnd - 1;
-					while (j >= lineStart && Character.isWhitespace(document.getChar(j)))
-						--j;
+					int j= getIndexOfRightMostNoneWhitspaceCharacter(lineStart, lineExclusiveEnd - 1, document);
 					
-					if (removeTrailingWhitespacesAll || j >= lineStart) {
-						++j;
+					if (removeTrailingWhitespacesAll) {
+						j++;
 						if (j < lineExclusiveEnd)
 							multiEdit.addChild(new DeleteEdit(j, lineExclusiveEnd - j));
+					} else if (removeTrailingWhitespacesIgnorEmpty) {
+						if (j >= lineStart) {
+							if (document.getChar(j) == '*' && getIndexOfRightMostNoneWhitspaceCharacter(lineStart, j - 1, document) < lineStart) {
+								j++;
+							}
+							j++;
+							if (j < lineExclusiveEnd)
+								multiEdit.addChild(new DeleteEdit(j, lineExclusiveEnd - j));							
+						}
 					}
 				}
 				
@@ -111,6 +118,26 @@ public class CodeFormatFix implements IFix {
 		return null;
 	}
 	
+	/**
+	 * Returns the index in document of a none whitespace character 
+	 * between start (inclusive) and end (inclusive) such that if 
+	 * more then one such character the index returned is the largest
+	 * possible (closest to end). Returns start - 1 if no such character. 
+	 * 
+	 * @param start
+	 * @param end
+	 * @param document
+	 * @return the position or start - 1
+	 * @throws BadLocationException
+	 */
+	private static int getIndexOfRightMostNoneWhitspaceCharacter(int start, int end, Document document) throws BadLocationException {
+		int position= end;
+		while (position >= start && Character.isWhitespace(document.getChar(position)))
+			position--;
+		
+		return position;
+	}
+
 	private final ICompilationUnit fCompilationUnit;
 	private final TextChange fChange;
 	

@@ -5831,13 +5831,13 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 	
 	public void testRemoveTrailingWhitespace01() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package    test1;     \n");
 		buf.append("   public class E1 {  \n");
 		buf.append("                   \n");
 		buf.append("}                  \n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
@@ -5853,13 +5853,13 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 	
 	public void testRemoveTrailingWhitespace02() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package    test1;     \n");
 		buf.append("   public class E1 {  \n");
 		buf.append("                   \n");
 		buf.append("}                  \n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY);
@@ -5868,6 +5868,42 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("package    test1;\n");
 		buf.append("   public class E1 {\n");
 		buf.append("                   \n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+	
+	public void testRemoveTrailingWhitespaceBug173081() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" * \n");
+		buf.append(" *     \n");
+		buf.append(" */\n");
+		buf.append("public class E1 { \n");
+		buf.append("    /**\n");
+		buf.append("     * \n");
+		buf.append("	 *     \n");
+		buf.append("     */\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
+		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" * \n");
+		buf.append(" * \n");
+		buf.append(" */\n");
+		buf.append("public class E1 {\n");
+		buf.append("    /**\n");
+		buf.append("     * \n");
+		buf.append("	 * \n");
+		buf.append("     */\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
