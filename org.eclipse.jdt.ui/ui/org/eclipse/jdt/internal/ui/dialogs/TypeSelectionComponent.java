@@ -76,6 +76,9 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
+/**
+ * @deprecated use {@link FilteredTypesSelectionDialog}
+ */
 public class TypeSelectionComponent extends Composite implements ITypeSelectionComponent {
 	
 	private IDialogSettings fSettings;
