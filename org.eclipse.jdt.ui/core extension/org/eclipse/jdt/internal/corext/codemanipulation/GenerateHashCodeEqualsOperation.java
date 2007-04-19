@@ -1016,8 +1016,12 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	private boolean needsNoSuperCall(ITypeBinding typeBinding, String name, ITypeBinding[] parameters) {
 		Assert.isNotNull(typeBinding);
 		IMethodBinding binding= findMethodInHierarchy(typeBinding, name, parameters);
-		if (binding != null)
-			return binding.getDeclaringClass().getQualifiedName().equals(JAVA_LANG_OBJECT);
+		if (binding != null) {
+			final ITypeBinding declaring= binding.getDeclaringClass();
+			if (Bindings.equals(typeBinding, declaring))
+				return true;
+			return declaring.getQualifiedName().equals(JAVA_LANG_OBJECT);
+		}
 		return true;
 	}
 
