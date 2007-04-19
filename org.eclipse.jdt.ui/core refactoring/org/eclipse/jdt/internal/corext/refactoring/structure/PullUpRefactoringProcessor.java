@@ -900,22 +900,23 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			if (members[i].getElementType() != IJavaElement.METHOD)
 				continue;
 			final IMethod method= (IMethod) members[i];
-			final String returnType= Signature.toString(Signature.getReturnType(method.getSignature()).toString());
-			Assert.isTrue(mapping.containsKey(method));
-			final Set set= (Set) mapping.get(method);
-			if (set != null) {
-				for (final Iterator iter= set.iterator(); iter.hasNext();) {
-					final IMethod matchingMethod= (IMethod) iter.next();
-					if (method.equals(matchingMethod))
-						continue;
-					if (!notDeletedMembersInSubtypes.contains(matchingMethod))
-						continue;
-					if (returnType.equals(Signature.toString(Signature.getReturnType(matchingMethod.getSignature()).toString())))
-						continue;
-					final String[] keys= { JavaElementLabels.getTextLabel(matchingMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(matchingMethod.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)};
-					final String message= Messages.format(RefactoringCoreMessages.PullUpRefactoring_different_method_return_type, keys);
-					final RefactoringStatusContext context= JavaStatusContext.create(matchingMethod.getCompilationUnit(), matchingMethod.getNameRange());
-					status.addError(message, context);
+			if (mapping.containsKey(method)) {
+				final Set set= (Set) mapping.get(method);
+				if (set != null) {
+					final String returnType= Signature.toString(Signature.getReturnType(method.getSignature()).toString());
+					for (final Iterator iter= set.iterator(); iter.hasNext();) {
+						final IMethod matchingMethod= (IMethod) iter.next();
+						if (method.equals(matchingMethod))
+							continue;
+						if (!notDeletedMembersInSubtypes.contains(matchingMethod))
+							continue;
+						if (returnType.equals(Signature.toString(Signature.getReturnType(matchingMethod.getSignature()).toString())))
+							continue;
+						final String[] keys= { JavaElementLabels.getTextLabel(matchingMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(matchingMethod.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)};
+						final String message= Messages.format(RefactoringCoreMessages.PullUpRefactoring_different_method_return_type, keys);
+						final RefactoringStatusContext context= JavaStatusContext.create(matchingMethod.getCompilationUnit(), matchingMethod.getNameRange());
+						status.addError(message, context);
+					}
 				}
 			}
 		}
