@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.workingsets;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -69,10 +69,16 @@ public class RemoveWorkingSetElementAction extends SelectionDispatchAction {
 		IWorkingSet ws= getWorkingSet(selection);
 		if (ws == null)
 			return;
-		List elements= new ArrayList(Arrays.asList(ws.getElements()));
+		HashSet elements= new HashSet(Arrays.asList(ws.getElements()));
 		List selectedElements= selection.toList();
 		for (Iterator iter= selectedElements.iterator(); iter.hasNext();) {
-			elements.remove(iter.next());
+			Object object= iter.next();
+			if (object instanceof IAdaptable) {
+				IAdaptable[] adaptedElements= ws.adaptElements(new IAdaptable[] {(IAdaptable)object});
+				if (adaptedElements.length == 1) {					
+					elements.remove(adaptedElements[0]);
+				}
+			}
 		}
 		ws.setElements((IAdaptable[])elements.toArray(new IAdaptable[elements.size()]));
 	}
