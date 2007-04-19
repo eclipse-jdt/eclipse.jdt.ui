@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -120,8 +121,8 @@ public class RenameLinkedMode {
 	
 	private static RenameLinkedMode fgActiveLinkedMode;
 	
-	private CompilationUnitEditor fEditor;
-	private IJavaElement fJavaElement;
+	private final CompilationUnitEditor fEditor;
+	private final IJavaElement fJavaElement;
 
 	private RenameInformationPopup fInfoPopup;
 	
@@ -137,6 +138,8 @@ public class RenameLinkedMode {
 
 
 	public RenameLinkedMode(IJavaElement element, CompilationUnitEditor editor) {
+		Assert.isNotNull(element);
+		Assert.isNotNull(editor);
 		fEditor= editor;
 		fJavaElement= element;
 		fFocusEditingSupport= new FocusEditingSupport();
@@ -343,7 +346,9 @@ public class RenameLinkedMode {
 	}
 
 	public void cancel() {
-		fLinkedModeModel.exit(ILinkedModeListener.NONE);
+		if (fLinkedModeModel != null) {
+			fLinkedModeModel.exit(ILinkedModeListener.NONE);
+		}
 		linkedModeLeft();
 	}
 	
@@ -543,7 +548,9 @@ public class RenameLinkedMode {
 
 	private void linkedModeLeft() {
 		fgActiveLinkedMode= null;
-		fInfoPopup.close();
+		if (fInfoPopup != null) {
+			fInfoPopup.close();
+		}
 		
 		ISourceViewer viewer= fEditor.getViewer();
 		if (viewer instanceof IEditingSupportRegistry) {
