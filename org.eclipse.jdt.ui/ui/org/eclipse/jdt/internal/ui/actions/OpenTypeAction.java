@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.actions;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
@@ -19,6 +21,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ISelection;
 
+import org.eclipse.ui.IActionDelegate2;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
@@ -36,7 +39,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-public class OpenTypeAction extends Action implements IWorkbenchWindowActionDelegate {
+public class OpenTypeAction extends Action implements IWorkbenchWindowActionDelegate, IActionDelegate2 {
 
 	public OpenTypeAction() {
 		super();
@@ -48,8 +51,18 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 	}
 
 	public void run() {
+		runWithEvent(null);
+	}
+	
+	public void runWithEvent(Event e) {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
-		SelectionDialog dialog= new OpenTypeSelectionDialog(parent, true, PlatformUI.getWorkbench().getProgressService(), null, IJavaSearchConstants.TYPE);
+		SelectionDialog dialog;
+		if (e != null && e.stateMask == SWT.MOD1) {
+			// use old open type dialog when MOD1 (but no other modifier) is down:
+			dialog= createOpenTypeSelectionDialog2(parent);
+		} else {
+			dialog= new OpenTypeSelectionDialog(parent, true, PlatformUI.getWorkbench().getProgressService(), null, IJavaSearchConstants.TYPE);
+		}
 		dialog.setTitle(JavaUIMessages.OpenTypeAction_dialogTitle);
 		dialog.setMessage(JavaUIMessages.OpenTypeAction_dialogMessage);
 
@@ -71,6 +84,15 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 		}
 	}
 
+	/**
+	 * @deprecated
+	 * @param parent
+	 * @return the dialog
+	 */
+	private SelectionDialog createOpenTypeSelectionDialog2(Shell parent) {
+		return new org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog2(parent, false, PlatformUI.getWorkbench().getProgressService(), null, IJavaSearchConstants.TYPE);
+	}
+
 	// ---- IWorkbenchWindowActionDelegate
 	// ------------------------------------------------
 
@@ -88,5 +110,16 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 
 	public void selectionChanged(IAction action, ISelection selection) {
 		// do nothing. Action doesn't depend on selection.
+	}
+	
+	// ---- IActionDelegate2
+	// ------------------------------------------------
+
+	public void runWithEvent(IAction action, Event event) {
+		runWithEvent(event);
+	}
+	
+	public void init(IAction action) {
+		// do nothing.
 	}
 }
