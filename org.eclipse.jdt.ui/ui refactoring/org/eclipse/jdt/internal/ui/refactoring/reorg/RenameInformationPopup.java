@@ -743,8 +743,9 @@ public class RenameInformationPopup {
 				IAction prefsAction= new Action(ReorgMessages.RenameInformationPopup_preferences) {
 					public void run() {
 						fRenameLinkedMode.cancel();
-						String prefPageID= JavaBasePreferencePage.JAVA_BASE_PREF_PAGE_ID;
-						PreferencesUtil.createPreferenceDialogOn(fEditor.getSite().getShell(), prefPageID, new String[] { prefPageID }, null).open();
+						String linkedModePrefPageID= "org.eclipse.ui.editors.preferencePages.LinkedModePreferencePage"; //$NON-NLS-1$
+						String refactoringPrefPageID= JavaBasePreferencePage.JAVA_BASE_PREF_PAGE_ID;
+						PreferencesUtil.createPreferenceDialogOn(fEditor.getSite().getShell(), refactoringPrefPageID, new String[] { linkedModePrefPageID, refactoringPrefPageID }, null).open();
 					}
 				};
 				manager.add(prefsAction);
