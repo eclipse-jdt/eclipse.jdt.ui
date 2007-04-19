@@ -25,18 +25,12 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 
 public class WorkingSetActionGroup extends ActionGroup {
 
-	private static final String GROUP_WORKINGSETS= "group.workingSets"; //$NON-NLS-1$
-	
 	private IViewSite fSite;
 	private ISelectionChangedListener fLazyInitializer= new  ISelectionChangedListener() {
 		public void selectionChanged(SelectionChangedEvent event) {
 			ISelectionProvider selectionProvider= fSite.getSelectionProvider();
 			selectionProvider.removeSelectionChangedListener(fLazyInitializer);
 			ISelection selection= event.getSelection();
-			
-			fRemoveAction= new RemoveWorkingSetElementAction(fSite);
-			fRemoveAction.update(selection);
-			selectionProvider.addSelectionChangedListener(fRemoveAction);
 			
 			fEditAction= new OpenPropertiesWorkingSetAction(fSite);
 			fEditAction.update(selection);
@@ -52,7 +46,6 @@ public class WorkingSetActionGroup extends ActionGroup {
 		}
 	};
 	
-	private RemoveWorkingSetElementAction fRemoveAction;
 	private OpenPropertiesWorkingSetAction fEditAction;
 	private OpenCloseWorkingSetAction fCloseAction;
 	private OpenCloseWorkingSetAction fOpenAction;
@@ -65,8 +58,6 @@ public class WorkingSetActionGroup extends ActionGroup {
 	public void dispose() {
 		ISelectionProvider selectionProvider= fSite.getSelectionProvider();
 		
-		if (fRemoveAction != null)
-			selectionProvider.removeSelectionChangedListener(fRemoveAction);
 		if (fEditAction != null)
 			selectionProvider.removeSelectionChangedListener(fEditAction);
 		if (fCloseAction != null) {
@@ -81,9 +72,6 @@ public class WorkingSetActionGroup extends ActionGroup {
 	
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new Separator(GROUP_WORKINGSETS));
-		if (fRemoveAction != null && fRemoveAction.isEnabled())
-			menu.appendToGroup(GROUP_WORKINGSETS, fRemoveAction);
 		if (fCloseAction != null && fCloseAction.isEnabled())
 			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fCloseAction);
 		if (fOpenAction != null && fOpenAction.isEnabled())

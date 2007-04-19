@@ -131,9 +131,8 @@ public class WorkingSetConfigurationBlock {
 
 			public void widgetSelected(SelectionEvent e) {
 				IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
-				IWorkingSet[] workingSets= manager.getWorkingSets();
-				SimpleWorkingSetSelectionDialog dialog= new SimpleWorkingSetSelectionDialog(parent.getShell(), workingSets, fWorkingSetIDs);
-				dialog.setSelection(fSelectedWorkingSets);
+				IWorkingSet[] workingSets= filter(manager.getWorkingSets());
+				SimpleWorkingSetSelectionDialog dialog= new SimpleWorkingSetSelectionDialog(parent.getShell(), workingSets, fSelectedWorkingSets);
 				if (fMessage != null)
 					dialog.setMessage(fMessage);
 
@@ -147,6 +146,26 @@ public class WorkingSetConfigurationBlock {
 					}
 					updateWorkingSetSelection();
 				}
+			}
+
+			private IWorkingSet[] filter(IWorkingSet[] workingSets) {
+				ArrayList result= new ArrayList();
+				
+				for (int i= 0; i < workingSets.length; i++) {
+					if (accept(workingSets[i], fWorkingSetIDs))
+						result.add(workingSets[i]);
+				}
+				
+				return (IWorkingSet[])result.toArray(new IWorkingSet[result.size()]);
+			}
+			
+			private boolean accept(IWorkingSet set, String[] workingSetIDs) {
+				for (int i= 0; i < workingSetIDs.length; i++) {
+					if (workingSetIDs[i].equals(set.getId()))
+						return true;
+				}
+				
+				return false;
 			}
 		});
 		

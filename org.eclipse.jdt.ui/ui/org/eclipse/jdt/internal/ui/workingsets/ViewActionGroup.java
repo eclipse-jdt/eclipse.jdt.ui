@@ -23,6 +23,8 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.actions.ActionGroup;
 
+import org.eclipse.jdt.ui.IContextMenuConstants;
+
 /**
  * An action group to provide access to the working sets.
  */
@@ -31,6 +33,7 @@ public class ViewActionGroup extends ActionGroup {
 	public static final int SHOW_PROJECTS= 1;
 	public static final int SHOW_WORKING_SETS= 2;
 	public static final String MODE_CHANGED= ViewActionGroup.class.getName() + ".mode_changed"; //$NON-NLS-1$
+	private static final String GROUP_WORKINGSETS= "group.workingSets"; //$NON-NLS-1$
 	
 	private static final Integer INT_SHOW_PROJECTS= new Integer(SHOW_PROJECTS);
 	private static final Integer INT_SHOW_WORKING_SETS= new Integer(SHOW_WORKING_SETS);
@@ -40,11 +43,14 @@ public class ViewActionGroup extends ActionGroup {
 	private int fMode;
 	private IMenuManager fMenuManager;
 	private IWorkingSetActionGroup fActiveActionGroup;
-	private WorkingSetShowActionGroup fShowActionGroup;
-	private WorkingSetFilterActionGroup fFilterActionGroup;
+	private final WorkingSetShowActionGroup fShowActionGroup;
+	private final WorkingSetFilterActionGroup fFilterActionGroup;
+	private final ConfigureWorkingSetAssignementAction fWorkingSetAssignementAction;
+	private final IWorkbenchPartSite fSite;
 
 	public ViewActionGroup(int mode, IPropertyChangeListener changeListener, IWorkbenchPartSite site) {
 		fChangeListener= changeListener;
+		fSite= site;
 		if(fChangeListener == null) {
 			fChangeListener = new IPropertyChangeListener() {
 				public void propertyChange(PropertyChangeEvent event) {}
@@ -52,6 +58,8 @@ public class ViewActionGroup extends ActionGroup {
 		}
 		fFilterActionGroup= new WorkingSetFilterActionGroup(site, fChangeListener);
 		fShowActionGroup= new WorkingSetShowActionGroup(site);
+		fWorkingSetAssignementAction= new ConfigureWorkingSetAssignementAction(site);
+		site.getSelectionProvider().addSelectionChangedListener(fWorkingSetAssignementAction);
 		fMode= mode;
 		if (showWorkingSets())
 			fActiveActionGroup= fShowActionGroup;
@@ -63,11 +71,21 @@ public class ViewActionGroup extends ActionGroup {
 		fFilterActionGroup.dispose();
 		fShowActionGroup.dispose();
 		fChangeListener= null;
+		fSite.getSelectionProvider().removeSelectionChangedListener(fWorkingSetAssignementAction);
 		super.dispose();
 	}
 	
 	public void setWorkingSetModel(WorkingSetModel model) {
 		fShowActionGroup.setWorkingSetMode(model);
+		fWorkingSetAssignementAction.setWorkingSetModel(model);
+	}
+	
+	public void fillContextMenu(IMenuManager menu) {
+		if (showWorkingSets()) {
+			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new Separator(GROUP_WORKINGSETS));
+			if (fWorkingSetAssignementAction.isEnabled())
+				menu.appendToGroup(GROUP_WORKINGSETS, fWorkingSetAssignementAction);
+		}
 	}
 
 	/**

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.workingsets;
 
+import com.ibm.icu.text.Collator;
+
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -37,6 +39,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.dialogs.SelectionDialog;
@@ -87,19 +90,9 @@ public class SimpleWorkingSetSelectionDialog extends SelectionDialog {
 	private class Filter extends ViewerFilter {
 		
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
-			IWorkingSet ws= (IWorkingSet)element;
-			return accept(ws, fWorkingSetIDs) && isCompatible(ws);
+			return isCompatible((IWorkingSet)element);
 		}
-		
-		private boolean accept(IWorkingSet set, String[] workingSetIDs) {
-			for (int i= 0; i < workingSetIDs.length; i++) {
-				if (workingSetIDs[i].equals(set.getId()))
-					return true;
-			}
-			
-			return false;
-		}
-		
+				
 		private boolean isCompatible(IWorkingSet set) {
 			if (!set.isSelfUpdating() || set.isAggregateWorkingSet())
 				return false;
@@ -112,23 +105,26 @@ public class SimpleWorkingSetSelectionDialog extends SelectionDialog {
 		
 	}
 	
-	private final IWorkingSet[] fWorkingSet;
-	private IWorkingSet[] fSelectedWorkingSets;
+	private final IWorkingSet[] fWorkingSets;
+	private final IWorkingSet[] fInitialSelection;
+	
 	private CheckboxTableViewer fTableViewer;
-	private final String[] fWorkingSetIDs;
+	private IWorkingSet[] fCheckedElements;
+	
 	private Button fSelectAll;
 	private Button fDeselectAll;
 
-	public SimpleWorkingSetSelectionDialog(Shell shell, IWorkingSet[] workingSet, String[] workingSetIDs) {
+	public SimpleWorkingSetSelectionDialog(Shell shell, IWorkingSet[] allWorkingSet, IWorkingSet[] initialSelection) {
 		super(shell);
 		setTitle(WorkingSetMessages.SimpleWorkingSetSelectionDialog_SimpleSelectWorkingSetDialog_title);
 		setHelpAvailable(false);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
-		fWorkingSet= workingSet;
-		fWorkingSetIDs= workingSetIDs;
+		fWorkingSets= allWorkingSet;
+		fInitialSelection= initialSelection;
+		fCheckedElements= fInitialSelection;
 	}
 	
-	protected Control createDialogArea(Composite parent) {
+	protected final Control createDialogArea(Composite parent) {
 		Composite composite= (Composite)super.createDialogArea(parent);
 		composite.setFont(parent.getFont());
 
@@ -141,23 +137,21 @@ public class SimpleWorkingSetSelectionDialog extends SelectionDialog {
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		inner.setLayout(layout);
-		createTableViewer(inner);
-		createSelectionButtons(inner);
+		fTableViewer= createTableViewer(inner);
+		createRightButtonBar(inner);
+		
+		createBottomButtonBar(composite);
 		
 		return composite;
 	}
 
-	public void setSelection(IWorkingSet[] selectedWorkingSets) {
-		fSelectedWorkingSets= selectedWorkingSets;
-	}
-
 	public IWorkingSet[] getSelection() {
-		return fSelectedWorkingSets;
+		return fCheckedElements;
 	}
 	
-	private void createTableViewer(Composite parent) {
-		fTableViewer= CheckboxTableViewer.newCheckList(parent, SWT.BORDER | SWT.MULTI);
-		fTableViewer.addCheckStateListener(new ICheckStateListener() {
+	protected CheckboxTableViewer createTableViewer(Composite parent) {
+		CheckboxTableViewer result= CheckboxTableViewer.newCheckList(parent, SWT.BORDER | SWT.MULTI);
+		result.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				checkedStateChanged();
 			}
@@ -165,12 +159,13 @@ public class SimpleWorkingSetSelectionDialog extends SelectionDialog {
 		GridData data= new GridData(GridData.FILL_BOTH);
 		data.heightHint= convertHeightInCharsToPixels(20);
 		data.widthHint= convertWidthInCharsToPixels(50);
-		fTableViewer.getTable().setLayoutData(data);
-		fTableViewer.getTable().setFont(parent.getFont());
+		result.getTable().setLayoutData(data);
+		result.getTable().setFont(parent.getFont());
 
-		fTableViewer.addFilter(new Filter());
-		fTableViewer.setLabelProvider(new WorkingSetLabelProvider());
-		fTableViewer.setContentProvider(new IStructuredContentProvider() {
+		result.addFilter(createTableFilter());
+		result.setLabelProvider(createTableLabelProvider());
+		result.setSorter(createTableSorter());
+		result.setContentProvider(new IStructuredContentProvider() {
 			public Object[] getElements(Object element) {
 				return (Object[])element;
 			}
@@ -180,11 +175,31 @@ public class SimpleWorkingSetSelectionDialog extends SelectionDialog {
 			}
 		});
 		
-		fTableViewer.setInput(fWorkingSet);
-		fTableViewer.setCheckedElements(fSelectedWorkingSets);
+		result.setInput(fWorkingSets);
+		result.setCheckedElements(fInitialSelection);
+		
+		return result;
+	}
+
+	protected ViewerSorter createTableSorter() {
+		return new ViewerSorter() {
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				IWorkingSet w1= (IWorkingSet)e1;
+				IWorkingSet w2= (IWorkingSet)e2;
+				return Collator.getInstance().compare(w1.getLabel(), w2.getLabel());
+			}
+		};
+	}
+
+	protected WorkingSetLabelProvider createTableLabelProvider() {
+		return new WorkingSetLabelProvider();
+	}
+
+	protected ViewerFilter createTableFilter() {
+		return new Filter();
 	}
 	
-	private void createSelectionButtons(Composite parent) {
+	protected void createRightButtonBar(Composite parent) {
 		Composite buttons= new Composite(parent, SWT.NONE);
 		buttons.setFont(parent.getFont());
 		buttons.setLayoutData(new GridData(GridData.FILL_VERTICAL));
@@ -193,9 +208,13 @@ public class SimpleWorkingSetSelectionDialog extends SelectionDialog {
 		layout.marginWidth= 0;
 		buttons.setLayout(layout);
 
-		fSelectAll= new Button(buttons, SWT.PUSH);
+		createButtonsForRightButtonBar(buttons);
+	}
+
+	protected void createButtonsForRightButtonBar(Composite bar) {
+		fSelectAll= new Button(bar, SWT.PUSH);
 		fSelectAll.setText(WorkingSetMessages.SimpleWorkingSetSelectionDialog_SelectAll_button); 
-		fSelectAll.setFont(parent.getFont());
+		fSelectAll.setFont(bar.getFont());
 		setButtonLayoutData(fSelectAll);
 		fSelectAll.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -203,9 +222,9 @@ public class SimpleWorkingSetSelectionDialog extends SelectionDialog {
 			}
 		});
 		
-		fDeselectAll= new Button(buttons, SWT.PUSH);
+		fDeselectAll= new Button(bar, SWT.PUSH);
 		fDeselectAll.setText(WorkingSetMessages.SimpleWorkingSetSelectionDialog_DeselectAll_button); 
-		fDeselectAll.setFont(parent.getFont());
+		fDeselectAll.setFont(bar.getFont());
 		setButtonLayoutData(fDeselectAll);
 		fDeselectAll.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -214,17 +233,20 @@ public class SimpleWorkingSetSelectionDialog extends SelectionDialog {
 		});
 	}
 	
-	private void checkedStateChanged() {
-		List elements= Arrays.asList(fTableViewer.getCheckedElements());
-		fSelectedWorkingSets= (IWorkingSet[])elements.toArray(new IWorkingSet[elements.size()]);
+	protected void createBottomButtonBar(Composite parent) {
 	}
 	
-	private void selectAll() {
+	protected void checkedStateChanged() {
+		List elements= Arrays.asList(fTableViewer.getCheckedElements());
+		fCheckedElements= (IWorkingSet[])elements.toArray(new IWorkingSet[elements.size()]);
+	}
+	
+	protected void selectAll() {
 		fTableViewer.setAllChecked(true);
 		checkedStateChanged();
 	}
 	
-	private void deselectAll() {
+	protected void deselectAll() {
 		fTableViewer.setAllChecked(false);
 		checkedStateChanged();
 	}

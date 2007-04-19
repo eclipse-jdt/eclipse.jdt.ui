@@ -24,6 +24,12 @@ public final class WorkingSetMessages extends NLS {
 	public static String AbstractWorkingSetPage_warning_nameMustNotBeEmpty;
 	public static String AbstractWorkingSetPage_warning_workingSetExists;
 	public static String AbstractWorkingSetPage_warning_nameWhitespace;
+	public static String ConfigureWorkingSetAssignementAction_DialogMessage_multi;
+	public static String ConfigureWorkingSetAssignementAction_DialogMessage_single;
+	public static String ConfigureWorkingSetAssignementAction_DialogMessage_specific;
+	public static String ConfigureWorkingSetAssignementAction_New_button;
+	public static String ConfigureWorkingSetAssignementAction_OnlyShowVisible_link;
+	public static String ConfigureWorkingSetAssignementAction_WorkingSets_actionLabel;
 	
 	public static String JavaWorkingSetPage_title;
 	public static String JavaWorkingSetPage_workingSet_name;
