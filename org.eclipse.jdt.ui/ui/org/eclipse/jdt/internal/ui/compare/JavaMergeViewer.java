@@ -46,6 +46,7 @@ import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator.ITokenComparatorFactory;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 
 
@@ -184,6 +185,9 @@ public class JavaMergeViewer extends TextMergeViewer {
 	/**
 	 * Creates a color from the information stored in the given preference store.
 	 * Returns <code>null</code> if there is no such information available.
+	 * @param store preference store
+	 * @param key preference key
+	 * @return the color or <code>null</code>
 	 */
 	private static RGB createColor(IPreferenceStore store, String key) {
 		if (!store.contains(key))
@@ -197,8 +201,12 @@ public class JavaMergeViewer extends TextMergeViewer {
 		return CompareMessages.JavaMergeViewer_title; 
 	}
 
-	protected ITokenComparator createTokenComparator(String s) {
-		return new JavaTokenComparator(s, true);
+	public ITokenComparator createTokenComparator(String s) {
+		return new JavaTokenComparator(s, new ITokenComparatorFactory() {
+			public ITokenComparator createTokenComparator(String text) {
+				return JavaMergeViewer.super.createTokenComparator(text);
+			}
+		});
 	}
 	
 	protected IDocumentPartitioner getDocumentPartitioner() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,10 +27,23 @@ import org.eclipse.jdt.internal.corext.dom.TokenScanner;
  * A comparator for Java tokens.
  */
 public class JavaTokenComparator implements ITokenComparator {
+	
+	/**
+	 * Factory to create text token comparators.
+	 * This is a workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=183224 .
+	 */
+	public static interface ITokenComparatorFactory {
+		/**
+		 * @param text text to be tokenized
+		 * @return a token comparator
+		 */
+		public ITokenComparator createTokenComparator(String text);
+	}
 		
 	private static final boolean DEBUG= false;
-	private String fText;
-	private boolean fAllowToSkip= true;
+	
+	private final String fText;
+	private final ITokenComparatorFactory fTextTokenComparatorFactory;
 	private int fCount;
 	private int[] fStarts;
 	private int[] fLengths;
@@ -38,15 +51,24 @@ public class JavaTokenComparator implements ITokenComparator {
 	/**
 	 * Creates a token comparator for the given string.
 	 * 
-	 * @param text the text to be tokenized 
-	 * @param allowToSkip <code>true</code> it is allowed to skip range comparisons 
+	 * @param text the text to be tokenized
 	 */
-	public JavaTokenComparator(String text, boolean allowToSkip) {
+	public JavaTokenComparator(String text) {
+		this(text, null);
+	}
+	
+	/**
+	 * Creates a token comparator for the given string.
+	 * 
+	 * @param text the text to be tokenized
+	 * @param textTokenComparatorFactory a factory to create text token comparators
+	 */
+	public JavaTokenComparator(String text, ITokenComparatorFactory textTokenComparatorFactory) {
 		
+		fTextTokenComparatorFactory= textTokenComparatorFactory;
 		Assert.isLegal(text != null);
 		
 		fText= text;
-		fAllowToSkip= allowToSkip;
 		
 		int length= fText.length();
 		fStarts= new int[length];
@@ -62,10 +84,10 @@ public class JavaTokenComparator implements ITokenComparator {
 				int start= scanner.getCurrentTokenStartPosition();
 				int end= scanner.getCurrentTokenEndPosition()+1;
 				// Comments are treated as a single token (see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=78063)
-				if (TokenScanner.isComment(tokenType)) {
-					int dl= getCommentStartTokenLength(tokenType);
+				if (TokenScanner.isComment(tokenType) || tokenType == ITerminalSymbols.TokenNameStringLiteral) {
+					int dl= fTextTokenComparatorFactory == null ? getCommentStartTokenLength(tokenType) : 0;
 					recordTokenRange(start, dl);
-					parseComment(start + dl, text.substring(start + dl, end), allowToSkip);
+					parseText(start + dl, text.substring(start + dl, end));
 				} else {
 					recordTokenRange(start, end - start);
 				}
@@ -95,8 +117,10 @@ public class JavaTokenComparator implements ITokenComparator {
 			System.out.println(fText.substring(start, start + length));
 	}
 
-	private void parseComment(int start, String commentText, boolean shouldEscape) {
-		JavaTokenComparator subTokenizer= new JavaTokenComparator(commentText, shouldEscape);
+	private void parseText(int start, String text) {
+		ITokenComparator subTokenizer= fTextTokenComparatorFactory == null
+				? new JavaTokenComparator(text)
+				: fTextTokenComparatorFactory.createTokenComparator(text);
 		int count= subTokenizer.getRangeCount();
 		for (int i= 0; i < count; i++) {
 			int subStart= subTokenizer.getTokenStart(i);
@@ -114,9 +138,13 @@ public class JavaTokenComparator implements ITokenComparator {
 	 * @since 3.3
 	 */
 	private static int getCommentStartTokenLength(int tokenType) {
-		if (tokenType == ITerminalSymbols.TokenNameCOMMENT_JAVADOC)
+		if (tokenType == ITerminalSymbols.TokenNameCOMMENT_JAVADOC) {
 			return 3;
-		return 2;
+		} else if (tokenType == ITerminalSymbols.TokenNameStringLiteral) {
+			return 1;
+		} else {
+			return 2;
+		}
 	}
 
 	/**
@@ -179,9 +207,6 @@ public class JavaTokenComparator implements ITokenComparator {
 	 * @return <code>true</code> to abort a token comparison
 	 */
 	public boolean skipRangeComparison(int length, int maxLength, IRangeComparator other) {
-
-		if (!fAllowToSkip)
-			return false;
 
 		if (getRangeCount() < 50 || other.getRangeCount() < 50)
 			return false;

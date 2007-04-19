@@ -176,8 +176,8 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			 * here in order to prevent loading of the Compare plug-in at load
 			 * time of this class.
 			 */
-			Object leftSide= new JavaTokenComparator(previewContent.get(), true);
-			Object rightSide= new JavaTokenComparator(currentConentString, true);
+			Object leftSide= new JavaTokenComparator(previewContent.get());
+			Object rightSide= new JavaTokenComparator(currentConentString);
 
 			RangeDifference[] differences= RangeDifferencer.findRanges((IRangeComparator)leftSide, (IRangeComparator)rightSide);
 			for (int i= 0; i < differences.length; i++) {
