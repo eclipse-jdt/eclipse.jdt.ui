@@ -591,7 +591,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 				history.checkConsistency(monitor);
 			}
 		}
-		public boolean needsExecution() {
+		public static boolean needsExecution() {
 			OpenTypeHistory history= OpenTypeHistory.getInstance();
 			return fgFirstTime || history.isEmpty() || history.needConsistencyCheck(); 
 		}
@@ -618,11 +618,11 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#reloadCache(boolean, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void reloadCache(boolean checkDuplicates, IProgressMonitor monitor) {
-		ConsistencyRunnable runnable= new ConsistencyRunnable();
 		IProgressMonitor remainingMonitor;
-		if (runnable.needsExecution()) {
+		if (ConsistencyRunnable.needsExecution()) {
 			monitor.beginTask(JavaUIMessages.TypeSelectionDialog_progress_consistency, 10);
 			try {
+				ConsistencyRunnable runnable= new ConsistencyRunnable();
 				runnable.run(new SubProgressMonitor(monitor, 1));
 			} catch (InvocationTargetException e) {
 				ExceptionHandler.handle(e, JavaUIMessages.TypeSelectionDialog_error3Title, JavaUIMessages.TypeSelectionDialog_error3Message); 
