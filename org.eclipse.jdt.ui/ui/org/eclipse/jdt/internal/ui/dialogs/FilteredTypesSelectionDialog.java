@@ -95,6 +95,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.dialogs.ITypeInfoFilterExtension;
 import org.eclipse.jdt.ui.dialogs.ITypeInfoImageProvider;
+import org.eclipse.jdt.ui.dialogs.ITypeSelectionComponent;
 import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -113,7 +114,7 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
  * 
  * @since 3.3
  */
-public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
+public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog implements ITypeSelectionComponent {
 
 	private static final String DIALOG_SETTINGS= "org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog"; //$NON-NLS-1$
 
@@ -390,6 +391,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 				addition.setLayoutData(gd);
 
 			}
+			
+			fExtension.initialize(this);
 		}
 
 		return addition;
@@ -638,6 +641,14 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 		monitor.done();
 	}
 
+	/*
+	 * @see org.eclipse.jdt.ui.dialogs.ITypeSelectionComponent#triggerSearch()
+	 */
+	public void triggerSearch() {
+		fTypeFilterVersion++;
+		applyFilter();
+	}
+
 	/**
 	 * The <code>ShowContainerForDuplicatesAction</code> provides means to
 	 * show/hide container information for duplicate elements.
@@ -675,8 +686,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog {
 		public void run() {
 			String typeFilterID= TypeFilterPreferencePage.TYPE_FILTER_PREF_PAGE_ID;
 			PreferencesUtil.createPreferenceDialogOn(getShell(), typeFilterID, new String[] { typeFilterID }, null).open();
-			fTypeFilterVersion++;
-			applyFilter();
+			triggerSearch();
 		}
 	}
 
