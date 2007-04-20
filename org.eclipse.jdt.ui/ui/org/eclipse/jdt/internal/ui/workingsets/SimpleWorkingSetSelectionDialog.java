@@ -137,7 +137,16 @@ public class SimpleWorkingSetSelectionDialog extends SelectionDialog {
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		inner.setLayout(layout);
-		fTableViewer= createTableViewer(inner);
+		
+		Composite tableComposite= new Composite(inner, SWT.NONE);
+		tableComposite.setFont(composite.getFont());
+		tableComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		tableComposite.setLayout(layout);
+		
+		fTableViewer= createTableViewer(tableComposite);
 		createRightButtonBar(inner);
 		
 		createBottomButtonBar(composite);

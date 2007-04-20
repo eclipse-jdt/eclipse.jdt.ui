@@ -18,7 +18,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IAdaptable;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
@@ -28,7 +27,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
@@ -37,24 +35,19 @@ import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.IWorkingSetManager;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.IWorkingSetNewWizard;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 public final class ConfigureWorkingSetAssignementAction extends SelectionDispatchAction {
@@ -101,6 +94,9 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 					}
 				}
 			});
+			
+			createShowVisibleOnly(parent);
+			
 			return fTableViewer;
 		}
 		
@@ -158,10 +154,13 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			};
 		}
 	
-		protected void createBottomButtonBar(Composite parent) {
+		private void createShowVisibleOnly(Composite parent) {
 			Composite bar= new Composite(parent, SWT.NONE);
 			bar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-			bar.setLayout(new GridLayout(2, false));
+			GridLayout gridLayout= new GridLayout(2, false);
+			gridLayout.marginHeight= 0;
+			gridLayout.marginWidth= 0;
+			bar.setLayout(gridLayout);
 			
 			final Button showVisibleOnly= new Button(bar, SWT.CHECK);
 			showVisibleOnly.setSelection(fShowVisibleOnly);
@@ -196,39 +195,6 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 					}
 					
 					recalculateCheckedState();
-				}
-			});
-		}
-		
-		protected void createButtonsForRightButtonBar(Composite bar) {
-			super.createButtonsForRightButtonBar(bar);
-			
-			new Label(bar, SWT.NONE);
-			
-			Button newButton= new Button(bar, SWT.NONE);
-			newButton.setText(WorkingSetMessages.ConfigureWorkingSetAssignementAction_New_button); 
-			newButton.setFont(bar.getFont());
-			setButtonLayoutData(newButton);
-			newButton.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
-					IWorkingSetNewWizard wizard= manager.createWorkingSetNewWizard(new String[] {JavaWorkingSetUpdater.ID});
-					WizardDialog dialog= new WizardDialog(getShell(), wizard);
-					dialog.create();
-					if (dialog.open() == Window.OK) {
-						IWorkingSet workingSet= wizard.getSelection();
-						manager.addWorkingSet(workingSet);
-						
-						IWorkingSet[] activeWorkingSets= fWorkingSetModel.getActiveWorkingSets();
-						IWorkingSet[] newActive= new IWorkingSet[activeWorkingSets.length + 1];
-						System.arraycopy(activeWorkingSets, 0, newActive, 0, activeWorkingSets.length);
-						newActive[activeWorkingSets.length]= workingSet;
-						fWorkingSetModel.setActiveWorkingSets(newActive);
-						
-						recalculateCheckedState();
-						
-						fTableViewer.setSelection(new StructuredSelection(workingSet), true);
-					}
 				}
 			});
 		}
@@ -296,19 +262,15 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		
 		if (fElements.length == 1) {
 			IAdaptable element= fElements[0];
-			if (element instanceof IProject || element instanceof IJavaProject) {
-				String elementName;
-				if (element instanceof IProject) {
-					elementName= ((IProject)element).getName();
-				} else {
-					elementName= ((IJavaProject)element).getProject().getName();
-				}
-				dialog.setMessage(Messages.format(WorkingSetMessages.ConfigureWorkingSetAssignementAction_DialogMessage_specific, elementName));
+			String elementName;
+			if (element instanceof IResource) {
+				elementName= ((IResource)element).getName();
 			} else {
-				dialog.setMessage(WorkingSetMessages.ConfigureWorkingSetAssignementAction_DialogMessage_single);
+				elementName= JavaElementLabels.getElementLabel((IJavaElement)element, JavaElementLabels.ALL_DEFAULT);
 			}
+			dialog.setMessage(Messages.format(WorkingSetMessages.ConfigureWorkingSetAssignementAction_DialogMessage_specific, elementName));
 		} else {
-			dialog.setMessage(WorkingSetMessages.ConfigureWorkingSetAssignementAction_DialogMessage_multi);
+			dialog.setMessage(Messages.format(WorkingSetMessages.ConfigureWorkingSetAssignementAction_DialogMessage_multi, new Integer(fElements.length)));
 		}
 		if (dialog.open() == Window.OK) {
 			updateWorkingSets(dialog.getSelection(), dialog.getGrayed(), fElements);
