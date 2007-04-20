@@ -44,6 +44,7 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 
@@ -216,6 +217,9 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 					if (!isValidWorkingSet(set))
 						return false;
 					
+					if (fWorkingSetModel == null)
+						return true;
+					
 					if (fShowVisibleOnly) {
 						if (!fWorkingSetModel.isActiveWorkingSet(set))
 							return false;
@@ -232,6 +236,9 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			final ViewerSorter superSorter= super.createTableSorter();
 			return new ViewerSorter() {
 				public int compare(Viewer viewer, Object e1, Object e2) {
+					if (fWorkingSetModel == null)
+						return superSorter.compare(viewer, e1, e2);
+					
 					IWorkingSet[] activeWorkingSets= fWorkingSetModel.getActiveWorkingSets();
 					for (int i= 0; i < activeWorkingSets.length; i++) {
 						IWorkingSet active= activeWorkingSets[i];
@@ -265,6 +272,9 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		}	
 	
 		private void createShowVisibleOnly(Composite parent) {
+			if (fWorkingSetModel == null)
+				return;
+			
 			Composite bar= new Composite(parent, SWT.NONE);
 			bar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 			GridLayout gridLayout= new GridLayout(2, false);
@@ -310,7 +320,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		}
 		
 		private void recalculateCheckedState() {
-			fModel= createGrayedCheckedModel(fElements, fWorkingSetModel);
+			fModel= createGrayedCheckedModel(fElements, getAllWorkingSets());
 			
 			fTableViewer.setInput(fModel.getAll());
 			fTableViewer.refresh();
@@ -359,7 +369,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 	public void run() {		
 		
-		GrayedCheckedModel model= createGrayedCheckedModel(fElements, fWorkingSetModel);
+		GrayedCheckedModel model= createGrayedCheckedModel(fElements, getAllWorkingSets());
 		WorkingSetModelAwareSelectionDialog dialog= new WorkingSetModelAwareSelectionDialog(fSite.getShell(), model);
 		
 		if (fElements.length == 1) {
@@ -379,8 +389,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		}
 	}
 	
-	private static GrayedCheckedModel createGrayedCheckedModel(IAdaptable[] elements, WorkingSetModel workingSetModel) {
-		IWorkingSet[] workingSets= workingSetModel.getAllWorkingSets();
+	private static GrayedCheckedModel createGrayedCheckedModel(IAdaptable[] elements, IWorkingSet[] workingSets) {
 		GrayedCheckedModelElement[] result= new GrayedCheckedModelElement[workingSets.length];
 		
 		for (int i= 0; i < workingSets.length; i++) {
@@ -403,7 +412,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 	private void updateWorkingSets(IWorkingSet[] newWorkingSets, IWorkingSet[] grayedWorkingSets, IAdaptable[] elements) {
 		HashSet selectedSets= new HashSet(Arrays.asList(newWorkingSets));
 		HashSet grayedSets= new HashSet(Arrays.asList(grayedWorkingSets));
-		IWorkingSet[] workingSets= fWorkingSetModel.getAllWorkingSets();
+		IWorkingSet[] workingSets= getAllWorkingSets();
 		
 		for (int i= 0; i < workingSets.length; i++) {
 			IWorkingSet workingSet= workingSets[i];
@@ -430,6 +439,14 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		}
 	}
 	
+	private IWorkingSet[] getAllWorkingSets() {
+		if (fWorkingSetModel != null) {
+			return fWorkingSetModel.getAllWorkingSets();
+		} else {
+			return PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets();
+		}
+	}
+
 	private static boolean isValidWorkingSet(IWorkingSet set) {
 		for (int i= 0; i < VALID_WORKING_SET_IDS.length; i++) {
 			if (VALID_WORKING_SET_IDS[i].equals(set.getId()))

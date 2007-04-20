@@ -81,11 +81,9 @@ public class ViewActionGroup extends ActionGroup {
 	}
 	
 	public void fillContextMenu(IMenuManager menu) {
-		if (showWorkingSets()) {
-			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new Separator(GROUP_WORKINGSETS));
-			if (fWorkingSetAssignementAction.isEnabled())
-				menu.appendToGroup(GROUP_WORKINGSETS, fWorkingSetAssignementAction);
-		}
+		menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new Separator(GROUP_WORKINGSETS));
+		if (fWorkingSetAssignementAction.isEnabled())
+			menu.appendToGroup(GROUP_WORKINGSETS, fWorkingSetAssignementAction);
 	}
 
 	/**
