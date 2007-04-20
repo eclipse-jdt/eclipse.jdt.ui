@@ -169,9 +169,9 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 				}
 			}
 		}
-		label.setImage(getImage(elementPath));
-		label.setText(getText(elementPath));
-		Font f = getFont(elementPath);
+		label.setImage(getImage(elementPath.getLastSegment()));
+		label.setText(getText(elementPath.getLastSegment()));
+		Font f = getFont(elementPath.getLastSegment());
 		if (f != null)
 			label.setFont(f);
 	}
