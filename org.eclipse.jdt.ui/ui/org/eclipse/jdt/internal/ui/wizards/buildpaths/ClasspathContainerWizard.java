@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -46,6 +47,9 @@ public class ClasspathContainerWizard extends Wizard {
 
 	/**
 	 * Constructor for ClasspathContainerWizard.
+	 * @param entryToEdit entry to edit
+	 * @param currProject current project
+	 * @param currEntries entries currently in classpath
 	 */
 	public ClasspathContainerWizard(IClasspathEntry entryToEdit, IJavaProject currProject, IClasspathEntry[] currEntries) {
 		this(entryToEdit, null, currProject, currEntries);
@@ -53,6 +57,9 @@ public class ClasspathContainerWizard extends Wizard {
 	
 	/**
 	 * Constructor for ClasspathContainerWizard.
+	 * @param pageDesc page description
+	 * @param currProject current project
+	 * @param currEntries entries currently in classpath
 	 */
 	public ClasspathContainerWizard(ClasspathContainerDescriptor pageDesc, IJavaProject currProject, IClasspathEntry[] currEntries) {
 		this(null, pageDesc, currProject, currEntries);	
@@ -74,18 +81,7 @@ public class ClasspathContainerWizard extends Wizard {
 		}
 		setWindowTitle(title);
 	}
-	
-	/**
-	 * @deprecated use getNewEntries()
-	 */
-	public IClasspathEntry getNewEntry() {
-		IClasspathEntry[] entries= getNewEntries();
-		if (entries != null) {
-			return entries[0];
-		}
-		return null;
-	}
-	
+		
 	public IClasspathEntry[] getNewEntries() {
 		return fNewEntries;
 	}
@@ -224,7 +220,7 @@ public class ClasspathContainerWizard extends Wizard {
 	
 	public static int openWizard(Shell shell, ClasspathContainerWizard wizard) {
 		WizardDialog dialog= new WizardDialog(shell, wizard);
-		PixelConverter converter= new PixelConverter(shell);
+		PixelConverter converter= new PixelConverter(JFaceResources.getDialogFont());
 		dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
 		dialog.create();
 		return dialog.open();

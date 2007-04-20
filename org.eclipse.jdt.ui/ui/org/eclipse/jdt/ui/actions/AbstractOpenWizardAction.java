@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -75,10 +76,8 @@ public abstract class AbstractOpenWizardAction extends Action {
 			wizard.init(PlatformUI.getWorkbench(), getSelection());
 			
 			WizardDialog dialog= new WizardDialog(shell, wizard);
-			if (shell != null) {
-				PixelConverter converter= new PixelConverter(shell);
-				dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
-			}
+			PixelConverter converter= new PixelConverter(JFaceResources.getDialogFont());
+			dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
 			dialog.create();
 			int res= dialog.open();
 			if (res == Window.OK && wizard instanceof NewElementWizard) {

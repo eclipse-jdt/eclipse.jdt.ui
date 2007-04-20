@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -208,8 +209,7 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 		if (fShowDialog) {
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
 			WizardDialog dialog= new WizardDialog(shell, wizard);
-			PixelConverter converter= new PixelConverter(shell);
-
+			PixelConverter converter= new PixelConverter(JFaceResources.getDialogFont());
 			dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
 			dialog.create();
 			dialog.getShell().setText(CorrectionMessages.NewCUCompletionUsingWizardProposal_dialogtitle);

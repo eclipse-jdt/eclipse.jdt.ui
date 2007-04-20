@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
@@ -91,10 +92,8 @@ public class EditFilterAction extends BuildpathModifierAction {
 			wizard.init(PlatformUI.getWorkbench(), new StructuredSelection(getSelectedElements().get(0)));
 			
 			WizardDialog dialog= new WizardDialog(shell, wizard);
-			if (shell != null) {
-				PixelConverter converter= new PixelConverter(shell);
-				dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
-			}
+			PixelConverter converter= new PixelConverter(JFaceResources.getDialogFont());
+			dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
 			dialog.create();
 			int res= dialog.open();
 			if (res == Window.OK) {

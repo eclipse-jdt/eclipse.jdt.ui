@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.util;
 
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.widgets.Control;
@@ -21,8 +22,12 @@ public class PixelConverter {
 	private final FontMetrics fFontMetrics;
 	
 	public PixelConverter(Control control) {
-		GC gc = new GC(control);
-		gc.setFont(control.getFont());
+		this(control.getFont());
+	}
+	
+	public PixelConverter(Font font) {
+		GC gc = new GC(font.getDevice());
+		gc.setFont(font);
 		fFontMetrics= gc.getFontMetrics();
 		gc.dispose();
 	}
