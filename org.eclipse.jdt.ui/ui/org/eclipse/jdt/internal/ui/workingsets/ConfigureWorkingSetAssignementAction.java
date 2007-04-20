@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.workingsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,6 +36,7 @@ import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -52,46 +54,135 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 public final class ConfigureWorkingSetAssignementAction extends SelectionDispatchAction {
 	
+	private static final class GrayedCheckedModel {
+
+		private final GrayedCheckedModelElement[] fElements;
+		private final Hashtable fLookup;
+		
+		public GrayedCheckedModel(GrayedCheckedModelElement[] elements) {
+			fElements= elements;
+			fLookup= new Hashtable();
+			for (int i= 0; i < elements.length; i++) {
+				fLookup.put(elements[i].getWorkingSet(), elements[i]);
+			}
+		}
+
+		public IWorkingSet[] getAll() {
+			IWorkingSet[] result= new IWorkingSet[fElements.length];
+			for (int i= 0; i < fElements.length; i++) {
+				result[i]= fElements[i].getWorkingSet();
+			}
+			return result;
+		}
+		
+		public GrayedCheckedModelElement getModelElement(IWorkingSet element) {
+			return (GrayedCheckedModelElement)fLookup.get(element);
+		}
+
+		public IWorkingSet[] getChecked() {
+			ArrayList result= new ArrayList();
+			for (int i= 0; i < fElements.length; i++) {
+				if (fElements[i].isChecked())
+					result.add(fElements[i].getWorkingSet());
+			}
+			return (IWorkingSet[])result.toArray(new IWorkingSet[result.size()]);
+		}
+
+		public IWorkingSet[] getGrayed() {
+			ArrayList result= new ArrayList();
+			for (int i= 0; i < fElements.length; i++) {
+				if (fElements[i].isGrayed())
+					result.add(fElements[i].getWorkingSet());
+			}
+			return (IWorkingSet[])result.toArray(new IWorkingSet[result.size()]);
+		}
+
+		public void selectAll() {
+			for (int i= 0; i < fElements.length; i++) {
+				fElements[i].select();
+			}
+		}
+
+		public void deselectAll() {
+			for (int i= 0; i < fElements.length; i++) {
+				fElements[i].deselect();
+			}
+		}
+		
+	}
+
+	private final static class GrayedCheckedModelElement {
+		
+		private final IWorkingSet fWorkingSet;
+		private final int fElementCount;
+		private int fCheckCount;
+		
+		public GrayedCheckedModelElement(IWorkingSet workingSet, int checkCount, int elementCount) {
+			fWorkingSet= workingSet;
+			fCheckCount= checkCount;
+			fElementCount= elementCount;
+		}
+		
+		public IWorkingSet getWorkingSet() {
+			return fWorkingSet;
+		}
+		
+		public int getCheckCount() {
+			return fCheckCount;
+		}
+		
+		public boolean isGrayed() {
+			return isChecked() && fCheckCount < fElementCount;
+		}
+		
+		public boolean isChecked() {
+			return fCheckCount > 0;
+		}
+
+		public void deselect() {
+			fCheckCount= 0;
+		}
+		
+		public void select() {
+			fCheckCount= fElementCount;
+		}
+		
+	}
+	
 	private final class WorkingSetModelAwareSelectionDialog extends SimpleWorkingSetSelectionDialog {
 		
 		private CheckboxTableViewer fTableViewer;
 		private boolean fShowVisibleOnly;
-		private final HashSet fGrayedElements;
-		private final HashSet fCheckedElements;
-		private final IWorkingSet[] fWorkingSets;
-
-		private WorkingSetModelAwareSelectionDialog(Shell shell, IWorkingSet[] allWorkingSet, IWorkingSet[] initialSelection, IWorkingSet[] initialGrayed) {
-			super(shell, allWorkingSet, initialSelection);
-			fWorkingSets= allWorkingSet;
+		private GrayedCheckedModel fModel;
+		
+		private WorkingSetModelAwareSelectionDialog(Shell shell, GrayedCheckedModel model) {
+			super(shell, model.getAll(), model.getChecked());
+			fModel= model;
 			fShowVisibleOnly= true;
-			fGrayedElements= new HashSet();
-			fGrayedElements.addAll(Arrays.asList(initialGrayed));
-			
-			fCheckedElements= new HashSet();
-			fCheckedElements.addAll(Arrays.asList(initialSelection));
 		}
 		
 		public IWorkingSet[] getGrayed() {
-			return (IWorkingSet[])fGrayedElements.toArray(new IWorkingSet[fGrayedElements.size()]);
+			return fModel.getGrayed();
 		}
 		
 		public IWorkingSet[] getSelection() {
-			return (IWorkingSet[])fCheckedElements.toArray(new IWorkingSet[fCheckedElements.size()]);
+			return fModel.getChecked();
 		}
 
 		protected CheckboxTableViewer createTableViewer(Composite parent) {
 			fTableViewer= super.createTableViewer(parent);
-			fTableViewer.setGrayedElements(fGrayedElements.toArray());
+			fTableViewer.setGrayedElements(fModel.getGrayed());
 			fTableViewer.addCheckStateListener(new ICheckStateListener() {
 				public void checkStateChanged(CheckStateChangedEvent event) {
-					Object element= event.getElement();
+					IWorkingSet element= (IWorkingSet)event.getElement();
 					fTableViewer.setGrayed(element, false);
-					fGrayedElements.remove(element);
+					GrayedCheckedModelElement modelElement= fModel.getModelElement(element);
 					if (event.getChecked()) {
-						fCheckedElements.add(element);
+						modelElement.select();
 					} else {
-						fCheckedElements.remove(element);
+						modelElement.deselect();
 					}
+					fTableViewer.update(element, null);
 				}
 			});
 			
@@ -102,14 +193,16 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		
 		protected void selectAll() {
 			super.selectAll();
-			fGrayedElements.clear();
-			fCheckedElements.addAll(Arrays.asList(fWorkingSets));
+			fModel.selectAll();
+			fTableViewer.setGrayedElements(new Object[0]);
+			fTableViewer.refresh();
 		}
 
 		protected void deselectAll() {
 			super.deselectAll();
-			fGrayedElements.clear();
-			fCheckedElements.clear();
+			fModel.deselectAll();
+			fTableViewer.setGrayedElements(new Object[0]);
+			fTableViewer.refresh();
 		}
 		
 		protected ViewerFilter createTableFilter() {
@@ -153,6 +246,23 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 				}
 			};
 		}
+		
+		protected LabelProvider createTableLabelProvider() {
+			final LabelProvider superLabelProvider= super.createTableLabelProvider();
+			return new LabelProvider() {
+				public String getText(Object element) {
+					String superText= superLabelProvider.getText(element);
+					if (superText == null)
+						return null;
+					
+					GrayedCheckedModelElement modelElement= fModel.getModelElement((IWorkingSet)element);
+					if (!modelElement.isGrayed())
+						return superText;
+					
+					return superText + Messages.format(WorkingSetMessages.ConfigureWorkingSetAssignementAction_XofY_label, new Object[] {new Integer(modelElement.getCheckCount()), new Integer(fElements.length)});
+				}
+			};
+		}	
 	
 		private void createShowVisibleOnly(Composite parent) {
 			Composite bar= new Composite(parent, SWT.NONE);
@@ -171,8 +281,8 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 					
 					fTableViewer.refresh();
 					
-					fTableViewer.setCheckedElements(fCheckedElements.toArray());
-					fTableViewer.setGrayedElements(fGrayedElements.toArray());
+					fTableViewer.setCheckedElements(fModel.getChecked());
+					fTableViewer.setGrayedElements(fModel.getGrayed());
 				}
 			});
 			
@@ -200,19 +310,12 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		}
 		
 		private void recalculateCheckedState() {
-			fTableViewer.setInput(fWorkingSetModel.getAllWorkingSets());
+			fModel= createGrayedCheckedModel(fElements, fWorkingSetModel);
 			
+			fTableViewer.setInput(fModel.getAll());
 			fTableViewer.refresh();
-			
-			IWorkingSet[] checked= getChecked();
-			IWorkingSet[] grayed= ConfigureWorkingSetAssignementAction.this.getGrayed(checked);
-			
-			fCheckedElements.clear();
-			fCheckedElements.addAll(Arrays.asList(checked));
-			fGrayedElements.addAll(Arrays.asList(grayed));
-			
-			fTableViewer.setCheckedElements(checked);
-			fTableViewer.setGrayedElements(grayed);
+			fTableViewer.setCheckedElements(fModel.getChecked());
+			fTableViewer.setGrayedElements(fModel.getGrayed());
 		}
 	}
 
@@ -256,9 +359,8 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 	public void run() {		
 		
-		IWorkingSet[] checked= getChecked();
-		IWorkingSet[] grayed= getGrayed(checked);
-		WorkingSetModelAwareSelectionDialog dialog= new WorkingSetModelAwareSelectionDialog(fSite.getShell(), fWorkingSetModel.getAllWorkingSets(), checked, grayed);
+		GrayedCheckedModel model= createGrayedCheckedModel(fElements, fWorkingSetModel);
+		WorkingSetModelAwareSelectionDialog dialog= new WorkingSetModelAwareSelectionDialog(fSite.getShell(), model);
 		
 		if (fElements.length == 1) {
 			IAdaptable element= fElements[0];
@@ -277,32 +379,25 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		}
 	}
 	
-	private IWorkingSet[] getChecked() {
-		HashSet result= new HashSet();
+	private static GrayedCheckedModel createGrayedCheckedModel(IAdaptable[] elements, WorkingSetModel workingSetModel) {
+		IWorkingSet[] workingSets= workingSetModel.getAllWorkingSets();
+		GrayedCheckedModelElement[] result= new GrayedCheckedModelElement[workingSets.length];
 		
-		IWorkingSet[] workingSets= fWorkingSetModel.getAllWorkingSets();
-		for (int i= 0; i < fElements.length; i++) {			
-			HashSet containingWorkingSets= getContainingWorkingSets(workingSets, fElements[i]);
-			result.addAll(containingWorkingSets);
-		}
-		
-		return (IWorkingSet[])result.toArray(new IWorkingSet[result.size()]);
-	}
-
-	private IWorkingSet[] getGrayed(IWorkingSet[] checked) {
-		HashSet result= new HashSet();
-		
-		for (int i= 0; i < checked.length; i++) {
-			IWorkingSet checkedSet= checked[i];
-			for (int j= 0; j < fElements.length && !result.contains(checkedSet); j++) {
-				IAdaptable adapted= adapt(checkedSet, fElements[j]);
-				if (adapted == null || !contains(checkedSet, adapted)) {
-					result.add(checkedSet);
+		for (int i= 0; i < workingSets.length; i++) {
+			IWorkingSet set= workingSets[i];
+			
+			int checkCount= 0;
+			for (int j= 0; j < elements.length; j++) {
+				IAdaptable adapted= adapt(set, elements[j]);
+				if (adapted != null && contains(set, adapted)) {
+					checkCount++;
 				}
 			}
+			
+			result[i]= new GrayedCheckedModelElement(set, checkCount, elements.length);
 		}
 		
-		return (IWorkingSet[])result.toArray(new IWorkingSet[result.size()]);
+		return new GrayedCheckedModel(result);
 	}
 
 	private void updateWorkingSets(IWorkingSet[] newWorkingSets, IWorkingSet[] grayedWorkingSets, IAdaptable[] elements) {
@@ -333,20 +428,6 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 				}
 			}
 		}
-	}
-
-	private HashSet getContainingWorkingSets(IWorkingSet[] workingSets, IAdaptable element) {
-		HashSet result= new HashSet();
-
-		for (int i= 0; i < workingSets.length; i++) {
-			IWorkingSet set= workingSets[i];
-			IAdaptable adapted= adapt(set, element);
-			if (adapted != null && contains(set, adapted)) {
-				result.add(set);
-			}
-		}
-
-		return result;
 	}
 	
 	private static boolean isValidWorkingSet(IWorkingSet set) {

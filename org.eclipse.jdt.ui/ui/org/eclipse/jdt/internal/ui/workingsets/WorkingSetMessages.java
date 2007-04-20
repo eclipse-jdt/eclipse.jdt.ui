@@ -28,6 +28,7 @@ public final class WorkingSetMessages extends NLS {
 	public static String ConfigureWorkingSetAssignementAction_DialogMessage_specific;
 	public static String ConfigureWorkingSetAssignementAction_OnlyShowVisible_link;
 	public static String ConfigureWorkingSetAssignementAction_WorkingSets_actionLabel;
+	public static String ConfigureWorkingSetAssignementAction_XofY_label;
 	
 	public static String JavaWorkingSetPage_title;
 	public static String JavaWorkingSetPage_workingSet_name;

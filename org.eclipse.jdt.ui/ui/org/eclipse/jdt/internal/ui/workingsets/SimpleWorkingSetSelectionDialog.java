@@ -200,7 +200,7 @@ public class SimpleWorkingSetSelectionDialog extends SelectionDialog {
 		};
 	}
 
-	protected WorkingSetLabelProvider createTableLabelProvider() {
+	protected LabelProvider createTableLabelProvider() {
 		return new WorkingSetLabelProvider();
 	}
 
