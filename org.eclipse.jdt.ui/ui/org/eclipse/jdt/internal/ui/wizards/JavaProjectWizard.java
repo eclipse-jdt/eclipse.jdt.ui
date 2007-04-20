@@ -11,10 +11,8 @@
 package org.eclipse.jdt.internal.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,7 +22,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
-import org.eclipse.jface.viewers.TreePath;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkingSet;
@@ -39,6 +36,7 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetConfigurationBlock;
 
 public class JavaProjectWizard extends NewElementWizard implements IExecutableExtension {
     
@@ -81,17 +79,7 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 			final IJavaElement newElement= getCreatedElement();
 			
 			IWorkingSet[] workingSets= fFirstPage.getWorkingSets();
-			for (int i= 0; i < workingSets.length; i++) {
-				IWorkingSet workingSet= workingSets[i];
-				IAdaptable[] adaptedNewElements= workingSet.adaptElements(new IAdaptable[] {newElement});
-				if (adaptedNewElements.length == 1) {
-					IAdaptable[] elements= workingSet.getElements();
-					IAdaptable[] newElements= new IAdaptable[elements.length + 1];
-					System.arraycopy(elements, 0, newElements, 0, elements.length);
-					newElements[newElements.length - 1]= adaptedNewElements[0];
-					workingSet.setElements(newElements);
-				}
-			}
+			WorkingSetConfigurationBlock.addToWorkingSets(newElement, workingSets);
 			
 			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
 			selectAndReveal(fSecondPage.getJavaProject().getProject());				
@@ -138,9 +126,11 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 	}
 	
 	private IWorkingSet[] getWorkingSets(IStructuredSelection selection) {
-		IWorkingSet selected= getSelectedWorkingSet(selection);
-		if (selected != null)
-			return new IWorkingSet[] {selected};
+		if (selection instanceof ITreeSelection) {
+			IWorkingSet selected= WorkingSetConfigurationBlock.getSelectedWorkingSet((ITreeSelection)selection);
+			if (selected != null && isValidWorkingSet(selected))
+				return new IWorkingSet[] {selected};
+		}
 		
 		PackageExplorerPart explorerPart= getActivePackageExplorer();
 		if (explorerPart == null)
@@ -170,35 +160,6 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 		}
 		
 		return null;
-	}
-
-	private IWorkingSet getSelectedWorkingSet(IStructuredSelection selection) {
-		if (!(selection instanceof ITreeSelection))
-			return null;
-		
-		ITreeSelection treeSelection= (ITreeSelection)selection;
-		List elements= treeSelection.toList();
-		if (elements.size() != 1)
-			return null;
-		
-		Object element= elements.get(0);
-		TreePath[] paths= treeSelection.getPathsFor(element);
-		if (paths.length != 1)
-			return null;
-
-		TreePath path= paths[0];
-		if (path.getSegmentCount() == 0)
-			return null;
-
-		Object candidate= path.getSegment(0);
-		if (!(candidate instanceof IWorkingSet))
-			return null;
-			
-		IWorkingSet result= (IWorkingSet)candidate;
-		if (!isValidWorkingSet(result))
-			return null;
-		
-		return result;
 	}
 
 	private PackageExplorerPart getActivePackageExplorer() {

@@ -614,7 +614,8 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			workingSetGroup.setLayout(new GridLayout(1, false));
 			
 			String[] workingSetIds= new String[] {JavaWorkingSetUpdater.ID, "org.eclipse.ui.resourceWorkingSetPage"}; //$NON-NLS-1$
-			fWorkingSetBlock= new WorkingSetConfigurationBlock(initialWorkingSets, workingSetIds, NewWizardMessages.JavaProjectWizardFirstPage_EnableWorkingSet_button, JavaPlugin.getDefault().getDialogSettings());
+			IWorkingSet[] workingSets= WorkingSetConfigurationBlock.filter(PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets(), workingSetIds);
+			fWorkingSetBlock= new WorkingSetConfigurationBlock(workingSets, initialWorkingSets, NewWizardMessages.JavaProjectWizardFirstPage_EnableWorkingSet_button, JavaPlugin.getDefault().getDialogSettings());
 			fWorkingSetBlock.setDialogMessage(NewWizardMessages.JavaProjectWizardFirstPage_WorkingSetSelection_message);
 			fWorkingSetBlock.createContent(workingSetGroup);
 		}

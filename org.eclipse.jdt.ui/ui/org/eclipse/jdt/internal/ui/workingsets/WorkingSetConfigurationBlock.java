@@ -15,9 +15,11 @@ import com.ibm.icu.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -35,6 +37,8 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.ITreeSelection;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkingSet;
@@ -44,6 +48,85 @@ import org.eclipse.ui.PlatformUI;
 
 public class WorkingSetConfigurationBlock {
 	
+	//Some static methods for convenience
+	
+	/**
+	 * Retrieves a working set from the given <code>treeSelection</code>
+	 * or <b>null</b> if no working set could be retrieved.  
+	 * 
+	 * @param treeSelection the selection to retrieve the working set from
+	 * @return the selected working set or <b>null</b>
+	 */
+	public static IWorkingSet getSelectedWorkingSet(ITreeSelection treeSelection) {
+		List elements= treeSelection.toList();
+		if (elements.size() != 1)
+			return null;
+		
+		Object element= elements.get(0);
+		TreePath[] paths= treeSelection.getPathsFor(element);
+		if (paths.length != 1)
+			return null;
+	
+		TreePath path= paths[0];
+		if (path.getSegmentCount() == 0)
+			return null;
+	
+		Object candidate= path.getSegment(0);
+		if (!(candidate instanceof IWorkingSet))
+			return null;
+			
+		return (IWorkingSet)candidate;
+	}
+	
+	/**
+	 * Add the <code>element</code> to each given working set in 
+	 * <code>workingSets</code> if possible.
+	 * 
+	 * @param element the element to add
+	 * @param workingSets the working sets to add the element to
+	 */
+	public static void addToWorkingSets(IAdaptable element, IWorkingSet[] workingSets) {
+		for (int i= 0; i < workingSets.length; i++) {
+			IWorkingSet workingSet= workingSets[i];
+			IAdaptable[] adaptedNewElements= workingSet.adaptElements(new IAdaptable[] {element});
+			if (adaptedNewElements.length == 1) {
+				IAdaptable[] elements= workingSet.getElements();
+				IAdaptable[] newElements= new IAdaptable[elements.length + 1];
+				System.arraycopy(elements, 0, newElements, 0, elements.length);
+				newElements[newElements.length - 1]= adaptedNewElements[0];
+				workingSet.setElements(newElements);
+			}
+		}
+	}
+	
+	/**
+	 * Filters the given working sets such that the following is true:
+	 * for each IWorkingSet s in result: s.getId() is element of workingSetIds
+	 * 
+	 * @param workingSets the array to filter
+	 * @param workingSetIds the acceptable working set ids
+	 * @return the filtered elements
+	 */
+	public static IWorkingSet[] filter(IWorkingSet[] workingSets, String[] workingSetIds) {
+		ArrayList result= new ArrayList();
+		
+		for (int i= 0; i < workingSets.length; i++) {
+			if (accept(workingSets[i], workingSetIds))
+				result.add(workingSets[i]);
+		}
+		
+		return (IWorkingSet[])result.toArray(new IWorkingSet[result.size()]);
+	}
+	
+	private static boolean accept(IWorkingSet set, String[] workingSetIDs) {
+		for (int i= 0; i < workingSetIDs.length; i++) {
+			if (workingSetIDs[i].equals(set.getId()))
+				return true;
+		}
+		
+		return false;
+	}
+	
 	private static final String WORKINGSET_SELECTION_HISTORY= "workingset_selection_history"; //$NON-NLS-1$
 	private static final int MAX_HISTORY_SIZE= 5;
 	
@@ -51,30 +134,30 @@ public class WorkingSetConfigurationBlock {
 	private Combo fWorkingSetCombo;
 	private Button fConfigure;
 	private IWorkingSet[] fSelectedWorkingSets;
-	private String[] fWorkingSetIDs;
 	private String fMessage;
 	private Button fEnableButton;
 	private ArrayList fSelectionHistory;
 	private final IDialogSettings fSettings;
 	private final String fEnableButtonText;
+	private final IWorkingSet[] fWorkingSets;
 
 	/**
-	 * @param preSelectedWorkingSets the working sets which are selected when showning the block, not <b>null</b>
-	 * @param compatibleWorkingSetIds only working sets with an id in compatibleWorkingSetIds can be selected, not <b>null</b>
-	 * @param enableButtonText the text shown for the enable button, not <b>null</b>
-	 * @param settings to store/load the selection history, not <b>null</b>
+	 * @param workingSets working sets from which the user can choose
+	 * @param preSelectedWorkingSets the working sets which are selected when showning the block
+	 * @param enableButtonText the text shown for the enable button
+	 * @param settings to store/load the selection history
 	 */
-	public WorkingSetConfigurationBlock(IWorkingSet[] preSelectedWorkingSets, String[] compatibleWorkingSetIds, String enableButtonText, IDialogSettings settings) {
+	public WorkingSetConfigurationBlock(IWorkingSet[] workingSets, IWorkingSet[] preSelectedWorkingSets, String enableButtonText, IDialogSettings settings) {
+		fWorkingSets= workingSets;
+		Assert.isNotNull(workingSets);
 		Assert.isNotNull(preSelectedWorkingSets);
-		Assert.isNotNull(compatibleWorkingSetIds);
 		Assert.isNotNull(enableButtonText);
 		Assert.isNotNull(settings);
 		
 		fEnableButtonText= enableButtonText;
 		fSelectedWorkingSets= preSelectedWorkingSets;
-		fWorkingSetIDs= compatibleWorkingSetIds;
 		fSettings= settings;
-		fSelectionHistory= loadSelectionHistory(settings, compatibleWorkingSetIds);
+		fSelectionHistory= loadSelectionHistory(settings, workingSets);
 	}
 
 	/**
@@ -85,7 +168,7 @@ public class WorkingSetConfigurationBlock {
 	}
 	
 	/**
-	 * @return the selected working sets, not <b>null</b>
+	 * @return the selected working sets
 	 */
 	public IWorkingSet[] getSelectedWorkingSets() {
 		if (fEnableButton.getSelection()) {
@@ -97,7 +180,8 @@ public class WorkingSetConfigurationBlock {
 
 	/**
 	 * Add this block to the <code>parent</parent>
-	 * @param parent the parent to add the block to, not <b>null</b>
+	 * 
+	 * @param parent the parent to add the block to
 	 */
 	public void createContent(final Composite parent) {
 		int numColumn= 3;
@@ -130,9 +214,7 @@ public class WorkingSetConfigurationBlock {
 		fConfigure.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(SelectionEvent e) {
-				IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
-				IWorkingSet[] workingSets= filter(manager.getWorkingSets());
-				SimpleWorkingSetSelectionDialog dialog= new SimpleWorkingSetSelectionDialog(parent.getShell(), workingSets, fSelectedWorkingSets);
+				SimpleWorkingSetSelectionDialog dialog= new SimpleWorkingSetSelectionDialog(parent.getShell(), fWorkingSets, fSelectedWorkingSets);
 				if (fMessage != null)
 					dialog.setMessage(fMessage);
 
@@ -140,32 +222,12 @@ public class WorkingSetConfigurationBlock {
 					IWorkingSet[] result= dialog.getSelection();
 					if (result != null && result.length > 0) {
 						fSelectedWorkingSets= result;
-						manager.addRecentWorkingSet(result[0]);
+						PlatformUI.getWorkbench().getWorkingSetManager().addRecentWorkingSet(result[0]);
 					} else {
 						fSelectedWorkingSets= new IWorkingSet[0];
 					}
 					updateWorkingSetSelection();
 				}
-			}
-
-			private IWorkingSet[] filter(IWorkingSet[] workingSets) {
-				ArrayList result= new ArrayList();
-				
-				for (int i= 0; i < workingSets.length; i++) {
-					if (accept(workingSets[i], fWorkingSetIDs))
-						result.add(workingSets[i]);
-				}
-				
-				return (IWorkingSet[])result.toArray(new IWorkingSet[result.size()]);
-			}
-			
-			private boolean accept(IWorkingSet set, String[] workingSetIDs) {
-				for (int i= 0; i < workingSetIDs.length; i++) {
-					if (workingSetIDs[i].equals(set.getId()))
-						return true;
-				}
-				
-				return false;
 			}
 		});
 		
@@ -270,12 +332,14 @@ public class WorkingSetConfigurationBlock {
 		settings.put(WORKINGSET_SELECTION_HISTORY, history);
 	}
 	
-	private ArrayList loadSelectionHistory(IDialogSettings settings, String[] compatibleWorkingSetIds) {
+	private ArrayList loadSelectionHistory(IDialogSettings settings, IWorkingSet[] workingSets) {
 		String[] strings= settings.getArray(WORKINGSET_SELECTION_HISTORY);
 		if (strings == null || strings.length == 0)
 			return new ArrayList();
 		
 		ArrayList result= new ArrayList();
+		
+		HashSet workingSetsSet= new HashSet(Arrays.asList(workingSets));
 		
 		IWorkingSetManager workingSetManager= PlatformUI.getWorkbench().getWorkingSetManager();
 		for (int i= 0; i < strings.length; i++) {
@@ -286,7 +350,7 @@ public class WorkingSetConfigurationBlock {
 				if (workingSet == null) {
 					valid= false;
 				} else {
-					if (!contains(compatibleWorkingSetIds, workingSet.getId()))
+					if (!workingSetsSet.contains(workingSet))
 						valid= false;
 				}
 			}
@@ -298,15 +362,6 @@ public class WorkingSetConfigurationBlock {
 		return result;
 	}
 
-	private boolean contains(String[] compatibleWorkingSetIds, String id) {
-		for (int i= 0; i < compatibleWorkingSetIds.length; i++) {
-			if (compatibleWorkingSetIds[i].equals(id))
-				return true;
-		}
-		
-		return false;
-	}
-	
 	private static int getButtonWidthHint(Button button) {
 		button.setFont(JFaceResources.getDialogFont());
 		
