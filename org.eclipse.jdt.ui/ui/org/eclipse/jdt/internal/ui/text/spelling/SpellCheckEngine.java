@@ -75,7 +75,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 			for (int index= 0; index < locales.length; index++) {
 
 				locale= locales[index];
-				url= new URL(location, locale.toString().toLowerCase() + ".dictionary"); //$NON-NLS-1$
+				url= new URL(location, locale.toString() + ".dictionary"); //$NON-NLS-1$
 
 				try {
 					stream= url.openStream();

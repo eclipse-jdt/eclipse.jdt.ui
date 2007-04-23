@@ -15,8 +15,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
-
 /**
  * Platform wide read-only locale sensitive dictionary for spell checking.
  *
@@ -56,6 +54,6 @@ public class LocaleSensitiveSpellDictionary extends AbstractSpellDictionary {
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary#getURL()
 	 */
 	protected final URL getURL() throws MalformedURLException {
-		return new URL(fLocation, fLocale.toString().toLowerCase() + "." + JavaUIMessages.Spelling_dictionary_file_extension);  //$NON-NLS-1$
+		return new URL(fLocation, fLocale.toString() + ".dictionary");  //$NON-NLS-1$
 	}
 }
