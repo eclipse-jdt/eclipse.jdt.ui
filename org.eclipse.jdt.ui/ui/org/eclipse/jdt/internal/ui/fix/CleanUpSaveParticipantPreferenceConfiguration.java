@@ -32,9 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.preference.IPreferencePageContainer;
 
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -53,6 +51,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.AbstractSaveParticipantPreferenceConfiguration;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.DialogBrowserConfigurationBlock;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 /**
@@ -66,7 +65,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	
 	private IScopeContext fContext;
 	private Map fSettings;
-	private Text fSelectedActionsText;
+	private DialogBrowserConfigurationBlock fSelectedActionsText;
 	private Button fFormatCodeButton;
 	private Button fOrganizeImportsButton;
 	private Shell fShell;
@@ -74,8 +73,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	private Link fOrganizeImportsConfigLink;
 	private IPreferencePageContainer fContainer;
 	private Button fAdditionalActionButton;
-	private Composite fAdvancedComposite;
-	private ControlEnableState fAdvancedCompositeEnableState;
+	private Button fConfigureButton;
 	
 	/**
 	 * {@inheritDoc}
@@ -137,7 +135,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		fAdditionalActionButton= new Button(composite, SWT.CHECK);
 		fAdditionalActionButton.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_AdditionalActions_Checkbox);
 		
-		fAdvancedComposite= createAdvancedComposite(composite);
+		createAdvancedComposite(composite);
 		fAdditionalActionButton.addSelectionListener(new SelectionAdapter() {
 			/**
 			 * {@inheritDoc}
@@ -157,15 +155,14 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		composite.setLayoutData(gridData);
 		composite.setLayout(new GridLayout(2, false));
 		
-		fSelectedActionsText= new Text(composite, SWT.BORDER | SWT.FLAT | SWT.MULTI | SWT.READ_ONLY | SWT.H_SCROLL | SWT.V_SCROLL);
-		final GridData data= new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
+		fSelectedActionsText= new DialogBrowserConfigurationBlock();
+		final GridData data= (GridData)fSelectedActionsText.createControl(composite).getLayoutData();
 		data.heightHint= new PixelConverter(composite).convertHeightInCharsToPixels(8);
-		fSelectedActionsText.setLayoutData(data);
 		
-		Button configureButton= new Button(composite, SWT.NONE);
-		configureButton.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_Configure_Button);
-		configureButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		configureButton.addSelectionListener(new SelectionAdapter() {
+		fConfigureButton= new Button(composite, SWT.NONE);
+		fConfigureButton.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_Configure_Button);
+		fConfigureButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		fConfigureButton.addSelectionListener(new SelectionAdapter() {
 			/**
 			 * {@inheritDoc}
 			 */
@@ -254,6 +251,8 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 			String key= (String)iterator.next();
 			node.remove(CleanUpPreferenceUtil.SAVE_PARTICIPANT_KEY_PREFIX + key);
 		}
+		
+		updateAdvancedEnableState();
 	}
 	
 	/**
@@ -292,17 +291,26 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		
 		final ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps(settings);
 		
-		boolean hasCleanUp= false;
 		StringBuffer buf= new StringBuffer();
-		for (int i= 0; i < cleanUps.length; i++) {
-			String[] descriptions= cleanUps[i].getDescriptions();
-			if (descriptions != null) {
-				for (int j= 0; j < descriptions.length; j++) {
-					buf.append('-').append(' ').append(descriptions[j]).append('\n');
-					hasCleanUp= true;
-				}
-			}
-		}
+		
+    	buf.append("<html><header></header><body>"); //$NON-NLS-1$
+    	buf.append("<ul style=\""); //$NON-NLS-1$
+    	buf.append("margin-top:0px; margin-left:20px;\n"); //$NON-NLS-1$
+    	buf.append("\">"); //$NON-NLS-1$
+    	
+    	boolean hasCleanUp= false;
+    	for (int i= 0; i < cleanUps.length; i++) {
+	        String[] descriptions= cleanUps[i].getDescriptions();
+	        if (descriptions != null) {
+    	        for (int j= 0; j < descriptions.length; j++) {
+    	            buf.append("<li>").append(descriptions[j]).append("</li>").append('\n'); //$NON-NLS-1$ //$NON-NLS-2$
+    	            hasCleanUp= true;
+                }
+	        }
+        }
+    	
+    	buf.append("</ul>"); //$NON-NLS-1$
+    	
 		if (!hasCleanUp) {
 			buf.append(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_NoActionEnabled_Info);
 		}
@@ -310,17 +318,10 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	}
 	
 	private void updateAdvancedEnableState() {
-		boolean additionalOptionEnabled= CleanUpConstants.TRUE.equals(fSettings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS));
+		boolean additionalOptionEnabled= isEnabled(fContext) && CleanUpConstants.TRUE.equals(fSettings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS));
 		boolean additionalEnabled= additionalOptionEnabled && (!ProjectScope.SCOPE.equals(fContext.getName()) || hasSettingsInScope(fContext));
-		if (additionalEnabled) {
-			if (fAdvancedCompositeEnableState != null) {
-				fAdvancedCompositeEnableState.restore();
-				fAdvancedCompositeEnableState= null;
-			}
-		} else {
-			if (fAdvancedComposite.isEnabled())
-				fAdvancedCompositeEnableState= ControlEnableState.disable(fAdvancedComposite);
-		}
+		fSelectedActionsText.setEnabled(additionalEnabled);
+		fConfigureButton.setEnabled(additionalEnabled);
 	}
 	
 	private void configurePreferenceLink(Link link, final IJavaProject javaProject, final String preferenceId, final String propertyId) {

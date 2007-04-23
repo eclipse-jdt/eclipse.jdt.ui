@@ -29,8 +29,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
@@ -65,6 +65,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 	private SelectionButtonDialogField fShowCleanUpWizardDialogField;
 	private CleanUpProfileManager fProfileManager;
 	private ProfileStore fProfileStore;
+	private DialogBrowserConfigurationBlock fBrowserBlock;
     
     public CleanUpConfigurationBlock(IProject project, PreferencesAccess access) {
 	    super(project, access, DIALOGSTORE_LASTSAVELOADPATH);
@@ -103,11 +104,10 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		
 		createLabel(composite, CleanUpMessages.CleanUpConfigurationBlock_SelectedCleanUps_label, numColumns);
 		
-		final Text detailField= new Text(composite, SWT.BORDER | SWT.FLAT | SWT.MULTI | SWT.READ_ONLY | SWT.H_SCROLL | SWT.V_SCROLL);
-		detailField.setText(getSelectedCleanUpsInfo(cleanUps));
-		final GridData data= new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
-		data.horizontalSpan= numColumns;
-		detailField.setLayoutData(data);
+		fBrowserBlock= new DialogBrowserConfigurationBlock();
+		Control control= fBrowserBlock.createControl(composite);
+		((GridData)control.getLayoutData()).horizontalSpan= numColumns;
+		fBrowserBlock.setText(getSelectedCleanUpsInfo(cleanUps));
 		
 		profileManager.addObserver(new Observer() {
 
@@ -119,7 +119,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 				case ProfileManager.SELECTION_CHANGED_EVENT:
 				case ProfileManager.SETTINGS_CHANGED_EVENT:
 					fill(profileManager.getSelected().getSettings(), sharedSettings);
-					detailField.setText(getSelectedCleanUpsInfo(cleanUps));
+					fBrowserBlock.setText(getSelectedCleanUpsInfo(cleanUps));
 				}
             }
 			
@@ -128,14 +128,22 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 
     private String getSelectedCleanUpsInfo(ICleanUp[] cleanUps) {
     	StringBuffer buf= new StringBuffer();
+    	
+    	buf.append("<html><header></header><body>"); //$NON-NLS-1$
+    	buf.append("<ul style=\""); //$NON-NLS-1$
+    	buf.append("margin-top:0px; margin-left:20px;\n"); //$NON-NLS-1$
+    	buf.append("\">"); //$NON-NLS-1$
+    	
     	for (int i= 0; i < cleanUps.length; i++) {
 	        String[] descriptions= cleanUps[i].getDescriptions();
 	        if (descriptions != null) {
     	        for (int j= 0; j < descriptions.length; j++) {
-    	            buf.append('-').append(' ').append(descriptions[j]).append('\n');
+    	            buf.append("<li>").append(descriptions[j]).append("</li>").append('\n'); //$NON-NLS-1$ //$NON-NLS-2$
                 }
 	        }
         }
+    	
+    	buf.append("</ul>"); //$NON-NLS-1$
     	return buf.toString();
     }
 
@@ -254,5 +262,9 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 				}
 			}
 		}
+	}
+	
+	public void enableProjectSpecificSettings(boolean useProjectSpecificSettings) {
+		fBrowserBlock.setEnabled(useProjectSpecificSettings);
 	}
 }
