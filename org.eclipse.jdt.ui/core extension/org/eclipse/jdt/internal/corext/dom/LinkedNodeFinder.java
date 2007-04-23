@@ -267,7 +267,9 @@ public class LinkedNodeFinder  {
 			if (fBinding == binding) {
 				fResult.add(node);
 			} else if (binding.getKind() == IBinding.METHOD) {
-				if (isConnectedMethod((IMethodBinding) binding, (IMethodBinding) fBinding)) {
+				IMethodBinding curr= (IMethodBinding) binding;
+				IMethodBinding methodBinding= (IMethodBinding) fBinding;
+				if (methodBinding.overrides(curr) || curr.overrides(methodBinding)) {
 					fResult.add(node);
 				}
 			}
@@ -283,17 +285,6 @@ public class LinkedNodeFinder  {
 				return ((IVariableBinding) binding).getVariableDeclaration();
 			}
 			return binding;
-		}
-		
-		private boolean isConnectedMethod(IMethodBinding meth1, IMethodBinding meth2) {
-			if (Bindings.isEqualMethod(meth1, meth2.getName(), meth2.getParameterTypes())) {
-				ITypeBinding type1= meth1.getDeclaringClass();
-				ITypeBinding type2= meth2.getDeclaringClass();
-				if (Bindings.isSuperType(type2, type1) || Bindings.isSuperType(type1, type2)) {
-					return true;
-				}
-			}
-			return false;
 		}
 	}
 }
