@@ -2869,7 +2869,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		SelectionListenerWithASTManager.getDefault().addListener(this, fPostSelectionListenerWithAST);
 		if (forceUpdate && getSelectionProvider() != null) {
 			fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();
-			updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, JavaPlugin.getDefault().getASTProvider().getAST(getInputJavaElement(), ASTProvider.WAIT_ACTIVE_ONLY, getProgressMonitor()));
+			updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, JavaPlugin.getDefault().getASTProvider().getAST(getInputJavaElement(), ASTProvider.WAIT_NO, getProgressMonitor()));
 		}
 
 		if (fOccurrencesFinderJobCanceler == null) {
