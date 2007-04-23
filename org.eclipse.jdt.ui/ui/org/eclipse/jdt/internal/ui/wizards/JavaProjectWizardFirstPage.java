@@ -615,8 +615,9 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			
 			String[] workingSetIds= new String[] {JavaWorkingSetUpdater.ID, "org.eclipse.ui.resourceWorkingSetPage"}; //$NON-NLS-1$
 			IWorkingSet[] workingSets= WorkingSetConfigurationBlock.filter(PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets(), workingSetIds);
-			fWorkingSetBlock= new WorkingSetConfigurationBlock(workingSets, initialWorkingSets, NewWizardMessages.JavaProjectWizardFirstPage_EnableWorkingSet_button, JavaPlugin.getDefault().getDialogSettings());
+			fWorkingSetBlock= new WorkingSetConfigurationBlock(workingSets, NewWizardMessages.JavaProjectWizardFirstPage_EnableWorkingSet_button, JavaPlugin.getDefault().getDialogSettings());
 			fWorkingSetBlock.setDialogMessage(NewWizardMessages.JavaProjectWizardFirstPage_WorkingSetSelection_message);
+			fWorkingSetBlock.setSelection(initialWorkingSets);
 			fWorkingSetBlock.createContent(workingSetGroup);
 		}
 
@@ -1001,14 +1002,10 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 	}
 
 	/**
-	 * @param workingSets the initialy selected working sets or <b>null</b>
+	 * @param workingSets the initial selected working sets or <b>null</b>
 	 */
 	public void setWorkingSets(IWorkingSet[] workingSets) {
-		if (workingSets == null) {
-			fInitWorkingSets= new IWorkingSet[0];
-		} else {
-			fInitWorkingSets= workingSets;
-		}
+		fInitWorkingSets= workingSets;
 	}
 
 	/**

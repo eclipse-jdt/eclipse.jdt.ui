@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeSelection;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkingSet;
@@ -126,11 +125,9 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 	}
 	
 	private IWorkingSet[] getWorkingSets(IStructuredSelection selection) {
-		if (selection instanceof ITreeSelection) {
-			IWorkingSet selected= WorkingSetConfigurationBlock.getSelectedWorkingSet((ITreeSelection)selection);
-			if (selected != null && isValidWorkingSet(selected))
-				return new IWorkingSet[] {selected};
-		}
+		IWorkingSet[] selected= WorkingSetConfigurationBlock.getSelectedWorkingSet(selection);
+		if (selected != null && selected.length == 1 && isValidWorkingSet(selected[0]))
+			return selected;
 		
 		PackageExplorerPart explorerPart= getActivePackageExplorer();
 		if (explorerPart == null)

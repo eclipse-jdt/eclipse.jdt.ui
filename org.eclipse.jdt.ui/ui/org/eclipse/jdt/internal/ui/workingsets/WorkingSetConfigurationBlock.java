@@ -37,6 +37,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.window.Window;
@@ -51,13 +52,17 @@ public class WorkingSetConfigurationBlock {
 	//Some static methods for convenience
 	
 	/**
-	 * Retrieves a working set from the given <code>treeSelection</code>
+	 * Retrieves a working set from the given <code>selection</code>
 	 * or <b>null</b> if no working set could be retrieved.  
 	 * 
-	 * @param treeSelection the selection to retrieve the working set from
+	 * @param selection the selection to retrieve the working set from
 	 * @return the selected working set or <b>null</b>
 	 */
-	public static IWorkingSet getSelectedWorkingSet(ITreeSelection treeSelection) {
+	public static IWorkingSet[] getSelectedWorkingSet(IStructuredSelection selection) {
+		if (!(selection instanceof ITreeSelection))
+			return null;
+		
+		ITreeSelection treeSelection= (ITreeSelection)selection;
 		List elements= treeSelection.toList();
 		if (elements.size() != 1)
 			return null;
@@ -75,7 +80,7 @@ public class WorkingSetConfigurationBlock {
 		if (!(candidate instanceof IWorkingSet))
 			return null;
 			
-		return (IWorkingSet)candidate;
+		return new IWorkingSet[] {(IWorkingSet)candidate};
 	}
 	
 	/**
@@ -143,19 +148,17 @@ public class WorkingSetConfigurationBlock {
 
 	/**
 	 * @param workingSets working sets from which the user can choose
-	 * @param preSelectedWorkingSets the working sets which are selected when showning the block
 	 * @param enableButtonText the text shown for the enable button
 	 * @param settings to store/load the selection history
 	 */
-	public WorkingSetConfigurationBlock(IWorkingSet[] workingSets, IWorkingSet[] preSelectedWorkingSets, String enableButtonText, IDialogSettings settings) {
+	public WorkingSetConfigurationBlock(IWorkingSet[] workingSets, String enableButtonText, IDialogSettings settings) {
 		fWorkingSets= workingSets;
 		Assert.isNotNull(workingSets);
-		Assert.isNotNull(preSelectedWorkingSets);
 		Assert.isNotNull(enableButtonText);
 		Assert.isNotNull(settings);
 		
 		fEnableButtonText= enableButtonText;
-		fSelectedWorkingSets= preSelectedWorkingSets;
+		fSelectedWorkingSets= new IWorkingSet[0];
 		fSettings= settings;
 		fSelectionHistory= loadSelectionHistory(settings, workingSets);
 	}
@@ -165,6 +168,18 @@ public class WorkingSetConfigurationBlock {
 	 */
 	public void setDialogMessage(String message) {
 		fMessage= message;
+	}
+	
+	/**
+	 * @param selection the selection to present in the UI or <b>null</b>
+	 */
+	public void setSelection(IWorkingSet[] selection) {
+		if (selection == null)
+			selection= new IWorkingSet[0];
+		
+		fSelectedWorkingSets= selection;
+		if (fWorkingSetCombo != null)
+			updateSelectedWorkingSets();
 	}
 	
 	/**
