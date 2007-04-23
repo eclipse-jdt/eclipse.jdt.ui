@@ -223,6 +223,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	/**
 	 * Computes the destination type based on the new name.
 	 * 
+	 * @param name the new name
 	 * @return the destination type
 	 */
 	public IType computeExtractedType(final String name) {
