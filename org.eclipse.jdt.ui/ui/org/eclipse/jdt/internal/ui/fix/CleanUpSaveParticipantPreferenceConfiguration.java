@@ -218,8 +218,6 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	public void performDefaults() {
 		fSettings= CleanUpPreferenceUtil.loadSaveParticipantOptions(new InstanceScope());
 		settingsChanged();
-		
-		super.performDefaults();
 	}
 	
 	/**
@@ -239,6 +237,8 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		super.enableProjectSettings();
 		
 		CleanUpPreferenceUtil.saveSaveParticipantOptions(fContext, fSettings);
+		
+		updateAdvancedEnableState();
 	}
 	
 	/**
@@ -310,7 +310,8 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	}
 	
 	private void updateAdvancedEnableState() {
-		boolean additionalEnabled= CleanUpConstants.TRUE.equals(fSettings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS));
+		boolean additionalOptionEnabled= CleanUpConstants.TRUE.equals(fSettings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS));
+		boolean additionalEnabled= additionalOptionEnabled && (!ProjectScope.SCOPE.equals(fContext.getName()) || hasSettingsInScope(fContext));
 		if (additionalEnabled) {
 			if (fAdvancedCompositeEnableState != null) {
 				fAdvancedCompositeEnableState.restore();
