@@ -17,6 +17,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
@@ -215,7 +216,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	 * {@inheritDoc}
 	 */
 	public void performDefaults() {
-		fSettings= CleanUpConstants.getSaveParticipantSettings();
+		fSettings= CleanUpPreferenceUtil.loadSaveParticipantOptions(new InstanceScope());
 		settingsChanged();
 		
 		super.performDefaults();
