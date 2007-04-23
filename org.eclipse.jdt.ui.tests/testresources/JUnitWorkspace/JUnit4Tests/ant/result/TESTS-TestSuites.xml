@@ -1,610 +1,448 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <testsuites>
-  <testsuite errors="0" failures="1" id="0" name="ATestCase" package="pack" tests="1" time="0.0">
-  
-    <properties>
-    
-      <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"></property>
+  <testsuite errors="0" failures="0" hostname="Lavinio" id="0" name="ATestCase" package="pack" tests="2" time="0.015" timestamp="2007-04-17T16:59:46">
+      <properties>
+          <property name="java.runtime.name" value="Java(TM) SE Runtime Environment" />
 
-          <property name="sun.boot.library.path" value="C:\java\jdk6_01\jre\bin"></property>
+          <property name="sun.boot.library.path" value="C:\java\jdk6-b105\jre\bin" />
 
-          <property name="java.vm.version" value="1.6.0_01-b04"></property>
+          <property name="java.vm.version" value="1.6.0-b105" />
 
-          <property name="ant.library.dir" value="C:\e\w\development\org.apache.ant\lib"></property>
+          <property name="ant.library.dir" value="C:\e\w\head\org.apache.ant\lib" />
 
-          <property name="ant.version" value="Apache Ant version 1.6.5 compiled on June 2 2005"></property>
+          <property name="ant.version" value="Apache Ant version 1.7.0 compiled on December 13 2006" />
 
-          <property name="ant.java.version" value="1.5"></property>
+          <property name="ant.java.version" value="1.6" />
 
-          <property name="java.vm.vendor" value="Sun Microsystems Inc."></property>
+          <property name="java.vm.vendor" value="Sun Microsystems Inc." />
 
-          <property name="java.vendor.url" value="http://java.sun.com/"></property>
+          <property name="java.vendor.url" value="http://java.sun.com/" />
 
-          <property name="path.separator" value=";"></property>
+          <property name="path.separator" value=";" />
 
-          <property name="java.vm.name" value="Java HotSpot(TM) Client VM"></property>
+          <property name="java.vm.name" value="Java HotSpot(TM) Client VM" />
 
-          <property name="file.encoding.pkg" value="sun.io"></property>
+          <property name="file.encoding.pkg" value="sun.io" />
 
-          <property name="user.country" value="CH"></property>
+          <property name="user.country" value="CH" />
 
-          <property name="sun.java.launcher" value="SUN_STANDARD"></property>
+          <property name="sun.java.launcher" value="SUN_STANDARD" />
 
-          <property name="sun.os.patch.level" value="Service Pack 2"></property>
+          <property name="sun.os.patch.level" value="Service Pack 2" />
 
-          <property name="java.vm.specification.name" value="Java Virtual Machine Specification"></property>
+          <property name="java.vm.specification.name" value="Java Virtual Machine Specification" />
 
-          <property name="user.dir" value="C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant"></property>
+          <property name="user.dir" value="C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant" />
 
-          <property name="java.runtime.version" value="1.6.0_01-b04"></property>
+          <property name="java.runtime.version" value="1.6.0-b105" />
 
-          <property name="java.awt.graphicsenv" value="sun.awt.Win32GraphicsEnvironment"></property>
+          <property name="java.awt.graphicsenv" value="sun.awt.Win32GraphicsEnvironment" />
 
-          <property name="eclipse.pdebuild.scripts" value="/C:/e/w/development/org.eclipse.pde.build/scripts/"></property>
+          <property name="eclipse.pdebuild.scripts" value="/C:/e/w/head/org.eclipse.pde.build/scripts/" />
 
-          <property name="basedir" value="C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant"></property>
+          <property name="basedir" value="C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant" />
 
-          <property name="java.endorsed.dirs" value="C:\java\jdk6_01\jre\lib\endorsed"></property>
+          <property name="java.endorsed.dirs" value="C:\java\jdk6-b105\jre\lib\endorsed" />
 
-          <property name="os.arch" value="x86"></property>
+          <property name="os.arch" value="x86" />
 
-          <property name="java.io.tmpdir" value="C:\DOCUME~1\mkl\LOCALS~1\Temp\"></property>
+          <property name="java.io.tmpdir" value="C:\DOCUME~1\mkl\LOCALS~1\Temp\" />
 
-          <property name="line.separator" value=" "></property>
+          <property name="ant.core.lib" value="C:\e\w\head\org.apache.ant\lib\ant.jar" />
 
-          <property name="java.vm.specification.vendor" value="Sun Microsystems Inc."></property>
+          <property name="line.separator" value=" " />
 
-          <property name="user.variant" value=""></property>
+          <property name="java.vm.specification.vendor" value="Sun Microsystems Inc." />
 
-          <property name="os.name" value="Windows XP"></property>
+          <property name="user.variant" value="" />
 
-          <property name="ant.home" value="C:\e\w\development\org.apache.ant"></property>
+          <property name="os.name" value="Windows XP" />
 
-          <property name="eclipse.pdebuild.templates" value="/C:/e/w/development/org.eclipse.pde.build/templates/"></property>
+          <property name="ant.home" value="C:\e\w\head\org.apache.ant" />
 
-          <property name="ant.project.name" value="run AllTests"></property>
+          <property name="eclipse.pdebuild.templates" value="/C:/e/w/head/org.eclipse.pde.build/templates/" />
 
-          <property name="result" value="result"></property>
+          <property name="ant.project.name" value="run AllTests" />
 
-          <property name="sun.jnu.encoding" value="Cp1252"></property>
+          <property name="result" value="result" />
 
-          <property name="java.library.path" value="C:\java\j9-5.0-20070201\jre\bin;.;C:\java\jdk1.5.0_11\bin;C:\Program Files\ThinkPad\Utilities;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\IBM\Infoprint Select;C:\Notes;C:\Program Files\XLView;C:\lotus\compnent;C:\Utilities;C:\Program Files\IBM\Personal Communications\;C:\Program Files\IBM\Trace Facility\;C:\Program Files\Intel\Wireless\Bin\;C:\Program Files\ThinkPad\ConnectUtilities;C:\WINDOWS\Downloaded Program Files;C:\cygwin\bin\;C:\Program Files\YourKit Java Profiler 5.5.4\bin\win32;C:\Program Files\IBM\CHKPII;C:\Program Files\jEdit 4.1;C:\apps\jadnt158;C:\apps;C:\Program Files\ATI Technologies\ATI.ACE\;C:\java\apache-ant-1.7.0\bin;C:\Program Files\QuickTime\QTSystem\;C:\e\w\development\org.eclipse.swt.win32.win32.x86"></property>
+          <property name="sun.jnu.encoding" value="Cp1252" />
 
-          <property name="eclipse.pdebuild.home" value="/C:/e/w/development/org.eclipse.pde.build/./"></property>
+          <property name="java.library.path" value="C:\java\jdk6-b105\bin;.;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\java\jdk1.5.0_11\bin;C:\Program Files\ThinkPad\Utilities;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\IBM\Infoprint Select;C:\Notes;C:\Program Files\XLView;C:\lotus\compnent;C:\Utilities;C:\Program Files\IBM\Personal Communications\;C:\Program Files\IBM\Trace Facility\;C:\Program Files\Intel\Wireless\Bin\;C:\Program Files\ThinkPad\ConnectUtilities;C:\WINDOWS\Downloaded Program Files;C:\cygwin\bin\;C:\Program Files\YourKit Java Profiler 5.5.4\bin\win32;C:\Program Files\IBM\CHKPII;C:\Program Files\jEdit 4.1;C:\apps\jadnt158;C:\apps;C:\Program Files\ATI Technologies\ATI.ACE\;C:\java\apache-ant-1.7.0\bin;C:\Program Files\QuickTime\QTSystem\;C:\Program Files\Intel\Wireless\Bin\;C:\Program Files\Intel\Wireless\Bin\;C:\e\w\head\org.eclipse.swt.win32.win32.x86" />
 
-          <property name="java.class.version" value="50.0"></property>
+          <property name="eclipse.pdebuild.home" value="/C:/e/w/head/org.eclipse.pde.build/./" />
 
-          <property name="java.specification.name" value="Java Platform API Specification"></property>
+          <property name="java.specification.name" value="Java Platform API Specification" />
 
-          <property name="sun.management.compiler" value="HotSpot Client Compiler"></property>
+          <property name="java.class.version" value="50.0" />
 
-          <property name="os.version" value="5.1"></property>
+          <property name="sun.management.compiler" value="HotSpot Client Compiler" />
 
-          <property name="ant.file" value="C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant\runAllTests.xml"></property>
+          <property name="os.version" value="5.1" />
 
-          <property name="user.home" value="C:\Documents and Settings\mkl"></property>
+          <property name="ant.file" value="C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant\runAllTests.xml" />
 
-          <property name="user.timezone" value=""></property>
+          <property name="user.home" value="C:\Documents and Settings\mkl" />
 
-          <property name="java.awt.printerjob" value="sun.awt.windows.WPrinterJob"></property>
+          <property name="user.timezone" value="" />
 
-          <property name="file.encoding" value="Cp1252"></property>
+          <property name="java.awt.printerjob" value="sun.awt.windows.WPrinterJob" />
 
-          <property name="java.specification.version" value="1.6"></property>
+          <property name="file.encoding" value="Cp1252" />
 
-          <property name="java.class.path" value="C:\e\w\development\org.apache.ant\lib\ant.jar;C:\e\w\development\org.apache.ant\lib\ant-antlr.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-bcel.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-bsf.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-log4j.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-oro.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-regexp.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-resolver.jar;C:\e\w\development\org.apache.ant\lib\ant-commons-logging.jar;C:\e\w\development\org.apache.ant\lib\ant-commons-net.jar;C:\e\w\development\org.apache.ant\lib\ant-icontract.jar;C:\e\w\development\org.apache.ant\lib\ant-jai.jar;C:\e\w\development\org.apache.ant\lib\ant-javamail.jar;C:\e\w\development\org.apache.ant\lib\ant-jdepend.jar;C:\e\w\development\org.apache.ant\lib\ant-jmf.jar;C:\e\w\development\org.apache.ant\lib\ant-jsch.jar;C:\e\w\development\org.apache.ant\lib\ant-junit.jar;C:\e\w\development\org.apache.ant\lib\ant-launcher.jar;C:\e\w\development\org.apache.ant\lib\ant-netrexx.jar;C:\e\w\development\org.apache.ant\lib\ant-nodeps.jar;C:\e\w\development\org.apache.ant\lib\ant-starteam.jar;C:\e\w\development\org.apache.ant\lib\ant-stylebook.jar;C:\e\w\development\org.apache.ant\lib\ant-swing.jar;C:\e\w\development\org.apache.ant\lib\ant-trax.jar;C:\e\w\development\org.apache.ant\lib\ant-vaj.jar;C:\e\w\development\org.apache.ant\lib\ant-weblogic.jar;C:\e\w\development\org.apache.ant\lib\ant-xalan1.jar;C:\e\w\development\org.apache.ant\lib\ant-xslp.jar;C:\e\w\development\.metadata\.plugins\org.eclipse.pde.core\JUnitWorkspace\org.eclipse.osgi\bundles\121\1\.cp\lib\remoteAnt.jar;C:\java\jdk6_01\lib\tools.jar;C:\e\w\development\org.eclipse.swt.win32.win32.x86\org.eclipse.swt.win32.win32.x86_3.3.0.v3330.jar;C:\e\i\I20070313-1051\plugins\org.junit4_4.1.0.1\junit-4.1.jar;C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\bin"></property>
+          <property name="java.specification.version" value="1.6" />
 
-          <property name="user.name" value="mkl"></property>
+          <property name="java.class.path" value="C:\e\w\head\org.apache.ant\lib\ant.jar;C:\e\w\head\org.apache.ant\lib\ant-antlr.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-bcel.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-bsf.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-log4j.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-oro.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-regexp.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-resolver.jar;C:\e\w\head\org.apache.ant\lib\ant-commons-logging.jar;C:\e\w\head\org.apache.ant\lib\ant-commons-net.jar;C:\e\w\head\org.apache.ant\lib\ant-jai.jar;C:\e\w\head\org.apache.ant\lib\ant-javamail.jar;C:\e\w\head\org.apache.ant\lib\ant-jdepend.jar;C:\e\w\head\org.apache.ant\lib\ant-jmf.jar;C:\e\w\head\org.apache.ant\lib\ant-jsch.jar;C:\e\w\head\org.apache.ant\lib\ant-junit.jar;C:\e\w\head\org.apache.ant\lib\ant-launcher.jar;C:\e\w\head\org.apache.ant\lib\ant-netrexx.jar;C:\e\w\head\org.apache.ant\lib\ant-nodeps.jar;C:\e\w\head\org.apache.ant\lib\ant-starteam.jar;C:\e\w\head\org.apache.ant\lib\ant-stylebook.jar;C:\e\w\head\org.apache.ant\lib\ant-swing.jar;C:\e\w\head\org.apache.ant\lib\ant-trax.jar;C:\e\w\head\org.apache.ant\lib\ant-weblogic.jar;C:\e\w\head\org.eclipse.ant.ui\lib\remoteAnt.jar;C:\java\jdk6-b105\lib\tools.jar;C:\e\i\I20070410-1043\plugins\org.junit4_4.2.0\junit.jar;C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\bin" />
 
-          <property name="ant.file.run AllTests" value="C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant\runAllTests.xml"></property>
+          <property name="user.name" value="mkl" />
 
-          <property name="java.vm.specification.version" value="1.0"></property>
+          <property name="ant.file.run AllTests" value="C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant\runAllTests.xml" />
 
-          <property name="java.home" value="C:\java\jdk6_01\jre"></property>
+          <property name="java.vm.specification.version" value="1.0" />
 
-          <property name="sun.arch.data.model" value="32"></property>
+          <property name="sun.arch.data.model" value="32" />
 
-          <property name="java.specification.vendor" value="Sun Microsystems Inc."></property>
+          <property name="java.home" value="C:\java\jdk6-b105\jre" />
 
-          <property name="user.language" value="de"></property>
+          <property name="java.specification.vendor" value="Sun Microsystems Inc." />
 
-          <property name="awt.toolkit" value="sun.awt.windows.WToolkit"></property>
+          <property name="user.language" value="de" />
 
-          <property name="java.vm.info" value="mixed mode"></property>
+          <property name="awt.toolkit" value="sun.awt.windows.WToolkit" />
 
-          <property name="java.version" value="1.6.0_01"></property>
+          <property name="java.vm.info" value="mixed mode" />
 
-          <property name="java.ext.dirs" value="C:\java\jdk6_01\jre\lib\ext;C:\WINDOWS\Sun\Java\lib\ext"></property>
+          <property name="java.version" value="1.6.0" />
 
-          <property name="sun.boot.class.path" value="C:\java\jdk6_01\jre\lib\resources.jar;C:\java\jdk6_01\jre\lib\rt.jar;C:\java\jdk6_01\jre\lib\sunrsasign.jar;C:\java\jdk6_01\jre\lib\jsse.jar;C:\java\jdk6_01\jre\lib\jce.jar;C:\java\jdk6_01\jre\lib\charsets.jar;C:\java\jdk6_01\jre\classes"></property>
+          <property name="java.ext.dirs" value="C:\java\jdk6-b105\jre\lib\ext;C:\WINDOWS\Sun\Java\lib\ext" />
 
-          <property name="java.vendor" value="Sun Microsystems Inc."></property>
+          <property name="sun.boot.class.path" value="C:\java\jdk6-b105\jre\lib\resources.jar;C:\java\jdk6-b105\jre\lib\rt.jar;C:\java\jdk6-b105\jre\lib\sunrsasign.jar;C:\java\jdk6-b105\jre\lib\jsse.jar;C:\java\jdk6-b105\jre\lib\jce.jar;C:\java\jdk6-b105\jre\lib\charsets.jar;C:\java\jdk6-b105\jre\classes" />
 
-          <property name="file.separator" value="\"></property>
+          <property name="java.vendor" value="Sun Microsystems Inc." />
 
-          <property name="java.vendor.url.bug" value="http://java.sun.com/cgi-bin/bugreport.cgi"></property>
+          <property name="file.separator" value="\" />
 
-          <property name="report" value="report"></property>
+          <property name="java.vendor.url.bug" value="http://java.sun.com/cgi-bin/bugreport.cgi" />
 
-          <property name="sun.cpu.endian" value="little"></property>
+          <property name="report" value="report" />
 
-          <property name="sun.io.unicode.encoding" value="UnicodeLittle"></property>
+          <property name="sun.cpu.endian" value="little" />
 
-          <property name="sun.desktop" value="windows"></property>
+          <property name="sun.io.unicode.encoding" value="UnicodeLittle" />
 
-          <property name="sun.cpu.isalist" value="pentium_pro+mmx pentium_pro pentium+mmx pentium i486 i386 i86"></property>
+          <property name="sun.desktop" value="windows" />
+
+          <property name="sun.cpu.isalist" value="pentium_pro+mmx pentium_pro pentium+mmx pentium i486 i386 i86" />
 
       </properties>
 
-      <testcase classname="junit.framework.TestSuite$1" name="warning" time="0.0">
-    
-      <failure message="No tests found in pack.ATestCase" type="junit.framework.AssertionFailedError">junit.framework.AssertionFailedError: No tests found in pack.ATestCase
-	at org.eclipse.ant.internal.ui.antsupport.EclipseDefaultExecutor.executeTargets(EclipseDefaultExecutor.java:32)
-	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.run(InternalAntRunner.java:423)
-	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.main(InternalAntRunner.java:137)
-</failure>
+      <testcase classname="pack.ATestCase" name="testSucceed" time="0.0" />
 
-      </testcase>
+      <testcase classname="pack.ATestCase" name="testSucceed2" time="0.0" />
 
       <system-out><![CDATA[]]></system-out>
 
       <system-err><![CDATA[]]></system-err>
 
   </testsuite>
-  <testsuite errors="0" failures="1" id="1" name="ATestSuite" package="pack" tests="1" time="0.0">
-  
-    <properties>
-    
-      <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"></property>
+  <testsuite errors="0" failures="0" hostname="Lavinio" id="1" name="ATestSuite" package="pack" tests="2" time="0.0" timestamp="2007-04-17T16:59:46">
+      <properties>
+          <property name="java.runtime.name" value="Java(TM) SE Runtime Environment" />
 
-          <property name="sun.boot.library.path" value="C:\java\jdk6_01\jre\bin"></property>
+          <property name="sun.boot.library.path" value="C:\java\jdk6-b105\jre\bin" />
 
-          <property name="java.vm.version" value="1.6.0_01-b04"></property>
+          <property name="java.vm.version" value="1.6.0-b105" />
 
-          <property name="ant.library.dir" value="C:\e\w\development\org.apache.ant\lib"></property>
+          <property name="ant.library.dir" value="C:\e\w\head\org.apache.ant\lib" />
 
-          <property name="ant.version" value="Apache Ant version 1.6.5 compiled on June 2 2005"></property>
+          <property name="ant.version" value="Apache Ant version 1.7.0 compiled on December 13 2006" />
 
-          <property name="ant.java.version" value="1.5"></property>
+          <property name="ant.java.version" value="1.6" />
 
-          <property name="java.vm.vendor" value="Sun Microsystems Inc."></property>
+          <property name="java.vm.vendor" value="Sun Microsystems Inc." />
 
-          <property name="java.vendor.url" value="http://java.sun.com/"></property>
+          <property name="java.vendor.url" value="http://java.sun.com/" />
 
-          <property name="path.separator" value=";"></property>
+          <property name="path.separator" value=";" />
 
-          <property name="java.vm.name" value="Java HotSpot(TM) Client VM"></property>
+          <property name="java.vm.name" value="Java HotSpot(TM) Client VM" />
 
-          <property name="file.encoding.pkg" value="sun.io"></property>
+          <property name="file.encoding.pkg" value="sun.io" />
 
-          <property name="user.country" value="CH"></property>
+          <property name="user.country" value="CH" />
 
-          <property name="sun.java.launcher" value="SUN_STANDARD"></property>
+          <property name="sun.java.launcher" value="SUN_STANDARD" />
 
-          <property name="sun.os.patch.level" value="Service Pack 2"></property>
+          <property name="sun.os.patch.level" value="Service Pack 2" />
 
-          <property name="java.vm.specification.name" value="Java Virtual Machine Specification"></property>
+          <property name="java.vm.specification.name" value="Java Virtual Machine Specification" />
 
-          <property name="user.dir" value="C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant"></property>
+          <property name="user.dir" value="C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant" />
 
-          <property name="java.runtime.version" value="1.6.0_01-b04"></property>
+          <property name="java.runtime.version" value="1.6.0-b105" />
 
-          <property name="java.awt.graphicsenv" value="sun.awt.Win32GraphicsEnvironment"></property>
+          <property name="java.awt.graphicsenv" value="sun.awt.Win32GraphicsEnvironment" />
 
-          <property name="eclipse.pdebuild.scripts" value="/C:/e/w/development/org.eclipse.pde.build/scripts/"></property>
+          <property name="eclipse.pdebuild.scripts" value="/C:/e/w/head/org.eclipse.pde.build/scripts/" />
 
-          <property name="basedir" value="C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant"></property>
+          <property name="basedir" value="C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant" />
 
-          <property name="java.endorsed.dirs" value="C:\java\jdk6_01\jre\lib\endorsed"></property>
+          <property name="java.endorsed.dirs" value="C:\java\jdk6-b105\jre\lib\endorsed" />
 
-          <property name="os.arch" value="x86"></property>
+          <property name="os.arch" value="x86" />
 
-          <property name="java.io.tmpdir" value="C:\DOCUME~1\mkl\LOCALS~1\Temp\"></property>
+          <property name="java.io.tmpdir" value="C:\DOCUME~1\mkl\LOCALS~1\Temp\" />
 
-          <property name="line.separator" value=" "></property>
+          <property name="ant.core.lib" value="C:\e\w\head\org.apache.ant\lib\ant.jar" />
 
-          <property name="java.vm.specification.vendor" value="Sun Microsystems Inc."></property>
+          <property name="line.separator" value=" " />
 
-          <property name="user.variant" value=""></property>
+          <property name="java.vm.specification.vendor" value="Sun Microsystems Inc." />
 
-          <property name="os.name" value="Windows XP"></property>
+          <property name="user.variant" value="" />
 
-          <property name="ant.home" value="C:\e\w\development\org.apache.ant"></property>
+          <property name="os.name" value="Windows XP" />
 
-          <property name="eclipse.pdebuild.templates" value="/C:/e/w/development/org.eclipse.pde.build/templates/"></property>
+          <property name="ant.home" value="C:\e\w\head\org.apache.ant" />
 
-          <property name="ant.project.name" value="run AllTests"></property>
+          <property name="eclipse.pdebuild.templates" value="/C:/e/w/head/org.eclipse.pde.build/templates/" />
 
-          <property name="result" value="result"></property>
+          <property name="ant.project.name" value="run AllTests" />
 
-          <property name="sun.jnu.encoding" value="Cp1252"></property>
+          <property name="result" value="result" />
 
-          <property name="java.library.path" value="C:\java\j9-5.0-20070201\jre\bin;.;C:\java\jdk1.5.0_11\bin;C:\Program Files\ThinkPad\Utilities;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\IBM\Infoprint Select;C:\Notes;C:\Program Files\XLView;C:\lotus\compnent;C:\Utilities;C:\Program Files\IBM\Personal Communications\;C:\Program Files\IBM\Trace Facility\;C:\Program Files\Intel\Wireless\Bin\;C:\Program Files\ThinkPad\ConnectUtilities;C:\WINDOWS\Downloaded Program Files;C:\cygwin\bin\;C:\Program Files\YourKit Java Profiler 5.5.4\bin\win32;C:\Program Files\IBM\CHKPII;C:\Program Files\jEdit 4.1;C:\apps\jadnt158;C:\apps;C:\Program Files\ATI Technologies\ATI.ACE\;C:\java\apache-ant-1.7.0\bin;C:\Program Files\QuickTime\QTSystem\;C:\e\w\development\org.eclipse.swt.win32.win32.x86"></property>
+          <property name="sun.jnu.encoding" value="Cp1252" />
 
-          <property name="eclipse.pdebuild.home" value="/C:/e/w/development/org.eclipse.pde.build/./"></property>
+          <property name="java.library.path" value="C:\java\jdk6-b105\bin;.;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\java\jdk1.5.0_11\bin;C:\Program Files\ThinkPad\Utilities;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\IBM\Infoprint Select;C:\Notes;C:\Program Files\XLView;C:\lotus\compnent;C:\Utilities;C:\Program Files\IBM\Personal Communications\;C:\Program Files\IBM\Trace Facility\;C:\Program Files\Intel\Wireless\Bin\;C:\Program Files\ThinkPad\ConnectUtilities;C:\WINDOWS\Downloaded Program Files;C:\cygwin\bin\;C:\Program Files\YourKit Java Profiler 5.5.4\bin\win32;C:\Program Files\IBM\CHKPII;C:\Program Files\jEdit 4.1;C:\apps\jadnt158;C:\apps;C:\Program Files\ATI Technologies\ATI.ACE\;C:\java\apache-ant-1.7.0\bin;C:\Program Files\QuickTime\QTSystem\;C:\Program Files\Intel\Wireless\Bin\;C:\Program Files\Intel\Wireless\Bin\;C:\e\w\head\org.eclipse.swt.win32.win32.x86" />
 
-          <property name="java.class.version" value="50.0"></property>
+          <property name="eclipse.pdebuild.home" value="/C:/e/w/head/org.eclipse.pde.build/./" />
 
-          <property name="java.specification.name" value="Java Platform API Specification"></property>
+          <property name="java.specification.name" value="Java Platform API Specification" />
 
-          <property name="sun.management.compiler" value="HotSpot Client Compiler"></property>
+          <property name="java.class.version" value="50.0" />
 
-          <property name="os.version" value="5.1"></property>
+          <property name="sun.management.compiler" value="HotSpot Client Compiler" />
 
-          <property name="ant.file" value="C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant\runAllTests.xml"></property>
+          <property name="os.version" value="5.1" />
 
-          <property name="user.home" value="C:\Documents and Settings\mkl"></property>
+          <property name="ant.file" value="C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant\runAllTests.xml" />
 
-          <property name="user.timezone" value=""></property>
+          <property name="user.home" value="C:\Documents and Settings\mkl" />
 
-          <property name="java.awt.printerjob" value="sun.awt.windows.WPrinterJob"></property>
+          <property name="user.timezone" value="" />
 
-          <property name="file.encoding" value="Cp1252"></property>
+          <property name="java.awt.printerjob" value="sun.awt.windows.WPrinterJob" />
 
-          <property name="java.specification.version" value="1.6"></property>
+          <property name="file.encoding" value="Cp1252" />
 
-          <property name="java.class.path" value="C:\e\w\development\org.apache.ant\lib\ant.jar;C:\e\w\development\org.apache.ant\lib\ant-antlr.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-bcel.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-bsf.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-log4j.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-oro.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-regexp.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-resolver.jar;C:\e\w\development\org.apache.ant\lib\ant-commons-logging.jar;C:\e\w\development\org.apache.ant\lib\ant-commons-net.jar;C:\e\w\development\org.apache.ant\lib\ant-icontract.jar;C:\e\w\development\org.apache.ant\lib\ant-jai.jar;C:\e\w\development\org.apache.ant\lib\ant-javamail.jar;C:\e\w\development\org.apache.ant\lib\ant-jdepend.jar;C:\e\w\development\org.apache.ant\lib\ant-jmf.jar;C:\e\w\development\org.apache.ant\lib\ant-jsch.jar;C:\e\w\development\org.apache.ant\lib\ant-junit.jar;C:\e\w\development\org.apache.ant\lib\ant-launcher.jar;C:\e\w\development\org.apache.ant\lib\ant-netrexx.jar;C:\e\w\development\org.apache.ant\lib\ant-nodeps.jar;C:\e\w\development\org.apache.ant\lib\ant-starteam.jar;C:\e\w\development\org.apache.ant\lib\ant-stylebook.jar;C:\e\w\development\org.apache.ant\lib\ant-swing.jar;C:\e\w\development\org.apache.ant\lib\ant-trax.jar;C:\e\w\development\org.apache.ant\lib\ant-vaj.jar;C:\e\w\development\org.apache.ant\lib\ant-weblogic.jar;C:\e\w\development\org.apache.ant\lib\ant-xalan1.jar;C:\e\w\development\org.apache.ant\lib\ant-xslp.jar;C:\e\w\development\.metadata\.plugins\org.eclipse.pde.core\JUnitWorkspace\org.eclipse.osgi\bundles\121\1\.cp\lib\remoteAnt.jar;C:\java\jdk6_01\lib\tools.jar;C:\e\w\development\org.eclipse.swt.win32.win32.x86\org.eclipse.swt.win32.win32.x86_3.3.0.v3330.jar;C:\e\i\I20070313-1051\plugins\org.junit4_4.1.0.1\junit-4.1.jar;C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\bin"></property>
+          <property name="java.specification.version" value="1.6" />
 
-          <property name="user.name" value="mkl"></property>
+          <property name="java.class.path" value="C:\e\w\head\org.apache.ant\lib\ant.jar;C:\e\w\head\org.apache.ant\lib\ant-antlr.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-bcel.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-bsf.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-log4j.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-oro.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-regexp.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-resolver.jar;C:\e\w\head\org.apache.ant\lib\ant-commons-logging.jar;C:\e\w\head\org.apache.ant\lib\ant-commons-net.jar;C:\e\w\head\org.apache.ant\lib\ant-jai.jar;C:\e\w\head\org.apache.ant\lib\ant-javamail.jar;C:\e\w\head\org.apache.ant\lib\ant-jdepend.jar;C:\e\w\head\org.apache.ant\lib\ant-jmf.jar;C:\e\w\head\org.apache.ant\lib\ant-jsch.jar;C:\e\w\head\org.apache.ant\lib\ant-junit.jar;C:\e\w\head\org.apache.ant\lib\ant-launcher.jar;C:\e\w\head\org.apache.ant\lib\ant-netrexx.jar;C:\e\w\head\org.apache.ant\lib\ant-nodeps.jar;C:\e\w\head\org.apache.ant\lib\ant-starteam.jar;C:\e\w\head\org.apache.ant\lib\ant-stylebook.jar;C:\e\w\head\org.apache.ant\lib\ant-swing.jar;C:\e\w\head\org.apache.ant\lib\ant-trax.jar;C:\e\w\head\org.apache.ant\lib\ant-weblogic.jar;C:\e\w\head\org.eclipse.ant.ui\lib\remoteAnt.jar;C:\java\jdk6-b105\lib\tools.jar;C:\e\i\I20070410-1043\plugins\org.junit4_4.2.0\junit.jar;C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\bin" />
 
-          <property name="ant.file.run AllTests" value="C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant\runAllTests.xml"></property>
+          <property name="user.name" value="mkl" />
 
-          <property name="java.vm.specification.version" value="1.0"></property>
+          <property name="ant.file.run AllTests" value="C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant\runAllTests.xml" />
 
-          <property name="java.home" value="C:\java\jdk6_01\jre"></property>
+          <property name="java.vm.specification.version" value="1.0" />
 
-          <property name="sun.arch.data.model" value="32"></property>
+          <property name="sun.arch.data.model" value="32" />
 
-          <property name="java.specification.vendor" value="Sun Microsystems Inc."></property>
+          <property name="java.home" value="C:\java\jdk6-b105\jre" />
 
-          <property name="user.language" value="de"></property>
+          <property name="java.specification.vendor" value="Sun Microsystems Inc." />
 
-          <property name="awt.toolkit" value="sun.awt.windows.WToolkit"></property>
+          <property name="user.language" value="de" />
 
-          <property name="java.vm.info" value="mixed mode"></property>
+          <property name="awt.toolkit" value="sun.awt.windows.WToolkit" />
 
-          <property name="java.version" value="1.6.0_01"></property>
+          <property name="java.vm.info" value="mixed mode" />
 
-          <property name="java.ext.dirs" value="C:\java\jdk6_01\jre\lib\ext;C:\WINDOWS\Sun\Java\lib\ext"></property>
+          <property name="java.version" value="1.6.0" />
 
-          <property name="sun.boot.class.path" value="C:\java\jdk6_01\jre\lib\resources.jar;C:\java\jdk6_01\jre\lib\rt.jar;C:\java\jdk6_01\jre\lib\sunrsasign.jar;C:\java\jdk6_01\jre\lib\jsse.jar;C:\java\jdk6_01\jre\lib\jce.jar;C:\java\jdk6_01\jre\lib\charsets.jar;C:\java\jdk6_01\jre\classes"></property>
+          <property name="java.ext.dirs" value="C:\java\jdk6-b105\jre\lib\ext;C:\WINDOWS\Sun\Java\lib\ext" />
 
-          <property name="java.vendor" value="Sun Microsystems Inc."></property>
+          <property name="sun.boot.class.path" value="C:\java\jdk6-b105\jre\lib\resources.jar;C:\java\jdk6-b105\jre\lib\rt.jar;C:\java\jdk6-b105\jre\lib\sunrsasign.jar;C:\java\jdk6-b105\jre\lib\jsse.jar;C:\java\jdk6-b105\jre\lib\jce.jar;C:\java\jdk6-b105\jre\lib\charsets.jar;C:\java\jdk6-b105\jre\classes" />
 
-          <property name="file.separator" value="\"></property>
+          <property name="java.vendor" value="Sun Microsystems Inc." />
 
-          <property name="java.vendor.url.bug" value="http://java.sun.com/cgi-bin/bugreport.cgi"></property>
+          <property name="file.separator" value="\" />
 
-          <property name="report" value="report"></property>
+          <property name="java.vendor.url.bug" value="http://java.sun.com/cgi-bin/bugreport.cgi" />
 
-          <property name="sun.cpu.endian" value="little"></property>
+          <property name="report" value="report" />
 
-          <property name="sun.io.unicode.encoding" value="UnicodeLittle"></property>
+          <property name="sun.cpu.endian" value="little" />
 
-          <property name="sun.desktop" value="windows"></property>
+          <property name="sun.io.unicode.encoding" value="UnicodeLittle" />
 
-          <property name="sun.cpu.isalist" value="pentium_pro+mmx pentium_pro pentium+mmx pentium i486 i386 i86"></property>
+          <property name="sun.desktop" value="windows" />
+
+          <property name="sun.cpu.isalist" value="pentium_pro+mmx pentium_pro pentium+mmx pentium i486 i386 i86" />
 
       </properties>
 
-      <testcase classname="junit.framework.TestSuite$1" name="warning" time="0.0">
-    
-      <failure message="No tests found in pack.ATestSuite" type="junit.framework.AssertionFailedError">junit.framework.AssertionFailedError: No tests found in pack.ATestSuite
-	at org.eclipse.ant.internal.ui.antsupport.EclipseDefaultExecutor.executeTargets(EclipseDefaultExecutor.java:32)
-	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.run(InternalAntRunner.java:423)
-	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.main(InternalAntRunner.java:137)
-</failure>
+      <testcase classname="pack.ATestCase" name="testSucceed" time="0.0" />
 
-      </testcase>
+      <testcase classname="pack.ATestCase" name="testSucceed2" time="0.0" />
 
       <system-out><![CDATA[]]></system-out>
 
       <system-err><![CDATA[]]></system-err>
 
   </testsuite>
-  <testsuite errors="0" failures="1" id="2" name="AllTests" package="pack" tests="1" time="0.281">
-  
-    <properties>
-    
-      <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"></property>
+  <testsuite errors="3" failures="2" hostname="Lavinio" id="2" name="AllTests" package="pack" tests="8" time="0.218" timestamp="2007-04-17T16:59:45">
+      <properties>
+          <property name="java.runtime.name" value="Java(TM) SE Runtime Environment" />
 
-          <property name="sun.boot.library.path" value="C:\java\jdk6_01\jre\bin"></property>
+          <property name="sun.boot.library.path" value="C:\java\jdk6-b105\jre\bin" />
 
-          <property name="java.vm.version" value="1.6.0_01-b04"></property>
+          <property name="java.vm.version" value="1.6.0-b105" />
 
-          <property name="ant.library.dir" value="C:\e\w\development\org.apache.ant\lib"></property>
+          <property name="ant.library.dir" value="C:\e\w\head\org.apache.ant\lib" />
 
-          <property name="ant.version" value="Apache Ant version 1.6.5 compiled on June 2 2005"></property>
+          <property name="ant.version" value="Apache Ant version 1.7.0 compiled on December 13 2006" />
 
-          <property name="ant.java.version" value="1.5"></property>
+          <property name="ant.java.version" value="1.6" />
 
-          <property name="java.vm.vendor" value="Sun Microsystems Inc."></property>
+          <property name="java.vm.vendor" value="Sun Microsystems Inc." />
 
-          <property name="java.vendor.url" value="http://java.sun.com/"></property>
+          <property name="java.vendor.url" value="http://java.sun.com/" />
 
-          <property name="path.separator" value=";"></property>
+          <property name="path.separator" value=";" />
 
-          <property name="java.vm.name" value="Java HotSpot(TM) Client VM"></property>
+          <property name="java.vm.name" value="Java HotSpot(TM) Client VM" />
 
-          <property name="file.encoding.pkg" value="sun.io"></property>
+          <property name="file.encoding.pkg" value="sun.io" />
 
-          <property name="user.country" value="CH"></property>
+          <property name="user.country" value="CH" />
 
-          <property name="sun.java.launcher" value="SUN_STANDARD"></property>
+          <property name="sun.java.launcher" value="SUN_STANDARD" />
 
-          <property name="sun.os.patch.level" value="Service Pack 2"></property>
+          <property name="sun.os.patch.level" value="Service Pack 2" />
 
-          <property name="java.vm.specification.name" value="Java Virtual Machine Specification"></property>
+          <property name="java.vm.specification.name" value="Java Virtual Machine Specification" />
 
-          <property name="user.dir" value="C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant"></property>
+          <property name="user.dir" value="C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant" />
 
-          <property name="java.runtime.version" value="1.6.0_01-b04"></property>
+          <property name="java.runtime.version" value="1.6.0-b105" />
 
-          <property name="java.awt.graphicsenv" value="sun.awt.Win32GraphicsEnvironment"></property>
+          <property name="java.awt.graphicsenv" value="sun.awt.Win32GraphicsEnvironment" />
 
-          <property name="eclipse.pdebuild.scripts" value="/C:/e/w/development/org.eclipse.pde.build/scripts/"></property>
+          <property name="eclipse.pdebuild.scripts" value="/C:/e/w/head/org.eclipse.pde.build/scripts/" />
 
-          <property name="basedir" value="C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant"></property>
+          <property name="basedir" value="C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant" />
 
-          <property name="java.endorsed.dirs" value="C:\java\jdk6_01\jre\lib\endorsed"></property>
+          <property name="java.endorsed.dirs" value="C:\java\jdk6-b105\jre\lib\endorsed" />
 
-          <property name="os.arch" value="x86"></property>
+          <property name="os.arch" value="x86" />
 
-          <property name="java.io.tmpdir" value="C:\DOCUME~1\mkl\LOCALS~1\Temp\"></property>
+          <property name="java.io.tmpdir" value="C:\DOCUME~1\mkl\LOCALS~1\Temp\" />
 
-          <property name="line.separator" value=" "></property>
+          <property name="ant.core.lib" value="C:\e\w\head\org.apache.ant\lib\ant.jar" />
 
-          <property name="java.vm.specification.vendor" value="Sun Microsystems Inc."></property>
+          <property name="line.separator" value=" " />
 
-          <property name="user.variant" value=""></property>
+          <property name="java.vm.specification.vendor" value="Sun Microsystems Inc." />
 
-          <property name="os.name" value="Windows XP"></property>
+          <property name="user.variant" value="" />
 
-          <property name="ant.home" value="C:\e\w\development\org.apache.ant"></property>
+          <property name="os.name" value="Windows XP" />
 
-          <property name="eclipse.pdebuild.templates" value="/C:/e/w/development/org.eclipse.pde.build/templates/"></property>
+          <property name="ant.home" value="C:\e\w\head\org.apache.ant" />
 
-          <property name="ant.project.name" value="run AllTests"></property>
+          <property name="eclipse.pdebuild.templates" value="/C:/e/w/head/org.eclipse.pde.build/templates/" />
 
-          <property name="result" value="result"></property>
+          <property name="ant.project.name" value="run AllTests" />
 
-          <property name="sun.jnu.encoding" value="Cp1252"></property>
+          <property name="result" value="result" />
 
-          <property name="java.library.path" value="C:\java\j9-5.0-20070201\jre\bin;.;C:\java\jdk1.5.0_11\bin;C:\Program Files\ThinkPad\Utilities;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\IBM\Infoprint Select;C:\Notes;C:\Program Files\XLView;C:\lotus\compnent;C:\Utilities;C:\Program Files\IBM\Personal Communications\;C:\Program Files\IBM\Trace Facility\;C:\Program Files\Intel\Wireless\Bin\;C:\Program Files\ThinkPad\ConnectUtilities;C:\WINDOWS\Downloaded Program Files;C:\cygwin\bin\;C:\Program Files\YourKit Java Profiler 5.5.4\bin\win32;C:\Program Files\IBM\CHKPII;C:\Program Files\jEdit 4.1;C:\apps\jadnt158;C:\apps;C:\Program Files\ATI Technologies\ATI.ACE\;C:\java\apache-ant-1.7.0\bin;C:\Program Files\QuickTime\QTSystem\;C:\e\w\development\org.eclipse.swt.win32.win32.x86"></property>
+          <property name="sun.jnu.encoding" value="Cp1252" />
 
-          <property name="eclipse.pdebuild.home" value="/C:/e/w/development/org.eclipse.pde.build/./"></property>
+          <property name="java.library.path" value="C:\java\jdk6-b105\bin;.;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\java\jdk1.5.0_11\bin;C:\Program Files\ThinkPad\Utilities;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\IBM\Infoprint Select;C:\Notes;C:\Program Files\XLView;C:\lotus\compnent;C:\Utilities;C:\Program Files\IBM\Personal Communications\;C:\Program Files\IBM\Trace Facility\;C:\Program Files\Intel\Wireless\Bin\;C:\Program Files\ThinkPad\ConnectUtilities;C:\WINDOWS\Downloaded Program Files;C:\cygwin\bin\;C:\Program Files\YourKit Java Profiler 5.5.4\bin\win32;C:\Program Files\IBM\CHKPII;C:\Program Files\jEdit 4.1;C:\apps\jadnt158;C:\apps;C:\Program Files\ATI Technologies\ATI.ACE\;C:\java\apache-ant-1.7.0\bin;C:\Program Files\QuickTime\QTSystem\;C:\Program Files\Intel\Wireless\Bin\;C:\Program Files\Intel\Wireless\Bin\;C:\e\w\head\org.eclipse.swt.win32.win32.x86" />
 
-          <property name="java.class.version" value="50.0"></property>
+          <property name="eclipse.pdebuild.home" value="/C:/e/w/head/org.eclipse.pde.build/./" />
 
-          <property name="java.specification.name" value="Java Platform API Specification"></property>
+          <property name="java.specification.name" value="Java Platform API Specification" />
 
-          <property name="sun.management.compiler" value="HotSpot Client Compiler"></property>
+          <property name="java.class.version" value="50.0" />
 
-          <property name="os.version" value="5.1"></property>
+          <property name="sun.management.compiler" value="HotSpot Client Compiler" />
 
-          <property name="ant.file" value="C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant\runAllTests.xml"></property>
+          <property name="os.version" value="5.1" />
 
-          <property name="user.home" value="C:\Documents and Settings\mkl"></property>
+          <property name="ant.file" value="C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant\runAllTests.xml" />
 
-          <property name="user.timezone" value=""></property>
+          <property name="user.home" value="C:\Documents and Settings\mkl" />
 
-          <property name="java.awt.printerjob" value="sun.awt.windows.WPrinterJob"></property>
+          <property name="user.timezone" value="" />
 
-          <property name="file.encoding" value="Cp1252"></property>
+          <property name="java.awt.printerjob" value="sun.awt.windows.WPrinterJob" />
 
-          <property name="java.specification.version" value="1.6"></property>
+          <property name="file.encoding" value="Cp1252" />
 
-          <property name="java.class.path" value="C:\e\w\development\org.apache.ant\lib\ant.jar;C:\e\w\development\org.apache.ant\lib\ant-antlr.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-bcel.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-bsf.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-log4j.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-oro.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-regexp.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-resolver.jar;C:\e\w\development\org.apache.ant\lib\ant-commons-logging.jar;C:\e\w\development\org.apache.ant\lib\ant-commons-net.jar;C:\e\w\development\org.apache.ant\lib\ant-icontract.jar;C:\e\w\development\org.apache.ant\lib\ant-jai.jar;C:\e\w\development\org.apache.ant\lib\ant-javamail.jar;C:\e\w\development\org.apache.ant\lib\ant-jdepend.jar;C:\e\w\development\org.apache.ant\lib\ant-jmf.jar;C:\e\w\development\org.apache.ant\lib\ant-jsch.jar;C:\e\w\development\org.apache.ant\lib\ant-junit.jar;C:\e\w\development\org.apache.ant\lib\ant-launcher.jar;C:\e\w\development\org.apache.ant\lib\ant-netrexx.jar;C:\e\w\development\org.apache.ant\lib\ant-nodeps.jar;C:\e\w\development\org.apache.ant\lib\ant-starteam.jar;C:\e\w\development\org.apache.ant\lib\ant-stylebook.jar;C:\e\w\development\org.apache.ant\lib\ant-swing.jar;C:\e\w\development\org.apache.ant\lib\ant-trax.jar;C:\e\w\development\org.apache.ant\lib\ant-vaj.jar;C:\e\w\development\org.apache.ant\lib\ant-weblogic.jar;C:\e\w\development\org.apache.ant\lib\ant-xalan1.jar;C:\e\w\development\org.apache.ant\lib\ant-xslp.jar;C:\e\w\development\.metadata\.plugins\org.eclipse.pde.core\JUnitWorkspace\org.eclipse.osgi\bundles\121\1\.cp\lib\remoteAnt.jar;C:\java\jdk6_01\lib\tools.jar;C:\e\w\development\org.eclipse.swt.win32.win32.x86\org.eclipse.swt.win32.win32.x86_3.3.0.v3330.jar;C:\e\i\I20070313-1051\plugins\org.junit4_4.1.0.1\junit-4.1.jar;C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\bin"></property>
+          <property name="java.specification.version" value="1.6" />
 
-          <property name="user.name" value="mkl"></property>
+          <property name="java.class.path" value="C:\e\w\head\org.apache.ant\lib\ant.jar;C:\e\w\head\org.apache.ant\lib\ant-antlr.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-bcel.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-bsf.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-log4j.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-oro.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-regexp.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-resolver.jar;C:\e\w\head\org.apache.ant\lib\ant-commons-logging.jar;C:\e\w\head\org.apache.ant\lib\ant-commons-net.jar;C:\e\w\head\org.apache.ant\lib\ant-jai.jar;C:\e\w\head\org.apache.ant\lib\ant-javamail.jar;C:\e\w\head\org.apache.ant\lib\ant-jdepend.jar;C:\e\w\head\org.apache.ant\lib\ant-jmf.jar;C:\e\w\head\org.apache.ant\lib\ant-jsch.jar;C:\e\w\head\org.apache.ant\lib\ant-junit.jar;C:\e\w\head\org.apache.ant\lib\ant-launcher.jar;C:\e\w\head\org.apache.ant\lib\ant-netrexx.jar;C:\e\w\head\org.apache.ant\lib\ant-nodeps.jar;C:\e\w\head\org.apache.ant\lib\ant-starteam.jar;C:\e\w\head\org.apache.ant\lib\ant-stylebook.jar;C:\e\w\head\org.apache.ant\lib\ant-swing.jar;C:\e\w\head\org.apache.ant\lib\ant-trax.jar;C:\e\w\head\org.apache.ant\lib\ant-weblogic.jar;C:\e\w\head\org.eclipse.ant.ui\lib\remoteAnt.jar;C:\java\jdk6-b105\lib\tools.jar;C:\e\i\I20070410-1043\plugins\org.junit4_4.2.0\junit.jar;C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\bin" />
 
-          <property name="ant.file.run AllTests" value="C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant\runAllTests.xml"></property>
+          <property name="user.name" value="mkl" />
 
-          <property name="java.vm.specification.version" value="1.0"></property>
+          <property name="ant.file.run AllTests" value="C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant\runAllTests.xml" />
 
-          <property name="java.home" value="C:\java\jdk6_01\jre"></property>
+          <property name="java.vm.specification.version" value="1.0" />
 
-          <property name="sun.arch.data.model" value="32"></property>
+          <property name="sun.arch.data.model" value="32" />
 
-          <property name="java.specification.vendor" value="Sun Microsystems Inc."></property>
+          <property name="java.home" value="C:\java\jdk6-b105\jre" />
 
-          <property name="user.language" value="de"></property>
+          <property name="java.specification.vendor" value="Sun Microsystems Inc." />
 
-          <property name="awt.toolkit" value="sun.awt.windows.WToolkit"></property>
+          <property name="user.language" value="de" />
 
-          <property name="java.vm.info" value="mixed mode"></property>
+          <property name="awt.toolkit" value="sun.awt.windows.WToolkit" />
 
-          <property name="java.version" value="1.6.0_01"></property>
+          <property name="java.vm.info" value="mixed mode" />
 
-          <property name="java.ext.dirs" value="C:\java\jdk6_01\jre\lib\ext;C:\WINDOWS\Sun\Java\lib\ext"></property>
+          <property name="java.version" value="1.6.0" />
 
-          <property name="sun.boot.class.path" value="C:\java\jdk6_01\jre\lib\resources.jar;C:\java\jdk6_01\jre\lib\rt.jar;C:\java\jdk6_01\jre\lib\sunrsasign.jar;C:\java\jdk6_01\jre\lib\jsse.jar;C:\java\jdk6_01\jre\lib\jce.jar;C:\java\jdk6_01\jre\lib\charsets.jar;C:\java\jdk6_01\jre\classes"></property>
+          <property name="java.ext.dirs" value="C:\java\jdk6-b105\jre\lib\ext;C:\WINDOWS\Sun\Java\lib\ext" />
 
-          <property name="java.vendor" value="Sun Microsystems Inc."></property>
+          <property name="sun.boot.class.path" value="C:\java\jdk6-b105\jre\lib\resources.jar;C:\java\jdk6-b105\jre\lib\rt.jar;C:\java\jdk6-b105\jre\lib\sunrsasign.jar;C:\java\jdk6-b105\jre\lib\jsse.jar;C:\java\jdk6-b105\jre\lib\jce.jar;C:\java\jdk6-b105\jre\lib\charsets.jar;C:\java\jdk6-b105\jre\classes" />
 
-          <property name="file.separator" value="\"></property>
+          <property name="java.vendor" value="Sun Microsystems Inc." />
 
-          <property name="java.vendor.url.bug" value="http://java.sun.com/cgi-bin/bugreport.cgi"></property>
+          <property name="file.separator" value="\" />
 
-          <property name="report" value="report"></property>
+          <property name="java.vendor.url.bug" value="http://java.sun.com/cgi-bin/bugreport.cgi" />
 
-          <property name="sun.cpu.endian" value="little"></property>
+          <property name="report" value="report" />
 
-          <property name="sun.io.unicode.encoding" value="UnicodeLittle"></property>
+          <property name="sun.cpu.endian" value="little" />
 
-          <property name="sun.desktop" value="windows"></property>
+          <property name="sun.io.unicode.encoding" value="UnicodeLittle" />
 
-          <property name="sun.cpu.isalist" value="pentium_pro+mmx pentium_pro pentium+mmx pentium i486 i386 i86"></property>
+          <property name="sun.desktop" value="windows" />
+
+          <property name="sun.cpu.isalist" value="pentium_pro+mmx pentium_pro pentium+mmx pentium i486 i386 i86" />
 
       </properties>
 
-      <testcase classname="junit.framework.TestSuite$1" name="warning" time="0.047">
-    
-      <failure message="No tests found in pack.AllTests" type="junit.framework.AssertionFailedError">junit.framework.AssertionFailedError: No tests found in pack.AllTests
+      <testcase classname="pack.ATestCase" name="testSucceed" time="0.015" />
+
+      <testcase classname="pack.ATestCase" name="testSucceed2" time="0.0" />
+
+      <testcase classname="pack.Failures" name="testNasty" time="0.016">
+          <failure message="&lt;/failure&gt;" type="junit.framework.AssertionFailedError">junit.framework.AssertionFailedError: &lt;/failure&gt;
 	at org.eclipse.ant.internal.ui.antsupport.EclipseDefaultExecutor.executeTargets(EclipseDefaultExecutor.java:32)
 	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.run(InternalAntRunner.java:423)
 	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.main(InternalAntRunner.java:137)
+	at pack.Failures.testNasty(Failures.java:12)
 </failure>
 
       </testcase>
 
-      <system-out><![CDATA[]]></system-out>
-
-      <system-err><![CDATA[]]></system-err>
-
-  </testsuite>
-  <testsuite errors="5" failures="0" id="3" name="Failures" package="pack" tests="6" time="0.187">
-  
-    <properties>
-    
-      <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"></property>
-
-          <property name="sun.boot.library.path" value="C:\java\jdk6_01\jre\bin"></property>
-
-          <property name="java.vm.version" value="1.6.0_01-b04"></property>
-
-          <property name="ant.library.dir" value="C:\e\w\development\org.apache.ant\lib"></property>
-
-          <property name="ant.version" value="Apache Ant version 1.6.5 compiled on June 2 2005"></property>
-
-          <property name="ant.java.version" value="1.5"></property>
-
-          <property name="java.vm.vendor" value="Sun Microsystems Inc."></property>
-
-          <property name="java.vendor.url" value="http://java.sun.com/"></property>
-
-          <property name="path.separator" value=";"></property>
-
-          <property name="java.vm.name" value="Java HotSpot(TM) Client VM"></property>
-
-          <property name="file.encoding.pkg" value="sun.io"></property>
-
-          <property name="user.country" value="CH"></property>
-
-          <property name="sun.java.launcher" value="SUN_STANDARD"></property>
-
-          <property name="sun.os.patch.level" value="Service Pack 2"></property>
-
-          <property name="java.vm.specification.name" value="Java Virtual Machine Specification"></property>
-
-          <property name="user.dir" value="C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant"></property>
-
-          <property name="java.runtime.version" value="1.6.0_01-b04"></property>
-
-          <property name="java.awt.graphicsenv" value="sun.awt.Win32GraphicsEnvironment"></property>
-
-          <property name="eclipse.pdebuild.scripts" value="/C:/e/w/development/org.eclipse.pde.build/scripts/"></property>
-
-          <property name="basedir" value="C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant"></property>
-
-          <property name="java.endorsed.dirs" value="C:\java\jdk6_01\jre\lib\endorsed"></property>
-
-          <property name="os.arch" value="x86"></property>
-
-          <property name="java.io.tmpdir" value="C:\DOCUME~1\mkl\LOCALS~1\Temp\"></property>
-
-          <property name="line.separator" value=" "></property>
-
-          <property name="java.vm.specification.vendor" value="Sun Microsystems Inc."></property>
-
-          <property name="user.variant" value=""></property>
-
-          <property name="os.name" value="Windows XP"></property>
-
-          <property name="ant.home" value="C:\e\w\development\org.apache.ant"></property>
-
-          <property name="eclipse.pdebuild.templates" value="/C:/e/w/development/org.eclipse.pde.build/templates/"></property>
-
-          <property name="ant.project.name" value="run AllTests"></property>
-
-          <property name="result" value="result"></property>
-
-          <property name="sun.jnu.encoding" value="Cp1252"></property>
-
-          <property name="java.library.path" value="C:\java\j9-5.0-20070201\jre\bin;.;C:\java\jdk1.5.0_11\bin;C:\Program Files\ThinkPad\Utilities;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\IBM\Infoprint Select;C:\Notes;C:\Program Files\XLView;C:\lotus\compnent;C:\Utilities;C:\Program Files\IBM\Personal Communications\;C:\Program Files\IBM\Trace Facility\;C:\Program Files\Intel\Wireless\Bin\;C:\Program Files\ThinkPad\ConnectUtilities;C:\WINDOWS\Downloaded Program Files;C:\cygwin\bin\;C:\Program Files\YourKit Java Profiler 5.5.4\bin\win32;C:\Program Files\IBM\CHKPII;C:\Program Files\jEdit 4.1;C:\apps\jadnt158;C:\apps;C:\Program Files\ATI Technologies\ATI.ACE\;C:\java\apache-ant-1.7.0\bin;C:\Program Files\QuickTime\QTSystem\;C:\e\w\development\org.eclipse.swt.win32.win32.x86"></property>
-
-          <property name="eclipse.pdebuild.home" value="/C:/e/w/development/org.eclipse.pde.build/./"></property>
-
-          <property name="java.class.version" value="50.0"></property>
-
-          <property name="java.specification.name" value="Java Platform API Specification"></property>
-
-          <property name="sun.management.compiler" value="HotSpot Client Compiler"></property>
-
-          <property name="os.version" value="5.1"></property>
-
-          <property name="ant.file" value="C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant\runAllTests.xml"></property>
-
-          <property name="user.home" value="C:\Documents and Settings\mkl"></property>
-
-          <property name="user.timezone" value=""></property>
-
-          <property name="java.awt.printerjob" value="sun.awt.windows.WPrinterJob"></property>
-
-          <property name="file.encoding" value="Cp1252"></property>
-
-          <property name="java.specification.version" value="1.6"></property>
-
-          <property name="java.class.path" value="C:\e\w\development\org.apache.ant\lib\ant.jar;C:\e\w\development\org.apache.ant\lib\ant-antlr.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-bcel.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-bsf.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-log4j.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-oro.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-regexp.jar;C:\e\w\development\org.apache.ant\lib\ant-apache-resolver.jar;C:\e\w\development\org.apache.ant\lib\ant-commons-logging.jar;C:\e\w\development\org.apache.ant\lib\ant-commons-net.jar;C:\e\w\development\org.apache.ant\lib\ant-icontract.jar;C:\e\w\development\org.apache.ant\lib\ant-jai.jar;C:\e\w\development\org.apache.ant\lib\ant-javamail.jar;C:\e\w\development\org.apache.ant\lib\ant-jdepend.jar;C:\e\w\development\org.apache.ant\lib\ant-jmf.jar;C:\e\w\development\org.apache.ant\lib\ant-jsch.jar;C:\e\w\development\org.apache.ant\lib\ant-junit.jar;C:\e\w\development\org.apache.ant\lib\ant-launcher.jar;C:\e\w\development\org.apache.ant\lib\ant-netrexx.jar;C:\e\w\development\org.apache.ant\lib\ant-nodeps.jar;C:\e\w\development\org.apache.ant\lib\ant-starteam.jar;C:\e\w\development\org.apache.ant\lib\ant-stylebook.jar;C:\e\w\development\org.apache.ant\lib\ant-swing.jar;C:\e\w\development\org.apache.ant\lib\ant-trax.jar;C:\e\w\development\org.apache.ant\lib\ant-vaj.jar;C:\e\w\development\org.apache.ant\lib\ant-weblogic.jar;C:\e\w\development\org.apache.ant\lib\ant-xalan1.jar;C:\e\w\development\org.apache.ant\lib\ant-xslp.jar;C:\e\w\development\.metadata\.plugins\org.eclipse.pde.core\JUnitWorkspace\org.eclipse.osgi\bundles\121\1\.cp\lib\remoteAnt.jar;C:\java\jdk6_01\lib\tools.jar;C:\e\w\development\org.eclipse.swt.win32.win32.x86\org.eclipse.swt.win32.win32.x86_3.3.0.v3330.jar;C:\e\i\I20070313-1051\plugins\org.junit4_4.1.0.1\junit-4.1.jar;C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\bin"></property>
-
-          <property name="user.name" value="mkl"></property>
-
-          <property name="ant.file.run AllTests" value="C:\e\w\development\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant\runAllTests.xml"></property>
-
-          <property name="java.vm.specification.version" value="1.0"></property>
-
-          <property name="java.home" value="C:\java\jdk6_01\jre"></property>
-
-          <property name="sun.arch.data.model" value="32"></property>
-
-          <property name="java.specification.vendor" value="Sun Microsystems Inc."></property>
-
-          <property name="user.language" value="de"></property>
-
-          <property name="awt.toolkit" value="sun.awt.windows.WToolkit"></property>
-
-          <property name="java.vm.info" value="mixed mode"></property>
-
-          <property name="java.version" value="1.6.0_01"></property>
-
-          <property name="java.ext.dirs" value="C:\java\jdk6_01\jre\lib\ext;C:\WINDOWS\Sun\Java\lib\ext"></property>
-
-          <property name="sun.boot.class.path" value="C:\java\jdk6_01\jre\lib\resources.jar;C:\java\jdk6_01\jre\lib\rt.jar;C:\java\jdk6_01\jre\lib\sunrsasign.jar;C:\java\jdk6_01\jre\lib\jsse.jar;C:\java\jdk6_01\jre\lib\jce.jar;C:\java\jdk6_01\jre\lib\charsets.jar;C:\java\jdk6_01\jre\classes"></property>
-
-          <property name="java.vendor" value="Sun Microsystems Inc."></property>
-
-          <property name="file.separator" value="\"></property>
-
-          <property name="java.vendor.url.bug" value="http://java.sun.com/cgi-bin/bugreport.cgi"></property>
-
-          <property name="report" value="report"></property>
-
-          <property name="sun.cpu.endian" value="little"></property>
-
-          <property name="sun.io.unicode.encoding" value="UnicodeLittle"></property>
-
-          <property name="sun.desktop" value="windows"></property>
-
-          <property name="sun.cpu.isalist" value="pentium_pro+mmx pentium_pro pentium+mmx pentium i486 i386 i86"></property>
-
-      </properties>
-
-      <testcase classname="junit.framework.JUnit4TestCaseFacade" name="unknown" time="0.0">
-    
-      <error message="&lt;/failure&gt;" type="java.lang.AssertionError">java.lang.AssertionError: &lt;/failure&gt;
-	at org.junit.Assert.fail(Assert.java:69)
-	at pack.Failures.testNasty(Failures.java:18)
-	at org.junit.internal.runners.TestMethodRunner.executeMethodBody(TestMethodRunner.java:99)
-	at org.junit.internal.runners.TestMethodRunner.runUnprotected(TestMethodRunner.java:81)
-	at org.junit.internal.runners.BeforeAndAfterRunner.runProtected(BeforeAndAfterRunner.java:34)
-	at org.junit.internal.runners.TestMethodRunner.runMethod(TestMethodRunner.java:75)
-	at org.junit.internal.runners.TestMethodRunner.run(TestMethodRunner.java:45)
-	at org.junit.internal.runners.TestClassMethodsRunner.invokeTestMethod(TestClassMethodsRunner.java:71)
-	at org.junit.internal.runners.TestClassMethodsRunner.run(TestClassMethodsRunner.java:35)
-	at org.junit.internal.runners.TestClassRunner$1.runUnprotected(TestClassRunner.java:42)
-	at org.junit.internal.runners.BeforeAndAfterRunner.runProtected(BeforeAndAfterRunner.java:34)
-	at org.junit.internal.runners.TestClassRunner.run(TestClassRunner.java:52)
-	at junit.framework.JUnit4TestAdapter.run(JUnit4TestAdapter.java:32)
+      <testcase classname="pack.Failures" name="testError" time="0.016">
+          <error message="&lt;/failure&gt;" type="java.lang.IllegalStateException">java.lang.IllegalStateException: &lt;/failure&gt;
+	at pack.Failures.testError(Failures.java:22)
 	at org.eclipse.ant.internal.ui.antsupport.EclipseDefaultExecutor.executeTargets(EclipseDefaultExecutor.java:32)
 	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.run(InternalAntRunner.java:423)
 	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.main(InternalAntRunner.java:137)
@@ -612,77 +450,26 @@
 
       </testcase>
 
-      <testcase classname="junit.framework.JUnit4TestCaseFacade" name="unknown" time="0.0">
-    
-      <error message="&lt;/failure&gt;" type="java.lang.IllegalStateException">java.lang.IllegalStateException: &lt;/failure&gt;
-	at pack.Failures.testError(Failures.java:28)
-	at org.junit.internal.runners.TestMethodRunner.executeMethodBody(TestMethodRunner.java:99)
-	at org.junit.internal.runners.TestMethodRunner.runUnprotected(TestMethodRunner.java:81)
-	at org.junit.internal.runners.BeforeAndAfterRunner.runProtected(BeforeAndAfterRunner.java:34)
-	at org.junit.internal.runners.TestMethodRunner.runMethod(TestMethodRunner.java:75)
-	at org.junit.internal.runners.TestMethodRunner.run(TestMethodRunner.java:45)
-	at org.junit.internal.runners.TestClassMethodsRunner.invokeTestMethod(TestClassMethodsRunner.java:71)
-	at org.junit.internal.runners.TestClassMethodsRunner.run(TestClassMethodsRunner.java:35)
-	at org.junit.internal.runners.TestClassRunner$1.runUnprotected(TestClassRunner.java:42)
-	at org.junit.internal.runners.BeforeAndAfterRunner.runProtected(BeforeAndAfterRunner.java:34)
-	at org.junit.internal.runners.TestClassRunner.run(TestClassRunner.java:52)
-	at junit.framework.JUnit4TestAdapter.run(JUnit4TestAdapter.java:32)
-	at org.eclipse.ant.internal.ui.antsupport.EclipseDefaultExecutor.executeTargets(EclipseDefaultExecutor.java:32)
-	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.run(InternalAntRunner.java:423)
-	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.main(InternalAntRunner.java:137)
-</error>
+      <testcase classname="pack.Failures" name="errorExpected" time="0.0" />
 
-      </testcase>
-
-      <testcase classname="junit.framework.JUnit4TestCaseFacade" name="unknown" time="0.0"></testcase>
-
-      <testcase classname="junit.framework.JUnit4TestCaseFacade" name="unknown" time="0.0">
-    
-      <error message="Unexpected exception, expected&lt;java.lang.IllegalArgumentException&gt; but was&lt;java.lang.IllegalStateException&gt;" type="java.lang.Exception">java.lang.Exception: Unexpected exception, expected&lt;java.lang.IllegalArgumentException&gt; but was&lt;java.lang.IllegalStateException&gt;
-	at org.junit.internal.runners.TestMethodRunner.runUnprotected(TestMethodRunner.java:91)
-	at org.junit.internal.runners.BeforeAndAfterRunner.runProtected(BeforeAndAfterRunner.java:34)
-	at org.junit.internal.runners.TestMethodRunner.runMethod(TestMethodRunner.java:75)
-	at org.junit.internal.runners.TestMethodRunner.run(TestMethodRunner.java:45)
-	at org.junit.internal.runners.TestClassMethodsRunner.invokeTestMethod(TestClassMethodsRunner.java:71)
-	at org.junit.internal.runners.TestClassMethodsRunner.run(TestClassMethodsRunner.java:35)
-	at org.junit.internal.runners.TestClassRunner$1.runUnprotected(TestClassRunner.java:42)
-	at org.junit.internal.runners.BeforeAndAfterRunner.runProtected(BeforeAndAfterRunner.java:34)
-	at org.junit.internal.runners.TestClassRunner.run(TestClassRunner.java:52)
-	at junit.framework.JUnit4TestAdapter.run(JUnit4TestAdapter.java:32)
+      <testcase classname="pack.Failures" name="errorExpectedOther" time="0.0">
+          <error message="Unexpected exception, expected&lt;java.lang.IllegalArgumentException&gt; but was&lt;java.lang.IllegalStateException&gt;" type="java.lang.Exception">java.lang.Exception: Unexpected exception, expected&lt;java.lang.IllegalArgumentException&gt; but was&lt;java.lang.IllegalStateException&gt;
 	at org.eclipse.ant.internal.ui.antsupport.EclipseDefaultExecutor.executeTargets(EclipseDefaultExecutor.java:32)
 	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.run(InternalAntRunner.java:423)
 	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.main(InternalAntRunner.java:137)
 Caused by: java.lang.IllegalStateException: xx
-	at pack.Failures.errorExpectedOther(Failures.java:38)
-	at org.junit.internal.runners.TestMethodRunner.executeMethodBody(TestMethodRunner.java:99)
-	at org.junit.internal.runners.TestMethodRunner.runUnprotected(TestMethodRunner.java:81)
-	... 25 more
+	at pack.Failures.errorExpectedOther(Failures.java:32)
 </error>
 
       </testcase>
 
-      <testcase classname="junit.framework.JUnit4TestCaseFacade" name="unknown" time="0.016">
-    
-      <error message="null expected:&lt; [Hello World.  ]&gt; but was:&lt; [ Hello my friend.]&gt;" type="org.junit.ComparisonFailure">org.junit.ComparisonFailure: null expected:&lt;
-[Hello World.
+      <testcase classname="pack.Failures" name="compareTheStuff" time="0.015">
+          <error message="expected:&lt; [Hello World.  ]&gt; but was:&lt; [ Hello my friend.]&gt;" type="org.junit.ComparisonFailure">[Hello World.
 
 ]&gt; but was:&lt;
 [
 Hello my friend.]&gt;
-	at org.junit.Assert.assertEquals(Assert.java:92)
-	at org.junit.Assert.assertEquals(Assert.java:104)
-	at pack.Failures.compareTheStuff(Failures.java:43)
-	at org.junit.internal.runners.TestMethodRunner.executeMethodBody(TestMethodRunner.java:99)
-	at org.junit.internal.runners.TestMethodRunner.runUnprotected(TestMethodRunner.java:81)
-	at org.junit.internal.runners.BeforeAndAfterRunner.runProtected(BeforeAndAfterRunner.java:34)
-	at org.junit.internal.runners.TestMethodRunner.runMethod(TestMethodRunner.java:75)
-	at org.junit.internal.runners.TestMethodRunner.run(TestMethodRunner.java:45)
-	at org.junit.internal.runners.TestClassMethodsRunner.invokeTestMethod(TestClassMethodsRunner.java:71)
-	at org.junit.internal.runners.TestClassMethodsRunner.run(TestClassMethodsRunner.java:35)
-	at org.junit.internal.runners.TestClassRunner$1.runUnprotected(TestClassRunner.java:42)
-	at org.junit.internal.runners.BeforeAndAfterRunner.runProtected(BeforeAndAfterRunner.java:34)
-	at org.junit.internal.runners.TestClassRunner.run(TestClassRunner.java:52)
-	at junit.framework.JUnit4TestAdapter.run(JUnit4TestAdapter.java:32)
+	at pack.Failures.compareTheStuff(Failures.java:37)
 	at org.eclipse.ant.internal.ui.antsupport.EclipseDefaultExecutor.executeTargets(EclipseDefaultExecutor.java:32)
 	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.run(InternalAntRunner.java:423)
 	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.main(InternalAntRunner.java:137)
@@ -690,25 +477,175 @@ Hello my friend.]&gt;
 
       </testcase>
 
-      <testcase classname="junit.framework.JUnit4TestCaseFacade" name="unknown" time="0.0">
-    
-      <error message="expected:&lt;Hello World.&gt; but was:&lt;null&gt;" type="java.lang.AssertionError">java.lang.AssertionError: expected:&lt;Hello World.&gt; but was:&lt;null&gt;
-	at org.junit.Assert.fail(Assert.java:69)
-	at org.junit.Assert.failNotEquals(Assert.java:314)
-	at org.junit.Assert.assertEquals(Assert.java:94)
-	at org.junit.Assert.assertEquals(Assert.java:104)
-	at pack.Failures.testCompareNull(Failures.java:48)
-	at org.junit.internal.runners.TestMethodRunner.executeMethodBody(TestMethodRunner.java:99)
-	at org.junit.internal.runners.TestMethodRunner.runUnprotected(TestMethodRunner.java:81)
-	at org.junit.internal.runners.BeforeAndAfterRunner.runProtected(BeforeAndAfterRunner.java:34)
-	at org.junit.internal.runners.TestMethodRunner.runMethod(TestMethodRunner.java:75)
-	at org.junit.internal.runners.TestMethodRunner.run(TestMethodRunner.java:45)
-	at org.junit.internal.runners.TestClassMethodsRunner.invokeTestMethod(TestClassMethodsRunner.java:71)
-	at org.junit.internal.runners.TestClassMethodsRunner.run(TestClassMethodsRunner.java:35)
-	at org.junit.internal.runners.TestClassRunner$1.runUnprotected(TestClassRunner.java:42)
-	at org.junit.internal.runners.BeforeAndAfterRunner.runProtected(BeforeAndAfterRunner.java:34)
-	at org.junit.internal.runners.TestClassRunner.run(TestClassRunner.java:52)
-	at junit.framework.JUnit4TestAdapter.run(JUnit4TestAdapter.java:32)
+      <testcase classname="pack.Failures" name="testCompareNull" time="0.0">
+          <failure message="expected:&lt;Hello World.&gt; but was:&lt;null&gt;" type="junit.framework.AssertionFailedError">junit.framework.AssertionFailedError: expected:&lt;Hello World.&gt; but was:&lt;null&gt;
+	at org.eclipse.ant.internal.ui.antsupport.EclipseDefaultExecutor.executeTargets(EclipseDefaultExecutor.java:32)
+	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.run(InternalAntRunner.java:423)
+	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.main(InternalAntRunner.java:137)
+	at pack.Failures.testCompareNull(Failures.java:42)
+</failure>
+
+      </testcase>
+
+      <system-out><![CDATA[[Hello World.
+
+]> but was:<
+[
+Hello my friend.]>)
+]]></system-out>
+
+      <system-err><![CDATA[]]></system-err>
+
+  </testsuite>
+  <testsuite errors="3" failures="2" hostname="Lavinio" id="3" name="Failures" package="pack" tests="6" time="0.015" timestamp="2007-04-17T16:59:46">
+      <properties>
+          <property name="java.runtime.name" value="Java(TM) SE Runtime Environment" />
+
+          <property name="sun.boot.library.path" value="C:\java\jdk6-b105\jre\bin" />
+
+          <property name="java.vm.version" value="1.6.0-b105" />
+
+          <property name="ant.library.dir" value="C:\e\w\head\org.apache.ant\lib" />
+
+          <property name="ant.version" value="Apache Ant version 1.7.0 compiled on December 13 2006" />
+
+          <property name="ant.java.version" value="1.6" />
+
+          <property name="java.vm.vendor" value="Sun Microsystems Inc." />
+
+          <property name="java.vendor.url" value="http://java.sun.com/" />
+
+          <property name="path.separator" value=";" />
+
+          <property name="java.vm.name" value="Java HotSpot(TM) Client VM" />
+
+          <property name="file.encoding.pkg" value="sun.io" />
+
+          <property name="user.country" value="CH" />
+
+          <property name="sun.java.launcher" value="SUN_STANDARD" />
+
+          <property name="sun.os.patch.level" value="Service Pack 2" />
+
+          <property name="java.vm.specification.name" value="Java Virtual Machine Specification" />
+
+          <property name="user.dir" value="C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant" />
+
+          <property name="java.runtime.version" value="1.6.0-b105" />
+
+          <property name="java.awt.graphicsenv" value="sun.awt.Win32GraphicsEnvironment" />
+
+          <property name="eclipse.pdebuild.scripts" value="/C:/e/w/head/org.eclipse.pde.build/scripts/" />
+
+          <property name="basedir" value="C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant" />
+
+          <property name="java.endorsed.dirs" value="C:\java\jdk6-b105\jre\lib\endorsed" />
+
+          <property name="os.arch" value="x86" />
+
+          <property name="java.io.tmpdir" value="C:\DOCUME~1\mkl\LOCALS~1\Temp\" />
+
+          <property name="ant.core.lib" value="C:\e\w\head\org.apache.ant\lib\ant.jar" />
+
+          <property name="line.separator" value=" " />
+
+          <property name="java.vm.specification.vendor" value="Sun Microsystems Inc." />
+
+          <property name="user.variant" value="" />
+
+          <property name="os.name" value="Windows XP" />
+
+          <property name="ant.home" value="C:\e\w\head\org.apache.ant" />
+
+          <property name="eclipse.pdebuild.templates" value="/C:/e/w/head/org.eclipse.pde.build/templates/" />
+
+          <property name="ant.project.name" value="run AllTests" />
+
+          <property name="result" value="result" />
+
+          <property name="sun.jnu.encoding" value="Cp1252" />
+
+          <property name="java.library.path" value="C:\java\jdk6-b105\bin;.;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\java\jdk1.5.0_11\bin;C:\Program Files\ThinkPad\Utilities;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\IBM\Infoprint Select;C:\Notes;C:\Program Files\XLView;C:\lotus\compnent;C:\Utilities;C:\Program Files\IBM\Personal Communications\;C:\Program Files\IBM\Trace Facility\;C:\Program Files\Intel\Wireless\Bin\;C:\Program Files\ThinkPad\ConnectUtilities;C:\WINDOWS\Downloaded Program Files;C:\cygwin\bin\;C:\Program Files\YourKit Java Profiler 5.5.4\bin\win32;C:\Program Files\IBM\CHKPII;C:\Program Files\jEdit 4.1;C:\apps\jadnt158;C:\apps;C:\Program Files\ATI Technologies\ATI.ACE\;C:\java\apache-ant-1.7.0\bin;C:\Program Files\QuickTime\QTSystem\;C:\Program Files\Intel\Wireless\Bin\;C:\Program Files\Intel\Wireless\Bin\;C:\e\w\head\org.eclipse.swt.win32.win32.x86" />
+
+          <property name="eclipse.pdebuild.home" value="/C:/e/w/head/org.eclipse.pde.build/./" />
+
+          <property name="java.specification.name" value="Java Platform API Specification" />
+
+          <property name="java.class.version" value="50.0" />
+
+          <property name="sun.management.compiler" value="HotSpot Client Compiler" />
+
+          <property name="os.version" value="5.1" />
+
+          <property name="ant.file" value="C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant\runAllTests.xml" />
+
+          <property name="user.home" value="C:\Documents and Settings\mkl" />
+
+          <property name="user.timezone" value="" />
+
+          <property name="java.awt.printerjob" value="sun.awt.windows.WPrinterJob" />
+
+          <property name="file.encoding" value="Cp1252" />
+
+          <property name="java.specification.version" value="1.6" />
+
+          <property name="java.class.path" value="C:\e\w\head\org.apache.ant\lib\ant.jar;C:\e\w\head\org.apache.ant\lib\ant-antlr.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-bcel.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-bsf.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-log4j.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-oro.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-regexp.jar;C:\e\w\head\org.apache.ant\lib\ant-apache-resolver.jar;C:\e\w\head\org.apache.ant\lib\ant-commons-logging.jar;C:\e\w\head\org.apache.ant\lib\ant-commons-net.jar;C:\e\w\head\org.apache.ant\lib\ant-jai.jar;C:\e\w\head\org.apache.ant\lib\ant-javamail.jar;C:\e\w\head\org.apache.ant\lib\ant-jdepend.jar;C:\e\w\head\org.apache.ant\lib\ant-jmf.jar;C:\e\w\head\org.apache.ant\lib\ant-jsch.jar;C:\e\w\head\org.apache.ant\lib\ant-junit.jar;C:\e\w\head\org.apache.ant\lib\ant-launcher.jar;C:\e\w\head\org.apache.ant\lib\ant-netrexx.jar;C:\e\w\head\org.apache.ant\lib\ant-nodeps.jar;C:\e\w\head\org.apache.ant\lib\ant-starteam.jar;C:\e\w\head\org.apache.ant\lib\ant-stylebook.jar;C:\e\w\head\org.apache.ant\lib\ant-swing.jar;C:\e\w\head\org.apache.ant\lib\ant-trax.jar;C:\e\w\head\org.apache.ant\lib\ant-weblogic.jar;C:\e\w\head\org.eclipse.ant.ui\lib\remoteAnt.jar;C:\java\jdk6-b105\lib\tools.jar;C:\e\i\I20070410-1043\plugins\org.junit4_4.2.0\junit.jar;C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\bin" />
+
+          <property name="user.name" value="mkl" />
+
+          <property name="ant.file.run AllTests" value="C:\e\w\head\org.eclipse.jdt.ui.tests\testresources\JUnitWorkspace\JUnit4Tests\ant\runAllTests.xml" />
+
+          <property name="java.vm.specification.version" value="1.0" />
+
+          <property name="sun.arch.data.model" value="32" />
+
+          <property name="java.home" value="C:\java\jdk6-b105\jre" />
+
+          <property name="java.specification.vendor" value="Sun Microsystems Inc." />
+
+          <property name="user.language" value="de" />
+
+          <property name="awt.toolkit" value="sun.awt.windows.WToolkit" />
+
+          <property name="java.vm.info" value="mixed mode" />
+
+          <property name="java.version" value="1.6.0" />
+
+          <property name="java.ext.dirs" value="C:\java\jdk6-b105\jre\lib\ext;C:\WINDOWS\Sun\Java\lib\ext" />
+
+          <property name="sun.boot.class.path" value="C:\java\jdk6-b105\jre\lib\resources.jar;C:\java\jdk6-b105\jre\lib\rt.jar;C:\java\jdk6-b105\jre\lib\sunrsasign.jar;C:\java\jdk6-b105\jre\lib\jsse.jar;C:\java\jdk6-b105\jre\lib\jce.jar;C:\java\jdk6-b105\jre\lib\charsets.jar;C:\java\jdk6-b105\jre\classes" />
+
+          <property name="java.vendor" value="Sun Microsystems Inc." />
+
+          <property name="file.separator" value="\" />
+
+          <property name="java.vendor.url.bug" value="http://java.sun.com/cgi-bin/bugreport.cgi" />
+
+          <property name="report" value="report" />
+
+          <property name="sun.cpu.endian" value="little" />
+
+          <property name="sun.io.unicode.encoding" value="UnicodeLittle" />
+
+          <property name="sun.desktop" value="windows" />
+
+          <property name="sun.cpu.isalist" value="pentium_pro+mmx pentium_pro pentium+mmx pentium i486 i386 i86" />
+
+      </properties>
+
+      <testcase classname="pack.Failures" name="testNasty" time="0.0">
+          <failure message="&lt;/failure&gt;" type="junit.framework.AssertionFailedError">junit.framework.AssertionFailedError: &lt;/failure&gt;
+	at org.eclipse.ant.internal.ui.antsupport.EclipseDefaultExecutor.executeTargets(EclipseDefaultExecutor.java:32)
+	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.run(InternalAntRunner.java:423)
+	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.main(InternalAntRunner.java:137)
+	at pack.Failures.testNasty(Failures.java:12)
+</failure>
+
+      </testcase>
+
+      <testcase classname="pack.Failures" name="testError" time="0.0">
+          <error message="&lt;/failure&gt;" type="java.lang.IllegalStateException">java.lang.IllegalStateException: &lt;/failure&gt;
+	at pack.Failures.testError(Failures.java:22)
 	at org.eclipse.ant.internal.ui.antsupport.EclipseDefaultExecutor.executeTargets(EclipseDefaultExecutor.java:32)
 	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.run(InternalAntRunner.java:423)
 	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.main(InternalAntRunner.java:137)
@@ -716,7 +653,49 @@ Hello my friend.]&gt;
 
       </testcase>
 
-      <system-out><![CDATA[]]></system-out>
+      <testcase classname="pack.Failures" name="errorExpected" time="0.0" />
+
+      <testcase classname="pack.Failures" name="errorExpectedOther" time="0.0">
+          <error message="Unexpected exception, expected&lt;java.lang.IllegalArgumentException&gt; but was&lt;java.lang.IllegalStateException&gt;" type="java.lang.Exception">java.lang.Exception: Unexpected exception, expected&lt;java.lang.IllegalArgumentException&gt; but was&lt;java.lang.IllegalStateException&gt;
+	at org.eclipse.ant.internal.ui.antsupport.EclipseDefaultExecutor.executeTargets(EclipseDefaultExecutor.java:32)
+	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.run(InternalAntRunner.java:423)
+	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.main(InternalAntRunner.java:137)
+Caused by: java.lang.IllegalStateException: xx
+	at pack.Failures.errorExpectedOther(Failures.java:32)
+</error>
+
+      </testcase>
+
+      <testcase classname="pack.Failures" name="compareTheStuff" time="0.0">
+          <error message="expected:&lt; [Hello World.  ]&gt; but was:&lt; [ Hello my friend.]&gt;" type="org.junit.ComparisonFailure">[Hello World.
+
+]&gt; but was:&lt;
+[
+Hello my friend.]&gt;
+	at pack.Failures.compareTheStuff(Failures.java:37)
+	at org.eclipse.ant.internal.ui.antsupport.EclipseDefaultExecutor.executeTargets(EclipseDefaultExecutor.java:32)
+	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.run(InternalAntRunner.java:423)
+	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.main(InternalAntRunner.java:137)
+</error>
+
+      </testcase>
+
+      <testcase classname="pack.Failures" name="testCompareNull" time="0.0">
+          <failure message="expected:&lt;Hello World.&gt; but was:&lt;null&gt;" type="junit.framework.AssertionFailedError">junit.framework.AssertionFailedError: expected:&lt;Hello World.&gt; but was:&lt;null&gt;
+	at org.eclipse.ant.internal.ui.antsupport.EclipseDefaultExecutor.executeTargets(EclipseDefaultExecutor.java:32)
+	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.run(InternalAntRunner.java:423)
+	at org.eclipse.ant.internal.ui.antsupport.InternalAntRunner.main(InternalAntRunner.java:137)
+	at pack.Failures.testCompareNull(Failures.java:42)
+</failure>
+
+      </testcase>
+
+      <system-out><![CDATA[[Hello World.
+
+]> but was:<
+[
+Hello my friend.]>)
+]]></system-out>
 
       <system-err><![CDATA[]]></system-err>
 

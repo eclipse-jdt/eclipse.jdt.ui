@@ -191,11 +191,10 @@ public class JUnit4TestFinderTest extends TestCase {
 		buf.append("}\n");
 		IType validTest1= p.createCompilationUnit("SuiteClass.java", buf.toString(), false, null).getType("SuiteClass");
 		
-		assertTestFound(validTest1, new String[] {});
-		assertTestFound(validTest1.getCompilationUnit(), new String[] {});
-				
-		String[] validTests= { };
+		String[] validTests= { "p.SuiteClass" };
 		
+		assertTestFound(validTest1, validTests);
+		assertTestFound(validTest1.getCompilationUnit(), validTests);
 		assertTestFound(p, validTests);
 		assertTestFound(fRoot, validTests);
 		assertTestFound(fProject, validTests);

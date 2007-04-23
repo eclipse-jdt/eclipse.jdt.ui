@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.junit.util;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,11 +26,23 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IRegion;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
@@ -144,4 +157,86 @@ public class TestSearchEngine {
 		}
 		return false;
 	}
+
+	public static boolean hasSuiteMethod(IType type) throws JavaModelException {
+		IMethod method= type.getMethod("suite", new String[0]); //$NON-NLS-1$
+		if (!method.exists())
+			return false;
+	
+		if (!Flags.isStatic(method.getFlags()) || !Flags.isPublic(method.getFlags())) {
+			return false;
+		}
+		if (!Signature.getSimpleName(Signature.toString(method.getReturnType())).equals(JUnitPlugin.SIMPLE_TEST_INTERFACE_NAME)) {
+			return false;
+		}
+		return true;
+	}
+	
+	public static IRegion getRegion(IJavaElement element) throws JavaModelException {
+		IRegion result= JavaCore.newRegion();
+		if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
+			// for projects only add the contained source folders
+			IPackageFragmentRoot[] roots= ((IJavaProject) element).getPackageFragmentRoots();
+			for (int i= 0; i < roots.length; i++) {
+				if (!roots[i].isArchive()) {
+					result.add(roots[i]);
+				}
+			}
+		} else {
+			result.add(element);
+		}
+		return result;
+	}
+
+	public static void findTestImplementorClasses(ITypeHierarchy typeHierarchy, IType testInterface, IRegion region, Set result)
+			throws JavaModelException {
+		IType[] subtypes= typeHierarchy.getAllSubtypes(testInterface);
+		for (int i= 0; i < subtypes.length; i++) {
+			IType type= subtypes[i];
+			int cachedFlags= typeHierarchy.getCachedFlags(type);
+			if (!Flags.isInterface(cachedFlags) && !Flags.isAbstract(cachedFlags) // do the cheaper tests first
+					&& region.contains(type) && TestSearchEngine.isAccessibleClass(type)) {
+				result.add(type);
+			}
+		}
+	}
+	
+	private static class SuiteMethodTypesCollector extends SearchRequestor {
+
+		private Collection fResult;
+		
+		public SuiteMethodTypesCollector(Collection result) {
+			fResult= result;
+		}
+
+		public void acceptSearchMatch(SearchMatch match) throws CoreException {
+			Object enclosingElement= match.getElement();
+			if (!(enclosingElement instanceof IMethod))
+				return;
+
+			IMethod method= (IMethod) enclosingElement;
+			if (!Flags.isStatic(method.getFlags()) || !Flags.isPublic(method.getFlags())) {
+				return;
+			}
+			
+			IType declaringType= ((IMethod) enclosingElement).getDeclaringType();
+			if (!TestSearchEngine.isAccessibleClass(declaringType)) {
+				return;
+			}
+			fResult.add(declaringType);
+		}
+	}
+
+	public static void findSuiteMethods(IJavaElement element, Set result, IProgressMonitor pm) throws CoreException {
+		// fix for bug 36449 JUnit should constrain tests to selected project
+		// [JUnit]
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element }, IJavaSearchScope.SOURCES);
+		
+		SearchRequestor requestor= new SuiteMethodTypesCollector(result);
+		int matchRule= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE | SearchPattern.R_ERASURE_MATCH;
+		SearchPattern suitePattern= SearchPattern.createPattern("suite() Test", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, matchRule); //$NON-NLS-1$
+		SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
+		new SearchEngine().search(suitePattern, participants, scope, requestor, pm);
+	}
+	
 }

@@ -1,17 +1,11 @@
 package pack;
 
 import static org.junit.Assert.*;
-import junit.framework.JUnit4TestAdapter;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
 public class Failures {
-
-	/** for Ant */
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(Failures.class);
-	}
 	
 	@Test
 	public void testNasty() throws Exception {

@@ -24,10 +24,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IRegion;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -126,9 +124,9 @@ public class JUnit4TestFinder implements ITestFinder {
 			pm= new NullProgressMonitor();
 		
 		try {
-			pm.beginTask(JUnitMessages.JUnit4TestFinder_searching_description, 3);
+			pm.beginTask(JUnitMessages.JUnit4TestFinder_searching_description, 4);
 			
-			IRegion region= getRegion(element);
+			IRegion region= TestSearchEngine.getRegion(element);
 			ITypeHierarchy hierarchy= JavaCore.newTypeHierarchy(region, null, new SubProgressMonitor(pm, 1));
 			IType[] allClasses= hierarchy.getAllClasses();
 			
@@ -140,6 +138,12 @@ public class JUnit4TestFinder implements ITestFinder {
 			int matchRule= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
 			SearchPattern runWithPattern= SearchPattern.createPattern(Annotation.RUN_WITH.getName(), IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.REFERENCES, matchRule);
 			SearchPattern testPattern= SearchPattern.createPattern(Annotation.TEST.getName(), IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.REFERENCES, matchRule);
+			
+			// TODO: Core bug (no results with OR pattern):
+//			SearchPattern annotationsPattern= SearchPattern.createOrPattern(runWithPattern, testPattern);
+//			SearchParticipant[] searchParticipants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
+//			new SearchEngine().search(annotationsPattern, searchParticipants, scope, requestor, new SubProgressMonitor(pm, 2));
+
 			SearchParticipant[] searchParticipants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
 			new SearchEngine().search(runWithPattern, searchParticipants, scope, requestor, new SubProgressMonitor(pm, 1));
 			new SearchEngine().search(testPattern, searchParticipants, scope, requestor, new SubProgressMonitor(pm, 1));
@@ -152,36 +156,17 @@ public class JUnit4TestFinder implements ITestFinder {
 				}
 			}
 			
-			// add all classes implementing Test in the region
+			// add all classes implementing JUnit 3.8's Test interface in the region
 			IType testInterface= element.getJavaProject().findType(JUnitPlugin.TEST_INTERFACE_NAME);
 			if (testInterface != null) {
-				IType[] allSubtypes= hierarchy.getAllSubtypes(testInterface);
-				for (int i= 0; i < allSubtypes.length; i++) {
-					IType curr= allSubtypes[i];
-					if (TestSearchEngine.isAccessibleClass(curr) && !Flags.isAbstract(curr.getFlags()) && region.contains(curr)) {
-						result.add(curr);
-					}
-				}
+				TestSearchEngine.findTestImplementorClasses(hierarchy, testInterface, region, result);
 			}
+			
+			//JUnit 4.3 can also run JUnit-3.8-style public static Test suite() methods: 
+			TestSearchEngine.findSuiteMethods(element, result, new SubProgressMonitor(pm, 1));
 		} finally {
 			pm.done();
 		}
-	}
-		
-	private static IRegion getRegion(IJavaElement element) throws JavaModelException {
-		IRegion result= JavaCore.newRegion();
-		if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
-			// for projects only add the contained source folders
-			IPackageFragmentRoot[] roots= ((IJavaProject) element).getPackageFragmentRoots();
-			for (int i= 0; i < roots.length; i++) {
-				if (!roots[i].isArchive()) {
-					result.add(roots[i]);
-				}
-			}
-		} else {
-			result.add(element);
-		}
-		return result;
 	}
 
 	private static class AnnotationSearchRequestor extends SearchRequestor {
@@ -223,6 +208,9 @@ public class JUnit4TestFinder implements ITestFinder {
 	
 	private boolean internalIsTest(IType type, IProgressMonitor monitor) throws JavaModelException {
 		if (TestSearchEngine.isAccessibleClass(type)) {
+			if (TestSearchEngine.hasSuiteMethod(type)) { // since JUnit 4.3.1
+				return true;
+			}
 			ASTParser parser= ASTParser.newParser(AST.JLS3);
 			/* TODO: When bug 156352 is fixed:
 			parser.setProject(type.getJavaProject());
