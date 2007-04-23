@@ -21,9 +21,8 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.widgets.Composite;
 
-import org.eclipse.jface.text.TextUtilities;
-
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -56,7 +55,8 @@ public class SnippetPreview extends JavaPreview {
             return;
         }
         
-        final String delimiter= TextUtilities.getDefaultLineDelimiter(fPreviewDocument);
+        //This delimiter looks best for invisible characters
+        final String delimiter= "\n"; //$NON-NLS-1$
         
         final StringBuffer buffer= new StringBuffer();
         for (final Iterator iter= fSnippets.iterator(); iter.hasNext();) {
