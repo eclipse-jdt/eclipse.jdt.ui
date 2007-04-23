@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
+import java.util.Locale;
+
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
@@ -3729,8 +3731,14 @@ public class PreferenceConstants {
 		
 		
 		// spell checking
-		store.setDefault(PreferenceConstants.SPELLING_LOCALE, SpellCheckEngine.getDefaultLocale().toString());
-		store.setToDefault(PreferenceConstants.SPELLING_LOCALE);
+		store.setDefault(PreferenceConstants.SPELLING_LOCALE, ""); // none; //$NON-NLS-1$
+		String isInitializedKey= "spelling_locale_initialized"; //$NON-NLS-1$
+		if (!store.getBoolean(isInitializedKey)) {
+			store.setValue(isInitializedKey, true);
+			Locale locale= SpellCheckEngine.getDefaultLocale();
+			locale= SpellCheckEngine.findClosestLocale(locale);
+			store.setValue(PreferenceConstants.SPELLING_LOCALE, locale.toString());
+		}
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_DIGITS, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_MIXED, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_SENTENCE, true);

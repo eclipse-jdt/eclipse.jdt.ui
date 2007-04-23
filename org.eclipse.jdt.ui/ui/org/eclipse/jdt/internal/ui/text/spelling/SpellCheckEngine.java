@@ -109,6 +109,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	/**
 	 * Returns the dictionary closest to the given locale.
 	 *
+	 * @param locale the locale
 	 * @return the dictionary or <code>null</code> if none is suitable
 	 * @since 3.3
 	 */
@@ -135,6 +136,9 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	 * @since 3.3
 	 */
 	public static Locale findClosestLocale(Locale locale) {
+		if (locale == null || locale.toString().length() == 0)
+			return locale;
+		
 		if (getLocalesWithInstalledDictionaries().contains(locale))
 			return locale;
 
@@ -146,6 +150,11 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 			if (dictLocale.getLanguage().equals(language))
 				return dictLocale;
 		}
+		
+		// Try whether American English is present
+		Locale defaultLocale= Locale.US;
+		if (getLocalesWithInstalledDictionaries().contains(defaultLocale))
+			return defaultLocale;
 		
 		return null;
 	}
@@ -265,6 +274,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	/**
 	 * Returns the current locale of the spelling preferences.
 	 *
+	 * @param store the preference store
 	 * @return The current locale of the spelling preferences
 	 */
 	private Locale getCurrentLocale(IPreferenceStore store) {

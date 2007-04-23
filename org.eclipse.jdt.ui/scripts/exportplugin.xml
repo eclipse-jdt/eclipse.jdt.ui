@@ -44,6 +44,8 @@
 			  <include name="JavadocHoverStyleSheet.css" />
 			  <include name="icons/**"/>
 			  <include name="schema/**"/>
+			  <include name="about_files**"/>
+			  <include name="dictionaries/**"/>
 			  <include name="templates/**" />
 			</fileset>
 			<fileset dir="bin" />
