@@ -159,6 +159,9 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		/** Are we in a type declaration statement? */
 		private boolean fTypeDeclarationStatement= false;
 
+		/** The binding of the enclosing method */
+		private final IMethodBinding fEnclosingMethod;
+
 		/**
 		 * Creates a new pull up ast node mapper.
 		 * 
@@ -172,14 +175,16 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		 *            the super reference type
 		 * @param mapping
 		 *            the type variable mapping
+		 * @param enclosing the binding of the enclosing method
 		 */
-		public PullUpAstNodeMapper(final CompilationUnitRewrite sourceRewriter, final CompilationUnitRewrite targetRewriter, final ASTRewrite rewrite, final IType type, final TypeVariableMaplet[] mapping) {
+		public PullUpAstNodeMapper(final CompilationUnitRewrite sourceRewriter, final CompilationUnitRewrite targetRewriter, final ASTRewrite rewrite, final IType type, final TypeVariableMaplet[] mapping, final IMethodBinding enclosing) {
 			super(rewrite, mapping);
 			Assert.isNotNull(rewrite);
 			Assert.isNotNull(type);
 			fSourceRewriter= sourceRewriter;
 			fTargetRewriter= targetRewriter;
 			fSuperReferenceType= type;
+			fEnclosingMethod= enclosing;
 		}
 
 		public final void endVisit(final AnonymousClassDeclaration node) {
@@ -213,11 +218,14 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 		public final boolean visit(final SuperMethodInvocation node) {
 			if (!fAnonymousClassDeclaration && !fTypeDeclarationStatement) {
-				final IBinding name= node.getName().resolveBinding();
-				if (name != null && name.getKind() == IBinding.METHOD) {
-					final ITypeBinding binding= ((IMethodBinding) name).getDeclaringClass();
-					if (binding != null) {
-						final IType type= (IType) binding.getJavaElement();
+				final IBinding superBinding= node.getName().resolveBinding();
+				if (superBinding instanceof IMethodBinding) {
+					final IMethodBinding extended= (IMethodBinding) superBinding;
+					if (fEnclosingMethod != null && fEnclosingMethod.overrides(extended))
+						return true;
+					final ITypeBinding declaringBinding= extended.getDeclaringClass();
+					if (declaringBinding != null) {
+						final IType type= (IType) declaringBinding.getJavaElement();
 						if (!fSuperReferenceType.equals(type))
 							return true;
 					}
@@ -939,7 +947,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			final IDocument document= new Document(method.getCompilationUnit().getBuffer().getContents());
 			final ASTRewrite rewrite= ASTRewrite.create(body.getAST());
 			final ITrackedNodePosition position= rewrite.track(body);
-			body.accept(new PullUpAstNodeMapper(sourceRewrite, targetRewrite, rewrite, getDeclaringSuperTypeHierarchy(monitor).getSuperclass(getDeclaringType()), mapping));
+			body.accept(new PullUpAstNodeMapper(sourceRewrite, targetRewrite, rewrite, getDeclaringSuperTypeHierarchy(monitor).getSuperclass(getDeclaringType()), mapping, oldMethod.resolveBinding()));
 			rewrite.rewriteAST(document, method.getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
 			String content= document.get(position.getStartPosition(), position.getLength());
 			final String[] lines= Strings.convertIntoLines(content);
@@ -1154,7 +1162,8 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				adjustor.rewriteVisibility(new SubProgressMonitor(monitor, 1));
 			final TextEditBasedChangeManager manager= new TextEditBasedChangeManager();
 			if (fReplace) {
-				for (final Iterator iterator= fCompilationUnitRewrites.keySet().iterator(); iterator.hasNext();) {
+				final Set set= fCompilationUnitRewrites.keySet();
+				for (final Iterator iterator= set.iterator(); iterator.hasNext();) {
 					unit= (ICompilationUnit) iterator.next();
 					rewrite= (CompilationUnitRewrite) fCompilationUnitRewrites.get(unit);
 					if (rewrite != null) {
@@ -1168,8 +1177,8 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				final Map workingcopies= new HashMap();
 				final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
 				try {
-					subMonitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, fCompilationUnitRewrites.keySet().size());
-					for (final Iterator iterator= fCompilationUnitRewrites.keySet().iterator(); iterator.hasNext();) {
+					subMonitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, set.size());
+					for (final Iterator iterator= set.iterator(); iterator.hasNext();) {
 						unit= (ICompilationUnit) iterator.next();
 						change= manager.get(unit);
 						if (change instanceof TextChange) {
