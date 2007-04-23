@@ -736,7 +736,9 @@ public abstract class ModifyDialogTabPage {
 		final Label label= new Label(parent, SWT.WRAP);
 		label.setFont(parent.getFont());
 		label.setText(text);
-		label.setLayoutData(createGridData(numColumns, gridDataStyle, SWT.DEFAULT));
+		
+		PixelConverter pixelConverter= new PixelConverter(parent);
+		label.setLayoutData(createGridData(numColumns, gridDataStyle, pixelConverter.convertHorizontalDLUsToPixels(150)));
 		return label;
 	}
 
