@@ -32,6 +32,9 @@ public class JavaReplaceAllTest extends AbstractJavaReplaceAllTest {
 		String property= System.getProperty("test.target");
 		System.err.println("test.target= '" + property + "'");
 		System.err.println("isPerformanceTest= '" + "performance".equals(property) + "'");
+
+		property= System.getProperty("eclipse.perf.dbloc");
+		System.err.println("eclipse.perf.dbloc= '" + property + "'");
 		
 		return false;
 	}
