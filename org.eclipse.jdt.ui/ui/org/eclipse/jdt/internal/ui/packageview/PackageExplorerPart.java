@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -90,12 +87,11 @@ import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.WorkbenchException;
-import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.ISetSelectionTarget;
@@ -184,7 +180,6 @@ public class PackageExplorerPart extends ViewPart
 	private static final String TAG_GROUP_LIBRARIES= "group_libraries"; //$NON-NLS-1$
 	private static final String TAG_ROOT_MODE= "rootMode"; //$NON-NLS-1$
 	private static final String TAG_LINK_EDITOR= "linkWithEditor"; //$NON-NLS-1$
-	private static final String TAG_MEMENTO= "memento"; //$NON-NLS-1$
 	
 	private boolean fIsCurrentLayoutFlat; // true means flat, false means hierarchical
 	private boolean fShowLibrariesNode;
@@ -468,16 +463,6 @@ public class PackageExplorerPart extends ViewPart
 	
     public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
-		if (memento == null) {
-			String persistedMemento= fDialogSettings.get(TAG_MEMENTO);
-			if (persistedMemento != null) {
-				try {
-					memento= XMLMemento.createReadRoot(new StringReader(persistedMemento));
-				} catch (WorkbenchException e) {
-					// don't do anything. Simply don't restore the settings
-				}
-			}
-		}
 		fMemento= memento;
 		if (memento != null) {
 			restoreLayoutState(memento);
@@ -508,7 +493,6 @@ public class PackageExplorerPart extends ViewPart
 	/**
 	 * Returns the package explorer part of the active perspective. If 
 	 * there isn't any package explorer part <code>null</code> is returned.
-	 * @return the package explorer from the active perspective
 	 */
 	public static PackageExplorerPart getFromActivePerspective() {
 		IWorkbenchPage activePage= JavaPlugin.getActivePage();
@@ -524,7 +508,6 @@ public class PackageExplorerPart extends ViewPart
 	 * Makes the package explorer part visible in the active perspective. If there
 	 * isn't a package explorer part registered <code>null</code> is returned.
 	 * Otherwise the opened view part is returned.
-	 * @return the opened package explorer
 	 */
 	public static PackageExplorerPart openInActivePerspective() {
 		try {
@@ -535,16 +518,6 @@ public class PackageExplorerPart extends ViewPart
 	} 
 		
 	 public void dispose() {
-		XMLMemento memento= XMLMemento.createWriteRoot("packageExplorer"); //$NON-NLS-1$
-		saveState(memento);
-		StringWriter writer= new StringWriter();
-		try {
-			memento.save(writer);
-			fDialogSettings.put(TAG_MEMENTO, writer.getBuffer().toString());
-		} catch (IOException e) {
-			// don't do anything. Simply don't store the settings
-		}
-		 
 		if (fContextMenu != null && !fContextMenu.isDisposed())
 			fContextMenu.dispose();
 		
@@ -564,8 +537,8 @@ public class PackageExplorerPart extends ViewPart
 		super.dispose();	
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
+	/**
+	 * Implementation of IWorkbenchPart.createPartControl(Composite)
 	 */
 	public void createPartControl(Composite parent) {
 
@@ -645,13 +618,18 @@ public class PackageExplorerPart extends ViewPart
 		fActionSet.getForwardAction().update();
 	}
 
+	/**
+	 * This viewer ensures that non-leaves in the hierarchical
+	 * layout are not removed by any filters.
+	 * 
+	 * @since 2.1
+	 */
 	private ProblemTreeViewer createViewer(Composite composite) {
-		return new PackageExplorerProblemTreeViewer(composite, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		return  new PackageExplorerProblemTreeViewer(composite, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 	}
 
 	/**
 	 * Answers whether this part shows the packages flat or hierarchical.
-	 * @return <true> if flat layout is selected
 	 * 
 	 * @since 2.1
 	 */
@@ -709,7 +687,6 @@ public class PackageExplorerPart extends ViewPart
 	/**
 	 * This method should only be called inside this class
 	 * and from test cases.
-	 * @return the created content provider
 	 */
 	public PackageExplorerContentProvider createContentProvider() {
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
@@ -756,8 +733,8 @@ public class PackageExplorerPart extends ViewPart
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.WorkbenchPart#getAdapter(java.lang.Class)
+	/**
+	 * Answer the property defined by key.
 	 */
 	public Object getAdapter(Class key) {
 		if (key.equals(ISelectionProvider.class))
@@ -781,8 +758,6 @@ public class PackageExplorerPart extends ViewPart
 
 	/**
 	 * Returns the tool tip text for the given element.
-	 * @param element the element
-	 * @return the tooltip
 	 */
 	String getToolTipText(Object element) {
 		String result;
@@ -846,21 +821,25 @@ public class PackageExplorerPart extends ViewPart
 		return getToolTipText(fViewer.getInput());
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.WorkbenchPart#setFocus()
+	/**
+	 * @see IWorkbenchPart#setFocus()
 	 */
 	public void setFocus() {
 		fViewer.getTree().setFocus();
 	}
 
+	/**
+	 * Returns the current selection.
+	 */
 	private ISelection getSelection() {
 		return fViewer.getSelection();
 	}
 	  
 	//---- Action handling ----------------------------------------------------------
 	
-	/* (non-Javadoc)
-	 * @see IMenuListener#menuAboutToShow(IMenuManager)
+	/**
+	 * Called when the context menu is about to open. Override
+	 * to add your own context dependent menu contributions.
 	 */
 	public void menuAboutToShow(IMenuManager menu) {
 		JavaPlugin.createStandardGroups(menu);
@@ -920,7 +899,6 @@ public class PackageExplorerPart extends ViewPart
 	 * Handles post selection changed in viewer.
 	 * 
 	 * Links to editor (if option enabled).
-	 * @param event the selection eveny
 	 */
 	private void handlePostSelectionChanged(SelectionChangedEvent event) {
 		ISelection selection= event.getSelection();
@@ -936,7 +914,7 @@ public class PackageExplorerPart extends ViewPart
 	 * @see org.eclipse.ui.part.ISetSelectionTarget#selectReveal(org.eclipse.jface.viewers.ISelection)
 	 */
 	public void selectReveal(final ISelection selection) {
-		Control ctrl= getTreeViewer().getControl();
+		Control ctrl= getViewer().getControl();
 		if (ctrl == null || ctrl.isDisposed())
 			return;
 		
@@ -1013,7 +991,6 @@ public class PackageExplorerPart extends ViewPart
 	
 	/**
 	 * Links to editor (if option enabled)
-	 * @param selection the selection
 	 */
 	private void linkToEditor(IStructuredSelection selection) {
 		// ignore selection changes if the package explorer is not the active part.
@@ -1105,11 +1082,10 @@ public class PackageExplorerPart extends ViewPart
 	/**
 	 * An editor has been activated.  Set the selection in this Packages Viewer
 	 * to be the editor's input, if linking is enabled.
-	 * @param editor the activated editor
 	 */
 	void editorActivated(IEditorPart editor) {
 		IEditorInput editorInput= getEditorInput(editor);
-		Object input= JavaUI.getEditorInputJavaElement(editorInput);
+		Object input= getElementOfInput(editorInput);
 		if (input == null) 
 			return;
 		if (!inputIsSelected(editorInput))
@@ -1190,7 +1166,6 @@ public class PackageExplorerPart extends ViewPart
 
 	/**
 	 * Returns the element's parent.
-	 * @param element the element
 	 * 
 	 * @return the parent or <code>null</code> if there's no parent
 	 */
@@ -1208,7 +1183,6 @@ public class PackageExplorerPart extends ViewPart
 	/**
 	 * A compilation unit or class was expanded, expand
 	 * the main type.  
-	 * @param element the element
 	 */
 	void expandMainType(Object element) {
 		try {
@@ -1242,8 +1216,27 @@ public class PackageExplorerPart extends ViewPart
 	}
 	
 	/**
+	 * Returns the element contained in the EditorInput
+	 */
+	Object getElementOfInput(IEditorInput input) {
+		if (input instanceof IClassFileEditorInput)
+			return ((IClassFileEditorInput)input).getClassFile();
+		else if (input instanceof IFileEditorInput)
+			return ((IFileEditorInput)input).getFile();
+		else if (input instanceof JarEntryEditorInput)
+			return ((JarEntryEditorInput)input).getStorage();
+		return null;
+	}
+	
+	/**
+ 	 * Returns the Viewer.
+ 	 */
+	TreeViewer getViewer() {
+		return fViewer;
+	}
+	
+	/**
  	 * Returns the TreeViewer.
-	 * @return the tree viewer
  	 */
 	public TreeViewer getTreeViewer() {
 		return fViewer;
@@ -1351,7 +1344,7 @@ public class PackageExplorerPart extends ViewPart
 		
 		Object input= context.getInput();
 		if (input instanceof IEditorInput) {
-			Object elementOfInput= JavaUI.getEditorInputJavaElement((IEditorInput)context.getInput());
+			Object elementOfInput= getElementOfInput((IEditorInput)context.getInput());
 			return elementOfInput != null && (tryToReveal(elementOfInput) == IStatus.OK);
 		}
 
@@ -1360,20 +1353,20 @@ public class PackageExplorerPart extends ViewPart
 
 	/**
 	 * Returns the <code>IShowInSource</code> for this view.
-	 * @return the <code>IShowInSource</code> 
 	 */
 	protected IShowInSource getShowInSource() {
 		return new IShowInSource() {
 			public ShowInContext getShowInContext() {
 				return new ShowInContext(
-					getTreeViewer().getInput(),
-					getTreeViewer().getSelection());
+					getViewer().getInput(),
+					getViewer().getSelection());
 			}
 		};
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.IPackagesViewPart#setLinkingEnabled(boolean)
+	/*
+	 * @see org.eclipse.ui.views.navigator.IResourceNavigator#setLinkingEnabled(boolean)
+	 * @since 2.1
 	 */
 	public void setLinkingEnabled(boolean enabled) {
 		fLinkingEnabled= enabled;
@@ -1395,8 +1388,6 @@ public class PackageExplorerPart extends ViewPart
 	/**
 	 * Returns the name for the given element.
 	 * Used as the name for the current frame. 
-	 * @param element the elemeny
-	 * @return the name of the frame
 	 */
 	String getFrameName(Object element) {
 		if (element instanceof IJavaElement) {
