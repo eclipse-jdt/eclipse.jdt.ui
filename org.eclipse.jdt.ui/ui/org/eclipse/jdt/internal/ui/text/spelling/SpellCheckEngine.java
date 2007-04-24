@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,8 @@ package org.eclipse.jdt.internal.ui.text.spelling;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,6 +25,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -57,41 +65,44 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	 * @return The available locales for this engine
 	 */
 	public static Set getLocalesWithInstalledDictionaries() {
-
-		URL url= null;
-		Locale locale= null;
-		InputStream stream= null;
-
-		final Set result= new HashSet();
+		URL location;
 		try {
-
-			final URL location= getDictionaryLocation();
-
+			location= getDictionaryLocation();
 			if (location == null)
 				return Collections.EMPTY_SET;
-
-			final Locale[] locales= Locale.getAvailableLocales();
-
-			for (int index= 0; index < locales.length; index++) {
-
-				locale= locales[index];
-				url= new URL(location, locale.toString() + ".dictionary"); //$NON-NLS-1$
-
-				try {
-					stream= url.openStream();
-					if (stream != null) {
-						try {
-							result.add(locale);
-						} finally {
-							stream.close();
-						}
-					}
-				} catch (IOException exception) {
-					// Do nothing
-				}
+		} catch (MalformedURLException e1) {
+			return Collections.EMPTY_SET;
+		}
+		
+		String[] fileNames;
+		try {
+			URL url= FileLocator.resolve(location);
+			URI uri= new URI(url.toString());
+			IFileStore store= EFS.getStore(uri);
+			fileNames= store.childNames(EFS.NONE, null);
+		} catch (CoreException ex) {
+			return Collections.EMPTY_SET;
+		} catch (URISyntaxException ex) {
+			return Collections.EMPTY_SET;
+		} catch (IOException ex) {
+			return Collections.EMPTY_SET;
+		}
+		
+		Set result= new HashSet();
+		int fileNameCount= fileNames.length;
+		for (int i= 0; i < fileNameCount; i++) {
+			String fileName= fileNames[i];
+			int localeEnd= fileName.indexOf(".dictionary"); //$NON-NLS-1$ 
+			if (localeEnd > 1) {
+				String localeName= fileName.substring(0, localeEnd);
+				int languageEnd=localeName.indexOf('_');
+				if (languageEnd == -1)
+					result.add(new Locale(localeName));
+				else if (languageEnd == 2 && localeName.length() == 5)
+					result.add(new Locale(localeName.substring(0, 2), localeName.substring(3)));
+				else if (localeName.length() > 6 && localeName.charAt(5) == '_')
+					result.add(new Locale(localeName.substring(0, 2), localeName.substring(3, 5), localeName.substring(6)));
 			}
-		} catch (MalformedURLException exception) {
-			// Do nothing
 		}
 
 		return result;
