@@ -37,7 +37,12 @@ public class CommentsTabPage extends FormatterTabPage {
 	private static String[] FALSE_TRUE = {
 		DefaultCodeFormatterConstants.FALSE,
 		DefaultCodeFormatterConstants.TRUE
-	};	
+	};
+	
+	private static String[] TRUE_FALSE = {
+		DefaultCodeFormatterConstants.TRUE,
+		DefaultCodeFormatterConstants.FALSE
+	};
 	
     /**
      * Constant array for insert / not_insert. 
@@ -109,7 +114,15 @@ public class CommentsTabPage extends FormatterTabPage {
 		"/**\n" + //$NON-NLS-1$
 		" * This is the comment for the example interface.\n" + //$NON-NLS-1$
 		" */\n" + //$NON-NLS-1$
-		" interface Example {" + //$NON-NLS-1$
+		" interface Example {\n" + //$NON-NLS-1$
+		"// This is a long comment that should be split in multiple line comments in case the line comment formatting is enabled\n" + //$NON-NLS-1$
+		"int foo3();\n" + //$NON-NLS-1$
+		"/*\n" + //$NON-NLS-1$
+		"*\n" + //$NON-NLS-1$
+		"* These possibilities include:\n" + //$NON-NLS-1$
+		"* <ul><li>Formatting of header comments.</li><li>Formatting of Javadoc tags</li></ul>\n" + //$NON-NLS-1$
+		"*/\n" + //$NON-NLS-1$
+		"int foo4();\n" + //$NON-NLS-1$
 		" /**\n" + //$NON-NLS-1$
 		" *\n" + //$NON-NLS-1$
 		" * These possibilities include:\n" + //$NON-NLS-1$
@@ -133,7 +146,7 @@ public class CommentsTabPage extends FormatterTabPage {
 		" * @param b The second parameter.\n" + //$NON-NLS-1$
 		" * @return The result of the foo operation, usually within 0 and 1000.\n" + //$NON-NLS-1$
 		" */" + //$NON-NLS-1$
-		" int foo(int a, int b);" + //$NON-NLS-1$
+		" int foo(int a, int b);\n" + //$NON-NLS-1$
 		"}"; //$NON-NLS-1$
 	
 	private CompilationUnitPreview fPreview;
@@ -149,7 +162,9 @@ public class CommentsTabPage extends FormatterTabPage {
 		final CheckboxPreference javadoc= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.commentsTabPage_enable_javadoc_comment_formatting, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT); 
 		final CheckboxPreference blockComment= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_enable_block_comment_formatting, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT);
 		final CheckboxPreference singleLineComments= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_enable_line_comment_formatting, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT); 
-		final CheckboxPreference header= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_format_header, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER); 
+		final CheckboxPreference header= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_format_header, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER);
+		createPrefTrueFalseInvert(globalGroup, numColumns, FormatterMessages.CommentsTabPage_never_indent_block_comments_on_first_column, DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_BLOCK_COMMENTS_ON_FIRST_COLUMN);
+		createPrefTrueFalseInvert(globalGroup, numColumns, FormatterMessages.CommentsTabPage_never_indent_line_comments_on_first_column, DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN);
 
 		// javadoc comment formatting settings
 		final Group settingsGroup= createGroup(numColumns, composite, FormatterMessages.CommentsTabPage_group2_title); 
@@ -162,7 +177,7 @@ public class CommentsTabPage extends FormatterTabPage {
 		final CheckboxPreference nlParam= createPrefInsert(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_new_line_after_param_tags, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER); 
 		final CheckboxPreference blankLinesJavadoc= createPrefTrueFalse(settingsGroup, numColumns, FormatterMessages.CommentsTabPage_clear_blank_lines, DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_JAVADOC_COMMENT); 
 		
-		// javadoc and block comment settings
+		// block comment settings
 		final Group blockSettingsGroup= createGroup(numColumns, composite, FormatterMessages.CommentsTabPage_group4_title);
 		final CheckboxPreference blankLinesBlock= createPrefTrueFalse(blockSettingsGroup, numColumns, FormatterMessages.CommentsTabPage_remove_blank_block_comment_lines, DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_BLOCK_COMMENT);
 		
@@ -243,6 +258,10 @@ public class CommentsTabPage extends FormatterTabPage {
 	
 	private CheckboxPreference createPrefTrueFalse(Composite composite, int numColumns, String text, String key) {
 		return createCheckboxPref(composite, numColumns, text, key, FALSE_TRUE);
+	}
+	
+	private CheckboxPreference createPrefTrueFalseInvert(Composite composite, int numColumns, String text, String key) {
+		return createCheckboxPref(composite, numColumns, text, key, TRUE_FALSE);
 	}
     
     private CheckboxPreference createPrefInsert(Composite composite, int numColumns, String text, String key) {

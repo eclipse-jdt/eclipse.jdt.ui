@@ -361,7 +361,10 @@ final class FormatterMessages extends NLS {
 	public static String CommentsTabPage_new_line_after_param_tags;
 	public static String CommentsTabPage_group3_title;
 	public static String CommentsTabPage_group4_title;
+	public static String CommentsTabPage_group5_title;
 	public static String CommentsTabPage_line_width;
+	public static String CommentsTabPage_never_indent_block_comments_on_first_column;
+	public static String CommentsTabPage_never_indent_line_comments_on_first_column;
 	public static String ControlStatementsTabPage_preview_header;
 	public static String ControlStatementsTabPage_general_group_title;
 	public static String ControlStatementsTabPage_general_group_insert_new_line_before_else_statements;
