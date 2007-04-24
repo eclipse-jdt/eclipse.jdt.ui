@@ -56,7 +56,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	/**
 	 * Caches the locales of installed dictionaries.
 	 * 
-	 * @sincde 3.3
+	 * @since 3.3
 	 */
 	private static Set fgLocalesWithInstalledDictionaries;
 
@@ -88,6 +88,8 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 			if (!file.isDirectory())
 				return fgLocalesWithInstalledDictionaries= Collections.EMPTY_SET;
 			fileNames= file.list();
+			if (fileNames == null)
+				return fgLocalesWithInstalledDictionaries= Collections.EMPTY_SET;
 		} catch (IOException ex) {
 			JavaPlugin.log(ex);
 			return fgLocalesWithInstalledDictionaries= Collections.EMPTY_SET;
