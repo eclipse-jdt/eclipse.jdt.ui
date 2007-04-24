@@ -11,7 +11,9 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
@@ -30,7 +32,7 @@ public class ColoredString {
 	
 	public ColoredString() {
 		fBuffer= new StringBuffer();
-		fRanges= new ArrayList(2);
+		fRanges= null;
 	}
 	
 	public ColoredString(String text) {
@@ -51,7 +53,9 @@ public class ColoredString {
 	}
 	
 	public Iterator getRanges() {
-		return fRanges.iterator();
+		if (!hasRanges())
+			return Collections.EMPTY_LIST.iterator();
+		return getRangesList().iterator();
 	}
 	
 	public ColoredString append(String text) {
@@ -67,7 +71,7 @@ public class ColoredString {
 		fBuffer.append(string.getString());
 		for (Iterator iterator= string.getRanges(); iterator.hasNext();) {
 			StyleRange curr= (StyleRange) iterator.next();
-			fRanges.add(new StyleRange(offset + curr.offset, curr.length, curr.style));
+			addRange(new StyleRange(offset + curr.offset, curr.length, curr.style));
 		}
 		return this;
 	}
@@ -79,14 +83,15 @@ public class ColoredString {
 		int offset= fBuffer.length();
 		fBuffer.append(text);
 		if (style != null) {
-			if (!fRanges.isEmpty()) {
-				StyleRange last= (StyleRange) fRanges.get(fRanges.size() - 1);
+			int nRanges= getNumberOfRanges();
+			if (nRanges > 0) {
+				StyleRange last= getRange(nRanges - 1);
 				if (last.offset + last.length == offset && style.equals(last.style)) {
 					last.length += text.length();
 					return this;
 				}
 			}
-			fRanges.add(new StyleRange(offset, text.length(), style));
+			addRange(new StyleRange(offset, text.length(), style));
 		}
 		return this;
 	}
@@ -96,21 +101,50 @@ public class ColoredString {
 			throw new IllegalArgumentException("Invalid offset (" + offset + ") or length (" + length + ")");   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 		}
 		
-		
 		int insertPos= 0;
-		for (int i= 0; i < fRanges.size(); i++) {
-			StyleRange curr= (StyleRange) fRanges.get(i);
+		int nRanges= getNumberOfRanges();
+		for (int i= 0; i < nRanges; i++) {
+			StyleRange curr= getRange(i);
 			if (curr.offset + curr.length <= offset) {
 				insertPos= i + 1;
 			}
 		}
-		if (insertPos < fRanges.size()) {
-			StyleRange curr= (StyleRange) fRanges.get(insertPos);
+		if (insertPos < nRanges) {
+			StyleRange curr= getRange(insertPos);
 			if (curr.offset > offset + length) {
 				throw new IllegalArgumentException("Overlapping ranges"); //$NON-NLS-1$
 			}
 		}
-		fRanges.add(insertPos, new StyleRange(offset, length, style));
+		addRange(insertPos, new StyleRange(offset, length, style));
+	}
+	
+	private boolean hasRanges() {
+		return fRanges != null && !fRanges.isEmpty();
+	}
+	
+	private int getNumberOfRanges() {
+		return fRanges == null ? 0 : fRanges.size();
+	}
+	
+	private StyleRange getRange(int index) {
+		if (fRanges != null) {
+			return (StyleRange) fRanges.get(index);
+		}
+		throw new IndexOutOfBoundsException();
+	}
+	
+	private void addRange(StyleRange range) {
+		getRangesList().add(range);
+	}
+	
+	private void addRange(int index, StyleRange range) {
+		getRangesList().add(index, range);
+	}
+	
+	private List getRangesList() {
+		if (fRanges == null)
+			fRanges= new ArrayList(2);
+		return fRanges;
 	}
 	
 	public static class StyleRange {
