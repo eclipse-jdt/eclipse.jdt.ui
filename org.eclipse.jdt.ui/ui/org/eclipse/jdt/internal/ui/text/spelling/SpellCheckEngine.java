@@ -70,7 +70,8 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 			location= getDictionaryLocation();
 			if (location == null)
 				return Collections.EMPTY_SET;
-		} catch (MalformedURLException e1) {
+		} catch (MalformedURLException ex) {
+			JavaPlugin.log(ex);
 			return Collections.EMPTY_SET;
 		}
 		
@@ -81,10 +82,13 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 			IFileStore store= EFS.getStore(uri);
 			fileNames= store.childNames(EFS.NONE, null);
 		} catch (CoreException ex) {
+			JavaPlugin.log(ex.getStatus());
 			return Collections.EMPTY_SET;
 		} catch (URISyntaxException ex) {
+			JavaPlugin.log(ex);
 			return Collections.EMPTY_SET;
 		} catch (IOException ex) {
+			JavaPlugin.log(ex);
 			return Collections.EMPTY_SET;
 		}
 		
