@@ -490,10 +490,12 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	
 	protected Control createContents(Composite parent) {
 		Control contents= super.createContents(parent);
-		if (contents instanceof Composite) {
-			Table listControl= findTableControl((Composite) contents);
-			if (listControl != null) {
-				installOwnerDraw(listControl);
+		if (OwnerDrawSupport.showColoredLabels()) {
+			if (contents instanceof Composite) {
+				Table listControl= findTableControl((Composite) contents);
+				if (listControl != null) {
+					installOwnerDraw(listControl);
+				}
 			}
 		}
 		return contents;

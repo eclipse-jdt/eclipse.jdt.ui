@@ -216,7 +216,7 @@ public abstract class OwnerDrawSupport implements Listener {
 		}
 	}
 			
-	private static boolean showColoredLabels() {
+	public static boolean showColoredLabels() {
 		String preference= PreferenceConstants.getPreference(AppearancePreferencePage.PREF_COLORED_LABELS, null);
 		return preference != null && Boolean.valueOf(preference).booleanValue();
 	}
