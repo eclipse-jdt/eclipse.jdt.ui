@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -109,7 +109,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 	public PackageExplorerActionGroup(PackageExplorerPart part) {
 		super();
 		fPart= part;
-		TreeViewer viewer= part.getViewer();
+		TreeViewer viewer= part.getTreeViewer();
 		
 		IPropertyChangeListener workingSetListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
@@ -240,7 +240,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 	}
 	
 	 private void addGotoMenu(IMenuManager menu, Object element, int size) {
-		boolean enabled= size == 1 && fPart.getViewer().isExpandable(element) && (isGoIntoTarget(element) || element instanceof IContainer);
+		boolean enabled= size == 1 && fPart.getTreeViewer().isExpandable(element) && (isGoIntoTarget(element) || element instanceof IContainer);
 		fZoomInAction.setEnabled(enabled);
 		if (enabled)
 			menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fZoomInAction);
@@ -280,7 +280,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 	//---- Key board and mouse handling ------------------------------------------------------------
 
 	/* package*/ void handleDoubleClick(DoubleClickEvent event) {
-		TreeViewer viewer= fPart.getViewer();
+		TreeViewer viewer= fPart.getTreeViewer();
 		IStructuredSelection selection= (IStructuredSelection)event.getSelection();
 		Object element= selection.getFirstElement();
 		if (viewer.isExpandable(element)) {
@@ -365,7 +365,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 	
 			String property= event.getProperty();
 			if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
-				TreeViewer viewer= fPart.getViewer();
+				TreeViewer viewer= fPart.getTreeViewer();
 				viewer.getControl().setRedraw(false);
 				viewer.refresh();
 				viewer.getControl().setRedraw(true);
