@@ -53,6 +53,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.AbstractInformationControl;
 import org.eclipse.jdt.internal.ui.typehierarchy.SuperTypeHierarchyViewer.SuperTypeHierarchyContentProvider;
 import org.eclipse.jdt.internal.ui.typehierarchy.TraditionalHierarchyViewer.TraditionalHierarchyContentProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
 
 /**
  * Show hierarchy in light-weight control.
@@ -128,6 +129,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		tree.setLayoutData(gd);
 
 		TreeViewer treeViewer= new TreeViewer(tree);
+		OwnerDrawSupport.install(treeViewer);
 		treeViewer.addFilter(new ViewerFilter() {
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				return element instanceof IType;

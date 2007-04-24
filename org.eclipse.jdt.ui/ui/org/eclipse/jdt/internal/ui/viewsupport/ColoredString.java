@@ -30,7 +30,7 @@ public class ColoredString {
 	
 	public ColoredString() {
 		fBuffer= new StringBuffer();
-		fRanges= new ArrayList(5);
+		fRanges= new ArrayList(2);
 	}
 	
 	public ColoredString(String text) {

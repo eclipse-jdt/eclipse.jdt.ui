@@ -34,7 +34,9 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.action.Action;
@@ -105,7 +107,10 @@ import org.eclipse.jdt.internal.ui.preferences.TypeFilterPreferencePage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 /**
@@ -482,6 +487,49 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	protected ItemsFilter createFilter() {
 		return new TypeItemsFilter(fSearchScope, fElementKinds, fFilterExtension);
 	}
+	
+	protected Control createContents(Composite parent) {
+		Control contents= super.createContents(parent);
+		if (contents instanceof Composite) {
+			Table listControl= findTableControl((Composite) contents);
+			if (listControl != null) {
+				installOwnerDraw(listControl);
+			}
+		}
+		return contents;
+	}
+	
+	private void installOwnerDraw(Table tableControl) {
+		new OwnerDrawSupport(tableControl) { // installs the owner draw listeners
+			public ColoredString getColoredLabel(Item item) {
+				String text= item.getText();
+				ColoredString str= new ColoredString(text);
+				int index= text.indexOf('-');
+				if (index != -1) {
+					str.colorize(index, str.length() - index, ColoredJavaElementLabels.QUALIFIER_STYLE);
+				}
+				return str;
+			}
+		};
+	}
+
+	private Table findTableControl(Composite composite) {
+		Control[] children= composite.getChildren();
+		for (int i= 0; i < children.length; i++) {
+			Control curr= children[i];
+			if (curr instanceof Table) {
+				return (Table) curr;
+			} else if (curr instanceof Composite) {
+				Table res= findTableControl((Composite) curr);
+				if (res != null) {
+					return res;
+				}
+			}
+		}
+		return null;
+	}
+	
+	
 
 	/*
 	 * (non-Javadoc)
