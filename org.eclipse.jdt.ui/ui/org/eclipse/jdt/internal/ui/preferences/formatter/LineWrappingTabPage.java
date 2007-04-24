@@ -21,12 +21,18 @@ import java.util.Observer;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -39,21 +45,27 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
  * The line wrapping tab page.
  */
 public class LineWrappingTabPage extends FormatterTabPage {
+	/**
+	 * Constant array for boolean selection 
+	 */
+	private static String[] FALSE_TRUE = {
+		DefaultCodeFormatterConstants.FALSE,
+		DefaultCodeFormatterConstants.TRUE
+	};
 
     /**
      * Represents a line wrapping category. All members are final.
@@ -63,14 +75,16 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		public final String name;
 		public final String previewText;
 		public final List children;
+		public final List preferences;
 		
 		public int index;
 
 		public Category(String _key, String _previewText, String _name) {
 			this.key= _key;
 			this.name= _name;
-			this.previewText= _previewText != null ? createPreviewHeader(_name) + _previewText : null; 
+			this.previewText= _previewText != null ? createPreviewHeader(_name) + _previewText : null;
 			children= new ArrayList();
+			preferences= new ArrayList();
 		}
 		
 		/**
@@ -82,6 +96,14 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		
 		public String toString() {
 			return name;
+		}
+
+		public void addPreference(Preference specificPreference) {
+			preferences.add(specificPreference);
+		}
+
+		public Preference[] getSpecificPreferences() {
+			return (Preference[])preferences.toArray(new Preference[preferences.size()]);
 		}
 	}
 	
@@ -180,11 +202,14 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	
 	private class SelectionState {
 	    private List fElements= new ArrayList();
+	    private boolean fRequiresRelayout;
 	    
 	    public void refreshState(IStructuredSelection selection) {
 	        Map wrappingStyleMap= new HashMap();
 		    Map indentStyleMap= new HashMap();
 		    Map forceWrappingMap= new HashMap();
+		    fRequiresRelayout= false;
+		    showSpecificControls(false);
 	        fElements.clear();
 	        evaluateElements(selection.iterator());
 	        evaluateMaps(wrappingStyleMap, indentStyleMap, forceWrappingMap);
@@ -192,7 +217,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	        refreshControls(wrappingStyleMap, indentStyleMap, forceWrappingMap);
 	    }
 	    
-	    public List getElements() {
+		public List getElements() {
 	        return fElements;
 	    }
 	    
@@ -264,11 +289,32 @@ public class LineWrappingTabPage extends FormatterTabPage {
             Integer wrappingStyleMax= getWrappingStyleMax(wrappingStyleMap);
 			boolean isInhomogeneous= (fElements.size() != ((Integer)wrappingStyleMap.get(wrappingStyleMax)).intValue());
 			updateControlEnablement(isInhomogeneous, wrappingStyleMax.intValue());
+			showSpecificControls(true);
+			if (fRequiresRelayout) {
+				fOptionsComposite.layout(true, true);
+			}
 		    doUpdatePreview();
 			notifyValuesModified();
         }
         
-        private Integer getWrappingStyleMax(Map wrappingStyleMap) {
+        private void showSpecificControls(boolean show) {
+        	if (fElements.size() != 1)
+        		return;
+        	
+        	Preference[] preferences= ((Category)fElements.get(0)).getSpecificPreferences();
+	    	if (preferences.length == 0)
+	    		return;
+	    	
+	    	fRequiresRelayout= true;
+	    	for (int i= 0; i < preferences.length; i++) {
+				Preference preference= preferences[i];
+				Control control= preference.getControl();
+				control.setVisible(show);
+				((GridData)control.getLayoutData()).exclude= !show;
+			}
+		}
+
+		private Integer getWrappingStyleMax(Map wrappingStyleMap) {
             int maxCount= 0, maxStyle= 0;
             for (int i=0; i<WRAPPING_NAMES.length; i++) {
                 Integer count= (Integer)wrappingStyleMap.get(new Integer(i));
@@ -550,6 +596,9 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	 * The key for the preview line width.
 	 */
 	private final String LINE_SPLIT= DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT;
+
+
+	private Composite fOptionsComposite;
 	
 	/**
 	 * Create a new line wrapping tab page.
@@ -622,12 +671,14 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	
 	protected void doCreatePreferences(Composite composite, int numColumns) {
 	
+		fOptionsComposite= composite;
+		
 		final Group lineWidthGroup= createGroup(numColumns, composite, FormatterMessages.LineWrappingTabPage_width_indent); 
 
 		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.LineWrappingTabPage_width_indent_option_max_line_width, DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, 0, 9999); 
 		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.LineWrappingTabPage_width_indent_option_default_indent_wrapped, DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION, 0, 9999); 
-		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.LineWrappingTabPage_width_indent_option_default_indent_array, DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION_FOR_ARRAY_INITIALIZER, 0, 9999); 
-
+		createNumberPref(lineWidthGroup, numColumns, FormatterMessages.LineWrappingTabPage_width_indent_option_default_indent_array, DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION_FOR_ARRAY_INITIALIZER, 0, 9999); 		
+		
 		fCategoriesViewer= new TreeViewer(composite /*categoryGroup*/, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY | SWT.V_SCROLL );
 		fCategoriesViewer.setContentProvider(new ITreeContentProvider() {
 			public Object[] getElements(Object inputElement) {
@@ -671,11 +722,18 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		
 		// button "Force split"
 		fForceSplit= new Button(fOptionsGroup, SWT.CHECK);
-		fForceSplit.setLayoutData(createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL, 0));
+		fForceSplit.setLayoutData(createGridData(numColumns - 1, GridData.HORIZONTAL_ALIGN_BEGINNING, SWT.DEFAULT));
 		fForceSplit.setText(FormatterMessages.LineWrappingTabPage_force_split_checkbox_text); 
+		
+		Preference expressionWrapPositionPreference= createCheckboxPref(fOptionsGroup, 1, FormatterMessages.LineWrappingTabPage_binary_expression_wrap_operator, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_BINARY_OPERATOR, FALSE_TRUE);
+		Control control= expressionWrapPositionPreference.getControl();
+		control.setVisible(false);
+		((GridData)control.getLayoutData()).exclude= true;
+		fBinaryExpressionCategory.addPreference(expressionWrapPositionPreference);
 		
 		// selection state object
 		fSelectionState= new SelectionState();
+		
 	}
 	
 		

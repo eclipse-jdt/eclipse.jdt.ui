@@ -246,12 +246,15 @@ class TestFormatterOptions {
 	public boolean keep_empty_array_initializer_on_one_line;
 	public boolean keep_simple_if_on_one_line;
 	public boolean keep_then_statement_on_same_line;
+	public boolean never_indent_block_comments_on_first_column;
+	public boolean never_indent_line_comments_on_first_column;
 	public int number_of_empty_lines_to_preserve;
 	public boolean put_empty_statement_on_new_line;
 	public int tab_size;
 	public final char filling_space = ' ';
 	public int page_width;
 	public boolean use_tab;
+	public boolean wrapBeforeBinaryOperator;
 
 	public int initial_indentation_level;
 	public String line_separator;
@@ -437,6 +440,9 @@ class TestFormatterOptions {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, Integer.toString(this.page_width));
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, this.use_tab ? JavaCore.TAB: JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, Integer.toString(this.tab_size));
+		options.put(DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_BINARY_OPERATOR, this.wrapBeforeBinaryOperator ? DefaultCodeFormatterConstants.TRUE : DefaultCodeFormatterConstants.FALSE);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_BLOCK_COMMENTS_ON_FIRST_COLUMN, this.never_indent_block_comments_on_first_column ? DefaultCodeFormatterConstants.TRUE : DefaultCodeFormatterConstants.FALSE);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, this.never_indent_line_comments_on_first_column ? DefaultCodeFormatterConstants.TRUE : DefaultCodeFormatterConstants.FALSE);
 		return options;
 	}
 
@@ -612,6 +618,9 @@ class TestFormatterOptions {
 		this.tab_size = 4;
 		this.page_width = 80;
 		this.use_tab = true; // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=49081
+		this.wrapBeforeBinaryOperator = true;
+		this.never_indent_block_comments_on_first_column = false;
+		this.never_indent_line_comments_on_first_column = false;
 	}
 }
 
