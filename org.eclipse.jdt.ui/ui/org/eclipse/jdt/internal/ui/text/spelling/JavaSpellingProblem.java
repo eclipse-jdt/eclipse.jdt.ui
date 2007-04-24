@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,6 +61,7 @@ public class JavaSpellingProblem extends SpellingProblem {
 	 * Initialize with the given spell event.
 	 * 
 	 * @param spellEvent the spell event
+	 * @param document the document
 	 */
 	public JavaSpellingProblem(ISpellEvent spellEvent, IDocument document) {
 		Assert.isLegal(document != null);
@@ -147,7 +148,7 @@ public class JavaSpellingProblem extends SpellingProblem {
 				}
 
 				boolean extendable= !fixed ? checker.acceptsWords() : false;
-				result= new IJavaCompletionProposal[size + (extendable ? 2 : 1)];
+				result= new IJavaCompletionProposal[size + (extendable ? 3 : 2)];
 
 				for (index= 0; index < size; index++) {
 
@@ -161,6 +162,7 @@ public class JavaSpellingProblem extends SpellingProblem {
 					result[index++]= new AddWordProposal(arguments[0], context);
 
 				result[index++]= new WordIgnoreProposal(arguments[0], context);
+				result[index++]= new DisableSpellCheckingProposal(context);
 			}
 		}
 

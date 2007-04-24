@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,12 +24,12 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
-import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
-import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
-import org.eclipse.jdt.internal.ui.text.spelling.engine.RankedWordProposal;
 
 import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
 import org.eclipse.jdt.internal.ui.text.javadoc.IJavaDocTagConstants;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.RankedWordProposal;
 
 /**
  * Quick fix processor for incorrectly spelled words.
@@ -96,7 +96,7 @@ public class WordQuickFixProcessor implements IQuickFixProcessor {
 							}
 
 							boolean extendable= !fixed ? checker.acceptsWords() : false;
-							result= new IJavaCompletionProposal[size + (extendable ? 2 : 1)];
+							result= new IJavaCompletionProposal[size + (extendable ? 3 : 2)];
 
 							for (index= 0; index < size; index++) {
 
@@ -108,6 +108,7 @@ public class WordQuickFixProcessor implements IQuickFixProcessor {
 								result[index++]= new AddWordProposal(arguments[0], context);
 
 							result[index++]= new WordIgnoreProposal(arguments[0], context);
+							result[index++]= new DisableSpellCheckingProposal(context);
 						}
 						break;
 					}
