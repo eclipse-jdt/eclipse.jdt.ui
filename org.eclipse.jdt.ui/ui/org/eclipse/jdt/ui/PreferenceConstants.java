@@ -3737,7 +3737,8 @@ public class PreferenceConstants {
 			store.setValue(isInitializedKey, true);
 			Locale locale= SpellCheckEngine.getDefaultLocale();
 			locale= SpellCheckEngine.findClosestLocale(locale);
-			store.setValue(PreferenceConstants.SPELLING_LOCALE, locale.toString());
+			if (locale != null)
+				store.setValue(PreferenceConstants.SPELLING_LOCALE, locale.toString());
 		}
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_DIGITS, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_MIXED, true);

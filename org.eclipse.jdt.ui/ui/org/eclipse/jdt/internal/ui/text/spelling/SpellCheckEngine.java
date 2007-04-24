@@ -11,11 +11,10 @@
 
 package org.eclipse.jdt.internal.ui.text.spelling;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,10 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import org.eclipse.core.filesystem.EFS;
-import org.eclipse.core.filesystem.IFileStore;
-
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -57,7 +52,15 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 
 	/** The singleton engine instance */
 	private static ISpellCheckEngine fgEngine= null;
+	
+	/**
+	 * Caches the locales of installed dictionaries.
+	 * 
+	 * @sincde 3.3
+	 */
+	private static Set fgLocalesWithInstalledDictionaries;
 
+	
 	/**
 	 * Returns the locales for which this
 	 * spell check engine has dictionaries.
@@ -65,34 +68,32 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	 * @return The available locales for this engine
 	 */
 	public static Set getLocalesWithInstalledDictionaries() {
+		if (fgLocalesWithInstalledDictionaries != null)
+			return fgLocalesWithInstalledDictionaries;
+		
 		URL location;
 		try {
 			location= getDictionaryLocation();
 			if (location == null)
-				return Collections.EMPTY_SET;
+				return fgLocalesWithInstalledDictionaries= Collections.EMPTY_SET;
 		} catch (MalformedURLException ex) {
 			JavaPlugin.log(ex);
-			return Collections.EMPTY_SET;
+			return fgLocalesWithInstalledDictionaries= Collections.EMPTY_SET;
 		}
 		
 		String[] fileNames;
 		try {
-			URL url= FileLocator.resolve(location);
-			URI uri= new URI(url.toString());
-			IFileStore store= EFS.getStore(uri);
-			fileNames= store.childNames(EFS.NONE, null);
-		} catch (CoreException ex) {
-			JavaPlugin.log(ex.getStatus());
-			return Collections.EMPTY_SET;
-		} catch (URISyntaxException ex) {
-			JavaPlugin.log(ex);
-			return Collections.EMPTY_SET;
+			URL url= FileLocator.toFileURL(location);
+			File file= new File(url.getFile());
+			if (!file.isDirectory())
+				return fgLocalesWithInstalledDictionaries= Collections.EMPTY_SET;
+			fileNames= file.list();
 		} catch (IOException ex) {
 			JavaPlugin.log(ex);
-			return Collections.EMPTY_SET;
+			return fgLocalesWithInstalledDictionaries= Collections.EMPTY_SET;
 		}
 		
-		Set result= new HashSet();
+		fgLocalesWithInstalledDictionaries= new HashSet();
 		int fileNameCount= fileNames.length;
 		for (int i= 0; i < fileNameCount; i++) {
 			String fileName= fileNames[i];
@@ -101,15 +102,15 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 				String localeName= fileName.substring(0, localeEnd);
 				int languageEnd=localeName.indexOf('_');
 				if (languageEnd == -1)
-					result.add(new Locale(localeName));
+					fgLocalesWithInstalledDictionaries.add(new Locale(localeName));
 				else if (languageEnd == 2 && localeName.length() == 5)
-					result.add(new Locale(localeName.substring(0, 2), localeName.substring(3)));
+					fgLocalesWithInstalledDictionaries.add(new Locale(localeName.substring(0, 2), localeName.substring(3)));
 				else if (localeName.length() > 6 && localeName.charAt(5) == '_')
-					result.add(new Locale(localeName.substring(0, 2), localeName.substring(3, 5), localeName.substring(6)));
+					fgLocalesWithInstalledDictionaries.add(new Locale(localeName.substring(0, 2), localeName.substring(3, 5), localeName.substring(6)));
 			}
 		}
 
-		return result;
+		return fgLocalesWithInstalledDictionaries;
 	}
 
 	/**
