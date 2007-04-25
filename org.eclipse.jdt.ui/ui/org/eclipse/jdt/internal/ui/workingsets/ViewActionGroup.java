@@ -15,6 +15,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
@@ -46,12 +47,13 @@ public class ViewActionGroup extends ActionGroup {
 	private final WorkingSetShowActionGroup fShowActionGroup;
 	private final WorkingSetFilterActionGroup fFilterActionGroup;
 	private final ConfigureWorkingSetAssignementAction fWorkingSetAssignementAction;
+	private final OpenPropertiesWorkingSetAction fEditWorkingSetGroupAction; // active on working sets: edit
 	private final IWorkbenchPartSite fSite;
 
 	public ViewActionGroup(int mode, IPropertyChangeListener changeListener, IWorkbenchPartSite site) {
 		fChangeListener= changeListener;
 		fSite= site;
-		if(fChangeListener == null) {
+		if (fChangeListener == null) {
 			fChangeListener = new IPropertyChangeListener() {
 				public void propertyChange(PropertyChangeEvent event) {}
 			};
@@ -59,7 +61,12 @@ public class ViewActionGroup extends ActionGroup {
 		fFilterActionGroup= new WorkingSetFilterActionGroup(site, fChangeListener);
 		fShowActionGroup= new WorkingSetShowActionGroup(site);
 		fWorkingSetAssignementAction= new ConfigureWorkingSetAssignementAction(site);
-		site.getSelectionProvider().addSelectionChangedListener(fWorkingSetAssignementAction);
+		fEditWorkingSetGroupAction= new OpenPropertiesWorkingSetAction(site);
+
+		ISelectionProvider selectionProvider= site.getSelectionProvider();
+		selectionProvider.addSelectionChangedListener(fWorkingSetAssignementAction);
+		selectionProvider.addSelectionChangedListener(fEditWorkingSetGroupAction);
+		
 		fMode= mode;
 		if (showWorkingSets())
 			fActiveActionGroup= fShowActionGroup;
@@ -71,7 +78,9 @@ public class ViewActionGroup extends ActionGroup {
 		fFilterActionGroup.dispose();
 		fShowActionGroup.dispose();
 		fChangeListener= null;
-		fSite.getSelectionProvider().removeSelectionChangedListener(fWorkingSetAssignementAction);
+		ISelectionProvider selectionProvider= fSite.getSelectionProvider();
+		selectionProvider.removeSelectionChangedListener(fWorkingSetAssignementAction);
+		selectionProvider.removeSelectionChangedListener(fEditWorkingSetGroupAction);
 		super.dispose();
 	}
 	
@@ -84,6 +93,11 @@ public class ViewActionGroup extends ActionGroup {
 		menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new Separator(GROUP_WORKINGSETS));
 		if (fWorkingSetAssignementAction.isEnabled())
 			menu.appendToGroup(GROUP_WORKINGSETS, fWorkingSetAssignementAction);
+		
+		if (fEditWorkingSetGroupAction.isEnabled()) {
+			menu.prependToGroup(IContextMenuConstants.GROUP_PROPERTIES, new Separator());
+			menu.prependToGroup(IContextMenuConstants.GROUP_PROPERTIES, fEditWorkingSetGroupAction);
+		}
 	}
 
 	/**
