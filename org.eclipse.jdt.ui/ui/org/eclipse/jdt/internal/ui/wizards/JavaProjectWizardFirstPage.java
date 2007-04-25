@@ -44,6 +44,7 @@ import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.util.Policy;
 import org.eclipse.jface.wizard.WizardPage;
 
@@ -335,6 +336,14 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 	
 	private final class JREGroup implements Observer, SelectionListener, IDialogFieldListener {
 
+		private static final String LAST_SELECTED_EE_SETTINGS_KEY= JavaUI.ID_PLUGIN + ".last.selected.execution.enviroment"; //$NON-NLS-1$
+		private static final String LAST_SELECTED_JRE_SETTINGS_KEY= JavaUI.ID_PLUGIN + ".last.selected.project.jre"; //$NON-NLS-1$
+		private static final String LAST_SELECTED_JRE_KIND= JavaUI.ID_PLUGIN + ".last.selected.jre.kind"; //$NON-NLS-1$
+		
+		private static final int DEFAULT_JRE= 0;
+		private static final int PROJECT_JRE= 1;
+		private static final int EE_JRE= 2;
+		
 		private final SelectionButtonDialogField fUseDefaultJRE, fUseProjectJRE, fUseEEJRE;
 		private final ComboDialogField fJRECombo;
 		private final ComboDialogField fEECombo;
@@ -365,7 +374,6 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			fUseProjectJRE= new SelectionButtonDialogField(SWT.RADIO);
 			fUseProjectJRE.setLabelText(NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_specific_compliance);
 			fUseProjectJRE.doFillIntoGrid(fGroup, 1);
-			fUseProjectJRE.setDialogFieldListener(this);
 						
 			fJRECombo= new ComboDialogField(SWT.READ_ONLY);
 			fillInstalledJREs(fJRECombo);
@@ -380,7 +388,6 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			fUseEEJRE= new SelectionButtonDialogField(SWT.RADIO);
 			fUseEEJRE.setLabelText(NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_specific_EE);
 			fUseEEJRE.doFillIntoGrid(fGroup, 1);
-			fUseEEJRE.setDialogFieldListener(this);
 						
 			fEECombo= new ComboDialogField(SWT.READ_ONLY);
 			fillExecutionEnvironments(fEECombo);
@@ -392,13 +399,28 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			
 			DialogField.createEmptySpace(fGroup);
 			
-			fUseDefaultJRE.setSelection(true);
+			switch (getLastSelectedJREKind()) {
+			case DEFAULT_JRE:				
+				fUseDefaultJRE.setSelection(true);
+				break;
+			case PROJECT_JRE:
+				fUseProjectJRE.setSelection(true);
+				break;
+			case EE_JRE:
+				fUseEEJRE.setSelection(true);
+				break;
+			}
+			
 			fJRECombo.setEnabled(fUseProjectJRE.isSelected());
 			fEECombo.setEnabled(fUseEEJRE.isSelected());
+			
+			fUseDefaultJRE.setDialogFieldListener(this);
+			fUseProjectJRE.setDialogFieldListener(this);
+			fUseEEJRE.setDialogFieldListener(this);
 		}
 
 		private void fillInstalledJREs(ComboDialogField comboField) {
-			String selectedItem= null;
+			String selectedItem= getLastSelectedJRE();
 			int selectionIndex= -1;
 			if (fUseProjectJRE.isSelected()) {
 				selectionIndex= comboField.getSelectionIndex();
@@ -447,7 +469,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		}
 		
 		private void fillExecutionEnvironments(ComboDialogField comboField) {
-			String selectedItem= null;
+			String selectedItem= getLastSelectedEE();
 			int selectionIndex= -1;
 			if (fUseEEJRE.isSelected()) {
 				selectionIndex= comboField.getSelectionIndex();
@@ -499,6 +521,28 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		}
 		
 		private String getDefaultEEName() {
+			IVMInstall defaultVM= JavaRuntime.getDefaultVMInstall();
+			
+			IExecutionEnvironment[] environments= JavaRuntime.getExecutionEnvironmentsManager().getExecutionEnvironments();
+			for (int i= 0; i < environments.length; i++) {
+				IVMInstall eeDefaultVM= environments[i].getDefaultVM();
+				if (eeDefaultVM != null && defaultVM.getId().equals(eeDefaultVM.getId()))
+					return environments[i].getId();			
+			}
+			
+			String defaultCC;
+			if (defaultVM instanceof IVMInstall2) {
+				defaultCC= JavaModelUtil.getCompilerCompliance((IVMInstall2)defaultVM, JavaCore.VERSION_1_4);
+			} else {
+				defaultCC= JavaCore.VERSION_1_4;
+			}
+			
+			for (int i= 0; i < environments.length; i++) {
+				String eeCompliance= JavaModelUtil.getExecutionEnvironmentCompliance(environments[i]);
+				if (defaultCC.endsWith(eeCompliance))
+					return environments[i].getId();
+			}
+			
 			return "J2SE-1.5"; //$NON-NLS-1$
 		}
 
@@ -555,6 +599,54 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		public void dialogFieldChanged(DialogField field) {
 			updateEnableState();
 			fDetectGroup.handlePossibleJVMChange();
+			if (field == fJRECombo) {
+				if (fUseProjectJRE.isSelected()) {
+					storeSelectionValue(fJRECombo, LAST_SELECTED_JRE_SETTINGS_KEY);
+				}
+			} else if (field == fEECombo) {
+				if (fUseEEJRE.isSelected()) {
+					storeSelectionValue(fEECombo, LAST_SELECTED_EE_SETTINGS_KEY);
+				}
+			} else if (field == fUseDefaultJRE) {
+				if (fUseDefaultJRE.isSelected()) {
+					JavaPlugin.getDefault().getDialogSettings().put(LAST_SELECTED_JRE_KIND, DEFAULT_JRE);
+				}
+			} else if (field == fUseProjectJRE) {
+				if (fUseProjectJRE.isSelected()) {
+					JavaPlugin.getDefault().getDialogSettings().put(LAST_SELECTED_JRE_KIND, PROJECT_JRE);
+				}
+			} else if (field == fUseEEJRE) {
+				if (fUseEEJRE.isSelected()) {
+					JavaPlugin.getDefault().getDialogSettings().put(LAST_SELECTED_JRE_KIND, EE_JRE);
+				}
+			}
+		}
+
+		private void storeSelectionValue(ComboDialogField combo, String preferenceKey) {
+			int index= combo.getSelectionIndex();
+			if (index == -1)
+				return;
+			
+			String item= combo.getItems()[index];
+			JavaPlugin.getDefault().getDialogSettings().put(preferenceKey, item);
+		}
+		
+		private int getLastSelectedJREKind() {
+			IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
+			if (settings.get(LAST_SELECTED_JRE_KIND) == null)
+				return DEFAULT_JRE;
+			
+			return settings.getInt(LAST_SELECTED_JRE_KIND);
+		}
+		
+		private String getLastSelectedEE() {
+			IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
+			return settings.get(LAST_SELECTED_EE_SETTINGS_KEY);
+		}
+		
+		private String getLastSelectedJRE() {
+			IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
+			return settings.get(LAST_SELECTED_JRE_SETTINGS_KEY);
 		}
 			
 		public IVMInstall getSelectedJVM() {
