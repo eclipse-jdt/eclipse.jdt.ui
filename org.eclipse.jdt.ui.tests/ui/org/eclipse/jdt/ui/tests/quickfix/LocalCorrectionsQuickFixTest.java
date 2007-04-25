@@ -6011,6 +6011,46 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
+	
+	public void testCollectionsFieldMethodReplacement() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_TYPE_PARAMETER_HIDING, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("b112441", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package b112441;\n");
+		buf.append("\n");
+		buf.append("import java.util.Collections;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("public class CollectionsTest {\n");
+		buf.append("    Map<String,String> m=Collections.EMPTY_MAP;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("CollectionsTest.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package b112441;\n");
+		buf.append("\n");
+		buf.append("import java.util.Collections;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("public class CollectionsTest {\n");
+		buf.append("    Map<String,String> m=Collections.emptyMap();\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
 
 	
 	
