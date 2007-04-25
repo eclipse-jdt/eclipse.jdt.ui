@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.ui.text.spelling.engine;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -505,6 +506,17 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 					}
 					return true;
 				}
+			} catch (FileNotFoundException ex) {
+				String urlString= url.toString();
+				String lowercaseUrlString= urlString.toLowerCase();
+				if (urlString.equals(lowercaseUrlString))
+					JavaPlugin.log(ex);
+				else
+					try {
+						return load(new URL(lowercaseUrlString));
+					} catch (MalformedURLException e) {
+						JavaPlugin.log(e);
+					}
 			} catch (IOException exception) {
 				if (line > 0) {
 					String message= Messages.format(JavaUIMessages.AbstractSpellingDictionary_encodingError, new Object[] { new Integer(line), url.toString() });
