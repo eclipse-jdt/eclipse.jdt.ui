@@ -53,6 +53,10 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 	}
 
 	public int findInContext(String qualifier, String name, int kind) {
+		int defaultResult= fImportRewrite.getDefaultImportRewriteContext().findInContext(qualifier, name, kind);
+		if (defaultResult != ImportRewriteContext.RES_NAME_UNKNOWN)
+			return defaultResult;
+		
 		IBinding[] declarationsInScope= getDeclarationsInScope();
 		for (int i= 0; i < declarationsInScope.length; i++) {
 			if (declarationsInScope[i] instanceof ITypeBinding) {
@@ -68,6 +72,7 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 				}
 			}
 		}
+		
 		
 		Name[] names= getImportedNames();
 		for (int i= 0; i < names.length; i++) {
