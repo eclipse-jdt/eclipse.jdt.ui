@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,10 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+
 
 /**
  * 
@@ -262,5 +265,21 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		
 		// no auto-insertion, but prefix-completion of IOException, as InvalidObjectException is a valid camel case match
 		assertMethodBodyIncrementalCompletion("IOExce|", "IOException|");
+	}
+	
+	public void testBug182468() throws Exception {
+		IPackageFragmentRoot src= (IPackageFragmentRoot)CompletionTestSetup.getTestPackage().getParent();
+		
+		IPackageFragment package1= src.createPackageFragment("package1", true, null);
+		package1.createCompilationUnit("AClass.java", "package " + package1.getElementName() + "; public class AClass {}", true, null);
+		
+		IPackageFragment package2= src.createPackageFragment("package2", true, null);
+		package1.createCompilationUnit("AClass.java", "package " + package2.getElementName() + "; public class AClass {}", true, null);
+		
+		waitBeforeCompleting(true);
+		
+		addImport(package1.getElementName() + ".AClass");
+		expectImport(package1.getElementName() + ".AClass");
+		assertMethodBodyProposal("new AClass|", "AClass - " + package2.getElementName(), "new " + package2.getElementName() + ".AClass");
 	}
 }
