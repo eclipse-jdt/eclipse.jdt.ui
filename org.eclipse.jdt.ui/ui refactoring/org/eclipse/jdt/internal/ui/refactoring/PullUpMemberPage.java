@@ -813,7 +813,13 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		storeDialogSettings();
 		if (getMethodsForAction(PULL_UP_ACTION).length == 0)
 			return computeSuccessorPage();
-
+		try {
+	        final IType destination= getDestinationType();
+	        if (destination != null && destination.isInterface())
+	        	return computeSuccessorPage();
+        } catch (JavaModelException exception) {
+	        JavaPlugin.log(exception);
+        }
 		return super.getNextPage();
 	}
 
