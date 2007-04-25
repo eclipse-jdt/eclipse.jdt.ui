@@ -701,7 +701,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		try {
 			ICompilationUnit copy= unit.findWorkingCopy(fOwner);
 			if (copy == null)
-				copy= unit.getWorkingCopy(fOwner, null, monitor);
+				copy= unit.getWorkingCopy(fOwner, monitor);
 			return copy;
 		} finally {
 			monitor.done();
