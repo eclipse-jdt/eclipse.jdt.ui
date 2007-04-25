@@ -17,7 +17,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IAdaptable;
+
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 
@@ -35,6 +40,7 @@ import org.eclipse.ui.navigator.PipelinedViewerUpdate;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -107,10 +113,27 @@ public class JavaNavigatorContentProvider extends
 	}
 
 	public Object[] getElements(Object inputElement) {
-		if (inputElement instanceof IWorkspaceRoot)
-			return super.getElements(JavaCore
-					.create((IWorkspaceRoot) inputElement));
+		if (inputElement instanceof IWorkspaceRoot) {
+			IWorkspaceRoot root = (IWorkspaceRoot) inputElement;
+			return root.getProjects();
+		} else if (inputElement instanceof IJavaModel) {
+			return ((IJavaModel)inputElement).getWorkspace().getRoot().getProjects();
+		}
+		if (inputElement instanceof IProject) {
+			return super.getElements(JavaCore.create((IProject)inputElement));
+		}
 		return super.getElements(inputElement);
+	}
+	
+	public Object[] getChildren(Object parentElement) {
+		if (parentElement instanceof IWorkspaceRoot) {
+			IWorkspaceRoot root = (IWorkspaceRoot) parentElement;
+			return root.getProjects();
+		} 
+		if (parentElement instanceof IProject) {
+			return super.getChildren(JavaCore.create((IProject)parentElement));
+		}
+		return super.getChildren(parentElement);
 	}
 
 	private Object findInputElement(Object newInput) {
@@ -128,22 +151,12 @@ public class JavaNavigatorContentProvider extends
 
 	}
 
-	public void getPipelinedChildren(Object parent, Set currentChildren) {
-		Object[] children = getChildren(parent);
-		for (Iterator iter = currentChildren.iterator(); iter.hasNext();)
-			if (iter.next() instanceof IResource)
-				iter.remove();
-		currentChildren.addAll(Arrays.asList(children));
+	public void getPipelinedChildren(Object parent, Set currentChildren) { 
+		customize(getChildren(parent), currentChildren);
 	}
 
 	public void getPipelinedElements(Object input, Set currentElements) {
-		Object[] children = getElements(input);
-
-		for (Iterator iter = currentElements.iterator(); iter.hasNext();)
-			if (iter.next() instanceof IResource)
-				iter.remove();
-
-		currentElements.addAll(Arrays.asList(children));
+		customize(getElements(input), currentElements);
 	}
 
 	public Object getPipelinedParent(Object object, Object suggestedParent) {
@@ -152,14 +165,36 @@ public class JavaNavigatorContentProvider extends
 
 	public PipelinedShapeModification interceptAdd(
 			PipelinedShapeModification addModification) {
+		
+		if(addModification.getParent() instanceof IJavaProject) {
+			addModification.setParent(((IJavaProject)addModification.getParent()).getProject());
+		} else if(addModification.getParent() instanceof IWorkspaceRoot || 
+				addModification.getParent() instanceof IJavaProject){
+		
+			deconvertJavaProjects(addModification);
+		}
+		
 		convertToJavaElements(addModification);
 		return addModification;
 	}
-
+ 
 	public PipelinedShapeModification interceptRemove(
 			PipelinedShapeModification removeModification) {
+		deconvertJavaProjects(removeModification);
 		convertToJavaElements(removeModification.getChildren());
 		return removeModification;
+	}
+	
+	private void deconvertJavaProjects(PipelinedShapeModification modification) {
+		Set convertedChildren = new LinkedHashSet();
+		for (Iterator iterator = modification.getChildren().iterator(); iterator.hasNext();) {
+			Object added = iterator.next(); 
+			if(added instanceof IJavaProject) {
+				iterator.remove();
+				convertedChildren.add(((IJavaProject)added).getProject());
+			}			
+		}
+		modification.getChildren().addAll(convertedChildren);
 	}
 
 	/**
@@ -172,11 +207,12 @@ public class JavaNavigatorContentProvider extends
 	 */
 	private boolean convertToJavaElements(PipelinedShapeModification modification) {
 		Object parent = modification.getParent();
+		// As of 3.3, we no longer re-parent additions to IProject.
 		if (parent instanceof IContainer) {
 			IJavaElement element = JavaCore.create((IContainer) parent);
 			if (element != null && element.exists()) {
 				// we don't convert the root
-				if( !(element instanceof IJavaModel))
+				if( !(element instanceof IJavaModel) && !(element instanceof IJavaProject))
 					modification.setParent(element);
 				return convertToJavaElements(modification.getChildren());
 				
@@ -200,12 +236,17 @@ public class JavaNavigatorContentProvider extends
 		for (Iterator childrenItr = currentChildren.iterator(); childrenItr
 				.hasNext();) {
 			Object child = childrenItr.next();
-			if (child instanceof IResource)
+			// only convert IFolders and IFiles
+			if (child instanceof IFolder || child instanceof IFile) {
 				if ((newChild = JavaCore.create((IResource) child)) != null
 						&& newChild.exists()) {
 					childrenItr.remove();
 					convertedChildren.add(newChild);
 				}
+			} else if (child instanceof IJavaProject) {
+				childrenItr.remove();
+				convertedChildren.add( ((IJavaProject)child).getProject());
+			}
 		}
 		if (!convertedChildren.isEmpty()) {
 			currentChildren.addAll(convertedChildren);
@@ -214,6 +255,45 @@ public class JavaNavigatorContentProvider extends
 		return false;
 
 	}
+	
+	/**
+	 * Adapted from the C Navigator Content Provider
+	 * @param javaElements
+	 * @param proposedChildren
+	 */
+	private void customize(Object[] javaElements, Set proposedChildren) {
+		List elementList= Arrays.asList(javaElements);
+		for (Iterator iter= proposedChildren.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			IResource resource= null;
+			if (element instanceof IResource) {
+				resource= (IResource)element;
+			} else if (element instanceof IAdaptable) {
+				resource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
+			}
+			if (resource != null) {
+				int i= elementList.indexOf(resource);
+				if (i >= 0) {
+					javaElements[i]= null;
+				}
+			}
+		}
+		for (int i= 0; i < javaElements.length; i++) {
+			Object element= javaElements[i];
+			if (element instanceof IJavaElement) {
+				IJavaElement cElement= (IJavaElement)element;
+				IResource resource= cElement.getResource();
+				if (resource != null) {
+					proposedChildren.remove(resource);
+				}
+				proposedChildren.add(element);
+			} else if (element != null) {
+				proposedChildren.add(element);
+			}
+		}
+	}
+
+
 
 	public boolean interceptRefresh(PipelinedViewerUpdate refreshSynchronization) {		
 		return convertToJavaElements(refreshSynchronization.getRefreshTargets());
