@@ -1516,4 +1516,51 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});	
 	}
 	
+	public void testSurroundWithBug162549() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void m() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("            System.out.println(\"T\");\n");
+		buf.append("        } // else {\n");
+		buf.append("        // System.out.println(\"F\");\n");
+		buf.append("        // }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		StringBuffer selection= new StringBuffer();
+		selection.append("if (true) {\n");
+		selection.append("            System.out.println(\"T\");\n");
+		selection.append("        } // else {\n");
+		selection.append("        // System.out.println(\"F\");\n");
+		selection.append("        // }\n");
+		
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		List proposals= getRunnableProposal(context);
+		
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void m() {\n");
+		buf.append("        Runnable runnable = new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                if (true) {\n");
+		buf.append("                    System.out.println(\"T\");\n");
+		buf.append("                } // else {\n");
+		buf.append("                // System.out.println(\"F\");\n");
+		buf.append("                // }\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});	
+	}
+	
 }

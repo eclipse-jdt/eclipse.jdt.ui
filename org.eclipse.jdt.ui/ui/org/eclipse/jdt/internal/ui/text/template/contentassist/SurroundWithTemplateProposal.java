@@ -14,11 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.RangeMarker;
-import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -50,8 +46,6 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
@@ -73,28 +67,12 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		
 		private final Template fTemplate;
 		private final IJavaProject fCurrentProject;
-		private ITrackedNodePosition fNewBodyPosition;
 		private ASTNode fTemplateNode;
 		
 		public SurroundWithTemplate(IInvocationContext context, Statement[] selectedNodes, Template template) {
 			super(context.getASTRoot(), selectedNodes);
 			fTemplate= template;
 			fCurrentProject= context.getCompilationUnit().getJavaProject();
-		}
-		
-		public ITrackedNodePosition getNewBodyPosition() {
-			return fNewBodyPosition;
-		}
-		
-		/**
-		 * Generate a new code skeleton.
-		 * @param newBody The new body which will be filled with code.
-		 * @param rewrite The rewrite to use to change the ast.
-		 * @return The root of the new code.
-		 */
-		protected Statement generateCodeSkeleton(Block newBody, ASTRewrite rewrite) {
-			fNewBodyPosition= rewrite.track(newBody);
-			return newBody;
 		}
 		
 		protected List getVariableDeclarationReadsInside(Statement[] selectedNodes, int maxVariableId) {
@@ -263,19 +241,12 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		
 		SurroundWithTemplate surroundWith= new SurroundWithTemplate(invocationContext, fSelectedStatements, fTemplate);
 		Map options= fCompilationUnit.getJavaProject().getOptions(true);
-		MultiTextEdit allEdits= (MultiTextEdit)surroundWith.getRewrite().rewriteAST(document, options);
-		removeBlockStartAndEnd(allEdits);
-		MultiTextEdit allEditsCopy= (MultiTextEdit)allEdits.copy();
 		
-		String newSelection= calculateNewSelection(document, surroundWith.getNewBodyPosition(), allEdits);
+		surroundWith.getRewrite().rewriteAST(document, options).apply(document);
 		
-		//Change the document such that it contains the new variable declarations (i.e. with final keyword)
-		allEditsCopy.apply(document);
-		
-		//The document may have changed and we need a new context
-		
-		//Find position for template insertion in new document
-		int offset= surroundWith.getNewBodyPosition().getStartPosition();
+		int offset= surroundWith.getBodyStart();
+		int length= surroundWith.getBodyLength();
+		String newSelection= document.get(offset, length);
 		
 		//Create the new context
 		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(JavaContextType.NAME);
@@ -283,38 +254,6 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		context.setVariable("selection", newSelection); //$NON-NLS-1$
 		context.setForceEvaluation(true);
 		return context;
-	}
-
-	private void removeBlockStartAndEnd(MultiTextEdit edits) {
-		TextEdit[] children= edits.getChildren();
-		int i= 0;
-		while (!(children[i] instanceof RangeMarker)) {
-			i++;
-		}
-		i++;
-		edits.removeChild(i);
-		while (!(children[i] instanceof RangeMarker)) {
-			i++;
-		}
-		children= edits.getChildren();
-		TextEdit edit= children[i - 2];
-		if (edit instanceof InsertEdit) {
-			final InsertEdit insert= (InsertEdit) edit;
-			final String text= insert.getText();
-			if (text != null && text.startsWith(";")) { //$NON-NLS-1$
-				children[i - 2]= new InsertEdit(edit.getOffset(), ";"); //$NON-NLS-1$
-				edits.removeChildren();
-				edits.addChildren(children);
-				return;
-			}
-		}
-		edits.removeChild(i - 2);
-	}
-	
-	private String calculateNewSelection(IDocument document, ITrackedNodePosition position, MultiTextEdit edits) throws BadLocationException {
-		IDocument tmpDocument= new Document(String.copyValueOf(document.get().toCharArray()));
-		edits.apply(tmpDocument);
-		return tmpDocument.get(position.getStartPosition(), position.getLength());
 	}
 	
 	private void handleException(ITextViewer viewer, Exception e, IRegion region) {
