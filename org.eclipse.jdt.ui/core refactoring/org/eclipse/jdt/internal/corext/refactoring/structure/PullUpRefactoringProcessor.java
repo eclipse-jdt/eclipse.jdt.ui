@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -101,9 +102,9 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
@@ -293,10 +294,23 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	}
 
 	private static Set getEffectedSubTypes(final ITypeHierarchy hierarchy, final IType type) throws JavaModelException {
-		final IType[] types= hierarchy.getSubclasses(type);
+		 IType[] types= null;
+		 final boolean isInterface= type.isInterface();
+		if (isInterface) {
+			 final Collection remove= new ArrayList();
+			 final List list= new ArrayList(Arrays.asList(hierarchy.getSubtypes(type)));
+			 for (final Iterator iterator= list.iterator(); iterator.hasNext();) {
+	            final IType element= (IType) iterator.next();
+	            if (element.isInterface())
+	            	remove.add(element);
+            }
+			 list.removeAll(remove);
+			 types= (IType[]) list.toArray(new IType[list.size()]);
+		 } else
+			 types= hierarchy.getSubclasses(type);
 		final Set result= new HashSet();
 		for (int index= 0; index < types.length; index++) {
-			if (JdtFlags.isAbstract(types[index]))
+			if (!isInterface && JdtFlags.isAbstract(types[index]))
 				result.addAll(getEffectedSubTypes(hierarchy, types[index]));
 			else
 				result.add(types[index]);
@@ -1336,7 +1350,10 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	private IMethod[] getAbstractMethods() throws JavaModelException {
 		final IMethod[] toDeclareAbstract= fAbstractMethods;
 		final IMethod[] abstractPulledUp= getAbstractMethodsToPullUp();
-		final List result= new ArrayList(toDeclareAbstract.length + abstractPulledUp.length);
+		final Set result= new LinkedHashSet(toDeclareAbstract.length + abstractPulledUp.length + fMembersToMove.length);
+		if (fDestinationType.isInterface()) {
+			result.addAll(Arrays.asList(fMembersToMove));
+		}
 		result.addAll(Arrays.asList(toDeclareAbstract));
 		result.addAll(Arrays.asList(abstractPulledUp));
 		return (IMethod[]) result.toArray(new IMethod[result.size()]);
