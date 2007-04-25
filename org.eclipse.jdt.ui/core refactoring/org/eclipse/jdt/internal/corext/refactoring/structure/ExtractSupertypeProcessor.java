@@ -483,9 +483,22 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 				fileComment= CodeGeneration.getFileComment(extractedWorkingCopy, delimiter);
 			}
 			final StringBuffer buffer= new StringBuffer(64);
-			createTypeDeclaration(extractedWorkingCopy, superType, declaringDeclaration, typeComment, buffer, status, new SubProgressMonitor(monitor, 1));
+			final ITypeBinding binding= declaringDeclaration.resolveBinding();
+			if (binding != null) {
+				final ITypeBinding superBinding= binding.getSuperclass();
+				if (superBinding != null)
+					fTypeBindings.add(superBinding);
+				final ITypeBinding[] bindings= binding.getInterfaces();
+				for (int i= 0; i < bindings.length; i++) {
+	                fTypeBindings.add(bindings[i]);
+                }
+			}
 			final String imports= createTypeImports(extractedWorkingCopy, monitor);
-			source= createTypeTemplate(extractedWorkingCopy, imports, fileComment, "", buffer.toString()); //$NON-NLS-1$
+			if (imports != null && !"".equals(imports)) { //$NON-NLS-1$
+				buffer.append(imports);
+			}
+			createTypeDeclaration(extractedWorkingCopy, superType, declaringDeclaration, typeComment, buffer, status, new SubProgressMonitor(monitor, 1));
+			source= createTypeTemplate(extractedWorkingCopy, "", fileComment, "", buffer.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 			if (source == null) {
 				if (!declaring.getPackageFragment().isDefaultPackage()) {
 					if (imports.length() > 0)
@@ -668,9 +681,10 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			if (type != null && declaration instanceof TypeDeclaration) {
 				final TypeDeclaration extended= (TypeDeclaration) declaration;
 				final Type superClass= extended.getSuperclassType();
-				if (superClass != null)
+				if (superClass != null) {
 					rewriter.replace(superClass, type, subRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.ExtractSupertypeProcessor_add_supertype, SET_EXTRACT_SUPERTYPE));
-				else
+					subRewrite.getImportRemover().registerRemovedNode(superClass);
+				} else
 					rewriter.set(extended, TypeDeclaration.SUPERCLASS_TYPE_PROPERTY, type, subRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.ExtractSupertypeProcessor_add_supertype, SET_EXTRACT_SUPERTYPE));
 			}
 		} finally {
