@@ -350,9 +350,13 @@ public class ColoredJavaElementLabels {
 			}
 			
 			if (getFlag(flags, JavaElementLabels.M_APP_RETURNTYPE) && method.exists() && !method.isConstructor()) {
+				int offset= result.length();
 				result.append(JavaElementLabels.DECL_STRING);
 				String returnTypeSig= resolvedSig != null ? Signature.getReturnType(resolvedSig) : method.getReturnType();
 				getTypeSignatureLabel(returnTypeSig, flags, result);
+				if (getFlag(flags, COLORIZE)) {
+					result.colorize(offset, result.length() - offset, QUALIFIER_STYLE);
+				}
 			}			
 
 			// category
@@ -427,11 +431,15 @@ public class ColoredJavaElementLabels {
 			result.append(field.getElementName());
 			
 			if (getFlag(flags, JavaElementLabels.F_APP_TYPE_SIGNATURE) && field.exists() && !Flags.isEnum(field.getFlags())) {
+				int offset= result.length();
 				result.append(JavaElementLabels.DECL_STRING);
 				if (getFlag(flags, JavaElementLabels.USE_RESOLVED) && field.isResolved()) {
 					getTypeSignatureLabel(new BindingKey(field.getKey()).toSignature(), flags, result);
 				} else {
 					getTypeSignatureLabel(field.getTypeSignature(), flags, result);
+				}
+				if (getFlag(flags, COLORIZE)) {
+					result.colorize(offset, result.length() - offset, QUALIFIER_STYLE);
 				}
 			}
 
@@ -474,8 +482,12 @@ public class ColoredJavaElementLabels {
 		result.append(localVariable.getElementName());
 		
 		if (getFlag(flags, JavaElementLabels.F_APP_TYPE_SIGNATURE)) {
+			int offset= result.length();
 			result.append(JavaElementLabels.DECL_STRING);
 			getTypeSignatureLabel(localVariable.getTypeSignature(), flags, result);
+			if (getFlag(flags, COLORIZE)) {
+				result.colorize(offset, result.length() - offset, QUALIFIER_STYLE);
+			}
 		}
 		
 		// post qualification

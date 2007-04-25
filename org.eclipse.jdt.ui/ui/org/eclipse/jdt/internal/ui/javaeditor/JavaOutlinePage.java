@@ -128,6 +128,7 @@ import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
 import org.eclipse.jdt.internal.ui.viewsupport.SourcePositionComparator;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
@@ -1036,6 +1037,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		);
 
 		fOutlineViewer= new JavaOutlineViewer(tree);
+		OwnerDrawSupport.install(fOutlineViewer);
 		initDragAndDrop();
 		fOutlineViewer.setContentProvider(new ChildrenProvider());
 		fOutlineViewer.setLabelProvider(new DecoratingJavaLabelProvider(lprovider));

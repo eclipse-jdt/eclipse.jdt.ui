@@ -75,6 +75,7 @@ import org.eclipse.jdt.internal.ui.typehierarchy.AbstractHierarchyViewerSorter;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.MemberFilter;
+import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
 
 /**
  * Show outline in light-weight control.
@@ -192,6 +193,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 
 		private OutlineTreeViewer(Tree tree) {
 			super(tree);
+			
 		}
 
 		/**
@@ -549,6 +551,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		tree.setLayoutData(gd);
 
 		final TreeViewer treeViewer= new OutlineTreeViewer(tree);
+		OwnerDrawSupport.install(treeViewer);
 
 		// Hard-coded filters
 		treeViewer.addFilter(new NamePatternFilter());
