@@ -66,6 +66,7 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
@@ -99,6 +100,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.actions.InferTypeArgumentsAction;
@@ -977,5 +979,48 @@ public class LocalCorrectionsSubProcessor {
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
 			proposals.add(proposal);
 		}
+	}
+	
+	public static void addDeprecatedFieldsToMethodsProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode instanceof Name) {
+			IBinding binding= ((Name) selectedNode).resolveBinding();
+			if (binding instanceof IVariableBinding) {
+				IVariableBinding variableBinding= (IVariableBinding) binding;
+				if (variableBinding.isField()) {
+					String qualifiedName= variableBinding.getDeclaringClass().getTypeDeclaration().getQualifiedName();
+					String fieldName= variableBinding.getName();
+					String[] methodName= getMethod(JavaModelUtil.concatenateName(qualifiedName, fieldName));
+					if (methodName != null) {
+						AST ast= selectedNode.getAST();
+						ASTRewrite astRewrite= ASTRewrite.create(ast);
+						ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
+
+						MethodInvocation method= ast.newMethodInvocation();
+						String qfn= importRewrite.addImport(methodName[0]);
+						method.setExpression(ast.newName(qfn));
+						method.setName(ast.newSimpleName(methodName[1]));
+						astRewrite.replace(selectedNode, method, null);
+
+						String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_replacefieldaccesswithmethod_description, method);
+						Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+						ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), astRewrite, 10, image);
+						proposal.setImportRewrite(importRewrite);
+						proposals.add(proposal);
+					}
+				}
+			}
+		}
+	}
+	
+	private static Map/*<String,String[]>*/ resolveMap; 
+	private static String[] getMethod(String fieldName) {
+		if (resolveMap==null){
+			resolveMap=new HashMap();
+			resolveMap.put("java.util.Collections.EMPTY_MAP", new String[]{"java.util.Collections","emptyMap"});   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+			resolveMap.put("java.util.Collections.EMPTY_SET", new String[]{"java.util.Collections","emptySet"});  //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+			resolveMap.put("java.util.Collections.EMPTY_LIST", new String[]{"java.util.Collections","emptyList"});//$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+		}
+		return (String[]) resolveMap.get(fieldName);
 	}
 }

@@ -532,6 +532,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnsafeTypeConversion:
 			case IProblem.RawTypeReference:
 			case IProblem.UnsafeRawMethodInvocation:
+				LocalCorrectionsSubProcessor.addDeprecatedFieldsToMethodsProposals(context, problem, proposals);
 				LocalCorrectionsSubProcessor.addTypePrametersToRawTypeReference(context, problem, proposals);
 				break;
 			case IProblem.FallthroughCase:

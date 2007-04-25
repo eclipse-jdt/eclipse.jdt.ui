@@ -25,6 +25,7 @@ public final class CorrectionMessages extends NLS {
 
 	public static String FixCorrectionProposal_WarningAdditionalProposalInfo;
 	public static String LocalCorrectionsSubProcessor_renaming_duplicate_method;
+	public static String LocalCorrectionsSubProcessor_replacefieldaccesswithmethod_description;
 	public static String ModifierCorrectionSubProcessor_addstatictoparenttype_description;
 	public static String ModifierCorrectionSubProcessor_changefieldmodifiertononstatic_description;
 	public static String ModifierCorrectionSubProcessor_changemodifiertostaticfinal_description;
