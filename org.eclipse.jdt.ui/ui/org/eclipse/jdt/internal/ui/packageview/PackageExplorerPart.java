@@ -1109,6 +1109,8 @@ public class PackageExplorerPart extends ViewPart
 	 */
 	void editorActivated(IEditorPart editor) {
 		IEditorInput editorInput= getEditorInput(editor);
+		if (editorInput == null)
+			return;
 		Object input= JavaUI.getEditorInputJavaElement(editorInput);
 		if (input == null) 
 			return;
