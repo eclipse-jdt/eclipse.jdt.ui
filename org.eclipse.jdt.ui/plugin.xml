@@ -5136,6 +5136,8 @@
       </viewerContentBinding>
    </extension>
    
+    <!-- CommonNavigator -->
+   
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">
       <navigatorContent
@@ -5185,9 +5187,6 @@
          </actionProvider>
       </navigatorContent>
    </extension>
-
-
-    <!-- CommonNavigator -->
 	
 	<extension
 			point="org.eclipse.ui.navigator.viewer">
@@ -5196,12 +5195,9 @@
 				<contentExtension pattern="org.eclipse.jdt.java.ui.javaContent" />
 				<contentExtension pattern="org.eclipse.jdt.java.ui.filters.*" />	
 				<contentExtension pattern="org.eclipse.jdt.java.ui.javaLinkHelper" />	
-							
 			</includes>
 		</viewerContentBinding>
 	</extension>
-	
-
 	
 	<extension
 			point="org.eclipse.ui.navigator.navigatorContent">
@@ -5215,55 +5211,20 @@
 				priority="high">
 			<triggerPoints>
 				<or>
-					<adapt
-							type="org.eclipse.core.resources.IProject" >
-						<test
-							property="org.eclipse.core.resources.projectNature"
-							value="org.eclipse.jdt.core.javanature" />
+					<adapt type="org.eclipse.core.resources.IProject" >
+						<test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
 					</adapt>
-					<instanceof
-							value="org.eclipse.core.resources.IWorkspaceRoot" />
-					<instanceof
-							value="org.eclipse.core.resources.IFolder" />
-					<instanceof
-							value="org.eclipse.core.resources.IFile" />
-					<instanceof
-							value="org.eclipse.core.resources.IStorage" />
-					<instanceof
-							value="org.eclipse.jdt.core.IJavaProject" />
-					<instanceof
-							value="org.eclipse.jdt.core.IJavaElement" />
-					<instanceof
-							value="org.eclipse.jdt.core.IJarEntryResource" />
-					<instanceof
-							value="org.eclipse.jdt.core.IClassFile" />
-					<instanceof
-							value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" />
+					<instanceof	value="org.eclipse.core.resources.IResource" />
+					<instanceof value="org.eclipse.jdt.core.IJavaElement" />
+					<instanceof value="org.eclipse.jdt.core.IJarEntryResource" />
+					<instanceof value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" />
  				</or>
 			</triggerPoints>
 			<possibleChildren>
 				<or>
-					<adapt
-							type="org.eclipse.core.resources.IProject" >
-					</adapt>
-					<instanceof
-							value="org.eclipse.core.resources.IWorkspaceRoot" />
-					<instanceof
-							value="org.eclipse.core.resources.IFolder" />
-					<instanceof
-							value="org.eclipse.core.resources.IFile" />
-					<instanceof
-							value="org.eclipse.core.resources.IStorage" />
-					<instanceof
-							value="org.eclipse.jdt.core.IJavaProject" />
-					<instanceof
-							value="org.eclipse.jdt.core.IJavaElement" />
-					<instanceof
-							value="org.eclipse.jdt.core.IJarEntryResource" />
-					<instanceof
-							value="org.eclipse.jdt.core.IClassFile" />
-					<instanceof
-							value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" />
+					<instanceof	value="org.eclipse.core.resources.IResource" />
+					<instanceof value="org.eclipse.jdt.core.IJavaElement" />
+					<instanceof value="org.eclipse.jdt.core.IJarEntryResource" />
 				</or>
 			</possibleChildren> 
 			<actionProvider
@@ -5271,11 +5232,10 @@
 					id="org.eclipse.jdt.ui.navigator.actions.ViewActions"> 
 				<enablement>
 					<or>  
-					<instanceof value="org.eclipse.core.resources.IWorkspaceRoot" /> 
-					<adapt type="org.eclipse.jdt.core.IJavaModel" />
-					<adapt type="java.util.Collection"> 
-						<count value="0" />
-					</adapt>		
+						<instanceof value="org.eclipse.core.resources.IWorkspaceRoot" /> 
+						<adapt type="java.util.Collection"> 
+							<count value="0" />
+						</adapt>		
 					</or>
 				</enablement>
 			</actionProvider>				
@@ -5285,12 +5245,16 @@
 					overrides="org.eclipse.ui.navigator.resources.actions.EditActions"> 
 				<enablement>
 					<or>   
-					<instanceof value="org.eclipse.jdt.core.IJavaElement" />
-					<instanceof value="org.eclipse.jdt.core.IJarEntryResource" /> 
-					<instanceof	value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" /> 
-					<adapt type="java.util.Collection"> 
-						<count value="0" />
-					</adapt>				
+						<and>
+							<instanceof value="org.eclipse.core.resources.IProject" />
+          					<test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature" />
+						</and>
+						<instanceof value="org.eclipse.jdt.core.IJavaElement" />
+						<instanceof value="org.eclipse.jdt.core.IJarEntryResource" /> 
+						<instanceof	value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" /> 
+						<adapt type="java.util.Collection"> 
+							<count value="0" />
+						</adapt>
 					</or>
 				</enablement>
 			</actionProvider> 
@@ -5301,12 +5265,16 @@
 					overrides="org.eclipse.ui.navigator.resources.actions.RefactorActions"> 
 				<enablement>
 					<or>
-					<instanceof value="org.eclipse.jdt.core.IJavaElement" />
-					<instanceof value="org.eclipse.jdt.core.IJarEntryResource" /> 
-					<instanceof value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" /> 
-					<adapt type="java.util.Collection"> 
-						<count value="0" />
-					</adapt>				
+						<and>
+							<instanceof value="org.eclipse.core.resources.IProject" />
+          					<test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature" />
+						</and>
+						<instanceof value="org.eclipse.jdt.core.IJavaElement" />
+						<instanceof value="org.eclipse.jdt.core.IJarEntryResource" /> 
+						<instanceof value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" /> 
+						<adapt type="java.util.Collection"> 
+							<count value="0" />
+						</adapt>				
 					</or>
 				</enablement>
 			</actionProvider>
@@ -5333,9 +5301,7 @@
 		           <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
 		           <instanceof value="org.eclipse.jdt.core.ICompilationUnit"/>
 		           <adapt type="org.eclipse.core.resources.IProject">
-		              <test
-		                    property="org.eclipse.core.resources.projectNature"
-		                    value="org.eclipse.jdt.core.javanature"/>
+		              <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
 		           </adapt>
 		        </or>
 		     </enablement>
@@ -5350,9 +5316,7 @@
 		           <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
 		           <instanceof value="org.eclipse.jdt.core.ICompilationUnit"/>
 		           <adapt type="org.eclipse.core.resources.IProject">
-		              <test
-		                    property="org.eclipse.core.resources.projectNature"
-		                    value="org.eclipse.jdt.core.javanature"/>
+		              <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
 		           </adapt>
 		        </or>
 		     </enablement>
@@ -5368,9 +5332,7 @@
 		           <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
 		           <instanceof value="org.eclipse.jdt.core.ICompilationUnit"/>
 		           <adapt type="org.eclipse.core.resources.IProject">
-		              <test
-		                    property="org.eclipse.core.resources.projectNature"
-		                    value="org.eclipse.jdt.core.javanature"/>
+		              <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
 		           </adapt>
 		        </or>
 		     </enablement>
@@ -5385,46 +5347,40 @@
 		           <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
 		           <instanceof value="org.eclipse.jdt.core.ICompilationUnit"/>
 		           <adapt type="org.eclipse.core.resources.IProject">
-		              <test
-		                    property="org.eclipse.core.resources.projectNature"
-		                    value="org.eclipse.jdt.core.javanature"/>
+		              <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
 		           </adapt>
 		        </or>
 		     </enablement>
 		  </commonWizard>
 
 		    <commonWizard
-		          menuGroupId="org.eclipse.jdt.ui.java"
+				  menuGroupId="org.eclipse.jdt.ui.java"
 		          type="new"
 		          wizardId="org.eclipse.jdt.ui.wizards.NewEnumCreationWizard">
-				     <enablement>
-				        <or>
-				           <instanceof value="org.eclipse.jdt.core.IPackageFragment"/>
-				           <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
-				           <instanceof value="org.eclipse.jdt.core.ICompilationUnit"/>
-				           <adapt type="org.eclipse.core.resources.IProject">
-				              <test
-				                    property="org.eclipse.core.resources.projectNature"
-				                    value="org.eclipse.jdt.core.javanature"/>
-				           </adapt>
-				        </or>
-				     </enablement>
+				<enablement>
+					<or>
+						<instanceof value="org.eclipse.jdt.core.IPackageFragment"/>
+						<instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
+						<instanceof value="org.eclipse.jdt.core.ICompilationUnit"/>
+						<adapt type="org.eclipse.core.resources.IProject">
+							<test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+						</adapt>
+					</or>
+				 </enablement>
 		    </commonWizard>	 
 		    <commonWizard
 		          menuGroupId="org.eclipse.jdt.ui.java"
 		          type="new"
 		          wizardId="org.eclipse.jdt.ui.wizards.NewSourceFolderCreationWizard">
-				     <enablement>
-				        <or> 
-				           <instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/> 
-				           <adapt type="org.eclipse.core.resources.IProject">
-				              <test
-				                    property="org.eclipse.core.resources.projectNature"
-				                    value="org.eclipse.jdt.core.javanature"/>
-				           </adapt>
-				        </or>
-				     </enablement>
-			 </commonWizard>
+				<enablement>
+					<or> 
+						<instanceof value="org.eclipse.jdt.core.IPackageFragmentRoot"/> 
+						<adapt type="org.eclipse.core.resources.IProject">
+							<test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+						</adapt>
+					</or>
+				</enablement>
+			</commonWizard>
   			<dropAssistant
     			class="org.eclipse.jdt.internal.ui.navigator.JavaDropAdapterAssistant"
    				id="org.eclipse.jdt.ui.dropAssistant">
@@ -5540,37 +5496,20 @@
 	          id="org.eclipse.jdt.java.ui.javaLinkHelper">          
 	         <editorInputEnablement>
 		         <or> 
-		         	<instanceof
-							value="org.eclipse.ui.IFileEditorInput" />
-		         	<instanceof
-							value="org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput" />
-		         	<instanceof
-							value="org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput" />
+		         	<instanceof value="org.eclipse.ui.IFileEditorInput" />
+		         	<instanceof value="org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput" />
+		         	<instanceof value="org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput" />
 		         </or>
 	         </editorInputEnablement>
 	         <selectionEnablement>
 	         	<or>
-					<adapt
-							type="org.eclipse.core.resources.IProject" >
+					<adapt type="org.eclipse.core.resources.IProject" >
+						<test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
 					</adapt>
-					<instanceof
-							value="org.eclipse.core.resources.IWorkspaceRoot" />
-					<instanceof
-							value="org.eclipse.core.resources.IFolder" />
-					<instanceof
-							value="org.eclipse.core.resources.IFile" />
-					<instanceof
-							value="org.eclipse.core.resources.IStorage" />
-					<instanceof
-							value="org.eclipse.jdt.core.IJavaProject" />
-					<instanceof
-							value="org.eclipse.jdt.core.IJavaElement" />
-					<instanceof
-							value="org.eclipse.jdt.internal.core.JarEntryFile" />
-					<instanceof
-							value="org.eclipse.jdt.core.IClassFile" />
-					<instanceof
-							value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" />
+					<instanceof value="org.eclipse.core.resources.IResource" />
+					<instanceof value="org.eclipse.jdt.core.IJavaElement" />
+					<instanceof value="org.eclipse.jdt.core.IJarEntryResource" /> 
+					<instanceof value="org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer" />
 				</or>
 	         </selectionEnablement>
       	</linkHelper>          

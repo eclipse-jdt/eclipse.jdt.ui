@@ -76,7 +76,6 @@ import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.GenerateBuildPathActionGroup;
 import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
-import org.eclipse.jdt.internal.ui.workingsets.WorkingSetActionGroup;
 
 class PackageExplorerActionGroup extends CompositeActionGroup {
 
@@ -131,9 +130,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 			fProjectActionGroup= new ProjectActionGroup(fPart), 
 			fViewActionGroup= new ViewActionGroup(fPart.getRootMode(), workingSetListener, site),
 			fCustomFiltersActionGroup= new CustomFiltersActionGroup(fPart, viewer),
-			new LayoutActionGroup(fPart),
-			// the working set action group must be created after the project action group
-			new WorkingSetActionGroup(fPart)});
+			new LayoutActionGroup(fPart)
+		});
 		
 
 		fViewActionGroup.fillFilters(viewer);
