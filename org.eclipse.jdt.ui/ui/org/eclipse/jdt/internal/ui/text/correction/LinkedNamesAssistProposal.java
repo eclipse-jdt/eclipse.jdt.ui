@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
@@ -27,6 +29,8 @@ import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
+import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
+import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
@@ -53,6 +57,42 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  */
 public class LinkedNamesAssistProposal implements IJavaCompletionProposal, ICompletionProposalExtension2, ICommandAccess {
 
+	/**
+	 * An exit policy that skips Backspace and Delete at the beginning and at the end
+	 * of a linked position, respectively.
+	 * 
+	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=183925 .  
+	 */
+	public static class DeleteBlockingExitPolicy implements IExitPolicy {
+		private IDocument fDocument;
+
+		public DeleteBlockingExitPolicy(IDocument document) {
+			fDocument= document;
+		}
+
+		public ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length) {
+			if (length == 0 && (event.character == SWT.BS || event.character == SWT.DEL)) {
+				LinkedPosition position= model.findPosition(new LinkedPosition(fDocument, offset, 0, LinkedPositionGroup.NO_STOP));
+				if (position != null) {
+					if (event.character == SWT.BS) {
+						if (offset - 1 < position.getOffset()) {
+							//skip backspace at beginning of linked position
+							event.doit= false;
+						}
+					} else /* event.character == SWT.DEL */ {
+						if (offset + 1 > position.getOffset() + position.getLength()) {
+							//skip delete at end of linked position
+							event.doit= false;
+						}
+					}
+				}
+			}
+			
+			return null; // don't change behavior
+		}
+	}
+
+	
 	public static final String ASSIST_ID= "org.eclipse.jdt.ui.correction.renameInFile.assist"; //$NON-NLS-1$
 	
 	private SimpleName fNode;
@@ -136,7 +176,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			}
 
 			LinkedModeUI ui= new EditorLinkedModeUI(model, viewer);
-//			ui.setInitialOffset(offset);
+			ui.setExitPolicy(new DeleteBlockingExitPolicy(document));
 			ui.setExitPosition(viewer, offset, 0, LinkedPositionGroup.NO_STOP);
 			ui.enter();
 

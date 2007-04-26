@@ -37,7 +37,6 @@ import org.eclipse.jface.text.link.LinkedModeUI;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
-import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 
@@ -73,6 +72,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.refactoring.DelegateUIHelper;
+import org.eclipse.jdt.internal.ui.text.correction.LinkedNamesAssistProposal.DeleteBlockingExitPolicy;
 
 public class RenameLinkedMode {
 
@@ -111,10 +111,14 @@ public class RenameLinkedMode {
 		}
 	}
 	
-	private class ExitPolicy implements IExitPolicy {
+	private class ExitPolicy extends DeleteBlockingExitPolicy {
+		public ExitPolicy(IDocument document) {
+			super(document);
+		}
+
 		public ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length) {
 			fShowPreview|= (event.stateMask & SWT.CTRL) != 0;
-			return null; // don't change behavior; do actions in EditorSynchronizer
+			return super.doExit(model, event, offset, length);
 		}
 	}
 	
@@ -225,7 +229,7 @@ public class RenameLinkedMode {
             
 			LinkedModeUI ui= new EditorLinkedModeUI(fLinkedModeModel, viewer);
 			ui.setExitPosition(viewer, offset, 0, Integer.MAX_VALUE);
-			ui.setExitPolicy(new ExitPolicy());
+			ui.setExitPolicy(new ExitPolicy(document));
 			ui.enter();
 			
 			viewer.setSelectedRange(fOriginalSelection.x, fOriginalSelection.y); // by default, full word is selected; restore original selection
