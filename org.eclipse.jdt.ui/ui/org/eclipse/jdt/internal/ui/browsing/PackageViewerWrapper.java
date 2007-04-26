@@ -200,6 +200,10 @@ class PackageViewerWrapper extends StructuredViewer {
 	public void addFilter(ViewerFilter filter) {
 		fViewer.addFilter(filter);
 	}
+	
+	public void setFilters(ViewerFilter[] filters) {
+		fViewer.setFilters(filters);
+	}
 
 	public void refresh() {
 		fViewer.refresh();
