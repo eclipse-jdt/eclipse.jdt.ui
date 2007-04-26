@@ -426,13 +426,19 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		restoreCPElements();
 		
 		int projectEntryIndex= -1;
+		boolean createFolderForExisting= false;
 		
+		IFolder folder= fParent.getFolder(new Path(fRootDialogField.getText()));
 		for (int i= 0; i < fExistingEntries.size(); i++) {
 			IClasspathEntry curr= ((CPListElement)fExistingEntries.get(i)).getClasspathEntry();
 			if (curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 				if (path.equals(curr.getPath()) && fExistingEntries.get(i) != fNewElement) {
-					result.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExisting); 
-					return result;
+					if (folder.exists()) {
+						result.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExisting); 
+						return result;
+					} else {
+						createFolderForExisting= true;
+					}
 				}
 				if (projPath.equals(curr.getPath())) {
 					projectEntryIndex= i;
@@ -440,7 +446,6 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			}
 		}
 		
-		IFolder folder= fParent.getFolder(new Path(fRootDialogField.getText()));
 		if (folder.exists() && !folder.getFullPath().equals(fOrginalPath))
 			return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewFolderDialog_folderNameEmpty_alreadyExists, folder.getFullPath().toString()));
 
@@ -460,7 +465,8 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			if (fOrginalPath == null) {
 				addExclusionPatterns(fNewElement, fExistingEntries, modified);
 				fModifiedElements.addAll(modified);
-				CPListElement.insert(fNewElement, fExistingEntries);
+				if (!createFolderForExisting)
+					CPListElement.insert(fNewElement, fExistingEntries);
 			}
 		} else {
 			if (isProjectASourceFolder) {
@@ -470,14 +476,16 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 					fExistingEntries.set(projectEntryIndex, fNewElement);
 					isProjectSourceFolderReplaced= true;
 				} else {
+					if (!createFolderForExisting)
 					CPListElement.insert(fNewElement, fExistingEntries);
 				}
 			} else {
-				CPListElement.insert(fNewElement, fExistingEntries);
+				if (!createFolderForExisting)
+					CPListElement.insert(fNewElement, fExistingEntries);
 			}
 		}
 		
-		if (!fAllowConflict && fCanCommitConflictingBuildpath)
+		if ((!fAllowConflict && fCanCommitConflictingBuildpath) || createFolderForExisting)
 			return new StatusInfo();
 		
 		fNewOutputLocation= null;
