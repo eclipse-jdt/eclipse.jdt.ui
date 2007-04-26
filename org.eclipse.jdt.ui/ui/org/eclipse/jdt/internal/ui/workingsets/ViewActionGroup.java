@@ -34,7 +34,6 @@ public class ViewActionGroup extends ActionGroup {
 	public static final int SHOW_PROJECTS= 1;
 	public static final int SHOW_WORKING_SETS= 2;
 	public static final String MODE_CHANGED= ViewActionGroup.class.getName() + ".mode_changed"; //$NON-NLS-1$
-	private static final String GROUP_WORKINGSETS= "group.workingSets"; //$NON-NLS-1$
 	
 	private static final Integer INT_SHOW_PROJECTS= new Integer(SHOW_PROJECTS);
 	private static final Integer INT_SHOW_WORKING_SETS= new Integer(SHOW_WORKING_SETS);
@@ -90,13 +89,11 @@ public class ViewActionGroup extends ActionGroup {
 	}
 	
 	public void fillContextMenu(IMenuManager menu) {
-		menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new Separator(GROUP_WORKINGSETS));
 		if (fWorkingSetAssignementAction.isEnabled())
-			menu.appendToGroup(GROUP_WORKINGSETS, fWorkingSetAssignementAction);
+			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fWorkingSetAssignementAction);
 		
 		if (fEditWorkingSetGroupAction.isEnabled()) {
-			menu.prependToGroup(IContextMenuConstants.GROUP_PROPERTIES, new Separator());
-			menu.prependToGroup(IContextMenuConstants.GROUP_PROPERTIES, fEditWorkingSetGroupAction);
+			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fEditWorkingSetGroupAction);
 		}
 	}
 
