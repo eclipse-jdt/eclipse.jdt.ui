@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,7 +67,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * Only used when compliance is set to 5.0 or higher.
  * </p>
  */
-public final class LazzyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
+public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 	/** Triggers for types. Do not modify. */
 	private final static char[] GENERIC_TYPE_TRIGGERS= new char[] { '.', '\t', '[', '(', '<', ' ' };
 
@@ -82,7 +82,7 @@ public final class LazzyGenericTypeProposal extends LazyJavaTypeCompletionPropos
 		private final Image fImage;
 		private final int fPosition;
 		
-		ContextInformation(LazzyGenericTypeProposal proposal) {
+		ContextInformation(LazyGenericTypeProposal proposal) {
 			// don't cache the proposal as content assistant
 			// might hang on to the context info
 			fContextDisplayString= proposal.getDisplayString();
@@ -112,7 +112,7 @@ public final class LazzyGenericTypeProposal extends LazyJavaTypeCompletionPropos
 			return fInformationDisplayString;
 		}
 
-		private String computeContextString(LazzyGenericTypeProposal proposal) {
+		private String computeContextString(LazyGenericTypeProposal proposal) {
 			try {
 				TypeArgumentProposal[] proposals= proposal.computeTypeArgumentProposals();
 				if (proposals.length == 0)
@@ -181,7 +181,7 @@ public final class LazzyGenericTypeProposal extends LazyJavaTypeCompletionPropos
 	private IRegion fSelectedRegion; // initialized by apply()
 	private TypeArgumentProposal[] fTypeArgumentProposals;
 
-	public LazzyGenericTypeProposal(CompletionProposal typeProposal, JavaContentAssistInvocationContext context) {
+	public LazyGenericTypeProposal(CompletionProposal typeProposal, JavaContentAssistInvocationContext context) {
 		super(typeProposal, context);
 	}
 

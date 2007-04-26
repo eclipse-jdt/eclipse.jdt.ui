@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -91,7 +91,7 @@ public final class FillArgumentNamesCompletionProposalCollector extends Completi
 		if (completion.length > 0 && (completion[completion.length - 1] == ';' || completion[completion.length - 1] == '.'))
 			return super.createJavaCompletionProposal(typeProposal);
 
-		LazyJavaCompletionProposal newProposal= new LazzyGenericTypeProposal(typeProposal, getInvocationContext());
+		LazyJavaCompletionProposal newProposal= new LazyGenericTypeProposal(typeProposal, getInvocationContext());
 		return newProposal;
 	}
 
@@ -100,7 +100,8 @@ public final class FillArgumentNamesCompletionProposalCollector extends Completi
 	 * <code>false</code> if not. Note that even though code (in a library)
 	 * may be referenced that uses generics, it is still possible that the
 	 * current source does not allow generics.
-	 *
+	 * 
+	 * @param project the Java project 
 	 * @return <code>true</code> if the generic proposals should be allowed,
 	 *         <code>false</code> if not
 	 */
