@@ -60,7 +60,7 @@ public class OpenTextEditorStartupTest extends StartupPerformanceTestCase {
 
 	private static final Class THIS= OpenTextEditorStartupTest.class;
 
-	private static final String SHORT_NAME= "Startup with open text editor";
+	private static final String SHORT_NAME= "Eclipse SDK startup with text editor open in Java perspective";
 
 	private static final String PREFIX= "/" + PerformanceTestSetup.PROJECT + "/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout";
 	

@@ -45,15 +45,10 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 			faust = "";
 			x.printStackTrace();
 		}
+		
 		FAUST1 = faust;
 		FAUST100 = faust.substring(0, 100).intern();
 		FAUST500 = faust.substring(0, 500).intern();
-		
-		// Set local fingerprints
-		LOCAL_FINGERPRINTS.put("measureDeleteInsert", "Gap text store: delete and insert");
-		LOCAL_FINGERPRINTS.put("measureInsertAtStart", "Gap text store: insert at beginning");
-		LOCAL_FINGERPRINTS.put("measureRandomReplace", "Gap text store: random replace");
-		LOCAL_FINGERPRINTS.put("measureRepeatedReplace", "Gap text store: repeated replace");
 	}
 
 	abstract protected ITextStore createTextStore();

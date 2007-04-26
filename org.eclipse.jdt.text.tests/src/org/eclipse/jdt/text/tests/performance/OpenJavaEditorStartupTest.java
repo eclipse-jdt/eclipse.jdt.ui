@@ -54,7 +54,7 @@ public class OpenJavaEditorStartupTest extends StartupPerformanceTestCase {
 
 	private static final Class THIS= OpenJavaEditorStartupTest.class;
 
-	private static final String SHORT_NAME= "Startup with open Java editor";
+	private static final String SHORT_NAME= "Eclipse SDK startup with Java editor open in Java perspective";
 
 	private static final String FILE= "/" + PerformanceTestSetup.PROJECT + "/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
 	
@@ -68,7 +68,7 @@ public class OpenJavaEditorStartupTest extends StartupPerformanceTestCase {
 	
 	public void testJavaEditorStartup() {
 		PerformanceMeter perfMeter= createPerformanceMeterForSummary(SHORT_NAME, Dimension.ELAPSED_PROCESS);
-		explainDegradation("The startup with open Java editor performance has been decreased due to general start-up time degradation. " +
+		explainDegradation("The startup of Eclipse SDK (Java perspective) with open Java editor performance has been decreased due to general start-up time degradation. " +
 				"See the org.eclipse.core.tests.runtime.perf.UIStartupTest.testUIApplicationStartup performance test on the detailed org.eclipse.core " +
 				"performance results page.", perfMeter);
 		measureStartup(perfMeter);
