@@ -74,6 +74,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(IProgressConstants.PROGRESS_VIEW_ID);
 
 		// new actions - Java project creation wizard
+		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.JavaProjectWizard"); //$NON-NLS-1$
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.NewPackageCreationWizard"); //$NON-NLS-1$
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.NewClassCreationWizard"); //$NON-NLS-1$
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.NewInterfaceCreationWizard"); //$NON-NLS-1$
