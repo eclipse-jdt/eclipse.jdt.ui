@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.browsing;
 
 import java.util.Iterator;
+
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -24,8 +26,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.IShowInTargetList;
@@ -36,28 +36,26 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.viewsupport.FilterUpdater;
-import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
-import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
-
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.ProjectActionGroup;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
+import org.eclipse.jdt.internal.ui.viewsupport.FilterUpdater;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
 public class ProjectsView extends JavaBrowsingPart {
 
 	private FilterUpdater fFilterUpdater;
 
-	/**
-	 * Creates the viewer of this part.
-	 *
-	 * @param parent	the parent for the viewer
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createViewer(org.eclipse.swt.widgets.Composite)
 	 */
 	protected StructuredViewer createViewer(Composite parent) {
 		ProblemTreeViewer result= new ProblemTreeViewer(parent, SWT.MULTI);
-		OwnerDrawSupport.install(result);
+		ColoredViewersManager.install(result);
 		fFilterUpdater= new FilterUpdater(result);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(fFilterUpdater);
 		return result;
@@ -72,8 +70,8 @@ public class ProjectsView extends JavaBrowsingPart {
 		super.dispose();
 	}
 
-	/**
-	 * Answer the property defined by key.
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#getAdapter(java.lang.Class)
 	 */
 	public Object getAdapter(Class key) {
 		if (key == IShowInTargetList.class) {
@@ -88,8 +86,8 @@ public class ProjectsView extends JavaBrowsingPart {
 	}
 
 
-	/**
-	 * Creates the content provider of this part.
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createContentProvider()
 	 */
 	protected IContentProvider createContentProvider() {
 		return new ProjectAndSourceFolderContentProvider(this);
@@ -156,6 +154,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	 * Finds the element which has to be selected in this part.
 	 *
 	 * @param je	the Java element which has the focus
+	 * @return the element to select
 	 */
 	protected IJavaElement findElementToSelect(IJavaElement je) {
 		if (je == null)

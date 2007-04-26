@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,8 +45,8 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
 import org.eclipse.jdt.internal.ui.filters.NonJavaElementFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
 public class TypesView extends JavaBrowsingPart {
 
 	private SelectAllAction fSelectAllAction;
@@ -65,13 +65,13 @@ public class TypesView extends JavaBrowsingPart {
 
 	protected StructuredViewer createViewer(Composite parent) {
 		StructuredViewer viewer= super.createViewer(parent);
-		OwnerDrawSupport.install(viewer);
+		ColoredViewersManager.install(viewer);
 		return viewer;
 	}
 	
 	
-	/**
-	 * Answer the property defined by key.
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#getAdapter(java.lang.Class)
 	 */
 	public Object getAdapter(Class key) {
 		if (key == IShowInTargetList.class) {
@@ -125,6 +125,7 @@ public class TypesView extends JavaBrowsingPart {
 	 * Finds the element which has to be selected in this part.
 	 *
 	 * @param je	the Java element which has the focus
+	 * @return the element to select
 	 */
 	protected IJavaElement findElementToSelect(IJavaElement je) {
 		if (je == null)

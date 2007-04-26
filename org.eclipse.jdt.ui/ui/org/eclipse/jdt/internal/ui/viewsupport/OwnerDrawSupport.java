@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 import java.util.Iterator;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
@@ -30,19 +28,10 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.TreeItem;
 
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.IBaseLabelProvider;
-import org.eclipse.jface.viewers.StructuredViewer;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
-
+/**
+ * Adding owner draw support to a control
+ */
 public abstract class OwnerDrawSupport implements Listener {
-	
-	private static final int X_OFFSET= 2; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=178008 
-	private static final int Y_OFFSET= 2; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=178008
 	
 	private TextLayout fTextLayout;
 	private final Control fControl;
@@ -56,7 +45,20 @@ public abstract class OwnerDrawSupport implements Listener {
 		control.addListener(SWT.Dispose, this);
 	}
 	
+	/**
+	 * Return the colored label for the given item.
+	 * @param item the item to return the colored label for
+	 * @return the colored string
+	 */
 	public abstract ColoredString getColoredLabel(Item item);
+	
+	/**
+	 * Return the color for the given style
+	 * @param foregroundColorName the name of the color
+	 * @param display the current display
+	 * @return the color
+	 */
+	public abstract Color getColor(String foregroundColorName, Display display);
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.swt.widgets.Listener#handleEvent(org.eclipse.swt.widgets.Event)
@@ -86,43 +88,54 @@ public abstract class OwnerDrawSupport implements Listener {
 		boolean isSelected= (event.detail & SWT.SELECTED) != 0 && fControl.isFocusControl();
 		if (item instanceof TreeItem) {
 			TreeItem treeItem= (TreeItem) item;
+			Rectangle textBounds= treeItem.getTextBounds(event.index);
+			Font font= treeItem.getFont(event.index);
+			processColoredLabel(coloredLabel, gc, textBounds, isSelected, font);
+			
 			Rectangle bounds= treeItem.getBounds();
-			Font font= treeItem.getFont(0);
-			processColoredLabel(coloredLabel, gc, bounds.x + X_OFFSET, bounds.y + Y_OFFSET, isSelected, font);
 			if ((event.detail & SWT.FOCUSED) != 0) {
 				gc.drawFocus(bounds.x, bounds.y, bounds.width, bounds.height);
 			}
 		} else if (item instanceof TableItem) {
 			TableItem tableItem= (TableItem) item;
+			Rectangle textBounds= tableItem.getTextBounds(event.index);
+			Font font= tableItem.getFont(event.index);
+			processColoredLabel(coloredLabel, gc, textBounds, isSelected, font);
+			
 			Rectangle bounds= tableItem.getBounds();
-			Font font= tableItem.getFont(0);
-			processColoredLabel(coloredLabel, gc, bounds.x + X_OFFSET, bounds.y + Y_OFFSET, isSelected, font);
 			if ((event.detail & SWT.FOCUSED) != 0) {
 				gc.drawFocus(bounds.x, bounds.y, bounds.width, bounds.height);
 			}
 		}
 	}
 	
-	private void processColoredLabel(ColoredString richLabel, GC gc, int x, int y, boolean isSelected, Font font) {
+	private void processColoredLabel(ColoredString richLabel, GC gc, Rectangle textBounds, boolean isSelected, Font font) {
 		String text= richLabel.getString();
 		fTextLayout.setText(text);
 		fTextLayout.setFont(font);
-		if (isSelected) {
-			// no styles when element is selected
-			fTextLayout.draw(gc, x, y, 0, text.length() - 1, null, null);
-		} else {
-			// apply the styled ranges
+		
+		if (!isSelected) {
+			// apply the styled ranges only when element is not selected
 			Display display= (Display) gc.getDevice();
 			Iterator ranges= richLabel.getRanges();
 			while (ranges.hasNext()) {
 				ColoredString.StyleRange curr= (ColoredString.StyleRange) ranges.next();
 				ColoredString.Style style= curr.style;
 				if (style != null) {
-					Color foreground= style.getForeground(display);
+					Color foreground= getColor(style.getForegroundColorName(), display);
 					TextStyle textStyle= new TextStyle(null, foreground, null);
 					fTextLayout.setStyle(textStyle, curr.offset, curr.offset + curr.length - 1);
 				}
 			}
+		}
+		
+		Rectangle bounds= fTextLayout.getBounds();
+		int x= textBounds.x;
+		int y = textBounds.y + Math.max(0, (textBounds.height - bounds.height) / 2);
+		
+		if (isSelected) {
+			fTextLayout.draw(gc, x, y, 0, text.length() - 1, null, null);
+		} else {
 			fTextLayout.draw(gc, x, y);
 		}
 	}
@@ -138,94 +151,4 @@ public abstract class OwnerDrawSupport implements Listener {
 			fControl.removeListener(SWT.Dispose, this);
     	}
 	}
-	
-	private static class StructuredViewerOwnerDrawController {
-		private static final String COLORED_LABEL_KEY= "coloredlabel"; //$NON-NLS-1$
-		
-		private StructuredViewer fViewer;
-		private OwnerDrawSupport fOwnerDrawSupport;
-		
-		private StructuredViewerOwnerDrawController(StructuredViewer viewer) {
-			fViewer= viewer;
-			fOwnerDrawSupport= null;
-			
-			class PropertyChangeListener implements IPropertyChangeListener, DisposeListener, Runnable {
-				public void widgetDisposed(DisposeEvent e) {
-		    	  	PreferenceConstants.getPreferenceStore().removePropertyChangeListener(this);
-				}
-				public void propertyChange(PropertyChangeEvent event) {
-					if (event.getProperty().equals(AppearancePreferencePage.PREF_COLORED_LABELS)) {
-						Display.getDefault().asyncExec(this);
-					}
-				}
-				public void run() {
-					performOwnerDrawPreferenceChanged();
-				}
-			}
-			PropertyChangeListener listener= new PropertyChangeListener();
-			PreferenceConstants.getPreferenceStore().addPropertyChangeListener(listener);
-			fViewer.getControl().addDisposeListener(listener); // will uninstall itself on dispose
-		}
-		
-		protected final void performOwnerDrawPreferenceChanged() {
-			Control control= fViewer.getControl();
-			if (!control.isDisposed()) {
-				if (showColoredLabels()) {
-					installOwnerDraw();
-				} else {
-					uninstallOwnerDraw();
-				}
-			}
-		}
-		
-		protected void installOwnerDraw() {
-			if (fOwnerDrawSupport != null)
-				return; // already installed
-			
-			fOwnerDrawSupport= new OwnerDrawSupport(fViewer.getControl()) { // will install itself as listeners
-				public ColoredString getColoredLabel(Item item) {
-					return getColoredLabelForView(item);
-				}
-			};
-		}
-		
-		protected void uninstallOwnerDraw() {
-			if (fOwnerDrawSupport == null)
-				return; // not installed
-
-			fOwnerDrawSupport.dispose(); // removes itself as listener
-			fViewer.setInput(fViewer.getInput()); // make sure all items are rebuilt
-		}
-		
-		protected ColoredString getColoredLabelForView(Item item) {
-			IBaseLabelProvider labelProvider= fViewer.getLabelProvider();
-			ColoredString oldLabel= (ColoredString) item.getData(COLORED_LABEL_KEY);
-			if (oldLabel != null && oldLabel.getString().equals(item.getText())) {
-				// avoid accesses to the label provider if possible
-				return oldLabel;
-			}
-			ColoredString newLabel= null;
-			if (labelProvider instanceof IRichLabelProvider) {
-				newLabel= ((IRichLabelProvider) labelProvider).getRichTextLabel(item.getData());
-			}
-			if (newLabel == null) {
-				newLabel= new ColoredString(item.getText()); // fallback. Should never happen.
-			}
-			item.setData(COLORED_LABEL_KEY, newLabel); // cache the result
-			return newLabel;
-		}
-	}
-			
-	public static boolean showColoredLabels() {
-		String preference= PreferenceConstants.getPreference(AppearancePreferencePage.PREF_COLORED_LABELS, null);
-		return preference != null && Boolean.valueOf(preference).booleanValue();
-	}
-	
-	public static void install(StructuredViewer viewer) {
-		StructuredViewerOwnerDrawController support= new StructuredViewerOwnerDrawController(viewer);
-		if (showColoredLabels()) {
-			support.installOwnerDraw();
-		}
-	}
-
 }

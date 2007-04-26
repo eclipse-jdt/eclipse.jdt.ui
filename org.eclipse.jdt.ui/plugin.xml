@@ -917,6 +917,33 @@
             %DeclarationViewBackgroundColor.description
          </description>
       </colorDefinition>
+     <colorDefinition
+            label="%coloredLabels.qualifier.label"
+            categoryId="org.eclipse.jdt.ui.presentation"
+            value="COLOR_DARK_GRAY"
+            id="org.eclipse.jdt.ui.ColoredLabels.qualifier">
+         <description>
+            %coloredLabels.qualifier.description
+         </description>
+      </colorDefinition>
+      <colorDefinition
+            label="%coloredLabels.decorations.label"
+            categoryId="org.eclipse.jdt.ui.presentation"
+            value="149,125,71"
+            id="org.eclipse.jdt.ui.ColoredLabels.decorations">
+         <description>
+            %coloredLabels.decorations.description
+         </description>
+      </colorDefinition>      
+      <colorDefinition
+            label="%coloredLabels.counter.label"
+            categoryId="org.eclipse.jdt.ui.presentation"
+            value="0,127,174"
+            id="org.eclipse.jdt.ui.ColoredLabels.counter">
+         <description>
+            %coloredLabels.counter.description
+         </description>
+      </colorDefinition>      
    </extension>
    
    

@@ -15,11 +15,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.jdt.core.BindingKey;
@@ -48,7 +43,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -56,30 +50,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.ColoredString.Style;
 
 public class ColoredJavaElementLabels {
 
-	public static final Style QUALIFIER_STYLE= new Style() {
-		private Color fColor;
-		public Color getForeground(Display display) {
-			if (fColor == null)
-				fColor= display.getSystemColor(SWT.COLOR_DARK_GRAY);
-			return fColor;
-		}
-	};
-	public static final Style COUNTER_STYLE= new Style() {
-		private Color fColor;
-		public Color getForeground(Display display) {
-			if (fColor == null)
-				fColor= JavaUI.getColorManager().getColor(new RGB(0, 127, 174));
-			return fColor;
-		}
-	};
-	public static final Style DECORATIONS_STYLE= new Style() {
-		private Color fColor;
-		public Color getForeground(Display display) {
-			if (fColor == null)
-				fColor= JavaUI.getColorManager().getColor(new RGB(149, 125, 71));
-			return fColor;
-		}
-	};
+	public static final Style QUALIFIER_STYLE= new Style(ColoredViewersManager.QUALIFIER_COLOR_NAME); 
+	public static final Style COUNTER_STYLE= new Style(ColoredViewersManager.COUNTER_COLOR_NAME); 
+	public static final Style DECORATIONS_STYLE= new Style(ColoredViewersManager.DECORATIONS_COLOR_NAME); 
 	
 	public final static long COLORIZE= 1L << 55;
 	

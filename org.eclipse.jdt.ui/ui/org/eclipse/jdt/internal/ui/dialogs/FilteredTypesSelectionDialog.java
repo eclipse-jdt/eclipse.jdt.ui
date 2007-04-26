@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,10 +30,12 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
@@ -108,6 +110,7 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
@@ -490,7 +493,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	
 	protected Control createContents(Composite parent) {
 		Control contents= super.createContents(parent);
-		if (OwnerDrawSupport.showColoredLabels()) {
+		if (ColoredViewersManager.showColoredLabels()) {
 			if (contents instanceof Composite) {
 				Table listControl= findTableControl((Composite) contents);
 				if (listControl != null) {
@@ -511,6 +514,10 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 					str.colorize(index, str.length() - index, ColoredJavaElementLabels.QUALIFIER_STYLE);
 				}
 				return str;
+			}
+
+			public Color getColor(String foregroundColorName, Display display) {
+				return PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(foregroundColorName);
 			}
 		};
 	}

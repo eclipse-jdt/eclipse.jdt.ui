@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,8 +47,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.filters.SyntheticMembersFilter;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 
 /**
@@ -99,7 +99,7 @@ public class MethodsViewer extends ProblemTableViewer {
 		showInheritedMethodsNoRedraw(false);
 		sortByDefiningTypeNoRedraw(false);
 		
-		OwnerDrawSupport.install(this);
+		ColoredViewersManager.install(this);
 		
 		JavaUIHelp.setHelp(this, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
 	}
@@ -122,6 +122,7 @@ public class MethodsViewer extends ProblemTableViewer {
 	
 	/**
 	 * Show inherited methods
+	 * @param on the new state
 	 */
 	public void showInheritedMethods(boolean on) {
 		if (on == isShowInheritedMethods()) {
@@ -144,6 +145,7 @@ public class MethodsViewer extends ProblemTableViewer {
 
 	/**
 	 * Show the name of the defining type
+	 * @param on the new state
 	 */
 	public void sortByDefiningType(boolean on) {
 		if (on == isShowDefiningTypes()) {
@@ -167,6 +169,7 @@ public class MethodsViewer extends ProblemTableViewer {
 	
 	/**
 	 * Returns <code>true</code> if inherited methods are shown.
+	 * @return <code>true</code> if inherited methods are shown.
 	 */	
 	public boolean isShowInheritedMethods() {
 		return ((MethodsContentProvider) getContentProvider()).isShowInheritedMethods();
@@ -174,6 +177,7 @@ public class MethodsViewer extends ProblemTableViewer {
 	
 	/**
 	 * Returns <code>true</code> if defining types are shown.
+	 * @return <code>true</code> if defining types are shown.
 	 */	
 	public boolean isShowDefiningTypes() {
 		return fLabelProvider.isShowDefiningType();
@@ -181,6 +185,7 @@ public class MethodsViewer extends ProblemTableViewer {
 
 	/**
 	 * Saves the state of the filter actions
+	 * @param memento the memento
 	 */
 	public void saveState(IMemento memento) {
 		fMemberFilterActionGroup.saveState(memento);
@@ -195,6 +200,7 @@ public class MethodsViewer extends ProblemTableViewer {
 
 	/**
 	 * Restores the state of the filter actions
+	 * @param memento the memento
 	 */	
 	public void restoreState(IMemento memento) {
 		fMemberFilterActionGroup.restoreState(memento);
@@ -219,6 +225,9 @@ public class MethodsViewer extends ProblemTableViewer {
 	
 	/**
 	 * Attaches a contextmenu listener to the table
+	 * @param menuListener the menu listener
+	 * @param popupId the popup id
+	 * @param viewSite the view site
 	 */
 	public void initContextMenu(IMenuListener menuListener, String popupId, IWorkbenchPartSite viewSite) {
 		MenuManager menuMgr= new MenuManager();
@@ -233,6 +242,7 @@ public class MethodsViewer extends ProblemTableViewer {
 	/**
 	 * Fills up the context menu with items for the method viewer
 	 * Should be called by the creator of the context menu
+	 * @param menu teh menu manager
 	 */	
 	public void contributeToContextMenu(IMenuManager menu) {
 	}
@@ -240,6 +250,7 @@ public class MethodsViewer extends ProblemTableViewer {
 	/**
 	 * Fills up the tool bar with items for the method viewer
 	 * Should be called by the creator of the tool bar
+	 * @param tbm the tool bar manager
 	 */
 	public void contributeToToolBar(ToolBarManager tbm) {
 		tbm.add(fShowInheritedMembersAction);

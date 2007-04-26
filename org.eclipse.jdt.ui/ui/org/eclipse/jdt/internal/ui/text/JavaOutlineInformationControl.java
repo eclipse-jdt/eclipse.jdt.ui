@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,8 +74,8 @@ import org.eclipse.jdt.internal.ui.actions.CategoryFilterActionGroup;
 import org.eclipse.jdt.internal.ui.typehierarchy.AbstractHierarchyViewerSorter;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.viewsupport.MemberFilter;
-import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
 
 /**
  * Show outline in light-weight control.
@@ -551,7 +551,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		tree.setLayoutData(gd);
 
 		final TreeViewer treeViewer= new OutlineTreeViewer(tree);
-		OwnerDrawSupport.install(treeViewer);
+		ColoredViewersManager.install(treeViewer);
 
 		// Hard-coded filters
 		treeViewer.addFilter(new NamePatternFilter());

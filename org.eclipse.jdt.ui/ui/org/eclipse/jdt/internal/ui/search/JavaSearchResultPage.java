@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -83,8 +83,8 @@ import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
@@ -332,13 +332,13 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	
 	protected TreeViewer createTreeViewer(Composite parent) {
 		ProblemTreeViewer problemTreeViewer= new ProblemTreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		OwnerDrawSupport.install(problemTreeViewer);
+		ColoredViewersManager.install(problemTreeViewer);
 		return problemTreeViewer;
 	}
 	
 	protected TableViewer createTableViewer(Composite parent) {
 		ProblemTableViewer problemTableViewer= new ProblemTableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		OwnerDrawSupport.install(problemTableViewer);
+		ColoredViewersManager.install(problemTableViewer);
 		return problemTableViewer;
 	}
 	

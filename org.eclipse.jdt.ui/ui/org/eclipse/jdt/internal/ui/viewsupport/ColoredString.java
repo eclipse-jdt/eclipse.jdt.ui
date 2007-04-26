@@ -15,14 +15,19 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.widgets.Display;
-
 
 public class ColoredString {
 	
-	public static abstract class Style {
-		public abstract Color getForeground(Display display);
+	public static class Style {
+		private final String fForegroundColorName;
+
+		public Style(String foregroundColorName) {
+			fForegroundColorName= foregroundColorName;	
+		}
+		
+		public String getForegroundColorName() {
+			return fForegroundColorName;
+		}
 	}
 	
 	public static final Style DEFAULT_STYLE= null;

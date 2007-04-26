@@ -41,19 +41,19 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.ProblemsLabelDecorator;
-import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.ProblemsLabelDecorator;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.AbstractInformationControl;
 import org.eclipse.jdt.internal.ui.typehierarchy.SuperTypeHierarchyViewer.SuperTypeHierarchyContentProvider;
 import org.eclipse.jdt.internal.ui.typehierarchy.TraditionalHierarchyViewer.TraditionalHierarchyContentProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 
 /**
  * Show hierarchy in light-weight control.
@@ -129,7 +129,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		tree.setLayoutData(gd);
 
 		TreeViewer treeViewer= new TreeViewer(tree);
-		OwnerDrawSupport.install(treeViewer);
+		ColoredViewersManager.install(treeViewer);
 		treeViewer.addFilter(new ViewerFilter() {
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				return element instanceof IType;
