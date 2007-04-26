@@ -1168,4 +1168,12 @@ public final class RefactoringAvailabilityTester {
 	private RefactoringAvailabilityTester() {
 		// Not for instantiation
 	}
+
+	public static boolean isIntroduceParameterObjectAvailable(IStructuredSelection selection) throws JavaModelException{
+		return isChangeSignatureAvailable(selection); //TODO test selected element for more than 1 parameter?
+	}
+
+	public static boolean isIntroduceParameterObjectAvailable(JavaTextSelection selection) throws JavaModelException{
+		return isChangeSignatureAvailable(selection); //TODO test selected element for more than 1 parameter?
+	}
 }

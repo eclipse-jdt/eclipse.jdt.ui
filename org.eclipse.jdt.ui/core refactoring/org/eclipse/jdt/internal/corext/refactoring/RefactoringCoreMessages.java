@@ -966,6 +966,12 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String IntroduceIndirectionRefactoring_unable_determine_declaring_type;
 
+	public static String IntroduceParameterObjectRefactoring_cannotalanyzemethod_mappingerror;
+
+	public static String IntroduceParameterObjectRefactoring_cannotanalysemethod_compilererror;
+
+	public static String IntroduceParameterObjectRefactoring_refactoring_name;
+
 	public static String IntroduceParameterRefactoring_cannot_introduce;
 
 	public static String IntroduceParameterRefactoring_descriptor_description;

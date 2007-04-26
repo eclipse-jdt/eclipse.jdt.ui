@@ -21,8 +21,8 @@ public class ParameterInfo {
 	public static final int INDEX_FOR_ADDED= -1;
 	public static final String ELLIPSIS= "..."; //$NON-NLS-1$
 	
-	private final IVariableBinding fOldBinding;
-	private final ITypeBinding fOldTypeBinding;
+	private IVariableBinding fOldBinding;
+	private ITypeBinding fOldTypeBinding;
 	private final String fOldName;
 	private final String fOldTypeName;
 	private final int fOldIndex;
@@ -32,6 +32,7 @@ public class ParameterInfo {
 	private String fDefaultValue;
 	private String fNewName;
 	private boolean fIsDeleted;
+	private boolean fCreateField=true;
 	
 	public ParameterInfo(String type, String name, int index) {
 		this(null, null, type, name, index);
@@ -54,6 +55,13 @@ public class ParameterInfo {
 		fIsDeleted= false;
 	}
 
+	public static ParameterInfo createInfoForAddedParameter(String type, String name) {
+		ParameterInfo info= new ParameterInfo("", "", INDEX_FOR_ADDED); //$NON-NLS-1$ //$NON-NLS-2$
+		info.setNewTypeName(type);
+		info.setNewName(name);
+		return info;
+	}
+	
 	public static ParameterInfo createInfoForAddedParameter(String type, String name, String defaultValue) {
 		ParameterInfo info= new ParameterInfo("", "", INDEX_FOR_ADDED); //$NON-NLS-1$ //$NON-NLS-2$
 		info.setNewTypeName(type);
@@ -174,4 +182,21 @@ public class ParameterInfo {
 	public ITypeBinding getOldTypeBinding() {
 		return fOldTypeBinding;
 	}
+
+	public boolean isCreateField() {
+		return fCreateField;
+	}
+
+	public void setCreateField(boolean createField) {
+		fIsDeleted= createField;
+		fCreateField= createField;
+	}
+
+	public void setOldBinding(IVariableBinding binding) {
+		//TODO: remove setter again ( https://bugs.eclipse.org/bugs/show_bug.cgi?id=102287 )
+		fOldBinding=binding;
+		fOldTypeBinding=binding.getType();
+		fNewTypeBinding=binding.getType();
+	}
+
 }

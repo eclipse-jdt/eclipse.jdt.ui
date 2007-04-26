@@ -51,6 +51,9 @@ public final class ActionMessages extends NLS {
 	public static String FormatAllAction_problem_accessing;
 	public static String FormatAllAction_read_only_skipped;
 	public static String GenerateNewConstructorUsingFieldsAction_error_not_a_source_file;
+	public static String IntroduceParameterObjectAction_action_text;
+	public static String IntroduceParameterObjectAction_exceptiondialog_title;
+	public static String IntroduceParameterObjectAction_unexpected_exception;
 	public static String OpenAction_error_problem_opening_editor;
 	public static String OpenAction_multistatus_message;
 	public static String OpenViewActionGroup_showInAction_label;

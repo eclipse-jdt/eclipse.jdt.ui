@@ -85,6 +85,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfacePro
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.IntroduceParameterObjectRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.JavaMoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;
@@ -114,6 +115,7 @@ import org.eclipse.jdt.internal.ui.refactoring.InlineConstantWizard;
 import org.eclipse.jdt.internal.ui.refactoring.InlineTempWizard;
 import org.eclipse.jdt.internal.ui.refactoring.IntroduceFactoryWizard;
 import org.eclipse.jdt.internal.ui.refactoring.IntroduceIndirectionWizard;
+import org.eclipse.jdt.internal.ui.refactoring.IntroduceParameterObjectWizard;
 import org.eclipse.jdt.internal.ui.refactoring.IntroduceParameterWizard;
 import org.eclipse.jdt.internal.ui.refactoring.MoveInnerToTopWizard;
 import org.eclipse.jdt.internal.ui.refactoring.MoveInstanceMethodWizard;
@@ -458,5 +460,19 @@ public final class RefactoringExecutionStarter {
 
 	private RefactoringExecutionStarter() {
 		// Not for instantiation
+	}
+	
+	public static void startIntroduceParameterObject(ICompilationUnit unit, int offset, int length, Shell shell) throws JavaModelException {
+		IJavaElement javaElement= unit.getElementAt(offset);
+		if (javaElement instanceof IMethod) {
+			IMethod method= (IMethod) javaElement;
+			IntroduceParameterObjectRefactoring refactoring= new IntroduceParameterObjectRefactoring(method);
+			new RefactoringStarter().activate(refactoring, new IntroduceParameterObjectWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
+		}
+	}
+
+	public static void startIntroduceParameterObject(IMethod method, Shell shell) throws JavaModelException {
+		IntroduceParameterObjectRefactoring refactoring= new IntroduceParameterObjectRefactoring(method);
+		new RefactoringStarter().activate(refactoring, new IntroduceParameterObjectWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
 	}
 }

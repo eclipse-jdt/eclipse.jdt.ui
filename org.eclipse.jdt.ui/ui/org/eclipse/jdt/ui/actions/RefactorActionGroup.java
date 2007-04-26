@@ -57,6 +57,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.ExtractSuperClassAction;
+import org.eclipse.jdt.internal.ui.actions.IntroduceParameterObjectAction;
 import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
@@ -159,6 +160,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fExtractTempAction;
 	private SelectionDispatchAction fExtractConstantAction;
 	private SelectionDispatchAction fIntroduceParameterAction;
+	private SelectionDispatchAction fIntroduceParameterObjectAction; 
 	private SelectionDispatchAction fIntroduceFactoryAction;
 	private SelectionDispatchAction fConvertLocalToFieldAction;
 	private SelectionDispatchAction fSelfEncapsulateField;
@@ -188,7 +190,7 @@ public class RefactorActionGroup extends ActionGroup {
 			setText(RefactoringMessages.RefactorActionGroup_no_refactoring_available); 
 		}
 	}
-	private Action fNoActionAvailable= new NoActionAvailable(); 
+	private Action fNoActionAvailable= new NoActionAvailable();
 		
 	/**
 	 * Creates a new <code>RefactorActionGroup</code>. The group requires
@@ -306,6 +308,10 @@ public class RefactorActionGroup extends ActionGroup {
 			fSelfEncapsulateField= new SelfEncapsulateFieldAction(editor);
 			initAction(fSelfEncapsulateField, selection, IJavaEditorActionDefinitionIds.SELF_ENCAPSULATE_FIELD);
 			editor.setAction("SelfEncapsulateField", fSelfEncapsulateField); //$NON-NLS-1$
+			
+			fIntroduceParameterObjectAction= new IntroduceParameterObjectAction(editor);
+			initAction(fIntroduceParameterObjectAction, selection, IntroduceParameterObjectAction.ACTION_DEFINITION_ID);//TODO Place in IJavaEditorActionDefinitionIds
+			editor.setAction("IntroduceParameterObjectAction", fIntroduceParameterObjectAction); //$NON-NLS-1$
 		}		
 		fIntroduceIndirectionAction= new IntroduceIndirectionAction(editor);
 		initUpdatingAction(fIntroduceIndirectionAction, provider, selection, IJavaEditorActionDefinitionIds.INTRODUCE_INDIRECTION);
@@ -353,6 +359,9 @@ public class RefactorActionGroup extends ActionGroup {
 			fSelfEncapsulateField= new SelfEncapsulateFieldAction(fSite);
 			initUpdatingAction(fSelfEncapsulateField, provider, selection, IJavaEditorActionDefinitionIds.SELF_ENCAPSULATE_FIELD);
 	
+			fIntroduceParameterObjectAction= new IntroduceParameterObjectAction(fSite);
+			initUpdatingAction(fIntroduceParameterObjectAction, provider, selection, IntroduceParameterObjectAction.ACTION_DEFINITION_ID);
+			
 			fExtractSupertypeAction= new ExtractSuperClassAction(fSite);
 			initUpdatingAction(fExtractSupertypeAction, provider, selection, ExtractSuperClassAction.EXTRACT_SUPERTYPE);
 	
@@ -442,6 +451,7 @@ public class RefactorActionGroup extends ActionGroup {
 			actionBars.setGlobalActionHandler(JdtActionConstants.INFER_TYPE_ARGUMENTS, fInferTypeArgumentsAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_LOCAL_TO_FIELD, fConvertLocalToFieldAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_ANONYMOUS_TO_NESTED, fConvertAnonymousToNestedAction);
+			actionBars.setGlobalActionHandler(IntroduceParameterObjectAction.ACTION_ID, fIntroduceParameterObjectAction); //TODO promote action ID to API
 		}
 		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE, fInlineAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.USE_SUPERTYPE, fUseSupertypeAction);
@@ -484,6 +494,7 @@ public class RefactorActionGroup extends ActionGroup {
 			disposeAction(fExtractTempAction, provider);
 			disposeAction(fExtractConstantAction, provider);
 			disposeAction(fIntroduceParameterAction, provider);
+			disposeAction(fIntroduceParameterObjectAction, provider);
 			disposeAction(fIntroduceFactoryAction, provider);
 			disposeAction(fExtractMethodAction, provider);
 			//	disposeAction(fReplaceInvocationsAction, provider);
@@ -564,6 +575,7 @@ public class RefactorActionGroup extends ActionGroup {
 		added+= addAction(refactorSubmenu, fIntroduceIndirectionAction);
 		added+= addAction(refactorSubmenu, fIntroduceFactoryAction);
 		added+= addAction(refactorSubmenu, fIntroduceParameterAction);
+		added+= addAction(refactorSubmenu, fIntroduceParameterObjectAction);
 		added+= addAction(refactorSubmenu, fSelfEncapsulateField);
 //		added+= addAction(refactorSubmenu, fReplaceInvocationsAction);
 		refactorSubmenu.add(new Separator(GROUP_TYPE2));

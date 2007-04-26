@@ -29,4 +29,14 @@ public abstract class BodyUpdater {
 	 */
 	public abstract void updateBody(MethodDeclaration methodDeclaration, CompilationUnitRewrite cuRewrite, RefactoringStatus result);
 
+	/**
+	 * Returns whether {@link ChangeSignatureRefactoring} should check if
+	 * deleted parameters are currently used in the method body.
+	 * 
+	 * @return <code>true</code> by default, subclasses can override
+	 */
+	public boolean needsParameterUsedCheck() {
+		return true;
+	}
+
 }

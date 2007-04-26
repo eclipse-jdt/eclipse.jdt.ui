@@ -90,6 +90,12 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionP
 
 public class TypeContextChecker {
 
+	public interface IProblemVerifier {
+
+		boolean isError(IProblem problem, ASTNode node);
+
+	}
+
 	private static class MethodTypesChecker {
 
 		private static final String METHOD_NAME= "__$$__"; //$NON-NLS-1$
@@ -99,11 +105,14 @@ public class TypeContextChecker {
 		private final List/*<ParameterInfo>*/ fParameterInfos;
 		private final ReturnTypeInfo fReturnTypeInfo;
 
-		public MethodTypesChecker(IMethod method, StubTypeContext stubTypeContext, List/*<ParameterInfo>*/ parameterInfos, ReturnTypeInfo returnTypeInfo) {
+		private final IProblemVerifier fProblemVerifier;
+
+		public MethodTypesChecker(IMethod method, StubTypeContext stubTypeContext, List/*<ParameterInfo>*/ parameterInfos, ReturnTypeInfo returnTypeInfo, IProblemVerifier problemVerifier) {
 			fMethod= method;
 			fStubTypeContext= stubTypeContext;
 			fParameterInfos= parameterInfos;
 			fReturnTypeInfo= returnTypeInfo;
+			fProblemVerifier= problemVerifier;
 		}
 		
 		public RefactoringStatus[] checkAndResolveMethodTypes() throws CoreException {
@@ -165,7 +174,7 @@ public class TypeContextChecker {
 			cuString.append(fStubTypeContext.getAfterString());
 			
 			// need a working copy to tell the parser where to resolve (package visible) types
-			ICompilationUnit wc= fMethod.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, null, new NullProgressMonitor());
+			ICompilationUnit wc= fMethod.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, new NullProgressMonitor());
 			try {
 				wc.getBuffer().setContents(cuString.toString());
 				CompilationUnit compilationUnit= new RefactoringASTParser(AST.JLS3).parse(wc, true);
@@ -193,7 +202,8 @@ public class TypeContextChecker {
 					IProblem[] problems= ASTNodes.getProblems(type, ASTNodes.NODE_ONLY, ASTNodes.PROBLEMS);
 					if (problems.length > 0) {
 						for (int p= 0; p < problems.length; p++)
-							results[i].addError(problems[p].getMessage());
+							if (isError(problems[p], type))
+								results[i].addError(problems[p].getMessage());
 					}
 					typeBindings[i]= type.resolveBinding();
 					typeBindings[i]= handleBug84585(typeBindings[i]);
@@ -204,6 +214,12 @@ public class TypeContextChecker {
 			} finally {
 				wc.discardWorkingCopy();
 			}
+		}
+
+		private boolean isError(IProblem problem, Type type) {
+			if (fProblemVerifier != null)
+				return fProblemVerifier.isError(problem, type);
+			return true;
 		}
 
 		private int appendMethodDeclaration(StringBuffer cuString, String[] types, int parameterCount) throws JavaModelException {
@@ -316,8 +332,16 @@ public class TypeContextChecker {
 			for (Iterator iter= collectedInfos.iterator(); iter.hasNext();) {
 				TypeNameMatch curr= (TypeNameMatch) iter.next();
 				IType type= curr.getType();
-				if (type != null && JavaModelUtil.isVisible(type, currPackage)) {
-					result.add(curr);
+				if (type != null) {
+					boolean visible=true;
+					try {
+						visible= JavaModelUtil.isVisible(type, currPackage);
+					} catch (JavaModelException e) {
+						//Assume visibile if not available
+					}
+					if (visible) {
+						result.add(curr);
+					}
 				}
 			}
 			return result;
@@ -436,8 +460,8 @@ public class TypeContextChecker {
 			return typeBinding;
 	}
 
-	public static RefactoringStatus[] checkAndResolveMethodTypes(IMethod method, StubTypeContext stubTypeContext, List parameterInfos, ReturnTypeInfo returnTypeInfo) throws CoreException {
-		MethodTypesChecker checker= new MethodTypesChecker(method, stubTypeContext, parameterInfos, returnTypeInfo);
+	public static RefactoringStatus[] checkAndResolveMethodTypes(IMethod method, StubTypeContext stubTypeContext, List parameterInfos, ReturnTypeInfo returnTypeInfo, IProblemVerifier problemVerifier) throws CoreException {
+		MethodTypesChecker checker= new MethodTypesChecker(method, stubTypeContext, parameterInfos, returnTypeInfo, problemVerifier);
 		return checker.checkAndResolveMethodTypes();
 	}
 
@@ -724,7 +748,7 @@ public class TypeContextChecker {
 		cuString.append(superClassContext.getAfterString());
 		
 		try {
-			ICompilationUnit wc= typeHandle.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, null, new NullProgressMonitor());
+			ICompilationUnit wc= typeHandle.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, new NullProgressMonitor());
 			try {
 				wc.getBuffer().setContents(cuString.toString());
 				CompilationUnit compilationUnit= new RefactoringASTParser(AST.JLS3).parse(wc, true);
@@ -762,7 +786,7 @@ public class TypeContextChecker {
 		cuString.append(superInterfaceContext.getAfterString());
 		
 		try {
-			ICompilationUnit wc= typeHandle.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, null, new NullProgressMonitor());
+			ICompilationUnit wc= typeHandle.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, new NullProgressMonitor());
 			try {
 				wc.getBuffer().setContents(cuString.toString());
 				CompilationUnit compilationUnit= new RefactoringASTParser(AST.JLS3).parse(wc, true);

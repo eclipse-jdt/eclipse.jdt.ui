@@ -113,6 +113,7 @@ import org.eclipse.jdt.internal.corext.refactoring.ReturnTypeInfo;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
+import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker.IProblemVerifier;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
@@ -152,7 +153,8 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 
 	private CompilationUnitRewrite fBaseCuRewrite;
 	private List fExceptionInfos;
-	private TextChangeManager fChangeManager;
+	protected TextChangeManager fChangeManager;
+	protected List/*<Change>*/ fOtherChanges;
 	private IMethod fMethod;
 	private IMethod fTopMethod;
 	private IMethod[] fRippleMethods;
@@ -168,6 +170,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 	private int fOldVarargIndex; // initialized in checkVarargs()
 
 	private BodyUpdater fBodyUpdater;
+	private IDefaultValueAdvisor fDefaultValueAdvisor;
 
 	private ITypeHierarchy fCachedTypeHierarchy= null;
 	private boolean fDelegateUpdating;
@@ -257,6 +260,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 	}
 	
 	/**
+	 * @return visibility
 	 * @see org.eclipse.jdt.core.dom.Modifier
 	 */
 	public int getVisibility(){
@@ -264,6 +268,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 	}
 
 	/**
+	 * @param visibility new visibility
 	 * @see org.eclipse.jdt.core.dom.Modifier
 	 */	
 	public void setVisibility(int visibility){
@@ -342,10 +347,10 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 	//------------------- /IDelegateUpdating ---------------------
 	
 	public RefactoringStatus checkSignature() {
-		return checkSignature(false);
+		return checkSignature(false, doGetProblemVerifier());
 	}
 	
-	private RefactoringStatus checkSignature(boolean resolveBindings) {
+	private RefactoringStatus checkSignature(boolean resolveBindings, IProblemVerifier problemVerifier) {
 		RefactoringStatus result= new RefactoringStatus();
 		checkMethodName(result);
 		if (result.hasFatalError())
@@ -362,7 +367,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		try {
 			RefactoringStatus[] typeStati;
 			if (resolveBindings)
-				typeStati= TypeContextChecker.checkAndResolveMethodTypes(fMethod, getStubTypeContext(), getNotDeletedInfos(), fReturnTypeInfo);
+				typeStati= TypeContextChecker.checkAndResolveMethodTypes(fMethod, getStubTypeContext(), getNotDeletedInfos(), fReturnTypeInfo, problemVerifier);
 			else
 				typeStati= TypeContextChecker.checkMethodTypesSyntax(fMethod, getNotDeletedInfos(), fReturnTypeInfo);
 			for (int i= 0; i < typeStati.length; i++)
@@ -398,9 +403,9 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 	}
 	
 	/**
-	 * Returns true if the new method cannot coexist with the old method since
-	 * the signatures are too much alike.
-	 * 
+	 * @return true if the new method cannot coexist with the old method since
+	 *         the signatures are too much alike
+	 * @throws JavaModelException
 	 */
 	public boolean isSignatureClashWithInitial() throws JavaModelException {
 
@@ -495,6 +500,8 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 	}
 
 	private void checkParameterDefaultValue(RefactoringStatus result, ParameterInfo info) {
+		if (fDefaultValueAdvisor != null)
+			return;
 		if (info.isNewVarargs()) {
 			if (! isValidVarargsExpression(info.getDefaultValue())){
 				String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_invalid_expression, new String[]{info.getDefaultValue()}); 
@@ -769,7 +776,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 
 			if (isSignatureSameAsInitial())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeSignatureRefactoring_unchanged); 
-			result.merge(checkSignature(true));
+			result.merge(checkSignature(true, doGetProblemVerifier()));
 			if (result.hasFatalError())
 				return result;
 			
@@ -808,7 +815,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			
 //			resolveTypesWithoutBindings(new SubProgressMonitor(pm, 1)); // already done in checkSignature(true)
 
-			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), result);
+			createChangeManager(new SubProgressMonitor(pm, 1), result);
 			fCachedTypeHierarchy= null;
 
 			if (mustAnalyzeAstOfDeclaringCu()) 
@@ -823,8 +830,13 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		}
 	}
 
+	protected IProblemVerifier doGetProblemVerifier() {
+		return null;
+	}
+
 	private void clearManagers() {
 		fChangeManager= null;
+		fOtherChanges= new ArrayList();
 	}
 	
 	private RefactoringStatus checkVisibilityChanges() throws JavaModelException {
@@ -959,17 +971,21 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < problems.length; i++) {
 			IProblem problem= problems[i];
-			if (shouldReport(problem))
+			if (shouldReport(problem, newCUNode))
 				result.addEntry(new RefactoringStatusEntry((problem.isError() ? RefactoringStatus.ERROR : RefactoringStatus.WARNING), problem.getMessage(), new JavaStringStatusContext(newCuSource, new SourceRange(problem))));
 		}
 		return result;
 	}
 		
-	private static boolean shouldReport(IProblem problem) {
+	private boolean shouldReport(IProblem problem, CompilationUnit cu) {
 		if (! problem.isError())
 			return false;
 		if (problem.getID() == IProblem.UndefinedType) //reported when trying to import
 			return false;
+		ASTNode node= ASTNodeSearchUtil.getAstNode(cu, problem.getSourceStart(), problem.getSourceEnd() - problem.getSourceStart());
+		IProblemVerifier verifier= doGetProblemVerifier();
+		if (verifier != null)
+			return verifier.isError(problem, node);
 		return true;	
 	}
 
@@ -1136,6 +1152,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		try {
 			final TextChange[] changes= fChangeManager.getAllChanges();
 			final List list= new ArrayList(changes.length);
+			list.addAll(fOtherChanges);
 			list.addAll(Arrays.asList(changes));
 			final Map arguments= new HashMap();
 			String project= null;
@@ -1244,16 +1261,20 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 				JavaPlugin.log(exception);
 				return null;
 			}
-			return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.ChangeSignatureRefactoring_restructure_parameters, (Change[]) list.toArray(new Change[list.size()]));
+			return new DynamicValidationRefactoringChange(descriptor, doGetRefactoringChangeName(), (Change[]) list.toArray(new Change[list.size()]));
 		} finally {
 			pm.done();
 			clearManagers();
 		}
 	}
 
+	protected String doGetRefactoringChangeName() {
+		return RefactoringCoreMessages.ChangeSignatureRefactoring_restructure_parameters;
+	}
+
 	private TextChangeManager createChangeManager(IProgressMonitor pm, RefactoringStatus result) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.ChangeSignatureRefactoring_preview, 2); 
-		TextChangeManager manager= new TextChangeManager();
+		fChangeManager= new TextChangeManager();
 		boolean isNoArgConstructor= isNoArgConstructor();
 		Map namedSubclassMapping= null;
 		if (isNoArgConstructor){
@@ -1292,11 +1313,11 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			}
 			TextChange change= cuRewrite.createChange();
 			if (change != null)
-				manager.manage(cu, change);
+				fChangeManager.manage(cu, change);
 		}
 		
 		pm.done();
-		return manager;
+		return fChangeManager;
 	}
 	
 	//Map<ICompilationUnit, Set<IType>>
@@ -1330,17 +1351,17 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 	
 	private void addExplicitSuperConstructorCall(MethodDeclaration constructor, CompilationUnitRewrite cuRewrite) {
 		SuperConstructorInvocation superCall= constructor.getAST().newSuperConstructorInvocation();
-		addArgumentsToNewSuperConstructorCall(superCall, cuRewrite.getASTRewrite());
+		addArgumentsToNewSuperConstructorCall(superCall, cuRewrite.getASTRewrite(), cuRewrite.getImportRewrite());
 		String msg= RefactoringCoreMessages.ChangeSignatureRefactoring_add_super_call; 
 		TextEditGroup description= cuRewrite.createGroupDescription(msg);
 		cuRewrite.getASTRewrite().getListRewrite(constructor.getBody(), Block.STATEMENTS_PROPERTY).insertFirst(superCall, description);
 	}
 	
-	private void addArgumentsToNewSuperConstructorCall(SuperConstructorInvocation superCall, ASTRewrite rewrite) {
+	private void addArgumentsToNewSuperConstructorCall(SuperConstructorInvocation superCall, ASTRewrite rewrite, ImportRewrite importRewrite) {
 		int i= 0;
 		for (Iterator iter= getNotDeletedInfos().iterator(); iter.hasNext(); i++) {
 			ParameterInfo info= (ParameterInfo) iter.next();
-			Expression newExpression= createNewExpression(rewrite, info);
+			Expression newExpression= createNewExpression(rewrite, importRewrite, info, null, null);
 			if (newExpression != null)
 				superCall.arguments().add(newExpression);
 		}
@@ -1372,7 +1393,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		Block body= ast.newBlock();
 		newConstructor.setBody(body);
 		SuperConstructorInvocation superCall= ast.newSuperConstructorInvocation();
-		addArgumentsToNewSuperConstructorCall(superCall, cuRewrite.getASTRewrite());
+		addArgumentsToNewSuperConstructorCall(superCall, cuRewrite.getASTRewrite(), cuRewrite.getImportRewrite());
 		body.statements().add(superCall);
 		
 		String msg= RefactoringCoreMessages.ChangeSignatureRefactoring_add_constructor; 
@@ -1409,11 +1430,15 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		return fMethod.isConstructor() && fMethod.getNumberOfParameters() == 0;
 	}
 	
-	private static Expression createNewExpression(ASTRewrite rewrite, ParameterInfo info) {
+	private Expression createNewExpression(ASTRewrite rewrite, ImportRewrite importRewrite, ParameterInfo info, List parameterInfos, List nodes) {
 		if (info.isNewVarargs() && info.getDefaultValue().trim().length() == 0)
 			return null;
-		else
-			return (Expression) rewrite.createStringPlaceholder(info.getDefaultValue(), ASTNode.METHOD_INVOCATION);
+		else {
+			if (fDefaultValueAdvisor==null)
+				return (Expression) rewrite.createStringPlaceholder(info.getDefaultValue(), ASTNode.METHOD_INVOCATION);
+			else
+				return fDefaultValueAdvisor.createDefaultExpression(rewrite, importRewrite, info, parameterInfos, nodes);
+		}
 	}
 
 	private boolean isVisibilitySameAsInitial() throws JavaModelException {
@@ -1501,7 +1526,8 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		public abstract void updateNode() throws JavaModelException;
 		
 		protected void registerImportRemoveNode(ASTNode node) {
-			getImportRemover().registerRemovedNode(node);
+			if (doPerformImportRemoval())
+				getImportRemover().registerRemovedNode(node);
 		}
 
 		protected final void reshuffleElements() {
@@ -1551,20 +1577,20 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 					}
 					
 				} else if (info.isAdded()) {
-					ASTNode newParamgument= createNewParamgument(info);
+					ASTNode newParamgument= createNewParamgument(info, fParameterInfos, nodes);
 					if (newParamgument != null)
 						newNodes.add(newParamgument);
 					
 				} else /* parameter stays */ {
 					if (oldIndex != fOldVarargIndex) {
 						ASTNode oldNode= (ASTNode) nodes.get(oldIndex);
-						ASTNode movedNode= moveNode(oldNode);
+						ASTNode movedNode= moveNode(oldNode, getASTRewrite());
 						newNodes.add(movedNode);
 					} else {
 						//vararg stays and is last parameter -> copy all remaining nodes:
 						for (int n= oldIndex; n < nodes.size(); n++) {
 							ASTNode oldNode= (ASTNode) nodes.get(n);
-							ASTNode movedNode= moveNode(oldNode);
+							ASTNode movedNode= moveNode(oldNode, getASTRewrite());
 							newNodes.add(movedNode);
 						}
 					}
@@ -1589,25 +1615,6 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 				ASTNode node= (ASTNode) newIter.next();
 				listRewrite.insertLast(node, fDescription);
 			}
-		}
-
-		/**
-		 * If this occurrence update is called from within a declaration update
-		 * (i.e., to update the call inside the newly created delegate), the old
-		 * node does not yet exist and therefore cannot be a move target.
-		 * 
-		 * Normally, always use createMoveTarget as this has the advantage of
-		 * being able to add changes inside changed nodes (for example, a method
-		 * call within a method call, see test case #4) and preserving comments
-		 * inside calls.
-		 */
-		private ASTNode moveNode(ASTNode oldNode) {
-			ASTNode movedNode;
-			if (ASTNodes.isExistingNode(oldNode))
-				movedNode= getASTRewrite().createMoveTarget(oldNode); //node must be one of ast
-			else
-				movedNode= ASTNode.copySubtree(getASTRewrite().getAST(), oldNode);
-			return movedNode;
 		}
 
 		/**
@@ -1646,9 +1653,11 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 	
 		/**
 		 * @param info
+		 * @param parameterInfos TODO
+		 * @param nodes TODO
 		 * @return a new method parameter or argument, or <code>null</code> for an empty vararg argument
 		 */
-		protected abstract ASTNode createNewParamgument(ParameterInfo info);
+		protected abstract ASTNode createNewParamgument(ParameterInfo info, List parameterInfos, List nodes);
 
 		protected abstract SimpleName getMethodNameNode();
 
@@ -1716,11 +1725,11 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			return null;
 		}
 		
-		protected ASTNode createNewParamgument(ParameterInfo info) {
+		protected ASTNode createNewParamgument(ParameterInfo info, List parameterInfos, List nodes) {
 			if (isRecursiveReference())
 				return createNewExpressionRecursive(info);
 			else
-				return createNewExpression(getASTRewrite(), info);
+				return createNewExpression(getASTRewrite(), getImportRewrite(), info, parameterInfos, nodes);
 		}
 
 		private Expression createNewExpressionRecursive(ParameterInfo info) {
@@ -1773,6 +1782,8 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		}
 		
 		/**
+		 * @param m1 method 1
+		 * @param m2 method 2
 		 * @return true iff
 		 * 		<ul><li>the methods are both constructors with same argument types, or</li>
 		 *	 		<li>the methods have the same name and the same argument types</li></ul>
@@ -1828,7 +1839,8 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			
 			changeJavadocTags();
 			
-			checkIfDeletedParametersUsed();
+			if (fBodyUpdater == null || fBodyUpdater.needsParameterUsedCheck())
+				checkIfDeletedParametersUsed();
 			
 			if (fBodyUpdater != null)
 				fBodyUpdater.updateBody(fMethDecl, fCuRewrite, fResult);
@@ -2210,6 +2222,8 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		}
 
 		/**
+		 * @param tags existing tags
+		 * @param tagName name of tag to add
 		 * @return the <code>TagElement<code> just before a new <code>TagElement</code> with name <code>tagName</code>,
 		 *   or <code>null</code>.
 		 */
@@ -2277,7 +2291,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			}
 		}
 		
-		protected ASTNode createNewParamgument(ParameterInfo info) {
+		protected ASTNode createNewParamgument(ParameterInfo info, List parameterInfos, List nodes) {
 			return createNewSingleVariableDeclaration(info);	
 		}
 	
@@ -2313,7 +2327,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 				changeMethodName();
 		}
 		
-		protected ASTNode createNewParamgument(ParameterInfo info) {
+		protected ASTNode createNewParamgument(ParameterInfo info, List parameterInfos, List nodes) {
 			return createNewMethodRefParameter(info);
 		}
 		
@@ -2409,7 +2423,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			return null;
 		}
 
-		protected ASTNode createNewParamgument(ParameterInfo info) {
+		protected ASTNode createNewParamgument(ParameterInfo info, List parameterInfos, List nodes) {
 			return null;
 		}
 
@@ -2435,7 +2449,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		protected ListRewrite getParamgumentsRewrite() {
 			return null;
 		}
-		protected ASTNode createNewParamgument(ParameterInfo info) {
+		protected ASTNode createNewParamgument(ParameterInfo info, List parameterInfos, List nodes) {
 			return null;
 		}
 		protected SimpleName getMethodNameNode() {
@@ -2553,10 +2567,44 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		return new RefactoringStatus();
 	}
 
+	/**
+	 * If this occurrence update is called from within a declaration update
+	 * (i.e., to update the call inside the newly created delegate), the old
+	 * node does not yet exist and therefore cannot be a move target.
+	 * 
+	 * Normally, always use createMoveTarget as this has the advantage of
+	 * being able to add changes inside changed nodes (for example, a method
+	 * call within a method call, see test case #4) and preserving comments
+	 * inside calls.
+	 * @param oldNode original node
+	 * @param rewrite an AST rewrite
+	 * @return the node to insert at the target location
+	 */
+	protected ASTNode moveNode(ASTNode oldNode, ASTRewrite rewrite) {
+		ASTNode movedNode;
+		if (ASTNodes.isExistingNode(oldNode))
+			movedNode= rewrite.createMoveTarget(oldNode); //node must be one of ast
+		else
+			movedNode= ASTNode.copySubtree(rewrite.getAST(), oldNode);
+		return movedNode;
+	}
+	
 	public String getDelegateUpdatingTitle(boolean plural) {
 		if (plural)
 			return RefactoringCoreMessages.DelegateCreator_keep_original_changed_plural;
 		else
 			return RefactoringCoreMessages.DelegateCreator_keep_original_changed_singular;
+	}
+
+	public IDefaultValueAdvisor getDefaultValueAdvisor() {
+		return fDefaultValueAdvisor;
+	}
+
+	public void setDefaultValueAdvisor(IDefaultValueAdvisor defaultValueAdvisor) {
+		fDefaultValueAdvisor= defaultValueAdvisor;
+	}
+
+	protected boolean doPerformImportRemoval() {
+		return true;
 	}
 }

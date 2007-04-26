@@ -440,6 +440,64 @@ public final class RefactoringMessages extends NLS {
 
 	public static String IntroduceParameterInputPage_description;
 
+	public static String IntroduceParameterObjectWizard_choosepackage_button;
+
+	public static String IntroduceParameterObjectWizard_choosepackage_label;
+
+	public static String IntroduceParameterObjectWizard_ChoosePackageDialog_description;
+
+	public static String IntroduceParameterObjectWizard_ChoosePackageDialog_empty;
+
+	public static String IntroduceParameterObjectWizard_ChoosePackageDialog_title;
+
+	public static String IntroduceParameterObjectWizard_classnamefield_label;
+
+	public static String IntroduceParameterObjectWizard_createasnestedclass_radio;
+
+	public static String IntroduceParameterObjectWizard_createastoplevel_radio;
+
+	public static String IntroduceParameterObjectWizard_createcomments_checkbox;
+
+	public static String IntroduceParameterObjectWizard_createdelegate_checkbox;
+
+	public static String IntroduceParameterObjectWizard_creategetter_checkbox;
+
+	public static String IntroduceParameterObjectWizard_createsetter_checkbox;
+
+	public static String IntroduceParameterObjectWizard_error_description;
+
+	public static String IntroduceParameterObjectWizard_error_title;
+
+	public static String IntroduceParameterObjectWizard_fieldgroup_text;
+
+	public static String IntroduceParameterObjectWizard_method_group;
+
+	public static String IntroduceParameterObjectWizard_moveentryup_button;
+
+	public static String IntroduceParameterObjectWizard_moventrydown_button;
+
+	public static String IntroduceParameterObjectWizard_name_column;
+
+	public static String IntroduceParameterObjectWizard_parameterfield_label;
+
+	public static String IntroduceParameterObjectWizard_parametername_check_alreadyexists;
+
+	public static String IntroduceParameterObjectWizard_parametername_check_atleastoneparameter;
+
+	public static String IntroduceParameterObjectWizard_parametername_check_notunique;
+
+	public static String IntroduceParameterObjectWizard_signaturepreview_label;
+
+	public static String IntroduceParameterObjectWizard_type_column;
+
+	public static String IntroduceParameterObjectWizard_type_group;
+
+	public static String IntroduceParameterObjectWizard_wizardpage_description;
+
+	public static String IntroduceParameterObjectWizard_wizardpage_name;
+
+	public static String IntroduceParameterObjectWizard_wizardpage_title;
+
 	public static String IntroduceParameterWizard_defaultPageTitle;
 
 	public static String IntroduceParameterWizard_parameters;

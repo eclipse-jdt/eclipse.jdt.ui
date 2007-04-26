@@ -2330,6 +2330,13 @@
                id="org.eclipse.jdt.ui.actions.IntroduceParameter">
          </action>
          <action
+               definitionId="org.eclipse.jdt.ui.refactoring.introduceparamobject"
+               label="%Refactoring.introduceParameterObject.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup2"
+               id="org.eclipse.jdt.ui.actions.IntroduceParameterObject">
+         </action>         
+         <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.introduce.factory"
                label="%Refactoring.introduceFactoryAction.label"
                retarget="true"
