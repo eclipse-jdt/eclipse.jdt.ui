@@ -206,7 +206,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				
 				if (binPath.segmentCount() > 0 && !binPath.equals(srcPath)) {
 					IFolder folder= fCurrProject.getFolder(binPath);
-					CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
+					CoreUtility.createDerivedFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
 				} else {
 					monitor.worked(1);
 				}

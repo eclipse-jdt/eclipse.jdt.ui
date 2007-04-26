@@ -763,7 +763,7 @@ public class BuildPathsBlock {
 			//create and set the output path first
 			if (!fWorkspaceRoot.exists(outputLocation)) {
 				IFolder folder= fWorkspaceRoot.getFolder(outputLocation);
-				CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
+				CoreUtility.createDerivedFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
 				folder.setDerived(true);		
 			} else {
 				monitor.worked(1);
@@ -794,7 +794,7 @@ public class BuildPathsBlock {
 					IPath folderOutput= (IPath) entry.getAttribute(CPListElement.OUTPUT);
 					if (folderOutput != null && folderOutput.segmentCount() > 1) {
 						IFolder folder= fWorkspaceRoot.getFolder(folderOutput);
-						CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
+						CoreUtility.createDerivedFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
 					} else {
 						monitor.worked(1);
 					}

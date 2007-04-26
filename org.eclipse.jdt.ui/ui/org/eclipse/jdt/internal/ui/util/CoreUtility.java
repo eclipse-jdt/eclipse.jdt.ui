@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -40,7 +41,15 @@ import org.osgi.framework.Bundle;
 
 public class CoreUtility {
 	
-
+	public static void createDerivedFolder(IFolder folder, boolean force, boolean local, IProgressMonitor monitor) throws CoreException {
+		if (!folder.exists()) {
+			IContainer parent= folder.getParent();
+			if (parent instanceof IFolder) {
+				createDerivedFolder((IFolder)parent, force, local, null);
+			}
+			folder.create(force ? (IResource.FORCE | IResource.DERIVED) : IResource.DERIVED, local, monitor);
+		}
+	}
 
 	/**
 	 * Creates a folder and all parent folders if not existing.
