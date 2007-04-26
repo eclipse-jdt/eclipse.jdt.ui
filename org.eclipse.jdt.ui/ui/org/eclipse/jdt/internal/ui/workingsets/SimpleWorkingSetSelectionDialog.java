@@ -94,10 +94,13 @@ public class SimpleWorkingSetSelectionDialog extends SelectionDialog {
 		}
 				
 		private boolean isCompatible(IWorkingSet set) {
-			if (!set.isSelfUpdating() || set.isAggregateWorkingSet())
+			if (set.isAggregateWorkingSet() || !set.isSelfUpdating())
 				return false;
 			
 			if (!set.isVisible())
+				return false;
+			
+			if (!set.isEditable())
 				return false;
 			
 			return true;
