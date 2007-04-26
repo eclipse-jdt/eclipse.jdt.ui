@@ -85,6 +85,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.link.LinkedModeModel;
+import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationRulerColumn;
@@ -765,12 +766,32 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		protected int findNextPosition(int position) {
 			ISourceViewer viewer= getSourceViewer();
 			int widget= -1;
-			while (position != BreakIterator.DONE && widget == -1) { // TODO: optimize
-				position= fIterator.following(position);
-				if (position != BreakIterator.DONE)
-					widget= modelOffset2WidgetOffset(viewer, position);
+			int next= position;
+			while (next != BreakIterator.DONE && widget == -1) { // TODO: optimize
+				next= fIterator.following(next);
+				if (next != BreakIterator.DONE)
+					widget= modelOffset2WidgetOffset(viewer, next);
 			}
-			return position;
+			
+			IDocument document= viewer.getDocument();
+			LinkedModeModel model= LinkedModeModel.getModel(document, position);
+			if (model != null) {
+				LinkedPosition linkedPosition= model.findPosition(new LinkedPosition(document, position, 0));
+				if (linkedPosition != null) {
+					int linkedPositionEnd= linkedPosition.getOffset() + linkedPosition.getLength();
+					if (position != linkedPositionEnd && linkedPositionEnd < next)
+						next= linkedPositionEnd;
+				} else {
+					LinkedPosition nextLinkedPosition= model.findPosition(new LinkedPosition(document, next, 0));
+					if (nextLinkedPosition != null) {
+						int nextLinkedPositionOffset= nextLinkedPosition.getOffset();
+						if (position != nextLinkedPositionOffset && nextLinkedPositionOffset < next)
+							next= nextLinkedPositionOffset;
+					}
+				}
+			}
+			
+			return next;
 		}
 
 		/**
@@ -946,12 +967,32 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		protected int findPreviousPosition(int position) {
 			ISourceViewer viewer= getSourceViewer();
 			int widget= -1;
-			while (position != BreakIterator.DONE && widget == -1) { // TODO: optimize
-				position= fIterator.preceding(position);
-				if (position != BreakIterator.DONE)
-					widget= modelOffset2WidgetOffset(viewer, position);
+			int previous= position;
+			while (previous != BreakIterator.DONE && widget == -1) { // TODO: optimize
+				previous= fIterator.preceding(previous);
+				if (previous != BreakIterator.DONE)
+					widget= modelOffset2WidgetOffset(viewer, previous);
 			}
-			return position;
+			
+			IDocument document= viewer.getDocument();
+			LinkedModeModel model= LinkedModeModel.getModel(document, position);
+			if (model != null) {
+				LinkedPosition linkedPosition= model.findPosition(new LinkedPosition(document, position, 0));
+				if (linkedPosition != null) {
+					int linkedPositionOffset= linkedPosition.getOffset();
+					if (position != linkedPositionOffset && previous < linkedPositionOffset)
+						previous= linkedPositionOffset;
+				} else {
+					LinkedPosition previousLinkedPosition= model.findPosition(new LinkedPosition(document, previous, 0));
+					if (previousLinkedPosition != null) {
+						int previousLinkedPositionEnd= previousLinkedPosition.getOffset() + previousLinkedPosition.getLength();
+						if (position != previousLinkedPositionEnd && previous < previousLinkedPositionEnd)
+							previous= previousLinkedPositionEnd;
+					}
+				}
+			}
+			
+			return previous;
 		}
 
 		/**
