@@ -20,6 +20,9 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Item;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
@@ -145,6 +148,7 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 					return getColorForName(foregroundColorName);
 				}
 			};
+			refreshViewer();
 		}
 		
 		protected void uninstallOwnerDraw() {
@@ -152,12 +156,35 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 				return; // not installed
 
 			fOwnerDrawSupport.dispose(); // removes itself as listener
-			fViewer.setInput(fViewer.getInput()); // make sure all items are rebuilt
+			fOwnerDrawSupport= null;
+			refreshViewer();
+		}
+		
+		private void refreshViewer() {
+			Control control= fViewer.getControl();
+			if (!control.isDisposed()) {
+				if (control instanceof Tree) {
+					refresh(((Tree) control).getItems());
+				} else if (control instanceof Table) {
+					refresh(((Table) control).getItems());
+				}
+			}
 		}
 
+		private void refresh(Item[] items) {
+			for (int i= 0; i < items.length; i++) {
+				Item item= items[i];
+				item.setData(COLORED_LABEL_KEY, null);
+				String text= item.getText();
+				item.setText(""); //$NON-NLS-1$
+				item.setText(text);
+				if (item instanceof TreeItem) {
+					refresh(((TreeItem) item).getItems());
+				}
+			}
+		}
 		
 		private ColoredString getColoredLabelForView(Item item) {
-			IBaseLabelProvider labelProvider= fViewer.getLabelProvider();
 			ColoredString oldLabel= (ColoredString) item.getData(COLORED_LABEL_KEY);
 			String itemText= item.getText();
 			if (oldLabel != null && oldLabel.getString().equals(itemText)) {
@@ -165,6 +192,7 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 				return oldLabel;
 			}
 			ColoredString newLabel= null;
+			IBaseLabelProvider labelProvider= fViewer.getLabelProvider();
 			if (labelProvider instanceof IRichLabelProvider) {
 				newLabel= ((IRichLabelProvider) labelProvider).getRichTextLabel(item.getData());
 			}
