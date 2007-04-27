@@ -158,6 +158,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		
 		private WorkingSetModelAwareSelectionDialog(Shell shell, GrayedCheckedModel model) {
 			super(shell, model.getAll(), model.getChecked());
+			setTitle(WorkingSetMessages.ConfigureWorkingSetAssignementAction_WorkingSetAssignments_title);
 			fModel= model;
 			fShowVisibleOnly= true;
 		}
