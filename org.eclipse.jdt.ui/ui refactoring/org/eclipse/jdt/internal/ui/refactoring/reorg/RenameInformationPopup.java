@@ -487,10 +487,13 @@ public class RenameInformationPopup {
 						textWidget.toControl(computePopupLocation(SNAP_POSITION_LOWER_RIGHT))
 				};
 				
-				final Rectangle[] DROP_TARGETS= new Rectangle[LOCATIONS.length];
-				for (int i= 0; i < LOCATIONS.length; i++) {
-					DROP_TARGETS[i]= Geometry.createRectangle(LOCATIONS[i], pSize);
-				}
+				final Rectangle[] DROP_TARGETS= {
+					Geometry.createRectangle(LOCATIONS[0], pSize),
+					Geometry.createRectangle(LOCATIONS[1], pSize),
+					new Rectangle(LOCATIONS[2].x, LOCATIONS[2].y + HAH, pSize.x, pSize.y),
+					Geometry.createRectangle(LOCATIONS[3], pSize),
+					Geometry.createRectangle(LOCATIONS[4], pSize)
+				};
 				final Rectangle MOUSE_MOVE_SOURCE= new Rectangle(1000000, 0, 0, 0);
 				tracker.setRectangles(new Rectangle[] { MOUSE_MOVE_SOURCE, DROP_TARGETS[fSnapPosition] });
 				tracker.setStippled(true);
