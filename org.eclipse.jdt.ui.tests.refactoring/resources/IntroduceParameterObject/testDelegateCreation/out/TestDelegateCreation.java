@@ -7,31 +7,61 @@ class TestDelegateCreationA {
 public class TestDelegateCreation extends TestDelegateCreationA{
 	String a[];
 	public static class FooParameter {
+		/**
+		 * 
+		 */
 		public String[] newA;
+		/**
+		 * 
+		 */
 		public int newB;
+		/**
+		 * 
+		 */
 		public double newD;
+		/**
+		 * 
+		 */
 		public FooParameter(String[] newA, int newB, double newD) {
 			this.newA = newA;
 			this.newB = newB;
 			this.newD = newD;
 		}
+		/**
+		 * @return the newA
+		 */
 		public String[] getNewA() {
 			return newA;
 		}
-		public void setNewA(String[] newNewA) {
-			newA = newNewA;
+		/**
+		 * @param newA the newA to set
+		 */
+		public void setNewA(String[] newA) {
+			newA = newA;
 		}
+		/**
+		 * @return the newB
+		 */
 		public int getNewB() {
 			return newB;
 		}
-		public void setNewB(int newNewB) {
-			newB = newNewB;
+		/**
+		 * @param newB the newB to set
+		 */
+		public void setNewB(int newB) {
+			newB = newB;
 		}
+		/**
+		 * @return the newD
+		 */
 		public double getNewD() {
 			return newD;
 		}
-		public void setNewD(double newNewD) {
-			newD = newNewD;
+		/**
+		 * @param newD the newD to set
+		 */
+		public void setNewD(double newD) {
+			newD = newD;
 		}
 	}
 	/**

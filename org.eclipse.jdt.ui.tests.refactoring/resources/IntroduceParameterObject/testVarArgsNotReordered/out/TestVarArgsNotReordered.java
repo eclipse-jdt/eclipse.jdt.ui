@@ -2,8 +2,17 @@ package p;
 
 public class TestVarArgsNotReordered {
 	public static class FooParameter {
+		/**
+		 * 
+		 */
 		public String[] a;
+		/**
+		 * 
+		 */
 		public int[] is;
+		/**
+		 * 
+		 */
 		public FooParameter(String[] a, int... is) {
 			this.a = a;
 			this.is = is;

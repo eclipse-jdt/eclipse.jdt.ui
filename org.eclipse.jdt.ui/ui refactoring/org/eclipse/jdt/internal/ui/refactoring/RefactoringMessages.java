@@ -464,11 +464,21 @@ public final class RefactoringMessages extends NLS {
 
 	public static String IntroduceParameterObjectWizard_createsetter_checkbox;
 
+	public static String IntroduceParameterObjectWizard_destination_label;
+
+	public static String IntroduceParameterObjectWizard_edit_button;
+
 	public static String IntroduceParameterObjectWizard_error_description;
 
 	public static String IntroduceParameterObjectWizard_error_title;
 
 	public static String IntroduceParameterObjectWizard_fieldgroup_text;
+
+	public static String IntroduceParameterObjectWizard_fieldname_message;
+
+	public static String IntroduceParameterObjectWizard_fieldname_title;
+
+	public static String IntroduceParameterObjectWizard_fields_selection_label;
 
 	public static String IntroduceParameterObjectWizard_method_group;
 

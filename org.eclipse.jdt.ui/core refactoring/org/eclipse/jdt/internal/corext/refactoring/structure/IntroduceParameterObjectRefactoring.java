@@ -16,14 +16,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 
 import org.eclipse.ltk.core.refactoring.Change;
@@ -31,6 +32,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -54,6 +56,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -62,7 +65,6 @@ import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
@@ -129,13 +131,13 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 						return false;
 					}
 
-					public boolean visit(QualifiedName node) {
-						return false;
-					}
-
 					public boolean visit(SimpleName node) {
-						if (node.getIdentifier().equals(pi.getOldName()) && ASTResolving.isWriteAccess(node))
-							notWritten= false;
+						IBinding binding= node.resolveBinding();
+						if (binding instanceof IVariableBinding) {
+							IVariableBinding variable= (IVariableBinding) binding;
+							if (variable.isParameter() && variable.getName().equals(pi.getOldName()) && ASTResolving.isWriteAccess(node))
+								notWritten= false;
+						}
 						return false;
 					}
 
@@ -154,44 +156,46 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 
 			public void updateBody(MethodDeclaration methodDeclaration, CompilationUnitRewrite cuRewrite, RefactoringStatus result) {
 				if (cuRewrite.getCu().equals(fCompilationUnit)) {
-					final ASTRewrite rewriter= cuRewrite.getASTRewrite();
-					final AST ast= rewriter.getAST();
-					ImportRewrite imports= cuRewrite.getImportRewrite();
-					fParameterObjectFactory.createType(imports, ast, fCreateAsTopLevel);
-					TypeDeclaration parent= (TypeDeclaration) methodDeclaration.getParent();
-					createParameterClass(methodDeclaration, rewriter, imports, parent);
+					try {
+						final ASTRewrite rewriter= cuRewrite.getASTRewrite();
+						final AST ast= rewriter.getAST();
+						ImportRewrite imports= cuRewrite.getImportRewrite();
+						fParameterObjectFactory.createType(imports, ast, fCreateAsTopLevel);
+						TypeDeclaration parent= (TypeDeclaration) methodDeclaration.getParent();
+						createParameterClass(methodDeclaration, rewriter, imports, parent);
 
-					Block body= methodDeclaration.getBody();
-					ListRewrite block= rewriter.getListRewrite(body, Block.STATEMENTS_PROPERTY);
-					List managedParams= getParameterInfos();
-					for (Iterator iter= managedParams.iterator(); iter.hasNext();) {
-						final ParameterInfo pi= (ParameterInfo) iter.next();
-						if (isValidField(pi)) {
-							if (isReadOnly(pi, body)) {
-								body.accept(new ASTVisitor(false) {
-									public boolean visit(FieldAccess node) {
-										return false;
-									}
+						Block body= methodDeclaration.getBody();
+						ListRewrite block= rewriter.getListRewrite(body, Block.STATEMENTS_PROPERTY);
+						List managedParams= getParameterInfos();
+						for (Iterator iter= managedParams.iterator(); iter.hasNext();) {
+							final ParameterInfo pi= (ParameterInfo) iter.next();
+							if (isValidField(pi)) {
+								if (isReadOnly(pi, body)) {
+									body.accept(new ASTVisitor(false) {
 
-									public boolean visit(QualifiedName node) {
-										return false;
-									}
+										public boolean visit(SimpleName node) {
+											IBinding binding= node.resolveBinding();
+											if (binding instanceof IVariableBinding) {
+												IVariableBinding variable= (IVariableBinding) binding;
+												if (variable.isParameter() && variable.getName().equals(pi.getOldName()))
+													rewriter.replace(node, fParameterObjectFactory.createFieldReadAccess(pi, getParameterName(), ast), null);
+											}
+											return false;
+										}
 
-									public boolean visit(SimpleName node) {
-										if (node.getIdentifier().equals(pi.getOldName()))
-											rewriter.replace(node, fParameterObjectFactory.createFieldReadAccess(pi, getParameterName(), ast), null);
-										return false;
-									}
-
-									public boolean visit(SuperFieldAccess node) {
-										return false;
-									}
-								});
-							} else {
-								ExpressionStatement initializer= fParameterObjectFactory.createInitializer(pi, rewriter, getParameterName(), imports);
-								block.insertFirst(initializer, null);
+									});
+								} else {
+									ExpressionStatement initializer= fParameterObjectFactory.createInitializer(pi, rewriter, getParameterName(), imports);
+									block.insertFirst(initializer, null);
+								}
 							}
 						}
+					} catch (CoreException e) {
+						JavaPlugin.log(e);
+					} catch (MalformedTreeException e) {
+						JavaPlugin.log(e);
+					} catch (BadLocationException e) {
+						JavaPlugin.log(e);
 					}
 				}
 			}
@@ -237,10 +241,21 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 						} else {
 							// An unpack of existing array creations would be
 							// cool
-							for (int i= pi.getOldIndex(); i < nodes.size(); i++) {
-								ASTNode node= (ASTNode) nodes.get(i);
-								importNodeTypes(importer, node);
-								arguments.add(moveNode(node, rewrite));
+							boolean needsCopy= true;
+							if (pi.getOldIndex() < nodes.size() && nodes.get(pi.getOldIndex()) instanceof ArrayCreation) {
+								ArrayCreation creation= (ArrayCreation) nodes.get(pi.getOldIndex());
+								ITypeBinding binding= creation.resolveTypeBinding();
+								if (binding != null && binding.isAssignmentCompatible(pi.getNewTypeBinding())) {
+									arguments.add(moveNode(creation, rewrite));
+									needsCopy= false;
+								}
+							}
+							if (needsCopy) {
+								for (int i= pi.getOldIndex(); i < nodes.size(); i++) {
+									ASTNode node= (ASTNode) nodes.get(i);
+									importNodeTypes(importer, node);
+									arguments.add(moveNode(node, rewrite));
+								}
 							}
 						}
 					} else {
@@ -461,17 +476,18 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		fParameterObjectFactory.updateParameterPosition(fParameterObjectReference);
 	}
 
-	private void createParameterClass(MethodDeclaration methodDeclaration, ASTRewrite rewriter, ImportRewrite importRewrite, TypeDeclaration parent) {
+	private void createParameterClass(MethodDeclaration methodDeclaration, ASTRewrite rewriter, ImportRewrite importRewrite, TypeDeclaration parent) throws CoreException, MalformedTreeException, BadLocationException {
 		if (fCreateAsTopLevel) {
+			IJavaProject javaProject= fCompilationUnit.getJavaProject();
+			IPackageFragmentRoot fragment= getPackageFragmentRoot();
+			IPackageFragment packageFragment= fragment.getPackageFragment(fParameterObjectFactory.getPackage());
+			if (!packageFragment.exists()) {
+				fOtherChanges.add(new CreatePackageChange(packageFragment));
+			}
+			ICompilationUnit unit= packageFragment.getCompilationUnit(fParameterObjectFactory.getClassName() + ".java"); //$NON-NLS-1$
+			ICompilationUnit workingCopy= null;
+			workingCopy= unit.getWorkingCopy(null);
 			try {
-				IJavaProject javaProject= fCompilationUnit.getJavaProject();
-				IPackageFragmentRoot fragment= getPackageFragmentRoot();
-				IPackageFragment packageFragment= fragment.getPackageFragment(fParameterObjectFactory.getPackage());
-				if (!packageFragment.exists()) {
-					fOtherChanges.add(new CreatePackageChange(packageFragment));
-				}
-				ICompilationUnit unit= packageFragment.getCompilationUnit(fParameterObjectFactory.getClassName() + ".java"); //$NON-NLS-1$
-				ICompilationUnit workingCopy= unit.getWorkingCopy(new NullProgressMonitor());
 				String lineDelimiter= StubUtility.getLineDelimiterUsed(javaProject);
 				String fileComment= getFileComment(workingCopy, lineDelimiter);
 				String typeComment= getTypeComment(workingCopy, lineDelimiter);
@@ -481,7 +497,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 				ASTParser newParser= ASTParser.newParser(AST.JLS3);
 				newParser.setSource(workingCopy);
 				newParser.setResolveBindings(true);
-				CompilationUnit root= (CompilationUnit) newParser.createAST(new NullProgressMonitor());
+				CompilationUnit root= (CompilationUnit) newParser.createAST(null);
 				AST ast= root.getAST();
 				rewriter= ASTRewrite.create(ast);
 				ListRewrite types= rewriter.getListRewrite(root, CompilationUnit.TYPES_PROPERTY);
@@ -495,21 +511,14 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 
 				String charset= ResourceUtil.getFile(fCompilationUnit).getCharset(false);
 				Document document= new Document(content);
-				try {
-					rewriter.rewriteAST().apply(document);
-					TextEdit rewriteImports= importRewrite.rewriteImports(new NullProgressMonitor());
-					rewriteImports.apply(document);
-				} catch (Exception e) {
-					JavaPlugin.log(e);
-				}
+				rewriter.rewriteAST().apply(document);
+				TextEdit rewriteImports= importRewrite.rewriteImports(null);
+				rewriteImports.apply(document);
 				String docContent= document.get();
-				workingCopy.discardWorkingCopy();
 				CreateCompilationUnitChange compilationUnitChange= new CreateCompilationUnitChange(unit, docContent, charset);
 				fOtherChanges.add(compilationUnitChange);
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-			} catch (CoreException e) {
-				JavaPlugin.log(e);
+			} finally {
+				workingCopy.discardWorkingCopy();
 			}
 		} else {
 			ListRewrite bodyRewrite= rewriter.getListRewrite(parent, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
@@ -520,10 +529,8 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		}
 	}
 
-	public IPackageFragmentRoot getPackageFragmentRoot() throws JavaModelException {
-		IJavaProject javaProject= fCompilationUnit.getJavaProject();
-		return javaProject.findPackageFragmentRoot(fCompilationUnit.getPath().uptoSegment(2)); // XXX:
-		// Hack?
+	public IPackageFragmentRoot getPackageFragmentRoot() {
+		return (IPackageFragmentRoot) fCompilationUnit.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 	}
 
 	protected String getFileComment(ICompilationUnit parentCU, String lineDelimiter) throws CoreException {
@@ -534,18 +541,14 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 
 	}
 
-	protected String getTypeComment(ICompilationUnit parentCU, String lineDelimiter) {
+	protected String getTypeComment(ICompilationUnit parentCU, String lineDelimiter) throws CoreException {
 		if (fParameterObjectFactory.isCreateComments()) {
-			try {
-				StringBuffer typeName= new StringBuffer();
-				typeName.append(fParameterObjectFactory.getClassName());
-				String[] typeParamNames= new String[0];
-				String comment= CodeGeneration.getTypeComment(parentCU, typeName.toString(), typeParamNames, lineDelimiter);
-				if (comment != null && isValidComment(comment)) {
-					return comment;
-				}
-			} catch (CoreException e) {
-				JavaPlugin.log(e);
+			StringBuffer typeName= new StringBuffer();
+			typeName.append(fParameterObjectFactory.getClassName());
+			String[] typeParamNames= new String[0];
+			String comment= CodeGeneration.getTypeComment(parentCU, typeName.toString(), typeParamNames, lineDelimiter);
+			if (comment != null && isValidComment(comment)) {
+				return comment;
 			}
 		}
 		return null;
@@ -586,15 +589,17 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 	}
 
 	public IPackageFragment getPackageFragment() throws JavaModelException {
-		IJavaProject javaProject= fCompilationUnit.getJavaProject();
-		return javaProject.findPackageFragment(fCompilationUnit.getPath());
+		return (IPackageFragment) fCompilationUnit.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 	}
 
 	public String getEnclosingPackage() {
 		return fMethodDeclaration.resolveBinding().getDeclaringClass().getPackage().getName();
 	}
 
-	protected boolean doPerformImportRemoval() {
+	protected boolean doPerformImportRemoval(OccurrenceUpdate update) {
+		if (update instanceof DeclarationUpdate) {
+			return fCreateAsTopLevel;
+		}
 		return false;
 	}
 

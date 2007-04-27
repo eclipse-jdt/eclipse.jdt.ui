@@ -91,7 +91,7 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		runRefactoring(false, true, false, false, Collections.EMPTY_MAP, null, null, indexMap);
 	}
 	
-	public void donottestImportAddTopLevel() throws Exception { //XXX Enable later
+	public void testImportAddTopLevel() throws Exception { //XXX Enable later
 		createCaller(DEFAULT_SUB_DIR);
 		runRefactoring(true, false, false, false, Collections.EMPTY_MAP,"TestImportAddTopLevelParameter","p.parameters");
 		checkCaller(DEFAULT_SUB_DIR);

@@ -1526,7 +1526,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		public abstract void updateNode() throws JavaModelException;
 		
 		protected void registerImportRemoveNode(ASTNode node) {
-			if (doPerformImportRemoval())
+			if (doPerformImportRemoval(this))
 				getImportRemover().registerRemovedNode(node);
 		}
 
@@ -2604,7 +2604,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		fDefaultValueAdvisor= defaultValueAdvisor;
 	}
 
-	protected boolean doPerformImportRemoval() {
+	protected boolean doPerformImportRemoval(OccurrenceUpdate update) {
 		return true;
 	}
 }
