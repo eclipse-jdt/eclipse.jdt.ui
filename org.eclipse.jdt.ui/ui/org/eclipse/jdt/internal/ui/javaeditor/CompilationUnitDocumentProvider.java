@@ -1379,57 +1379,47 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			};
 		}
 		
-		// XXX: Work in progress 'Save As' case
-//		return new DocumentProviderOperation() {
-//
-//			protected void execute(IProgressMonitor monitor) throws CoreException {
-//				if (monitor == null)
-//					monitor= new NullProgressMonitor();
-//				
-//				monitor.beginTask("", 120); //$NON-NLS-1$
-//				
-//				try {
-//					getParentProvider().saveDocument(getSubProgressMonitor(monitor, 100), element, document, overwrite);
-//					
-//					if (!(element instanceof IFileEditorInput))
-//						return;
-//					
-//					ICompilationUnit unit= createCompilationUnit(((IFileEditorInput)element).getFile());
-//					if (unit == null)
-//						return;
-//					
-//					//Can't open non Java Project?
-////					if (!unit.isOpen())
-////						unit.open(getProgressMonitor());
-//		
-////					//Pkgexpl not correctly updated...
-//					boolean primary= JavaModelUtil.isPrimary(unit);
-//					try {
-//						if (primary)
-//							unit.becomeWorkingCopy(null, getProgressMonitor());
-//					
-//						notifyPostSaveListeners(unit, null, getSubProgressMonitor(monitor, 20));
-//					} finally {
-//						if (primary)
-//							unit.commitWorkingCopy(true, null);
-//					}
-//				} finally {
-//					monitor.done();
-//				}
-//            }
-//			
-//			/*
-//			 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider.DocumentProviderOperation#getSchedulingRule()
-//			 */
-//			public ISchedulingRule getSchedulingRule() {
-//				if (element instanceof IFileEditorInput) {
-//					IFile file= ((IFileEditorInput) element).getFile();
-//					return computeSchedulingRule(file);
-//				} else
-//					return null;
-//			}
-//		};
-		return null;
+		return new DocumentProviderOperation() {
+
+			protected void execute(IProgressMonitor monitor) throws CoreException {
+				if (monitor == null)
+					monitor= new NullProgressMonitor();
+				
+				monitor.beginTask("", 130); //$NON-NLS-1$
+				
+				try {
+					getParentProvider().saveDocument(getSubProgressMonitor(monitor, 100), element, document, overwrite);
+					
+					if (!(element instanceof IFileEditorInput))
+						return;
+					
+					ICompilationUnit unit= createCompilationUnit(((IFileEditorInput)element).getFile());
+					if (unit == null)
+						return;
+					
+					try {
+						unit= unit.getWorkingCopy(new WorkingCopyOwner() {}, getSubProgressMonitor(monitor, 5));
+						
+						notifyPostSaveListeners(unit, null, getSubProgressMonitor(monitor, 20));						
+					} finally {
+						unit.commitWorkingCopy(true, getSubProgressMonitor(monitor, 5));
+					}
+				} finally {
+					monitor.done();
+				}
+            }
+			
+			/*
+			 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider.DocumentProviderOperation#getSchedulingRule()
+			 */
+			public ISchedulingRule getSchedulingRule() {
+				if (element instanceof IFileEditorInput) {
+					IFile file= ((IFileEditorInput) element).getFile();
+					return computeSchedulingRule(file);
+				} else
+					return null;
+			}
+		};
 	}
 
 	/**
@@ -1553,7 +1543,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 						try {
 							long stamp= unit.getResource().getModificationStamp();
 							
-							listener.saved(unit, getSubProgressMonitor(monitor, 4));
+							listener.saved(unit, info == null, getSubProgressMonitor(monitor, 4));
 							
 							if (stamp != unit.getResource().getModificationStamp()) {
 								String msg= Messages.format(JavaEditorMessages.CompilationUnitDocumentProvider_error_saveParticipantSavedFile, participantName);
@@ -1591,18 +1581,15 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 								AbstractMarkerAnnotationModel markerModel= (AbstractMarkerAnnotationModel)info.fModel;
 								markerModel.resetMarkers();
 							}
+						} else if (buffer.hasUnsavedChanges()) {
+							try {
+								buffer.save(getSubProgressMonitor(monitor, 1), true);
+							} catch (JavaModelException e) {
+								msg= Messages.format("Error reverting changes after failure of save participant ''{0}''.", participantName); //$NON-NLS-1$
+								IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, msg, ex);
+								JavaPlugin.getDefault().getLog().log(status);
+							}
 						}
-						
-						// XXX: Work in progress 'Save As' case
-//						else if (buffer.hasUnsavedChanges()) {
-//							try {
-//								buffer.save(getSubProgressMonitor(monitor, 1), true);
-//							} catch (JavaModelException e) {
-//								message= Messages.format("Error reverting changes after failure of save participant ''{0}''.", participantName); //$NON-NLS-1$
-//								IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, ex);
-//								JavaPlugin.getDefault().getLog().log(status);
-//							}
-//						}
 					}
 				});
 			}

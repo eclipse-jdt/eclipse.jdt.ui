@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,9 +67,11 @@ public interface IPostSaveListener {
 	 * The compilation unit document provider can disable a listener that violates any of the above rules.</p> 
 	 *
 	 * @param compilationUnit the compilation unit which was saved
+	 * @param saveAs if the operation was a save as
 	 * @param monitor the progress monitor for reporting progress
 	 * @see CompilationUnitDocumentProvider
+	 * @throws CoreException if an exception occurred while executing this listener
 	 */
-	void saved(ICompilationUnit compilationUnit, IProgressMonitor monitor) throws CoreException;
+	void saved(ICompilationUnit compilationUnit, boolean saveAs, IProgressMonitor monitor) throws CoreException;
 
 }
