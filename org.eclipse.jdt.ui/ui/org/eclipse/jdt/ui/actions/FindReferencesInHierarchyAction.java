@@ -75,7 +75,7 @@ public class FindReferencesInHierarchyAction extends FindReferencesAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_REFERENCES_IN_HIERARCHY_ACTION);
 	}
 
-	QuerySpecification createQuery(IJavaElement element) throws JavaModelException {
+	QuerySpecification createQuery(IJavaElement element) throws JavaModelException, InterruptedException {
 		IType type= getType(element);
 		if (type == null) {
 			return super.createQuery(element);

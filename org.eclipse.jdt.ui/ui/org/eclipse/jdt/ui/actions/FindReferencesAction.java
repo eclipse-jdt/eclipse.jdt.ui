@@ -83,7 +83,7 @@ public class FindReferencesAction extends FindAction {
 		return IJavaSearchConstants.REFERENCES;
 	}	
 	
-	QuerySpecification createQuery(IJavaElement element) throws JavaModelException {
+	QuerySpecification createQuery(IJavaElement element) throws JavaModelException, InterruptedException {
 		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 		boolean isInsideJRE= factory.isInsideJRE(element);
 		

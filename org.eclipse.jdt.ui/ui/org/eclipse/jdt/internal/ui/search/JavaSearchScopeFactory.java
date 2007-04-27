@@ -80,17 +80,19 @@ public class JavaSearchScopeFactory {
 		return fgInstance;
 	}
 
-	public IWorkingSet[] queryWorkingSets() throws JavaModelException {
+	public IWorkingSet[] queryWorkingSets() throws JavaModelException, InterruptedException {
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		if (shell == null)
 			return null;
 		IWorkingSetSelectionDialog dialog= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSetSelectionDialog(shell, true);
-		if (dialog.open() == Window.OK) {
-			IWorkingSet[] workingSets= dialog.getSelection();
-			if (workingSets.length > 0)
-				return workingSets;
+		if (dialog.open() != Window.OK) {
+			throw new InterruptedException();
 		}
-		return null;
+			
+		IWorkingSet[] workingSets= dialog.getSelection();
+		if (workingSets.length > 0)
+			return workingSets;
+		return null; // 'no working set' selected
 	}
 
 	public IJavaSearchScope createJavaSearchScope(IWorkingSet[] workingSets, boolean includeJRE) {

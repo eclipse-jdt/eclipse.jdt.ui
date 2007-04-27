@@ -265,10 +265,12 @@ public abstract class FindAction extends SelectionDispatchAction {
 			performNewSearch(element);
 		} catch (JavaModelException ex) {
 			ExceptionHandler.handle(ex, getShell(), SearchMessages.Search_Error_search_notsuccessful_title, SearchMessages.Search_Error_search_notsuccessful_message); 
+		} catch (InterruptedException e) {
+			// cancelled
 		}
 	}
 
-	private void performNewSearch(IJavaElement element) throws JavaModelException {
+	private void performNewSearch(IJavaElement element) throws JavaModelException, InterruptedException {
 		JavaSearchQuery query= new JavaSearchQuery(createQuery(element));
 		if (query.canRunInBackground()) {
 			/*
@@ -293,7 +295,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 		}
 	}
 	
-	QuerySpecification createQuery(IJavaElement element) throws JavaModelException {
+	QuerySpecification createQuery(IJavaElement element) throws JavaModelException, InterruptedException {
 		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 		IJavaSearchScope scope= factory.createWorkspaceScope(true);
 		String description= factory.getWorkspaceScopeDescription(true);

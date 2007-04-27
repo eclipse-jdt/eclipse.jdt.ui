@@ -51,6 +51,8 @@ class SelectWorkingSetAction extends Action {
 			ExceptionHandler.handle(e, JavaPlugin.getActiveWorkbenchShell(), 
 					CallHierarchyMessages.SelectWorkingSetAction_error_title, 
 					CallHierarchyMessages.SelectWorkingSetAction_error_message); 
+		} catch (InterruptedException e) {
+			// cancel pressed
 		}
 	}
 }
