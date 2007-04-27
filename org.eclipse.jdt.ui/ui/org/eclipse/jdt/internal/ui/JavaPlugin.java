@@ -87,7 +87,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.DocumentAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
-import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantRegistry;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
@@ -370,10 +369,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 		
 		fThemeListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
-				if (IThemeManager.CHANGE_CURRENT_THEME.equals(event.getProperty())) {
+				if (IThemeManager.CHANGE_CURRENT_THEME.equals(event.getProperty()))
 					new JavaUIPreferenceInitializer().initializeDefaultPreferences();
-					SemanticHighlightings.initDefaults(getPreferenceStore());
-				}
 			}
 		};
 		PlatformUI.getWorkbench().getThemeManager().addPropertyChangeListener(fThemeListener);
