@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,12 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.swt.graphics.RGB;
 
+import org.eclipse.jface.resource.ColorRegistry;
+
+import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.jdt.ui.JavaUI;
+
 /**
  * Semantic highlighting
  */
@@ -24,9 +30,19 @@ public abstract class SemanticHighlighting {
 	public abstract String getPreferenceKey();
 
 	/**
-	 * @return the default text color
+	 * @return the default default text color
+	 * @since 3.3
 	 */
-	public abstract RGB getDefaultTextColor();
+	public abstract RGB getDefaultDefaultTextColor();
+	
+	/**
+	 * @return the default default text color
+	 */
+	public RGB getDefaultTextColor() {
+		return findRGB(PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry(),
+			getThemeColorKey(),
+			getDefaultDefaultTextColor());
+	}
 
 	/**
 	 * @return <code>true</code> if the text attribute bold is set by default
@@ -93,4 +109,25 @@ public abstract class SemanticHighlighting {
 	public boolean consumesLiteral(SemanticToken token) {
 		return false;
 	}
+	
+	private String getThemeColorKey() {
+		return JavaUI.ID_PLUGIN + "." + getPreferenceKey() + "Highlighting";  //$NON-NLS-1$//$NON-NLS-2$
+	}
+	
+	/**
+	 * Returns the RGB for the given key in the given color registry.
+	 * 
+	 * @param registry the color registry
+	 * @param key the key for the constant in the registry
+	 * @param defaultRGB the default RGB if no entry is found
+	 * @return RGB the RGB
+	 * @since 3.3
+	 */
+	private static RGB findRGB(ColorRegistry registry, String key, RGB defaultRGB) {
+		RGB rgb= registry.getRGB(key);
+		if (rgb != null)
+			return rgb;
+		return defaultRGB;
+	}
+	
 }
