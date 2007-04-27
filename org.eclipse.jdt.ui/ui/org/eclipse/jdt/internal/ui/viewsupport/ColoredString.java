@@ -123,6 +123,13 @@ public class ColoredString {
 		addRange(insertPos, new StyleRange(offset, length, style));
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return fBuffer.toString();
+	}
+	
 	private boolean hasRanges() {
 		return fRanges != null && !fRanges.isEmpty();
 	}
