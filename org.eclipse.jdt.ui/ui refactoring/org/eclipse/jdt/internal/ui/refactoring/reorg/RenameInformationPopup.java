@@ -11,11 +11,13 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
@@ -27,6 +29,8 @@ import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.ShellAdapter;
@@ -35,12 +39,11 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
@@ -57,7 +60,6 @@ import org.eclipse.jface.bindings.keys.IKeyLookup;
 import org.eclipse.jface.bindings.keys.KeyLookupFactory;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.Geometry;
 
 import org.eclipse.jface.text.ITextListener;
@@ -73,13 +75,9 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.keys.IBindingService;
-import org.eclipse.ui.part.PageBook;
+import org.eclipse.ui.progress.UIJob;
 
-import org.eclipse.ui.forms.HyperlinkGroup;
-import org.eclipse.ui.forms.HyperlinkSettings;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
@@ -113,13 +111,14 @@ public class RenameInformationPopup {
 					fEditor.getSite().getShell().removeControlListener(PopupVisibilityManager.this);
 					viewer.removeTextListener(PopupVisibilityManager.this);
 					viewer.removeViewportListener(PopupVisibilityManager.this);
-					if (fMenuImage != null)
+					if (fMenuImage != null) {
 						fMenuImage.dispose();
-					if (fMinimizedMenuManager != null)
-						fMinimizedMenuManager.dispose();
-					if (fTableMenuManager != null)
-						fTableMenuManager.dispose();
-					
+						fMenuImage= null;
+					}
+					if (fMenuManager != null) {
+						fMenuManager.dispose();
+						fMenuManager= null;
+					}
 					fRenameLinkedMode.cancel();
 				}
 			});
@@ -169,21 +168,6 @@ public class RenameInformationPopup {
 		}
 		
 		
-		private void updateVisibility() {
-			if (fPopup != null && !fPopup.isDisposed()) {
-				boolean visible= false;
-				if (fRenameLinkedMode.isCaretInLinkedPosition()) {
-					StyledText textWidget= fEditor.getViewer().getTextWidget();
-					Rectangle eArea= Geometry.toDisplay(textWidget, textWidget.getClientArea());
-					Rectangle pBounds= fPopup.getBounds();
-					if (eArea.intersects(pBounds)) {
-						visible= true;
-					}
-				}
-				fPopup.setVisible(visible);
-			}
-		}
-
 		public void mouseDoubleClick(MouseEvent e) {
 		}
 
@@ -205,19 +189,8 @@ public class RenameInformationPopup {
 		
 
 		public void textChanged(TextEvent event) {
-			updateEnablement();
 			updatePopupLocation(false);
 			updateVisibility(); //only for hiding outside editor area
-		}
-		
-		private void updateEnablement() {
-			if (fPopup != null && !fPopup.isDisposed()) {
-				boolean enabled= fRenameLinkedMode.isEnabled();
-				for (Iterator iterator= fRefactorEntries.iterator(); iterator.hasNext();) {
-					InfoEntry entry= (InfoEntry) iterator.next();
-					entry.setEnabled(enabled);
-				}
-			}
 		}
 		
 		public void viewportChanged(int verticalOffset) {
@@ -226,62 +199,8 @@ public class RenameInformationPopup {
 		}
 	}
 
-	private static class DisableAwareHyperlink extends Hyperlink {
-		//workaround for 169859: Hyperlink widget should be rendered gray when disabled
-		
-		public DisableAwareHyperlink(Composite parent, int style) {
-			super(parent, style);
-		}
-		
-		public Color getForeground() {
-			if (getEnabled())
-				return super.getForeground();
-			else
-				return getDisplay().getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW);
-		}
-	}
-	
-	private class InfoEntry {
-		private final Hyperlink fLink;
-		private final Label fBindingLabel;
-
-		public InfoEntry(Composite table, HyperlinkGroup hyperlinkGroup, String info, final Runnable runnable, String keybinding) {
-			final Display display= table.getDisplay();
-			fLink= new DisableAwareHyperlink(table, SWT.NONE);
-			fLink.setText(info);
-			fLink.setForeground(hyperlinkGroup.getForeground());
-			fLink.addHyperlinkListener(new HyperlinkAdapter() {
-				public void linkActivated(HyperlinkEvent e) {
-					//workaround for 157196: [Forms] Hyperlink listener notification throws AIOOBE when listener removed in callback
-					display.asyncExec(runnable);
-				}
-			});
-			hyperlinkGroup.add(fLink);
-			
-			if (keybinding != null) {
-				fBindingLabel= new Label(table, SWT.NONE);
-				fBindingLabel.setText(keybinding);
-				addMoveSupport(fPopup, fBindingLabel);
-			} else {
-				fBindingLabel= null;
-			}
-		}
-		
-		public void setEnabled(boolean enabled) {
-			fLink.setEnabled(enabled);
-			if (fBindingLabel != null)
-				fBindingLabel.setEnabled(enabled);
-		}
-		
-		public Hyperlink getLink() {
-			return fLink;
-		}
-	}
-	
 	private static final String DIALOG_SETTINGS_SECTION= "RenameInformationPopup"; //$NON-NLS-1$
 	private static final String SNAP_POSITION_KEY= "snap_position"; //$NON-NLS-1$
-	private static final String SNAP_POSITION_MINIMIZED_KEY= "snap_position_minimized"; //$NON-NLS-1$
-	private static final String IS_MINIMIZED_KEY= "is_minimized"; //$NON-NLS-1$
 
 	private static final int SNAP_POSITION_UNDER_RIGHT_FIELD= 0;
 	private static final int SNAP_POSITION_OVER_RIGHT_FIELD= 1;
@@ -289,39 +208,56 @@ public class RenameInformationPopup {
 	private static final int SNAP_POSITION_OVER_LEFT_FIELD= 3;
 	private static final int SNAP_POSITION_LOWER_RIGHT= 4;
 	
+	private static final int POPUP_VISIBILITY_DELAY= 300;
+
+	/**
+	 * Offset of info hover arrow from the left or right side.
+	 */
+	private static final int HAO= 10;
+
+	/**
+	 * Width of info hover arrow.
+	 */
+	private static final int HAW= 8;
+
+	/**
+	 * Height of info hover arrow.
+	 */
+	private static final int HAH= 10;
+
+	/**
+	 * Gap between linked position and popup.
+	 */
+	private static final int GAP= 2;
+
 	private final CompilationUnitEditor fEditor;
 	private final RenameLinkedMode fRenameLinkedMode;
 	
 	private int fSnapPosition;
-	private boolean fIsMinimized;
 	private Shell fPopup;
-	private List/*<InfoEntry>*/ fRefactorEntries;
+	private GridLayout fPopupLayout;
+	private Region fRegion;
+
 	private Image fMenuImage;
-	private MenuManager fMinimizedMenuManager;
-	private MenuManager fTableMenuManager;
+	private MenuManager fMenuManager;
+	private String fOpenDialogBinding= ""; //$NON-NLS-1$
 	private boolean fIsMenuUp= false;
+	
+	private boolean fDelayJobFinished= false;
 	
 	public RenameInformationPopup(CompilationUnitEditor editor, RenameLinkedMode renameLinkedMode) {
 		fEditor= editor;
 		fRenameLinkedMode= renameLinkedMode;
-		fIsMinimized= getDialogSettings().getBoolean(IS_MINIMIZED_KEY);
 		restoreSnapPosition();
 	}
 
 	private void restoreSnapPosition() {
 		IDialogSettings settings= getDialogSettings();
-		if (fIsMinimized) {
-			try {
-				fSnapPosition= settings.getInt(SNAP_POSITION_MINIMIZED_KEY);
-			} catch (NumberFormatException e) {
-				fSnapPosition= SNAP_POSITION_LOWER_RIGHT;
-			}
-		} else {
-			try {
-				fSnapPosition= settings.getInt(SNAP_POSITION_KEY);
-			} catch (NumberFormatException e) {
-				fSnapPosition= SNAP_POSITION_UNDER_LEFT_FIELD;
-			}
+		try {
+			fSnapPosition= settings.getInt(SNAP_POSITION_KEY);
+		} catch (NumberFormatException e) {
+			// default:
+			fSnapPosition= SNAP_POSITION_UNDER_LEFT_FIELD;
 		}
 	}
 
@@ -330,24 +266,22 @@ public class RenameInformationPopup {
 	}
 
 	public void open() {
-		ISourceViewer viewer= fEditor.getViewer();
+		// Must cache here, since editor context is not available in menu from popup shell:
+		fOpenDialogBinding= getOpenDialogBinding();
 		
 		Shell workbenchShell= fEditor.getSite().getShell();
 		final Display display= workbenchShell.getDisplay();
 		
-		fPopup= new Shell(workbenchShell, SWT.ON_TOP | SWT.NO_TRIM);
-		GridLayout shellLayout= new GridLayout();
-		shellLayout.marginWidth= 1;
-		shellLayout.marginHeight= 1;
-		fPopup.setLayout(shellLayout);
-		fPopup.setBackground(viewer.getTextWidget().getForeground());
+		fPopup= new Shell(workbenchShell, SWT.ON_TOP | SWT.NO_TRIM | SWT.TOOL);
+		fPopupLayout= new GridLayout(2, false);
+		fPopupLayout.marginWidth= 1;
+		fPopupLayout.marginHeight= 1;
+		fPopupLayout.marginLeft= 4;
+		fPopupLayout.horizontalSpacing= 0;
+		fPopup.setLayout(fPopupLayout);
 		
-		createTable(fPopup);
-		
-		fPopup.pack();
+		createContent(fPopup);
 		updatePopupLocation(true);
-		
-		addMoveSupport(fPopup, fPopup);
 		new PopupVisibilityManager().start();
 		
 		// Leave linked mode when popup loses focus
@@ -370,11 +304,30 @@ public class RenameInformationPopup {
 			}
 		});
 		
+		fPopup.addPaintListener(new PaintListener() {
+			public void paintControl(PaintEvent pe) {
+//				if (!CARBON) { //TODO: why does ControlDecoration not draw border on carbon?
+					pe.gc.drawPolygon(getPolygon(true));
+//				}
+			}
+		});
+		
 //		fPopup.moveBelow(null); // make sure hovers are on top of the info popup
 // XXX workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=170774
-		fPopup.moveBelow(workbenchShell.getShells()[0]);
+//		fPopup.moveBelow(workbenchShell.getShells()[0]);
 		
-		fPopup.setVisible(true);
+		UIJob delayJob= new UIJob(display, ReorgMessages.RenameInformationPopup_delayJobName) {
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				fDelayJobFinished= true;
+				if (fPopup != null && ! fPopup.isDisposed()) {
+					updateVisibility();
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		delayJob.setSystem(true);
+		delayJob.setPriority(Job.INTERACTIVE);
+		delayJob.schedule(POPUP_VISIBILITY_DELAY); 
 	}
 
 	public void close() {
@@ -383,6 +336,11 @@ public class RenameInformationPopup {
 				fPopup.close();
 			}
 			fPopup= null;
+		}
+		if (fRegion != null) {
+			if (! fRegion.isDisposed()) {
+				fRegion.dispose();
+			}
 		}
 	}
 	
@@ -394,11 +352,32 @@ public class RenameInformationPopup {
 		if (! force && fSnapPosition == SNAP_POSITION_LOWER_RIGHT)
 			return;
 		
+		packPopup();
 		Point loc= computePopupLocation(fSnapPosition);
 		if (loc != null) {
 			fPopup.setLocation(loc);
 			// XXX workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=170774
-			fPopup.moveBelow(fEditor.getSite().getShell().getShells()[0]);
+//			fPopup.moveBelow(fEditor.getSite().getShell().getShells()[0]);
+		}
+	}
+
+	private void updateVisibility() {
+		if (fPopup != null && !fPopup.isDisposed() && fDelayJobFinished) {
+			boolean visible= false;
+			//TODO: Check for visibility of linked position, not whether popup is outside of editor?
+			if (fRenameLinkedMode.isCaretInLinkedPosition()) {
+				StyledText textWidget= fEditor.getViewer().getTextWidget();
+				Rectangle eArea= Geometry.toDisplay(textWidget, textWidget.getClientArea());
+				Rectangle pBounds= fPopup.getBounds();
+				pBounds.x-= GAP;
+				pBounds.y-= GAP;
+				pBounds.width+= 2 * GAP;
+				pBounds.height+= 2 * GAP;
+				if (eArea.intersects(pBounds)) {
+					visible= true;
+				}
+			}
+			fPopup.setVisible(visible);
 		}
 	}
 
@@ -416,7 +395,7 @@ public class RenameInformationPopup {
 				StyledText eWidget= fEditor.getViewer().getTextWidget();
 				Rectangle eBounds= eWidget.getClientArea();
 				Point eLowerRight= eWidget.toDisplay(eBounds.x + eBounds.width, eBounds.y + eBounds.height);
-				Point pSize= fPopup.getSize();
+				Point pSize= getExtent();
 				return new Point(eLowerRight.x - pSize.x - 5, eLowerRight.y - pSize.y - 5);
 			}
 			
@@ -432,13 +411,13 @@ public class RenameInformationPopup {
 				
 				StyledText textWidget= viewer.getTextWidget();
 				Point pos= textWidget.getLocationAtOffset(widgetOffset);
-				Point pSize= fPopup.getSize();
+				Point pSize= getExtent();
 				if (snapPosition == SNAP_POSITION_OVER_RIGHT_FIELD) {
-					pos.y-= pSize.y;
+					pos.y-= pSize.y + GAP;
 				} else {
-					pos.y+= textWidget.getLineHeight(widgetOffset);
+					pos.y+= textWidget.getLineHeight(widgetOffset) + GAP;
 				}
-				pos.x+= 2;
+				pos.x+= GAP;
 				Point dPos= textWidget.toDisplay(pos);
 				Rectangle displayBounds= textWidget.getDisplay().getClientArea();
 				Rectangle dPopupRect= Geometry.createRectangle(dPos, pSize);
@@ -459,7 +438,9 @@ public class RenameInformationPopup {
 				
 				StyledText textWidget= viewer.getTextWidget();
 				Point pos= textWidget.getLocationAtOffset(widgetOffset);
-				Point pSize= fPopup.getSize();
+				Point pSize= getExtent();
+				pSize.y+= HAH + 1;
+				pos.x-= HAO;
 				if (snapPosition == SNAP_POSITION_OVER_LEFT_FIELD) {
 					pos.y-= pSize.y;
 				} else {
@@ -485,7 +466,7 @@ public class RenameInformationPopup {
 				
 				final Point POPUP_SOURCE= popupShell.getLocation();
 				final StyledText textWidget= fEditor.getViewer().getTextWidget();
-				Point pSize= fPopup.getSize();
+				Point pSize= getExtent();
 				int originalSnapPosition= fSnapPosition;
 				
 				/*
@@ -545,201 +526,192 @@ public class RenameInformationPopup {
 				tracker.close();
 				tracker.dispose();
 				if (committed) {
-					getDialogSettings().put(fIsMinimized ? SNAP_POSITION_MINIMIZED_KEY : SNAP_POSITION_KEY, fSnapPosition);
+					getDialogSettings().put(SNAP_POSITION_KEY, fSnapPosition);
 				} else {
 					fSnapPosition= originalSnapPosition;
 				}
 				updatePopupLocation(true);
-				fEditor.getSite().getShell().setActive();
+				activateEditor();
 			}
 		});
 	}
+		
+	private void packPopup() {
+		boolean isUnderLeft= fSnapPosition == SNAP_POSITION_UNDER_LEFT_FIELD;
+		boolean isOverLeft= fSnapPosition == SNAP_POSITION_OVER_LEFT_FIELD;
+		fPopupLayout.marginTop= isUnderLeft ? HAH : 0;
+		fPopupLayout.marginBottom= isOverLeft ? HAH + 1 : 0;
+		fPopup.pack();
+		
+		Region oldRegion= fRegion;
+		if (isUnderLeft || isOverLeft) {
+			fRegion= new Region();
+			fRegion.add(getPolygon(false));
+			fPopup.setRegion(fRegion);
+			Rectangle bounds= fRegion.getBounds();
+			fPopup.setSize(bounds.width, bounds.height + 1);
+		} else {
+			fRegion= null;
+			fPopup.setRegion(null);
+		}
+		
+		if (oldRegion != null) {
+			oldRegion.dispose();
+		}
+	}
 	
-	private Control createTable(Composite parent) {
-		final Display display= parent.getDisplay();
+	Point getExtent() {
+		Point e = fPopup.getSize();
+		switch (fSnapPosition) {
+			case SNAP_POSITION_UNDER_LEFT_FIELD:
+				e.y -= HAH;
+				break;
+			case SNAP_POSITION_OVER_LEFT_FIELD:
+				e.y -= HAH + 1;
+				break;
+		}
+		return e;
+	}
+	
+	int[] getPolygon(boolean border) {
+		Point e = getExtent();
+		int b = border ? 1 : 0;
+		if (true /*arrowOnLeft*/) {
+			switch (fSnapPosition) {
+				case SNAP_POSITION_OVER_LEFT_FIELD:
+					return new int[] {
+							0, 0,
+							e.x - b, 0,
+							e.x - b, e.y - b,
+							HAO + HAW, e.y - b,
+							HAO + HAW / 2, e.y + HAH - b,
+							HAO, e.y - b,
+							0, e.y - b,
+							0, 0 };
+
+				case SNAP_POSITION_UNDER_LEFT_FIELD:
+					return new int[] {
+							0, HAH,
+							HAO + b, HAH,
+							HAO + HAW / 2, b,
+							HAO + HAW - b, HAH,
+							e.x - b, HAH,
+							e.x - b, e.y + HAH - b,
+							0, e.y + HAH - b,
+							0, HAH };
+					
+				default:
+					return new int[] {
+							0, 0,
+							e.x - b, 0,
+							e.x - b, e.y - b,
+							0, e.y - b,
+							0, 0 };
+			}
+		}
+		//TODO: BiDi?
+		return new int[] { 0, 0, e.x - b, 0, e.x - b, e.y - b,
+				e.x - HAO - b, e.y - b, e.x - HAO - HAW / 2, e.y + HAH - b,
+				e.x - HAO - HAW, e.y - b, 0, e.y - b, 0, 0 };
+	}
+	
+	private void createContent(Composite parent) {
+		Display display= parent.getDisplay();
 		Color foreground= display.getSystemColor(SWT.COLOR_INFO_FOREGROUND);
 		Color background= display.getSystemColor(SWT.COLOR_INFO_BACKGROUND);
+		addMoveSupport(fPopup, parent);
 		
-		final PageBook book= new PageBook(parent, SWT.NONE);
-		final Composite table= new Composite(book, SWT.NONE);
-		final Composite minimized= new Composite(book, SWT.NONE);
+		StyledText hint= new StyledText(fPopup, SWT.READ_ONLY | SWT.SINGLE);
+		String enterKeyName= getEnterBinding();
+		String hintTemplate= ReorgMessages.RenameInformationPopup_EnterNewName;
+		hint.setText(Messages.format(hintTemplate, enterKeyName));
+		hint.setForeground(foreground);
+		hint.setStyleRange(new StyleRange(hintTemplate.indexOf("{0}"), enterKeyName.length(), null, null, SWT.BOLD)); //$NON-NLS-1$
+		hint.setEnabled(false); // text must not be selectable
+		addMoveSupport(fPopup, hint);
 		
-		GridLayout tableLayout= new GridLayout(2, false);
-		tableLayout.marginHeight= 4; 
-		tableLayout.marginWidth= 4;
-		tableLayout.horizontalSpacing= 10;
-		tableLayout.verticalSpacing= 2;
-		table.setLayout(tableLayout);
+		addViewMenu(parent);
 		
-		HyperlinkGroup refactorGroup= new HyperlinkGroup(display);
-		refactorGroup.setForeground(foreground);
-		refactorGroup.setHyperlinkUnderlineMode(HyperlinkSettings.UNDERLINE_HOVER);
-		fRefactorEntries= new ArrayList();
+		recursiveSetBackgroundColor(parent, background);
 		
-		InfoEntry refactorEntry= new InfoEntry(
-				table,
-				refactorGroup,
-				ReorgMessages.RenameInformationPopup_refactor_rename,
-				new Runnable() {
-					public void run() {
-						fRenameLinkedMode.doRename(false);
-					}
-				},
-				KeyStroke.getInstance(KeyLookupFactory.getDefault().formalKeyLookup(IKeyLookup.CR_NAME)).format());
-		refactorEntry.getLink().setFont(JFaceResources.getFontRegistry().getBold("")); //$NON-NLS-1$ // bold OS font
-		fRefactorEntries.add(refactorEntry);
-		
-		InfoEntry previewEntry= new InfoEntry(
-				table,
-				refactorGroup,
-				ReorgMessages.RenameInformationPopup_preview,
-				new Runnable() {
-					public void run() {
-						fRenameLinkedMode.doRename(true);
-					}
-				},
-				KeyStroke.getInstance(SWT.CTRL, KeyLookupFactory.getDefault().formalKeyLookup(IKeyLookup.CR_NAME)).format());
-		fRefactorEntries.add(previewEntry);
-
-		new InfoEntry(
-				table,
-				refactorGroup,
-				ReorgMessages.RenameInformationPopup_open_dialog,
-				new Runnable() {
-					public void run() {
-						fRenameLinkedMode.startFullDialog();
-					}
-				},
-				getOpenDialogBinding());
-		
-		HyperlinkGroup cancelGroup= new HyperlinkGroup(display);
-		cancelGroup.setForeground(foreground);
-		cancelGroup.setHyperlinkUnderlineMode(HyperlinkSettings.UNDERLINE_HOVER);
-		
-		new InfoEntry(
-				table,
-				cancelGroup,
-				ReorgMessages.RenameInformationPopup_leave,
-				new Runnable() {
-					public void run() {
-						fRenameLinkedMode.cancel();
-					}
-				},
-				KeyStroke.getInstance(KeyLookupFactory.getDefault().formalKeyLookup(IKeyLookup.ESC_NAME)).format());
-		
-		addMoveSupport(fPopup, table);
-		
-		ToolBar tableToolBar= addViewMenu(book, table, minimized, true);
-		GridData gridData= new GridData();
-		gridData.exclude= true;
-		tableToolBar.setLayoutData(gridData);
-		Point tableSize= table.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-		// having the button overlap the keybinding for refactor is OK, since Ctrl+Enter is always wider than Enter...
-		tableToolBar.setLocation(tableSize.x - tableToolBar.getSize().x, 0);
-		
-		// minimized:
-		GridLayout minimizedLayout= new GridLayout(2, false);
-		minimizedLayout.marginWidth= minimizedLayout.marginHeight= 0;
-		minimizedLayout.horizontalSpacing= 0;
-		minimized.setLayout(minimizedLayout);
-		
-		Composite minimizedBorder= new Composite(minimized, SWT.NONE);
-		GridLayout minimizedBorderLayout= new GridLayout(1, false);
-		minimizedBorderLayout.marginHeight= tableLayout.marginHeight; 
-		minimizedBorderLayout.marginWidth= tableLayout.marginWidth;
-		minimizedBorder.setLayout(minimizedBorderLayout);
-		
-		InfoEntry minRefactorEntry= new InfoEntry(
-				minimizedBorder,
-				refactorGroup,
-				ReorgMessages.RenameInformationPopup_refactor_rename,
-				new Runnable() {
-					public void run() {
-						fRenameLinkedMode.doRename(false);
-					}
-				},
-				null);
-		minRefactorEntry.getLink().setFont(JFaceResources.getFontRegistry().getBold("")); //$NON-NLS-1$ // bold OS font
-		fRefactorEntries.add(minRefactorEntry);
-		
-		addMoveSupport(fPopup, minimized);
-		addMoveSupport(fPopup, minimizedBorder);
-		
-		addViewMenu(book, table, minimized, false);
-		
-		recursiveSetBackgroundColor(book, background);
-		book.showPage(fIsMinimized ? minimized : table);
-		return table;
 	}
 
-	private ToolBar addViewMenu(final PageBook book, final Composite table, final Composite minimized, final boolean addToTable) {
-		final ToolBar toolBar= new ToolBar(addToTable ? table : minimized, SWT.FLAT);
+	private ToolBar addViewMenu(final Composite parent) {
+		final ToolBar toolBar= new ToolBar(parent, SWT.FLAT);
 		final ToolItem menuButton = new ToolItem(toolBar, SWT.PUSH, 0);
 		fMenuImage= JavaPluginImages.DESC_ELCL_VIEW_MENU.createImage();
 		menuButton.setImage(fMenuImage);
 		menuButton.setToolTipText(ReorgMessages.RenameInformationPopup_menu);
 		toolBar.addMouseListener(new MouseAdapter() {
 			public void mouseDown(MouseEvent e) {
-				showMenu(book, table, minimized, addToTable, toolBar);
+				showMenu(parent, toolBar);
 			}
 		});
 		menuButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				showMenu(book, table, minimized, addToTable, toolBar);
+				showMenu(parent, toolBar);
 			}
 		});
 		toolBar.pack();
 		return toolBar;
 	}
 
-	private void showMenu(PageBook book, Composite table, Composite minimized, boolean addToTable, ToolBar toolBar) {
-		MenuManager menuManager;
-		if (addToTable) {
-			if (fTableMenuManager == null)
-				fTableMenuManager= createMenuManager(book, table, minimized);
-			menuManager= fTableMenuManager;
-		} else {
-			if (fMinimizedMenuManager == null)
-				fMinimizedMenuManager= createMenuManager(book, table, minimized);
-			menuManager= fMinimizedMenuManager;
-		}
-		Menu menu= menuManager.createContextMenu(toolBar);
+	private void showMenu(Composite parent, ToolBar toolBar) {
+		Menu menu= getMenuManager(parent).createContextMenu(toolBar);
 		menu.setLocation(toolBar.toDisplay(0, toolBar.getSize().y));
 		fIsMenuUp= true;
 		menu.setVisible(true);
 	}
 
-	private MenuManager createMenuManager(final PageBook book, final Composite table, final Composite minimized) {
-		MenuManager menuManager= new MenuManager();
-		menuManager.setRemoveAllWhenShown(true);
-		menuManager.addMenuListener(new IMenuListener2() {
+	private MenuManager getMenuManager(final Composite parent) {
+		if (fMenuManager != null) {
+			return fMenuManager;
+		}
+		
+		fMenuManager= new MenuManager();
+		fMenuManager.setRemoveAllWhenShown(true);
+
+		fMenuManager.addMenuListener(new IMenuListener2() {
 			public void menuAboutToHide(IMenuManager manager) {
 				fIsMenuUp= false;
 			}
 			public void menuAboutToShow(IMenuManager manager) {
-				IAction minMaxAction= new Action(
-						fIsMinimized ? ReorgMessages.RenameInformationPopup_restore : ReorgMessages.RenameInformationPopup_minimize,
-						SWT.PUSH) {
+				IAction refactorAction= new Action(ReorgMessages.RenameInformationPopup_RenameInWorkspace) {
 					public void run() {
-						book.showPage(fIsMinimized ? table : minimized);
-						fPopup.pack();
-						fIsMinimized= ! fIsMinimized;
-						getDialogSettings().put(IS_MINIMIZED_KEY, fIsMinimized); 
-						restoreSnapPosition();
-						updatePopupLocation(true);
-						fEditor.getSite().getShell().setActive();
+						activateEditor();
+						fRenameLinkedMode.doRename(false);
 					}
 				};
-				manager.add(minMaxAction);
+				refactorAction.setAccelerator(SWT.CR);
+				manager.add(refactorAction);
 				
-				manager.add(new Separator());
-				addMoveMenuItem(manager, SNAP_POSITION_UNDER_LEFT_FIELD, ReorgMessages.RenameInformationPopup_snap_under_left);
-				addMoveMenuItem(manager, SNAP_POSITION_UNDER_RIGHT_FIELD, ReorgMessages.RenameInformationPopup_snap_under_right);
-				addMoveMenuItem(manager, SNAP_POSITION_OVER_LEFT_FIELD, ReorgMessages.RenameInformationPopup_snap_over_left);
-				addMoveMenuItem(manager, SNAP_POSITION_OVER_RIGHT_FIELD, ReorgMessages.RenameInformationPopup_snap_over_right);
-				addMoveMenuItem(manager, SNAP_POSITION_LOWER_RIGHT, ReorgMessages.RenameInformationPopup_snap_bottom_right);
+				IAction previewAction= new Action(ReorgMessages.RenameInformationPopup_Preview) {
+					public void run() {
+						activateEditor();
+						fRenameLinkedMode.doRename(true);
+					}
+				};
+				previewAction.setAccelerator(SWT.CTRL | SWT.CR);
+				manager.add(previewAction);
 				
+				IAction openDialogAction= new Action(ReorgMessages.RenameInformationPopup_OpenDialog + '\t' + fOpenDialogBinding) {
+					public void run() {
+						activateEditor();
+						fRenameLinkedMode.startFullDialog();
+					}
+				};
+				manager.add(openDialogAction);
+								
 				manager.add(new Separator());
+				
+				MenuManager subMenuManager= new MenuManager(ReorgMessages.RenameInformationPopup_SnapTo);
+				addMoveMenuItem(subMenuManager, SNAP_POSITION_UNDER_LEFT_FIELD, ReorgMessages.RenameInformationPopup_snap_under_left);
+				addMoveMenuItem(subMenuManager, SNAP_POSITION_UNDER_RIGHT_FIELD, ReorgMessages.RenameInformationPopup_snap_under_right);
+				addMoveMenuItem(subMenuManager, SNAP_POSITION_OVER_LEFT_FIELD, ReorgMessages.RenameInformationPopup_snap_over_left);
+				addMoveMenuItem(subMenuManager, SNAP_POSITION_OVER_RIGHT_FIELD, ReorgMessages.RenameInformationPopup_snap_over_right);
+				addMoveMenuItem(subMenuManager, SNAP_POSITION_LOWER_RIGHT, ReorgMessages.RenameInformationPopup_snap_bottom_right);
+				manager.add(subMenuManager);
+				
 				IAction prefsAction= new Action(ReorgMessages.RenameInformationPopup_preferences) {
 					public void run() {
 						fRenameLinkedMode.cancel();
@@ -751,22 +723,30 @@ public class RenameInformationPopup {
 				manager.add(prefsAction);
 			}
 		});
-		return menuManager;
+		return fMenuManager;
 	}
 
 	private void addMoveMenuItem(IMenuManager manager, final int snapPosition, String text) {
 		IAction action= new Action(text, IAction.AS_RADIO_BUTTON) {
 			public void run() {
 				fSnapPosition= snapPosition;
-				getDialogSettings().put(fIsMinimized ? SNAP_POSITION_MINIMIZED_KEY : SNAP_POSITION_KEY, fSnapPosition);
+				getDialogSettings().put(SNAP_POSITION_KEY, fSnapPosition);
 				updatePopupLocation(true);
-				fEditor.getSite().getShell().setActive();
+				activateEditor();
 			}
 		};
 		action.setChecked(fSnapPosition == snapPosition);
 		manager.add(action);
 	}
 	
+	private static String getEnterBinding() {
+		return KeyStroke.getInstance(KeyLookupFactory.getDefault().formalKeyLookup(IKeyLookup.CR_NAME)).format();
+	}
+
+	/**
+	 * WARNING: only works in workbench window context!
+	 * @return the keybinding for Refactor &gt; Rename
+	 */
 	private static String getOpenDialogBinding() {
 		IBindingService bindingService= (IBindingService)PlatformUI.getWorkbench().getAdapter(IBindingService.class);
 		if (bindingService == null)
@@ -794,5 +774,9 @@ public class RenameInformationPopup {
 		if (fPopup == activeShell)
 			return true;
 		return false;
+	}
+
+	private void activateEditor() {
+		fEditor.getSite().getShell().setActive();
 	}
 }
