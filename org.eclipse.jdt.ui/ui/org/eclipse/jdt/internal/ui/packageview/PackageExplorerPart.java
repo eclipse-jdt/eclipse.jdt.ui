@@ -1354,6 +1354,9 @@ public class PackageExplorerPart extends ViewPart
 		Object input= context.getInput();
 		if (input instanceof IEditorInput) {
 			Object elementOfInput= JavaUI.getEditorInputJavaElement((IEditorInput)context.getInput());
+			if (elementOfInput == null) {
+				elementOfInput= ((IEditorInput) input).getAdapter(IFile.class);
+			}
 			return elementOfInput != null && (tryToReveal(elementOfInput) == IStatus.OK);
 		}
 
