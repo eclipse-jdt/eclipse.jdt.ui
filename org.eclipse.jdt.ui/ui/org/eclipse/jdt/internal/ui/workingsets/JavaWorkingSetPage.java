@@ -74,6 +74,7 @@ import org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
@@ -140,6 +141,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		label.setLayoutData(gd);
 
 		fTree= new CheckboxTreeViewer(composite, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+		ColoredViewersManager.install(fTree);
 		gd= new GridData(GridData.FILL_BOTH | GridData.GRAB_VERTICAL);
 		gd.heightHint= convertHeightInCharsToPixels(15);
 		fTree.getControl().setLayoutData(gd);
