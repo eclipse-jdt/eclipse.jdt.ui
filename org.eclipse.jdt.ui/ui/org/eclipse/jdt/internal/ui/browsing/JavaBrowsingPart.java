@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,7 +47,6 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.util.TransferDragSourceListener;
 import org.eclipse.jface.util.TransferDropTargetListener;
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
@@ -88,7 +87,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
-import org.eclipse.search.ui.ISearchResultView;
 import org.eclipse.search.ui.ISearchResultViewPart;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -107,8 +105,8 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.actions.BuildActionGroup;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
@@ -128,7 +126,6 @@ import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
-import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
@@ -322,8 +319,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		}
 	}
 
-	/**
-	 * Creates the search list inner viewer.
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createPartControl(Composite parent) {
 		Assert.isTrue(fViewer == null);
@@ -385,8 +382,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		setHelp();
 	}
 
-	/**
-	 * Answer the property defined by key.
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.part.WorkbenchPart#getAdapter(java.lang.Class)
 	 */
 	public Object getAdapter(Class key) {
 		if (key == IShowInSource.class) {
@@ -400,6 +397,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	/**
 	 * Returns the <code>IShowInSource</code> for this view.
+	 * @return returns the <code>IShowInSource</code>
 	 */
 	protected IShowInSource getShowInSource() {
 		return new IShowInSource() {
@@ -411,7 +409,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		};
 	}
 
-	protected DecoratingLabelProvider createDecoratingLabelProvider(JavaUILabelProvider provider) {
+	protected DecoratingJavaLabelProvider createDecoratingLabelProvider(JavaUILabelProvider provider) {
 //		XXX: Work in progress for problem decorator being a workbench decorator//
 //		return new ExcludingDecoratingLabelProvider(provider, decorationMgr, "org.eclipse.jdt.ui.problem.decorator"); //$NON-NLS-1$
 		return new DecoratingJavaLabelProvider(provider);
@@ -526,9 +524,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	protected void fillToolBar(IToolBarManager tbm) {
 	}
 
-	/**
-	 * Called when the context menu is about to open.
-	 * Override to add your own context dependent menu contributions.
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.action.IMenuListener#menuAboutToShow(org.eclipse.jface.action.IMenuManager)
 	 */
 	public void menuAboutToShow(IMenuManager menu) {
 		JavaPlugin.createStandardGroups(menu);
@@ -604,6 +601,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	/**
 	 * Returns the shell to use for opening dialogs.
 	 * Used in this class, and in the actions.
+	 * @return returns the shell
 	 */
 	Shell getShell() {
 		return fViewer.getControl().getShell();
@@ -615,6 +613,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	/**
 	 * Returns the selection provider.
+	 * @return the selection provider
 	 */
 	ISelectionProvider getSelectionProvider() {
 		return fViewer;
@@ -637,11 +636,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 * @return	<code>true</code> if the given element is a valid element
 	 */
 	protected boolean isValidElement(Object element) {
-		if (element == null)
+		if (!(element instanceof IJavaElement)) {
 			return false;
-		element= getSuitableJavaElement(element);
-		if (element == null)
-			return false;
+		}
 		Object input= getViewer().getInput();
 		if (input == null)
 			return false;
@@ -698,7 +695,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	private boolean isSearchResultView(IWorkbenchPart part) {
-		return SearchUtil.isSearchPlugInActivated() && (part instanceof ISearchResultView || part instanceof ISearchResultViewPart);
+		return SearchUtil.isSearchPlugInActivated() && part instanceof ISearchResultViewPart;
 	}
 
 	protected boolean needsToProcessSelectionChanged(IWorkbenchPart part, ISelection selection) {
@@ -801,6 +798,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	/**
 	 * Returns the tool tip text for the given element.
+	 * @param element the element
+	 * @return the tooltip for the element
 	 */
 	String getToolTipText(Object element) {
 		String result;
@@ -825,6 +824,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		return Messages.format(JavaBrowsingMessages.JavaBrowsingPart_toolTip2, new String[] { result, ws.getLabel() });
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.part.WorkbenchPart#getTitleToolTip()
+	 */
 	public String getTitleToolTip() {
 		if (fViewer == null)
 			return super.getTitleToolTip();
@@ -862,6 +864,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 * Creates the viewer of this part.
 	 *
 	 * @param parent	the parent for the viewer
+	 * @return the created viewer
 	 */
 	protected StructuredViewer createViewer(Composite parent) {
 		return new ProblemTableViewer(parent, SWT.MULTI);
@@ -881,6 +884,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	/**
 	 * Creates the content provider of this part.
+	 * @return the content provider
 	 */
 	protected IContentProvider createContentProvider() {
 		return new JavaBrowsingContentProvider(true, this);
@@ -998,7 +1002,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		}
 
 		IJavaElement je= (IJavaElement)o;
-		IJavaElement elementToSelect= getSuitableJavaElement(findElementToSelect(je));
+		IJavaElement elementToSelect= findElementToSelect(je);
 		IJavaElement newInput= findInputForJavaElement(je);
 		IJavaElement oldInput= null;
 		if (getInput() instanceof IJavaElement)
@@ -1010,8 +1014,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		else if (mustSetNewInput(elementToSelect, oldInput, newInput)) {
 			// Adjust input to selection
 			setInput(newInput);
-			// Recompute suitable element since it depends on the viewer's input
-			elementToSelect= getSuitableJavaElement(elementToSelect);
 		}
 
 		if (elementToSelect != null && elementToSelect.exists())
@@ -1022,7 +1024,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	/**
 	 * Compute if a new input must be set.
-	 *
+	 * 
+	 * @param elementToSelect the element to select 
+	 * @param oldInput old input
+	 * @param newInput new input
 	 * @return	<code>true</code> if the input has to be set
 	 * @since 3.0
 	 */
@@ -1060,6 +1065,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 * Finds the element which has to be selected in this part.
 	 *
 	 * @param je	the Java element which has the focus
+	 * @return returns the element to select
 	 */
 	abstract protected IJavaElement findElementToSelect(IJavaElement je);
 
@@ -1116,6 +1122,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	/**
 	 * Links to editor (if option enabled)
+	 * @param selection the selection
 	 */
 	private void linkToEditor(IStructuredSelection selection) {
 		Object obj= selection.getFirstElement();
@@ -1182,14 +1189,14 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	/**
 	 * Returns the element contained in the EditorInput
+	 * @param input the editor input
+	 * @return the input element
 	 */
 	Object getElementOfInput(IEditorInput input) {
-		if (input instanceof IClassFileEditorInput)
-			return ((IClassFileEditorInput)input).getClassFile();
-		else if (input instanceof IFileEditorInput)
+		if (input instanceof IFileEditorInput)
 			return ((IFileEditorInput)input).getFile();
-		else if (input instanceof JarEntryEditorInput)
-			return ((JarEntryEditorInput)input).getStorage();
+		if (input != null)
+			return JavaUI.getEditorInputJavaElement(input);
 		return null;
 	}
 
@@ -1202,45 +1209,9 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	/**
-	 * Tries to find the given element in a workingcopy.
-	 */
-	protected static IJavaElement getWorkingCopy(IJavaElement input) {
-		// MA: with new working copy story original == working copy
-		return input;
-	}
-
-	/**
-	 * Converts the given Java element to one which is suitable for this
-	 * view. It takes into account whether the view shows working copies or not.
-	 *
-	 * @param	obj the Java element to be converted
-	 * @return	an element suitable for this view
-	 */
-	IJavaElement getSuitableJavaElement(Object obj) {
-		if (!(obj instanceof IJavaElement))
-			return null;
-		IJavaElement element= (IJavaElement)obj;
-		if (fTypeComparator.compare(element, IJavaElement.COMPILATION_UNIT) > 0)
-			return element;
-		if (element.getElementType() == IJavaElement.CLASS_FILE)
-			return element;
-		if (isInputAWorkingCopy()) {
-			IJavaElement wc= getWorkingCopy(element);
-			if (wc != null)
-				element= wc;
-			return element;
-		}
-		else {
-			return element.getPrimaryElement();
-		}
-	}
-
-	boolean isInputAWorkingCopy() {
-		return ((StandardJavaElementContentProvider)getViewer().getContentProvider()).getProvideWorkingCopy();
-	}
-
-	/**
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#getElementAt(int)
+	 * @param input the editor input
+	 * @param offset the offset in the file
+	 * @return the element at the given offset
 	 */
 	protected IJavaElement getElementAt(IEditorInput input, int offset) {
 		if (input instanceof IClassFileEditorInput) {
@@ -1271,8 +1242,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	protected IType getTypeForCU(ICompilationUnit cu) {
-		cu= (ICompilationUnit)getSuitableJavaElement(cu);
-
 		// Use primary type if possible
 		IType primaryType= cu.findPrimaryType();
 		if (primaryType != null)

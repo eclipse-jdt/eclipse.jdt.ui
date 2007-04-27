@@ -209,29 +209,25 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 			case IJavaElement.TYPE:
 				if (((IType)je).getDeclaringType() == null)
 					return null;
-				return getSuitableJavaElement(je);
+				return je;
 			case IJavaElement.METHOD:
 			case IJavaElement.INITIALIZER:
 			case IJavaElement.FIELD:
 			case IJavaElement.PACKAGE_DECLARATION:
 			case IJavaElement.IMPORT_CONTAINER:
-				return getSuitableJavaElement(je);
+				return je;
 			case IJavaElement.IMPORT_DECLARATION:
-				je= getSuitableJavaElement(je);
-				if (je != null) {
-					ICompilationUnit cu= (ICompilationUnit)je.getParent().getParent();
-					try {
-						if (cu.getImports()[0].equals(je)) {
-							Object selectedElement= getSingleElementFromSelection(getViewer().getSelection());
-							if (selectedElement instanceof IImportContainer)
-								return (IImportContainer)selectedElement;
-						}
-					} catch (JavaModelException ex) {
-						// return je;
+				ICompilationUnit cu= (ICompilationUnit)je.getParent().getParent();
+				try {
+					if (cu.getImports()[0].equals(je)) {
+						Object selectedElement= getSingleElementFromSelection(getViewer().getSelection());
+						if (selectedElement instanceof IImportContainer)
+							return (IImportContainer)selectedElement;
 					}
-					return je;
+				} catch (JavaModelException ex) {
+					// return je;
 				}
-				break;
+				return je;
 		}
 		return null;
 	}

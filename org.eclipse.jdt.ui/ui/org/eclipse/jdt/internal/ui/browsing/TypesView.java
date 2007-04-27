@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.swt.widgets.Composite;
 
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -46,7 +45,9 @@ import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
 import org.eclipse.jdt.internal.ui.filters.NonJavaElementFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
+import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
+
 public class TypesView extends JavaBrowsingPart {
 
 	private SelectAllAction fSelectAllAction;
@@ -136,7 +137,7 @@ public class TypesView extends JavaBrowsingPart {
 				IType type= ((IType)je).getDeclaringType();
 				if (type == null)
 					type= (IType)je;
-				return getSuitableJavaElement(type);
+				return type;
 			case IJavaElement.COMPILATION_UNIT:
 				return getTypeForCU((ICompilationUnit)je);
 			case IJavaElement.CLASS_FILE:
@@ -216,8 +217,8 @@ public class TypesView extends JavaBrowsingPart {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createDecoratingLabelProvider(org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider)
 	 */
-	protected DecoratingLabelProvider createDecoratingLabelProvider(JavaUILabelProvider provider) {
-		DecoratingLabelProvider decoratingLabelProvider= super.createDecoratingLabelProvider(provider);
+	protected DecoratingJavaLabelProvider createDecoratingLabelProvider(JavaUILabelProvider provider) {
+		DecoratingJavaLabelProvider decoratingLabelProvider= super.createDecoratingLabelProvider(provider);
 		provider.addLabelDecorator(new TopLevelTypeProblemsLabelDecorator(null));
 		return decoratingLabelProvider;
 	}

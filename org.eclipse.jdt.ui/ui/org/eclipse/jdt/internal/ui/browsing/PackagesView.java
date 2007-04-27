@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,7 +28,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ISelection;
@@ -194,13 +193,11 @@ public class PackagesView extends JavaBrowsingPart{
 		memento.putInteger(this.getViewSite().getId()+TAG_VIEW_STATE,fCurrViewState);
 	}
 
-	/**
-	 * Creates the viewer of this part dependent on the current
-	 * layout.
-	 *
-	 * @param parent the parent for the viewer
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createViewer(org.eclipse.swt.widgets.Composite)
 	 */
 	protected StructuredViewer createViewer(Composite parent) {
+		//Creates the viewer of this part dependent on the current layout.
 		StructuredViewer viewer;
 		if(isInListState())
 			viewer= createTableViewer(parent);
@@ -211,8 +208,8 @@ public class PackagesView extends JavaBrowsingPart{
 		return fWrappedViewer;
 	}
 
-	/**
-	 * Answer the property defined by key.
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#getAdapter(java.lang.Class)
 	 */
 	public Object getAdapter(Class key) {
 		if (key == IShowInTargetList.class) {
@@ -309,10 +306,8 @@ public class PackagesView extends JavaBrowsingPart{
 		return false;
 	}
 
-	/**
-	 * Finds the element which has to be selected in this part.
-	 *
-	 * @param je	the Java element which has the focus
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#findElementToSelect(org.eclipse.jdt.core.IJavaElement)
 	 */
 	protected IJavaElement findElementToSelect(IJavaElement je) {
 		if (je == null)
@@ -581,7 +576,7 @@ public class PackagesView extends JavaBrowsingPart{
 	 *
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createDecoratingLabelProvider(JavaUILabelProvider)
 	 */
-	protected DecoratingLabelProvider createDecoratingLabelProvider(JavaUILabelProvider provider) {
+	protected DecoratingJavaLabelProvider createDecoratingLabelProvider(JavaUILabelProvider provider) {
 		return new DecoratingJavaLabelProvider(provider, false, isInListState()) {
 
 			public String getText(Object element){
@@ -618,7 +613,7 @@ public class PackagesView extends JavaBrowsingPart{
 	 */
 	void adjustInputAndSetSelection(IJavaElement je) {
 
-		IJavaElement jElementToSelect= getSuitableJavaElement(findElementToSelect(je));
+		IJavaElement jElementToSelect= findElementToSelect(je);
 		LogicalPackagesProvider p= (LogicalPackagesProvider) fWrappedViewer.getContentProvider();
 
 		Object elementToSelect= jElementToSelect;
@@ -647,10 +642,8 @@ public class PackagesView extends JavaBrowsingPart{
 			} else
 				setInput(newInput);
 
-			// Recompute suitable element since it depends on the viewer's input
-			jElementToSelect= getSuitableJavaElement(elementToSelect);
-			if (jElementToSelect != null && jElementToSelect.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-				IPackageFragment pkgFragment= (IPackageFragment)jElementToSelect;
+			if (elementToSelect instanceof IPackageFragment) {
+				IPackageFragment pkgFragment= (IPackageFragment)elementToSelect;
 				elementToSelect= p.findLogicalPackage(pkgFragment);
 				if (elementToSelect == null)
 					elementToSelect= pkgFragment;
