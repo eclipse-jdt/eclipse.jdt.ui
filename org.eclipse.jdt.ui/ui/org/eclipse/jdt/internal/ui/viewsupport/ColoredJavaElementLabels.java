@@ -42,10 +42,13 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredString.Style;
 
 public class ColoredJavaElementLabels {
@@ -53,6 +56,8 @@ public class ColoredJavaElementLabels {
 	public static final Style QUALIFIER_STYLE= new Style(ColoredViewersManager.QUALIFIER_COLOR_NAME); 
 	public static final Style COUNTER_STYLE= new Style(ColoredViewersManager.COUNTER_COLOR_NAME); 
 	public static final Style DECORATIONS_STYLE= new Style(ColoredViewersManager.DECORATIONS_COLOR_NAME); 
+	
+	private static final Style APPENDED_TYPE_STYLE= DECORATIONS_STYLE; 
 	
 	public final static long COLORIZE= 1L << 55;
 	
@@ -75,6 +80,9 @@ public class ColoredJavaElementLabels {
 			return getElementLabel((IJavaElement) obj, flags);
 		} else if (obj instanceof IResource) {
 			return new ColoredString(((IResource) obj).getName());
+		} else if (obj instanceof ClassPathContainer) {
+			ClassPathContainer container= (ClassPathContainer) obj;
+			return getContainerEntryLabel(container.getClasspathEntry().getPath(), container.getJavaProject());
 		}
 		return new ColoredString(JavaElementLabels.getTextLabel(obj, flags));
 	}
@@ -299,6 +307,7 @@ public class ColoredJavaElementLabels {
 			}
 			
 			if (getFlag(flags, JavaElementLabels.M_APP_TYPE_PARAMETERS)) {
+				int offset= result.length();
 				if (resolvedKey != null) {
 					if (resolvedKey.isParameterizedMethod()) {
 						String[] typeArgRefs= resolvedKey.getTypeArguments();
@@ -319,7 +328,10 @@ public class ColoredJavaElementLabels {
 						result.append(' ');
 						getTypeParametersLabel(typeParameters, flags, result);
 					}
-				}					
+				}
+				if (getFlag(flags, COLORIZE)) {
+					result.colorize(offset, result.length() - offset, APPENDED_TYPE_STYLE);
+				}
 			}
 			
 			if (getFlag(flags, JavaElementLabels.M_APP_RETURNTYPE) && method.exists() && !method.isConstructor()) {
@@ -328,7 +340,7 @@ public class ColoredJavaElementLabels {
 				String returnTypeSig= resolvedSig != null ? Signature.getReturnType(resolvedSig) : method.getReturnType();
 				getTypeSignatureLabel(returnTypeSig, flags, result);
 				if (getFlag(flags, COLORIZE)) {
-					result.colorize(offset, result.length() - offset, QUALIFIER_STYLE);
+					result.colorize(offset, result.length() - offset, APPENDED_TYPE_STYLE);
 				}
 			}			
 
@@ -412,7 +424,7 @@ public class ColoredJavaElementLabels {
 					getTypeSignatureLabel(field.getTypeSignature(), flags, result);
 				}
 				if (getFlag(flags, COLORIZE)) {
-					result.colorize(offset, result.length() - offset, QUALIFIER_STYLE);
+					result.colorize(offset, result.length() - offset, APPENDED_TYPE_STYLE);
 				}
 			}
 
@@ -459,7 +471,7 @@ public class ColoredJavaElementLabels {
 			result.append(JavaElementLabels.DECL_STRING);
 			getTypeSignatureLabel(localVariable.getTypeSignature(), flags, result);
 			if (getFlag(flags, COLORIZE)) {
-				result.colorize(offset, result.length() - offset, QUALIFIER_STYLE);
+				result.colorize(offset, result.length() - offset, APPENDED_TYPE_STYLE);
 			}
 		}
 		
@@ -941,18 +953,34 @@ public class ColoredJavaElementLabels {
 	 * @param containerPath The path of the container.
 	 * @param project The project the container is resolved in.
 	 * @return Returns the label of the classpath container
-	 * @throws JavaModelException Thrown when the resolving of the container failed.
 	 */
-	public static String getContainerEntryLabel(IPath containerPath, IJavaProject project) throws JavaModelException {
-		IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, project);
-		if (container != null) {
-			return container.getDescription();
+	public static ColoredString getContainerEntryLabel(IPath containerPath, IJavaProject project) {
+		try {
+			IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, project);
+			String description= null;
+			if (container != null) {
+				description= container.getDescription();
+			}
+			if (description == null) {
+				ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerPath.segment(0));
+				if (initializer != null) {
+					description= initializer.getDescription(containerPath, project);
+				}
+			}
+			if (description != null) {
+				ColoredString str= new ColoredString(description);
+				if (containerPath.segmentCount() > 0 && JavaRuntime.JRE_CONTAINER.equals(containerPath.segment(0))) {
+					int index= description.indexOf('[');
+					if (index != -1) {
+						str.colorize(index, description.length() - index, DECORATIONS_STYLE); 
+					}
+				}
+				return str;
+			}
+		} catch (JavaModelException e) {
+			// ignore
 		}
-		ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerPath.segment(0));
-		if (initializer != null) {
-			return initializer.getDescription(containerPath, project);
-		}
-		return containerPath.toString();
+		return new ColoredString(containerPath.toString());
 	}
 
 	public static ColoredString decorateColoredString(ColoredString string, String decorated, Style color) {
