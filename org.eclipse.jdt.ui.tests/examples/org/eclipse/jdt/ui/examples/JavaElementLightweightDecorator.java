@@ -109,11 +109,14 @@ public class JavaElementLightweightDecorator extends LabelProvider implements IL
 	private FileBufferListener fListener;
 
 	public JavaElementLightweightDecorator() {
-		fColor= new Color(Display.getDefault(), 100, 100, 100);
-		FontRegistry fontRegistry= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry();
-		fBold= fontRegistry.getBold(JFaceResources.DIALOG_FONT);
+		final FontRegistry fontRegistry= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry();
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				fColor= new Color(Display.getDefault(), 100, 100, 100);
+				fBold= fontRegistry.getBold(JFaceResources.DIALOG_FONT);
+			}
+		});
 		fListener= new FileBufferListener();
-		
 		FileBuffers.getTextFileBufferManager().addFileBufferListener(fListener);
 	}
 
