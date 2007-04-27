@@ -579,7 +579,7 @@ public class RenameLinkedMode {
 		LinkedPosition[] positions= fLinkedPositionGroup.getPositions();
 		for (int i= 0; i < positions.length; i++) {
 			LinkedPosition position= positions[i];
-			if (position.includes(start) && position.includes(end))
+			if (position.includes(start) || position.includes(end))
 				return position;
 		}
 		return null;
