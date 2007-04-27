@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.Flags;
@@ -33,11 +34,12 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
  * Label provider for the hierarchy viewers. Types in the hierarchy that are not belonging to the
- * input scope are rendered differntly.
+ * input scope are rendered differently.
   */
 public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 
@@ -71,7 +73,6 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		}		
 	}
 
-	private Color fGrayedColor;
 	private Color fSpecialColor;
 
 	private ViewerFilter fFilter;
@@ -179,10 +180,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 			}
 			return fSpecialColor;
 		} else if (element instanceof IType && isDifferentScope((IType) element)) {
-			if (fGrayedColor == null) {
-				fGrayedColor= Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY);
-			}
-			return fGrayedColor;
+			return JFaceResources.getColorRegistry().get(ColoredViewersManager.QUALIFIER_COLOR_NAME);
 		}
 		return null;
 	}	

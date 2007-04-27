@@ -36,6 +36,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -557,7 +558,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		treeViewer.addFilter(new NamePatternFilter());
 		treeViewer.addFilter(new MemberFilter());
 
-		fForegroundColor= parent.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
+		fForegroundColor= JFaceResources.getColorRegistry().get(ColoredViewersManager.QUALIFIER_COLOR_NAME);
 
 		fInnerLabelProvider= new OutlineLabelProvider();
 		fInnerLabelProvider.addLabelDecorator(new ProblemsLabelDecorator(null));

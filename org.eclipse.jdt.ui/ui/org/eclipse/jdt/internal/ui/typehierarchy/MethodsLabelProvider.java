@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -27,13 +27,12 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 
 /**
  * Label provider for the hierarchy method viewers. 
  */
 public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
-
-	private Color fResolvedBackground;
 	
 	private boolean fShowDefiningType;
 	private TypeHierarchyLifeCycle fHierarchy;
@@ -44,7 +43,6 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 		fHierarchy= lifeCycle;
 		fShowDefiningType= false;
 		fMethodsViewer= methodsViewer;
-		fResolvedBackground= null;
 	}
 	
 	public void setShowDefiningType(boolean showDefiningType) {
@@ -126,12 +124,8 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 			IMethod curr= (IMethod) element;
 			IMember declaringType= curr.getDeclaringType();
 			
-			if (declaringType.equals(fMethodsViewer.getInput())) {
-				if (fResolvedBackground == null) {
-					Display display= Display.getCurrent();
-					fResolvedBackground= display.getSystemColor(SWT.COLOR_DARK_BLUE);
-				}
-				return fResolvedBackground;
+			if (!declaringType.equals(fMethodsViewer.getInput())) {
+				return JFaceResources.getColorRegistry().get(ColoredViewersManager.QUALIFIER_COLOR_NAME);
 			}
 		}
 		return null;
