@@ -199,6 +199,11 @@ public class RenameInformationPopup {
 		}
 	}
 
+	/**
+	 * Cached platform flags for dealing with platform-specific issues.
+	 */
+	private static boolean CARBON = "carbon".equals(SWT.getPlatform()); //$NON-NLS-1$
+
 	private static final String DIALOG_SETTINGS_SECTION= "RenameInformationPopup"; //$NON-NLS-1$
 	private static final String SNAP_POSITION_KEY= "snap_position"; //$NON-NLS-1$
 
@@ -304,13 +309,13 @@ public class RenameInformationPopup {
 			}
 		});
 		
-		fPopup.addPaintListener(new PaintListener() {
-			public void paintControl(PaintEvent pe) {
-//				if (!CARBON) { //TODO: why does ControlDecoration not draw border on carbon?
+		if (! CARBON) { // carbon draws its own border...
+			fPopup.addPaintListener(new PaintListener() {
+				public void paintControl(PaintEvent pe) {
 					pe.gc.drawPolygon(getPolygon(true));
-//				}
-			}
-		});
+				}
+			});
+		}
 		
 //		fPopup.moveBelow(null); // make sure hovers are on top of the info popup
 // XXX workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=170774
