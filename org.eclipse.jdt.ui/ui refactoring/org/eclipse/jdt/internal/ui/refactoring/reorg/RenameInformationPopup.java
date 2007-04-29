@@ -65,6 +65,10 @@ import org.eclipse.jface.util.Geometry;
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.IViewportListener;
+import org.eclipse.jface.text.IWidgetTokenKeeper;
+import org.eclipse.jface.text.IWidgetTokenKeeperExtension;
+import org.eclipse.jface.text.IWidgetTokenOwner;
+import org.eclipse.jface.text.IWidgetTokenOwnerExtension;
 import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -86,7 +90,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 
-public class RenameInformationPopup {
+public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenKeeperExtension {
 	
 	private class PopupVisibilityManager implements IPartListener2, ControlListener, MouseListener, KeyListener, ITextListener, IViewportListener {
 		
@@ -204,6 +208,8 @@ public class RenameInformationPopup {
 	 */
 	private static boolean CARBON = "carbon".equals(SWT.getPlatform()); //$NON-NLS-1$
 
+	private static final int WIDGET_PRIORITY= 1000;
+	
 	private static final String DIALOG_SETTINGS_SECTION= "RenameInformationPopup"; //$NON-NLS-1$
 	private static final String SNAP_POSITION_KEY= "snap_position"; //$NON-NLS-1$
 
@@ -245,6 +251,7 @@ public class RenameInformationPopup {
 
 	private Image fMenuImage;
 	private MenuManager fMenuManager;
+	private ToolBar fToolBar;
 	private String fOpenDialogBinding= ""; //$NON-NLS-1$
 	private boolean fIsMenuUp= false;
 	
@@ -342,6 +349,7 @@ public class RenameInformationPopup {
 			}
 			fPopup= null;
 		}
+		releaseWidgetToken();
 		if (fRegion != null) {
 			if (! fRegion.isDisposed()) {
 				fRegion.dispose();
@@ -382,7 +390,24 @@ public class RenameInformationPopup {
 					visible= true;
 				}
 			}
+			if (visible && ! fPopup.isVisible()) {
+				ISourceViewer viewer= fEditor.getViewer();
+				if (viewer instanceof IWidgetTokenOwnerExtension) {
+					IWidgetTokenOwnerExtension widgetTokenOwnerExtension= (IWidgetTokenOwnerExtension) viewer;
+					widgetTokenOwnerExtension.requestWidgetToken(this, WIDGET_PRIORITY);
+				}
+			} else if (! visible && fPopup.isVisible()) {
+				releaseWidgetToken();
+			}
 			fPopup.setVisible(visible);
+		}
+	}
+
+	private void releaseWidgetToken() {
+		ISourceViewer viewer= fEditor.getViewer();
+		if (viewer instanceof IWidgetTokenOwner) {
+			IWidgetTokenOwner widgetTokenOwner= (IWidgetTokenOwner) viewer;
+			widgetTokenOwner.releaseWidgetToken(this);
 		}
 	}
 
@@ -568,7 +593,7 @@ public class RenameInformationPopup {
 		}
 	}
 	
-	Point getExtent() {
+	private Point getExtent() {
 		Point e = fPopup.getSize();
 		switch (fSnapPosition) {
 			case SNAP_POSITION_UNDER_LEFT_FIELD:
@@ -581,7 +606,7 @@ public class RenameInformationPopup {
 		return e;
 	}
 	
-	int[] getPolygon(boolean border) {
+	private int[] getPolygon(boolean border) {
 		Point e = getExtent();
 		int b = border ? 1 : 0;
 		if (true /*arrowOnLeft*/) {
@@ -645,33 +670,33 @@ public class RenameInformationPopup {
 	}
 
 	private ToolBar addViewMenu(final Composite parent) {
-		final ToolBar toolBar= new ToolBar(parent, SWT.FLAT);
-		final ToolItem menuButton = new ToolItem(toolBar, SWT.PUSH, 0);
+		fToolBar= new ToolBar(parent, SWT.FLAT);
+		final ToolItem menuButton = new ToolItem(fToolBar, SWT.PUSH, 0);
 		fMenuImage= JavaPluginImages.DESC_ELCL_VIEW_MENU.createImage();
 		menuButton.setImage(fMenuImage);
 		menuButton.setToolTipText(ReorgMessages.RenameInformationPopup_menu);
-		toolBar.addMouseListener(new MouseAdapter() {
+		fToolBar.addMouseListener(new MouseAdapter() {
 			public void mouseDown(MouseEvent e) {
-				showMenu(parent, toolBar);
+				showMenu(fToolBar);
 			}
 		});
 		menuButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				showMenu(parent, toolBar);
+				showMenu(fToolBar);
 			}
 		});
-		toolBar.pack();
-		return toolBar;
+		fToolBar.pack();
+		return fToolBar;
 	}
 
-	private void showMenu(Composite parent, ToolBar toolBar) {
-		Menu menu= getMenuManager(parent).createContextMenu(toolBar);
+	private void showMenu(ToolBar toolBar) {
+		Menu menu= getMenuManager().createContextMenu(toolBar);
 		menu.setLocation(toolBar.toDisplay(0, toolBar.getSize().y));
 		fIsMenuUp= true;
 		menu.setVisible(true);
 	}
 
-	private MenuManager getMenuManager(final Composite parent) {
+	private MenuManager getMenuManager() {
 		if (fMenuManager != null) {
 			return fMenuManager;
 		}
@@ -786,5 +811,19 @@ public class RenameInformationPopup {
 
 	private void activateEditor() {
 		fEditor.getSite().getShell().setActive();
+	}
+	
+	public boolean requestWidgetToken(IWidgetTokenOwner owner) {
+		return false;
+	}
+	
+	public boolean requestWidgetToken(IWidgetTokenOwner owner, int priority) {
+		return false;
+	}
+	
+	public boolean setFocus(IWidgetTokenOwner owner) {
+		if (fToolBar != null && ! fToolBar.isDisposed())
+			showMenu(fToolBar);
+		return true;
 	}
 }
