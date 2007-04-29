@@ -30,8 +30,6 @@ import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
-import org.eclipse.osgi.util.NLS;
-
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -273,7 +271,7 @@ public class OpenViewActionGroup extends ActionGroup {
 		if (keyBinding == null)
 			keyBinding= ""; //$NON-NLS-1$
 		
-		return NLS.bind(ActionMessages.OpenViewActionGroup_showInAction_label, keyBinding);
+		return ActionMessages.OpenViewActionGroup_showInAction_label + '\t' + keyBinding;
 	}
 
 	/*

@@ -32,8 +32,6 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.keys.IBindingService;
 
-import org.eclipse.jdt.internal.corext.util.Messages;
-
 /**
  * A quick menu actions provides support to assign short cuts
  * to sub menus.
@@ -101,8 +99,7 @@ public abstract class QuickMenuAction extends Action {
 		if (menuText == null || shortcut == null)
 			return menuText;
 		
-		String[] args= new String[] { menuText, shortcut};
-		return Messages.format(ActionMessages.QuickMenuAction_menuTextWithShortcut, args); 
+		return menuText + '\t' + shortcut;
 	}
 	
 	/**

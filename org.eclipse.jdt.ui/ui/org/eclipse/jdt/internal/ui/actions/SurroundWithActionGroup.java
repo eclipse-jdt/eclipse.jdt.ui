@@ -24,8 +24,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.keys.IBindingService;
 
-import org.eclipse.jdt.internal.corext.util.Messages;
-
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.SurroundWithTryCatchAction;
@@ -69,8 +67,7 @@ public class SurroundWithActionGroup extends ActionGroup {
 				
 		String shortcutString= getShortcutString();
 		if (shortcutString != null) {
-			String[] args= new String[] { menuText, shortcutString};
-			menuText= Messages.format(ActionMessages.QuickMenuAction_menuTextWithShortcut, args); 
+			menuText= menuText + '\t' + shortcutString;
 		}
 		
 		MenuManager subMenu = new MenuManager(menuText, SurroundWithTemplateMenuAction.SURROUND_WITH_QUICK_MENU_ACTION_ID);	
