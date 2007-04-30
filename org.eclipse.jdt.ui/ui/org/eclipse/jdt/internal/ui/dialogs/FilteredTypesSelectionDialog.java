@@ -123,6 +123,12 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
  * @since 3.3
  */
 public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog implements ITypeSelectionComponent {
+	
+	/**
+	 * Disabled "Show Container for Duplicates because of
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=184693 .
+	 */
+	private static final boolean BUG_184693= true;
 
 	private static final String DIALOG_SETTINGS= "org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog"; //$NON-NLS-1$
 
@@ -291,7 +297,9 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	protected void storeDialog(IDialogSettings settings) {
 		super.storeDialog(settings);
 
-		settings.put(SHOW_CONTAINER_FOR_DUPLICATES, fShowContainerForDuplicatesAction.isChecked());
+		if (! BUG_184693) {
+			settings.put(SHOW_CONTAINER_FOR_DUPLICATES, fShowContainerForDuplicatesAction.isChecked());
+		}
 
 		if (fFilterActionGroup != null) {
 			XMLMemento memento= XMLMemento.createWriteRoot("workingSet"); //$NON-NLS-1$
@@ -316,10 +324,14 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	protected void restoreDialog(IDialogSettings settings) {
 		super.restoreDialog(settings);
 
-		boolean showContainer= settings.getBoolean(SHOW_CONTAINER_FOR_DUPLICATES);
-		fShowContainerForDuplicatesAction.setChecked(showContainer);
-		fTypeInfoLabelProvider.setContainerInfo(showContainer);
-
+		if (! BUG_184693) {
+			boolean showContainer= settings.getBoolean(SHOW_CONTAINER_FOR_DUPLICATES);
+			fShowContainerForDuplicatesAction.setChecked(showContainer);
+			fTypeInfoLabelProvider.setContainerInfo(showContainer);
+		} else {
+			fTypeInfoLabelProvider.setContainerInfo(true);
+		}
+		
 		if (fAllowScopeSwitching) {
 			String setting= settings.get(WORKINGS_SET_SETTINGS);
 			if (setting != null) {
@@ -357,9 +369,10 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	protected void fillViewMenu(IMenuManager menuManager) {
 		super.fillViewMenu(menuManager);
 
-		fShowContainerForDuplicatesAction= new ShowContainerForDuplicatesAction();
-		menuManager.add(fShowContainerForDuplicatesAction);
-
+		if (! BUG_184693) {
+			fShowContainerForDuplicatesAction= new ShowContainerForDuplicatesAction();
+			menuManager.add(fShowContainerForDuplicatesAction);
+		}
 		if (fAllowScopeSwitching) {
 			fFilterActionGroup= new WorkingSetFilterActionGroup(getShell(), JavaPlugin.getActivePage(), new IPropertyChangeListener() {
 				public void propertyChange(PropertyChangeEvent event) {
