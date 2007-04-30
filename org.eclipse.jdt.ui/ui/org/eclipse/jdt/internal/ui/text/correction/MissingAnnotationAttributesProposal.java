@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -79,7 +80,7 @@ public class MissingAnnotationAttributesProposal extends LinkedCorrectionProposa
 				MemberValuePair curr= (MemberValuePair) list.get(i);
 				implementedAttribs.add(curr.getName().getIdentifier());
 			}
-		} else {
+		} else if (fAnnotation instanceof SingleMemberAnnotation){
 			implementedAttribs.add("value"); //$NON-NLS-1$
 		}
 		ASTRewrite rewriter= listRewriter.getASTRewrite();

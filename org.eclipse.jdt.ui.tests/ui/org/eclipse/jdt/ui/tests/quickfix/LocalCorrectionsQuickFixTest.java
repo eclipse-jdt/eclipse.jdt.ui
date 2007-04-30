@@ -5429,6 +5429,35 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
+	
+	public void testMissingAnnotationAttributes_bug179316 () throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("e", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package e;\n");
+		buf.append("@Requires1\n");
+		buf.append("@interface Requires1 {\n");
+		buf.append("        String value();\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Requires1.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package e;\n");
+		buf.append("@Requires1(value=\"\")\n");
+		buf.append("@interface Requires1 {\n");
+		buf.append("        String value();\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 
 	public void testTypePrametersToRawTypeReference01() throws Exception {
 		Hashtable options= JavaCore.getOptions();
