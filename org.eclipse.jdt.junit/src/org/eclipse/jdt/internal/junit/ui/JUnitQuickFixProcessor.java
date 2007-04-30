@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
@@ -124,7 +125,14 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 			} else if (s.equals("TestCase") || s.equals("TestSuite") || s.equals("junit")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				res= JUNIT3;
 			} else if (s.equals("Test")) { //$NON-NLS-1$
-				res= JUNIT3 | JUNIT4;
+				ASTNode node= location.getCoveredNode(context.getASTRoot());
+				if (node != null && node.getLocationInParent() == MarkerAnnotation.TYPE_NAME_PROPERTY) {
+					res= JUNIT4;
+				} else {
+					res= JUNIT3 | JUNIT4;
+				}
+			} else if (s.equals("RunWith")) { //$NON-NLS-1$
+				res= JUNIT4;
 			}
 			if (res != 0) {
 				IJavaProject javaProject= unit.getJavaProject();

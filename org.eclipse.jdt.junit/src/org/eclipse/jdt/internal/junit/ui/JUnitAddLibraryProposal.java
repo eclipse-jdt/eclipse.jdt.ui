@@ -11,8 +11,10 @@
 package org.eclipse.jdt.internal.junit.ui;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.swt.graphics.Image;
@@ -89,21 +91,48 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 	
 	private static boolean addToClasspath(Shell shell, final IJavaProject project, IClasspathEntry entry, IRunnableContext context) throws JavaModelException {
 		IClasspathEntry[] oldEntries= project.getRawClasspath();
+		ArrayList newEntries= new ArrayList(oldEntries.length + 1);
+		boolean added= false;
 		for (int i= 0; i < oldEntries.length; i++) {
-			if (oldEntries[i].equals(entry)) {
-				return true;
+			IClasspathEntry curr= oldEntries[i];
+			if (curr.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+				IPath path= curr.getPath();
+				if (path.equals(entry.getPath())) {
+					return true; // already on build path
+				} else if (path.matchingFirstSegments(entry.getPath()) > 0) {
+					if (!added) {
+						curr= entry; // replace
+						added= true;
+					} else {
+						curr= null;
+					}
+				}
+			} else if (curr.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+				IPath path= curr.getPath();
+				if (path.segmentCount() > 0 && JUnitPlugin.JUNIT_HOME.equals(path.segment(0))) {
+					if (!added) {
+						curr= entry; // replace
+						added= true;
+					} else {
+						curr= null;
+					}
+				}
+			}
+			if (curr != null) {
+				newEntries.add(curr);
 			}
 		}
-		int nEntries= oldEntries.length;
-		final IClasspathEntry[] newEntries= new IClasspathEntry[nEntries + 1];
-		System.arraycopy(oldEntries, 0, newEntries, 0, nEntries);
-		newEntries[nEntries]= entry;
+		if (!added) {
+			newEntries.add(entry);
+		}
+		
+		final IClasspathEntry[] newCPEntries= (IClasspathEntry[]) newEntries.toArray(new IClasspathEntry[newEntries.size()]);
 		// fix for 64974 OCE in New JUnit Test Case wizard while workspace is locked [JUnit] 
 		try {
 			context.run(true, false, new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
-						project.setRawClasspath(newEntries, monitor);
+						project.setRawClasspath(newCPEntries, monitor);
 					} catch (JavaModelException e) {
 						throw new InvocationTargetException(e);
 					}
