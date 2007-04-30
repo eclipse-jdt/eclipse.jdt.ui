@@ -478,6 +478,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private void updateEnableStates() {
 		boolean enableUnusedParams= !checkValue(PREF_PB_UNUSED_PARAMETER, IGNORE);
 		getCheckBox(PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING).setEnabled(enableUnusedParams);
+		getCheckBox(PREF_PB_UNUSED_PARAMETER_INCLUDE_DOC_COMMENT_REFERENCE).setEnabled(enableUnusedParams);
 		
 		boolean enableDeprecation= !checkValue(PREF_PB_DEPRECATION, IGNORE);
 		getCheckBox(PREF_PB_DEPRECATION_IN_DEPRECATED_CODE).setEnabled(enableDeprecation);
