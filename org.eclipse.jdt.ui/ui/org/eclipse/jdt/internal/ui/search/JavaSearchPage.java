@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -433,6 +433,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	/**
 	 * Return search pattern data and update previous searches.
 	 * An existing entry will be updated.
+	 * @return the pattern data
 	 */
 	private SearchPatternData getPatternData() {
 		String pattern= getPattern();
@@ -478,8 +479,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 
 	//---- Widget creation ------------------------------------------------
 
-	/**
-	 * Creates the page's content.
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
@@ -717,8 +719,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		result.setLayout(new GridLayout(4, false));
 		fIncludeMasks= new Button[] {
 			createButton(result, SWT.CHECK, SearchMessages.SearchPage_searchIn_sources, JavaSearchScopeFactory.SOURCES, true),
-			createButton(result, SWT.CHECK, SearchMessages.SearchPage_searchIn_jre, JavaSearchScopeFactory.JRE, false),
 			createButton(result, SWT.CHECK, SearchMessages.SearchPage_searchIn_projects, JavaSearchScopeFactory.PROJECTS, true),
+			createButton(result, SWT.CHECK, SearchMessages.SearchPage_searchIn_jre, JavaSearchScopeFactory.JRE, false),
 			createButton(result, SWT.CHECK, SearchMessages.SearchPage_searchIn_libraries, JavaSearchScopeFactory.LIBS, true),
 		};
 		return result;
@@ -908,6 +910,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	
 	/**
 	 * Returns the search page's container.
+	 * @return the search page container
 	 */
 	private ISearchPageContainer getContainer() {
 		return fContainer;
