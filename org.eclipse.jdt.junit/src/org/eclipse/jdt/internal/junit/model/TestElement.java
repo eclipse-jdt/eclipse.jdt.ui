@@ -299,6 +299,7 @@ public abstract class TestElement implements ITestElement {
 		if (index < 0) 
 			return testNameString;
 		testNameString= testNameString.substring(index + 1);
+		testNameString= testNameString.replace('$', '.'); // see bug 178503 
 		return testNameString.substring(0, testNameString.indexOf(')'));
 	}
 	
