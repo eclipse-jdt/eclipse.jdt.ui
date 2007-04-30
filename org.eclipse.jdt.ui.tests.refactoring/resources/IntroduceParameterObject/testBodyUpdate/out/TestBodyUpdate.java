@@ -9,21 +9,9 @@ class s {
 public class TestBodyUpdate extends s{
 	Permission p;
 	public static class FooParameter {
-		/**
-		 * 
-		 */
 		public Permission p;
-		/**
-		 * 
-		 */
 		public String s;
-		/**
-		 * 
-		 */
 		public int i;
-		/**
-		 * 
-		 */
 		public FooParameter(Permission p, String s, int i) {
 			this.p = p;
 			this.s = s;

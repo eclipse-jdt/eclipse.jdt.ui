@@ -462,17 +462,31 @@ public final class RefactoringExecutionStarter {
 		// Not for instantiation
 	}
 	
-	public static void startIntroduceParameterObject(ICompilationUnit unit, int offset, int length, Shell shell) throws JavaModelException {
+	public static void startIntroduceParameterObject(ICompilationUnit unit, int offset, int length, Shell shell) throws CoreException {
 		IJavaElement javaElement= unit.getElementAt(offset);
 		if (javaElement instanceof IMethod) {
 			IMethod method= (IMethod) javaElement;
-			IntroduceParameterObjectRefactoring refactoring= new IntroduceParameterObjectRefactoring(method);
-			new RefactoringStarter().activate(refactoring, new IntroduceParameterObjectWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
+			startIntroduceParameterObject(method, shell);
 		}
 	}
 
-	public static void startIntroduceParameterObject(IMethod method, Shell shell) throws JavaModelException {
+	public static void startIntroduceParameterObject(IMethod method, Shell shell) throws CoreException {
 		IntroduceParameterObjectRefactoring refactoring= new IntroduceParameterObjectRefactoring(method);
-		new RefactoringStarter().activate(refactoring, new IntroduceParameterObjectWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
+		final RefactoringStatus status= refactoring.checkInitialConditions(new NullProgressMonitor());
+		if (status.hasFatalError()) {
+			final RefactoringStatusEntry entry= status.getEntryMatchingSeverity(RefactoringStatus.FATAL);
+			if (entry.getCode() == RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD || entry.getCode() == RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE) {
+
+				String message= entry.getMessage();
+				final Object element= entry.getData();
+				message= message + RefactoringMessages.RefactoringErrorDialogUtil_okToPerformQuestion;
+				if (element != null && MessageDialog.openQuestion(shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, message)) {
+					refactoring=new IntroduceParameterObjectRefactoring((IMethod) element);
+				}
+				else refactoring=null;
+			}
+		}
+		if (refactoring!=null)
+			new RefactoringStarter().activate(refactoring, new IntroduceParameterObjectWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
 	}
 }

@@ -401,22 +401,11 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			topLvlRadio.setText(RefactoringMessages.IntroduceParameterObjectWizard_createastoplevel_radio);
 			topLvlRadio.setSelection(fRefactoring.isCreateAsTopLevel());
 			topLvlRadio.addSelectionListener(new SelectionAdapter() {
-
-				// private String lastPackage= packageInput.getText();
-
 				public void widgetSelected(SelectionEvent e) {
 					boolean fAsTopLevel= topLvlRadio.getSelection();
 					fRefactoring.setCreateAsTopLevel(fAsTopLevel);
-					/*
-					 * for (Iterator iter= packageEnablements.iterator(); iter.hasNext();) { Control
-					 * control= (Control) iter.next(); control.setEnabled(fAsTopLevel); } if
-					 * (fAsTopLevel) { packageInput.setText(lastPackage); } else { lastPackage=
-					 * packageInput.getText();
-					 * packageInput.setText(fRefactoring.getEnclosingPackage()); }
-					 */
 					validateRefactoring();
 				}
-
 			});
 
 			Button nestedRadio= new Button(composite, SWT.RADIO);

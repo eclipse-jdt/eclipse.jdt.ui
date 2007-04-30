@@ -118,18 +118,18 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 			Object editorInput= SelectionConverter.getInput(fEditor);
 			if (editorInput instanceof ICompilationUnit)
 				run(selection.getOffset(), selection.getLength(), (ICompilationUnit) editorInput);
-		} catch (JavaModelException e) {
+		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), ActionMessages.IntroduceParameterObjectAction_exceptiondialog_title, ActionMessages.IntroduceParameterObjectAction_unexpected_exception);
 		}
 	}
 
-	private void run(int offset, int length, ICompilationUnit unit) throws JavaModelException {
+	private void run(int offset, int length, ICompilationUnit unit) throws CoreException {
 		if (!ActionUtil.isEditable(fEditor, getShell(), unit))
 			return;
 		RefactoringExecutionStarter.startIntroduceParameterObject(unit, offset, length, getShell());
 	}
 
-	private void run(IMethod method) throws JavaModelException {
+	private void run(IMethod method) throws CoreException {
 		if (!ActionUtil.isEditable(fEditor, getShell(), method))
 			return;
 		RefactoringExecutionStarter.startIntroduceParameterObject(method, getShell());

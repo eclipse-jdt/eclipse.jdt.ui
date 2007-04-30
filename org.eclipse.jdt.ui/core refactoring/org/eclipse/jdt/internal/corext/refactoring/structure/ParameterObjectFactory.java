@@ -58,7 +58,7 @@ public class ParameterObjectFactory {
 
 	private String fClassName;
 	private ICompilationUnit fCompilationUnit;
-	private boolean fCreateComments;//initialized with setting from StubUtility
+	private boolean fCreateComments;// initialized with setting from StubUtility
 	private boolean fCreateGetter;
 	private boolean fCreateSetter;
 	private String fEnclosingType;
@@ -116,18 +116,20 @@ public class ParameterObjectFactory {
 		methodDeclaration.setConstructor(true);
 		methodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 		String lineDelimiter= StubUtility.getLineDelimiterUsed(unit);
-		String comment= CodeGeneration.getMethodComment(unit, declaringTypeName, methodDeclaration, null, lineDelimiter);
-		if (comment!=null){
-			Javadoc doc= (Javadoc) rewriter.createStringPlaceholder(comment, ASTNode.JAVADOC);
-			methodDeclaration.setJavadoc(doc);
+		if (fCreateComments) {
+			String comment= CodeGeneration.getMethodComment(unit, declaringTypeName, methodDeclaration, null, lineDelimiter);
+			if (comment != null) {
+				Javadoc doc= (Javadoc) rewriter.createStringPlaceholder(comment, ASTNode.JAVADOC);
+				methodDeclaration.setJavadoc(doc);
+			}
 		}
 		List parameters= methodDeclaration.parameters();
 		Block block= ast.newBlock();
 		methodDeclaration.setBody(block);
 		List statements= block.statements();
-		List validParameter=new ArrayList();
+		List validParameter= new ArrayList();
 		for (Iterator iter= fVariables.iterator(); iter.hasNext();) {
-			ParameterInfo pi=(ParameterInfo) iter.next();
+			ParameterInfo pi= (ParameterInfo) iter.next();
 			if (isValidField(pi)) {
 				validParameter.add(pi);
 			}
@@ -136,12 +138,12 @@ public class ParameterObjectFactory {
 			ParameterInfo pi= (ParameterInfo) iter.next();
 			SingleVariableDeclaration svd= ast.newSingleVariableDeclaration();
 			ITypeBinding typeBinding= pi.getNewTypeBinding();
-			if (!iter.hasNext() && typeBinding.isArray() && JavaModelUtil.is50OrHigher(fCompilationUnit.getJavaProject())){
+			if (!iter.hasNext() && typeBinding.isArray() && JavaModelUtil.is50OrHigher(fCompilationUnit.getJavaProject())) {
 				int dimensions= typeBinding.getDimensions();
-				if (dimensions==1){
-					typeBinding=typeBinding.getComponentType();
+				if (dimensions == 1) {
+					typeBinding= typeBinding.getComponentType();
 				} else {
-					typeBinding=typeBinding.createArrayType(dimensions-1);
+					typeBinding= typeBinding.createArrayType(dimensions - 1);
 				}
 				svd.setVarargs(true);
 			}
@@ -168,10 +170,12 @@ public class ParameterObjectFactory {
 		fragment.setName(fieldName);
 		IVariableBinding variable= pi.getOldBinding();
 		FieldDeclaration declaration= ast.newFieldDeclaration(fragment);
-		String comment= StubUtility.getFieldComment(unit, pi.getNewTypeName(), pi.getNewName(), lineDelim);
-		if (comment!=null){
-			Javadoc doc= (Javadoc) rewriter.createStringPlaceholder(comment, ASTNode.JAVADOC);
-			declaration.setJavadoc(doc);
+		if (fCreateComments) {
+			String comment= StubUtility.getFieldComment(unit, pi.getNewTypeName(), pi.getNewName(), lineDelim);
+			if (comment != null) {
+				Javadoc doc= (Javadoc) rewriter.createStringPlaceholder(comment, ASTNode.JAVADOC);
+				declaration.setJavadoc(doc);
+			}
 		}
 		List modifiers= ast.newModifiers((variable.getModifiers() & ~Modifier.FINAL) | Modifier.PUBLIC);
 		declaration.modifiers().addAll(modifiers);
@@ -328,10 +332,10 @@ public class ParameterObjectFactory {
 		Assert.isTrue(idx >= 0 && idx < fVariables.size() - 1);
 		int nextIdx= idx + 1;
 		ParameterInfo next= (ParameterInfo) fVariables.get(nextIdx);
-		if (next.isAdded()){
+		if (next.isAdded()) {
 			nextIdx++;
-			Assert.isTrue(nextIdx<=fVariables.size()-1);
-			next=(ParameterInfo) fVariables.get(nextIdx);
+			Assert.isTrue(nextIdx <= fVariables.size() - 1);
+			next= (ParameterInfo) fVariables.get(nextIdx);
 		}
 		fVariables.set(idx, next);
 		fVariables.set(nextIdx, selected);
@@ -342,10 +346,10 @@ public class ParameterObjectFactory {
 		Assert.isTrue(idx > 0);
 		int prevIdx= idx - 1;
 		ParameterInfo prev= (ParameterInfo) fVariables.get(prevIdx);
-		if (prev.isAdded()){
+		if (prev.isAdded()) {
 			prevIdx--;
-			Assert.isTrue(prevIdx>=0);
-			prev=(ParameterInfo) fVariables.get(prevIdx);
+			Assert.isTrue(prevIdx >= 0);
+			prev= (ParameterInfo) fVariables.get(prevIdx);
 		}
 		fVariables.set(idx, prev);
 		fVariables.set(prevIdx, selected);
@@ -356,7 +360,7 @@ public class ParameterObjectFactory {
 	}
 
 	public void setCreateComments(boolean selection) {
-		fCreateComments=selection;
+		fCreateComments= selection;
 	}
 
 	public void setCreateGetter(boolean createGetter) {
@@ -392,14 +396,16 @@ public class ParameterObjectFactory {
 	}
 
 	/**
-	 * Updates the position of the newly inserted parameterObject so that it is directly after the first checked parameter
+	 * Updates the position of the newly inserted parameterObject so that it is
+	 * directly after the first checked parameter
+	 * 
 	 * @param parameterObjectReference
 	 */
 	public void updateParameterPosition(ParameterInfo parameterObjectReference) {
 		fVariables.remove(parameterObjectReference);
 		for (ListIterator iterator= fVariables.listIterator(); iterator.hasNext();) {
 			ParameterInfo pi= (ParameterInfo) iterator.next();
-			if (isValidField(pi)){
+			if (isValidField(pi)) {
 				iterator.add(parameterObjectReference);
 				return;
 			}

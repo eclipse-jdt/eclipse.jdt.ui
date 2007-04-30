@@ -1,5 +1,6 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -13,14 +14,19 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.IntroduceParameterObjectRefactoring;
+
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class IntroduceParameterObjectTests extends RefactoringTest {
 
@@ -45,11 +51,7 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 	}
 
 	public void testBodyUpdate() throws Exception {
-		runDefaultRefactoring();
-	}
-
-	private void runDefaultRefactoring() throws Exception {
-		runRefactoring(false, false, false, false, Collections.EMPTY_MAP);
+		runRefactoring(new RunRefactoringParameter());
 	}
 
 	public void testDelegateCreation() throws Exception {
@@ -57,30 +59,39 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		renamings.put("a", "newA");
 		renamings.put("b", "newB");
 		renamings.put("d", "newD");
-		runRefactoring(false, true, true, true, renamings);
+		RunRefactoringParameter param= new RunRefactoringParameter();
+		param.getters=true;
+		param.setters=true;
+		param.delegate=true;
+		param.renamings=renamings;
+		runRefactoring(param);
 	}
 
 	public void testImportAddEnclosing() throws Exception {
 		Map renamings= new HashMap();
 		renamings.put("a", "permissions");
 		createCaller(null);
-		runRefactoring(false, false, false, false, renamings);
+		RunRefactoringParameter param= new RunRefactoringParameter();
+		param.renamings=renamings;
+		runRefactoring(param);
 		checkCaller(null);
 	}
 
 	public void testSimpleEnclosing() throws Exception{
-		runDefaultRefactoring();
+		runRefactoring(new RunRefactoringParameter());
 	}
 	
 	public void testVarArgsNotReordered() throws Exception{
-		runDefaultRefactoring();
+		runRefactoring(new RunRefactoringParameter());
 	}
 	
 	public void testVarArgsReordered() throws Exception{
 		Map indexMap= new HashMap();
 		indexMap.put("is", new Integer(0));
 		indexMap.put("a", new Integer(1));
-		runRefactoring(false, false, false, false, Collections.EMPTY_MAP, null, null, indexMap);
+		RunRefactoringParameter param= new RunRefactoringParameter();
+		param.indexMap=indexMap;
+		runRefactoring(param);
 	}
 	
 	public void testReorderGetter() throws Exception{
@@ -88,23 +99,47 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		indexMap.put("d", new Integer(0));
 		indexMap.put("a", new Integer(1));
 		indexMap.put("b", new Integer(2));
-		runRefactoring(false, true, false, false, Collections.EMPTY_MAP, null, null, indexMap);
+		RunRefactoringParameter param= new RunRefactoringParameter();
+		param.getters=true;
+		param.indexMap=indexMap;
+		runRefactoring(param);
 	}
 	
-	public void testImportAddTopLevel() throws Exception { //XXX Enable later
+	public void testImportAddTopLevel() throws Exception {
 		createCaller(DEFAULT_SUB_DIR);
-		runRefactoring(true, false, false, false, Collections.EMPTY_MAP,"TestImportAddTopLevelParameter","p.parameters");
+		RunRefactoringParameter params= new RunRefactoringParameter();
+		params.topLevel=true;
+		params.className="TestImportAddTopLevelParameter";
+		params.packageName="p.parameters";
+		runRefactoring(params);
 		checkCaller(DEFAULT_SUB_DIR);
+	}
+	
+	public void testInterfaceMethod() throws Exception {
+		createAdditionalFile(null, "TestInterfaceMethod2Impl");
+		createAdditionalFile(null, "ITestInterfaceMethod");
+		RunRefactoringParameter params= new RunRefactoringParameter();
+		params.topLevel=true;
+		params.expectFailure=true;
+		runRefactoring(params);
+		params.useSuggestedMethod=true;
+		runRefactoring(params);
+		checkAdditionalFile(null, "ITestInterfaceMethod");
+		checkAdditionalFile(null, "TestInterfaceMethod2Impl");
 	}
 
 	private void createCaller(String subDir) throws Exception {
-		IPackageFragment pack= getPackage(subDir);
-		ICompilationUnit cu= createCUfromTestFile(pack, getCUName(true), true);
+		createAdditionalFile(subDir, getCUName(true));
+	}
+
+	private void createAdditionalFile(String subDir, String fileName) throws Exception {
+		IPackageFragment pack= getSubPackage(subDir);
+		ICompilationUnit cu= createCUfromTestFile(pack, fileName, true);
 		assertNotNull(cu);
 		assertTrue(cu.exists());
 	}
 
-	private IPackageFragment getPackage(String subDir) throws Exception {
+	private IPackageFragment getSubPackage(String subDir) throws Exception {
 		IPackageFragment pack= getPackageP();
 		if (subDir != null) {
 			String packageName= pack.getElementName() + "." + subDir;
@@ -120,24 +155,51 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 	}
 
 	private void checkCaller(String subdir) throws Exception {
-		IPackageFragment pack= getPackage(subdir);
-		ICompilationUnit cu= pack.getCompilationUnit(getCUFileName(true));
+		checkAdditionalFile(subdir, getCUName(true));
+	}
+
+	private void checkAdditionalFile(String subdir, String fileName) throws Exception, JavaModelException, IOException {
+		IPackageFragment pack= getSubPackage(subdir);
+		ICompilationUnit cu= pack.getCompilationUnit(fileName+".java");
 		assertNotNull(cu);
 		assertTrue(cu.getPath() + " does not exist", cu.exists());
 		String actual= cu.getSource();
-		String expected= getFileContents(getOutputTestFileName(getCUName(true)));
+		String expected= getFileContents(getOutputTestFileName(fileName));
 		assertEqualLines(expected, actual);
 	}
 
-	private void runRefactoring(boolean topLevel, boolean getters, boolean setters, boolean delegate, Map renamings) throws Exception {
-		runRefactoring(topLevel, getters, setters, delegate, renamings, null, null, null);
+
+	public static class RunRefactoringParameter {
+		public boolean useSuggestedMethod;
+		public boolean topLevel=false;
+		public boolean getters=false;
+		public boolean setters=false;
+		public boolean delegate=false;
+		public Map renamings=null;
+		public String className=null;
+		public String packageName=null;
+		public Map indexMap=null;
+		public boolean commments=false;
+		public boolean expectFailure=false;
+
+		public RunRefactoringParameter()
+		{
+		}
+		
+		public RunRefactoringParameter(boolean topLevel, boolean getters, boolean setters, boolean delegate, Map renamings, String className, String packageName, Map indexMap, boolean commments) {
+			this.topLevel= topLevel;
+			this.getters= getters;
+			this.setters= setters;
+			this.delegate= delegate;
+			this.renamings= renamings;
+			this.className= className;
+			this.packageName= packageName;
+			this.indexMap= indexMap;
+			this.commments= commments;
+		}
 	}
 
-	private void runRefactoring(boolean topLevel, boolean getters, boolean setters, boolean delegate, Map renamings, String className, String packageName) throws Exception {
-		runRefactoring(topLevel, getters, setters, delegate, renamings, className, packageName, null);
-	}
-	
-	private void runRefactoring(boolean topLevel, boolean getters, boolean setters, boolean delegate, Map renamings, String className, String packageName, final Map indexMap) throws Exception {
+	private void runRefactoring(final RunRefactoringParameter parameter) throws Exception {
 		IPackageFragment pack= getPackageP();
 		ICompilationUnit cu= createCUfromTestFile(pack, getCUName(false), true);
 		IType type= cu.getType(getCUName(false));
@@ -154,39 +216,25 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		assertNotNull(fooMethod);
 		assertTrue(fooMethod.exists());
 		IntroduceParameterObjectRefactoring ref= new IntroduceParameterObjectRefactoring(fooMethod);
-		ref.setCreateAsTopLevel(topLevel);
-		ref.setCreateGetter(getters);
-		ref.setCreateSetter(setters);
-		ref.setDelegateUpdating(delegate);
-		if (className != null)
-			ref.setClassName(className);
-		if (packageName != null)
-			ref.setPackage(packageName);
-		List pis= ref.getParameterInfos();
-		for (Iterator iter= pis.iterator(); iter.hasNext();) {
-			ParameterInfo pi= (ParameterInfo) iter.next();
-			if (!pi.isAdded())
-				pi.setCreateField(true);
-			if (renamings != null) {
-				String newName= (String) renamings.get(pi.getNewName());
-				if (newName != null)
-					pi.setNewName(newName);
-			}
-		}
-		if (indexMap!=null){
-			Collections.sort(pis, new Comparator() {
-			
-				public int compare(Object arg0, Object arg1) {
-					ParameterInfo pi0=(ParameterInfo) arg0;
-					ParameterInfo pi1=(ParameterInfo) arg1;
-					Integer idx0= (Integer) indexMap.get(pi0.getNewName());
-					Integer idx1= (Integer) indexMap.get(pi1.getNewName());
-					return idx0.compareTo(idx1);
-				}
-			
-			});
-		}
+		configureRefactoring(parameter, ref);
 		RefactoringStatus status= performRefactoring(ref);
+		if (parameter.expectFailure) {
+			assertNotNull(status);
+			if (parameter.useSuggestedMethod){
+				final RefactoringStatusEntry entry= status.getEntryMatchingSeverity(RefactoringStatus.FATAL);
+				if (entry.getCode() == RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD || entry.getCode() == RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE) {
+
+					String message= entry.getMessage();
+					final Object element= entry.getData();
+					message= message + RefactoringMessages.RefactoringErrorDialogUtil_okToPerformQuestion;
+					ref=new IntroduceParameterObjectRefactoring((IMethod) element);
+					configureRefactoring(parameter, ref);
+					status= performRefactoring(ref);
+				}
+			} else {
+				return;
+			}
+		} 
 		assertNull(status+"",status);
 		String expected= getFileContents(getOutputTestFileName(getCUName(false)));
 		assertNotNull(expected);
@@ -196,6 +244,54 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		String result= resultCU.getSource();
 		assertNotNull(result);
 		assertEqualLines(expected, result);
+		if (parameter.topLevel){
+			pack=getRoot().getPackageFragment(ref.getPackage());
+			assertNotNull(pack);
+			String parameterClassFile= ref.getClassName()+".java";
+			ICompilationUnit unit= pack.getCompilationUnit(parameterClassFile);
+			assertNotNull(unit);
+			assertTrue(unit.exists());
+			expected=getFileContents(getOutputTestFileName(ref.getClassName()));
+			result=unit.getSource();
+			assertNotNull(result);
+			assertEqualLines(expected, result);
+		}
+	}
+
+	private void configureRefactoring(final RunRefactoringParameter parameter, IntroduceParameterObjectRefactoring ref) {
+		ref.setCreateAsTopLevel(parameter.topLevel);
+		ref.setCreateGetter(parameter.getters);
+		ref.setCreateSetter(parameter.setters);
+		ref.setDelegateUpdating(parameter.delegate);
+		ref.setCreateComments(parameter.commments);
+		if (parameter.className != null)
+			ref.setClassName(parameter.className);
+		if (parameter.packageName != null)
+			ref.setPackage(parameter.packageName);
+		List pis= ref.getParameterInfos();
+		for (Iterator iter= pis.iterator(); iter.hasNext();) {
+			ParameterInfo pi= (ParameterInfo) iter.next();
+			if (!pi.isAdded())
+				pi.setCreateField(true);
+			if (parameter.renamings != null) {
+				String newName= (String) parameter.renamings.get(pi.getNewName());
+				if (newName != null)
+					pi.setNewName(newName);
+			}
+		}
+		if (parameter.indexMap!=null){
+			Collections.sort(pis, new Comparator() {
+			
+				public int compare(Object arg0, Object arg1) {
+					ParameterInfo pi0=(ParameterInfo) arg0;
+					ParameterInfo pi1=(ParameterInfo) arg1;
+					Integer idx0= (Integer) parameter.indexMap.get(pi0.getNewName());
+					Integer idx1= (Integer) parameter.indexMap.get(pi1.getNewName());
+					return idx0.compareTo(idx1);
+				}
+			
+			});
+		}
 	}
 
 	private String getCUFileName(boolean caller) {

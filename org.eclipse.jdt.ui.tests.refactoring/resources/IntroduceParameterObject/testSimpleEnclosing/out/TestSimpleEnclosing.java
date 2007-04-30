@@ -2,17 +2,8 @@ package p;
 
 public class TestSimpleEnclosing {
 	public static class FooParameter {
-		/**
-		 * 
-		 */
 		public String[] a;
-		/**
-		 * 
-		 */
 		public int b;
-		/**
-		 * 
-		 */
 		public FooParameter(String[] a, int b) {
 			this.a = a;
 			this.b = b;
