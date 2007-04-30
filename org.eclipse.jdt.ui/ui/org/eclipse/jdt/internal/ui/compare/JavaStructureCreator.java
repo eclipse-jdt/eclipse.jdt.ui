@@ -189,7 +189,7 @@ public class JavaStructureCreator extends StructureCreator {
 		}
 				
 		/**
-		 * Returns true if some nodes could be successfully combined into one.
+		 * @return true if some nodes could be successfully combined into one
 		 */
 		boolean matches() {
 			return !fIsOut && fAncestor != null && fLeft != null && fRight != null;
@@ -204,15 +204,15 @@ public class JavaStructureCreator extends StructureCreator {
 	}
 	
 	/**
-	 * Returns the name that appears in the enclosing pane title bar.
+	 * @return the name that appears in the enclosing pane title bar
 	 */
 	public String getName() {
 		return CompareMessages.JavaStructureViewer_title; 
 	}
 	
 	/**
-	 * Returns a tree of JavaNodes for the given input
-	 * which must implement the IStreamContentAccessor interface.
+	 * @param input implement the IStreamContentAccessor interface
+	 * @return a tree of JavaNodes for the given input.
 	 * In case of error null is returned.
 	 */
 	public IStructureComparator getStructure(final Object input) {
@@ -305,6 +305,7 @@ public class JavaStructureCreator extends StructureCreator {
 	 * the content will do.
 	 * @param node must implement the IStreamContentAccessor interface
 	 * @param ignoreWhiteSpace if true all Java white space (including comments) is removed from the contents.
+	 * @return contents for equality test
 	 */
 	public String getContents(Object node, boolean ignoreWhiteSpace) {
 		
@@ -334,10 +335,7 @@ public class JavaStructureCreator extends StructureCreator {
 				int token;
 				while ((token= scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
 					switch (token) {
-					case ITerminalSymbols.TokenNameWHITESPACE:
-					case ITerminalSymbols.TokenNameCOMMENT_BLOCK:
-					case ITerminalSymbols.TokenNameCOMMENT_JAVADOC:
-					case ITerminalSymbols.TokenNameCOMMENT_LINE:
+					case ITerminalSymbols.TokenNameWHITESPACE:						
 						int l= buf.length();
 						if (l > 0 && buf.charAt(l-1) != ' ')
 							buf.append(' ');
@@ -357,7 +355,7 @@ public class JavaStructureCreator extends StructureCreator {
 	}
 	
 	/**
-	 * Returns true since this IStructureCreator can rewrite the diff tree
+	 * @return true since this IStructureCreator can rewrite the diff tree
 	 * in order to fold certain combinations of additions and deletions.
 	 */
 	public boolean canRewriteTree() {
@@ -367,6 +365,8 @@ public class JavaStructureCreator extends StructureCreator {
 	/**
 	 * Tries to detect certain combinations of additions and deletions
 	 * as renames or signature changes and folders them into a single node.
+	 * @param differencer 
+	 * @param root 
 	 */
 	public void rewriteTree(Differencer differencer, IDiffContainer root) {
 		
@@ -452,10 +452,11 @@ public class JavaStructureCreator extends StructureCreator {
 	}
 
 	/**
-	 * Returns true if the given IJavaElement maps to a JavaNode.
 	 * The JavaHistoryAction uses this function to determine whether
 	 * a selected Java element can be replaced by some piece of
 	 * code from the local history.
+	 * @param je Java element
+	 * @return true if the given IJavaElement maps to a JavaNode
 	 */
 	static boolean hasEdition(IJavaElement je) {
 		return JavaElementHistoryPageSource.hasEdition(je);
