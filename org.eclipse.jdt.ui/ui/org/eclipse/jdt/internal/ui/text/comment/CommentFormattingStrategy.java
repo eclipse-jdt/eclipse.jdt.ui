@@ -102,7 +102,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 
 		Map preferences= getPreferences();
 		final boolean isFormattingHeader= DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER));
-		int documentsHeaderEnd= computeHeaderEnd(document);
+		int documentsHeaderEnd= computeHeaderEnd(document, preferences);
 
 		TextEdit edit= null;		
 		if (position.offset >= documentsHeaderEnd) {
@@ -316,9 +316,10 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	 * Returns the end offset for the document's header.
 	 *
 	 * @param document the document
+	 * @param preferences the given preferences to format
 	 * @return the header's end offset
 	 */
-	private int computeHeaderEnd(IDocument document) {
+	private int computeHeaderEnd(IDocument document, Map preferences) {
 		if (document == null)
 			return -1;
 
@@ -329,7 +330,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 			// should not happen -> recompute
 		}
 
-		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
+		IScanner scanner= ToolFactory.createScanner(true, false, false, (String) preferences.get(JavaCore.COMPILER_SOURCE), (String) preferences.get(JavaCore.COMPILER_COMPLIANCE));
 		scanner.setSource(document.get().toCharArray());
 
 		try {
