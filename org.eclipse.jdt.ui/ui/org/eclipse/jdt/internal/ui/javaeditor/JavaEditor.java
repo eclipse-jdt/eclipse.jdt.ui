@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -1339,6 +1340,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected final static String MATCHING_BRACKETS=  PreferenceConstants.EDITOR_MATCHING_BRACKETS;
 	/** Preference key for matching brackets color */
 	protected final static String MATCHING_BRACKETS_COLOR=  PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
+	
+	/**
+	 * Tells whether mark occurrences is in debug mode.
+	 * @since 3.3
+	 */
+	private static final boolean DEBUG_MARK_OCCURRENCES= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/MarkOccurrences"));  //$NON-NLS-1$//$NON-NLS-2$
+	
 
 	protected final static char[] BRACKETS= { '{', '}', '(', ')', '[', ']', '<', '>' };
 
@@ -2711,6 +2719,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 
 		private boolean isCanceled() {
+			if (DEBUG_MARK_OCCURRENCES) {
+				System.out.println("  isCanceled:"); //$NON-NLS-1$
+				System.out.println("    fCanceled: " + fCanceled); //$NON-NLS-1$
+				System.out.println("    monitor canceled: " + fProgressMonitor.isCanceled()); //$NON-NLS-1$
+				System.out.println("    forced selection: " + (fPostSelectionValidator != null && !(fPostSelectionValidator.isValid(fSelection) || fForcedMarkOccurrencesSelection == fSelection))); //$NON-NLS-1$
+				System.out.println("    has linked mode model: " + LinkedModeModel.hasInstalledModel(fDocument)); //$NON-NLS-1$
+			}
+			
 			return fCanceled || fProgressMonitor.isCanceled()
 				||  fPostSelectionValidator != null && !(fPostSelectionValidator.isValid(fSelection) || fForcedMarkOccurrencesSelection == fSelection)
 				|| LinkedModeModel.hasInstalledModel(fDocument);
@@ -2795,27 +2811,45 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.0
 	 */
 	protected void updateOccurrenceAnnotations(ITextSelection selection, CompilationUnit astRoot) {
+		if (DEBUG_MARK_OCCURRENCES) {
+			String ast= astRoot == null ? null : astRoot.getJavaElement().getElementName();
+			System.out.println(""); //$NON-NLS-1$
+			System.out.println("update occurrences with: " + ast + ", selection: " + selection); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 
 		if (fOccurrencesFinderJob != null)
 			fOccurrencesFinderJob.cancel();
-
-		if (!fMarkOccurrenceAnnotations)
+		
+		if (!fMarkOccurrenceAnnotations) {
+			if (DEBUG_MARK_OCCURRENCES)
+				System.out.println("    exiting due to fMarkOccurrenceAnnotations == false"); //$NON-NLS-1$
 			return;
+		}
 
-		if (astRoot == null || selection == null)
+		if (astRoot == null || selection == null) {
+			if (DEBUG_MARK_OCCURRENCES)
+				System.out.println("    exit due ast or selection being 'null'"); //$NON-NLS-1$
 			return;
+		}
 
 		IDocument document= getSourceViewer().getDocument();
-		if (document == null)
+		if (document == null) {
+			if (DEBUG_MARK_OCCURRENCES)
+				System.out.println("    exit due document being 'null'"); //$NON-NLS-1$
 			return;
+		}
 
 		if (document instanceof IDocumentExtension4) {
 			int offset= selection.getOffset();
 			long currentModificationStamp= ((IDocumentExtension4)document).getModificationStamp();
 			IRegion markOccurrenceTargetRegion= fMarkOccurrenceTargetRegion; 
 			if (markOccurrenceTargetRegion != null && currentModificationStamp == fMarkOccurrenceModificationStamp) {
-				if (markOccurrenceTargetRegion.getOffset() <= offset && offset <= markOccurrenceTargetRegion.getOffset() + markOccurrenceTargetRegion.getLength())
+				if (markOccurrenceTargetRegion.getOffset() <= offset && offset <= markOccurrenceTargetRegion.getOffset() + markOccurrenceTargetRegion.getLength()) {
+					if (DEBUG_MARK_OCCURRENCES)
+						System.out.println("    exit due target region"); //$NON-NLS-1$
 					return;
+				}
+				
 			}
 			fMarkOccurrenceTargetRegion= JavaWordFinder.findWord(document, offset);
 			fMarkOccurrenceModificationStamp= currentModificationStamp;
@@ -2882,6 +2916,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (matches == null || matches.size() == 0) {
 			if (!fStickyOccurrenceAnnotations)
 				removeOccurrenceAnnotations();
+			
+			if (DEBUG_MARK_OCCURRENCES)
+				System.out.println("    exit due to no matches"); //$NON-NLS-1$
+			
 			return;
 		}
 

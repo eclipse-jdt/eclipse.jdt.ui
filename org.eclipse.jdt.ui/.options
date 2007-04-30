@@ -27,3 +27,6 @@ org.eclipse.jdt.ui/perf/content_assist/extensions=1000
 
 #Reports the time for a single completion proposal sorter
 org.eclipse.jdt.ui/perf/content_assist_sorters/extensions
+
+# Prints debug information related to occurrence marking
+org.eclipse.jdt.ui/debug/MarkOccurrences=false
