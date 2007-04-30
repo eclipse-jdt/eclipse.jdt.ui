@@ -39,11 +39,6 @@ public class CommentsTabPage extends FormatterTabPage {
 		DefaultCodeFormatterConstants.TRUE
 	};
 	
-	private static String[] TRUE_FALSE = {
-		DefaultCodeFormatterConstants.TRUE,
-		DefaultCodeFormatterConstants.FALSE
-	};
-	
     /**
      * Constant array for insert / not_insert. 
      */
@@ -163,8 +158,8 @@ public class CommentsTabPage extends FormatterTabPage {
 		final CheckboxPreference blockComment= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_enable_block_comment_formatting, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT);
 		final CheckboxPreference singleLineComments= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_enable_line_comment_formatting, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT); 
 		final CheckboxPreference header= createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_format_header, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER);
-		createPrefTrueFalseInvert(globalGroup, numColumns, FormatterMessages.CommentsTabPage_never_indent_block_comments_on_first_column, DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_BLOCK_COMMENTS_ON_FIRST_COLUMN);
-		createPrefTrueFalseInvert(globalGroup, numColumns, FormatterMessages.CommentsTabPage_never_indent_line_comments_on_first_column, DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN);
+		createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_never_indent_block_comments_on_first_column, DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_BLOCK_COMMENTS_ON_FIRST_COLUMN);
+		createPrefTrueFalse(globalGroup, numColumns, FormatterMessages.CommentsTabPage_never_indent_line_comments_on_first_column, DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN);
 
 		// javadoc comment formatting settings
 		final Group settingsGroup= createGroup(numColumns, composite, FormatterMessages.CommentsTabPage_group2_title); 
@@ -258,10 +253,6 @@ public class CommentsTabPage extends FormatterTabPage {
 	
 	private CheckboxPreference createPrefTrueFalse(Composite composite, int numColumns, String text, String key) {
 		return createCheckboxPref(composite, numColumns, text, key, FALSE_TRUE);
-	}
-	
-	private CheckboxPreference createPrefTrueFalseInvert(Composite composite, int numColumns, String text, String key) {
-		return createCheckboxPref(composite, numColumns, text, key, TRUE_FALSE);
 	}
     
     private CheckboxPreference createPrefInsert(Composite composite, int numColumns, String text, String key) {
