@@ -541,11 +541,13 @@ public class UnresolvedElementsSubProcessor {
 		// change to similar type proposals
 		addSimilarTypeProposals(kind, cu, node, 3, proposals);
 
-		// add type
 		while (node.getParent() instanceof QualifiedName) {
 			node= (Name) node.getParent();
 		}
 		
+		if (selectedNode != node) {
+			kind= evauateTypeKind(node, cu.getJavaProject());
+		}
 		if ((kind & (SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES)) != 0) {
 			kind &= ~SimilarElementsRequestor.ANNOTATIONS; // only propose annotations when there are no other suggestions
 		}		

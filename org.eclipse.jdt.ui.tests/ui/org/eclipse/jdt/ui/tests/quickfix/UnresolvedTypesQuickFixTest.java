@@ -825,6 +825,34 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });		
 	}
 	
+	public void testTypeInAnnotation_bug153881() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("a", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package a;\n");
+		buf.append("public class SomeClass {\n");
+		buf.append("        @scratch.Unimportant void foo() {}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("SomeClass.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package scratch;\n");
+		buf.append("\n");
+		buf.append("public @interface Unimportant {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	
 	public void testPrimitiveTypeInFieldDecl() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
