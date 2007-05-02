@@ -747,6 +747,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) input;
 		IClassFile file= classFileEditorInput.getClassFile();
 		
+		IAction copyQualifiedName= getAction(IJavaEditorActionConstants.COPY_QUALIFIED_NAME);
+		
 		boolean wasUsingSourceCopyAction= fSourceCopyAction == getAction(ITextEditorActionConstants.COPY);
 
 		// show source attachment form if no source found
@@ -790,6 +792,9 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				selectAllAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.SELECT_ALL);
 				setAction(ITextEditorActionConstants.SELECT_ALL, selectAllAction);
 				copyAction.setEnabled(fNoSourceTextWidget.getSelectionText().length() > 0);
+				copyQualifiedName.setEnabled(false);
+				
+				
 			}
 
 		} else { // show source viewer
@@ -804,6 +809,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 			setAction(ITextEditorActionConstants.COPY, fSourceCopyAction);
 			setAction(ITextEditorActionConstants.SELECT_ALL, fSelectAllAction);
+			copyQualifiedName.setEnabled(true);
 
 		}
 		
