@@ -270,31 +270,34 @@ public class WorkingSetConfigurationBlock {
 	
 	private void updateEnableState(boolean enabled) {
 		fLabel.setEnabled(enabled);
-		fWorkingSetCombo.setEnabled(enabled);
+		fWorkingSetCombo.setEnabled(enabled && (fSelectedWorkingSets.length > 0 || getHistoryEntries().length > 0));
 		fConfigure.setEnabled(enabled);
 	}
 	
 	private void updateWorkingSetSelection() {
-		StringBuffer buf= new StringBuffer();
-		
 		if (fSelectedWorkingSets.length > 0) {
+			fWorkingSetCombo.setEnabled(true);
+			StringBuffer buf= new StringBuffer();
+
 			buf.append(fSelectedWorkingSets[0].getLabel());
 			for (int i= 1; i < fSelectedWorkingSets.length; i++) {
 				IWorkingSet ws= fSelectedWorkingSets[i];
 				buf.append(',').append(' ');
 				buf.append(ws.getLabel());
 			}
-		}
-			
-		String currentSelection= buf.toString();
-		int index= historyIndex(currentSelection);
-		if (index >= 0) {
+
+			String currentSelection= buf.toString();
+			int index= historyIndex(currentSelection);
 			historyInsert(currentSelection);
-			fWorkingSetCombo.select(index);
-		} else {
-			historyInsert(currentSelection);
-			fWorkingSetCombo.setItems(getHistoryEntries());
-			fWorkingSetCombo.select(historyIndex(currentSelection));
+			if (index >= 0) {
+				fWorkingSetCombo.select(index);
+			} else {
+				fWorkingSetCombo.setItems(getHistoryEntries());
+				fWorkingSetCombo.select(historyIndex(currentSelection));
+			} 
+		}else {
+			fEnableButton.setSelection(false);
+			updateEnableState(false);
 		}
 	}
 
