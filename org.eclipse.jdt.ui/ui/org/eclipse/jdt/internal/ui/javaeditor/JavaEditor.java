@@ -867,7 +867,29 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor.NextSubWordAction#findNextPosition(int)
 		 */
 		protected int findNextPosition(int position) {
-			return fIterator.following(position);
+			int next= super.findNextPosition(position);
+			
+			ISourceViewer viewer= getSourceViewer();
+			IDocument document= viewer.getDocument();
+			LinkedModeModel model= LinkedModeModel.getModel(document, position);
+			if (model != null) {
+				LinkedPosition linkedPosition= model.findPosition(new LinkedPosition(document, position, 0));
+				if (linkedPosition != null) {
+					int linkedPositionEnd= linkedPosition.getOffset() + linkedPosition.getLength();
+					if (position != linkedPositionEnd && linkedPositionEnd < next)
+						next= linkedPositionEnd;
+				} else {
+					LinkedPosition nextLinkedPosition= model.findPosition(new LinkedPosition(document, next, 0));
+					if (nextLinkedPosition != null) {
+						int nextLinkedPositionOffset= nextLinkedPosition.getOffset();
+						if (position != nextLinkedPositionOffset && nextLinkedPositionOffset < next)
+							next= nextLinkedPositionOffset;
+					}
+				}
+			}
+			
+			return next;
+			
 		}
 
 		/*
@@ -1067,7 +1089,28 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor.PreviousSubWordAction#findPreviousPosition(int)
 		 */
 		protected int findPreviousPosition(int position) {
-			return fIterator.preceding(position);
+			int previous= fIterator.preceding(position);
+			
+			ISourceViewer viewer= getSourceViewer();
+			IDocument document= viewer.getDocument();
+			LinkedModeModel model= LinkedModeModel.getModel(document, position);
+			if (model != null) {
+				LinkedPosition linkedPosition= model.findPosition(new LinkedPosition(document, position, 0));
+				if (linkedPosition != null) {
+					int linkedPositionOffset= linkedPosition.getOffset();
+					if (position != linkedPositionOffset && previous < linkedPositionOffset)
+						previous= linkedPositionOffset;
+				} else {
+					LinkedPosition previousLinkedPosition= model.findPosition(new LinkedPosition(document, previous, 0));
+					if (previousLinkedPosition != null) {
+						int previousLinkedPositionEnd= previousLinkedPosition.getOffset() + previousLinkedPosition.getLength();
+						if (position != previousLinkedPositionEnd && previous < previousLinkedPositionEnd)
+							previous= previousLinkedPositionEnd;
+					}
+				}
+			}
+			
+			return previous;
 		}
 
 		/*
