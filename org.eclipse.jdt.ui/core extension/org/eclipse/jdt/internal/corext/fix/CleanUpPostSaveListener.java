@@ -17,7 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.UndoEdit;
 
@@ -48,7 +47,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
 
@@ -177,7 +175,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void saved(ICompilationUnit unit, boolean saveAs, IProgressMonitor monitor) throws CoreException {
+	public void saved(ICompilationUnit unit, IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		
@@ -207,113 +205,81 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 				filteredSettins.put(CleanUpConstants.ORGANIZE_IMPORTS, settings.get(CleanUpConstants.ORGANIZE_IMPORTS));
 				cleanUps= CleanUpRefactoring.createCleanUps(filteredSettins);
 			}
+						
+			long oldFileValue= unit.getResource().getModificationStamp();
+			long oldDocValue= getDocumentStamp((IFile)unit.getResource(), new SubProgressMonitor(monitor, 2));
 			
-			if (saveAs) {
-				do {					
-					List undoneCleanUps= new ArrayList();
-					CleanUpChange change= calculateChange(unit, cleanUps, undoneCleanUps, monitor);
-					if (change != null) {
-						Document document= new Document(unit.getBuffer().getContents());
-						try {
-							change.getEdit().apply(document);
-						} catch (MalformedTreeException e) {
-							throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, 0, e.getLocalizedMessage(), e));
-						} catch (BadLocationException e) {
-							String message= e.getLocalizedMessage();
-			                if (message == null)
-			                	message= "BadLocationException"; //$NON-NLS-1$
-							throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IRefactoringCoreStatusCodes.BAD_LOCATION, message, e));
-						}
-						unit.getBuffer().setContents(document.get());
-					}
-					cleanUps= (ICleanUp[])undoneCleanUps.toArray(new ICleanUp[undoneCleanUps.size()]);
-				} while (cleanUps.length > 0);
-			} else {
-				long oldFileValue= unit.getResource().getModificationStamp();
-				long oldDocValue= getDocumentStamp((IFile)unit.getResource(), new SubProgressMonitor(monitor, 2));
-				
-				CompositeChange result= new CompositeChange(FixMessages.CleanUpPostSaveListener_SaveAction_ChangeName);
-				LinkedList undoEdits= new LinkedList();
-				
-				IUndoManager manager= RefactoringCore.getUndoManager();
-				
-				try {
-	    			manager.aboutToPerformChange(result);
-	    			
-	    			do {
-	    				List undoneCleanUps= new ArrayList();
-	    				CleanUpChange change= calculateChange(unit, cleanUps, undoneCleanUps, monitor);
-	    				
-	    				if (change != null) {
-	    					result.add(change);
-	    					
-	    					change.setSaveMode(TextFileChange.LEAVE_DIRTY);
-	    					change.initializeValidationData(new NullProgressMonitor());
-	    					
-	    					PerformChangeOperation performChangeOperation= RefactoringUI.createUIAwareChangeOperation(change);
-	    					performChangeOperation.setSchedulingRule(unit.getSchedulingRule());
-	    					
-	    					performChangeOperation.run(new SubProgressMonitor(monitor, 5));
-	    					
-	    					performChangeOperation.getUndoChange();
-	    					undoEdits.addFirst(change.getUndoEdit());
-	    				}
-	    				
-	    				cleanUps= (ICleanUp[])undoneCleanUps.toArray(new ICleanUp[undoneCleanUps.size()]);
-	    			} while (cleanUps.length > 0);
-				} finally {
-					manager.changePerformed(result, true);
-				}
-				
-				if (undoEdits.size() > 0) {
-	    			UndoEdit[] undoEditArray= (UndoEdit[])undoEdits.toArray(new UndoEdit[undoEdits.size()]);
-	    			CleanUpSaveUndo undo= new CleanUpSaveUndo(result.getName(), (IFile)unit.getResource(), undoEditArray, oldDocValue, oldFileValue);
-	    			undo.initializeValidationData(new NullProgressMonitor());
-	    			manager.addUndo(result.getName(), undo);
-				}
+			CompositeChange result= new CompositeChange(FixMessages.CleanUpPostSaveListener_SaveAction_ChangeName);
+			LinkedList undoEdits= new LinkedList();
+			
+			IUndoManager manager= RefactoringCore.getUndoManager();
+			
+			try {
+    			manager.aboutToPerformChange(result);
+    			
+    			do {
+    				RefactoringStatus preCondition= new RefactoringStatus();
+    				for (int i= 0; i < cleanUps.length; i++) {
+    					RefactoringStatus conditions= cleanUps[i].checkPreConditions(unit.getJavaProject(), new ICompilationUnit[] {unit}, new SubProgressMonitor(monitor, 5));
+    					preCondition.merge(conditions);
+    				}
+    				if (showStatus(preCondition) != Window.OK)
+    					return;
+    				
+    				Map options= new HashMap();
+    				for (int i= 0; i < cleanUps.length; i++) {
+    					Map map= cleanUps[i].getRequiredOptions();
+    					if (map != null) {
+    						options.putAll(map);
+    					}
+    				}
+    					
+    				CompilationUnit ast= null;
+    				if (requiresAST(cleanUps, unit)) {
+    					ast= createAst(unit, options, new SubProgressMonitor(monitor, 10));
+    				}
+    				
+    				List undoneCleanUps= new ArrayList();
+    				CleanUpChange change= CleanUpRefactoring.calculateChange(ast, unit, cleanUps, undoneCleanUps);
+    				
+    				RefactoringStatus postCondition= new RefactoringStatus();
+    				for (int i= 0; i < cleanUps.length; i++) {
+    					RefactoringStatus conditions= cleanUps[i].checkPostConditions(new SubProgressMonitor(monitor, 1));
+    					postCondition.merge(conditions);
+    				}
+    				if (showStatus(postCondition) != Window.OK)
+    					return;
+    				
+    				if (change != null) {
+    					result.add(change);
+    					
+    					change.setSaveMode(TextFileChange.LEAVE_DIRTY);
+    					change.initializeValidationData(new NullProgressMonitor());
+    					
+    					PerformChangeOperation performChangeOperation= RefactoringUI.createUIAwareChangeOperation(change);
+    					performChangeOperation.setSchedulingRule(unit.getSchedulingRule());
+    					
+    					performChangeOperation.run(new SubProgressMonitor(monitor, 5));
+    					
+    					performChangeOperation.getUndoChange();
+    					undoEdits.addFirst(change.getUndoEdit());
+    				}
+    				
+    				cleanUps= (ICleanUp[])undoneCleanUps.toArray(new ICleanUp[undoneCleanUps.size()]);
+    			} while (cleanUps.length > 0);
+			} finally {
+				manager.changePerformed(result, true);
+			}
+			
+			if (undoEdits.size() > 0) {
+    			UndoEdit[] undoEditArray= (UndoEdit[])undoEdits.toArray(new UndoEdit[undoEdits.size()]);
+    			CleanUpSaveUndo undo= new CleanUpSaveUndo(result.getName(), (IFile)unit.getResource(), undoEditArray, oldDocValue, oldFileValue);
+    			undo.initializeValidationData(new NullProgressMonitor());
+    			manager.addUndo(result.getName(), undo);
 			}
 		} finally {
 			monitor.done();
 		}
-	}
-
-	private CleanUpChange calculateChange(ICompilationUnit unit, ICleanUp[] cleanUps, List undoneCleanUps, IProgressMonitor monitor) throws CoreException {
-		RefactoringStatus preCondition= new RefactoringStatus();
-		for (int i= 0; i < cleanUps.length; i++) {
-			RefactoringStatus conditions= cleanUps[i].checkPreConditions(unit.getJavaProject(), new ICompilationUnit[] {unit}, new SubProgressMonitor(monitor, 5));
-			preCondition.merge(conditions);
-		}
-		if (showStatus(preCondition) != Window.OK) {
-			undoneCleanUps.clear();
-			return null;
-		}
-		
-		Map options= new HashMap();
-		for (int i= 0; i < cleanUps.length; i++) {
-			Map map= cleanUps[i].getRequiredOptions();
-			if (map != null) {
-				options.putAll(map);
-			}
-		}
-			
-		CompilationUnit ast= null;
-		if (requiresAST(cleanUps, unit)) {
-			ast= createAst(unit, options, new SubProgressMonitor(monitor, 10));
-		}
-		
-		CleanUpChange change= CleanUpRefactoring.calculateChange(ast, unit, cleanUps, undoneCleanUps);
-		
-		RefactoringStatus postCondition= new RefactoringStatus();
-		for (int i= 0; i < cleanUps.length; i++) {
-			RefactoringStatus conditions= cleanUps[i].checkPostConditions(new SubProgressMonitor(monitor, 1));
-			postCondition.merge(conditions);
-		}
-		if (showStatus(postCondition) != Window.OK) {
-			undoneCleanUps.clear();
-			return null;
-		}
-		
-		return change;
 	}
 
 	private int showStatus(RefactoringStatus status) {
