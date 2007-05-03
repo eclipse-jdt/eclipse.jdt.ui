@@ -133,11 +133,7 @@ public abstract class OwnerDrawSupport implements Listener {
 		int x= textBounds.x;
 		int y = textBounds.y + Math.max(0, (textBounds.height - bounds.height) / 2);
 		
-		if (isSelected) {
-			fTextLayout.draw(gc, x, y, 0, text.length() - 1, null, null);
-		} else {
-			fTextLayout.draw(gc, x, y);
-		}
+		fTextLayout.draw(gc, x, y);
 	}
 	
 	public void dispose() {
