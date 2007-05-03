@@ -29,6 +29,9 @@ import org.eclipse.swt.events.ShellListener;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
@@ -41,6 +44,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.spelling.SpellingService;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IElementChangedListener;
@@ -227,6 +231,11 @@ public class JavaReconciler extends MonoReconciler {
 	 */
 	private IResourceChangeListener fResourceChangeListener;
 	/**
+	 * The property change listener.
+	 * @since 3.3
+	 */
+	private IPropertyChangeListener fPropertyChangeListener;
+	/**
 	 * Tells whether a reconcile is in progress.
 	 * @since 3.1
 	 */
@@ -282,6 +291,14 @@ public class JavaReconciler extends MonoReconciler {
 		fResourceChangeListener= new ResourceChangeListener();
 		IWorkspace workspace= JavaPlugin.getWorkspace();
 		workspace.addResourceChangeListener(fResourceChangeListener);
+		
+		fPropertyChangeListener= new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				if (SpellingService.PREFERENCE_SPELLING_ENABLED.equals(event.getProperty()) || SpellingService.PREFERENCE_SPELLING_ENGINE.equals(event.getProperty()))
+					forceReconciling();
+			}
+		};
+		JavaPlugin.getDefault().getCombinedPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
 	}
 
 	/*
@@ -305,6 +322,9 @@ public class JavaReconciler extends MonoReconciler {
 		IWorkspace workspace= JavaPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(fResourceChangeListener);
 		fResourceChangeListener= null;
+		
+		JavaPlugin.getDefault().getCombinedPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
+		fPropertyChangeListener= null;
 
 		super.uninstall();
 	}
