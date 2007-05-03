@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ISafeRunnable;
@@ -83,10 +84,10 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
@@ -97,7 +98,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.actions.ActionContext;
-import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTarget;
@@ -142,8 +142,6 @@ import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.filters.OutputFolderFilter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
-import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
@@ -1108,10 +1106,10 @@ public class PackageExplorerPart extends ViewPart
 	 * @param editor the activated editor
 	 */
 	void editorActivated(IEditorPart editor) {
-		IEditorInput editorInput= getEditorInput(editor);
+		IEditorInput editorInput= editor.getEditorInput();
 		if (editorInput == null)
 			return;
-		Object input= JavaUI.getEditorInputJavaElement(editorInput);
+		Object input= getInputFromEditor(editorInput);
 		if (input == null) 
 			return;
 		if (!inputIsSelected(editorInput))
@@ -1119,22 +1117,22 @@ public class PackageExplorerPart extends ViewPart
 		else
 			getTreeViewer().getTree().showSelection();
 	}
-
-	private IEditorInput getEditorInput(IEditorPart editor) {
-		IEditorInput editorInput= editor.getEditorInput();
-		if (editorInput instanceof IClassFileEditorInput)
-			return editorInput;
-		else if (editorInput instanceof IFileEditorInput)
-			return editorInput;
-		else if (editorInput instanceof JarEntryEditorInput)
-			return editorInput;
-		
-		IFile file= (IFile)editorInput.getAdapter(IFile.class); 
-		if (file != null)
-			return new FileEditorInput(file);
-		
-		return null;
+	
+	private Object getInputFromEditor(IEditorInput editorInput) {
+		Object input= JavaUI.getEditorInputJavaElement(editorInput);
+		if (input == null) {
+			input= editorInput.getAdapter(IFile.class); 
+		}
+		if (input == null && editorInput instanceof IStorageEditorInput) {
+			try {
+				input= ((IStorageEditorInput) editorInput).getStorage();
+			} catch (CoreException e) {
+				// ignore
+			}
+		}
+		return input;
 	}
+	
 
 	private boolean inputIsSelected(IEditorInput input) {
 		IStructuredSelection selection= (IStructuredSelection)fViewer.getSelection();
@@ -1353,10 +1351,7 @@ public class PackageExplorerPart extends ViewPart
 		
 		Object input= context.getInput();
 		if (input instanceof IEditorInput) {
-			Object elementOfInput= JavaUI.getEditorInputJavaElement((IEditorInput)context.getInput());
-			if (elementOfInput == null) {
-				elementOfInput= ((IEditorInput) input).getAdapter(IFile.class);
-			}
+			Object elementOfInput= getInputFromEditor((IEditorInput) input);
 			return elementOfInput != null && (tryToReveal(elementOfInput) == IStatus.OK);
 		}
 
