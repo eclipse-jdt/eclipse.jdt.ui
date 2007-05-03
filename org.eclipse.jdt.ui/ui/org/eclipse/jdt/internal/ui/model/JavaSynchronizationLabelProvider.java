@@ -59,6 +59,8 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 	public void dispose() {
 		if (fPackageImage != null && !fPackageImage.isDisposed())
 			fPackageImage.dispose();
+		if (fLabelProvider != null)
+			fLabelProvider.dispose();
 		super.dispose();
 	}
 
