@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -601,6 +601,8 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			fDetectGroup.handlePossibleJVMChange();
 			if (field == fJRECombo) {
 				if (fUseProjectJRE.isSelected()) {
+				
+				
 					storeSelectionValue(fJRECombo, LAST_SELECTED_JRE_SETTINGS_KEY);
 				}
 			} else if (field == fEECombo) {
@@ -910,9 +912,16 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 				return;
 			}
 
-			// If we do not place the contents in the workspace validate the
-			// location.
+			// check external location
 			if (!fLocationGroup.isInWorkspace()) {
+				if (!canCreate(projectPath.toFile())) {
+					setErrorMessage(NewWizardMessages.JavaProjectWizardFirstPage_Message_cannotCreateAtExternalLocation); 
+					setPageComplete(false);
+					return;
+				}
+
+				// If we do not place the contents in the workspace validate the
+				// location.
 				final IStatus locationStatus= workspace.validateProjectLocation(handle, projectPath);
 				if (!locationStatus.isOK()) {
 					setErrorMessage(locationStatus.getMessage());
@@ -925,6 +934,16 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 
 			setErrorMessage(null);
 			setMessage(null);
+		}
+
+		private boolean canCreate(File file) {
+			while (!file.exists()) {
+				file= file.getParentFile();
+				if (file == null)
+					return false;
+			}
+			
+			return file.canWrite();
 		}
 
 	}

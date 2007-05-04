@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -530,6 +530,7 @@ public final class NewWizardMessages extends NLS {
 	public static String JavaProjectWizardFirstPage_Message_enterLocation;
 	public static String JavaProjectWizardFirstPage_Message_invalidDirectory;
 	public static String JavaProjectWizardFirstPage_Message_cannotCreateInWorkspace;
+	public static String JavaProjectWizardFirstPage_Message_cannotCreateAtExternalLocation;
 	public static String JavaProjectWizardFirstPage_page_pageName;
 	public static String JavaProjectWizardFirstPage_page_title;
 	public static String JavaProjectWizardFirstPage_page_description;
