@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -182,6 +182,9 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	/**
 	 * Checks if the key is defined in the property file
 	 * and adds it to the list of used properties.
+	 * 
+	 * @param key the key 
+	 * @return <code>true</code> if the key is defined
 	 */
 	private boolean isKeyDefined(String key) {
 		if (key == null)
@@ -209,6 +212,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	 * @param keyPositionResult reference parameter: will be filled with the position of the found key
 	 * @param enclosingElement enclosing java element
 	 * @return a string denoting the key, null if no key can be found
+	 * @throws CoreException if a problem occurs while accessing the <code>enclosingElement</code>
 	 */
 	private String findKey(Position keyPositionResult, IJavaElement enclosingElement) throws CoreException {
 		ICompilationUnit unit= (ICompilationUnit)enclosingElement.getAncestor(IJavaElement.COMPILATION_UNIT);
@@ -221,9 +225,12 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		
 		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
 		scanner.setSource(source.toCharArray());
-		scanner.resetTo(keyPositionResult.getOffset() + keyPositionResult.getLength() + 1, source.length());
+		scanner.resetTo(keyPositionResult.getOffset() + keyPositionResult.getLength(), source.length());
 
 		try {
+			if (scanner.getNextToken() != ITerminalSymbols.TokenNameDOT)
+				return null;
+			
 			if (scanner.getNextToken() != ITerminalSymbols.TokenNameIdentifier)
 				return null;
 			
@@ -256,6 +263,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	 * Finds the start position in the property file. We assume that
 	 * the key is the first match on a line.
 	 * 
+	 * @param propertyName the property name 
 	 * @return	the start position of the property name in the file, -1 if not found
 	 */
 	private int findPropertyNameStartPosition(String propertyName) {

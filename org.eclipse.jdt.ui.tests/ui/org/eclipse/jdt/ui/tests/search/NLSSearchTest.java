@@ -320,4 +320,39 @@ public class NLSSearchTest extends TestCase {
 			manager.disconnect(propertiesFile.getFullPath(), LocationKind.IFILE, new NullProgressMonitor());
 		}
 	}
+	
+	public void testBug185178() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.util.MissingResourceException;\n");
+		buf.append("import java.util.ResourceBundle;\n");
+		buf.append("public class Accessor {\n");
+		buf.append("    private static final String BUNDLE_NAME = \"test.Accessor\"; //$NON-NLS-1$\n");
+		buf.append("    private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);\n");
+		buf.append("    private Accessor() {}\n");
+		buf.append("    public static String getString(String key) {\n");
+		buf.append("        try {\n");
+		buf.append("            return RESOURCE_BUNDLE.getString(key);\n");
+		buf.append("        } catch (MissingResourceException e) {\n");
+		buf.append("            return '!' + key + '!';\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit accessor= pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Client {\n");
+		buf.append("    public String s1= Accessor\n");
+		buf.append("                            .getString(\"Client.0\"); //$NON-NLS-1$\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("Client.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("Client.0=s1\n");
+		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
+
+		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 0);
+	}
 }
