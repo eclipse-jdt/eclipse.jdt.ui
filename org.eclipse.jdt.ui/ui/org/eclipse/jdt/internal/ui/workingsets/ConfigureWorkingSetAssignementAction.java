@@ -155,12 +155,14 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		private CheckboxTableViewer fTableViewer;
 		private boolean fShowVisibleOnly;
 		private GrayedCheckedModel fModel;
+		private final IAdaptable[] fElements;
 		
-		private WorkingSetModelAwareSelectionDialog(Shell shell, GrayedCheckedModel model) {
+		private WorkingSetModelAwareSelectionDialog(Shell shell, GrayedCheckedModel model, IAdaptable[] elements) {
 			super(shell, model.getAll(), model.getChecked());
 			setTitle(WorkingSetMessages.ConfigureWorkingSetAssignementAction_WorkingSetAssignments_title);
 			fModel= model;
 			fShowVisibleOnly= true;
+			fElements= elements;
 		}
 		
 		public IWorkingSet[] getGrayed() {
@@ -335,7 +337,6 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			"org.eclipse.ui.resourceWorkingSetPage" //$NON-NLS-1$
 	};
 	
-	private IAdaptable[] fElements;
 	private WorkingSetModel fWorkingSetModel;
 	private final IWorkbenchSite fSite;
 
@@ -350,8 +351,21 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 	}
 	
 	public void selectionChanged(IStructuredSelection selection) {
-		fElements= getSelectedElements(selection);
-		setEnabled(fElements.length > 0);
+		setEnabled(canEnable(selection));
+	}
+
+	private boolean canEnable(IStructuredSelection selection) {
+		if (selection.isEmpty())
+			return false;
+		
+		List list= selection.toList();
+		for (Iterator iterator= list.iterator(); iterator.hasNext();) {
+			Object object= iterator.next();
+			if (!(object instanceof IResource) && !(object instanceof IJavaElement))
+				return false;
+		}
+		
+		return true;
 	}
 
 	private IAdaptable[] getSelectedElements(IStructuredSelection selection) {
@@ -367,14 +381,14 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		
 		return (IAdaptable[])result.toArray(new IAdaptable[result.size()]);
 	}
-
-	public void run() {		
+	
+	public void run(IStructuredSelection selection) {
+		IAdaptable[] elements= getSelectedElements(selection);
+		GrayedCheckedModel model= createGrayedCheckedModel(elements, getAllWorkingSets());
+		WorkingSetModelAwareSelectionDialog dialog= new WorkingSetModelAwareSelectionDialog(fSite.getShell(), model, elements);
 		
-		GrayedCheckedModel model= createGrayedCheckedModel(fElements, getAllWorkingSets());
-		WorkingSetModelAwareSelectionDialog dialog= new WorkingSetModelAwareSelectionDialog(fSite.getShell(), model);
-		
-		if (fElements.length == 1) {
-			IAdaptable element= fElements[0];
+		if (elements.length == 1) {
+			IAdaptable element= elements[0];
 			String elementName;
 			if (element instanceof IResource) {
 				elementName= ((IResource)element).getName();
@@ -383,10 +397,10 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			}
 			dialog.setMessage(Messages.format(WorkingSetMessages.ConfigureWorkingSetAssignementAction_DialogMessage_specific, elementName));
 		} else {
-			dialog.setMessage(Messages.format(WorkingSetMessages.ConfigureWorkingSetAssignementAction_DialogMessage_multi, new Integer(fElements.length)));
+			dialog.setMessage(Messages.format(WorkingSetMessages.ConfigureWorkingSetAssignementAction_DialogMessage_multi, new Integer(elements.length)));
 		}
 		if (dialog.open() == Window.OK) {
-			updateWorkingSets(dialog.getSelection(), dialog.getGrayed(), fElements);
+			updateWorkingSets(dialog.getSelection(), dialog.getGrayed(), elements);
 		}
 	}
 	
