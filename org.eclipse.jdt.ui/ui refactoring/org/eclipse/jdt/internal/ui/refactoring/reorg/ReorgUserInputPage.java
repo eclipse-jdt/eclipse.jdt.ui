@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,7 +77,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 	}
 	
 	protected Control addLabel(Composite parent) {
-		Label label= new Label(parent, SWT.NONE);
+		Label label= new Label(parent, SWT.WRAP);
 		String text;
 		int resources= getResources().length;
 		int javaElements= getJavaElements().length;
@@ -97,7 +97,9 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		}
 
 		label.setText(text);
-		label.setLayoutData(new GridData(SWT.BEGINNING, SWT.END, false, false));
+		GridData data= new GridData(SWT.FILL, SWT.END, true, false);
+		data.widthHint= convertWidthInCharsToPixels(50);
+		label.setLayoutData(data);
 		return label;
 	}
 	
