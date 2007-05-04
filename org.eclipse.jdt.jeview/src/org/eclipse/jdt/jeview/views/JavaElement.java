@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -149,6 +150,8 @@ public class JavaElement extends JEAttribute {
 		if (fJavaElement instanceof IPackageFragment)
 			addPackageFragmentChildren(result, (IPackageFragment) fJavaElement);
 		
+		if (fJavaElement instanceof ITypeRoot)
+			addTypeRootChildren(result, (ITypeRoot) fJavaElement);
 		if (fJavaElement instanceof IClassFile)
 			addClassFileChildren(result, (IClassFile) fJavaElement);
 		if (fJavaElement instanceof ICompilationUnit)
@@ -298,6 +301,14 @@ public class JavaElement extends JEAttribute {
 		});
 	}
 	
+	private void addTypeRootChildren(ArrayList<JEAttribute> result, final ITypeRoot typeRoot) {
+		result.add(JavaElement.compute(this, "FIND PRIMARY TYPE", new Callable<IJavaElement>() {
+			public IJavaElement call() {
+				return typeRoot.findPrimaryType();
+			}
+		}));
+	}
+	
 	private void addClassFileChildren(ArrayList<JEAttribute> result, final IClassFile classFile) {
 		result.add(JavaElement.compute(this, "TYPE", new Callable<IJavaElement>() {
 			public IJavaElement call() throws JavaModelException {
@@ -308,11 +319,6 @@ public class JavaElement extends JEAttribute {
 
 	private void addCompilationUnitChildren(ArrayList<JEAttribute> result, final ICompilationUnit compilationUnit) {
 		//TODO: WorkingCopyOwner
-		result.add(JavaElement.compute(this, "FIND PRIMARY TYPE", new Callable<IJavaElement>() {
-			public IJavaElement call() {
-				return compilationUnit.findPrimaryType();
-			}
-		}));
 		result.add(new JavaElement(this, "PRIMARY", compilationUnit.getPrimary()));
 		result.add(new JavaElementChildrenProperty(this, "TYPES") {
 			@Override
@@ -344,6 +350,7 @@ public class JavaElement extends JEAttribute {
 	private void addMemberChildren(ArrayList<JEAttribute> result, final IMember member) {
 		result.add(new JavaElement(this, "CLASS FILE", member.getClassFile()));
 		result.add(new JavaElement(this, "COMPILATION UNIT", member.getCompilationUnit()));
+		result.add(new JavaElement(this, "TYPE ROOT", member.getTypeRoot()));
 		result.add(new JavaElement(this, "DECLARING TYPE", member.getDeclaringType()));
 		result.add(new JavaElementChildrenProperty(this, "CATEGORIES") {
 			@Override
