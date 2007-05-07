@@ -147,11 +147,13 @@ public class RenameSupport {
 			starter= RenameUserInterfaceManager.getDefault().getStarter(fRefactoring);
 		} else {
 			starter= new RenameUserInterfaceStarter();
-			starter.initialize(new RenameRefactoringWizard(fRefactoring, fRefactoring.getName(), null, null, null) {
+			RenameRefactoringWizard wizard= new RenameRefactoringWizard(fRefactoring, fRefactoring.getName(), null, null, null) {
 				protected void addUserInputPages() {
 					// nothing to add
 				}
-			});
+			};
+			wizard.setForcePreviewReview(showPreviewOnly);
+			starter.initialize(wizard);
 		}
 		return starter.activate(fRefactoring, parent, getJavaRenameProcessor().getSaveMode());
 	}
