@@ -9,6 +9,9 @@
 package org.eclipse.jdt.internal.ui.navigator;
 
 
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
@@ -18,8 +21,6 @@ import org.eclipse.ui.navigator.INavigatorContentService;
 
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
-
-
 
 /**
  * 
@@ -42,32 +43,48 @@ public abstract class NonEssentialElementsFilter extends ViewerFilter {
 		fDelegateFilter = delegateFilter;
 	}
 
-	/**
-	 * Returns the result of this filter, when applied to the given inputs.
-	 * 
-	 * @return Returns true if element should be included in filtered set
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
 	public boolean select(Viewer viewer, Object parent, Object element) {
-
 		if (!isStateModelInitialized) {
 			initStateModel(viewer);
 		}
 		if (fContentService == null || fStateModel == null) {
 			return true;
 		} else if (element instanceof IPackageFragment) {
-			if (isApplicable()) {
-				boolean isFlatLayout = fStateModel.getBooleanProperty(IExtensionStateConstants.Values.IS_LAYOUT_FLAT);
+			if (isApplicable() && viewer instanceof StructuredViewer) {
+				boolean isHierarchicalLayout= !fStateModel.getBooleanProperty(IExtensionStateConstants.Values.IS_LAYOUT_FLAT);
 				try {
 					IPackageFragment fragment = (IPackageFragment) element;
-					if (!isFlatLayout && (!fragment.isDefaultPackage() && fragment.hasSubpackages()))
-						return true;
+					if (isHierarchicalLayout && !fragment.isDefaultPackage() && fragment.hasSubpackages()) {
+						return hasFilteredChildren((StructuredViewer) viewer, fragment);
+					}
 				} catch (JavaModelException e) {
 					return false;
 				}
 			}
 		}
-
 		return doSelect(viewer, parent, element);
+	}
+
+	private boolean hasFilteredChildren(StructuredViewer viewer, IPackageFragment fragment) {
+		Object[] children= getRawChildren(viewer, fragment);
+		ViewerFilter[] filters= viewer.getFilters();
+		for (int i= 0; i < filters.length; i++) {
+			children= filters[i].filter(viewer, fragment, children);
+			if (children.length == 0)
+				return false;
+		} 
+		return true;
+	}
+	
+	private Object[] getRawChildren(StructuredViewer viewer, IPackageFragment fragment) {
+		IStructuredContentProvider provider = (IStructuredContentProvider) viewer.getContentProvider();
+		if (provider instanceof ITreeContentProvider) {
+			return ((ITreeContentProvider)provider).getChildren(fragment);
+		}
+		return provider.getElements(fragment);
 	}
 
 	protected boolean doSelect(Viewer viewer, Object parent, Object element) {
@@ -79,7 +96,6 @@ public abstract class NonEssentialElementsFilter extends ViewerFilter {
 	}
 
 	private synchronized void initStateModel(Viewer viewer) {
-
 		if (!isStateModelInitialized) {
 			if (viewer instanceof CommonViewer) {
 
@@ -91,7 +107,4 @@ public abstract class NonEssentialElementsFilter extends ViewerFilter {
 			}
 		}
 	}
-
-
-
 }
