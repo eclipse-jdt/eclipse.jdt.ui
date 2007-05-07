@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -96,6 +96,9 @@ public class AnnotationExpandHover implements IAnnotationHover, IAnnotationHover
 		 * @see org.eclipse.jface.text.source.IVerticalRulerListener#annotationDefaultSelected(org.eclipse.jface.text.source.VerticalRulerEvent)
 		 */
 		public void annotationDefaultSelected(VerticalRulerEvent event) {
+			// Reduces flickering on Linux GTK and MAC OS X.
+			Shell shell= fCompositeRuler.getControl().getShell();
+			shell.setFocus();
 			fCompositeRuler.fireAnnotationDefaultSelected(event);
 		}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -246,9 +246,12 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		}
 
 		/*
-		 * @see org.eclipse.swt.events.MouseListener#mouseUp(org.eclipse.swt.events.MouseEvent)
+		 * Using mouseDown as mouseUp isn't fired on some Platforms, for
+		 * details see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=165533
+		 * 
+		 * @see org.eclipse.swt.events.MouseListener#mouseDown(org.eclipse.swt.events.MouseEvent)
 		 */
-		public void mouseUp(MouseEvent e) {
+		public void mouseDown(MouseEvent e) {
 			Item item= (Item) ((Widget) e.getSource()).getData();
 			// TODO for now, to make double click work: disable single click on the first item
 			// disable later when the annotationlistener selectively handles input
@@ -256,12 +259,6 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 				item.defaultSelected();
 		}
 
-		/*
-		 * @see org.eclipse.swt.events.MouseAdapter#mouseDown(org.eclipse.swt.events.MouseEvent)
-		 */
-		public void mouseDown(MouseEvent e) {
-			super.mouseDown(e);
-		}
 	}
 
 	/**
