@@ -15,10 +15,10 @@ public class TestVarArgsReordered {
 	}
 
 	public void fooCaller() {
-		foo(new TestVarArgsReordered.FooParameter(new int[0], new String[0]));
-		foo(new TestVarArgsReordered.FooParameter(null, new String[0]));
-		foo(new TestVarArgsReordered.FooParameter(new int[]{1, 2, 3, 4, 5}, new String[0]));
-		foo(new TestVarArgsReordered.FooParameter(new int[]{Integer.parseInt("5")}, new String[0]));
-		foo(new TestVarArgsReordered.FooParameter(new int[]{new Integer(6).intValue(), 2, 3}, new String[0]));
+		foo(new FooParameter(new int[0], new String[0]));
+		foo(new FooParameter(null, new String[0]));
+		foo(new FooParameter(new int[]{1, 2, 3, 4, 5}, new String[0]));
+		foo(new FooParameter(new int[]{Integer.parseInt("5")}, new String[0]));
+		foo(new FooParameter(new int[]{new Integer(6).intValue(), 2, 3}, new String[0]));
 	}
 }

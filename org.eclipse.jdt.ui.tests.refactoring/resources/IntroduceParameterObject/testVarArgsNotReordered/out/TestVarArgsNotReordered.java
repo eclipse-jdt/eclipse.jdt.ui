@@ -14,11 +14,11 @@ public class TestVarArgsNotReordered {
 	}
 
 	public void fooCaller() {
-		foo(new TestVarArgsNotReordered.FooParameter(new String[0]));
-		foo(new TestVarArgsNotReordered.FooParameter(new String[0], null));
-		foo(new TestVarArgsNotReordered.FooParameter(new String[0], 1, 2, 3, 4, 5));
-		foo(new TestVarArgsNotReordered.FooParameter(new String[0], Integer.parseInt("5")));
-		foo(new TestVarArgsNotReordered.FooParameter(new String[0], new Integer(6).intValue(), 2, 3));
+		foo(new FooParameter(new String[0]));
+		foo(new FooParameter(new String[0], null));
+		foo(new FooParameter(new String[0], 1, 2, 3, 4, 5));
+		foo(new FooParameter(new String[0], Integer.parseInt("5")));
+		foo(new FooParameter(new String[0], new Integer(6).intValue(), 2, 3));
 
 	}
 }

@@ -38,7 +38,7 @@ public class TestDelegateCreation extends TestDelegateCreationA{
 	 * @deprecated Use {@link #foo(FooParameter)} instead
 	 */
 	public void foo(String[] a, int b, double d){
-		foo(new TestDelegateCreation.FooParameter(a, b, d));
+		foo(new FooParameter(a, b, d));
 	}
 	public void foo(FooParameter parameterObject){
 		double d = parameterObject.getNewD();

@@ -13,22 +13,19 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 
 public interface IDefaultValueAdvisor {
 
 	/**
-	 * Create an Expression for
-	 * @param rewrite
-	 * @param importRewrite
-	 * @param info
-	 * @param parameterInfos
-	 * @param nodes
-	 * @return
+	 * Create an Expression for added parameters using information from the calling scope.
+	 * @param cuRewrite the CompilationUnitRewrite to use for rewrite, imports etc..
+	 * @param info the added ParamterInfo object
+	 * @param parameterInfos all other ParameterInfo objects
+	 * @param nodes list of arguments from the calling method
+	 * @return Expression for invocation
 	 */
-	Expression createDefaultExpression(ASTRewrite rewrite, ImportRewrite importRewrite, ParameterInfo info, List parameterInfos, List nodes);
+	Expression createDefaultExpression(CompilationUnitRewrite cuRewrite, ParameterInfo info, List parameterInfos, List nodes);
 
 }

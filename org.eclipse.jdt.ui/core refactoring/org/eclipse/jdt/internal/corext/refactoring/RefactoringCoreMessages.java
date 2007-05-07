@@ -970,6 +970,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String IntroduceParameterObjectRefactoring_cannotanalysemethod_compilererror;
 
+	public static String IntroduceParameterObjectRefactoring_parameter_object_creation_error;
+
 	public static String IntroduceParameterObjectRefactoring_refactoring_name;
 
 	public static String IntroduceParameterRefactoring_cannot_introduce;

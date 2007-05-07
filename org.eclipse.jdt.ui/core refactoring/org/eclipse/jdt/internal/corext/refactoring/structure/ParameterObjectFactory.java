@@ -44,8 +44,6 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -78,29 +76,29 @@ public class ParameterObjectFactory {
 		return result;
 	}
 
-	public TypeDeclaration createClassDeclaration(ASTRewrite rewriter, ICompilationUnit unit, ImportRewrite imports, String declaringType) throws CoreException {
-		AST ast= rewriter.getAST();
+	public TypeDeclaration createClassDeclaration(ICompilationUnit unit, String declaringType, CompilationUnitRewrite cuRewrite) throws CoreException {
+		AST ast= cuRewrite.getAST();
 		TypeDeclaration typeDeclaration= ast.newTypeDeclaration();
 		typeDeclaration.setName(ast.newSimpleName(fClassName));
 		List body= typeDeclaration.bodyDeclarations();
 		for (Iterator iter= fVariables.iterator(); iter.hasNext();) {
 			ParameterInfo pi= (ParameterInfo) iter.next();
 			if (isValidField(pi)) {
-				FieldDeclaration declaration= createField(rewriter, pi, imports, unit);
+				FieldDeclaration declaration= createField(pi, unit, cuRewrite);
 				body.add(declaration);
 			}
 		}
-		MethodDeclaration constructor= createConstructor(rewriter, imports, unit, declaringType);
+		MethodDeclaration constructor= createConstructor(unit, declaringType, cuRewrite);
 		body.add(constructor);
 		for (Iterator iter= fVariables.iterator(); iter.hasNext();) {
 			ParameterInfo pi= (ParameterInfo) iter.next();
 			if (fCreateGetter && isValidField(pi)) {
-				ASTNode getter= createGetter(rewriter, pi, imports, declaringType, unit);
+				ASTNode getter= createGetter(pi, declaringType, unit, cuRewrite);
 				body.add(getter);
 			}
 			if (fCreateSetter && isValidField(pi)) {
 				if (!Modifier.isFinal(pi.getOldBinding().getModifiers())) {
-					ASTNode setter= createSetter(rewriter, pi, imports, declaringType, unit);
+					ASTNode setter= createSetter(pi, declaringType, unit, cuRewrite);
 					body.add(setter);
 				}
 			}
@@ -109,8 +107,8 @@ public class ParameterObjectFactory {
 		return typeDeclaration;
 	}
 
-	private MethodDeclaration createConstructor(ASTRewrite rewriter, ImportRewrite imports, ICompilationUnit unit, String declaringTypeName) throws CoreException {
-		AST ast= rewriter.getAST();
+	private MethodDeclaration createConstructor(ICompilationUnit unit, String declaringTypeName, CompilationUnitRewrite cuRewrite) throws CoreException {
+		AST ast= cuRewrite.getAST();
 		MethodDeclaration methodDeclaration= ast.newMethodDeclaration();
 		methodDeclaration.setName(ast.newSimpleName(fClassName));
 		methodDeclaration.setConstructor(true);
@@ -119,7 +117,7 @@ public class ParameterObjectFactory {
 		if (fCreateComments) {
 			String comment= CodeGeneration.getMethodComment(unit, declaringTypeName, methodDeclaration, null, lineDelimiter);
 			if (comment != null) {
-				Javadoc doc= (Javadoc) rewriter.createStringPlaceholder(comment, ASTNode.JAVADOC);
+				Javadoc doc= (Javadoc) cuRewrite.getASTRewrite().createStringPlaceholder(comment, ASTNode.JAVADOC);
 				methodDeclaration.setJavadoc(doc);
 			}
 		}
@@ -147,7 +145,7 @@ public class ParameterObjectFactory {
 				}
 				svd.setVarargs(true);
 			}
-			Type fieldType= imports.addImport(typeBinding, ast);
+			Type fieldType= importBinding(typeBinding,cuRewrite);
 			svd.setType(fieldType);
 			svd.setName(getFieldName(ast, pi));
 			parameters.add(svd);
@@ -162,8 +160,14 @@ public class ParameterObjectFactory {
 		return methodDeclaration;
 	}
 
-	private FieldDeclaration createField(ASTRewrite rewriter, ParameterInfo pi, ImportRewrite imports, ICompilationUnit unit) throws CoreException {
-		AST ast= rewriter.getAST();
+	private Type importBinding(ITypeBinding typeBinding, CompilationUnitRewrite cuRewrite) {
+		Type type= cuRewrite.getImportRewrite().addImport(typeBinding, cuRewrite.getAST());
+		cuRewrite.getImportRemover().registerAddedImports(type);
+		return type;
+	}
+
+	private FieldDeclaration createField(ParameterInfo pi, ICompilationUnit unit, CompilationUnitRewrite cuRewrite) throws CoreException {
+		AST ast= cuRewrite.getAST();
 		VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 		String lineDelim= StubUtility.getLineDelimiterUsed(unit);
 		SimpleName fieldName= getFieldName(ast, pi);
@@ -173,13 +177,13 @@ public class ParameterObjectFactory {
 		if (fCreateComments) {
 			String comment= StubUtility.getFieldComment(unit, pi.getNewTypeName(), pi.getNewName(), lineDelim);
 			if (comment != null) {
-				Javadoc doc= (Javadoc) rewriter.createStringPlaceholder(comment, ASTNode.JAVADOC);
+				Javadoc doc= (Javadoc) cuRewrite.getASTRewrite().createStringPlaceholder(comment, ASTNode.JAVADOC);
 				declaration.setJavadoc(doc);
 			}
 		}
 		List modifiers= ast.newModifiers((variable.getModifiers() & ~Modifier.FINAL) | Modifier.PUBLIC);
 		declaration.modifiers().addAll(modifiers);
-		declaration.setType(imports.addImport(pi.getNewTypeBinding(), ast));
+		declaration.setType(importBinding(pi.getNewTypeBinding(), cuRewrite));
 		return declaration;
 	}
 
@@ -194,8 +198,8 @@ public class ParameterObjectFactory {
 		}
 	}
 
-	private ASTNode createGetter(ASTRewrite rewriter, ParameterInfo pi, ImportRewrite imports, String declaringType, ICompilationUnit cu) throws CoreException {
-		AST ast= rewriter.getAST();
+	private ASTNode createGetter(ParameterInfo pi, String declaringType, ICompilationUnit cu, CompilationUnitRewrite cuRewrite) throws CoreException {
+		AST ast= cuRewrite.getAST();
 		MethodDeclaration methodDeclaration= ast.newMethodDeclaration();
 		String fieldName= pi.getNewName();
 		String getterName= getGetterName(pi, ast);
@@ -204,10 +208,10 @@ public class ParameterObjectFactory {
 		if (fCreateComments) {
 			String comment= CodeGeneration.getGetterComment(cu, declaringType, getterName, fieldName, pi.getNewTypeName(), bareFieldname, lineDelim);
 			if (comment != null)
-				methodDeclaration.setJavadoc((Javadoc) rewriter.createStringPlaceholder(comment, ASTNode.JAVADOC));
+				methodDeclaration.setJavadoc((Javadoc) cuRewrite.getASTRewrite().createStringPlaceholder(comment, ASTNode.JAVADOC));
 		}
 		methodDeclaration.setName(ast.newSimpleName(getterName));
-		methodDeclaration.setReturnType2(imports.addImport(pi.getNewTypeBinding(), ast));
+		methodDeclaration.setReturnType2(importBinding(pi.getNewTypeBinding(), cuRewrite));
 		methodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 		Block block= ast.newBlock();
 		methodDeclaration.setBody(block);
@@ -216,27 +220,27 @@ public class ParameterObjectFactory {
 			fieldName= "this." + fieldName; //$NON-NLS-1$
 		}
 		String bodyContent= CodeGeneration.getGetterMethodBodyContent(cu, declaringType, getterName, fieldName, lineDelim);
-		ASTNode getterBody= rewriter.createStringPlaceholder(bodyContent, ASTNode.EXPRESSION_STATEMENT);
+		ASTNode getterBody= cuRewrite.getASTRewrite().createStringPlaceholder(bodyContent, ASTNode.EXPRESSION_STATEMENT);
 		block.statements().add(getterBody);
 		return methodDeclaration;
 	}
 
-	public ExpressionStatement createInitializer(ParameterInfo pi, ASTRewrite rewrite, String paramName, ImportRewrite imports) {
-		AST ast= rewrite.getAST();
+	public ExpressionStatement createInitializer(ParameterInfo pi, String paramName, CompilationUnitRewrite cuRewrite) {
+		AST ast= cuRewrite.getAST();
 		VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 		fragment.setName(ast.newSimpleName(pi.getOldName()));
 		fragment.setInitializer(createFieldReadAccess(pi, paramName, ast));
 		VariableDeclarationExpression declaration= ast.newVariableDeclarationExpression(fragment);
 		IVariableBinding variable= pi.getOldBinding();
-		declaration.setType(imports.addImport(pi.getNewTypeBinding(), ast));
+		declaration.setType(importBinding(pi.getNewTypeBinding(), cuRewrite));
 		int modifiers= variable.getModifiers();
 		List newModifiers= ast.newModifiers(modifiers);
 		declaration.modifiers().addAll(newModifiers);
 		return ast.newExpressionStatement(declaration);
 	}
 
-	private ASTNode createSetter(ASTRewrite rewriter, ParameterInfo pi, ImportRewrite imports, String declaringType, ICompilationUnit cu) throws CoreException {
-		AST ast= rewriter.getAST();
+	private ASTNode createSetter(ParameterInfo pi, String declaringType, ICompilationUnit cu, CompilationUnitRewrite cuRewrite) throws CoreException {
+		AST ast= cuRewrite.getAST();
 		MethodDeclaration methodDeclaration= ast.newMethodDeclaration();
 		String fieldName= pi.getNewName();
 		String setterName= getSetterName(pi, ast);
@@ -246,12 +250,12 @@ public class ParameterObjectFactory {
 		if (fCreateComments) {
 			String comment= CodeGeneration.getSetterComment(cu, declaringType, setterName, fieldName, pi.getNewTypeName(), paramName, bareFieldname, lineDelim);
 			if (comment != null)
-				methodDeclaration.setJavadoc((Javadoc) rewriter.createStringPlaceholder(comment, ASTNode.JAVADOC));
+				methodDeclaration.setJavadoc((Javadoc) cuRewrite.getASTRewrite().createStringPlaceholder(comment, ASTNode.JAVADOC));
 		}
 		methodDeclaration.setName(ast.newSimpleName(setterName));
 		methodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 		SingleVariableDeclaration variable= ast.newSingleVariableDeclaration();
-		variable.setType(imports.addImport(pi.getNewTypeBinding(), ast));
+		variable.setType(importBinding(pi.getNewTypeBinding(), cuRewrite));
 		variable.setName(ast.newSimpleName(paramName));
 		methodDeclaration.parameters().add(variable);
 		Block block= ast.newBlock();
@@ -261,21 +265,22 @@ public class ParameterObjectFactory {
 			fieldName= "this." + fieldName; //$NON-NLS-1$
 		}
 		String bodyContent= CodeGeneration.getSetterMethodBodyContent(fCompilationUnit, declaringType, setterName, fieldName, paramName, lineDelim);
-		ASTNode setterBody= rewriter.createStringPlaceholder(bodyContent, ASTNode.EXPRESSION_STATEMENT);
+		ASTNode setterBody= cuRewrite.getASTRewrite().createStringPlaceholder(bodyContent, ASTNode.EXPRESSION_STATEMENT);
 		block.statements().add(setterBody);
 		return methodDeclaration;
 	}
 
-	public Type createType(ImportRewrite imports, AST ast, boolean asTopLevelClass) {
+	public Type createType(boolean asTopLevelClass, CompilationUnitRewrite cuRewrite) {
 		String concatenateName= null;
-		if (asTopLevelClass)
+		if (asTopLevelClass) {
 			concatenateName= JavaModelUtil.concatenateName(fPackage, fClassName);
-		else
-			concatenateName= fEnclosingType;
-		String addImport= imports.addImport(concatenateName);
-		if (asTopLevelClass)
-			return ast.newSimpleType(ast.newName(addImport));
-		return ast.newQualifiedType(ast.newSimpleType(ast.newName(addImport)), ast.newSimpleName(fClassName));
+		} else {
+			concatenateName= JavaModelUtil.concatenateName(fEnclosingType, fClassName);
+		}
+		String addedImport= cuRewrite.getImportRewrite().addImport(concatenateName);
+		cuRewrite.getImportRemover().registerAddedImport(addedImport);
+		AST ast=cuRewrite.getAST();
+		return ast.newSimpleType(ast.newName(addedImport));
 	}
 
 	public String getClassName() {

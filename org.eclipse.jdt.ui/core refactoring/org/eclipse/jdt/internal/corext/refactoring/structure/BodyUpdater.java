@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -26,8 +28,9 @@ public abstract class BodyUpdater {
 	 * @param methodDeclaration
 	 * @param cuRewrite
 	 * @param result
+	 * @throws CoreException 
 	 */
-	public abstract void updateBody(MethodDeclaration methodDeclaration, CompilationUnitRewrite cuRewrite, RefactoringStatus result);
+	public abstract void updateBody(MethodDeclaration methodDeclaration, CompilationUnitRewrite cuRewrite, RefactoringStatus result) throws CoreException;
 
 	/**
 	 * Returns whether {@link ChangeSignatureRefactoring} should check if

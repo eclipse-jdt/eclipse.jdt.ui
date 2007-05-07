@@ -17,6 +17,6 @@ public class TestSimpleEnclosing {
 	}
 	
 	public void fooCaller(){
-		foo(new TestSimpleEnclosing.FooParameter(new String[]{"Test"}, 6));
+		foo(new FooParameter(new String[]{"Test"}, 6));
 	}
 }

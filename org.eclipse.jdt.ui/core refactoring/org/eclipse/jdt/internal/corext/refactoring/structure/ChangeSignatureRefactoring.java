@@ -314,10 +314,6 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		fBodyUpdater= bodyUpdater;
 	}
 	
-	/**
-	 * @deprecated consider removing this method
-	 * @return .
-	 */
 	public CompilationUnitRewrite getBaseCuRewrite() {
 		return fBaseCuRewrite;
 	}
@@ -1351,17 +1347,17 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 	
 	private void addExplicitSuperConstructorCall(MethodDeclaration constructor, CompilationUnitRewrite cuRewrite) {
 		SuperConstructorInvocation superCall= constructor.getAST().newSuperConstructorInvocation();
-		addArgumentsToNewSuperConstructorCall(superCall, cuRewrite.getASTRewrite(), cuRewrite.getImportRewrite());
+		addArgumentsToNewSuperConstructorCall(superCall, cuRewrite);
 		String msg= RefactoringCoreMessages.ChangeSignatureRefactoring_add_super_call; 
 		TextEditGroup description= cuRewrite.createGroupDescription(msg);
 		cuRewrite.getASTRewrite().getListRewrite(constructor.getBody(), Block.STATEMENTS_PROPERTY).insertFirst(superCall, description);
 	}
 	
-	private void addArgumentsToNewSuperConstructorCall(SuperConstructorInvocation superCall, ASTRewrite rewrite, ImportRewrite importRewrite) {
+	private void addArgumentsToNewSuperConstructorCall(SuperConstructorInvocation superCall, CompilationUnitRewrite cuRewrite) {
 		int i= 0;
 		for (Iterator iter= getNotDeletedInfos().iterator(); iter.hasNext(); i++) {
 			ParameterInfo info= (ParameterInfo) iter.next();
-			Expression newExpression= createNewExpression(rewrite, importRewrite, info, null, null);
+			Expression newExpression= createNewExpression(info, getParameterInfos(), superCall.arguments(), cuRewrite);
 			if (newExpression != null)
 				superCall.arguments().add(newExpression);
 		}
@@ -1393,7 +1389,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		Block body= ast.newBlock();
 		newConstructor.setBody(body);
 		SuperConstructorInvocation superCall= ast.newSuperConstructorInvocation();
-		addArgumentsToNewSuperConstructorCall(superCall, cuRewrite.getASTRewrite(), cuRewrite.getImportRewrite());
+		addArgumentsToNewSuperConstructorCall(superCall, cuRewrite);
 		body.statements().add(superCall);
 		
 		String msg= RefactoringCoreMessages.ChangeSignatureRefactoring_add_constructor; 
@@ -1430,14 +1426,14 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		return fMethod.isConstructor() && fMethod.getNumberOfParameters() == 0;
 	}
 	
-	private Expression createNewExpression(ASTRewrite rewrite, ImportRewrite importRewrite, ParameterInfo info, List parameterInfos, List nodes) {
+	private Expression createNewExpression(ParameterInfo info, List parameterInfos, List nodes, CompilationUnitRewrite cuRewrite) {
 		if (info.isNewVarargs() && info.getDefaultValue().trim().length() == 0)
 			return null;
 		else {
 			if (fDefaultValueAdvisor==null)
-				return (Expression) rewrite.createStringPlaceholder(info.getDefaultValue(), ASTNode.METHOD_INVOCATION);
+				return (Expression) cuRewrite.getASTRewrite().createStringPlaceholder(info.getDefaultValue(), ASTNode.METHOD_INVOCATION);
 			else
-				return fDefaultValueAdvisor.createDefaultExpression(rewrite, importRewrite, info, parameterInfos, nodes);
+				return fDefaultValueAdvisor.createDefaultExpression(cuRewrite, info, parameterInfos, nodes);
 		}
 	}
 
@@ -1523,11 +1519,14 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			return fCuRewrite.getImportRemover();
 		}
 		
-		public abstract void updateNode() throws JavaModelException;
+		protected final CompilationUnitRewrite getCompilationUnitRewrite() {
+			return fCuRewrite;
+		}
+		
+		public abstract void updateNode() throws CoreException;
 		
 		protected void registerImportRemoveNode(ASTNode node) {
-			if (doPerformImportRemoval(this))
-				getImportRemover().registerRemovedNode(node);
+			getImportRemover().registerRemovedNode(node);
 		}
 
 		protected final void reshuffleElements() {
@@ -1729,7 +1728,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			if (isRecursiveReference())
 				return createNewExpressionRecursive(info);
 			else
-				return createNewExpression(getASTRewrite(), getImportRewrite(), info, parameterInfos, nodes);
+				return createNewExpression(info, parameterInfos, nodes, getCompilationUnitRewrite());
 		}
 
 		private Expression createNewExpressionRecursive(ParameterInfo info) {
@@ -1824,7 +1823,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 				super.registerImportRemoveNode(node);
 		}
 
-		public void updateNode() throws JavaModelException {
+		public void updateNode() throws CoreException {
 			changeParamguments();
 			
 			if (canChangeNameAndReturnType()) {
@@ -2602,9 +2601,5 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 
 	public void setDefaultValueAdvisor(IDefaultValueAdvisor defaultValueAdvisor) {
 		fDefaultValueAdvisor= defaultValueAdvisor;
-	}
-
-	protected boolean doPerformImportRemoval(OccurrenceUpdate update) {
-		return true;
 	}
 }
