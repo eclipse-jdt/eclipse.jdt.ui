@@ -261,7 +261,7 @@ public class ParameterObjectFactory {
 		Block block= ast.newBlock();
 		methodDeclaration.setBody(block);
 		boolean useThis= StubUtility.useThisForFieldAccess(cu.getJavaProject());
-		if (useThis) {
+		if (useThis || fieldName.equals(paramName)) {
 			fieldName= "this." + fieldName; //$NON-NLS-1$
 		}
 		String bodyContent= CodeGeneration.getSetterMethodBodyContent(fCompilationUnit, declaringType, setterName, fieldName, paramName, lineDelim);

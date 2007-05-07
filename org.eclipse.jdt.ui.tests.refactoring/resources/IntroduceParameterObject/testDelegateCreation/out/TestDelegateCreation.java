@@ -19,19 +19,19 @@ public class TestDelegateCreation extends TestDelegateCreationA{
 			return newA;
 		}
 		public void setNewA(String[] newA) {
-			newA = newA;
+			this.newA = newA;
 		}
 		public int getNewB() {
 			return newB;
 		}
 		public void setNewB(int newB) {
-			newB = newB;
+			this.newB = newB;
 		}
 		public double getNewD() {
 			return newD;
 		}
 		public void setNewD(double newD) {
-			newD = newD;
+			this.newD = newD;
 		}
 	}
 	/**
