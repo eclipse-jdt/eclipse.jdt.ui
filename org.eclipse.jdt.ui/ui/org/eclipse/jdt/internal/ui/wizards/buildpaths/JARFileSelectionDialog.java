@@ -40,6 +40,9 @@ public class JARFileSelectionDialog extends ElementTreeSelectionDialog {
 	
 	/**
 	 * Constructor for JARFileSelectionDialog.
+	 * @param parent parent shell
+	 * @param multiSelect specifies if selecting multiple elements is allowed
+	 * @param acceptFolders specifies if folders can be selected as well
 	 */
 	public JARFileSelectionDialog(Shell parent, boolean multiSelect, boolean acceptFolders) {
 		super(parent, new FileLabelProvider(), new FileContentProvider());
@@ -132,9 +135,11 @@ public class JARFileSelectionDialog extends ElementTreeSelectionDialog {
 					return true;
 				} else {
 					File[] listFiles= file.listFiles();
-					for (int i= 0; i < listFiles.length; i++) {
-						if (select(viewer, file, listFiles[i])) {
-							return true;
+					if (listFiles != null) {
+						for (int i= 0; i < listFiles.length; i++) {
+							if (select(viewer, file, listFiles[i])) {
+								return true;
+							}
 						}
 					}
 				}
