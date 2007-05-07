@@ -928,6 +928,11 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 							if (fParent != null && !fParent.isDisposed()) {
 								Point size= fParent.getSize();
 								if (size.x != 0 && size.y != 0) {
+									// bug 185397 - Hierarchy View flips orientation multiple times on resize
+									Control viewFormToolbar= fTypeViewerViewForm.getTopLeft();
+									if (viewFormToolbar != null && !viewFormToolbar.isDisposed() && viewFormToolbar.isVisible()) {
+										size.y -= viewFormToolbar.getSize().y;
+									}
 									horizontal= size.x > size.y;
 								}
 							}
