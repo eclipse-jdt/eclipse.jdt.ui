@@ -3596,7 +3596,7 @@ public class PreferenceConstants {
 
 		// JavaEditorPreferencePage
 		store.setDefault(PreferenceConstants.EDITOR_MATCHING_BRACKETS, true);
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, 
 				findRGB(registry, IJavaThemeConstants.EDITOR_MATCHING_BRACKETS_COLOR, new RGB(192, 192,192)));
@@ -3611,7 +3611,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_TAB_WIDTH, 4);
 		store.setDefault(PreferenceConstants.EDITOR_SPACES_FOR_TABS, false);
 
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR, 
 				findRGB(registry, IJavaThemeConstants.EDITOR_MULTI_LINE_COMMENT_COLOR, new RGB(63, 127, 95)));
@@ -3619,7 +3619,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_ITALIC, false);
 
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR, 
 				findRGB(registry, IJavaThemeConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR, new RGB(63, 127, 95)));
@@ -3627,7 +3627,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_ITALIC, false);
 
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR, 
 				findRGB(registry, IJavaThemeConstants.EDITOR_JAVA_KEYWORD_COLOR, new RGB(127, 0, 85)));
@@ -3638,7 +3638,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_ANNOTATION_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_ANNOTATION_ITALIC, false);
 
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.EDITOR_STRING_COLOR, 
 				findRGB(registry, IJavaThemeConstants.EDITOR_STRING_COLOR, new RGB(42, 0, 255)));
@@ -3646,67 +3646,67 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_STRING_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_STRING_ITALIC, false);
 
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR, 
 				findRGB(registry, IJavaThemeConstants.EDITOR_JAVA_DEFAULT_COLOR, new RGB(0, 0, 0)));
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_DEFAULT_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_DEFAULT_ITALIC, false);
 
-		setDefault(store, PreferenceConstants.EDITOR_JAVA_METHOD_NAME_COLOR, new RGB(0, 0, 0));
+		setDefaultAndFireEvent(store, PreferenceConstants.EDITOR_JAVA_METHOD_NAME_COLOR, new RGB(0, 0, 0));
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_METHOD_NAME_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_METHOD_NAME_ITALIC, false);
 
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_COLOR, 
 				findRGB(registry, IJavaThemeConstants.EDITOR_JAVA_KEYWORD_RETURN_COLOR, new RGB(127, 0, 85)));
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_BOLD, true);
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_ITALIC, false);
 
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR, 
 				findRGB(registry, IJavaThemeConstants.EDITOR_JAVA_OPERATOR_COLOR, new RGB(0, 0, 0)));
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_OPERATOR_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_OPERATOR_ITALIC, false);
 
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.EDITOR_JAVA_BRACKET_COLOR, 
 				findRGB(registry, IJavaThemeConstants.EDITOR_JAVA_BRACKET_COLOR, new RGB(0, 0, 0)));
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_BRACKET_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_BRACKET_ITALIC, false);
 
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.EDITOR_TASK_TAG_COLOR, 
 				findRGB(registry, IJavaThemeConstants.EDITOR_TASK_TAG_COLOR, new RGB(127, 159, 191)));
 		store.setDefault(PreferenceConstants.EDITOR_TASK_TAG_BOLD, true);
 		store.setDefault(PreferenceConstants.EDITOR_TASK_TAG_ITALIC, false);
 
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR, 
 				findRGB(registry, IJavaThemeConstants.EDITOR_JAVADOC_KEYWORD_COLOR, new RGB(127, 159, 191)));
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_KEYWORD_BOLD, true);
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_KEYWORD_ITALIC, false);
 
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.EDITOR_JAVADOC_TAG_COLOR, 
 				findRGB(registry, IJavaThemeConstants.EDITOR_JAVADOC_TAG_COLOR, new RGB(127, 127, 159)));
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_TAG_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_TAG_ITALIC, false);
 
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR, 
 				findRGB(registry, IJavaThemeConstants.EDITOR_JAVADOC_LINKS_COLOR, new RGB(63, 63, 191)));
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_LINKS_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_LINKS_ITALIC, false);
 
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR, 
 				findRGB(registry, IJavaThemeConstants.EDITOR_JAVADOC_DEFAULT_COLOR, new RGB(63, 95, 191)));
@@ -3717,27 +3717,27 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 200);
 
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, 
 				findRGB(registry, IJavaThemeConstants.CODEASSIST_PROPOSALS_BACKGROUND, new RGB(255, 255, 255)));
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, 
 				findRGB(registry, IJavaThemeConstants.CODEASSIST_PROPOSALS_FOREGROUND, new RGB(0, 0, 0)));
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND, 
 				findRGB(registry, IJavaThemeConstants.CODEASSIST_PARAMETERS_BACKGROUND, new RGB(255, 255, 255)));
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND, 
 				findRGB(registry, IJavaThemeConstants.CODEASSIST_PARAMETERS_FOREGROUND, new RGB(0, 0, 0)));
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND, 
 				findRGB(registry, IJavaThemeConstants.CODEASSIST_REPLACEMENT_BACKGROUND, new RGB(255, 255, 0)));
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND, 
 				findRGB(registry, IJavaThemeConstants.CODEASSIST_REPLACEMENT_FOREGROUND, new RGB(255, 0, 0)));
@@ -3838,35 +3838,35 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_HEADERS, true);
 		
 		// properties file editor
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.PROPERTIES_FILE_COLORING_KEY, 
 				findRGB(registry, IJavaThemeConstants.PROPERTIES_FILE_COLORING_KEY, new RGB(0, 0, 0)));
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_KEY_BOLD, false);
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_KEY_ITALIC, false);
 		
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE, 
 				findRGB(registry, IJavaThemeConstants.PROPERTIES_FILE_COLORING_VALUE, new RGB(42, 0, 255)));
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE_BOLD, false);
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE_ITALIC, false);
 		
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT, 
 				findRGB(registry, IJavaThemeConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT, new RGB(0, 0, 0)));
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT_BOLD, false);
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT_ITALIC, false);
 		
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT, 
 				findRGB(registry, IJavaThemeConstants.PROPERTIES_FILE_COLORING_ARGUMENT, new RGB(127, 0, 85)));
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT_BOLD, true);
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT_ITALIC, false);
 		
-		setDefault(
+		setDefaultAndFireEvent(
 				store, 
 				PreferenceConstants.PROPERTIES_FILE_COLORING_COMMENT,  
 				findRGB(registry, IJavaThemeConstants.PROPERTIES_FILE_COLORING_COMMENT, new RGB(63, 127, 95)));
@@ -4007,7 +4007,7 @@ public class PreferenceConstants {
 	 * @param newValue the new value
 	 * @since 3.3
 	 */
-	private static void setDefault(IPreferenceStore store, String key, RGB newValue) {
+	private static void setDefaultAndFireEvent(IPreferenceStore store, String key, RGB newValue) {
 		RGB oldValue= null;
 		if (store.isDefault(key))
 			oldValue= PreferenceConverter.getDefaultColor(store, key);

@@ -1681,7 +1681,7 @@ public class SemanticHighlightings {
 		SemanticHighlighting[] semanticHighlightings= getSemanticHighlightings();
 		for (int i= 0, n= semanticHighlightings.length; i < n; i++) {
 			SemanticHighlighting semanticHighlighting= semanticHighlightings[i];
-			setDefault(store, SemanticHighlightings.getColorPreferenceKey(semanticHighlighting), semanticHighlighting.getDefaultTextColor());
+			setDefaultAndFireEvent(store, SemanticHighlightings.getColorPreferenceKey(semanticHighlighting), semanticHighlighting.getDefaultTextColor());
 			store.setDefault(SemanticHighlightings.getBoldPreferenceKey(semanticHighlighting), semanticHighlighting.isBoldByDefault());
 			store.setDefault(SemanticHighlightings.getItalicPreferenceKey(semanticHighlighting), semanticHighlighting.isItalicByDefault());
 			store.setDefault(SemanticHighlightings.getStrikethroughPreferenceKey(semanticHighlighting), semanticHighlighting.isStrikethroughByDefault());
@@ -1854,7 +1854,7 @@ public class SemanticHighlightings {
 	 * @param newValue the new value
 	 * @since 3.3
 	 */
-	private static void setDefault(IPreferenceStore store, String key, RGB newValue) {
+	private static void setDefaultAndFireEvent(IPreferenceStore store, String key, RGB newValue) {
 		RGB oldValue= null;
 		if (store.isDefault(key))
 			oldValue= PreferenceConverter.getDefaultColor(store, key);
