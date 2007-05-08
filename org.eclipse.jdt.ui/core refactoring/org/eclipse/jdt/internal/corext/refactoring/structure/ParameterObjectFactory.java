@@ -172,7 +172,6 @@ public class ParameterObjectFactory {
 		String lineDelim= StubUtility.getLineDelimiterUsed(unit);
 		SimpleName fieldName= getFieldName(ast, pi);
 		fragment.setName(fieldName);
-		IVariableBinding variable= pi.getOldBinding();
 		FieldDeclaration declaration= ast.newFieldDeclaration(fragment);
 		if (fCreateComments) {
 			String comment= StubUtility.getFieldComment(unit, pi.getNewTypeName(), pi.getNewName(), lineDelim);
@@ -181,7 +180,11 @@ public class ParameterObjectFactory {
 				declaration.setJavadoc(doc);
 			}
 		}
-		List modifiers= ast.newModifiers((variable.getModifiers() & ~Modifier.FINAL) | Modifier.PUBLIC);
+		int visibility= Modifier.PUBLIC;
+		if (fCreateGetter) {
+			visibility= Modifier.PRIVATE;
+		}
+		List modifiers= ast.newModifiers(visibility);
 		declaration.modifiers().addAll(modifiers);
 		declaration.setType(importBinding(pi.getNewTypeBinding(), cuRewrite));
 		return declaration;

@@ -7,9 +7,9 @@ class TestDelegateCreationA {
 public class TestDelegateCreationCodeStyle extends TestDelegateCreationA{
 	String a[];
 	public static class FooParameter {
-		public String[] fAG;
-		public int fBG;
-		public double newD;
+		private String[] fAG;
+		private int fBG;
+		private double newD;
 		public FooParameter(String[] fAG, int fBG, double newD) {
 			this.fAG = fAG;
 			this.fBG = fBG;

@@ -7,9 +7,9 @@ class TestDelegateCreationA {
 public class TestDelegateCreation extends TestDelegateCreationA{
 	String a[];
 	public static class FooParameter {
-		public String[] newA;
-		public int newB;
-		public double newD;
+		private String[] newA;
+		private int newB;
+		private double newD;
 		public FooParameter(String[] newA, int newB, double newD) {
 			this.newA = newA;
 			this.newB = newB;

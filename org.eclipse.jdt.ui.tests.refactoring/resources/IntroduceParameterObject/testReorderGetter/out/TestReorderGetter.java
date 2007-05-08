@@ -2,9 +2,9 @@ package p;
 
 public class TestReorderGetter {
 	public static class FooParameter {
-		public double d;
-		public String a;
-		public int b;
+		private double d;
+		private String a;
+		private int b;
 		public FooParameter(double d, String a, int b) {
 			this.d = d;
 			this.a = a;
