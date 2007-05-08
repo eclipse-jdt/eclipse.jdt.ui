@@ -445,11 +445,9 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			List parameterInfos= fRefactoring.getParameterInfos();
 			for (Iterator iter= parameterInfos.iterator(); iter.hasNext();) {
 				ParameterInfo pi= (ParameterInfo) iter.next();
-				if (!pi.isAdded()) {
-					pi.setCreateField(true);
-					tv.setChecked(pi, true);
-				}
+				tv.setChecked(pi, pi.isCreateField());
 			}
+			tv.refresh(true);
 			gridData= new GridData(GridData.FILL_BOTH);
 			gridData.heightHint= SWTUtil.getTableHeightHint(table, parameterInfos.size());
 			layoutComposite.setLayoutData(gridData);
@@ -540,6 +538,12 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 				public void checkStateChanged(CheckStateChangedEvent event) {
 					ParameterInfo element= (ParameterInfo) event.getElement();
 					element.setCreateField(event.getChecked());
+					if (element.isCreateField() && element.getOldName().equals(element.getNewName())) {
+						element.setNewName(fRefactoring.getFieldName(element));
+					} else if (!element.isCreateField() && element.getNewName().equals(fRefactoring.getFieldName(element))) {
+						element.setNewName(element.getOldName());
+					}
+					tv.update(element, null);
 					updateButtons(tv, upButton, downButton, editButton);
 					validateRefactoring();
 				}

@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -278,6 +279,14 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 			initializeFields(method);
 		setBodyUpdater(new RewriteParameterBody());
 		setDefaultValueAdvisor(new RewriteArguments());
+		List parameterInfos= getParameterInfos();
+		for (Iterator iter= parameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo pi= (ParameterInfo) iter.next();
+			if (!pi.isAdded()){
+				pi.setCreateField(true);
+				pi.setNewName(getFieldName(pi));
+			}
+		}
 	}
 
 	public Type importBinding(ITypeBinding newTypeBinding, CompilationUnitRewrite cuRewrite) {
@@ -395,6 +404,15 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		return Messages.format(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_cannotalanyzemethod_mappingerror, new String[] {});
 	}
 
+	public String getFieldName(ParameterInfo element) {
+		String paramName= element.getOldName();
+		IJavaProject javaProject= fCompilationUnit.getJavaProject();
+		String stripped= NamingConventions.removePrefixAndSuffixForArgumentName(javaProject, paramName);
+		int dim= element.getNewTypeBinding() != null ? element.getNewTypeBinding().getDimensions() : 0;
+		return StubUtility.getVariableNameSuggestions(StubUtility.INSTANCE_FIELD, javaProject, stripped, dim, null, true)[0];
+	}
+
+	
 	public IMethodBinding getMethodBinding() {
 		return fMethodDeclaration.resolveBinding();
 	}

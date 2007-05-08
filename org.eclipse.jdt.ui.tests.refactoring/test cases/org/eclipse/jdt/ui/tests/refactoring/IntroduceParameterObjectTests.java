@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -17,9 +18,11 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
@@ -67,6 +70,28 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		runRefactoring(param);
 	}
 
+	public void testDelegateCreationCodeStyle() throws Exception {
+		IJavaProject javaProject= getRoot().getJavaProject();
+		Map originalOptions= javaProject.getOptions(false);
+		try {
+			Hashtable newOptions= new Hashtable();
+			newOptions.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
+			newOptions.put(JavaCore.CODEASSIST_FIELD_SUFFIXES, "G");
+			javaProject.setOptions(newOptions);
+			
+			Map renamings= new HashMap();
+			renamings.put("fDG", "newD");
+			RunRefactoringParameter param= new RunRefactoringParameter();
+			param.getters= true;
+			param.setters= true;
+			param.delegate= true;
+			param.renamings= renamings;
+			runRefactoring(param);
+		} finally {
+			javaProject.setOptions(originalOptions);
+		}
+	}
+	
 	public void testImportAddEnclosing() throws Exception {
 		Map renamings= new HashMap();
 		renamings.put("a", "permissions");
@@ -274,12 +299,15 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 			if (!pi.isAdded())
 				pi.setCreateField(true);
 			if (parameter.renamings != null) {
-				String newName= (String) parameter.renamings.get(pi.getNewName());
-				if (newName != null)
+				String newName= (String) parameter.renamings.remove(pi.getNewName());
+				if (newName != null) {
 					pi.setNewName(newName);
+				}
 			}
 		}
-		if (parameter.indexMap!=null){
+		if (parameter.renamings != null)
+			assertTrue("Some renamings did not match:"+parameter.renamings,parameter.renamings.size()==0);
+		if (parameter.indexMap != null){
 			Collections.sort(pis, new Comparator() {
 			
 				public int compare(Object arg0, Object arg1) {
