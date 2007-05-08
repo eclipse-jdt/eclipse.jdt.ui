@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.TreeHierarchyLayoutProblemsDecorator;
@@ -74,7 +75,7 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 		return super.getImage(element);
 	}
 
-	/**
+	/*
 	 * Decoration is only concerned with error ticks
 	 */
 	private Image getLogicalPackageImage(LogicalPackage cp) {
@@ -114,6 +115,16 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 		else
 			return super.getText(element);
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getRichTextLabel(java.lang.Object)
+	 */
+	public ColoredString getRichTextLabel(Object element) {
+		if (element instanceof IPackageFragment || element instanceof LogicalPackage)
+			return new ColoredString(getText(element));
+		return super.getRichTextLabel(element);
+	}
+	
 
 	private String getText(IPackageFragment fragment) {
 		if (isFlatView())
