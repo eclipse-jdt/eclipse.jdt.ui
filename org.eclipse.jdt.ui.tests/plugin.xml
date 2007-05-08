@@ -216,7 +216,6 @@
       <filter
             targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="Hide Java projects with other natures (jdt.ui.test)"
-            enabled="true"
             description="Hide Java projects with other natures (jdt.ui.test)"
             class="org.eclipse.jdt.ui.examples.filters.PureProjectFilter"
             id="org.eclipse.jdt.internal.ui.PackageExplorer.PureProjectFilter">
