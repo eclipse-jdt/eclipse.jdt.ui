@@ -6003,7 +6003,7 @@
          </colorOverride>
          <colorOverride
             id="org.eclipse.jdt.ui.classHighlighting"
-            value="WIDGET_DARK_SHADOW">
+            value="COLOR_WIDGET_DARK_SHADOW">
          </colorOverride>
          <colorOverride
             id="org.eclipse.jdt.ui.enumHighlighting"
