@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,8 +42,10 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -62,6 +64,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -88,6 +91,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 
 	/**
 	 * Constructor for JavaProjectWizardSecondPage.
+	 * @param mainPage the first page of the wizard
 	 */
 	public JavaProjectWizardSecondPage(JavaProjectWizardFirstPage mainPage) {
 		fFirstPage= mainPage;
@@ -110,26 +114,32 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 	 */
 	public void setVisible(boolean visible) {
 		if (visible) {
-			changeToNewProject();
+			IStatus status= changeToNewProject();
+			if (status != null && !status.isOK()) {
+				ErrorDialog.openError(getShell(), NewWizardMessages.JavaProjectWizardSecondPage_error_title, null, status);
+			}
 		} else {
 			removeProject();
 		}
 		super.setVisible(visible);
 		if (visible) {
+
 			setFocus();
 		}
 	}
 
-	private void changeToNewProject() {
+	private IStatus changeToNewProject() {
 		fKeepContent= fFirstPage.getDetect();
-		
-		final IRunnableWithProgress op= new IRunnableWithProgress() {
+
+		class UpdateRunnable implements IRunnableWithProgress {
+			public IStatus infoStatus= Status.OK_STATUS;
+			
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
 					if (fIsAutobuild == null) {
 						fIsAutobuild= Boolean.valueOf(CoreUtility.enableAutoBuild(false));
 					}
-                    updateProject(monitor);
+					infoStatus= updateProject(monitor);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				} catch (OperationCanceledException e) {
@@ -138,10 +148,11 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
                     monitor.done();
                 }
 			}
-		};
-	
+		}
+		UpdateRunnable op= new UpdateRunnable();
 		try {
 			getContainer().run(true, false, new WorkspaceModifyDelegatingOperation(op));
+			return op.infoStatus;
 		} catch (InvocationTargetException e) {
 			final String title= NewWizardMessages.JavaProjectWizardSecondPage_error_title; 
 			final String message= NewWizardMessages.JavaProjectWizardSecondPage_error_message; 
@@ -149,9 +160,12 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		} catch  (InterruptedException e) {
 			// cancel pressed
 		}
+		return null;
 	}
 	
-	final void updateProject(IProgressMonitor monitor) throws CoreException, InterruptedException {
+	final IStatus updateProject(IProgressMonitor monitor) throws CoreException, InterruptedException {
+		
+		IStatus result= StatusInfo.OK_STATUS;
 		
 		fCurrProject= fFirstPage.getProjectHandle();
 		fCurrProjectLocation= getProjectLocationURI(); 
@@ -179,7 +193,21 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 
 			rememberExistingFiles(realLocation);
             
-			createProject(fCurrProject, fCurrProjectLocation, new SubProgressMonitor(monitor, 2));
+			try {
+				createProject(fCurrProject, fCurrProjectLocation, new SubProgressMonitor(monitor, 2));
+			} catch (CoreException e) {
+				if (e.getStatus().getCode() == IResourceStatus.FAILED_READ_METADATA) {					
+					result= new StatusInfo(IStatus.INFO, Messages.format(NewWizardMessages.JavaProjectWizardSecondPage_DeleteCorruptProjectFile_message, e.getLocalizedMessage()));
+					
+					deleteProjectFile(fCurrProjectLocation);
+					if (fCurrProject.exists())
+						fCurrProject.delete(true, null);
+					
+					createProject(fCurrProject, fCurrProjectLocation, null);					
+				} else {
+					throw e;
+				}	
+			}
 				
 			IClasspathEntry[] entries= null;
 			IPath outputLocation= null;
@@ -240,6 +268,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		} finally {
 			monitor.done();
 		}
+		return result;
 	}
 	
 	private URI getProjectLocationURI() throws CoreException {
@@ -262,6 +291,16 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			return new IClasspathEntry[] { JavaCore.newContainerEntry(newPath) };
 		}
 		return defaultJRELibrary;
+	}
+	
+	private void deleteProjectFile(URI projectLocation) throws CoreException {
+		IFileStore file= EFS.getStore(projectLocation);
+		if (file.fetchInfo().exists()) {
+			IFileStore projectFile= file.getChild(FILENAME_PROJECT);
+			if (projectFile.fetchInfo().exists()) {
+				projectFile.delete(EFS.NONE, null);
+			}
+		}
 	}
 	
 	private void rememberExistingFiles(URI projectLocation) throws CoreException {
@@ -350,6 +389,9 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 	
 	/**
 	 * Called from the wizard on finish.
+	 * @param monitor the progress monitor
+	 * @throws CoreException thrown when the project creation or configuration failed
+	 * @throws InterruptedException thrown when the user cancelled the project creation
 	 */
 	public void performFinish(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		try {
