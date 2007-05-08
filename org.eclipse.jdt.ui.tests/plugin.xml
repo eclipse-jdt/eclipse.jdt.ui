@@ -211,4 +211,31 @@
 		<description>In/Out Project (jdt.ui.tests)</description>
     </wizard>	 
 </extension>   
+
+   <extension point="org.eclipse.jdt.ui.javaElementFilters">
+      <filter
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
+            name="Hide Java projects with other natures (jdt.ui.test)"
+            enabled="true"
+            description="Hide Java projects with other natures (jdt.ui.test)"
+            class="org.eclipse.jdt.ui.examples.filters.PureProjectFilter"
+            id="org.eclipse.jdt.internal.ui.PackageExplorer.PureProjectFilter">
+      </filter>
+      <filter
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
+            name="Hide A.java (jdt.ui.test)"
+            enabled="false"
+            description="Hide A.java (jdt.ui.test)"
+            class="org.eclipse.jdt.ui.examples.filters.AFileFilter"
+            id="org.eclipse.jdt.internal.ui.PackageExplorer.AFileFilter">
+      </filter>
+    </extension> 
+	<extension point="org.eclipse.ui.navigator.navigatorContent">      
+       <commonFilter
+		        activeByDefault="false"
+		        class="org.eclipse.jdt.ui.examples.filters.AFileFilter"
+		        name="Hide A.java (jdt.ui.test)"
+		        description="Hide A.java (jdt.ui.test)"
+		        id="org.eclipse.jdt.java.ui.filters.AFileFilter"/>
+	</extension>
 </plugin>
