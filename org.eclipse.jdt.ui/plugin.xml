@@ -5887,7 +5887,7 @@
          </colorOverride>
          <colorOverride
             id="org.eclipse.jdt.ui.java_default"
-            value="LIST_FOREGROUND">
+            value="COLOR_LIST_FOREGROUND">
          </colorOverride>
          <colorOverride
             id="org.eclipse.jdt.ui.java_doc_link"
