@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,6 +82,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		
 	/**
 	 * Creates a new content provider for Java elements.
+	 * @param provideMembers if set, members of compilation units and class files are shown
 	 */
 	public PackageExplorerContentProvider(boolean provideMembers) {
 		super(provideMembers);
@@ -404,7 +405,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	 * Returns the hierarchical packages inside a given folder.
 	 * @param folder The parent folder
 	 * @param result Collection where the resulting elements are added
-	 * @throws JavaModelException
+	 * @throws CoreException thrown when elements could not be accessed
 	 */
 	private void getHierarchicalPackagesInFolder(IFolder folder, Collection result) throws CoreException {
 		IResource[] resources= folder.members();
@@ -493,8 +494,11 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	 * Processes a delta recursively. When more than two children are affected the
 	 * tree is fully refreshed starting at this node.
 	 * 
+	 * @param delta the delta to process
+	 * @param runnables the resulting view changes as runnables (type {@link Runnable})
 	 * @return true is returned if the conclusion is to refresh a parent of an element. In that case no siblings need
 	 * to be processed
+	 * @throws JavaModelException thrown when the access to an element failed
 	 */
 	private boolean processDelta(IJavaElementDelta delta, Collection runnables) throws JavaModelException {
 	
@@ -564,6 +568,13 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			if ((flags & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0) {
 				postRefresh(element, ORIGINAL, element, runnables);
 				return false;				
+			}
+			// if added it could be that the corresponding IProject is already shown. Remove it first.
+			// bug 184296
+			if (kind == IJavaElementDelta.ADDED) { 
+				postRemove(element.getResource(), runnables);
+				postAdd(element.getParent(), element, runnables);
+				return false;
 			}
 		}
 	
@@ -721,6 +732,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	/**
 	 * Updates the selection. It finds newly added elements
 	 * and selects them.
+	 * @param delta the delta to process
+	 * @param runnables the resulting view changes as runnables (type {@link Runnable})
 	 */
 	private void updateSelection(IJavaElementDelta delta, Collection runnables) {
 		final IJavaElement addedElement= findAddedElement(delta);
@@ -750,6 +763,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 
 	/**
 	 * Updates the package icon
+	 * @param element the element to update
+	 * @param runnables the resulting view changes as runnables (type {@link Runnable})
 	 */
 	 private void postUpdateIcon(final IJavaElement element, Collection runnables) {
 		 runnables.add(new Runnable() {
@@ -762,8 +777,10 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 
 	/**
 	 * Process a resource delta.
-	 * @param runnables 
 	 * 
+	 * @param delta the delta to process
+	 * @param parent the parent
+	 * @param runnables the resulting view changes as runnables (type {@link Runnable})
 	 * @return true if the parent got refreshed
 	 */
 	private boolean processResourceDelta(IResourceDelta delta, Object parent, Collection runnables) {
