@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -33,12 +34,19 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener;
  * @since 3.1
  */
 public class JavaSpellingEngine extends SpellingEngine {
+	
+	/*
+	 * XXX: To be made public in 3.4,
+	 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=186117
+	 */
+	public static final String SPELLING_IGNORE_JAVA_STRINGS= "spelling_ignore_java_stringsr"; //$NON-NLS-1$;
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.SpellingEngine#check(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IRegion[], org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker, org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	protected void check(IDocument document, IRegion[] regions, ISpellChecker checker, ISpellingProblemCollector collector, IProgressMonitor monitor) {
 		ISpellEventListener listener= new SpellEventListener(collector, document);
+		boolean isIgnoringJavaStrings= PreferenceConstants.getPreferenceStore().getBoolean(SPELLING_IGNORE_JAVA_STRINGS);
 		try {
 			checker.addListener(listener);
 			try {
@@ -50,7 +58,12 @@ public class JavaSpellingEngine extends SpellingEngine {
 							return;
 
 						ITypedRegion partition= partitions[index];
-						if (!partition.getType().equals(IDocument.DEFAULT_CONTENT_TYPE) && !partition.getType().equals(IJavaPartitions.JAVA_CHARACTER))
+						final String type= partition.getType();
+						
+						if (isIgnoringJavaStrings && type.equals(IJavaPartitions.JAVA_STRING))
+							continue;
+						
+						if (!type.equals(IDocument.DEFAULT_CONTENT_TYPE) && !type.equals(IJavaPartitions.JAVA_CHARACTER))
 							checker.execute(new SpellCheckIterator(document, partition, checker.getLocale()));
 					}
 				}
