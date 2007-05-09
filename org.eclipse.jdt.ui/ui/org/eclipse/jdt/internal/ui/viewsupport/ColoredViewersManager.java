@@ -136,18 +136,18 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 		}
 		
 		protected void installOwnerDraw() {
-			if (fOwnerDrawSupport != null)
-				return; // already installed
-			
-			fOwnerDrawSupport= new OwnerDrawSupport(fViewer.getControl()) { // will install itself as listeners
-				public ColoredString getColoredLabel(Item item) {
-					return getColoredLabelForView(item);
-				}
-
-				public Color getColor(String foregroundColorName, Display display) {
-					return getColorForName(foregroundColorName);
-				}
-			};
+			if (fOwnerDrawSupport == null) {
+				// not yet installed
+				fOwnerDrawSupport= new OwnerDrawSupport(fViewer.getControl()) { // will install itself as listeners
+					public ColoredString getColoredLabel(Item item) {
+						return getColoredLabelForView(item);
+					}
+	
+					public Color getColor(String foregroundColorName, Display display) {
+						return getColorForName(foregroundColorName);
+					}
+				};
+			}
 			refreshViewer();
 		}
 		
