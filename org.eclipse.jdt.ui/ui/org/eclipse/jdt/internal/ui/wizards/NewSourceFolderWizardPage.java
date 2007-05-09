@@ -491,7 +491,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 			IPath projPath= fCurrJProject.getProject().getFullPath();
 			if (fOutputLocation.equals(projPath) && !fNewOutputLocation.equals(projPath)) {
 				if (BuildPathsBlock.hasClassfiles(fCurrJProject.getProject())) {
-					if (BuildPathsBlock.getRemoveOldBinariesQuery(getShell()).doQuery(projPath)) {
+					if (BuildPathsBlock.getRemoveOldBinariesQuery(getShell()).doQuery(false, projPath)) {
 						BuildPathsBlock.removeOldClassfiles(fCurrJProject.getProject());
 					}
 				}

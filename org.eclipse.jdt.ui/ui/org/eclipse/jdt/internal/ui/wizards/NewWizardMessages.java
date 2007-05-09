@@ -40,6 +40,7 @@ public final class NewWizardMessages extends NLS {
 	public static String AddSourceFolderWizardPage_conflictWarning;
 	public static String AddSourceFolderWizardPage_ignoreNestingConflicts;
 	public static String AddSourceFolderWizardPage_replaceSourceFolderInfo;
+	public static String BuildPathsBlock_RemoveOldOutputFolder_description;
 	public static String BuildPathSupport_deprecated;
 	public static String CPListLabelProvider_attribute_label;
 	public static String CPVariableElementLabelProvider_appendix;
