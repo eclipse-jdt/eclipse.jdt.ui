@@ -113,6 +113,9 @@ public final class JavaUIMessages extends NLS {
 	public static String Spelling_correct_label;
 	public static String Spelling_add_info;
 	public static String Spelling_add_label;
+	public static String Spelling_add_askToConfigure_title;
+	public static String Spelling_add_askToConfigure_question;
+	public static String Spelling_add_askToConfigure_ignoreMessage;
 	public static String Spelling_ignore_info;
 	public static String Spelling_ignore_label;
 	public static String Spelling_disable_label;

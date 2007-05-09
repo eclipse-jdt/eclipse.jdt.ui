@@ -147,7 +147,7 @@ public class JavaSpellingProblem extends SpellingProblem {
 					size= proposals.size();
 				}
 
-				boolean extendable= !fixed ? checker.acceptsWords() : false;
+				boolean extendable= !fixed ? (checker.acceptsWords() || AddWordProposal.canAskToConfigure()) : false;
 				result= new IJavaCompletionProposal[size + (extendable ? 3 : 2)];
 
 				for (index= 0; index < size; index++) {

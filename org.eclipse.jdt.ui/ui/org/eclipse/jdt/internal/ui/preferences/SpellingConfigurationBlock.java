@@ -183,8 +183,10 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		if (path.length() > 0) {
 
 			final File file= new File(path);
-			if (!file.isFile() || !file.isAbsolute() || !file.exists() || !file.canRead() || !file.canWrite())
-				status.setError(PreferencesMessages.SpellingPreferencePage_dictionary_error); 
+			if (!file.exists() && (!file.isAbsolute() || !file.getParentFile().canWrite()))
+				status.setError(PreferencesMessages.SpellingPreferencePage_dictionary_error);
+			else if (file.exists() && (!file.isFile() || !file.isAbsolute() || !file.canRead() || !file.canWrite()))
+				status.setError(PreferencesMessages.SpellingPreferencePage_dictionary_error);
 
 		}
 		return status;

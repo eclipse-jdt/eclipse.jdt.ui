@@ -355,10 +355,14 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 		}
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		final String file= store.getString(PreferenceConstants.SPELLING_USER_DICTIONARY);
-		if (file.length() > 0) {
+		final String filePath= store.getString(PreferenceConstants.SPELLING_USER_DICTIONARY);
+		if (filePath.length() > 0) {
 			try {
-				final URL url= new URL("file", null, file); //$NON-NLS-1$
+				File file= new File(filePath);
+				if (!file.exists() && !file.createNewFile())
+					return;
+				
+				final URL url= new URL("file", null, filePath); //$NON-NLS-1$
 				InputStream stream= url.openStream();
 				if (stream != null) {
 					try {

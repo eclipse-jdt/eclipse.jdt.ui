@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,17 +13,23 @@ package org.eclipse.jdt.internal.ui.text.spelling;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
@@ -40,11 +46,14 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
  */
 public class AddWordProposal implements IJavaCompletionProposal {
 
+	private static final String PREF_KEY_DO_NOT_ASK= "do_not_ask_to_install_user_dictionary"; //$NON-NLS-1$
+	
 	/** The invocation context */
 	private final IInvocationContext fContext;
 
 	/** The word to add */
 	private final String fWord;
+
 
 	/**
 	 * Creates a new add word proposal
@@ -67,12 +76,64 @@ public class AddWordProposal implements IJavaCompletionProposal {
 		final ISpellCheckEngine engine= SpellCheckEngine.getInstance();
 		final ISpellChecker checker= engine.getSpellChecker();
 
-		if (checker != null) {
+		if (checker == null)
+			return;
+		
+		final ITextEditor editor= getEditor();
+		
+		if (!checker.acceptsWords()) {
+			final Shell shell;
+			if (editor != null)
+				shell= editor.getEditorSite().getShell();
+			else
+				shell= JavaPlugin.getActiveWorkbenchShell();
+			
+			if (!canAskToConfigure() || !askUserToConfigureUserDictionary(shell))
+				return;
+			
+			String[] preferencePageIds= new String[] { "org.eclipse.ui.editors.preferencePages.Spelling" }; //$NON-NLS-1$
+			PreferencesUtil.createPreferenceDialogOn(shell, preferencePageIds[0], preferencePageIds, null).open();
+		}
+		
+		if (checker.acceptsWords()) {
 			checker.addWord(fWord);
-			SpellingProblem.removeAllInActiveEditor(getEditor(), fWord);
+			SpellingProblem.removeAllInActiveEditor(editor, fWord);
 		}
 	}
 	
+	/**
+	 * Asks the user whether he wants to configure
+	 * a user dictionary.
+	 * 
+	 * @param shell
+	 * @return <code>true</code> if the user wants to configure the user dictionary
+	 * @since 3.3
+	 */
+	private boolean askUserToConfigureUserDictionary(Shell shell) {
+		MessageDialogWithToggle toggleDialog= MessageDialogWithToggle.openYesNoQuestion(
+				shell,
+				JavaUIMessages.Spelling_add_askToConfigure_title,
+				JavaUIMessages.Spelling_add_askToConfigure_question,
+				JavaUIMessages.Spelling_add_askToConfigure_ignoreMessage,
+				false,
+				null,
+				null);
+		
+		PreferenceConstants.getPreferenceStore().setValue(PREF_KEY_DO_NOT_ASK, toggleDialog.getToggleState());
+		
+		return toggleDialog.getReturnCode() == IDialogConstants.YES_ID;
+	}
+
+	/**
+	 * Tells whether this proposal can ask to
+	 * configure a user dictionary.
+	 * 
+	 * @return <code>true</code> if it can ask the user
+	 */
+	static boolean canAskToConfigure() {
+		return !PreferenceConstants.getPreferenceStore().getBoolean(PREF_KEY_DO_NOT_ASK);
+	}
+
 	private ITextEditor getEditor() {
 		IWorkbenchPage activePage= JavaPlugin.getActivePage();
 		if (activePage == null)

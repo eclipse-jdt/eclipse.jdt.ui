@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -152,8 +152,8 @@ public class DefaultSpellChecker implements ISpellChecker {
 	/**
 	 * Creates a new default spell checker.
 	 *
-	 * @param store
-	 *                   The preference store for this spell checker
+	 * @param store the preference store for this spell checker
+	 * @param locale the locale
 	 */
 	public DefaultSpellChecker(IPreferenceStore store, Locale locale) {
 		Assert.isLegal(store != null);
@@ -185,7 +185,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 	public boolean acceptsWords() {
 		// synchronizing might not be needed here since acceptWords is
 		// a read-only access and only called in the same thread as
-		// the modifing methods add/checkWord (?)
+		// the modifying methods add/checkWord (?)
 		Set copy;
 		synchronized (fDictionaries) {
 			copy= new HashSet(fDictionaries);
@@ -212,13 +212,18 @@ public class DefaultSpellChecker implements ISpellChecker {
 		}
 
 		final String addable= word.toLowerCase();
-		fIgnored.add(addable);
-
-		ISpellDictionary dictionary= null;
+		boolean hasBeenAdded= false;
 		for (final Iterator iterator= copy.iterator(); iterator.hasNext();) {
-
-			dictionary= (ISpellDictionary)iterator.next();
-			dictionary.addWord(addable);
+			ISpellDictionary dictionary= (ISpellDictionary)iterator.next();
+			if (dictionary.acceptsWords()) {
+				dictionary.addWord(addable);
+				hasBeenAdded= true;
+			}
+		}
+		
+		if (hasBeenAdded) {
+			fIgnored.add(addable);
+			return;
 		}
 	}
 
