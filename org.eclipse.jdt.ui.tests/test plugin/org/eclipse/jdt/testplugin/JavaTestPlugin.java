@@ -14,17 +14,18 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 
 public class JavaTestPlugin extends Plugin {
@@ -54,11 +55,12 @@ public class JavaTestPlugin extends Plugin {
 	
 	public File getFileInPlugin(IPath path) {
 		try {
-			URL installURL= new URL(getDescriptor().getInstallURL(), path.toString());
-			URL localURL= Platform.asLocalURL(installURL);
+			URL installURL= new URL(getBundle().getEntry("/"), path.toString());
+			URL localURL= FileLocator.toFileURL(installURL);
 			return new File(localURL.getFile());
-		} catch (IOException e) {
-			return null;
+		} catch (IOException e2) {
+			log(e2);
+			throw new RuntimeException(e2);
 		}
 	}
 	
