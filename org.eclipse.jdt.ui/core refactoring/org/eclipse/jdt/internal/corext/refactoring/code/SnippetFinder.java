@@ -76,7 +76,7 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 			return ASTNodes.getVariableBinding(name);
 		}
 		public boolean isEmpty() {
-			return fNodes.isEmpty();
+			return fNodes.isEmpty() && fLocalMappings.isEmpty();
 		}
 		/**
 		 * Tests if the whole duplicate is the full body of a method. If so

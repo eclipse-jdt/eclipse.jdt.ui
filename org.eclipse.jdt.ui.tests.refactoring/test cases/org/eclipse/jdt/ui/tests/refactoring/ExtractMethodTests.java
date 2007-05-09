@@ -1722,6 +1722,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		duplicatesTest();
 	}
 	
+	public void test970() throws Exception {
+		duplicatesTest(); // for https://bugs.eclipse.org/bugs/show_bug.cgi?id=186061
+	}
+	
 	//---- Test code in initializers -----------------------------------------------
 	
 	public void test1000() throws Exception {
