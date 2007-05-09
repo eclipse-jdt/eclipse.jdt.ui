@@ -53,6 +53,7 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -277,6 +278,10 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
                         return false;
                 } else if (element instanceof PackageFragmentRootContainer) {
                 	return false;
+                } else if (element instanceof IPackageFragment) {
+					IPackageFragment fragment= (IPackageFragment)element;
+                	if (fragment.isDefaultPackage() && !fragment.hasChildren())
+                		return false;
                 }
             } catch (JavaModelException e) {
                 JavaPlugin.log(e);
