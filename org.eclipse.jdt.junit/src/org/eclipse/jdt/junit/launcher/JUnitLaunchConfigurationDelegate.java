@@ -270,9 +270,17 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 
 	private void informAndAbort(String message, Throwable exception, int code) throws CoreException {
 		IStatus status= new Status(IStatus.INFO, JUnitPlugin.PLUGIN_ID, code, message, exception);
-		if (showStatusMessage(status))
+		if (showStatusMessage(status)) {
+			// Status message successfully shown
+			// -> Abort with INFO exception
+			// -> Worker.run() will not write to log
 			throw new CoreException(status);
-		abort(message, exception, code);
+		} else {
+			// Status message could not be shown
+			// -> Abort with original exception
+			// -> Will write WARNINGs and ERRORs to log
+			abort(message, exception, code);
+		}
 	}	
 	
 	/**
@@ -453,7 +461,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		if (testTypeName.length() != 0) {
 			testTypeName= performStringSubstitution(testTypeName);
 			IType type= javaProject.findType(testTypeName);
-			if (type != null) {
+			if (type != null && type.exists()) {
 				return type;
 			}
 		}
