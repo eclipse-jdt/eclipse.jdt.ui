@@ -11,8 +11,10 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
 
@@ -148,6 +150,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 					getViewer().update(element, null);
 				}
 				validateRefactoring();
+				updateSignaturePreview();
 			}
 
 			public abstract void doSetValue(ParameterInfo pi, String string);
@@ -167,7 +170,11 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			}
 
 			protected boolean canEdit(Object element) {
-				return fTextEditor != null;
+				if (element instanceof ParameterInfo) {
+					ParameterInfo pi= (ParameterInfo) element;
+					return fTextEditor!=null && pi.isCreateField();
+				}
+				return false;
 			}
 		}
 
@@ -188,17 +195,12 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			result.setLayout(new GridLayout(2, false));
 			Group group= createGroup(result, RefactoringMessages.IntroduceParameterObjectWizard_type_group);
 
-			// List packageEnablements= new ArrayList();
-			// Text packageInput= createPackageInput(group, packageEnablements);
 			createClassNameInput(group);
 			createLocationInput(group);
 
-			// group= createGroup(result,
-			// RefactoringMessages.IntroduceParameterObjectWizard_fieldgroup_text);
 			createTable(group);
 			createGetterInput(group);
 			createSetterInput(group);
-			// createCommentsInput(group);
 
 			group= createGroup(result, RefactoringMessages.IntroduceParameterObjectWizard_method_group);
 			createParameterNameInput(group);
@@ -415,20 +417,22 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 		}
 
 		private void createTable(Composite parent) {
-			Label l= new Label(parent, SWT.NONE);
-			l.setText(RefactoringMessages.IntroduceParameterObjectWizard_fields_selection_label);
-			GridData gridData= new GridData(GridData.FILL_HORIZONTAL);
-			gridData.horizontalSpan= 2;
-			l.setLayoutData(gridData);
-
 			Composite result= new Composite(parent, SWT.NONE);
 			GridLayout layout= new GridLayout(2, false);
 			layout.marginHeight= 0;
 			layout.marginWidth= 0;
 			result.setLayout(layout);
-			gridData= new GridData(GridData.FILL_BOTH);
+			GridData gridData= new GridData(GridData.FILL_BOTH);
 			gridData.horizontalSpan= 2;
 			result.setLayoutData(gridData);
+
+			Label l= new Label(result, SWT.NONE);
+			l.setText(RefactoringMessages.IntroduceParameterObjectWizard_fields_selection_label);
+			gridData= new GridData(GridData.FILL_HORIZONTAL);
+			gridData.horizontalSpan= 2;
+			gridData.verticalIndent= 5;
+			l.setLayoutData(gridData);
+			
 			TableLayoutComposite layoutComposite= new TableLayoutComposite(result, SWT.NONE);
 			layoutComposite.addColumnData(new ColumnWeightData(40, convertWidthInCharsToPixels(20), true));
 			layoutComposite.addColumnData(new ColumnWeightData(60, convertWidthInCharsToPixels(20), true));
@@ -486,7 +490,9 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 					if (selection instanceof IStructuredSelection) {
 						IStructuredSelection ss= (IStructuredSelection) selection;
 						ParameterInfo selected= (ParameterInfo) ss.getFirstElement();
-						InputDialog inputDialog= new InputDialog(getShell(), RefactoringMessages.IntroduceParameterObjectWizard_fieldname_title, RefactoringMessages.IntroduceParameterObjectWizard_fieldname_message, selected.getNewName(), new IInputValidator() {
+						String message= RefactoringMessages.IntroduceParameterObjectWizard_fieldname_message;
+						String title= RefactoringMessages.IntroduceParameterObjectWizard_fieldname_title;
+						InputDialog inputDialog= new InputDialog(getShell(), title, message, selected.getNewName(), new IInputValidator() {
 
 							public String isValid(String newText) {
 								IJavaProject project= fRefactoring.getCompilationUnit().getJavaProject();
@@ -502,6 +508,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 						if (inputDialog.open() == Window.OK) {
 							selected.setNewName(inputDialog.getValue());
 							tv.refresh(selected);
+							updateSignaturePreview();
 						}
 							
 					}
@@ -535,12 +542,18 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 
 			});
 			tv.addCheckStateListener(new ICheckStateListener() {
+				Map fLastNames=new HashMap();
 				public void checkStateChanged(CheckStateChangedEvent event) {
 					ParameterInfo element= (ParameterInfo) event.getElement();
 					element.setCreateField(event.getChecked());
-					if (element.isCreateField() && element.getOldName().equals(element.getNewName())) {
-						element.setNewName(fRefactoring.getFieldName(element));
-					} else if (!element.isCreateField() && element.getNewName().equals(fRefactoring.getFieldName(element))) {
+					if (element.isCreateField()){
+						String lastName= (String) fLastNames.get(element);
+						if (lastName==null){
+							lastName=fRefactoring.getFieldName(element);
+						}
+						element.setNewName(lastName);
+					} else {
+						fLastNames.put(element, element.getNewName());
 						element.setNewName(element.getOldName());
 					}
 					tv.update(element, null);
@@ -652,15 +665,17 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 		}
 
 		private void updateButtons(final TableViewer tv, Button upButton, Button downButton, Button editButton) {
-			int selectionIndex= tv.getTable().getSelectionIndex();
-			if (selectionIndex == -1) {
+			IStructuredSelection selection= (IStructuredSelection) tv.getSelection();
+			ParameterInfo firstElement= (ParameterInfo) selection.getFirstElement();
+			if (selection.isEmpty()) {
 				upButton.setEnabled(false);
 				downButton.setEnabled(false);
 				editButton.setEnabled(false);
 			} else {
+				int selectionIndex= tv.getTable().getSelectionIndex();
 				upButton.setEnabled(selectionIndex != 0);
 				downButton.setEnabled(selectionIndex != tv.getTable().getItemCount() - 1);
-				editButton.setEnabled(true);
+				editButton.setEnabled(firstElement.isCreateField());
 			}
 			fRefactoring.updateParameterPosition();
 			updateSignaturePreview();
