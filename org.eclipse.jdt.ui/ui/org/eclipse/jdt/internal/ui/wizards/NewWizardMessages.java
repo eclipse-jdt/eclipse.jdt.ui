@@ -59,6 +59,9 @@ public final class NewWizardMessages extends NLS {
 	public static String JavaProjectWizardFirstPage_DetectGroup_differendWorkspaceCC_message;
 	public static String JavaProjectWizardFirstPage_EnableWorkingSet_button;
 	public static String JavaProjectWizardFirstPage_JREGroup_specific_EE;
+	public static String JavaProjectWizardFirstPage_Message_invalidProjectNameForWorkspaceRoot;
+	public static String JavaProjectWizardFirstPage_Message_notExisingProjectOnWorkspaceRoot;
+	public static String JavaProjectWizardFirstPage_Message_notOnWorkspaceRoot;
 	public static String JavaProjectWizardFirstPage_WorkingSets_group;
 	public static String JavaProjectWizardFirstPage_WorkingSetSelection_message;
 	public static String JavaProjectWizardSecondPage_DeleteCorruptProjectFile_message;
@@ -531,7 +534,6 @@ public final class NewWizardMessages extends NLS {
 	public static String JavaProjectWizardFirstPage_Message_projectAlreadyExists;
 	public static String JavaProjectWizardFirstPage_Message_enterLocation;
 	public static String JavaProjectWizardFirstPage_Message_invalidDirectory;
-	public static String JavaProjectWizardFirstPage_Message_cannotCreateInWorkspace;
 	public static String JavaProjectWizardFirstPage_Message_cannotCreateAtExternalLocation;
 	public static String JavaProjectWizardFirstPage_page_pageName;
 	public static String JavaProjectWizardFirstPage_page_title;
