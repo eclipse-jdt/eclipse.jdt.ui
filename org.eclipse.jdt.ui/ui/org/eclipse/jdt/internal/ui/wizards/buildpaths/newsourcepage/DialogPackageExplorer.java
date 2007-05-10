@@ -260,8 +260,11 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
     }
     
     /**
-     * A extended filter for the package explorer which filters libraries and
-     * files if their name is either ".classpath" or ".project".
+     * An extended filter for the package explorer which filters
+     * libraries,
+     * files named ".classpath" or ".project",
+     * the default package, and
+     * hidden folders.
      */
     private final class PackageFilter extends LibraryFilter {
         private OutputFolderFilter fOutputFolderFilter= new OutputFolderFilter();
@@ -271,8 +274,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
                     IFile file= (IFile) element;
                     if (file.getName().equals(".classpath") || file.getName().equals(".project")) //$NON-NLS-1$//$NON-NLS-2$
                         return false;
-                }
-                if (element instanceof IPackageFragmentRoot) {
+                } else if (element instanceof IPackageFragmentRoot) {
                     IClasspathEntry cpe= ((IPackageFragmentRoot)element).getRawClasspathEntry();
                     if (cpe == null || cpe.getEntryKind() == IClasspathEntry.CPE_CONTAINER || cpe.getEntryKind() == IClasspathEntry.CPE_LIBRARY || cpe.getEntryKind() == IClasspathEntry.CPE_VARIABLE)
                         return false;
@@ -281,6 +283,10 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionProvider,
                 } else if (element instanceof IPackageFragment) {
 					IPackageFragment fragment= (IPackageFragment)element;
                 	if (fragment.isDefaultPackage() && !fragment.hasChildren())
+                		return false;
+                } else if (element instanceof IFolder) {
+                	IFolder folder= (IFolder)element;
+                	if (folder.getName().startsWith(".")) //$NON-NLS-1$
                 		return false;
                 }
             } catch (JavaModelException e) {
