@@ -88,7 +88,7 @@ replaces the deprecated attributed &quot;viewId&quot;.
          <attribute name="enabled" type="boolean">
             <annotation>
                <documentation>
-                  the filter will be enabled if this attribute is present and its value is &quot;true&quot;. Most likely the user will be able to override this setting in the UI.
+                  the filter will be enabled if this attribute is &quot;true&quot; or if this attribute is not present. Most likely the user will be able to override this setting in the UI.
                </documentation>
             </annotation>
          </attribute>
