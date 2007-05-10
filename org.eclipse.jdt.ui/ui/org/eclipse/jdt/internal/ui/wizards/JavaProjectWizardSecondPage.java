@@ -324,9 +324,9 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		int ticks= ((fDotProjectBackup != null ? 1 : 0) + (fDotClasspathBackup != null ? 1 : 0)) * 2;
 		monitor.beginTask("", ticks); //$NON-NLS-1$
 		try {
+			IFileStore projectFile= EFS.getStore(projectLocation).getChild(FILENAME_PROJECT);
+			projectFile.delete(EFS.NONE, new SubProgressMonitor(monitor, 1));
 			if (fDotProjectBackup != null) {
-				IFileStore projectFile= EFS.getStore(projectLocation).getChild(FILENAME_PROJECT);
-				projectFile.delete(EFS.NONE, new SubProgressMonitor(monitor, 1));
 				copyFile(fDotProjectBackup, projectFile, new SubProgressMonitor(monitor, 1));
 			}
 		} catch (IOException e) {
@@ -334,9 +334,9 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			throw new CoreException(status);
 		}
 		try {
+			IFileStore classpathFile= EFS.getStore(projectLocation).getChild(FILENAME_CLASSPATH);
+			classpathFile.delete(EFS.NONE, new SubProgressMonitor(monitor, 1));
 			if (fDotClasspathBackup != null) {
-				IFileStore classpathFile= EFS.getStore(projectLocation).getChild(FILENAME_CLASSPATH);
-				classpathFile.delete(EFS.NONE, new SubProgressMonitor(monitor, 1));
 				copyFile(fDotClasspathBackup, classpathFile, new SubProgressMonitor(monitor, 1));
 			}
 		} catch (IOException e) {
