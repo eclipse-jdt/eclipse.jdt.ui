@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
+import org.eclipse.jdt.internal.ui.preferences.BulletListBlock;
 import org.eclipse.jdt.internal.ui.preferences.PreferencesAccess;
 import org.eclipse.jdt.internal.ui.preferences.formatter.IProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
@@ -65,7 +66,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 	private SelectionButtonDialogField fShowCleanUpWizardDialogField;
 	private CleanUpProfileManager fProfileManager;
 	private ProfileStore fProfileStore;
-	private DialogBrowserConfigurationBlock fBrowserBlock;
+	private BulletListBlock fBrowserBlock;
     
     public CleanUpConfigurationBlock(IProject project, PreferencesAccess access) {
 	    super(project, access, DIALOGSTORE_LASTSAVELOADPATH);
@@ -104,7 +105,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		
 		createLabel(composite, CleanUpMessages.CleanUpConfigurationBlock_SelectedCleanUps_label, numColumns);
 		
-		fBrowserBlock= new DialogBrowserConfigurationBlock();
+		fBrowserBlock= new BulletListBlock();
 		Control control= fBrowserBlock.createControl(composite);
 		((GridData)control.getLayoutData()).horizontalSpan= numColumns;
 		fBrowserBlock.setText(getSelectedCleanUpsInfo(cleanUps));
@@ -127,23 +128,26 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
     }
 
     private String getSelectedCleanUpsInfo(ICleanUp[] cleanUps) {
+    	if (cleanUps.length == 0)
+    		return ""; //$NON-NLS-1$
+    	
     	StringBuffer buf= new StringBuffer();
     	
-    	buf.append("<html><header></header><body>"); //$NON-NLS-1$
-    	buf.append("<ul style=\""); //$NON-NLS-1$
-    	buf.append("margin-top:0px; margin-left:20px;\n"); //$NON-NLS-1$
-    	buf.append("\">"); //$NON-NLS-1$
-    	
+    	boolean first= true;
     	for (int i= 0; i < cleanUps.length; i++) {
 	        String[] descriptions= cleanUps[i].getDescriptions();
 	        if (descriptions != null) {
     	        for (int j= 0; j < descriptions.length; j++) {
-    	            buf.append("<li>").append(descriptions[j]).append("</li>").append('\n'); //$NON-NLS-1$ //$NON-NLS-2$
+    	        	if (first) {
+    	        		first= false;
+    	        	} else {
+    	        		buf.append('\n');
+    	        	}
+    	            buf.append(descriptions[j]);
                 }
 	        }
         }
     	
-    	buf.append("</ul>"); //$NON-NLS-1$
     	return buf.toString();
     }
 

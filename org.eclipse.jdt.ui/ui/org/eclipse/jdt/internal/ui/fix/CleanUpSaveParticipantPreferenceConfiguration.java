@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,9 +49,9 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.AbstractSaveParticipantPreferenceConfiguration;
+import org.eclipse.jdt.internal.ui.preferences.BulletListBlock;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.DialogBrowserConfigurationBlock;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 /**
@@ -65,7 +65,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	
 	private IScopeContext fContext;
 	private Map fSettings;
-	private DialogBrowserConfigurationBlock fSelectedActionsText;
+	private BulletListBlock fSelectedActionsText;
 	private Button fFormatCodeButton;
 	private Button fOrganizeImportsButton;
 	private Shell fShell;
@@ -153,9 +153,12 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.horizontalIndent= INDENT;
 		composite.setLayoutData(gridData);
-		composite.setLayout(new GridLayout(2, false));
+		GridLayout layout= new GridLayout(2, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		composite.setLayout(layout);
 		
-		fSelectedActionsText= new DialogBrowserConfigurationBlock();
+		fSelectedActionsText= new BulletListBlock();
 		final GridData data= (GridData)fSelectedActionsText.createControl(composite).getLayoutData();
 		data.heightHint= new PixelConverter(composite).convertHeightInCharsToPixels(8);
 		
@@ -291,30 +294,27 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		
 		final ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps(settings);
 		
-		StringBuffer buf= new StringBuffer();
-		
-    	buf.append("<html><header></header><body>"); //$NON-NLS-1$
-    	buf.append("<ul style=\""); //$NON-NLS-1$
-    	buf.append("margin-top:0px; margin-left:20px;\n"); //$NON-NLS-1$
-    	buf.append("\">"); //$NON-NLS-1$
-    	
-    	boolean hasCleanUp= false;
-    	for (int i= 0; i < cleanUps.length; i++) {
-	        String[] descriptions= cleanUps[i].getDescriptions();
-	        if (descriptions != null) {
-    	        for (int j= 0; j < descriptions.length; j++) {
-    	            buf.append("<li>").append(descriptions[j]).append("</li>").append('\n'); //$NON-NLS-1$ //$NON-NLS-2$
-    	            hasCleanUp= true;
-                }
+		if (cleanUps.length == 0) {			
+			fSelectedActionsText.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_NoActionEnabled_Info);
+		} else {
+			StringBuffer buf= new StringBuffer();
+			
+			boolean first= true;
+	    	for (int i= 0; i < cleanUps.length; i++) {
+		        String[] descriptions= cleanUps[i].getDescriptions();
+		        if (descriptions != null) {
+	    	        for (int j= 0; j < descriptions.length; j++) {
+	    	        	if (first) {
+	    	        		first= false;
+	    	        	} else {
+	    	        		buf.append('\n');	    	        		
+	    	        	}
+	    	            buf.append(descriptions[j]);
+	                }
+		        }
 	        }
-        }
-    	
-    	buf.append("</ul>"); //$NON-NLS-1$
-    	
-		if (!hasCleanUp) {
-			buf.append(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_NoActionEnabled_Info);
+	    	fSelectedActionsText.setText(buf.toString());
 		}
-		fSelectedActionsText.setText(buf.toString());
 	}
 	
 	private void updateAdvancedEnableState() {
