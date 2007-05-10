@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,9 @@ import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.IUndoManager;
 import org.eclipse.ltk.core.refactoring.NullChange;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -116,7 +118,14 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 						valid.getMessageMatchingSeverity(RefactoringStatus.FATAL), null);
 					throw new CoreException(status);
 				} else {
-					change.perform(new NullProgressMonitor());
+					IUndoManager manager= RefactoringCore.getUndoManager();
+					manager.aboutToPerformChange(change);
+					Change undoChange= change.perform(new NullProgressMonitor());
+					manager.changePerformed(change, true);
+					if (undoChange != null) {
+						undoChange.initializeValidationData(new NullProgressMonitor());
+						manager.addUndo(getName(), undoChange);
+					}
 				}
 			}
 		} finally {
@@ -169,8 +178,17 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	public String getDisplayString() {
 		String shortCutString= CorrectionCommandHandler.getShortCutString(getCommandId());
 		if (shortCutString != null) {
-			return Messages.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[] { fName, shortCutString });
+			return Messages.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[] { getName(), shortCutString });
 		}
+		return getName();
+	}
+	
+	/** 
+	 * Returns the name of the proposal.
+	 * 
+	 * @return return the name of the proposal
+	 */
+	public String getName() {
 		return fName;
 	}
 	
@@ -201,6 +219,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	 * Returns the change that will be executed when the proposal is applied.
 	 * 
 	 * @return returns the change for this proposal.
+	 * @throws CoreException thrown when the change could not be created
 	 */
 	public final Change getChange() throws CoreException {
 		if (fChange == null) {

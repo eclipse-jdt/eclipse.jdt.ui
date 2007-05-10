@@ -403,7 +403,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	 */
 	protected TextChange createTextChange() throws CoreException {
 		ICompilationUnit cu= getCompilationUnit();
-		String name= getDisplayString();
+		String name= getName();
 		TextChange change;
 		if (!cu.getResource().exists()) {
 			String source;

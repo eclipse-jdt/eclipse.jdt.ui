@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -393,6 +393,9 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 	 * This method performs checks on the constant name which are
 	 * quick enough to be performed every time the ui input component
 	 * contents are changed.
+	 * 
+	 * @return return the resulting status
+	 * @throws JavaModelException thrown when the operation could not be executed
 	 */
 	public RefactoringStatus checkConstantNameOnChange() throws JavaModelException {
 		if (Arrays.asList(getExcludedVariableNames()).contains(fConstantName))
@@ -409,7 +412,7 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 	public CompilationUnitChange createTextChange(IProgressMonitor pm) throws CoreException {
 		createConstantDeclaration();
 		replaceExpressionsWithConstant();
-		return fCuRewrite.createChange(true, pm);
+		return fCuRewrite.createChange(RefactoringCoreMessages.ExtractConstantRefactoring_change_name, true, pm);
 	}
 	
 
@@ -618,7 +621,7 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 			fToInsertAfter= lastStaticDependency;
 	}
 	
-	/** bd is a static field declaration or static initializer */
+	/* bd is a static field declaration or static initializer */
 	private static boolean depends(IExpressionFragment selected, BodyDeclaration bd) {
 		/* We currently consider selected to depend on bd only if db includes a declaration
 		 * of a static field on which selected depends.
@@ -690,9 +693,10 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 		
 		return true;
 	}
-	/**
-	 *   Elements returned by next() are BodyDeclaration
-	 *   instances.
+	
+	/*
+	 * Elements returned by next() are BodyDeclaration
+	 * instances.
 	 */
 	private Iterator getReplacementScope() throws JavaModelException {
 		boolean declPredecessorReached= false;

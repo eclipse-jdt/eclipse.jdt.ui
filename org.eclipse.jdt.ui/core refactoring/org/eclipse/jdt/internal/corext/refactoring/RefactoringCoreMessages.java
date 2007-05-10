@@ -396,6 +396,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractConstantRefactoring_another_variable;
 
+	public static String ExtractConstantRefactoring_change_name;
+
 	public static String ExtractConstantRefactoring_checking_preconditions;
 
 	public static String ExtractConstantRefactoring_constant_expression_pattern;
@@ -595,6 +597,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractTempRefactoring_assigned_to;
 
 	public static String ExtractTempRefactoring_assignment;
+
+	public static String ExtractTempRefactoring_change_name;
 
 	public static String ExtractTempRefactoring_checking_preconditions;
 
