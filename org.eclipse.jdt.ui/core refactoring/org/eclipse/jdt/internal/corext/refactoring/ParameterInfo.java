@@ -33,6 +33,7 @@ public class ParameterInfo {
 	private String fNewName;
 	private boolean fIsDeleted;
 	private boolean fCreateField=true;
+	private boolean fInlined;
 	
 	public ParameterInfo(String type, String name, int index) {
 		this(null, null, type, name, index);
@@ -197,6 +198,14 @@ public class ParameterInfo {
 		fOldBinding=binding;
 		fOldTypeBinding=binding.getType();
 		fNewTypeBinding=binding.getType();
+	}
+
+	public void setInlined(boolean inlined) {
+		fInlined=inlined;
+	}
+	
+	public boolean isInlined() {
+		return fInlined;
 	}
 
 }

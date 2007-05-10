@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import org.eclipse.text.edits.TextEdit;
@@ -67,6 +68,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
@@ -100,26 +102,37 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactoring {
 
 	private final class RewriteArguments implements IDefaultValueAdvisor {
-		public Expression createDefaultExpression(CompilationUnitRewrite cuRewrite, ParameterInfo info, List parameterInfos, List nodes) {
-			AST ast= cuRewrite.getAST();
-			ASTRewrite rewrite= cuRewrite.getASTRewrite();
+		public Expression createDefaultExpression(CompilationUnitRewrite cuRewrite, ParameterInfo info, List parameterInfos, List nodes, boolean isRecursive) {
+			final AST ast= cuRewrite.getAST();
+			final ASTRewrite rewrite= cuRewrite.getASTRewrite();
+			Map piMapping= new LinkedHashMap();
+			boolean allInlined=isRecursive;
+			for (ListIterator iter= parameterInfos.listIterator(); iter.hasNext();) {
+				ParameterInfo pi= (ParameterInfo) iter.next();
+				if (isValidField(pi)) {
+					piMapping.put(pi.getOldName(), pi);
+					if (pi.isInlined() && allInlined) {
+						ASTNode node= (ASTNode) nodes.get(pi.getOldIndex());
+						if (!isParameter(pi, node)) {
+							allInlined= false;
+						}
+					} else
+						allInlined= false;
+				}
+			}
+			if (allInlined) {
+				return ast.newSimpleName(info.getNewName());
+			}
 			ClassInstanceCreation invocation= ast.newClassInstanceCreation();
 			invocation.setType(fParameterObjectFactory.createType(fCreateAsTopLevel, cuRewrite));
 			List arguments= invocation.arguments();
-			List validParameterInfos= new ArrayList();
-			for (Iterator iter= parameterInfos.iterator(); iter.hasNext();) {
-				ParameterInfo pi= (ParameterInfo) iter.next();
-				if (isValidField(pi)) {
-					validParameterInfos.add(pi);
-				}
-			}
-			for (Iterator iter= validParameterInfos.iterator(); iter.hasNext();) {
+			for (Iterator iter= piMapping.values().iterator(); iter.hasNext();) {
 				ParameterInfo pi= (ParameterInfo) iter.next();
 				if (pi.isOldVarargs()) {
 					if (iter.hasNext()) { // not new vararg
 						if (pi.getOldIndex() < nodes.size() && (nodes.get(pi.getOldIndex()) instanceof NullLiteral)) {
 							NullLiteral nullLiteral= (NullLiteral) nodes.get(pi.getOldIndex());
-							arguments.add(moveNode(nullLiteral, rewrite));
+							arguments.add(moveNode(nullLiteral, rewrite, piMapping));
 						} else {
 							ArrayCreation creation= ast.newArrayCreation();
 							creation.setType((ArrayType) importBinding(pi.getNewTypeBinding(), cuRewrite));
@@ -128,7 +141,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 							for (int i= pi.getOldIndex(); i < nodes.size(); i++) {
 								ASTNode node= (ASTNode) nodes.get(i);
 								importNodeTypes(node, cuRewrite);
-								expressions.add(moveNode(node, rewrite));
+								expressions.add(moveNode(node, rewrite, piMapping));
 							}
 							if (expressions.size() != 0)
 								creation.setInitializer(initializer);
@@ -144,25 +157,26 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 							ArrayCreation creation= (ArrayCreation) nodes.get(pi.getOldIndex());
 							ITypeBinding binding= creation.resolveTypeBinding();
 							if (binding != null && binding.isAssignmentCompatible(pi.getNewTypeBinding())) {
-								arguments.add(moveNode(creation, rewrite));
+								arguments.add(moveNode(creation, rewrite, piMapping));
 								needsCopy= false;
 							}
 						}
-						if (needsCopy) {
+						if (needsCopy) {// last argument was either a number of
+							// args (including 0) or an incompatible
+							// array
 							for (int i= pi.getOldIndex(); i < nodes.size(); i++) {
 								ASTNode node= (ASTNode) nodes.get(i);
 								importNodeTypes(node, cuRewrite);
-								arguments.add(moveNode(node, rewrite));
+								arguments.add(moveNode(node, rewrite, piMapping));
 							}
 						}
 					}
 				} else {
 					Expression exp= (Expression) nodes.get(pi.getOldIndex());
 					importNodeTypes(exp, cuRewrite);
-					arguments.add(moveNode(exp, rewrite));
+					arguments.add(moveNode(exp, rewrite, piMapping));
 				}
 			}
-
 			return invocation;
 		}
 
@@ -180,6 +194,43 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		}
 	}
 
+	private boolean isParameter(ParameterInfo pi, ASTNode node) {
+		if (node instanceof Name) {
+			Name name= (Name) node;
+			IVariableBinding binding= ASTNodes.getVariableBinding(name);
+			if (binding != null && binding.isParameter() && binding.getName().equals(pi.getOldName()))
+				return true;
+		}
+		return false;
+	}
+	
+	protected ASTNode moveNode(final ASTNode oldNode, final ASTRewrite rewrite, final Map piMapping) {
+		class SimpleNameRewriter extends ASTVisitor {
+			private Expression fNewNode;
+
+			SimpleNameRewriter() {
+				super(false);
+			}
+
+			public boolean visit(SimpleName node) {
+				ParameterInfo pi= (ParameterInfo) piMapping.get(node.getIdentifier());
+				if (pi != null && pi.isInlined()) {
+					if (oldNode == node) {
+						fNewNode= updateSimpleName(rewrite, pi, node, false);
+					} else {
+						updateSimpleName(rewrite, pi, node, true);
+					}
+				}
+				return false;
+			}
+		}
+		SimpleNameRewriter visitor= new SimpleNameRewriter();
+		oldNode.accept(visitor);
+		if (visitor.fNewNode != null)
+			return moveNode(visitor.fNewNode, rewrite);
+		return moveNode(oldNode, rewrite);
+	}
+
 	private final class RewriteParameterBody extends BodyUpdater {
 		private boolean fParameterClassCreated= false;
 
@@ -192,12 +243,8 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 				}
 
 				public boolean visit(SimpleName node) {
-					IBinding binding= node.resolveBinding();
-					if (binding instanceof IVariableBinding) {
-						IVariableBinding variable= (IVariableBinding) binding;
-						if (variable.isParameter() && variable.getName().equals(pi.getOldName()) && ASTResolving.isWriteAccess(node))
-							notWritten= false;
-					}
+					if (isParameter(pi, node) && ASTResolving.isWriteAccess(node))
+						notWritten= false;
 					return false;
 				}
 
@@ -214,9 +261,9 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 			return false;
 		}
 
-		public void updateBody(final MethodDeclaration methodDeclaration, CompilationUnitRewrite cuRewrite, RefactoringStatus result) throws CoreException {
+		public void updateBody(final MethodDeclaration methodDeclaration, CompilationUnitRewrite cuRewrite, RefactoringStatus result)
+				throws CoreException {
 			final ASTRewrite rewriter= cuRewrite.getASTRewrite();
-			final AST ast= rewriter.getAST();
 			fParameterObjectFactory.createType(fCreateAsTopLevel, cuRewrite);
 			TypeDeclaration parent= (TypeDeclaration) methodDeclaration.getParent();
 			if (cuRewrite.getCu().equals(fCompilationUnit) && !fParameterClassCreated) {
@@ -234,12 +281,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 							body.accept(new ASTVisitor(false) {
 
 								public boolean visit(SimpleName node) {
-									IBinding binding= node.resolveBinding();
-									if (binding instanceof IVariableBinding) {
-										IVariableBinding variable= (IVariableBinding) binding;
-										if (variable.isParameter() && variable.getName().equals(pi.getOldName()))
-											rewriter.replace(node, fParameterObjectFactory.createFieldReadAccess(pi, getParameterName(), ast), null);
-									}
+									updateSimpleName(rewriter, pi, node, true);
 									return false;
 								}
 
@@ -253,6 +295,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 									return true;
 								}
 							});
+							pi.setInlined(true);
 						} else {
 							ExpressionStatement initializer= fParameterObjectFactory.createInitializer(pi, getParameterName(), cuRewrite);
 							block.insertFirst(initializer, null);
@@ -264,13 +307,21 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 	}
 
 	private static final String PARAMETER_CLASS_APPENDIX= "Parameter"; //$NON-NLS-1$
+
 	private static final String DEFAULT_PARAMETER_OBJECT_NAME= "parameterObject"; //$NON-NLS-1$
+
 	private MethodDeclaration fMethodDeclaration;
+
 	private ICompilationUnit fCompilationUnit;
+
 	private int fOffset;
+
 	private int fLength;
+
 	private ParameterObjectFactory fParameterObjectFactory;
+
 	private boolean fCreateAsTopLevel= true;
+
 	private ParameterInfo fParameterObjectReference;
 
 	public IntroduceParameterObjectRefactoring(IMethod method) throws JavaModelException {
@@ -282,7 +333,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		List parameterInfos= getParameterInfos();
 		for (Iterator iter= parameterInfos.iterator(); iter.hasNext();) {
 			ParameterInfo pi= (ParameterInfo) iter.next();
-			if (!pi.isAdded()){
+			if (!pi.isAdded()) {
 				pi.setCreateField(true);
 				pi.setNewName(getFieldName(pi));
 			}
@@ -290,7 +341,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 	}
 
 	public Type importBinding(ITypeBinding newTypeBinding, CompilationUnitRewrite cuRewrite) {
-		Type type= cuRewrite.getImportRewrite().addImport(newTypeBinding,cuRewrite.getAST());
+		Type type= cuRewrite.getImportRewrite().addImport(newTypeBinding, cuRewrite.getAST());
 		cuRewrite.getImportRemover().registerAddedImports(type);
 		return type;
 	}
@@ -412,7 +463,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		return StubUtility.getVariableNameSuggestions(StubUtility.INSTANCE_FIELD, javaProject, stripped, dim, null, true)[0];
 	}
 
-	
+
 	public IMethodBinding getMethodBinding() {
 		return fMethodDeclaration.resolveBinding();
 	}
@@ -472,7 +523,8 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		Message[] messages= ASTNodes.getMessages(node, ASTNodes.INCLUDE_ALL_PARENTS);
 		if (messages.length == 0)
 			return false;
-		result.addFatalError(Messages.format(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_cannotanalysemethod_compilererror, new String[] { messages[0].getMessage() }));
+		result.addFatalError(Messages.format(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_cannotanalysemethod_compilererror,
+				new String[] { messages[0].getMessage() }));
 		return true;
 	}
 
@@ -511,7 +563,8 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		fParameterObjectFactory.updateParameterPosition(fParameterObjectReference);
 	}
 
-	private void createParameterClass(MethodDeclaration methodDeclaration, TypeDeclaration parent, CompilationUnitRewrite cuRewrite) throws CoreException {
+	private void createParameterClass(MethodDeclaration methodDeclaration, TypeDeclaration parent, CompilationUnitRewrite cuRewrite)
+			throws CoreException {
 		if (fCreateAsTopLevel) {
 			IJavaProject javaProject= fCompilationUnit.getJavaProject();
 			IPackageFragmentRoot fragment= getPackageFragmentRoot();
@@ -526,7 +579,8 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 				String lineDelimiter= StubUtility.getLineDelimiterUsed(javaProject);
 				String fileComment= getFileComment(workingCopy, lineDelimiter);
 				String typeComment= getTypeComment(workingCopy, lineDelimiter);
-				String content= CodeGeneration.getCompilationUnitContent(workingCopy, fileComment, typeComment, "class " + getClassName() + "{}", lineDelimiter); //$NON-NLS-1$ //$NON-NLS-2$
+				String content= CodeGeneration.getCompilationUnitContent(workingCopy, fileComment, typeComment,
+						"class " + getClassName() + "{}", lineDelimiter); //$NON-NLS-1$ //$NON-NLS-2$
 				workingCopy.getBuffer().setContents(content);
 
 				cuRewrite= new CompilationUnitRewrite(workingCopy);
@@ -536,7 +590,8 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 				ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 				ListRewrite types= rewriter.getListRewrite(root, CompilationUnit.TYPES_PROPERTY);
 				ASTNode oldType= (ASTNode) types.getOriginalList().get(0);
-				TypeDeclaration classDeclaration= fParameterObjectFactory.createClassDeclaration(workingCopy, JavaModelUtil.concatenateName(fParameterObjectFactory.getPackage(), fParameterObjectFactory.getClassName()), cuRewrite);
+				TypeDeclaration classDeclaration= fParameterObjectFactory.createClassDeclaration(workingCopy, JavaModelUtil.concatenateName(
+						fParameterObjectFactory.getPackage(), fParameterObjectFactory.getClassName()), cuRewrite);
 				classDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 				Javadoc javadoc= (Javadoc) oldType.getStructuralProperty(TypeDeclaration.JAVADOC_PROPERTY);
 				rewriter.set(classDeclaration, TypeDeclaration.JAVADOC_PROPERTY, javadoc, null);
@@ -549,7 +604,8 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 					TextEdit rewriteImports= importRewrite.rewriteImports(null);
 					rewriteImports.apply(document);
 				} catch (BadLocationException e) {
-					throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), RefactoringCoreMessages.IntroduceParameterObjectRefactoring_parameter_object_creation_error, e));
+					throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
+							RefactoringCoreMessages.IntroduceParameterObjectRefactoring_parameter_object_creation_error, e));
 				}
 				String docContent= document.get();
 				CreateCompilationUnitChange compilationUnitChange= new CreateCompilationUnitChange(unit, docContent, charset);
@@ -560,7 +616,8 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		} else {
 			ASTRewrite rewriter= cuRewrite.getASTRewrite();
 			ListRewrite bodyRewrite= rewriter.getListRewrite(parent, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
-			TypeDeclaration classDeclaration= fParameterObjectFactory.createClassDeclaration(fCompilationUnit, parent.getName().getFullyQualifiedName(), cuRewrite);
+			TypeDeclaration classDeclaration= fParameterObjectFactory.createClassDeclaration(fCompilationUnit, parent.getName()
+					.getFullyQualifiedName(), cuRewrite);
 			classDeclaration.modifiers().add(rewriter.getAST().newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 			classDeclaration.modifiers().add(rewriter.getAST().newModifier(ModifierKeyword.STATIC_KEYWORD));
 			bodyRewrite.insertBefore(classDeclaration, methodDeclaration, null);
@@ -632,6 +689,30 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 
 	public String getEnclosingPackage() {
 		return fMethodDeclaration.resolveBinding().getDeclaringClass().getPackage().getName();
+	}
+
+	private Expression updateSimpleName(ASTRewrite rewriter, ParameterInfo pi, SimpleName node, boolean replaceNode) {
+		AST ast= rewriter.getAST();
+		IBinding binding= node.resolveBinding();
+		Expression replacementNode= fParameterObjectFactory.createFieldReadAccess(pi, getParameterName(), ast);
+		if (binding instanceof IVariableBinding) {
+			IVariableBinding variable= (IVariableBinding) binding;
+			if (variable.isParameter() && variable.getName().equals(pi.getOldName())) {
+				if (replaceNode)
+					rewriter.replace(node, replacementNode, null);
+				return replacementNode;
+			}
+		} else {
+			ASTNode parent= node.getParent();
+			if (! (parent instanceof QualifiedName || parent instanceof FieldAccess || parent instanceof SuperFieldAccess)) {
+				if (node.getIdentifier().equals(pi.getOldName())) {
+					if (replaceNode)
+						rewriter.replace(node, replacementNode, null);
+					return replacementNode;
+				}
+			}
+		}
+		return null;
 	}
 
 }

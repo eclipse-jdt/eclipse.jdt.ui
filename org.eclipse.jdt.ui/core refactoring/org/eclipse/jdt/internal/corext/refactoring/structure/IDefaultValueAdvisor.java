@@ -24,8 +24,9 @@ public interface IDefaultValueAdvisor {
 	 * @param info the added ParamterInfo object
 	 * @param parameterInfos all other ParameterInfo objects
 	 * @param nodes list of arguments from the calling method
+	 * @param isRecursive true if called from a recursive invocation
 	 * @return Expression for invocation
 	 */
-	Expression createDefaultExpression(CompilationUnitRewrite cuRewrite, ParameterInfo info, List parameterInfos, List nodes);
+	Expression createDefaultExpression(CompilationUnitRewrite cuRewrite, ParameterInfo info, List parameterInfos, List nodes, boolean isRecursive);
 
 }

@@ -102,9 +102,9 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ExceptionInfo;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -1294,9 +1294,21 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 				cuRewrite.getASTRewrite().setTargetSourceRangeComputer(new TightSourceRangeComputer());
 			}
 			ASTNode[] nodes= ASTNodeSearchUtil.findNodes(group.getSearchResults(), cuRewrite.getRoot());
+			
+			//IntroduceParameterObjectRefactoring needs to update declarations first:
+			List/*<OccurrenceUpdate>*/ deferredUpdates= new ArrayList();
 			for (int j= 0; j < nodes.length; j++) {
-				createOccurrenceUpdate(nodes[j], cuRewrite, result).updateNode();
+				OccurrenceUpdate update= createOccurrenceUpdate(nodes[j], cuRewrite, result);
+				if (update instanceof DeclarationUpdate) {
+					update.updateNode();
+				} else {
+					deferredUpdates.add(update);
+				}
 			}
+			for (Iterator iter= deferredUpdates.iterator(); iter.hasNext();) {
+				((OccurrenceUpdate) iter.next()).updateNode();
+			}
+			
 			if (isNoArgConstructor && namedSubclassMapping.containsKey(cu)){
 				//only non-anonymous subclasses may have noArgConstructors to modify - see bug 43444
 				Set subtypes= (Set)namedSubclassMapping.get(cu);
@@ -1430,10 +1442,10 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		if (info.isNewVarargs() && info.getDefaultValue().trim().length() == 0)
 			return null;
 		else {
-			if (fDefaultValueAdvisor==null)
+			if (fDefaultValueAdvisor == null)
 				return (Expression) cuRewrite.getASTRewrite().createStringPlaceholder(info.getDefaultValue(), ASTNode.METHOD_INVOCATION);
 			else
-				return fDefaultValueAdvisor.createDefaultExpression(cuRewrite, info, parameterInfos, nodes);
+				return fDefaultValueAdvisor.createDefaultExpression(cuRewrite, info, parameterInfos, nodes, false);
 		}
 	}
 
@@ -1725,13 +1737,17 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		}
 		
 		protected ASTNode createNewParamgument(ParameterInfo info, List parameterInfos, List nodes) {
+			CompilationUnitRewrite cuRewrite= getCompilationUnitRewrite();
 			if (isRecursiveReference())
-				return createNewExpressionRecursive(info);
+				return createNewExpressionRecursive(info, parameterInfos, nodes, cuRewrite);
 			else
-				return createNewExpression(info, parameterInfos, nodes, getCompilationUnitRewrite());
+				return createNewExpression(info, parameterInfos, nodes, cuRewrite);
 		}
 
-		private Expression createNewExpressionRecursive(ParameterInfo info) {
+		private Expression createNewExpressionRecursive(ParameterInfo info, List parameterInfos, List nodes, CompilationUnitRewrite cuRewrite) {
+			if (fDefaultValueAdvisor != null && info.isAdded()) {
+				return fDefaultValueAdvisor.createDefaultExpression(cuRewrite, info, parameterInfos, nodes, true);
+			}
 			return (Expression) getASTRewrite().createStringPlaceholder(info.getNewName(), ASTNode.METHOD_INVOCATION);
 		}
 

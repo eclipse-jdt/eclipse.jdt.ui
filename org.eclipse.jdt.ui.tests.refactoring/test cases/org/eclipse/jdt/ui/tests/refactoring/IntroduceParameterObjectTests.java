@@ -130,6 +130,25 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		runRefactoring(param);
 	}
 	
+	public void testRecursiveSimple() throws Exception {
+		RunRefactoringParameter param= new RunRefactoringParameter();
+		runRefactoring(param);
+	}
+	
+	public void testRecursiveSimpleReordered() throws Exception {
+		RunRefactoringParameter param= new RunRefactoringParameter();
+		runRefactoring(param);
+	}
+	
+	public void testRecursiveReordered() throws Exception {
+		Map indexMap= new HashMap();
+		indexMap.put("y", new Integer(0));
+		indexMap.put("x", new Integer(1));
+		RunRefactoringParameter param= new RunRefactoringParameter();
+		param.indexMap= indexMap;
+		runRefactoring(param);
+	}
+	
 	public void testImportAddTopLevel() throws Exception {
 		createCaller(DEFAULT_SUB_DIR);
 		RunRefactoringParameter params= new RunRefactoringParameter();
