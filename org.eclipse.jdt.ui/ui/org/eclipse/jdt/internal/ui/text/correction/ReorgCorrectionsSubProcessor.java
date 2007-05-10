@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -67,6 +66,7 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
@@ -127,32 +127,40 @@ public class ReorgCorrectionsSubProcessor {
 		if (!(parentType instanceof AbstractTypeDeclaration))
 			return;
 		
-		 List types= root.types();
-		int index= types.indexOf(parentType);
-		 if (index == -1)
-			 return;
-		 
-		 for (int i= 0; i < index; i++) {
-			 AbstractTypeDeclaration curr= (AbstractTypeDeclaration) types.get(i);
-			 if (Modifier.isPublic(curr.getModifiers())) {
-				 return;
-			 }
-		 }
-			
 		String currTypeName= ((SimpleName) coveredNode).getIdentifier();
 		String newTypeName= JavaCore.removeJavaLikeExtension(cu.getElementName());
+				
+		boolean hasOtherPublicTypeBefore= false;
+		
+		boolean found= false;
+		List types= root.types();
+		for (int i= 0; i < types.size(); i++) {
+			 AbstractTypeDeclaration curr= (AbstractTypeDeclaration) types.get(i);
+			 if (parentType != curr) {
+				 if (newTypeName.equals(curr.getName().getIdentifier())) {
+					 return;
+				 }
+				 if (!found && Modifier.isPublic(curr.getModifiers())) {
+					 hasOtherPublicTypeBefore= true;
+				 }
+			 } else {
+				 found= true;
+			 }
+		 }
 		if (!JavaConventions.validateJavaTypeName(newTypeName, sourceLevel, compliance).matches(IStatus.ERROR)) {
 			proposals.add(new CorrectMainTypeNameProposal(cu, context, currTypeName, newTypeName, 5));
-		}			
-
-		String newCUName= JavaModelUtil.getRenamedCUName(cu, currTypeName);
-		ICompilationUnit newCU= ((IPackageFragment) (cu.getParent())).getCompilationUnit(newCUName);
-		if (!newCU.exists() && !isLinked && !JavaConventions.validateCompilationUnitName(newCUName, sourceLevel, compliance).matches(IStatus.ERROR)) {
-			RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);
-
-			// rename CU
-			String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renamecu_description, newCUName);
-			proposals.add(new ChangeCorrectionProposal(label, change, 6, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME)));
+		}
+		
+		if (!hasOtherPublicTypeBefore) {
+			String newCUName= JavaModelUtil.getRenamedCUName(cu, currTypeName);
+			ICompilationUnit newCU= ((IPackageFragment) (cu.getParent())).getCompilationUnit(newCUName);
+			if (!newCU.exists() && !isLinked && !JavaConventions.validateCompilationUnitName(newCUName, sourceLevel, compliance).matches(IStatus.ERROR)) {
+				RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);
+	
+				// rename CU
+				String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renamecu_description, newCUName);
+				proposals.add(new ChangeCorrectionProposal(label, change, 6, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME)));
+			}
 		}
 	}
 
