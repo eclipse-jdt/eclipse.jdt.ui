@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -215,7 +215,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         fUseFolderOutputs.setDialogFieldListener(new IDialogFieldListener() {
             public void dialogFieldChanged(DialogField field) {
                 boolean isUseFolders= fUseFolderOutputs.isSelected();
-                if (isUseFolders) {
+                if (!isUseFolders) {
                 	ResetAllOutputFoldersAction action= new ResetAllOutputFoldersAction(fContext, fJavaProject, fPackageExplorer) {
                 		public void run() {
                     		commitDefaultOutputFolder();
@@ -254,8 +254,6 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 		PixelConverter converter= new PixelConverter(parent);
 		gd.heightHint= converter.convertHeightInCharsToPixels(20);
 		sashForm.setLayoutData(gd);
-        
-        fUseFolderOutputs.dialogFieldChanged();
         
         parent.layout(true);
 
@@ -385,6 +383,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     
     /**
      * Update <code>fClassPathList</code>.
+     * @param delta describing the changes to the buildpath
      */
     public void buildpathChanged(BuildpathDelta delta) {
         fClassPathList.setElements(Arrays.asList(delta.getNewEntries()));
