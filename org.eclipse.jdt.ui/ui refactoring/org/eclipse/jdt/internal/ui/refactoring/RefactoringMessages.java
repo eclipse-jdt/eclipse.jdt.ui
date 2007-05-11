@@ -16,6 +16,22 @@ public final class RefactoringMessages extends NLS {
 
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.refactoring.refactoringui";//$NON-NLS-1$
 
+	public static String ChangeExceptionHandler_abort_button;
+
+	public static String ChangeExceptionHandler_dialog_message;
+
+	public static String ChangeExceptionHandler_dialog_title;
+
+	public static String ChangeExceptionHandler_message;
+
+	public static String ChangeExceptionHandler_status_without_detail;
+
+	public static String ChangeExceptionHandler_undo_button;
+
+	public static String ChangeExceptionHandler_undo_dialog_message;
+
+	public static String ChangeExceptionHandler_undo_dialog_title;
+
 	public static String ChangeExceptionsControl_buttons_add;
 
 	public static String ChangeExceptionsControl_buttons_remove;

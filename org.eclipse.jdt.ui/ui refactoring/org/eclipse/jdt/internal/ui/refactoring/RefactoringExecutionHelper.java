@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,7 +39,6 @@ import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler;
 import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -106,6 +105,7 @@ public class RefactoringExecutionHelper {
 		}
 
 		/**
+		 * @param status the status to show
 		 * @return <code>true</code> iff the operation should be cancelled
 		 */
 		private boolean showStatusDialog(RefactoringStatus status) {
@@ -135,6 +135,10 @@ public class RefactoringExecutionHelper {
 	
 	/**
 	 * Must be called in the UI thread.
+	 * @param fork if set, the operation will be forked
+	 * @param cancelable  if set, the operation will be cancellable
+	 * @throws InterruptedException thrown when the operation is cancelled
+	 * @throws InvocationTargetException thrown when the operation failed to execute
 	 */
 	public void perform(boolean fork, boolean cancelable) throws InterruptedException, InvocationTargetException {
 		Assert.isTrue(Display.getCurrent() != null);
