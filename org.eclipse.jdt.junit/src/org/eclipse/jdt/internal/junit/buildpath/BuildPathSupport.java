@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,9 @@ import java.net.URL;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+
+import org.eclipse.osgi.service.resolver.VersionRange;
 
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
@@ -28,17 +31,51 @@ import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.ui.JUnitPreferencesConstants;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
 
 /**
  * 
  */
 public class BuildPathSupport {
 	
-	public static final String JUNIT3_PLUGIN_ID= "org.junit"; //$NON-NLS-1$
-	public static final String JUNIT4_PLUGIN_ID= "org.junit4"; //$NON-NLS-1$
+	public static class JUnitPluginDescription {
+		private final String fBundleId;
+		private final VersionRange fVersionRange;
+		
+		public JUnitPluginDescription(String bundleId, VersionRange versionRange) {
+			fBundleId= bundleId;
+			fVersionRange= versionRange;
+		}
+		
+		public Bundle getBundle() {
+			Bundle[] bundles= Platform.getBundles(fBundleId, null);
+			if (bundles != null) {
+				for (int i= 0; i < bundles.length; i++) {
+					Bundle curr= bundles[i];
+					String version= (String) curr.getHeaders().get(Constants.BUNDLE_VERSION);
+					try {
+						if (fVersionRange.isIncluded(Version.parseVersion(version))) {
+							return curr;
+						}
+					} catch (IllegalArgumentException e) {
+						// ignore
+					}
+				}
+			}
+			return null;
+		}
+
+		public String getBundleId() {
+			return fBundleId;
+		}
+	}
 	
-	public static IPath getBundleLocation(String bundleName) {
-		Bundle bundle= JUnitPlugin.getDefault().getBundle(bundleName);
+	public static final JUnitPluginDescription JUNIT3_PLUGIN= new JUnitPluginDescription("org.junit", new VersionRange("[3.8.2,3.9)")); //$NON-NLS-1$ //$NON-NLS-2$
+	public static final JUnitPluginDescription JUNIT4_PLUGIN= new JUnitPluginDescription("org.junit4", new VersionRange("[4.3.1,4.4.0)")); //$NON-NLS-1$ //$NON-NLS-2$
+	
+	public static IPath getBundleLocation(JUnitPluginDescription pluginDesc) {
+		Bundle bundle= pluginDesc.getBundle();
 		if (bundle == null)
 			return null;
 		
@@ -52,8 +89,8 @@ public class BuildPathSupport {
 		return Path.fromOSString(fullPath);
 	}
 	
-	public static IPath getSourceLocation(String bundleName) {
-		Bundle bundle= JUnitPlugin.getDefault().getBundle(bundleName);
+	public static IPath getSourceLocation(JUnitPluginDescription pluginDesc) {
+		Bundle bundle= pluginDesc.getBundle();
 		if (bundle == null)
 			return null;
 			
@@ -72,7 +109,7 @@ public class BuildPathSupport {
 			return null;
 		}
 		String fullPath= new File(local.getPath()).getAbsolutePath() 
-			+ File.separator + "src" + File.separator + bundleName + "_" + version;   //$NON-NLS-1$ //$NON-NLS-2$
+			+ File.separator + "src" + File.separator + pluginDesc.getBundleId() + "_" + version;   //$NON-NLS-1$ //$NON-NLS-2$
 		return Path.fromOSString(fullPath);
 	}
 	
@@ -85,11 +122,11 @@ public class BuildPathSupport {
 	}
 	
 	public static IClasspathEntry getJUnit3LibraryEntry() {
-		IPath bundleBase= getBundleLocation(JUNIT3_PLUGIN_ID);
+		IPath bundleBase= getBundleLocation(JUNIT3_PLUGIN);
 		if (bundleBase != null) {
 			IPath jarLocation= bundleBase.append("junit.jar"); //$NON-NLS-1$
 			
-			IPath sourceBase= getSourceLocation(JUNIT3_PLUGIN_ID);
+			IPath sourceBase= getSourceLocation(JUNIT3_PLUGIN);
 			IPath srcLocation= sourceBase != null ? sourceBase.append("junitsrc.zip") : null; //$NON-NLS-1$
 			
 			IAccessRule[] accessRules= { };
@@ -103,11 +140,11 @@ public class BuildPathSupport {
 	}
 	
 	public static IClasspathEntry getJUnit4LibraryEntry() {
-		IPath bundleBase= getBundleLocation(JUNIT4_PLUGIN_ID);
+		IPath bundleBase= getBundleLocation(JUNIT4_PLUGIN);
 		if (bundleBase != null) {
 			IPath jarLocation= bundleBase.append("junit.jar"); //$NON-NLS-1$
 			
-			IPath sourceBase= getSourceLocation(JUNIT4_PLUGIN_ID);
+			IPath sourceBase= getSourceLocation(JUNIT4_PLUGIN);
 			IPath srcLocation= sourceBase != null ? sourceBase.append("junitsrc.zip") : null; //$NON-NLS-1$
 			
 			IAccessRule[] accessRules= { };
