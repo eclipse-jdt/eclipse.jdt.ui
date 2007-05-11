@@ -904,8 +904,10 @@ public final class StubUtility2 {
 			while (superType.getSuperclass() != null)
 				superType= superType.getSuperclass();
 			IMethodBinding method= Bindings.findMethodInType(superType, "Object", new ITypeBinding[0]); //$NON-NLS-1$
-			if ((proposeDefault || (!accountExisting || (existingConstructors == null || existingConstructors.isEmpty()))) && (!accountExisting || !Bindings.containsSignatureEquivalentConstructor(methods, method)))
-				constructorMethods.add(method);
+			if (method != null) {
+				if ((proposeDefault || (!accountExisting || (existingConstructors == null || existingConstructors.isEmpty()))) && (!accountExisting || !Bindings.containsSignatureEquivalentConstructor(methods, method)))
+					constructorMethods.add(method);
+			}
 		}
 		return (IMethodBinding[]) constructorMethods.toArray(new IMethodBinding[constructorMethods.size()]);
 	}
