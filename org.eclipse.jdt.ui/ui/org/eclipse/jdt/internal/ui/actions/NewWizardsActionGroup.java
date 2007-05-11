@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.action.IMenuManager;
@@ -62,14 +65,26 @@ public class NewWizardsActionGroup extends ActionGroup {
 		
 		ISelection selection= getContext().getSelection();
 		if (selection instanceof IStructuredSelection) {
-			IStructuredSelection sel= (IStructuredSelection) selection;
-			if (sel.size() <= 1 && isNewTarget(sel.getFirstElement())) {
+			if (canEnable((IStructuredSelection)selection)) {
 		        MenuManager newMenu = new MenuManager(ActionMessages.NewWizardsActionGroup_new);
 		        menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
 		        newMenu.add(new NewWizardMenu(fSite.getWorkbenchWindow()));
 			}
 		}		
 		
+	}
+	
+	private boolean canEnable(IStructuredSelection sel) {
+		if (sel.size() == 0)
+			return false;
+		
+		List list= sel.toList();
+		for (Iterator iterator= list.iterator(); iterator.hasNext();) {
+			if (!isNewTarget(iterator.next()))
+				return false;
+		}
+
+		return true;
 	}
 	
 	private boolean isNewTarget(Object element) {

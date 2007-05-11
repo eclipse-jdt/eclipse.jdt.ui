@@ -126,8 +126,13 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 	
 	private IWorkingSet[] getWorkingSets(IStructuredSelection selection) {
 		IWorkingSet[] selected= WorkingSetConfigurationBlock.getSelectedWorkingSet(selection);
-		if (selected != null && selected.length == 1 && isValidWorkingSet(selected[0]))
+		if (selected != null && selected.length > 0) {
+			for (int i= 0; i < selected.length; i++) {
+				if (!isValidWorkingSet(selected[i]))
+					return null;
+			}
 			return selected;
+		}
 		
 		PackageExplorerPart explorerPart= getActivePackageExplorer();
 		if (explorerPart == null)

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
@@ -63,24 +64,35 @@ public class WorkingSetConfigurationBlock {
 			return null;
 		
 		ITreeSelection treeSelection= (ITreeSelection)selection;
-		List elements= treeSelection.toList();
-		if (elements.size() != 1)
+		if (treeSelection.isEmpty())
 			return null;
 		
-		Object element= elements.get(0);
-		TreePath[] paths= treeSelection.getPathsFor(element);
-		if (paths.length != 1)
-			return null;
-	
-		TreePath path= paths[0];
-		if (path.getSegmentCount() == 0)
-			return null;
-	
-		Object candidate= path.getSegment(0);
-		if (!(candidate instanceof IWorkingSet))
-			return null;
-			
-		return new IWorkingSet[] {(IWorkingSet)candidate};
+		List elements= treeSelection.toList();
+		if (elements.size() == 1) {
+			Object element= elements.get(0);
+			TreePath[] paths= treeSelection.getPathsFor(element);
+			if (paths.length != 1)
+				return null;
+		
+			TreePath path= paths[0];
+			if (path.getSegmentCount() == 0)
+				return null;
+		
+			Object candidate= path.getSegment(0);
+			if (!(candidate instanceof IWorkingSet))
+				return null;
+				
+			return new IWorkingSet[] {(IWorkingSet)candidate};
+		} else {
+			ArrayList result= new ArrayList();
+			for (Iterator iterator= elements.iterator(); iterator.hasNext();) {
+				Object element= iterator.next();
+				if (element instanceof IWorkingSet) {
+					result.add(element);
+				}
+			}
+			return (IWorkingSet[])result.toArray(new IWorkingSet[result.size()]);
+		}
 	}
 	
 	/**
