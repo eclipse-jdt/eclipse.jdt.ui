@@ -390,6 +390,8 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 	}
 		
 	public IClasspathEntry[] getClasspath() {
+		if (fResultClasspath == null)
+			return new IClasspathEntry[0];
 		return fResultClasspath;
 	}
 }
