@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,10 +16,14 @@ import java.util.HashSet;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -102,26 +106,24 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 		final ArrayList packageList= new ArrayList();
 		
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
-			public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+				if (monitor == null) {
+					monitor= new NullProgressMonitor();
+				}
+				boolean hideEmpty= (fFlags & F_HIDE_EMPTY_INNER) != 0;
+				monitor.beginTask(JavaUIMessages.PackageSelectionDialog_progress_search, hideEmpty ? 2 : 1);
 				try {
 					SearchRequestor requestor= new SearchRequestor() {
 						private HashSet fSet= new HashSet();
 						private final boolean fAddDefault= (fFlags & F_HIDE_DEFAULT_PACKAGE) == 0;
 						private final boolean fDuplicates= (fFlags & F_REMOVE_DUPLICATES) == 0;
 						private final boolean fIncludeParents= (fFlags & F_SHOW_PARENTS) != 0;
-						private final boolean fHideEmptyInner= (fFlags & F_HIDE_EMPTY_INNER) != 0;
 
 						public void acceptSearchMatch(SearchMatch match) throws CoreException {
 							IJavaElement enclosingElement= (IJavaElement) match.getElement();
 							String name= enclosingElement.getElementName();
 							if (fAddDefault || name.length() > 0) {
 								if (fDuplicates || fSet.add(name)) {
-									if (fHideEmptyInner) {
-										IPackageFragment pkg= (IPackageFragment) enclosingElement;
-										if (pkg.getCompilationUnits().length == 0 && pkg.getClassFiles().length == 0) {
-											return;
-										}
-									}
 									packageList.add(enclosingElement);
 									if (fIncludeParents) {
 										addParentPackages(enclosingElement, name);
@@ -145,12 +147,42 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 					SearchPattern pattern= SearchPattern.createPattern("*", //$NON-NLS-1$
 							IJavaSearchConstants.PACKAGE, IJavaSearchConstants.DECLARATIONS,
 							SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CASE_SENSITIVE);
-					new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), fScope, requestor, monitor);
+					new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), fScope, requestor, new SubProgressMonitor(monitor, 1));
+					
+					if (monitor.isCanceled()) {
+						throw new InterruptedException();
+					}
+
+					if (hideEmpty) {
+						removeEmptyPackages(new SubProgressMonitor(monitor, 1));
+					}
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
-				}
-				if (monitor.isCanceled()) {
+				} catch (OperationCanceledException e) {
 					throw new InterruptedException();
+				} finally {
+					monitor.done();
+				}
+			}
+			
+			private void removeEmptyPackages(IProgressMonitor monitor) throws JavaModelException, InterruptedException {
+				monitor.beginTask(JavaUIMessages.PackageSelectionDialog_progress_findEmpty, packageList.size());
+				try {
+					ArrayList res= new ArrayList(packageList.size());
+					for (int i= 0; i < packageList.size(); i++) {
+						IPackageFragment pkg= (IPackageFragment) packageList.get(i);
+						if (pkg.hasChildren() || !pkg.hasSubpackages()) {
+							res.add(pkg);
+						}
+						monitor.worked(1);
+						if (monitor.isCanceled()) {
+							throw new InterruptedException();
+						}
+					}
+					packageList.clear();
+					packageList.addAll(res);
+				} finally{
+					monitor.done();
 				}
 			}
 		};

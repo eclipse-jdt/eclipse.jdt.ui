@@ -38,6 +38,8 @@ public final class JavaUIMessages extends NLS {
 	public static String JavaUI_defaultDialogMessage;
 	
 	public static String MultiElementListSelectionDialog_pageInfoMessage;
+	public static String PackageSelectionDialog_progress_findEmpty;
+	public static String PackageSelectionDialog_progress_search;
 	
 	public static String TypeSelectionDialog_errorMessage;
 	public static String TypeSelectionDialog_dialogMessage;
