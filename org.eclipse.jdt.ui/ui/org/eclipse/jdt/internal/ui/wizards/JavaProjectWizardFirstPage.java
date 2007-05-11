@@ -798,13 +798,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			if (o instanceof LocationGroup) {
 				boolean oldDetectState= fDetect;
 				if (fLocationGroup.isInWorkspace()) {
-					String name= getProjectName();
-					if (name.length() == 0 || JavaPlugin.getWorkspace().getRoot().findMember(name) != null) {
-						fDetect= false;
-					} else {
-						final File directory= fLocationGroup.getLocation().append(getProjectName()).toFile();
-						fDetect= directory.isDirectory();
-					}
+					fDetect= false;
 				} else {
 					final File directory= fLocationGroup.getLocation().toFile();
 					fDetect= directory.isDirectory();
@@ -904,10 +898,9 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 				return;
 			}
 
+			IPath projectPath= Path.fromOSString(location);
 			// check external location
-			if (!fLocationGroup.isInWorkspace()) {
-				IPath projectPath= Path.fromOSString(location);
-				
+			if (!fLocationGroup.isInWorkspace()) {				
 				if (!canCreate(projectPath.toFile())) {
 					setErrorMessage(NewWizardMessages.JavaProjectWizardFirstPage_Message_cannotCreateAtExternalLocation); 
 					setPageComplete(false);
@@ -942,6 +935,13 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 						setPageComplete(false);
 						return;
 					}
+				}
+			} else {
+				IPath projectFolder= projectPath.append(fNameGroup.getName());
+				if (projectFolder.toFile().exists()) {
+					setErrorMessage(NewWizardMessages.JavaProjectWizardFirstPage_Message_existingFolderInWorkspace); 
+					setPageComplete(false);
+					return;
 				}
 			}
 			
