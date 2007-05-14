@@ -344,6 +344,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		super(site);
 		fSite= site;
 		setText(WorkingSetMessages.ConfigureWorkingSetAssignementAction_WorkingSets_actionLabel);
+		setEnabled(false);
 	}
 	
 	public void setWorkingSetModel(WorkingSetModel workingSetModel) {

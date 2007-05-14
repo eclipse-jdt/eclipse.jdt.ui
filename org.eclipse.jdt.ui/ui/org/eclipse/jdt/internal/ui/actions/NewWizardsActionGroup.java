@@ -76,7 +76,7 @@ public class NewWizardsActionGroup extends ActionGroup {
 	
 	private boolean canEnable(IStructuredSelection sel) {
 		if (sel.size() == 0)
-			return false;
+			return true;
 		
 		List list= sel.toList();
 		for (Iterator iterator= list.iterator(); iterator.hasNext();) {

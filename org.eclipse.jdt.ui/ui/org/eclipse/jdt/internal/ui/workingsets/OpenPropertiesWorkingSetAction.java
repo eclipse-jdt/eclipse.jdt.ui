@@ -26,6 +26,7 @@ public class OpenPropertiesWorkingSetAction extends SelectionDispatchAction {
 	public OpenPropertiesWorkingSetAction(IWorkbenchSite site) {
 		super(site);
 		setText(WorkingSetMessages.OpenPropertiesWorkingSetAction_label); 
+		setEnabled(false);
 	}
 	
 	public void selectionChanged(IStructuredSelection selection) {
