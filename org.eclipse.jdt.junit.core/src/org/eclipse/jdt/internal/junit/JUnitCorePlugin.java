@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -320,16 +320,29 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	 * @since 3.2
 	 */
 	public Bundle getBundle(String bundleName) {
-		Bundle bundle= Platform.getBundle(bundleName);
-		if (bundle != null)
-			return bundle;
+		Bundle[] bundles= getBundles(bundleName, null);
+		if (bundles != null && bundles.length > 0)
+			return bundles[0];
+		return null;
+	}
+	
+	/**
+	 * Returns the bundles for a given bundle name,
+	 * 
+	 * @param bundleName the bundle name
+	 * @return the bundles of the given name
+	 */
+	public Bundle[] getBundles(String bundleName, String version) {
+		Bundle[] bundles= Platform.getBundles(bundleName, version);
+		if (bundles != null)
+			return bundles;
 		
 		// Accessing unresolved bundle
 		ServiceReference serviceRef= fBundleContext.getServiceReference(PackageAdmin.class.getName());
 		PackageAdmin admin= (PackageAdmin)fBundleContext.getService(serviceRef);
-		Bundle[] bundles= admin.getBundles(bundleName, null);
+		bundles= admin.getBundles(bundleName, version);
 		if (bundles != null && bundles.length > 0)
-			return bundles[0];
+			return bundles;
 		return null;
 	}
 
