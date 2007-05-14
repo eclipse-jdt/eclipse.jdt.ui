@@ -212,19 +212,12 @@ public class DefaultSpellChecker implements ISpellChecker {
 		}
 
 		final String addable= word.toLowerCase();
-		boolean hasBeenAdded= false;
 		for (final Iterator iterator= copy.iterator(); iterator.hasNext();) {
 			ISpellDictionary dictionary= (ISpellDictionary)iterator.next();
-			if (dictionary.acceptsWords()) {
+			if (dictionary.acceptsWords())
 				dictionary.addWord(addable);
-				hasBeenAdded= true;
-			}
 		}
-		
-		if (hasBeenAdded) {
-			fIgnored.add(addable);
-			return;
-		}
+	
 	}
 
 	/*
