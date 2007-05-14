@@ -156,23 +156,23 @@ public class WorkingSetConfigurationBlock {
 	private ArrayList fSelectionHistory;
 	private final IDialogSettings fSettings;
 	private final String fEnableButtonText;
-	private final IWorkingSet[] fWorkingSets;
+	private final String[] fWorkingSetIds;
 
 	/**
-	 * @param workingSets working sets from which the user can choose
+	 * @param workingSetIds working set ids from which the user can choose
 	 * @param enableButtonText the text shown for the enable button
 	 * @param settings to store/load the selection history
 	 */
-	public WorkingSetConfigurationBlock(IWorkingSet[] workingSets, String enableButtonText, IDialogSettings settings) {
-		fWorkingSets= workingSets;
-		Assert.isNotNull(workingSets);
+	public WorkingSetConfigurationBlock(String[] workingSetIds, String enableButtonText, IDialogSettings settings) {
+		Assert.isNotNull(workingSetIds);
 		Assert.isNotNull(enableButtonText);
 		Assert.isNotNull(settings);
 		
+		fWorkingSetIds= workingSetIds;
 		fEnableButtonText= enableButtonText;
 		fSelectedWorkingSets= new IWorkingSet[0];
 		fSettings= settings;
-		fSelectionHistory= loadSelectionHistory(settings, workingSets);
+		fSelectionHistory= loadSelectionHistory(settings, workingSetIds);
 	}
 
 	/**
@@ -241,7 +241,7 @@ public class WorkingSetConfigurationBlock {
 		fConfigure.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(SelectionEvent e) {
-				SimpleWorkingSetSelectionDialog dialog= new SimpleWorkingSetSelectionDialog(parent.getShell(), fWorkingSets, fSelectedWorkingSets);
+				SimpleWorkingSetSelectionDialog dialog= new SimpleWorkingSetSelectionDialog(parent.getShell(), fWorkingSetIds, fSelectedWorkingSets);
 				if (fMessage != null)
 					dialog.setMessage(fMessage);
 
@@ -362,14 +362,14 @@ public class WorkingSetConfigurationBlock {
 		settings.put(WORKINGSET_SELECTION_HISTORY, history);
 	}
 	
-	private ArrayList loadSelectionHistory(IDialogSettings settings, IWorkingSet[] workingSets) {
+	private ArrayList loadSelectionHistory(IDialogSettings settings, String[] workingSetIds) {
 		String[] strings= settings.getArray(WORKINGSET_SELECTION_HISTORY);
 		if (strings == null || strings.length == 0)
 			return new ArrayList();
 		
 		ArrayList result= new ArrayList();
 		
-		HashSet workingSetsSet= new HashSet(Arrays.asList(workingSets));
+		HashSet workingSetIdsSet= new HashSet(Arrays.asList(workingSetIds));
 		
 		IWorkingSetManager workingSetManager= PlatformUI.getWorkbench().getWorkingSetManager();
 		for (int i= 0; i < strings.length; i++) {
@@ -380,7 +380,7 @@ public class WorkingSetConfigurationBlock {
 				if (workingSet == null) {
 					valid= false;
 				} else {
-					if (!workingSetsSet.contains(workingSet))
+					if (!workingSetIdsSet.contains(workingSet.getId()))
 						valid= false;
 				}
 			}

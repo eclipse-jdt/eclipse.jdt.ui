@@ -37,6 +37,7 @@ import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -57,7 +58,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 	
 	private static final class GrayedCheckedModel {
 
-		private final GrayedCheckedModelElement[] fElements;
+		private GrayedCheckedModelElement[] fElements;
 		private final Hashtable fLookup;
 		
 		public GrayedCheckedModel(GrayedCheckedModelElement[] elements) {
@@ -66,6 +67,14 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			for (int i= 0; i < elements.length; i++) {
 				fLookup.put(elements[i].getWorkingSet(), elements[i]);
 			}
+		}
+		
+		public void addElement(GrayedCheckedModelElement element) {
+			ArrayList list= new ArrayList(Arrays.asList(fElements));
+			list.add(element);
+			fElements= (GrayedCheckedModelElement[])list.toArray(new GrayedCheckedModelElement[list.size()]);
+			
+			fLookup.put(element.getWorkingSet(), element);
 		}
 
 		public IWorkingSet[] getAll() {
@@ -158,7 +167,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		private final IAdaptable[] fElements;
 		
 		private WorkingSetModelAwareSelectionDialog(Shell shell, GrayedCheckedModel model, IAdaptable[] elements) {
-			super(shell, model.getAll(), model.getChecked());
+			super(shell, VALID_WORKING_SET_IDS, model.getChecked());
 			setTitle(WorkingSetMessages.ConfigureWorkingSetAssignementAction_WorkingSetAssignments_title);
 			fModel= model;
 			fShowVisibleOnly= true;
@@ -209,6 +218,37 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			fTableViewer.refresh();
 		}
 		
+		/**
+		 * {@inheritDoc}
+		 */
+		protected void addNewWorkingSet(IWorkingSet workingSet) {
+			if (fWorkingSetModel != null) {
+				IWorkingSet[] workingSets= fWorkingSetModel.getActiveWorkingSets();
+				IWorkingSet[] activeWorkingSets= new IWorkingSet[workingSets.length+ 1];
+				activeWorkingSets[0]= workingSet;
+				System.arraycopy(workingSets, 0, activeWorkingSets, 1, workingSets.length);
+				fWorkingSetModel.setActiveWorkingSets(activeWorkingSets);
+			}
+			
+			int checkCount= 0;
+			for (int i= 0; i < fElements.length; i++) {
+				IAdaptable adapted= adapt(workingSet, fElements[i]);
+				if (adapted != null && contains(workingSet, adapted)) {
+					checkCount++;
+				}
+			}
+			
+			fModel.addElement(new GrayedCheckedModelElement(workingSet, checkCount, fElements.length));
+			
+			fTableViewer.setInput(fModel.getAll());
+			fTableViewer.refresh();
+			
+			fTableViewer.setCheckedElements(fModel.getChecked());
+			fTableViewer.setGrayedElements(fModel.getGrayed());
+			
+			fTableViewer.setSelection(new StructuredSelection(workingSet));
+		}
+
 		protected ViewerFilter createTableFilter() {
 			final ViewerFilter superFilter= super.createTableFilter();
 			return new ViewerFilter() {

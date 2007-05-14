@@ -60,6 +60,7 @@ public final class WorkingSetMessages extends NLS {
 	
 	public static String ConfigureWorkingSetAction_label;
 	public static String SimpleWorkingSetSelectionDialog_DeselectAll_button;
+	public static String SimpleWorkingSetSelectionDialog_New_button;
 	public static String SimpleWorkingSetSelectionDialog_SelectAll_button;
 	public static String SimpleWorkingSetSelectionDialog_SimpleSelectWorkingSetDialog_title;
 	public static String ViewActionGroup_show_label;

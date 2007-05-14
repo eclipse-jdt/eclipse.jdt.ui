@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.workingsets;
 
 import com.ibm.icu.text.Collator;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -29,6 +30,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -37,11 +39,17 @@ import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.IWorkingSetNewWizard;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 public class SimpleWorkingSetSelectionDialog extends SelectionDialog {
@@ -110,21 +118,26 @@ public class SimpleWorkingSetSelectionDialog extends SelectionDialog {
 	
 	private final IWorkingSet[] fWorkingSets;
 	private final IWorkingSet[] fInitialSelection;
+	private final ArrayList fCreatedWorkingSets;
 	
 	private CheckboxTableViewer fTableViewer;
 	private IWorkingSet[] fCheckedElements;
 	
 	private Button fSelectAll;
 	private Button fDeselectAll;
+	private Button fNewWorkingSet;
 
-	public SimpleWorkingSetSelectionDialog(Shell shell, IWorkingSet[] allWorkingSet, IWorkingSet[] initialSelection) {
+	public SimpleWorkingSetSelectionDialog(Shell shell, String[] workingSetIds, IWorkingSet[] initialSelection) {
 		super(shell);
+		
 		setTitle(WorkingSetMessages.SimpleWorkingSetSelectionDialog_SimpleSelectWorkingSetDialog_title);
 		setHelpAvailable(false);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
-		fWorkingSets= allWorkingSet;
+
+		fWorkingSets= WorkingSetConfigurationBlock.filter(PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets(), workingSetIds);
 		fInitialSelection= initialSelection;
 		fCheckedElements= fInitialSelection;
+		fCreatedWorkingSets= new ArrayList();
 	}
 	
 	protected final Control createDialogArea(Composite parent) {
@@ -243,6 +256,21 @@ public class SimpleWorkingSetSelectionDialog extends SelectionDialog {
 				deselectAll();
 			}
 		});
+		
+		new Label(bar, SWT.NONE);
+		
+		fNewWorkingSet= new Button(bar, SWT.PUSH);
+		fNewWorkingSet.setText(WorkingSetMessages.SimpleWorkingSetSelectionDialog_New_button); 
+		fNewWorkingSet.setFont(bar.getFont());
+		setButtonLayoutData(fNewWorkingSet);
+		fNewWorkingSet.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				IWorkingSet workingSet= newWorkingSet();
+				if (workingSet != null) {
+					
+				}
+			}
+		});
 	}
 	
 	protected void createBottomButtonBar(Composite parent) {
@@ -261,5 +289,50 @@ public class SimpleWorkingSetSelectionDialog extends SelectionDialog {
 	protected void deselectAll() {
 		fTableViewer.setAllChecked(false);
 		checkedStateChanged();
+	}
+	
+	protected IWorkingSet newWorkingSet() {
+		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
+		
+		//can only allow to create java working sets at the moment, see bug 186762
+//		IWorkingSetNewWizard wizard= manager.createWorkingSetNewWizard(fWorkingSetIds);
+//		if (wizard == null)
+//			return;
+		
+		IWorkingSetNewWizard wizard= manager.createWorkingSetNewWizard(new String[] {JavaWorkingSetUpdater.ID});
+		
+		WizardDialog dialog= new WizardDialog(getShell(), wizard);
+		dialog.create();
+		if (dialog.open() == Window.OK) {
+			IWorkingSet workingSet= wizard.getSelection();
+			Filter filter= new Filter();
+			if (filter.select(null, null, workingSet)) {
+				addNewWorkingSet(workingSet);
+				checkedStateChanged();
+				manager.addWorkingSet(workingSet);
+				fCreatedWorkingSets.add(workingSet);
+				return workingSet;
+			}
+		}
+		
+		return null;
+	}
+
+	protected void addNewWorkingSet(IWorkingSet workingSet) {
+		fTableViewer.add(workingSet);
+		fTableViewer.setSelection(new StructuredSelection(workingSet), true);
+		fTableViewer.setChecked(workingSet, true);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void cancelPressed() {
+		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
+		for (int i= 0; i < fCreatedWorkingSets.size(); i++) {
+			manager.removeWorkingSet((IWorkingSet)fCreatedWorkingSets.get(i));
+		}
+		
+		super.cancelPressed();
 	}
 }
