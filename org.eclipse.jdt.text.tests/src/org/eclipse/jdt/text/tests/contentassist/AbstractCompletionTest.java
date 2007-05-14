@@ -500,7 +500,7 @@ public class AbstractCompletionTest extends TestCase {
 	private void waitBeforeCoreCompletion() {
 	    if (fWaitBeforeCompleting || JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH))) {
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(2000);
 			} catch (InterruptedException x) {
 			}
 		}
