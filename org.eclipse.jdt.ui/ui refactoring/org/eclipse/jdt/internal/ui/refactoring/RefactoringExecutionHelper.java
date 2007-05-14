@@ -15,7 +15,6 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
@@ -40,14 +39,11 @@ import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 /**
  * A helper class to execute a refactoring. The class takes care of pushing the
@@ -186,9 +182,6 @@ public class RefactoringExecutionHelper {
 				if (op.fPerformChangeOperation != null) {
 					RefactoringStatus validationStatus= op.fPerformChangeOperation.getValidationStatus();
 					if (validationStatus != null && validationStatus.hasFatalError()) {
-						RefactoringStatusEntry entry= validationStatus.getEntryMatchingSeverity(RefactoringStatus.FATAL);
-						JavaPlugin.log(new CoreException(new StatusInfo(IStatus.ERROR, entry.getMessage())));
-						
 						MessageDialog.openError(fParent, fRefactoring.getName(), 
 								Messages.format(
 										RefactoringMessages.RefactoringExecutionHelper_cannot_execute, 

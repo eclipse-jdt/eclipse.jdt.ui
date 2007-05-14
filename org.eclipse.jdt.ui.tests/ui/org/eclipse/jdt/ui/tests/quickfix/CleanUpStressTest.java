@@ -19,14 +19,10 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -35,8 +31,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -5279,9 +5273,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
 		enable(CleanUpConstants.SORT_MEMBERS);
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
 	
-		ICompilationUnit[] units= (ICompilationUnit[])cus.toArray(new ICompilationUnit[cus.size()]);	
-		Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-		RefactoringExecutionStarter.startCleanupRefactoring(units, CleanUpRefactoring.createCleanUps(), shell, false, "Clean Up");
+		ICompilationUnit[] units= (ICompilationUnit[])cus.toArray(new ICompilationUnit[cus.size()]);
+		performRefactoring(units);
 		
 //		generateTable(units);
 		

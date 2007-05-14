@@ -12,45 +12,45 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import org.eclipse.ui.PlatformUI;
-
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
+import org.eclipse.ltk.core.refactoring.CreateChangeOperation;
+import org.eclipse.ltk.core.refactoring.IUndoManager;
+import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -151,31 +151,8 @@ public class CleanUpTestCase extends QuickFixTest {
 		profileStore.writeProfiles(profiles, new InstanceScope());
 	}
 
-	protected RefactoringStatus assertRefactoringResultAsExpected(ICompilationUnit[] cus, String[] expected) throws InvocationTargetException, JavaModelException {
-		Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-		
-		final RefactoringStatus[] conditionCheck= new RefactoringStatus[1];
-		final CleanUpRefactoring refactoring= new CleanUpRefactoring() {
-			public RefactoringStatus checkAllConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-			    RefactoringStatus conditions= super.checkAllConditions(pm);
-			    conditionCheck[0]= conditions;
-				return conditions;
-			}
-		};
-		for (int i= 0; i < cus.length; i++) {
-			refactoring.addCompilationUnit(cus[i]);
-		}
-		
-		ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps();
-		for (int i= 0; i < cleanUps.length; i++) {
-			refactoring.addCleanUp(cleanUps[i]);
-		}
-
-		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.ERROR, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES, shell, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
-		try {
-			helper.perform(true, true);
-		} catch (InterruptedException e) {
-		}
+	protected RefactoringStatus assertRefactoringResultAsExpected(ICompilationUnit[] cus, String[] expected) throws CoreException {
+		RefactoringStatus status= performRefactoring(cus);
 
 		String[] previews= new String[cus.length];
 		for (int i= 0; i < cus.length; i++) {
@@ -185,11 +162,11 @@ public class CleanUpTestCase extends QuickFixTest {
 
 		assertEqualStringsIgnoreOrder(previews, expected);
 		
-		return conditionCheck[0];
+		return status;
 	}
 
-	protected void assertRefactoringResultAsExpectedIgnoreHashValue(ICompilationUnit[] cus, String[] expected) throws InvocationTargetException, JavaModelException {
-		RefactoringExecutionStarter.startCleanupRefactoring(cus, CleanUpRefactoring.createCleanUps(), PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), false, "Clean Up");
+	protected void assertRefactoringResultAsExpectedIgnoreHashValue(ICompilationUnit[] cus, String[] expected) throws CoreException {
+		performRefactoring(cus);
 
 		Pattern regex= Pattern.compile("long serialVersionUID = .*L;");
 
@@ -202,12 +179,58 @@ public class CleanUpTestCase extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(previews, expected);
 	}
 
-	protected RefactoringStatus assertRefactoringHasNoChange(ICompilationUnit[] cus) throws JavaModelException, InvocationTargetException {
+	protected RefactoringStatus assertRefactoringHasNoChange(ICompilationUnit[] cus) throws CoreException, InvocationTargetException {
 		String[] expected= new String[cus.length];
 		for (int i= 0; i < cus.length; i++) {
 			expected[i]= cus[i].getBuffer().getContents();
 		}
 		return assertRefactoringResultAsExpected(cus, expected);
+	}
+	
+	protected final RefactoringStatus performRefactoring(ICompilationUnit[] cus) throws CoreException {
+		final CleanUpRefactoring ref= new CleanUpRefactoring();
+		for (int i= 0; i < cus.length; i++) {
+			ref.addCompilationUnit(cus[i]);
+		}
+		
+		ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps();
+		for (int i= 0; i < cleanUps.length; i++) {
+			ref.addCleanUp(cleanUps[i]);
+		}
+
+		IUndoManager undoManager= getUndoManager();
+		final CreateChangeOperation create= new CreateChangeOperation(
+			new CheckConditionsOperation(ref, CheckConditionsOperation.ALL_CONDITIONS),
+			RefactoringStatus.FATAL);
+		
+		final PerformChangeOperation perform= new PerformChangeOperation(create);
+		perform.setUndoManager(undoManager, ref.getName());
+		
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		executePerformOperation(perform, workspace);
+			
+		RefactoringStatus status= create.getConditionCheckingStatus();
+		if (status.hasFatalError()) {
+			throw new CoreException(new StatusInfo(status.getSeverity(), status.getMessageMatchingSeverity(status.getSeverity())));
+		}
+		
+		assertTrue("Change wasn't executed", perform.changeExecuted());
+		
+		Change undo= perform.getUndoChange();
+		assertNotNull("Undo doesn't exist", undo);
+		assertTrue("Undo manager is empty", undoManager.anythingToUndo());
+		
+		return status;
+	}
+	
+	private IUndoManager getUndoManager() {
+		IUndoManager undoManager= RefactoringCore.getUndoManager();
+		undoManager.flush();
+		return undoManager;
+	}
+	
+	private void executePerformOperation(final PerformChangeOperation perform, IWorkspace workspace) throws CoreException {
+		workspace.run(perform, new NullProgressMonitor());
 	}
 
 }
