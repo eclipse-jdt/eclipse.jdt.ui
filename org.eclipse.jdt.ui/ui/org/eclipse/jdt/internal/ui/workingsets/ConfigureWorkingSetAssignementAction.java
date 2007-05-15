@@ -484,7 +484,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 
 		for (int i= 0; i < newWorkingSets.length; i++) {
 			IWorkingSet set= newWorkingSets[i];
-			if (!grayedSets.contains(set)) {
+			if (isValidWorkingSet(set) && !grayedSets.contains(set)) {
 				for (int j= 0; j < elements.length; j++) {						
 					IAdaptable adapted= adapt(set, elements[j]);
 					if (adapted != null && !contains(set, adapted)) {
@@ -504,6 +504,15 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 	}
 
 	private static boolean isValidWorkingSet(IWorkingSet set) {
+		if (set.isAggregateWorkingSet() || !set.isSelfUpdating())
+			return false;
+		
+		if (!set.isVisible())
+			return false;
+		
+		if (!set.isEditable())
+			return false;
+
 		for (int i= 0; i < VALID_WORKING_SET_IDS.length; i++) {
 			if (VALID_WORKING_SET_IDS[i].equals(set.getId()))
 				return true;
