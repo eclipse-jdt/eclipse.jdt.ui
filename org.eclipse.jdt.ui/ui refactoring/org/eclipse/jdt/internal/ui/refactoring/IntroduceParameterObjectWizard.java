@@ -276,9 +276,13 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 						ICompilationUnit cu= cus[i];
 						IType type= cu.getType(fRefactoring.getClassName());
 						if (type.exists()) {
-							setErrorMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_parametername_check_alreadyexists, new Object[] { fRefactoring.getClassName(), cu.getElementName() }));
-							setPageComplete(false);
-							return;
+							if (fRefactoring.isCreateAsTopLevel()) {
+								setErrorMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_parametername_check_alreadyexists, new Object[] { fRefactoring.getClassName(), cu.getElementName() }));
+								setPageComplete(false);
+								return;
+							} else {
+								setMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_type_already_exists_in_package_info, new Object[]  {fRefactoring.getClassName(), fRefactoring.getPackage() }), IMessageProvider.INFORMATION);
+							}
 						}
 					}
 				}
