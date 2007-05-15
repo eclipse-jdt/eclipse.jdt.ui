@@ -213,7 +213,6 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
 	public void setVisible(boolean visible) {
-		super.setVisible(visible);
 		if (visible) {
 			setFocus();		
 			updateClassesInSuiteTable();
@@ -221,6 +220,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		} else {
 			saveWidgetValues();
 		}
+		super.setVisible(visible);
 	}
 
 	private void handleAllFieldsChanged() {
