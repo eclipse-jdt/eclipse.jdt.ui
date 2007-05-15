@@ -40,7 +40,7 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 	public static final String QUALIFIER_COLOR_NAME= "org.eclipse.jdt.ui.ColoredLabels.qualifier"; //$NON-NLS-1$
 	public static final String DECORATIONS_COLOR_NAME= "org.eclipse.jdt.ui.ColoredLabels.decorations"; //$NON-NLS-1$
 	public static final String COUNTER_COLOR_NAME= "org.eclipse.jdt.ui.ColoredLabels.counter"; //$NON-NLS-1$
-
+	public static final String INHERITED_COLOR_NAME= "org.eclipse.jdt.ui.ColoredLabels.inherited"; //$NON-NLS-1$
 	
 	private static ColoredViewersManager fgInstance= new ColoredViewersManager();
 	

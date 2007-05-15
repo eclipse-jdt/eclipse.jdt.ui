@@ -943,7 +943,16 @@
          <description>
             %coloredLabels.counter.description
          </description>
-      </colorDefinition>      
+      </colorDefinition>
+      <colorDefinition
+            label="%coloredLabels.inherited.label"
+            categoryId="org.eclipse.jdt.ui.presentation"
+            value="COLOR_DARK_BLUE"
+            id="org.eclipse.jdt.ui.ColoredLabels.inherited">
+         <description>
+            %coloredLabels.inherited.description
+         </description>
+      </colorDefinition>
    </extension>
    
    

@@ -92,7 +92,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	private OutlineSorter fOutlineSorter;
 
 	private OutlineLabelProvider fInnerLabelProvider;
-	protected Color fForegroundColor;
 
 	private boolean fShowOnlyMainType;
 	private LexicalSortingAction fLexicalSortingAction;
@@ -150,7 +149,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 						return null;
 					}
 				}
-				return fForegroundColor;
+				return JFaceResources.getColorRegistry().get(ColoredViewersManager.INHERITED_COLOR_NAME);
 			}
 			return null;
 		}
@@ -557,8 +556,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		// Hard-coded filters
 		treeViewer.addFilter(new NamePatternFilter());
 		treeViewer.addFilter(new MemberFilter());
-
-		fForegroundColor= JFaceResources.getColorRegistry().get(ColoredViewersManager.QUALIFIER_COLOR_NAME);
 
 		fInnerLabelProvider= new OutlineLabelProvider();
 		fInnerLabelProvider.addLabelDecorator(new ProblemsLabelDecorator(null));

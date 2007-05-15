@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,9 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 import org.eclipse.swt.graphics.Color;
 
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -37,12 +40,21 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 	private boolean fShowDefiningType;
 	private TypeHierarchyLifeCycle fHierarchy;
 	private MethodsViewer fMethodsViewer;
+	private IPropertyChangeListener fColorRegistryListener;
 
 	public MethodsLabelProvider(TypeHierarchyLifeCycle lifeCycle, MethodsViewer methodsViewer) {
 		super(DEFAULT_TEXTFLAGS, DEFAULT_IMAGEFLAGS);
 		fHierarchy= lifeCycle;
 		fShowDefiningType= false;
 		fMethodsViewer= methodsViewer;
+		fColorRegistryListener= new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				if (event.getProperty().equals(ColoredViewersManager.INHERITED_COLOR_NAME)) {
+					fireLabelProviderChanged(new LabelProviderChangedEvent(MethodsLabelProvider.this, null));
+				}
+			}
+		};
+		JFaceResources.getColorRegistry().addListener(fColorRegistryListener);
 	}
 	
 	public void setShowDefiningType(boolean showDefiningType) {
@@ -125,10 +137,16 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 			IMember declaringType= curr.getDeclaringType();
 			
 			if (!declaringType.equals(fMethodsViewer.getInput())) {
-				return JFaceResources.getColorRegistry().get(ColoredViewersManager.QUALIFIER_COLOR_NAME);
+				return JFaceResources.getColorRegistry().get(ColoredViewersManager.INHERITED_COLOR_NAME);
 			}
 		}
 		return null;
+	}
+	
+	public void dispose() {
+		JFaceResources.getColorRegistry().removeListener(fColorRegistryListener);
+		fColorRegistryListener= null;
+		super.dispose();
 	}
 	
 }
