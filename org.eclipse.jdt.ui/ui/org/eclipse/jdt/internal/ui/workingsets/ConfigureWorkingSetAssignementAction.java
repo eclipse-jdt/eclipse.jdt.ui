@@ -43,6 +43,8 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
@@ -53,6 +55,9 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 
 public final class ConfigureWorkingSetAssignementAction extends SelectionDispatchAction {
 	
@@ -442,6 +447,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		}
 		if (dialog.open() == Window.OK) {
 			updateWorkingSets(dialog.getSelection(), dialog.getGrayed(), elements);
+			selectAndReveal(elements);
 		}
 	}
 	
@@ -553,6 +559,23 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		System.arraycopy(elements, 0, newElements, 0, elements.length);
 		newElements[elements.length]= adaptedElement;
 		workingSet.setElements(newElements);
+	}
+	
+	private void selectAndReveal(IAdaptable[] elements) {
+		PackageExplorerPart explorer= getActivePackageExplorer();
+		if (explorer != null)
+			explorer.selectReveal(new StructuredSelection(elements));
+	}
+	
+	private PackageExplorerPart getActivePackageExplorer() {
+		IWorkbenchPage page= JavaPlugin.getActivePage();
+		if (page != null) {
+			IWorkbenchPart activePart= page.getActivePart();
+			if (activePart instanceof PackageExplorerPart) {
+				return (PackageExplorerPart) activePart;
+			}
+		}
+		return null;
 	}
 
 }
