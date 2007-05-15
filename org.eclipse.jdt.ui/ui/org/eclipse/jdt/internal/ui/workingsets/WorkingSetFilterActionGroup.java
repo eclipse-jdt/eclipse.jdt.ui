@@ -343,6 +343,9 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 		} else if  (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
 			IWorkingSet newWorkingSet= (IWorkingSet) event.getNewValue();
 			if (newWorkingSet.equals(fWorkingSet)) {
+				if (fWorkingSetFilter != null) {
+					fWorkingSetFilter.notifyWorkingSetContentChange(); // first refresh the filter
+				}
 				fChangeListener.propertyChange(event);
 			}
 		}

@@ -15,13 +15,9 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.IWorkingSetManager;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -123,13 +119,10 @@ public class WorkingSetFilter extends JavaViewerFilter {
 	private IWorkingSet fWorkingSet;
 	
 	private WorkingSetCompareEntry[] fCachedCompareEntries;
-	private IPropertyChangeListener fPropertyListener;
 	
 	public WorkingSetFilter() {
 		fWorkingSet= null;
 		fCachedCompareEntries= null;
-		
-		fPropertyListener= null;
 	}
 	
 	/**
@@ -149,7 +142,7 @@ public class WorkingSetFilter extends JavaViewerFilter {
 	public void setWorkingSet(IWorkingSet workingSet) {
 		if (fWorkingSet != workingSet) {
 			fWorkingSet= workingSet;
-			updateCache();
+			notifyWorkingSetContentChange();
 		}
 	}
 
@@ -157,23 +150,13 @@ public class WorkingSetFilter extends JavaViewerFilter {
 	 * @see org.eclipse.jdt.internal.ui.filters.JavaViewerFilter#initFilter()
 	 */
 	protected void initFilter() {
-		if (fPropertyListener == null) {
-			fPropertyListener= new IPropertyChangeListener() {
-				public void propertyChange(PropertyChangeEvent event) {
-					if  (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(event.getProperty())) {
-						IWorkingSet newWorkingSet= (IWorkingSet) event.getNewValue();
-						if (newWorkingSet.equals(fWorkingSet)) {
-							updateCache();
-						}
-					}
-				}
-			};
-			PlatformUI.getWorkbench().getWorkingSetManager().addPropertyChangeListener(fPropertyListener);
-		}
-		updateCache();
+		notifyWorkingSetContentChange();
 	}
 
-	/* package */ final void updateCache() {
+	/**
+	 * Invoke when the content of the current working set changed. Clients are responsible to listen to changes and call this method. 
+	 */
+	public final void notifyWorkingSetContentChange() {
 		if (fWorkingSet != null) {
 			IAdaptable[] elements= fWorkingSet.getElements();
 			fCachedCompareEntries= new WorkingSetCompareEntry[elements.length];
@@ -190,10 +173,6 @@ public class WorkingSetFilter extends JavaViewerFilter {
 	 */
 	protected void freeFilter() {
 		fCachedCompareEntries= null;
-		if (fPropertyListener != null) {
-			PlatformUI.getWorkbench().getWorkingSetManager().removePropertyChangeListener(fPropertyListener);
-			fPropertyListener= null;
-		}
 	}
 	
 	/*
