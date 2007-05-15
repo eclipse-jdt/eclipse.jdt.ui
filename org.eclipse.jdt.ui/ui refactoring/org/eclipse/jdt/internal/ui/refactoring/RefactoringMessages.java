@@ -482,6 +482,8 @@ public final class RefactoringMessages extends NLS {
 
 	public static String IntroduceParameterObjectWizard_destination_label;
 
+	public static String IntroduceParameterObjectWizard_dot_not_allowed_error;
+
 	public static String IntroduceParameterObjectWizard_edit_button;
 
 	public static String IntroduceParameterObjectWizard_error_description;

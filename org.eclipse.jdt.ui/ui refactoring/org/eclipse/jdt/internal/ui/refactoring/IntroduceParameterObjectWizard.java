@@ -259,6 +259,10 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			IStatus validateJavaTypeName= JavaConventions.validateJavaTypeName(fRefactoring.getClassName(), sourceLevel, compliance);
 			if (isErrorMessage(validateJavaTypeName))
 				return;
+			if (fRefactoring.getClassName().indexOf('.') != -1) {
+				setErrorMessage(RefactoringMessages.IntroduceParameterObjectWizard_dot_not_allowed_error);
+				setPageComplete(false);
+			}
 			if (!"".equals(fRefactoring.getPackage())) { //$NON-NLS-1$
 				IStatus validatePackageName= JavaConventions.validatePackageName(fRefactoring.getPackage(), sourceLevel, compliance);
 				if (isErrorMessage(validatePackageName))
