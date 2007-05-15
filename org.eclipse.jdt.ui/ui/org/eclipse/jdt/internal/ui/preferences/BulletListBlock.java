@@ -64,7 +64,7 @@ public class BulletListBlock {
 		if (count == 0)
 			return;
 		
-		Color foreground= enabled ? null : Display.getDefault().getSystemColor(SWT.COLOR_GRAY);
+		Color foreground= enabled ? null : Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
 
 		fStyledText.setStyleRange(new StyleRange(0, count, foreground, null));
 					
