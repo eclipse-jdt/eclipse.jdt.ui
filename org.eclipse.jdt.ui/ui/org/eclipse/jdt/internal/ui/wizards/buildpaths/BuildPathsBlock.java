@@ -512,7 +512,7 @@ public class BuildPathsBlock {
 		if (field == fBuildPathDialogField) {
 			IContainer container= chooseContainer();
 			if (container != null) {
-				fBuildPathDialogField.setText(container.getFullPath().toString());
+				fBuildPathDialogField.setText(container.getFullPath().makeRelative().toString());
 			}
 		}
 	}
