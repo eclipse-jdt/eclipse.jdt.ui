@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.preferences.cleanup;
 
 import java.util.Map;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
@@ -42,15 +44,25 @@ public final class MemberAccessesTabPage extends CleanUpTabPage {
     	Group instanceGroup= createGroup(numColumns, composite, CleanUpMessages.MemberAccessesTabPage_GroupName_NonStaticAccesses);
     	
     	final CheckboxPreference thisFieldPref= createCheckboxPref(instanceGroup, numColumns, CleanUpMessages.MemberAccessesTabPage_CheckboxName_FieldQualifier, CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS, CleanUpModifyDialog.FALSE_TRUE);
-    	intent(instanceGroup);
-		final RadioPreference thisFieldAlwaysPref= createRadioPref(instanceGroup, 1, CleanUpMessages.MemberAccessesTabPage_RadioName_AlwaysThisForFields, CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS, CleanUpModifyDialog.FALSE_TRUE);
-		final RadioPreference thisFieldNecessaryPref= createRadioPref(instanceGroup, 1, CleanUpMessages.MemberAccessesTabPage_RadioName_NeverThisForFields, CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY, CleanUpModifyDialog.FALSE_TRUE);    	
+    	
+    	Composite fieldComposite= new Composite(instanceGroup, SWT.NONE);
+    	fieldComposite.setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL, SWT.DEFAULT));
+    	fieldComposite.setLayout(createGridLayout(3, false));
+    	
+    	intent(fieldComposite);
+		final RadioPreference thisFieldAlwaysPref= createRadioPref(fieldComposite, 1, CleanUpMessages.MemberAccessesTabPage_RadioName_AlwaysThisForFields, CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS, CleanUpModifyDialog.FALSE_TRUE);
+		final RadioPreference thisFieldNecessaryPref= createRadioPref(fieldComposite, 1, CleanUpMessages.MemberAccessesTabPage_RadioName_NeverThisForFields, CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY, CleanUpModifyDialog.FALSE_TRUE);    	
 		registerSlavePreference(thisFieldPref, new RadioPreference[] {thisFieldAlwaysPref, thisFieldNecessaryPref});
+		
+		final CheckboxPreference thisMethodPref= createCheckboxPref(instanceGroup, numColumns, CleanUpMessages.MemberAccessesTabPage_CheckboxName_MethodQualifier, CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS, CleanUpModifyDialog.FALSE_TRUE);
+		
+		Composite methodComposite= new Composite(instanceGroup, SWT.NONE);
+    	methodComposite.setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL, SWT.DEFAULT));
+    	methodComposite.setLayout(createGridLayout(3, false));
 
-    	final CheckboxPreference thisMethodPref= createCheckboxPref(instanceGroup, numColumns, CleanUpMessages.MemberAccessesTabPage_CheckboxName_MethodQualifier, CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS, CleanUpModifyDialog.FALSE_TRUE);    	
-    	intent(instanceGroup);
-		final RadioPreference thisMethodAlwaysPref= createRadioPref(instanceGroup, 1, CleanUpMessages.MemberAccessesTabPage_RadioName_AlwaysThisForMethods, CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS, CleanUpModifyDialog.FALSE_TRUE);
-		final RadioPreference thisMethodNecessaryPref= createRadioPref(instanceGroup, 1, CleanUpMessages.MemberAccessesTabPage_RadioName_NeverThisForMethods, CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY, CleanUpModifyDialog.FALSE_TRUE);
+    	intent(methodComposite);
+		final RadioPreference thisMethodAlwaysPref= createRadioPref(methodComposite, 1, CleanUpMessages.MemberAccessesTabPage_RadioName_AlwaysThisForMethods, CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS, CleanUpModifyDialog.FALSE_TRUE);
+		final RadioPreference thisMethodNecessaryPref= createRadioPref(methodComposite, 1, CleanUpMessages.MemberAccessesTabPage_RadioName_NeverThisForMethods, CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY, CleanUpModifyDialog.FALSE_TRUE);
 		registerSlavePreference(thisMethodPref, new RadioPreference[] {thisMethodAlwaysPref, thisMethodNecessaryPref});
     	
     	Group staticGroup= createGroup(numColumns, composite, CleanUpMessages.MemberAccessesTabPage_GroupName_StaticAccesses);
