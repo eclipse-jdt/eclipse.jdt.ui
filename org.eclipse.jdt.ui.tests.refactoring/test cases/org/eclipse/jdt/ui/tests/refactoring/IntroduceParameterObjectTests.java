@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -28,8 +30,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.IntroduceParameterObjectRefactoring;
-
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class IntroduceParameterObjectTests extends RefactoringTest {
 
@@ -100,6 +100,15 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		param.renamings=renamings;
 		runRefactoring(param);
 		checkCaller(null);
+	}
+	
+	public void testInlineRename() throws Exception {
+		RunRefactoringParameter param= new RunRefactoringParameter();
+		Set useParams= new HashSet();
+		useParams.add("xg");
+		useParams.add("yg");
+		param.useParams= useParams;
+		runRefactoring(param);
 	}
 
 	public void testSimpleEnclosing() throws Exception{
@@ -214,6 +223,7 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 
 
 	public static class RunRefactoringParameter {
+		public Set useParams;
 		public boolean useSuggestedMethod;
 		public boolean topLevel=false;
 		public boolean getters=false;
@@ -267,10 +277,7 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 			if (parameter.useSuggestedMethod){
 				final RefactoringStatusEntry entry= status.getEntryMatchingSeverity(RefactoringStatus.FATAL);
 				if (entry.getCode() == RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD || entry.getCode() == RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE) {
-
-					String message= entry.getMessage();
 					final Object element= entry.getData();
-					message= message + RefactoringMessages.RefactoringErrorDialogUtil_okToPerformQuestion;
 					ref=new IntroduceParameterObjectRefactoring((IMethod) element);
 					configureRefactoring(parameter, ref);
 					status= performRefactoring(ref);
@@ -322,6 +329,9 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 				if (newName != null) {
 					pi.setNewName(newName);
 				}
+			}
+			if (parameter.useParams != null) {
+				pi.setCreateField(parameter.useParams.contains(pi.getNewName()));
 			}
 		}
 		if (parameter.renamings != null)

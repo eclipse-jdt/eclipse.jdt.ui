@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 
@@ -25,8 +26,9 @@ public interface IDefaultValueAdvisor {
 	 * @param parameterInfos all other ParameterInfo objects
 	 * @param nodes list of arguments from the calling method
 	 * @param isRecursive true if called from a recursive invocation
+	 * @param caller the Method that encloses the reference, or the affected declaration. Can be null if there is no enclosing method.
 	 * @return Expression for invocation
 	 */
-	Expression createDefaultExpression(CompilationUnitRewrite cuRewrite, ParameterInfo info, List parameterInfos, List nodes, boolean isRecursive);
+	Expression createDefaultExpression(CompilationUnitRewrite cuRewrite, ParameterInfo info, List parameterInfos, List nodes, boolean isRecursive, MethodDeclaration caller);
 
 }

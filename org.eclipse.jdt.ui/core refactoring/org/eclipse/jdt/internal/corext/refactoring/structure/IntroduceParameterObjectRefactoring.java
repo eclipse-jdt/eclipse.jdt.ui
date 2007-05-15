@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -65,7 +65,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -102,18 +101,19 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactoring {
 
 	private final class RewriteArguments implements IDefaultValueAdvisor {
-		public Expression createDefaultExpression(CompilationUnitRewrite cuRewrite, ParameterInfo info, List parameterInfos, List nodes, boolean isRecursive) {
+		public Expression createDefaultExpression(CompilationUnitRewrite cuRewrite, ParameterInfo info, List parameterInfos, List nodes, boolean isRecursive, MethodDeclaration caller) {
 			final AST ast= cuRewrite.getAST();
 			final ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			Map piMapping= new LinkedHashMap();
 			boolean allInlined=isRecursive;
+			final List parameters= caller == null ? null : caller.parameters();
+			List validParamters= new ArrayList();
 			for (ListIterator iter= parameterInfos.listIterator(); iter.hasNext();) {
 				ParameterInfo pi= (ParameterInfo) iter.next();
 				if (isValidField(pi)) {
-					piMapping.put(pi.getOldName(), pi);
+					validParamters.add(pi);
 					if (pi.isInlined() && allInlined) {
 						ASTNode node= (ASTNode) nodes.get(pi.getOldIndex());
-						if (!isParameter(pi, node)) {
+						if (!isParameter(pi, node, parameters, info.getNewName())) {
 							allInlined= false;
 						}
 					} else
@@ -126,58 +126,57 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 			ClassInstanceCreation invocation= ast.newClassInstanceCreation();
 			invocation.setType(fParameterObjectFactory.createType(fCreateAsTopLevel, cuRewrite));
 			List arguments= invocation.arguments();
-			for (Iterator iter= piMapping.values().iterator(); iter.hasNext();) {
+			for (Iterator iter= validParamters.iterator(); iter.hasNext();) {
 				ParameterInfo pi= (ParameterInfo) iter.next();
 				if (pi.isOldVarargs()) {
-					if (iter.hasNext()) { // not new vararg
-						if (pi.getOldIndex() < nodes.size() && (nodes.get(pi.getOldIndex()) instanceof NullLiteral)) {
-							NullLiteral nullLiteral= (NullLiteral) nodes.get(pi.getOldIndex());
-							arguments.add(moveNode(nullLiteral, rewrite, piMapping));
-						} else {
-							ArrayCreation creation= ast.newArrayCreation();
-							creation.setType((ArrayType) importBinding(pi.getNewTypeBinding(), cuRewrite));
-							ArrayInitializer initializer= ast.newArrayInitializer();
-							List expressions= initializer.expressions();
-							for (int i= pi.getOldIndex(); i < nodes.size(); i++) {
-								ASTNode node= (ASTNode) nodes.get(i);
-								importNodeTypes(node, cuRewrite);
-								expressions.add(moveNode(node, rewrite, piMapping));
-							}
-							if (expressions.size() != 0)
-								creation.setInitializer(initializer);
-							else
-								creation.dimensions().add(ast.newNumberLiteral("0")); //$NON-NLS-1$
-							arguments.add(creation);
-						}
-					} else {
-						// An unpack of existing array creations would be
-						// cool
-						boolean needsCopy= true;
-						if (pi.getOldIndex() < nodes.size() && nodes.get(pi.getOldIndex()) instanceof ArrayCreation) {
-							ArrayCreation creation= (ArrayCreation) nodes.get(pi.getOldIndex());
-							ITypeBinding binding= creation.resolveTypeBinding();
-							if (binding != null && binding.isAssignmentCompatible(pi.getNewTypeBinding())) {
-								arguments.add(moveNode(creation, rewrite, piMapping));
-								needsCopy= false;
-							}
-						}
-						if (needsCopy) {// last argument was either a number of
-							// args (including 0) or an incompatible
-							// array
-							for (int i= pi.getOldIndex(); i < nodes.size(); i++) {
-								ASTNode node= (ASTNode) nodes.get(i);
-								importNodeTypes(node, cuRewrite);
-								arguments.add(moveNode(node, rewrite, piMapping));
-							}
-						}
-					}
+					handleVarargs(cuRewrite, nodes, ast, rewrite, arguments, iter, pi);
 				} else {
 					Expression exp= (Expression) nodes.get(pi.getOldIndex());
 					importNodeTypes(exp, cuRewrite);
-					arguments.add(moveNode(exp, rewrite, piMapping));
+					arguments.add(moveNode(exp, rewrite));
 				}
 			}
 			return invocation;
+		}
+
+		private void handleVarargs(CompilationUnitRewrite cuRewrite, List nodes, final AST ast, final ASTRewrite rewrite, List arguments, Iterator iter, ParameterInfo pi) {
+			boolean isEmptyVarArg= pi.getOldIndex() >= nodes.size();
+			ASTNode lastNode= isEmptyVarArg ? null : (ASTNode) nodes.get(pi.getOldIndex());
+			if (lastNode instanceof ArrayCreation) {
+				ArrayCreation creation= (ArrayCreation) lastNode;
+				ITypeBinding binding= creation.resolveTypeBinding();
+				if (binding != null && binding.isAssignmentCompatible(pi.getNewTypeBinding())) {
+					arguments.add(moveNode(creation, rewrite));
+					return;
+				}
+			}
+			if (iter.hasNext()) { //new signature would String...args, int
+				if (lastNode instanceof NullLiteral) {
+					NullLiteral nullLiteral= (NullLiteral) lastNode;
+					arguments.add(moveNode(nullLiteral, rewrite));
+				} else {
+					ArrayCreation creation= ast.newArrayCreation();
+					creation.setType((ArrayType) importBinding(pi.getNewTypeBinding(), cuRewrite));
+					ArrayInitializer initializer= ast.newArrayInitializer();
+					List expressions= initializer.expressions();
+					for (int i= pi.getOldIndex(); i < nodes.size(); i++) {
+						ASTNode node= (ASTNode) nodes.get(i);
+						importNodeTypes(node, cuRewrite);
+						expressions.add(moveNode(node, rewrite));
+					}
+					if (expressions.size() != 0)
+						creation.setInitializer(initializer);
+					else
+						creation.dimensions().add(ast.newNumberLiteral("0")); //$NON-NLS-1$
+					arguments.add(creation);
+				}
+			} else {
+				for (int i= pi.getOldIndex(); i < nodes.size(); i++) {
+					ASTNode node= (ASTNode) nodes.get(i);
+					importNodeTypes(node, cuRewrite);
+					arguments.add(moveNode(node, rewrite));
+				}
+			}
 		}
 
 		private void importNodeTypes(ASTNode node, final CompilationUnitRewrite cuRewrite) {
@@ -194,56 +193,32 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		}
 	}
 
-	private boolean isParameter(ParameterInfo pi, ASTNode node) {
+	private boolean isParameter(ParameterInfo pi, ASTNode node, List parameters, String qualifier) {
 		if (node instanceof Name) {
 			Name name= (Name) node;
 			IVariableBinding binding= ASTNodes.getVariableBinding(name);
-			if (binding != null && binding.isParameter() && binding.getName().equals(pi.getOldName()))
-				return true;
+			if (binding != null && binding.isParameter()){
+				return binding.getName().equals(getName(pi, parameters));
+			} else {
+				if (node instanceof QualifiedName){
+					QualifiedName qn= (QualifiedName) node;
+					return qn.getFullyQualifiedName().endsWith(JavaModelUtil.concatenateName(qualifier, getName(pi, parameters)));
+				}
+			}
+				
 		}
 		return false;
 	}
 	
-	protected ASTNode moveNode(final ASTNode oldNode, final ASTRewrite rewrite, final Map piMapping) {
-		class SimpleNameRewriter extends ASTVisitor {
-			private Expression fNewNode;
-
-			SimpleNameRewriter() {
-				super(false);
-			}
-
-			public boolean visit(SimpleName node) {
-				ParameterInfo pi= (ParameterInfo) piMapping.get(node.getIdentifier());
-				if (pi != null && pi.isInlined()) {
-					if (oldNode == node) {
-						fNewNode= updateSimpleName(rewrite, pi, node, false);
-					} else {
-						updateSimpleName(rewrite, pi, node, true);
-					}
-				}
-				return false;
-			}
-		}
-		SimpleNameRewriter visitor= new SimpleNameRewriter();
-		oldNode.accept(visitor);
-		if (visitor.fNewNode != null)
-			return moveNode(visitor.fNewNode, rewrite);
-		return moveNode(oldNode, rewrite);
-	}
-
 	private final class RewriteParameterBody extends BodyUpdater {
 		private boolean fParameterClassCreated= false;
 
-		private boolean isReadOnly(final ParameterInfo pi, Block block) {
+		private boolean isReadOnly(final ParameterInfo pi, Block block, final List parameters, final String qualifier) {
 			class NotWrittenDetector extends ASTVisitor {
 				boolean notWritten= true;
 
-				public boolean visit(FieldAccess node) {
-					return false;
-				}
-
 				public boolean visit(SimpleName node) {
-					if (isParameter(pi, node) && ASTResolving.isWriteAccess(node))
+					if (isParameter(pi, node, parameters, qualifier) && ASTResolving.isWriteAccess(node))
 						notWritten= false;
 					return false;
 				}
@@ -271,29 +246,21 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 				fParameterClassCreated= true;
 			}
 			Block body= methodDeclaration.getBody();
+			final List parameters= methodDeclaration.parameters();
 			if (body != null) {
 				ListRewrite block= rewriter.getListRewrite(body, Block.STATEMENTS_PROPERTY);
 				final List managedParams= getParameterInfos();
 				for (Iterator iter= managedParams.iterator(); iter.hasNext();) {
 					final ParameterInfo pi= (ParameterInfo) iter.next();
 					if (isValidField(pi)) {
-						if (isReadOnly(pi, body)) {
+						if (isReadOnly(pi, body, parameters, null)) {
 							body.accept(new ASTVisitor(false) {
 
 								public boolean visit(SimpleName node) {
-									updateSimpleName(rewriter, pi, node, true);
+									updateSimpleName(rewriter, pi, node, true, parameters);
 									return false;
 								}
 
-								public boolean visit(MethodInvocation node) {
-									IMethodBinding nodeBinding= node.resolveMethodBinding();
-									if (nodeBinding != null && nodeBinding.getMethodDeclaration() == methodDeclaration.resolveBinding()) {
-										return false; // do not update
-										// methods that will
-										// be updated by CMS
-									}
-									return true;
-								}
 							});
 							pi.setInlined(true);
 						} else {
@@ -691,13 +658,13 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		return fMethodDeclaration.resolveBinding().getDeclaringClass().getPackage().getName();
 	}
 
-	private Expression updateSimpleName(ASTRewrite rewriter, ParameterInfo pi, SimpleName node, boolean replaceNode) {
+	private Expression updateSimpleName(ASTRewrite rewriter, ParameterInfo pi, SimpleName node, boolean replaceNode, List parameters) {
 		AST ast= rewriter.getAST();
 		IBinding binding= node.resolveBinding();
 		Expression replacementNode= fParameterObjectFactory.createFieldReadAccess(pi, getParameterName(), ast);
 		if (binding instanceof IVariableBinding) {
 			IVariableBinding variable= (IVariableBinding) binding;
-			if (variable.isParameter() && variable.getName().equals(pi.getOldName())) {
+			if (variable.isParameter() && variable.getName().equals(getName(pi, parameters))) {
 				if (replaceNode)
 					rewriter.replace(node, replacementNode, null);
 				return replacementNode;
@@ -705,7 +672,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		} else {
 			ASTNode parent= node.getParent();
 			if (! (parent instanceof QualifiedName || parent instanceof FieldAccess || parent instanceof SuperFieldAccess)) {
-				if (node.getIdentifier().equals(pi.getOldName())) {
+				if (node.getIdentifier().equals(getName(pi, parameters))) {
 					if (replaceNode)
 						rewriter.replace(node, replacementNode, null);
 					return replacementNode;
@@ -713,6 +680,14 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 			}
 		}
 		return null;
+	}
+
+	private String getName(ParameterInfo pi, List parameters) {
+		if (parameters != null && pi.getOldIndex() < parameters.size()) {
+			SingleVariableDeclaration svd= (SingleVariableDeclaration) parameters.get(pi.getOldIndex());
+			return svd.getName().getIdentifier();
+		}
+		return pi.getOldName();
 	}
 
 }

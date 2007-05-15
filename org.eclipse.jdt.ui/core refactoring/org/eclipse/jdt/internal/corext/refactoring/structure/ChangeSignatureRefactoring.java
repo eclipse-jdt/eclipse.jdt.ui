@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1369,7 +1370,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		int i= 0;
 		for (Iterator iter= getNotDeletedInfos().iterator(); iter.hasNext(); i++) {
 			ParameterInfo info= (ParameterInfo) iter.next();
-			Expression newExpression= createNewExpression(info, getParameterInfos(), superCall.arguments(), cuRewrite);
+			Expression newExpression= createNewExpression(info, getParameterInfos(), superCall.arguments(), cuRewrite, (MethodDeclaration) ASTNodes.getParent(superCall, MethodDeclaration.class));
 			if (newExpression != null)
 				superCall.arguments().add(newExpression);
 		}
@@ -1438,14 +1439,14 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		return fMethod.isConstructor() && fMethod.getNumberOfParameters() == 0;
 	}
 	
-	private Expression createNewExpression(ParameterInfo info, List parameterInfos, List nodes, CompilationUnitRewrite cuRewrite) {
+	private Expression createNewExpression(ParameterInfo info, List parameterInfos, List nodes, CompilationUnitRewrite cuRewrite, MethodDeclaration method) {
 		if (info.isNewVarargs() && info.getDefaultValue().trim().length() == 0)
 			return null;
 		else {
 			if (fDefaultValueAdvisor == null)
 				return (Expression) cuRewrite.getASTRewrite().createStringPlaceholder(info.getDefaultValue(), ASTNode.METHOD_INVOCATION);
 			else
-				return fDefaultValueAdvisor.createDefaultExpression(cuRewrite, info, parameterInfos, nodes, false);
+				return fDefaultValueAdvisor.createDefaultExpression(cuRewrite, info, parameterInfos, nodes, false, method);
 		}
 	}
 
@@ -1570,7 +1571,13 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			// }
 			
 			ListRewrite listRewrite= getParamgumentsRewrite();
+			Map newOldMap= new LinkedHashMap();
 			List nodes= listRewrite.getRewrittenList();
+			Iterator rewriteIter= nodes.iterator();
+			List original= listRewrite.getOriginalList();
+			for (Iterator iter= original.iterator(); iter.hasNext();) {
+				newOldMap.put(rewriteIter.next(),iter.next());
+			}
 			List newNodes= new ArrayList();
 			// register removed nodes, and collect nodes in new sequence:
 			for (int i= 0; i < fParameterInfos.size(); i++) {
@@ -1614,12 +1621,18 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			while (nodesIter.hasNext() && newIter.hasNext()) {
 				ASTNode node= (ASTNode) nodesIter.next();
 				ASTNode newNode= (ASTNode) newIter.next();
-				listRewrite.replace(node, newNode, fDescription);
+				if (!ASTNodes.isExistingNode(node)) //XXX:should better be addressed in ListRewriteEvent.replaceEntry(ASTNode, ASTNode)
+					listRewrite.replace((ASTNode) newOldMap.get(node), newNode, fDescription);
+				else
+					listRewrite.replace(node, newNode, fDescription);
 			}
 			//remove remaining existing nodes:
 			while (nodesIter.hasNext()) {
 				ASTNode node= (ASTNode) nodesIter.next();
-				listRewrite.remove(node, fDescription);
+				if (!ASTNodes.isExistingNode(node))
+					listRewrite.remove((ASTNode) newOldMap.get(node), fDescription);
+				else
+					listRewrite.remove(node, fDescription);
 			}
 			//add additional new nodes:
 			while (newIter.hasNext()) {
@@ -1709,6 +1722,9 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		}
 
 		public void updateNode() {
+			if (fDefaultValueAdvisor != null) {
+				//fDefaultValueAdvisor.updateInvocationNames(getParamgumentsRewrite(), getParameterInfos(), (MethodDeclaration) ASTNodes.getParent(fNode, MethodDeclaration.class), getCompilationUnitRewrite());
+			}
 			reshuffleElements();
 			changeMethodName();
 		}
@@ -1738,15 +1754,16 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		
 		protected ASTNode createNewParamgument(ParameterInfo info, List parameterInfos, List nodes) {
 			CompilationUnitRewrite cuRewrite= getCompilationUnitRewrite();
-			if (isRecursiveReference())
-				return createNewExpressionRecursive(info, parameterInfos, nodes, cuRewrite);
-			else
-				return createNewExpression(info, parameterInfos, nodes, cuRewrite);
+			MethodDeclaration declaration= (MethodDeclaration) ASTNodes.getParent(fNode, MethodDeclaration.class);
+			if (isRecursiveReference()) {
+				return createNewExpressionRecursive(info, parameterInfos, nodes, cuRewrite, declaration);
+			} else
+				return createNewExpression(info, parameterInfos, nodes, cuRewrite, declaration);
 		}
 
-		private Expression createNewExpressionRecursive(ParameterInfo info, List parameterInfos, List nodes, CompilationUnitRewrite cuRewrite) {
+		private Expression createNewExpressionRecursive(ParameterInfo info, List parameterInfos, List nodes, CompilationUnitRewrite cuRewrite, MethodDeclaration methodDeclaration) {
 			if (fDefaultValueAdvisor != null && info.isAdded()) {
-				return fDefaultValueAdvisor.createDefaultExpression(cuRewrite, info, parameterInfos, nodes, true);
+				return fDefaultValueAdvisor.createDefaultExpression(cuRewrite, info, parameterInfos, nodes, true, methodDeclaration);
 			}
 			return (Expression) getASTRewrite().createStringPlaceholder(info.getNewName(), ASTNode.METHOD_INVOCATION);
 		}
