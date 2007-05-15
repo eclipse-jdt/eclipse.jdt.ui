@@ -134,6 +134,7 @@ public abstract class OwnerDrawSupport implements Listener {
 		int y = textBounds.y + Math.max(0, (textBounds.height - bounds.height) / 2);
 		
 		fTextLayout.draw(gc, x, y);
+		fTextLayout.setText(""); // clear all ranges //$NON-NLS-1$
 	}
 	
 	public void dispose() {
