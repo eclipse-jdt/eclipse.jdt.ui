@@ -424,4 +424,8 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     public void setFocus() {
     	fPackageExplorer.getViewerControl().setFocus();
     }
+
+	public IJavaProject getJavaProject() {
+		return fJavaProject;
+	}
 }
