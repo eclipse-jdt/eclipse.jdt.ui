@@ -922,10 +922,16 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 		Expression selectedExpression= getSelectedExpression().getAssociatedExpression(); // whole expression selected
 		
 		Expression initializer= (Expression) rewrite.createMoveTarget(selectedExpression);
-		VariableDeclarationStatement vds= createTempDeclaration(initializer);
+		ASTNode replacement= createTempDeclaration(initializer); // creates a VariableDeclarationStatement
 		
 		ExpressionStatement parent= (ExpressionStatement) selectedExpression.getParent();
-		rewrite.replace(parent, vds, fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_declare_local_variable));
+		if (ASTNodes.isControlStatementBody(parent.getLocationInParent())) {
+			Block block= rewrite.getAST().newBlock();
+			block.statements().add(replacement);
+			replacement= block;
+			
+		}
+		rewrite.replace(parent, replacement, fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_declare_local_variable));
 	}
 
 	public void setDeclareFinal(boolean declareFinal) {
