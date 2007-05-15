@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,7 +58,6 @@ import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension2;
 
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PlatformUI;
@@ -68,7 +67,6 @@ import org.eclipse.ui.commands.ICommand;
 import org.eclipse.ui.commands.ICommandManager;
 import org.eclipse.ui.commands.IKeySequenceBinding;
 import org.eclipse.ui.commands.Priority;
-import org.eclipse.ui.contexts.IWorkbenchContextSupport;
 import org.eclipse.ui.keys.KeySequence;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -143,8 +141,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;
 
-	private IKeyBindingService fKeyBindingService;
-	private String[] fKeyBindingScopes;
 	private IAction fShowViewMenuAction;
 	private HandlerSubmission fShowViewMenuHandlerSubmission;
 
@@ -154,7 +150,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * @since 3.2
 	 */
 	private int fTreeStyle;
-
+	
 	/**
 	 * Creates a tree information control with the given shell as parent. The given
 	 * styles are applied to the shell and the tree widget.
@@ -565,7 +561,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		removeHandlerAndKeyBindingSupport();
 		fTreeViewer= null;
 		fFilterText= null;
-		fKeyBindingService= null;
 	}
 
 	/**
@@ -574,12 +569,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * @since 3.2
 	 */
 	protected void addHandlerAndKeyBindingSupport() {
-		// Remember current scope and then set window context.
-		if (fKeyBindingScopes == null && fKeyBindingService != null) {
-			fKeyBindingScopes= fKeyBindingService.getScopes();
-			fKeyBindingService.setScopes(new String[] { IWorkbenchContextSupport.CONTEXT_ID_WINDOW });
-		}
-
 		// Register action with command support
 		if (fShowViewMenuHandlerSubmission == null) {
 			fShowViewMenuHandlerSubmission= new HandlerSubmission(null, getShell(), null, fShowViewMenuAction.getActionDefinitionId(), new ActionHandler(fShowViewMenuAction), Priority.MEDIUM);
@@ -597,11 +586,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		if (fShowViewMenuHandlerSubmission != null)
 			PlatformUI.getWorkbench().getCommandSupport().removeHandlerSubmission(fShowViewMenuHandlerSubmission);
 
-		// Restore editor's key binding scope
-		if (fKeyBindingService != null && fKeyBindingScopes != null) {
-			fKeyBindingService.setScopes(fKeyBindingScopes);
-			fKeyBindingScopes= null;
-		}
 	}
 
 	/**
@@ -762,7 +746,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		// Key binding service
 		IWorkbenchPart part= JavaPlugin.getActivePage().getActivePart();
 		IWorkbenchPartSite site= part.getSite();
-		fKeyBindingService= site.getKeyBindingService();
 
 		// Create show view menu action
 		fShowViewMenuAction= new Action("showViewMenu") { //$NON-NLS-1$
