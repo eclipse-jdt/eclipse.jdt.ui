@@ -58,8 +58,6 @@ import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension2;
 
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ActionHandler;
 import org.eclipse.ui.commands.HandlerSubmission;
@@ -741,11 +739,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		if (hasHeader()) {
 			fFilterText= createFilterText(parent);
 		}
-
-		// Create a key binding for showing the dialog menu
-		// Key binding service
-		IWorkbenchPart part= JavaPlugin.getActivePage().getActivePart();
-		IWorkbenchPartSite site= part.getSite();
 
 		// Create show view menu action
 		fShowViewMenuAction= new Action("showViewMenu") { //$NON-NLS-1$
