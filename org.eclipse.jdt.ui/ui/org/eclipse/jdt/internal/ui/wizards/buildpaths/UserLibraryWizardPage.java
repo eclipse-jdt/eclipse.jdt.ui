@@ -70,7 +70,6 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	private Set fUsedPaths;
 	private boolean fIsEditMode;
 	private IJavaProject fProject;
-	private boolean fIsExported;
 	
 	public UserLibraryWizardPage() {
 		super("UserLibraryWizardPage"); //$NON-NLS-1$
@@ -248,7 +247,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	 */
 	public IClasspathEntry getSelection() {
 		if (fEditResult != null) {
-			return JavaCore.newContainerEntry(fEditResult.getPath(), fIsExported);
+			return JavaCore.newContainerEntry(fEditResult.getPath());
 		}
 		return null;
 	}
@@ -261,7 +260,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		IClasspathEntry[] res= new IClasspathEntry[selected.size()];
 		for (int i= 0; i < res.length; i++) {
 			CPUserLibraryElement curr= (CPUserLibraryElement) selected.get(i);
-			res[i]= JavaCore.newContainerEntry(curr.getPath(), fIsExported);
+			res[i]= JavaCore.newContainerEntry(curr.getPath());
 		}
 		return res;
 	}
@@ -270,8 +269,6 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	 * @see org.eclipse.jdt.ui.wizards.IClasspathContainerPage#setSelection(org.eclipse.jdt.core.IClasspathEntry)
 	 */
 	public void setSelection(IClasspathEntry containerEntry) {
-		fIsExported= containerEntry != null && containerEntry.isExported();
-		
 		updateDescription(containerEntry);
 		fIsEditMode= (containerEntry != null);
 		if (containerEntry != null) {
