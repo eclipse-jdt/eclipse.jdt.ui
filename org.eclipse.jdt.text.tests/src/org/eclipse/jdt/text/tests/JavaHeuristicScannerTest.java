@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -846,16 +846,6 @@ public class JavaHeuristicScannerTest extends TestCase {
 	    	assertFalse(fHeuristicScanner.looksLikeClassInstanceCreationBackward(offset, JavaHeuristicScanner.UNBOUND));
     }
 	
-	public void testShiftOperator() throws Exception {
-		fDocument.set(
-				"		for (int j = 0; j == 0; j ++) {\n" + 
-				"			j = 3 >>> 1;\n" 
-		);
-		
-		String indent= fScanner.computeIndentation(fDocument.getLength()).toString();
-		Assert.assertEquals("\t\t\t", indent);
-	}
-
 	public void testConditional1() throws Exception {
 		if (true) // XXX enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed
 			return;

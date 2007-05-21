@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,7 +7,6 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Olaf van Zon <olafvanzon@hotmail.com> - Bug 143029 [typing] Correct Indentation works incorrect after >> operator (bit shift right)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
@@ -1286,8 +1285,6 @@ public final class JavaIndenter {
 					return false;
 				int storedPosition= fPosition;
 				int storedToken= fToken;
-				int storedLine= fLine;
-				int storedPreviousPos= fPreviousPos;
 				nextToken();
 				switch (fToken) {
 					case Symbols.TokenIDENT:
@@ -1301,8 +1298,6 @@ public final class JavaIndenter {
 				// <> are harder to detect - restore the position if we fail
 				fPosition= storedPosition;
 				fToken= storedToken;
-				fLine= storedLine;
-				fPreviousPos= storedPreviousPos;
 				return false;
 
 			default:
