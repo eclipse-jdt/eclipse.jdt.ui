@@ -215,6 +215,16 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 		result.addAll(matches);
 	}
+	
+	/**
+	 * Tells whether this dictionary is empty.
+	 * 
+	 * @return <code>true</code> if this dictionary is empty
+	 * @since 3.3
+	 */
+	protected boolean isEmpty() {
+		return fHashBuckets.size() == 0;
+	}
 
 	/**
 	 * Returns the used phonetic distance algorithm.
