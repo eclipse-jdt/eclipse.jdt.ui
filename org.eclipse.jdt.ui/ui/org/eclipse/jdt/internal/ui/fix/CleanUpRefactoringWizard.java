@@ -237,6 +237,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
         	final Composite composite= new Composite(parent, SWT.NONE);
 			composite.setLayout(new GridLayout(2, false));
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			composite.setFont(parent.getFont());
 			
 			SelectionButtonDialogField useProfile= new SelectionButtonDialogField(SWT.RADIO);
 			useProfile.setLabelText(MultiFixMessages.CleanUpRefactoringWizard_use_configured_radio);
@@ -318,6 +319,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			Link preferencePageLink= new Link(composite, SWT.WRAP);
 			preferencePageLink.setText(MultiFixMessages.CleanUpRefactoringWizard_HideWizard_Link);
+			preferencePageLink.setFont(parent.getFont());
 			GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, false);
 			gridData.widthHint= convertWidthInCharsToPixels(300);
 			gridData.horizontalSpan= 2;

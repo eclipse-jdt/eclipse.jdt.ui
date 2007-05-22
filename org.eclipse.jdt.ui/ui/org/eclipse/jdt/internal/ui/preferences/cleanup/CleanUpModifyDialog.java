@@ -72,6 +72,7 @@ public class CleanUpModifyDialog extends ModifyDialog {
 		
 		fCountLabel= new Label(control, SWT.NONE);
 		fCountLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		fCountLabel.setFont(parent.getFont());
 		updateCountLabel();
 		
 		return control;

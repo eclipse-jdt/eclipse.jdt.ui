@@ -48,6 +48,7 @@ public final class MemberAccessesTabPage extends CleanUpTabPage {
     	Composite fieldComposite= new Composite(instanceGroup, SWT.NONE);
     	fieldComposite.setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL, SWT.DEFAULT));
     	fieldComposite.setLayout(createGridLayout(3, false));
+    	fieldComposite.setFont(composite.getFont());
     	
     	intent(fieldComposite);
 		final RadioPreference thisFieldAlwaysPref= createRadioPref(fieldComposite, 1, CleanUpMessages.MemberAccessesTabPage_RadioName_AlwaysThisForFields, CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS, CleanUpModifyDialog.FALSE_TRUE);
@@ -59,6 +60,7 @@ public final class MemberAccessesTabPage extends CleanUpTabPage {
 		Composite methodComposite= new Composite(instanceGroup, SWT.NONE);
     	methodComposite.setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL, SWT.DEFAULT));
     	methodComposite.setLayout(createGridLayout(3, false));
+    	methodComposite.setFont(composite.getFont());
 
     	intent(methodComposite);
 		final RadioPreference thisMethodAlwaysPref= createRadioPref(methodComposite, 1, CleanUpMessages.MemberAccessesTabPage_RadioName_AlwaysThisForMethods, CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_ALWAYS, CleanUpModifyDialog.FALSE_TRUE);
