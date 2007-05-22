@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Sebastian Davids, sdavids@gmx.de - 187316 [preferences] Mark Occurences Pref Page; Link to
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.preferences;
@@ -20,6 +21,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -28,6 +30,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
+
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -99,7 +104,7 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 	 * @param parent the parent composite
 	 * @return the control for the preference page
 	 */
-	public Control createControl(Composite parent) {
+	public Control createControl(final Composite parent) {
 	
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
@@ -107,6 +112,19 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		composite.setLayout(layout);
+		
+		Link link= new Link(composite, SWT.NONE);
+		link.setText(PreferencesMessages.MarkOccurrencesConfigurationBlock_link);
+		link.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				PreferencesUtil.createPreferenceDialogOn(parent.getShell(), e.text, null, null); 
+			}
+		});
+		// TODO replace by link-specific tooltips when
+		// bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=88866 gets fixed
+		link.setToolTipText(PreferencesMessages.MarkOccurrencesConfigurationBlock_link_tooltip); 
+		
+		addFiller(composite);
 		
 		String label;
 		

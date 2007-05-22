@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
+ *     Sebastian Davids, sdavids@gmx.de - 187316 [preferences] Mark Occurences Pref Page; Link to
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -243,6 +244,8 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorHoverConfigurationBlock_insertModifierAndDelimiter;
 	public static String JavaEditorHoverConfigurationBlock_insertDelimiterAndModifier;
 	public static String MarkOccurrencesConfigurationBlock_title;
+	public static String MarkOccurrencesConfigurationBlock_link;
+	public static String MarkOccurrencesConfigurationBlock_link_tooltip;
 	public static String MarkOccurrencesConfigurationBlock_markOccurrences;
 	public static String MarkOccurrencesConfigurationBlock_markTypeOccurrences;
 	public static String MarkOccurrencesConfigurationBlock_markMethodOccurrences;
