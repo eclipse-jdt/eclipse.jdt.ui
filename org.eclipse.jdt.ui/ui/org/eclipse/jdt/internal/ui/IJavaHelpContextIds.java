@@ -303,6 +303,7 @@ public interface IJavaHelpContextIds {
 	public static final String JAVA_BASE_PREFERENCE_PAGE= PREFIX + "java_base_preference_page_context"; //$NON-NLS-1$
 	public static final String REFACTORING_PREFERENCE_PAGE= PREFIX + "refactoring_preference_page_context"; //$NON-NLS-1$
 	public static final String JAVA_EDITOR_PREFERENCE_PAGE= PREFIX + "java_editor_preference_page_context"; //$NON-NLS-1$
+	public static final String SPELLING_CONFIGURATION_BLOCK= PREFIX + "spelling_configuration_block_context"; //$NON-NLS-1$
 	public static final String PROPERTIES_FILE_EDITOR_PREFERENCE_PAGE= PREFIX + "properties_file_editor_preference_page_context"; //$NON-NLS-1$
 	public static final String COMPILER_PREFERENCE_PAGE= PREFIX + "compiler_preference_page_context"; //$NON-NLS-1$
 	public static final String JAVA_BUILD_PREFERENCE_PAGE= PREFIX + "java_build_preference_page_context"; //$NON-NLS-1$

@@ -448,7 +448,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 
 		fAllControls= (Control[]) allControls.toArray(new Control[allControls.size()]);
 		
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.SPELLING_CONFIGURATION_BLOCK);
 		return composite;
 	}
 
