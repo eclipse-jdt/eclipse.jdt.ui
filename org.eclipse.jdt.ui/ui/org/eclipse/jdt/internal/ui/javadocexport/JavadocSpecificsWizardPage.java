@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -140,7 +140,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		createLabel(inner, SWT.NONE, JavadocExportMessages.JavadocSpecificsWizardPage_sourcecompatibility_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, 0)); 
 
 		fSourceCombo= createCombo(inner, SWT.NONE, fStore.getSource(), createGridData(1));
-		String[] versions= { "-", "1.3", "1.4", "1.5" };//$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
+		String[] versions= { "-", "1.3", "1.4", "1.5", "1.6" };//$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		fSourceCombo.setItems(versions);   
 		fSourceCombo.setText(fStore.getSource());
 		
