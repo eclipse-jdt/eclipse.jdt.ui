@@ -3592,6 +3592,12 @@
             id="org.eclipse.jdt.ui.edit.text.java.introduce.parameter">
       </command>
       <command
+            name="%ActionDefinition.introduceParameterObject.name"
+            description="%ActionDefinition.introduceParameterObject.description"
+            categoryId="org.eclipse.jdt.ui.category.refactoring"
+            id="org.eclipse.jdt.ui.refactoring.introduceparamobject">
+      </command>
+      <command
             name="%ActionDefinition.introduceFactory.name"
             description="%ActionDefinition.introduceFactory.description"
             categoryId="org.eclipse.jdt.ui.category.refactoring"
