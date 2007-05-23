@@ -142,6 +142,9 @@ public class ExpressionsFix extends AbstractFix {
 						fNodes.add(node);
 					}
 					return;
+				} else if (expressionPrecedence == parentPrecedence && parentExpression instanceof ConditionalExpression) {
+					if (((ConditionalExpression)parentExpression).getElseExpression() != parenthesizedExpression)
+						return;
 				}
 			}
 			fNodes.add(node);
