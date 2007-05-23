@@ -36,7 +36,7 @@ public class BulletListBlock {
 	}
 
 	public Control createControl(Composite parent) {
-		fStyledText= new StyledText(parent, SWT.FLAT | SWT.BORDER);
+		fStyledText= new StyledText(parent, SWT.FLAT | SWT.BORDER | SWT.READ_ONLY);
 		
 		final GridData data= new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
 		fStyledText.setLayoutData(data);
