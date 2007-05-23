@@ -1048,8 +1048,10 @@ public class PackageExplorerPart extends ViewPart
 		
 		saveLayoutState(memento);
 		saveLinkingEnabled(memento);
-
-		fActionSet.saveFilterAndSorterState(memento);
+		
+		if (fActionSet != null) {
+			fActionSet.saveFilterAndSorterState(memento);
+		}
 	}
 
 	private void saveLinkingEnabled(IMemento memento) {
