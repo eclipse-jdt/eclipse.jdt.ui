@@ -113,7 +113,7 @@ public class JavaElementLightweightDecorator extends LabelProvider implements IL
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
 				fColor= new Color(Display.getDefault(), 100, 100, 100);
-				fBold= fontRegistry.getBold(JFaceResources.DIALOG_FONT);
+				fBold= fontRegistry.getBold(JFaceResources.DEFAULT_FONT);
 			}
 		});
 		fListener= new FileBufferListener();
