@@ -80,7 +80,7 @@ public final class ExtractSupertypeTests extends RefactoringTest {
 		return REFACTORING_PATH;
 	}
 
-	private void helper1(String[] methodNames, String[][] signatures, boolean deleteAllInSourceType, boolean deleteAllMatchingMethods) throws Exception {
+	private void helper1(String[] methodNames, String[][] signatures, boolean deleteAllInSourceType, boolean deleteAllMatchingMethods, boolean replaceOccurences) throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try {
 			IType type= getType(cu, "B");
@@ -96,7 +96,7 @@ public final class ExtractSupertypeTests extends RefactoringTest {
 			processor.setTypeName("Z");
 			processor.setCreateMethodStubs(true);
 			processor.setInstanceOf(false);
-			processor.setReplace(true);
+			processor.setReplace(replaceOccurences);
 			if (deleteAllInSourceType)
 				processor.setDeletedMethods(methods);
 			if (deleteAllMatchingMethods)
@@ -124,22 +124,26 @@ public final class ExtractSupertypeTests extends RefactoringTest {
 	}
 
 	public void test0() throws Exception {
-		helper1(new String[] { "m"}, new String[][] { new String[0]}, true, false);
+		helper1(new String[] { "m"}, new String[][] { new String[0]}, true, false, true);
 	}
 
 	public void test1() throws Exception {
-		helper1(new String[] { "m"}, new String[][] { new String[0]}, true, false);
+		helper1(new String[] { "m"}, new String[][] { new String[0]}, true, false, true);
 	}
 
 	public void test2() throws Exception {
-		helper1(new String[] { "m", "n"}, new String[][] { new String[0], new String[0]}, true, false);
+		helper1(new String[] { "m", "n"}, new String[][] { new String[0], new String[0]}, true, false, true);
 	}
 
 	public void test3() throws Exception {
-		helper1(new String[] { "m", "n"}, new String[][] { new String[0], new String[0]}, true, false);
+		helper1(new String[] { "m", "n"}, new String[][] { new String[0], new String[0]}, true, false, true);
 	}
 
 	public void test4() throws Exception {
-		helper1(new String[] { "m"}, new String[][] { new String[0]}, true, false);
+		helper1(new String[] { "m"}, new String[][] { new String[0]}, true, false, true);
+	}
+	
+	public void testBug151683() throws Exception {
+		helper1(new String[] { "m"}, new String[][] { new String[0]}, true, false, false);
 	}
 }
