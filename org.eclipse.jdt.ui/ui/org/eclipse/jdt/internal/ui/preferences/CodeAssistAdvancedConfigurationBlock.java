@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,10 +19,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.commands.Command;
+import org.eclipse.core.commands.CommandManager;
 import org.eclipse.core.commands.IParameter;
 import org.eclipse.core.commands.Parameterization;
 import org.eclipse.core.commands.ParameterizedCommand;
 import org.eclipse.core.commands.common.NotDefinedException;
+import org.eclipse.core.commands.contexts.ContextManager;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -41,7 +43,8 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
-import org.eclipse.jface.bindings.Binding;
+import org.eclipse.jface.bindings.BindingManager;
+import org.eclipse.jface.bindings.Scheme;
 import org.eclipse.jface.bindings.TriggerSequence;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
@@ -67,6 +70,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
@@ -720,19 +724,43 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		}
 	}
 
-	private static String getKeyboardShortcut(ParameterizedCommand command) {
-		final IBindingService bindingSvc= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
-		final Binding[] bindings= bindingSvc.getBindings();
-		for (int i= 0; i < bindings.length; i++) {
-			Binding binding= bindings[i];
-			if (command.equals(binding.getParameterizedCommand())) {
-				TriggerSequence triggers= binding.getTriggerSequence();
-				return triggers.format();
+	private static BindingManager fgLocalBindingManager;
+	static {
+		fgLocalBindingManager= new BindingManager(new ContextManager(), new CommandManager());
+		final IBindingService bindingService= (IBindingService)PlatformUI.getWorkbench().getService(IBindingService.class);
+		final Scheme[] definedSchemes= bindingService.getDefinedSchemes();
+		if (definedSchemes != null) {
+			try {
+				for (int i = 0; i < definedSchemes.length; i++) {
+					final Scheme scheme= definedSchemes[i];
+					final Scheme copy= fgLocalBindingManager.getScheme(scheme.getId());
+					copy.define(scheme.getName(), scheme.getDescription(), scheme.getParentId());
+				}
+			} catch (final NotDefinedException e) {
+				JavaPlugin.log(e);
 			}
 		}
+		fgLocalBindingManager.setLocale(bindingService.getLocale());
+		fgLocalBindingManager.setPlatform(bindingService.getPlatform());
+	}
+
+	private static String getKeyboardShortcut(ParameterizedCommand command) {
+		IBindingService bindingService= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
+		fgLocalBindingManager.setBindings(bindingService.getBindings());
+		try {
+			Scheme activeScheme= bindingService.getActiveScheme();
+			if (activeScheme != null)
+				fgLocalBindingManager.setActiveScheme(activeScheme);
+		} catch (NotDefinedException e) {
+			JavaPlugin.log(e);
+		}
+		
+		TriggerSequence[] bindings= fgLocalBindingManager.getActiveBindingsDisregardingContextFor(command);
+		if (bindings.length > 0)
+			return bindings[0].format();
 		return null;
 	}
-	
+
 	private Image getImage(ImageDescriptor imgDesc) {
 		if (imgDesc == null)
 			return null;
