@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -176,6 +176,8 @@ public class ScopeAnalyzer {
 	 * Collects all elements available in a type and its hierarchy
 	 * @param binding The type binding
 	 * @param flags Flags defining the elements to report
+	 * @param requestor the requestor to which all results are reported
+	 * @return return <code>true</code> if the requestor has reported the binding as found and no further results are required
 	 */
 	private boolean addInherited(ITypeBinding binding, int flags, IBindingRequestor requestor) {
 		if (!fTypesVisited.add(binding)) {
@@ -232,6 +234,8 @@ public class ScopeAnalyzer {
 	 * Collects all elements available in a type: its hierarchy and its outer scopes.
 	 * @param binding The type binding
 	 * @param flags Flags defining the elements to report
+	 * @param requestor the requestor to which all results are reported
+	 * @return return <code>true</code> if the requestor has reported the binding as found and no further results are required
 	 */
 	private boolean addTypeDeclarations(ITypeBinding binding, int flags, IBindingRequestor requestor) {
 		if (hasFlag(TYPES, flags) && !binding.isAnonymous()) {
@@ -401,11 +405,11 @@ public class ScopeAnalyzer {
 			if (binding == fToSearch) {
 				fFound= true;
 			} else {
-				binding= Bindings.getDeclaration(binding);
-				if (binding == fToSearch) {
+				IBinding bindingDeclaration= Bindings.getDeclaration(binding);
+				if (bindingDeclaration == fToSearch) {
 					fFound= true;
-				} else if (binding.getName().equals(fToSearch.getName())) {
-					String signature= getSignature(binding);
+				} else if (bindingDeclaration.getName().equals(fToSearch.getName())) {
+					String signature= getSignature(bindingDeclaration);
 					if (signature != null && signature.equals(getSignature(fToSearch))) {
 						if (checkVisibility) {
 							fIsVisible= false;
@@ -715,11 +719,7 @@ public class ScopeAnalyzer {
 	
 		public boolean visit(TypeDeclarationStatement node) {
 			if (hasFlag(TYPES, fFlags) && node.getStartPosition() + node.getLength() < fPosition) {
-				if (node.getAST().apiLevel() == AST.JLS2) {
-					fBreak= fRequestor.acceptBinding(node.getTypeDeclaration().resolveBinding());
-				} else {
-					fBreak= fRequestor.acceptBinding(node.getDeclaration().getName().resolveBinding());
-				}
+				fBreak= fRequestor.acceptBinding(node.resolveBinding());
 				return false;
 			}
 			return !fBreak && isInside(node);
@@ -768,11 +768,7 @@ public class ScopeAnalyzer {
 
 		public boolean visit(TypeDeclarationStatement node) {
 			if (hasFlag(TYPES, fFlags) && fPosition < node.getStartPosition()) {
-				if (node.getAST().apiLevel() == AST.JLS2) {
-					fBreak= fRequestor.acceptBinding(node.getTypeDeclaration().resolveBinding());
-				} else {
-					fBreak= fRequestor.acceptBinding(node.getDeclaration().getName().resolveBinding());
-				}
+				fBreak= fRequestor.acceptBinding(node.resolveBinding());
 			}
 			return false;
 		}

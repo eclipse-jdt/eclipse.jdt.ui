@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -2162,8 +2162,94 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}
+	
+	public void testStaticImports_bug187004a() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
+		IPackageFragment pack0= sourceFolder.createPackageFragment("b", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package b;\n");
+		buf.append("\n");
+		buf.append("abstract public class Parent<T> {\n");
+		buf.append("        protected static final int CONSTANT = 42;\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("Parent.java", buf.toString(), false, null);
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("a", false, null);
+		buf= new StringBuffer();
+		buf.append("package a;\n");
+		buf.append("\n");
+		buf.append("import b.Parent;\n");
+		buf.append("\n");
+		buf.append("public class Child extends Parent<String> {\n");
+		buf.append("        public Child() {\n");
+		buf.append("                System.out.println(CONSTANT);\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Child.java", buf.toString(), false, null);
 
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("Child", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package a;\n");
+		buf.append("\n");
+		buf.append("import b.Parent;\n"); 		// no static import for CONSTANT
+		buf.append("\n");
+		buf.append("public class Child extends Parent<String> {\n");
+		buf.append("        public Child() {\n");
+		buf.append("                System.out.println(CONSTANT);\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
+	public void testStaticImports_bug187004b() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack0= sourceFolder.createPackageFragment("b", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package b;\n");
+		buf.append("\n");
+		buf.append("abstract public class Parent<T> {\n");
+		buf.append("        protected static final int CONSTANT() { return 42; }\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("Parent.java", buf.toString(), false, null);
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("a", false, null);
+		buf= new StringBuffer();
+		buf.append("package a;\n");
+		buf.append("\n");
+		buf.append("import b.Parent;\n");
+		buf.append("\n");
+		buf.append("public class Child extends Parent<String> {\n");
+		buf.append("        public Child() {\n");
+		buf.append("                System.out.println(CONSTANT());\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Child.java", buf.toString(), false, null);
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("Child", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package a;\n");
+		buf.append("\n");
+		buf.append("import b.Parent;\n"); 		// no static import for CONSTANT()
+		buf.append("\n");
+		buf.append("public class Child extends Parent<String> {\n");
+		buf.append("        public Child() {\n");
+		buf.append("                System.out.println(CONSTANT());\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
 	
 	public void testImportCountAddNew() throws Exception {
 	    IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
