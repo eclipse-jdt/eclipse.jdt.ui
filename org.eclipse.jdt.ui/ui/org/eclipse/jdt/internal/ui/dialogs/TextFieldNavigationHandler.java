@@ -11,9 +11,16 @@
 package org.eclipse.jdt.internal.ui.dialogs;
 
 import com.ibm.icu.text.BreakIterator;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.eclipse.core.commands.Command;
+import org.eclipse.core.commands.CommandManager;
+import org.eclipse.core.commands.ParameterizedCommand;
+import org.eclipse.core.commands.common.NotDefinedException;
+import org.eclipse.core.commands.contexts.ContextManager;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -30,6 +37,8 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.bindings.BindingManager;
+import org.eclipse.jface.bindings.Scheme;
 import org.eclipse.jface.bindings.TriggerSequence;
 import org.eclipse.jface.bindings.keys.KeySequence;
 import org.eclipse.jface.bindings.keys.SWTKeySupport;
@@ -37,9 +46,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
-import org.eclipse.ui.contexts.IContextActivation;
-import org.eclipse.ui.contexts.IContextService;
-import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 
@@ -293,7 +299,6 @@ public class TextFieldNavigationHandler {
 		private KeyAdapter getKeyListener() {
 			if (fKeyListener == null) {
 				fKeyListener= new KeyAdapter() {
-					private static final String TEXT_EDITOR_CONTEXT_ID= "org.eclipse.ui.textEditorScope"; //$NON-NLS-1$
 					private final boolean IS_WORKAROUND= (fNavigable instanceof ComboNavigable)
 							|| (fNavigable instanceof TextNavigable && TextNavigable.BUG_106024_TEXT_SELECTION);
 					private List/*<Submission>*/ fSubmissions;
@@ -348,20 +353,39 @@ public class TextFieldNavigationHandler {
 						
 						fSubmissions= new ArrayList();
 						
-						IContextService contextService= (IContextService) PlatformUI.getWorkbench().getAdapter(IContextService.class);
 						ICommandService commandService= (ICommandService) PlatformUI.getWorkbench().getAdapter(ICommandService.class);
-						IHandlerService handlerService= (IHandlerService) PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
 						IBindingService bindingService= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
-						if (contextService == null || commandService == null || handlerService == null || bindingService == null)
+						if (commandService == null || bindingService == null)
 							return fSubmissions;
 						
-						IContextActivation[] contextActivations;
-						contextActivations= new IContextActivation[] {
-								contextService.activateContext(IContextService.CONTEXT_ID_WINDOW), // XXX relying on workbench feature https://bugs.eclipse.org/bugs/show_bug.cgi?id=115460#c11
-								contextService.activateContext(TEXT_EDITOR_CONTEXT_ID)
-						};
+						// Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=184502 ,
+						// similar to CodeAssistAdvancedConfigurationBlock.getKeyboardShortcut(..):
+						BindingManager localBindingManager= new BindingManager(new ContextManager(), new CommandManager());
+						final Scheme[] definedSchemes= bindingService.getDefinedSchemes();
+						if (definedSchemes != null) {
+							try {
+								for (int i = 0; i < definedSchemes.length; i++) {
+									Scheme scheme= definedSchemes[i];
+									Scheme localSchemeCopy= localBindingManager.getScheme(scheme.getId());
+									localSchemeCopy.define(scheme.getName(), scheme.getDescription(), scheme.getParentId());
+								}
+							} catch (final NotDefinedException e) {
+								JavaPlugin.log(e);
+							}
+						}
+						localBindingManager.setLocale(bindingService.getLocale());
+						localBindingManager.setPlatform(bindingService.getPlatform());
 						
-						fSubmissions.add(new Submission(bindingService.getActiveBindingsFor(ITextEditorActionDefinitionIds.SELECT_WORD_NEXT)) {
+						localBindingManager.setBindings(bindingService.getBindings());
+						try {
+							Scheme activeScheme= bindingService.getActiveScheme();
+							if (activeScheme != null)
+								localBindingManager.setActiveScheme(activeScheme);
+						} catch (NotDefinedException e) {
+							JavaPlugin.log(e);
+						}
+						
+						fSubmissions.add(new Submission(getKeyBindings(localBindingManager, commandService, ITextEditorActionDefinitionIds.SELECT_WORD_NEXT)) {
 							public void execute() {
 								fIterator.setText(fNavigable.getText());
 								int caretPosition= fNavigable.getCaretPosition();
@@ -376,7 +400,7 @@ public class TextFieldNavigationHandler {
 								fIterator.setText(EMPTY_TEXT);
 							}
 						});
-						fSubmissions.add(new Submission(bindingService.getActiveBindingsFor(ITextEditorActionDefinitionIds.SELECT_WORD_PREVIOUS)) {
+						fSubmissions.add(new Submission(getKeyBindings(localBindingManager, commandService, ITextEditorActionDefinitionIds.SELECT_WORD_PREVIOUS)) {
 							public void execute() {
 								fIterator.setText(fNavigable.getText());
 								int caretPosition= fNavigable.getCaretPosition();
@@ -391,7 +415,7 @@ public class TextFieldNavigationHandler {
 								fIterator.setText(EMPTY_TEXT);
 							}
 						});
-						fSubmissions.add(new Submission(bindingService.getActiveBindingsFor(ITextEditorActionDefinitionIds.WORD_NEXT)) {
+						fSubmissions.add(new Submission(getKeyBindings(localBindingManager, commandService, ITextEditorActionDefinitionIds.WORD_NEXT)) {
 							public void execute() {
 								fIterator.setText(fNavigable.getText());
 								int caretPosition= fNavigable.getCaretPosition();
@@ -401,7 +425,7 @@ public class TextFieldNavigationHandler {
 								fIterator.setText(EMPTY_TEXT);
 							}
 						});
-						fSubmissions.add(new Submission(bindingService.getActiveBindingsFor(ITextEditorActionDefinitionIds.WORD_PREVIOUS)) {
+						fSubmissions.add(new Submission(getKeyBindings(localBindingManager, commandService, ITextEditorActionDefinitionIds.WORD_PREVIOUS)) {
 							public void execute() {
 								fIterator.setText(fNavigable.getText());
 								int caretPosition= fNavigable.getCaretPosition();
@@ -411,7 +435,7 @@ public class TextFieldNavigationHandler {
 								fIterator.setText(EMPTY_TEXT);
 							}
 						});
-						fSubmissions.add(new Submission(bindingService.getActiveBindingsFor(ITextEditorActionDefinitionIds.DELETE_NEXT_WORD)) {
+						fSubmissions.add(new Submission(getKeyBindings(localBindingManager, commandService, ITextEditorActionDefinitionIds.DELETE_NEXT_WORD)) {
 							public void execute() {
 								Point selection= fNavigable.getSelection();
 								String text= fNavigable.getText();
@@ -432,7 +456,7 @@ public class TextFieldNavigationHandler {
 								fNavigable.setSelection(start, start);
 							}
 						});
-						fSubmissions.add(new Submission(bindingService.getActiveBindingsFor(ITextEditorActionDefinitionIds.DELETE_PREVIOUS_WORD)) {
+						fSubmissions.add(new Submission(getKeyBindings(localBindingManager, commandService, ITextEditorActionDefinitionIds.DELETE_PREVIOUS_WORD)) {
 							public void execute() {
 								Point selection= fNavigable.getSelection();
 								String text= fNavigable.getText();
@@ -454,11 +478,13 @@ public class TextFieldNavigationHandler {
 							}
 						});
 						
-						for (int i= 0; i < contextActivations.length; i++) {
-							contextService.deactivateContext(contextActivations[i]);
-						}
-						
 						return fSubmissions;
+					}
+
+					private TriggerSequence[] getKeyBindings(BindingManager localBindingManager, ICommandService commandService, String commandID) {
+						Command command= commandService.getCommand(commandID);
+						ParameterizedCommand pCmd= new ParameterizedCommand(command, null);
+						return localBindingManager.getActiveBindingsDisregardingContextFor(pCmd);
 					}
 					
 				};
