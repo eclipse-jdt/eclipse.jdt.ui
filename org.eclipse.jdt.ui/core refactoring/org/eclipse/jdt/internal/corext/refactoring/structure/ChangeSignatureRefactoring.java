@@ -1446,7 +1446,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			if (fDefaultValueAdvisor == null)
 				return (Expression) cuRewrite.getASTRewrite().createStringPlaceholder(info.getDefaultValue(), ASTNode.METHOD_INVOCATION);
 			else
-				return fDefaultValueAdvisor.createDefaultExpression(cuRewrite, info, parameterInfos, nodes, false, method);
+				return fDefaultValueAdvisor.createDefaultExpression(nodes, info, parameterInfos, method, false, cuRewrite);
 		}
 	}
 
@@ -1469,7 +1469,12 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 	}
 	
 	private static String createDeclarationString(ParameterInfo info) {
-		return info.getNewTypeName() + " " + info.getNewName(); //$NON-NLS-1$
+		String newTypeName= info.getNewTypeName();
+		int index= newTypeName.indexOf('.');
+		if (index != -1){
+			newTypeName= newTypeName.substring(index+1);
+		}
+		return newTypeName + " " + info.getNewName(); //$NON-NLS-1$
 	}
 	
 	private static final boolean BUG_89686= true; //see bug 83693: Search for References to methods/constructors: do ranges include parameter lists?
@@ -1698,7 +1703,10 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		protected final Type createNewTypeNode(String newTypeName, ITypeBinding newTypeBinding) {
 			Type newTypeNode;
 			if (newTypeBinding == null) {
-				newTypeNode= (Type) getASTRewrite().createStringPlaceholder(newTypeName, ASTNode.SIMPLE_TYPE);
+				if (fDefaultValueAdvisor != null)
+					newTypeNode= fDefaultValueAdvisor.createType(newTypeName, getMethodNameNode().getStartPosition(), getCompilationUnitRewrite());
+				else
+					newTypeNode= (Type) getASTRewrite().createStringPlaceholder(newTypeName, ASTNode.SIMPLE_TYPE);
 				//Don't import if not resolved.
 			} else {
 				newTypeNode= getImportRewrite().addImport(newTypeBinding, fCuRewrite.getAST());
@@ -1722,9 +1730,6 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		}
 
 		public void updateNode() {
-			if (fDefaultValueAdvisor != null) {
-				//fDefaultValueAdvisor.updateInvocationNames(getParamgumentsRewrite(), getParameterInfos(), (MethodDeclaration) ASTNodes.getParent(fNode, MethodDeclaration.class), getCompilationUnitRewrite());
-			}
 			reshuffleElements();
 			changeMethodName();
 		}
@@ -1763,7 +1768,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 
 		private Expression createNewExpressionRecursive(ParameterInfo info, List parameterInfos, List nodes, CompilationUnitRewrite cuRewrite, MethodDeclaration methodDeclaration) {
 			if (fDefaultValueAdvisor != null && info.isAdded()) {
-				return fDefaultValueAdvisor.createDefaultExpression(cuRewrite, info, parameterInfos, nodes, true, methodDeclaration);
+				return fDefaultValueAdvisor.createDefaultExpression(nodes, info, parameterInfos, methodDeclaration, true, cuRewrite);
 			}
 			return (Expression) getASTRewrite().createStringPlaceholder(info.getNewName(), ASTNode.METHOD_INVOCATION);
 		}

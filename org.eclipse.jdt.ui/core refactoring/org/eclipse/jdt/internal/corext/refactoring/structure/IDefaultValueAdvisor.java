@@ -14,21 +14,33 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 
 public interface IDefaultValueAdvisor {
 
 	/**
-	 * Create an Expression for added parameters using information from the calling scope.
-	 * @param cuRewrite the CompilationUnitRewrite to use for rewrite, imports etc..
-	 * @param info the added ParamterInfo object
-	 * @param parameterInfos all other ParameterInfo objects
-	 * @param nodes list of arguments from the calling method
+	 * Creates a default expression for an added parameter for a given method invocation.
+	 * 
+	 * @param invocationArguments arguments of the method invocation
+	 * @param addedInfo the added ParamterInfo object
+	 * @param parameterInfos all ParameterInfo objects, including the added ParameterInfo
+	 * @param enclosingMethod the Method that encloses the invocation. Can be null if there is no enclosing method
 	 * @param isRecursive true if called from a recursive invocation
-	 * @param caller the Method that encloses the reference, or the affected declaration. Can be null if there is no enclosing method.
-	 * @return Expression for invocation
+	 * @param cuRewrite the CompilationUnitRewrite to use for rewrite, imports etc..
+	 * @return a new Expression to be used as argument for the new parameter
 	 */
-	Expression createDefaultExpression(CompilationUnitRewrite cuRewrite, ParameterInfo info, List parameterInfos, List nodes, boolean isRecursive, MethodDeclaration caller);
+	Expression createDefaultExpression(List/*<Expression>*/ invocationArguments, ParameterInfo addedInfo, List/*<ParameterInfo>*/ parameterInfos, MethodDeclaration enclosingMethod, boolean isRecursive, CompilationUnitRewrite cuRewrite);
+
+	/**
+	 * Create a type for the added parameter.
+	 * 
+	 * @param newTypeName the fully qualified name of the type
+	 * @param startPosition the position where the type is defined in a compilation unit
+	 * @param cuRewrite the CompilationUnitRewrite to use for rewrite, imports etc..
+	 * @return the new type to be used in default expressions
+	 */
+	Type createType(String newTypeName, int startPosition, CompilationUnitRewrite cuRewrite);
 
 }

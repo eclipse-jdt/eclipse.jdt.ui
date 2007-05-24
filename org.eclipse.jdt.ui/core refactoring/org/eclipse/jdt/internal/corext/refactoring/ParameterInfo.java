@@ -34,6 +34,7 @@ public class ParameterInfo {
 	private boolean fIsDeleted;
 	private boolean fCreateField=true;
 	private boolean fInlined;
+	private boolean fResolve= true;
 	
 	public ParameterInfo(String type, String name, int index) {
 		this(null, null, type, name, index);
@@ -56,13 +57,25 @@ public class ParameterInfo {
 		fIsDeleted= false;
 	}
 
+	
+	/**
+	 * Creates a new ParameterInfo. Parameter is marked as added and not resolvable
+	 * @param type the fullyqualified type
+	 * @param name the name
+	 * @return the parameter info object
+	 */
 	public static ParameterInfo createInfoForAddedParameter(String type, String name) {
 		ParameterInfo info= new ParameterInfo("", "", INDEX_FOR_ADDED); //$NON-NLS-1$ //$NON-NLS-2$
 		info.setNewTypeName(type);
 		info.setNewName(name);
+		info.setResolve(false);
 		return info;
 	}
 	
+	private void setResolve(boolean resolve) {
+		fResolve= resolve;
+	}
+
 	public static ParameterInfo createInfoForAddedParameter(String type, String name, String defaultValue) {
 		ParameterInfo info= new ParameterInfo("", "", INDEX_FOR_ADDED); //$NON-NLS-1$ //$NON-NLS-2$
 		info.setNewTypeName(type);
@@ -130,7 +143,10 @@ public class ParameterInfo {
 	}
 	
 	public void setNewTypeBinding(ITypeBinding typeBinding){
-		fNewTypeBinding= typeBinding;
+		//TODO: TypeContextChecker should not resolve such a parameter at all.
+		// That would also make IProblemVerifier obsolete.
+		if (fResolve)
+			fNewTypeBinding= typeBinding;
 	}
 
 	public boolean isOldVarargs() {

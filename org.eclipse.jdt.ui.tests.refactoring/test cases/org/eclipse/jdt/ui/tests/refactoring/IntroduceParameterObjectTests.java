@@ -120,22 +120,23 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 	}
 	
 	public void testVarArgsReordered() throws Exception{
-		Map indexMap= new HashMap();
-		indexMap.put("is", new Integer(0));
-		indexMap.put("a", new Integer(1));
 		RunRefactoringParameter param= new RunRefactoringParameter();
-		param.indexMap=indexMap;
+		param.indexMap= createIndexMap(new String[] { "is", "a" });
 		runRefactoring(param);
 	}
 	
+	private Map createIndexMap(String[] strings) {
+		Map result=new HashMap();
+		for (int i= 0; i < strings.length; i++) {
+			result.put(strings[i], new Integer(i));
+		}
+		return result;
+	}
+
 	public void testReorderGetter() throws Exception{
-		Map indexMap= new HashMap();
-		indexMap.put("d", new Integer(0));
-		indexMap.put("a", new Integer(1));
-		indexMap.put("b", new Integer(2));
 		RunRefactoringParameter param= new RunRefactoringParameter();
 		param.getters=true;
-		param.indexMap=indexMap;
+		param.indexMap= createIndexMap(new String[] { "d", "a", "b" });
 		runRefactoring(param);
 	}
 	
@@ -150,11 +151,8 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 	}
 	
 	public void testRecursiveReordered() throws Exception {
-		Map indexMap= new HashMap();
-		indexMap.put("y", new Integer(0));
-		indexMap.put("x", new Integer(1));
 		RunRefactoringParameter param= new RunRefactoringParameter();
-		param.indexMap= indexMap;
+		param.indexMap= createIndexMap(new String[] { "y", "x" });
 		runRefactoring(param);
 	}
 	
@@ -179,6 +177,29 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		runRefactoring(params);
 		checkAdditionalFile(null, "ITestInterfaceMethod");
 		checkAdditionalFile(null, "TestInterfaceMethod2Impl");
+	}
+	
+	public void testDefaultPackagePoint() throws Exception {
+		RunRefactoringParameter params= new RunRefactoringParameter();
+		params.className= "ArrayList";
+		params.inputPackage= "";
+		runRefactoring(params);
+	}
+	
+	public void testDefaultPackagePointTopLevel() throws Exception {
+		RunRefactoringParameter params= new RunRefactoringParameter();
+		params.className= "ArrayList";
+		params.topLevel= true;
+		params.inputPackage= "";
+		runRefactoring(params);
+	}
+	
+	public void testImportNameSimple() throws Exception {
+		RunRefactoringParameter params= new RunRefactoringParameter();
+		params.className= "ArrayList";
+		params.parameterName= "p";
+		params.topLevel= true;
+		runRefactoring(params);
 	}
 
 	private void createCaller(String subDir) throws Exception {
@@ -223,38 +244,27 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 
 
 	public static class RunRefactoringParameter {
+		public String parameterName;
 		public Set useParams;
 		public boolean useSuggestedMethod;
-		public boolean topLevel=false;
-		public boolean getters=false;
-		public boolean setters=false;
-		public boolean delegate=false;
-		public Map renamings=null;
-		public String className=null;
-		public String packageName=null;
-		public Map indexMap=null;
-		public boolean commments=false;
-		public boolean expectFailure=false;
-
-		public RunRefactoringParameter()
-		{
-		}
-		
-		public RunRefactoringParameter(boolean topLevel, boolean getters, boolean setters, boolean delegate, Map renamings, String className, String packageName, Map indexMap, boolean commments) {
-			this.topLevel= topLevel;
-			this.getters= getters;
-			this.setters= setters;
-			this.delegate= delegate;
-			this.renamings= renamings;
-			this.className= className;
-			this.packageName= packageName;
-			this.indexMap= indexMap;
-			this.commments= commments;
-		}
+		public boolean topLevel;
+		public boolean getters;
+		public boolean setters;
+		public boolean delegate;
+		public Map renamings;
+		public String className;
+		public String packageName;
+		public String inputPackage;
+		public Map indexMap;
+		public boolean commments;
+		public boolean expectFailure;
 	}
 
 	private void runRefactoring(final RunRefactoringParameter parameter) throws Exception {
 		IPackageFragment pack= getPackageP();
+		if (parameter.inputPackage!=null){
+			pack= getRoot().createPackageFragment(parameter.inputPackage,true,null);
+		}
 		ICompilationUnit cu= createCUfromTestFile(pack, getCUName(false), true);
 		IType type= cu.getType(getCUName(false));
 		assertNotNull(type);
@@ -319,6 +329,8 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 			ref.setClassName(parameter.className);
 		if (parameter.packageName != null)
 			ref.setPackage(parameter.packageName);
+		if (parameter.parameterName != null)
+			ref.setParameterName(parameter.parameterName);
 		List pis= ref.getParameterInfos();
 		for (Iterator iter= pis.iterator(); iter.hasNext();) {
 			ParameterInfo pi= (ParameterInfo) iter.next();

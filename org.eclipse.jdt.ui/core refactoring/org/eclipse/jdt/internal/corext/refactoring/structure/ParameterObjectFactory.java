@@ -44,7 +44,9 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
@@ -145,7 +147,7 @@ public class ParameterObjectFactory {
 				}
 				svd.setVarargs(true);
 			}
-			Type fieldType= importBinding(typeBinding,cuRewrite);
+			Type fieldType= importBinding(typeBinding, cuRewrite);
 			svd.setType(fieldType);
 			svd.setName(getFieldName(ast, pi));
 			parameters.add(svd);
@@ -273,16 +275,18 @@ public class ParameterObjectFactory {
 		return methodDeclaration;
 	}
 
-	public Type createType(boolean asTopLevelClass, CompilationUnitRewrite cuRewrite) {
+	public Type createType(final boolean asTopLevelClass, final CompilationUnitRewrite cuRewrite, final int position) {
 		String concatenateName= null;
 		if (asTopLevelClass) {
 			concatenateName= JavaModelUtil.concatenateName(fPackage, fClassName);
 		} else {
 			concatenateName= JavaModelUtil.concatenateName(fEnclosingType, fClassName);
 		}
-		String addedImport= cuRewrite.getImportRewrite().addImport(concatenateName);
+		ImportRewrite importRewrite= cuRewrite.getImportRewrite();
+		ContextSensitiveImportRewriteContext context= new ContextSensitiveImportRewriteContext(cuRewrite.getRoot(), position, importRewrite);
+		String addedImport= importRewrite.addImport(concatenateName, context);
 		cuRewrite.getImportRemover().registerAddedImport(addedImport);
-		AST ast=cuRewrite.getAST();
+		AST ast= cuRewrite.getAST();
 		return ast.newSimpleType(ast.newName(addedImport));
 	}
 
