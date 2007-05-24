@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -107,8 +107,6 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 	private ITypeBinding fTypeBinding;
 
 	private IVariableBinding[] fCandidateFields;
-
-	private List fAlreadyChecked;
 
 	private class HashCodeEqualsInfo {
 		
@@ -268,7 +266,6 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 	 * 
 	 * @param shell the shell to use
 	 * @param type the type to generate stubs for
-	 * @throws JavaModelException
 	 * @throws CoreException if an error occurs
 	 */
 	private void run(Shell shell, IType type) throws CoreException {
@@ -318,7 +315,7 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 
 			ITypeBinding superclass= fTypeBinding.getSuperclass();
 			RefactoringStatus status= new RefactoringStatus();
-			fAlreadyChecked= new ArrayList();
+			ArrayList alreadyChecked= new ArrayList();
 
 			if (!"java.lang.Object".equals(superclass.getQualifiedName())) { //$NON-NLS-1$
 				status.merge(checkHashCodeEqualsExists(superclass, true));
@@ -328,9 +325,9 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 				ITypeBinding fieldsType= selectedBindings[i].getType();
 				if (fieldsType.isArray())
 					fieldsType= fieldsType.getElementType();
-				if (!fieldsType.isPrimitive() && !fAlreadyChecked.contains(fieldsType) && !fieldsType.equals(fTypeBinding)) {
+				if (!fieldsType.isPrimitive() && !fieldsType.isEnum() && !alreadyChecked.contains(fieldsType) && !fieldsType.equals(fTypeBinding)) {
 					status.merge(checkHashCodeEqualsExists(fieldsType, false));
-					fAlreadyChecked.add(fieldsType);
+					alreadyChecked.add(fieldsType);
 				}
 				if (Modifier.isTransient(selectedBindings[i].getModifiers()))
 					status.addWarning(Messages.format(ActionMessages.GenerateHashCodeEqualsAction_transient_field_included_error, selectedBindings[i]
