@@ -776,6 +776,10 @@ public final class RefactoringMessages extends NLS {
 
 	public static String RefactoringExecutionHelper_cannot_execute;
 
+	public static String RefactoringExecutionStarter_IntroduceParameterObject_problem_description;
+
+	public static String RefactoringExecutionStarter_IntroduceParameterObject_problem_title;
+
 	public static String RefactoringGroup_modify_Parameters_label;
 
 	public static String RefactoringGroup_move_label;

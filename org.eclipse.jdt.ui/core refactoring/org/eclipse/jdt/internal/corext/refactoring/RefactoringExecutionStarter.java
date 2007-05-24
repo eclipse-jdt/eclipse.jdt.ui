@@ -479,9 +479,15 @@ public final class RefactoringExecutionStarter {
 
 				String message= entry.getMessage();
 				final Object element= entry.getData();
+				IMethod superMethod= (IMethod) element;
+				RefactoringStatus availability= Checks.checkAvailability(superMethod);
+				if (availability.hasError()){
+					MessageDialog.openError(shell, RefactoringMessages.RefactoringExecutionStarter_IntroduceParameterObject_problem_title, RefactoringMessages.RefactoringExecutionStarter_IntroduceParameterObject_problem_description);
+					return;
+				}
 				message= message + RefactoringMessages.RefactoringErrorDialogUtil_okToPerformQuestion;
 				if (element != null && MessageDialog.openQuestion(shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, message)) {
-					refactoring=new IntroduceParameterObjectRefactoring((IMethod) element);
+					refactoring=new IntroduceParameterObjectRefactoring(superMethod);
 				}
 				else refactoring=null;
 			}
