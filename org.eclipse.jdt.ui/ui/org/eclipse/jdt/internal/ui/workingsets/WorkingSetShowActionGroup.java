@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,7 +62,10 @@ public class WorkingSetShowActionGroup extends ActionGroup implements IWorkingSe
 	
 	public void cleanViewMenu(IMenuManager menuManager) {
 		for (Iterator iter= fContributions.iterator(); iter.hasNext();) {
-			menuManager.remove((IContributionItem)iter.next());
+			IContributionItem removed= menuManager.remove((IContributionItem) iter.next());
+			if (removed != null) {
+				removed.dispose();
+			}
 		}
 		fContributions.clear();
 	}

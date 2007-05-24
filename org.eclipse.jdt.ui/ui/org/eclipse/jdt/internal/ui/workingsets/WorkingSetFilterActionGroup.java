@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -273,7 +273,10 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 		for (int i= 1; i < fLRUMenuCount; i++) {
 			String id= WorkingSetMenuContributionItem.getId(i);
 			IContributionItem item= mm.remove(id);
-			fContributions.remove(item);
+			if (item != null) {
+				item.dispose();
+				fContributions.remove(item);
+			}
 		}
 	}
 
@@ -303,7 +306,10 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	
 	public void cleanViewMenu(IMenuManager menuManager) {
 		for (Iterator iter= fContributions.iterator(); iter.hasNext();) {
-			menuManager.remove((IContributionItem)iter.next());
+			IContributionItem removed= menuManager.remove((IContributionItem) iter.next());
+			if (removed != null) {
+				removed.dispose();
+			}
 		}
 		fContributions.clear();
 		fMenuManager.removeMenuListener(fMenuListener);
