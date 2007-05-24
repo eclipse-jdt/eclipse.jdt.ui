@@ -110,8 +110,8 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
@@ -566,16 +566,34 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		SearchEngine engine= new SearchEngine((WorkingCopyOwner) null);
 		String packPattern= typeSearchFilter.getPackagePattern();
 		progressMonitor.setTaskName(JavaUIMessages.FilteredTypesSelectionDialog_searchJob_taskName);
+		
 		/*
-		 * Setting the filter into match everything mode avoids filtering twice by the same pattern
-		 * (the search engine only provides filtered matches).
+		 * Setting the filter into match everything mode avoids filtering twice
+		 * by the same pattern (the search engine only provides filtered
+		 * matches). For the case when the pattern is a camel case pattern with
+		 * a terminator, the filter is not set to match everything mode because
+		 * jdt.core's SearchPattern does not support that case.
 		 */ 
-		typeSearchFilter.setMatchEverythingMode(true);
+		String typePattern= itemsFilter.getPattern();
+		int matchRule= typeSearchFilter.getMatchRule();
+		if (matchRule == SearchPattern.RULE_CAMELCASE_MATCH) {
+			 // If the pattern is empty, the RULE_BLANK_MATCH will be chosen, so we don't have to check the pattern length
+			char lastChar= typePattern.charAt(typePattern.length() - 1);
+
+			if (lastChar == '<' || lastChar == ' ') {
+				typePattern= typePattern.substring(0, typePattern.length() - 1);
+			} else {
+				typeSearchFilter.setMatchEverythingMode(true);
+			}
+		} else {
+			typeSearchFilter.setMatchEverythingMode(true);
+		}
+
 		try {
 			engine.searchAllTypeNames(packPattern == null ? null : packPattern.toCharArray(),
 					typeSearchFilter.getPackageFlags(), //TODO: https://bugs.eclipse.org/bugs/show_bug.cgi?id=176017
-					typeSearchFilter.getPattern().toCharArray(),
-					typeSearchFilter.getMatchRule(), //TODO: https://bugs.eclipse.org/bugs/show_bug.cgi?id=176017
+					typePattern.toCharArray(),
+					matchRule, //TODO: https://bugs.eclipse.org/bugs/show_bug.cgi?id=176017
 					typeSearchFilter.getElementKind(),
 					typeSearchFilter.getSearchScope(),
 					requestor,
