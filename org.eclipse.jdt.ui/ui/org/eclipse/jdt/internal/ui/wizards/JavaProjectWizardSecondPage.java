@@ -199,7 +199,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				if (e.getStatus().getCode() == IResourceStatus.FAILED_READ_METADATA) {					
 					result= new StatusInfo(IStatus.INFO, Messages.format(NewWizardMessages.JavaProjectWizardSecondPage_DeleteCorruptProjectFile_message, e.getLocalizedMessage()));
 					
-					deleteProjectFile(fCurrProjectLocation);
+					deleteProjectFile(realLocation);
 					if (fCurrProject.exists())
 						fCurrProject.delete(true, null);
 					
