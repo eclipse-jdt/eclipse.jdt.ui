@@ -268,6 +268,8 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 		
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		Locale locale= getCurrentLocale(store);
+		if (fUserDictionary == null && "".equals(locale.toString())) //$NON-NLS-1$
+			return null;
 		
 		if (fChecker != null && fChecker.getLocale().equals(locale))
 			return fChecker;
