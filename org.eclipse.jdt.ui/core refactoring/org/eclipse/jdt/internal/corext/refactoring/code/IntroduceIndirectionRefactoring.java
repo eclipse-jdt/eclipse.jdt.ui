@@ -580,6 +580,9 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 				IMethod method= tester.findOverridingMethodInType(subtypes[i], fTargetMethod);
 				if (method != null && method.exists()) {
 					result.merge(adjustVisibility(method, neededVisibility, monitor));
+					if (monitor.isCanceled())
+						throw new OperationCanceledException();
+					
 					if (result.hasError())
 						return result; // binary
 				}
@@ -753,6 +756,8 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 	/**
 	 * Checks whether the target method can be created. Note that this
 	 * can only be done after fDelegateParameterType has been initialized.
+	 * @return resulting status
+	 * @throws JavaModelException 
 	 */
 	private RefactoringStatus checkCanCreateIntermediaryMethod() throws JavaModelException {
 		// check if method already exists:
@@ -998,6 +1003,11 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 	 * 		2b) outside the type of the invocation
 	 * 
 	 * In case of 1a) and 2b), qualify with the enclosing type. 
+	 * @param expr 
+	 * @param originalInvocation 
+	 * @param enclosing 
+	 * @param unitRewriter 
+	 * @return resulting status
 	 * 
 	 */
 	private RefactoringStatus qualifyThisExpression(ThisExpression expr, MethodInvocation originalInvocation, IMember enclosing, CompilationUnitRewrite unitRewriter) {

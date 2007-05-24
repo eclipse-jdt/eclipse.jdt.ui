@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
@@ -520,6 +521,9 @@ public final class MemberVisibilityAdjustor {
 	/**
 	 * Check whether anyone accesses the members of the moved type from the
 	 * outside. Those may need to have their visibility adjusted.
+	 * @param member 
+	 * @param monitor 
+	 * @throws JavaModelException 
 	 */
 	private void adjustMemberVisibility(final IMember member, final IProgressMonitor monitor) throws JavaModelException {
 
@@ -1107,6 +1111,8 @@ public final class MemberVisibilityAdjustor {
 				adjustment= (IVisibilityAdjustment) fAdjustments.get(member);
 				if (adjustment != null)
 					adjustment.rewriteVisibility(this, new SubProgressMonitor(monitor, 1));
+				if (monitor.isCanceled())
+					throw new OperationCanceledException();
 			}
 		} finally {
 			fTypeHierarchies.clear();
