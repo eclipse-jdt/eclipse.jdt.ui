@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
  * while QuickDiff is initializing with lots of changes in a large file.
  * 
  * @since 3.1
+ * @deprecated since INVOCATION_COUNT dimension is no longer supported.
  */
 public class QuickDiffInvocationCountTest extends TextPerformanceTestCase {
 

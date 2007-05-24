@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import junit.framework.TestSuite;
  * when typing on a line with annotations shown as squiggles in the text editor.
  * 
  * @since 3.1
+ * @deprecated since INVOCATION_COUNT dimension is no longer supported.
  */
 public class TextTypingInvocationCountTest extends TypingInvocationCountTest {
 
