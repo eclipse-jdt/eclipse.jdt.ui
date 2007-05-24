@@ -434,7 +434,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				LocalCorrectionsSubProcessor.addUnnecessaryThrownExceptionProposal(context, problem, proposals);
 				break;
 			case IProblem.UnqualifiedFieldAccess:
-				//ModifierCorrectionSubProcessor.addGetterSetterProposal(context, problem, proposals, 15);
+				ModifierCorrectionSubProcessor.addGetterSetterProposal(context, problem, proposals, 15);
 				LocalCorrectionsSubProcessor.addUnqualifiedFieldAccessProposal(context, problem, proposals);
 				break;
 			case IProblem.Task:

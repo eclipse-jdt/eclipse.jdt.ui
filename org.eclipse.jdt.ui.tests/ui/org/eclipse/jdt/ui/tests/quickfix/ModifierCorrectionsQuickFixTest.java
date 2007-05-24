@@ -12,12 +12,10 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -26,18 +24,23 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	
@@ -3049,5 +3052,85 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
+	
+	public void testCreateFieldUsingSef() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    private int t;\n");
+		buf.append("    {\n");
+		buf.append("        System.out.println(t);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class B {\n");
+		buf.append("    {\n");
+		buf.append("        new A().t=5;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    int t;\n");
+		buf.append("    {\n");
+		buf.append("        System.out.println(t);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class B {\n");
+		buf.append("    {\n");
+		buf.append("        new A().t=5;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+		buf= new StringBuffer();
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    private int t;\n");
+		buf.append("    {\n");
+		buf.append("        System.out.println(getT());\n");
+		buf.append("    }\n");
+		buf.append("    public void setT(int t) {\n");
+		buf.append("        this.t = t;\n");
+		buf.append("    }\n");
+		buf.append("    public int getT() {\n");
+		buf.append("        return t;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class B {\n");
+		buf.append("    {\n");
+		buf.append("        new A().setT(5);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		checkForSEFProposal(proposals, cu, buf.toString());
+	}
+
+	private void checkForSEFProposal(ArrayList proposals, ICompilationUnit cu, String expected) throws Exception {
+		for (Iterator iter= proposals.iterator(); iter.hasNext();) {
+			ChangeCorrectionProposal proposal= (ChangeCorrectionProposal) iter.next();
+			if (proposal instanceof ModifierCorrectionSubProcessor.SelfEncapsulateFieldProposal) {
+				ModifierCorrectionSubProcessor.SelfEncapsulateFieldProposal sefp= (ModifierCorrectionSubProcessor.SelfEncapsulateFieldProposal) proposal;
+				sefp.setNoDialog(true);
+				sefp.apply(null);
+				assertEquals(expected, cu.getSource());
+				return;
+			}
+		}
+		fail("No SEF Quickfix found");
+	}
+
 	
 }

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
@@ -25,12 +26,17 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedPosition;
+
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -100,6 +106,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.sef.SelfEncapsulateFieldWizard;
@@ -831,12 +838,13 @@ public class ModifierCorrectionSubProcessor {
 	}
 	
 	private static class ProposalParameter {
-		final boolean useSuper;
-		final ICompilationUnit compilationUnit;
-		final ASTRewrite astRewrite;
-		final Expression accessNode;
-		final Expression qualifier;
-		final IVariableBinding variableBinding;
+		public final boolean useSuper;
+		public final ICompilationUnit compilationUnit;
+		public final ASTRewrite astRewrite;
+		public final Expression accessNode;
+		public final Expression qualifier;
+		public final IVariableBinding variableBinding;
+
 		public ProposalParameter(boolean useSuper, ICompilationUnit compilationUnit, ASTRewrite rewrite, Expression accessNode, Expression qualifier, IVariableBinding variableBinding) {
 			this.useSuper= useSuper;
 			this.compilationUnit= compilationUnit;
@@ -846,14 +854,20 @@ public class ModifierCorrectionSubProcessor {
 			this.variableBinding= variableBinding;
 		}
 	}
-	
-	private static class SelfEncapsulateFieldProposal extends ChangeCorrectionProposal {
+
+	public static class SelfEncapsulateFieldProposal extends ChangeCorrectionProposal {
 
 		private IField fField;
+		private boolean fNoDialog;
 
 		public SelfEncapsulateFieldProposal(int relevance, IField field, boolean isReadAccess) {
 			super(getDescription(isReadAccess), null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
-			fField=field;
+			fField= field;
+			fNoDialog= false;
+		}
+		
+		public void setNoDialog(boolean noDialog) {
+			fNoDialog= noDialog;
 		}
 
 		private static String getDescription(boolean getter) {
@@ -864,30 +878,55 @@ public class ModifierCorrectionSubProcessor {
 		}
 
 		public void apply(IDocument document) {
-			Shell shell= JavaPlugin.getActiveWorkbenchShell();
 			try {
 				final SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(fField);
 				refactoring.setVisibility(Flags.AccPublic);
 				refactoring.setConsiderVisibility(false);//private field references are just searched in local file
-				new RefactoringStarter().activate(refactoring, new SelfEncapsulateFieldWizard(refactoring), shell, "", RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES); //$NON-NLS-1$
+				if (fNoDialog) {
+					IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+					final RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, RefactoringStatus.ERROR, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES, JavaPlugin.getActiveWorkbenchShell(), window);
+					if (Display.getCurrent() != null) {
+						try {
+							helper.perform(false, false);
+						} catch (InterruptedException e) {
+							JavaPlugin.log(e);
+						} catch (InvocationTargetException e) {
+							JavaPlugin.log(e);
+						}
+					} else {
+						Display.getDefault().syncExec(new Runnable() {
+							public void run() {
+								try {
+									helper.perform(false, false);
+								} catch (InterruptedException e) {
+									JavaPlugin.log(e);
+								} catch (InvocationTargetException e) {
+									JavaPlugin.log(e);
+								}
+							}
+						});
+					}
+				} else {
+					new RefactoringStarter().activate(refactoring, new SelfEncapsulateFieldWizard(refactoring), JavaPlugin.getActiveWorkbenchShell(), "", RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES); //$NON-NLS-1$
+				}
 			} catch (JavaModelException e) {
 				ExceptionHandler.handle(e, CorrectionMessages.ModifierCorrectionSubProcessor_encapsulate_field_error_title, CorrectionMessages.ModifierCorrectionSubProcessor_encapsulate_field_error_message);
 			}
 		}
 	}
-	
+
 	public static void addGetterSetterProposal(IInvocationContext context, IProblemLocation problem, Collection proposals, int relevance) {
-		ASTNode coveringNode = problem.getCoveringNode(context.getASTRoot());
+		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
 		ICompilationUnit compilationUnit= context.getCompilationUnit();
 		if (coveringNode instanceof SimpleName) {
-			SimpleName sn=(SimpleName) coveringNode;
+			SimpleName sn= (SimpleName) coveringNode;
 			if (sn.isDeclaration())
 				return;
 			IVariableBinding variableBinding= (IVariableBinding) sn.resolveBinding();
-			if (variableBinding==null || !variableBinding.isField())
+			if (variableBinding == null || !variableBinding.isField())
 				return;
-			ChangeCorrectionProposal proposal= getProposal(compilationUnit,sn,variableBinding,relevance);
-			if (proposal!=null)
+			ChangeCorrectionProposal proposal= getProposal(compilationUnit, sn, variableBinding, relevance);
+			if (proposal != null)
 				proposals.add(proposal);
 		}
 	}
@@ -898,24 +937,24 @@ public class ModifierCorrectionSubProcessor {
 		AST ast= sn.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		boolean useSuper= false;
-		boolean writeAccess = ASTResolving.isWriteAccess(sn);
-		ASTNode parent = sn.getParent();
-		switch(parent.getNodeType()){
+		boolean writeAccess= ASTResolving.isWriteAccess(sn);
+		ASTNode parent= sn.getParent();
+		switch (parent.getNodeType()) {
 		case ASTNode.QUALIFIED_NAME:
-				accessNode= (Expression) parent;
-				qualifier= ((QualifiedName) parent).getQualifier();
-				break;
-			case ASTNode.SUPER_FIELD_ACCESS:
-				accessNode= (Expression) parent;
-				qualifier= ((SuperFieldAccess) parent).getQualifier();
-				useSuper= true;
-				break;
+			accessNode= (Expression) parent;
+			qualifier= ((QualifiedName) parent).getQualifier();
+			break;
+		case ASTNode.SUPER_FIELD_ACCESS:
+			accessNode= (Expression) parent;
+			qualifier= ((SuperFieldAccess) parent).getQualifier();
+			useSuper= true;
+			break;
 		}
 		ProposalParameter gspc= new ProposalParameter(useSuper, cu, rewrite, accessNode, qualifier, variableBinding);
 		if (writeAccess)
 			return addSetterProposal(gspc, relevance);
 		else
-			return addGetterProposal(gspc, relevance);		
+			return addGetterProposal(gspc, relevance);
 	}
 
 	/**
@@ -925,12 +964,12 @@ public class ModifierCorrectionSubProcessor {
 	 * @return the proposal if available or null
 	 */
 	private static ChangeCorrectionProposal addGetterProposal(ProposalParameter context, int relevance) {
-		IMethodBinding method = findGetter(context);
-		if (method!=null){
-			Expression mi = createMethodInvocation(context, method, null);
+		IMethodBinding method= findGetter(context);
+		if (method != null) {
+			Expression mi= createMethodInvocation(context, method, null);
 			context.astRewrite.replace(context.accessNode, mi, null);
-			
-			String label=Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_replacewithgetter_description, context.accessNode);
+
+			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_replacewithgetter_description, context.accessNode);
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.compilationUnit, context.astRewrite, relevance, image);
 			return proposal;
@@ -940,7 +979,7 @@ public class ModifierCorrectionSubProcessor {
 				IField field= (IField) element;
 				try {
 					if (RefactoringAvailabilityTester.isSelfEncapsulateAvailable(field))
-						return new SelfEncapsulateFieldProposal(relevance,field,true);
+						return new SelfEncapsulateFieldProposal(relevance, field, true);
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
 				}
@@ -980,7 +1019,7 @@ public class ModifierCorrectionSubProcessor {
 			return invocation;
 		}
 	}
-	
+
 	/**
 	 * Proposes a setter for this field
 	 * @param context 
@@ -1030,51 +1069,51 @@ public class ModifierCorrectionSubProcessor {
 		ASTNode parent= context.accessNode.getParent();
 		AST ast= context.astRewrite.getAST();
 		switch (parent.getNodeType()) {
-			case ASTNode.ASSIGNMENT:
-				Assignment assignment= ((Assignment) parent);
-				Expression rightHandSide= assignment.getRightHandSide();
-				Expression copiedRightOp= (Expression) context.astRewrite.createCopyTarget(rightHandSide);
-				if (isNotInBlock(parent))
-					break;
-				if (assignment.getOperator() == Operator.ASSIGN) {
-					ITypeBinding rightHandSideType= rightHandSide.resolveTypeBinding();
-					copiedRightOp= checkForNarrowCast(context, copiedRightOp, true, rightHandSideType);
-					return copiedRightOp;
-				}
-				IMethodBinding getter= findGetter(context);
-				if (getter != null) {
-					InfixExpression infix= ast.newInfixExpression();
-					infix.setLeftOperand(createMethodInvocation(context, getter, null));
-					infix.setOperator(ASTNodes.convertToInfixOperator(assignment.getOperator()));
-					infix.setRightOperand(copiedRightOp);
-					ITypeBinding infixType= infix.resolveTypeBinding();
-					return checkForNarrowCast(context, infix, true, infixType);
-				}
+		case ASTNode.ASSIGNMENT:
+			Assignment assignment= ((Assignment) parent);
+			Expression rightHandSide= assignment.getRightHandSide();
+			Expression copiedRightOp= (Expression) context.astRewrite.createCopyTarget(rightHandSide);
+			if (isNotInBlock(parent))
 				break;
-			case ASTNode.POSTFIX_EXPRESSION:
-				PostfixExpression po= (PostfixExpression) parent;
-				if (isNotInBlock(parent))
-					break;
-				InfixExpression.Operator postfixOp= null;
-				if (po.getOperator() == PostfixExpression.Operator.INCREMENT)
-					postfixOp= InfixExpression.Operator.PLUS;
-				if (po.getOperator() == PostfixExpression.Operator.DECREMENT)
-					postfixOp= InfixExpression.Operator.MINUS;
-				if (postfixOp == null)
-					break;
-				return createInfixInvocationFromPostPrefixExpression(context, postfixOp);
-			case ASTNode.PREFIX_EXPRESSION:
-				PrefixExpression pe= (PrefixExpression) parent;
-				if (isNotInBlock(parent))
-					break;
-				InfixExpression.Operator prefixOp= null;
-				if (pe.getOperator() == PrefixExpression.Operator.INCREMENT)
-					prefixOp= InfixExpression.Operator.PLUS;
-				if (pe.getOperator() == PrefixExpression.Operator.DECREMENT)
-					prefixOp= InfixExpression.Operator.MINUS;
-				if (prefixOp == null)
-					break;
-				return createInfixInvocationFromPostPrefixExpression(context, prefixOp);
+			if (assignment.getOperator() == Operator.ASSIGN) {
+				ITypeBinding rightHandSideType= rightHandSide.resolveTypeBinding();
+				copiedRightOp= checkForNarrowCast(context, copiedRightOp, true, rightHandSideType);
+				return copiedRightOp;
+			}
+			IMethodBinding getter= findGetter(context);
+			if (getter != null) {
+				InfixExpression infix= ast.newInfixExpression();
+				infix.setLeftOperand(createMethodInvocation(context, getter, null));
+				infix.setOperator(ASTNodes.convertToInfixOperator(assignment.getOperator()));
+				infix.setRightOperand(copiedRightOp);
+				ITypeBinding infixType= infix.resolveTypeBinding();
+				return checkForNarrowCast(context, infix, true, infixType);
+			}
+			break;
+		case ASTNode.POSTFIX_EXPRESSION:
+			PostfixExpression po= (PostfixExpression) parent;
+			if (isNotInBlock(parent))
+				break;
+			InfixExpression.Operator postfixOp= null;
+			if (po.getOperator() == PostfixExpression.Operator.INCREMENT)
+				postfixOp= InfixExpression.Operator.PLUS;
+			if (po.getOperator() == PostfixExpression.Operator.DECREMENT)
+				postfixOp= InfixExpression.Operator.MINUS;
+			if (postfixOp == null)
+				break;
+			return createInfixInvocationFromPostPrefixExpression(context, postfixOp);
+		case ASTNode.PREFIX_EXPRESSION:
+			PrefixExpression pe= (PrefixExpression) parent;
+			if (isNotInBlock(parent))
+				break;
+			InfixExpression.Operator prefixOp= null;
+			if (pe.getOperator() == PrefixExpression.Operator.INCREMENT)
+				prefixOp= InfixExpression.Operator.PLUS;
+			if (pe.getOperator() == PrefixExpression.Operator.DECREMENT)
+				prefixOp= InfixExpression.Operator.MINUS;
+			if (prefixOp == null)
+				break;
+			return createInfixInvocationFromPostPrefixExpression(context, prefixOp);
 		}
 
 		return null;
@@ -1110,28 +1149,28 @@ public class ModifierCorrectionSubProcessor {
 	 * @return the casted expression if necessary
 	 */
 	private static Expression checkForNarrowCast(ProposalParameter context, Expression expression, boolean parenthesize, ITypeBinding expressionType) {
-		PrimitiveType castTo=null;
+		PrimitiveType castTo= null;
 		ITypeBinding type= context.variableBinding.getType();
 		if (type.isEqualTo(expressionType))
 			return expression; //no cast for same type
 		AST ast= context.astRewrite.getAST();
-		if (JavaModelUtil.is50OrHigher(context.compilationUnit.getJavaProject())){
+		if (JavaModelUtil.is50OrHigher(context.compilationUnit.getJavaProject())) {
 			if (ast.resolveWellKnownType("java.lang.Character").isEqualTo(type)) //$NON-NLS-1$
-				castTo=ast.newPrimitiveType(PrimitiveType.CHAR);
+				castTo= ast.newPrimitiveType(PrimitiveType.CHAR);
 			if (ast.resolveWellKnownType("java.lang.Byte").isEqualTo(type)) //$NON-NLS-1$
-				castTo=ast.newPrimitiveType(PrimitiveType.BYTE);
+				castTo= ast.newPrimitiveType(PrimitiveType.BYTE);
 			if (ast.resolveWellKnownType("java.lang.Short").isEqualTo(type)) //$NON-NLS-1$
-				castTo=ast.newPrimitiveType(PrimitiveType.SHORT);	
+				castTo= ast.newPrimitiveType(PrimitiveType.SHORT);
 		}
 		if (ast.resolveWellKnownType("char").isEqualTo(type)) //$NON-NLS-1$
-			castTo=ast.newPrimitiveType(PrimitiveType.CHAR);
+			castTo= ast.newPrimitiveType(PrimitiveType.CHAR);
 		if (ast.resolveWellKnownType("byte").isEqualTo(type)) //$NON-NLS-1$
-			castTo=ast.newPrimitiveType(PrimitiveType.BYTE);
+			castTo= ast.newPrimitiveType(PrimitiveType.BYTE);
 		if (ast.resolveWellKnownType("short").isEqualTo(type)) //$NON-NLS-1$
-			castTo=ast.newPrimitiveType(PrimitiveType.SHORT);
-		if (castTo!=null){
+			castTo= ast.newPrimitiveType(PrimitiveType.SHORT);
+		if (castTo != null) {
 			CastExpression cast= ast.newCastExpression();
-			if (parenthesize){
+			if (parenthesize) {
 				ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
 				parenthesized.setExpression(expression);
 				cast.setExpression(parenthesized);

@@ -4018,12 +4018,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
+		String[] expecteds=new String[1];
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -4032,7 +4030,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        this.count= i;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		expecteds[0]=buf.toString();
+		assertExpectedExistInProposals(proposals, expecteds);
 	}
 	
 	public void testUnqualifiedFieldAccess2() throws Exception {
@@ -4061,12 +4060,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
+		String[] expecteds=new String[1];
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -4075,7 +4072,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        this.f.count= i;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		expecteds[0]=buf.toString();
+		assertExpectedExistInProposals(proposals, expecteds);
 	}
 	
 	public void testUnqualifiedFieldAccess3() throws Exception {
@@ -4105,12 +4103,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
+		String[] expecteds=new String[1];
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -4119,7 +4115,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        this.f.setCount(i);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		expecteds[0]=buf.toString();
+		assertExpectedExistInProposals(proposals, expecteds);
 	}
 	
 	public void testUnqualifiedFieldAccess4() throws Exception {
@@ -4145,12 +4142,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
+		String[] expecteds=new String[1];
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -4163,7 +4158,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		expecteds[0]=buf.toString();
+		assertExpectedExistInProposals(proposals, expecteds);
 	}
 	
 	public void testUnqualifiedFieldAccess_bug50960() throws Exception {
@@ -4192,12 +4188,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
+		String[] expecteds=new String[1];
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E extends F {\n");
@@ -4206,7 +4200,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        this.count= 1;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		expecteds[0]=buf.toString();
+		assertExpectedExistInProposals(proposals, expecteds);
 	}
 	
 	public void testUnqualifiedFieldAccess_bug88313() throws Exception {
@@ -4238,12 +4233,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
+		String[] expecteds=new String[1];
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E extends F {\n");
@@ -4255,7 +4248,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("         };\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		expecteds[0]=buf.toString();
+		assertExpectedExistInProposals(proposals, expecteds);
 	}
 	
 	public void testUnqualifiedFieldAccess_bug115277() throws Exception {
@@ -4291,7 +4285,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 0);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 	}
 	
@@ -4314,12 +4308,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
+		String[] expecteds=new String[1];
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E<T> {\n");
@@ -4328,7 +4320,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        System.out.println(this.i);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		expecteds[0]=buf.toString();
+		assertExpectedExistInProposals(proposals, expecteds);
 	}
 	
 	public void testUnqualifiedFieldAccess_bug138325_2() throws Exception {
@@ -4354,12 +4347,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
+		String[] expecteds=new String[1];
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E<T> {\n");
@@ -4372,7 +4363,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        };\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		expecteds[0]=buf.toString();
+		assertExpectedExistInProposals(proposals, expecteds);
 	}
 	
 	public void testUnqualifiedFieldAccessWithGenerics() throws Exception {
@@ -4404,12 +4396,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
+		String[] expecteds=new String[1];
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E<T> extends F<String> {\n");
@@ -4421,7 +4411,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("         };\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		expecteds[0]=buf.toString();
+		assertExpectedExistInProposals(proposals, expecteds);
 	}
 	
 	public void testHidingVariable1() throws Exception {
