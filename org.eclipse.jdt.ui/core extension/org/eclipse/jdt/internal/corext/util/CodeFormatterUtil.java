@@ -233,6 +233,17 @@ public class CodeFormatterUtil {
 		return format2(kind, string, 0, string.length(), indentationLevel, lineSeparator, options);
 	}
 	
+	public static TextEdit reFormat(int kind, String string, int offset, int length, int indentationLevel, String lineSeparator, Map options) {
+		if (offset < 0 || length < 0 || offset + length > string.length()) {
+			throw new IllegalArgumentException("offset or length outside of string. offset: " + offset + ", length: " + length + ", string size: " + string.length());   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+		}
+		return ToolFactory.createCodeFormatter(options, ToolFactory.M_FORMAT_HONOR_NEVER_INDENT_COMMENT_OPTIONS).format(kind, string, offset, length, indentationLevel, lineSeparator);
+	}
+	
+	public static TextEdit reFormat(int kind, String string, int indentationLevel, String lineSeparator, Map options) {
+		return reFormat(kind, string, 0, string.length(), indentationLevel, lineSeparator, options);
+	}
+	
 	/**
 	 * Creates edits that describe how to format the given string. Returns <code>null</code> if the code could not be formatted for the given kind.
 	 * @throws IllegalArgumentException If the offset and length are not inside the string, a

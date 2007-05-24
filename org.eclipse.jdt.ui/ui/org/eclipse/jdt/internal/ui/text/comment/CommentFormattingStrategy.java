@@ -115,7 +115,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 				int partitionOffset= position.getOffset() - sourceOffset;
 				int sourceLength= partitionOffset + position.getLength();
 				String source= document.get(sourceOffset, sourceLength);
-				CodeFormatter commentFormatter= ToolFactory.createCodeFormatter(preferences);
+				CodeFormatter commentFormatter= ToolFactory.createCodeFormatter(preferences, ToolFactory.M_FORMAT_HONOR_NEVER_INDENT_COMMENT_OPTIONS);
 				int indentationLevel= inferIndentationLevel(source.substring(0, partitionOffset), getTabSize(preferences), getIndentSize(preferences));
 				edit= commentFormatter.format(getKindForPartitionType(position.getType()), source, partitionOffset, position.getLength(), indentationLevel, TextUtilities.getDefaultLineDelimiter(document));
 

@@ -61,7 +61,7 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 			Map partitioners= null;
 			try {
 
-				final TextEdit edit= CodeFormatterUtil.format2(CodeFormatter.K_COMPILATION_UNIT, document.get(), partition.getOffset(), partition.getLength(), 0, TextUtilities.getDefaultLineDelimiter(document), getPreferences());
+				final TextEdit edit= CodeFormatterUtil.reFormat(CodeFormatter.K_COMPILATION_UNIT, document.get(), partition.getOffset(), partition.getLength(), 0, TextUtilities.getDefaultLineDelimiter(document), getPreferences());
 				if (edit != null) {
 					if (edit.getChildrenSize() > 20)
 						partitioners= TextUtilities.removeDocumentPartitioners(document);
