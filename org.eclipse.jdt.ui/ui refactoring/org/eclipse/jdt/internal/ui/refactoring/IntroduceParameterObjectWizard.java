@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -80,6 +81,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefa
 import org.eclipse.jdt.internal.corext.refactoring.structure.IntroduceParameterObjectRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
@@ -102,6 +104,10 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 	}
 
 	private static class IntroduceParameterObjectInputPage extends UserInputWizardPage {
+
+		private static final String CREATE_TOP_LEVEL_SETTING= "CreateTopLevel"; //$NON-NLS-1$
+		private static final String CREATE_SETTERS_SETTING= "CreateSetters"; //$NON-NLS-1$
+		private static final String CREATE_GETTERS_SETTING= "CreateGetters"; //$NON-NLS-1$
 
 		private final class ParameterObjectCreatorContentProvider implements IStructuredContentProvider {
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -181,6 +187,8 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 		private IntroduceParameterObjectRefactoring fRefactoring;
 		private JavaSourceViewer fSignaturePreview;
 		private IDocument fSignaturePreviewDocument= new Document();
+		private Button fLeaveDelegateCheckBox;
+		private Button fDeprecateDelegateCheckBox;
 
 		public IntroduceParameterObjectInputPage() {
 			super(RefactoringMessages.IntroduceParameterObjectWizard_wizardpage_name);
@@ -276,12 +284,14 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 						ICompilationUnit cu= cus[i];
 						IType type= cu.getType(fRefactoring.getClassName());
 						if (type.exists()) {
+							StringBuffer packageName= new StringBuffer();
+							JavaElementLabels.getPackageFragmentLabel(fragment, JavaElementLabels.ALL_DEFAULT, packageName);
 							if (fRefactoring.isCreateAsTopLevel()) {
-								setErrorMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_parametername_check_alreadyexists, new Object[] { fRefactoring.getClassName(), cu.getElementName() }));
+								setErrorMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_parametername_check_alreadyexists, new Object[] { fRefactoring.getClassName(), packageName.toString()}));
 								setPageComplete(false);
 								return;
 							} else {
-								setMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_type_already_exists_in_package_info, new Object[]  {fRefactoring.getClassName(), fRefactoring.getPackage() }), IMessageProvider.INFORMATION);
+								setMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_type_already_exists_in_package_info, new Object[]  {fRefactoring.getClassName(), packageName.toString() }), IMessageProvider.INFORMATION);
 							}
 						}
 					}
@@ -354,12 +364,12 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 		}
 
 		private void createDelegateInput(Group group) {
-			final Button fLeaveDelegateCheckBox= DelegateUIHelper.generateLeaveDelegateCheckbox(group, getRefactoring(), false);
+			fLeaveDelegateCheckBox= DelegateUIHelper.generateLeaveDelegateCheckbox(group, getRefactoring(), false);
 			GridData gridData= new GridData(GridData.FILL_HORIZONTAL);
 			gridData.horizontalSpan= 2;
 			fLeaveDelegateCheckBox.setLayoutData(gridData);
 			if (fLeaveDelegateCheckBox != null) {
-				final Button fDeprecateDelegateCheckBox= new Button(group, SWT.CHECK);
+				fDeprecateDelegateCheckBox= new Button(group, SWT.CHECK);
 				GridData data= new GridData();
 				data.horizontalAlignment= GridData.FILL;
 				GridLayout layout= (GridLayout) group.getLayout();
@@ -409,7 +419,6 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 
 			final Button topLvlRadio= new Button(composite, SWT.RADIO);
 			topLvlRadio.setText(RefactoringMessages.IntroduceParameterObjectWizard_createastoplevel_radio);
-			topLvlRadio.setSelection(fRefactoring.isCreateAsTopLevel());
 			topLvlRadio.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					boolean fAsTopLevel= topLvlRadio.getSelection();
@@ -420,7 +429,10 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 
 			Button nestedRadio= new Button(composite, SWT.RADIO);
 			nestedRadio.setText(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_createasnestedclass_radio, fRefactoring.getContainingClass().getName()));
-			nestedRadio.setSelection(!fRefactoring.isCreateAsTopLevel());
+			boolean createAsTopLevel= getBooleanSetting(CREATE_TOP_LEVEL_SETTING, fRefactoring.isCreateAsTopLevel());
+			fRefactoring.setCreateAsTopLevel(createAsTopLevel);
+			topLvlRadio.setSelection(createAsTopLevel);
+			nestedRadio.setSelection(!createAsTopLevel);
 
 		}
 
@@ -626,7 +638,6 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 
 			final Button button= new Button(buttons, SWT.CHECK);
 			button.setText(RefactoringMessages.IntroduceParameterObjectWizard_creategetter_checkbox);
-			button.setSelection(fRefactoring.isCreateGetter());
 			button.addSelectionListener(new SelectionAdapter() {
 
 				public void widgetSelected(SelectionEvent e) {
@@ -635,6 +646,8 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 				}
 
 			});
+			button.setSelection(getBooleanSetting(CREATE_GETTERS_SETTING, fRefactoring.isCreateGetter()));
+			fRefactoring.setCreateGetter(button.getSelection());
 			gridData= new GridData();
 			button.setLayoutData(gridData);
 		}
@@ -642,7 +655,6 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 		private void createSetterInput(Composite result) {
 			final Button button= new Button(result, SWT.CHECK);
 			button.setText(RefactoringMessages.IntroduceParameterObjectWizard_createsetter_checkbox);
-			button.setSelection(fRefactoring.isCreateSetter());
 			button.addSelectionListener(new SelectionAdapter() {
 
 				public void widgetSelected(SelectionEvent e) {
@@ -651,6 +663,8 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 				}
 
 			});
+			button.setSelection(getBooleanSetting(CREATE_SETTERS_SETTING, fRefactoring.isCreateSetter()));
+			fRefactoring.setCreateSetter(button.getSelection());
 			GridData gridData= new GridData();
 			button.setLayoutData(gridData);
 		}
@@ -660,6 +674,8 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			label.setText(RefactoringMessages.IntroduceParameterObjectWizard_classnamefield_label);
 			final Text text= new Text(result, SWT.SINGLE | SWT.BORDER);
 			text.setText(fRefactoring.getClassName());
+			text.selectAll();
+			text.setFocus();
 			text.addModifyListener(new ModifyListener() {
 
 				public void modifyText(ModifyEvent e) {
@@ -697,6 +713,24 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			} catch (JavaModelException e) {
 				ExceptionHandler.handle(e, RefactoringMessages.IntroduceParameterObjectWizard_error_title, RefactoringMessages.IntroduceParameterObjectWizard_error_description);
 			}
+		}
+		
+		public void dispose() {
+			DelegateUIHelper.saveDeprecateDelegateSetting(fDeprecateDelegateCheckBox);
+			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);
+			IDialogSettings settings= getRefactoringSettings();
+			settings.put(IntroduceParameterObjectInputPage.CREATE_GETTERS_SETTING, fRefactoring.isCreateGetter());
+			settings.put(IntroduceParameterObjectInputPage.CREATE_SETTERS_SETTING, fRefactoring.isCreateSetter());
+			settings.put(IntroduceParameterObjectInputPage.CREATE_TOP_LEVEL_SETTING, fRefactoring.isCreateAsTopLevel());
+			super.dispose();
+		}
+		
+		protected boolean getBooleanSetting(String key, boolean defaultValue) {
+			String update= getRefactoringSettings().get(key);
+			if (update != null)
+				return Boolean.valueOf(update).booleanValue();
+			else
+				return defaultValue;
 		}
 	}
 
