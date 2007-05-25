@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -80,15 +80,15 @@ public abstract class OwnerDrawSupport implements Listener {
 	private void performPaint(Event event) {
 		Item item= (Item) event.item;
 		GC gc= event.gc;
-		Image image= item.getImage();
-		if (image != null) {
-			int yOffset= Math.max(0, (event.height - image.getBounds().height) / 2);
-			gc.drawImage(image, event.x, event.y + yOffset);
-		}
+
 		ColoredString coloredLabel= getColoredLabel(item);
 		boolean isSelected= (event.detail & SWT.SELECTED) != 0 && fControl.isFocusControl();
 		if (item instanceof TreeItem) {
 			TreeItem treeItem= (TreeItem) item;
+			Image image = treeItem.getImage(event.index);
+			if (image != null) {
+				processImage(image, gc, treeItem.getImageBounds(event.index));
+			}
 			Rectangle textBounds= treeItem.getTextBounds(event.index);
 			Font font= treeItem.getFont(event.index);
 			processColoredLabel(coloredLabel, gc, textBounds, isSelected, font);
@@ -99,6 +99,10 @@ public abstract class OwnerDrawSupport implements Listener {
 			}
 		} else if (item instanceof TableItem) {
 			TableItem tableItem= (TableItem) item;
+			Image image = tableItem.getImage(event.index);
+			if (image != null) {
+				processImage(image, gc, tableItem.getImageBounds(event.index));
+			}
 			Rectangle textBounds= tableItem.getTextBounds(event.index);
 			Font font= tableItem.getFont(event.index);
 			processColoredLabel(coloredLabel, gc, textBounds, isSelected, font);
@@ -108,6 +112,13 @@ public abstract class OwnerDrawSupport implements Listener {
 				gc.drawFocus(bounds.x, bounds.y, bounds.width, bounds.height);
 			}
 		}
+	}
+	
+	private void processImage(Image image, GC gc, Rectangle imageBounds) {
+		Rectangle bounds= image.getBounds();
+		int x= imageBounds.x + Math.max(0, (imageBounds.width - bounds.width) / 2);
+		int y= imageBounds.y + Math.max(0, (imageBounds.height - bounds.height) / 2);
+		gc.drawImage(image, x, y);
 	}
 	
 	private void processColoredLabel(ColoredString richLabel, GC gc, Rectangle textBounds, boolean isSelected, Font font) {
