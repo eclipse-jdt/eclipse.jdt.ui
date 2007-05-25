@@ -142,7 +142,7 @@ public class ParameterObjectFactory {
 			ParameterInfo pi= (ParameterInfo) iter.next();
 			SingleVariableDeclaration svd= ast.newSingleVariableDeclaration();
 			ITypeBinding typeBinding= pi.getNewTypeBinding();
-			if (!iter.hasNext() && typeBinding.isArray() && JavaModelUtil.is50OrHigher(project)) {
+			if (!iter.hasNext() && typeBinding.isArray() && pi.isOldVarargs()) {
 				int dimensions= typeBinding.getDimensions();
 				if (dimensions == 1) {
 					typeBinding= typeBinding.getComponentType();
