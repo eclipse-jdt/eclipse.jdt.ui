@@ -67,10 +67,7 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
@@ -215,6 +212,8 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			createDelegateInput(group);
 			createSignaturePreview(group);
 
+			validateRefactoring();
+			
 			setControl(result);
 		}
 
@@ -277,23 +276,18 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 					return;
 			}
 			try {
-				IPackageFragment fragment= getPackageFragmentRoot().getPackageFragment(fRefactoring.getPackage());
-				if (fragment.exists()) {
-					ICompilationUnit[] cus= fragment.getCompilationUnits();
-					for (int i= 0; i < cus.length; i++) {
-						ICompilationUnit cu= cus[i];
-						IType type= cu.getType(fRefactoring.getClassName());
-						if (type.exists()) {
-							StringBuffer packageName= new StringBuffer();
-							JavaElementLabels.getPackageFragmentLabel(fragment, JavaElementLabels.ALL_DEFAULT, packageName);
-							if (fRefactoring.isCreateAsTopLevel()) {
-								setErrorMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_parametername_check_alreadyexists, new Object[] { fRefactoring.getClassName(), packageName.toString()}));
-								setPageComplete(false);
-								return;
-							} else {
-								setMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_type_already_exists_in_package_info, new Object[]  {fRefactoring.getClassName(), packageName.toString() }), IMessageProvider.INFORMATION);
-							}
-						}
+				IType type= project.findType(fRefactoring.getNewTypeName());
+				if (type != null) {
+					StringBuffer packageName= new StringBuffer();
+					JavaElementLabels.getPackageFragmentLabel(type.getPackageFragment(), JavaElementLabels.ALL_DEFAULT, packageName);
+					if (fRefactoring.isCreateAsTopLevel()) {
+						setErrorMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_type_already_exists_in_package_info, new Object[]  {fRefactoring.getClassName(), packageName.toString() }));
+						setPageComplete(false);
+						return;
+					} else {
+						setErrorMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_parametername_check_alreadyexists, new Object[] { fRefactoring.getClassName(), type.getCompilationUnit().getElementName()}));
+						setPageComplete(false);
+						return;
 					}
 				}
 			} catch (JavaModelException e) {
@@ -315,10 +309,6 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 				}
 			}
 			return false;
-		}
-
-		private IPackageFragmentRoot getPackageFragmentRoot() throws JavaModelException {
-			return fRefactoring.getPackageFragmentRoot();
 		}
 
 		private void createSignaturePreview(Composite composite) {
@@ -423,6 +413,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 				public void widgetSelected(SelectionEvent e) {
 					boolean fAsTopLevel= topLvlRadio.getSelection();
 					fRefactoring.setCreateAsTopLevel(fAsTopLevel);
+					updateSignaturePreview();
 					validateRefactoring();
 				}
 			});

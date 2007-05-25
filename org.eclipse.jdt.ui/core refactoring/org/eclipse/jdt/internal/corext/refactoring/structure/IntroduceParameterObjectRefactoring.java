@@ -559,6 +559,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 
 	public void setCreateAsTopLevel(boolean topLevel) {
 		this.fCreateAsTopLevel= topLevel;
+		updateReferenceType();
 	}
 
 	public void updateParameterPosition() {
@@ -696,6 +697,10 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 			return svd.getName().getIdentifier();
 		}
 		return null;
+	}
+
+	public String getNewTypeName() {
+		return fParameterObjectReference.getNewTypeName();
 	}
 
 }
