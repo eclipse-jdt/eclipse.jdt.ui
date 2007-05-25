@@ -53,7 +53,7 @@ public class CodeFormatFix implements IFix {
 			String content= cu.getBuffer().getContents();
 			Document document= new Document(content);
 			
-			TextEdit edit= CodeFormatterUtil.reFormat(CodeFormatter.K_COMPILATION_UNIT, content, 0, TextUtilities.getDefaultLineDelimiter(document), fomatterSettings);
+			TextEdit edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT, content, 0, TextUtilities.getDefaultLineDelimiter(document), fomatterSettings);
 			if (edit == null || !edit.hasChildren())
 				return null;
 			
