@@ -25,6 +25,8 @@ public class MultiFixMessages extends NLS {
 	public static String CleanUpRefactoringWizard_code_organizing_tab;
 	public static String CleanUpRefactoringWizard_code_style_tab;
 	public static String CleanUpRefactoringWizard_Configure_Button;
+	public static String CleanUpRefactoringWizard_ConfigureCustomProfile_button;
+	public static String CleanUpRefactoringWizard_CustomCleanUpsDialog_title;
 	public static String CleanUpRefactoringWizard_HideWizard_Link;
 	public static String CleanUpRefactoringWizard_member_accesses_tab;
 	public static String CleanUpRefactoringWizard_missing_code_tab;

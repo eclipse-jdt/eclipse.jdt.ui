@@ -109,18 +109,7 @@ public class CleanUpSaveParticipantConfigurationModifyDialog extends StatusDialo
 		fTabFolder.setFont(composite.getFont());
 		fTabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		fPages= new CleanUpTabPage[5];
-		fPages[0]= new CodeStyleTabPage(this, fWorkingValues, true);
-		fPages[1]= new MemberAccessesTabPage(this, fWorkingValues, true);
-		fPages[2]= new UnnecessaryCodeTabPage(this, fWorkingValues, true);
-		fPages[3]= new MissingCodeTabPage(this, fWorkingValues, true);
-		fPages[4]= new CodeFormatingTabPage(this, fWorkingValues, true);
-		
-		addTabPage(SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_CodeStyle_TabPage, fPages[0]);
-		addTabPage(SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_MemberAccesses_TabPage, fPages[1]);
-		addTabPage(SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_UnnecessaryCode_TabPage, fPages[2]);
-		addTabPage(SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_MissingCode_TabPage, fPages[3]);
-		addTabPage(SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_CodeOrganizing_TabPage, fPages[4]);
+		fPages= createTabPages(fWorkingValues);
 		
 		fCountLabel= new Label(composite, SWT.NONE);
 		fCountLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
@@ -142,6 +131,23 @@ public class CleanUpSaveParticipantConfigurationModifyDialog extends StatusDialo
 		updateStatus(StatusInfo.OK_STATUS);
 		
 		return composite;
+	}
+
+	protected CleanUpTabPage[] createTabPages(Map workingValues) {
+		CleanUpTabPage[] result= new CleanUpTabPage[5];
+		result[0]= new CodeStyleTabPage(this, workingValues, true);
+		result[1]= new MemberAccessesTabPage(this, workingValues, true);
+		result[2]= new UnnecessaryCodeTabPage(this, workingValues, true);
+		result[3]= new MissingCodeTabPage(this, workingValues, true);
+		result[4]= new CodeFormatingTabPage(this, workingValues, true);
+		
+		addTabPage(SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_CodeStyle_TabPage, result[0]);
+		addTabPage(SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_MemberAccesses_TabPage, result[1]);
+		addTabPage(SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_UnnecessaryCode_TabPage, result[2]);
+		addTabPage(SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_MissingCode_TabPage, result[3]);
+		addTabPage(SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_CodeOrganizing_TabPage, result[4]);
+		
+		return result;
 	}
 	
 	public void updateStatus(IStatus status) {
