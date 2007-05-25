@@ -3799,7 +3799,7 @@ public class PreferenceConstants {
 		
 		
 		// spell checking
-		store.setDefault(PreferenceConstants.SPELLING_LOCALE, "en_US");
+		store.setDefault(PreferenceConstants.SPELLING_LOCALE, "en_US"); //$NON-NLS-1$
 		String isInitializedKey= "spelling_locale_initialized"; //$NON-NLS-1$
 		if (!store.getBoolean(isInitializedKey)) {
 			store.setValue(isInitializedKey, true);
