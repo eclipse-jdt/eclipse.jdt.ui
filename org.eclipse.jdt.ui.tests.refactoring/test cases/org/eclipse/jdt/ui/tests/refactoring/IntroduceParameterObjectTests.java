@@ -92,6 +92,24 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		}
 	}
 	
+	public void testSimpleEnclosingCodeStyle() throws Exception {
+		IJavaProject javaProject= getRoot().getJavaProject();
+		Map originalOptions= javaProject.getOptions(false);
+		try {
+			Hashtable newOptions= new Hashtable();
+			newOptions.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
+			newOptions.put(JavaCore.CODEASSIST_FIELD_SUFFIXES, "G");
+			newOptions.put(JavaCore.CODEASSIST_ARGUMENT_PREFIXES, "a");
+			newOptions.put(JavaCore.CODEASSIST_ARGUMENT_SUFFIXES, "M");
+			javaProject.setOptions(newOptions);
+			
+			RunRefactoringParameter param= new RunRefactoringParameter();
+			runRefactoring(param);
+		} finally {
+			javaProject.setOptions(originalOptions);
+		}
+	}
+	
 	public void testImportAddEnclosing() throws Exception {
 		Map renamings= new HashMap();
 		renamings.put("a", "permissions");

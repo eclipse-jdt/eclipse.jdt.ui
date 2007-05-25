@@ -10,9 +10,9 @@ public class TestDelegateCreationCodeStyle extends TestDelegateCreationA{
 		private String[] fAG;
 		private int fBG;
 		private double newD;
-		public FooParameter(String[] fAG, int fBG, double newD) {
-			this.fAG = fAG;
-			this.fBG = fBG;
+		public FooParameter(String[] a, int b, double newD) {
+			fAG = a;
+			fBG = b;
 			this.newD = newD;
 		}
 		public String[] getA() {

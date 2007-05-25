@@ -22,6 +22,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -134,11 +135,14 @@ public class ParameterObjectFactory {
 				validParameter.add(pi);
 			}
 		}
+		
+		IJavaProject project= fCompilationUnit.getJavaProject();
+		
 		for (Iterator iter= validParameter.iterator(); iter.hasNext();) {
 			ParameterInfo pi= (ParameterInfo) iter.next();
 			SingleVariableDeclaration svd= ast.newSingleVariableDeclaration();
 			ITypeBinding typeBinding= pi.getNewTypeBinding();
-			if (!iter.hasNext() && typeBinding.isArray() && JavaModelUtil.is50OrHigher(fCompilationUnit.getJavaProject())) {
+			if (!iter.hasNext() && typeBinding.isArray() && JavaModelUtil.is50OrHigher(project)) {
 				int dimensions= typeBinding.getDimensions();
 				if (dimensions == 1) {
 					typeBinding= typeBinding.getComponentType();
@@ -147,20 +151,37 @@ public class ParameterObjectFactory {
 				}
 				svd.setVarargs(true);
 			}
+			
+			String paramName= getParameterName(pi);
+			
 			Type fieldType= importBinding(typeBinding, cuRewrite);
 			svd.setType(fieldType);
-			svd.setName(getFieldName(ast, pi));
+			svd.setName(ast.newSimpleName(paramName));
 			parameters.add(svd);
-			FieldAccess fieldAccess= ast.newFieldAccess();
-			fieldAccess.setName(getFieldName(ast, pi));
-			fieldAccess.setExpression(ast.newThisExpression());
+			Expression leftHandSide;
+			if (paramName.equals(pi.getNewName()) || StubUtility.useThisForFieldAccess(project)) {
+				FieldAccess fieldAccess= ast.newFieldAccess();
+				fieldAccess.setName(ast.newSimpleName(pi.getNewName()));
+				fieldAccess.setExpression(ast.newThisExpression());
+				leftHandSide= fieldAccess;
+			} else {
+				leftHandSide= ast.newSimpleName(pi.getNewName());
+			}
 			Assignment assignment= ast.newAssignment();
-			assignment.setLeftHandSide(fieldAccess);
-			assignment.setRightHandSide(getFieldName(ast, pi));
+			assignment.setLeftHandSide(leftHandSide);
+			assignment.setRightHandSide(ast.newSimpleName(paramName));
 			statements.add(ast.newExpressionStatement(assignment));
 		}
 		return methodDeclaration;
 	}
+
+	private String getParameterName(ParameterInfo pi) {
+		String fieldName = pi.getNewName();
+		String strippedName= NamingConventions.removePrefixAndSuffixForFieldName(fCompilationUnit.getJavaProject(), fieldName, 0);
+		String[] suggestions= StubUtility.getVariableNameSuggestions(StubUtility.PARAMETER, fCompilationUnit.getJavaProject(), strippedName, 0, null, true);
+		return suggestions[0];
+	}
+
 
 	private Type importBinding(ITypeBinding typeBinding, CompilationUnitRewrite cuRewrite) {
 		Type type= cuRewrite.getImportRewrite().addImport(typeBinding, cuRewrite.getAST());
@@ -172,7 +193,7 @@ public class ParameterObjectFactory {
 		AST ast= cuRewrite.getAST();
 		VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 		String lineDelim= StubUtility.getLineDelimiterUsed(unit);
-		SimpleName fieldName= getFieldName(ast, pi);
+		SimpleName fieldName= ast.newSimpleName(pi.getNewName());
 		fragment.setName(fieldName);
 		FieldDeclaration declaration= ast.newFieldDeclaration(fragment);
 		if (fCreateComments) {
@@ -296,10 +317,6 @@ public class ParameterObjectFactory {
 
 	public String getEnclosingType() {
 		return fEnclosingType;
-	}
-
-	private SimpleName getFieldName(AST ast, ParameterInfo pi) {
-		return ast.newSimpleName(pi.getNewName());
 	}
 
 	private String getGetterName(ParameterInfo pi, AST ast) {
