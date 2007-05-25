@@ -57,6 +57,7 @@ Text Team Documents/*
 com.ibm.icu/*
 org.apache.ant/*
 org.apache.lucene/*
+org.apache.lucene.analysis/*
 org.eclipse.ant.core/*
 org.eclipse.core.commands/*
 org.eclipse.core.contenttype/*
