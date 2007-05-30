@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.DefaultSpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellDictionary;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.LocaleSensitiveSpellDictionary;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.PersistentSpellDictionary;
 
 /**
@@ -249,7 +250,7 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 			for (final Iterator iterator= getLocalesWithInstalledDictionaries().iterator(); iterator.hasNext();) {
 
 				locale= (Locale)iterator.next();
-				fLocaleDictionaries.put(locale, new SpellReconcileDictionary(locale, location));
+				fLocaleDictionaries.put(locale, new LocaleSensitiveSpellDictionary(locale, location));
 			}
 
 		} catch (MalformedURLException exception) {
