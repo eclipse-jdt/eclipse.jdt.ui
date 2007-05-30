@@ -95,6 +95,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
 
 /**
@@ -355,11 +356,14 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		}
 
 		private Label createLabel(Composite parent, String text) {
-			Label label = new Label(parent, SWT.NONE);
+			Label label= new Label(parent, SWT.WRAP);
 			if (text != null)
 				label.setText(text);
 			label.setBackground(fBackgroundColor);
 			label.setForeground(fForegroundColor);
+			GridData gd= new GridData();
+			gd.widthHint= new PixelConverter(label).convertWidthInCharsToPixels(80);
+			label.setLayoutData(gd);
 			return label;
 		}
 
