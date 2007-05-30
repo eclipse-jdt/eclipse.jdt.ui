@@ -41,10 +41,12 @@ public class BuildPathSupport {
 	public static class JUnitPluginDescription {
 		private final String fBundleId;
 		private final VersionRange fVersionRange;
+		private final boolean fIsOrbitBundle;
 		
-		public JUnitPluginDescription(String bundleId, VersionRange versionRange) {
+		public JUnitPluginDescription(String bundleId, VersionRange versionRange, boolean isOrbitBundle) {
 			fBundleId= bundleId;
 			fVersionRange= versionRange;
+			fIsOrbitBundle= isOrbitBundle;
 		}
 		
 		public Bundle getBundle() {
@@ -64,14 +66,18 @@ public class BuildPathSupport {
 			}
 			return null;
 		}
-
+		
 		public String getBundleId() {
 			return fBundleId;
 		}
+		
+		public boolean isOrbitBundle() {
+			return fIsOrbitBundle;
+		}
 	}
 	
-	public static final JUnitPluginDescription JUNIT3_PLUGIN= new JUnitPluginDescription("org.junit", new VersionRange("[3.8.2,3.9)"));  //$NON-NLS-1$//$NON-NLS-2$
-	public static final JUnitPluginDescription JUNIT4_PLUGIN= new JUnitPluginDescription("org.junit4", new VersionRange("[4.3.1,4.4.0)")); //$NON-NLS-1$ //$NON-NLS-2$
+	public static final JUnitPluginDescription JUNIT3_PLUGIN= new JUnitPluginDescription("org.junit", new VersionRange("[3.8.2,3.9)"), true);  //$NON-NLS-1$//$NON-NLS-2$
+	public static final JUnitPluginDescription JUNIT4_PLUGIN= new JUnitPluginDescription("org.junit4", new VersionRange("[4.3.1,4.4.0)"), false); //$NON-NLS-1$ //$NON-NLS-2$
 	
 	public static IPath getBundleLocation(JUnitPluginDescription pluginDesc) {
 		Bundle bundle= pluginDesc.getBundle();
@@ -97,13 +103,22 @@ public class BuildPathSupport {
 		if (version == null) {
 			return null;
 		}
-		bundle= JUnitPlugin.getDefault().getBundle("org.eclipse.jdt.source"); //$NON-NLS-1$
-		if (bundle == null) {
+
+		Bundle sourceBundle= null;
+		if (pluginDesc.isOrbitBundle()) {
+			 Bundle[] bundles= JUnitPlugin.getDefault().getBundles(pluginDesc.getBundleId() + ".source", version); //$NON-NLS-1$
+			 if (bundles != null && bundles.length > 0) {
+				sourceBundle= bundles[0];
+			 }
+		} else {
+			sourceBundle= JUnitPlugin.getDefault().getBundle("org.eclipse.jdt.source"); //$NON-NLS-1$
+		}
+		if (sourceBundle == null) {
 			return null;
 		}
 		URL local= null;
 		try {
-			local= FileLocator.toFileURL(bundle.getEntry("/")); //$NON-NLS-1$
+			local= FileLocator.toFileURL(sourceBundle.getEntry("/")); //$NON-NLS-1$
 		} catch (IOException e) {
 			return null;
 		}
