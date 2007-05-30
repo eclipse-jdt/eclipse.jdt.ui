@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 
 import org.eclipse.jface.dialogs.ControlEnableState;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -368,6 +369,8 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			});
 			
 			setControl(composite);
+			
+			Dialog.applyDialogFont(composite);
         }
 
 		private void updateEnableState(boolean isCustom, final ListDialogField settingsField, Button configureCustom, BulletListBlock bulletListBlock) {
