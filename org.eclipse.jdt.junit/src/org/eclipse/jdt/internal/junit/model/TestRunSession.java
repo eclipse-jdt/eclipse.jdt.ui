@@ -121,6 +121,12 @@ public class TestRunSession implements ITestRunSession {
 	
 	volatile boolean fIsStopped;
 	
+	private static int fgNextSessionID= 0;
+	private final int fSessionID= getNextSessionID();
+	
+	private static synchronized int getNextSessionID() {
+		return fgNextSessionID++;
+	}
 
 	/**
 	 * @param testRunName
@@ -285,6 +291,10 @@ public class TestRunSession implements ITestRunSession {
 
 	public long getStartTime() {
 		return fStartTime;
+	}
+	
+	public int getSessionID() {
+		return fSessionID;
 	}
 	
 	/**
