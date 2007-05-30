@@ -1087,18 +1087,20 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 					if (rewrite != null) {
 						CompilationUnitChange change= rewrite.createChange();
 
-						final TextEdit edit= ((TextChange) change).getEdit();
-						if (edit != null) {
-							final IDocument document= new Document(fSuperSource);
-							try {
-								edit.apply(document, TextEdit.UPDATE_REGIONS);
-							} catch (MalformedTreeException exception) {
-								JavaPlugin.log(exception);
-							} catch (BadLocationException exception) {
-								JavaPlugin.log(exception);
+						if (change != null) {
+							final TextEdit edit= ((TextChange) change).getEdit();
+							if (edit != null) {
+								final IDocument document= new Document(fSuperSource);
+								try {
+									edit.apply(document, TextEdit.UPDATE_REGIONS);
+								} catch (MalformedTreeException exception) {
+									JavaPlugin.log(exception);
+								} catch (BadLocationException exception) {
+									JavaPlugin.log(exception);
+								}
+								fSuperSource= document.get();
+								manager.remove(extractedUnit);
 							}
-							fSuperSource= document.get();
-							manager.remove(extractedUnit);
 						}
 					}
 				} else {
