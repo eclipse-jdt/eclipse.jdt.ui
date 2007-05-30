@@ -21,7 +21,6 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -293,10 +292,6 @@ public class TestRunnerViewPart extends ViewPart {
 
 	
 	private class RunnerViewHistory extends ViewHistory {
-		/*
-		 * Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=185843 :
-		 * History elements are Integers that stand for TestRunSession#getSessionID().
-		 */
 
 		public void configureHistoryListAction(IAction action) {
 			action.setText(JUnitMessages.TestRunnerViewPart_history);
@@ -324,57 +319,35 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 
 		public List getHistoryEntries() {
-			List testRunSessions= JUnitPlugin.getModel().getTestRunSessions();
-			ArrayList result= new ArrayList(testRunSessions.size());
-			for (Iterator iter= testRunSessions.iterator(); iter.hasNext();) {
-				TestRunSession session= (TestRunSession) iter.next();
-				result.add(new Integer(session.getSessionID()));
-			}
-			return result;
+			return JUnitPlugin.getModel().getTestRunSessions();
 		}
 
 		public Object getCurrentEntry() {
-			return new Integer(fTestRunSession.getSessionID());
+			return fTestRunSession;
 		}
 
 		public void setActiveEntry(Object entry) {
-			TestRunSession deactivatedSession= setActiveTestRunSession(getTestRunSession((Integer) entry));
+			TestRunSession deactivatedSession= setActiveTestRunSession((TestRunSession) entry);
 			if (deactivatedSession != null)
 				deactivatedSession.swapOut();
 		}
 
-		private TestRunSession getTestRunSession(Integer sessionID) {
-			if (sessionID == null)
-				return null;
-			
-			List testRunSessions= JUnitPlugin.getModel().getTestRunSessions();
-			for (Iterator iter= testRunSessions.iterator(); iter.hasNext();) {
-				TestRunSession session= (TestRunSession) iter.next();
-				if (session.getSessionID() == sessionID.intValue())
-					return session;
-			}
-			return null;
-		}
-
 		public void setHistoryEntries(List remainingEntries, Object activeEntry) {
-			setActiveTestRunSession(getTestRunSession((Integer) activeEntry));
+			setActiveTestRunSession((TestRunSession) activeEntry);
 			
 			List testRunSessions= JUnitPlugin.getModel().getTestRunSessions();
 			testRunSessions.removeAll(remainingEntries);
 			for (Iterator iter= testRunSessions.iterator(); iter.hasNext();) {
-				TestRunSession session= (TestRunSession) iter.next();
-				if (remainingEntries.contains(new Integer(session.getSessionID())))
-					session.swapOut();
-				else
-					JUnitPlugin.getModel().removeTestRunSession(session);
+				JUnitPlugin.getModel().removeTestRunSession((TestRunSession) iter.next());
+			}
+			for (Iterator iter= remainingEntries.iterator(); iter.hasNext();) {
+				TestRunSession remaining= (TestRunSession) iter.next();
+				remaining.swapOut();
 			}
 		}
 
 		public ImageDescriptor getImageDescriptor(Object element) {
-			TestRunSession session= getTestRunSession((Integer) element);
-			if (session == null)
-				return null;
-			
+			TestRunSession session= (TestRunSession) element;
 			if (session.isStopped())
 				return fSuiteIconDescriptor;
 			
@@ -393,10 +366,7 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 
 		public String getText(Object element) {
-			TestRunSession session= getTestRunSession((Integer) element);
-			if (session == null)
-				return ""; //$NON-NLS-1$
-			
+			TestRunSession session= (TestRunSession) element;
 			if (session.getStartTime() == 0) {
 				return session.getTestRunName();
 			} else {
@@ -687,21 +657,20 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 		
 		public void run() {
-			List testRunSessions= getRunningSessionIDs();
+			List testRunSessions= getRunningSessions();
 			Object first= testRunSessions.isEmpty() ? null : testRunSessions.get(0);
 			fViewHistory.setHistoryEntries(testRunSessions, first);
 		}
 
-		private List getRunningSessionIDs() {
+		private List getRunningSessions() {
 			List testRunSessions= JUnitPlugin.getModel().getTestRunSessions();
-			ArrayList result= new ArrayList();
 			for (Iterator iter= testRunSessions.iterator(); iter.hasNext();) {
 				TestRunSession testRunSession= (TestRunSession) iter.next();
-				if (testRunSession.isRunning()) {
-					result.add(new Integer(testRunSession.getSessionID()));
+				if (! testRunSession.isRunning()) {
+					iter.remove();
 				}
 			}
-			return result;
+			return testRunSessions;
 		}
 	}
 
@@ -1338,7 +1307,6 @@ action enablement
 		fTestIgnoredIcon.dispose();
 		
 		fSuiteIcon.dispose();
-		fSuiteOkIcon.dispose();
 		fSuiteRunningIcon.dispose();
 		fSuiteErrorIcon.dispose();
 		fSuiteFailIcon.dispose();
