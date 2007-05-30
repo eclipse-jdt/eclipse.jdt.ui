@@ -72,6 +72,16 @@ deprecated in favor of <code>createJarDescriptionWriter(OutputStream, String)</c
 			<li>setHierarchyMode(int)</li>
 			<li>getHierarchyMode()</li>
         </ul>
+        New Constants in <code>org.eclipse.jdt.ui.ITypeHierarchyViewPart</code>:
+        <ul>
+        	<li>VIEW_LAYOUT_VERTICAL</li>
+        	<li>VIEW_LAYOUT_HORIZONTAL</li>
+        	<li>VIEW_LAYOUT_SINGLE</li>
+        	<li>VIEW_LAYOUT_AUTOMATIC</li>
+        	<li>HIERARCHY_MODE_CLASSIC</li>
+        	<li>HIERARCHY_MODE_SUPERTYPES</li>
+        	<li>HIERARCHY_MODE_SUBTYPES</li>
+        </ul>
       </td>
     </tr>
     <tr>
@@ -94,10 +104,40 @@ deprecated in favor of <code>createJarDescriptionWriter(OutputStream, String)</c
     </tr>
     <tr>
       <td>
+        The following actions have been deprecated <code>org.eclipse.jdt.ui.actions</code>:
+         <ul>
+			<li>FindStringsToExternalizeAction: replaced by ExternalizeStringsAction</li>
+			<li></li>
+        </ul>
+        
+        The following constants have been deprecated in <code>org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds</code>:
+        <ul>
+        	<li>SHOW_JAVADOC: replaced by ITextEditorActionDefinitionIds#SHOW_INFORMATION</li>
+        	<li>FIND_STRINGS_TO_EXTERNALIZE: replaced by IJavaEditorActionDefinitionIds#EXTERNALIZE_STRINGS</li>
+        </ul>
+        
+        The following constants have been deprecated in <code>org.eclipse.jdt.ui.actions.JdtActionConstants</code>:
+        <ul>
+        	<li>SHOW_JAVADOC: replaced by ITextEditorActionConstants#SHOW_INFORMATION</li>
+        	<li>FIND_STRINGS_TO_EXTERNALIZE: replaced by JdtActionConstants#EXTERNALIZE_STRINGS</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
         Added API to type wizard open actions: <code>OpenNewAnnotationWizardAction</code>, <code>OpenNewEnumWizardAction</code>, <code>OpenNewClassWizardAction</code>, <code>OpenNewInterfaceWizardAction (org.eclipse.jdt.ui.actions)</code> to control if an editor is opened after the type is created: 
         <ul>
 			<li>setOpenEditorOnFinish(boolean openEditorOnFinish)</li>
         </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Added API to <code>org.eclipse.jdt.ui.actions.OpenViewActionGroup</code>:
+        <ul>
+          <li>containsOpenPropertiesAction(boolean enable)</li>
+          <li>containsShowInMenu(boolean enable)</li>
+        </ul> 
       </td>
     </tr>
     <tr>
@@ -126,6 +166,17 @@ deprecated in favor of <code>createJarDescriptionWriter(OutputStream, String)</c
 			<li>REFACTOR_LIGHTWEIGHT: controls whether certain refactorings use a lightweight UI when started from a Java editor</li>
 			<li>SPELLING_IGNORE_NON_LETTERS: controls whether non-letters at word boundaries should be ignored during spell checking</li>
 			<li>SPELLING_IGNORE_SINGLE_LETTERS: controls whether single letters should be ignored during spell checking</li>
+			<li>SPELLING_IGNORE_AMPERSAND_IN_PROPERTIES: controls whether ampersands should be ignored during spell checking</li>
+			<li>CODEASSIST_FAVORITE_STATIC_MEMBERS: the preference that holds the favorite static members</li>
+			<li>EDITOR_SOURCE_HOVER_BACKGROUND_COLOR: the preference that holds the source hover background color</li>
+			<li>EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT: the preference that tells whether to use the system default color for the source hover background color </li>
+        </ul>
+        The following constants have been deprecated in <code>org.eclipse.jdt.ui.PreferenceConstants</code>:
+        <ul>
+        	<li>LINK_PACKAGES_TO_EDITOR: Not used anymore</li>
+        	<li>LINK_TYPEHIERARCHY_TO_EDITOR: Not used anymore</li>
+        	<li>EDITOR_SHOW_TEXT_HOVER_AFFORDANCE: Replaced by AbstractDecoratedTextEditorPreferenceConstants#EDITOR_SHOW_TEXT_HOVER_AFFORDANCE</li>
+        	<li>EDITOR_SMART_HOME_END: Replaced by AbstractDecoratedTextEditorPreferenceConstants#EDITOR_SMART_HOME_END</li>
         </ul>
       </td>
     </tr>
@@ -145,15 +196,32 @@ deprecated in favor of <code>createJarDescriptionWriter(OutputStream, String)</c
     </tr>
     <tr>
       <td>
-        Added API to <code>JavaElementImageDescriptor (org.eclipse.jdt.ui)</code>
+        Added API to <code>org.eclipse.jdt.ui.JavaElementImageDescriptor</code>:
          <ul>
 			<li>JavaElementImageDescriptor.VOLATILE</li>
 			<li>JavaElementImageDescriptor.TRANSIENT</li>
         </ul>
       </td>
-    </tr>     
+    </tr>
+    <tr>
+      <td>
+        Added API to <code>org.eclipse.jdt.ui.refactoring.RenameSupport<code>:
+        <ul>
+          <li>static RenameSupport create(RenameJavaElementDescriptor descriptor) throws CoreException</li>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Added API to <code>org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage<code>:
+        <ul>
+          <li>protected void setFocus()</li>
+        </ul>
+      </td>
+    </tr>   
   </tbody>
 </table>
 <p> </p>
 </body>
 </html>
+

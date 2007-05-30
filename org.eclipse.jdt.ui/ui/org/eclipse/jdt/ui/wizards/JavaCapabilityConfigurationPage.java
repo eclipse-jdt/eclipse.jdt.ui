@@ -273,6 +273,11 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 		}			
 	}
 	
+	/**
+	 * Transfers the focus into this page.
+	 * 
+	 * @since 3.3
+	 */
 	protected void setFocus() {
 		getBuildPathsBlock().setFocus();
 	}
