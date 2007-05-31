@@ -517,17 +517,24 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		}
 
 		private String getDefaultJVMName() {
-			return JavaRuntime.getDefaultVMInstall().getName();
+			IVMInstall install= JavaRuntime.getDefaultVMInstall();
+			if (install != null) {
+				return install.getName();
+			} else {
+				return NewWizardMessages.JavaProjectWizardFirstPage_UnknownDefaultJRE_name;
+			}
 		}
 		
 		private String getDefaultEEName() {
 			IVMInstall defaultVM= JavaRuntime.getDefaultVMInstall();
 			
 			IExecutionEnvironment[] environments= JavaRuntime.getExecutionEnvironmentsManager().getExecutionEnvironments();
-			for (int i= 0; i < environments.length; i++) {
-				IVMInstall eeDefaultVM= environments[i].getDefaultVM();
-				if (eeDefaultVM != null && defaultVM.getId().equals(eeDefaultVM.getId()))
-					return environments[i].getId();			
+			if (defaultVM != null) {
+				for (int i= 0; i < environments.length; i++) {
+					IVMInstall eeDefaultVM= environments[i].getDefaultVM();
+					if (eeDefaultVM != null && defaultVM.getId().equals(eeDefaultVM.getId()))
+						return environments[i].getId();			
+				}
 			}
 			
 			String defaultCC;
@@ -753,6 +760,15 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		}
 		
 		public void handlePossibleJVMChange() {
+			
+			if (JavaRuntime.getDefaultVMInstall() == null) {
+				fHintText.setText(NewWizardMessages.JavaProjectWizardFirstPage_NoJREFound_link);
+				fHintText.setVisible(true);
+				fIcon.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
+				fIcon.setVisible(true);
+				return;
+			}
+			
 			String selectedCompliance= fJREGroup.getSelectedCompilerCompliance();
 			if (selectedCompliance != null) {
 				String defaultCompliance= JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE);
@@ -838,7 +854,8 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			String complianceId= CompliancePreferencePage.PREF_ID;
 			Map data= new HashMap();
 			data.put(PropertyAndPreferencePage.DATA_NO_LINK, Boolean.TRUE);
-			PreferencesUtil.createPreferenceDialogOn(getShell(), complianceId, new String[] { jreID, complianceId  }, data).open();
+			String id= "JRE".equals(e.text) ? jreID : complianceId; //$NON-NLS-1$
+			PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { jreID, complianceId  }, data).open();
 			
 			fJREGroup.handlePossibleJVMChange();
 			handlePossibleJVMChange();

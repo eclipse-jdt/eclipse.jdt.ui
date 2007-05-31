@@ -63,6 +63,8 @@ public final class NewWizardMessages extends NLS {
 	public static String JavaProjectWizardFirstPage_Message_invalidProjectNameForWorkspaceRoot;
 	public static String JavaProjectWizardFirstPage_Message_notExisingProjectOnWorkspaceRoot;
 	public static String JavaProjectWizardFirstPage_Message_notOnWorkspaceRoot;
+	public static String JavaProjectWizardFirstPage_NoJREFound_link;
+	public static String JavaProjectWizardFirstPage_UnknownDefaultJRE_name;
 	public static String JavaProjectWizardFirstPage_WorkingSets_group;
 	public static String JavaProjectWizardFirstPage_WorkingSetSelection_message;
 	public static String JavaProjectWizardSecondPage_DeleteCorruptProjectFile_message;
