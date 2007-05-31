@@ -542,11 +542,8 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 			if (fQualified) {
 				switch (type) {
 					case IJavaElement.PACKAGE_FRAGMENT:
-					case IJavaElement.TYPE: {
-						if (fPatterns == null || fPatterns.length() == 0)
-							status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_patterns_constraint));
+					case IJavaElement.TYPE:
 						break;
-					}
 					default:
 						status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameJavaElementDescriptor_qualified_constraint));
 				}
