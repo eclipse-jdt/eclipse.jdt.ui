@@ -422,6 +422,7 @@ public class JavaPluginImages {
 	public static final String IMG_CORRECTION_CHANGE= NAME_PREFIX + "correction_change.gif"; //$NON-NLS-1$
 	public static final String IMG_CORRECTION_MOVE= NAME_PREFIX + "correction_move.gif"; //$NON-NLS-1$
 	public static final String IMG_CORRECTION_RENAME= NAME_PREFIX + "correction_rename.gif"; //$NON-NLS-1$
+	public static final String IMG_CORRECTION_LINKED_RENAME= NAME_PREFIX + "correction_linked_rename.gif"; //$NON-NLS-1$
 	public static final String IMG_CORRECTION_DELETE_IMPORT= NAME_PREFIX + "correction_delete_import.gif"; //$NON-NLS-1$
 	public static final String IMG_CORRECTION_LOCAL= NAME_PREFIX + "localvariable_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_CORRECTION_REMOVE= NAME_PREFIX + "remove_correction.gif"; //$NON-NLS-1$
@@ -432,6 +433,7 @@ public class JavaPluginImages {
 		createManagedFromKey(T_OBJ, IMG_CORRECTION_CHANGE);
 		createManagedFromKey(T_OBJ, IMG_CORRECTION_MOVE);
 		createManagedFromKey(T_OBJ, IMG_CORRECTION_RENAME);
+		createManagedFromKey(T_OBJ, IMG_CORRECTION_LINKED_RENAME);
 		createManagedFromKey(T_OBJ, IMG_CORRECTION_DELETE_IMPORT);
 		createManagedFromKey(T_OBJ, IMG_CORRECTION_LOCAL);
 		createManagedFromKey(T_OBJ, IMG_CORRECTION_REMOVE);
