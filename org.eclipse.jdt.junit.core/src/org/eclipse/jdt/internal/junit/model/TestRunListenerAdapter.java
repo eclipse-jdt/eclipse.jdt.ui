@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.junit.model;
 
 import org.eclipse.jdt.junit.TestRunListener;
 import org.eclipse.jdt.junit.model.ITestCaseElement;
-import org.eclipse.jdt.junit.model.ITestRunSession;
 
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
@@ -23,9 +22,9 @@ import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
  */
 public class TestRunListenerAdapter implements ITestSessionListener {
 
-	private final ITestRunSession fSession;
+	private final TestRunSession fSession;
 
-	public TestRunListenerAdapter(ITestRunSession session) {
+	public TestRunListenerAdapter(TestRunSession session) {
 		fSession= session;
 	}
 	
@@ -74,6 +73,7 @@ public class TestRunListenerAdapter implements ITestSessionListener {
 	 */
 	public void sessionEnded(long elapsedTime) {
 		fireSessionFinished();
+		fSession.swapOut();
 	}
 
 	/* (non-Javadoc)
@@ -81,12 +81,14 @@ public class TestRunListenerAdapter implements ITestSessionListener {
 	 */
 	public void sessionStopped(long elapsedTime) {
 		fireSessionFinished();
+		fSession.swapOut();
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.junit.model.ITestSessionListener#sessionTerminated()
 	 */
 	public void sessionTerminated() {
+		fSession.swapOut();
 	}
 
 	/* (non-Javadoc)
