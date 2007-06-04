@@ -346,6 +346,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 
 	private void initializeFields(IMethod method) throws JavaModelException {
 		fCompilationUnit= method.getCompilationUnit();
+		Assert.isNotNull(fCompilationUnit);
 		fOffset= method.getNameRange().getOffset();
 		fLength= method.getNameRange().getLength();
 		fParameterObjectFactory= new ParameterObjectFactory(fCompilationUnit);
