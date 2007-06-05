@@ -105,6 +105,15 @@ with a public 0-argument constructor.
          
       </documentation>
    </annotation>
+   
+   <annotation>
+      <appInfo>
+         <meta.section type="since"/>
+      </appInfo>
+      <documentation>
+         3.3
+      </documentation>
+   </annotation>
 
    <annotation>
       <appInfo>
