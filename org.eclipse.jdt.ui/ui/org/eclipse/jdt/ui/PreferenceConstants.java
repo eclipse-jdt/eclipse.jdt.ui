@@ -41,7 +41,6 @@ import org.eclipse.jdt.internal.ui.IJavaThemeConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
 import org.eclipse.jdt.internal.ui.text.java.ProposalSorterRegistry;
 import org.eclipse.jdt.internal.ui.text.spelling.JavaSpellingEngine;
@@ -3880,9 +3879,6 @@ public class PreferenceConstants {
 
 		// do more complicated stuff
 		NewJavaProjectPreferencePage.initDefaults(store);
-		
-		// work in progress
-		WorkInProgressPreferencePage.initDefaults(store);
 
 		// reset preferences that are not settable by editor any longer
 		// see AbstractDecoratedTextEditorPreferenceConstants
