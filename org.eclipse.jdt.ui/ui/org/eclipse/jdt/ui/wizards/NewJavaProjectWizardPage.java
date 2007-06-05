@@ -103,8 +103,9 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 		fClasspathEntries= null;
 	}		
 	
-    /**
-     * {@inheritDoc}
+    /*
+     * @see org.eclipse.jface.dialogs.DialogPage#dispose()
+     * @since 3.3
      */
     public void dispose() {
     	try {
