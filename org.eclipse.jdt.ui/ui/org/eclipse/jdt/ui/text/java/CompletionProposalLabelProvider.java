@@ -14,7 +14,6 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
-
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.Flags;
@@ -203,10 +202,10 @@ public class CompletionProposalLabelProvider {
 	 * Creates a display string of a parameter list (without the parentheses)
 	 * for the given parameter types and names.
 	 *
+	 * @param buffer the string buffer 
 	 * @param parameterTypes the parameter types
 	 * @param parameterNames the parameter names
-	 * @return the display string of the parameter list defined by the passed
-	 *         arguments
+	 * @return the display string of the parameter list defined by the passed arguments
 	 */
 	private final StringBuffer appendParameterSignature(StringBuffer buffer, char[][] parameterTypes, char[][] parameterNames) {
 		if (parameterTypes != null) {
@@ -437,11 +436,19 @@ public class CompletionProposalLabelProvider {
 		return buf.toString();
 	}
 
+	/**
+	 * Returns whether the given string starts with "this.".
+	 * 
+	 * @param string 
+	 * @return <code>true</code> if the given string starts with "this."
+	 * @since 3.3
+	 */
 	private boolean isThisPrefix(char[] string) {
 		if (string == null || string.length < 5)
 			return false;
 		return string[0] == 't' && string[1] == 'h' && string[2] == 'i' && string[3] == 's' && string[4] == '.'; 		
 	}
+
 	String createLabelWithTypeAndDeclaration(CompletionProposal proposal) {
 		char[] name= proposal.getCompletion(); 
 		if (!isThisPrefix(name))

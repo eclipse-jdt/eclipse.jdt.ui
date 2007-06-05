@@ -375,6 +375,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		 * @param ast the compilation unit AST
 		 * @param delta the Java element delta for the given AST element
 		 * @return <code>true</code> if the delta should be ignored
+		 * @since 3.3
 		 */
 		private boolean shouldIgnoreDelta(CompilationUnit ast, IJavaElementDelta delta) {
 			if (ast == null)
@@ -499,6 +500,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		 * Returns 0 if none is found.
 		 *
 		 * @param content the content to search
+		 * @param prefixEnd the end of the prefix
 		 * @return the first index of a unicode identifier part, or zero if none can
 		 *         be found
 		 */
@@ -1056,7 +1058,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 * 
 	 * @param type the type to test
 	 * @return <code>true</code> if <code>type</code> is an anonymous enum declaration
-	 * @since 3.2
+	 * @since 3.3
 	 */
 	private boolean isAnonymousEnum(IType type) {
 		try {
@@ -1280,6 +1282,11 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 * (for additions) or marked as deletion instead (for changes). The
 	 * result is that more annotations are changed and fewer get
 	 * deleted/re-added.
+	 * 
+	 * @param deletions list with deleted annotations
+	 * @param additions map with position to annotation mappings
+	 * @param changes list with changed annotations
+	 * @param ctx	the context 
 	 */
 	private void match(List deletions, Map additions, List changes, FoldingStructureComputationContext ctx) {
 		if (deletions.isEmpty() || (additions.isEmpty() && changes.isEmpty()))
@@ -1346,6 +1353,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 *        <code>JavaProjectionAnnotation</code>
 	 * @param positionMap a <code>Map&lt;Annotation, Position&gt;</code>
 	 *        or <code>null</code>
+	 * @param ctx the context
 	 * @return a matching tuple or <code>null</code> for no match
 	 */
 	private Tuple findMatch(Tuple tuple, Collection annotations, Map positionMap, FoldingStructureComputationContext ctx) {
