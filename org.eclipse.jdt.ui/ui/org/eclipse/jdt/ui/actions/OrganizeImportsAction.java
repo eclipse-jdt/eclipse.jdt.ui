@@ -24,6 +24,7 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.DocumentEvent;
@@ -218,6 +219,17 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		} else {
 			fCleanUpDelegate.run(selection);
 		}
+	}
+	
+	/**
+	 * Perform organize import on multiple compilation units. No editors are opened.
+	 * @param cus The compilation units to run on
+	 */
+	public void runOnMultiple(final ICompilationUnit[] cus) {
+		if (cus.length == 0)
+			return;
+		
+		fCleanUpDelegate.run(new StructuredSelection(cus));	
 	}
 
 	/**
