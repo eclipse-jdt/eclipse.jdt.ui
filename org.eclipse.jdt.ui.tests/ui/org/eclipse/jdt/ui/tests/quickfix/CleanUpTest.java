@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Alex Blewitt - https://bugs.eclipse.org/bugs/show_bug.cgi?id=168954
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
