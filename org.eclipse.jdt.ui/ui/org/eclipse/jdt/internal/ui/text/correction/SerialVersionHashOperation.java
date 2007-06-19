@@ -111,7 +111,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		DataOutputStream doos= new DataOutputStream(os);
 		doos.writeUTF(getClassName(cfReader.getClassName())); // class name
 		int mod= getClassModifiers(cfReader);
-		System.out.println(Integer.toHexString(mod) + ' ' + Flags.toString(mod));
+//		System.out.println(Integer.toHexString(mod) + ' ' + Flags.toString(mod));
 		
 		int classModifiers= mod & (Flags.AccPublic | Flags.AccFinal | Flags.AccInterface | Flags.AccAbstract); 
 		
