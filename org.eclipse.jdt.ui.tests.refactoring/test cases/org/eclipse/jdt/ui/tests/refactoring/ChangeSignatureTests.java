@@ -78,9 +78,14 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 	
 	private String getTestFileName(boolean canReorder, boolean input){
-		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
-		fileName += (canReorder ? "canModify/": "cannotModify/");
+		String fileName= getTestFolderPath(canReorder);
 		return fileName + getSimpleTestFileName(canReorder, input);
+	}
+
+	private String getTestFolderPath(boolean canModify) {
+		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
+		fileName += (canModify ? "canModify/": "cannotModify/");
+		return fileName;
 	}
 		
 	//---helpers 
@@ -1504,6 +1509,23 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.PROTECTED;
 		String newReturnTypeName= "void";
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}	
+	
+	public void testAddSyntaxError01()throws Exception{ // https://bugs.eclipse.org/bugs/show_bug.cgi?id=191349
+		String refNameIn= "A_testAddSyntaxError01_Ref_in.java";
+		String refNameOut= "A_testAddSyntaxError01_Ref_out.java";
+		ICompilationUnit refCu= createCU(getPackageP(), refNameIn, getFileContents(getTestFolderPath(true) + refNameIn));
+		
+		String[] signature= {"QString;"};
+		String[] newNames= {"newParam"};
+		String[] newTypes= {"Object"};
+		String[] newDefaultValues= {"null"};
+		ParameterInfo[] newParamInfos= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= { 1 };
+		helperAdd(signature, newParamInfos, newIndices);
+		
+		String expectedRefContents= getFileContents(getTestFolderPath(true) + refNameOut);
+		assertEqualLines(expectedRefContents, refCu.getSource());
 	}	
 	
 	public void testAddRecursive1()throws Exception{ //bug 42100
