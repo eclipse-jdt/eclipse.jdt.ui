@@ -10,23 +10,31 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 
 import org.eclipse.swt.widgets.Display;
@@ -37,23 +45,32 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IRegion;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.util.IClassFileReader;
+import org.eclipse.jdt.core.util.IFieldInfo;
+import org.eclipse.jdt.core.util.IInnerClassesAttribute;
+import org.eclipse.jdt.core.util.IInnerClassesAttributeEntry;
+import org.eclipse.jdt.core.util.IMethodInfo;
 
 import org.eclipse.jdt.internal.corext.fix.AbstractSerialVersionOperation;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
-import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -63,49 +80,206 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * @since 3.1
  */
 public final class SerialVersionHashOperation extends AbstractSerialVersionOperation {
-
-	/** The serial support jar */
-	private static final String SERIAL_SUPPORT_JAR= "serialsupport.jar"; //$NON-NLS-1$
-
-	/**
-	 * Computes the class path entries which are on the user class path and are
-	 * explicitely put on the boot class path.
-	 * 
-	 * @param project
-	 *            the project to compute the classpath for
-	 * @return the computed classpath. May be empty, but not null.
-	 * @throws CoreException
-	 *             if the project's class path cannot be computed
-	 */
-	public static String[] computeUserAndBootClasspath(final IJavaProject project) throws CoreException {
-		final IRuntimeClasspathEntry[] unresolved= JavaRuntime.computeUnresolvedRuntimeClasspath(project);
-		final List resolved= new ArrayList(unresolved.length);
-		for (int index= 0; index < unresolved.length; index++) {
-			final IRuntimeClasspathEntry entry= unresolved[index];
-			final int property= entry.getClasspathProperty();
-			if (property == IRuntimeClasspathEntry.USER_CLASSES || property == IRuntimeClasspathEntry.BOOTSTRAP_CLASSES) {
-				final IRuntimeClasspathEntry[] entries= JavaRuntime.resolveRuntimeClasspathEntry(entry, project);
-				for (int offset= 0; offset < entries.length; offset++) {
-					final String location= entries[offset].getLocation();
-					if (location != null)
-						resolved.add(location);
+	
+	private static final String STATIC_CLASS_INITIALIZER= "<clinit>"; //$NON-NLS-1$
+		
+	public static Long calculateSerialVersionId(ITypeBinding typeBinding, IJavaProject project, final IProgressMonitor monitor) throws CoreException, IOException {
+		IFile classfileResource= getClassfile(typeBinding);
+		if (classfileResource == null)
+			return null;
+		
+		InputStream contents= classfileResource.getContents();
+		try {
+			IClassFileReader cfReader= ToolFactory.createDefaultClassFileReader(contents, IClassFileReader.ALL);
+			if (cfReader != null) {
+				return calculateSerialVersionId(cfReader);
+			}
+		} finally {
+			contents.close();
+		}
+		return null;
+	}
+	
+	private static String getClassName(char[] name) {
+		return new String(name).replace('/', '.');
+	}
+	
+	private static Long calculateSerialVersionId(IClassFileReader cfReader) throws IOException {
+		// implementing algorithm specified on http://java.sun.com/j2se/1.5.0/docs/guide/serialization/spec/class.html#4100
+		
+		ByteArrayOutputStream os= new ByteArrayOutputStream();
+		DataOutputStream doos= new DataOutputStream(os);
+		doos.writeUTF(getClassName(cfReader.getClassName())); // class name
+		int mod= getClassModifiers(cfReader);
+		System.out.println(Integer.toHexString(mod) + ' ' + Flags.toString(mod));
+		
+		int classModifiers= mod & (Flags.AccPublic | Flags.AccFinal | Flags.AccInterface | Flags.AccAbstract); 
+		
+		doos.writeInt(classModifiers); // class modifiers
+		char[][] interfaces= getSortedInterfacesNames(cfReader);
+		for (int i= 0; i < interfaces.length; i++) {
+			doos.writeUTF(getClassName(interfaces[i]));
+		}
+		IFieldInfo[] sortedFields= getSortedFields(cfReader);
+		for (int i= 0; i < sortedFields.length; i++) {
+			IFieldInfo curr= sortedFields[i];
+			int flags= curr.getAccessFlags();
+			if (!Flags.isPrivate(flags) || (!Flags.isStatic(flags) && !Flags.isTransient(flags))) {
+				doos.writeUTF(new String(curr.getName()));
+				doos.writeInt(flags & (Flags.AccPublic | Flags.AccPrivate | Flags.AccProtected | Flags.AccStatic | Flags.AccFinal | Flags.AccVolatile | Flags.AccTransient)); // field modifiers
+				doos.writeUTF(new String(curr.getDescriptor()));
+			}
+		}
+		if (hasStaticClassInitializer(cfReader)) {
+			doos.writeUTF(STATIC_CLASS_INITIALIZER);
+			doos.writeInt(Flags.AccStatic);
+			doos.writeUTF("()V"); //$NON-NLS-1$
+		}
+		IMethodInfo[] sortedMethods= getSortedMethods(cfReader);
+		for (int i= 0; i < sortedMethods.length; i++) {
+			IMethodInfo curr= sortedMethods[i];
+			int flags= curr.getAccessFlags();
+			if (!Flags.isPrivate(flags) && !curr.isClinit()) {
+				doos.writeUTF(new String(curr.getName()));
+				doos.writeInt(flags & (Flags.AccPublic | Flags.AccPrivate | Flags.AccProtected | Flags.AccStatic | Flags.AccFinal | Flags.AccSynchronized | Flags.AccNative | Flags.AccAbstract | Flags.AccStrictfp)); // method modifiers
+				doos.writeUTF(getClassName(curr.getDescriptor()));
+			}
+		}
+		doos.flush();
+		return computeHash(os.toByteArray());
+	}
+	
+	private static int getClassModifiers(IClassFileReader cfReader) {
+		IInnerClassesAttribute innerClassesAttribute= cfReader.getInnerClassesAttribute();
+		if (innerClassesAttribute != null) {
+			IInnerClassesAttributeEntry[] entries = innerClassesAttribute.getInnerClassAttributesEntries();
+			for (int i= 0; i < entries.length; i++) {
+				IInnerClassesAttributeEntry entry = entries[i];
+				char[] innerClassName = entry.getInnerClassName();
+				if (innerClassName != null) {
+					if (CharOperation.equals(cfReader.getClassName(), innerClassName)) {
+						return entry.getAccessFlags();
+					}
 				}
 			}
 		}
-		return (String[]) resolved.toArray(new String[resolved.size()]);
+		return cfReader.getAccessFlags();
 	}
-	
-	public static long[] calculateSerialVersionIds(String[] qualifiedNames, IJavaProject project, final IProgressMonitor monitor) throws CoreException, IOException {
-		final String[] entries= computeUserAndBootClasspath(project);
-		final IRuntimeClasspathEntry[] classpath= new IRuntimeClasspathEntry[entries.length + 2];
-		classpath[0]= JavaRuntime.newRuntimeContainerClasspathEntry(new Path(JavaRuntime.JRE_CONTAINER), IRuntimeClasspathEntry.STANDARD_CLASSES, project);
-		classpath[1]= JavaRuntime.newArchiveRuntimeClasspathEntry(Path.fromOSString(FileLocator.toFileURL(JavaPlugin.getDefault().getBundle().getEntry(SERIAL_SUPPORT_JAR)).getFile()));
-		for (int index= 2; index < classpath.length; index++)
-			classpath[index]= JavaRuntime.newArchiveRuntimeClasspathEntry(Path.fromOSString(entries[index - 2]));
-		return SerialVersionComputationHelper.computeSerialIDs(classpath, project, qualifiedNames, monitor);
-	}
-	
 
+//	private static void print(byte[] bytes) {
+//		StringBuffer buf= new StringBuffer();
+//		for (int i= 0; i < bytes.length; i++) {
+//			char c= (char) bytes[i];
+//			if (!Character.isISOControl(c)) {
+//				buf.append(c).append(' ');
+//			} else {
+//				buf.append(Integer.toHexString(c)).append(' ');
+//			}
+//		}
+//		System.out.println(buf.toString());
+//		System.out.println();
+//	}
+	
+	
+	private static Long computeHash(byte[] bytes) {
+		try {
+		    byte[] sha= MessageDigest.getInstance("SHA-1").digest(bytes); //$NON-NLS-1$
+			if (sha.length >= 8) {
+			    long hash= 0;
+			    for (int i= 7; i >= 0; i--) {
+			    	hash= (hash << 8) | (sha[i] & 0xFF);
+			    }
+				return new Long(hash);
+			}
+		} catch (NoSuchAlgorithmException e) {
+			JavaPlugin.log(e);
+		}
+		return null;
+	}
+	
+	private static char[][] getSortedInterfacesNames(IClassFileReader cfReader) {
+		char[][] interfaceNames= cfReader.getInterfaceNames();
+		Arrays.sort(interfaceNames, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				return CharOperation.compareTo(((char[]) o1), ((char[]) o2));
+			}
+		});
+		return interfaceNames;
+	}
+	
+	private static IFieldInfo[] getSortedFields(IClassFileReader cfReader) {
+		IFieldInfo[] allFields= cfReader.getFieldInfos();
+		Arrays.sort(allFields, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				return CharOperation.compareTo(((IFieldInfo) o1).getName(), ((IFieldInfo) o2).getName());
+			}
+		});
+		return allFields;
+	}
+	
+	private static boolean hasStaticClassInitializer(IClassFileReader cfReader) {
+		IMethodInfo[] methodInfos= cfReader.getMethodInfos();
+		for (int i= 0; i < methodInfos.length; i++) {
+			if (methodInfos[i].isClinit()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private static IMethodInfo[] getSortedMethods(IClassFileReader cfReader) {
+		IMethodInfo[] allMethods= cfReader.getMethodInfos();
+		Arrays.sort(allMethods, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				IMethodInfo mi1= (IMethodInfo) o1;
+				IMethodInfo mi2= (IMethodInfo) o2;
+				if (mi1.isConstructor() != mi2.isConstructor()) {
+					return mi1.isConstructor() ? -1 : 1;
+				} else if (mi1.isConstructor()) {
+					return 0;
+				}
+				int res= CharOperation.compareTo(mi1.getName(), mi2.getName());
+				if (res != 0) {
+					return res;
+				}
+				return CharOperation.compareTo(mi1.getDescriptor(), mi2.getDescriptor());
+			}
+		});
+		return allMethods;
+	}
+	
+	private static IFile getClassfile(ITypeBinding typeBinding) throws CoreException {
+		// bug 191943
+		IType type= (IType) typeBinding.getJavaElement();
+		if (type == null || type.getCompilationUnit() == null) {
+			return null;
+		}
+
+		IRegion region= JavaCore.newRegion();
+		region.add(type.getCompilationUnit());
+		
+		String name= typeBinding.getBinaryName();
+		if (name != null) {
+			int packStart= name.indexOf('.');
+			if (packStart != -1) {
+				name= name.substring(packStart + 1);
+			}
+		} else {
+			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, CorrectionMessages.SerialVersionHashOperation_error_classnotfound));
+		}
+		
+		name += ".class"; //$NON-NLS-1$
+
+		IResource[] classFiles= JavaCore.getGeneratedResources(region, false);
+		for (int i= 0; i < classFiles.length; i++) {
+			IResource resource= classFiles[i];
+			if (resource.getType() == IResource.FILE && resource.getName().equals(name)) {
+				return (IFile) resource;
+			}
+		}
+		throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, CorrectionMessages.SerialVersionHashOperation_error_classnotfound));
+	}
+		
 	/**
 	 * Displays an appropriate error message for a specific problem.
 	 * 
@@ -121,7 +295,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 					if (!display.isDisposed()) {
 						final Shell shell= display.getActiveShell();
 						if (shell != null && !shell.isDisposed())
-							MessageDialog.openError(shell, CorrectionMessages.SerialVersionHashProposal_dialog_error_caption, Messages.format(CorrectionMessages.SerialVersionHashProposal_dialog_error_message, message));
+							MessageDialog.openError(shell, CorrectionMessages.SerialVersionHashOperation_dialog_error_caption, Messages.format(CorrectionMessages.SerialVersionHashOperation_dialog_error_message, message));
 					}
 				}
 			});
@@ -145,6 +319,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 	 *            The title to display
 	 * @param message
 	 *            The message to display
+	 * @return returns the result of the dialog
 	 */
 	private static boolean displayYesNoMessage(final String title, final String message) {
 		final boolean[] result= { true};
@@ -205,16 +380,17 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		Assert.isNotNull(monitor);
 		long serialVersionID= SERIAL_VALUE;
 		try {
-			monitor.beginTask(CorrectionMessages.SerialVersionHashProposal_computing_id, 200);
+			monitor.beginTask(CorrectionMessages.SerialVersionHashOperation_computing_id, 200);
 			final IJavaProject project= fCompilationUnit.getJavaProject();
 			final IPath path= fCompilationUnit.getResource().getFullPath();
+			ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
 			try {
-				FileBuffers.getTextFileBufferManager().connect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 10));
+				bufferManager.connect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 10));
 				if (monitor.isCanceled())
 					throw new InterruptedException();
 				
-				final ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(path, LocationKind.IFILE);
-				if (buffer.isDirty() && buffer.isStateValidated() && buffer.isCommitable() && displayYesNoMessage(CorrectionMessages.SerialVersionHashProposal_save_caption, CorrectionMessages.SerialVersionHashProposal_save_message))
+				final ITextFileBuffer buffer= bufferManager.getTextFileBuffer(path, LocationKind.IFILE);
+				if (buffer.isDirty() && buffer.isStateValidated() && buffer.isCommitable() && displayYesNoMessage(CorrectionMessages.SerialVersionHashOperation_save_caption, CorrectionMessages.SerialVersionHashOperation_save_message))
 					buffer.commit(new SubProgressMonitor(monitor, 20), true);
 				else
 					monitor.worked(20);
@@ -222,15 +398,18 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 				if (monitor.isCanceled())
 					throw new InterruptedException();
 			} finally {
-				FileBuffers.getTextFileBufferManager().disconnect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 10));
+				bufferManager.disconnect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 10));
 			}
 			project.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor, 60));
 			if (monitor.isCanceled())
 				throw new InterruptedException();
 			
-			long[] ids= calculateSerialVersionIds(new String[] {getQualifiedName(declarationNode)}, project, new SubProgressMonitor(monitor, 100));
-			if (ids.length == 1)
-				serialVersionID= ids[0];
+			ITypeBinding typeBinding= getTypeBinding(declarationNode);
+			if (typeBinding != null) {
+				Long id= calculateSerialVersionId(typeBinding, project, new SubProgressMonitor(monitor, 100));
+				if (id != null)
+					serialVersionID= id.longValue();
+			}
 		} catch (CoreException exception) {
 			displayErrorMessage(exception);
 		} catch (IOException exception) {
@@ -241,26 +420,17 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		return serialVersionID + LONG_SUFFIX;
 	}
 
-	/**
-	 * Returns the qualified type name of the class declaration.
-	 * 
-	 * @return the qualified type name of the class
-	 */
-	private String getQualifiedName(final ASTNode parent) {
-		ITypeBinding binding= null;
+	private static ITypeBinding getTypeBinding(final ASTNode parent) {
 		if (parent instanceof AbstractTypeDeclaration) {
 			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) parent;
-			binding= declaration.resolveBinding();
+			return declaration.resolveBinding();
 		} else if (parent instanceof AnonymousClassDeclaration) {
 			final AnonymousClassDeclaration declaration= (AnonymousClassDeclaration) parent;
-			final ClassInstanceCreation creation= (ClassInstanceCreation) declaration.getParent();
-			binding= creation.resolveTypeBinding();
+			return declaration.resolveBinding();
 		} else if (parent instanceof ParameterizedType) {
 			final ParameterizedType type= (ParameterizedType) parent;
-			binding= type.resolveBinding();
+			return type.resolveBinding();
 		}
-		if (binding != null)
-			return binding.getBinaryName();
 		return null;
 	}
 }

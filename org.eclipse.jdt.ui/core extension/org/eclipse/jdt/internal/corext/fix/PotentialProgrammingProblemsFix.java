@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,8 +25,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -56,13 +57,13 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.SerialVersionHashOperation;
-import org.eclipse.jdt.internal.ui.text.correction.SerialVersionLaunchConfigurationDelegate;
 
 
 public class PotentialProgrammingProblemsFix extends LinkedFix {
@@ -75,15 +76,14 @@ public class PotentialProgrammingProblemsFix extends LinkedFix {
 	
 	private interface ISerialVersionFixContext {
 		public RefactoringStatus initialize(IProgressMonitor monitor) throws CoreException;
-		public boolean hasSerialVersionId(String qualifiedName);
-		public long getSerialVersionId(String qualifiedName);
+		public Long getSerialVersionId(ITypeBinding binding);
 	}
 	
 	private static class SerialVersionHashContext implements ISerialVersionFixContext {
 		
 		private final IJavaProject fProject;
 		private final ICompilationUnit[] fCompilationUnits;
-		private final Hashtable fIdsTable;
+		private final Hashtable /*<bindingKey, Long>*/ fIdsTable;
 		
 		public SerialVersionHashContext(IJavaProject project, ICompilationUnit[] compilationUnits) {
 			fProject= project;
@@ -95,82 +95,55 @@ public class PotentialProgrammingProblemsFix extends LinkedFix {
 			if (monitor == null)
 				monitor= new NullProgressMonitor();
 			
-			monitor.beginTask("", 3); //$NON-NLS-1$
-			
-			IType[] types= findTypesWithMissingUID(fProject, fCompilationUnits, new SubProgressMonitor(monitor, 1));
-			if (types.length == 0)
-				return new RefactoringStatus();
-			
-			RefactoringStatus result= new RefactoringStatus();
-			
-			ASTParser parser= ASTParser.newParser(AST.JLS3);
-			parser.setProject(fProject);
-			IBinding[] bindings= parser.createBindings(types, new SubProgressMonitor(monitor, 1));
-			
-			List qualifiedNames= new ArrayList();
-			for (int i= 0; i < bindings.length; i++) {
-	            ITypeBinding binding= (ITypeBinding)bindings[i];
-	            if (binding != null && binding.getBinaryName() != null) {
-					qualifiedNames.add(binding.getBinaryName());
-	            } else {
-					final IType type= types[i];
-	            	result.addWarning(Messages.format(FixMessages.PotentialProgrammingProblemsFix_calculatingUIDFailed_binding, types[i].getFullyQualifiedName()), new RefactoringStatusContext() {
-						public Object getCorrespondingElement() {
-	                        return type;
-                        }
-	            	});
-	            }
-            }
-			
-			if (qualifiedNames.size() == 0)
-				return result;
-			
-            try {
-                String[] names= (String[])qualifiedNames.toArray(new String[qualifiedNames.size()]);
-				long[] ids= SerialVersionHashOperation.calculateSerialVersionIds(names, fProject, new SubProgressMonitor(monitor, 1));
+			RefactoringStatus result;
+			try {
+				monitor.beginTask("", 10); //$NON-NLS-1$
 				
-				for (int i= 0; i < ids.length; i++) {
-                    if (ids[i] != SerialVersionLaunchConfigurationDelegate.FAILING_ID) {
-                    	fIdsTable.put(names[i], new Long(ids[i]));
-                    } else {
-                    	result.addWarning(Messages.format(FixMessages.PotentialProgrammingProblemsFix_calculatingUIDFailed_unknown, names[i]));
-                    }
-                }
-            } catch (IOException e) {
-            	return createWarning(e);
-            } catch (CoreException ce) {
-            	return createWarning(ce);
-            }
-		
+				IType[] types= findTypesWithMissingUID(fProject, fCompilationUnits, new SubProgressMonitor(monitor, 1));
+				if (types.length == 0)
+					return new RefactoringStatus();
+				
+				fProject.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor, 60));
+				if (monitor.isCanceled())
+					throw new OperationCanceledException();
+				
+				result= new RefactoringStatus();
+				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				parser.setProject(fProject);
+				IBinding[] bindings= parser.createBindings(types, new SubProgressMonitor(monitor, 1));
+				for (int i= 0; i < bindings.length; i++) {
+					IBinding curr= bindings[i];
+					if (curr instanceof ITypeBinding) {
+						ITypeBinding typeBinding= (ITypeBinding) curr;
+						try {
+							Long id= SerialVersionHashOperation.calculateSerialVersionId(typeBinding, fProject, new SubProgressMonitor(monitor, 1));
+							if (id != null) {
+								setSerialVersionId(typeBinding, id);
+							} else {
+							   	result.addWarning(Messages.format(FixMessages.PotentialProgrammingProblemsFix_calculatingUIDFailed_unknown, typeBinding.getName()));
+							}
+						} catch (IOException e) {
+						   	result.addWarning(Messages.format(FixMessages.PotentialProgrammingProblemsFix_calculatingUIDFailed_exception, new String[] { typeBinding.getName(), e.getLocalizedMessage()}), JavaStatusContext.create(types[i]));
+				        } catch (CoreException e) {
+						   	result.addWarning(Messages.format(FixMessages.PotentialProgrammingProblemsFix_calculatingUIDFailed_exception, new String[] { typeBinding.getName(), e.getLocalizedMessage()}), JavaStatusContext.create(types[i]));
+				        }
+					}
+				}
+			} finally {
+				monitor.done();
+			}
 			return result;
-		}
-		
-		private RefactoringStatus createWarning(Exception e) {
-			RefactoringStatus result= new RefactoringStatus();
-			result.addWarning(Messages.format(FixMessages.PotentialProgrammingProblemsFix_calculatingUIDFailed_exception, new String[] {fProject.getElementName(), e.getLocalizedMessage()}), new RefactoringStatusContext() {
-				public Object getCorrespondingElement() {
-                    return fProject;
-                }
-			});
-			return result;
-        }
-
-		public boolean hasSerialVersionId(String qualifiedName) {
-			if (qualifiedName == null)
-				return false;
-			
-			Long id= (Long)fIdsTable.get(qualifiedName);
-			if (id == null)
-				return false;
-			
-			return true;
 		}
 		
 		/**
 		 * {@inheritDoc}
 		 */
-		public long getSerialVersionId(String qualifiedName) {
-			return ((Long)fIdsTable.get(qualifiedName)).longValue();
+		public Long getSerialVersionId(ITypeBinding binding) {
+			return (Long) fIdsTable.get(binding.getKey());
+		}
+		
+		protected void setSerialVersionId(ITypeBinding binding, Long id) {
+			fIdsTable.put(binding.getKey(), id);
 		}
 		
 		private IType[] findTypesWithMissingUID(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
@@ -266,12 +239,15 @@ public class PotentialProgrammingProblemsFix extends LinkedFix {
 		 * {@inheritDoc}
 		 */
 		protected boolean addInitializer(VariableDeclarationFragment fragment, ASTNode declarationNode) throws CoreException {
-			String qualifiedName= getQualifiedName(declarationNode);
-			if (!fContext.hasSerialVersionId(qualifiedName))
+			ITypeBinding typeBinding= getTypeBinding(declarationNode);
+			if (typeBinding == null)
 				return false;
 			
-			long id= fContext.getSerialVersionId(qualifiedName);
-			fragment.setInitializer(fragment.getAST().newNumberLiteral(id + LONG_SUFFIX));
+			Long id= fContext.getSerialVersionId(typeBinding);
+			if (id == null)
+				return false;
+			
+			fragment.setInitializer(fragment.getAST().newNumberLiteral(id.toString() + LONG_SUFFIX));
 			return true;
 		}
 
@@ -316,29 +292,23 @@ public class PotentialProgrammingProblemsFix extends LinkedFix {
 		
 		if (defaultId) {
 			fCurrentContext= new ISerialVersionFixContext() {
-				public long getSerialVersionId(String qualifiedName) {
-					return 1;
+				public Long getSerialVersionId(ITypeBinding binding) {
+					return new Long(1);
 				}
 				public RefactoringStatus initialize(IProgressMonitor pm) throws CoreException {
 	                return new RefactoringStatus();
-                }
-				public boolean hasSerialVersionId(String qualifiedName) {
-	                return true;
                 }
 			};
 			return fCurrentContext.initialize(monitor);
 		} else if (randomId) {
 			fCurrentContext= new ISerialVersionFixContext() {
 				private Random rng;
-				public long getSerialVersionId(String qualifiedName) {
-					return rng.nextLong();
+				public Long getSerialVersionId(ITypeBinding binding) {
+					return new Long(rng.nextLong());
 				}
 				public RefactoringStatus initialize(IProgressMonitor pm) throws CoreException {
 					rng= new Random((new Date()).getTime());
 	                return new RefactoringStatus();
-                }
-				public boolean hasSerialVersionId(String qualifiedName) {
-	                return true;
                 }
 			};
 			return fCurrentContext.initialize(monitor);
@@ -391,8 +361,9 @@ public class PotentialProgrammingProblemsFix extends LinkedFix {
 				return null;
 			
 			for (Iterator iter= declarationNodes.iterator(); iter.hasNext();) {
-	            ASTNode declarationNode= (ASTNode)iter.next();
-	            if (fCurrentContext.hasSerialVersionId(getQualifiedName(declarationNode))) {
+	            ASTNode declarationNode= (ASTNode) iter.next();
+	            ITypeBinding binding= getTypeBinding(declarationNode);
+	            if (fCurrentContext.getSerialVersionId(binding) != null) {
 	            	SerialVersionHashBatchOperation op= new SerialVersionHashBatchOperation(unit, (ASTNode[])declarationNodes.toArray(new ASTNode[declarationNodes.size()]), fCurrentContext);
 	    			return new PotentialProgrammingProblemsFix(FixMessages.PotentialProgrammingProblemsFix_add_id_change_name, compilationUnit, new IFixRewriteOperation[] {op});	            	
 	            }
@@ -432,11 +403,11 @@ public class PotentialProgrammingProblemsFix extends LinkedFix {
 	
 	/**
 	 * Returns the declaration node for the originally selected node.
+	 * @param name the name of the node
 	 *
 	 * @return the declaration node
 	 */
-	private static ASTNode getDeclarationNode(SimpleName name) {
-
+	private static ASTNode getDeclarationNode(SimpleName name) {		
 		ASTNode parent= name.getParent();
 		if (!(parent instanceof AbstractTypeDeclaration)) {
 
@@ -453,25 +424,22 @@ public class PotentialProgrammingProblemsFix extends LinkedFix {
 	}
 	
 	/**
-	 * Returns the qualified type name of the class declaration.
+	 * Returns the type binding of the class declaration node.
 	 * 
-	 * @return the qualified type name of the class
+	 * @param parent the node to get the type for
+	 * @return the type binding
 	 */
-	private static String getQualifiedName(final ASTNode parent) {
-		ITypeBinding binding= null;
+	private static ITypeBinding getTypeBinding(final ASTNode parent) {
 		if (parent instanceof AbstractTypeDeclaration) {
 			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) parent;
-			binding= declaration.resolveBinding();
+			return declaration.resolveBinding();
 		} else if (parent instanceof AnonymousClassDeclaration) {
 			final AnonymousClassDeclaration declaration= (AnonymousClassDeclaration) parent;
-			final ClassInstanceCreation creation= (ClassInstanceCreation) declaration.getParent();
-			binding= creation.resolveTypeBinding();
+			return declaration.resolveBinding();
 		} else if (parent instanceof ParameterizedType) {
 			final ParameterizedType type= (ParameterizedType) parent;
-			binding= type.resolveBinding();
+			return type.resolveBinding();
 		}
-		if (binding != null)
-			return binding.getBinaryName();
 		return null;
 	}
 

@@ -5109,16 +5109,6 @@
 		</provider>
 	</extension>
 
-	<extension point="org.eclipse.debug.core.launchConfigurationTypes">
-    	<launchConfigurationType
-           delegate="org.eclipse.jdt.internal.ui.text.correction.SerialVersionLaunchConfigurationDelegate"
-           public="false"
-           name="%serialVersionLaunchConfigName"
-           modes="run"
-           id="org.eclipse.jdt.ui.serial.support">
-    	</launchConfigurationType>
-	</extension>
-
     <extension point="org.eclipse.ui.workbench.texteditor.spellingEngine">
         <engine
               preferencesClass="org.eclipse.jdt.internal.ui.preferences.SpellingPreferenceBlock"

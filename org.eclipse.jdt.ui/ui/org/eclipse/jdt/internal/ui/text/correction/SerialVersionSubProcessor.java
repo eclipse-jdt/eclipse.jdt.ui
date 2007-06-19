@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,8 +17,6 @@ import java.util.Map;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.swt.graphics.Image;
-
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.PotentialProgrammingProblemsFix;
@@ -27,6 +25,7 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
 
 /**
@@ -36,6 +35,42 @@ import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
  */
 public final class SerialVersionSubProcessor {
 
+	public static final class SerialVersionProposal extends FixCorrectionProposal {
+		private boolean fIsDefaultProposal;
+
+		public SerialVersionProposal(IFix fix, int relevance, IInvocationContext context, boolean isDefault) {
+			super(fix, createCleanUp(isDefault), relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD), context);
+			fIsDefaultProposal= isDefault;
+		}
+
+		private static ICleanUp createCleanUp(boolean isDefault) {
+			Map options= new Hashtable();
+			options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID, CleanUpConstants.TRUE);
+			if (isDefault) {
+				options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, CleanUpConstants.TRUE);
+			} else {
+				options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED, CleanUpConstants.TRUE);
+			}
+			return new PotentialProgrammingProblemsCleanUp(options);
+		}
+
+		public boolean isDefaultProposal() {
+			return fIsDefaultProposal;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public String getAdditionalProposalInfo() {
+			if (fIsDefaultProposal) {
+				return CorrectionMessages.SerialVersionDefaultProposal_message_default_info;
+			} else {
+				return CorrectionMessages.SerialVersionHashProposal_message_generated_info;
+			}
+		}
+	}
+	
+	
 	/**
 	 * Determines the serial version quickfix proposals.
 	 *
@@ -55,17 +90,8 @@ public final class SerialVersionSubProcessor {
 		
 		IFix[] fixes= PotentialProgrammingProblemsFix.createMissingSerialVersionFixes(context.getASTRoot(), location);
 		if (fixes != null) {
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
-			Map options= new Hashtable();
-			options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID, CleanUpConstants.TRUE);
-			options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, CleanUpConstants.TRUE);
-			FixCorrectionProposal prop1= new SerialVersionDefaultProposal(fixes[0], new PotentialProgrammingProblemsCleanUp(options), 9, image, context);
-			proposals.add(prop1);
-			options= new Hashtable();
-			options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID, CleanUpConstants.TRUE);
-			options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED, CleanUpConstants.TRUE);
-			FixCorrectionProposal prop2= new SerialVersionHashProposal(fixes[1], new PotentialProgrammingProblemsCleanUp(options), 9, image, context);
-			proposals.add(prop2);
+			proposals.add(new SerialVersionProposal(fixes[0], 9, context, true));
+			proposals.add(new SerialVersionProposal(fixes[1], 9, context, false));
 		}
 	}
 }
