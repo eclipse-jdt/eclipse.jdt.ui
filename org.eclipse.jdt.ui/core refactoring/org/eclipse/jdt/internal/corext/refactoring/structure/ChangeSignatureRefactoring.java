@@ -114,7 +114,6 @@ import org.eclipse.jdt.internal.corext.refactoring.ReturnTypeInfo;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
-import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker.IProblemVerifier;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
@@ -344,10 +343,10 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 	//------------------- /IDelegateUpdating ---------------------
 	
 	public RefactoringStatus checkSignature() {
-		return checkSignature(false, doGetProblemVerifier());
+		return checkSignature(false);
 	}
 	
-	private RefactoringStatus checkSignature(boolean resolveBindings, IProblemVerifier problemVerifier) {
+	private RefactoringStatus checkSignature(boolean resolveBindings) {
 		RefactoringStatus result= new RefactoringStatus();
 		checkMethodName(result);
 		if (result.hasFatalError())
@@ -364,7 +363,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		try {
 			RefactoringStatus[] typeStati;
 			if (resolveBindings)
-				typeStati= TypeContextChecker.checkAndResolveMethodTypes(fMethod, getStubTypeContext(), getNotDeletedInfos(), fReturnTypeInfo, problemVerifier);
+				typeStati= TypeContextChecker.checkAndResolveMethodTypes(fMethod, getStubTypeContext(), getNotDeletedInfos(), fReturnTypeInfo);
 			else
 				typeStati= TypeContextChecker.checkMethodTypesSyntax(fMethod, getNotDeletedInfos(), fReturnTypeInfo);
 			for (int i= 0; i < typeStati.length; i++)
@@ -773,7 +772,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 
 			if (isSignatureSameAsInitial())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeSignatureRefactoring_unchanged); 
-			result.merge(checkSignature(true, doGetProblemVerifier()));
+			result.merge(checkSignature(true));
 			if (result.hasFatalError())
 				return result;
 			
@@ -825,10 +824,6 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		} finally {
 			pm.done();
 		}
-	}
-
-	protected IProblemVerifier doGetProblemVerifier() {
-		return null;
 	}
 
 	private void clearManagers() {
@@ -974,15 +969,11 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		return result;
 	}
 		
-	private boolean shouldReport(IProblem problem, CompilationUnit cu) {
+	protected boolean shouldReport(IProblem problem, CompilationUnit cu) {
 		if (! problem.isError())
 			return false;
 		if (problem.getID() == IProblem.UndefinedType) //reported when trying to import
 			return false;
-		ASTNode node= ASTNodeSearchUtil.getAstNode(cu, problem.getSourceStart(), problem.getSourceEnd() - problem.getSourceStart());
-		IProblemVerifier verifier= doGetProblemVerifier();
-		if (verifier != null)
-			return verifier.isError(problem, node);
 		return true;	
 	}
 
@@ -1470,7 +1461,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 	
 	private static String createDeclarationString(ParameterInfo info) {
 		String newTypeName= info.getNewTypeName();
-		int index= newTypeName.indexOf('.');
+		int index= newTypeName.lastIndexOf('.');
 		if (index != -1){
 			newTypeName= newTypeName.substring(index+1);
 		}

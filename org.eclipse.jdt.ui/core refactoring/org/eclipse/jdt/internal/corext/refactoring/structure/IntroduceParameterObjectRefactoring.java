@@ -37,6 +37,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.ToolFactory;
@@ -84,7 +86,6 @@ import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker.IProblemVerifier;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreatePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -229,10 +230,10 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 	private final class RewriteParameterBody extends BodyUpdater {
 		private boolean fParameterClassCreated= false;
 
-		public void updateBody(MethodDeclaration methodDeclaration, CompilationUnitRewrite cuRewrite, RefactoringStatus result) throws CoreException {
+		public void updateBody(MethodDeclaration methodDeclaration, final CompilationUnitRewrite cuRewrite, RefactoringStatus result) throws CoreException {
 			// ensure that the parameterObject is imported
 			fParameterObjectFactory.createType(fCreateAsTopLevel, cuRewrite, methodDeclaration.getStartPosition());
-			if (cuRewrite.getCu().equals(fCompilationUnit) && !fParameterClassCreated) {
+			if (cuRewrite.getCu().equals(getCompilationUnit()) && !fParameterClassCreated) {
 				createParameterClass(methodDeclaration, cuRewrite);
 				fParameterClassCreated= true;
 			}
@@ -249,7 +250,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 							body.accept(new ASTVisitor(false) {
 
 								public boolean visit(SimpleName node) {
-									updateSimpleName(rewriter, pi, node, parameters);
+									updateSimpleName(rewriter, pi, node, parameters, cuRewrite.getCu().getJavaProject());
 									return false;
 								}
 
@@ -266,10 +267,10 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 
 		}
 
-		private void updateSimpleName(ASTRewrite rewriter, ParameterInfo pi, SimpleName node, List enclosingParameters) {
+		private void updateSimpleName(ASTRewrite rewriter, ParameterInfo pi, SimpleName node, List enclosingParameters, IJavaProject project) {
 			AST ast= rewriter.getAST();
 			IBinding binding= node.resolveBinding();
-			Expression replacementNode= fParameterObjectFactory.createFieldReadAccess(pi, getParameterName(), ast);
+			Expression replacementNode= fParameterObjectFactory.createFieldReadAccess(pi, getParameterName(), ast, project);
 			if (binding instanceof IVariableBinding) {
 				IVariableBinding variable= (IVariableBinding) binding;
 				if (variable.isParameter() && variable.getName().equals(getNameInScope(pi, enclosingParameters))) {
@@ -316,12 +317,6 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 
 	private MethodDeclaration fMethodDeclaration;
 
-	private ICompilationUnit fCompilationUnit;
-
-	private int fOffset;
-
-	private int fLength;
-
 	private ParameterObjectFactory fParameterObjectFactory;
 
 	private boolean fCreateAsTopLevel= true;
@@ -334,30 +329,31 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		initializeFields(method);
 		setBodyUpdater(new RewriteParameterBody());
 		setDefaultValueAdvisor(new ParameterObjectCreator());
-		List parameterInfos= getParameterInfos();
-		for (Iterator iter= parameterInfos.iterator(); iter.hasNext();) {
-			ParameterInfo pi= (ParameterInfo) iter.next();
-			if (!pi.isAdded()) {
-				pi.setCreateField(true);
-				pi.setNewName(getFieldName(pi));
-			}
-		}
 	}
 
 	private void initializeFields(IMethod method) throws JavaModelException {
-		fCompilationUnit= method.getCompilationUnit();
-		Assert.isNotNull(fCompilationUnit);
-		fOffset= method.getNameRange().getOffset();
-		fLength= method.getNameRange().getLength();
-		fParameterObjectFactory= new ParameterObjectFactory(fCompilationUnit);
+		fParameterObjectFactory= new ParameterObjectFactory();
 		String methodName= method.getElementName();
 		String className= String.valueOf(Character.toUpperCase(methodName.charAt(0)));
 		if (methodName.length() > 1)
 			className+= methodName.substring(1);
 		className+= PARAMETER_CLASS_APPENDIX;
+
 		fParameterObjectReference= ParameterInfo.createInfoForAddedParameter(className, DEFAULT_PARAMETER_OBJECT_NAME);
 		fParameterObjectFactory.setClassName(className);
-		fParameterObjectFactory.setPackage(method.getDeclaringType().getPackageFragment().getElementName());
+
+		List parameterInfos= super.getParameterInfos();
+		for (Iterator iter= parameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo pi= (ParameterInfo) iter.next();
+			if (!pi.isAdded()) {
+				pi.setCreateField(true);
+			}
+		}
+
+		IType declaringType= method.getDeclaringType();
+		Assert.isNotNull(declaringType);
+		fParameterObjectFactory.setPackage(declaringType.getPackageFragment().getElementName());
+
 		updateReferenceType();
 	}
 
@@ -374,11 +370,11 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		RefactoringStatus status= new RefactoringStatus();
 		status.merge(super.checkInitialConditions(pm));
-		status.merge(Checks.checkAvailability(fCompilationUnit));
 		if (status.hasFatalError())
 			return status;
 		CompilationUnit astRoot= getBaseCuRewrite().getRoot();
-		ASTNode selectedNode= NodeFinder.perform(astRoot, fOffset, fLength);
+		ISourceRange nameRange= getMethod().getNameRange();
+		ASTNode selectedNode= NodeFinder.perform(astRoot, nameRange.getOffset(), nameRange.getLength());
 		if (selectedNode == null) {
 			return mappingErrorFound(status, selectedNode);
 		}
@@ -400,6 +396,17 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 			fParameterObjectFactory.setEnclosingType(declaringClass.getQualifiedName());
 
 		List parameterInfos= super.getParameterInfos();
+		for (Iterator iter= parameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo pi= (ParameterInfo) iter.next();
+			if (!pi.isAdded()) {
+				if (pi.getOldName().equals(pi.getNewName())) // may have been
+																// set to
+																// something
+																// else after
+																// creation
+					pi.setNewName(getFieldName(pi));
+			}
+		}
 		if (!parameterInfos.contains(fParameterObjectReference)) {
 			parameterInfos.add(0, fParameterObjectReference);
 		}
@@ -417,25 +424,22 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		return status;
 	}
 
-	protected IProblemVerifier doGetProblemVerifier() {
-		return new IProblemVerifier() {
-
-			public boolean isError(IProblem problem, ASTNode node) {
-				if (node instanceof Type) {
-					Type type= (Type) node;
-					if (problem.getID() == IProblem.UndefinedType && getClassName().equals(ASTNodes.getTypeName(type))) {
-						return false;
-					}
-				}
-				if (node instanceof Name) {
-					Name name= (Name) node;
-					if (problem.getID() == IProblem.ImportNotFound && getPackage().indexOf(name.getFullyQualifiedName()) != -1)
-						return false;
-				}
-				return true;
+	protected boolean shouldReport(IProblem problem, CompilationUnit cu) {
+		if (!super.shouldReport(problem,cu))
+			return false;
+		ASTNode node= ASTNodeSearchUtil.getAstNode(cu, problem.getSourceStart(), problem.getSourceEnd() - problem.getSourceStart());
+		if (node instanceof Type) {
+			Type type= (Type) node;
+			if (problem.getID() == IProblem.UndefinedType && getClassName().equals(ASTNodes.getTypeName(type))) {
+				return false;
 			}
-
-		};
+		}
+		if (node instanceof Name) {
+			Name name= (Name) node;
+			if (problem.getID() == IProblem.ImportNotFound && getPackage().indexOf(name.getFullyQualifiedName()) != -1)
+				return false;
+		}
+		return true;
 	}
 
 	public String getClassName() {
@@ -451,9 +455,8 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 	}
 
 	public String getFieldName(ParameterInfo element) {
-		String paramName= element.getOldName();
-		IJavaProject javaProject= fCompilationUnit.getJavaProject();
-		String stripped= NamingConventions.removePrefixAndSuffixForArgumentName(javaProject, paramName);
+		IJavaProject javaProject= getCompilationUnit().getJavaProject();
+		String stripped= NamingConventions.removePrefixAndSuffixForArgumentName(javaProject, element.getOldName());
 		int dim= element.getNewTypeBinding() != null ? element.getNewTypeBinding().getDimensions() : 0;
 		return StubUtility.getVariableNameSuggestions(StubUtility.INSTANCE_FIELD, javaProject, stripped, dim, null, true)[0];
 	}
@@ -493,7 +496,8 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 	 * Checks if the given parameter info has been selected for field creation
 	 * 
 	 * @param pi parameter info
-	 * @return true if the given parameter info has been selected for field creation
+	 * @return true if the given parameter info has been selected for field
+	 *         creation
 	 */
 	private boolean isValidField(ParameterInfo pi) {
 		return pi.isCreateField() & !pi.isAdded();
@@ -537,10 +541,6 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 					fParameterObjectFactory.getClassName()));
 	}
 
-	public void setCreateComments(boolean selection) {
-		fParameterObjectFactory.setCreateComments(selection);
-	}
-
 	public void setCreateGetter(boolean createGetter) {
 		fParameterObjectFactory.setCreateGetter(createGetter);
 	}
@@ -569,7 +569,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 
 	private void createParameterClass(MethodDeclaration methodDeclaration, CompilationUnitRewrite cuRewrite) throws CoreException {
 		if (fCreateAsTopLevel) {
-			IJavaProject javaProject= fCompilationUnit.getJavaProject();
+			IJavaProject javaProject= getCompilationUnit().getJavaProject();
 			IPackageFragment packageFragment= getPackageFragmentRoot().getPackageFragment(fParameterObjectFactory.getPackage());
 			if (!packageFragment.exists()) {
 				fOtherChanges.add(new CreatePackageChange(packageFragment));
@@ -582,8 +582,8 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 			ASTRewrite rewriter= cuRewrite.getASTRewrite();
 			TypeDeclaration enclosingType= (TypeDeclaration) methodDeclaration.getParent();
 			ListRewrite bodyRewrite= rewriter.getListRewrite(enclosingType, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
-			TypeDeclaration classDeclaration= fParameterObjectFactory.createClassDeclaration(fCompilationUnit, enclosingType.getName()
-					.getFullyQualifiedName(), cuRewrite);
+			TypeDeclaration classDeclaration= fParameterObjectFactory.createClassDeclaration(enclosingType.getName().getFullyQualifiedName(),
+					cuRewrite);
 			classDeclaration.modifiers().add(rewriter.getAST().newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 			classDeclaration.modifiers().add(rewriter.getAST().newModifier(ModifierKeyword.STATIC_KEYWORD));
 			bodyRewrite.insertBefore(classDeclaration, methodDeclaration, null);
@@ -612,7 +612,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 			ListRewrite types= rewriter.getListRewrite(root, CompilationUnit.TYPES_PROPERTY);
 			ASTNode dummyType= (ASTNode) types.getOriginalList().get(0);
 			String newTypeName= JavaModelUtil.concatenateName(fParameterObjectFactory.getPackage(), fParameterObjectFactory.getClassName());
-			TypeDeclaration classDeclaration= fParameterObjectFactory.createClassDeclaration(workingCopy, newTypeName, cuRewrite);
+			TypeDeclaration classDeclaration= fParameterObjectFactory.createClassDeclaration(newTypeName, cuRewrite);
 			classDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 			Javadoc javadoc= (Javadoc) dummyType.getStructuralProperty(TypeDeclaration.JAVADOC_PROPERTY);
 			rewriter.set(classDeclaration, TypeDeclaration.JAVADOC_PROPERTY, javadoc, null);
@@ -621,7 +621,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 			// Apply rewrites and discard workingcopy
 			// Using CompilationUnitRewrite.createChange() leads to strange
 			// results
-			String charset= ResourceUtil.getFile(fCompilationUnit).getCharset(false);
+			String charset= ResourceUtil.getFile(getCompilationUnit()).getCharset(false);
 			Document document= new Document(content);
 			try {
 				rewriter.rewriteAST().apply(document);
@@ -640,11 +640,11 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 	}
 
 	public IPackageFragmentRoot getPackageFragmentRoot() {
-		return (IPackageFragmentRoot) fCompilationUnit.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+		return (IPackageFragmentRoot) getCompilationUnit().getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 	}
 
 	protected String getFileComment(ICompilationUnit parentCU, String lineDelimiter) throws CoreException {
-		if (fParameterObjectFactory.isCreateComments()) {
+		if (StubUtility.doAddComments(parentCU.getJavaProject())) {
 			return CodeGeneration.getFileComment(parentCU, lineDelimiter);
 		}
 		return null;
@@ -652,7 +652,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 	}
 
 	protected String getTypeComment(ICompilationUnit parentCU, String lineDelimiter) throws CoreException {
-		if (fParameterObjectFactory.isCreateComments()) {
+		if (StubUtility.doAddComments(parentCU.getJavaProject())) {
 			StringBuffer typeName= new StringBuffer();
 			typeName.append(fParameterObjectFactory.getClassName());
 			String[] typeParamNames= new String[0];
@@ -686,10 +686,6 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		fParameterObjectFactory.setPackage(typeQualifier);
 	}
 
-	public ICompilationUnit getCompilationUnit() {
-		return fCompilationUnit;
-	}
-
 	private String getNameInScope(ParameterInfo pi, List enclosingMethodParameters) {
 		Assert.isNotNull(enclosingMethodParameters);
 		boolean emptyVararg= pi.getOldIndex() >= enclosingMethodParameters.size();
@@ -702,6 +698,10 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 
 	public String getNewTypeName() {
 		return fParameterObjectReference.getNewTypeName();
+	}
+
+	public ICompilationUnit getCompilationUnit() {
+		return getBaseCuRewrite().getCu();
 	}
 
 }

@@ -58,18 +58,14 @@ import org.eclipse.jdt.ui.CodeGeneration;
 public class ParameterObjectFactory {
 
 	private String fClassName;
-	private ICompilationUnit fCompilationUnit;
-	private boolean fCreateComments;// initialized with setting from StubUtility
 	private boolean fCreateGetter;
 	private boolean fCreateSetter;
 	private String fEnclosingType;
 	private String fPackage;
 	private List fVariables;
 
-	public ParameterObjectFactory(ICompilationUnit cu) {
+	public ParameterObjectFactory() {
 		super();
-		this.fCompilationUnit= cu;
-		this.fCreateComments= StubUtility.doAddComments(cu.getJavaProject());
 	}
 
 	public RefactoringStatus checkConditions() {
@@ -79,7 +75,7 @@ public class ParameterObjectFactory {
 		return result;
 	}
 
-	public TypeDeclaration createClassDeclaration(ICompilationUnit unit, String declaringType, CompilationUnitRewrite cuRewrite) throws CoreException {
+	public TypeDeclaration createClassDeclaration(String declaringType, CompilationUnitRewrite cuRewrite) throws CoreException {
 		AST ast= cuRewrite.getAST();
 		TypeDeclaration typeDeclaration= ast.newTypeDeclaration();
 		typeDeclaration.setName(ast.newSimpleName(fClassName));
@@ -87,21 +83,21 @@ public class ParameterObjectFactory {
 		for (Iterator iter= fVariables.iterator(); iter.hasNext();) {
 			ParameterInfo pi= (ParameterInfo) iter.next();
 			if (isValidField(pi)) {
-				FieldDeclaration declaration= createField(pi, unit, cuRewrite);
+				FieldDeclaration declaration= createField(pi, cuRewrite);
 				body.add(declaration);
 			}
 		}
-		MethodDeclaration constructor= createConstructor(unit, declaringType, cuRewrite);
+		MethodDeclaration constructor= createConstructor(declaringType, cuRewrite);
 		body.add(constructor);
 		for (Iterator iter= fVariables.iterator(); iter.hasNext();) {
 			ParameterInfo pi= (ParameterInfo) iter.next();
 			if (fCreateGetter && isValidField(pi)) {
-				ASTNode getter= createGetter(pi, declaringType, unit, cuRewrite);
+				ASTNode getter= createGetter(pi, declaringType, cuRewrite);
 				body.add(getter);
 			}
 			if (fCreateSetter && isValidField(pi)) {
 				if (!Modifier.isFinal(pi.getOldBinding().getModifiers())) {
-					ASTNode setter= createSetter(pi, declaringType, unit, cuRewrite);
+					ASTNode setter= createSetter(pi, declaringType, cuRewrite);
 					body.add(setter);
 				}
 			}
@@ -110,14 +106,17 @@ public class ParameterObjectFactory {
 		return typeDeclaration;
 	}
 
-	private MethodDeclaration createConstructor(ICompilationUnit unit, String declaringTypeName, CompilationUnitRewrite cuRewrite) throws CoreException {
+	private MethodDeclaration createConstructor(String declaringTypeName, CompilationUnitRewrite cuRewrite) throws CoreException {
 		AST ast= cuRewrite.getAST();
+		ICompilationUnit unit= cuRewrite.getCu();
+		IJavaProject project= unit.getJavaProject();
+		
 		MethodDeclaration methodDeclaration= ast.newMethodDeclaration();
 		methodDeclaration.setName(ast.newSimpleName(fClassName));
 		methodDeclaration.setConstructor(true);
 		methodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 		String lineDelimiter= StubUtility.getLineDelimiterUsed(unit);
-		if (fCreateComments) {
+		if (createComments(project)) {
 			String comment= CodeGeneration.getMethodComment(unit, declaringTypeName, methodDeclaration, null, lineDelimiter);
 			if (comment != null) {
 				Javadoc doc= (Javadoc) cuRewrite.getASTRewrite().createStringPlaceholder(comment, ASTNode.JAVADOC);
@@ -136,7 +135,6 @@ public class ParameterObjectFactory {
 			}
 		}
 		
-		IJavaProject project= fCompilationUnit.getJavaProject();
 		
 		for (Iterator iter= validParameter.iterator(); iter.hasNext();) {
 			ParameterInfo pi= (ParameterInfo) iter.next();
@@ -152,7 +150,7 @@ public class ParameterObjectFactory {
 				svd.setVarargs(true);
 			}
 			
-			String paramName= getParameterName(pi);
+			String paramName= getParameterName(pi, project);
 			
 			Type fieldType= importBinding(typeBinding, cuRewrite);
 			svd.setType(fieldType);
@@ -175,10 +173,10 @@ public class ParameterObjectFactory {
 		return methodDeclaration;
 	}
 
-	private String getParameterName(ParameterInfo pi) {
+	private String getParameterName(ParameterInfo pi, IJavaProject project) {
 		String fieldName = pi.getNewName();
-		String strippedName= NamingConventions.removePrefixAndSuffixForFieldName(fCompilationUnit.getJavaProject(), fieldName, 0);
-		String[] suggestions= StubUtility.getVariableNameSuggestions(StubUtility.PARAMETER, fCompilationUnit.getJavaProject(), strippedName, 0, null, true);
+		String strippedName= NamingConventions.removePrefixAndSuffixForFieldName(project, fieldName, 0);
+		String[] suggestions= StubUtility.getVariableNameSuggestions(StubUtility.PARAMETER, project, strippedName, 0, null, true);
 		return suggestions[0];
 	}
 
@@ -189,14 +187,16 @@ public class ParameterObjectFactory {
 		return type;
 	}
 
-	private FieldDeclaration createField(ParameterInfo pi, ICompilationUnit unit, CompilationUnitRewrite cuRewrite) throws CoreException {
+	private FieldDeclaration createField(ParameterInfo pi, CompilationUnitRewrite cuRewrite) throws CoreException {
 		AST ast= cuRewrite.getAST();
+		ICompilationUnit unit= cuRewrite.getCu();
+		
 		VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 		String lineDelim= StubUtility.getLineDelimiterUsed(unit);
 		SimpleName fieldName= ast.newSimpleName(pi.getNewName());
 		fragment.setName(fieldName);
 		FieldDeclaration declaration= ast.newFieldDeclaration(fragment);
-		if (fCreateComments) {
+		if (createComments(unit.getJavaProject())) {
 			String comment= StubUtility.getFieldComment(unit, pi.getNewTypeName(), pi.getNewName(), lineDelim);
 			if (comment != null) {
 				Javadoc doc= (Javadoc) cuRewrite.getASTRewrite().createStringPlaceholder(comment, ASTNode.JAVADOC);
@@ -213,25 +213,28 @@ public class ParameterObjectFactory {
 		return declaration;
 	}
 
-	public Expression createFieldReadAccess(ParameterInfo pi, String paramName, AST ast) {
+	public Expression createFieldReadAccess(ParameterInfo pi, String paramName, AST ast, IJavaProject project) {
 		if (!fCreateGetter) {
 			return ast.newName(new String[] { paramName, pi.getNewName() });
 		} else {
 			MethodInvocation method= ast.newMethodInvocation();
-			method.setName(ast.newSimpleName(getGetterName(pi, ast)));
+			method.setName(ast.newSimpleName(getGetterName(pi, ast, project)));
 			method.setExpression(ast.newSimpleName(paramName));
 			return method;
 		}
 	}
 
-	private ASTNode createGetter(ParameterInfo pi, String declaringType, ICompilationUnit cu, CompilationUnitRewrite cuRewrite) throws CoreException {
+	private ASTNode createGetter(ParameterInfo pi, String declaringType, CompilationUnitRewrite cuRewrite) throws CoreException {
 		AST ast= cuRewrite.getAST();
+		ICompilationUnit cu= cuRewrite.getCu();
+		IJavaProject project= cu.getJavaProject();
+
 		MethodDeclaration methodDeclaration= ast.newMethodDeclaration();
 		String fieldName= pi.getNewName();
-		String getterName= getGetterName(pi, ast);
+		String getterName= getGetterName(pi, ast, project);
 		String lineDelim= StubUtility.getLineDelimiterUsed(cu);
-		String bareFieldname= NamingConventions.removePrefixAndSuffixForFieldName(cu.getJavaProject(), fieldName, Flags.AccPrivate);
-		if (fCreateComments) {
+		String bareFieldname= NamingConventions.removePrefixAndSuffixForFieldName(project, fieldName, Flags.AccPrivate);
+		if (createComments(project)) {
 			String comment= CodeGeneration.getGetterComment(cu, declaringType, getterName, fieldName, pi.getNewTypeName(), bareFieldname, lineDelim);
 			if (comment != null)
 				methodDeclaration.setJavadoc((Javadoc) cuRewrite.getASTRewrite().createStringPlaceholder(comment, ASTNode.JAVADOC));
@@ -241,7 +244,7 @@ public class ParameterObjectFactory {
 		methodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 		Block block= ast.newBlock();
 		methodDeclaration.setBody(block);
-		boolean useThis= StubUtility.useThisForFieldAccess(cu.getJavaProject());
+		boolean useThis= StubUtility.useThisForFieldAccess(project);
 		if (useThis) {
 			fieldName= "this." + fieldName; //$NON-NLS-1$
 		}
@@ -253,9 +256,10 @@ public class ParameterObjectFactory {
 
 	public ExpressionStatement createInitializer(ParameterInfo pi, String paramName, CompilationUnitRewrite cuRewrite) {
 		AST ast= cuRewrite.getAST();
+		
 		VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 		fragment.setName(ast.newSimpleName(pi.getOldName()));
-		fragment.setInitializer(createFieldReadAccess(pi, paramName, ast));
+		fragment.setInitializer(createFieldReadAccess(pi, paramName, ast, cuRewrite.getCu().getJavaProject()));
 		VariableDeclarationExpression declaration= ast.newVariableDeclarationExpression(fragment);
 		IVariableBinding variable= pi.getOldBinding();
 		declaration.setType(importBinding(pi.getNewTypeBinding(), cuRewrite));
@@ -265,15 +269,18 @@ public class ParameterObjectFactory {
 		return ast.newExpressionStatement(declaration);
 	}
 
-	private ASTNode createSetter(ParameterInfo pi, String declaringType, ICompilationUnit cu, CompilationUnitRewrite cuRewrite) throws CoreException {
+	private ASTNode createSetter(ParameterInfo pi, String declaringType, CompilationUnitRewrite cuRewrite) throws CoreException {
 		AST ast= cuRewrite.getAST();
+		ICompilationUnit cu= cuRewrite.getCu();
+		IJavaProject project= cu.getJavaProject();
+		
 		MethodDeclaration methodDeclaration= ast.newMethodDeclaration();
 		String fieldName= pi.getNewName();
-		String setterName= getSetterName(pi, ast);
+		String setterName= getSetterName(pi, ast, project);
 		String lineDelim= StubUtility.getLineDelimiterUsed(cu);
-		String bareFieldname= NamingConventions.removePrefixAndSuffixForFieldName(cu.getJavaProject(), fieldName, Flags.AccPrivate);
-		String paramName= StubUtility.suggestArgumentName(cu.getJavaProject(), bareFieldname, null);
-		if (fCreateComments) {
+		String bareFieldname= NamingConventions.removePrefixAndSuffixForFieldName(project, fieldName, Flags.AccPrivate);
+		String paramName= StubUtility.suggestArgumentName(project, bareFieldname, null);
+		if (createComments(project)) {
 			String comment= CodeGeneration.getSetterComment(cu, declaringType, setterName, fieldName, pi.getNewTypeName(), paramName, bareFieldname, lineDelim);
 			if (comment != null)
 				methodDeclaration.setJavadoc((Javadoc) cuRewrite.getASTRewrite().createStringPlaceholder(comment, ASTNode.JAVADOC));
@@ -286,17 +293,17 @@ public class ParameterObjectFactory {
 		methodDeclaration.parameters().add(variable);
 		Block block= ast.newBlock();
 		methodDeclaration.setBody(block);
-		boolean useThis= StubUtility.useThisForFieldAccess(cu.getJavaProject());
+		boolean useThis= StubUtility.useThisForFieldAccess(project);
 		if (useThis || fieldName.equals(paramName)) {
 			fieldName= "this." + fieldName; //$NON-NLS-1$
 		}
-		String bodyContent= CodeGeneration.getSetterMethodBodyContent(fCompilationUnit, declaringType, setterName, fieldName, paramName, lineDelim);
+		String bodyContent= CodeGeneration.getSetterMethodBodyContent(cu, declaringType, setterName, fieldName, paramName, lineDelim);
 		ASTNode setterBody= cuRewrite.getASTRewrite().createStringPlaceholder(bodyContent, ASTNode.EXPRESSION_STATEMENT);
 		block.statements().add(setterBody);
 		return methodDeclaration;
 	}
 
-	public Type createType(final boolean asTopLevelClass, final CompilationUnitRewrite cuRewrite, final int position) {
+	public Type createType(boolean asTopLevelClass, CompilationUnitRewrite cuRewrite, int position) {
 		String concatenateName= null;
 		if (asTopLevelClass) {
 			concatenateName= JavaModelUtil.concatenateName(fPackage, fClassName);
@@ -319,8 +326,10 @@ public class ParameterObjectFactory {
 		return fEnclosingType;
 	}
 
-	private String getGetterName(ParameterInfo pi, AST ast) {
-		return suggestGetterName(pi, ast);
+	private String getGetterName(ParameterInfo pi, AST ast, IJavaProject project) {
+		ITypeBinding type= pi.getNewTypeBinding();
+		boolean isBoolean= ast.resolveWellKnownType("boolean").isEqualTo(type) || ast.resolveWellKnownType("java.lang.Boolean").isEqualTo(type); //$NON-NLS-1$//$NON-NLS-2$
+		return NamingConventions.suggestGetterName(project, pi.getNewName(), Flags.AccPublic, isBoolean, null);
 	}
 
 	public String getPackage() {
@@ -336,12 +345,10 @@ public class ParameterObjectFactory {
 		return null;
 	}
 
-	private String getSetterName(ParameterInfo pi, AST ast) {
-		return suggestSetterName(pi, ast);
-	}
-
-	public boolean isCreateComments() {
-		return fCreateComments;
+	private String getSetterName(ParameterInfo pi, AST ast, IJavaProject project) {
+		ITypeBinding type= pi.getNewTypeBinding();
+		boolean isBoolean= ast.resolveWellKnownType("boolean").isEqualTo(type) || ast.resolveWellKnownType("java.lang.Boolean").isEqualTo(type); //$NON-NLS-1$//$NON-NLS-2$
+		return NamingConventions.suggestSetterName(project, pi.getNewName(), Flags.AccPublic, isBoolean, null);
 	}
 
 	public boolean isCreateGetter() {
@@ -385,19 +392,15 @@ public class ParameterObjectFactory {
 	}
 
 	public void setClassName(String className) {
-		this.fClassName= className;
-	}
-
-	public void setCreateComments(boolean selection) {
-		fCreateComments= selection;
+		fClassName= className;
 	}
 
 	public void setCreateGetter(boolean createGetter) {
-		this.fCreateGetter= createGetter;
+		fCreateGetter= createGetter;
 	}
 
 	public void setCreateSetter(boolean createSetter) {
-		this.fCreateSetter= createSetter;
+		fCreateSetter= createSetter;
 	}
 
 	public void setEnclosingType(String enclosingType) {
@@ -405,23 +408,11 @@ public class ParameterObjectFactory {
 	}
 
 	public void setPackage(String typeQualifier) {
-		this.fPackage= typeQualifier;
+		fPackage= typeQualifier;
 	}
 
 	public void setVariables(List parameters) {
 		fVariables= parameters;
-	}
-
-	private String suggestGetterName(ParameterInfo pi, AST ast) {
-		ITypeBinding type= pi.getNewTypeBinding();
-		boolean isBoolean= ast.resolveWellKnownType("boolean").isEqualTo(type) || ast.resolveWellKnownType("java.lang.Boolean").isEqualTo(type); //$NON-NLS-1$//$NON-NLS-2$
-		return NamingConventions.suggestGetterName(fCompilationUnit.getJavaProject(), pi.getNewName(), Flags.AccPublic, isBoolean, null);
-	}
-
-	private String suggestSetterName(ParameterInfo pi, AST ast) {
-		ITypeBinding type= pi.getNewTypeBinding();
-		boolean isBoolean= ast.resolveWellKnownType("boolean").isEqualTo(type) || ast.resolveWellKnownType("java.lang.Boolean").isEqualTo(type); //$NON-NLS-1$//$NON-NLS-2$
-		return NamingConventions.suggestSetterName(fCompilationUnit.getJavaProject(), pi.getNewName(), Flags.AccPublic, isBoolean, null);
 	}
 
 	/**
@@ -439,6 +430,10 @@ public class ParameterObjectFactory {
 				return;
 			}
 		}
+	}
+
+	private boolean createComments(IJavaProject project) {
+		return StubUtility.doAddComments(project);
 	}
 
 }

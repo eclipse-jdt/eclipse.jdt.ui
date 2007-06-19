@@ -89,13 +89,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 
 public class TypeContextChecker {
-
-	public interface IProblemVerifier {
-
-		boolean isError(IProblem problem, ASTNode node);
-
-	}
-
 	private static class MethodTypesChecker {
 
 		private static final String METHOD_NAME= "__$$__"; //$NON-NLS-1$
@@ -105,14 +98,11 @@ public class TypeContextChecker {
 		private final List/*<ParameterInfo>*/ fParameterInfos;
 		private final ReturnTypeInfo fReturnTypeInfo;
 
-		private final IProblemVerifier fProblemVerifier;
-
-		public MethodTypesChecker(IMethod method, StubTypeContext stubTypeContext, List/*<ParameterInfo>*/ parameterInfos, ReturnTypeInfo returnTypeInfo, IProblemVerifier problemVerifier) {
+		public MethodTypesChecker(IMethod method, StubTypeContext stubTypeContext, List/*<ParameterInfo>*/ parameterInfos, ReturnTypeInfo returnTypeInfo) {
 			fMethod= method;
 			fStubTypeContext= stubTypeContext;
 			fParameterInfos= parameterInfos;
 			fReturnTypeInfo= returnTypeInfo;
-			fProblemVerifier= problemVerifier;
 		}
 		
 		public RefactoringStatus[] checkAndResolveMethodTypes() throws CoreException {
@@ -140,6 +130,8 @@ public class TypeContextChecker {
 			
 			for (int i= 0; i < fParameterInfos.size(); i++) {
 				ParameterInfo parameterInfo= (ParameterInfo) fParameterInfos.get(i);
+				if (!parameterInfo.isResolve())
+					continue;
 				if (parameterInfo.getOldTypeBinding() != null && ! parameterInfo.isTypeNameChanged()) {
 					parameterInfo.setNewTypeBinding(parameterInfo.getOldTypeBinding());
 				} else {
@@ -217,8 +209,6 @@ public class TypeContextChecker {
 		}
 
 		private boolean isError(IProblem problem, Type type) {
-			if (fProblemVerifier != null)
-				return fProblemVerifier.isError(problem, type);
 			return true;
 		}
 
@@ -460,8 +450,8 @@ public class TypeContextChecker {
 			return typeBinding;
 	}
 
-	public static RefactoringStatus[] checkAndResolveMethodTypes(IMethod method, StubTypeContext stubTypeContext, List parameterInfos, ReturnTypeInfo returnTypeInfo, IProblemVerifier problemVerifier) throws CoreException {
-		MethodTypesChecker checker= new MethodTypesChecker(method, stubTypeContext, parameterInfos, returnTypeInfo, problemVerifier);
+	public static RefactoringStatus[] checkAndResolveMethodTypes(IMethod method, StubTypeContext stubTypeContext, List parameterInfos, ReturnTypeInfo returnTypeInfo) throws CoreException {
+		MethodTypesChecker checker= new MethodTypesChecker(method, stubTypeContext, parameterInfos, returnTypeInfo);
 		return checker.checkAndResolveMethodTypes();
 	}
 

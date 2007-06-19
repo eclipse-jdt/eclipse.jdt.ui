@@ -143,10 +143,7 @@ public class ParameterInfo {
 	}
 	
 	public void setNewTypeBinding(ITypeBinding typeBinding){
-		//TODO: TypeContextChecker should not resolve such a parameter at all.
-		// That would also make IProblemVerifier obsolete.
-		if (fResolve)
-			fNewTypeBinding= typeBinding;
+		fNewTypeBinding= typeBinding;
 	}
 
 	public boolean isOldVarargs() {
@@ -210,7 +207,7 @@ public class ParameterInfo {
 	}
 
 	public void setOldBinding(IVariableBinding binding) {
-		//TODO: remove setter again ( https://bugs.eclipse.org/bugs/show_bug.cgi?id=102287 )
+		//The variableBinding is needed by IPOR to check what modifier were present
 		fOldBinding=binding;
 		fOldTypeBinding=binding.getType();
 		fNewTypeBinding=binding.getType();
@@ -222,6 +219,10 @@ public class ParameterInfo {
 	
 	public boolean isInlined() {
 		return fInlined;
+	}
+
+	public boolean isResolve() {
+		return fResolve;
 	}
 
 }

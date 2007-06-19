@@ -26,6 +26,8 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
@@ -40,6 +42,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.IntroduceParameterObjectRefactoring;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class IntroduceParameterObjectTests extends RefactoringTest {
 
@@ -67,6 +73,18 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		runRefactoring(new RunRefactoringParameter());
 	}
 
+	protected void setUp() throws Exception {
+		super.setUp();
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
+	}
+
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setToDefault(PreferenceConstants.CODEGEN_ADD_COMMENTS);
+	}
+	
 	public void testDelegateCreation() throws Exception {
 		Map renamings= new HashMap();
 		renamings.put("a", "newA");
@@ -90,7 +108,7 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 			javaProject.setOptions(newOptions);
 			
 			Map renamings= new HashMap();
-			renamings.put("fDG", "newD");
+			renamings.put("d", "newD");
 			RunRefactoringParameter param= new RunRefactoringParameter();
 			param.getters= true;
 			param.setters= true;
@@ -284,7 +302,6 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		public String packageName;
 		public String inputPackage;
 		public Map indexMap;
-		public boolean commments;
 		public boolean expectFailure;
 	}
 
@@ -352,7 +369,6 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		ref.setCreateGetter(parameter.getters);
 		ref.setCreateSetter(parameter.setters);
 		ref.setDelegateUpdating(parameter.delegate);
-		ref.setCreateComments(parameter.commments);
 		if (parameter.className != null)
 			ref.setClassName(parameter.className);
 		if (parameter.packageName != null)
@@ -371,11 +387,13 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 				}
 			}
 			if (parameter.useParams != null) {
-				pi.setCreateField(parameter.useParams.contains(pi.getNewName()));
+				pi.setCreateField(parameter.useParams.remove(pi.getNewName()));
 			}
 		}
 		if (parameter.renamings != null)
 			assertTrue("Some renamings did not match:"+parameter.renamings,parameter.renamings.size()==0);
+		if (parameter.useParams != null)
+			assertTrue("Some parmeter did not match:"+parameter.useParams,parameter.useParams.size()==0);
 		if (parameter.indexMap != null){
 			Collections.sort(pis, new Comparator() {
 			
