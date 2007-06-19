@@ -695,4 +695,12 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(5, 41, 5, 41, "fD", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 	
+	public void testDeclaringMethodBindingUnavailable01() throws Exception {
+		int accessModifier= Modifier.PRIVATE;
+		int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
+		boolean declareFinal= false;
+		boolean declareStatic= false;
+		passHelper(9, 14, 9, 18, "fDate", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+	
 }

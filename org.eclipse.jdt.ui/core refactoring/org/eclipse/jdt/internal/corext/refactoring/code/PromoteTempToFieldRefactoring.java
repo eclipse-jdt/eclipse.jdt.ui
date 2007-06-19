@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -380,7 +381,8 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
     	if (initializer == null)
 	        return;
 	    
-		ITypeBinding[] methodTypeParameters= getMethodDeclaration().resolveBinding().getTypeParameters();
+		IMethodBinding declaringMethodBinding= getMethodDeclaration().resolveBinding();
+		ITypeBinding[] methodTypeParameters= declaringMethodBinding == null ? new ITypeBinding[0] : declaringMethodBinding.getTypeParameters();
 	    LocalTypeAndVariableUsageAnalyzer localTypeAnalyer= new LocalTypeAndVariableUsageAnalyzer(methodTypeParameters);
 	    initializer.accept(localTypeAnalyer);
 	    fInitializerUsesLocalTypes= ! localTypeAnalyer.getUsageOfEnclosingNodes().isEmpty();
@@ -395,7 +397,8 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
     	if (binding == null)
     		return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.PromoteTempToFieldRefactoring_cannot_promote); 
     	
-		ITypeBinding[] methodTypeParameters= getMethodDeclaration().resolveBinding().getTypeParameters();
+		IMethodBinding declaringMethodBinding= getMethodDeclaration().resolveBinding();
+		ITypeBinding[] methodTypeParameters= declaringMethodBinding == null ? new ITypeBinding[0] : declaringMethodBinding.getTypeParameters();
 		LocalTypeAndVariableUsageAnalyzer analyzer= new LocalTypeAndVariableUsageAnalyzer(methodTypeParameters);
 		type.accept(analyzer);
 		boolean usesLocalTypes= ! analyzer.getUsageOfEnclosingNodes().isEmpty();
