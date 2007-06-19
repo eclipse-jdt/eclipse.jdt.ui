@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.junit.launcher;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -105,6 +106,11 @@ public class JUnitMigrationDelegate implements ILaunchConfigurationMigrationDele
 				}
 				if (element == null) {
 					element = javaProject;
+				}
+			} else {
+				IProject project= javaProject.getProject();
+				if (project.exists() && !project.isOpen()) {
+					return project;
 				}
 			}
 		} else if (containerHandle != null) {
