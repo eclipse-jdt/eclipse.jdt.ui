@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.io.File;
@@ -55,11 +54,11 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.text.spelling.JavaSpellingEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+
 
 /**
  * Options configuration block for spell check related settings.
@@ -83,7 +82,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_SPELLING_IGNORE_MIXED= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_MIXED);
 	private static final Key PREF_SPELLING_IGNORE_SENTENCE= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_SENTENCE);
 	private static final Key PREF_SPELLING_IGNORE_UPPER= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_UPPER);
-	private static final Key PREF_SPELLING_IGNORE_JAVA_STRINGS= getJDTUIKey(JavaSpellingEngine.SPELLING_IGNORE_JAVA_STRINGS);
+	private static final Key PREF_SPELLING_IGNORE_JAVA_STRINGS= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_JAVA_STRINGS);
 	private static final Key PREF_SPELLING_IGNORE_SINGLE_LETTERS= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_SINGLE_LETTERS);
 	private static final Key PREF_SPELLING_IGNORE_NON_LETTERS= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_NON_LETTERS);
 	private static final Key PREF_SPELLING_IGNORE_URLS= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_URLS);
