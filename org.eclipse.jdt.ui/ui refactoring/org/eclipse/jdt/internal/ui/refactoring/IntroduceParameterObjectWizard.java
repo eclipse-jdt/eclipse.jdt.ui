@@ -76,6 +76,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.IntroduceParameterObjectRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -506,10 +507,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 						InputDialog inputDialog= new InputDialog(getShell(), title, message, selected.getNewName(), new IInputValidator() {
 
 							public String isValid(String newText) {
-								IJavaProject project= fRefactoring.getCompilationUnit().getJavaProject();
-								String sourceLevel= project.getOption(JavaCore.COMPILER_SOURCE, true);
-								String compliance= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-								IStatus status= JavaConventions.validateIdentifier(newText, sourceLevel, compliance);
+								IStatus status= JavaConventionsUtil.validateIdentifier(newText, fRefactoring.getCompilationUnit());
 								if (!status.isOK())
 									return status.getMessage();
 								return null;

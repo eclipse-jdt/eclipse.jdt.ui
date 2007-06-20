@@ -116,6 +116,7 @@ import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
@@ -581,18 +582,14 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		if (project == null || !project.exists()) {
 			return JavaConventions.validateJavaTypeName(text, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
 		}
-		String sourceLevel= project.getOption(JavaCore.COMPILER_SOURCE, true);
-		String compliance= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-		return JavaConventions.validateJavaTypeName(text, sourceLevel, compliance);
+		return JavaConventionsUtil.validateJavaTypeName(text, project);
 	}
 	
 	private static IStatus validatePackageName(String text, IJavaProject project) {
 		if (project == null || !project.exists()) {
 			return JavaConventions.validatePackageName(text, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
 		}
-		String sourceLevel= project.getOption(JavaCore.COMPILER_SOURCE, true);
-		String compliance= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-		return JavaConventions.validatePackageName(text, sourceLevel, compliance);
+		return JavaConventionsUtil.validatePackageName(text, project);
 	}
 	
 	// -------- UI Creation ---------

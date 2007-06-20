@@ -58,10 +58,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizardPage;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -72,6 +69,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor;
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.refactoring.RenameSupport;
@@ -605,10 +603,7 @@ public class RenameLinkedMode {
 			 * but make sure implementations don't access outdated Java Model
 			 * (cache all necessary information before starting linked mode).
 			 */
-			IJavaProject project= fJavaElement.getJavaProject();
-			String sourceLevel= project.getOption(JavaCore.COMPILER_SOURCE, true);
-			String complianceLevel= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-			return JavaConventions.validateIdentifier(newName, sourceLevel, complianceLevel).isOK();
+			return JavaConventionsUtil.validateIdentifier(newName, fJavaElement).isOK();
 		} catch (BadLocationException e) {
 			return false;
 		}

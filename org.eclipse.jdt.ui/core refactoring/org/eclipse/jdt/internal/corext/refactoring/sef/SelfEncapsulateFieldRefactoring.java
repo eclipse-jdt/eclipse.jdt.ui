@@ -47,8 +47,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -104,6 +102,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -710,13 +709,10 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 			isStatic= JdtFlags.isStatic(fField);
 		} catch(JavaModelException e) {
 		}
-		IJavaProject project= fField.getJavaProject();
-		String sourceLevel= project.getOption(JavaCore.COMPILER_SOURCE, true);
-		String compliance= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-		
-		if ((isStatic && fArgName.equals(fieldName) && fieldName.equals(fField.getDeclaringType().getElementName()))
-			|| JavaConventions.validateIdentifier(fArgName, sourceLevel, compliance).getSeverity() == IStatus.ERROR)
+		if ( (isStatic && fArgName.equals(fieldName) && fieldName.equals(fField.getDeclaringType().getElementName()))
+				|| JavaConventionsUtil.validateIdentifier(fArgName, fField).getSeverity() == IStatus.ERROR) {
 			fArgName= "_" + fArgName; //$NON-NLS-1$
+		}
 	}
 	
 	private String getTypeName(ASTNode type) {

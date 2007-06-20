@@ -27,14 +27,13 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.CodeGeneration;
@@ -62,9 +61,7 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
 		}
 
 		if (prefix.length() > 0 && !"main".equals(prefix) && !hasMethod(methods, prefix) && suggestedMethods.add(prefix)) { //$NON-NLS-1$
-			String sourceLevel= type.getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true);
-			String complianceLevel= type.getJavaProject().getOption(JavaCore.COMPILER_COMPLIANCE, true);
-			if (!JavaConventions.validateMethodName(prefix, sourceLevel, complianceLevel).matches(IStatus.ERROR))
+			if (!JavaConventionsUtil.validateMethodName(prefix, type).matches(IStatus.ERROR))
 				result.add(new MethodDeclarationCompletionProposal(type, prefix, Signature.SIG_VOID, offset, length, relevance));
 		}
 	}
