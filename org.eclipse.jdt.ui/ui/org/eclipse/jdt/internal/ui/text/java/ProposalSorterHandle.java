@@ -103,6 +103,10 @@ public final class ProposalSorterHandle {
 	 * point schema. Throws an
 	 * <code>InvalidRegistryObjectException</code> if <code>obj</code>
 	 * is <code>null</code>.
+	 * 
+	 * @param obj the object to check if not null
+	 * @param attribute the attribute
+	 * @throws InvalidRegistryObjectException 
 	 */
 	private void checkNotNull(Object obj, String attribute) throws InvalidRegistryObjectException {
 		if (obj == null) {

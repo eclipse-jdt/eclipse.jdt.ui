@@ -118,6 +118,9 @@ public class ProposalInfo {
 	
 	/**
 	 * Gets the reader content as a String
+	 * 
+	 * @param reader the reader 
+	 * @return the reader content as string
 	 */
 	private static String getString(Reader reader) {
 		StringBuffer buf= new StringBuffer();
