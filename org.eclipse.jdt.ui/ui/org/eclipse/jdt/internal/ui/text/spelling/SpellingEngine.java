@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.text.spelling;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,6 +23,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener;
+
 
 /**
  * Internal abstract spelling engine, subclasses provide a content-type specific implementation.
