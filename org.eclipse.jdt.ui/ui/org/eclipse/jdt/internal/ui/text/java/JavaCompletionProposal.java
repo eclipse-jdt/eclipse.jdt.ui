@@ -8,9 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.text.java;
-
 
 import org.eclipse.core.runtime.Assert;
 
@@ -31,8 +29,8 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * @param replacementOffset the offset of the text to be replaced
 	 * @param replacementLength the length of the text to be replaced
 	 * @param image the image to display for this proposal
-	 * @param displayString the string to be displayed for the proposal If set to <code>null</code>,
-	 *        the replacement string will be taken as display string.
+	 * @param displayString the string to be displayed for the proposal If set to <code>null</code>, the replacement string will be taken as display string.
+	 * @param relevance the relevance
 	 */
 	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, Image image, String displayString, int relevance) {
 		this(replacementString, replacementOffset, replacementLength, image, displayString, relevance, false);
@@ -92,7 +90,7 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isValidPrefix(java.lang.String)
 	 */
 	protected boolean isValidPrefix(String prefix) {
-		String word= getDisplayString();
+		String word= getPrefixValidationString();
 		if (isInJavadoc()) {
 			int idx = word.indexOf("{@link "); //$NON-NLS-1$
 			if (idx==0) {

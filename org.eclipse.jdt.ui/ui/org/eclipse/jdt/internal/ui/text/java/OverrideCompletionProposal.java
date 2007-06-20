@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,6 +55,7 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
 
 public class OverrideCompletionProposal extends JavaTypeCompletionProposal implements ICompletionProposalExtension4 {
 
@@ -182,4 +183,13 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 	public boolean isAutoInsertable() {
 		return false;
 	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#getPrefixValidationString()
+	 * @since 3.4
+	 */
+	protected String getPrefixValidationString() {
+		return getDisplayString();
+	}
+
 }
