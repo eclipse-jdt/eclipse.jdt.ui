@@ -28,6 +28,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
@@ -61,9 +62,10 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
 		}
 
 		if (prefix.length() > 0 && !"main".equals(prefix) && !hasMethod(methods, prefix) && suggestedMethods.add(prefix)) { //$NON-NLS-1$
-			if (!JavaConventions.validateMethodName(prefix).matches(IStatus.ERROR)) {
+			String sourceLevel= type.getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true);
+			String complianceLevel= type.getJavaProject().getOption(JavaCore.COMPILER_COMPLIANCE, true);
+			if (!JavaConventions.validateMethodName(prefix, sourceLevel, complianceLevel).matches(IStatus.ERROR))
 				result.add(new MethodDeclarationCompletionProposal(type, prefix, Signature.SIG_VOID, offset, length, relevance));
-			}
 		}
 	}
 
