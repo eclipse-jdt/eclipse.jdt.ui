@@ -43,8 +43,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
 import org.eclipse.jdt.internal.ui.text.java.ProposalSorterRegistry;
-import org.eclipse.jdt.internal.ui.text.spelling.JavaSpellingEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
+
 
 /**
  * Preference constants used in the JDT-UI preference store. Clients should only read the
@@ -2570,6 +2570,17 @@ public class PreferenceConstants {
 	 * @since 3.3
 	 */
 	public final static String SPELLING_IGNORE_NON_LETTERS= "spelling_ignore_non_letters"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that controls whether Java strings
+	 * should be ignored during spell checking.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.4
+	 */
+	public static final String SPELLING_IGNORE_JAVA_STRINGS= "spelling_ignore_java_strings"; //$NON-NLS-1$;
 
 	/**
 	 * A named preference that controls the locale used for spell checking.
@@ -3814,7 +3825,6 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_URLS, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_SINGLE_LETTERS, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_AMPERSAND_IN_PROPERTIES, true);
-		store.setDefault(JavaSpellingEngine.SPELLING_IGNORE_JAVA_STRINGS, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_NON_LETTERS, true);
 		store.setDefault(PreferenceConstants.SPELLING_USER_DICTIONARY, ""); //$NON-NLS-1$
 		

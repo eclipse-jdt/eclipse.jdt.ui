@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.text.spelling;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -28,6 +27,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener;
 
+
 /**
  * Java spelling engine
  *
@@ -35,18 +35,13 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener;
  */
 public class JavaSpellingEngine extends SpellingEngine {
 	
-	/*
-	 * XXX: To be made public in 3.4,
-	 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=186117
-	 */
-	public static final String SPELLING_IGNORE_JAVA_STRINGS= "spelling_ignore_java_stringsr"; //$NON-NLS-1$;
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.SpellingEngine#check(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IRegion[], org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker, org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	protected void check(IDocument document, IRegion[] regions, ISpellChecker checker, ISpellingProblemCollector collector, IProgressMonitor monitor) {
 		ISpellEventListener listener= new SpellEventListener(collector, document);
-		boolean isIgnoringJavaStrings= PreferenceConstants.getPreferenceStore().getBoolean(SPELLING_IGNORE_JAVA_STRINGS);
+		boolean isIgnoringJavaStrings= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SPELLING_IGNORE_JAVA_STRINGS);
 		try {
 			checker.addListener(listener);
 			try {
