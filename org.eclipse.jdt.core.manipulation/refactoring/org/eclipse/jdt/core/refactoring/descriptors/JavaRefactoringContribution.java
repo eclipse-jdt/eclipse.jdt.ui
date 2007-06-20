@@ -13,7 +13,9 @@ package org.eclipse.jdt.core.refactoring.descriptors;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 
@@ -37,4 +39,15 @@ public abstract class JavaRefactoringContribution extends RefactoringContributio
 			return ((JavaRefactoringDescriptor) descriptor).getArguments();
 		return super.retrieveArgumentMap(descriptor);
 	}
+	
+	/**
+	 * Creates the a new refactoring instance.
+	 * 
+	 * @param descriptor
+	 *            the refactoring descriptor
+	 * @return the refactoring, or <code>null</code>
+	 * @throws CoreException
+	 *             if an error occurs while creating the refactoring
+	 */
+	public abstract Refactoring createRefactoring(RefactoringDescriptor descriptor) throws CoreException;
 }

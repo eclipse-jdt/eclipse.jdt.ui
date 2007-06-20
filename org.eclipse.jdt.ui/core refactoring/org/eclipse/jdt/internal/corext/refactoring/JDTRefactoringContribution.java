@@ -12,9 +12,6 @@ package org.eclipse.jdt.internal.corext.refactoring;
 
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
@@ -33,14 +30,4 @@ public abstract class JDTRefactoringContribution extends JavaRefactoringContribu
 		return new JDTRefactoringDescriptor(id, project, description, comment, arguments, flags);
 	}
 
-	/**
-	 * Creates the a new refactoring instance.
-	 * 
-	 * @param descriptor
-	 *            the refactoring descriptor
-	 * @return the refactoring, or <code>null</code>
-	 * @throws CoreException
-	 *             if an error occurs while creating the refactoring
-	 */
-	public abstract Refactoring createRefactoring(RefactoringDescriptor descriptor) throws CoreException;
 }

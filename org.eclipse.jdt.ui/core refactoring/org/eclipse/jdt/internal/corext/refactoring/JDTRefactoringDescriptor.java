@@ -24,8 +24,6 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringContribution;
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -286,22 +284,15 @@ public class JDTRefactoringDescriptor extends JavaRefactoringDescriptor {
 	 * {@inheritDoc}
 	 */
 	public Refactoring createRefactoring(final RefactoringStatus status) throws CoreException {
-		Refactoring refactoring= null;
-		final RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(getID());
-		if (contribution instanceof JDTRefactoringContribution) {
-			final JDTRefactoringContribution extended= (JDTRefactoringContribution) contribution;
-			refactoring= extended.createRefactoring(this);
-		}
-		if (refactoring != null) {
-			if (refactoring instanceof IScriptableRefactoring) {
-				final JavaRefactoringArguments arguments= createArguments();
-				if (arguments != null)
-					status.merge(((IScriptableRefactoring) refactoring).initialize(arguments));
-				else
-					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments));
-			} else
-				status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_initialization_error, getID())));
-		}
+		Refactoring refactoring= super.createRefactoring(status);
+		if (refactoring instanceof IScriptableRefactoring) {
+			final JavaRefactoringArguments arguments= createArguments();
+			if (arguments != null)
+				status.merge(((IScriptableRefactoring) refactoring).initialize(arguments));
+			else
+				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments));
+		} else
+			status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_initialization_error, getID())));
 		return refactoring;
 	}
 
