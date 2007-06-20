@@ -322,9 +322,9 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 		final String id= getID();
 		final RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(id);
 		if (contribution != null) {
-			if (contribution instanceof JavaRefactoringContribution) {
-				JavaRefactoringContribution javaContribution= (JavaRefactoringContribution) contribution;
-				refactoring= javaContribution.createRefactoring(this);
+			final RefactoringDescriptor descriptor= contribution.createDescriptor(id, getProject(), getDescription(), getComment(), fArguments, getFlags());
+			if (descriptor != null) {
+				refactoring= descriptor.createRefactoring(status);
 			} else
 				JavaManipulationPlugin.log(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), 0, MessageFormat.format(DescriptorMessages.JavaRefactoringDescriptor_no_resulting_descriptor, new Object[] { id}), null));
 		}
