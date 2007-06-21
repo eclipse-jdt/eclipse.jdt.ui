@@ -18,7 +18,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
@@ -74,8 +73,8 @@ public class CompilationUnitEditorActionContributor extends BasicCompilationUnit
 		bars.setGlobalActionHandler(JdtActionConstants.REMOVE_BLOCK_COMMENT, getAction(textEditor, "RemoveBlockComment")); //$NON-NLS-1$
 		bars.setGlobalActionHandler(JdtActionConstants.INDENT, getAction(textEditor, "Indent")); //$NON-NLS-1$
 
-		IAction action= getAction(textEditor, ActionFactory.REFRESH.getId());
-		bars.setGlobalActionHandler(ActionFactory.REFRESH.getId(), action);
+		IAction action= getAction(textEditor, ITextEditorActionConstants.REFRESH);
+		bars.setGlobalActionHandler(ITextEditorActionConstants.REFRESH, action);
 
 		fToggleInsertModeAction.setAction(getAction(textEditor, ITextEditorActionConstants.TOGGLE_INSERT_MODE));
 	}
