@@ -119,7 +119,7 @@ public class JavaElementUtil {
 		return type.getCompilationUnit().getTypes().length == 1;
 	}
 
-	/** see org.eclipse.jdt.internal.core.JavaElement#isAncestorOf(org.eclipse.jdt.core.IJavaElement) */
+	/* @see org.eclipse.jdt.internal.core.JavaElement#isAncestorOf(org.eclipse.jdt.core.IJavaElement) */
 	public static boolean isAncestorOf(IJavaElement ancestor, IJavaElement child) {
 		IJavaElement parent= child.getParent();
 		while (parent != null && !parent.equals(ancestor)) {
@@ -142,8 +142,9 @@ public class JavaElementUtil {
 	}
 
 	/**
-	 * Returns an array of projects that have the specified root on their
-	 * classpaths.
+	 * @param root 
+	 * @return array of projects that have the specified root on their classpaths
+	 * @throws JavaModelException 
 	 */
 	public static IJavaProject[] getReferencingProjects(IPackageFragmentRoot root) throws JavaModelException {
 		IClasspathEntry cpe= root.getRawClasspathEntry();
