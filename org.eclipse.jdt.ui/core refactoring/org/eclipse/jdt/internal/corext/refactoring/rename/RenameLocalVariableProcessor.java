@@ -279,7 +279,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating#checkNewElementName(java.lang.String)
 	 */
 	public RefactoringStatus checkNewElementName(String newName) throws JavaModelException {
-		RefactoringStatus result= Checks.checkFieldName(newName);
+		RefactoringStatus result= Checks.checkFieldName(newName, fCu);
 		if (! Checks.startsWithLowerCase(newName))
 			if (fIsComposite) {
 				final String nameOfParent= (fLocalVariable.getParent() instanceof IMethod) ? fLocalVariable.getParent().getElementName() : RefactoringCoreMessages.JavaElementUtil_initializer;

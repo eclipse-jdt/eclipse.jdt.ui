@@ -41,16 +41,17 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -176,15 +177,16 @@ public class MoveMembersWizard extends RefactoringWizard {
 					handleDestinationChanged();
 				}
 				private void handleDestinationChanged() {
-					IStatus status= JavaConventions.validateJavaTypeName(fDestinationField.getText());
+					IType declaring= getMoveProcessor().getDeclaringType();
+					IJavaProject javaProject= declaring.getJavaProject();
+					IStatus status= JavaConventionsUtil.validateJavaTypeName(fDestinationField.getText(), javaProject);
 					if (status.getSeverity() == IStatus.ERROR){
 						error(status.getMessage());
 					} else {
 						try {
-							final IType declaring= getMoveProcessor().getDeclaringType();
-							IType resolvedType= declaring.getJavaProject().findType(fDestinationField.getText());
+							IType resolvedType= javaProject.findType(fDestinationField.getText());
 							if (resolvedType == null)
-								resolvedType= declaring.getJavaProject().findType(declaring.getPackageFragment().getElementName(), fDestinationField.getText());
+								resolvedType= javaProject.findType(declaring.getPackageFragment().getElementName(), fDestinationField.getText());
 							IStatus validationStatus= validateDestinationType(resolvedType, fDestinationField.getText());
 							if (validationStatus.isOK()){
 								setErrorMessage(null);

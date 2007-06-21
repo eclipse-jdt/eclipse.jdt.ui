@@ -17,13 +17,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaCore;
-
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -33,17 +26,24 @@ import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class NewNameQueries implements INewNameQueries {
 
@@ -164,7 +164,7 @@ public class NewNameQueries implements INewNameQueries {
 				if (newText == null || "".equals(newText)) //$NON-NLS-1$
 					return INVALID_NAME_NO_MESSAGE;
 				String newCuName= JavaModelUtil.getRenamedCUName(cu, newText);
-				IStatus status= JavaConventions.validateCompilationUnitName(newCuName);	
+				IStatus status= JavaConventionsUtil.validateCompilationUnitName(newCuName, cu);	
 				if (status.getSeverity() == IStatus.ERROR)
 					return status.getMessage();
 				RefactoringStatus refStatus;
@@ -196,7 +196,7 @@ public class NewNameQueries implements INewNameQueries {
 			public String isValid(String newText) {
 				if (newText == null || "".equals(newText)) //$NON-NLS-1$
 					return INVALID_NAME_NO_MESSAGE;
-				IStatus status= JavaConventions.validatePackageName(newText);
+				IStatus status= JavaConventionsUtil.validatePackageName(newText, pack);
 				if (status.getSeverity() == IStatus.ERROR)
 					return status.getMessage();
 				

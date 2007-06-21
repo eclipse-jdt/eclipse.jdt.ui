@@ -184,7 +184,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 					}							
 				}
 				String name= prefix ? val + "x" : "x" + val; //$NON-NLS-2$ //$NON-NLS-1$
-				IStatus status= JavaConventions.validateFieldName(name);
+				IStatus status= JavaConventions.validateIdentifier(name, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
 				if (status.matches(IStatus.ERROR)) {
 					if (prefix) {
 						return new StatusInfo(IStatus.ERROR, Messages.format(PreferencesMessages.NameConventionConfigurationBlock_error_invalidprefix, val)); 
@@ -419,7 +419,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 			setValue(PREF_EXCEPTION_NAME, name);
 			
 			// validation
-			IStatus status = JavaConventions.validateIdentifier(name);
+			IStatus status = JavaConventions.validateIdentifier(name, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
 			if (!status.isOK()) {
 				fContext.statusChanged(status);
 			} else {

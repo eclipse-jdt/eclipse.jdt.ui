@@ -75,7 +75,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating#checkNewElementName(java.lang.String)
 	 */
 	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
-		RefactoringStatus result= Checks.checkEnumConstantName(newName);
+		RefactoringStatus result= Checks.checkEnumConstantName(newName, getField());
 		if (Checks.isAlreadyNamed(getField(), newName))
 			result.addFatalError(RefactoringCoreMessages.RenameEnumConstRefactoring_another_name);
 		if (getField().getDeclaringType().getField(newName).exists())

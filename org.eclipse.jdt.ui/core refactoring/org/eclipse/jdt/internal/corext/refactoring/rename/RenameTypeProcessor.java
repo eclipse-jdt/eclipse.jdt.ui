@@ -263,7 +263,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	
 	public RefactoringStatus checkNewElementName(String newName){
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
-		RefactoringStatus result= Checks.checkTypeName(newName);
+		RefactoringStatus result= Checks.checkTypeName(newName, fType);
 		if (Checks.isAlreadyNamed(fType, newName))
 			result.addFatalError(RefactoringCoreMessages.RenameTypeRefactoring_choose_another_name);	 
 		return result;

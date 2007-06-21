@@ -311,7 +311,7 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
     }
 
     public RefactoringStatus validateInput() {
-        RefactoringStatus result= Checks.checkTypeName(fClassName);
+        RefactoringStatus result= Checks.checkTypeName(fClassName, fCu);
         if (result.hasFatalError())
             return result;
 

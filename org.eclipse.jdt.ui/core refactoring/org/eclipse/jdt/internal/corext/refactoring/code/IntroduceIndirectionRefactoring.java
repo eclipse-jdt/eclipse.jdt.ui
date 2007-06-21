@@ -285,7 +285,8 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 	public RefactoringStatus setIntermediaryMethodName(String newMethodName) {
 		Assert.isNotNull(newMethodName);
 		fIntermediaryMethodName= newMethodName;
-		RefactoringStatus stat= Checks.checkMethodName(newMethodName);
+		IJavaElement context= fIntermediaryClass != null ? fIntermediaryClass : (IMember) fTargetMethod;
+		RefactoringStatus stat= Checks.checkMethodName(newMethodName, context);
 		stat.merge(checkOverloading());
 		return stat;
 	}
@@ -472,7 +473,7 @@ public class IntroduceIndirectionRefactoring extends ScriptableRefactoring {
 		pm.beginTask("", startupTicks + hierarchyTicks + visibilityTicks + referenceTicks + creationTicks); //$NON-NLS-1$
 		pm.setTaskName(RefactoringCoreMessages.IntroduceIndirectionRefactoring_checking_conditions);
 
-		result.merge(Checks.checkMethodName(fIntermediaryMethodName));
+		result.merge(Checks.checkMethodName(fIntermediaryMethodName, fIntermediaryClass));
 		if (result.hasFatalError())
 			return result;
 		

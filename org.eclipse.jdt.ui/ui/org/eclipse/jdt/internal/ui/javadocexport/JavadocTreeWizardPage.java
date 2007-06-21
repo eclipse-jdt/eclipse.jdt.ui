@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.launching.JavaRuntime;
@@ -111,6 +112,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	/**
 	 * Constructor for JavadocTreeWizardPage.
 	 * @param pageName
+	 * @param store 
 	 */
 	protected JavadocTreeWizardPage(String pageName, JavadocOptionsManager store) {
 		super(pageName);
@@ -398,6 +400,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	 * to the CheckedTree. List can contain multiple projects and elements from
 	 * different projects. If the list of seletected elements is empty a default
 	 * project is selected.
+	 * @param sourceElements 
 	 */
 	private void setTreeChecked(IJavaElement[] sourceElements) {
 		for (int i= 0; i < sourceElements.length; i++) {
@@ -482,6 +485,8 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	/**
 	 * Gets a list of elements to generated javadoc for from each project. 
 	 * Javadoc can be generated for either a IPackageFragment or a ICompilationUnit.
+	 * @param projects 
+	 * @return source elements
 	 */
 	private IJavaElement[] getSourceElements(IJavaProject[] projects) {
 		ArrayList res= new ArrayList();
@@ -611,7 +616,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 					if (doclet.length() == 0) {
 						fDocletStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_nodocletname_error); 
 
-					} else if (JavaConventions.validateJavaTypeName(doclet).matches(IStatus.ERROR)) {
+					} else if (JavaConventions.validateJavaTypeName(doclet, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3).matches(IStatus.ERROR)) {
 						fDocletStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_invaliddocletname_error); 
 					} else if ((docletPath.length() == 0) || !validDocletPath(docletPath)) {
 						fDocletStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_invaliddocletpath_error); 
@@ -699,7 +704,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	}
 
 	/**
-	 * Finds the most severe error (if there is one)
+	 * @return the most severe error (if there is one)
 	 */
 	private IStatus findMostSevereStatus() {
 		return StatusUtil.getMostSevere(new IStatus[] { fJavadocStatus, fPreferenceStatus, fDestinationStatus, fDocletStatus, fTreeStatus, fWizardStatus });

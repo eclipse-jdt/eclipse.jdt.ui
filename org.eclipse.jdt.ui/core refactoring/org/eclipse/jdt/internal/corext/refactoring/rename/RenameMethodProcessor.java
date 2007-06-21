@@ -44,7 +44,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
@@ -84,6 +83,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -207,7 +207,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	public final RefactoringStatus checkNewElementName(String newName) {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 				
-		RefactoringStatus status= Checks.checkName(newName, JavaConventions.validateMethodName(newName));
+		RefactoringStatus status= Checks.checkName(newName, JavaConventionsUtil.validateMethodName(newName, fMethod));
 		if (status.isOK() && Checks.startsWithUpperCase(newName))
 			status= RefactoringStatus.createWarningStatus(fIsComposite 
 					? Messages.format(RefactoringCoreMessages.Checks_method_names_lowercase2, new String[] { newName, fMethod.getDeclaringType().getElementName()})

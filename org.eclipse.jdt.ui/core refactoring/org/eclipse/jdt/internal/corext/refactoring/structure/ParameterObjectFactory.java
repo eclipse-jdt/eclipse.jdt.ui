@@ -18,8 +18,6 @@ import java.util.ListIterator;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -49,7 +47,6 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -66,13 +63,6 @@ public class ParameterObjectFactory {
 
 	public ParameterObjectFactory() {
 		super();
-	}
-
-	public RefactoringStatus checkConditions() {
-		RefactoringStatus result= new RefactoringStatus();
-		result.merge(Checks.checkTypeName(fClassName));
-		// TODO: Check for availability
-		return result;
 	}
 
 	public TypeDeclaration createClassDeclaration(String declaringType, CompilationUnitRewrite cuRewrite) throws CoreException {

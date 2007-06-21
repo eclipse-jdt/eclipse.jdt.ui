@@ -31,7 +31,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.refactoring.IJavaElementMapper;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.RenameTypeArguments;
@@ -55,6 +54,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ISimilarDeclarationUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -141,7 +141,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		String typeName= removeFileNameExtension(newName);
-		RefactoringStatus result= Checks.checkCompilationUnitName(newName);
+		RefactoringStatus result= Checks.checkCompilationUnitName(newName, fCu);
 		if (fWillRenameType)
 			result.merge(fRenameTypeProcessor.checkNewElementName(typeName));
 		if (Checks.isAlreadyNamed(fCu, newName))
@@ -156,12 +156,9 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 	}
 	
 	public Object getNewElement() {
-		IJavaElement parent= fCu.getParent();
-		if (parent.getElementType() != IJavaElement.PACKAGE_FRAGMENT)
-			return fCu; //??
-		IPackageFragment pack= (IPackageFragment)parent;
-		if (JavaConventions.validateCompilationUnitName(getNewElementName()).getSeverity() == IStatus.ERROR)
-			return fCu; //??
+		IPackageFragment pack= (IPackageFragment) fCu.getParent();
+		if (JavaConventionsUtil.validateCompilationUnitName(getNewElementName(), pack).getSeverity() == IStatus.ERROR)
+			return null;
 		return pack.getCompilationUnit(getNewElementName());
 	}
 	
@@ -366,6 +363,8 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 	
 	/**
 	 * Removes the extension (whatever comes after the last '.') from the given file name.
+	 * @param fileName 
+	 * @return main type name
 	 */
 	private static String removeFileNameExtension(String fileName) {
 		if (fileName.lastIndexOf(".") == -1) //$NON-NLS-1$

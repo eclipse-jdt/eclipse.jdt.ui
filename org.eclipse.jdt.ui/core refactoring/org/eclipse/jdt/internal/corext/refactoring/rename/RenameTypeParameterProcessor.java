@@ -242,7 +242,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 
 	public final RefactoringStatus checkNewElementName(final String name) throws CoreException {
 		Assert.isNotNull(name);
-		final RefactoringStatus result= Checks.checkTypeParameterName(name);
+		final RefactoringStatus result= Checks.checkTypeParameterName(name, fTypeParameter);
 		if (Checks.startsWithLowerCase(name))
 			result.addWarning(RefactoringCoreMessages.RenameTypeParameterRefactoring_should_start_lowercase);
 		if (Checks.isAlreadyNamed(fTypeParameter, name))

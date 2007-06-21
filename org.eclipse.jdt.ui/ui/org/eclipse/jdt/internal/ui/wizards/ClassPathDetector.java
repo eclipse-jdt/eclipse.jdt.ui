@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.util.IClassFileReader;
 import org.eclipse.jdt.core.util.ISourceAttribute;
 
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -359,7 +360,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 	}
 	
 	private boolean isValidCUName(String name) {
-		return !JavaConventions.validateCompilationUnitName(name).matches(IStatus.ERROR);
+		return !JavaConventionsUtil.validateCompilationUnitName(name, JavaCore.create(fProject)).matches(IStatus.ERROR);
 	}	
 
 	/* (non-Javadoc)

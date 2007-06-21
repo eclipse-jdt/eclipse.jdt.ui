@@ -192,10 +192,10 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 		final ICompilationUnit cu= getDeclaringType().getCompilationUnit();
 		if (fTypeName == null || "".equals(fTypeName)) //$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.Checks_Choose_name);
-		status.merge(Checks.checkTypeName(fTypeName));
+		status.merge(Checks.checkTypeName(fTypeName, cu));
 		if (status.hasFatalError())
 			return status;
-		status.merge(Checks.checkCompilationUnitName(JavaModelUtil.getRenamedCUName(cu, fTypeName)));
+		status.merge(Checks.checkCompilationUnitName(JavaModelUtil.getRenamedCUName(cu, fTypeName), cu));
 		if (status.hasFatalError())
 			return status;
 		status.merge(Checks.checkCompilationUnitNewName(cu, fTypeName));

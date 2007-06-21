@@ -616,7 +616,7 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 	}
 
 	public RefactoringStatus checkTempName(String newName) {
-		RefactoringStatus status= Checks.checkTempName(newName);
+		RefactoringStatus status= Checks.checkTempName(newName, fCu);
 		if (Arrays.asList(getExcludedVariableNames()).contains(newName))
 			status.addWarning(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_another_variable, newName)); 
 		return status;

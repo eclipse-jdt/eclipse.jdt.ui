@@ -39,7 +39,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -61,6 +60,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -104,44 +104,48 @@ public class Checks {
 	 * Checks if the given name is a valid Java field name.
 	 *
 	 * @param name the java field name.
+	 * @param context an {@link IJavaElement} or <code>null</code>
 	 * @return a refactoring status containing the error message if the
 	 *  name is not a valid java field name.
 	 */
-	public static RefactoringStatus checkFieldName(String name) {
-		return checkName(name, JavaConventions.validateFieldName(name));
+	public static RefactoringStatus checkFieldName(String name, IJavaElement context) {
+		return checkName(name, JavaConventionsUtil.validateFieldName(name, context));
 	}
 
 	/**
 	 * Checks if the given name is a valid Java type parameter name.
 	 *
 	 * @param name the java type parameter name.
+	 * @param context an {@link IJavaElement} or <code>null</code>
 	 * @return a refactoring status containing the error message if the
 	 *  name is not a valid java type parameter name.
 	 */
-	public static RefactoringStatus checkTypeParameterName(String name) {
-		return checkName(name, JavaConventions.validateTypeVariableName(name));
+	public static RefactoringStatus checkTypeParameterName(String name, IJavaElement context) {
+		return checkName(name, JavaConventionsUtil.validateTypeVariableName(name, context));
 	}
 
 	/**
 	 * Checks if the given name is a valid Java identifier.
 	 *
 	 * @param name the java identifier.
+	 * @param context an {@link IJavaElement} or <code>null</code>
 	 * @return a refactoring status containing the error message if the
 	 *  name is not a valid java identifier.
 	 */
-	public static RefactoringStatus checkIdentifier(String name) {
-		return checkName(name, JavaConventions.validateIdentifier(name));
+	public static RefactoringStatus checkIdentifier(String name, IJavaElement context) {
+		return checkName(name, JavaConventionsUtil.validateIdentifier(name, context));
 	}
 	
 	/**
 	 * Checks if the given name is a valid Java method name.
 	 *
 	 * @param name the java method name.
+	 * @param context an {@link IJavaElement} or <code>null</code>
 	 * @return a refactoring status containing the error message if the
 	 *  name is not a valid java method name.
 	 */
-	public static RefactoringStatus checkMethodName(String name) {
-		RefactoringStatus status= checkName(name, JavaConventions.validateMethodName(name));
+	public static RefactoringStatus checkMethodName(String name, IJavaElement context) {
+		RefactoringStatus status= checkName(name, JavaConventionsUtil.validateMethodName(name, context));
 		if (status.isOK() && startsWithUpperCase(name))
 			return RefactoringStatus.createWarningStatus(RefactoringCoreMessages.Checks_method_names_lowercase); 
 		else	
@@ -152,37 +156,40 @@ public class Checks {
 	 * Checks if the given name is a valid Java type name.
 	 *
 	 * @param name the java method name.
+	 * @param context an {@link IJavaElement} or <code>null</code>
 	 * @return a refactoring status containing the error message if the
 	 *  name is not a valid java type name.
 	 */
-	public static RefactoringStatus checkTypeName(String name) {
+	public static RefactoringStatus checkTypeName(String name, IJavaElement context) {
 		//fix for: 1GF5Z0Z: ITPJUI:WINNT - assertion failed after renameType refactoring
 		if (name.indexOf(".") != -1) //$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.Checks_no_dot);
 		else	
-			return checkName(name, JavaConventions.validateJavaTypeName(name));
+			return checkName(name, JavaConventionsUtil.validateJavaTypeName(name, context));
 	}
 	
 	/**
 	 * Checks if the given name is a valid Java package name.
 	 *
 	 * @param name the java package name.
+	 * @param context an {@link IJavaElement} or <code>null</code>
 	 * @return a refactoring status containing the error message if the
 	 *  name is not a valid java package name.
 	 */
-	public static RefactoringStatus checkPackageName(String name) {
-		return checkName(name, JavaConventions.validatePackageName(name));
+	public static RefactoringStatus checkPackageName(String name, IJavaElement context) {
+		return checkName(name, JavaConventionsUtil.validatePackageName(name, context));
 	}
 	
 	/**
 	 * Checks if the given name is a valid compilation unit name.
 	 *
 	 * @param name the compilation unit name.
+	 * @param context an {@link IJavaElement} or <code>null</code>
 	 * @return a refactoring status containing the error message if the
 	 *  name is not a valid compilation unit name.
 	 */
-	public static RefactoringStatus checkCompilationUnitName(String name) {
-		return checkName(name, JavaConventions.validateCompilationUnitName(name));
+	public static RefactoringStatus checkCompilationUnitName(String name, IJavaElement context) {
+		return checkName(name, JavaConventionsUtil.validateCompilationUnitName(name, context));
 	}
 
 	/**
@@ -765,8 +772,8 @@ public class Checks {
 		return null;
 	}
 
-	public static RefactoringStatus checkTempName(String newName) {
-		RefactoringStatus result= Checks.checkIdentifier(newName);
+	public static RefactoringStatus checkTempName(String newName, IJavaElement context) {
+		RefactoringStatus result= Checks.checkIdentifier(newName, context);
 		if (result.hasFatalError())
 			return result;
 		if (! Checks.startsWithLowerCase(newName))
@@ -774,8 +781,8 @@ public class Checks {
 		return result;		
 	}
 
-	public static RefactoringStatus checkEnumConstantName(String newName) {
-		RefactoringStatus result= Checks.checkFieldName(newName);
+	public static RefactoringStatus checkEnumConstantName(String newName, IJavaElement context) {
+		RefactoringStatus result= Checks.checkFieldName(newName, context);
 		if (result.hasFatalError())
 			return result;
 		for (int i= 0; i < newName.length(); i++) {
@@ -788,8 +795,8 @@ public class Checks {
 		return result;
 	}
 
-	public static RefactoringStatus checkConstantName(String newName) {
-		RefactoringStatus result= Checks.checkFieldName(newName);
+	public static RefactoringStatus checkConstantName(String newName, IJavaElement context) {
+		RefactoringStatus result= Checks.checkFieldName(newName, context);
 		if (result.hasFatalError())
 			return result;
 		for (int i= 0; i < newName.length(); i++) {

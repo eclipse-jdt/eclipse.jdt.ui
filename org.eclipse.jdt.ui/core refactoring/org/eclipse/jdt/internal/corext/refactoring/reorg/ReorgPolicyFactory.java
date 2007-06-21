@@ -77,7 +77,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -133,6 +132,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -464,7 +464,7 @@ public final class ReorgPolicyFactory {
 
 		private Change createChange(IPackageFragment pack, IPackageFragmentRoot destination, NewNameProposer nameProposer, INewNameQueries copyQueries) {
 			String newName= nameProposer.createNewName(pack, destination);
-			if (newName == null || JavaConventions.validatePackageName(newName).getSeverity() < IStatus.ERROR) {
+			if (newName == null || JavaConventionsUtil.validatePackageName(newName, destination).getSeverity() < IStatus.ERROR) {
 				INewNameQuery nameQuery;
 				if (newName == null)
 					nameQuery= copyQueries.createNullQuery();

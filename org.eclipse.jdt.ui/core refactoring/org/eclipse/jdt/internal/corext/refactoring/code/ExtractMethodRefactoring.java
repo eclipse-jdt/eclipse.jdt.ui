@@ -218,6 +218,7 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
 	 * @param selectionStart
 	 * @param selectionLength
+	 * @throws CoreException 
 	 */
 	public ExtractMethodRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) throws CoreException {
 		fCUnit= unit;
@@ -243,6 +244,7 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 	 *
 	 * @param pm a progress monitor to report progress during activation checking.
 	 * @return the refactoring status describing the result of the activation check.	 
+	 * @throws CoreException 
 	 */
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
@@ -337,9 +339,10 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 	 * Checks if the new method name is a valid method name. This method doesn't
 	 * check if a method with the same name already exists in the hierarchy. This
 	 * check is done in <code>checkInput</code> since it is expensive.
+	 * @return validation status
 	 */
 	public RefactoringStatus checkMethodName() {
-		return Checks.checkMethodName(fMethodName);
+		return Checks.checkMethodName(fMethodName, fCUnit);
 	}
 	
 	public ASTNode[] getDestinations() {
@@ -353,12 +356,13 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 	
 	/**
 	 * Checks if the parameter names are valid.
+	 * @return validation status
 	 */
 	public RefactoringStatus checkParameterNames() {
 		RefactoringStatus result= new RefactoringStatus();
 		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
 			ParameterInfo parameter= (ParameterInfo)iter.next();
-			result.merge(Checks.checkIdentifier(parameter.getNewName()));
+			result.merge(Checks.checkIdentifier(parameter.getNewName(), fCUnit));
 			for (Iterator others= fParameterInfos.iterator(); others.hasNext();) {
 				ParameterInfo other= (ParameterInfo) others.next();
 				if (parameter != other && other.getNewName().equals(parameter.getNewName())) {
@@ -380,6 +384,7 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 	
 	/**
 	 * Checks if varargs are ordered correctly.
+	 * @return validation status
 	 */
 	public RefactoringStatus checkVarargOrder() {
 		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {

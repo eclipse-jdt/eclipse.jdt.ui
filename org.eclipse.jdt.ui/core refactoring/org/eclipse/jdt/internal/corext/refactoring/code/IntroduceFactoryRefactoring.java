@@ -1135,7 +1135,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		Assert.isNotNull(newMethodName);
 		fNewMethodName = newMethodName;
 
-		RefactoringStatus	stat= Checks.checkMethodName(newMethodName);
+		RefactoringStatus stat= Checks.checkMethodName(newMethodName, fCUHandle);
 
 		stat.merge(isUniqueMethodName(newMethodName));
 

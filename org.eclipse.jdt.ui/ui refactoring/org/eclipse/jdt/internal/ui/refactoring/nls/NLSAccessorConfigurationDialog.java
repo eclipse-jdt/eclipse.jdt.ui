@@ -42,13 +42,13 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -302,7 +302,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	private void validateAccessorClassName() {
 		String className= fAccessorClassName.getText();
 
-		IStatus status= JavaConventions.validateJavaTypeName(className);
+		IStatus status= JavaConventionsUtil.validateJavaTypeName(className, fAccessorPackage.getSelectedFragmentRoot());
 		if (status.getSeverity() == IStatus.ERROR) {
 			setInvalid(IDX_ACCESSOR_CLASS, status.getMessage());
 			return;
@@ -347,7 +347,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		
 		String pkgName= fragment.getElementName();
 
-		IStatus status= JavaConventions.validatePackageName(pkgName);
+		IStatus status= JavaConventionsUtil.validatePackageName(pkgName, root);
 		if ((pkgName.length() > 0) && (status.getSeverity() == IStatus.ERROR)) {
 			setInvalid(IDX_BUNDLE_PACKAGE, status.getMessage());
 			return;

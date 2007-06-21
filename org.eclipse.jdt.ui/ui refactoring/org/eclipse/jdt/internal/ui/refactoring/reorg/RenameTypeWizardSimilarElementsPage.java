@@ -75,12 +75,12 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
@@ -168,7 +168,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 			if (name.length() == 0) {
 				return new StatusInfo(IStatus.ERROR, RefactoringMessages.RenameTypeWizardSimilarElementsPage_name_empty);
 			}
-			IStatus status= JavaConventions.validateIdentifier(name);
+			IStatus status= JavaConventionsUtil.validateIdentifier(name, fElementToEdit);
 			if (status.matches(IStatus.ERROR))
 				return status;
 			if (!Checks.startsWithLowerCase(name))

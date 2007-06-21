@@ -698,7 +698,7 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 	public RefactoringStatus checkEnclosingInstanceName(String name) {
 		if (!fCreateInstanceField)
 			return new RefactoringStatus();
-		RefactoringStatus result= Checks.checkFieldName(name);
+		RefactoringStatus result= Checks.checkFieldName(name, fType);
 		if (!Checks.startsWithLowerCase(name))
 			result.addWarning(RefactoringCoreMessages.MoveInnerToTopRefactoring_names_start_lowercase); 
 
@@ -718,12 +718,13 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 			if (JdtFlags.isStatic(fType))
 				result.merge(checkEnclosingInstanceName(fEnclosingInstanceFieldName));
 
-			if (fType.getPackageFragment().getCompilationUnit((JavaModelUtil.getRenamedCUName(fType.getCompilationUnit(), fType.getElementName()))).exists()) {
-				String message= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_compilation_Unit_exists, new String[] { (JavaModelUtil.getRenamedCUName(fType.getCompilationUnit(), fType.getElementName())), fType.getPackageFragment().getElementName()});
+			String newCUName= JavaModelUtil.getRenamedCUName(fType.getCompilationUnit(), fType.getElementName());
+			if (fType.getPackageFragment().getCompilationUnit(newCUName).exists()) {
+				String message= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_compilation_Unit_exists, new String[] { (newCUName), fType.getPackageFragment().getElementName()});
 				result.addFatalError(message);
 			}
 			result.merge(checkEnclosingInstanceName(fEnclosingInstanceFieldName));
-			result.merge(Checks.checkCompilationUnitName((JavaModelUtil.getRenamedCUName(fType.getCompilationUnit(), fType.getElementName()))));
+			result.merge(Checks.checkCompilationUnitName(newCUName, fType));
 			result.merge(checkConstructorParameterNames());
 			result.merge(checkTypeNameInPackage());
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), result);

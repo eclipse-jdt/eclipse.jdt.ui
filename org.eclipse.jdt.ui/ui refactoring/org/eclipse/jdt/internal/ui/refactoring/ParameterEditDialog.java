@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.jdt.core.JavaConventions;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -30,12 +28,16 @@ import org.eclipse.jface.dialogs.StatusDialog;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
+import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -54,6 +56,10 @@ public class ParameterEditDialog extends StatusDialog {
 	private Text fDefaultValue;
 	
 	/**
+	 * @param parentShell 
+	 * @param parameter 
+	 * @param canEditType 
+	 * @param canEditDefault 
 	 * @param context the <code>IPackageFragment</code> for type ContentAssist.
 	 * Can be <code>null</code> if <code>canEditType</code> is <code>false</code>.
 	 */
@@ -197,7 +203,9 @@ public class ParameterEditDialog extends StatusDialog {
 		String text= fName.getText();
 		if (text.length() == 0)
 			return createErrorStatus(RefactoringMessages.ParameterEditDialog_name_error);
-		IStatus status= JavaConventions.validateFieldName(text);
+		IStatus status= fContext != null
+				? JavaConventionsUtil.validateFieldName(text, fContext.getCuHandle().getJavaProject())
+				: JavaConventions.validateFieldName(text, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
 		if (status.matches(IStatus.ERROR))
 			return status;
 		if (! Checks.startsWithLowerCase(text))

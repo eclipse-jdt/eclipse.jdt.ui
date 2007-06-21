@@ -265,7 +265,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 	
 	//---- IJavaElementMapper ----------------------------------
 	
-	public IJavaElement getRefactoredJavaElement(IJavaElement element) {
+	public IJavaElement getRefactoredJavaElement(IJavaElement original) {
 		return new GenericRefactoringHandleTransplanter() {
 			protected IPackageFragment transplantHandle(IPackageFragmentRoot parent, IPackageFragment element) {
 				if (! fRenameSubpackages) {
@@ -324,7 +324,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 				buf.append(source.substring(currentIndex));
 				return buf.toString();
 			}
-		}.transplantHandle(element);
+		}.transplantHandle(original);
 	}
 
 	//----
@@ -353,7 +353,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 	
 	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
-		RefactoringStatus result= Checks.checkPackageName(newName);
+		RefactoringStatus result= Checks.checkPackageName(newName, fPackage);
 		if (Checks.isAlreadyNamed(fPackage, newName))
 			result.addFatalError(RefactoringCoreMessages.RenamePackageRefactoring_another_name); 
 		result.merge(checkPackageInCurrentRoot(newName));
@@ -724,6 +724,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 		}
 	
 		/** Removes the found SearchResultGroup from the list iff found.
+		 *  @param cu 
 		 *  @param searchResultGroups List of SearchResultGroup
 		 *  @return the SearchResultGroup for cu, or null iff not found */
 		private static SearchResultGroup extractGroupFor(ICompilationUnit cu, List searchResultGroups) {
@@ -832,7 +833,10 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 		}
 	
 		/**
+		 * @param scope 
+		 * @param pm 
 		 * @return all package fragments in <code>scope</code> with same name as <code>fPackage</code>, excluding fPackage
+		 * @throws CoreException 
 		 */
 		private IPackageFragment[] getNamesakePackages(IJavaSearchScope scope, IProgressMonitor pm) throws CoreException {
 			SearchPattern pattern= SearchPattern.createPattern(fPackage.getElementName(), IJavaSearchConstants.PACKAGE, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
@@ -887,6 +891,8 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 		
 		/**
 		 * Add new imports to types in <code>typeReferences</code> with package <code>fPackage</code>.
+		 * @param typeReferences 
+		 * @throws CoreException 
 		 */
 		private void addTypeImports(SearchResultGroup typeReferences) throws CoreException {
 			SearchMatch[] searchResults= typeReferences.getSearchResults();
@@ -908,6 +914,8 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 		/**
 		 * Add new imports to types in <code>typeReferences</code> with package <code>fNewElementName</code>
 		 * and remove old import with <code>fPackage</code>.
+		 * @param typeReferences 
+		 * @throws CoreException 
 		 */
 		private void updateTypeImports(SearchResultGroup typeReferences) throws CoreException {
 			SearchMatch[] searchResults= typeReferences.getSearchResults();

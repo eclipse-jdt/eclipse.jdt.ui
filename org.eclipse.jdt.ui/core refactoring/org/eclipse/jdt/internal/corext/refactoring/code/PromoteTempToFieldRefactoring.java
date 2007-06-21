@@ -428,7 +428,7 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 	}
 
 	public RefactoringStatus validateInput(){
-		return Checks.checkFieldName(fFieldName);
+		return Checks.checkFieldName(fFieldName, fCu);
 	}
 	
     /*

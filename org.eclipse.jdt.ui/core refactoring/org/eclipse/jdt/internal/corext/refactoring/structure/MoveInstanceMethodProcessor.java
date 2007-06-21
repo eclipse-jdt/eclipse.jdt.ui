@@ -2940,7 +2940,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 */
 	public final RefactoringStatus setMethodName(final String name) {
 		Assert.isNotNull(name);
-		RefactoringStatus status= Checks.checkMethodName(name);
+		RefactoringStatus status= Checks.checkMethodName(name, fTargetType);
 		if (status.hasFatalError())
 			return status;
 		fMethodName= name;
@@ -2994,7 +2994,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 */
 	public final RefactoringStatus setTargetName(final String name) {
 		Assert.isNotNull(name);
-		final RefactoringStatus status= Checks.checkTempName(name);
+		final RefactoringStatus status= Checks.checkTempName(name, fMethod);
 		if (status.hasFatalError())
 			return status;
 		fTargetName= name;

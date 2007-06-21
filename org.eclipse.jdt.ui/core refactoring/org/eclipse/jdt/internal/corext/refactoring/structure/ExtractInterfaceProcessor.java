@@ -293,11 +293,11 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	public final RefactoringStatus checkTypeName(final String name) {
 		Assert.isNotNull(name);
 		try {
-			final RefactoringStatus result= Checks.checkTypeName(name);
+			final RefactoringStatus result= Checks.checkTypeName(name, fSubType);
 			if (result.hasFatalError())
 				return result;
 			final String unitName= JavaModelUtil.getRenamedCUName(fSubType.getCompilationUnit(), name);
-			result.merge(Checks.checkCompilationUnitName(unitName));
+			result.merge(Checks.checkCompilationUnitName(unitName, fSubType));
 			if (result.hasFatalError())
 				return result;
 			final IPackageFragment fragment= fSubType.getPackageFragment();

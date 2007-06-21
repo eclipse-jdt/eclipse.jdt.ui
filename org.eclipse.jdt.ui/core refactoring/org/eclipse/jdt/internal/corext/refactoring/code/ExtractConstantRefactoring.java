@@ -400,7 +400,7 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 	public RefactoringStatus checkConstantNameOnChange() throws JavaModelException {
 		if (Arrays.asList(getExcludedVariableNames()).contains(fConstantName))
 			return RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_another_variable, getConstantName())); 
-		return Checks.checkConstantName(getConstantName());
+		return Checks.checkConstantName(fConstantName, fCu);
 	}
 	
 	// !! similar to ExtractTempRefactoring equivalent

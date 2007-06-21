@@ -476,7 +476,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			result.addFatalError(Messages.format(
 					RefactoringCoreMessages.ChangeSignatureRefactoring_param_name_not_empty, Integer.toString(position))); 
 		} else {
-			result.merge(Checks.checkTempName(info.getNewName()));
+			result.merge(Checks.checkTempName(info.getNewName(), fMethod));
 		}
 	}
 
@@ -492,7 +492,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			String msg= RefactoringCoreMessages.ChangeSignatureRefactoring_constructor_name; 
 			result.addWarning(msg);
 		}
-		result.merge(Checks.checkMethodName(fMethodName));
+		result.merge(Checks.checkMethodName(fMethodName, fMethod));
 	}
 
 	private void checkParameterDefaultValue(RefactoringStatus result, ParameterInfo info) {
@@ -2508,7 +2508,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			final String name= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_NAME);
 			if (name != null) {
 				fMethodName= name;
-				final RefactoringStatus status= Checks.checkMethodName(fMethodName);
+				final RefactoringStatus status= Checks.checkMethodName(fMethodName, fMethod);
 				if (status.hasError())
 					return status;
 			} else

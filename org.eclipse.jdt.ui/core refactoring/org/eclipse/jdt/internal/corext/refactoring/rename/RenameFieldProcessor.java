@@ -213,7 +213,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	
 	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
-		RefactoringStatus result= Checks.checkFieldName(newName);
+		RefactoringStatus result= Checks.checkFieldName(newName, fField);
 
 		if (isInstanceField(fField) && (!Checks.startsWithLowerCase(newName)))
 			result.addWarning(fIsComposite

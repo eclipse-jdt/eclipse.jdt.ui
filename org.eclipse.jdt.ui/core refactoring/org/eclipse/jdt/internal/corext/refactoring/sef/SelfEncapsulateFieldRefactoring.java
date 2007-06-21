@@ -293,7 +293,7 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 			isStatic= Flags.isStatic(field.getFlags());
 		} catch (JavaModelException e) {
 		}
-		status.merge(Checks.checkMethodName(name));
+		status.merge(Checks.checkMethodName(name, field));
 		for (Iterator iter= usedNames.iterator(); iter.hasNext(); ) {
 			IMethodBinding method= (IMethodBinding)iter.next();
 			String selector= method.getName();

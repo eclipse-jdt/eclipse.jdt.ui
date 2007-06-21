@@ -359,8 +359,10 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		RefactoringStatus status= new RefactoringStatus();
-		status.merge(fParameterObjectFactory.checkConditions());
-		status.merge(Checks.checkIdentifier(getParameterName()));
+		IMethod context= getMethod();
+		// TODO: Check for availability
+		status.merge(Checks.checkTypeName(fParameterObjectFactory.getClassName(), context));
+		status.merge(Checks.checkIdentifier(getParameterName(), context));
 		if (status.hasFatalError())
 			return status;
 		status.merge(super.checkFinalConditions(pm));
