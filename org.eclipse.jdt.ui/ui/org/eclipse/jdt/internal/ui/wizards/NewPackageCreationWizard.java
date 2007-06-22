@@ -24,11 +24,17 @@ public class NewPackageCreationWizard extends NewElementWizard {
 
 	private NewPackageWizardPage fPage;
 
-	public NewPackageCreationWizard() {
+	public NewPackageCreationWizard(NewPackageWizardPage page) {
 		super();
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWPACK);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 		setWindowTitle(NewWizardMessages.NewPackageCreationWizard_title); 
+		
+		fPage= page;
+	}
+	
+	public NewPackageCreationWizard() {
+		this(null);
 	}
 
 	/*
@@ -36,9 +42,11 @@ public class NewPackageCreationWizard extends NewElementWizard {
 	 */	
 	public void addPages() {
 		super.addPages();
-		fPage= new NewPackageWizardPage();
+		if (fPage == null) {
+			fPage= new NewPackageWizardPage();
+			fPage.init(getSelection());
+		}
 		addPage(fPage);
-		fPage.init(getSelection());
 	}	
 	
 	/* (non-Javadoc)
