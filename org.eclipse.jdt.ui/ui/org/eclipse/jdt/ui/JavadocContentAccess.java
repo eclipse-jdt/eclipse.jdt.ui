@@ -144,6 +144,13 @@ public class JavadocContentAccess {
 	}
 
 	private static Reader findDocInHierarchy(IMethod method) throws JavaModelException {
+		/*
+		 * Catch ExternalJavaProject in which case
+		 * no hierarchy can be built.
+		 */
+		if (!method.getJavaProject().exists())  
+			return null;
+		
 		IType type= method.getDeclaringType();
 		ITypeHierarchy hierarchy= type.newSupertypeHierarchy(null);
 		
