@@ -3826,6 +3826,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_SINGLE_LETTERS, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_AMPERSAND_IN_PROPERTIES, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_NON_LETTERS, true);
+		store.setDefault(PreferenceConstants.SPELLING_IGNORE_JAVA_STRINGS, true);
 		store.setDefault(PreferenceConstants.SPELLING_USER_DICTIONARY, ""); //$NON-NLS-1$
 		
 		// Note: For backwards compatibility we must use the property and not the workspace default
