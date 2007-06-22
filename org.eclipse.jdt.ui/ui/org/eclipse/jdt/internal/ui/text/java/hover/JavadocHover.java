@@ -195,7 +195,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 					
 				} catch (JavaModelException ex) {
 					reader= new StringReader(JavaHoverMessages.JavadocHover_error_gettingJavadoc);
-					JavaPlugin.log(ex.getStatus());
+					JavaPlugin.log(ex);
 				}
 				
 				if (reader != null) {
