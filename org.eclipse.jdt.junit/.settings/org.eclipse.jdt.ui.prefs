@@ -1,5 +1,7 @@
-#Tue Apr 11 15:46:34 CEST 2006
+#Tue Jun 26 10:22:16 CEST 2007
 eclipse.preferences.version=1
+formatter_profile=_JDT UI Code Style Conventions
+formatter_settings_version=11
 internal.default.compliance=default
 org.eclipse.jdt.ui.exception.name=e
 org.eclipse.jdt.ui.gettersetter.use.is=true
