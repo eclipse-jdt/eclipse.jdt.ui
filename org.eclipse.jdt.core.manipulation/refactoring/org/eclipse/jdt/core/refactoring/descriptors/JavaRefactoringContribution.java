@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,12 @@ package org.eclipse.jdt.core.refactoring.descriptors;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * Partial implementation of a Java refactoring contribution.
@@ -37,4 +40,19 @@ public abstract class JavaRefactoringContribution extends RefactoringContributio
 			return ((JavaRefactoringDescriptor) descriptor).getArguments();
 		return super.retrieveArgumentMap(descriptor);
 	}
+
+	/**
+	 * Creates the a new refactoring instance.
+	 * 
+	 * @param descriptor
+	 *            the refactoring descriptor
+	 * @param status
+	 *            the status used for the resulting status
+	 * @return
+	 *            the refactoring, or <code>null</code>
+	 * @throws CoreException
+	 *             if an error occurs while creating the refactoring
+	 * @since 3.4
+	 */
+	public abstract Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException;
 }

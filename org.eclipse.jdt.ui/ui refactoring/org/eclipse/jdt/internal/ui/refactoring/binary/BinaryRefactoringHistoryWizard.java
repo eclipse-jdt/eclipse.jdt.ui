@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,11 +57,11 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringContribution;
-import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.binary.SourceCreationOperation;
@@ -415,6 +415,8 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	 *            the refactoring to create the source code for
 	 * @param monitor
 	 *            the progress monitor to use
+	 * @return
+	 *            the resulting status
 	 */
 	private RefactoringStatus createNecessarySourceCode(final Refactoring refactoring, final IProgressMonitor monitor) {
 		final RefactoringStatus status= new RefactoringStatus();
@@ -493,30 +495,30 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	protected Refactoring createRefactoring(final RefactoringDescriptor descriptor, final RefactoringStatus status) throws CoreException {
 		Assert.isNotNull(descriptor);
 		Refactoring refactoring= null;
-		if (descriptor instanceof JDTRefactoringDescriptor) {
-			final JDTRefactoringDescriptor javaDescriptor= (JDTRefactoringDescriptor) descriptor;
+		if (descriptor instanceof JavaRefactoringDescriptor) {
+			final JavaRefactoringDescriptor javaDescriptor= (JavaRefactoringDescriptor) descriptor;
 			final RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(javaDescriptor.getID());
-			if (contribution instanceof JDTRefactoringContribution) {
-				final JDTRefactoringContribution extended= (JDTRefactoringContribution) contribution;
-				refactoring= extended.createRefactoring(descriptor);
+			if (contribution instanceof JavaRefactoringContribution) {
+				final JavaRefactoringContribution extended= (JavaRefactoringContribution) contribution;
+				refactoring= extended.createRefactoring(javaDescriptor, status);
 			}
 			if (refactoring != null) {
-				final RefactoringArguments arguments= javaDescriptor.createArguments();
+				final RefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), contribution.retrieveArgumentMap(descriptor));
 				if (arguments instanceof JavaRefactoringArguments) {
 					final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
 					if (fJavaProject != null) {
 						final String name= fJavaProject.getElementName();
 						extended.setProject(name);
-						String handle= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_INPUT);
+						String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
 						if (handle != null && !"".equals(handle)) //$NON-NLS-1$
-							extended.setAttribute(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, getTransformedHandle(name, handle));
+							extended.setAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, getTransformedHandle(name, handle));
 						int count= 1;
-						String attribute= JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
+						String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
 						while ((handle= extended.getAttribute(attribute)) != null) {
 							if (!"".equals(handle)) //$NON-NLS-1$
 								extended.setAttribute(attribute, getTransformedHandle(name, handle));
 							count++;
-							attribute= JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
+							attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
 						}
 					}
 				} else
@@ -621,7 +623,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 			if (target instanceof IPackageFragmentRoot) {
 				final IPackageFragmentRoot extended= (IPackageFragmentRoot) target;
 				String sourceIdentifier= null;
-				final IJavaElement element= JDTRefactoringDescriptor.handleToElement(project, handle, false);
+				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(project, handle, false);
 				if (element != null) {
 					final IPackageFragmentRoot root= (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 					if (root != null)
@@ -634,7 +636,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 					if (sourceIdentifier != null) {
 						final IJavaElement result= JavaCore.create(extended.getHandleIdentifier() + element.getHandleIdentifier().substring(sourceIdentifier.length()));
 						if (result != null)
-							return JDTRefactoringDescriptor.elementToHandle(project, result);
+							return JavaRefactoringDescriptorUtil.elementToHandle(project, result);
 					}
 				}
 			}

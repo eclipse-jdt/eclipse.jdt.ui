@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,14 +16,10 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
@@ -32,13 +28,11 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.DescriptorMessages;
+import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDescriptorUtil;
 
 /**
  * Partial implementation of a java refactoring descriptor.
@@ -167,12 +161,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * @return a corresponding input handle
 	 */
 	protected static String elementToHandle(final String project, final IJavaElement element) {
-		final String handle= element.getHandleIdentifier();
-		if (project != null && !(element instanceof IJavaProject)) {
-			final String id= element.getJavaProject().getHandleIdentifier();
-			return handle.substring(id.length());
-		}
-		return handle;
+		return JavaRefactoringDescriptorUtil.elementToHandle(project, element);
 	}
 
 	/**
@@ -222,28 +211,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 *         element exists
 	 */
 	protected static IJavaElement handleToElement(final WorkingCopyOwner owner, final String project, final String handle, final boolean check) {
-		IJavaElement element= null;
-		if (owner != null)
-			element= JavaCore.create(handle, owner);
-		else
-			element= JavaCore.create(handle);
-		if (element == null && project != null) {
-			final IJavaProject javaProject= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProject(project);
-			final String identifier= javaProject.getHandleIdentifier();
-			if (owner != null)
-				element= JavaCore.create(identifier + handle, owner);
-			else
-				element= JavaCore.create(identifier + handle);
-		}
-		if (check && element instanceof IMethod) {
-			final IMethod method= (IMethod) element;
-			final IMethod[] methods= method.getDeclaringType().findMethods(method);
-			if (methods != null && methods.length > 0)
-				element= methods[0];
-		}
-		if (element != null && (!check || element.exists()))
-			return element;
-		return null;
+		return JavaRefactoringDescriptorUtil.handleToElement(owner, project, handle, check);
 	}
 
 	/**
@@ -259,15 +227,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 *         resource exists
 	 */
 	protected static IResource handleToResource(final String project, final String handle) {
-		final IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		if ("".equals(handle)) //$NON-NLS-1$
-			return null;
-		final IPath path= Path.fromPortableString(handle);
-		if (path == null)
-			return null;
-		if (project != null && !"".equals(project)) //$NON-NLS-1$
-			return root.getProject(project).findMember(path);
-		return root.findMember(path);
+		return JavaRefactoringDescriptorUtil.handleToResource(project, handle);
 	}
 
 	/**
@@ -281,9 +241,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * @return the input handle
 	 */
 	protected static String resourceToHandle(final String project, final IResource resource) {
-		if (project != null && !"".equals(project)) //$NON-NLS-1$
-			return resource.getProjectRelativePath().toPortableString();
-		return resource.getFullPath().toPortableString();
+		return JavaRefactoringDescriptorUtil.resourceToHandle(project, resource);
 	}
 
 	/** The argument map */
@@ -296,19 +254,32 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 *            the unique id of the refactoring
 	 */
 	protected JavaRefactoringDescriptor(final String id) {
-		this(id, new HashMap());
+		this(id, null, DescriptorMessages.JavaRefactoringDescriptor_not_available, null, new HashMap(), RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 	}
-
+	
 	/**
-	 * Creates a new java refactoring descriptor.
+	 * Creates a new Java refactoring descriptor.
 	 * 
 	 * @param id
 	 *            the unique id of the refactoring
+	 * @param project
+	 *            the non-empty name of the project associated with this
+	 *            refactoring, or <code>null</code> for a workspace
+	 *            refactoring
+	 * @param description
+	 *            a non-empty human-readable description of the particular
+	 *            refactoring instance
+	 * @param comment
+	 *            the human-readable comment of the particular refactoring
+	 *            instance, or <code>null</code> for no comment
 	 * @param arguments
-	 *            the argument map to use
+	 * 			  a map of arguments that will be persisted and describes
+	 * 			  all settings for this refactoring
+	 * @param flags
+	 *            the flags of the refactoring descriptor
 	 */
-	protected JavaRefactoringDescriptor(final String id, final Map arguments) {
-		super(id, null, DescriptorMessages.JavaRefactoringDescriptor_not_available, null, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+	public JavaRefactoringDescriptor(final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
+		super(id,project,description,comment,flags);
 		fArguments= arguments;
 		fArguments.put(ATTRIBUTE_VERSION, VALUE_VERSION_1_0);
 	}
@@ -322,9 +293,9 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 		final String id= getID();
 		final RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(id);
 		if (contribution != null) {
-			final RefactoringDescriptor descriptor= contribution.createDescriptor(id, getProject(), getDescription(), getComment(), fArguments, getFlags());
-			if (descriptor != null) {
-				refactoring= descriptor.createRefactoring(status);
+			if (contribution instanceof JavaRefactoringContribution) {
+				JavaRefactoringContribution javaContribution= (JavaRefactoringContribution) contribution;
+				refactoring= javaContribution.createRefactoring(this, status);
 			} else
 				JavaManipulationPlugin.log(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), 0, MessageFormat.format(DescriptorMessages.JavaRefactoringDescriptor_no_resulting_descriptor, new Object[] { id}), null));
 		}

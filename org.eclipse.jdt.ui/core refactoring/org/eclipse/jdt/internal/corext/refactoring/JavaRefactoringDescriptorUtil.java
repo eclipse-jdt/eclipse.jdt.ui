@@ -1,21 +1,5 @@
-/*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -23,27 +7,14 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringContribution;
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
-import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
-import org.eclipse.jdt.internal.corext.util.Messages;
-
-/**
- * Descriptor object of a JDT refactoring.
- * 
- * @since 3.2
- */
-public class JDTRefactoringDescriptor extends JavaRefactoringDescriptor {
+public class JavaRefactoringDescriptorUtil {
+	private JavaRefactoringDescriptorUtil(){}
 
 	/**
 	 * Predefined argument called <code>element&lt;Number&gt;</code>.
@@ -102,17 +73,6 @@ public class JDTRefactoringDescriptor extends JavaRefactoringDescriptor {
 	public static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
 
 	/**
-	 * Constant describing the deprecation resolving flag.
-	 * <p>
-	 * Clients should set this flag to indicate that the refactoring can used to
-	 * resolve deprecation problems of members. Refactorings which can run on
-	 * binary targets, but require a source attachment to work correctly, should
-	 * set the <code>JAR_SOURCE_ATTACHMENT</code> flag as well.
-	 * </p>
-	 */
-	public static final int DEPRECATION_RESOLVING= 1 << 17;
-
-	/**
 	 * Converts the specified element to an input handle.
 	 * 
 	 * @param project
@@ -129,7 +89,7 @@ public class JDTRefactoringDescriptor extends JavaRefactoringDescriptor {
 		}
 		return handle;
 	}
-
+	
 	/**
 	 * Converts an input handle back to the corresponding java element.
 	 * 
@@ -241,98 +201,4 @@ public class JDTRefactoringDescriptor extends JavaRefactoringDescriptor {
 		return resource.getFullPath().toPortableString();
 	}
 
-	/**
-	 * Creates a new JDT refactoring descriptor.
-	 * 
-	 * @param id
-	 *            the unique id of the refactoring
-	 * @param project
-	 *            the project name, or <code>null</code>
-	 * @param description
-	 *            the description
-	 * @param comment
-	 *            the comment, or <code>null</code>
-	 * @param arguments
-	 *            the argument map
-	 * @param flags
-	 *            the flags
-	 */
-	public JDTRefactoringDescriptor(final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
-		super(id, arguments);
-		setProject(project);
-		setDescription(description);
-		setComment(comment);
-		setFlags(flags);
-	}
-
-	/**
-	 * Creates refactoring arguments for this refactoring descriptor.
-	 * 
-	 * @return the refactoring arguments
-	 */
-	public JavaRefactoringArguments createArguments() {
-		final JavaRefactoringArguments arguments= new JavaRefactoringArguments(getProject());
-		for (final Iterator iterator= getArguments().entrySet().iterator(); iterator.hasNext();) {
-			final Map.Entry entry= (Entry) iterator.next();
-			final String name= (String) entry.getKey();
-			final String value= (String) entry.getValue();
-			if (name != null && !"".equals(name) && value != null) //$NON-NLS-1$
-				arguments.setAttribute(name, value);
-		}
-		return arguments;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Refactoring createRefactoring(final RefactoringStatus status) throws CoreException {
-		Refactoring refactoring= null;
-		final RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(getID());
-		if (contribution instanceof JDTRefactoringContribution) {
-			final JDTRefactoringContribution extended= (JDTRefactoringContribution) contribution;
-			refactoring= extended.createRefactoring(this);
-		}
-		if (refactoring != null) {
-			if (refactoring instanceof IScriptableRefactoring) {
-				final JavaRefactoringArguments arguments= createArguments();
-				if (arguments != null)
-					status.merge(((IScriptableRefactoring) refactoring).initialize(arguments));
-				else
-					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments));
-			} else
-				status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_initialization_error, getID())));
-		}
-		return refactoring;
-	}
-
-	/**
-	 * Converts the specified element to an input handle.
-	 * 
-	 * @param element
-	 *            the element
-	 * @return a corresponding input handle
-	 */
-	public String elementToHandle(final IJavaElement element) {
-		Assert.isNotNull(element);
-		return elementToHandle(getProject(), element);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Map getArguments() {
-		return super.getArguments();
-	}
-
-	/**
-	 * Converts the specified resource to an input handle.
-	 * 
-	 * @param resource
-	 *            the resource
-	 * @return a corresponding input handle
-	 */
-	public String resourceToHandle(final IResource resource) {
-		Assert.isNotNull(resource);
-		return resourceToHandle(getProject(), resource);
-	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,9 @@
 package org.eclipse.jdt.internal.corext.refactoring;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -43,8 +45,26 @@ public final class JavaRefactoringArguments extends RefactoringArguments {
 	 *            the project, or <code>null</code> for the workspace
 	 */
 	public JavaRefactoringArguments(final String project) {
-		Assert.isTrue(project == null || !"".equals(project)); //$NON-NLS-1$
-		fProject= project;
+		setProject(project);
+	}
+
+	/**
+	 * Creates a new java refactoring arguments from arguments
+	 * 
+	 * @param project
+	 *            the project, or <code>null</code> for the workspace
+	 * @param arguments
+	 *            the arguments
+	 */
+	public JavaRefactoringArguments(String project, Map arguments) {
+		this(project);
+		for (final Iterator iterator= arguments.entrySet().iterator(); iterator.hasNext();) {
+			final Map.Entry entry= (Entry) iterator.next();
+			final String name= (String) entry.getKey();
+			final String value= (String) entry.getValue();
+			if (name != null && !"".equals(name) && value != null) //$NON-NLS-1$
+				setAttribute(name, value);
+		}
 	}
 
 	/**

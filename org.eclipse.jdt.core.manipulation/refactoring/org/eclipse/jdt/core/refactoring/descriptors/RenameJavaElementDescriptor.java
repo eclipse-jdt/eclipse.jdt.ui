@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.core.refactoring.descriptors;
 
+import java.util.Map;
+
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
@@ -143,6 +145,32 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 */
 	public RenameJavaElementDescriptor(final String id) {
 		super(id);
+		Assert.isLegal(checkId(id), "Refactoring id is not a rename refactoring id"); //$NON-NLS-1$
+	}
+	
+	/**
+	 * Note: This constructor is experimental and for internal use only. Clients should not call this constructor.
+	 *
+	 * @param project
+	 *            the non-empty name of the project associated with this
+	 *            refactoring, or <code>null</code> for a workspace
+	 *            refactoring
+	 * @param description
+	 *            a non-empty human-readable description of the particular
+	 *            refactoring instance
+	 * @param comment
+	 *            the human-readable comment of the particular refactoring
+	 *            instance, or <code>null</code> for no comment
+	 * @param arguments
+	 * 			  a map of arguments that will be persisted and describes
+	 * 			  all settings for this refactoring
+	 * @param flags
+	 *            the flags of the refactoring descriptor
+	 *            
+	 * @since 3.4
+	 */
+	public RenameJavaElementDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
+		super(id, project, description, comment, arguments, flags);
 		Assert.isLegal(checkId(id), "Refactoring id is not a rename refactoring id"); //$NON-NLS-1$
 	}
 

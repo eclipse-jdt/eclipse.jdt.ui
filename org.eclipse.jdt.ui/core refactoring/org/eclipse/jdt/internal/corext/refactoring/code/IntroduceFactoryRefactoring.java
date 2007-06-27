@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,6 +68,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+import org.eclipse.jdt.core.refactoring.descriptors.IntroduceFactoryDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -81,9 +82,9 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
-import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
@@ -252,7 +253,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		fCU= ASTCreator.createAST(fCUHandle, null);
 	}
 
-	/**
+	/*
 	 * Finds and returns the <code>ASTNode</code> for the given source text
 	 * selection, if it is an entire constructor call or the class name portion
 	 * of a constructor call or constructor declaration, or null otherwise.
@@ -278,7 +279,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return null;
 	}
 
-	/**
+	/*
 	 * Determines what kind of AST node was selected, and returns an error status
 	 * if the kind of node is inappropriate for this refactoring.
 	 * @param pm
@@ -363,7 +364,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	/**
+	/*
 	 * Returns the set of compilation units that will be affected by this
 	 * particular invocation of this refactoring. This in general includes
 	 * the class containing the constructor in question, as well as all
@@ -387,7 +388,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
 
-	/**
+	/*
 	 * Returns a <code>SearchPattern</code> that finds all calls to the constructor
 	 * identified by the argument <code>methodBinding</code>.
 	 */
@@ -423,7 +424,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	/**
+	/*
 	 * Returns an array of <code>SearchResultGroup</code>'s like the argument,
 	 * but omitting those groups that have no corresponding compilation unit
 	 * (i.e. are binary and therefore can't be modified).
@@ -443,7 +444,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return (SearchResultGroup[]) result.toArray(new SearchResultGroup[result.size()]);
 	}
 
-	/**
+	/*
 	 * Search for all calls to the given <code>IMethodBinding</code> in the project
 	 * that contains the compilation unit <code>fCUHandle</code>.
 	 * @param methodBinding
@@ -462,7 +463,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return (SearchResultGroup[]) engine.getResults();
 	}
 
-	/**
+	/*
 	 * Returns an array of <code>SearchResultGroup</code>'s containing all method
 	 * calls in the Java project that invoke the constructor identified by the given
 	 * <code>IMethodBinding</code>
@@ -532,7 +533,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	/**
+	/*
 	 * Returns an array containing the argument names for the constructor
 	 * identified by <code>fCtorBinding</code>, if available, or default
 	 * names if unavailable (e.g. if the constructor resides in a binary unit).
@@ -563,7 +564,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return names;
 	}
 
-	/**
+	/*
 	 * Creates and returns a new MethodDeclaration that represents the factory
 	 * method to be used in place of direct calls to the constructor in question.
 	 * @param ast An AST used as a factory for various AST nodes
@@ -736,7 +737,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	/**
+	/*
 	 * Returns a Type that describes the given ITypeBinding. If the binding
 	 * refers to an object type, use the import rewriter to determine whether
 	 * the reference requires a new import, or instead needs to be qualified.<br>
@@ -765,16 +766,16 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 	 * the factory method
 	 */
 	private void createFactoryMethodConstructorArgs(AST ast, ClassInstanceCreation newCtorCall) {
-		List	argList= newCtorCall.arguments();
+		List argList= newCtorCall.arguments();
 
 		for(int i=0; i < fArgTypes.length; i++) {
-			ASTNode	ctorArg= ast.newSimpleName(fFormalArgNames[i]);
+			ASTNode ctorArg= ast.newSimpleName(fFormalArgNames[i]);
 
 			argList.add(ctorArg);
 		}
 	}
 
-	/**
+	/*
 	 * Creates and returns a new MethodInvocation node to represent a call to
 	 * the factory method that replaces a direct constructor call.<br>
 	 * The original constructor call is marked as replaced by the new method
@@ -817,7 +818,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return factoryMethodCall;
 	}
 
-	/**
+	/*
 	 * Returns true iff the given <code>ICompilationUnit</code> is the unit
 	 * containing the original constructor.
 	 * @param unit
@@ -826,7 +827,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return unit.equals(ASTCreator.getCu(fCtorOwningClass));
 	}
 
-	/**
+	/*
 	 * Returns true iff we should actually change the original constructor's
 	 * visibility to <code>protected</code>. This takes into account the user-
 	 * requested mode and whether the constructor's compilation unit is in
@@ -836,7 +837,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return fProtectConstructor && fCtorOwningClass != null;
 	}
 
-	/**
+	/*
 	 * Creates and adds the necessary change to make the constructor method protected.
 	 * Returns false iff the constructor didn't exist (i.e. was implicit)
 	 */
@@ -850,7 +851,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return true;
 	}
 
-	/**
+	/*
 	 * Add all changes necessary on the <code>ICompilationUnit</code> in the given
 	 * <code>SearchResultGroup</code> to implement the refactoring transformation
 	 * to the given <code>CompilationUnitChange</code>.
@@ -901,7 +902,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return someChange;
 	}
 
-	/**
+	/*
 	 * Returns an AST for the given compilation unit handle.<br>
 	 * If this is the unit containing the selection or the unit in which the factory
 	 * is to reside, checks the appropriate field (<code>fCU</code> or <code>fFactoryCU</code>,
@@ -923,7 +924,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 			return ASTCreator.createAST(unitHandle, null);
 	}
 
-	/**
+	/*
 	 * Use the given <code>ASTRewrite</code> to replace direct calls to the constructor
 	 * with calls to the newly-created factory method.
 	 * @param rg the <code>SearchResultGroup</code> indicating all of the constructor references
@@ -955,7 +956,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return someCallPatched;
 	}
 
-	/**
+	/*
 	 * Look "in the vicinity" of the given range to find the <code>ClassInstanceCreation</code>
 	 * node that this search hit identified. Necessary because the <code>SearchEngine</code>
 	 * doesn't always cough up text extents that <code>NodeFinder.perform()</code> agrees with.
@@ -1025,7 +1026,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 					null));
 	}
 
-	/**
+	/*
 	 * Perform the AST rewriting necessary on the given <code>CompilationUnit</code>
 	 * to create the factory method. The method will reside on the type identified by
 	 * <code>fFactoryOwningClass</code>.
@@ -1049,6 +1050,9 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		unitRewriter.getListRewrite(factoryOwner, factoryOwner.getBodyDeclarationsProperty()).insertAt(fFactoryMethod, idx, gd);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.ltk.core.refactoring.Refactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
+	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.IntroduceFactory_createChanges, fAllCallsTo.length);
@@ -1069,11 +1073,11 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_owner_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 			if (fProtectConstructor)
 				comment.addSetting(RefactoringCoreMessages.IntroduceFactoryRefactoring_declare_private);
-			final JDTRefactoringDescriptor descriptor= new JDTRefactoringDescriptor(IJavaRefactorings.INTRODUCE_FACTORY, project, description, comment.asString(), arguments, flags);
-			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCUHandle));
-			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_NAME, fNewMethodName);
-			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(binding.getJavaElement()));
-			arguments.put(JDTRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+			final IntroduceFactoryDescriptor descriptor= new IntroduceFactoryDescriptor(project, description, comment.asString(), arguments, flags);
+			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fCUHandle));
+			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fNewMethodName);
+			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + 1, JavaRefactoringDescriptorUtil.elementToHandle(project, binding.getJavaElement()));
+			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 			arguments.put(ATTRIBUTE_PROTECT, Boolean.valueOf(fProtectConstructor).toString());
 			final DynamicValidationStateChange result= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.IntroduceFactory_name);
 			boolean hitInFactoryClass= false;
@@ -1111,8 +1115,8 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
+	/* (non-Javadoc)
+	 * @see org.eclipse.ltk.core.refactoring.Refactoring#getName()
 	 */
 	public String getName() {
 		return RefactoringCoreMessages.IntroduceFactory_name;
@@ -1120,6 +1124,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 
 	/**
 	 * Returns the name to be used for the generated factory method.
+	 * @return the new method name
 	 */
 	public String getNewMethodName() {
 		return fNewMethodName;
@@ -1130,6 +1135,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 	 * Returns a <code>RefactoringStatus</code> that indicates whether the
 	 * given name is valid for the new factory method.
 	 * @param newMethodName the name to be used for the generated factory method
+	 * @return the resulting status
 	 */
 	public RefactoringStatus setNewMethodName(String newMethodName) {
 		Assert.isNotNull(newMethodName);
@@ -1142,7 +1148,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return stat;
 	}
 
-	/**
+	/*
 	 * Returns a <code>RefactoringStatus</code> that identifies whether the
 	 * the name <code>newMethodName</code> is available to use as the name of
 	 * the new factory method within the factory-owner class (either a to-be-
@@ -1156,7 +1162,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return conflict ? RefactoringStatus.createErrorStatus(RefactoringCoreMessages.IntroduceFactory_duplicateMethodName + methodName) : new RefactoringStatus(); 
 	}
 
-	/**
+	/*
 	 * Returns true iff the given <code>AbstractTypeDeclaration</code> has a method with
 	 * the given name.
 	 * @param type
@@ -1177,6 +1183,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 
 	/**
 	 * Returns true iff the selected constructor can be protected.
+	 * @return return <code>true</code> if the constructor can be made protected
 	 */
 	public boolean canProtectConstructor() {
 		return !fCtorBinding.isSynthetic() && fFactoryCU.findDeclaringNode(fCtorBinding.getKey()) != null;
@@ -1193,6 +1200,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 
 	/**
 	 * Returns the project on behalf of which this refactoring was invoked.
+	 * @return returns the Java project
 	 */
 	public IJavaProject getProject() {
 		return fCUHandle.getJavaProject();
@@ -1201,6 +1209,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 	/**
 	 * Sets the class on which the generated factory method is to be placed.
 	 * @param fullyQualifiedTypeName an <code>IType</code> referring to an existing class
+	 * @return return the resulting status
 	 */
 	public RefactoringStatus setFactoryClass(String fullyQualifiedTypeName) {
 		IType factoryType;
@@ -1265,6 +1274,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 	/**
 	 * Returns the name of the class on which the generated factory method is
 	 * to be placed.
+	 * @return return the factory class name
 	 */
 	public String getFactoryClassName() {
 		return fFactoryOwningClass.resolveBinding().getQualifiedName();
@@ -1273,7 +1283,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String selection= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_SELECTION);
+			final String selection= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION);
 			if (selection != null) {
 				int offset= -1;
 				int length= -1;
@@ -1286,12 +1296,12 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 					fSelectionStart= offset;
 					fSelectionLength= length;
 				} else
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JDTRefactoringDescriptor.ATTRIBUTE_SELECTION}));
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION}));
 			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_SELECTION));
-			String handle= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_INPUT);
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION));
+			String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
 			if (handle != null) {
-				final IJavaElement element= JDTRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
 					return createInputFatalStatus(element, IJavaRefactorings.INTRODUCE_FACTORY);
 				else {
@@ -1299,10 +1309,10 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		        	initialize();
 				}
 			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_INPUT));
-			handle= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1);
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+			handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + 1);
 			if (handle != null) {
-				final IJavaElement element= JDTRefactoringDescriptor.handleToElement(extended.getProject(), handle, false);
+				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
 					return createInputFatalStatus(element, IJavaRefactorings.INTRODUCE_FACTORY);
 				else {
@@ -1310,12 +1320,12 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 					fFactoryClassName= type.getFullyQualifiedName();
 				}
 			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_INPUT));
-			final String name= extended.getAttribute(JDTRefactoringDescriptor.ATTRIBUTE_NAME);
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+			final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				fNewMethodName= name;
 			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JDTRefactoringDescriptor.ATTRIBUTE_NAME));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
 			final String protect= extended.getAttribute(ATTRIBUTE_PROTECT);
 			if (protect != null) {
 				fProtectConstructor= Boolean.valueOf(protect).booleanValue();

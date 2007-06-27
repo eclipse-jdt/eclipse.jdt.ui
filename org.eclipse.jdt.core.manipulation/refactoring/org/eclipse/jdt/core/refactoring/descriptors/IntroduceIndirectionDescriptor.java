@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.core.refactoring.descriptors;
+
+import java.util.Map;
 
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
@@ -38,4 +40,30 @@ public final class IntroduceIndirectionDescriptor extends JavaRefactoringDescrip
 	public IntroduceIndirectionDescriptor() {
 		super(IJavaRefactorings.INTRODUCE_INDIRECTION);
 	}
+	
+	/**
+	 * Note: This constructor is experimental and for internal use only. Clients should not call this constructor.
+	 *
+	 * @param project
+	 *            the non-empty name of the project associated with this
+	 *            refactoring, or <code>null</code> for a workspace
+	 *            refactoring
+	 * @param description
+	 *            a non-empty human-readable description of the particular
+	 *            refactoring instance
+	 * @param comment
+	 *            the human-readable comment of the particular refactoring
+	 *            instance, or <code>null</code> for no comment
+	 * @param arguments
+	 * 			  a map of arguments that will be persisted and describes
+	 * 			  all settings for this refactoring
+	 * @param flags
+	 *            the flags of the refactoring descriptor
+	 *            
+	 * @since 3.4
+	 */
+	public IntroduceIndirectionDescriptor(String project, String description, String comment, Map arguments, int flags) {
+		super(IJavaRefactorings.INTRODUCE_INDIRECTION, project, description, comment, arguments, flags);
+	}
+	
 }
