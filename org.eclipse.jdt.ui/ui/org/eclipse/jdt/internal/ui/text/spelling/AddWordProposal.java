@@ -20,11 +20,9 @@ import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.dialogs.PreferencesUtil;
-import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -79,12 +77,14 @@ public class AddWordProposal implements IJavaCompletionProposal {
 		if (checker == null)
 			return;
 		
-		final ITextEditor editor= getEditor();
+		IQuickAssistInvocationContext quickAssistContext= null;
+		if (fContext instanceof IQuickAssistInvocationContext)
+			quickAssistContext= (IQuickAssistInvocationContext)fContext;
 		
 		if (!checker.acceptsWords()) {
 			final Shell shell;
-			if (editor != null)
-				shell= editor.getEditorSite().getShell();
+			if (quickAssistContext != null && quickAssistContext.getSourceViewer() != null)
+				shell= quickAssistContext.getSourceViewer().getTextWidget().getShell();
 			else
 				shell= JavaPlugin.getActiveWorkbenchShell();
 			
@@ -97,7 +97,8 @@ public class AddWordProposal implements IJavaCompletionProposal {
 		
 		if (checker.acceptsWords()) {
 			checker.addWord(fWord);
-			SpellingProblem.removeAllInActiveEditor(editor, fWord);
+			if (quickAssistContext != null && quickAssistContext.getSourceViewer() != null)
+				SpellingProblem.removeAll(quickAssistContext.getSourceViewer(), fWord);
 		}
 	}
 	
@@ -132,19 +133,6 @@ public class AddWordProposal implements IJavaCompletionProposal {
 	 */
 	static boolean canAskToConfigure() {
 		return !PreferenceConstants.getPreferenceStore().getBoolean(PREF_KEY_DO_NOT_ASK);
-	}
-
-	private ITextEditor getEditor() {
-		IWorkbenchPage activePage= JavaPlugin.getActivePage();
-		if (activePage == null)
-			return null;
-	
-		IEditorPart editor= activePage.getActiveEditor();
-		if (activePage.getActivePart() != editor ||  !(editor instanceof ITextEditor))
-			return null;
-		
-		return (ITextEditor)editor;
-		
 	}
 
 	/*

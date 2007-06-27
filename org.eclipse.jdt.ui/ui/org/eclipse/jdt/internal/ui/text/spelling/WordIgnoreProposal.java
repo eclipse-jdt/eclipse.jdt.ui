@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,10 +16,9 @@ import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
+import org.eclipse.jface.text.source.ISourceViewer;
 
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -27,7 +26,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
@@ -69,21 +67,12 @@ public class WordIgnoreProposal implements IJavaCompletionProposal {
 
 		if (checker != null) {
 			checker.ignoreWord(fWord);
-			SpellingProblem.removeAllInActiveEditor(getEditor(), fWord);
+			if (fContext instanceof IQuickAssistInvocationContext) {
+				ISourceViewer sourceViewer= ((IQuickAssistInvocationContext)fContext).getSourceViewer();
+				if (sourceViewer != null)
+					SpellingProblem.removeAll(sourceViewer, fWord);
+			}
 		}
-	}
-
-	private ITextEditor getEditor() {
-		IWorkbenchPage activePage= JavaPlugin.getActivePage();
-		if (activePage == null)
-			return null;
-	
-		IEditorPart editor= activePage.getActiveEditor();
-		if (activePage.getActivePart() != editor ||  !(editor instanceof ITextEditor))
-			return null;
-		
-		return (ITextEditor)editor;
-		
 	}
 
 	/*

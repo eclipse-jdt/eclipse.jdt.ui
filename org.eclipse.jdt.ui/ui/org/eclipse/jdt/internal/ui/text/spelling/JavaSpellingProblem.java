@@ -21,6 +21,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 
 import org.eclipse.ui.texteditor.spelling.SpellingProblem;
 
@@ -98,6 +99,14 @@ public class JavaSpellingProblem extends SpellingProblem {
 	 * @see org.eclipse.ui.texteditor.spelling.SpellingProblem#getProposals()
 	 */
 	public ICompletionProposal[] getProposals() {
+		return getProposals(null);
+	}
+
+	/*
+	 * @see org.eclipse.ui.texteditor.spelling.SpellingProblem#getProposals(org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext)
+	 * @since 3.4
+	 */
+	public ICompletionProposal[] getProposals(IQuickAssistInvocationContext originalContext) {
 		String[] arguments= getArguments();
 		if (arguments == null)
 			return new ICompletionProposal[0];
@@ -122,8 +131,11 @@ public class JavaSpellingProblem extends SpellingProblem {
 
 		if (checker != null) {
 
-			IInvocationContext context= new AssistContext(null, getOffset(),
-					getLength());
+			IInvocationContext context;
+			if (originalContext == null)
+				context= new AssistContext(null, getOffset(), getLength());
+			else
+				context= new AssistContext(null, originalContext.getSourceViewer(), getOffset(), getLength());
 
 			// FIXME: this is a pretty ugly hack
 			fixed= arguments[0].charAt(0) == IHtmlTagConstants.HTML_TAG_PREFIX

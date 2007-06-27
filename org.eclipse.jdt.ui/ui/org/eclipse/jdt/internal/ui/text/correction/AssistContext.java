@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
+
+import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.TextInvocationContext;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -22,28 +25,32 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
   */
-public class AssistContext implements IInvocationContext {
+public class AssistContext extends TextInvocationContext implements IInvocationContext {
 
 	private ICompilationUnit fCompilationUnit;
-	private int fOffset;
-	private int fLength;
 
 	private CompilationUnit fASTRoot;
 
 	/*
 	 * Constructor for CorrectionContext.
+	 * @since 3.4
+	 */
+	public AssistContext(ICompilationUnit cu, ISourceViewer sourceViewer, int offset, int length) {
+		super(sourceViewer, offset, length);
+		fCompilationUnit= cu;
+		fASTRoot= null;
+	}
+	
+	/*
+	 * Constructor for CorrectionContext.
 	 */
 	public AssistContext(ICompilationUnit cu, int offset, int length) {
-		fCompilationUnit= cu;
-		fOffset= offset;
-		fLength= length;
-
-		fASTRoot= null;
+		this(cu, null, offset, length);
 	}
 
 	/**
 	 * Returns the compilation unit.
-	 * @return Returns a ICompilationUnit
+	 * @return an <code>ICompilationUnit</code>
 	 */
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
@@ -54,7 +61,7 @@ public class AssistContext implements IInvocationContext {
 	 * @return int
 	 */
 	public int getSelectionLength() {
-		return fLength;
+		return Math.max(getLength(), 0);
 	}
 
 	/**
@@ -62,7 +69,7 @@ public class AssistContext implements IInvocationContext {
 	 * @return int
 	 */
 	public int getSelectionOffset() {
-		return fOffset;
+		return getOffset();
 	}
 
 	public CompilationUnit getASTRoot() {
@@ -88,7 +95,7 @@ public class AssistContext implements IInvocationContext {
 	 * @see org.eclipse.jdt.ui.text.java.IInvocationContext#getCoveringNode()
 	 */
 	public ASTNode getCoveringNode() {
-		NodeFinder finder= new NodeFinder(fOffset, fLength);
+		NodeFinder finder= new NodeFinder(getOffset(), getLength());
 		getASTRoot().accept(finder);
 		return finder.getCoveringNode();
 	}
@@ -97,7 +104,7 @@ public class AssistContext implements IInvocationContext {
 	 * @see org.eclipse.jdt.ui.text.java.IInvocationContext#getCoveredNode()
 	 */
 	public ASTNode getCoveredNode() {
-		NodeFinder finder= new NodeFinder(fOffset, fLength);
+		NodeFinder finder= new NodeFinder(getOffset(), getLength());
 		getASTRoot().accept(finder);
 		return finder.getCoveredNode();
 	}

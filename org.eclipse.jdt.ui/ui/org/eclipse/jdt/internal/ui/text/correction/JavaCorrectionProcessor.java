@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IMarker;
 
-import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ContentAssistEvent;
 import org.eclipse.jface.text.contentassist.ICompletionListener;
@@ -33,6 +32,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMarkerHelpRegistry;
@@ -190,7 +190,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
 	public ICompletionProposal[] computeQuickAssistProposals(IQuickAssistInvocationContext quickAssistContext) {
-		ITextViewer viewer= quickAssistContext.getSourceViewer();
+		ISourceViewer viewer= quickAssistContext.getSourceViewer();
 		int documentOffset= quickAssistContext.getOffset();
 		
 		IEditorPart part= fAssistant.getEditor();
@@ -199,7 +199,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(part.getEditorInput());
 		
 		int length= viewer != null ? viewer.getSelectedRange().y : 0;
-		AssistContext context= new AssistContext(cu, documentOffset, length);
+		AssistContext context= new AssistContext(cu, viewer, documentOffset, length);
 
 		Annotation[] annotations= fAssistant.getAnnotationsAtOffset();
 		
