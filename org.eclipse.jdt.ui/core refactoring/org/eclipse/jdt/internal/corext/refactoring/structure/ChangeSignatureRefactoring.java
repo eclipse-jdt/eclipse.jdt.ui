@@ -725,6 +725,10 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 				fBaseCuRewrite= new CompilationUnitRewrite(getCu());
 				fBaseCuRewrite.getASTRewrite().setTargetSourceRangeComputer(new TightSourceRangeComputer());
 			}
+			RefactoringStatus[] status= TypeContextChecker.checkMethodTypesSyntax(fMethod, getParameterInfos(), fReturnTypeInfo);
+			for (int i= 0; i < status.length; i++) {
+				result.merge(status[i]);
+			}
 			monitor.worked(1);
 			result.merge(createExceptionInfoList());
 			monitor.worked(1);
@@ -1143,14 +1147,14 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			final List list= new ArrayList(changes.length);
 			list.addAll(fOtherChanges);
 			list.addAll(Arrays.asList(changes));
-			return new DynamicValidationRefactoringChange(doCreateDescriptor(), doGetRefactoringChangeName(), (Change[]) list.toArray(new Change[list.size()]));
+			return new DynamicValidationRefactoringChange(createDescriptor(), doGetRefactoringChangeName(), (Change[]) list.toArray(new Change[list.size()]));
 		} finally {
 			pm.done();
 			clearManagers();
 		}
 	}
 
-	protected JavaRefactoringDescriptor doCreateDescriptor() {
+	public JavaRefactoringDescriptor createDescriptor() {
 		final Map arguments= new HashMap();
 		String project= null;
 		IJavaProject javaProject= fMethod.getJavaProject();
@@ -1190,9 +1194,15 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 				buffer.append(" "); //$NON-NLS-1$
 				buffer.append(info.getOldIndex());
 				buffer.append(" "); //$NON-NLS-1$
-				buffer.append(info.getNewTypeName());
+				if (info.isDeleted())
+					buffer.append("{deleted}"); //$NON-NLS-1$
+				else
+					buffer.append(info.getNewTypeName().replaceAll(" ", ""));  //$NON-NLS-1$//$NON-NLS-2$
 				buffer.append(" "); //$NON-NLS-1$
-				buffer.append(info.getNewName());
+				if (info.isDeleted())
+					buffer.append("{deleted}"); //$NON-NLS-1$
+				else
+					buffer.append(info.getNewName());
 				buffer.append(" "); //$NON-NLS-1$
 				buffer.append(info.isDeleted());
 				arguments.put(ATTRIBUTE_PARAMETER + count, buffer.toString());
@@ -2535,7 +2545,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
 			final String type= extended.getAttribute(ATTRIBUTE_RETURN);
 			if (type != null && !"".equals(type)) //$NON-NLS-1$
-				fReturnTypeInfo= new ReturnTypeInfo(type);
+				fReturnTypeInfo.setNewTypeName(type);
 			final String visibility= extended.getAttribute(ATTRIBUTE_VISIBILITY);
 			if (visibility != null && !"".equals(visibility)) {//$NON-NLS-1$
 				int flag= 0;

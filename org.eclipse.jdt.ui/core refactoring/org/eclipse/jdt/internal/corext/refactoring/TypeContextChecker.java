@@ -357,13 +357,14 @@ public class TypeContextChecker {
 			results[parameterCount]= checkReturnTypeSyntax();
 			for (int i= 0; i < parameterCount; i++) {
 				ParameterInfo info= (ParameterInfo) fParameterInfos.get(i);
-				results[i]= checkParameterTypeSyntax(info);
+				if (!info.isDeleted())
+					results[i]= checkParameterTypeSyntax(info);
 			}
 			return results;
 		}
 		
 		private RefactoringStatus checkParameterTypeSyntax(ParameterInfo info) {
-			if (! info.isAdded() && ! info.isTypeNameChanged())
+			if (!info.isAdded() && !info.isTypeNameChanged() && !info.isDeleted())
 				return null;
 			return TypeContextChecker.checkParameterTypeSyntax(info.getNewTypeName(), fMethod.getJavaProject());
 		}

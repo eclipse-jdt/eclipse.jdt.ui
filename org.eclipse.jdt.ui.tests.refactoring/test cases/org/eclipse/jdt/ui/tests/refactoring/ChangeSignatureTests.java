@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.ExceptionInfo;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
@@ -124,7 +125,10 @@ public class ChangeSignatureTests extends RefactoringTest {
 		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 		ref.setDelegateUpdating(createDelegate);
 		addInfos(ref.getParameterInfos(), newParamInfos, newIndices);
-		RefactoringStatus result= performRefactoring(ref);
+		RefactoringStatus initialConditions= ref.checkInitialConditions(new NullProgressMonitor());
+		assertTrue("precondition was supposed to pass:"+initialConditions.getEntryWithHighestSeverity(), initialConditions.isOK());
+		JavaRefactoringDescriptor descriptor= ref.createDescriptor();
+		RefactoringStatus result= performRefactoring(descriptor);
 		assertEquals("precondition was supposed to pass", null, result);
 		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
@@ -146,7 +150,9 @@ public class ChangeSignatureTests extends RefactoringTest {
 		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 		ref.setNewMethodName(newMethodName);
 		ref.setDelegateUpdating(createDelegate);
-		RefactoringStatus result= performRefactoring(ref);
+		ref.checkInitialConditions(new NullProgressMonitor());
+		JavaRefactoringDescriptor descriptor= ref.createDescriptor();
+		RefactoringStatus result= performRefactoring(descriptor);
 		assertEquals("precondition was supposed to pass", null, result);
 		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
@@ -180,7 +186,10 @@ public class ChangeSignatureTests extends RefactoringTest {
 		modifyInfos(ref.getParameterInfos(), newParamInfos, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation);
 		if (newVisibility != JdtFlags.VISIBILITY_CODE_INVALID)
 			ref.setVisibility(newVisibility);
-		RefactoringStatus result= performRefactoring(ref);
+		RefactoringStatus initialConditions= ref.checkInitialConditions(new NullProgressMonitor());
+		assertTrue(initialConditions.isOK());
+		JavaRefactoringDescriptor descriptor= ref.createDescriptor();
+		RefactoringStatus result= performRefactoring(descriptor);
 		assertEquals("precondition was supposed to pass", null, result);
 		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
@@ -226,7 +235,9 @@ public class ChangeSignatureTests extends RefactoringTest {
 		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 		ref.setDelegateUpdating(createDelegate);
 		modifyInfos(ref.getParameterInfos(), newOrder, oldNames, newNames);
-		RefactoringStatus result= performRefactoring(ref);
+		ref.checkInitialConditions(new NullProgressMonitor());
+		JavaRefactoringDescriptor descriptor= ref.createDescriptor();
+		RefactoringStatus result= performRefactoring(descriptor);
 		assertEquals("precondition was supposed to pass", null, result);
 		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
@@ -322,7 +333,12 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IMethod method= classA.getMethod("m", signature);
 		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 		modifyInfos(ref.getParameterInfos(), newOrder, null, null);
-		RefactoringStatus result= performRefactoring(ref);
+		ref.checkInitialConditions(new NullProgressMonitor());
+		RefactoringStatus result= ref.checkInitialConditions(new NullProgressMonitor());
+		if (result.isOK()) {
+			JavaRefactoringDescriptor descriptor= ref.createDescriptor();
+			result= performRefactoring(descriptor, true);
+		}
 		assertNotNull("precondition was supposed to fail", result);		
 		assertEquals("Severity:", expectedSeverity, result.getSeverity());
 	}
@@ -332,8 +348,12 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IMethod method= classA.getMethod("m", signature);
 		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 		addInfos(ref.getParameterInfos(), newParamInfos, newIndices);
-		RefactoringStatus result= performRefactoring(ref);
-		assertNotNull("precondition was supposed to fail", result);		
+		RefactoringStatus result= ref.checkInitialConditions(new NullProgressMonitor());
+		if (result.isOK()) {
+			JavaRefactoringDescriptor descriptor= ref.createDescriptor();
+			result= performRefactoring(descriptor, true);
+		}
+		assertNotNull("precondition was supposed to fail", result);
 		assertEquals("Severity:" + result.getMessageMatchingSeverity(result.getSeverity()), expectedSeverity, result.getSeverity());
 	}
 	
@@ -356,7 +376,11 @@ public class ChangeSignatureTests extends RefactoringTest {
 		modifyInfos(ref.getParameterInfos(), newParamInfos, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation);
 		if (newVisibility != JdtFlags.VISIBILITY_CODE_INVALID)
 			ref.setVisibility(newVisibility);
-		RefactoringStatus result= performRefactoring(ref);
+		RefactoringStatus result= ref.checkInitialConditions(new NullProgressMonitor());
+		if (result.isOK()) {
+			JavaRefactoringDescriptor descriptor= ref.createDescriptor();
+			result= performRefactoring(descriptor);
+		}
 		assertNotNull("precondition was supposed to fail", result);	
 		assertEquals("Severity:" + result.getMessageMatchingSeverity(result.getSeverity()), expectedSeverity, result.getSeverity());		
 	}

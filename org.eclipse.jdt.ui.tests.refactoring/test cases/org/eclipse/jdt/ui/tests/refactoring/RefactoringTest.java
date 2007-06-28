@@ -222,8 +222,12 @@ public abstract class RefactoringTest extends TestCase {
 	}
 
 	protected final RefactoringStatus performRefactoring(RefactoringDescriptor descriptor) throws Exception {
+		return performRefactoring(descriptor, true);
+	}
+
+	protected final RefactoringStatus performRefactoring(RefactoringDescriptor descriptor, boolean providesUndo) throws Exception {
 		Refactoring refactoring= createRefactoring(descriptor);
-		return performRefactoring(refactoring);
+		return performRefactoring(refactoring, providesUndo);
 	}
 
     protected final Refactoring createRefactoring(RefactoringDescriptor descriptor) throws CoreException {
@@ -246,7 +250,6 @@ public abstract class RefactoringTest extends TestCase {
 			RefactoringStatus.FATAL);
 		final PerformChangeOperation perform= new PerformChangeOperation(create);
 		perform.setUndoManager(undoManager, ref.getName());
-		
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		if (fIsPreDeltaTest) {
 			IResourceChangeListener listener= new IResourceChangeListener() {
@@ -285,7 +288,12 @@ public abstract class RefactoringTest extends TestCase {
 		workspace.run(perform, new NullProgressMonitor());
 	}
 	
-	protected final RefactoringStatus performRefactoringWithStatus(Refactoring ref) throws Exception {
+	protected final RefactoringStatus performRefactoringWithStatus(RefactoringDescriptor descriptor) throws Exception {
+		Refactoring ref= createRefactoring(descriptor);
+		return performRefactoringWithStatus(ref);
+	}
+
+	public RefactoringStatus performRefactoringWithStatus(Refactoring ref) throws Exception, CoreException {
 		performDummySearch();
 		CreateChangeOperation create= new CreateChangeOperation(
 			new CheckConditionsOperation(ref, CheckConditionsOperation.ALL_CONDITIONS),
@@ -300,7 +308,7 @@ public abstract class RefactoringTest extends TestCase {
 		return status;
 	}
 	
-	protected final Change performChange(final Refactoring refactoring, boolean storeUndo) throws Exception {
+	protected final Change performChange(Refactoring refactoring, boolean storeUndo) throws Exception {
 		CreateChangeOperation create= new CreateChangeOperation(refactoring);
 		PerformChangeOperation perform= new PerformChangeOperation(create);
 		if (storeUndo) {
