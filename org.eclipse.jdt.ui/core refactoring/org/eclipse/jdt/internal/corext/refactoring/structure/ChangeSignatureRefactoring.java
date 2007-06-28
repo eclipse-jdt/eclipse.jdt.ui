@@ -1178,9 +1178,15 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			for (final Iterator iterator= fParameterInfos.iterator(); iterator.hasNext();) {
 				final ParameterInfo info= (ParameterInfo) iterator.next();
 				final StringBuffer buffer= new StringBuffer(64);
-				buffer.append(info.getOldTypeName());
+				if (info.isAdded())
+					buffer.append("{added}"); //$NON-NLS-1$
+				else 
+					 buffer.append(info.getOldTypeName());
 				buffer.append(" "); //$NON-NLS-1$
-				buffer.append(info.getOldName());
+				if (info.isAdded())
+					buffer.append("{added}"); //$NON-NLS-1$
+				else 
+					 buffer.append(info.getOldName());
 				buffer.append(" "); //$NON-NLS-1$
 				buffer.append(info.getOldIndex());
 				buffer.append(" "); //$NON-NLS-1$
@@ -2514,7 +2520,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 						fVisibility= JdtFlags.getVisibilityCode(fMethod);
 						fReturnTypeInfo= new ReturnTypeInfo(Signature.toString(Signature.getReturnType(fMethod.getSignature())));
 					} catch (JavaModelException exception) {
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_VISIBILITY));
+						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[]{ new Integer(fVisibility), ATTRIBUTE_VISIBILITY}));
 					}
 				}
 			} else
@@ -2545,9 +2551,9 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			String value= null;
 			fParameterInfos= new ArrayList(3);
 			while ((value= extended.getAttribute(attribute)) != null) {
-				StringTokenizer tokenizer= new StringTokenizer(value);
+				StringTokenizer tokenizer= new StringTokenizer(value, " "); //$NON-NLS-1$
 				if (tokenizer.countTokens() < 6)
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] {value, ATTRIBUTE_PARAMETER}));
 				String oldTypeName= tokenizer.nextToken();
 				String oldName= tokenizer.nextToken();
 				String oldIndex= tokenizer.nextToken();
@@ -2556,18 +2562,23 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 				String deleted= tokenizer.nextToken();
 				ParameterInfo info= null;
 				try {
-					info= new ParameterInfo(oldTypeName, oldName, Integer.valueOf(oldIndex).intValue());
-					info.setNewTypeName(newTypeName);
-					info.setNewName(newName);
-					if (Boolean.valueOf(deleted).booleanValue())
-						info.markAsDeleted();
+					int index= Integer.parseInt(oldIndex);
+					if (index == -1){
+						String result= extended.getAttribute(ATTRIBUTE_DEFAULT + count);
+						if (result == null)
+							result= ""; //$NON-NLS-1$
+						info= ParameterInfo.createInfoForAddedParameter(newTypeName, newName, result);
+					} else {
+						info= new ParameterInfo(oldTypeName, oldName, index);
+						info.setNewTypeName(newTypeName);
+						info.setNewName(newName);
+						if (Boolean.valueOf(deleted).booleanValue())
+							info.markAsDeleted();
+					}
 					fParameterInfos.add(info);
 				} catch (NumberFormatException exception) {
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] {value, ATTRIBUTE_PARAMETER}));
 				}
-				final String result= extended.getAttribute(ATTRIBUTE_DEFAULT + count);
-				if (result != null && !"".equals(result)) //$NON-NLS-1$
-					info.setDefaultValue(result);
 				count++;
 				attribute= ATTRIBUTE_PARAMETER + count;
 			}
@@ -2585,11 +2596,11 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 						try {
 							info= new ExceptionInfo((IType) element, Integer.valueOf(kind).intValue(), null);
 						} catch (NumberFormatException exception) {
-							return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_KIND));
+							return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] {kind, ATTRIBUTE_KIND}));
 						}
 					}
 				} else
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_KIND));
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[]{kind, ATTRIBUTE_KIND}));
 				fExceptionInfos.add(info);
 				count++;
 				attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
