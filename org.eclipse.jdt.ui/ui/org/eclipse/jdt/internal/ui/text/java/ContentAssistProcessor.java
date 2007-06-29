@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -442,6 +442,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 * Informs the user about the fact that there are no enabled categories in the default content
 	 * assist set and shows a link to the preferences.
 	 * 
+	 * @return  <code>true</code> if the default should be restored
 	 * @since 3.3
 	 */
 	private boolean informUserAboutEmptyDefaultCategory() {

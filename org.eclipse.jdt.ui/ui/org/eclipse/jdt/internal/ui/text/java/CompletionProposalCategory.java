@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -102,9 +102,11 @@ public final class CompletionProposalCategory {
 
 	/**
 	 * Checks an element that must be defined according to the extension
-	 * point schema. Throws an
-	 * <code>InvalidRegistryObjectException</code> if <code>obj</code>
-	 * is <code>null</code>.
+	 * point schema.
+	 * 
+	 * @param obj the element to be checked
+	 * @param attribute the attribute
+	 * @throws InvalidRegistryObjectException if <code>obj</code> is <code>null</code> 
 	 */
 	private void checkNotNull(Object obj, String attribute) throws InvalidRegistryObjectException {
 		if (obj == null) {
