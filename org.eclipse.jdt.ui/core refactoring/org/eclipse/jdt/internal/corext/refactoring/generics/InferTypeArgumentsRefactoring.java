@@ -397,7 +397,12 @@ public class InferTypeArgumentsRefactoring extends ScriptableRefactoring {
 		return false;
 	}
 
-	/*
+	/**
+	 * @param baseType 
+	 * @param typeArgumentCvs 
+	 * @param rewrite 
+	 * @param tCModel 
+	 * @param leaveUnconstraindRaw 
 	 * @return the new type arguments, or <code>null</code> iff an argument could not be infered
 	 */
 	private static Type[] getTypeArguments(Type baseType, ArrayList typeArgumentCvs, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw) {

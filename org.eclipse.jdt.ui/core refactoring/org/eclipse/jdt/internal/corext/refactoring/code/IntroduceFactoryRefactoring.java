@@ -253,7 +253,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		fCU= ASTCreator.createAST(fCUHandle, null);
 	}
 
-	/*
+	/**
 	 * Finds and returns the <code>ASTNode</code> for the given source text
 	 * selection, if it is an entire constructor call or the class name portion
 	 * of a constructor call or constructor declaration, or null otherwise.
@@ -279,7 +279,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return null;
 	}
 
-	/*
+	/**
 	 * Determines what kind of AST node was selected, and returns an error status
 	 * if the kind of node is inappropriate for this refactoring.
 	 * @param pm
@@ -364,12 +364,12 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	/*
-	 * Returns the set of compilation units that will be affected by this
+	/**
+	 * @param searchHits 
+	 * @return the set of compilation units that will be affected by this
 	 * particular invocation of this refactoring. This in general includes
 	 * the class containing the constructor in question, as well as all
 	 * call sites to the constructor.
-	 * @return ICompilationUnit[]
 	 */
 	private ICompilationUnit[] collectAffectedUnits(SearchResultGroup[] searchHits) {
 		Collection	result= new ArrayList();
@@ -388,8 +388,10 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
 
-	/*
-	 * Returns a <code>SearchPattern</code> that finds all calls to the constructor
+	/**
+	 * @param ctor 
+	 * @param methodBinding 
+	 * @return a <code>SearchPattern</code> that finds all calls to the constructor
 	 * identified by the argument <code>methodBinding</code>.
 	 */
 	private SearchPattern createSearchPattern(IMethod ctor, IMethodBinding methodBinding) {
@@ -424,8 +426,9 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	/*
-	 * Returns an array of <code>SearchResultGroup</code>'s like the argument,
+	/**
+	 * @param groups 
+	 * @return an array of <code>SearchResultGroup</code>'s like the argument,
 	 * but omitting those groups that have no corresponding compilation unit
 	 * (i.e. are binary and therefore can't be modified).
 	 */
@@ -444,7 +447,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return (SearchResultGroup[]) result.toArray(new SearchResultGroup[result.size()]);
 	}
 
-	/*
+	/**
 	 * Search for all calls to the given <code>IMethodBinding</code> in the project
 	 * that contains the compilation unit <code>fCUHandle</code>.
 	 * @param methodBinding
@@ -463,7 +466,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return (SearchResultGroup[]) engine.getResults();
 	}
 
-	/*
+	/**
 	 * Returns an array of <code>SearchResultGroup</code>'s containing all method
 	 * calls in the Java project that invoke the constructor identified by the given
 	 * <code>IMethodBinding</code>
@@ -474,6 +477,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 	 * @param status
 	 * @return an array of <code>SearchResultGroup</code>'s identifying all
 	 * calls to the given constructor signature
+	 * @throws JavaModelException 
 	 */
 	private SearchResultGroup[] findAllCallsTo(IMethodBinding ctorBinding, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		SearchResultGroup[] groups= excludeBinaryUnits(searchForCallsTo(ctorBinding, pm, status));
@@ -533,8 +537,8 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	/*
-	 * Returns an array containing the argument names for the constructor
+	/**
+	 * @return an array containing the argument names for the constructor
 	 * identified by <code>fCtorBinding</code>, if available, or default
 	 * names if unavailable (e.g. if the constructor resides in a binary unit).
 	 */
@@ -564,12 +568,13 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return names;
 	}
 
-	/*
+	/**
 	 * Creates and returns a new MethodDeclaration that represents the factory
 	 * method to be used in place of direct calls to the constructor in question.
 	 * @param ast An AST used as a factory for various AST nodes
 	 * @param ctorBinding binding for the constructor being wrapped
 	 * @param unitRewriter the ASTRewrite to be used
+	 * @return the new method declaration
 	 */
 	private MethodDeclaration createFactoryMethod(AST ast, IMethodBinding ctorBinding, ASTRewrite unitRewriter) {
 		MethodDeclaration		newMethod= ast.newMethodDeclaration();
@@ -737,12 +742,14 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	/*
-	 * Returns a Type that describes the given ITypeBinding. If the binding
+	/**
+	 * @param argType 
+	 * @param extraDims number of extra array dimensions to add to the resulting type
+	 * @param ast 
+	 * @return a Type that describes the given ITypeBinding. If the binding
 	 * refers to an object type, use the import rewriter to determine whether
 	 * the reference requires a new import, or instead needs to be qualified.<br>
 	 * Like ASTNodeFactory.newType(), but for the handling of imports.
-	 * @param extraDims number of extra array dimensions to add to the resulting type
 	 */
 	private Type typeNodeForTypeBinding(ITypeBinding argType, int extraDims, AST ast) {
 		if (extraDims > 0) {
@@ -775,13 +782,16 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	/*
+	/**
 	 * Creates and returns a new MethodInvocation node to represent a call to
 	 * the factory method that replaces a direct constructor call.<br>
 	 * The original constructor call is marked as replaced by the new method
 	 * call with the ASTRewrite instance fCtorCallRewriter.
 	 * @param ast utility object used to create AST nodes
 	 * @param ctorCall the ClassInstanceCreation to be marked as replaced
+	 * @param unitRewriter 
+	 * @param gd 
+	 * @return the new method invocation
 	 */
 	private MethodInvocation createFactoryMethodCall(AST ast, ClassInstanceCreation ctorCall,
 													 ASTRewrite unitRewriter, TextEditGroup gd) {
@@ -818,17 +828,17 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return factoryMethodCall;
 	}
 
-	/*
-	 * Returns true iff the given <code>ICompilationUnit</code> is the unit
-	 * containing the original constructor.
+	/**
 	 * @param unit
+	 * @return true iff the given <code>ICompilationUnit</code> is the unit
+	 * containing the original constructor
 	 */
 	private boolean isConstructorUnit(ICompilationUnit unit) {
 		return unit.equals(ASTCreator.getCu(fCtorOwningClass));
 	}
 
-	/*
-	 * Returns true iff we should actually change the original constructor's
+	/**
+	 * @return true iff we should actually change the original constructor's
 	 * visibility to <code>protected</code>. This takes into account the user-
 	 * requested mode and whether the constructor's compilation unit is in
 	 * source form.
@@ -837,9 +847,12 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return fProtectConstructor && fCtorOwningClass != null;
 	}
 
-	/*
+	/**
 	 * Creates and adds the necessary change to make the constructor method protected.
-	 * Returns false iff the constructor didn't exist (i.e. was implicit)
+	 * @param unitAST 
+	 * @param unitRewriter 
+	 * @param declGD 
+	 * @return false iff the constructor didn't exist (i.e. was implicit)
 	 */
 	private boolean protectConstructor(CompilationUnit unitAST, ASTRewrite unitRewriter, TextEditGroup declGD) {
 		MethodDeclaration constructor= (MethodDeclaration) unitAST.findDeclaringNode(fCtorBinding.getKey());
@@ -851,12 +864,14 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return true;
 	}
 
-	/*
+	/**
 	 * Add all changes necessary on the <code>ICompilationUnit</code> in the given
 	 * <code>SearchResultGroup</code> to implement the refactoring transformation
 	 * to the given <code>CompilationUnitChange</code>.
 	 * @param rg the <code>SearchResultGroup</code> for which changes should be created
+	 * @param unitHandle 
 	 * @param unitChange the CompilationUnitChange object for the compilation unit in question
+	 * @return <code>true</code> iff a change has been added
 	 * @throws CoreException
 	 */
 	private boolean addAllChangesFor(SearchResultGroup rg, ICompilationUnit	unitHandle, CompilationUnitChange unitChange) throws CoreException {
@@ -902,8 +917,9 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return someChange;
 	}
 
-	/*
-	 * Returns an AST for the given compilation unit handle.<br>
+	/**
+	 * @param unitHandle 
+	 * @return an AST for the given compilation unit handle.<br>
 	 * If this is the unit containing the selection or the unit in which the factory
 	 * is to reside, checks the appropriate field (<code>fCU</code> or <code>fFactoryCU</code>,
 	 * respectively) and initializes the field with a new AST only if not already done.
@@ -924,7 +940,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 			return ASTCreator.createAST(unitHandle, null);
 	}
 
-	/*
+	/**
 	 * Use the given <code>ASTRewrite</code> to replace direct calls to the constructor
 	 * with calls to the newly-created factory method.
 	 * @param rg the <code>SearchResultGroup</code> indicating all of the constructor references
@@ -956,7 +972,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return someCallPatched;
 	}
 
-	/*
+	/**
 	 * Look "in the vicinity" of the given range to find the <code>ClassInstanceCreation</code>
 	 * node that this search hit identified. Necessary because the <code>SearchEngine</code>
 	 * doesn't always cough up text extents that <code>NodeFinder.perform()</code> agrees with.
@@ -964,6 +980,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 	 * @param length
 	 * @param unitAST
 	 * @return may return null if this is really a constructor->constructor call (e.g. "this(...)")
+	 * @throws CoreException 
 	 */
 	private ClassInstanceCreation getCtorCallAt(int start, int length, CompilationUnit unitAST) throws CoreException {
 		ICompilationUnit unitHandle= ASTCreator.getCu(unitAST);
@@ -1026,7 +1043,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 					null));
 	}
 
-	/*
+	/**
 	 * Perform the AST rewriting necessary on the given <code>CompilationUnit</code>
 	 * to create the factory method. The method will reside on the type identified by
 	 * <code>fFactoryOwningClass</code>.
@@ -1148,13 +1165,13 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return stat;
 	}
 
-	/*
-	 * Returns a <code>RefactoringStatus</code> that identifies whether the
+	/**
+	 * @param methodName
+	 * @return a <code>RefactoringStatus</code> that identifies whether the
 	 * the name <code>newMethodName</code> is available to use as the name of
 	 * the new factory method within the factory-owner class (either a to-be-
 	 * created factory class or the constructor-owning class, depending on the
 	 * user options).
-	 * @param methodName
 	 */
 	private RefactoringStatus isUniqueMethodName(String methodName) {
 		boolean	conflict= hasMethod(fFactoryOwningClass, methodName);
@@ -1162,11 +1179,11 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return conflict ? RefactoringStatus.createErrorStatus(RefactoringCoreMessages.IntroduceFactory_duplicateMethodName + methodName) : new RefactoringStatus(); 
 	}
 
-	/*
-	 * Returns true iff the given <code>AbstractTypeDeclaration</code> has a method with
-	 * the given name.
+	/**
 	 * @param type
 	 * @param name
+	 * @return true iff the given <code>AbstractTypeDeclaration</code> has a method with
+	 * the given name
 	 */
 	private boolean hasMethod(AbstractTypeDeclaration type, String name) {
 		List	decls= type.bodyDeclarations();

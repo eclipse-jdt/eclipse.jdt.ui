@@ -461,9 +461,12 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 		fResources= (IResource[]) resources.toArray(new IResource[resources.size()]);
 	}
 
-	/*
-	 * Returns true if this initially selected package is really deletable
+	/**
+	 * @param pack 
+	 * @param packagesToDelete 
+	 * @return true if this initially selected package is really deletable
 	 * (if it has non-selected subpackages, it may only be cleared). 
+	 * @throws JavaModelException 
 	 */
 	private boolean canRemoveCompletely(IPackageFragment pack, List packagesToDelete) throws JavaModelException {
 		final IPackageFragment[] subPackages= JavaElementUtil.getPackageAndSubpackages(pack);
@@ -474,10 +477,15 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 		return true;
 	}
 
-	/*
+	/**
 	 * Adds deletable parent packages of the fragment "frag" to the list
 	 * "deletableParentPackages"; also adds the resources of those packages to the
 	 * set "resourcesToDelete".
+	 * @param frag 
+	 * @param initialPackagesToDelete 
+	 * @param resourcesToDelete 
+	 * @param deletableParentPackages 
+	 * @throws CoreException 
 	 */
 	private void addDeletableParentPackages(IPackageFragment frag, List initialPackagesToDelete, Set resourcesToDelete, List deletableParentPackages)
 			throws CoreException {
