@@ -48,9 +48,9 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatin
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-public final class JavaMoveProcessor extends MoveProcessor implements IScriptableRefactoring, ICommentProvider, IQualifiedNameUpdating, IReorgDestinationValidator {
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
-	public static final String IDENTIFIER= "org.eclipse.jdt.ui.MoveProcessor"; //$NON-NLS-1$
+public final class JavaMoveProcessor extends MoveProcessor implements IScriptableRefactoring, ICommentProvider, IQualifiedNameUpdating, IReorgDestinationValidator {
 
 	private String fComment;
 
@@ -208,7 +208,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 	}
 
 	public String getIdentifier() {
-		return IDENTIFIER;
+		return IRefactoringProcessorIds.MOVE_PROCESSOR;
 	}
 
 	public IJavaElement[] getJavaElements() {

@@ -49,9 +49,9 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactorin
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-public class RenameResourceProcessor extends RenameProcessor implements IScriptableRefactoring, ICommentProvider, INameUpdating {
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
-	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameResourceProcessor"; //$NON-NLS-1$
+public class RenameResourceProcessor extends RenameProcessor implements IScriptableRefactoring, ICommentProvider, INameUpdating {
 
 	private String fComment;
 
@@ -160,7 +160,7 @@ public class RenameResourceProcessor extends RenameProcessor implements IScripta
 	}
 
 	public String getIdentifier() {
-		return IDENTIFIER;
+		return IRefactoringProcessorIds.RENAME_RESOURCE_PROCESSOR;
 	}
 
 	public Object getNewElement() {

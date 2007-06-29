@@ -119,6 +119,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
@@ -148,8 +149,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	private boolean fUpdateQualifiedNames;
 	private String fFilePatterns;
 
-	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameTypeProcessor"; //$NON-NLS-1$
-	
 	// --- similar elements
 
 	private boolean fUpdateSimilarElements;
@@ -211,7 +210,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	}
 
 	public String getIdentifier() {
-		return IDENTIFIER;
+		return IRefactoringProcessorIds.RENAME_TYPE_PROCESSOR;
 	}
 	
 	public boolean isApplicable() throws CoreException {

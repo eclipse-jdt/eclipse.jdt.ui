@@ -91,6 +91,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
@@ -114,8 +115,6 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	private GroupCategorySet fCategorySet;
 	private boolean fDelegateUpdating;
 	private boolean fDelegateDeprecation;
-
-	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameFieldProcessor"; //$NON-NLS-1$
 
 	/**
 	 * Creates a new rename field processor.
@@ -156,7 +155,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	}
 
 	public String getIdentifier() {
-		return IDENTIFIER;
+		return IRefactoringProcessorIds.RENAME_FIELD_PROCESSOR;
 	}
 	
 	public boolean isApplicable() throws CoreException {

@@ -48,9 +48,9 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-public final class JavaCopyProcessor extends CopyProcessor implements IReorgDestinationValidator, IScriptableRefactoring, ICommentProvider {
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
-	public static final String IDENTIFIER= "org.eclipse.jdt.ui.CopyProcessor"; //$NON-NLS-1$
+public final class JavaCopyProcessor extends CopyProcessor implements IReorgDestinationValidator, IScriptableRefactoring, ICommentProvider {
 
 	private String fComment;
 
@@ -174,7 +174,7 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 	}
 
 	public String getIdentifier() {
-		return IDENTIFIER;
+		return IRefactoringProcessorIds.COPY_PROCESSOR;
 	}
 
 	public IJavaElement[] getJavaElements() {

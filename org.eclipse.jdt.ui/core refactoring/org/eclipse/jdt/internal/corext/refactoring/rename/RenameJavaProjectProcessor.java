@@ -50,14 +50,14 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
+
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 
 public final class RenameJavaProjectProcessor extends JavaRenameProcessor implements IReferenceUpdating {
 
 	private IJavaProject fProject;
 	private boolean fUpdateReferences;
-
-	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameJavaProjectProcessor"; //$NON-NLS-1$
 
 	/**
 	 * Creates a new rename java project processor.
@@ -71,7 +71,7 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 	}
 
 	public String getIdentifier() {
-		return IDENTIFIER;
+		return IRefactoringProcessorIds.RENAME_JAVA_PROJECT_PROCESSOR;
 	}
 	
 	public boolean isApplicable() throws CoreException {

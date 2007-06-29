@@ -57,6 +57,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 
@@ -66,8 +68,6 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 	private boolean fWillRenameType= false;
 	private ICompilationUnit fCu;
 
-	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameCompilationUnitProcessor"; //$NON-NLS-1$
-	
 	/**
 	 * Creates a new rename compilation unit processor.
 	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
@@ -82,7 +82,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 	}
 
 	public String getIdentifier() {
-		return IDENTIFIER;
+		return IRefactoringProcessorIds.RENAME_COMPILATION_UNIT_PROCESSOR;
 	}
 
 	public boolean isApplicable() {

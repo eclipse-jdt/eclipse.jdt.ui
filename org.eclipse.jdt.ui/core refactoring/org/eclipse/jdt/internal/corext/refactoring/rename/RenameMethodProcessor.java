@@ -90,6 +90,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
@@ -111,8 +112,6 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	private boolean fDelegateDeprecation;
 	protected boolean fInitialized= false;
 
-	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameMethodProcessor"; //$NON-NLS-1$
-	
 	/**
 	 * Creates a new rename method processor.
 	 * @param method the method, or <code>null</code> if invoked by scripting
@@ -161,7 +160,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 
 	public String getIdentifier() {
-		return IDENTIFIER;
+		return IRefactoringProcessorIds.RENAME_METHOD_PROCESSOR;
 	}
 
 	public boolean isApplicable() throws CoreException {

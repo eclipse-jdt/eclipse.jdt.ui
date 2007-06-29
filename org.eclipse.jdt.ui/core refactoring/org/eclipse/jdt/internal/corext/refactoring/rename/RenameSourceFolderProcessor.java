@@ -44,6 +44,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
+
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 
 public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
@@ -52,8 +54,6 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 	
 	private IPackageFragmentRoot fSourceFolder;
-
-	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameSourceFolderProcessor"; //$NON-NLS-1$
 
 	/**
 	 * Creates a new rename source folder processor.
@@ -66,7 +66,7 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 	}
 
 	public String getIdentifier() {
-		return IDENTIFIER;
+		return IRefactoringProcessorIds.RENAME_SOURCE_FOLDER_PROCESSOR;
 	}
 	
 	public boolean isApplicable() throws CoreException {

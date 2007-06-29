@@ -80,6 +80,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public final class JavaDeleteProcessor extends DeleteProcessor implements IScriptableRefactoring, ICommentProvider {
@@ -102,8 +104,6 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 	private Change fDeleteChange;
 	private boolean fDeleteSubPackages;
 	
-	public static final String IDENTIFIER= "org.eclipse.jdt.ui.DeleteProcessor"; //$NON-NLS-1$
-
 	public JavaDeleteProcessor(Object[] elements) {
 		fElements= elements;
 		if (fElements != null) {
@@ -116,7 +116,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 	}
 
 	public String getIdentifier() {
-		return IDENTIFIER;
+		return IRefactoringProcessorIds.DELETE_PROCESSOR;
 	}
 	
 	public boolean isApplicable() throws CoreException {

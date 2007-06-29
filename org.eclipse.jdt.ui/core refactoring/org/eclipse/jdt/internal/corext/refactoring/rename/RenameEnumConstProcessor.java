@@ -39,12 +39,11 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public final class RenameEnumConstProcessor extends RenameFieldProcessor {
-
-	public static final String ID= "org.eclipse.jdt.ui.renameEnumConstProcessor"; //$NON-NLS-1$
 
 	/**
 	 * Creates a new rename enum const processor.
@@ -127,7 +126,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getIdentifier()
 	 */
 	public String getIdentifier() {
-		return ID;
+		return IRefactoringProcessorIds.RENAME_ENUM_CONSTANT_PROCESSOR;
 	}
 
 	/*
