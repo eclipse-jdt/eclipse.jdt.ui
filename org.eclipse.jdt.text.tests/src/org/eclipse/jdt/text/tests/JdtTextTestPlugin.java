@@ -13,8 +13,6 @@ package org.eclipse.jdt.text.tests;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.eclipse.core.runtime.IPluginDescriptor;
-
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -39,9 +37,8 @@ public class JdtTextTestPlugin extends AbstractUIPlugin {
 	 * 
 	 * @param descriptor the plug-in descriptor
 	 */
-	public JdtTextTestPlugin(IPluginDescriptor descriptor) {
-		super(descriptor);
-		plugin = this;
+	public JdtTextTestPlugin() {
+		plugin= this;
 		try {
 			resourceBundle= ResourceBundle.getBundle("org.eclipse.jdt.text.tests.JdtTextTestPluginResources"); //$NON-NLS-1$
 		} catch (MissingResourceException x) {
