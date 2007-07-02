@@ -45,6 +45,9 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -101,7 +104,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
@@ -578,8 +580,32 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
     }
 
     private void copyArguments(CompilationUnitRewrite rewrite, ClassInstanceCreation newClassCreation) {
-        for (Iterator iter= ((ClassInstanceCreation) fAnonymousInnerClassNode.getParent()).arguments().iterator(); iter.hasNext(); )
-            newClassCreation.arguments().add(rewrite.getASTRewrite().createCopyTarget((Expression)iter.next()));
+    	Iterator iter= ((ClassInstanceCreation) fAnonymousInnerClassNode.getParent()).arguments().iterator();
+    	if (!iter.hasNext())
+    		return;
+    	
+    	IMethodBinding superConstructorBinding= getSuperConstructorBinding();
+    	ITypeBinding[] parameterTypes= superConstructorBinding.getParameterTypes();
+    	
+    	List arguments= newClassCreation.arguments();
+		ASTRewrite astRewrite= rewrite.getASTRewrite();
+		int last= parameterTypes.length - 1;
+		
+		for (int i= 0; i < last; i++) {
+			arguments.add(astRewrite.createCopyTarget((Expression) iter.next()));
+		}
+    	if (superConstructorBinding.isVarargs()) {
+    		AST ast= astRewrite.getAST();
+    		ArrayCreation arrayCreation= ast.newArrayCreation();
+    		arrayCreation.setType((ArrayType) rewrite.getImportRewrite().addImport(parameterTypes[last], ast));
+    		ArrayInitializer initializer= ast.newArrayInitializer();
+    		arrayCreation.setInitializer(initializer);
+    		arguments.add(arrayCreation);
+    		arguments= initializer.expressions();
+    	}
+    	while (iter.hasNext()) {
+    		arguments.add(astRewrite.createCopyTarget((Expression) iter.next()));
+    	}
     }
 
     private void addNestedClass(CompilationUnitRewrite rewrite, ITypeBinding[] typeParameters) throws CoreException {
@@ -724,7 +750,7 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-    private void createFieldsForAccessedLocals(CompilationUnitRewrite rewrite, IVariableBinding[] varBindings, String[] fieldNames, List newBodyDeclarations) {
+    private void createFieldsForAccessedLocals(CompilationUnitRewrite rewrite, IVariableBinding[] varBindings, String[] fieldNames, List newBodyDeclarations) throws JavaModelException {
 		final ImportRewrite importRewrite= rewrite.getImportRewrite();
 		final ASTRewrite astRewrite= rewrite.getASTRewrite();
 		final AST ast= astRewrite.getAST();
@@ -746,7 +772,7 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 						field.setJavadoc(javadoc);
 					}
 				} catch (CoreException exception) {
-					JavaPlugin.log(exception);
+					throw new JavaModelException(exception);
 				}
 			}
 			
@@ -895,7 +921,7 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 					newConstructor.setJavadoc(javadoc);
 				}
 			} catch (CoreException exception) {
-				JavaPlugin.log(exception);
+				throw new JavaModelException(exception);
 			}
 		}
 		return newConstructor;
