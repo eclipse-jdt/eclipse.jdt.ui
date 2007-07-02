@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.InlineMethodDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceFactoryDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceIndirectionDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterDescriptor;
+import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.MoveDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.MoveMethodDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.MoveStaticMembersDescriptor;
@@ -268,7 +269,18 @@ public interface IJavaRefactorings {
 	 * </p>
 	 */
 	public static final String INTRODUCE_PARAMETER= "org.eclipse.jdt.ui.introduce.parameter"; //$NON-NLS-1$
-
+	
+	/**
+	 * Refactoring id of the 'Introduce Parameter Object' refactoring (value:
+	 * <code>org.eclipse.jdt.ui.introduce.parameter.object</code>).
+	 * <p>
+	 * Clients may safely cast the obtained refactoring descriptor to
+	 * {@link IntroduceParameterObjectDescriptor}.
+	 * </p>
+	 * @since 3.4
+	 */	
+	public static final String INTRODUCE_PARAMETER_OBJECT= "org.eclipse.jdt.ui.introduce.parameter.object"; //$NON-NLS-1$
+	
 	/**
 	 * Refactoring id of the 'Move' refactoring (value:
 	 * <code>org.eclipse.jdt.ui.move</code>).

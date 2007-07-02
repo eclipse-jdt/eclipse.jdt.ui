@@ -77,6 +77,9 @@ import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor;
+import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
+import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor.Parameter;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -84,6 +87,7 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
@@ -323,12 +327,52 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 
 	private ParameterInfo fParameterObjectReference;
 
-	public IntroduceParameterObjectRefactoring(IMethod method) throws JavaModelException {
-		super(method);
+	public IntroduceParameterObjectRefactoring(IntroduceParameterObjectDescriptor descriptor) throws JavaModelException {
+		super(descriptor.getMethod());
+		IMethod method= descriptor.getMethod();
 		Assert.isNotNull(method);
 		initializeFields(method);
 		setBodyUpdater(new RewriteParameterBody());
 		setDefaultValueAdvisor(new ParameterObjectCreator());
+		configureRefactoring(descriptor, this);
+	}
+
+	private void configureRefactoring(final IntroduceParameterObjectDescriptor parameter, IntroduceParameterObjectRefactoring ref) throws JavaModelException {
+		ref.setCreateAsTopLevel(parameter.isTopLevel());
+		ref.setCreateGetter(parameter.isGetters());
+		ref.setCreateSetter(parameter.isSetters());
+		ref.setDelegateUpdating(parameter.isDelegate());
+		ref.setDeprecateDelegates(parameter.isDeprecateDelegate());
+		if (parameter.getClassName() != null)
+			ref.setClassName(parameter.getClassName());
+		if (parameter.getPackageName() != null)
+			ref.setPackage(parameter.getPackageName());
+		if (parameter.getParameterName() != null)
+			ref.setParameterName(parameter.getParameterName());
+		List pis= ref.getParameterInfos();
+		Parameter[] parameters= parameter.getParameters();
+		if (parameters==null)
+			parameters=IntroduceParameterObjectDescriptor.createParameters(getMethod());
+		Map paramIndex=new HashMap();
+		for (Iterator iter= pis.iterator(); iter.hasNext();) {
+			ParameterInfo pi= (ParameterInfo) iter.next();
+			paramIndex.put(new Integer(pi.getOldIndex()), pi);
+		}
+		paramIndex.put(new Integer(ParameterInfo.INDEX_FOR_ADDED), fParameterObjectReference);
+		pis.clear();
+		for (int i= 0; i < parameters.length; i++) {
+			Parameter param= parameters[i];
+			ParameterInfo pi= (ParameterInfo) paramIndex.get(new Integer(param.getIndex()));
+			pis.add(pi);
+			if (param!=IntroduceParameterObjectDescriptor.PARAMETER_OBJECT) {
+				pi.setCreateField(param.isCreateField());
+				if (pi.isCreateField()) {
+					String fieldName= param.getFieldName();
+					if (fieldName!=null)
+						pi.setNewName(fieldName);
+				}
+			}
+		}
 	}
 
 	private void initializeFields(IMethod method) throws JavaModelException {
@@ -341,14 +385,6 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 
 		fParameterObjectReference= ParameterInfo.createInfoForAddedParameter(className, DEFAULT_PARAMETER_OBJECT_NAME);
 		fParameterObjectFactory.setClassName(className);
-
-		List parameterInfos= super.getParameterInfos();
-		for (Iterator iter= parameterInfos.iterator(); iter.hasNext();) {
-			ParameterInfo pi= (ParameterInfo) iter.next();
-			if (!pi.isAdded()) {
-				pi.setCreateField(true);
-			}
-		}
 
 		IType declaringType= method.getDeclaringType();
 		Assert.isNotNull(declaringType);
@@ -387,7 +423,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		IMethodBinding resolveBinding= fMethodDeclaration.resolveBinding();
 		if (resolveBinding == null) {
 			if (!processCompilerError(status, selectedNode))
-				status.addFatalError(RefactoringCoreMessages.SelfEncapsulateField_type_not_resolveable);
+				status.addFatalError(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_error_cannot_resolve_type);
 			return status;
 		}
 
@@ -427,7 +463,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 	}
 
 	protected boolean shouldReport(IProblem problem, CompilationUnit cu) {
-		if (!super.shouldReport(problem,cu))
+		if (!super.shouldReport(problem, cu))
 			return false;
 		ASTNode node= ASTNodeSearchUtil.getAstNode(cu, problem.getSourceStart(), problem.getSourceEnd() - problem.getSourceStart());
 		if (node instanceof Type) {
@@ -468,6 +504,79 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		return RefactoringCoreMessages.IntroduceParameterObjectRefactoring_refactoring_name;
 	}
 
+	public JavaRefactoringDescriptor createDescriptor() {
+		IntroduceParameterObjectDescriptor ipod= new IntroduceParameterObjectDescriptor();
+		ipod.setMethod(getMethod());
+		ipod.setClassName(getClassName());
+		ipod.setDelegate(getDelegateUpdating());
+		ipod.setDeprecateDelegate(getDeprecateDelegates());
+		ipod.setGetters(isCreateGetter());
+		ipod.setSetters(isCreateSetter());
+		ipod.setPackageName(getPackage());
+		ipod.setParameterName(getParameterName());
+		ipod.setTopLevel(isCreateAsTopLevel());
+
+		ArrayList parameters= new ArrayList();
+		List pis= getParameterInfos();
+		for (Iterator iter= pis.iterator(); iter.hasNext();) {
+			ParameterInfo pi= (ParameterInfo) iter.next();
+			if (pi.isAdded()) {
+				parameters.add(IntroduceParameterObjectDescriptor.PARAMETER_OBJECT);
+			} else {
+				IntroduceParameterObjectDescriptor.Parameter parameter= new IntroduceParameterObjectDescriptor.Parameter(pi.getOldName(), pi.getOldIndex());
+				if (pi.isCreateField()){
+					parameter.setCreateField(true);
+					parameter.setFieldName(pi.getNewName());
+				}
+				parameters.add(parameter);
+			}
+		}
+		ipod.setParameters((Parameter[]) parameters.toArray(new Parameter[parameters.size()]));
+		String project= getCompilationUnit().getJavaProject().getElementName();
+		try {
+			ipod.setComment(createComment(project).asString());
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+		ipod.setProject(project);
+		ipod.setDescription(getName());
+		ipod.setFlags(getDescriptorFlags());
+		return ipod;
+	}
+
+	private JDTRefactoringDescriptorComment createComment(String project) throws JavaModelException {
+		String header= Messages.format(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_descriptor_description, getOldMethodSignature());
+		JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
+		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_descriptor_object_class, fParameterObjectFactory.getClassName()));
+		if (fCreateAsTopLevel) {
+			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_descriptor_package, fParameterObjectFactory.getPackage()));
+		} else {
+			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_descriptor_enclosing_type, fParameterObjectFactory.getEnclosingType()));
+		}
+		List infos= getParameterInfos();
+		List kept= new ArrayList();
+		List fields= new ArrayList();
+		for (Iterator iter= infos.iterator(); iter.hasNext();) {
+			ParameterInfo pi= (ParameterInfo) iter.next();
+			if (pi.isCreateField()) {
+				fields.add(pi.getNewName());
+			} else {
+				if (!pi.isAdded()) {
+					kept.add(pi.getNewName());
+				}
+			}
+		}
+
+		comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_descriptor_fields, (String[]) fields.toArray(new String[0])));
+		if (!kept.isEmpty())
+			comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_descriptor_keep_parameter, (String[]) kept.toArray(new String[0])));
+		if (fParameterObjectFactory.isCreateGetter())
+			comment.addSetting(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_descriptor_create_getter);
+		if (fParameterObjectFactory.isCreateSetter())
+			comment.addSetting(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_descriptor_create_setter);
+		return comment;
+	}
+
 	protected String doGetRefactoringChangeName() {
 		return getName();
 	}
@@ -478,7 +587,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		RefactoringStatus refactoringStatus= new RefactoringStatus();
-		refactoringStatus.merge(super.initialize(arguments));
+		// this refactoring is initialized using the descriptor from constructor
 		return refactoringStatus;
 	}
 

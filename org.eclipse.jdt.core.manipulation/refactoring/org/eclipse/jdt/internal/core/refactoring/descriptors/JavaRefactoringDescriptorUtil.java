@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.refactoring.descriptors;
 
+import java.util.Map;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -24,6 +26,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 
 public class JavaRefactoringDescriptorUtil {
+
+	private static final String LOWER_CASE_FALSE= Boolean.FALSE.toString().toLowerCase();
+	private static final String LOWER_CASE_TRUE= LOWER_CASE_FALSE;
 
 	/**
 	 * Converts the specified element to an input handle.
@@ -58,7 +63,7 @@ public class JavaRefactoringDescriptorUtil {
 			return resource.getProjectRelativePath().toPortableString();
 		return resource.getFullPath().toPortableString();
 	}
-	
+
 	/**
 	 * Converts an input handle back to the corresponding java element.
 	 * 
@@ -122,4 +127,103 @@ public class JavaRefactoringDescriptorUtil {
 			return root.getProject(project).findMember(path);
 		return root.findMember(path);
 	}
+
+
+	public static String getString(Map map, String attribute, boolean allowNull) {
+		Object object= map.get(attribute);
+		if (object == null) {
+			if (allowNull)
+				return null;
+			throw new IllegalArgumentException("The map does not contain the attribute '" + attribute + "'");  //$NON-NLS-1$//$NON-NLS-2$
+		}
+		if (object instanceof String) {
+			String value= (String) object;
+			return value;
+		}
+		throw new IllegalArgumentException("The provided map does not contain a string for attribute '" + attribute + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public static String getString(Map map, String attribute) {
+		return getString(map, attribute, false);
+	}
+
+	public static String getString(Map map, String attribute, int index) {
+		return getString(map, getAttributeName(attribute, index));
+	}
+
+	public static int getInt(Map map, String attribute) {
+		String value= getString(map, attribute);
+		try {
+			return Integer.parseInt(value);
+		} catch (NumberFormatException e) {
+			throw new IllegalArgumentException("The attribute '" + attribute + "' does not contain a valid int '" + value + "'");   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+		}
+	}
+
+	public static int[] getIntArray(Map map, String attribute, int count) {
+		int[] result= new int[count];
+		for (int i= 0; i < count; i++) {
+			result[i]= getInt(map, getAttributeName(attribute, i));
+		}
+		return result;
+	}
+
+	public static String getAttributeName(String attribute, int index) {
+		return attribute + index;
+	}
+
+	public static IJavaElement getJavaElement(Map map, String attribute, String project) {
+		String handle= getString(map, attribute);
+		return handleToElement(null, project, handle, true);
+	}
+
+	public static boolean[] getBoolArray(Map map, String attribute, int count) {
+		boolean[] result= new boolean[count];
+		for (int i= 0; i < count; i++) {
+			result[i]= getBoolean(map, getAttributeName(attribute, i));
+		}
+		return result;
+	}
+
+	public static boolean getBoolean(Map map, String attribute) {
+		String value= getString(map, attribute).toLowerCase();
+		//Boolean.valueOf(value) does not complain about wrong values
+		if (LOWER_CASE_TRUE.equals(value))
+			return true;
+		if (LOWER_CASE_FALSE.equals(value))
+			return false;
+		throw new IllegalArgumentException("The attribute '" + attribute + "' does not contain a valid boolean '" + value + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
+	public static void setJavaElement(Map arguments, String attribute, String project, IJavaElement element) {
+		setString(arguments, attribute, elementToHandle(project, element));
+	}
+
+	public static void setInteger(Map arguments, String attribute, int value) {
+		setString(arguments, attribute, Integer.toString(value));
+	}
+
+	public static void setInteger(Map arguments, String attribute, int value, int index) {
+		setInteger(arguments, getAttributeName(attribute, index), value);
+	}
+
+	public static void setBoolean(Map arguments, String attribute, boolean value) {
+		setString(arguments, attribute, value ? LOWER_CASE_TRUE : LOWER_CASE_FALSE);
+	}
+
+	public static void setBoolean(Map arguments, String attribute, boolean value, int index) {
+		setBoolean(arguments, getAttributeName(attribute, index), value);
+	}
+
+	public static void setString(Map arguments, String attribute, String value, int index) {
+		setString(arguments, getAttributeName(attribute, index), value);
+	}
+
+	public static void setString(Map arguments, String attribute, String value) {
+		if (attribute == null || "".equals(attribute) || attribute.indexOf(' ') != -1) //$NON-NLS-1$
+			throw new IllegalArgumentException("Attribute '" + attribute + "' is not valid");  //$NON-NLS-1$//$NON-NLS-2$
+		if (value != null)
+			arguments.put(attribute, value);
+	}
+
 }

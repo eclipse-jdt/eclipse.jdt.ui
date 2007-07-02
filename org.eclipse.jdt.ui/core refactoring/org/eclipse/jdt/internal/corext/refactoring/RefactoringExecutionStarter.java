@@ -56,6 +56,7 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
@@ -476,7 +477,9 @@ public final class RefactoringExecutionStarter {
 			MessageDialog.openError(shell, RefactoringMessages.RefactoringExecutionStarter_IntroduceParameterObject_problem_title, RefactoringMessages.RefactoringExecutionStarter_IntroduceParameterObject_problem_description);
 			return;
 		}
-		IntroduceParameterObjectRefactoring refactoring= new IntroduceParameterObjectRefactoring(method);
+		IntroduceParameterObjectDescriptor ipod= new IntroduceParameterObjectDescriptor();
+		ipod.setMethod(method);
+		IntroduceParameterObjectRefactoring refactoring= new IntroduceParameterObjectRefactoring(ipod);
 		final RefactoringStatus status= refactoring.checkInitialConditions(new NullProgressMonitor());
 		if (status.hasFatalError()) {
 			final RefactoringStatusEntry entry= status.getEntryMatchingSeverity(RefactoringStatus.FATAL);
@@ -492,7 +495,9 @@ public final class RefactoringExecutionStarter {
 				}
 				message= message + RefactoringMessages.RefactoringErrorDialogUtil_okToPerformQuestion;
 				if (element != null && MessageDialog.openQuestion(shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, message)) {
-					refactoring=new IntroduceParameterObjectRefactoring(superMethod);
+					ipod= new IntroduceParameterObjectDescriptor();
+					ipod.setMethod(superMethod);
+					refactoring=new IntroduceParameterObjectRefactoring(ipod);
 				}
 				else refactoring=null;
 			}

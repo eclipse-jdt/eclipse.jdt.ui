@@ -974,6 +974,24 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String IntroduceParameterObjectRefactoring_cannotanalysemethod_compilererror;
 
+	public static String IntroduceParameterObjectRefactoring_descriptor_create_getter;
+
+	public static String IntroduceParameterObjectRefactoring_descriptor_create_setter;
+
+	public static String IntroduceParameterObjectRefactoring_descriptor_description;
+
+	public static String IntroduceParameterObjectRefactoring_descriptor_enclosing_type;
+
+	public static String IntroduceParameterObjectRefactoring_descriptor_fields;
+
+	public static String IntroduceParameterObjectRefactoring_descriptor_keep_parameter;
+
+	public static String IntroduceParameterObjectRefactoring_descriptor_object_class;
+
+	public static String IntroduceParameterObjectRefactoring_descriptor_package;
+
+	public static String IntroduceParameterObjectRefactoring_error_cannot_resolve_type;
+
 	public static String IntroduceParameterObjectRefactoring_parameter_object_creation_error;
 
 	public static String IntroduceParameterObjectRefactoring_refactoring_name;

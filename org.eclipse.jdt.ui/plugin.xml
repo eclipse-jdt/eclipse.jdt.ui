@@ -5018,6 +5018,9 @@
             class="org.eclipse.jdt.internal.corext.refactoring.scripting.IntroduceParameterRefactoringContribution"
             id="org.eclipse.jdt.ui.introduce.parameter"/>
       <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.IntroduceParameterObjectContribution"
+            id="org.eclipse.jdt.ui.introduce.parameter.object"/>
+      <contribution
             class="org.eclipse.jdt.internal.corext.refactoring.scripting.IntroduceFactoryRefactoringContribution"
             id="org.eclipse.jdt.ui.introduce.factory"/>
       <contribution
