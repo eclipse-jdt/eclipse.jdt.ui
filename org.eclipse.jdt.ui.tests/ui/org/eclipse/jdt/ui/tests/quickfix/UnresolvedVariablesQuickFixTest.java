@@ -2385,6 +2385,74 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });		
 	}
 	
+	public void testVarInArrayAccess() throws Exception {
+		// bug 194913
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(int i) {\n");
+		buf.append("        bar[0][i] = \"bar\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 4);
+
+		String[] expected= new String[4];
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    private String[][] bar;\n");
+		buf.append("\n");
+		buf.append("    void foo(int i) {\n");
+		buf.append("        bar[0][i] = \"bar\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    private static final String[][] bar = null;\n");
+		buf.append("\n");
+		buf.append("    void foo(int i) {\n");
+		buf.append("        bar[0][i] = \"bar\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(int i, String[][] bar) {\n");
+		buf.append("        bar[0][i] = \"bar\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(int i) {\n");
+		buf.append("        String[][] bar;\n");
+		buf.append("        bar[0][i] = \"bar\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[3]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
 	public void testVarWithMethodName1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
