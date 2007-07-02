@@ -1,38 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
-<plugin
-   id="org.eclipse.jdt.ui.tests.refactoring"
-   name="%Plugin.name"
-   version="3.1.0"
-   provider-name="%Plugin.providerName"
-   class="org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin">
+<plugin>
 
-   <runtime>
-      <library name="refactoringtests.jar">
-         <export name="*"/>
-      </library>
-   </runtime>
-   <requires>
-      <import plugin="org.junit"/>
-      <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.eclipse.core.filebuffers"/>
-      <import plugin="org.eclipse.core.filesystem"/>
-      <import plugin="org.eclipse.jface.text"/>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.ui.workbench.texteditor"/>
-      <import plugin="org.eclipse.ui.ide"/>
-      <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.eclipse.jdt.ui"/>
-      <import plugin="org.eclipse.jdt.ui.tests"/>
-	  <import plugin="org.eclipse.ltk.core.refactoring"/>      
-	  <import plugin="org.eclipse.ltk.ui.refactoring"/>    
-	  <import plugin="org.eclipse.test.performance"/>
-	  <import plugin="org.eclipse.jdt.core.manipulation"/>
-   <import plugin="org.eclipse.team.core"/>    
-   </requires>
-   
-    <extension point="org.eclipse.ltk.core.refactoring.renameParticipants">
+     <extension point="org.eclipse.ltk.core.refactoring.renameParticipants">
       <renameParticipant
             class="org.eclipse.jdt.ui.tests.refactoring.TestRenameParticipantShared"
             name="org.eclipse.jdt.ui.tests.refactoring.TestRenameParticipantShared"
