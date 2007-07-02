@@ -190,7 +190,11 @@ public class ASTResolving {
 			if (((ArrayAccess) parent).getIndex().equals(node)) {
 				return parent.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
 			} else {
-				return getPossibleReferenceBinding(parent);
+				ITypeBinding parentBinding= getPossibleReferenceBinding(parent);
+				if (parentBinding == null) {
+					parentBinding= parent.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+				}
+				return parentBinding.createArrayType(1);
 			}
 		case ASTNode.ARRAY_CREATION:
 			if (((ArrayCreation) parent).dimensions().contains(node)) {

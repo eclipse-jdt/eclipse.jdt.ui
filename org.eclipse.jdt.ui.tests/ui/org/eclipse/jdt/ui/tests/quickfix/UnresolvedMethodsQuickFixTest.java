@@ -1626,8 +1626,46 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		String expected2= buf.toString();		
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
-
 	}
+	
+	public void testMethodInArrayAccess() throws Exception {
+		// bug 148011
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        int i = bar()[0];\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        int i = bar()[0];\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private int[] bar() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	
 	
 	public void testParameterMismatchCast() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
