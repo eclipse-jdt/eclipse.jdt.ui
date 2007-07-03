@@ -197,7 +197,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 		if (binding == null)
 			return false;
 		for (int i= 0; i < fMembers.length; i++) {
-			if (Bindings.equals(fMembers[i], binding))
+			if (Bindings.equalDeclarations(fMembers[i], binding))
 				return true;
 		}
 		return false;

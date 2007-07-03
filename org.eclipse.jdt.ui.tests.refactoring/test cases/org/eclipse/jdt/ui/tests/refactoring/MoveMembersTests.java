@@ -549,6 +549,15 @@ public class MoveMembersTests extends RefactoringTest {
 		}	
 	}
 	
+	// parameterized type references
+	
+	
+	public void test62() throws Exception {
+		// Move a type which references a field in an enclosing type
+		// and a field in a sibling
+		typeHelper_passing(new String[] { "SomeInner" });
+	}
+	
 	//---
 	public void testFail0() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],

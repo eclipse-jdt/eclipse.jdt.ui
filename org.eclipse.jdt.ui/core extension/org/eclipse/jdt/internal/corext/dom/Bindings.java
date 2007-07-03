@@ -68,6 +68,21 @@ public class Bindings {
 		return b1.isEqualTo(b2);
 	}
 
+	
+	/**
+	 * Checks if the declarations of two bindings are equals. First an identity check is
+	 * made an then the key of the declaration bindings are compared. 
+	 * @param b1 first binding treated as <code>this</code>. So it must
+	 *  not be <code>null</code>
+	 * @param b2 the second binding.
+	 * @return boolean
+	 */
+	public static boolean equalDeclarations(IBinding b1, IBinding b2) {
+		if (b1.getKind() != b2.getKind())
+			return false;
+		return getDeclaration(b1).isEqualTo(getDeclaration(b2));
+	}
+	
 	/**
 	 * Checks if the two arrays of bindings have the same length and
 	 * their elements are equal. Uses
@@ -102,6 +117,8 @@ public class Bindings {
 	/**
 	 * Note: this method is for debugging and testing purposes only.
 	 * There are tests whose pre-computed test results rely on the returned String's format.
+	 * @param binding the binding
+	 * @return a string representation of given binding
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider
 	 */
 	public static String asString(IBinding binding) {
@@ -576,6 +593,10 @@ public class Bindings {
 
 	/**
 	 * Tests whether the two methods are erasure-equivalent.
+	 * @param method the first method 
+	 * @param methodName the name of the second method
+	 * @param parameters the parameters of the second parameters
+	 * @return return <code>true</code> if the two bindings are equal
 	 * @deprecated use {@link #isSubsignature(IMethodBinding, IMethodBinding)}
 	 */
 	//TODO: rename to isErasureEquivalentMethod and change to two IMethodBinding parameters
@@ -1117,6 +1138,9 @@ public class Bindings {
 
 
 	/**
+	 * @param candidates the candidates
+	 * @param overridable the overriding method
+	 * @return returns <code>true></code> if the overriding method overrides a candidate
 	 * @deprecated Need to review: Use {@link #isSubsignature(IMethodBinding, IMethodBinding)} if the two bindings
 	 * are in the same hierarchy (directly overrides each other), or {@link #findMethodInHierarchy(ITypeBinding, String, ITypeBinding[])}
 	 * else.
@@ -1141,6 +1165,9 @@ public class Bindings {
 	}
 	
 	/**
+	 * @param overridden the overridden method
+	 * @param overridable the overriding method
+	 * @return returns <code>true</code> if the overriding method overrrides the overridden
 	 * @deprecated Need to review: Use {@link #isSubsignature(IMethodBinding, IMethodBinding)} if the two bindings
 	 * are in the same hierarchy (directly overrides each other), or {@link #findMethodInHierarchy(ITypeBinding, String, ITypeBinding[])}
 	 * else.
