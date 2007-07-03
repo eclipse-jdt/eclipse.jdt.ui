@@ -14,7 +14,6 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -244,7 +243,9 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 		return JavaRefactoringDescriptorUtil.resourceToHandle(project, resource);
 	}
 
-	/** The argument map */
+	/**
+	 * The argument map (key type: {@link String}, value type: {@link String}).
+	 */
 	protected final Map fArguments;
 
 	/**
@@ -313,7 +314,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * called from outside the refactoring framework.
 	 * </p>
 	 * 
-	 * @return the argument map
+	 * @return the argument map (key type: {@link String}, value type: {@link String})
 	 */
 	protected Map getArguments() {
 		populateArgumentMap();
@@ -322,10 +323,12 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 
 	/**
 	 * Populates the refactoring descriptor argument map based on the specified
-	 * arguments.
+	 * arguments. Subclasses should extend and add their arguments to {@link #fArguments}. 
 	 */
 	protected void populateArgumentMap() {
-		Assert.isTrue(!validateDescriptor().hasFatalError(), "Validation returns a fatal error status."); //$NON-NLS-1$
+		RefactoringStatus status= validateDescriptor();
+		if (status.hasFatalError())
+			throw new RuntimeException("Validation returns a fatal error status", new CoreException(status.getEntryWithHighestSeverity().toStatus())); //$NON-NLS-1$
 	}
 
 	/**
