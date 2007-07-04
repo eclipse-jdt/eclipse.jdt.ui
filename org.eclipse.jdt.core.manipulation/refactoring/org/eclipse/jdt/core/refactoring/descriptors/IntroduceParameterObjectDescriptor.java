@@ -82,11 +82,11 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 
 		/**
 		 * The index of the parameter in the original method signature. The parameter object has the special index {@link IntroduceParameterObjectDescriptor#PARAMETER_OBJECT_IDX}. 
-		 * The position in the new method signature depends on the position in the array passed to {@link IntroduceParameterObjectDescriptor#setParameters(Parameter[])}
+		 * The position in the new method signature depends on the position in the array passed to {@link IntroduceParameterObjectDescriptor#setParameters(IntroduceParameterObjectDescriptor.Parameter[])}
 		 *  
 		 * @see IntroduceParameterObjectDescriptor#PARAMETER_OBJECT
 		 * @see IntroduceParameterObjectDescriptor#PARAMETER_OBJECT_IDX
-		 * @see IntroduceParameterObjectDescriptor#setParameters(Parameter[])
+		 * @see IntroduceParameterObjectDescriptor#setParameters(IntroduceParameterObjectDescriptor.Parameter[])
 		 */
 		public int getIndex() {
 			return fIndex;
@@ -132,7 +132,7 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 		 * Sets the name of the field that will be created in the parameter object if {@link #isCreateField()}
 		 *  is <code>true</code>. Changing the fieldName of the parameter object will throw a {@link IllegalArgumentException}
 		 * 
-		 * @param fieldName the new name of the field. A <code>null</code> indicates that the fieldname should be automatically derived
+		 * @param fieldName the new name of the field. A <code>null</code> indicates that the field name should be automatically derived
 		 * @see #isCreateField() 
 		 */
 		public void setFieldName(String fieldName) {
@@ -233,7 +233,7 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 	}
 
 	/**
-	 * Note: This constructor is experimental and for internal use only. Clients should not call this constructor.
+	 * Note: This constructor is is for internal use only. Clients should not call this constructor.
 	 *
 	 * @param project
 	 *            the non-empty name of the project associated with this
@@ -250,8 +250,6 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 	 * 			  all settings for this refactoring
 	 * @param flags
 	 *            the flags of the refactoring descriptor
-	 *            
-	 * @since 3.4
 	 */
 	public IntroduceParameterObjectDescriptor(final String project, final String description, final String comment, final Map arguments, final int flags) {
 		super(IJavaRefactorings.INTRODUCE_PARAMETER_OBJECT, project, description, comment, arguments, flags);
