@@ -233,7 +233,7 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 	}
 
 	/**
-	 * Note: This constructor is is for internal use only. Clients should not call this constructor.
+	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 *
 	 * @param project
 	 *            the non-empty name of the project associated with this
