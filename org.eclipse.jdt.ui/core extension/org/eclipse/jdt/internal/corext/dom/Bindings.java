@@ -57,8 +57,7 @@ public class Bindings {
 	}
 
 	/**
-	 * Checks if the two bindings are equals. First an identity check is
-	 * made an then the key of the bindings are compared. 
+	 * Checks if the two bindings are equals. Also works across binding environments.
 	 * @param b1 first binding treated as <code>this</code>. So it must
 	 *  not be <code>null</code>
 	 * @param b2 the second binding.
@@ -70,11 +69,10 @@ public class Bindings {
 
 	
 	/**
-	 * Checks if the declarations of two bindings are equals. First an identity check is
-	 * made an then the key of the declaration bindings are compared. 
-	 * @param b1 first binding treated as <code>this</code>. So it must
-	 *  not be <code>null</code>
-	 * @param b2 the second binding.
+	 * Checks if the declarations of two bindings are equals.
+	 * Also works across binding environments.
+	 * @param b1 first binding, must not be <code>null</code>
+	 * @param b2 second binding, must not be <code>null</code>
 	 * @return boolean
 	 */
 	public static boolean equalDeclarations(IBinding b1, IBinding b2) {
