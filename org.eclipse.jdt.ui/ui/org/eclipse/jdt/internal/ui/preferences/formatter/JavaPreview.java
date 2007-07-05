@@ -217,6 +217,5 @@ public abstract class JavaPreview {
 			fSourceViewer.removePainter(fWhitespaceCharacterPainter);
 			fWhitespaceCharacterPainter= null;
 		}
-		update();
 	}
 }

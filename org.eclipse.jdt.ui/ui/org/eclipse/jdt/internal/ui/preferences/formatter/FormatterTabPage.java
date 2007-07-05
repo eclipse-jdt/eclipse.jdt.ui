@@ -50,6 +50,7 @@ public abstract class FormatterTabPage extends ModifyDialogTabPage {
 			public void widgetSelected(SelectionEvent e) {
 				fPreview.showInvisibleCharacters(fShowInvisibleButton.getSelection());
 				fDialogSettings.put(SHOW_INVISIBLE_PREFERENCE_KEY, fShowInvisibleButton.getSelection());
+				doUpdatePreview();
 			}
 		});
 		fShowInvisibleButton.setSelection(isShowInvisible());
