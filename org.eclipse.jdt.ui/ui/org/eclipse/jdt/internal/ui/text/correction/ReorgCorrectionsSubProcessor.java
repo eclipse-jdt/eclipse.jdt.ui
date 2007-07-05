@@ -49,6 +49,7 @@ import org.eclipse.ui.progress.IProgressService;
 
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 
+import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -550,9 +551,39 @@ public class ReorgCorrectionsSubProcessor {
 		} else if (node instanceof Name) {
 			referencedElement= ((Name) node).resolveBinding();
 		}
-		IProject project= context.getCompilationUnit().getJavaProject().getProject();
-		String label= CorrectionMessages.ReorgCorrectionsSubProcessor_accessrules_description;
-		OpenBuildPathCorrectionProposal proposal= new OpenBuildPathCorrectionProposal(project, label, 5, referencedElement);
-		proposals.add(proposal);
+		if (referencedElement != null && canModifyAccessRules(referencedElement)) {
+			IProject project= context.getCompilationUnit().getJavaProject().getProject();
+			String label= CorrectionMessages.ReorgCorrectionsSubProcessor_accessrules_description;
+			OpenBuildPathCorrectionProposal proposal= new OpenBuildPathCorrectionProposal(project, label, 5, referencedElement);
+			proposals.add(proposal);
+		}
 	}
+	
+	private static boolean canModifyAccessRules(IBinding binding) {
+		IJavaElement element= binding.getJavaElement();
+		if (element == null)
+			return false;
+		
+		IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
+		if (root == null)
+			return false;
+		
+		try {
+			IClasspathEntry classpathEntry= root.getRawClasspathEntry();
+			if (classpathEntry == null)
+				return false;
+			if (classpathEntry.getEntryKind() == IClasspathEntry.CPE_LIBRARY)
+				return true;
+			if (classpathEntry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+				ClasspathContainerInitializer classpathContainerInitializer= JavaCore.getClasspathContainerInitializer(classpathEntry.getPath().segment(0));
+				IStatus status= classpathContainerInitializer.getAccessRulesStatus(classpathEntry.getPath(), root.getJavaProject());
+				return status.isOK();
+			}
+		} catch (JavaModelException e) {
+			return false;
+		}
+		return false;
+	}
+	
+	
 }
