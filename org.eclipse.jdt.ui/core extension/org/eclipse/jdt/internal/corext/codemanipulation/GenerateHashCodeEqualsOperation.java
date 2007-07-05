@@ -866,6 +866,12 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 		body.statements().add(otherDeclaration);
 
+		if (fType.getDeclaringClass() != null) {
+			
+			
+			
+		}
+		
 		for (int i= 0; i < fFields.length; i++) {
 			if (fFields[i].getType().isPrimitive())
 				body.statements().add(createSimpleComparison(fFields[i]));
@@ -938,6 +944,8 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	 * 		return false;
 	 * }
 	 * </pre>
+	 * @param name the field name
+	 * @return the comparison statement
 	 */
 	private Statement createQualifiedComparison(String name) {
 		InfixExpression newCondition= fAst.newInfixExpression();
@@ -1015,52 +1023,14 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 	private boolean needsNoSuperCall(ITypeBinding typeBinding, String name, ITypeBinding[] parameters) {
 		Assert.isNotNull(typeBinding);
-		IMethodBinding binding= findMethodInHierarchy(typeBinding, name, parameters);
+		IMethodBinding binding= Bindings.findMethodInHierarchy(typeBinding.getSuperclass(), name, parameters);
 		if (binding != null) {
-			final ITypeBinding declaring= binding.getDeclaringClass();
-			if (Bindings.equals(typeBinding, declaring))
-				return true;
+			ITypeBinding declaring= binding.getDeclaringClass();
 			return declaring.getQualifiedName().equals(JAVA_LANG_OBJECT);
 		}
 		return true;
 	}
 
-	// Adapted from Bindings
-	public static IMethodBinding findMethodInType(ITypeBinding type, String methodName, ITypeBinding[] parameters) {
-		if (type.isPrimitive())
-			return null;
-		IMethodBinding[] methods= type.getDeclaredMethods();
-		for (int i= 0; i < methods.length; i++) {
-			if (parameters == null) {
-				if (methodName.equals(methods[i].getName()) && !Modifier.isAbstract(methods[i].getModifiers()))
-					return methods[i];
-			} else {
-				if (Bindings.isEqualMethod(methods[i], methodName, parameters) && !Modifier.isAbstract(methods[i].getModifiers()))
-					return methods[i];
-			}
-		}
-		return null;
-	}
-
-	// Adapted from Bindings
-	public static IMethodBinding findMethodInHierarchy(ITypeBinding type, String methodName, ITypeBinding[] parameters) {
-		IMethodBinding method= findMethodInType(type, methodName, parameters);
-		if (method != null)
-			return method;
-		ITypeBinding superClass= type.getSuperclass();
-		if (superClass != null) {
-			method= findMethodInHierarchy(superClass, methodName, parameters);
-			if (method != null)
-				return method;			
-		}
-		ITypeBinding[] interfaces= type.getInterfaces();
-		for (int i= 0; i < interfaces.length; i++) {
-			method= findMethodInHierarchy(interfaces[i], methodName, parameters);
-			if (method != null)
-				return method;
-		}
-		return null;
-	}
 
 	private Expression getThisAccessForEquals(String name) {
 		return getThisAccess(name, false);
