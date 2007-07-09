@@ -154,7 +154,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"			return false;\r\n" + 
 				"		if (getClass() != obj.getClass())\r\n" + 
 				"			return false;\r\n" + 
-				"		final A other = (A) obj;\r\n" + 
+				"		A other = (A) obj;\r\n" + 
 				"		if (aBool != other.aBool)\r\n" + 
 				"			return false;\r\n" + 
 				"		if (aByte != other.aByte)\r\n" + 
@@ -232,7 +232,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"			return false;\r\n" + 
 				"		if (getClass() != obj.getClass())\r\n" + 
 				"			return false;\r\n" + 
-				"		final A other = (A) obj;\r\n" + 
+				"		A other = (A) obj;\r\n" + 
 				"		if (aBool != other.aBool)\r\n" + 
 				"			return false;\r\n" + 
 				"		return true;\r\n" + 
@@ -299,7 +299,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"			return false;\r\n" + 
 				"		if (getClass() != obj.getClass())\r\n" + 
 				"			return false;\r\n" + 
-				"		final A other = (A) obj;\r\n" + 
+				"		A other = (A) obj;\r\n" + 
 				"		if (anA == null) {\r\n" + 
 				"			if (other.anA != null)\r\n" + 
 				"				return false;\r\n" + 
@@ -374,7 +374,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"			return false;\r\n" + 
 				"		if (getClass() != obj.getClass())\r\n" + 
 				"			return false;\r\n" + 
-				"		final A other = (A) obj;\r\n" + 
+				"		A other = (A) obj;\r\n" + 
 				"		if (anA == null) {\r\n" + 
 				"			if (other.anA != null)\r\n" + 
 				"				return false;\r\n" + 
@@ -444,7 +444,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"			return false;\r\n" + 
 				"		if (getClass() != obj.getClass())\r\n" + 
 				"			return false;\r\n" + 
-				"		final A other = (A) obj;\r\n" + 
+				"		A other = (A) obj;\r\n" + 
 				"		if (!Arrays.equals(someAs, other.someAs))\r\n" + 
 				"			return false;\r\n" + 
 				"		if (!Arrays.equals(someInts, other.someInts))\r\n" + 
@@ -508,7 +508,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"			return false;\r\n" + 
 				"		if (getClass() != obj.getClass())\r\n" + 
 				"			return false;\r\n" + 
-				"		final A other = (A) obj;\r\n" + 
+				"		A other = (A) obj;\r\n" + 
 				"		if (someInt != other.someInt)\r\n" + 
 				"			return false;\r\n" + 
 				"		return true;\r\n" + 
@@ -577,7 +577,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"			return false;\r\n" + 
 				"		if (getClass() != obj.getClass())\r\n" + 
 				"			return false;\r\n" + 
-				"		final A other = (A) obj;\r\n" + 
+				"		A other = (A) obj;\r\n" + 
 				"		if (intList == null) {\r\n" + 
 				"			if (other.intList != null)\r\n" + 
 				"				return false;\r\n" + 
@@ -650,7 +650,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"			return false;\r\n" + 
 				"		if (getClass() != obj.getClass())\r\n" + 
 				"			return false;\r\n" + 
-				"		final A other = (A) obj;\r\n" + 
+				"		A other = (A) obj;\r\n" + 
 				"		if (Double.doubleToLongBits(d1) != Double.doubleToLongBits(other.d1))\r\n" + 
 				"			return false;\r\n" + 
 				"		if (Double.doubleToLongBits(d2) != Double.doubleToLongBits(other.d2))\r\n" + 
@@ -716,7 +716,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"			return false;\r\n" + 
 				"		if (getClass() != obj.getClass())\r\n" + 
 				"			return false;\r\n" + 
-				"		final A other = (A) obj;\r\n" + 
+				"		A other = (A) obj;\r\n" + 
 				"		if (Double.doubleToLongBits(temp) != Double.doubleToLongBits(other.temp))\r\n" + 
 				"			return false;\r\n" + 
 				"		if (result != other.result)\r\n" + 
@@ -798,7 +798,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"			return false;\r\n" + 
 				"		if (!(obj instanceof A))\r\n" + 
 				"			return false;\r\n" + 
-				"		final A other = (A) obj;\r\n" + 
+				"		A other = (A) obj;\r\n" + 
 				"		if (aBool != other.aBool)\r\n" + 
 				"			return false;\r\n" + 
 				"		if (aByte != other.aByte)\r\n" + 
@@ -876,7 +876,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"			return false;\r\n" + 
 				"		if (!(obj instanceof A))\r\n" + 
 				"			return false;\r\n" + 
-				"		final A other = (A) obj;\r\n" + 
+				"		A other = (A) obj;\r\n" + 
 				"		if (aBool != other.aBool)\r\n" + 
 				"			return false;\r\n" + 
 				"		return true;\r\n" + 
@@ -943,7 +943,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"			return false;\r\n" + 
 				"		if (!(obj instanceof A))\r\n" + 
 				"			return false;\r\n" + 
-				"		final A other = (A) obj;\r\n" + 
+				"		A other = (A) obj;\r\n" + 
 				"		if (anA == null) {\r\n" + 
 				"			if (other.anA != null)\r\n" + 
 				"				return false;\r\n" + 
@@ -1019,7 +1019,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"			return false;\r\n" + 
 				"		if (!(obj instanceof A))\r\n" + 
 				"			return false;\r\n" + 
-				"		final A other = (A) obj;\r\n" + 
+				"		A other = (A) obj;\r\n" + 
 				"		if (anA == null) {\r\n" + 
 				"			if (other.anA != null)\r\n" + 
 				"				return false;\r\n" + 
@@ -1041,4 +1041,72 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 		runOperation(a.getType("A"), fields, true, true);
 		compareSource(expected, a.getSource());		
 	}
+	
+	/**
+	 * Test member types
+	 * 
+	 * @throws Exception
+	 */
+	public void test14() throws Exception {
+		
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + 
+				"\r\n" + 
+				"public class A {\r\n" + 
+				"	public class Inner {\r\n" + 
+				"		int x;\r\n" +
+				"	}\r\n" + 
+				"}\r\n" + 
+				"", true, null);
+				
+		IType type= a.getType("A").getType("Inner");
+		IField[] fields= getFields(type, new String[] {"x" });
+		runOperation(type, fields, true, false);
+		
+		String expected= "package p;\r\n" + 
+				"\r\n" + 
+				"public class A {\r\n" + 
+				"	public class Inner {\r\n" + 
+				"		int x;\r\n" +
+				"\r\n" + 
+				"		/* (non-Javadoc)\r\n" + 
+				"		 * @see java.lang.Object#hashCode()\r\n" + 
+				"		 */\r\n" + 
+				"		@Override\r\n" + 
+				"		public int hashCode() {\r\n" + 
+				"			final int prime = 31;\r\n" + 
+				"			int result = 1;\r\n" + 
+				"			result = prime * result + getOuterType().hashCode();\r\n" + 
+				"			result = prime * result + x;\r\n" + 
+				"			return result;\r\n" + 
+				"		}\r\n" + 
+				"\r\n" + 
+				"		/* (non-Javadoc)\r\n" + 
+				"		 * @see java.lang.Object#equals(java.lang.Object)\r\n" + 
+				"		 */\r\n" + 
+				"		@Override\r\n" + 
+				"		public boolean equals(Object obj) {\r\n" + 
+				"			if (this == obj)\r\n" + 
+				"				return true;\r\n" + 
+				"			if (obj == null)\r\n" + 
+				"				return false;\r\n" + 
+				"			if (!(obj instanceof Inner))\r\n" + 
+				"				return false;\r\n" + 
+				"			Inner other = (Inner) obj;\r\n" + 
+				"			if (!getOuterType().equals(other.getOuterType()))\r\n" + 
+				"				return false;\r\n" + 
+				"			if (x != other.x)\r\n" + 
+				"				return false;\r\n" + 
+				"			return true;\r\n" + 
+				"		}\r\n" +
+				"\r\n" +
+				"		private A getOuterType() {\r\n" + 
+				"			return A.this;\r\n" + 
+				"		}\r\n" +
+				"	}\r\n" + 
+				"}\r\n" + 
+				"";
+		
+		compareSource(expected, a.getSource());
+	}
+
 }

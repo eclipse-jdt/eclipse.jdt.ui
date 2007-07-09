@@ -21,22 +21,12 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-
-import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-
-import org.eclipse.ltk.core.refactoring.Change;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -75,6 +65,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -86,14 +77,10 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * <p>
@@ -155,6 +142,8 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	private static final String METHODNAME_EQUALS= "equals"; //$NON-NLS-1$
 
 	private static final String METHODNAME_HASH_CODE= "hashCode"; //$NON-NLS-1$
+	
+	private static final String METHODNAME_OUTER_TYPE= "getOuterType"; //$NON-NLS-1$
 
 	private static final String PRIME_NUMBER= "31"; //$NON-NLS-1$
 
@@ -285,130 +274,82 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			// get the declaration and the rewrite
 			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.findDeclaration(fType, fRewrite.getRoot());
 			ListRewrite rewriter= fRewrite.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
-
+			final List list= (List) declaration.getStructuralProperty(declaration.getBodyDeclarationsProperty());
 			if (fType != null && rewriter != null) {
 
 				ICompilationUnit cu= (ICompilationUnit) fUnit.getJavaElement();
 
-				ITextFileBuffer buffer= null;
-				IDocument document= null;
-				try {
-					if (!JavaModelUtil.isPrimary(cu))
-						document= new Document(cu.getBuffer().getContents());
-					else {
-						buffer= RefactoringFileBuffers.acquire(cu);
-						document= buffer.getDocument();
-					}
-					ASTNode insertion= null;
-					if (fInsert instanceof IMethod)
-						insertion= ASTNodes.getParent(NodeFinder.perform(fRewrite.getRoot(), ((IMethod) fInsert).getNameRange()),
-								MethodDeclaration.class);
+				ASTNode insertion= null;
+				if (fInsert instanceof IMethod)
+					insertion= ASTNodes.getParent(NodeFinder.perform(fRewrite.getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
 
-					BodyDeclaration toReplace= null;
-					if (fForce) {
-						final List list= (List) declaration.getStructuralProperty(declaration.getBodyDeclarationsProperty());
-						for (final Iterator iterator= list.iterator(); iterator.hasNext();) {
-							final BodyDeclaration bodyDecl= (BodyDeclaration) iterator.next();
-							if (bodyDecl instanceof MethodDeclaration) {
-								final MethodDeclaration method= (MethodDeclaration) bodyDecl;
-								final IMethodBinding binding= method.resolveBinding();
-								if (binding != null && binding.getName().equals(METHODNAME_EQUALS)) {
-									final ITypeBinding[] bindings= binding.getParameterTypes();
-									if (bindings.length == 1 && bindings[0].getQualifiedName().equals(JAVA_LANG_OBJECT)) {
-										toReplace= bodyDecl;
-										break;
-									}
-								}
-							}
-						}
-					}
-					// equals(..)
-					MethodDeclaration equalsMethod= createEqualsMethod();
-					addMethod(rewriter, insertion, equalsMethod, toReplace);
+				// equals(..)
+				ITypeBinding[] objectAsParam= { declaration.getAST().resolveWellKnownType("java.lang.Object") }; //$NON-NLS-1$
+				BodyDeclaration oldEquals= fForce ? findMethodToReplace(list, METHODNAME_EQUALS, objectAsParam) : null;
 
-					if (monitor.isCanceled())
-						throw new OperationCanceledException();
+				MethodDeclaration equalsMethod= createEqualsMethod();
+				addMethod(rewriter, insertion, equalsMethod, oldEquals);
 
-					toReplace= null;
-					if (fForce) {
-						final List list= (List) declaration.getStructuralProperty(declaration.getBodyDeclarationsProperty());
-						for (final Iterator iterator= list.iterator(); iterator.hasNext();) {
-							final BodyDeclaration bodyDecl= (BodyDeclaration) iterator.next();
-							if (bodyDecl instanceof MethodDeclaration) {
-								final MethodDeclaration method= (MethodDeclaration) bodyDecl;
-								final IMethodBinding binding= method.resolveBinding();
-								if (binding != null && binding.getName().equals(METHODNAME_HASH_CODE)) {
-									final ITypeBinding[] bindings= binding.getParameterTypes();
-									if (bindings.length == 0) {
-										toReplace= bodyDecl;
-										break;
-									}
-								}
-							}
-						}
-					}
-					// hashCode()
-					MethodDeclaration hashCodeMethod= createHashCodeMethod();
-					addMethod(rewriter, equalsMethod, hashCodeMethod, toReplace);
+				if (monitor.isCanceled())
+					throw new OperationCanceledException();
 
-					// helpers
-					MethodDeclaration previous= null;
-					for (final Iterator iterator= fCustomHashCodeTypes.iterator(); iterator.hasNext();) {
-						boolean found= false;
-						final ITypeBinding binding= (ITypeBinding) iterator.next();
-						final ITypeBinding typeBinding= declaration.resolveBinding();
-						if (typeBinding != null) {
-							final IMethodBinding[] bindings= typeBinding.getDeclaredMethods();
-							for (int index= 0; index < bindings.length; index++) {
-								final IMethodBinding method= bindings[index];
-								final ITypeBinding[] parameters= method.getParameterTypes();
-								if (method.getName().equals(METHODNAME_HASH_CODE) && parameters.length == 1) {
-									final ITypeBinding parameter= parameters[0];
-									if (!parameter.isPrimitive()) {
-										found= parameter.getQualifiedName().equals(JAVA_LANG_OBJECT);
-									} else
-										found= parameter.isEqualTo(binding);
-									if (found)
-										break;
-								}
-							}
-						}
-						if (!found) {
-							final MethodDeclaration helperDecl= createHashCodeHelper(binding);
-							addHelper(rewriter, previous, helperDecl);
-						}
-					}
+				// hashCode()
+				BodyDeclaration oldHash= fForce ? findMethodToReplace(list, METHODNAME_HASH_CODE, new ITypeBinding[0]) : null;
 
-					// add 'em
-					final Change result= fRewrite.createChange();
-					if (result instanceof CompilationUnitChange) {
-						final CompilationUnitChange change= (CompilationUnitChange) result;
-						final TextEdit edit= change.getEdit();
-						if (edit != null) {
-							try {
-								fEdit= edit;
-								if (fApply)
-									edit.apply(document, TextEdit.UPDATE_REGIONS);
-								if (fSave) {
-									if (buffer != null)
-										buffer.commit(new SubProgressMonitor(monitor, 1), true);
-									else
-										cu.getBuffer().setContents(document.get());
-								}
-							} catch (Exception exception) {
-								throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, exception.getLocalizedMessage(),
-										exception));
-							}
-						}
+				MethodDeclaration hashCodeMethod= createHashCodeMethod();
+				addMethod(rewriter, equalsMethod, hashCodeMethod, oldHash);
+
+				// helpers
+				for (final Iterator iterator= fCustomHashCodeTypes.iterator(); iterator.hasNext();) {
+					final ITypeBinding binding= (ITypeBinding) iterator.next();
+					
+					if (findMethodToReplace(list, METHODNAME_HASH_CODE, objectAsParam) == null) {
+						final MethodDeclaration helperDecl= createHashCodeHelper(binding);
+						addHelper(rewriter, null, helperDecl);
 					}
-				} finally {
-					if (buffer != null)
-						RefactoringFileBuffers.release(cu);
 				}
+				
+				if (isMemberType()) {
+					if (findMethodToReplace(list, METHODNAME_OUTER_TYPE, new ITypeBinding[0]) == null) {
+						final MethodDeclaration helperDecl= createGetOuterHelper();
+						rewriter.insertLast(helperDecl, null);
+					}				
+				}
+
+				fEdit= fRewrite.createChange().getEdit();
+				if (fApply)
+					JavaModelUtil.applyEdit(cu, fEdit, fSave, monitor);
 			}
 		} finally {
 			monitor.done();
 		}
+	}
+	
+	private boolean isMemberType() {
+		return fType.isMember() && !Modifier.isStatic(fType.getModifiers());
+	}
+	
+
+	private BodyDeclaration findMethodToReplace(final List list, String name, ITypeBinding[] paramTypes) {
+		for (final Iterator iterator= list.iterator(); iterator.hasNext();) {
+			final BodyDeclaration bodyDecl= (BodyDeclaration) iterator.next();
+			if (bodyDecl instanceof MethodDeclaration) {
+				final MethodDeclaration method= (MethodDeclaration) bodyDecl;
+				final IMethodBinding binding= method.resolveBinding();
+				if (binding != null && binding.getName().equals(name)) {
+					final ITypeBinding[] bindings= binding.getParameterTypes();
+					if (bindings.length == paramTypes.length) {
+						for (int i= 0; i < bindings.length; i++) {
+							if (!bindings[i].isEqualTo(paramTypes[i])) {
+								return null;
+							}
+						}
+						return method;
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	private void addHelper(ListRewrite rewriter, ASTNode insertion, MethodDeclaration stub) {
@@ -468,6 +409,10 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			fragment.setInitializer(invoc);
 		}
 
+		if (isMemberType()) {
+			body.statements().add(createAddOuterHashCode());
+		}
+		
 		for (int i= 0; i < fFields.length; i++) {
 			if (fFields[i].getType().isPrimitive()) {
 				Statement[] sts= createAddSimpleHashCode(fFields[i].getType(), new IHashCodeAccessProvider() {
@@ -506,6 +451,14 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		return hashCodeMethod;
 	}
 
+	private Statement createAddOuterHashCode() {
+		MethodInvocation outer= fAst.newMethodInvocation();
+		outer.setName(fAst.newSimpleName(METHODNAME_OUTER_TYPE));
+		MethodInvocation hashAccess= fAst.newMethodInvocation();
+		hashAccess.setName(fAst.newSimpleName(METHODNAME_HASH_CODE));
+		hashAccess.setExpression(outer);
+		return prepareAssignment(hashAccess);
+	}
 
 	private Statement[] createAddSimpleHashCode(ITypeBinding type, IHashCodeAccessProvider provider, String name, boolean singleTemp) {
 
@@ -597,6 +550,29 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		}
 		return prepareAssignment(invoc);
 	}
+	
+	private MethodDeclaration createGetOuterHelper() {
+		String outerTypeName= fType.getDeclaringClass().getTypeDeclaration().getName();
+		
+		MethodDeclaration helperMethod= fAst.newMethodDeclaration();
+		helperMethod.modifiers().addAll(ASTNodeFactory.newModifiers(fAst, Modifier.PRIVATE));
+		helperMethod.setName(fAst.newSimpleName(METHODNAME_OUTER_TYPE));
+		helperMethod.setConstructor(false);
+		helperMethod.setReturnType2(fAst.newSimpleType(fAst.newSimpleName(outerTypeName)));
+		
+		Block body= fAst.newBlock();
+		helperMethod.setBody(body);
+		
+		ThisExpression thisExpression= fAst.newThisExpression();
+		thisExpression.setQualifier(fAst.newSimpleName(outerTypeName));
+		
+		ReturnStatement endReturn= fAst.newReturnStatement();
+		endReturn.setExpression(thisExpression);
+		body.statements().add(endReturn);
+		
+		return helperMethod;
+	}
+	
 
 	private MethodDeclaration createHashCodeHelper(ITypeBinding binding) {
 		Assert.isTrue(!binding.isArray());
@@ -626,7 +602,6 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		frag.setInitializer(fAst.newNumberLiteral(PRIME_NUMBER));
 
 		VariableDeclarationStatement primeNumberDeclaration= fAst.newVariableDeclarationStatement(frag);
-		primeNumberDeclaration.modifiers().add(fAst.newModifier(ModifierKeyword.FINAL_KEYWORD));
 		primeNumberDeclaration.setType(fAst.newPrimitiveType(PrimitiveType.INT));
 		body.statements().add(primeNumberDeclaration);
 
@@ -862,14 +837,11 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 		VariableDeclarationStatement otherDeclaration= fAst.newVariableDeclarationStatement(sd);
 		otherDeclaration.setType(fAst.newSimpleType(fAst.newSimpleName(fType.getName())));
-		otherDeclaration.modifiers().add(fAst.newModifier(ModifierKeyword.FINAL_KEYWORD));
 
 		body.statements().add(otherDeclaration);
 
-		if (fType.getDeclaringClass() != null) {
-			
-			
-			
+		if (isMemberType()) { // test outer type
+			body.statements().add(createOuterComparison());
 		}
 		
 		for (int i= 0; i < fFields.length; i++) {
@@ -901,6 +873,29 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		}
 
 		return equalsMethodDeclaration;
+	}
+
+	private Statement createOuterComparison() {
+		MethodInvocation outer1= fAst.newMethodInvocation();
+		outer1.setName(fAst.newSimpleName(METHODNAME_OUTER_TYPE));
+		
+		MethodInvocation outer2= fAst.newMethodInvocation();
+		outer2.setName(fAst.newSimpleName(METHODNAME_OUTER_TYPE));
+		outer2.setExpression(fAst.newSimpleName(VARIABLE_NAME_EQUALS_CASTED));
+		
+		MethodInvocation outerEql= fAst.newMethodInvocation();
+		outerEql.setName(fAst.newSimpleName(METHODNAME_EQUALS));
+		outerEql.setExpression(outer1);
+		outerEql.arguments().add(outer2);
+		
+		PrefixExpression not= fAst.newPrefixExpression();
+		not.setOperand(outerEql);
+		not.setOperator(PrefixExpression.Operator.NOT);
+		
+		IfStatement notEqNull= fAst.newIfStatement();
+		notEqNull.setExpression(not);
+		notEqNull.setThenStatement(getReturnFalse());
+		return notEqNull;
 	}
 
 	private Statement createSimpleComparison(IVariableBinding binding) {
