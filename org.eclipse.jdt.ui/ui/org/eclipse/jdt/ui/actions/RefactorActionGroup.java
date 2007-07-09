@@ -310,7 +310,7 @@ public class RefactorActionGroup extends ActionGroup {
 			editor.setAction("SelfEncapsulateField", fSelfEncapsulateField); //$NON-NLS-1$
 			
 			fIntroduceParameterObjectAction= new IntroduceParameterObjectAction(editor);
-			initAction(fIntroduceParameterObjectAction, selection, IntroduceParameterObjectAction.ACTION_DEFINITION_ID);//TODO Place in IJavaEditorActionDefinitionIds
+			initAction(fIntroduceParameterObjectAction, selection, IJavaEditorActionDefinitionIds.INTRODUCE_PARAMETER_OBJECT);
 			editor.setAction("IntroduceParameterObjectAction", fIntroduceParameterObjectAction); //$NON-NLS-1$
 		}		
 		fIntroduceIndirectionAction= new IntroduceIndirectionAction(editor);
@@ -360,7 +360,7 @@ public class RefactorActionGroup extends ActionGroup {
 			initUpdatingAction(fSelfEncapsulateField, provider, selection, IJavaEditorActionDefinitionIds.SELF_ENCAPSULATE_FIELD);
 	
 			fIntroduceParameterObjectAction= new IntroduceParameterObjectAction(fSite);
-			initUpdatingAction(fIntroduceParameterObjectAction, provider, selection, IntroduceParameterObjectAction.ACTION_DEFINITION_ID);
+			initUpdatingAction(fIntroduceParameterObjectAction, provider, selection, IJavaEditorActionDefinitionIds.INTRODUCE_PARAMETER_OBJECT);
 			
 			fExtractSupertypeAction= new ExtractSuperClassAction(fSite);
 			initUpdatingAction(fExtractSupertypeAction, provider, selection, ExtractSuperClassAction.EXTRACT_SUPERTYPE);
@@ -451,7 +451,7 @@ public class RefactorActionGroup extends ActionGroup {
 			actionBars.setGlobalActionHandler(JdtActionConstants.INFER_TYPE_ARGUMENTS, fInferTypeArgumentsAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_LOCAL_TO_FIELD, fConvertLocalToFieldAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_ANONYMOUS_TO_NESTED, fConvertAnonymousToNestedAction);
-			actionBars.setGlobalActionHandler(IntroduceParameterObjectAction.ACTION_ID, fIntroduceParameterObjectAction); //TODO promote action ID to API
+			actionBars.setGlobalActionHandler(JdtActionConstants.INTRODUCE_PARAMETER_OBJECT, fIntroduceParameterObjectAction);
 		}
 		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE, fInlineAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.USE_SUPERTYPE, fUseSupertypeAction);
@@ -592,13 +592,13 @@ public class RefactorActionGroup extends ActionGroup {
 		return 0;
 	}
 	
-	private void refactorMenuShown(final IMenuManager refactorSubmenu) {
+	private void refactorMenuShown(IMenuManager refactorSubmenu) {
 		// we know that we have an MenuManager since we created it in
 		// addRefactorSubmenu.
 		Menu menu= ((MenuManager)refactorSubmenu).getMenu();
 		menu.addMenuListener(new MenuAdapter() {
 			public void menuHidden(MenuEvent e) {
-				refactorMenuHidden(refactorSubmenu);
+				refactorMenuHidden();
 			}
 		});
 		ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
@@ -614,7 +614,7 @@ public class RefactorActionGroup extends ActionGroup {
 			refactorSubmenu.add(fNoActionAvailable);
 	}
 	
-	private void refactorMenuHidden(IMenuManager manager) {
+	private void refactorMenuHidden() {
 		ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
 		for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
 			SelectionDispatchAction action= (SelectionDispatchAction)iter.next();

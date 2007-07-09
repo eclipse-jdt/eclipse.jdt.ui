@@ -345,6 +345,14 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * @since 3.0
 	 */
 	public static final String INTRODUCE_FACTORY= "org.eclipse.jdt.ui.edit.text.java.introduce.factory"; //$NON-NLS-1$
+	
+	/**
+	 * Action definition ID of the refactor -> introduce parameter object action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.introduce.parameter.object"</code>).
+	 * 
+	 * @since 3.4
+	 */
+	public static final String INTRODUCE_PARAMETER_OBJECT= "org.eclipse.jdt.ui.edit.text.java.introduce.parameter.object"; //$NON-NLS-1$
 
 	/**
 	 * Action definition ID of the refactor -> inline local variable action

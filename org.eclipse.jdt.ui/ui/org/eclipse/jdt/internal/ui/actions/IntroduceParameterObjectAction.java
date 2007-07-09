@@ -35,9 +35,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class IntroduceParameterObjectAction extends SelectionDispatchAction {
-	public static final String ACTION_ID= "org.eclipse.jdt.ui.actions.IntroduceParameterObject"; //TODO Place in JdtActionConstants //$NON-NLS-1$
-
-	public static final String ACTION_DEFINITION_ID= "org.eclipse.jdt.ui.refactoring.introduceparamobject"; //TODO Place in IJavaEditorActionDefinitionIds //$NON-NLS-1$
 	
 	private JavaEditor fEditor;
 
@@ -61,7 +58,6 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 		setText(ActionMessages.IntroduceParameterObjectAction_action_text);
 		setToolTipText(ActionMessages.IntroduceParameterObjectAction_action_tooltip);
 		setDescription(ActionMessages.IntroduceParameterObjectAction_action_description);
-		//PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.INTRODUCE_INDIRECTION_ACTION);
 	}
 
 	//---- structured selection --------------------------------------------------
