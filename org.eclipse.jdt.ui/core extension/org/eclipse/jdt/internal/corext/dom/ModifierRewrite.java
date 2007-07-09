@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
@@ -104,6 +106,18 @@ public class ModifierRewrite {
 		ASTNode copy= modifierList.createCopyTarget((ASTNode) originalList.get(0), (ASTNode) originalList.get(originalList.size() - 1));
 		if (copy != null) {
 			fModifierRewrite.insertLast(copy, editGroup);
+		}
+	}
+	
+	public void copyAllAnnotations(ASTNode otherDecl, TextEditGroup editGroup) {
+		ListRewrite modifierList= evaluateListRewrite(fModifierRewrite.getASTRewrite(), otherDecl);
+		List originalList= modifierList.getOriginalList();
+		
+		for (Iterator iterator= originalList.iterator(); iterator.hasNext();) {
+			IExtendedModifier modifier= (IExtendedModifier) iterator.next();
+			if (modifier.isAnnotation()) {
+				fModifierRewrite.insertLast(fModifierRewrite.getASTRewrite().createCopyTarget((Annotation) modifier), editGroup);
+			}
 		}
 	}
 	

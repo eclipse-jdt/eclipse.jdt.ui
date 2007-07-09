@@ -5801,6 +5801,49 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
 	}
 	
+	public void testAddFinalBug191862() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E01 {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    @Deprecated\n");
+		buf.append("    private int x = 5, y= 10;\n");
+		buf.append("    \n");
+		buf.append("    private void foo() {\n");
+		buf.append("        @SuppressWarnings(\"unused\")\n");
+		buf.append("        @Deprecated\n");
+		buf.append("        int i= 10, j;\n");
+		buf.append("        j= 10;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E01 {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    @Deprecated\n");
+		buf.append("    private final int x = 5, y= 10;\n");
+		buf.append("    \n");
+		buf.append("    private void foo() {\n");
+		buf.append("        @SuppressWarnings(\"unused\")\n");
+		buf.append("        @Deprecated final\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        @SuppressWarnings(\"unused\")\n");
+		buf.append("        @Deprecated\n");
+		buf.append("        int j;\n");
+		buf.append("        j= 10;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
+	}
+	
 	public void testRemoveBlockReturnThrows01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
