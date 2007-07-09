@@ -25,6 +25,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import org.eclipse.core.variables.IStringVariableManager;
+import org.eclipse.core.variables.VariablesPlugin;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -358,7 +362,14 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 		}
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		final String filePath= store.getString(PreferenceConstants.SPELLING_USER_DICTIONARY);
+		String filePath= store.getString(PreferenceConstants.SPELLING_USER_DICTIONARY);
+		IStringVariableManager variableManager= VariablesPlugin.getDefault().getStringVariableManager();
+		try {
+			filePath= variableManager.performStringSubstitution(filePath);
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+			return;
+		}
 		if (filePath.length() > 0) {
 			try {
 				File file= new File(filePath);

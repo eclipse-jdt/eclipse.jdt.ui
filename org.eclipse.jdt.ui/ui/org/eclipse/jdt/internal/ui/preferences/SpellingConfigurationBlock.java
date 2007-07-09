@@ -17,6 +17,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.eclipse.core.variables.IStringVariableManager;
+import org.eclipse.core.variables.VariablesPlugin;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IProject;
@@ -41,11 +45,14 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.ui.ide.dialogs.EncodingFieldEditor;
+
+import org.eclipse.debug.ui.StringVariableSelectionDialog;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -173,20 +180,24 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 * 
 	 * @param path
 	 *                   The path of the file to validate
-	 * @return <code>true</code> iff the file exists and can be opened,
-	 *               <code>false</code> otherwise
+	 * @return a status without error if the path is valid
 	 */
-	protected static IStatus validateAbsoluteFilePath(final String path) {
+	protected static IStatus validateAbsoluteFilePath(String path) {
 
 		final StatusInfo status= new StatusInfo();
-		if (path.length() > 0) {
-
-			final File file= new File(path);
-			if (!file.exists() && (!file.isAbsolute() || !file.getParentFile().canWrite()))
-				status.setError(PreferencesMessages.SpellingPreferencePage_dictionary_error);
-			else if (file.exists() && (!file.isFile() || !file.isAbsolute() || !file.canRead() || !file.canWrite()))
-				status.setError(PreferencesMessages.SpellingPreferencePage_dictionary_error);
-
+		IStringVariableManager variableManager= VariablesPlugin.getDefault().getStringVariableManager();
+		try {
+			path= variableManager.performStringSubstitution(path);
+			if (path.length() > 0) {
+				
+				final File file= new File(path);
+				if (!file.exists() && (!file.isAbsolute() || !file.getParentFile().canWrite()))
+					status.setError(PreferencesMessages.SpellingPreferencePage_dictionary_error);
+				else if (file.exists() && (!file.isFile() || !file.isAbsolute() || !file.canRead() || !file.canWrite()))
+					status.setError(PreferencesMessages.SpellingPreferencePage_dictionary_error);
+			}
+		} catch (CoreException e) {
+			status.setError(e.getLocalizedMessage());
 		}
 		return status;
 	}
@@ -400,8 +411,11 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		allControls.add(fDictionaryPath);
 		allControls.add(fLabels.get(fDictionaryPath));
 
+		Composite buttons=new Composite(engine, SWT.NONE);
+		buttons.setLayout(new GridLayout(2,true));
+		buttons.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		
-		Button button= new Button(engine, SWT.PUSH);
+		Button button= new Button(buttons, SWT.PUSH);
 		button.setText(PreferencesMessages.SpellingPreferencePage_browse_label); 
 		button.addSelectionListener(new SelectionAdapter() {
 
@@ -409,8 +423,21 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 				handleBrowseButtonSelected();
 			}
 		});
-		button.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		SWTUtil.setButtonDimensionHint(button);
+		button.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+		allControls.add(button);
+		
+		button=new Button(buttons, SWT.PUSH);
+		button.setText(PreferencesMessages.SpellingPreferencePage_variables);
+		button.addSelectionListener(new SelectionAdapter() {
+		
+			public void widgetSelected(SelectionEvent e) {
+				handleVariablesButtonSelected();
+			}
+		
+		});
+		SWTUtil.setButtonDimensionHint(button);
+		button.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		allControls.add(button);
 		
 		// Description for user dictionary
@@ -565,6 +592,13 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		fEncodingEditor.loadDefault();
 	}
 
+
+	protected void handleVariablesButtonSelected() {
+		StringVariableSelectionDialog dialog= new StringVariableSelectionDialog(fDictionaryPath.getShell());
+		if (dialog.open() == Window.OK)
+			fDictionaryPath.setText(fDictionaryPath.getText() + dialog.getVariableExpression());
+	}
+	
 	/**
 	 * Handles selections of the browse button.
 	 */

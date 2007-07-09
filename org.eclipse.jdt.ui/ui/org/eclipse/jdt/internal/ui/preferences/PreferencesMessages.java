@@ -632,6 +632,7 @@ public final class PreferencesMessages extends NLS {
 	public static String SpellingPreferencePage_group_dictionaries;
 	public static String SpellingPreferencePage_group_advanced;
 	public static String SpellingPreferencePage_user_dictionary_description;
+	public static String SpellingPreferencePage_variables;
 	public static String BuildPathPreferencePage_title;
 	public static String BuildPathPreferencePage_description;
 	public static String UserLibraryPreferencePage_title;
