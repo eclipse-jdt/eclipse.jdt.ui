@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -20,7 +23,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -55,7 +60,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 		return allTests();
 	}
 
-	public void runOperation(IType type, IField[] fields, IJavaElement insertBefore, boolean createComments, boolean useInstanceof, boolean force) throws CoreException {
+	public void runOperation(IType type, IField[] fields, IJavaElement insertBefore, boolean createComments, boolean useInstanceof, boolean useBlocks, boolean force) throws CoreException {
 
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 		CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);
@@ -72,13 +77,13 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 		AbstractTypeDeclaration decl= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(type, unit);
 		ITypeBinding binding= decl.resolveBinding();
 		GenerateHashCodeEqualsOperation op= new GenerateHashCodeEqualsOperation(binding, fKeys, unit, insertBefore, fSettings, useInstanceof, force, true, true);
-
+		op.setUseBlocksForThen(useBlocks);
 		op.run(new NullProgressMonitor());
 		JavaModelUtil.reconcile(type.getCompilationUnit());
 	}
 
 	public void runOperation(IType type, IField[] fields, boolean useInstanceof, boolean force) throws CoreException {
-		runOperation(type, fields, null, true, useInstanceof, force);
+		runOperation(type, fields, null, true, useInstanceof, false, force);
 	}
 
 	private IField[] getFields(IType type, String[] fieldNames) {
@@ -478,7 +483,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"", true, null);
 		
 		IField[] fields= getFields(a.getType("A"), new String[] {"someInt" });
-		runOperation(a.getType("A"), fields, a.getType("A").getMethod("bar", new String[0]), true, false, false);
+		runOperation(a.getType("A"), fields, a.getType("A").getMethod("bar", new String[0]), true, false, false, false);
 		
 		String expected= "package p;\r\n" + 
 				"\r\n" + 
@@ -1047,7 +1052,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	 * 
 	 * @throws Exception
 	 */
-	public void test14() throws Exception {
+	public void testMemberType() throws Exception {
 		
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + 
 				"\r\n" + 
@@ -1108,5 +1113,190 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 		
 		compareSource(expected, a.getSource());
 	}
+	
+	/**
+	 * Test non-reference types in a direct subclass of Object
+	 * 
+	 * @throws Exception
+	 */
+	public void testThenWithBlocks() throws Exception {
+		
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + 
+				"\r\n" + 
+				"public class A {\r\n" + 
+				"	\r\n" + 
+				"	boolean aBool;\r\n" + 
+				"	Object obj;\r\n" + 
+				"\r\n" + 
+				"}", true, null);
+		
+		IField[] fields= getFields(a.getType("A"), new String[] {"aBool", "obj" });
+		runOperation(a.getType("A"), fields, null, true, false, true, false);
+		
+		String expected= "package p;\r\n" + 
+				"\r\n" + 
+				"public class A {\r\n" + 
+				"	\r\n" + 
+				"	boolean aBool;\r\n" + 
+				"	Object obj;\r\n" + 
+				"	/* (non-Javadoc)\r\n" + 
+				"	 * @see java.lang.Object#hashCode()\r\n" + 
+				"	 */\r\n" + 
+				"	@Override\r\n" + 
+				"	public int hashCode() {\r\n" + 
+				"		final int prime = 31;\r\n" + 
+				"		int result = 1;\r\n" + 
+				"		result = prime * result + (aBool ? 1231 : 1237);\r\n" + 
+				"		result = prime * result + ((obj == null) ? 0 : obj.hashCode());\r\n" + 
+				"		return result;\r\n" + 
+				"	}\r\n" + 
+				"	/* (non-Javadoc)\r\n" + 
+				"	 * @see java.lang.Object#equals(java.lang.Object)\r\n" + 
+				"	 */\r\n" + 
+				"	@Override\r\n" + 
+				"	public boolean equals(Object obj) {\r\n" + 
+				"		if (this == obj) {\r\n" + 
+				"			return true;\r\n" + 
+				"		}\r\n" + 
+				"		if (obj == null) {\r\n" + 
+				"			return false;\r\n" + 
+				"		}\r\n" + 
+				"		if (getClass() != obj.getClass()) {\r\n" + 
+				"			return false;\r\n" + 
+				"		}\r\n" + 
+				"		A other = (A) obj;\r\n" + 
+				"		if (aBool != other.aBool) {\r\n" + 
+				"			return false;\r\n" + 
+				"		}\r\n" + 
+				"		if (this.obj == null) {\r\n" + 
+				"			if (other.obj != null) {\r\n" + 
+				"				return false;\r\n" + 
+				"			}\r\n" + 
+				"		} else if (!this.obj.equals(other.obj)) {\r\n" + 
+				"			return false;\r\n" + 
+				"		}\r\n" + 
+				"		return true;\r\n" + 
+				"	}\r\n" + 
+				"\r\n" + 
+				"}\r\n" + 
+				"";
+	
+		compareSource(expected, a.getSource());
+	}
+
+	/**
+	 * Test reference types in an subclass
+	 * 
+	 * @throws Exception
+	 */
+	public void testSubTypeAndArraysIn14() throws Exception {
+		IJavaProject javaProject= fPackageP.getJavaProject();
+		Map oldOptions= javaProject.getOptions(false);
+		Map newOptions= new HashMap(oldOptions);
+		JavaModelUtil.setCompilanceOptions(newOptions, JavaCore.VERSION_1_4);
+		javaProject.setOptions(newOptions);
+		try {
+			fPackageP.createCompilationUnit("B.java", "package p;\r\n" + 
+					"\r\n" + 
+					"public class B {\r\n" + 
+					"	public int hashCode() {\r\n" + 
+					"		return 1;\r\n" + 
+					"	}\r\n" + 
+					"	public boolean equals(Object obj) {\r\n" + 
+					"		return obj instanceof B;\r\n" + 
+					"	}\r\n" + 
+					"\r\n" + 
+					"}\r\n" + 
+					"", true, null);
+			
+			ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + 
+					"\r\n" + 
+					"public class A extends B {\r\n" + 
+					"\r\n" + 
+					"	A[] anArray;\r\n" + 
+					"	double[] anDArray;\r\n" + 
+					"\r\n" + 
+					"}\r\n" + 
+					"", true, null);
+			
+			IField[] fields= getFields(a.getType("A"), new String[] {"anArray", "anDArray"});
+			runOperation(a.getType("A"), fields, false, false);
+			
+			String expected= "package p;\r\n" + 
+					"\r\n" + 
+					"import java.util.Arrays;\r\n" + 
+					"\r\n" + 
+					"public class A extends B {\r\n" + 
+					"\r\n" + 
+					"	/**\r\n" + 
+					"	 * Returns a hash code value for the array\r\n" + 
+					"	 * @param array the array to create a hash code value for\r\n" + 
+					"	 * @return a hash code value for the array\r\n" + 
+					"	 */\r\n" + 
+					"	private static int hashCode(double[] array) {\r\n" + 
+					"		int prime = 31;\r\n" + 
+					"		if (array == null)\r\n" + 
+					"			return 0;\r\n" + 
+					"		int result = 1;\r\n" + 
+					"		for (int index = 0; index < array.length; index++) {\r\n" + 
+					"			long temp = Double.doubleToLongBits(array[index]);\r\n" + 
+					"			result = prime * result + (int) (temp ^ (temp >>> 32));\r\n" + 
+					"		}\r\n" + 
+					"		return result;\r\n" + 
+					"	}\r\n" + 
+					"	/**\r\n" + 
+					"	 * Returns a hash code value for the array\r\n" + 
+					"	 * @param array the array to create a hash code value for\r\n" + 
+					"	 * @return a hash code value for the array\r\n" + 
+					"	 */\r\n" + 
+					"	private static int hashCode(Object[] array) {\r\n" + 
+					"		int prime = 31;\r\n" + 
+					"		if (array == null)\r\n" + 
+					"			return 0;\r\n" + 
+					"		int result = 1;\r\n" + 
+					"		for (int index = 0; index < array.length; index++) {\r\n" + 
+					"			result = prime * result + (array[index] == null ? 0 : array[index].hashCode());\r\n" + 
+					"		}\r\n" + 
+					"		return result;\r\n" + 
+					"	}\r\n" + 
+					"	A[] anArray;\r\n" + 
+					"	double[] anDArray;\r\n" + 
+					"	/* (non-Javadoc)\r\n" + 
+					"	 * @see java.lang.Object#hashCode()\r\n" + 
+					"	 */\r\n" + 
+					"	public int hashCode() {\r\n" + 
+					"		final int prime = 31;\r\n" + 
+					"		int result = super.hashCode();\r\n" + 
+					"		result = prime * result + A.hashCode(anArray);\r\n" + 
+					"		result = prime * result + A.hashCode(anDArray);\r\n" + 
+					"		return result;\r\n" + 
+					"	}\r\n" + 
+					"	/* (non-Javadoc)\r\n" + 
+					"	 * @see java.lang.Object#equals(java.lang.Object)\r\n" + 
+					"	 */\r\n" + 
+					"	public boolean equals(Object obj) {\r\n" + 
+					"		if (this == obj)\r\n" + 
+					"			return true;\r\n" + 
+					"		if (!super.equals(obj))\r\n" + 
+					"			return false;\r\n" + 
+					"		if (getClass() != obj.getClass())\r\n" + 
+					"			return false;\r\n" + 
+					"		A other = (A) obj;\r\n" + 
+					"		if (!Arrays.equals(anArray, other.anArray))\r\n" + 
+					"			return false;\r\n" + 
+					"		if (!Arrays.equals(anDArray, other.anDArray))\r\n" + 
+					"			return false;\r\n" + 
+					"		return true;\r\n" + 
+					"	}\r\n" + 
+					"\r\n" + 
+					"}\r\n" + 
+					"";
+			
+			compareSource(expected, a.getSource());
+		} finally {
+			javaProject.setOptions(oldOptions);
+		}
+	}
+
 
 }

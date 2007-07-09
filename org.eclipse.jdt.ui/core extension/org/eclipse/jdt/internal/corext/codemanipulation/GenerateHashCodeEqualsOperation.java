@@ -11,10 +11,8 @@
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.text.edits.TextEdit;
 
@@ -200,10 +198,13 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	private int fDoubleCount;
 
 	/** The primitive types to generate custom hashCode() methods for */
-	private Set fCustomHashCodeTypes= new HashSet();
+	private List fCustomHashCodeTypes= new ArrayList();
 
 	/** <code>true</code> to use 'instanceof' to compare types, <code>false</code> otherwise */
 	private final boolean fUseInstanceOf;
+	
+	/** <code>true</code> to use blocks for then */
+	private boolean fUseBlocksForThen;
 
 	/**
 	 * Creates a new add hash code equals operation.
@@ -239,8 +240,18 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		fRewrite= new CompilationUnitRewrite((ICompilationUnit) fUnit.getJavaElement(), fUnit);
 		fForce= force;
 		fAst= fRewrite.getAST();
+		fUseBlocksForThen= false;
 	}
 
+	/**
+	 * Defines if then statements should use blocks or not.
+	 * 
+	 * @param useBlocksForThen if set, blocks are forced in if-then statements 
+	 */
+	public void setUseBlocksForThen(boolean useBlocksForThen) {
+		fUseBlocksForThen= useBlocksForThen;
+	}
+	
 	/**
 	 * Returns the resulting text edit.
 	 * 
@@ -329,7 +340,6 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		return fType.isMember() && !Modifier.isStatic(fType.getModifiers());
 	}
 	
-
 	private BodyDeclaration findMethodToReplace(final List list, String name, ITypeBinding[] paramTypes) {
 		for (final Iterator iterator= list.iterator(); iterator.hasNext();) {
 			final BodyDeclaration bodyDecl= (BodyDeclaration) iterator.next();
@@ -337,13 +347,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 				final MethodDeclaration method= (MethodDeclaration) bodyDecl;
 				final IMethodBinding binding= method.resolveBinding();
 				if (binding != null && binding.getName().equals(name)) {
-					final ITypeBinding[] bindings= binding.getParameterTypes();
-					if (bindings.length == paramTypes.length) {
-						for (int i= 0; i < bindings.length; i++) {
-							if (!bindings[i].isEqualTo(paramTypes[i])) {
-								return null;
-							}
-						}
+					if (Bindings.equals(binding.getParameterTypes(), paramTypes)) {
 						return method;
 					}
 				}
@@ -540,12 +544,12 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			if (element != null && !"".equals(element.getElementName())) //$NON-NLS-1$
 				invoc.setExpression(fAst.newSimpleName(element.getElementName()));
 			invoc.arguments().add(getThisAccessForHashCode(binding.getName()));
-			final ITypeBinding type= binding.getType().getElementType();
+			ITypeBinding type= binding.getType().getElementType();
 			if (!Bindings.isVoidType(type)) {
-				if (type.isPrimitive() && binding.getType().getDimensions() < 2)
+				if (!type.isPrimitive() || binding.getType().getDimensions() >= 2)
+					type= fAst.resolveWellKnownType(JAVA_LANG_OBJECT);
+				if (!fCustomHashCodeTypes.contains(type))
 					fCustomHashCodeTypes.add(type);
-				else
-					fCustomHashCodeTypes.add(fAst.resolveWellKnownType(JAVA_LANG_OBJECT));
 			}
 		}
 		return prepareAssignment(invoc);
@@ -614,7 +618,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		ifStatement.setExpression(newInfixExpression);
 		final ReturnStatement returnStatement= fAst.newReturnStatement();
 		returnStatement.setExpression(fAst.newNumberLiteral("0")); //$NON-NLS-1$
-		ifStatement.setThenStatement(returnStatement);
+		ifStatement.setThenStatement(getThenStatement(returnStatement));
 		body.statements().add(ifStatement);
 
 		// RESULT
@@ -794,7 +798,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 			IfStatement superEqualsIf= fAst.newIfStatement();
 			superEqualsIf.setExpression(pe);
-			superEqualsIf.setThenStatement(getReturnFalse());
+			superEqualsIf.setThenStatement(getThenStatement(getReturnFalse()));
 
 			body.statements().add(superEqualsIf);
 		}
@@ -894,7 +898,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		
 		IfStatement notEqNull= fAst.newIfStatement();
 		notEqNull.setExpression(not);
-		notEqNull.setThenStatement(getReturnFalse());
+		notEqNull.setThenStatement(getThenStatement(getReturnFalse()));
 		return notEqNull;
 	}
 
@@ -922,7 +926,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 		IfStatement ifSt= fAst.newIfStatement();
 		ifSt.setExpression(pe);
-		ifSt.setThenStatement(getReturnFalse());
+		ifSt.setThenStatement(getThenStatement(getReturnFalse()));
 
 		return ifSt;
 	}
@@ -956,7 +960,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 		IfStatement thenPart= fAst.newIfStatement();
 		thenPart.setExpression(notEqNull);
-		thenPart.setThenStatement(getReturnFalse());
+		thenPart.setThenStatement(getThenStatement(getReturnFalse()));
 
 		Block thenPart2= fAst.newBlock();
 		thenPart2.statements().add(thenPart);
@@ -973,7 +977,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 		IfStatement elsePart= fAst.newIfStatement();
 		elsePart.setExpression(pe);
-		elsePart.setThenStatement(getReturnFalse());
+		elsePart.setThenStatement(getThenStatement(getReturnFalse()));
 
 		// ALL
 		IfStatement isNull= fAst.newIfStatement();
@@ -1000,7 +1004,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 		ReturnStatement returner= fAst.newReturnStatement();
 		returner.setExpression(fAst.newBooleanLiteral(result));
-		firstIf.setThenStatement(returner);
+		firstIf.setThenStatement(getThenStatement(returner));
 		return firstIf;
 	}
 
@@ -1072,6 +1076,16 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		falseReturn.setExpression(fAst.newBooleanLiteral(false));
 		return falseReturn;
 	}
+	
+	private Statement getThenStatement(Statement statement) {
+		if (fUseBlocksForThen && !(statement instanceof Block)) {
+			Block block= fAst.newBlock();
+			block.statements().add(statement);
+			return block;
+		}
+		return statement;
+	}
+	
 
 	private Expression parenthesize(Expression expression) {
 		ParenthesizedExpression pe= fAst.newParenthesizedExpression();
