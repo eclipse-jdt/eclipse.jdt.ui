@@ -25,6 +25,7 @@ import java.util.StringTokenizer;
 import junit.framework.TestCase;
 import org.eclipse.osgi.service.environment.Constants;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
 
 public class ChkpiiTests extends TestCase {
@@ -184,7 +185,7 @@ public class ChkpiiTests extends TestCase {
 	private String toLocation(URL platformURL) {
 		File localFile;
 		try {
-			localFile= new File(Platform.asLocalURL(platformURL).getFile());
+			localFile= new File(FileLocator.toFileURL(platformURL).getFile());
 		} catch (IOException e) {
 			e.printStackTrace();
 			return platformURL.getFile();
