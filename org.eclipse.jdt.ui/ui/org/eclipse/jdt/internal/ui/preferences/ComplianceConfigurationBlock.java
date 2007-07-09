@@ -309,7 +309,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		GridData gd= new GridData(GridData.FILL, GridData.FILL, true, true);
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(50);
 		fJRE50InfoText.setLayoutData(gd);
-		validateJRE50Status();
+		validateComplianceStatus();
 		
 		return sc1;
 	}
@@ -320,7 +320,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			data.put(BuildPathsPropertyPage.DATA_REVEAL_ENTRY, JavaRuntime.getDefaultJREContainerEntry());
 			getPreferenceContainer().openPage(BuildPathsPropertyPage.PROP_ID, data);
 		}
-		validateJRE50Status();
+		validateComplianceStatus();
 	}
 	
 	protected final void openJREInstallPreferencePage() {
@@ -330,7 +330,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		} else {
 			PreferencesUtil.createPreferenceDialogOn(getShell(), jreID, new String[] { jreID }, null).open();
 		}
-		validateJRE50Status();
+		validateComplianceStatus();
 	}
 
 	/* (non-javadoc)
@@ -352,7 +352,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			    updateComplianceEnableState();
 				updateComplianceDefaultSettings(USER_CONF.equals(oldDefault), oldValue);
 				fComplianceStatus= validateCompliance();
-				validateJRE50Status();
+				validateComplianceStatus();
 			} else if (PREF_SOURCE_COMPATIBILITY.equals(changedKey)) {
 				updateAssertEnumAsIdentifierEnableState();
 				fComplianceStatus= validateCompliance();
@@ -370,12 +370,12 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			updateAssertEnumAsIdentifierEnableState();
 			updateInlineJSREnableState();
 			fComplianceStatus= validateCompliance();
-			validateJRE50Status();
+			validateComplianceStatus();
 		}		
 		fContext.statusChanged(fComplianceStatus);
 	}
 	
-	private void validateJRE50Status() {
+	private void validateComplianceStatus() {
 		if (fJRE50InfoText != null && !fJRE50InfoText.isDisposed()) {
 			boolean isVisible= false;
 			String compliance= getStoredValue(PREF_COMPLIANCE); // get actual value
@@ -391,7 +391,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			}
 			if (install instanceof IVMInstall2) {
 				String compilerCompliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) install, compliance);
-				if (JavaModelUtil.isVersionLessThan(compilerCompliance, compliance)) { // Discourage using compiler with version less than compliance
+				if (!compilerCompliance.equals(compliance)) { // Discourage using compiler with version other than compliance
 					String[] args= { getVersionLabel(compliance), getVersionLabel(compilerCompliance) };
 					if (fProject == null) {
 						fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info, args));
@@ -447,7 +447,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	 */
 	public void useProjectSpecificSettings(boolean enable) {
 		super.useProjectSpecificSettings(enable);
-		validateJRE50Status();
+		validateComplianceStatus();
 	}
 		
 	/*
