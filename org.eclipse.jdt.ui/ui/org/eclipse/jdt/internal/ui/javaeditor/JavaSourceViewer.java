@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,7 +55,6 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
@@ -401,17 +400,6 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 			fPreferenceStore.addPropertyChangeListener(this);
 			initializeViewerColors();
 		}
-	}
-	
-	/*
-	 * @see org.eclipse.jface.text.ITextViewer#resetVisibleRegion()
-	 * @since 3.1
-	 */
-	public void resetVisibleRegion() {
-		super.resetVisibleRegion();
-		// re-enable folding if ProjectionViewer failed to due so
-		if (fPreferenceStore != null && fPreferenceStore.getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED) && !isProjectionMode())
-			enableProjection();
 	}
 
 	/*
