@@ -240,6 +240,9 @@ public final class RefactoringAvailabilityTester {
 				// rename
 				// isClasspathDelete
 				return false;
+			
+			if (root.getResource().equals(root.getJavaProject().getProject()))
+				return false;
 		}
 		if (element.getResource() == null && !RefactoringAvailabilityTester.isWorkingCopyElement(element))
 			return false;
