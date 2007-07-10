@@ -712,6 +712,38 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		
 		validatePassingTest("C", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
 	}
+	
+	public void test104() throws Exception {
+		// bug 195817
+		String[] names= new String[]{ "m1" };
+		String[][] signatures= new String[][]{ new String[0] };
+		
+		validatePassingTest("A", new String[]{"A", "B"}, "I", true, names, signatures, null);
+	}
+	
+	public void test105() throws Exception{
+		// bug 195817
+		String[] names= new String[]{ "m2" };
+		String[][] signatures= new String[][]{ new String[0] };
+		
+		validatePassingTest("A", new String[]{"A", "B"}, "I", true, names, signatures, null);
+	}
+	
+	public void test106() throws Exception {
+		// bug 195817
+		String[] names= new String[]{ "m1" };
+		String[][] signatures= new String[][]{ new String[0] };
+		
+		validatePassingTest("A", new String[]{"A", "B"}, "I", true, names, signatures, null);
+	}
+	
+	public void test107() throws Exception{
+		// bug 195817
+		String[] names= new String[]{ "m2" };
+		String[][] signatures= new String[][]{ new String[0] };
+		
+		validatePassingTest("A", new String[]{"A", "B"}, "I", true, names, signatures, null);
+	}
 
 	public void testPaperExample0() throws Exception{
 		String[] names= new String[]{"add", "addAll", "iterator"};
@@ -865,4 +897,6 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	public void testFail1() throws Exception{
 		validateFailingTest("A", "I", true, RefactoringStatus.FATAL);
 	}
+	
+	
 }
