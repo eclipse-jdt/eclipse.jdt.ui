@@ -803,7 +803,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				}
 			}
 			i++;
-		} while (i < cleanUps.length && (solution == null || ast != null && !cleanUps[i].needsFreshAST(ast)));
+		} while (i < cleanUps.length && (ast == null || !cleanUps[i].needsFreshAST(ast)));
 		
 		for (; i < cleanUps.length; i++) {
 			undoneCleanUps.add(cleanUps[i]);
