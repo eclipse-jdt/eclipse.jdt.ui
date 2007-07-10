@@ -90,7 +90,7 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isValidPrefix(java.lang.String)
 	 */
 	protected boolean isValidPrefix(String prefix) {
-		String word= getPrefixValidationString();
+		String word= getDisplayString();
 		if (isInJavadoc()) {
 			int idx = word.indexOf("{@link "); //$NON-NLS-1$
 			if (idx==0) {

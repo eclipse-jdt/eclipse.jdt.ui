@@ -192,13 +192,5 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
 	public boolean isAutoInsertable() {
 		return false;
 	}
-	
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#getPrefixValidationString()
-	 * @since 3.4
-	 */
-	protected String getPrefixValidationString() {
-		return getDisplayString();
-	}
 
 }

@@ -695,7 +695,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * proposal is still valid.
 	 * <p>
 	 * The default implementation checks if <code>prefix</code> is a prefix of the proposal's
-	 * {@link #getReplacementString() display string} using the {@link #isPrefix(String, String) }
+	 * {@link #getDisplayString() display string} using the {@link #isPrefix(String, String) }
 	 * method.
 	 * </p>
 	 * 
@@ -703,17 +703,12 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * @return <code>true</code> if <code>prefix</code> is a valid prefix of this proposal
 	 */
 	protected boolean isValidPrefix(String prefix) {
-		return isPrefix(prefix, getPrefixValidationString());
-	}
-	
-	/**
-	 * Returns the string used to do the prefix validation.
-	 * 
-	 * @return the string for the prefix validation.
-	 * @since 3.4
-	 */
-	protected String getPrefixValidationString() {
-		return getReplacementString();
+		/*
+		 * See http://dev.eclipse.org/bugs/show_bug.cgi?id=17667
+		 * why we do not use the replacement string.
+		 * String word= fReplacementString;
+		 */
+		return isPrefix(prefix, getDisplayString());
 	}
 
 	/**
