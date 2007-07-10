@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,98 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.AssertStatement;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BlockComment;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.BooleanLiteral;
+import org.eclipse.jdt.core.dom.BreakStatement;
+import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.CharacterLiteral;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EmptyStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.LineComment;
+import org.eclipse.jdt.core.dom.MarkerAnnotation;
+import org.eclipse.jdt.core.dom.MemberRef;
+import org.eclipse.jdt.core.dom.MemberValuePair;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodRef;
+import org.eclipse.jdt.core.dom.MethodRefParameter;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.QualifiedType;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.SynchronizedStatement;
+import org.eclipse.jdt.core.dom.TagElement;
+import org.eclipse.jdt.core.dom.TextElement;
+import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
+import org.eclipse.jdt.core.dom.TypeLiteral;
+import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.WildcardType;
 
 
 public class ASTFlattener extends GenericVisitor {
@@ -50,6 +141,8 @@ public class ASTFlattener extends GenericVisitor {
 	}
 
 	public static String asString(ASTNode node) {
+		Assert.isTrue(node.getAST().apiLevel() == AST.JLS3);
+		
 		ASTFlattener flattener= new ASTFlattener();
 		node.accept(flattener);
 		return flattener.getResult();
@@ -73,48 +166,6 @@ public class ASTFlattener extends GenericVisitor {
 			ASTNode p= (ASTNode) it.next();
 			p.accept(this);
 			this.fBuffer.append(" ");//$NON-NLS-1$
-		}
-	}
-
-	/**
-	 * Appends the text representation of the given modifier flags, followed by a single space.
-	 * Used for JLS2 modifiers.
-	 * 
-	 * @param modifiers the modifier flags
-	 */
-	private void printModifiers(int modifiers) {
-		if (Modifier.isPublic(modifiers)) {
-			this.fBuffer.append("public ");//$NON-NLS-1$
-		}
-		if (Modifier.isProtected(modifiers)) {
-			this.fBuffer.append("protected ");//$NON-NLS-1$
-		}
-		if (Modifier.isPrivate(modifiers)) {
-			this.fBuffer.append("private ");//$NON-NLS-1$
-		}
-		if (Modifier.isStatic(modifiers)) {
-			this.fBuffer.append("static ");//$NON-NLS-1$
-		}
-		if (Modifier.isAbstract(modifiers)) {
-			this.fBuffer.append("abstract ");//$NON-NLS-1$
-		}
-		if (Modifier.isFinal(modifiers)) {
-			this.fBuffer.append("final ");//$NON-NLS-1$
-		}
-		if (Modifier.isSynchronized(modifiers)) {
-			this.fBuffer.append("synchronized ");//$NON-NLS-1$
-		}
-		if (Modifier.isVolatile(modifiers)) {
-			this.fBuffer.append("volatile ");//$NON-NLS-1$
-		}
-		if (Modifier.isNative(modifiers)) {
-			this.fBuffer.append("native ");//$NON-NLS-1$
-		}
-		if (Modifier.isStrictfp(modifiers)) {
-			this.fBuffer.append("strictfp ");//$NON-NLS-1$
-		}
-		if (Modifier.isTransient(modifiers)) {
-			this.fBuffer.append("transient ");//$NON-NLS-1$
 		}
 	}
 
@@ -344,9 +395,6 @@ public class ASTFlattener extends GenericVisitor {
 			this.fBuffer.append(".");//$NON-NLS-1$
 		}
 		this.fBuffer.append("new ");//$NON-NLS-1$
-		if (node.getAST().apiLevel() == AST.JLS2) {
-			node.getName().accept(this);
-		}
 		if (node.getAST().apiLevel() >= AST.JLS3) {
 			if (!node.typeArguments().isEmpty()) {
 				this.fBuffer.append("<");//$NON-NLS-1$
@@ -580,9 +628,6 @@ public class ASTFlattener extends GenericVisitor {
 		if (node.getJavadoc() != null) {
 			node.getJavadoc().accept(this);
 		}
-		if (node.getAST().apiLevel() == AST.JLS2) {
-			printModifiers(node.getModifiers());
-		}
 		if (node.getAST().apiLevel() >= AST.JLS3) {
 			printModifiers(node.modifiers());
 		}
@@ -692,9 +737,6 @@ public class ASTFlattener extends GenericVisitor {
 	public boolean visit(Initializer node) {
 		if (node.getJavadoc() != null) {
 			node.getJavadoc().accept(this);
-		}
-		if (node.getAST().apiLevel() == AST.JLS2) {
-			printModifiers(node.getModifiers());
 		}
 		if (node.getAST().apiLevel() >= AST.JLS3) {
 			printModifiers(node.modifiers());
@@ -816,9 +858,6 @@ public class ASTFlattener extends GenericVisitor {
 		if (node.getJavadoc() != null) {
 			node.getJavadoc().accept(this);
 		}
-		if (node.getAST().apiLevel() == AST.JLS2) {
-			printModifiers(node.getModifiers());
-		}
 		if (node.getAST().apiLevel() >= AST.JLS3) {
 			printModifiers(node.modifiers());
 			if (!node.typeParameters().isEmpty()) {
@@ -834,15 +873,11 @@ public class ASTFlattener extends GenericVisitor {
 			}
 		}
 		if (!node.isConstructor()) {
-			if (node.getAST().apiLevel() == AST.JLS2) {
-				node.getReturnType().accept(this);
+			if (node.getReturnType2() != null) {
+				node.getReturnType2().accept(this);
 			} else {
-				if (node.getReturnType2() != null) {
-					node.getReturnType2().accept(this);
-				} else {
-					// methods really ought to have a return type
-					this.fBuffer.append("void");//$NON-NLS-1$
-				}
+				// methods really ought to have a return type
+				this.fBuffer.append("void");//$NON-NLS-1$
 			}
 			this.fBuffer.append(" ");//$NON-NLS-1$
 		}
@@ -1096,9 +1131,6 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(SingleVariableDeclaration)
 	 */
 	public boolean visit(SingleVariableDeclaration node) {
-		if (node.getAST().apiLevel() == AST.JLS2) {
-			printModifiers(node.getModifiers());
-		}
 		if (node.getAST().apiLevel() >= AST.JLS3) {
 			printModifiers(node.modifiers());
 		}
@@ -1346,9 +1378,6 @@ public class ASTFlattener extends GenericVisitor {
 		if (node.getJavadoc() != null) {
 			node.getJavadoc().accept(this);
 		}
-		if (node.getAST().apiLevel() == AST.JLS2) {
-			printModifiers(node.getModifiers());
-		}
 		if (node.getAST().apiLevel() >= AST.JLS3) {
 			printModifiers(node.modifiers());
 		}
@@ -1368,24 +1397,6 @@ public class ASTFlattener extends GenericVisitor {
 			}
 		}
 		this.fBuffer.append(" ");//$NON-NLS-1$
-		if (node.getAST().apiLevel() == AST.JLS2) {
-			if (node.getSuperclass() != null) {
-				this.fBuffer.append("extends ");//$NON-NLS-1$
-				node.getSuperclass().accept(this);
-				this.fBuffer.append(" ");//$NON-NLS-1$
-			}
-			if (!node.superInterfaces().isEmpty()) {
-				this.fBuffer.append(node.isInterface() ? "extends " : "implements ");//$NON-NLS-2$//$NON-NLS-1$
-				for (Iterator it= node.superInterfaces().iterator(); it.hasNext();) {
-					Name n= (Name) it.next();
-					n.accept(this);
-					if (it.hasNext()) {
-						this.fBuffer.append(", ");//$NON-NLS-1$
-					}
-				}
-				this.fBuffer.append(" ");//$NON-NLS-1$
-			}
-		}
 		if (node.getAST().apiLevel() >= AST.JLS3) {
 			if (node.getSuperclassType() != null) {
 				this.fBuffer.append("extends ");//$NON-NLS-1$
@@ -1420,6 +1431,7 @@ public class ASTFlattener extends GenericVisitor {
 				}
 			}
 			d.accept(this);
+			prev= d;
 		}
 		this.fBuffer.append("}");//$NON-NLS-1$
 		return false;
@@ -1429,9 +1441,6 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(TypeDeclarationStatement)
 	 */
 	public boolean visit(TypeDeclarationStatement node) {
-		if (node.getAST().apiLevel() == AST.JLS2) {
-			node.getTypeDeclaration().accept(this);
-		}
 		if (node.getAST().apiLevel() >= AST.JLS3) {
 			node.getDeclaration().accept(this);
 		}
@@ -1470,9 +1479,6 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(VariableDeclarationExpression)
 	 */
 	public boolean visit(VariableDeclarationExpression node) {
-		if (node.getAST().apiLevel() == AST.JLS2) {
-			printModifiers(node.getModifiers());
-		}
 		if (node.getAST().apiLevel() >= AST.JLS3) {
 			printModifiers(node.modifiers());
 		}
@@ -1507,9 +1513,6 @@ public class ASTFlattener extends GenericVisitor {
 	 * @see ASTVisitor#visit(VariableDeclarationStatement)
 	 */
 	public boolean visit(VariableDeclarationStatement node) {
-		if (node.getAST().apiLevel() == AST.JLS2) {
-			printModifiers(node.getModifiers());
-		}
 		if (node.getAST().apiLevel() >= AST.JLS3) {
 			printModifiers(node.modifiers());
 		}
