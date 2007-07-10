@@ -842,6 +842,13 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		postRefresh(toRefresh, true, runnables);
 	}
 	
+	/**
+	 * Can be implemented by subclasses to add additional elements to refresh
+	 * 
+	 * @param toRefresh the elements to refresh
+	 * @param relation the relation to the affected element ({@link #GRANT_PARENT}, {@link #PARENT}, {@link #ORIGINAL}, {@link #PROJECT})
+	 * @param affectedElement the affected element
+	 */
 	protected void augmentElementToRefresh(List toRefresh, int relation, Object affectedElement) {
 	}
 
