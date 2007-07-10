@@ -407,7 +407,13 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				
 				for (Iterator iterator= sourceList.iterator(); iterator.hasNext();) {
 					ICompilationUnit cu= (ICompilationUnit)iterator.next();
+					
+					monitor.worked(1);
+					
 					requestor.acceptSource(cu);
+					
+					if (monitor.isCanceled())
+						throw new OperationCanceledException();
 				}
 				
 				fParseList= requestor.getUndoneElements();
