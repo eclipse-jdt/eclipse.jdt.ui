@@ -39,6 +39,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.ISourceReference;
@@ -56,12 +57,14 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.GenerateHashCodeEqualsOperation;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -350,8 +353,11 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 			if (target != null)
 				target.beginCompoundChange();
 			try {
+				
 				final GenerateHashCodeEqualsOperation operation= new GenerateHashCodeEqualsOperation(fTypeBinding, selectedBindings, fUnit, dialog
 						.getElementPosition(), settings, dialog.isUseInstanceOf(), regenerate, true, false);
+				operation.setUseBlocksForThen(useBlocks(type.getJavaProject()));
+				
 				IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 				if (context == null)
 					context= new BusyIndicatorRunnableContext();
@@ -368,6 +374,14 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 		}
 		notifyResult(dialogResult == Window.OK);
 	}
+	
+	private boolean useBlocks(IJavaProject project) {
+		if (CleanUpConstants.TRUE.equals(PreferenceConstants.getPreference(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, project))) {
+			return CleanUpConstants.TRUE.equals(PreferenceConstants.getPreference(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS, project));
+		}
+		return false;
+	}
+	
 	
 	private static RefactoringStatusContext createRefactoringStatusContext(IJavaElement element) {
 		if (element instanceof IMember) {

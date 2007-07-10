@@ -83,21 +83,26 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 	
 	private static final String STATIC_CLASS_INITIALIZER= "<clinit>"; //$NON-NLS-1$
 		
-	public static Long calculateSerialVersionId(ITypeBinding typeBinding, IJavaProject project, final IProgressMonitor monitor) throws CoreException, IOException {
-		IFile classfileResource= getClassfile(typeBinding);
-		if (classfileResource == null)
-			return null;
-		
-		InputStream contents= classfileResource.getContents();
+	public static Long calculateSerialVersionId(ITypeBinding typeBinding, final IProgressMonitor monitor) throws CoreException, IOException {
 		try {
-			IClassFileReader cfReader= ToolFactory.createDefaultClassFileReader(contents, IClassFileReader.ALL);
-			if (cfReader != null) {
-				return calculateSerialVersionId(cfReader);
+			IFile classfileResource= getClassfile(typeBinding);
+			if (classfileResource == null)
+				return null;
+			
+			InputStream contents= classfileResource.getContents();
+			try {
+				IClassFileReader cfReader= ToolFactory.createDefaultClassFileReader(contents, IClassFileReader.ALL);
+				if (cfReader != null) {
+					return calculateSerialVersionId(cfReader);
+				}
+			} finally {
+				contents.close();
 			}
+			return null;
 		} finally {
-			contents.close();
+			if (monitor != null)
+				monitor.done();
 		}
-		return null;
 	}
 	
 	private static String getClassName(char[] name) {
@@ -406,7 +411,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 			
 			ITypeBinding typeBinding= getTypeBinding(declarationNode);
 			if (typeBinding != null) {
-				Long id= calculateSerialVersionId(typeBinding, project, new SubProgressMonitor(monitor, 100));
+				Long id= calculateSerialVersionId(typeBinding, new SubProgressMonitor(monitor, 100));
 				if (id != null)
 					serialVersionID= id.longValue();
 			}

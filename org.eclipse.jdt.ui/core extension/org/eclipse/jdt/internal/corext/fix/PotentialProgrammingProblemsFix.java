@@ -116,7 +116,7 @@ public class PotentialProgrammingProblemsFix extends LinkedFix {
 					if (curr instanceof ITypeBinding) {
 						ITypeBinding typeBinding= (ITypeBinding) curr;
 						try {
-							Long id= SerialVersionHashOperation.calculateSerialVersionId(typeBinding, fProject, new SubProgressMonitor(monitor, 1));
+							Long id= SerialVersionHashOperation.calculateSerialVersionId(typeBinding, new SubProgressMonitor(monitor, 1));
 							if (id != null) {
 								setSerialVersionId(typeBinding, id);
 							} else {
