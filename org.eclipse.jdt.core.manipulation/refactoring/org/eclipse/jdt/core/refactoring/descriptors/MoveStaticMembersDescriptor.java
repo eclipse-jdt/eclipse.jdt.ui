@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.DescriptorMessages;
+import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDescriptorUtil;
 
 /**
  * Refactoring descriptor for the move static members refactoring.
@@ -89,7 +90,10 @@ public final class MoveStaticMembersDescriptor extends JavaRefactoringDescriptor
 	 */
 	public MoveStaticMembersDescriptor(String project, String description, String comment, Map arguments, int flags) {
 		super(IJavaRefactorings.MOVE_STATIC_MEMBERS, project, description, comment, arguments, flags);
-		//REVIEW Initialize fields
+		fType= (IType) JavaRefactoringDescriptorUtil.getJavaElement(fArguments, ATTRIBUTE_INPUT, project);
+		fDelegate= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_DELEGATE);
+		fDeprecate= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_DEPRECATE);
+		fMembers= (IMember[]) JavaRefactoringDescriptorUtil.getJavaElementArray(fArguments, null, ATTRIBUTE_ELEMENT, 1, project, IMember.class);
 	}
 
 	/**
@@ -97,11 +101,11 @@ public final class MoveStaticMembersDescriptor extends JavaRefactoringDescriptor
 	 */
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
-		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, elementToHandle(getProject(), fType));
-		fArguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegate).toString());
-		fArguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDeprecate).toString());
-		for (int index= 0; index < fMembers.length; index++)
-			fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1), elementToHandle(getProject(), fMembers[index]));
+		String project= getProject();
+		JavaRefactoringDescriptorUtil.setJavaElement(fArguments, ATTRIBUTE_INPUT, project, fType);
+		JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_DELEGATE, fDelegate);
+		JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_DEPRECATE, fDeprecate);
+		JavaRefactoringDescriptorUtil.setJavaElementArray(fArguments, null, ATTRIBUTE_ELEMENT, project, fMembers, 1);
 	}
 
 	/**

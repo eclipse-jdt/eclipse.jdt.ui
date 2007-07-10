@@ -38,6 +38,7 @@ public class AllRefactoringTests {
 		
 		//-- structure
 		suite.addTest(ChangeSignatureTests.suite());
+		suite.addTest(IntroduceParameterObjectTests.suite());
 		suite.addTest(PullUpTests.suite());
 		suite.addTest(PushDownTests.suite());
 		suite.addTest(MoveMembersTests.suite());

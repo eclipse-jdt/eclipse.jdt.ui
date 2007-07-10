@@ -34,11 +34,14 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
 import org.eclipse.ltk.core.refactoring.CreateChangeOperation;
 import org.eclipse.ltk.core.refactoring.IUndoManager;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -55,6 +58,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
@@ -67,6 +71,14 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
 
 public abstract class RefactoringTest extends TestCase {
+
+	/**
+	 * If <code>true</code> a descriptor is created from the change.
+	 * The new descriptor is then used to create the refactoring again
+	 * and run the refactoring. As this is very time consuming this should 
+	 * be <code>false</code> by default.
+	 */
+	private static final boolean DESCRIPTOR_TEST= false;
 
 	private IPackageFragmentRoot fRoot;
 	private IPackageFragment fPackageP;
@@ -245,6 +257,39 @@ public abstract class RefactoringTest extends TestCase {
 	protected final RefactoringStatus performRefactoring(Refactoring ref, boolean providesUndo) throws Exception {
 		performDummySearch();
 		IUndoManager undoManager= getUndoManager();
+		if (DESCRIPTOR_TEST){
+			final CreateChangeOperation create= new CreateChangeOperation(
+					new CheckConditionsOperation(ref, CheckConditionsOperation.ALL_CONDITIONS),
+					RefactoringStatus.FATAL);
+			create.run(new NullProgressMonitor());
+			RefactoringStatus checkingStatus= create.getConditionCheckingStatus();
+			if (!checkingStatus.isOK())
+				return checkingStatus;
+			Change change= create.getChange();
+			ChangeDescriptor descriptor= change.getDescriptor();
+			if (descriptor instanceof RefactoringChangeDescriptor) {
+				RefactoringChangeDescriptor rcd= (RefactoringChangeDescriptor) descriptor;
+				RefactoringDescriptor refactoringDescriptor= rcd.getRefactoringDescriptor();
+				if (refactoringDescriptor instanceof JavaRefactoringDescriptor) {
+					JavaRefactoringDescriptor jrd= (JavaRefactoringDescriptor) refactoringDescriptor;
+					RefactoringStatus validation= jrd.validateDescriptor();
+					if (!validation.isOK())
+						return validation;
+					RefactoringStatus refactoringStatus= new RefactoringStatus();
+					Class expected= jrd.getClass();
+					RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(jrd.getID());
+					jrd= (JavaRefactoringDescriptor) contribution.createDescriptor(jrd.getID(), jrd.getProject(), jrd.getDescription(), jrd.getComment(), contribution.retrieveArgumentMap(jrd), jrd.getFlags());
+					assertEquals(expected, jrd.getClass());
+					ref= jrd.createRefactoring(refactoringStatus);
+					if (!refactoringStatus.isOK())
+						return refactoringStatus;
+					TestRenameParticipantSingle.reset();
+					TestCreateParticipantSingle.reset();
+					TestMoveParticipantSingle.reset();
+					TestDeleteParticipantSingle.reset();
+				}
+			}
+		}
 		final CreateChangeOperation create= new CreateChangeOperation(
 			new CheckConditionsOperation(ref, CheckConditionsOperation.ALL_CONDITIONS),
 			RefactoringStatus.FATAL);

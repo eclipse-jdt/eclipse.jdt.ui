@@ -46,7 +46,7 @@ import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
-import org.eclipse.jdt.core.refactoring.descriptors.RenameLocalVariableDescriptor;
+import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -349,7 +349,6 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 			monitor.beginTask(RefactoringCoreMessages.RenameTypeProcessor_creating_changes, 1);
 			Change change= fChange;
 			if (change != null) {
-				final ISourceRange range= fLocalVariable.getNameRange();
 				String project= null;
 				IJavaProject javaProject= fCu.getJavaProject();
 				if (javaProject != null)
@@ -357,14 +356,13 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 				final String header= Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, JavaElementLabels.getElementLabel(fLocalVariable.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), fNewName});
 				final String description= Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description_short, fCurrentName);
 				final String comment= new JDTRefactoringDescriptorComment(project, this, header).asString();
-				final RenameLocalVariableDescriptor descriptor= new RenameLocalVariableDescriptor();
+				final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_LOCAL_VARIABLE);
 				descriptor.setProject(project);
 				descriptor.setDescription(description);
 				descriptor.setComment(comment);
 				descriptor.setFlags(RefactoringDescriptor.NONE);
-				descriptor.setCompilationUnit(fCu);
+				descriptor.setJavaElement(fLocalVariable);
 				descriptor.setNewName(getNewElementName());
-				descriptor.setSelection(range);
 				descriptor.setUpdateReferences(fUpdateReferences);
 				final RefactoringDescriptorChange result= new RefactoringDescriptorChange(descriptor, RefactoringCoreMessages.RenameTempRefactoring_rename, new Change[] { change});
 				result.markAsSynthetic();

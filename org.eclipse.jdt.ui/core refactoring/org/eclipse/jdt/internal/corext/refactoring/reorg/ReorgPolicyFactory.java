@@ -802,7 +802,6 @@ public final class ReorgPolicyFactory {
 			final String header= Messages.format(getHeaderPattern(), new String[] { String.valueOf(length), getDestinationLabel()});
 			int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
-			final JavaRefactoringDescriptor descriptor= createRefactoringDescriptor(comment, arguments, description, project, flags);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
 			arguments.put(ATTRIBUTE_FILES, new Integer(fFiles.length).toString());
 			for (int offset= 0; offset < fFiles.length; offset++)
@@ -814,6 +813,7 @@ public final class ReorgPolicyFactory {
 			for (int offset= 0; offset < fCus.length; offset++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (offset + fFolders.length + fFiles.length + 1), JavaRefactoringDescriptorUtil.elementToHandle(project, fCus[offset]));
 			arguments.putAll(getRefactoringArguments(project));
+			final JavaRefactoringDescriptor descriptor= createRefactoringDescriptor(comment, arguments, description, project, flags);
 			return new RefactoringChangeDescriptor(descriptor);
 		}
 
@@ -2233,12 +2233,12 @@ public final class ReorgPolicyFactory {
 			final String header= Messages.format(getHeaderPattern(), new String[] { String.valueOf(length), getDestinationLabel()});
 			int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
-			final JavaRefactoringDescriptor descriptor= createRefactoringDescriptor(comment, arguments, description, project, flags);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
 			arguments.put(ATTRIBUTE_ROOTS, new Integer(fPackageFragmentRoots.length).toString());
 			for (int offset= 0; offset < fPackageFragmentRoots.length; offset++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (offset + 1), JavaRefactoringDescriptorUtil.elementToHandle(project, fPackageFragmentRoots[offset]));
 			arguments.putAll(getRefactoringArguments(project));
+			final JavaRefactoringDescriptor descriptor= createRefactoringDescriptor(comment, arguments, description, project, flags);
 			return new RefactoringChangeDescriptor(descriptor);
 		}
 
@@ -2412,12 +2412,12 @@ public final class ReorgPolicyFactory {
 			final String header= Messages.format(getHeaderPattern(), new String[] { String.valueOf(length), getDestinationLabel()});
 			int flags= JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_MIGRATION | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
-			final JavaRefactoringDescriptor descriptor= createRefactoringDescriptor(comment, arguments, description, project, flags);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
 			arguments.put(ATTRIBUTE_FRAGMENTS, new Integer(fPackageFragments.length).toString());
 			for (int offset= 0; offset < fPackageFragments.length; offset++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (offset + 1), JavaRefactoringDescriptorUtil.elementToHandle(project, fPackageFragments[offset]));
 			arguments.putAll(getRefactoringArguments(project));
+			final JavaRefactoringDescriptor descriptor= createRefactoringDescriptor(comment, arguments, description, project, flags);
 			return new RefactoringChangeDescriptor(descriptor);
 		}
 
@@ -3072,12 +3072,12 @@ public final class ReorgPolicyFactory {
 			final String header= Messages.format(getHeaderPattern(), new String[] { String.valueOf(length), getDestinationLabel()});
 			int flags= JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_MIGRATION | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
-			final JavaRefactoringDescriptor descriptor= createRefactoringDescriptor(comment, arguments, description, project, flags);
 			arguments.put(ATTRIBUTE_POLICY, getPolicyId());
 			arguments.put(ATTRIBUTE_MEMBERS, new Integer(fJavaElements.length).toString());
 			for (int offset= 0; offset < fJavaElements.length; offset++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (offset + 1), JavaRefactoringDescriptorUtil.elementToHandle(project, fJavaElements[offset]));
 			arguments.putAll(getRefactoringArguments(project));
+			final JavaRefactoringDescriptor descriptor= createRefactoringDescriptor(comment, arguments, description, project, flags);
 			return new RefactoringChangeDescriptor(descriptor);
 		}
 

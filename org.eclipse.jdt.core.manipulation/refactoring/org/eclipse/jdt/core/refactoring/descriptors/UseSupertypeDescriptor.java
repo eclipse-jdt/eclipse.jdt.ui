@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.DescriptorMessages;
+import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDescriptorUtil;
 
 /**
  * Refactoring descriptor for the use supertype refactoring.
@@ -78,11 +79,13 @@ public final class UseSupertypeDescriptor extends JavaRefactoringDescriptor {
 	 * @param flags
 	 *            the flags of the refactoring descriptor
 	 *            
-	 * @since 3.4
+	 * @throws IllegalArgumentException if the argument map contains invalid keys/values
 	 */
 	public UseSupertypeDescriptor(String project, String description, String comment, Map arguments, int flags) {
 		super(IJavaRefactorings.USE_SUPER_TYPE, project, description, comment, arguments, flags);
-		//REVIEW Initialize fields
+		fInstanceof= JavaRefactoringDescriptorUtil.getBoolean(arguments, ATTRIBUTE_INSTANCEOF);
+		fSubType= (IType) JavaRefactoringDescriptorUtil.getJavaElement(arguments, ATTRIBUTE_INPUT, project);
+		fSupertype= (IType) JavaRefactoringDescriptorUtil.getJavaElement(arguments, JavaRefactoringDescriptorUtil.getAttributeName(ATTRIBUTE_ELEMENT, 1), project);
 	}
 
 	/**
@@ -90,9 +93,9 @@ public final class UseSupertypeDescriptor extends JavaRefactoringDescriptor {
 	 */
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
-		fArguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceof).toString());
-		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, elementToHandle(getProject(), fSubType));
-		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, elementToHandle(getProject(), fSupertype));
+		JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_INSTANCEOF, fInstanceof);
+		JavaRefactoringDescriptorUtil.setJavaElement(fArguments, ATTRIBUTE_INPUT, getProject(), fSubType);
+		JavaRefactoringDescriptorUtil.setJavaElement(fArguments, JavaRefactoringDescriptorUtil.getAttributeName(ATTRIBUTE_ELEMENT, 1), getProject(), fSupertype);
 	}
 
 	/**

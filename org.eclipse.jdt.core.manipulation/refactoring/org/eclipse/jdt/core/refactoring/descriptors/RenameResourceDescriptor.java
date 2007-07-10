@@ -24,6 +24,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.DescriptorMessages;
+import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDescriptorUtil;
 
 /**
  * Refactoring descriptor for the rename resource refactoring.
@@ -74,11 +75,12 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 * @param flags
 	 *            the flags of the refactoring descriptor
 	 *            
-	 * @since 3.4
+	 * @throws IllegalArgumentException if the argument map contains invalid keys/values
 	 */
 	public RenameResourceDescriptor(String project, String description, String comment, Map arguments, int flags) {
 		super(IJavaRefactorings.RENAME_RESOURCE, project, description, comment, arguments, flags);
-		//REVIEW Initialize fields
+		fResource= JavaRefactoringDescriptorUtil.getResource(arguments, ATTRIBUTE_INPUT, project);
+		fName= JavaRefactoringDescriptorUtil.getString(arguments, ATTRIBUTE_NAME);
 	}
 
 	/**
@@ -86,8 +88,8 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 */
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
-		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, resourceToHandle(getProject(), fResource));
-		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fName);
+		JavaRefactoringDescriptorUtil.setResource(fArguments, ATTRIBUTE_INPUT, getProject(), fResource);
+		JavaRefactoringDescriptorUtil.setString(fArguments, ATTRIBUTE_NAME, fName);
 	}
 
 	/**

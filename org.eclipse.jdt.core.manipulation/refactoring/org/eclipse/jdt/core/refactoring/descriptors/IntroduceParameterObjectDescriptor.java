@@ -365,20 +365,20 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 		super.populateArgumentMap();
 		JavaRefactoringDescriptorUtil.setJavaElement(fArguments, ATTRIBUTE_INPUT, getProject(), fMethod);
 		Parameter[] parameters= fParameters;
-		if (parameters == null)
+		if (parameters == null) {
 			try {
 				parameters= createParameters(fMethod);
 			} catch (JavaModelException e) {
 				JavaManipulationPlugin.log(e);
 			}
-		if (parameters != null) {
-			JavaRefactoringDescriptorUtil.setInteger(fArguments, PARAMETER_COUNT, parameters.length);
+		} else {
+			JavaRefactoringDescriptorUtil.setInt(fArguments, PARAMETER_COUNT, parameters.length);
 			for (int i= 0; i < parameters.length; i++) {
 				Parameter param= parameters[i];
-				JavaRefactoringDescriptorUtil.setInteger(fArguments, PARAMETER_IDX, param.getIndex(), i);
-				JavaRefactoringDescriptorUtil.setBoolean(fArguments, PARAMETER_CREATE_FIELD, param.isCreateField(), i);
+				JavaRefactoringDescriptorUtil.setInt(fArguments, JavaRefactoringDescriptorUtil.getAttributeName(PARAMETER_IDX, i), param.getIndex());
+				JavaRefactoringDescriptorUtil.setBoolean(fArguments, JavaRefactoringDescriptorUtil.getAttributeName(PARAMETER_CREATE_FIELD, i), param.isCreateField());
 				if (param.isCreateField())
-					JavaRefactoringDescriptorUtil.setString(fArguments, PARAMETER_FIELD_NAME, param.getFieldName(), i);
+					JavaRefactoringDescriptorUtil.setString(fArguments, JavaRefactoringDescriptorUtil.getAttributeName(PARAMETER_FIELD_NAME, i), param.getFieldName());
 			}
 		}
 		JavaRefactoringDescriptorUtil.setString(fArguments, CLASS_NAME, fClassName);
@@ -412,8 +412,8 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 			if (params.length != count) {
 				throw new IllegalArgumentException("The number of arguments in the method does not match the number of stored parameters"); //$NON-NLS-1$
 			}
-			int[] idx= JavaRefactoringDescriptorUtil.getIntArray(map, PARAMETER_IDX, count);
-			boolean[] createField= JavaRefactoringDescriptorUtil.getBoolArray(map, PARAMETER_CREATE_FIELD, count);
+			int[] idx= JavaRefactoringDescriptorUtil.getIntArray(map, PARAMETER_COUNT, PARAMETER_IDX);
+			boolean[] createField= JavaRefactoringDescriptorUtil.getBooleanArray(map, PARAMETER_COUNT, PARAMETER_CREATE_FIELD);
 			List resList= new ArrayList(count);
 			for (int i= 0; i < count; i++) {
 				int index= idx[i];
@@ -424,7 +424,7 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 					resList.add(parameter);
 					parameter.setCreateField(createField[i]);
 					if (createField[i])
-						parameter.setFieldName(JavaRefactoringDescriptorUtil.getString(map, PARAMETER_FIELD_NAME, i));
+						parameter.setFieldName(JavaRefactoringDescriptorUtil.getString(map, JavaRefactoringDescriptorUtil.getAttributeName(PARAMETER_FIELD_NAME, i)));
 				}
 			}
 			setParameters((Parameter[]) resList.toArray(new Parameter[resList.size()]));
@@ -548,10 +548,6 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 			return result;
 		if (fMethod == null) {
 			result.addFatalError("The method must not be null"); //$NON-NLS-1$
-			return result;
-		}
-		if (!fMethod.exists()) {
-			result.addFatalError("The method must exist"); //$NON-NLS-1$
 			return result;
 		}
 		IJavaProject javaProject= fMethod.getJavaProject();

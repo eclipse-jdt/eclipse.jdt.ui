@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.DescriptorMessages;
+import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDescriptorUtil;
 
 /**
  * Refactoring descriptor for the move refactoring.
@@ -156,7 +157,29 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 	 */
 	public MoveDescriptor(String project, String description, String comment, Map arguments, int flags) {
 		super(IJavaRefactorings.MOVE, project, description, comment, arguments, flags);
-		//REVIEW initialize fields
+		fMovePolicy= JavaRefactoringDescriptorUtil.getString(fArguments, ATTRIBUTE_POLICY);
+		
+		fDestination= JavaRefactoringDescriptorUtil.getJavaElement(fArguments, ATTRIBUTE_DESTINATION, project, true);
+		if (fDestination == null)
+			fDestination= JavaRefactoringDescriptorUtil.getResource(fArguments, ATTRIBUTE_TARGET, null);
+		
+		if (POLICY_MOVE_RESOURCES.equals(fMovePolicy)) {
+			fReferences= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_REFERENCES);
+			fQualified= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_QUALIFIED);
+			fPatterns= JavaRefactoringDescriptorUtil.getString(fArguments, ATTRIBUTE_PATTERNS, true);
+			int offset= 1;
+			fFiles= (IFile[]) JavaRefactoringDescriptorUtil.getResourceArray(fArguments, ATTRIBUTE_FILES, ATTRIBUTE_ELEMENT, offset, project, IFile.class);
+			offset+= fFiles.length;
+			fFolders= (IFolder[]) JavaRefactoringDescriptorUtil.getResourceArray(fArguments, ATTRIBUTE_FOLDERS, ATTRIBUTE_ELEMENT, offset, project, IFolder.class);
+			offset+= fFolders.length;
+			fUnits= (ICompilationUnit[]) JavaRefactoringDescriptorUtil.getJavaElementArray(fArguments, ATTRIBUTE_UNITS, ATTRIBUTE_ELEMENT, offset, project, ICompilationUnit.class);
+		} else if (POLICY_MOVE_ROOTS.equals(fMovePolicy)) {
+			fRoots= (IPackageFragmentRoot[]) JavaRefactoringDescriptorUtil.getJavaElementArray(fArguments, ATTRIBUTE_ROOTS, ATTRIBUTE_ELEMENT, 1, project, IPackageFragmentRoot.class);
+		} else if (POLICY_MOVE_PACKAGES.equals(fMovePolicy)) {
+			fFragments= (IPackageFragment[]) JavaRefactoringDescriptorUtil.getJavaElementArray(fArguments, ATTRIBUTE_FRAGMENTS, ATTRIBUTE_ELEMENT, 1, project, IPackageFragment.class);
+		} else if (POLICY_MOVE_MEMBERS.equals(fMovePolicy)) {
+			fMembers= (IMember[]) JavaRefactoringDescriptorUtil.getJavaElementArray(fArguments, ATTRIBUTE_MEMBERS, ATTRIBUTE_ELEMENT, 1, project, IMember.class);
+		}
 	}
 
 	/**
@@ -164,38 +187,28 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 	 */
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
-		fArguments.put(ATTRIBUTE_POLICY, fMovePolicy);
+		JavaRefactoringDescriptorUtil.setString(fArguments, ATTRIBUTE_POLICY, fMovePolicy);
 		final String project= getProject();
 		if (fDestination instanceof IJavaElement)
-			fArguments.put(ATTRIBUTE_DESTINATION, JavaRefactoringDescriptor.elementToHandle(project, (IJavaElement) fDestination));
+			JavaRefactoringDescriptorUtil.setJavaElement(fArguments, ATTRIBUTE_DESTINATION, project, (IJavaElement) fDestination);
 		else if (fDestination instanceof IResource)
-			fArguments.put(ATTRIBUTE_TARGET, JavaRefactoringDescriptor.resourceToHandle(null, (IResource) fDestination));
+			JavaRefactoringDescriptorUtil.setResource(fArguments, ATTRIBUTE_TARGET, null, (IResource) fDestination);
 		if (POLICY_MOVE_RESOURCES.equals(fMovePolicy)) {
-			fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_REFERENCES, Boolean.toString(fReferences));
-			fArguments.put(ATTRIBUTE_QUALIFIED, Boolean.toString(fQualified));
-			if (fPatterns != null && !"".equals(fPatterns)) //$NON-NLS-1$
-				fArguments.put(ATTRIBUTE_PATTERNS, fPatterns);
-			fArguments.put(ATTRIBUTE_FILES, new Integer(fFiles.length).toString());
-			for (int offset= 0; offset < fFiles.length; offset++)
-				fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), JavaRefactoringDescriptor.resourceToHandle(project, fFiles[offset]));
-			fArguments.put(ATTRIBUTE_FOLDERS, new Integer(fFolders.length).toString());
-			for (int offset= 0; offset < fFolders.length; offset++)
-				fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fFiles.length + 1), JavaRefactoringDescriptor.resourceToHandle(project, fFolders[offset]));
-			fArguments.put(ATTRIBUTE_UNITS, new Integer(fUnits.length).toString());
-			for (int offset= 0; offset < fUnits.length; offset++)
-				fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + fFolders.length + fFiles.length + 1), JavaRefactoringDescriptor.elementToHandle(project, fUnits[offset]));
+			JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_REFERENCES, fReferences);
+			JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_QUALIFIED, fQualified);
+			JavaRefactoringDescriptorUtil.setString(fArguments, ATTRIBUTE_PATTERNS, fPatterns);
+			int offset= 1;
+			JavaRefactoringDescriptorUtil.setResourceArray(fArguments, ATTRIBUTE_FILES, ATTRIBUTE_ELEMENT, project, fFiles, offset);
+			offset+= fFiles.length;
+			JavaRefactoringDescriptorUtil.setResourceArray(fArguments, ATTRIBUTE_FOLDERS, ATTRIBUTE_ELEMENT, project, fFolders, offset);
+			offset+= fFolders.length;
+			JavaRefactoringDescriptorUtil.setJavaElementArray(fArguments, ATTRIBUTE_UNITS, ATTRIBUTE_ELEMENT, project, fUnits, offset);
 		} else if (POLICY_MOVE_ROOTS.equals(fMovePolicy)) {
-			fArguments.put(ATTRIBUTE_ROOTS, new Integer(fRoots.length).toString());
-			for (int offset= 0; offset < fRoots.length; offset++)
-				fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), JavaRefactoringDescriptor.elementToHandle(project, fRoots[offset]));
+			JavaRefactoringDescriptorUtil.setJavaElementArray(fArguments, ATTRIBUTE_ROOTS, ATTRIBUTE_ELEMENT, project, fRoots, 1);
 		} else if (POLICY_MOVE_PACKAGES.equals(fMovePolicy)) {
-			fArguments.put(ATTRIBUTE_FRAGMENTS, new Integer(fFragments.length).toString());
-			for (int offset= 0; offset < fFragments.length; offset++)
-				fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), JavaRefactoringDescriptor.elementToHandle(project, fFragments[offset]));
+			JavaRefactoringDescriptorUtil.setJavaElementArray(fArguments, ATTRIBUTE_FRAGMENTS, ATTRIBUTE_ELEMENT, project, fFragments, 1);
 		} else if (POLICY_MOVE_MEMBERS.equals(fMovePolicy)) {
-			fArguments.put(ATTRIBUTE_MEMBERS, new Integer(fMembers.length).toString());
-			for (int offset= 0; offset < fMembers.length; offset++)
-				fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (offset + 1), JavaRefactoringDescriptor.elementToHandle(project, fMembers[offset]));
+			JavaRefactoringDescriptorUtil.setJavaElementArray(fArguments, ATTRIBUTE_MEMBERS, ATTRIBUTE_ELEMENT, project, fMembers, 1);
 		}
 	}
 

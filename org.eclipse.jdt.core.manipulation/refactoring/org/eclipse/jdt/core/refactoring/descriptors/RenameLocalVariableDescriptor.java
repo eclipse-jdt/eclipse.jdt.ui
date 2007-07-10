@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.DescriptorMessages;
+import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDescriptorUtil;
 
 /**
  * Refactoring descriptor for the rename local variable refactoring.
@@ -36,6 +37,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.DescriptorMessages;
  * </p>
  * 
  * @since 3.3
+ * @deprecated merged into {@link RenameJavaElementDescriptor}
  */
 public final class RenameLocalVariableDescriptor extends JavaRefactoringDescriptor {
 
@@ -53,6 +55,7 @@ public final class RenameLocalVariableDescriptor extends JavaRefactoringDescript
 
 	/**
 	 * Creates a new refactoring descriptor.
+	 * @deprecated merged into {@link RenameJavaElementDescriptor}
 	 */
 	public RenameLocalVariableDescriptor() {
 		super(IJavaRefactorings.RENAME_LOCAL_VARIABLE);
@@ -63,10 +66,10 @@ public final class RenameLocalVariableDescriptor extends JavaRefactoringDescript
 	 */
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
-		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fName);
-		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, elementToHandle(getProject(), fUnit));
-		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelection.getOffset()).toString() + " " + new Integer(fSelection.getLength()).toString()); //$NON-NLS-1$
-		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_REFERENCES, Boolean.toString(fReferences));
+		JavaRefactoringDescriptorUtil.setString(fArguments, ATTRIBUTE_NAME, fName);
+		JavaRefactoringDescriptorUtil.setJavaElement(fArguments, ATTRIBUTE_INPUT, getProject(), fUnit);
+		JavaRefactoringDescriptorUtil.setSelection(fArguments, ATTRIBUTE_SELECTION, fSelection.getOffset(), fSelection.getLength());
+		JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_REFERENCES, fReferences);
 	}
 
 	/**

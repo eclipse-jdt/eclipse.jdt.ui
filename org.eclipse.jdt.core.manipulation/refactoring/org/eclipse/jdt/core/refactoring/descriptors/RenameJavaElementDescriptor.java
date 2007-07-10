@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.DescriptorMessages;
+import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDescriptorUtil;
 
 /**
  * Refactoring descriptor for the rename java element refactoring.
@@ -167,11 +168,67 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 * @param flags
 	 *            the flags of the refactoring descriptor
 	 *            
-	 * @since 3.4
+	 * @throws IllegalArgumentException if the argument map contains invalid keys/values
 	 */
 	public RenameJavaElementDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
 		super(id, project, description, comment, arguments, flags);
 		Assert.isLegal(checkId(id), "Refactoring id is not a rename refactoring id"); //$NON-NLS-1$
+		fName= JavaRefactoringDescriptorUtil.getString(fArguments, ATTRIBUTE_NAME);
+		if (getID().equals(IJavaRefactorings.RENAME_TYPE_PARAMETER)) {
+			fJavaElement= JavaRefactoringDescriptorUtil.getJavaElement(fArguments, ATTRIBUTE_INPUT, getProject());
+			String parameterName= JavaRefactoringDescriptorUtil.getString(fArguments, ATTRIBUTE_PARAMETER);
+			if (fJavaElement instanceof IType) {
+				fJavaElement= ((IType) fJavaElement).getTypeParameter(parameterName);
+			}
+			if (fJavaElement instanceof IMethod) {
+				fJavaElement=((IMethod) fJavaElement).getTypeParameter(parameterName);
+			}
+		} else
+			fJavaElement= JavaRefactoringDescriptorUtil.getJavaElement(fArguments, ATTRIBUTE_INPUT, getProject());
+		final int type= fJavaElement.getElementType();
+		if (type != IJavaElement.PACKAGE_FRAGMENT_ROOT)
+			fReferences= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_REFERENCES);
+		if (type == IJavaElement.FIELD) {
+			fRenameGetter= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_RENAME_GETTER);
+			fRenameSetter= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_RENAME_SETTER);
+		}
+		switch (type) {
+			case IJavaElement.PACKAGE_FRAGMENT:
+			case IJavaElement.TYPE:
+			case IJavaElement.FIELD:
+				fTextual= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_TEXTUAL_MATCHES);
+			default:
+				break;
+		}
+		switch (type) {
+			case IJavaElement.METHOD:
+			case IJavaElement.FIELD:
+				fDeprecate= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_DEPRECATE);
+				fDelegate= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_DELEGATE);
+			default:
+				break;
+		}
+		switch (type) {
+			case IJavaElement.PACKAGE_FRAGMENT:
+			case IJavaElement.TYPE:
+				fQualified= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_QUALIFIED);
+				fPatterns= JavaRefactoringDescriptorUtil.getString(fArguments, ATTRIBUTE_PATTERNS, true);
+			default:
+				break;
+		}
+		switch (type) {
+			case IJavaElement.TYPE:
+				fSimilarDeclarations= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_SIMILAR_DECLARATIONS);
+				fMatchStrategy= JavaRefactoringDescriptorUtil.getInt(fArguments, ATTRIBUTE_MATCH_STRATEGY);
+			default:
+				break;
+		}
+		switch (type) {
+			case IJavaElement.PACKAGE_FRAGMENT:
+				fHierarchical= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_HIERARCHICAL);
+			default:
+				break;
+		}
 	}
 
 	/**
@@ -213,55 +270,54 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 */
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
-		fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fName);
+		JavaRefactoringDescriptorUtil.setString(fArguments, ATTRIBUTE_NAME, fName);
 		if (getID().equals(IJavaRefactorings.RENAME_TYPE_PARAMETER)) {
 			final ITypeParameter parameter= (ITypeParameter) fJavaElement;
-			fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, elementToHandle(getProject(), parameter.getDeclaringMember()));
-			fArguments.put(ATTRIBUTE_PARAMETER, parameter.getElementName());
+			JavaRefactoringDescriptorUtil.setJavaElement(fArguments, ATTRIBUTE_INPUT, getProject(), parameter.getDeclaringMember());
+			JavaRefactoringDescriptorUtil.setString(fArguments, ATTRIBUTE_PARAMETER, parameter.getElementName());
 		} else
-			fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, elementToHandle(getProject(), fJavaElement));
+			JavaRefactoringDescriptorUtil.setJavaElement(fArguments, ATTRIBUTE_INPUT, getProject(), fJavaElement);
 		final int type= fJavaElement.getElementType();
 		if (type != IJavaElement.PACKAGE_FRAGMENT_ROOT)
-			fArguments.put(JavaRefactoringDescriptor.ATTRIBUTE_REFERENCES, Boolean.toString(fReferences));
+			JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_REFERENCES, fReferences);
 		if (type == IJavaElement.FIELD) {
-			fArguments.put(ATTRIBUTE_RENAME_GETTER, Boolean.toString(fRenameGetter));
-			fArguments.put(ATTRIBUTE_RENAME_SETTER, Boolean.toString(fRenameSetter));
+			JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_RENAME_GETTER, fRenameGetter);
+			JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_RENAME_SETTER, fRenameSetter);
 		}
 		switch (type) {
 			case IJavaElement.PACKAGE_FRAGMENT:
 			case IJavaElement.TYPE:
 			case IJavaElement.FIELD:
-				fArguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.toString(fTextual));
+				JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_TEXTUAL_MATCHES, fTextual);
 			default:
 				break;
 		}
 		switch (type) {
 			case IJavaElement.METHOD:
 			case IJavaElement.FIELD:
-				fArguments.put(ATTRIBUTE_DEPRECATE, Boolean.toString(fDeprecate));
-				fArguments.put(ATTRIBUTE_DELEGATE, Boolean.toString(fDelegate));
+				JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_DEPRECATE, fDeprecate);
+				JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_DELEGATE, fDelegate);
 			default:
 				break;
 		}
 		switch (type) {
 			case IJavaElement.PACKAGE_FRAGMENT:
 			case IJavaElement.TYPE:
-				fArguments.put(ATTRIBUTE_QUALIFIED, Boolean.toString(fQualified));
-				if (fPatterns != null && !"".equals(fPatterns)) //$NON-NLS-1$
-					fArguments.put(ATTRIBUTE_PATTERNS, fPatterns);
+				JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_QUALIFIED, fQualified);
+				JavaRefactoringDescriptorUtil.setString(fArguments, ATTRIBUTE_PATTERNS, fPatterns);
 			default:
 				break;
 		}
 		switch (type) {
 			case IJavaElement.TYPE:
-				fArguments.put(ATTRIBUTE_SIMILAR_DECLARATIONS, Boolean.toString(fSimilarDeclarations));
-				fArguments.put(ATTRIBUTE_MATCH_STRATEGY, Integer.toString(fMatchStrategy));
+				JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_SIMILAR_DECLARATIONS, fSimilarDeclarations);
+				JavaRefactoringDescriptorUtil.setInt(fArguments, ATTRIBUTE_MATCH_STRATEGY, fMatchStrategy);
 			default:
 				break;
 		}
 		switch (type) {
 			case IJavaElement.PACKAGE_FRAGMENT:
-				fArguments.put(ATTRIBUTE_HIERARCHICAL, Boolean.toString(fHierarchical));
+				JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_HIERARCHICAL, fHierarchical);
 			default:
 				break;
 		}
