@@ -1053,9 +1053,9 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				new UnnecessaryCodeCleanUp(), 
 				new StringCleanUp(), 
 				new SortMembersCleanUp(), 
-				new ImportsCleanUp(), 
-				new CodeFormatCleanUp(), 
-				new CommentFormatCleanUp()};
+				new ImportsCleanUp(),
+				new CommentFormatCleanUp(),
+				new CodeFormatCleanUp()};
 	}
 	
 	public static ICleanUp[] createCleanUps(Map settings) {
@@ -1072,7 +1072,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				new StringCleanUp(settings),
 				new SortMembersCleanUp(settings), 
 				new ImportsCleanUp(settings), 
-				new CodeFormatCleanUp(settings), 
-				new CommentFormatCleanUp(settings)};
+				new CommentFormatCleanUp(settings),
+				new CodeFormatCleanUp(settings)};
 	}
 }

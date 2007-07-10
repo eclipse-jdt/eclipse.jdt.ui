@@ -122,7 +122,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("                \"junit.framework.TestResult\", //$NON-NLS-1$\n");
         buf.append("                \"junit.framework.TestSuite\", //$NON-NLS-1$\n");
         buf.append("                \"junit.framework.Assert.\", // don't filter AssertionFailure\n");
-        buf.append("                                            // //$NON-NLS-1$\n");
+        buf.append("                // //$NON-NLS-1$\n");
         buf.append("                \"junit.swingui.TestRunner\", //$NON-NLS-1$\n");
         buf.append("                \"junit.awtui.TestRunner\", //$NON-NLS-1$\n");
         buf.append("                \"junit.textui.TestRunner\", //$NON-NLS-1$\n");
@@ -348,8 +348,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("        }\n");
         buf.append("        Test test = null;\n");
         buf.append("        try {\n");
-        buf.append("            test = (Test) suiteMethod.invoke(null, new Class[0]); // static\n");
-        buf.append("                                                                    // method\n");
+        buf.append("            test = (Test) suiteMethod.invoke(null, new Class[0]); // static method\n");
         buf.append("            if (test == null) {\n");
         buf.append("                return test;\n");
         buf.append("            }\n");
@@ -3594,10 +3593,10 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    }\n");
         buf.append("\n");
         buf.append("    public void printDefect(final TestFailure booBoo, final int count) { // only\n");
-        buf.append("                                                                            // public\n");
-        buf.append("                                                                            // for\n");
-        buf.append("                                                                            // testing\n");
-        buf.append("                                                                            // purposes\n");
+        buf.append("        // public\n");
+        buf.append("        // for\n");
+        buf.append("        // testing\n");
+        buf.append("        // purposes\n");
         buf.append("        this.printDefectHeader(booBoo, count);\n");
         buf.append("        this.printDefectTrace(booBoo);\n");
         buf.append("    }\n");
@@ -4371,7 +4370,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("        final TestSuite suite = new TestSuite(\"Framework Tests\"); //$NON-NLS-1$\n");
         buf.append("        suite.addTestSuite(TestCaseTest.class);\n");
         buf.append("        suite.addTest(SuiteTest.suite()); // Tests suite building, so can't\n");
-        buf.append("                                            // use automatic test extraction\n");
+        buf.append("        // use automatic test extraction\n");
         buf.append("        suite.addTestSuite(TestListenerTest.class);\n");
         buf.append("        suite.addTestSuite(AssertTest.class);\n");
         buf.append("        suite.addTestSuite(TestImplementorTest.class);\n");
@@ -5403,7 +5402,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 //		CU_ORDER[70]= "junit.samples.money.Money.java";
 //	}
 //	
-//	private static void generateTable(ICompilationUnit[] units) throws CoreException {
+//	private void generateTable(ICompilationUnit[] units) throws CoreException {
 //
 //		assertNoCompileErrors(units);
 //		
@@ -5471,10 +5470,10 @@ public class CleanUpStressTest extends CleanUpTestCase {
 //		return buf.toString();
 //	}
 //	
-//	private static void assertNoCompileErrors(ICompilationUnit[] units) throws JavaModelException, CoreException {
+//	private void assertNoCompileErrors(ICompilationUnit[] units) throws JavaModelException, CoreException {
 //        ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 //        parser.setResolveBindings(true);
-//        parser.setProject(MyTestSetup.fJProject1);
+//        parser.setProject(fJProject1);
 //    
 //        parser.createASTs(units, new String[0], new ASTRequestor() {
 //        	public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
