@@ -657,6 +657,7 @@ public abstract class OptionsConfigurationBlock {
 	}
 
 	private boolean getChanges(IScopeContext currContext, List changedSettings) {
+		boolean completeSettings= fProject != null && fDisabledProjectSettings == null; // complete when project settings are enabled
 		boolean needsBuild= false;
 		for (int i= 0; i < fAllKeys.length; i++) {
 			Key key= fAllKeys[i];
@@ -666,6 +667,10 @@ public abstract class OptionsConfigurationBlock {
 				if (oldVal != null) {
 					changedSettings.add(key);
 					needsBuild |= !oldVal.equals(key.getStoredValue(fLookupOrder, true, fManager));
+				} else if (completeSettings) {
+					key.setStoredValue(currContext, key.getStoredValue(fLookupOrder, true, fManager), fManager);
+					changedSettings.add(key);
+					// no build needed
 				}
 			} else if (!val.equals(oldVal)) {
 				changedSettings.add(key);
@@ -714,6 +719,7 @@ public abstract class OptionsConfigurationBlock {
 	
 	protected boolean processChanges(IWorkbenchPreferenceContainer container) {
 		IScopeContext currContext= fLookupOrder[0];
+		
 		
 		List /* <Key>*/ changedOptions= new ArrayList();
 		boolean needsBuild= getChanges(currContext, changedOptions);
