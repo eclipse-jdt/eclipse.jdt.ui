@@ -707,6 +707,10 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		 * See http://dev.eclipse.org/bugs/show_bug.cgi?id=17667
 		 * why we do not use the replacement string.
 		 * String word= fReplacementString;
+		 * 
+		 * Besides that bug we also use the display string
+		 * for performance reasons, as computing the
+		 * replacement string can be expensive.
 		 */
 		return isPrefix(prefix, getDisplayString());
 	}
