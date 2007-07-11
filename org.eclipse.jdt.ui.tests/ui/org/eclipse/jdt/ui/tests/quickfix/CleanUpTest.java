@@ -4043,7 +4043,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("public class E1 {\n");
 		buf.append("	private void bar(boolean bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) {\n");
 		buf.append("		if (bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb) { // a b c d e f g\n");
-		buf.append("			// h i j k\n");
+		buf.append("																// h i j k\n");
 		buf.append("			final String s = \"\";\n");
 		buf.append("		}\n");
 		buf.append("	}\n");
