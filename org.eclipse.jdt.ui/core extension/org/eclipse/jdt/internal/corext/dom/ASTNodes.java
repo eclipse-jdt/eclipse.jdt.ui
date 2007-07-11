@@ -24,6 +24,9 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.Assert;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -110,7 +113,13 @@ public class ASTNodes {
 		String unformatted= asString(node);
 		TextEdit edit= CodeFormatterUtil.format2(node, unformatted, indent, lineDelim, options);
 		if (edit != null) {
-			return CodeFormatterUtil.evaluateFormatterEdit(unformatted, edit, null);
+			Document document= new Document(unformatted);
+			try {
+				edit.apply(document, TextEdit.NONE);
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
+			}
+			return document.get();
 		}
 		return unformatted; // unknown node
 	}	

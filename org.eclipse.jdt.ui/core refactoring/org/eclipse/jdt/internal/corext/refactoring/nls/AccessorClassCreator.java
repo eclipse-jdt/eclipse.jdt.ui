@@ -84,7 +84,7 @@ public class AccessorClassCreator {
 	private String createAccessorCUSource(IProgressMonitor pm) throws CoreException {
 		IProject project= getFileHandle(fAccessorPath).getProject();
 		String lineDelimiter= StubUtility.getLineDelimiterPreference(project);
-		return CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, getUnformattedSource(pm), 0, null, lineDelimiter, fCu.getJavaProject());
+		return CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, getUnformattedSource(pm), 0, lineDelimiter, fCu.getJavaProject());
 	}
 	
 	private static IFile getFileHandle(IPath filePath) {

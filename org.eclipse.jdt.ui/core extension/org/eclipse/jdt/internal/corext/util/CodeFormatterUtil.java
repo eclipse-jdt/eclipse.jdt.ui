@@ -12,56 +12,49 @@ package org.eclipse.jdt.internal.corext.util;
 
 import java.util.Map;
 
-import org.eclipse.text.edits.DeleteEdit;
-import org.eclipse.text.edits.InsertEdit;
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.BadPositionCategoryException;
-import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.formatter.CodeFormatter;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CodeFormatterUtil {
-				
+
 	/**
-	 * Creates a string that represents the given number of indentation units.
-	 * The returned string can contain tabs and/or spaces depending on the core
-	 * formatter preferences.
+	 * Creates a string that represents the given number of indentation units. 
+	 * The returned string can contain tabs and/or spaces depending on the core formatter preferences.
 	 * 
-	 * @param indentationUnits the number of indentation units to generate
-	 * @param project the project from which to get the formatter settings,
+	 * @param indentationUnits
+	 *        the number of indentation units to generate
+	 * @param project
+	 *        the project from which to get the formatter settings, 
 	 *        <code>null</code> if the workspace default should be used
 	 * @return the indent string
 	 */
 	public static String createIndentString(int indentationUnits, IJavaProject project) {
-		Map options= project != null ? project.getOptions(true) : JavaCore.getOptions();		
+		Map options= project != null ? project.getOptions(true) : JavaCore.getOptions();
 		return ToolFactory.createCodeFormatter(options).createIndentationString(indentationUnits);
-	} 
-		
+	}
+
 	/**
 	 * Gets the current tab width.
 	 * 
-	 * @param project The project where the source is used, used for project
-	 *        specific options or <code>null</code> if the project is unknown
-	 *        and the workspace default should be used
+	 * @param project
+	 *        The project where the source is used, used for project specific options or 
+	 *        <code>null</code> if the project is unknown and the workspace default should be used
 	 * @return The tab width
 	 */
 	public static int getTabWidth(IJavaProject project) {
@@ -76,15 +69,16 @@ public class CodeFormatterUtil {
 			key= DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE;
 		else
 			key= DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE;
-		
+
 		return getCoreOption(project, key, 4);
 	}
 
 	/**
 	 * Returns the current indent width.
 	 * 
-	 * @param project the project where the source is used or <code>null</code>
-	 *        if the project is unknown and the workspace default should be used
+	 * @param project
+	 *        the project where the source is used or, 
+	 *        <code>null</code> if the project is unknown and the workspace default should be used
 	 * @return the indent width
 	 * @since 3.1
 	 */
@@ -94,17 +88,18 @@ public class CodeFormatterUtil {
 			key= DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE;
 		else
 			key= DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE;
-		
+
 		return getCoreOption(project, key, 4);
 	}
 
 	/**
-	 * Returns the possibly <code>project</code>-specific core preference
-	 * defined under <code>key</code>.
+	 * Returns the possibly <code>project</code>-specific core preference defined under <code>key</code>.
 	 * 
-	 * @param project the project to get the preference from, or
-	 *        <code>null</code> to get the global preference
-	 * @param key the key of the preference
+	 * @param project
+	 *        the project to get the preference from, 
+	 *        or <code>null</code> to get the global preference
+	 * @param key
+	 *        the key of the preference
 	 * @return the value of the preference
 	 * @since 3.1
 	 */
@@ -115,14 +110,16 @@ public class CodeFormatterUtil {
 	}
 
 	/**
-	 * Returns the possibly <code>project</code>-specific core preference
-	 * defined under <code>key</code>, or <code>def</code> if the value is
-	 * not a integer.
+	 * Returns the possibly <code>project</code>-specific core preference defined under <code>key</code>, 
+	 * or <code>def</code> if the value is not a integer.
 	 * 
-	 * @param project the project to get the preference from, or
-	 *        <code>null</code> to get the global preference
-	 * @param key the key of the preference
-	 * @param def the default value
+	 * @param project
+	 *        the project to get the preference from, 
+	 *        or <code>null</code> to get the global preference
+	 * @param key
+	 *        the key of the preference
+	 * @param def
+	 *        the default value
 	 * @return the value of the preference
 	 * @since 3.1
 	 */
@@ -138,118 +135,211 @@ public class CodeFormatterUtil {
 
 	/**
 	 * Old API. Consider to use format2 (TextEdit)
-	 */	
-	public static String format(int kind, String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
-		return format(kind, string, 0, string.length(), indentationLevel, positions, lineSeparator, options);
-	}
-	
-	public static String format(int kind, String string, int indentationLevel, int[] positions, String lineSeparator, IJavaProject project) {
+	 * 
+	 * @param kind
+	 *        Use to specify the kind of the code snippet to format. 
+	 *        It can be any of the kind constants defined in {@link CodeFormatter}
+	 * @param source
+	 *        The source to format
+	 * @param indentationLevel
+	 *        The initial indentation level, used to shift left/right the entire source fragment. 
+	 *        An initial indentation level of zero or below has no effect.
+	 * @param lineSeparator
+	 *        The line separator to use in formatted source, 
+	 *        if set to <code>null</code>, then the platform default one will be used.
+	 * @param project
+	 *        The project from which to retrieve the formatter options from 
+	 *        If set to <code>null</code>, then use the current settings from <code>JavaCore#getOptions</code>.
+	 * @return the formatted source string
+	 */
+	public static String format(int kind, String source, int indentationLevel, String lineSeparator, IJavaProject project) {
 		Map options= project != null ? project.getOptions(true) : null;
-		return format(kind, string, 0, string.length(), indentationLevel, positions, lineSeparator, options);
+		return format(kind, source, indentationLevel, lineSeparator, options);
 	}
-	
 
 	/**
 	 * Old API. Consider to use format2 (TextEdit)
-	 */	
-	public static String format(int kind, String string, int offset, int length, int indentationLevel, int[] positions, String lineSeparator, Map options) {
-		TextEdit edit= format2(kind, string, offset, length, indentationLevel, lineSeparator, options);
+	 * 
+	 * @param kind
+	 *        Use to specify the kind of the code snippet to format. 
+	 *        It can be any of the kind constants defined in {@link CodeFormatter}
+	 * @param source
+	 *        The source to format
+	 * @param indentationLevel
+	 *        The initial indentation level, used to shift left/right the entire source fragment. 
+	 *        An initial indentation level of zero or below has no effect.
+	 * @param lineSeparator
+	 *        The line separator to use in formatted source, 
+	 *        if set to <code>null</code>, then the platform default one will be used.
+	 * @param options
+	 *        The options map to use for formatting with the default code formatter. 
+	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>. 
+	 *        If set to <code>null</code>, then use the current settings from <code>JavaCore#getOptions</code>.
+	 * @return the formatted source string
+	 */
+	public static String format(int kind, String source, int indentationLevel, String lineSeparator, Map options) {
+		TextEdit edit= format2(kind, source, indentationLevel, lineSeparator, options);
 		if (edit == null) {
-			//JavaPlugin.logErrorMessage("formatter failed to format (no edit returned). Will use unformatted text instead. kind: " + kind + ", string: " + string); //$NON-NLS-1$ //$NON-NLS-2$
-			return string.substring(offset, offset + length);
-		}
-		String formatted= getOldAPICompatibleResult(string, edit, indentationLevel, positions, lineSeparator, options);
-		return formatted.substring(offset, formatted.length() - (string.length() - (offset + length)));
-	}
-	
-	/**
-	 * Old API. Consider to use format2 (TextEdit)
-	 */	
-	public static String format(ASTNode node, String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
-		
-		TextEdit edit= format2(node, string, indentationLevel, lineSeparator, options);
-		if (edit == null) {
-			//JavaPlugin.logErrorMessage("formatter failed to format (no edit returned). Will use unformatted text instead. node: " + node.getNodeType() + ", string: " + string); //$NON-NLS-1$ //$NON-NLS-2$
-			return string;
-		}
-		return getOldAPICompatibleResult(string, edit, indentationLevel, positions, lineSeparator, options);
-	}
-	
-	private static String getOldAPICompatibleResult(String string, TextEdit edit, int indentationLevel, int[] positions, String lineSeparator, Map options) {
-		Position[] p= null;
-		
-		if (positions != null) {
-			p= new Position[positions.length];
-			for (int i= 0; i < positions.length; i++) {
-				p[i]= new Position(positions[i], 0);
+			return source;
+		} else {
+			Document document= new Document(source);
+			try {
+				edit.apply(document, TextEdit.NONE);
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e); // bug in the formatter
+				Assert.isTrue(false, "Formatter created edits with wrong positions: " + e.getMessage()); //$NON-NLS-1$
 			}
+			return document.get();
 		}
-		String res= evaluateFormatterEdit(string, edit, p);
-		
-		if (positions != null) {
-			for (int i= 0; i < positions.length; i++) {
-				Position curr= p[i];
-				positions[i]= curr.getOffset();
-			}
-		}			
-		return res;
 	}
-	
+
 	/**
-	 * Evaluates the edit on the given string.
-	 * @throws IllegalArgumentException If the positions are not inside the string, a
-	 *  IllegalArgumentException is thrown.
+	 * Creates edits that describe how to format the given string. 
+	 * Returns <code>null</code> if the code could not be formatted for the given kind.
+	 * 
+	 * @param kind
+	 *        Use to specify the kind of the code snippet to format. 
+	 *        It can be any of the kind constants defined in {@link CodeFormatter}
+	 * @param source
+	 *        The source to format
+	 * @param offset 
+	 *        The given offset to start recording the edits (inclusive).
+	 * @param length the given length to stop recording the edits (exclusive).
+	 * @param indentationLevel
+	 *        The initial indentation level, used to shift left/right the entire source fragment. 
+	 *        An initial indentation level of zero or below has no effect.
+	 * @param lineSeparator
+	 *        The line separator to use in formatted source, 
+	 *        if set to <code>null</code>, then the platform default one will be used.
+	 * @param options
+	 *        The options map to use for formatting with the default code formatter. 
+	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>. 
+	 *        If set to <code>null</code>, then use the current settings from <code>JavaCore#getOptions</code>.
+	 * @return an TextEdit describing the changes required to format source 
+	 * @throws IllegalArgumentException
+	 *         If the offset and length are not inside the string, a IllegalArgumentException is thrown.
 	 */
-	public static String evaluateFormatterEdit(String string, TextEdit edit, Position[] positions) {
-		try {
-			Document doc= createDocument(string, positions);
-			edit.apply(doc, 0);
-			if (positions != null) {
-				for (int i= 0; i < positions.length; i++) {
-					Assert.isTrue(!positions[i].isDeleted, "Position got deleted"); //$NON-NLS-1$
-				}
-			}
-			return doc.get();
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e); // bug in the formatter
-			Assert.isTrue(false, "Formatter created edits with wrong positions: " + e.getMessage()); //$NON-NLS-1$
+	public static TextEdit format2(int kind, String source, int offset, int length, int indentationLevel, String lineSeparator, Map options) {
+		if (offset < 0 || length < 0 || offset + length > source.length()) {
+			throw new IllegalArgumentException("offset or length outside of string. offset: " + offset + ", length: " + length + ", string size: " + source.length()); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 		}
-		return null;
+		return ToolFactory.createCodeFormatter(options).format(kind, source, offset, length, indentationLevel, lineSeparator);
 	}
-	
+
 	/**
-	 * Creates edits that describe how to format the given string. Returns <code>null</code> if the code could not be formatted for the given kind.
-	 * @throws IllegalArgumentException If the offset and length are not inside the string, a
-	 *  IllegalArgumentException is thrown.
+	 * Creates edits that describe how to format the given string. 
+	 * Returns <code>null</code> if the code could not be formatted for the given kind.
+	 * 
+	 * @param kind
+	 *        Use to specify the kind of the code snippet to format. 
+	 *        It can be any of the kind constants defined in {@link CodeFormatter}
+	 * @param source
+	 *        The source to format
+	 * @param indentationLevel
+	 *        The initial indentation level, used to shift left/right the entire source fragment. 
+	 *        An initial indentation level of zero or below has no effect.
+	 * @param lineSeparator
+	 *        The line separator to use in formatted source, 
+	 *        if set to <code>null</code>, then the platform default one will be used.
+	 * @param options
+	 *        The options map to use for formatting with the default code formatter. 
+	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>. 
+	 *        If set to <code>null</code>, then use the current settings from <code>JavaCore#getOptions</code>.
+	 * @return an TextEdit describing the changes required to format source 
+	 * @throws IllegalArgumentException
+	 *         If the offset and length are not inside the string, a IllegalArgumentException is thrown.
 	 */
-	public static TextEdit format2(int kind, String string, int offset, int length, int indentationLevel, String lineSeparator, Map options) {
-		if (offset < 0 || length < 0 || offset + length > string.length()) {
-			throw new IllegalArgumentException("offset or length outside of string. offset: " + offset + ", length: " + length + ", string size: " + string.length());   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-		}
-		return ToolFactory.createCodeFormatter(options).format(kind, string, offset, length, indentationLevel, lineSeparator);
+	public static TextEdit format2(int kind, String source, int indentationLevel, String lineSeparator, Map options) {
+		return format2(kind, source, 0, source.length(), indentationLevel, lineSeparator, options);
 	}
-	
-	public static TextEdit format2(int kind, String string, int indentationLevel, String lineSeparator, Map options) {
-		return format2(kind, string, 0, string.length(), indentationLevel, lineSeparator, options);
-	}
-	
-	public static TextEdit reformat(int kind, String string, int offset, int length, int indentationLevel, String lineSeparator, Map options) {
-		if (offset < 0 || length < 0 || offset + length > string.length()) {
-			throw new IllegalArgumentException("offset or length outside of string. offset: " + offset + ", length: " + length + ", string size: " + string.length());   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-		}
-		return ToolFactory.createCodeFormatter(options, ToolFactory.M_FORMAT_EXISTING).format(kind, string, offset, length, indentationLevel, lineSeparator);
-	}
-	
-	public static TextEdit reformat(int kind, String string, int indentationLevel, String lineSeparator, Map options) {
-		return reformat(kind, string, 0, string.length(), indentationLevel, lineSeparator, options);
-	}
-	
+
 	/**
-	 * Creates edits that describe how to format the given string. Returns <code>null</code> if the code could not be formatted for the given kind.
-	 * @throws IllegalArgumentException If the offset and length are not inside the string, a
-	 *  IllegalArgumentException is thrown.
+	 * Creates edits that describe how to re-format the given string. 
+	 * This method should be used for formatting existing code.
+	 * Returns <code>null</code> if the code could not be formatted for the given kind.
+	 * 
+	 * @param kind
+	 *        Use to specify the kind of the code snippet to format. 
+	 *        It can be any of the kind constants defined in {@link CodeFormatter}
+	 * @param source
+	 *        The source to format
+	 * @param offset 
+	 *        The given offset to start recording the edits (inclusive).
+	 * @param length the given length to stop recording the edits (exclusive).
+	 * @param indentationLevel
+	 *        The initial indentation level, used to shift left/right the entire source fragment. 
+	 *        An initial indentation level of zero or below has no effect.
+	 * @param lineSeparator
+	 *        The line separator to use in formatted source, 
+	 *        if set to <code>null</code>, then the platform default one will be used.
+	 * @param options
+	 *        The options map to use for formatting with the default code formatter. 
+	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>. 
+	 *        If set to <code>null</code>, then use the current settings from <code>JavaCore#getOptions</code>.
+	 * @return an TextEdit describing the changes required to format source 
+	 * @throws IllegalArgumentException
+	 *         If the offset and length are not inside the string, a IllegalArgumentException is thrown.
 	 */
-	public static TextEdit format2(ASTNode node, String str, int indentationLevel, String lineSeparator, Map options) {
+	public static TextEdit reformat(int kind, String source, int offset, int length, int indentationLevel, String lineSeparator, Map options) {
+		if (offset < 0 || length < 0 || offset + length > source.length()) {
+			throw new IllegalArgumentException("offset or length outside of string. offset: " + offset + ", length: " + length + ", string size: " + source.length()); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+		}
+		return ToolFactory.createCodeFormatter(options, ToolFactory.M_FORMAT_EXISTING).format(kind, source, offset, length, indentationLevel, lineSeparator);
+	}
+
+	/**
+	 * Creates edits that describe how to re-format the given string. 
+	 * This method should be used for formatting existing code.
+	 * Returns <code>null</code> if the code could not be formatted for the given kind.
+	 * 
+	 * @param kind
+	 *        Use to specify the kind of the code snippet to format. 
+	 *        It can be any of the kind constants defined in {@link CodeFormatter}
+	 * @param source
+	 *        The source to format
+	 * @param indentationLevel
+	 *        The initial indentation level, used to shift left/right the entire source fragment. 
+	 *        An initial indentation level of zero or below has no effect.
+	 * @param lineSeparator
+	 *        The line separator to use in formatted source, 
+	 *        if set to <code>null</code>, then the platform default one will be used.
+	 * @param options
+	 *        The options map to use for formatting with the default code formatter. 
+	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>. 
+	 *        If set to <code>null</code>, then use the current settings from <code>JavaCore#getOptions</code>.
+	 * @return an TextEdit describing the changes required to format source 
+	 * @throws IllegalArgumentException
+	 *         If the offset and length are not inside the string, a IllegalArgumentException is thrown.
+	 */
+	public static TextEdit reformat(int kind, String source, int indentationLevel, String lineSeparator, Map options) {
+		return reformat(kind, source, 0, source.length(), indentationLevel, lineSeparator, options);
+	}
+
+	/**
+	 * Creates edits that describe how to format the given string.
+	 * The given node is used to infer the kind to use to format the string.
+	 * Consider to use {@link #format2(int, String, int, String, Map)} if the kind is already known.
+	 * Returns <code>null</code> if the code could not be formatted for the given kind.
+	 * 
+	 * @param node
+	 *        Use to infer the kind of the code snippet to format.
+	 * @param source
+	 *        The source to format
+	 * @param indentationLevel
+	 *        The initial indentation level, used to shift left/right the entire source fragment. 
+	 *        An initial indentation level of zero or below has no effect.
+	 * @param lineSeparator
+	 *        The line separator to use in formatted source, 
+	 *        if set to <code>null</code>, then the platform default one will be used.
+	 * @param options
+	 *        The options map to use for formatting with the default code formatter. 
+	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>. 
+	 *        If set to <code>null</code>, then use the current settings from <code>JavaCore#getOptions</code>.
+	 * @return an TextEdit describing the changes required to format source 
+	 * @throws IllegalArgumentException
+	 *         If the offset and length are not inside the string, a IllegalArgumentException is thrown.
+	 */
+	public static TextEdit format2(ASTNode node, String source, int indentationLevel, String lineSeparator, Map options) {
 		int code;
 		String prefix= ""; //$NON-NLS-1$
 		String suffix= ""; //$NON-NLS-1$
@@ -291,7 +381,7 @@ public class CodeFormatterUtil {
 					prefix= "A "; //$NON-NLS-1$
 					suffix= ";"; //$NON-NLS-1$
 					code= CodeFormatter.K_STATEMENTS;
-					break;			
+					break;
 				case ASTNode.PACKAGE_DECLARATION:
 				case ASTNode.IMPORT_DECLARATION:
 					suffix= "\nclass A {}"; //$NON-NLS-1$
@@ -317,7 +407,7 @@ public class CodeFormatterUtil {
 					break;
 				case ASTNode.MODIFIER:
 					suffix= " class x {}"; //$NON-NLS-1$
-					code= CodeFormatter.K_COMPILATION_UNIT;				
+					code= CodeFormatter.K_COMPILATION_UNIT;
 					break;
 				case ASTNode.TYPE_PARAMETER:
 					prefix= "class X<"; //$NON-NLS-1$
@@ -330,75 +420,19 @@ public class CodeFormatterUtil {
 				case ASTNode.TAG_ELEMENT:
 				case ASTNode.TEXT_ELEMENT:
 					// Javadoc formatting not yet supported:
-				    return null;
+					return null;
 				default:
 					//Assert.isTrue(false, "Node type not covered: " + node.getClass().getName()); //$NON-NLS-1$
 					return null;
 			}
 		}
-		
-		String concatStr= prefix + str + suffix;
-		TextEdit edit= ToolFactory.createCodeFormatter(options).format(code, concatStr, prefix.length(), str.length(), indentationLevel, lineSeparator);
-		if (prefix.length() > 0) {
-			edit= shifEdit(edit, prefix.length());
-		}		
+
+		String concatStr= prefix + source + suffix;
+		TextEdit edit= format2(code, concatStr, prefix.length(), source.length(), indentationLevel, lineSeparator, options);
+		if (edit != null && prefix.length() > 0) {
+			edit.moveTree(-prefix.length());
+		}
 		return edit;
-	}	
-			
-	private static TextEdit shifEdit(TextEdit oldEdit, int diff) {
-		TextEdit newEdit;
-		if (oldEdit instanceof ReplaceEdit) {
-			ReplaceEdit edit= (ReplaceEdit) oldEdit;
-			newEdit= new ReplaceEdit(edit.getOffset() - diff, edit.getLength(), edit.getText());
-		} else if (oldEdit instanceof InsertEdit) {
-			InsertEdit edit= (InsertEdit) oldEdit;
-			newEdit= new InsertEdit(edit.getOffset() - diff,  edit.getText());
-		} else if (oldEdit instanceof DeleteEdit) {
-			DeleteEdit edit= (DeleteEdit) oldEdit;
-			newEdit= new DeleteEdit(edit.getOffset() - diff,  edit.getLength());
-		} else if (oldEdit instanceof MultiTextEdit) {
-			newEdit= new MultiTextEdit();			
-		} else {
-			return null; // not supported
-		}
-		TextEdit[] children= oldEdit.getChildren();
-		for (int i= 0; i < children.length; i++) {
-			TextEdit shifted= shifEdit(children[i], diff);
-			if (shifted != null) {
-				newEdit.addChild(shifted);
-			}
-		}
-		return newEdit;
 	}
-		
-	private static Document createDocument(String string, Position[] positions) throws IllegalArgumentException {
-		Document doc= new Document(string);
-		try {
-			if (positions != null) {
-				final String POS_CATEGORY= "myCategory"; //$NON-NLS-1$
-				
-				doc.addPositionCategory(POS_CATEGORY);
-				doc.addPositionUpdater(new DefaultPositionUpdater(POS_CATEGORY) {
-					protected boolean notDeleted() {
-						if (fOffset < fPosition.offset && (fPosition.offset + fPosition.length < fOffset + fLength)) {
-							fPosition.offset= fOffset + fLength; // deleted positions: set to end of remove
-							return false;
-						}
-						return true;
-					}
-				});
-				for (int i= 0; i < positions.length; i++) {
-					try {
-						doc.addPosition(POS_CATEGORY, positions[i]);
-					} catch (BadLocationException e) {
-						throw new IllegalArgumentException("Position outside of string. offset: " + positions[i].offset + ", length: " + positions[i].length + ", string size: " + string.length());   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-					}
-				}
-			}
-		} catch (BadPositionCategoryException cannotHappen) {
-			// can not happen: category is correctly set up
-		}
-		return doc;
-	}
-	
+
 }

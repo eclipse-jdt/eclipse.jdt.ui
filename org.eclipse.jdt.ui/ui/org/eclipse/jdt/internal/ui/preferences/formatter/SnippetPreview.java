@@ -63,7 +63,7 @@ public class SnippetPreview extends JavaPreview {
             final PreviewSnippet snippet= (PreviewSnippet) iter.next();
             String formattedSource;
             try {
-                formattedSource= CodeFormatterUtil.format(snippet.kind, snippet.source, 0, null, delimiter, fWorkingValues);
+                formattedSource= CodeFormatterUtil.format(snippet.kind, snippet.source, 0, delimiter, fWorkingValues);
             } catch (Exception e) {
                 final IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, 
                     FormatterMessages.JavaPreview_formatter_exception, e); 

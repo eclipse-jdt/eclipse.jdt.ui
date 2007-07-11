@@ -33,6 +33,8 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -108,20 +110,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 		if (position.offset >= documentsHeaderEnd) {
 			// not a header
 			try {
-				// compute offset in document of region passed to the formatter
-				int sourceOffset= document.getLineOffset(document.getLineOfOffset(position.getOffset()));
-
-				// format region
-				int partitionOffset= position.getOffset() - sourceOffset;
-				int sourceLength= partitionOffset + position.getLength();
-				String source= document.get(sourceOffset, sourceLength);
-				CodeFormatter commentFormatter= ToolFactory.createCodeFormatter(preferences, ToolFactory.M_FORMAT_EXISTING);
-				int indentationLevel= inferIndentationLevel(source.substring(0, partitionOffset), getTabSize(preferences), getIndentSize(preferences));
-				edit= commentFormatter.format(getKindForPartitionType(position.getType()), source, partitionOffset, position.getLength(), indentationLevel, TextUtilities.getDefaultLineDelimiter(document));
-
-				// move edit offset to match document
-				if (edit != null)
-					edit.moveTree(sourceOffset);
+				edit= formatRegion(position, document, preferences);
 			} catch (BadLocationException x) {
 				JavaPlugin.log(x);
 			}
@@ -139,20 +128,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 				preferences.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT, DefaultCodeFormatterConstants.TRUE);
 			
 			try {
-				// compute offset in document of region passed to the formatter
-				int sourceOffset= document.getLineOffset(document.getLineOfOffset(position.getOffset()));
-
-				// format region
-				int partitionOffset= position.getOffset() - sourceOffset;
-				int sourceLength= partitionOffset + position.getLength();
-				String source= document.get(sourceOffset, sourceLength);
-				CodeFormatter commentFormatter= ToolFactory.createCodeFormatter(preferences);
-				int indentationLevel= inferIndentationLevel(source.substring(0, partitionOffset), getTabSize(preferences), getIndentSize(preferences));
-				edit= commentFormatter.format(getKindForPartitionType(position.getType()), source, partitionOffset, position.getLength(), indentationLevel, TextUtilities.getDefaultLineDelimiter(document));
-
-				// move edit offset to match document
-				if (edit != null)
-					edit.moveTree(sourceOffset);
+				edit= formatRegion(position, document, preferences);
 			} catch (BadLocationException x) {
 				JavaPlugin.log(x);
 			} finally {
@@ -166,6 +142,23 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 
 		}
 		return edit;		
+	}
+
+	private TextEdit formatRegion(final TypedPosition region, final IDocument document, Map preferences) throws BadLocationException {
+		// compute offset in document of region passed to the formatter
+		int sourceOffset= document.getLineOffset(document.getLineOfOffset(region.getOffset()));
+
+		String intendString= document.get(sourceOffset, region.getOffset() - sourceOffset);
+		int indentationLevel= inferIndentationLevel(intendString, getTabSize(preferences), getIndentSize(preferences));
+		
+		String formatString= document.get(region.getOffset(), region.getLength());
+		TextEdit result= CodeFormatterUtil.reformat(getKindForPartitionType(region.getType()), formatString, indentationLevel, TextUtilities.getDefaultLineDelimiter(document), preferences);
+
+		// move edit offset to match document
+		if (result != null)
+			result.moveTree(region.getOffset());
+		
+		return result;
 	}
 
 	/*

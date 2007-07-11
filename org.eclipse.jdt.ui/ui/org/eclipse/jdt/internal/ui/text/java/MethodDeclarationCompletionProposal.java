@@ -172,7 +172,7 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
 		int lineStart= region.getOffset();
 		int indent= Strings.computeIndentUnits(document.get(lineStart, getReplacementOffset() - lineStart), settings.tabWidth, settings.indentWidth);
 
-		String replacement= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, stub, indent, null, lineDelim, fType.getJavaProject());
+		String replacement= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, stub, indent, lineDelim, fType.getJavaProject());
 
 		if (replacement.endsWith(lineDelim)) {
 			replacement= replacement.substring(0, replacement.length() - lineDelim.length());

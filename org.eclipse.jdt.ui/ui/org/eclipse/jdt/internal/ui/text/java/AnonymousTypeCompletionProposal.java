@@ -275,7 +275,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
 		int indent= Strings.computeIndentUnits(document.get(region.getOffset(), region.getLength()), project);
 
-		String replacement= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, buf.toString(), 0, null, lineDelim, project);
+		String replacement= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, buf.toString(), 0, lineDelim, project);
 		replacement= Strings.changeIndent(replacement, 0, project, CodeFormatterUtil.createIndentString(indent, project), lineDelim);
 		setReplacementString(replacement.substring(replacement.indexOf('(') + 1));
 
