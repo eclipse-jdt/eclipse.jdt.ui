@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.core.refactoring.descriptors;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
@@ -54,18 +52,13 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 
 		private final int fIndex;
 
-		private final String fParameterName;
-
 		/**
 		 * Creates a new parameter object. It is not recommended to call this constructor directly. 
 		 * Use {@link IntroduceParameterObjectDescriptor#createParameters(IMethod)} instead.
-		 * 
-		 * @param parameterName the name the parameter has in the method
 		 * @param index the index of the parameter in the method
 		 */
-		public Parameter(String parameterName, int index) {
+		public Parameter(int index) {
 			super();
-			fParameterName= parameterName;
 			fIndex= index;
 		}
 
@@ -90,17 +83,6 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 		 */
 		public int getIndex() {
 			return fIndex;
-		}
-
-		/**
-		 * The name of the parameter. The parameter object has the special name 
-		 * {@link IntroduceParameterObjectDescriptor#PARAMETER_OBJECT_ID}
-		 * 
-		 * @see IntroduceParameterObjectDescriptor#PARAMETER_OBJECT
-		 * @see IntroduceParameterObjectDescriptor#PARAMETER_OBJECT_ID
-		 */
-		public String getParameterName() {
-			return fParameterName;
 		}
 
 		/**
@@ -167,11 +149,6 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 	private static final String TOP_LEVEL= "top_level"; //$NON-NLS-1$
 
 	/**
-	 * The parameter name of the special parameter object. The value is "{parameterObject}".
-	 */
-	public static final String PARAMETER_OBJECT_ID= "{parameterObject}"; //$NON-NLS-1$
-
-	/**
 	 * The parameter index of the special parameter object. The value is "-1".
 	 */
 	public static final int PARAMETER_OBJECT_IDX= -1;
@@ -179,7 +156,7 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 	/**
 	 * Singleton instance that represents the parameter object
 	 */
-	public static final Parameter PARAMETER_OBJECT= new Parameter(PARAMETER_OBJECT_ID, PARAMETER_OBJECT_IDX);
+	public static final Parameter PARAMETER_OBJECT= new Parameter(PARAMETER_OBJECT_IDX);
 
 
 	/**
@@ -192,11 +169,11 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 	 * @throws JavaModelException if the method does not exist or if an exception occurs while accessing its corresponding resource
 	 */
 	public static Parameter[] createParameters(IMethod method) throws JavaModelException {
-		String[] parameterNames= method.getParameterNames();
-		Parameter[] result= new Parameter[parameterNames.length + 1];
+		int length= method.getNumberOfParameters();
+		Parameter[] result= new Parameter[length + 1];
 		result[0]= PARAMETER_OBJECT;
-		for (int i= 0; i < parameterNames.length; i++) {
-			result[i + 1]= new Parameter(parameterNames[i], i);
+		for (int i= 0; i < length; i++) {
+			result[i + 1]= new Parameter(i);
 			result[i + 1].setCreateField(true);
 		}
 		return result;
@@ -250,8 +227,9 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 	 * 			  all settings for this refactoring
 	 * @param flags
 	 *            the flags of the refactoring descriptor
+	 * @throws IllegalArgumentException if the argument map contains invalid keys/values            
 	 */
-	public IntroduceParameterObjectDescriptor(final String project, final String description, final String comment, final Map arguments, final int flags) {
+	public IntroduceParameterObjectDescriptor(final String project, final String description, final String comment, final Map arguments, final int flags) throws IllegalArgumentException {
 		super(IJavaRefactorings.INTRODUCE_PARAMETER_OBJECT, project, description, comment, arguments, flags);
 		initializeFromMap(arguments);
 	}
@@ -391,10 +369,10 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 		JavaRefactoringDescriptorUtil.setBoolean(fArguments, TOP_LEVEL, fTopLevel);
 	}
 
-	private void initializeFromMap(Map map) {
+	private void initializeFromMap(Map map) throws IllegalArgumentException {
 		IMethod method= (IMethod) JavaRefactoringDescriptorUtil.getJavaElement(map, ATTRIBUTE_INPUT, getProject());
 		setMethod(method);
-		initializeParameter(map, method);
+		initializeParameter(map);
 		setClassName(JavaRefactoringDescriptorUtil.getString(map, CLASS_NAME, true));
 		setPackageName(JavaRefactoringDescriptorUtil.getString(map, PACKAGE_NAME, true));
 		setParameterName(JavaRefactoringDescriptorUtil.getString(map, PARAMETER_NAME, true));
@@ -405,32 +383,23 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 		setTopLevel(JavaRefactoringDescriptorUtil.getBoolean(map, TOP_LEVEL));
 	}
 
-	private void initializeParameter(Map map, IMethod method) {
-		try {
-			Parameter[] params= createParameters(method);
-			int count= JavaRefactoringDescriptorUtil.getInt(map, PARAMETER_COUNT);
-			if (params.length != count) {
-				throw new IllegalArgumentException("The number of arguments in the method does not match the number of stored parameters"); //$NON-NLS-1$
+	private void initializeParameter(Map map) throws IllegalArgumentException {
+		int[] idx= JavaRefactoringDescriptorUtil.getIntArray(map, PARAMETER_COUNT, PARAMETER_IDX);
+		boolean[] createField= JavaRefactoringDescriptorUtil.getBooleanArray(map, PARAMETER_COUNT, PARAMETER_CREATE_FIELD);
+		Parameter[] result=new Parameter[idx.length];
+		for (int i= 0; i < idx.length; i++) {
+			int index= idx[i];
+			if (index == PARAMETER_OBJECT_IDX) {
+				result[i]= new Parameter(PARAMETER_OBJECT_IDX);
+			} else {
+				Parameter parameter= new Parameter(index);
+				result[i]= parameter;
+				parameter.setCreateField(createField[i]);
+				if (createField[i])
+					parameter.setFieldName(JavaRefactoringDescriptorUtil.getString(map, JavaRefactoringDescriptorUtil.getAttributeName(PARAMETER_FIELD_NAME, i)));
 			}
-			int[] idx= JavaRefactoringDescriptorUtil.getIntArray(map, PARAMETER_COUNT, PARAMETER_IDX);
-			boolean[] createField= JavaRefactoringDescriptorUtil.getBooleanArray(map, PARAMETER_COUNT, PARAMETER_CREATE_FIELD);
-			List resList= new ArrayList(count);
-			for (int i= 0; i < count; i++) {
-				int index= idx[i];
-				if (index == -1) //Indicator for added field. The only added field can be the parameter object
-					resList.add(params[0]);
-				else {
-					Parameter parameter= params[index];
-					resList.add(parameter);
-					parameter.setCreateField(createField[i]);
-					if (createField[i])
-						parameter.setFieldName(JavaRefactoringDescriptorUtil.getString(map, JavaRefactoringDescriptorUtil.getAttributeName(PARAMETER_FIELD_NAME, i)));
-				}
-			}
-			setParameters((Parameter[]) resList.toArray(new Parameter[resList.size()]));
-		} catch (JavaModelException e) {
-			throw new IllegalArgumentException("Exception while generating parameter objects:" + e.getMessage()); //$NON-NLS-1$
 		}
+		setParameters(result);
 	}
 
 	/**
@@ -567,7 +536,7 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 				if (parameter.isCreateField()) {
 					String fieldName= parameter.getFieldName();
 					if (fieldName == null)
-						result.addError("The parameter " + parameter.getParameterName() + " is marked for field creation but does not have a field name"); //$NON-NLS-1$ //$NON-NLS-2$
+						result.addError("The parameter " + parameter.getIndex() + " is marked for field creation but does not have a field name"); //$NON-NLS-1$ //$NON-NLS-2$
 					else {
 						result.merge(RefactoringStatus.create(JavaConventions.validateFieldName(fieldName, sourceLevel, complianceLevel)));
 					}

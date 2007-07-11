@@ -21,7 +21,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.refactoring.descriptors.RenameLocalVariableDescriptor;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 
@@ -82,11 +83,10 @@ public class RenameTempTests extends RefactoringTest{
 		assertEquals(1, elements.length);
 		assertTrue(elements[0].getClass().toString(), elements[0] instanceof ILocalVariable);
 
-		final RenameLocalVariableDescriptor descriptor= new RenameLocalVariableDescriptor();
-		descriptor.setCompilationUnit(cu);
+		final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_LOCAL_VARIABLE);
+		descriptor.setJavaElement(elements[0]);
 		descriptor.setNewName(newName);
 		descriptor.setUpdateReferences(updateReferences);
-		descriptor.setSelection(selection);
 
 		final RefactoringStatus status= new RefactoringStatus();
 		final Refactoring refactoring= descriptor.createRefactoring(status);
@@ -130,11 +130,10 @@ public class RenameTempTests extends RefactoringTest{
 		assertEquals(1, elements.length);
 		assertTrue(elements[0].getClass().toString(), elements[0] instanceof ILocalVariable);
 
-		final RenameLocalVariableDescriptor descriptor= new RenameLocalVariableDescriptor();
-		descriptor.setCompilationUnit(cu);
+		final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_LOCAL_VARIABLE);
+		descriptor.setJavaElement(elements[0]);
 		descriptor.setNewName(newName);
 		descriptor.setUpdateReferences(updateReferences);
-		descriptor.setSelection(selection);
 
 		final RefactoringStatus status= new RefactoringStatus();
 		final Refactoring refactoring= descriptor.createRefactoring(status);

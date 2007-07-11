@@ -523,7 +523,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 			if (pi.isAdded()) {
 				parameters.add(IntroduceParameterObjectDescriptor.PARAMETER_OBJECT);
 			} else {
-				IntroduceParameterObjectDescriptor.Parameter parameter= new IntroduceParameterObjectDescriptor.Parameter(pi.getOldName(), pi.getOldIndex());
+				IntroduceParameterObjectDescriptor.Parameter parameter= new IntroduceParameterObjectDescriptor.Parameter(pi.getOldIndex());
 				if (pi.isCreateField()){
 					parameter.setCreateField(true);
 					parameter.setFieldName(pi.getNewName());

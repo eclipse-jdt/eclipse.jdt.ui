@@ -24,7 +24,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 
@@ -132,7 +131,17 @@ public class JavaRefactoringDescriptorUtil {
 	}
 
 
-	public static String getString(Map map, String attribute, boolean allowNull) {
+	/**
+	 * Retrieves a {@link String} attribute from map.
+	 * 
+	 * @param map the map with <code>&lt;String, String&gt;</code> mapping
+	 * @param attribute the key in the map
+	 * @param allowNull if <code>true</code> a <code>null</code> will be returned if the attribute does not exist
+	 * @return the value of the attribute
+	 * 
+	 * @throws IllegalArgumentException if the value of the attribute is not a {@link String} or allowNull is <code>false</code> and the attribute does not exist
+	 */
+	public static String getString(Map map, String attribute, boolean allowNull) throws IllegalArgumentException {
 		Object object= map.get(attribute);
 		if (object == null) {
 			if (allowNull)
@@ -146,11 +155,29 @@ public class JavaRefactoringDescriptorUtil {
 		throw new IllegalArgumentException("The provided map does not contain a string for attribute '" + attribute + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	public static String getString(Map map, String attribute) {
+	/**
+	 * Retrieves a {@link String} attribute from map.
+	 * 
+	 * @param map the map with <code>&lt;String, String&gt;</code> mapping
+	 * @param attribute the key in the map
+	 * @return the value of the attribute
+	 * 
+	 * @throws IllegalArgumentException if the value of the attribute is not a {@link String} or the attribute does not exist
+	 */
+	public static String getString(Map map, String attribute)  throws IllegalArgumentException {
 		return getString(map, attribute, false);
 	}
 
-	public static int getInt(Map map, String attribute) {
+	/**
+	 * Retrieves an <code>int</code> attribute from map.
+	 * 
+	 * @param map the map with <code>&lt;String, String&gt;</code> mapping
+	 * @param attribute the key in the map
+	 * @return the value of the attribute
+	 * 
+	 * @throws IllegalArgumentException if the attribute does not exist or is not a number
+	 */
+	public static int getInt(Map map, String attribute)  throws IllegalArgumentException{
 		String value= getString(map, attribute);
 		try {
 			return Integer.parseInt(value);
@@ -158,8 +185,18 @@ public class JavaRefactoringDescriptorUtil {
 			throw new IllegalArgumentException("The attribute '" + attribute + "' does not contain a valid int '" + value + "'"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 		}
 	}
-
-	public static int[] getIntArray(Map map, String countAttribute, String arrayAttribute) {
+	
+	/**
+	 * Retrieves an <code>int[]</code> attribute from map.
+	 * 
+	 * @param countAttribute the attribute that contains the number of elements
+	 * @param arrayAttribute the attribute name where the values are stored. The index starting from '0' is appended to this
+	 * @param map the map with <code>&lt;String, String&gt;</code> mapping
+	 * @return the <code>int[]</code>
+	 * 
+	 * @throws IllegalArgumentException if any of the attribute does not exist or is not a number
+	 */
+	public static int[] getIntArray(Map map, String countAttribute, String arrayAttribute)  throws IllegalArgumentException {
 		int count= getInt(map, countAttribute);
 		int[] result= new int[count];
 		for (int i= 0; i < count; i++) {
@@ -168,145 +205,65 @@ public class JavaRefactoringDescriptorUtil {
 		return result;
 	}
 
+	/**
+	 * Create the name for accessing the ith element of an attribute.
+	 * 
+	 * @param attribute the base attribute 
+	 * @param index the index that should be accessed
+	 * @return the attribute name for the ith element of an attribute
+	 */
 	public static String getAttributeName(String attribute, int index) {
 		return attribute + index;
 	}
 
-	public static IJavaElement getJavaElement(Map map, String attribute, String project) {
+	/**
+	 * Retrieves an <code>{@link IJavaElement}</code> attribute from map.
+	 * 
+	 * @param map the map with <code>&lt;String, String&gt;</code> mapping
+	 * @param attribute the key in the map
+	 * @param project the project for resolving the java element. Can be <code>null</code> for workspace
+	 * @return a {@link IJavaElement} or <code>null</code>
+	 * 
+	 * @throws IllegalArgumentException if the attribute does not exist or is not a java element
+	 * @see #handleToElement(WorkingCopyOwner, String, String, boolean)
+	 */
+	public static IJavaElement getJavaElement(Map map, String attribute, String project)  throws IllegalArgumentException{
 		return getJavaElement(map, attribute, project, false);
 	}
 
-	public static IJavaElement getJavaElement(Map map, String attribute, String project, boolean allowNull) {
+	/**
+	 * Retrieves an <code>{@link IJavaElement}</code> attribute from map.
+	 * 
+	 * @param map the map with <code>&lt;String, String&gt;</code> mapping
+	 * @param attribute the key in the map
+	 * @param project the project for resolving the java element. Can be <code>null</code> for workspace
+	 * @param allowNull if <code>true</code> a <code>null</code> will be returned if the attribute does not exist
+	 * @return a {@link IJavaElement} or <code>null</code>
+	 * 
+	 * @throws IllegalArgumentException if the attribute does not existt
+	 * @see #handleToElement(WorkingCopyOwner, String, String, boolean)
+	 */
+	public static IJavaElement getJavaElement(Map map, String attribute, String project, boolean allowNull)  throws IllegalArgumentException{
 		String handle= getString(map, attribute, allowNull);
 		if (handle != null)
 			return handleToElement(null, project, handle, true);
 		return null;
 	}
-	
-	public static IResource getResource(Map map, String attribute, String project) {
-		String handle= getString(map, attribute);
-		return handleToResource(project, handle);
-	}
-
-	public static boolean[] getBooleanArray(Map map, String countAttribute, String arrayAttribute) {
-		int count= getInt(map, countAttribute);
-		boolean[] result= new boolean[count];
-		for (int i= 0; i < count; i++) {
-			result[i]= getBoolean(map, getAttributeName(arrayAttribute, i));
-		}
-		return result;
-	}
-
-	public static boolean getBoolean(Map map, String attribute) {
-		String value= getString(map, attribute).toLowerCase();
-		//Boolean.valueOf(value) does not complain about wrong values
-		if (LOWER_CASE_TRUE.equals(value))
-			return true;
-		if (LOWER_CASE_FALSE.equals(value))
-			return false;
-		throw new IllegalArgumentException("The attribute '" + attribute + "' does not contain a valid boolean '" + value + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	}
-
-	public static ISourceRange getSelection(Map map, String attribute) {
-		String value= getString(map, attribute);
-		String[] split= value.split(" "); //$NON-NLS-1$
-		if (split.length != 2)
-			throw new IllegalArgumentException("The attribute '" + attribute + "' does not contain valid selection information '" + value + "'"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-		try {
-			final int offSet= Integer.parseInt(split[0]);
-			final int length= Integer.parseInt(split[1]);
-			return new ISourceRange() {
-
-				public int getOffset() {
-					return offSet;
-				}
-
-				public int getLength() {
-					return length;
-				}
-
-			};
-		} catch (NumberFormatException e) {
-			throw new IllegalArgumentException("The attribute '" + attribute + "' does not contain valid selection information '" + value + "'"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-		}
-	}
-
-	public static void setJavaElement(Map arguments, String attribute, String project, IJavaElement element) {
-		setString(arguments, attribute, elementToHandle(project, element));
-	}
-
-	public static void setResource(Map arguments, String attribute, String project, IResource resource) {
-		setString(arguments, attribute, resourceToHandle(project, resource));
-	}
-
-	public static void setInt(Map arguments, String attribute, int value) {
-		setString(arguments, attribute, Integer.toString(value));
-	}
-
-	public static void setBoolean(Map arguments, String attribute, boolean value) {
-		setString(arguments, attribute, value ? LOWER_CASE_TRUE : LOWER_CASE_FALSE);
-	}
-
-	public static void setString(Map arguments, String attribute, String value) {
-		if (attribute == null || "".equals(attribute) || attribute.indexOf(' ') != -1) //$NON-NLS-1$
-			throw new IllegalArgumentException("Attribute '" + attribute + "' is not valid"); //$NON-NLS-1$//$NON-NLS-2$
-		if (value != null)
-			arguments.put(attribute, value);
-	}
-
-	public static void setSelection(Map arguments, String attribute, int offset, int length) {
-		String value= Integer.toString(offset) + " " + Integer.toString(length); //$NON-NLS-1$
-		setString(arguments, attribute, value);
-	}
-
-	public static void setResourceArray(Map arguments, String countAttribute, String arrayAttribute, String project, IResource[] resources, int offset) {
-		if (countAttribute != null)
-			setInt(arguments, countAttribute, resources.length);
-		for (int i= 0; i < resources.length; i++) {
-			IResource resource= resources[i];
-			setResource(arguments, getAttributeName(arrayAttribute, offset + i), project, resource);
-		}
-	}
-
-	public static void setJavaElementArray(Map arguments, String countAttribute, String arrayAttribute, String project, IJavaElement[] elements, int offset) {
-		if (countAttribute != null)
-			setInt(arguments, countAttribute, elements.length);
-		for (int i= 0; i < elements.length; i++) {
-			IJavaElement element= elements[i];
-			setJavaElement(arguments, getAttributeName(arrayAttribute, offset + i), project, element);
-		}
-	}
 
 	/**
+	 * Retrieves an <code>IJavaElement[]</code> attribute from map.
 	 * 
-	 * @param map
-	 * @param countAttribute
-	 * @param arrayAttribute
-	 * @param offset
-	 * @param project
-	 * @param arrayClass the array component type. The array will safely be castable to arrayClass[] afterward
-	 * @return an array of resources
-	 */
-	public static IResource[] getResourceArray(Map map, String countAttribute, String arrayAttribute, int offset, String project, Class arrayClass) {
-		int count= getInt(map, countAttribute);
-		IResource[] result= (IResource[]) Array.newInstance(arrayClass, count);
-		for (int i= 0; i < count; i++) {
-			result[i]= getResource(map, getAttributeName(arrayAttribute, i + offset), project);
-		}
-		return result;
-	}
-
-	/**
+	 * @param map the map with <code>&lt;String, String&gt;</code> mapping
+	 * @param countAttribute the attribute that contains the number of elements. Can be <code>null</code> to indicate that no count attribute exists
+	 * @param arrayAttribute the attribute name where the values are stored. The index starting from offset is appended to this
+	 * @param offset the starting index for arrayAttribute
+	 * @param project the project for resolving the java element. Can be <code>null</code> for workspace
+	 * @param arrayClass the component type for the resulting array. The resulting array can then be safely casted to arrayClass[] 
+	 * @return the <code>IJavaElement[]</code>
 	 * 
-	 * @param map
-	 * @param countAttribute
-	 * @param arrayAttribute
-	 * @param offset
-	 * @param project
-	 * @param arrayClass the array component type. The array will safely be castable to arrayClass[] afterward
-	 * @return an array of javaelements
+	 * @throws IllegalArgumentException if any of the attribute does not exist or is not a number
 	 */
-	public static IJavaElement[] getJavaElementArray(Map map, String countAttribute, String arrayAttribute, int offset, String project, Class arrayClass) {
+	public static IJavaElement[] getJavaElementArray(Map map, String countAttribute, String arrayAttribute, int offset, String project, Class arrayClass)  throws IllegalArgumentException{
 		if (countAttribute != null) {
 			int count= getInt(map, countAttribute);
 			IJavaElement[] result= (IJavaElement[]) Array.newInstance(arrayClass, count);
@@ -323,4 +280,216 @@ public class JavaRefactoringDescriptorUtil {
 			return (IJavaElement[]) result.toArray((Object[]) Array.newInstance(arrayClass, result.size()));
 		}
 	}
+	
+	/**
+	 * Retrieves an <code>{@link IResource}</code> attribute from map.
+	 * 
+	 * @param map the map with <code>&lt;String, String&gt;</code> mapping
+	 * @param attribute the key in the map
+	 * @param project the project for resolving the resource. Can be <code>null</code> for workspace
+	 * @return the <code>{@link IResource}</code> or <code>null</code>
+	 * 
+	 * @throws IllegalArgumentException if the attribute does not exist
+	 * @see #handleToResource(String, String)
+	 */
+	public static IResource getResource(Map map, String attribute, String project)  throws IllegalArgumentException {
+		String handle= getString(map, attribute);
+		return handleToResource(project, handle);
+	}
+
+	/**
+	 * Retrieves an <code>IResource[]</code> attribute from map.
+	 * 
+	 * @param map the map with <code>&lt;String, String&gt;</code> mapping
+	 * @param countAttribute the attribute that contains the number of elements. Can be <code>null</code> to indicate that no count attribute exists
+	 * @param arrayAttribute the attribute name where the values are stored. The index starting from offset is appended to this
+	 * @param offset the starting index for arrayAttribute
+	 * @param project the project for resolving the java element. Can be <code>null</code> for workspace
+	 * @param arrayClass the component type for the resulting array. The resulting array can then be safely casted to arrayClass[] 
+	 * @return the <code>IResource[]</code>
+	 * 
+	 * @throws IllegalArgumentException if any of the attribute does not exist or is not a number
+	 */
+	public static IResource[] getResourceArray(Map map, String countAttribute, String arrayAttribute, int offset, String project, Class arrayClass)  throws IllegalArgumentException{
+		int count= getInt(map, countAttribute);
+		IResource[] result= (IResource[]) Array.newInstance(arrayClass, count);
+		for (int i= 0; i < count; i++) {
+			result[i]= getResource(map, getAttributeName(arrayAttribute, i + offset), project);
+		}
+		return result;
+	}
+	
+	/**
+	 * Retrieves a <code>boolean[]</code> attribute from map.
+	 * 
+	 * @param countAttribute the attribute that contains the number of elements
+	 * @param arrayAttribute the attribute name where the values are stored. The index starting from '0' is appended to this
+	 * @param map the map with <code>&lt;String, String&gt;</code> mapping
+	 * @return the <code>boolean[]</code>
+	 * 
+	 * @throws IllegalArgumentException if any of the attribute does not exist or is not a boolean
+	 */
+	public static boolean[] getBooleanArray(Map map, String countAttribute, String arrayAttribute)  throws IllegalArgumentException{
+		int count= getInt(map, countAttribute);
+		boolean[] result= new boolean[count];
+		for (int i= 0; i < count; i++) {
+			result[i]= getBoolean(map, getAttributeName(arrayAttribute, i));
+		}
+		return result;
+	}
+
+	/**
+	 * Retrieves a <code>boolean</code> attribute from map.
+	 * 
+	 * @param map the map with <code>&lt;String, String&gt;</code> mapping
+	 * @param attribute the key in the map
+	 * @return the <code>boolean</code> value of the attribute
+	 * 
+	 * @throws IllegalArgumentException if the attribute does not exist or is not a boolean
+	 */
+	public static boolean getBoolean(Map map, String attribute)  throws IllegalArgumentException{
+		String value= getString(map, attribute).toLowerCase();
+		//Boolean.valueOf(value) does not complain about wrong values
+		if (LOWER_CASE_TRUE.equals(value))
+			return true;
+		if (LOWER_CASE_FALSE.equals(value))
+			return false;
+		throw new IllegalArgumentException("The attribute '" + attribute + "' does not contain a valid boolean: '" + value + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
+	/**
+	 * Inserts the <code>{@link IJavaElement}</code> into the map.
+	 * 
+	 * @param arguments the map with <code>&lt;String, String&gt;</code> mapping
+	 * @param attribute the key's name for the map 
+	 * @param project the project of the element or <code>null</code>
+	 * @param element the element to store
+	 * 
+	 * @throws IllegalArgumentException if the attribute name is invalid, or the element is <code>null</code>
+	 */
+	public static void setJavaElement(Map arguments, String attribute, String project, IJavaElement element)  throws IllegalArgumentException{
+		if (element == null)
+			throw new IllegalArgumentException("The element for attribute '" + attribute + "' may not be null"); //$NON-NLS-1$ //$NON-NLS-2$
+		setString(arguments, attribute, elementToHandle(project, element));
+	}
+	
+	/**
+	 * Inserts the <code>{@link IResource}</code> into the map.
+	 * 
+	 * @param arguments the map with <code>&lt;String, String&gt;</code> mapping
+	 * @param attribute the key's name for the map 
+	 * @param project the project of the element or <code>null</code>
+	 * @param resource the resource to store
+	 * 
+	 * @throws IllegalArgumentException if the attribute name is invalid, or the resource is <code>null</code>
+	 */
+	public static void setResource(Map arguments, String attribute, String project, IResource resource)  throws IllegalArgumentException{
+		if (resource == null)
+			throw new IllegalArgumentException("The resource for attribute '" + attribute + "' may not be null");  //$NON-NLS-1$//$NON-NLS-2$
+		setString(arguments, attribute, resourceToHandle(project, resource));
+	}
+
+	/**
+	 * Inserts the <code>int</code> into the map.
+	 * 
+	 * @param arguments the map with <code>&lt;String, String&gt;</code> mapping
+	 * @param attribute the key's name for the map 
+	 * @param value the <code>int</code> to store
+	 * 
+	 * @throws IllegalArgumentException if the attribute name is invalid
+	 */
+	public static void setInt(Map arguments, String attribute, int value)  throws IllegalArgumentException{
+		setString(arguments, attribute, Integer.toString(value));
+	}
+
+	/**
+	 * Inserts the <code>boolean</code> into the map.
+	 * 
+	 * @param arguments the map with <code>&lt;String, String&gt;</code> mapping
+	 * @param attribute the key's name for the map 
+	 * @param value the <code>boolean</code> to store
+	 * 
+	 * @throws IllegalArgumentException if the attribute name is invalid
+	 */
+	public static void setBoolean(Map arguments, String attribute, boolean value)  throws IllegalArgumentException{
+		setString(arguments, attribute, value ? LOWER_CASE_TRUE : LOWER_CASE_FALSE);
+	}
+
+	/**
+	 * Inserts the <code>{@link String}</code> into the map.
+	 * 
+	 * @param arguments the map with <code>&lt;String, String&gt;</code> mapping
+	 * @param attribute the key's name for the map 
+	 * @param value the <code>{@link String}</code> to store. If <code>null</code> no insertion is performed
+	 * 
+	 * @throws IllegalArgumentException if the attribute name is invalid
+	 */
+	public static void setString(Map arguments, String attribute, String value)  throws IllegalArgumentException{
+		if (attribute == null || "".equals(attribute) || attribute.indexOf(' ') != -1) //$NON-NLS-1$
+			throw new IllegalArgumentException("Attribute '" + attribute + "' is not valid: '" + value + "'"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		if (value != null)
+			arguments.put(attribute, value);
+	}
+
+	/**
+	 * Inserts the selection into the map.
+	 * 
+	 * @param arguments the map with <code>&lt;String, String&gt;</code> mapping
+	 * @param attribute the key's name for the map 
+	 * @param offset the offset of the selection
+	 * @param length the length of the selection
+	 * 
+	 * @throws IllegalArgumentException if the attribute name is invalid
+	 */
+	public static void setSelection(Map arguments, String attribute, int offset, int length)  throws IllegalArgumentException{
+		String value= Integer.toString(offset) + " " + Integer.toString(length); //$NON-NLS-1$
+		setString(arguments, attribute, value);
+	}
+
+	/**
+	 * Inserts the resources into the map.
+	 * 
+	 * @param arguments arguments the map with <code>&lt;String, String&gt;</code> mapping
+	 * @param countAttribute the attribute where the number of resources will be stored. Can be <code>null</code> if no count attribute should be created
+	 * @param arrayAttribute the attribute where the resources will be stored
+	 * @param project the project of the resources or <code>null</code>
+	 * @param resources the resources to store 
+	 * @param offset the offset to start at
+	 * 
+	 * @throws IllegalArgumentException if the attribute name is invalid or any of the resources are null
+	 */
+	public static void setResourceArray(Map arguments, String countAttribute, String arrayAttribute, String project, IResource[] resources, int offset)  throws IllegalArgumentException{
+		if (resources == null)
+			throw new IllegalArgumentException("The resources for countAttribute '" + countAttribute + "' may not be null"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (countAttribute != null)
+			setInt(arguments, countAttribute, resources.length);
+		for (int i= 0; i < resources.length; i++) {
+			IResource resource= resources[i];
+			setResource(arguments, getAttributeName(arrayAttribute, offset + i), project, resource);
+		}
+	}
+
+	/**
+	 * Inserts the resources into the map.
+	 * 
+	 * @param arguments arguments the map with <code>&lt;String, String&gt;</code> mapping
+	 * @param countAttribute the attribute where the number of elements will be stored. Can be <code>null</code> if no count attribute should be created
+	 * @param arrayAttribute the attribute where the elements will be stored
+	 * @param project the project of the elements or <code>null</code>
+	 * @param elements the elements to store 
+	 * @param offset the offset to start at
+	 * 
+	 * @throws IllegalArgumentException if the attribute name is invalid or any of the elements are null
+	 */
+	public static void setJavaElementArray(Map arguments, String countAttribute, String arrayAttribute, String project, IJavaElement[] elements, int offset)  throws IllegalArgumentException{
+		if (elements == null)
+			throw new IllegalArgumentException("The elements for countAttribute '" + countAttribute + "' may not be null"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (countAttribute != null)
+			setInt(arguments, countAttribute, elements.length);
+		for (int i= 0; i < elements.length; i++) {
+			IJavaElement element= elements[i];
+			setJavaElement(arguments, getAttributeName(arrayAttribute, offset + i), project, element);
+		}
+	}
+
 }
