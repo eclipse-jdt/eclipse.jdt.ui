@@ -252,7 +252,15 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			String[] buttons= new String[] {
 				MultiFixMessages.CleanUpRefactoringWizard_Configure_Button
 			};
-			final ListDialogField settingsField= new ListDialogField(listAdapter, buttons, tableLabelProvider);
+			final ListDialogField settingsField= new ListDialogField(listAdapter, buttons, tableLabelProvider) {
+				/**
+				 * {@inheritDoc}
+				 */
+				protected int getListStyle() {
+					return super.getListStyle() | SWT.SINGLE;
+//					return  SWT.BORDER | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION;
+				}
+			};
 			
 			String[] headerNames= new String[] {
 					MultiFixMessages.CleanUpRefactoringWizard_Project_TableHeader, 
