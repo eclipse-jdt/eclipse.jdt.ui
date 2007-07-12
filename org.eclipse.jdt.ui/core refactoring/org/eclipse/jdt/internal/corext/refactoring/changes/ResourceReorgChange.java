@@ -32,21 +32,17 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
 abstract class ResourceReorgChange extends JDTChange {
 	
-	private final IPath fResourcePath;
-	private final boolean fIsFile;
-	private final IPath fDestinationPath;
-	private final boolean fIsDestinationProject;
 	private final INewNameQuery fNewNameQuery;
+	private final IResource fSource;
+	private final IContainer fTarget;
 
 	ResourceReorgChange(IResource res, IContainer dest, INewNameQuery nameQuery){
-		Assert.isTrue(res instanceof IFile || res instanceof IFolder);
-		fIsFile= (res instanceof IFile);
-		fResourcePath= Utils.getResourcePath(res);
-	
+		Assert.isTrue(res instanceof IFile || res instanceof IFolder);	
 		Assert.isTrue(dest instanceof IProject || dest instanceof IFolder);
-		fIsDestinationProject= (dest instanceof IProject);
-		fDestinationPath= Utils.getResourcePath(dest);
+		
 		fNewNameQuery= nameQuery;
+		fSource= res;
+		fTarget= dest;
 	}
 	
 	protected abstract Change doPerformReorg(IPath path, IProgressMonitor pm) throws CoreException;
@@ -119,27 +115,13 @@ abstract class ResourceReorgChange extends JDTChange {
 	public Object getModifiedElement() {
 		return getResource();
 	}
-
-	private IFile getFile(){
-		return Utils.getFile(fResourcePath);
-	}
-	
-	private IFolder getFolder(){
-		return Utils.getFolder(fResourcePath);
-	}
 	
 	protected IResource getResource(){
-		if (fIsFile)
-			return getFile();
-		else
-			return getFolder();
+		return fSource;
 	}
 	
 	IContainer getDestination(){
-		if (fIsDestinationProject)
-			return Utils.getProject(fDestinationPath);
-		else
-			return Utils.getFolder(fDestinationPath);	
+		return fTarget;	
 	}
 
 	protected int getReorgFlags() {

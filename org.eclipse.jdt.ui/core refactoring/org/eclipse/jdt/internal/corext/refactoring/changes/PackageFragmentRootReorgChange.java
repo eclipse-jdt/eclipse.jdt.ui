@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import org.eclipse.core.resources.mapping.ResourceMapping;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -21,6 +19,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -40,17 +40,17 @@ import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 abstract class PackageFragmentRootReorgChange extends JDTChange {
 
 	private final String fRootHandle;
-	private final IPath fDestinationPath;
 	private final INewNameQuery fNewNameQuery;
 	private final IPackageFragmentRootManipulationQuery fUpdateClasspathQuery;
+	private final IProject fDestination;
 	
 	PackageFragmentRootReorgChange(IPackageFragmentRoot root, IProject destination, INewNameQuery newNameQuery, 
 			IPackageFragmentRootManipulationQuery updateClasspathQuery) {
 		Assert.isTrue(! root.isExternal());
 		fRootHandle= root.getHandleIdentifier();
-		fDestinationPath= Utils.getResourcePath(destination);
 		fNewNameQuery= newNameQuery;
 		fUpdateClasspathQuery= updateClasspathQuery;
+		fDestination= destination;
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
@@ -86,11 +86,11 @@ abstract class PackageFragmentRootReorgChange extends JDTChange {
 	}
 	
 	protected IPath getDestinationProjectPath(){
-		return fDestinationPath;
+		return fDestination.getFullPath().removeFirstSegments(ResourcesPlugin.getWorkspace().getRoot().getFullPath().segmentCount());
 	}
 
 	protected IProject getDestinationProject(){
-		return Utils.getProject(getDestinationProjectPath());
+		return fDestination;
 	}
 	
 	private String getNewResourceName() throws OperationCanceledException {

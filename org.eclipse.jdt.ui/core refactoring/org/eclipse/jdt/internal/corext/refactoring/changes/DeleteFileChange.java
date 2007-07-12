@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -27,24 +26,24 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class DeleteFileChange extends AbstractDeleteChange {
 
-	private final IPath fPath;
 	private final boolean fIsExecuteChange;
+	private final IFile fFile;
 	
 	public DeleteFileChange(IFile file, boolean executeChange) {
 		Assert.isNotNull(file, "file");  //$NON-NLS-1$
-		fPath= Utils.getResourcePath(file);
 		fIsExecuteChange= executeChange;
+		fFile= file;
 	}
 	
 	private IFile getFile(){
-		return Utils.getFile(fPath);
+		return fFile;
 	}
 	
 	/* non java-doc
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		return Messages.format(RefactoringCoreMessages.DeleteFileChange_1, fPath.lastSegment()); 
+		return Messages.format(RefactoringCoreMessages.DeleteFileChange_1, fFile.getName()); 
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
