@@ -100,7 +100,7 @@ class OverwriteHelper {
 	private void confirmOverwritting(IReorgQueries reorgQueries) {
 		IConfirmQuery overwriteQuery= reorgQueries.createYesYesToAllNoNoToAllQuery(RefactoringCoreMessages.OverwriteHelper_0, true, IReorgQueries.CONFIRM_OVERWRITING); 
 		IConfirmQuery skipQuery= reorgQueries.createSkipQuery(RefactoringCoreMessages.OverwriteHelper_2, IReorgQueries.CONFIRM_SKIPPING); 
-		confirmFileOverwritting(overwriteQuery);
+		confirmFileOverwritting(overwriteQuery, skipQuery);
 		confirmFolderOverwritting(skipQuery);
 		confirmCuOverwritting(overwriteQuery);	
 		confirmPackageFragmentRootOverwritting(skipQuery);	
@@ -133,19 +133,27 @@ class OverwriteHelper {
 		List foldersToNotOverwrite= new ArrayList(1);
 		for (int i= 0; i < fFolders.length; i++) {
 			IFolder folder= fFolders[i];
-			if (canOverwrite(folder) && ! skip(folder.getName(), overwriteQuery))
+			if (willOverwrite(folder) && ! skip(folder.getName(), overwriteQuery))
 				foldersToNotOverwrite.add(folder);				
 		}
 		IFolder[] folders= (IFolder[]) foldersToNotOverwrite.toArray(new IFolder[foldersToNotOverwrite.size()]);
 		fFolders= ArrayTypeConverter.toFolderArray(ReorgUtils.setMinus(fFolders, folders));
 	}
 
-	private void confirmFileOverwritting(IConfirmQuery overwriteQuery) {
+	private void confirmFileOverwritting(IConfirmQuery overwriteQuery, IConfirmQuery skipQuery) {
 		List filesToNotOverwrite= new ArrayList(1);
 		for (int i= 0; i < fFiles.length; i++) {
 			IFile file= fFiles[i];
-			if (canOverwrite(file) && ! overwrite(file, overwriteQuery))
-				filesToNotOverwrite.add(file);
+			if (willOverwrite(file)) {
+				IContainer destination= (IContainer) ResourceUtil.getResource(fDestination);
+				if (ParentChecker.isDescendantOf(file, destination.findMember(file.getName()))) {
+					if (!skip(file.getName(), skipQuery)) {
+						filesToNotOverwrite.add(file);
+					}
+				} else if (!overwrite(file, overwriteQuery)) {
+					filesToNotOverwrite.add(file);
+				}
+			}
 		}
 		IFile[] files= (IFile[]) filesToNotOverwrite.toArray(new IFile[filesToNotOverwrite.size()]);
 		fFiles= ArrayTypeConverter.toFileArray(ReorgUtils.setMinus(fFiles, files));
@@ -168,7 +176,10 @@ class OverwriteHelper {
 		return ! destination.equals(pack.getParent()) && destination.getPackageFragment(pack.getElementName()).exists();
 	}
 
-	private boolean canOverwrite(IResource resource) {
+	/*
+	 * Will resource override a member of destination? 
+	 */
+	private boolean willOverwrite(IResource resource) {
 		if (resource == null)
 			return false;
 		IResource destinationResource= ResourceUtil.getResource(fDestination);
@@ -208,7 +219,7 @@ class OverwriteHelper {
 			IPackageFragment destination= (IPackageFragment)fDestination;
 			return ! destination.equals(cu.getParent()) && destination.getCompilationUnit(cu.getElementName()).exists();
 		} else {
-			return canOverwrite(ReorgUtils.getResource(cu));
+			return willOverwrite(ReorgUtils.getResource(cu));
 		}
 	}
 

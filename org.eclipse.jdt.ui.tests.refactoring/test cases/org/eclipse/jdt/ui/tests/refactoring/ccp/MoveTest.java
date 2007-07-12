@@ -17,12 +17,20 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -36,24 +44,59 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IConfirmQuery;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
+import org.eclipse.jdt.internal.corext.refactoring.structure.JavaMoveRefactoring;
+
+import org.eclipse.jdt.internal.ui.refactoring.reorg.CreateTargetQueries;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jdt.ui.tests.refactoring.ParticipantTesting;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
-import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
-
 
 public class MoveTest extends RefactoringTest {
+
+	private static final class ConfirmAllQuery implements IReorgQueries {
+		public IConfirmQuery createSkipQuery(String queryTitle, int queryID) {
+			return new IConfirmQuery() {
+				public boolean confirm(String question) throws OperationCanceledException {
+					return false;
+				}
+				public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
+					return false;
+				}
+			};
+		}
+
+		public IConfirmQuery createYesNoQuery(String queryTitle, boolean allowCancel, int queryID) {
+			return new IConfirmQuery() {
+				public boolean confirm(String question) throws OperationCanceledException {
+					return true;
+				}
+				public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
+					return true;
+				}
+			};
+		}
+
+		public IConfirmQuery createYesYesToAllNoNoToAllQuery(String queryTitle, boolean allowCancel, int queryID) {
+			return new IConfirmQuery() {
+				public boolean confirm(String question) throws OperationCanceledException {
+					return true;
+				}
+				public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
+					return true;
+				}
+			};
+		}
+	}
 
 	public MoveTest(String name) {
 		super(name);
@@ -1864,5 +1907,54 @@ public class MoveTest extends RefactoringTest {
 			performDummySearch();
 			safeDelete(cu);
 		}
+	}
+	
+	public void testDestination_bug79318() throws Exception{
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
+		IFolder folder= superFolder.getFolder("bar");
+		folder.create(true, true, null);
+		IFile file= folder.getFile("bar");
+		file.create(getStream("123"), true, null);
+		
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {file};
+			
+			move(javaElements, resources, superFolder);
+			
+			assertIsParent(folder, file);
+			assertIsParent(superFolder, folder);
+		}finally{
+			performDummySearch();
+			safeDelete(file);
+		}
+	}	
+	
+	private static void assertIsParent(IContainer parent, IResource child) {
+		assertTrue(child.getParent().equals(parent));
+	}
+
+	public void move(IJavaElement[] javaElements, IResource[] resources, IResource destination) throws Exception {
+		assertNotNull(javaElements);
+		assertNotNull(resources);
+		assertNotNull(destination);
+		
+		assertTrue(destination.exists());
+		for (int i= 0; i < resources.length; i++) {
+			assertTrue(resources[i].exists());
+		}
+		
+		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(resources, javaElements);
+		assertTrue(policy.canEnable());
+		
+		JavaMoveProcessor processor= new JavaMoveProcessor(policy);
+		assertTrue(processor.setDestination(destination).isOK());
+		
+		JavaMoveRefactoring ref= new JavaMoveRefactoring(processor);
+		
+		processor.setCreateTargetQueries(new CreateTargetQueries(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()));
+		processor.setReorgQueries(new ConfirmAllQuery());
+		
+		performRefactoring(ref);
 	}
 }
