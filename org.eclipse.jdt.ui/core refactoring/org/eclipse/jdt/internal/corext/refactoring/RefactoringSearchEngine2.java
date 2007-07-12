@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
@@ -459,8 +460,10 @@ public final class RefactoringSearchEngine2 {
 	 * @param monitor the progress monitor, or <code>null</code>
 	 * @throws JavaModelException if an error occurs during search
 	 */
-	public final void searchPattern(final IProgressMonitor monitor) throws JavaModelException {
+	public final void searchPattern(IProgressMonitor monitor) throws JavaModelException {
 		Assert.isNotNull(fPattern);
+		if (monitor == null)
+			monitor=  new NullProgressMonitor();
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.RefactoringSearchEngine_searching_occurrences); 
@@ -486,8 +489,10 @@ public final class RefactoringSearchEngine2 {
 	 * @param monitor the progress monitor, or <code>null</code>
 	 * @throws JavaModelException if an error occurs during search
 	 */
-	public final void searchReferencedFields(final IJavaElement element, final IProgressMonitor monitor) throws JavaModelException {
+	public final void searchReferencedFields(final IJavaElement element, IProgressMonitor monitor) throws JavaModelException {
 		Assert.isNotNull(element);
+		if (monitor == null)
+			monitor=  new NullProgressMonitor();
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.RefactoringSearchEngine_searching_referenced_fields); 
@@ -513,8 +518,10 @@ public final class RefactoringSearchEngine2 {
 	 * @param monitor the progress monitor, or <code>null</code>
 	 * @throws JavaModelException if an error occurs during search
 	 */
-	public final void searchReferencedMethods(final IJavaElement element, final IProgressMonitor monitor) throws JavaModelException {
+	public final void searchReferencedMethods(final IJavaElement element, IProgressMonitor monitor) throws JavaModelException {
 		Assert.isNotNull(element);
+		if (monitor == null)
+			monitor=  new NullProgressMonitor();
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.RefactoringSearchEngine_searching_referenced_methods); 
@@ -540,8 +547,10 @@ public final class RefactoringSearchEngine2 {
 	 * @param monitor the progress monitor, or <code>null</code>
 	 * @throws JavaModelException if an error occurs during search
 	 */
-	public final void searchReferencedTypes(final IJavaElement element, final IProgressMonitor monitor) throws JavaModelException {
+	public final void searchReferencedTypes(final IJavaElement element, IProgressMonitor monitor) throws JavaModelException {
 		Assert.isNotNull(element);
+		if (monitor == null)
+			monitor=  new NullProgressMonitor();
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.RefactoringSearchEngine_searching_referenced_types); 
@@ -558,20 +567,6 @@ public final class RefactoringSearchEngine2 {
 		} finally {
 			monitor.done();
 		}
-	}
-
-	/**
-	 * Sets the conjunction of search patterns to be used during search.
-	 * <p>
-	 * This method must be called before {@link RefactoringSearchEngine2#searchPattern(IProgressMonitor)}
-	 * 
-	 * @param first the first search pattern to set
-	 * @param second the second search pattern to set
-	 */
-	public final void setAndPattern(final SearchPattern first, final SearchPattern second) {
-		Assert.isNotNull(first);
-		Assert.isNotNull(second);
-		fPattern= SearchPattern.createAndPattern(first, second);
 	}
 
 	/**
