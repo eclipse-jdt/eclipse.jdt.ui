@@ -21,10 +21,8 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDescriptorUtil;
 
 /**
@@ -166,9 +164,8 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 	 * @param method derive parameter from this method
 	 * @return an array of parameter corresponding to the parameter declared in the method. The first object 
 	 * 			will be the parameter object. All parameter are marked for field creation 
-	 * @throws JavaModelException if the method does not exist or if an exception occurs while accessing its corresponding resource
 	 */
-	public static Parameter[] createParameters(IMethod method) throws JavaModelException {
+	public static Parameter[] createParameters(IMethod method) {
 		int length= method.getNumberOfParameters();
 		Parameter[] result= new Parameter[length + 1];
 		result[0]= PARAMETER_OBJECT;
@@ -344,20 +341,15 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 		JavaRefactoringDescriptorUtil.setJavaElement(fArguments, ATTRIBUTE_INPUT, getProject(), fMethod);
 		Parameter[] parameters= fParameters;
 		if (parameters == null) {
-			try {
-				parameters= createParameters(fMethod);
-			} catch (JavaModelException e) {
-				JavaManipulationPlugin.log(e);
-			}
-		} else {
-			JavaRefactoringDescriptorUtil.setInt(fArguments, PARAMETER_COUNT, parameters.length);
-			for (int i= 0; i < parameters.length; i++) {
-				Parameter param= parameters[i];
-				JavaRefactoringDescriptorUtil.setInt(fArguments, JavaRefactoringDescriptorUtil.getAttributeName(PARAMETER_IDX, i), param.getIndex());
-				JavaRefactoringDescriptorUtil.setBoolean(fArguments, JavaRefactoringDescriptorUtil.getAttributeName(PARAMETER_CREATE_FIELD, i), param.isCreateField());
-				if (param.isCreateField())
-					JavaRefactoringDescriptorUtil.setString(fArguments, JavaRefactoringDescriptorUtil.getAttributeName(PARAMETER_FIELD_NAME, i), param.getFieldName());
-			}
+			parameters= createParameters(fMethod);
+		}
+		JavaRefactoringDescriptorUtil.setInt(fArguments, PARAMETER_COUNT, parameters.length);
+		for (int i= 0; i < parameters.length; i++) {
+			Parameter param= parameters[i];
+			JavaRefactoringDescriptorUtil.setInt(fArguments, JavaRefactoringDescriptorUtil.getAttributeName(PARAMETER_IDX, i), param.getIndex());
+			JavaRefactoringDescriptorUtil.setBoolean(fArguments, JavaRefactoringDescriptorUtil.getAttributeName(PARAMETER_CREATE_FIELD, i), param.isCreateField());
+			if (param.isCreateField())
+				JavaRefactoringDescriptorUtil.setString(fArguments, JavaRefactoringDescriptorUtil.getAttributeName(PARAMETER_FIELD_NAME, i), param.getFieldName());
 		}
 		JavaRefactoringDescriptorUtil.setString(fArguments, CLASS_NAME, fClassName);
 		JavaRefactoringDescriptorUtil.setString(fArguments, PACKAGE_NAME, fPackageName);
