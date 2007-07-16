@@ -97,6 +97,7 @@ public final class JavaModelUtil {
 	 * @param jproject The java project to search in
 	 * @param fullyQualifiedName The fully qualified name (type name with enclosing type names and package (all separated by dots))
 	 * @return The type found, or null if not existing
+	 * 	@throws JavaModelException thrown when the project can not be accessed
 	 */	
 	public static IType findType(IJavaProject jproject, String fullyQualifiedName) throws JavaModelException {
 		//workaround for bug 22883
@@ -119,6 +120,7 @@ public final class JavaModelUtil {
 	 * @param fullyQualifiedName The fully qualified name (type name with enclosing type names and package (all separated by dots))
 	 * @param owner the working copy owner
 	 * @return The type found, or null if not existing
+	 * @throws JavaModelException thrown when the project can not be accessed
 	 */	
 	public static IType findType(IJavaProject jproject, String fullyQualifiedName, WorkingCopyOwner owner) throws JavaModelException {
 		//workaround for bug 22883
@@ -180,6 +182,8 @@ public final class JavaModelUtil {
 	 * <code>null</code> is returned if the type container could not be found.
 	 * @param jproject The Java project defining the context to search
 	 * @param typeContainerName A dot separated name of the type container
+	 * @return returns the container
+	 * @throws JavaModelException thrown when the project can not be accessed
 	 * @see #getTypeContainerName(IType)
 	 */
 	public static IJavaElement findTypeContainer(IJavaProject jproject, String typeContainerName) throws JavaModelException {
@@ -203,6 +207,7 @@ public final class JavaModelUtil {
 	 * @param cu the compilation unit to search in
 	 * @param typeQualifiedName the type qualified name (type name with enclosing type names (separated by dots))
 	 * @return the type found, or null if not existing
+	 * @throws JavaModelException thrown when the cu can not be accessed
 	 */		
 	public static IType findTypeInCompilationUnit(ICompilationUnit cu, String typeQualifiedName) throws JavaModelException {
 		IType[] types= cu.getAllTypes();
@@ -237,6 +242,8 @@ public final class JavaModelUtil {
 	 * This is a replace for IType.getTypeQualifiedName()
 	 * which uses '$' as separators. As '$' is also a valid character in an id
 	 * this is ambiguous. JavaCore PR: 1GCFUNT
+	 * @param type the type
+	 * @return the type qualified name
 	 */
 	public static String getTypeQualifiedName(IType type) {
 		try {
@@ -257,6 +264,8 @@ public final class JavaModelUtil {
 	 * This is a replace for IType.getFullyQualifiedTypeName
 	 * which uses '$' as separators. As '$' is also a valid character in an id
 	 * this is ambiguous. JavaCore PR: 1GCFUNT
+	 * @param type the type
+	 * @return the fully qualified name
 	 */
 	public static String getFullyQualifiedName(IType type) {
 		try {
@@ -274,6 +283,8 @@ public final class JavaModelUtil {
 	
 	/**
 	 * Returns the fully qualified name of a type's container. (package name or enclosing type name)
+	 * @param type the type
+	 * @return the type container name
 	 */
 	public static String getTypeContainerName(IType type) {
 		IType outerType= type.getDeclaringType();
@@ -288,6 +299,9 @@ public final class JavaModelUtil {
 	/**
 	 * Concatenates two names. Uses a dot for separation.
 	 * Both strings can be empty or <code>null</code>.
+	 * @param name1 the first name
+	 * @param name2 the second name
+	 * @return the concatenated name
 	 */
 	public static String concatenateName(String name1, String name2) {
 		StringBuffer buf= new StringBuffer();
@@ -306,6 +320,9 @@ public final class JavaModelUtil {
 	/**
 	 * Concatenates two names. Uses a dot for separation.
 	 * Both strings can be empty or <code>null</code>.
+	 * @param name1 the first string
+	 * @param name2 the second string
+	 * @return the concatenated string
 	 */
 	public static String concatenateName(char[] name1, char[] name2) {
 		StringBuffer buf= new StringBuffer();
@@ -326,6 +343,8 @@ public final class JavaModelUtil {
 	 * elements in a package.
 	 * @param member The member to test the visibility for
 	 * @param pack The package in focus
+	 * @return returns <code>true</code> if the member is visible from the package
+	 * @throws JavaModelException thrown when the member can not be accessed
 	 */
 	public static boolean isVisible(IMember member, IPackageFragment pack) throws JavaModelException {
 		
@@ -351,6 +370,8 @@ public final class JavaModelUtil {
 	 * elements in a package.
 	 * @param member The member to test the visibility for
 	 * @param pack The package of the focus element focus
+	 * @return returns <code>true</code> if the member is visible from the package
+	 * @throws JavaModelException thrown when the member can not be accessed
 	 */
 	public static boolean isVisibleInHierarchy(IMember member, IPackageFragment pack) throws JavaModelException {
 		int type= member.getElementType();
@@ -375,6 +396,8 @@ public final class JavaModelUtil {
 	/**
 	 * Returns the package fragment root of <code>IJavaElement</code>. If the given
 	 * element is already a package fragment root, the element itself is returned.
+	 * @param element the element 
+	 * @return the package fragment root of the element or <code>null</code>
 	 */
 	public static IPackageFragmentRoot getPackageFragmentRoot(IJavaElement element) {
 		return (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
@@ -388,7 +411,9 @@ public final class JavaModelUtil {
 	 * @param name The name of the method to find
 	 * @param paramTypes The type signatures of the parameters e.g. <code>{"QString;","I"}</code>
 	 * @param isConstructor If the method is a constructor
-	 * @return The first found method or <code>null</code>, if nothing found
+	 * @param type the type
+	 * @return The first found method or <code>null</code>, if nothing foun
+	 * @throws JavaModelException thrown when the type can not be accessed
 	 */
 	public static IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IType type) throws JavaModelException {
 		IMethod[] methods= type.getMethods();
@@ -412,6 +437,7 @@ public final class JavaModelUtil {
 	 * @param paramTypes The type signatures of the parameters e.g. <code>{"QString;","I"}</code>
 	 * @param isConstructor If the method is a constructor
 	 * @return The first found method or <code>null</code>, if nothing found
+	 * @throws JavaModelException thrown when the type can not be accessed
 	 */
 	public static IMethod findMethodInHierarchy(ITypeHierarchy hierarchy, IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
 		IMethod method= findMethod(name, paramTypes, isConstructor, type);
@@ -446,7 +472,9 @@ public final class JavaModelUtil {
 	 * @param name Name of the method
 	 * @param paramTypes The type signatures of the parameters e.g. <code>{"QString;","I"}</code>
 	 * @param isConstructor Specifies if the method is a constructor
+	 * @param curr the method
 	 * @return Returns <code>true</code> if the method has the given name and parameter types and constructor state.
+	 * @throws JavaModelException thrown when the method can not be accessed
 	 */
 	public static boolean isSameMethodSignature(String name, String[] paramTypes, boolean isConstructor, IMethod curr) throws JavaModelException {
 		if (isConstructor || name.equals(curr.getElementName())) {
@@ -469,6 +497,8 @@ public final class JavaModelUtil {
 
 	/**
 	 * Tests if two <code>IPackageFragment</code>s represent the same logical java package.
+	 * @param pack1 the first package
+	 * @param pack2 the second package
 	 * @return <code>true</code> if the package fragments' names are equal.
 	 */
 	public static boolean isSamePackage(IPackageFragment pack1, IPackageFragment pack2) {
@@ -477,6 +507,9 @@ public final class JavaModelUtil {
 	
 	/**
 	 * Checks whether the given type has a valid main method or not.
+	 * @param type the type to test
+	 * @return returns <code>true</code> if the type has a main method
+	 * @throws JavaModelException thrown when the type can not be accessed
 	 */
 	public static boolean hasMainMethod(IType type) throws JavaModelException {
 		IMethod[] methods= type.getMethods();
@@ -490,13 +523,18 @@ public final class JavaModelUtil {
 	
 	/**
 	 * Checks if the field is boolean.
+	 * @param field the field
+	 * @return returns <code>true</code> if the field returns a boolean
+	 * @throws JavaModelException thrown when the field can not be accessed
 	 */
 	public static boolean isBoolean(IField field) throws JavaModelException{
 		return field.getTypeSignature().equals(Signature.SIG_BOOLEAN);
 	}
 	
 	/**
+	 * @param type the type to test
 	 * @return <code>true</code> iff the type is an interface or an annotation
+	 * @throws JavaModelException thrown when the field can not be accessed
 	 */
 	public static boolean isInterfaceOrAnnotation(IType type) throws JavaModelException {
 		return type.isInterface();
@@ -508,6 +546,7 @@ public final class JavaModelUtil {
 	 * @param refTypeSig the type name in signature notation (for example 'QVector') this can also be an array type, but dimensions will be ignored.
 	 * @param declaringType the context for resolving (type where the reference was made in)
 	 * @return returns the fully qualified type name or build-in-type name. if a unresolved type couldn't be resolved null is returned
+	 * @throws JavaModelException thrown when the type can not be accessed
 	 */
 	public static String getResolvedTypeName(String refTypeSig, IType declaringType) throws JavaModelException {
 		int arrayCount= Signature.getArrayCount(refTypeSig);
@@ -536,6 +575,8 @@ public final class JavaModelUtil {
 	
 	/**
 	 * Returns if a CU can be edited.
+	 * @param cu the compilation unit 
+	 * @return <code>true</code> if the CU can be edited
 	 */
 	public static boolean isEditable(ICompilationUnit cu)  {
 		Assert.isNotNull(cu);
@@ -544,56 +585,9 @@ public final class JavaModelUtil {
 	}
 
 	/**
-	 * Returns the original if the given member. If the member is already
-	 * an original the input is returned. The returned member might not exist
-	 * 
-	 * @deprecated Replace by IMember#getPrimaryElement() if <code>member</code> is not part
-	 * of a shared working copy owner. Also have a look at http://bugs.eclipse.org/bugs/show_bug.cgi?id=18568
-	 */
-	public static IMember toOriginal(IMember member) {
-		if (member instanceof IMethod)
-			return toOriginalMethod((IMethod)member);
-
-		// TODO: remove toOriginalMethod(IMethod)
-
-		return (IMember) member.getPrimaryElement();
-		/*ICompilationUnit cu= member.getCompilationUnit();
-		if (cu != null && cu.isWorkingCopy())
-			return (IMember)cu.getOriginal(member);
-		return member;*/
-	}
-	
-	/*
-	 * TODO remove if toOriginal(IMember) can be removed
-	 * XXX workaround for bug 18568
-	 * http://bugs.eclipse.org/bugs/show_bug.cgi?id=18568
-	 * to be removed once the bug is fixed
-	 */
-	private static IMethod toOriginalMethod(IMethod method) {
-		ICompilationUnit cu= method.getCompilationUnit();
-		if (cu == null || isPrimary(cu)) {
-			return method;
-		}
-		try{
-			//use the workaround only if needed	
-			if (! method.getElementName().equals(method.getDeclaringType().getElementName()))
-				return (IMethod) method.getPrimaryElement();
-			
-			IType originalType = (IType) toOriginal(method.getDeclaringType());
-			IMethod[] methods = originalType.findMethods(method);
-			boolean isConstructor = method.isConstructor();
-			for (int i=0; i < methods.length; i++) {
-			  if (methods[i].isConstructor() == isConstructor) 
-				return methods[i];
-			}
-			return null;
-		} catch (JavaModelException e){
-			return null;
-		}	
-	}
-
-	/**
 	 * Returns true if a cu is a primary cu (original or shared working copy)
+	 * @param cu the compilation unit
+	 * @return return <code>true</code> if the CU is primary
 	 */
 	public static boolean isPrimary(ICompilationUnit cu) {
 		return cu.getOwner() == null;
@@ -631,18 +625,23 @@ public final class JavaModelUtil {
 	}
 
 	public static IType[] getAllSuperTypes(IType type, IProgressMonitor pm) throws JavaModelException {
-		// workaround for 23656
-		IType[] superTypes= SuperTypeHierarchyCache.getTypeHierarchy(type).getAllSupertypes(type);
-		if (type.isInterface()) {
-			IType objekt= type.getJavaProject().findType("java.lang.Object");//$NON-NLS-1$
-			if (objekt != null) {
-				IType[] superInterfacesAndObject= new IType[superTypes.length + 1];
-				System.arraycopy(superTypes, 0, superInterfacesAndObject, 0, superTypes.length);
-				superInterfacesAndObject[superTypes.length]= objekt;
-				return superInterfacesAndObject;
+		try {
+			// workaround for 23656
+			IType[] superTypes= SuperTypeHierarchyCache.getTypeHierarchy(type).getAllSupertypes(type);
+			if (type.isInterface()) {
+				IType objekt= type.getJavaProject().findType("java.lang.Object");//$NON-NLS-1$
+				if (objekt != null) {
+					IType[] superInterfacesAndObject= new IType[superTypes.length + 1];
+					System.arraycopy(superTypes, 0, superInterfacesAndObject, 0, superTypes.length);
+					superInterfacesAndObject[superTypes.length]= objekt;
+					return superInterfacesAndObject;
+				}
 			}
+			return superTypes;
+		} finally {
+			if (pm != null)
+				pm.done();
 		}
-		return superTypes;
 	}
 	
 	public static boolean isSuperType(ITypeHierarchy hierarchy, IType possibleSuperType, IType type) {
@@ -675,9 +674,12 @@ public final class JavaModelUtil {
 	}
 
 
-	/*
+	/**
 	 * Returns whether the given resource path matches one of the exclusion
 	 * patterns.
+	 * @param resourcePath the resource path
+	 * @param exclusionPatterns the exclusion patterns
+	 * @return returns <code> true</code> if the given resource path matches one of the exclusion
 	 * 
 	 * @see IClasspathEntry#getExclusionPatterns
 	 */
@@ -693,7 +695,8 @@ public final class JavaModelUtil {
 
 	/**
 	 * Force a reconcile of a compilation unit.
-	 * @param unit
+	 * @param unit the compilation unit
+	 * @throws JavaModelException thrown when the compilation unit can not be accessed
 	 */
 	public static void reconcile(ICompilationUnit unit) throws JavaModelException {
 		unit.reconcile(
@@ -794,6 +797,7 @@ public final class JavaModelUtil {
 	
 	/**
 	 * Sets all compliance settings in the given map to 5.0
+	 * @param map the map to update
 	 */
 	public static void set50CompilanceOptions(Map map) {
 		setCompilanceOptions(map, JavaCore.VERSION_1_5);
@@ -838,6 +842,8 @@ public final class JavaModelUtil {
 	}
 	
 	/**
+	 * @param version1 the first version
+	 * @param version2 the second version
 	 * @return returns if version 1 is less than version 2.
 	 */
 	public static boolean isVersionLessThan(String version1, String version2) {
@@ -931,8 +937,9 @@ public final class JavaModelUtil {
 		try {
 			IDocument document= null;
 			try {
-				document= aquireDocument(cu, new SubProgressMonitor(monitor, 1));
-				if (save) {
+				boolean[] needsSave= { save };
+				document= aquireDocument(cu, needsSave, new SubProgressMonitor(monitor, 1));
+				if (needsSave[0]) {
 					commitDocument(cu, document, edit, new SubProgressMonitor(monitor, 1));
 				} else {
 					new RewriteSessionEditProcessor(document, edit, TextEdit.UPDATE_REGIONS).performEdits();
@@ -947,12 +954,15 @@ public final class JavaModelUtil {
 		}		
 	}
 
-	private static IDocument aquireDocument(ICompilationUnit cu, IProgressMonitor monitor) throws CoreException {
+	private static IDocument aquireDocument(ICompilationUnit cu, boolean[] needsSave, IProgressMonitor monitor) throws CoreException {
 		if (JavaModelUtil.isPrimary(cu)) {
 			IFile file= (IFile) cu.getResource();
 			if (file.exists()) {
 				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
 				IPath path= cu.getPath();
+				if (!needsSave[0] && bufferManager.getTextFileBuffer(path, LocationKind.IFILE) == null) {
+					needsSave[0]= true;
+				}
 				bufferManager.connect(path, LocationKind.IFILE, monitor);
 				return bufferManager.getTextFileBuffer(path, LocationKind.IFILE).getDocument();
 			}
