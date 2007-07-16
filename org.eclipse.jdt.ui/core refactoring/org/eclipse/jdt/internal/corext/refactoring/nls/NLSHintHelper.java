@@ -55,7 +55,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeLiteral;
@@ -75,6 +75,10 @@ public class NLSHintHelper {
 
 	/**
 	 * Returns the accessor binding info or <code>null</code> if this element is not a nls'ed entry
+	 * 
+	 * @param astRoot the ast root
+	 * @param nlsElement the nls element
+	 * @return the accessor class reference or <code>null</code> if this element is not a nls'ed entry
 	 */
 	public static AccessorClassReference getAccessorClassReference(CompilationUnit astRoot, NLSElement nlsElement) {
 		IRegion region= nlsElement.getPosition();
@@ -83,68 +87,74 @@ public class NLSHintHelper {
 	
 	/**
 	 * Returns the accessor binding info or <code>null</code> if this element is not a nls'ed entry
+	 * 
+	 * @param astRoot the ast root
+	 * @param region the text region
+	 * @return the accessor class reference or <code>null</code> if this element is not a nls'ed entry
 	 */
 	public static AccessorClassReference getAccessorClassReference(CompilationUnit astRoot, IRegion region) {
 		ASTNode nlsStringLiteral= NodeFinder.perform(astRoot, region.getOffset(), region.getLength());
-		if (nlsStringLiteral == null) {
+		if (nlsStringLiteral == null)
 			return null; // not found
-		}
+
 		ASTNode parent= nlsStringLiteral.getParent();
 		
 		ITypeBinding accessorBinding= null;
-		if (parent instanceof MethodInvocation) {
-			MethodInvocation methodInvocation= (MethodInvocation) parent;
-			List args= methodInvocation.arguments();
-			if (args.indexOf(nlsStringLiteral) != 0) {
-				return null; // must be first argument in lookup method
-			}
+		
+		if (nlsStringLiteral instanceof SimpleName) {
+			SimpleName name= (SimpleName)nlsStringLiteral;
 			
-			Expression firstArgument= (Expression)args.get(0);
-			ITypeBinding argumentBinding= firstArgument.resolveTypeBinding();
-			if (argumentBinding == null || !argumentBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
-				return null;
-			}
-			
-			ITypeBinding typeBinding= methodInvocation.resolveTypeBinding();
-			if (typeBinding == null || !typeBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
-				return null;
-			}
-			
-			IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
-			if (methodBinding == null || !Modifier.isStatic(methodBinding.getModifiers())) {
-				return null; // only static methods qualify
-			}
-	
-			accessorBinding= methodBinding.getDeclaringClass();
-		} else if (parent instanceof QualifiedName) {
-			QualifiedName name= (QualifiedName)parent;
 			IBinding binding= name.resolveBinding();
-			if (!(binding instanceof IVariableBinding))
-				return null;
-			
-			IVariableBinding variableBinding= (IVariableBinding)binding;
-			if (!Modifier.isStatic(variableBinding.getModifiers()))
-				return null;
-			
-			accessorBinding= variableBinding.getDeclaringClass();
-		} else if (parent instanceof VariableDeclarationFragment) {
-			VariableDeclarationFragment decl= (VariableDeclarationFragment)parent;
-			if (decl.getInitializer() != null)
-				return null;
-			
-			IBinding binding= decl.resolveBinding();
-			if (!(binding instanceof IVariableBinding))
-				return null;
-			
-			IVariableBinding variableBinding= (IVariableBinding)binding;
-			if (!Modifier.isStatic(variableBinding.getModifiers()))
-				return null;
-			
-			if (!Modifier.isPublic(variableBinding.getModifiers()))
-				return null;
-			
-			accessorBinding= variableBinding.getDeclaringClass();
+			if (binding instanceof IVariableBinding) {
+				IVariableBinding variableBinding= (IVariableBinding)binding;
+				if (Modifier.isStatic(variableBinding.getModifiers()))
+					accessorBinding= variableBinding.getDeclaringClass();
+			}
 		}
+		
+		if (accessorBinding == null) {
+		
+			if (parent instanceof MethodInvocation) {
+				MethodInvocation methodInvocation= (MethodInvocation) parent;
+				List args= methodInvocation.arguments();
+				if (args.indexOf(nlsStringLiteral) != 0) {
+					return null; // must be first argument in lookup method
+				}
+				
+				Expression firstArgument= (Expression)args.get(0);
+				ITypeBinding argumentBinding= firstArgument.resolveTypeBinding();
+				if (argumentBinding == null || !argumentBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
+					return null;
+				}
+				
+				ITypeBinding typeBinding= methodInvocation.resolveTypeBinding();
+				if (typeBinding == null || !typeBinding.getQualifiedName().equals("java.lang.String")) { //$NON-NLS-1$
+					return null;
+				}
+				
+				IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+				if (methodBinding == null || !Modifier.isStatic(methodBinding.getModifiers())) {
+					return null; // only static methods qualify
+				}
+		
+				accessorBinding= methodBinding.getDeclaringClass();
+			} else if (parent instanceof VariableDeclarationFragment) {
+				VariableDeclarationFragment decl= (VariableDeclarationFragment)parent;
+				if (decl.getInitializer() != null)
+					return null;
+				
+				IBinding binding= decl.resolveBinding();
+				if (!(binding instanceof IVariableBinding))
+					return null;
+				
+				IVariableBinding variableBinding= (IVariableBinding)binding;
+				if (!Modifier.isStatic(variableBinding.getModifiers()))
+					return null;
+				
+				accessorBinding= variableBinding.getDeclaringClass();
+			}
+		}
+		
 		if (accessorBinding == null)
 			return null;
 		
