@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
@@ -94,13 +95,14 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		 */
 		public SupertypeSelectionDialog(final Shell shell) {
 			super(shell);
+			setHelpAvailable(false);
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public void create() {
-			setShellStyle(SWT.DIALOG_TRIM | SWT.RESIZE);
+			setShellStyle(getShellStyle() | SWT.RESIZE);
 			super.create();
 			getShell().setText(RefactoringMessages.ExtractSupertypeMemberPage_choose_type_caption);
 		}
@@ -118,15 +120,13 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 			fViewer.setContentProvider(new ArrayContentProvider());
 			fViewer.setComparator(new SupertypeSelectionViewerSorter());
 			fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-
 				public void selectionChanged(final SelectionChangedEvent event) {
-					setSelectionResult(((IStructuredSelection) fViewer.getSelection()).toArray());
+					performSelectionChanged(((IStructuredSelection) fViewer.getSelection()).toArray());
 				}
 			});
 			fViewer.addDoubleClickListener(new IDoubleClickListener() {
-
 				public void doubleClick(final DoubleClickEvent event) {
-					setSelectionResult(((IStructuredSelection) fViewer.getSelection()).toArray());
+					performSelectionChanged(((IStructuredSelection) fViewer.getSelection()).toArray());
 					close();
 				}
 			});
@@ -137,15 +137,25 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 			applyDialogFont(control);
 			return control;
 		}
+		
+		protected void performSelectionChanged(Object[] selection) {
+			setSelectionResult(selection);
+			getOkButton().setEnabled(selection.length != 0);
+		}
+		
 
 		/**
 		 * Sets the input of this dialog.
 		 * 
-		 * @param object
-		 *            the input
+		 * @param input
+		 *            the input elements
 		 */
-		public void setInput(final Object object) {
-			fViewer.setInput(object);
+		public void setInput(final Object[] input) {
+			fViewer.setInput(input);
+			if (input.length > 0) {
+				fViewer.setSelection(new StructuredSelection(input[0]));
+			}
+			getOkButton().setEnabled(!fViewer.getSelection().isEmpty());
 		}
 	}
 
@@ -425,6 +435,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	 * 
 	 * @param parent
 	 *            the parent control
+	 * @throws JavaModelException 
 	 */
 	protected void createSuperTypeList(final Composite parent) throws JavaModelException {
 		createSpacer(parent);
@@ -490,6 +501,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 
 	/**
 	 * Returns the extract supertype refactoring.
+	 * @return the refactoring
 	 */
 	public ExtractSupertypeRefactoring getExtractSuperTypeRefactoring() {
 		return (ExtractSupertypeRefactoring) getRefactoring();
