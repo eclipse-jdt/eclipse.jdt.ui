@@ -102,6 +102,12 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 		};
 	}
 	
+	/**
+	 * Sets a new name, validates the input, and returns the status.
+	 * 
+	 * @param newName the new name
+	 * @return validation status
+	 */
 	protected RefactoringStatus validateNewName(String newName) {
 		INameUpdating ref= getNameUpdating();
 		ref.setNewElementName(newName);
