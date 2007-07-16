@@ -16,8 +16,13 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -157,7 +162,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	private final RefactoringStatus performRefactoring(JavaCopyProcessor processor, boolean providesUndo) throws Exception {
-		return performRefactoring(new CopyRefactoring(processor), false);
+		return performRefactoring(new CopyRefactoring(processor), providesUndo);
 	}
 	
 	private static class MockNewNameQueries implements INewNameQueries{
@@ -1631,7 +1636,6 @@ public class CopyTest extends RefactoringTest {
 
 	public void test_type_canel_package() throws Exception{
 		ICompilationUnit cu= getPackageP().createCompilationUnit("A.java", "package p;class A{}", true, new NullProgressMonitor());
-		ICompilationUnit newCu= null;
 		try {
 			ParticipantTesting.reset();
 			IType type= cu.getType("A");
@@ -1656,8 +1660,6 @@ public class CopyTest extends RefactoringTest {
 			});
 		} finally {
 			performDummySearch();
-			if (newCu != null && newCu.exists())
-				newCu.delete(true, new NullProgressMonitor());
 			cu.delete(true, new NullProgressMonitor());
 		}
 	}
@@ -1918,7 +1920,6 @@ public class CopyTest extends RefactoringTest {
 		
 		IFolder destinationFolder= parentFolder;
 		
-		IFile newFile= null;
 		try {
 			INewNameQueries queries= new MockCancelNameQueries();
 
@@ -1944,8 +1945,6 @@ public class CopyTest extends RefactoringTest {
 		} finally {
 			performDummySearch();
 			file.delete(true, false, null);
-			if (newFile != null)
-				newFile.delete(true, false, null);
 		}
 	}
 	
@@ -2272,6 +2271,61 @@ public class CopyTest extends RefactoringTest {
 				newFile.delete(true, false, null);
 		}
 	}
+	
+	public void testCopy_Bug67124() throws Exception {
+		String fileName= "A.java";
+		ICompilationUnit cu= getPackageP().createCompilationUnit(fileName, "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
+		IPath cuPath= cu.getResource().getFullPath();
+
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
+		IFolder destinationFolder= superFolder.getFolder("folder");
+		destinationFolder.create(true, true, null);
+		
+		IFile newFile= null;
+		try {
+			FileBuffers.getTextFileBufferManager().connect(cuPath, LocationKind.IFILE, null);
+			ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(cuPath, LocationKind.IFILE);
+			buffer.getDocument().replace(0, 0, "Dirty");			
+			
+			INewNameQueries queries= new MockNewNameQueries();
+
+			IJavaElement[] javaElements= {cu};
+			IResource[] resources= { };
+			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+
+			Object destination= destinationFolder;
+			verifyValidDestination(ref, destination);
+			
+			assertTrue("source cu does not exist before copying", cu.exists());
+			
+			RefactoringStatus status= performRefactoring(ref, false);
+			assertEquals(null, status);
+			
+			assertTrue("source cu does not exist after copying", cu.exists());
+			
+			newFile= destinationFolder.getFile(fileName);
+			assertTrue("new cu does not exist after copying", newFile.exists());
+			
+			IPath newFilePath= newFile.getFullPath();
+			try {
+				FileBuffers.getTextFileBufferManager().connect(newFilePath, LocationKind.IFILE, null);
+				ITextFileBuffer newBuffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(newFilePath, LocationKind.IFILE);
+				assertEquals(buffer.getDocument().get(), newBuffer.getDocument().get());
+			} finally {
+				FileBuffers.getTextFileBufferManager().disconnect(newFilePath, LocationKind.IFILE, null);	
+			}
+		} finally {
+			performDummySearch();
+			
+			FileBuffers.getTextFileBufferManager().disconnect(cuPath, LocationKind.IFILE, null);
+			
+			cu.delete(true, new NullProgressMonitor());
+			destinationFolder.delete(true, false, null);
+			if (newFile != null)
+				newFile.delete(true, false, null);
+			
+		}
+	}
 
 	public void testCopy_Cu_to_Same_Package() throws Exception {
 		ParticipantTesting.reset();
@@ -2323,7 +2377,6 @@ public class CopyTest extends RefactoringTest {
 		String fileName= "A.java";
 		ICompilationUnit cu= getPackageP().createCompilationUnit(fileName, "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
 
-		ICompilationUnit newCu= null;
 		try {
 			INewNameQueries queries= new MockCancelNameQueries();
 
@@ -2350,9 +2403,6 @@ public class CopyTest extends RefactoringTest {
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
-			if (newCu != null && newCu.exists()){
-				newCu.delete(true, new NullProgressMonitor());
-			}
 		}
 	}
 
@@ -3180,7 +3230,6 @@ public class CopyTest extends RefactoringTest {
 	
 	public void testCopy_root_to_same_Java_project_cancel() throws Exception {
 		ParticipantTesting.reset();
-		IPackageFragmentRoot newRoot= null;
 		try {
 			IJavaElement[] javaElements= { getRoot()};
 			IResource[] resources= {};
@@ -3202,8 +3251,6 @@ public class CopyTest extends RefactoringTest {
 			});
 		} finally {
 			performDummySearch();
-			if (newRoot != null && newRoot.exists())
-				newRoot.delete(0, 0, new NullProgressMonitor());
 		}
 	}
 	

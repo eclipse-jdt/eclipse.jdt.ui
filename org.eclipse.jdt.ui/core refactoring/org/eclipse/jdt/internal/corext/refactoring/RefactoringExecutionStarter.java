@@ -274,7 +274,7 @@ public final class RefactoringExecutionStarter {
 			RefactoringWizard wizard= new ReorgCopyWizard(refactoring);
 			processor.setNewNameQueries(new NewNameQueries(wizard));
 			processor.setReorgQueries(new ReorgQueries(wizard));
-			new RefactoringStarter().activate(refactoring, wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_NOTHING);
+			new RefactoringStarter().activate(refactoring, wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_ALL);
 		}
 	}
 

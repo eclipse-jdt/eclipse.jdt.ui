@@ -32,10 +32,8 @@ public class CopyResourceChange extends ResourceReorgChange {
 	
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		// Copy resource change isn't undoable and isn't used
-		// as a redo/undo change right now. Furthermore the current 
-		// implementation allows copying dirty files. In this case only 
-		// the content on disk is copied.
-		return super.isValid(pm, NONE);
+		// as a redo/undo change right now.
+		return super.isValid(pm, SAVE_IF_DIRTY);
 	}
 	
 	protected Change doPerformReorg(IPath path, IProgressMonitor pm) throws CoreException{
