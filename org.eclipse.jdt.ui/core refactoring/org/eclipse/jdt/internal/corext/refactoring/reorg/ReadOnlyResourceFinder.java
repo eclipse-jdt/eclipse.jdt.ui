@@ -127,8 +127,6 @@ class ReadOnlyResourceFinder{
 	}
 
 	private static boolean hasReadOnlyResourcesAndSubResources(IResource resource) throws CoreException {
-		if (resource.isLinked()) //we don't want to count these because we never actually delete linked resources
-			return false;
 		if (Resources.isReadOnly(resource))
 			return true;
 		if (resource instanceof IContainer)
