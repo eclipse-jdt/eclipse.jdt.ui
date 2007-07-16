@@ -97,6 +97,41 @@ public class MoveTest extends RefactoringTest {
 			};
 		}
 	}
+	
+	private static final class ConfirmNoneQuery implements IReorgQueries {
+		public IConfirmQuery createSkipQuery(String queryTitle, int queryID) {
+			return new IConfirmQuery() {
+				public boolean confirm(String question) throws OperationCanceledException {
+					return false;
+				}
+				public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
+					return false;
+				}
+			};
+		}
+
+		public IConfirmQuery createYesNoQuery(String queryTitle, boolean allowCancel, int queryID) {
+			return new IConfirmQuery() {
+				public boolean confirm(String question) throws OperationCanceledException {
+					return false;
+				}
+				public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
+					return false;
+				}
+			};
+		}
+
+		public IConfirmQuery createYesYesToAllNoNoToAllQuery(String queryTitle, boolean allowCancel, int queryID) {
+			return new IConfirmQuery() {
+				public boolean confirm(String question) throws OperationCanceledException {
+					return false;
+				}
+				public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
+					return false;
+				}
+			};
+		}
+	}
 
 	public MoveTest(String name) {
 		super(name);
@@ -1164,8 +1199,7 @@ public class MoveTest extends RefactoringTest {
 			safeDelete(newCuD);
 			safeDelete(orgTest);
 			safeDelete(org);
-			if (newOptions != null)
-				javaProject.setOptions(originalOptions);
+			javaProject.setOptions(originalOptions);
 		}
 	}
 
@@ -1209,8 +1243,7 @@ public class MoveTest extends RefactoringTest {
 			safeDelete(newCuD);
 			safeDelete(orgTest);
 			safeDelete(org);
-			if (newOptions != null)
-				javaProject.setOptions(originalOptions);
+			javaProject.setOptions(originalOptions);
 		}
 	}
 
@@ -1920,7 +1953,31 @@ public class MoveTest extends RefactoringTest {
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
 			
-			move(javaElements, resources, superFolder);
+			move(javaElements, resources, superFolder, true);
+			
+			assertIsParent(folder, file);
+			assertIsParent(superFolder, folder);
+		}finally{
+			performDummySearch();
+			safeDelete(file);
+		}
+	}	
+	
+	public void testDestination_bug196303() throws Exception{
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
+		IFolder folder1= superFolder.getFolder("bar");
+		folder1.create(true, true, null);
+		
+		IFolder folder= superFolder.getFolder("foo");
+		folder.create(true, true, null);
+		IFile file= folder.getFile("bar");
+		file.create(getStream("123"), true, null);
+		
+		try{
+			IJavaElement[] javaElements= {};
+			IResource[] resources= {file};
+			
+			move(javaElements, resources, superFolder, false);
 			
 			assertIsParent(folder, file);
 			assertIsParent(superFolder, folder);
@@ -1934,7 +1991,7 @@ public class MoveTest extends RefactoringTest {
 		assertTrue(child.getParent().equals(parent));
 	}
 
-	public void move(IJavaElement[] javaElements, IResource[] resources, IResource destination) throws Exception {
+	public void move(IJavaElement[] javaElements, IResource[] resources, IResource destination, boolean confirmAll) throws Exception {
 		assertNotNull(javaElements);
 		assertNotNull(resources);
 		assertNotNull(destination);
@@ -1953,7 +2010,11 @@ public class MoveTest extends RefactoringTest {
 		JavaMoveRefactoring ref= new JavaMoveRefactoring(processor);
 		
 		processor.setCreateTargetQueries(new CreateTargetQueries(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()));
-		processor.setReorgQueries(new ConfirmAllQuery());
+		if (confirmAll) {
+			processor.setReorgQueries(new ConfirmAllQuery());			
+		} else {
+			processor.setReorgQueries(new ConfirmNoneQuery());
+		}
 		
 		performRefactoring(ref);
 	}

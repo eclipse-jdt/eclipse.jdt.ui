@@ -182,22 +182,17 @@ class OverwriteHelper {
 	private boolean willOverwrite(IResource resource) {
 		if (resource == null)
 			return false;
+		
 		IResource destinationResource= ResourceUtil.getResource(fDestination);
 		if (destinationResource.equals(resource.getParent()))
 			return false;
+		
 		if (destinationResource instanceof IContainer) {
 			IContainer container= (IContainer)destinationResource;
 			IResource member=  container.findMember(resource.getName());
 			if (member == null || !member.exists())
 				return false;
-			if (member instanceof IContainer) {
-				try {
-					if (((IContainer)member).members().length == 0)
-						return false;
-				} catch (CoreException e) {
-					return true;
-				}
-			}
+			
 			return true;
 		}
 		return false;
