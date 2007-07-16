@@ -751,12 +751,16 @@ public class LocalCorrectionsSubProcessor {
 		if (selectedNode == null) {
 			return;
 		}
-		if (!(selectedNode.getParent() instanceof IfStatement)) {
+		ASTNode parent= selectedNode.getParent();
+		if (parent instanceof ExpressionStatement) {
+			parent= parent.getParent();
+		}
+		if (!(parent instanceof IfStatement)) {
 			return;
 		}
-		IfStatement ifStatement= (IfStatement) selectedNode.getParent();
+		IfStatement ifStatement= (IfStatement) parent;
 		ASTNode ifParent= ifStatement.getParent();
-		if (!(ifParent instanceof Block)) {
+		if (!(ifParent instanceof Block) && !ASTNodes.isControlStatementBody(ifStatement.getLocationInParent())) {
 			return;
 		}
 
@@ -767,8 +771,15 @@ public class LocalCorrectionsSubProcessor {
 		}
 		rewrite.remove(ifStatement.getElseStatement(), null);
 
-		ListRewrite listRewrite= rewrite.getListRewrite(ifParent, Block.STATEMENTS_PROPERTY);
-		listRewrite.insertAfter(placeholder, ifStatement, null);
+		if (ifParent instanceof Block) {
+			ListRewrite listRewrite= rewrite.getListRewrite(ifParent, Block.STATEMENTS_PROPERTY);
+			listRewrite.insertAfter(placeholder, ifStatement, null);
+		} else {
+			Block block= root.getAST().newBlock();
+			rewrite.replace(ifStatement, block, null);
+			block.statements().add(rewrite.createCopyTarget(ifStatement));
+			block.statements().add(placeholder);
+		}
 
 		String label= CorrectionMessages.LocalCorrectionsSubProcessor_removeelse_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);

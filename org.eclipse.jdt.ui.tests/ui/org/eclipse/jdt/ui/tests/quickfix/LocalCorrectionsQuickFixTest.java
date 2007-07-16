@@ -4761,6 +4761,51 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		
 	}
 	
+	public void testUnnecessaryElse4() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNNECESSARY_ELSE, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    boolean foo(int i) {\n");
+		buf.append("        if (i < 100)\n");
+		buf.append("            if (i == 42)\n");
+		buf.append("                return true;\n");
+		buf.append("            else\n");
+		buf.append("                i = i + 3;\n");
+		buf.append("        return false;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    boolean foo(int i) {\n");
+		buf.append("        if (i < 100) {\n");
+		buf.append("            if (i == 42)\n");
+		buf.append("                return true;\n");
+		buf.append("            i = i + 3;\n");
+		buf.append("        }\n");
+		buf.append("        return false;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
 	
 	public void testInterfaceExtendsClass() throws Exception {
 		Hashtable hashtable= JavaCore.getOptions();
