@@ -223,6 +223,8 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 					final ClassPathDetector detector= new ClassPathDetector(fCurrProject, new SubProgressMonitor(monitor, 2));
 					entries= detector.getClasspath();
                     outputLocation= detector.getOutputLocation();
+                    if (entries.length == 0)
+                    	entries= null;
 				} else {
 					monitor.worked(2);
 				}
