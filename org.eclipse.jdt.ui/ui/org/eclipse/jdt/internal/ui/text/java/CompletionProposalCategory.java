@@ -287,7 +287,7 @@ public final class CompletionProposalCategory {
 		List descriptors= new ArrayList(fRegistry.getProposalComputerDescriptors(partition));
 		for (Iterator it= descriptors.iterator(); it.hasNext();) {
 			CompletionProposalComputerDescriptor desc= (CompletionProposalComputerDescriptor) it.next();
-			if (desc.getCategory() == this)
+			if (desc.getCategory() == this && (isIncluded() || isSeparateCommand()))
 				result.addAll(desc.computeContextInformation(context, monitor));
 			if (fLastError == null)
 				fLastError= desc.getErrorMessage();
