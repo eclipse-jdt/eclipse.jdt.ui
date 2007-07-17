@@ -1732,6 +1732,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenamePackageProcessor_rename_subpackages;
 
+	public static String RenamePackageProcessor_subpackage_collides;
+
 	public static String RenamePackageRefactoring_aleady_exists;
 
 	public static String RenamePackageRefactoring_another_name;

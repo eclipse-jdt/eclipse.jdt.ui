@@ -205,19 +205,28 @@ public class RenameModifications extends RefactoringModifications {
 	}
 	
 	private void addAllResourceModifications(IPackageFragment rootPackage, RenameArguments args, boolean renameSubPackages, IPackageFragment[] allSubPackages) throws CoreException {
-		addResourceModifications(rootPackage, args, rootPackage, renameSubPackages);
+		IFolder target= addResourceModifications(rootPackage, args, rootPackage, renameSubPackages);
 		if (renameSubPackages) {
+			IContainer container= (IContainer) rootPackage.getResource();
+			if (container == null)
+				return;
+			boolean removeContainer= ! container.contains(target);
 			for (int i= 0; i < allSubPackages.length; i++) {
 				IPackageFragment pack= allSubPackages[i];
-				addResourceModifications(rootPackage, args, pack, renameSubPackages);
+				IFolder subTarget= addResourceModifications(rootPackage, args, pack, renameSubPackages);
+				if (container.contains(subTarget))
+					removeContainer= false;
+			}
+			if (removeContainer) {
+				getResourceModifications().addDelete(container);
 			}
 		}
 	}
 	
-	private void addResourceModifications(IPackageFragment rootPackage, RenameArguments args, IPackageFragment pack, boolean renameSubPackages) throws CoreException {
+	private IFolder addResourceModifications(IPackageFragment rootPackage, RenameArguments args, IPackageFragment pack, boolean renameSubPackages) throws CoreException {
 		IContainer container= (IContainer)pack.getResource();
 		if (container == null)
-			return;
+			return null;
 		IFolder target= computeTargetFolder(rootPackage, args, pack);
 		createIncludingParents(target);
 		MoveArguments arguments= new MoveArguments(target, args.getUpdateReferences());
@@ -235,10 +244,10 @@ public class RenameModifications extends RefactoringModifications {
 				iter.remove();
 			}
 		}
-		if (renameSubPackages && rootPackage.equals(pack)
-				|| ! renameSubPackages && allMembers.isEmpty()) {
+		if (! renameSubPackages && allMembers.isEmpty()) {
 			getResourceModifications().addDelete(container);
 		}
+		return target;
 	}
 
 	private boolean canMove(IContainer source, IContainer target) {

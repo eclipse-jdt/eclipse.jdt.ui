@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -108,13 +110,23 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 
 		if (!fRenameSubpackages) {
 			renamePackage(pack, pm, createNewPath(), getNewName());
+			
 		} else {
 			IPackageFragment[] allPackages= JavaElementUtil.getPackageAndSubpackages(pack);
-
-			pm.beginTask("", allPackages.length); //$NON-NLS-1$
+			Arrays.sort(allPackages, new Comparator() {
+				public int compare(Object o1, Object o2) {
+					String p1= ((IPackageFragment) o1).getElementName();
+					String p2= ((IPackageFragment) o2).getElementName();
+					return p1.compareTo(p2);
+				}
+			});
+			int count= allPackages.length;
+			pm.beginTask("", count); //$NON-NLS-1$
+			// When renaming to subpackage (a -> a.b), do it inside-out:
+			boolean insideOut= getNewName().startsWith(getOldName());
 			try {
-				for (int i= 0; i < allPackages.length; i++) {
-					IPackageFragment currentPackage= allPackages[i];
+				for (int i= 0; i < count; i++) {
+					IPackageFragment currentPackage= allPackages[insideOut ? count - i - 1 : i];
 					renamePackage(currentPackage, new SubProgressMonitor(pm, 1), createNewPath(currentPackage), getNewName(currentPackage));
 				}
 			} finally {
