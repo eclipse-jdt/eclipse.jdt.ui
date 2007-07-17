@@ -914,6 +914,28 @@ public class PullUpTests extends RefactoringTest {
 								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, 
 								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
 	}
+	
+	public void test46() throws Exception{
+		// for bug 196635
+		
+		String[] selectedMethodNames= {"getConst"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {"CONST"};
+		String[] selectedTypeNames= {};
+		String[] namesOfMethodsToPullUp= {"getConst"};
+		String[][] signaturesOfMethodsToPullUp= {new String[0]};
+		String[] namesOfFieldsToPullUp= {"CONST"};
+		String[] namesOfTypesToPullUp= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures, 
+								selectedFieldNames,	
+								selectedTypeNames, namesOfMethodsToPullUp, 
+								signaturesOfMethodsToPullUp, 
+								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, 
+								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
+	}
 
 	public void testFail0() throws Exception{
 //		printTestDisabledMessage("6538: searchDeclarationsOf* incorrect");

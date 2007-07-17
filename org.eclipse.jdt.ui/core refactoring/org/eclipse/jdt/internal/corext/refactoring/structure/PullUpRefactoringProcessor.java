@@ -1124,7 +1124,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 								if (oldMethod != null) {
 									if (JdtFlags.isStatic(member) && fDestinationType.isInterface())
 										status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.PullUpRefactoring_moving_static_method_to_interface, new String[] { JavaElementLabels.getTextLabel(member, JavaElementLabels.ALL_FULLY_QUALIFIED)}), JavaStatusContext.create(member)));
-									final MethodDeclaration newMethod= createNewMethodDeclarationNode(sourceRewriter, rewrite, ((IMethod) member), oldMethod, root, mapping, adjustments, new SubProgressMonitor(subsub, 1), status);
+									final MethodDeclaration newMethod= createNewMethodDeclarationNode(sourceRewriter, rewrite, ((IMethod) member), oldMethod, mapping, adjustments, new SubProgressMonitor(subsub, 1), status);
 									rewriter.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, declaration.bodyDeclarations()), rewrite.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PULL_UP));
 									ImportRewriteUtil.addImports(rewrite, oldMethod, new HashMap(), new HashMap(), false);
 								}
@@ -1271,7 +1271,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		return result;
 	}
 
-	private MethodDeclaration createNewMethodDeclarationNode(final CompilationUnitRewrite sourceRewrite, final CompilationUnitRewrite targetRewrite, final IMethod sourceMethod, final MethodDeclaration oldMethod, final CompilationUnit declaringCuNode, final TypeVariableMaplet[] mapping, final Map adjustments, final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
+	private MethodDeclaration createNewMethodDeclarationNode(final CompilationUnitRewrite sourceRewrite, final CompilationUnitRewrite targetRewrite, final IMethod sourceMethod, final MethodDeclaration oldMethod, final TypeVariableMaplet[] mapping, final Map adjustments, final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
 		final ASTRewrite rewrite= targetRewrite.getASTRewrite();
 		final AST ast= rewrite.getAST();
 		final MethodDeclaration newMethod= ast.newMethodDeclaration();
@@ -1353,7 +1353,11 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		final IMethod[] abstractPulledUp= getAbstractMethodsToPullUp();
 		final Set result= new LinkedHashSet(toDeclareAbstract.length + abstractPulledUp.length + fMembersToMove.length);
 		if (fDestinationType.isInterface()) {
-			result.addAll(Arrays.asList(fMembersToMove));
+			for (int i= 0; i < fMembersToMove.length; i++) {
+				if (fMembersToMove[i].getElementType() == IJavaElement.METHOD) {
+					result.add(fMembersToMove[i]);
+				}
+			}
 		}
 		result.addAll(Arrays.asList(toDeclareAbstract));
 		result.addAll(Arrays.asList(abstractPulledUp));
