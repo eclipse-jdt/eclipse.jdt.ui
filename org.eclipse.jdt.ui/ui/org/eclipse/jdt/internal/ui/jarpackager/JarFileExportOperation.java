@@ -326,19 +326,11 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			
 			IPath destinationPath= resource.getFullPath().removeFirstSegments(leadSegmentsToRemove);
 			
-			boolean isInOutputFolder= false;
-			if (isInJavaProject && jProject != null) {
-				try {
-					isInOutputFolder= jProject.getOutputLocation().isPrefixOf(resource.getFullPath());
-				} catch (JavaModelException ex) {
-					isInOutputFolder= false;
-				}
-			}
 			if (typeRootElement != null) {
 				exportClassFiles(progressMonitor, typeRootElement, destinationPath);
 			}
 			
-			exportResource(progressMonitor, pkgRoot, isInJavaProject, resource, destinationPath, isInOutputFolder);
+			exportResource(progressMonitor, pkgRoot, isInJavaProject, resource, destinationPath);
 
 			progressMonitor.worked(1);
 			ModalContext.checkCanceled(progressMonitor);
@@ -414,7 +406,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			return findPackageFragmentRoot(jProject, path.removeLastSegments(1));
 	}
 
-	private void exportResource(IProgressMonitor progressMonitor, IPackageFragmentRoot pkgRoot, boolean isInJavaProject, IResource resource, IPath destinationPath, boolean isInOutputFolder) {
+	private void exportResource(IProgressMonitor progressMonitor, IPackageFragmentRoot pkgRoot, boolean isInJavaProject, IResource resource, IPath destinationPath) {
 
 		// Handle case where META-INF/MANIFEST.MF is part of the exported files
 		if (fJarPackage.areClassFilesExported() && destinationPath.toString().equals("META-INF/MANIFEST.MF")) {//$NON-NLS-1$
@@ -634,7 +626,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		if (fExportedClassContainers.contains(classContainer))
 			return Collections.EMPTY_LIST.iterator();
 		
-		if (JavaCore.ENABLED.equals(javaProject.getOption(JavaCore.COMPILER_SOURCE_FILE_ATTR, true))) {
+		if (JavaCore.GENERATE.equals(javaProject.getOption(JavaCore.COMPILER_SOURCE_FILE_ATTR, true))) {
 			if (fClassFilesMapContainer == null || !fClassFilesMapContainer.equals(classContainer)) {
 				fJavaNameToClassFilesMap= buildJavaToClassMap(classContainer, progressMonitor);
 				if (fJavaNameToClassFilesMap == null) {
