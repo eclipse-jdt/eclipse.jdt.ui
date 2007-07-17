@@ -74,70 +74,70 @@ public class ParticipantTesting {
 		return (String[])result.toArray(new String[result.size()]);
 	}
 	
-	public static void testRename(String[] handles, RenameArguments[] args) {
-		Assert.assertEquals(handles.length, args.length);
-		if (handles.length == 0) {
+	public static void testRename(String[] expectedHandles, RenameArguments[] args) {
+		Assert.assertEquals(expectedHandles.length, args.length);
+		if (expectedHandles.length == 0) {
 			TestRenameParticipantShared.testNumberOfElements(0);
 			TestRenameParticipantSingle.testNumberOfInstances(0);
 		} else {
-			testElementsShared(handles, TestRenameParticipantShared.fgInstance.fHandles);
+			testElementsShared(expectedHandles, TestRenameParticipantShared.fgInstance.fHandles);
 			TestRenameParticipantShared.testArguments(args);
 			
-			TestRenameParticipantSingle.testNumberOfInstances(handles.length);
-			TestRenameParticipantSingle.testElements(handles);
+			TestRenameParticipantSingle.testNumberOfInstances(expectedHandles.length);
+			TestRenameParticipantSingle.testElements(expectedHandles);
 			TestRenameParticipantSingle.testArguments(args);
 		}
 	}
 	
-	public static void testMove(String[] handles, MoveArguments[] args) {
-		Assert.assertEquals(handles.length, args.length);
-		if (handles.length == 0) {
+	public static void testMove(String[] expectedHandles, MoveArguments[] args) {
+		Assert.assertEquals(expectedHandles.length, args.length);
+		if (expectedHandles.length == 0) {
 			TestMoveParticipantShared.testNumberOfElements(0);
 			TestMoveParticipantSingle.testNumberOfInstances(0);
 		} else {
-			testElementsShared(handles, TestMoveParticipantShared.fgInstance.fHandles);
+			testElementsShared(expectedHandles, TestMoveParticipantShared.fgInstance.fHandles);
 			TestMoveParticipantShared.testArguments(args);
 			
-			TestMoveParticipantSingle.testNumberOfInstances(handles.length);
-			TestMoveParticipantSingle.testElements(handles);
+			TestMoveParticipantSingle.testNumberOfInstances(expectedHandles.length);
+			TestMoveParticipantSingle.testElements(expectedHandles);
 			TestMoveParticipantSingle.testArguments(args);
 		}
 	}
 	
-	public static void testDelete(String[] handles) {
-		if (handles.length == 0) {
+	public static void testDelete(String[] expectedHandles) {
+		if (expectedHandles.length == 0) {
 			TestDeleteParticipantShared.testNumberOfElements(0);
 			TestDeleteParticipantSingle.testNumberOfInstances(0);
 		} else {
-			testElementsShared(handles, TestDeleteParticipantShared.fgInstance.fHandles);
+			testElementsShared(expectedHandles, TestDeleteParticipantShared.fgInstance.fHandles);
 			
-			TestDeleteParticipantSingle.testNumberOfInstances(handles.length);
-			TestDeleteParticipantSingle.testElements(handles);
+			TestDeleteParticipantSingle.testNumberOfInstances(expectedHandles.length);
+			TestDeleteParticipantSingle.testElements(expectedHandles);
 		}
 	}	
 	
-	public static void testCreate(String[] handles) {
-		if (handles.length == 0)  {
+	public static void testCreate(String[] expectedHandles) {
+		if (expectedHandles.length == 0)  {
 			TestCreateParticipantShared.testNumberOfElements(0);
 			TestCreateParticipantSingle.testNumberOfInstances(0);
 		} else {
-			testElementsShared(handles, TestCreateParticipantShared.fgInstance.fHandles);
+			testElementsShared(expectedHandles, TestCreateParticipantShared.fgInstance.fHandles);
 			
-			TestCreateParticipantSingle.testNumberOfInstances(handles.length);
-			TestCreateParticipantSingle.testElements(handles);
+			TestCreateParticipantSingle.testNumberOfInstances(expectedHandles.length);
+			TestCreateParticipantSingle.testElements(expectedHandles);
 		}
 	}
 	
-	public static void testCopy(String[] handles, CopyArguments[] arguments) {
-		if (handles.length == 0)  {
+	public static void testCopy(String[] expectedHandles, CopyArguments[] arguments) {
+		if (expectedHandles.length == 0)  {
 			TestCopyParticipantShared.testNumberOfElements(0);
 			TestCopyParticipantSingle.testNumberOfInstances(0);
 		} else {
-			testElementsShared(handles, TestCopyParticipantShared.fgInstance.fHandles);
+			testElementsShared(expectedHandles, TestCopyParticipantShared.fgInstance.fHandles);
 			TestCopyParticipantShared.testArguments(arguments);
 			
-			TestCopyParticipantSingle.testNumberOfInstances(handles.length);
-			TestCopyParticipantSingle.testElements(handles);
+			TestCopyParticipantSingle.testNumberOfInstances(expectedHandles.length);
+			TestCopyParticipantSingle.testElements(expectedHandles);
 			TestCopyParticipantSingle.testArguments(arguments);
 		}
 	}
@@ -152,17 +152,17 @@ public class ParticipantTesting {
 		
 	}	
 	
-	private static void testElementsShared(String[] handles, List list) {
-		for (int i= 0; i < handles.length; i++) {
-			String handle= handles[i];
-			Assert.assertTrue("Handle not found: " + handle, list.contains(handle));
+	private static void testElementsShared(String[] expected, List actual) {
+		for (int i= 0; i < expected.length; i++) {
+			String handle= expected[i];
+			Assert.assertTrue("Expected handle not found: " + handle, actual.contains(handle));
 		}
-		testNumberOfElements(handles.length, list);
+		testNumberOfElements(expected.length, actual);
 	}
 	
-	private static void testNumberOfElements(int expected, List list) {
-		if (expected == 0 && list == null)
+	private static void testNumberOfElements(int expected, List actual) {
+		if (expected == 0 && actual == null)
 			return;
-		Assert.assertEquals(expected, list.size());
+		Assert.assertEquals(expected, actual.size());
 	}	
 }
