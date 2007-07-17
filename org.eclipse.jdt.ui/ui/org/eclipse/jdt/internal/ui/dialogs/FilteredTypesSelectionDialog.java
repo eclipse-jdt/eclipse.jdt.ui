@@ -228,7 +228,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			fAllowScopeSwitching= true;
 			scope= SearchEngine.createWorkspaceScope();
 		}
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.TYPE_SELECTION_DIALOG2);
 
 		fElementKinds= elementKinds;
 		fExtension= extension;
@@ -502,6 +501,14 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	 */
 	protected ItemsFilter createFilter() {
 		return new TypeItemsFilter(fSearchScope, fElementKinds, fFilterExtension);
+	}
+	
+	/*
+	 * @see org.eclipse.ui.dialogs.SelectionStatusDialog#configureShell(org.eclipse.swt.widgets.Shell)
+	 */
+	protected void configureShell(Shell shell) {
+		super.configureShell(shell);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.TYPE_SELECTION_DIALOG2);
 	}
 	
 	protected Control createContents(Composite parent) {
