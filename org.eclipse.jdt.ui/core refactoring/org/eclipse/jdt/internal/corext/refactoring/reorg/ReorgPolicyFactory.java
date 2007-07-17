@@ -3326,7 +3326,7 @@ public final class ReorgPolicyFactory {
 		if (containsNull(javaElements))
 			return NO;
 		
-		if (ReorgUtils.isArchiveMember(javaElements))
+		if (ReorgUtils.isArchiveMember(javaElements) && ReorgUtils.getElementsOfType(javaElements, IJavaElement.PACKAGE_FRAGMENT_ROOT).size() != javaElements.length)
 			return NO;
 		
 		if (ReorgUtils.hasElementsOfType(javaElements, IJavaElement.JAVA_PROJECT))

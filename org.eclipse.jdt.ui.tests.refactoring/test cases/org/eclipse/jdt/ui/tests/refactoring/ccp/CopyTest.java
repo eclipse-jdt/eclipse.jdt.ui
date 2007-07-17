@@ -456,6 +456,18 @@ public class CopyTest extends RefactoringTest {
 		IResource[] resources= {};
 		verifyEnabled(resources, javaElements, null, createReorgQueries());
 	}	
+	
+	public void testEnabled_archivePackageRoot() throws Exception {
+		IJavaProject project= RefactoringTestSetup.getProject();
+		IProject projectFolder= project.getProject();
+		IFile archiveFile= projectFolder.getFile("archive.jar");
+		archiveFile.create(getStream(""), true, null);
+		
+		IPackageFragmentRoot root= JavaProjectHelper.addLibrary(project, archiveFile.getFullPath());
+		IJavaElement[] javaElements= { root};
+		IResource[] resources= {};
+		verifyEnabled(resources, javaElements, null, createReorgQueries());
+	}	
 
 	public void testEnabled_file() throws Exception {
 		IFolder folder= (IFolder)getPackageP().getResource();
