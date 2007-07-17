@@ -21,10 +21,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.filesystem.URIUtil;
 
@@ -64,6 +67,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -88,6 +92,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 	private File fDotProjectBackup;
 	private File fDotClasspathBackup;
 	private Boolean fIsAutobuild;
+	private HashSet fOrginalFolders;
 
 	/**
 	 * Constructor for JavaProjectWizardSecondPage.
@@ -192,6 +197,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			}
 
 			rememberExistingFiles(realLocation);
+			rememberExisitingFolders(realLocation);
             
 			try {
 				createProject(fCurrProject, fCurrProjectLocation, new SubProgressMonitor(monitor, 2));
@@ -300,6 +306,44 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			if (projectFile.fetchInfo().exists()) {
 				projectFile.delete(EFS.NONE, null);
 			}
+		}
+	}
+	
+	private void rememberExisitingFolders(URI projectLocation) {
+		fOrginalFolders= new HashSet();
+				
+		try {
+			IFileStore[] children= EFS.getStore(projectLocation).childStores(EFS.NONE, null);
+			for (int i= 0; i < children.length; i++) {
+				IFileStore child= children[i];
+				IFileInfo info= child.fetchInfo();
+				if (info.isDirectory() && info.exists() && !fOrginalFolders.contains(child.getName())) {
+					fOrginalFolders.add(child);
+				}
+			}
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		}
+	}
+	
+	private void restoreExistingFolders(URI projectLocation) {
+		try {
+			IFileStore[] children= EFS.getStore(projectLocation).childStores(EFS.NONE, null);
+			for (int i= 0; i < children.length; i++) {
+				IFileStore child= children[i];
+				IFileInfo info= child.fetchInfo();
+				if (info.isDirectory() && info.exists() && !fOrginalFolders.contains(child)) {
+					child.delete(EFS.NONE, null);
+					fOrginalFolders.remove(child);
+				}
+			}
+			
+			for (Iterator iterator= fOrginalFolders.iterator(); iterator.hasNext();) {
+				IFileStore deleted= (IFileStore) iterator.next();
+				deleted.mkdir(EFS.NONE, null);
+			}
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
 		}
 	}
 	
@@ -454,6 +498,9 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				URI projLoc= fCurrProject.getLocationURI();
 				
 			    boolean removeContent= !fKeepContent && fCurrProject.isSynchronized(IResource.DEPTH_INFINITE);
+			    if (!removeContent) {
+			    	restoreExistingFolders(projLoc);
+			    }
 			    fCurrProject.delete(removeContent, false, new SubProgressMonitor(monitor, 2));
 				
 				restoreExistingFiles(projLoc, new SubProgressMonitor(monitor, 1));
