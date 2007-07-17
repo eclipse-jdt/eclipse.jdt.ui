@@ -333,23 +333,10 @@ public abstract class RefactoringTest extends TestCase {
 		workspace.run(perform, new NullProgressMonitor());
 	}
 	
-	protected final RefactoringStatus performRefactoringWithStatus(RefactoringDescriptor descriptor) throws Exception {
-		Refactoring ref= createRefactoring(descriptor);
-		return performRefactoringWithStatus(ref);
-	}
-
 	public RefactoringStatus performRefactoringWithStatus(Refactoring ref) throws Exception, CoreException {
-		performDummySearch();
-		CreateChangeOperation create= new CreateChangeOperation(
-			new CheckConditionsOperation(ref, CheckConditionsOperation.ALL_CONDITIONS),
-			RefactoringStatus.FATAL);
-		PerformChangeOperation perform= new PerformChangeOperation(create);
-		perform.setUndoManager(RefactoringCore.getUndoManager(), ref.getName());
-		ResourcesPlugin.getWorkspace().run(perform, new NullProgressMonitor());
-		RefactoringStatus status= create.getConditionCheckingStatus();
-		if (status.hasFatalError())
-			return status;
-		assertTrue("Change wasn't executed", perform.changeExecuted());
+		RefactoringStatus status= performRefactoring(ref);
+		if (status == null)
+			return new RefactoringStatus();
 		return status;
 	}
 	
