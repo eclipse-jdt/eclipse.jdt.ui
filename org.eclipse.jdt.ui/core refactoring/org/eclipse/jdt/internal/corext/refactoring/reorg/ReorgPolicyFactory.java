@@ -3317,7 +3317,28 @@ public final class ReorgPolicyFactory {
 		IResource[] resources= selectionComputer.getActualResourcesToReorg();
 		IJavaElement[] javaElements= selectionComputer.getActualJavaElementsToReorg();
 
-		if ((resources.length + javaElements.length == 0) || containsNull(resources) || containsNull(javaElements) || ReorgUtils.isArchiveMember(javaElements) || ReorgUtils.hasElementsOfType(javaElements, IJavaElement.JAVA_PROJECT) || ReorgUtils.hasElementsOfType(javaElements, IJavaElement.JAVA_MODEL) || ReorgUtils.hasElementsOfType(resources, IResource.PROJECT | IResource.ROOT) || !new ParentChecker(resources, javaElements).haveCommonParent())
+		if (resources.length == 0 && javaElements.length == 0)
+			return NO;
+		
+		if (containsNull(resources))
+			return NO;
+		
+		if (containsNull(javaElements))
+			return NO;
+		
+		if (ReorgUtils.isArchiveMember(javaElements))
+			return NO;
+		
+		if (ReorgUtils.hasElementsOfType(javaElements, IJavaElement.JAVA_PROJECT))
+			return NO;
+		
+		if (ReorgUtils.hasElementsOfType(javaElements, IJavaElement.JAVA_MODEL))
+			return NO;
+		
+		if (ReorgUtils.hasElementsOfType(resources, IResource.PROJECT | IResource.ROOT))
+			return NO;
+		
+		if (!new ParentChecker(resources, javaElements).haveCommonParent())
 			return NO;
 
 		if (ReorgUtils.hasElementsOfType(javaElements, IJavaElement.PACKAGE_FRAGMENT)) {
