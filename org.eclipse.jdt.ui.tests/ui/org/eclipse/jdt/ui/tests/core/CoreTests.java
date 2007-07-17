@@ -43,6 +43,7 @@ public class CoreTests extends TestCase {
 		suite.addTest(ClassPathDetectorTest.allTests());
 		suite.addTest(CodeCompletionTest.allTests());
 		suite.addTest(CodeFormatterUtilTest.allTests());
+		suite.addTest(CodeFormatterTest.allTests());
 		suite.addTest(HierarchicalASTVisitorTest.allTests());
 		suite.addTest(ImportOrganizeTest.allTests());
 		suite.addTest(JavaElementLabelsTest.allTests());
