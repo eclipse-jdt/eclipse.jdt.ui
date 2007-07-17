@@ -763,15 +763,6 @@ public class CopyTest extends RefactoringTest {
 			folder.delete(true, new NullProgressMonitor());
 		}
 	}
-
-	public void testDestination_root_yes_2() throws Exception{
-		IJavaElement[] javaElements= { getRoot()};
-		IResource[] resources= {};
-		JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
-
-		Object destination= getRoot();
-		verifyValidDestination(ref, destination);
-	}
 	
 	public void testDestination_cu_yes_0() throws Exception{
 		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());

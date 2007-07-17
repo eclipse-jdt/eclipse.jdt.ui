@@ -2323,7 +2323,7 @@ public final class ReorgPolicyFactory {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot1);
 			if (javaElement instanceof IJavaModel)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_jmodel);
-			if (!(javaElement instanceof IJavaProject || javaElement instanceof IPackageFragmentRoot))
+			if (!(javaElement instanceof IJavaProject))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_src2proj);
 			if (javaElement.isReadOnly())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_src2writable);
