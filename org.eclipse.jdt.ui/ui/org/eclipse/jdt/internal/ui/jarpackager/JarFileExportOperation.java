@@ -634,7 +634,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		if (fExportedClassContainers.contains(classContainer))
 			return Collections.EMPTY_LIST.iterator();
 		
-		if (JavaCore.ENABLED.equals(javaProject.getOption(JavaCore.COMPILER_SOURCE_FILE_ATTR, true))) {
+		if (JavaCore.GENERATE.equals(javaProject.getOption(JavaCore.COMPILER_SOURCE_FILE_ATTR, true))) {
 			if (fClassFilesMapContainer == null || !fClassFilesMapContainer.equals(classContainer)) {
 				fJavaNameToClassFilesMap= buildJavaToClassMap(classContainer, progressMonitor);
 				if (fJavaNameToClassFilesMap == null) {
