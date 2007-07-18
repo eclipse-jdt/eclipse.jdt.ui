@@ -316,7 +316,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 			String curr= properties.getProperty(String.valueOf(i));
 			if (curr != null) {
 				ImportOrderEntry entry= ImportOrderEntry.fromSerialized(curr);
-				if (!JavaConventions.validatePackageName(entry.name, JavaCore.VERSION_1_3, JavaCore.VERSION_1_5).matches(IStatus.ERROR)) {
+				if (entry.name.length() == 0 || !JavaConventions.validatePackageName(entry.name, JavaCore.VERSION_1_3, JavaCore.VERSION_1_5).matches(IStatus.ERROR)) {
 					res.add(entry);
 				} else {
 					return null;
