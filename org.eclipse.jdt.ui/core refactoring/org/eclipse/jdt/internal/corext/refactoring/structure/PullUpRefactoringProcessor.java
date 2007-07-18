@@ -1352,7 +1352,11 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		final IMethod[] abstractPulledUp= getAbstractMethodsToPullUp();
 		final Set result= new LinkedHashSet(toDeclareAbstract.length + abstractPulledUp.length + fMembersToMove.length);
 		if (fDestinationType.isInterface()) {
-			result.addAll(Arrays.asList(fMembersToMove));
+			for (int i= 0; i < fMembersToMove.length; i++) {
+				if (fMembersToMove[i].getElementType() == IJavaElement.METHOD) {
+					result.add(fMembersToMove[i]);
+				}
+			}
 		}
 		result.addAll(Arrays.asList(toDeclareAbstract));
 		result.addAll(Arrays.asList(abstractPulledUp));
