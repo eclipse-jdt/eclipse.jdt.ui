@@ -105,7 +105,9 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 				if (((Button)event.widget).getSelection())
 					changeRefactoring(InlineMethodRefactoring.Mode.INLINE_SINGLE);
 			}
-		});		
+		});
+		
+		fInlineMode.setFocus();
 		Dialog.applyDialogFont(result);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INLINE_METHOD_WIZARD_PAGE);
 	}
