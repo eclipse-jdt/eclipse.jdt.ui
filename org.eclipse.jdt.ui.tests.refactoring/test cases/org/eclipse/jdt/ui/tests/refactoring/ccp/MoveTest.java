@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.ccp;
 
+import java.io.IOException;
 import java.util.Map;
 
 import junit.framework.Test;
@@ -1953,7 +1954,7 @@ public class MoveTest extends RefactoringTest {
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
 			
-			move(javaElements, resources, superFolder, true);
+			move(javaElements, resources, superFolder, null, true);
 			
 			assertIsParent(folder, file);
 			assertIsParent(superFolder, folder);
@@ -1977,7 +1978,7 @@ public class MoveTest extends RefactoringTest {
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
 			
-			move(javaElements, resources, superFolder, false);
+			move(javaElements, resources, superFolder, null, false);
 			
 			assertIsParent(folder, file);
 			assertIsParent(superFolder, folder);
@@ -1987,16 +1988,49 @@ public class MoveTest extends RefactoringTest {
 		}
 	}	
 	
+	private void delete(ICompilationUnit cu) throws Exception {
+		try {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		} catch (JavaModelException e) {
+			e.printStackTrace();
+			//ingore and keep going
+		}
+	}
+	
+	private void compareContents(String cuName) throws JavaModelException, IOException {
+		assertEqualLines(cuName, getFileContents(getOutputTestFileName(cuName)), getPackageP().getCompilationUnit(cuName + ".java").getSource());
+	}
+	
+	public void testDestination_fieldWithImport() throws Exception {
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		try {
+			IType typeA= cuA.getType("A");
+			IJavaElement fieldF= typeA.getField("f");
+			IJavaElement fieldG= typeA.getField("g");
+			
+			move(new IJavaElement[] {fieldF} , new IResource[0], null, fieldG, true);
+			
+			compareContents("A");
+		} finally{
+			delete(cuA);
+		}
+	}
+	
 	private static void assertIsParent(IContainer parent, IResource child) {
 		assertTrue(child.getParent().equals(parent));
 	}
 
-	public void move(IJavaElement[] javaElements, IResource[] resources, IResource destination, boolean confirmAll) throws Exception {
+	public void move(IJavaElement[] javaElements, IResource[] resources, IResource destination, IJavaElement javaDestination, boolean confirmAll) throws Exception {
 		assertNotNull(javaElements);
 		assertNotNull(resources);
-		assertNotNull(destination);
+		assertTrue((destination != null || javaDestination != null) && (destination == null || javaDestination == null));
 		
-		assertTrue(destination.exists());
+		if (javaDestination != null) {
+			assertTrue(javaDestination.exists());
+		} else {
+			assertTrue(destination.exists());
+		}
 		for (int i= 0; i < resources.length; i++) {
 			assertTrue(resources[i].exists());
 		}
@@ -2005,7 +2039,11 @@ public class MoveTest extends RefactoringTest {
 		assertTrue(policy.canEnable());
 		
 		JavaMoveProcessor processor= new JavaMoveProcessor(policy);
-		assertTrue(processor.setDestination(destination).isOK());
+		if (javaDestination != null) {
+			assertTrue(processor.setDestination(javaDestination).isOK());
+		} else {
+			assertTrue(processor.setDestination(destination).isOK());
+		}
 		
 		JavaMoveRefactoring ref= new JavaMoveRefactoring(processor);
 		
