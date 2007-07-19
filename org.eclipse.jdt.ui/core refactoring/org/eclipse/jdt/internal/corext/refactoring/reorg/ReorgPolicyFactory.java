@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1824,10 +1825,11 @@ public final class ReorgPolicyFactory {
 					CompositeChange result= new DynamicValidationStateChange(RefactoringCoreMessages.ReorgPolicy_move_members);
 					result.markAsSynthetic();
 					result.add(targetCuChange);
-					if (Arrays.asList(getJavaElements()).containsAll(Arrays.asList(sourceCu.getTypes())))
-						result.add(DeleteChangeCreator.createDeleteChange(null, new IResource[0], new ICompilationUnit[] {sourceCu}, RefactoringCoreMessages.ReorgPolicy_move, null));
-					else
+					if (Arrays.asList(getJavaElements()).containsAll(Arrays.asList(sourceCu.getTypes()))) {
+						result.add(DeleteChangeCreator.createDeleteChange(null, new IResource[0], new ICompilationUnit[] {sourceCu}, RefactoringCoreMessages.ReorgPolicy_move, Collections.EMPTY_LIST));
+					} else {
 						result.add(createCompilationUnitChange(sourceCu, sourceRewriter));
+					}
 					return result;
 				}
 			} catch (JavaModelException e) {
