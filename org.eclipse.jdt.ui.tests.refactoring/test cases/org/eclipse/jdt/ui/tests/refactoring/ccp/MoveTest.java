@@ -1988,20 +1988,6 @@ public class MoveTest extends RefactoringTest {
 		}
 	}	
 	
-	private void delete(ICompilationUnit cu) throws Exception {
-		try {
-			performDummySearch();
-			cu.delete(true, new NullProgressMonitor());
-		} catch (JavaModelException e) {
-			e.printStackTrace();
-			//ingore and keep going
-		}
-	}
-	
-	private void compareContents(String cuName) throws JavaModelException, IOException {
-		assertEqualLines(cuName, getFileContents(getOutputTestFileName(cuName)), getPackageP().getCompilationUnit(cuName + ".java").getSource());
-	}
-	
 	public void testDestination_fieldWithImport() throws Exception {
 		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
 		try {
@@ -2012,6 +1998,24 @@ public class MoveTest extends RefactoringTest {
 			move(new IJavaElement[] {fieldF} , new IResource[0], null, fieldG, true);
 			
 			compareContents("A");
+		} finally{
+			delete(cuA);
+		}
+	}
+	
+	public void testDestination_fieldWithImportMoveAcross() throws Exception {
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
+		try {
+			IType typeA= cuA.getType("A");
+			IJavaElement fieldF= typeA.getField("f");
+			
+			IType typeB= cuB.getType("B");
+			
+			move(new IJavaElement[] {fieldF} , new IResource[0], null, typeB, true);
+			
+			compareContents("A");
+			compareContents("B");
 		} finally{
 			delete(cuA);
 		}
@@ -2055,5 +2059,19 @@ public class MoveTest extends RefactoringTest {
 		}
 		
 		performRefactoring(ref);
+	}
+	
+	private void delete(ICompilationUnit cu) throws Exception {
+		try {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		} catch (JavaModelException e) {
+			e.printStackTrace();
+			//ingore and keep going
+		}
+	}
+	
+	private void compareContents(String cuName) throws JavaModelException, IOException {
+		assertEqualLines(cuName, getFileContents(getOutputTestFileName(cuName)), getPackageP().getCompilationUnit(cuName + ".java").getSource());
 	}
 }

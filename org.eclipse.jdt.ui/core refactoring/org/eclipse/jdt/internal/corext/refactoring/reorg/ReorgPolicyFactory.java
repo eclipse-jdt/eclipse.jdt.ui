@@ -598,6 +598,8 @@ public final class ReorgPolicyFactory {
 			Assert.isTrue(getSourceCu() != null || getSourceClassFile() != null);
 			Assert.isTrue(getSourceCu() == null || getSourceClassFile() == null);
 			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			parser.setBindingsRecovery(true);
+			parser.setResolveBindings(true);
 			if (getSourceCu() != null)
 				parser.setSource(getSourceCu());
 			else
@@ -1799,7 +1801,7 @@ public final class ReorgPolicyFactory {
 			pm.beginTask("", 3); //$NON-NLS-1$
 			try {
 				final ICompilationUnit sourceCu= getSourceCu();
-				CompilationUnit sourceCuNode= RefactoringASTParser.parseWithASTProvider(sourceCu, false, new SubProgressMonitor(pm, 1));
+				CompilationUnit sourceCuNode= RefactoringASTParser.parseWithASTProvider(sourceCu, true, new SubProgressMonitor(pm, 1));
 				CompilationUnitRewrite sourceRewriter= new CompilationUnitRewrite(sourceCu, sourceCuNode);
 				ICompilationUnit destinationCu= getDestinationCu();
 				CompilationUnitRewrite targetRewriter;
@@ -1807,7 +1809,7 @@ public final class ReorgPolicyFactory {
 					targetRewriter= sourceRewriter;
 					pm.worked(1);
 				} else {
-					CompilationUnit destinationCuNode= RefactoringASTParser.parseWithASTProvider(destinationCu, false, new SubProgressMonitor(pm, 1));
+					CompilationUnit destinationCuNode= RefactoringASTParser.parseWithASTProvider(destinationCu, true, new SubProgressMonitor(pm, 1));
 					targetRewriter= new CompilationUnitRewrite(destinationCu, destinationCuNode);
 				}
 				IJavaElement[] javaElements= getJavaElements();
