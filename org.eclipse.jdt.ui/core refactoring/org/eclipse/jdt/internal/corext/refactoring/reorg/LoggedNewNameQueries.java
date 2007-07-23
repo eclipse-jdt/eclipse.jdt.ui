@@ -77,17 +77,6 @@ public final class LoggedNewNameQueries implements INewNameQueries {
 		}
 	}
 
-	/** Null implementation of new name query */
-	private static final class NullNewNameQuery implements INewNameQuery {
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public String getNewName() {
-			return "null"; //$NON-NLS-1$
-		}
-	}
-
 	/** The reorg execution log */
 	private final ReorgExecutionLog fLog;
 
@@ -133,7 +122,7 @@ public final class LoggedNewNameQueries implements INewNameQueries {
 	 * {@inheritDoc}
 	 */
 	public INewNameQuery createNullQuery() {
-		return new NullNewNameQuery();
+		return createStaticQuery(null);
 	}
 
 	/**
