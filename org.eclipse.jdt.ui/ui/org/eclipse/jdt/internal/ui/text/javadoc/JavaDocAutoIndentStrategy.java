@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,9 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.text.javadoc;
-
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -71,8 +69,8 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 
 	/**
 	 * Copies the indentation of the previous line and adds a star.
-	 * If the javadoc just started on this line add standard method tags
-	 * and close the javadoc.
+	 * If the Javadoc just started on this line add standard method tags
+	 * and close the Javadoc.
 	 *
 	 * @param d the document to work on
 	 * @param c the command to deal with
@@ -100,20 +98,23 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 
 			if (firstNonWS < offset) {
 				if (d.getChar(firstNonWS) == '/') {
-					// javadoc started on this line
+					// Javadoc started on this line
 					buf.append(" * "); //$NON-NLS-1$
 
 					if (isPreferenceTrue(PreferenceConstants.EDITOR_CLOSE_JAVADOCS) && isNewComment(d, offset)) {
 						c.shiftsCaret= false;
 						c.caretOffset= c.offset + buf.length();
 						String lineDelimiter= TextUtilities.getDefaultLineDelimiter(d);
-
+						
+						int eolOffset= lineOffset + line.getLength();
+						int replacementLength= eolOffset - p;
+						String restOfLine= d.get(p, replacementLength);
 						String endTag= lineDelimiter + indentation + " */"; //$NON-NLS-1$
 
 						if (isPreferenceTrue(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS)) {
 							// we need to close the comment before computing
 							// the correct tags in order to get the method
-							d.replace(offset, 0, endTag);
+							d.replace(offset, replacementLength, endTag);
 
 							// evaluate method signature
 							ICompilationUnit unit= getCompilationUnit();
@@ -122,6 +123,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 								try {
 									JavaModelUtil.reconcile(unit);
 									String string= createJavaDocTags(d, c, indentation, lineDelimiter, unit);
+									buf.append(restOfLine);
 									// only add tags if they are non-empty - the empty line has already been added above.
 									if (string != null && !string.trim().equals("*")) //$NON-NLS-1$
 										buf.append(string);
@@ -130,6 +132,8 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 								}
 							}
 						} else {
+							c.length= replacementLength;
+							buf.append(restOfLine);
 							buf.append(endTag);
 						}
 					}
@@ -161,13 +165,12 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	 * Returns the range of the Javadoc prefix on the given line in
 	 * <code>document</code>. The prefix greedily matches the following regex
 	 * pattern: <code>\w*\*\w*</code>, that is, any number of whitespace
-	 * characters, followed by an asterix ('*'), followed by any number of
+	 * characters, followed by an asterisk ('*'), followed by any number of
 	 * whitespace characters.
 	 *
 	 * @param document the document to which <code>line</code> refers
 	 * @param line the line from which to extract the prefix range
-	 * @return an <code>IRegion</code> describing the range of the prefix on
-	 *         the given line
+	 * @return an <code>IRegion</code> describing the range of the prefix on the given line
 	 * @throws BadLocationException if accessing the document fails
 	 */
 	private IRegion findPrefixRange(IDocument document, IRegion line) throws BadLocationException {
@@ -191,7 +194,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	 * @param lineDelimiter the line delimiter to use
 	 * @param unit the compilation unit shown in the editor
 	 * @return the tags to add to the document
-	 * @throws CoreException if accessing the java model fails
+	 * @throws CoreException if accessing the Java model fails
 	 * @throws BadLocationException if accessing the document fails
 	 */
 	private String createJavaDocTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, ICompilationUnit unit)
@@ -219,8 +222,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	 *
 	 * @param comment the computed comment
 	 * @param indentation the base indentation
-	 * @param project the java project for the formatter settings, or
-	 *        <code>null</code> for global preferences
+	 * @param project the Java project for the formatter settings, or <code>null</code> for global preferences
 	 * @param lineDelimiter the line delimiter
 	 * @return a trimmed version of <code>comment</code>
 	 */
@@ -282,11 +284,18 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	/**
 	 * Returns <code>true</code> if the comment being inserted at
 	 * <code>command.offset</code> is the first comment (the first
-	 * javadoc comment if <code>ignoreJavadoc</code> is
+	 * Javadoc comment if <code>ignoreJavadoc</code> is
 	 * <code>true</code>) of the given member.
 	 * <p>
 	 * see also https://bugs.eclipse.org/bugs/show_bug.cgi?id=55325 (don't add parameters if the member already has a comment)
 	 * </p>
+	 * @param document the document
+	 * @param command the document command
+	 * @param member the Java member
+	 * @param ignoreNonJavadoc <code>true</code> if non Javadoc should be ignored
+	 * @return <code>true</code> if it is the first comment
+	 * @throws JavaModelException if accessing the Java model fails
+	 * @throws BadLocationException if accessing the document fails
 	 */
 	private boolean isFirstComment(IDocument document, DocumentCommand command, IMember member, boolean ignoreNonJavadoc) throws BadLocationException, JavaModelException {
 		IRegion partition= TextUtilities.getPartition(document, fPartitioning, command.offset, false);
@@ -323,8 +332,8 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	}
 
 	/**
-	 * Guesses if the command operates within a newly created javadoc comment or not.
-	 * If in doubt, it will assume that the javadoc is new.
+	 * Guesses if the command operates within a newly created Javadoc comment or not.
+	 * If in doubt, it will assume that the Javadoc is new.
 	 *
 	 * @param document the document
 	 * @param commandOffset the command offset
@@ -401,7 +410,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	 * Returns the method inherited from, <code>null</code> if method is newly defined.
 	 * @param method the method being written
 	 * @return the ancestor method, or <code>null</code> if none
-	 * @throws JavaModelException if accessing the java model fails
+	 * @throws JavaModelException if accessing the Java model fails
 	 */
 	private static IMethod getInheritedMethod(IMethod method) throws JavaModelException {
 		IType declaringType= method.getDeclaringType();
@@ -410,7 +419,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	}
 
 	/**
-	 * Returns the compilation unit of the CompilationUnitEditor invoking the AutoIndentStrategy,
+	 * Returns the compilation unit of the compilation unit editor invoking the <code>AutoIndentStrategy</code>,
 	 * might return <code>null</code> on error.
 	 * @return the compilation unit represented by the document
 	 */
