@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,8 +35,9 @@ import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
 import org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher;
 
+
 /**
- * AbstractJavaCommentScanner.java
+ * Java comment scanner.
  */
 public class JavaCommentScanner extends AbstractJavaScanner{
 
@@ -134,7 +134,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		}
 
 		/**
-		 * Is task tag detection case-senstive?
+		 * Is task tag detection case-sensitive?
 		 *
 		 * @return <code>true</code> iff task tag detection is case-sensitive
 		 * @since 3.0
