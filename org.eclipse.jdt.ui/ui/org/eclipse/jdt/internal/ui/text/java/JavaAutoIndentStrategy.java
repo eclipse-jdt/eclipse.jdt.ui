@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *     Nikolay Metchev - Fixed https://bugs.eclipse.org/bugs/show_bug.cgi?id=29909
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
-
 
 import org.eclipse.core.runtime.Assert;
 
@@ -61,6 +60,7 @@ import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.JavaIndenter;
 import org.eclipse.jdt.internal.ui.text.Symbols;
+
 
 /**
  * Auto indent strategy sensitive to brackets.
@@ -455,8 +455,9 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * parenthesis of the definition's parameter list.
 	 *
 	 * @param document the document being modified
-	 * @param position the first character position in <code>document</code> to be considered
 	 * @param partitioning the document partitioning
+	 * @param scanner the scanner
+	 * @param position the first character position in <code>document</code> to be considered
 	 * @return <code>true</code> if the content of <code>document</code> looks like an anonymous class definition, <code>false</code> otherwise
 	 */
 	private static boolean looksLikeAnonymousClassDef(IDocument document, String partitioning, JavaHeuristicScanner scanner, int position) {
@@ -494,7 +495,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 	private boolean isClosed(IDocument document, int offset, int length) {
 
-		CompilationUnitInfo info= getCompilationUnitForMethod(document, offset, fPartitioning);
+		CompilationUnitInfo info= getCompilationUnitForMethod(document, offset);
 		if (info == null)
 			return false;
 
@@ -996,13 +997,14 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
     }
 
     /**
-     * Skips the scope opened by <code>token</code> in <code>document</code>,
-     * returns either the position of the
-     * @param pos
-     * @param token
-     * @return the position after the scope
+     * Skips the scope opened by <code>token</code>.
+     * 
+     * @param scanner the scanner 
+     * @param start the start position
+     * @param token the token
+     * @return the position after the scope or <code>JavaHeuristicScanner.NOT_FOUND</code>
      */
-    private static int skipScope(JavaHeuristicScanner scanner, int pos, int token) {
+    private static int skipScope(JavaHeuristicScanner scanner, int start, int token) {
     	int openToken= token;
     	int closeToken;
     	switch (token) {
@@ -1021,7 +1023,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
     	}
 
     	int depth= 1;
-    	int p= pos;
+    	int p= start;
 
     	while (true) {
     		int tok= scanner.nextToken(p, JavaHeuristicScanner.UNBOUND);
@@ -1205,7 +1207,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		return false;
 	}
 
-	private static CompilationUnitInfo getCompilationUnitForMethod(IDocument document, int offset, String partitioning) {
+	private static CompilationUnitInfo getCompilationUnitForMethod(IDocument document, int offset) {
 		try {
 			JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
 
