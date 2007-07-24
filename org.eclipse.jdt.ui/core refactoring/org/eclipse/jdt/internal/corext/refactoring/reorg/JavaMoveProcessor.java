@@ -286,11 +286,13 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 	}
 
 	public RefactoringStatus setDestination(IJavaElement destination) throws JavaModelException {
-		return fMovePolicy.setDestination(destination);
+		fMovePolicy.setDestination(destination);
+		return fMovePolicy.verifyDestination(destination);
 	}
 
 	public RefactoringStatus setDestination(IResource destination) throws JavaModelException {
-		return fMovePolicy.setDestination(destination);
+		fMovePolicy.setDestination(destination);
+		return fMovePolicy.verifyDestination(destination);
 	}
 
 	public void setFilePatterns(String patterns) {

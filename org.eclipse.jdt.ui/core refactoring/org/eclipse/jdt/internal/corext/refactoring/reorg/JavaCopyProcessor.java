@@ -223,11 +223,13 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 	}
 
 	public RefactoringStatus setDestination(IJavaElement destination) throws JavaModelException {
-		return fCopyPolicy.setDestination(destination);
+		fCopyPolicy.setDestination(destination);
+		return fCopyPolicy.verifyDestination(destination);
 	}
 
 	public RefactoringStatus setDestination(IResource destination) throws JavaModelException {
-		return fCopyPolicy.setDestination(destination);
+		fCopyPolicy.setDestination(destination);
+		return fCopyPolicy.verifyDestination(destination);
 	}
 
 	public void setNewNameQueries(INewNameQueries newNameQueries) {

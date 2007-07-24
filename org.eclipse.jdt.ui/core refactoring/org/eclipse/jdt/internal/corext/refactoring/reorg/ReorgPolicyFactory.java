@@ -1004,7 +1004,7 @@ public final class ReorgPolicyFactory {
 			return false;
 		}
 
-		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
+		public RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			Assert.isNotNull(javaElement);
 			if (!fCheckDestination)
 				return new RefactoringStatus();
@@ -1046,7 +1046,7 @@ public final class ReorgPolicyFactory {
 			return new RefactoringStatus();
 		}
 
-		protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
+		public RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
 			Assert.isNotNull(resource);
 			if (!resource.exists() || resource.isPhantom())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_phantom);
@@ -1410,7 +1410,10 @@ public final class ReorgPolicyFactory {
 		}
 
 		public boolean hasAllInputSet() {
-			return super.hasAllInputSet() && !canUpdateReferences() && !canUpdateQualifiedNames();
+			if (getResourceDestination() == null && getJavaElementDestination() == null)
+				return false;
+			
+			return !canUpdateReferences() && !canUpdateQualifiedNames();
 		}
 
 		public RefactoringStatus initialize(RefactoringArguments arguments) {
@@ -1465,7 +1468,7 @@ public final class ReorgPolicyFactory {
 			fUpdateReferences= update;
 		}
 
-		protected RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
+		public RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
 			RefactoringStatus superStatus= super.verifyDestination(destination);
 			if (superStatus.hasFatalError())
 				return superStatus;
@@ -1483,7 +1486,7 @@ public final class ReorgPolicyFactory {
 			return superStatus;
 		}
 
-		protected RefactoringStatus verifyDestination(IResource destination) throws JavaModelException {
+		public RefactoringStatus verifyDestination(IResource destination) throws JavaModelException {
 			RefactoringStatus superStatus= super.verifyDestination(destination);
 			if (superStatus.hasFatalError())
 				return superStatus;
@@ -1639,7 +1642,7 @@ public final class ReorgPolicyFactory {
 			fCheckDestination= check;
 		}
 
-		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
+		public RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			RefactoringStatus superStatus= super.verifyDestination(javaElement);
 			if (superStatus.hasFatalError())
 				return superStatus;
@@ -1647,6 +1650,80 @@ public final class ReorgPolicyFactory {
 			if (isParentOfAny(javaProject, getPackageFragmentRoots()))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_element2parent);
 			return superStatus;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canEnableQualifiedNameUpdating() {
+			return false;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean getUpdateQualifiedNames() {
+			return false;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canUpdateQualifiedNames() {
+			return false;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setUpdateQualifiedNames(boolean update) {
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setFilePatterns(String patterns) {
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public String getFilePatterns() {
+			return null;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canEnableUpdateReferences() {
+			return false;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canUpdateReferences() {
+			return false;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean getUpdateReferences() {
+			return false;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setUpdateReferences(boolean update) {
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean hasAllInputSet() {
+			return getJavaElementDestination() != null || getResourceDestination() != null;
 		}
 	}
 
@@ -1772,7 +1849,7 @@ public final class ReorgPolicyFactory {
 			fCheckDestination= check;
 		}
 
-		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
+		public RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			RefactoringStatus superStatus= super.verifyDestination(javaElement);
 			if (superStatus.hasFatalError())
 				return superStatus;
@@ -1781,6 +1858,80 @@ public final class ReorgPolicyFactory {
 			if (isParentOfAny(root, getPackages()))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_package2parent);
 			return superStatus;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canEnableQualifiedNameUpdating() {
+			return false;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean getUpdateQualifiedNames() {
+			return false;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canUpdateQualifiedNames() {
+			return false;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setUpdateQualifiedNames(boolean update) {
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setFilePatterns(String patterns) {
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public String getFilePatterns() {
+			return null;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canEnableUpdateReferences() {
+			return false;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canUpdateReferences() {
+			return false;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean getUpdateReferences() {
+			return false;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setUpdateReferences(boolean update) {
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean hasAllInputSet() {
+			return getJavaElementDestination() != null || getResourceDestination() != null;
 		}
 	}
 
@@ -1929,7 +2080,7 @@ public final class ReorgPolicyFactory {
 			fCheckDestination= check;
 		}
 
-		protected RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
+		public RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
 			IJavaElement[] elements= getJavaElements();
 			for (int i= 0; i < elements.length; i++) {
 				IJavaElement parent= destination.getParent();
@@ -1948,6 +2099,80 @@ public final class ReorgPolicyFactory {
 			if (destination.equals(commonParent) || Arrays.asList(getJavaElements()).contains(destination))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_element2parent);
 			return superStatus;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canEnableQualifiedNameUpdating() {
+			return false;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean getUpdateQualifiedNames() {
+			return false;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canUpdateQualifiedNames() {
+			return false;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setUpdateQualifiedNames(boolean update) {
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setFilePatterns(String patterns) {
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public String getFilePatterns() {
+			return null;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canEnableUpdateReferences() {
+			return false;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canUpdateReferences() {
+			return false;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean getUpdateReferences() {
+			return false;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setUpdateReferences(boolean update) {
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean hasAllInputSet() {
+			return getJavaElementDestination() != null || getResourceDestination() != null;
 		}
 	}
 
@@ -2082,11 +2307,11 @@ public final class ReorgPolicyFactory {
 			return new RefactoringStatus();
 		}
 
-		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
+		public RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_noCopying);
 		}
 
-		protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
+		public RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_noCopying);
 		}
 	}
@@ -2161,12 +2386,86 @@ public final class ReorgPolicyFactory {
 			fCheckDestination= check;
 		}
 
-		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
+		public RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_noMoving);
 		}
 
-		protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
+		public RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_noMoving);
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canEnableQualifiedNameUpdating() {
+			return false;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean getUpdateQualifiedNames() {
+			return false;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canUpdateQualifiedNames() {
+			return false;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setUpdateQualifiedNames(boolean update) {
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setFilePatterns(String patterns) {
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public String getFilePatterns() {
+			return null;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canEnableUpdateReferences() {
+			return false;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canUpdateReferences() {
+			return false;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean getUpdateReferences() {
+			return false;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setUpdateReferences(boolean update) {
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean hasAllInputSet() {
+			return getJavaElementDestination() != null || getResourceDestination() != null;
 		}
 	}
 
@@ -2319,7 +2618,7 @@ public final class ReorgPolicyFactory {
 			return status;
 		}
 
-		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
+		public RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			Assert.isNotNull(javaElement);
 			if (!fCheckDestination)
 				return new RefactoringStatus();
@@ -2336,7 +2635,7 @@ public final class ReorgPolicyFactory {
 			return new RefactoringStatus();
 		}
 
-		protected RefactoringStatus verifyDestination(IResource resource) {
+		public RefactoringStatus verifyDestination(IResource resource) {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_src2proj);
 		}
 	}
@@ -2505,7 +2804,7 @@ public final class ReorgPolicyFactory {
 			return status;
 		}
 
-		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
+		public RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			Assert.isNotNull(javaElement);
 			if (!fCheckDestination)
 				return new RefactoringStatus();
@@ -2519,7 +2818,7 @@ public final class ReorgPolicyFactory {
 			return new RefactoringStatus();
 		}
 
-		protected RefactoringStatus verifyDestination(IResource resource) {
+		public RefactoringStatus verifyDestination(IResource resource) {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_packages);
 		}
 	}
@@ -2569,26 +2868,6 @@ public final class ReorgPolicyFactory {
 			return true;
 		}
 
-		public boolean canEnableQualifiedNameUpdating() {
-			return false;
-		}
-
-		public boolean canEnableUpdateReferences() {
-			return false;
-		}
-
-		public boolean canUpdateQualifiedNames() {
-			Assert.isTrue(false);
-			// should not be called if
-			// canEnableQualifiedNameUpdating is not
-			// overridden and returns false
-			return false;
-		}
-
-		public boolean canUpdateReferences() {
-			return false;
-		}
-
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws CoreException {
 			Assert.isNotNull(reorgQueries);
 			ResourceChangeChecker checker= (ResourceChangeChecker) context.getChecker(ResourceChangeChecker.class);
@@ -2605,7 +2884,7 @@ public final class ReorgPolicyFactory {
 			return new RefactoringStatus();
 		}
 
-		public IFile[] getAllModifiedFiles() {
+		protected IFile[] getAllModifiedFiles() {
 			return new IFile[0];
 		}
 
@@ -2618,14 +2897,6 @@ public final class ReorgPolicyFactory {
 			if (destination == null)
 				destination= getResourceDestination();
 			return JavaElementLabels.getTextLabel(destination, JavaElementLabels.ALL_FULLY_QUALIFIED);
-		}
-
-		public String getFilePatterns() {
-			Assert.isTrue(false);
-			// should not be called if
-			// canEnableQualifiedNameUpdating is not
-			// overridden and returns false
-			return null;
 		}
 
 		protected abstract String getHeaderPattern();
@@ -2660,26 +2931,6 @@ public final class ReorgPolicyFactory {
 			return fResourceDestination;
 		}
 
-		public boolean getUpdateQualifiedNames() {
-			Assert.isTrue(false);
-			// should not be called if
-			// canEnableQualifiedNameUpdating is not
-			// overridden and returns false
-			return false;
-		}
-
-		public boolean getUpdateReferences() {
-			Assert.isTrue(false);
-			// should not be called if
-			// canUpdateReferences is not overridden and
-			// returns false
-			return false;
-		}
-
-		public boolean hasAllInputSet() {
-			return fJavaElementDestination != null || fResourceDestination != null;
-		}
-
 		public RefactoringStatus initialize(RefactoringArguments arguments) {
 			if (arguments instanceof JavaRefactoringArguments) {
 				final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
@@ -2691,7 +2942,8 @@ public final class ReorgPolicyFactory {
 							return ScriptableRefactoring.createInputFatalStatus(element, getProcessorId(), getRefactoringId());
 						else {
 							try {
-								return setDestination(element);
+								setDestination(element);
+								return verifyDestination(element);
 							} catch (JavaModelException exception) {
 								JavaPlugin.log(exception);
 								return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { handle, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT}));
@@ -2705,7 +2957,8 @@ public final class ReorgPolicyFactory {
 							return ScriptableRefactoring.createInputFatalStatus(resource, getProcessorId(), getRefactoringId());
 						else {
 							try {
-								return setDestination(resource);
+								setDestination(resource);
+								return verifyDestination(resource);
 							} catch (JavaModelException exception) {
 								JavaPlugin.log(exception);
 								return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { handle, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT}));
@@ -2721,7 +2974,8 @@ public final class ReorgPolicyFactory {
 							return ScriptableRefactoring.createInputFatalStatus(resource, getProcessorId(), getRefactoringId());
 						else {
 							try {
-								return setDestination(resource);
+								setDestination(resource);
+								return verifyDestination(resource);
 							} catch (JavaModelException exception) {
 								JavaPlugin.log(exception);
 								return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { handle, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT}));
@@ -2743,46 +2997,17 @@ public final class ReorgPolicyFactory {
 			}
 		}
 
-		public final RefactoringStatus setDestination(IJavaElement destination) throws JavaModelException {
+		public final void setDestination(IJavaElement destination) {
 			Assert.isNotNull(destination);
-			fJavaElementDestination= null;
 			fResourceDestination= null;
 			fJavaElementDestination= destination;
-			return verifyDestination(destination);
 		}
 
-		public final RefactoringStatus setDestination(IResource destination) throws JavaModelException {
+		public final void setDestination(IResource destination) { 
 			Assert.isNotNull(destination);
 			fJavaElementDestination= null;
-			fResourceDestination= null;
 			fResourceDestination= destination;
-			return verifyDestination(destination);
 		}
-
-		public void setFilePatterns(String patterns) {
-			Assert.isTrue(false);
-			// should not be called if
-			// canEnableQualifiedNameUpdating is not
-			// overridden and returns false
-		}
-
-		public void setUpdateQualifiedNames(boolean update) {
-			Assert.isTrue(false);
-			// should not be called if
-			// canEnableQualifiedNameUpdating is not
-			// overridden and returns false
-		}
-
-		public void setUpdateReferences(boolean update) {
-			Assert.isTrue(false);
-			// should not be called if
-			// canUpdateReferences is not overridden and
-			// returns false
-		}
-
-		protected abstract RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException;
-
-		protected abstract RefactoringStatus verifyDestination(IResource destination) throws JavaModelException;
 	}
 
 	private static abstract class SubCuElementReorgPolicy extends ReorgPolicy {
@@ -3211,11 +3436,11 @@ public final class ReorgPolicyFactory {
 			return new RefactoringStatus();
 		}
 
-		protected RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
+		public RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
 			return recursiveVerifyDestination(destination);
 		}
 
-		protected final RefactoringStatus verifyDestination(IResource destination) throws JavaModelException {
+		public final RefactoringStatus verifyDestination(IResource destination) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_no_resource);
 		}
 	}
