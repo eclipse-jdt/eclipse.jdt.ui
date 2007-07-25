@@ -168,6 +168,42 @@ public final class RefactoringMessages extends NLS {
 
 	public static String DeleteWizard_also_delete_sub_packages;
 
+	public static String ExtractClassAction_action_text;
+
+	public static String ExtractClassWizard_button_down;
+
+	public static String ExtractClassWizard_button_edit;
+
+	public static String ExtractClassWizard_button_up;
+
+	public static String ExtractClassWizard_check_getters;
+
+	public static String ExtractClassWizard_checke_setters;
+
+	public static String ExtractClassWizard_column_name;
+
+	public static String ExtractClassWizard_column_type;
+
+	public static String ExtractClassWizard_dialog_message;
+
+	public static String ExtractClassWizard_dialog_title;
+
+	public static String ExtractClassWizard_field_name;
+
+	public static String ExtractClassWizard_label_class_name;
+
+	public static String ExtractClassWizard_label_destination;
+
+	public static String ExtractClassWizard_label_select_fields;
+
+	public static String ExtractClassWizard_not_available;
+
+	public static String ExtractClassWizard_page_title;
+
+	public static String ExtractClassWizard_radio_nested;
+
+	public static String ExtractClassWizard_radio_top_level;
+
 	public static String ExtractConstantAction_extract_constant;
 
 	public static String ExtractConstantAction_label;

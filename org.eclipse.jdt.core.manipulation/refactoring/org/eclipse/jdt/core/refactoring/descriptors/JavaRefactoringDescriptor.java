@@ -289,7 +289,6 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * {@inheritDoc}
 	 */
 	public Refactoring createRefactoring(final RefactoringStatus status) throws CoreException {
-		populateArgumentMap();
 		Refactoring refactoring= null;
 		final String id= getID();
 		final RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(id);

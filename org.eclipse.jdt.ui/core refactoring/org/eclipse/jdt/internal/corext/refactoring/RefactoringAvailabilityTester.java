@@ -1179,4 +1179,12 @@ public final class RefactoringAvailabilityTester {
 	public static boolean isIntroduceParameterObjectAvailable(JavaTextSelection selection) throws JavaModelException{
 		return isChangeSignatureAvailable(selection); //TODO test selected element for more than 1 parameter?
 	}
+
+	public static boolean isExtractClassAvailable(IType type) throws JavaModelException {
+		if (type == null)
+			return false;
+		if (!type.exists())
+			return false;
+		return ReorgUtils.hasSourceAvailable(type);
+	}
 }

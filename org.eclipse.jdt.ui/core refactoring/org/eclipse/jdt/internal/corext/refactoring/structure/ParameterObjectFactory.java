@@ -14,18 +14,33 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.NamingConventions;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -36,6 +51,7 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
@@ -43,14 +59,23 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CreatePackageChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class ParameterObjectFactory {
 
@@ -65,7 +90,30 @@ public class ParameterObjectFactory {
 		super();
 	}
 
-	public TypeDeclaration createClassDeclaration(String declaringType, CompilationUnitRewrite cuRewrite) throws CoreException {
+	public static class CreationListener {
+		public void getterCreated(CompilationUnitRewrite cuRewrite, MethodDeclaration getter, ParameterInfo pi){}
+		public void setterCreated(CompilationUnitRewrite cuRewrite, MethodDeclaration setter, ParameterInfo pi){}
+		public void fieldCreated(CompilationUnitRewrite cuRewrite, FieldDeclaration field, ParameterInfo pi){}
+		public void constructorCreated(CompilationUnitRewrite cuRewrite, MethodDeclaration constructor){}
+		public void typeCreated(CompilationUnitRewrite cuRewrite, TypeDeclaration declaration) {}
+		
+		protected static ASTNode moveNode(CompilationUnitRewrite cuRewrite, ASTNode node) {
+			ASTRewrite rewrite= cuRewrite.getASTRewrite();
+			if (rewrite.getAST() != node.getAST())
+				return ASTNode.copySubtree(rewrite.getAST(), node);
+			return rewrite.createMoveTarget(node);
+		}
+	}
+	
+	/**
+	 * 
+	 * @param declaringType
+	 * @param cuRewrite
+	 * @param constructorInitilized names of parameterInfos that should be used in the constructor, or <code>null</code> if all should be used
+	 * @return
+	 * @throws CoreException
+	 */
+	public TypeDeclaration createClassDeclaration(String declaringType, CompilationUnitRewrite cuRewrite, Set constructorInitilized, CreationListener listener) throws CoreException {
 		AST ast= cuRewrite.getAST();
 		TypeDeclaration typeDeclaration= ast.newTypeDeclaration();
 		typeDeclaration.setName(ast.newSimpleName(fClassName));
@@ -74,29 +122,43 @@ public class ParameterObjectFactory {
 			ParameterInfo pi= (ParameterInfo) iter.next();
 			if (isValidField(pi)) {
 				FieldDeclaration declaration= createField(pi, cuRewrite);
+				if (listener != null) {
+					listener.fieldCreated(cuRewrite, declaration, pi);
+				}
 				body.add(declaration);
 			}
 		}
-		MethodDeclaration constructor= createConstructor(declaringType, cuRewrite);
+		MethodDeclaration constructor= createConstructor(declaringType, cuRewrite, constructorInitilized);
+		if (listener != null) {
+			listener.constructorCreated(cuRewrite, constructor);
+		}
 		body.add(constructor);
 		for (Iterator iter= fVariables.iterator(); iter.hasNext();) {
 			ParameterInfo pi= (ParameterInfo) iter.next();
 			if (fCreateGetter && isValidField(pi)) {
-				ASTNode getter= createGetter(pi, declaringType, cuRewrite);
+				MethodDeclaration getter= createGetter(pi, declaringType, cuRewrite);
+				if (listener != null) {
+					listener.getterCreated(cuRewrite, getter, pi);
+				}
 				body.add(getter);
 			}
 			if (fCreateSetter && isValidField(pi)) {
 				if (!Modifier.isFinal(pi.getOldBinding().getModifiers())) {
-					ASTNode setter= createSetter(pi, declaringType, cuRewrite);
+					MethodDeclaration setter= createSetter(pi, declaringType, cuRewrite);
+					if (listener != null) {
+						listener.setterCreated(cuRewrite, setter, pi);
+					}
 					body.add(setter);
 				}
 			}
 		}
-
+		if (listener != null) {
+			listener.typeCreated(cuRewrite, typeDeclaration);
+		}
 		return typeDeclaration;
 	}
 
-	private MethodDeclaration createConstructor(String declaringTypeName, CompilationUnitRewrite cuRewrite) throws CoreException {
+	private MethodDeclaration createConstructor(String declaringTypeName, CompilationUnitRewrite cuRewrite, Set namesToInitializers) throws CoreException {
 		AST ast= cuRewrite.getAST();
 		ICompilationUnit unit= cuRewrite.getCu();
 		IJavaProject project= unit.getJavaProject();
@@ -121,7 +183,8 @@ public class ParameterObjectFactory {
 		for (Iterator iter= fVariables.iterator(); iter.hasNext();) {
 			ParameterInfo pi= (ParameterInfo) iter.next();
 			if (isValidField(pi)) {
-				validParameter.add(pi);
+				if ((namesToInitializers== null) || namesToInitializers.contains(pi.getOldName()))
+					validParameter.add(pi);
 			}
 		}
 		
@@ -193,11 +256,12 @@ public class ParameterObjectFactory {
 				declaration.setJavadoc(doc);
 			}
 		}
-		int visibility= Modifier.PUBLIC;
+		List modifiers= new ArrayList();
 		if (fCreateGetter) {
-			visibility= Modifier.PRIVATE;
+			modifiers.add(ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD));
+		} else {
+			modifiers.add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 		}
-		List modifiers= ast.newModifiers(visibility);
 		declaration.modifiers().addAll(modifiers);
 		declaration.setType(importBinding(pi.getNewTypeBinding(), cuRewrite));
 		return declaration;
@@ -214,7 +278,23 @@ public class ParameterObjectFactory {
 		}
 	}
 
-	private ASTNode createGetter(ParameterInfo pi, String declaringType, CompilationUnitRewrite cuRewrite) throws CoreException {
+	public Expression createFieldWriteAccess(ParameterInfo pi, String paramName, AST ast, IJavaProject project, Expression assignedValue) {
+		if (!fCreateSetter) {
+			Name leftHandSide= ast.newName(new String[]{ paramName, pi.getNewName()});
+			Assignment assignment= ast.newAssignment();
+			assignment.setRightHandSide(assignedValue);
+			assignment.setLeftHandSide(leftHandSide);
+			return assignment;
+		} else {
+			MethodInvocation method= ast.newMethodInvocation();
+			method.setName(ast.newSimpleName(getSetterName(pi, ast, project)));
+			method.setExpression(ast.newSimpleName(paramName));
+			method.arguments().add(assignedValue);
+			return method;
+		}
+	}
+	
+	private MethodDeclaration createGetter(ParameterInfo pi, String declaringType, CompilationUnitRewrite cuRewrite) throws CoreException {
 		AST ast= cuRewrite.getAST();
 		ICompilationUnit cu= cuRewrite.getCu();
 		IJavaProject project= cu.getJavaProject();
@@ -259,7 +339,7 @@ public class ParameterObjectFactory {
 		return ast.newExpressionStatement(declaration);
 	}
 
-	private ASTNode createSetter(ParameterInfo pi, String declaringType, CompilationUnitRewrite cuRewrite) throws CoreException {
+	private MethodDeclaration createSetter(ParameterInfo pi, String declaringType, CompilationUnitRewrite cuRewrite) throws CoreException {
 		AST ast= cuRewrite.getAST();
 		ICompilationUnit cu= cuRewrite.getCu();
 		IJavaProject project= cu.getJavaProject();
@@ -426,4 +506,102 @@ public class ParameterObjectFactory {
 		return StubUtility.doAddComments(project);
 	}
 
+
+	public List/*<Change>*/ createTopLevelParameterObject(IPackageFragmentRoot packageFragmentRoot, Set namesToInitializers, CreationListener listener) throws CoreException {
+		List changes=new ArrayList();
+		IPackageFragment packageFragment= packageFragmentRoot.getPackageFragment(getPackage());
+		if (!packageFragment.exists()) {
+			changes.add(new CreatePackageChange(packageFragment));
+		}
+		ICompilationUnit unit= packageFragment.getCompilationUnit(getClassName() + ".java"); //$NON-NLS-1$
+		Assert.isTrue(!unit.exists());
+		IJavaProject javaProject= unit.getJavaProject();
+		ICompilationUnit workingCopy= unit.getWorkingCopy(null);
+
+		try {
+			// create stub with comments and dummy type
+			String lineDelimiter= StubUtility.getLineDelimiterUsed(javaProject);
+			String fileComment= getFileComment(workingCopy, lineDelimiter);
+			String typeComment= getTypeComment(workingCopy, lineDelimiter);
+			String content= CodeGeneration.getCompilationUnitContent(workingCopy, fileComment, typeComment,
+					"class " + getClassName() + "{}", lineDelimiter); //$NON-NLS-1$ //$NON-NLS-2$
+			workingCopy.getBuffer().setContents(content);
+
+			CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite(workingCopy);
+			ASTRewrite rewriter= cuRewrite.getASTRewrite();
+			CompilationUnit root= cuRewrite.getRoot();
+			AST ast= cuRewrite.getAST();
+			ImportRewrite importRewrite= cuRewrite.getImportRewrite();
+
+			// retrieve&replace dummy type with real class
+			ListRewrite types= rewriter.getListRewrite(root, CompilationUnit.TYPES_PROPERTY);
+			ASTNode dummyType= (ASTNode) types.getOriginalList().get(0);
+			String newTypeName= JavaModelUtil.concatenateName(getPackage(), getClassName());
+			TypeDeclaration classDeclaration= createClassDeclaration(newTypeName, cuRewrite, namesToInitializers, listener);
+			classDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
+			Javadoc javadoc= (Javadoc) dummyType.getStructuralProperty(TypeDeclaration.JAVADOC_PROPERTY);
+			rewriter.set(classDeclaration, TypeDeclaration.JAVADOC_PROPERTY, javadoc, null);
+			types.replace(dummyType, classDeclaration, null);
+
+			// Apply rewrites and discard workingcopy
+			// Using CompilationUnitRewrite.createChange() leads to strange
+			// results
+			String charset= ResourceUtil.getFile(unit).getCharset(false);
+			Document document= new Document(content);
+			try {
+				rewriter.rewriteAST().apply(document);
+				TextEdit rewriteImports= importRewrite.rewriteImports(null);
+				rewriteImports.apply(document);
+			} catch (BadLocationException e) {
+				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
+						RefactoringCoreMessages.IntroduceParameterObjectRefactoring_parameter_object_creation_error, e));
+			}
+			String docContent= document.get();
+			CreateCompilationUnitChange compilationUnitChange= new CreateCompilationUnitChange(unit, docContent, charset);
+			changes.add(compilationUnitChange);
+		} finally {
+			workingCopy.discardWorkingCopy();
+		}
+		return changes;
+	}
+	
+	public List/*<Change>*/ createTopLevelParameterObject(IPackageFragmentRoot packageFragmentRoot) throws CoreException {
+		return createTopLevelParameterObject(packageFragmentRoot, null, null);
+	}
+	
+	protected String getFileComment(ICompilationUnit parentCU, String lineDelimiter) throws CoreException {
+		if (StubUtility.doAddComments(parentCU.getJavaProject())) {
+			return CodeGeneration.getFileComment(parentCU, lineDelimiter);
+		}
+		return null;
+
+	}
+
+	protected String getTypeComment(ICompilationUnit parentCU, String lineDelimiter) throws CoreException {
+		if (StubUtility.doAddComments(parentCU.getJavaProject())) {
+			StringBuffer typeName= new StringBuffer();
+			typeName.append(getClassName());
+			String[] typeParamNames= new String[0];
+			String comment= CodeGeneration.getTypeComment(parentCU, typeName.toString(), typeParamNames, lineDelimiter);
+			if (comment != null && isValidComment(comment)) {
+				return comment;
+			}
+		}
+		return null;
+	}
+
+	private boolean isValidComment(String template) {
+		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
+		scanner.setSource(template.toCharArray());
+		try {
+			int next= scanner.getNextToken();
+			while (TokenScanner.isComment(next)) {
+				next= scanner.getNextToken();
+			}
+			return next == ITerminalSymbols.TokenNameEOF;
+		} catch (InvalidInputException e) {
+		}
+		return false;
+	}
+	
 }

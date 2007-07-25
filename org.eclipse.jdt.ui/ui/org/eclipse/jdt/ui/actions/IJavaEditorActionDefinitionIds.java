@@ -331,6 +331,14 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String EXTRACT_CONSTANT= "org.eclipse.jdt.ui.edit.text.java.extract.constant"; //$NON-NLS-1$
 
 	/**
+	 * Action definition ID of the refactor -> extract class action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.extract.class"</code>).
+	 * 
+	 * @since 3.4
+	 */
+	public static final String EXTRACT_CLASS= "org.eclipse.jdt.ui.edit.text.java.extract.class"; //$NON-NLS-1$
+	
+	/**
 	 * Action definition ID of the refactor -> introduce parameter action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.introduce.parameter"</code>).
 	 * 

@@ -394,6 +394,68 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String DynamicValidationStateChange_workspace_changed;
 
+	public static String ExtractClassContribution_error_unknown_descriptor;
+
+	public static String ExtractClassRefactoring_change_comment_header;
+
+	public static String ExtractClassRefactoring_change_name;
+
+	public static String ExtractClassRefactoring_comment_enclosing_type;
+
+	public static String ExtractClassRefactoring_comment_extracted_class;
+
+	public static String ExtractClassRefactoring_comment_field_renamed;
+
+	public static String ExtractClassRefactoring_comment_fieldname;
+
+	public static String ExtractClassRefactoring_comment_getters;
+
+	public static String ExtractClassRefactoring_comment_move_field;
+
+	public static String ExtractClassRefactoring_comment_package;
+
+	public static String ExtractClassRefactoring_comment_setters;
+
+	public static String ExtractClassRefactoring_error_duplicate_field_name;
+
+	public static String ExtractClassRefactoring_error_field_already_exists;
+
+	public static String ExtractClassRefactoring_error_field_is_static;
+
+	public static String ExtractClassRefactoring_error_msg_one_field;
+
+	public static String ExtractClassRefactoring_error_no_usable_fields;
+
+	public static String ExtractClassRefactoring_error_switch;
+
+	public static String ExtractClassRefactoring_error_toplevel_name_clash;
+
+	public static String ExtractClassRefactoring_errror_nested_name_clash;
+
+	public static String ExtractClassRefactoring_group_insert_parameter;
+
+	public static String ExtractClassRefactoring_group_remove_field;
+
+	public static String ExtractClassRefactoring_group_replace_read;
+
+	public static String ExtractClassRefactoring_group_replace_write;
+
+	public static String ExtractClassRefactoring_progress_create_change;
+
+	public static String ExtractClassRefactoring_progress_final_conditions;
+
+	public static String ExtractClassRefactoring_progress_msg_check_initial_condition;
+
+	public static String ExtractClassRefactoring_progress_updating_references;
+
+	public static String ExtractClassRefactoring_refactoring_name;
+
+	public static String ExtractClassRefactoring_warning_field_is_transient;
+
+	public static String ExtractClassRefactoring_warning_field_is_volatile;
+
+	public static String ExtractClassRefactoring_warning_no_fields_moved;
+
 	public static String ExtractConstantRefactoring_another_variable;
 
 	public static String ExtractConstantRefactoring_change_name;

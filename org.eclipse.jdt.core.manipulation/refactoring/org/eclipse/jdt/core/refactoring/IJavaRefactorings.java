@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.ConvertMemberTypeDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.CopyDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.DeleteDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.EncapsulateFieldDescriptor;
+import org.eclipse.jdt.core.refactoring.descriptors.ExtractClassDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractConstantDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractInterfaceDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractLocalDescriptor;
@@ -140,6 +141,16 @@ public interface IJavaRefactorings {
 	 */
 	public static final String ENCAPSULATE_FIELD= "org.eclipse.jdt.ui.self.encapsulate"; //$NON-NLS-1$
 
+	/**
+	 * Refactoring id of the 'Extract Class' refactoring (value:
+	 * <code>"org.eclipse.jdt.ui.extract.class</code>).
+	 * <p>
+	 * Clients may safely cast the obtained refactoring descriptor to
+	 * {@link ExtractClassDescriptor}.
+	 * </p>
+	 */
+	public static final String EXTRACT_CLASS= "org.eclipse.jdt.ui.extract.class"; //$NON-NLS-1$
+	
 	/**
 	 * Refactoring id of the 'Extract Constant' refactoring (value:
 	 * <code>org.eclipse.jdt.ui.extract.constant</code>).

@@ -42,14 +42,13 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -58,17 +57,11 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.NumberLiteral;
-import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.PostfixExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression;
-import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -79,7 +72,6 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.Assignment.Operator;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
@@ -1067,119 +1059,16 @@ public class ModifierCorrectionSubProcessor {
 
 	private static Expression getAssignedValue(ProposalParameter context) {
 		ASTNode parent= context.accessNode.getParent();
-		AST ast= context.astRewrite.getAST();
-		switch (parent.getNodeType()) {
-		case ASTNode.ASSIGNMENT:
-			Assignment assignment= ((Assignment) parent);
-			Expression rightHandSide= assignment.getRightHandSide();
-			Expression copiedRightOp= (Expression) context.astRewrite.createCopyTarget(rightHandSide);
-			if (isNotInBlock(parent))
-				break;
-			if (assignment.getOperator() == Operator.ASSIGN) {
-				ITypeBinding rightHandSideType= rightHandSide.resolveTypeBinding();
-				copiedRightOp= checkForNarrowCast(context, copiedRightOp, true, rightHandSideType);
-				return copiedRightOp;
-			}
-			IMethodBinding getter= findGetter(context);
-			if (getter != null) {
-				InfixExpression infix= ast.newInfixExpression();
-				infix.setLeftOperand(createMethodInvocation(context, getter, null));
-				infix.setOperator(ASTNodes.convertToInfixOperator(assignment.getOperator()));
-				infix.setRightOperand(copiedRightOp);
-				ITypeBinding infixType= infix.resolveTypeBinding();
-				return checkForNarrowCast(context, infix, true, infixType);
-			}
-			break;
-		case ASTNode.POSTFIX_EXPRESSION:
-			PostfixExpression po= (PostfixExpression) parent;
-			if (isNotInBlock(parent))
-				break;
-			InfixExpression.Operator postfixOp= null;
-			if (po.getOperator() == PostfixExpression.Operator.INCREMENT)
-				postfixOp= InfixExpression.Operator.PLUS;
-			if (po.getOperator() == PostfixExpression.Operator.DECREMENT)
-				postfixOp= InfixExpression.Operator.MINUS;
-			if (postfixOp == null)
-				break;
-			return createInfixInvocationFromPostPrefixExpression(context, postfixOp);
-		case ASTNode.PREFIX_EXPRESSION:
-			PrefixExpression pe= (PrefixExpression) parent;
-			if (isNotInBlock(parent))
-				break;
-			InfixExpression.Operator prefixOp= null;
-			if (pe.getOperator() == PrefixExpression.Operator.INCREMENT)
-				prefixOp= InfixExpression.Operator.PLUS;
-			if (pe.getOperator() == PrefixExpression.Operator.DECREMENT)
-				prefixOp= InfixExpression.Operator.MINUS;
-			if (prefixOp == null)
-				break;
-			return createInfixInvocationFromPostPrefixExpression(context, prefixOp);
-		}
-
-		return null;
-	}
-
-	private static boolean isNotInBlock(ASTNode parent) {
-		ASTNode grandParent= parent.getParent();
-		return (grandParent.getNodeType() != ASTNode.EXPRESSION_STATEMENT) || (grandParent.getParent().getNodeType() != ASTNode.BLOCK);
-	}
-
-	private static Expression createInfixInvocationFromPostPrefixExpression(ProposalParameter context, InfixExpression.Operator operator) {
-		AST ast= context.astRewrite.getAST();
+		ASTRewrite astRewrite= context.astRewrite;
+		IJavaProject javaProject= context.compilationUnit.getJavaProject();
 		IMethodBinding getter= findGetter(context);
+		Expression getterExpression= null;
 		if (getter != null) {
-			InfixExpression infix= ast.newInfixExpression();
-			infix.setLeftOperand(createMethodInvocation(context, getter, null));
-			infix.setOperator(operator);
-			NumberLiteral number= ast.newNumberLiteral();
-			number.setToken("1"); //$NON-NLS-1$
-			infix.setRightOperand(number);
-			ITypeBinding infixType= infix.resolveTypeBinding();
-			return checkForNarrowCast(context, infix, true, infixType);
+			getterExpression= createMethodInvocation(context, getter, null);
 		}
-		return null;
-	}
-
-	/**
-	 * 
-	 * @param context general context
-	 * @param expression the right handside
-	 * @param parenthesize if true places () around expression
-	 * @param expressionType the type of the right handside. Can be null
-	 * @return the casted expression if necessary
-	 */
-	private static Expression checkForNarrowCast(ProposalParameter context, Expression expression, boolean parenthesize, ITypeBinding expressionType) {
-		PrimitiveType castTo= null;
 		ITypeBinding type= context.variableBinding.getType();
-		if (type.isEqualTo(expressionType))
-			return expression; //no cast for same type
-		AST ast= context.astRewrite.getAST();
-		if (JavaModelUtil.is50OrHigher(context.compilationUnit.getJavaProject())) {
-			if (ast.resolveWellKnownType("java.lang.Character").isEqualTo(type)) //$NON-NLS-1$
-				castTo= ast.newPrimitiveType(PrimitiveType.CHAR);
-			if (ast.resolveWellKnownType("java.lang.Byte").isEqualTo(type)) //$NON-NLS-1$
-				castTo= ast.newPrimitiveType(PrimitiveType.BYTE);
-			if (ast.resolveWellKnownType("java.lang.Short").isEqualTo(type)) //$NON-NLS-1$
-				castTo= ast.newPrimitiveType(PrimitiveType.SHORT);
-		}
-		if (ast.resolveWellKnownType("char").isEqualTo(type)) //$NON-NLS-1$
-			castTo= ast.newPrimitiveType(PrimitiveType.CHAR);
-		if (ast.resolveWellKnownType("byte").isEqualTo(type)) //$NON-NLS-1$
-			castTo= ast.newPrimitiveType(PrimitiveType.BYTE);
-		if (ast.resolveWellKnownType("short").isEqualTo(type)) //$NON-NLS-1$
-			castTo= ast.newPrimitiveType(PrimitiveType.SHORT);
-		if (castTo != null) {
-			CastExpression cast= ast.newCastExpression();
-			if (parenthesize) {
-				ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
-				parenthesized.setExpression(expression);
-				cast.setExpression(parenthesized);
-			} else
-				cast.setExpression(expression);
-			cast.setType(castTo);
-			return cast;
-		}
-		return expression;
+		boolean is50OrHigher= JavaModelUtil.is50OrHigher(javaProject);
+		return ASTNodes.getAssignedValue(parent, astRewrite, getterExpression, type, is50OrHigher);
 	}
 
 }

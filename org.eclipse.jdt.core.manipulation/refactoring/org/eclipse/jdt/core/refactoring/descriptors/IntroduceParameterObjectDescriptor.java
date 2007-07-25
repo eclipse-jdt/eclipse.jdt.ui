@@ -377,7 +377,7 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 
 	private void initializeParameter(Map map) throws IllegalArgumentException {
 		int[] idx= JavaRefactoringDescriptorUtil.getIntArray(map, PARAMETER_COUNT, PARAMETER_IDX);
-		boolean[] createField= JavaRefactoringDescriptorUtil.getBooleanArray(map, PARAMETER_COUNT, PARAMETER_CREATE_FIELD);
+		boolean[] createField= JavaRefactoringDescriptorUtil.getBooleanArray(map, PARAMETER_COUNT, PARAMETER_CREATE_FIELD, 0);
 		Parameter[] result=new Parameter[idx.length];
 		for (int i= 0; i < idx.length; i++) {
 			int index= idx[i];

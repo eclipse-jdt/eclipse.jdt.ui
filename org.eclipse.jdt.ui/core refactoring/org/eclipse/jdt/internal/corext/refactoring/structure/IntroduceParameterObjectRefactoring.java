@@ -16,17 +16,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -35,17 +28,12 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
-import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.compiler.ITerminalSymbols;
-import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -62,7 +50,6 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
@@ -75,7 +62,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
@@ -84,19 +70,13 @@ import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDesc
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CreatePackageChange;
-import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
@@ -104,8 +84,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactoring {
 
 	private final class ParameterObjectCreator implements IDefaultValueAdvisor {
-		public Expression createDefaultExpression(List invocationArguments, ParameterInfo addedInfo, List parameterInfos,
-				MethodDeclaration enclosingMethod, boolean isRecursive, CompilationUnitRewrite cuRewrite) {
+		public Expression createDefaultExpression(List invocationArguments, ParameterInfo addedInfo, List parameterInfos, MethodDeclaration enclosingMethod, boolean isRecursive, CompilationUnitRewrite cuRewrite) {
 			final AST ast= cuRewrite.getAST();
 			final ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			if (isRecursive && canReuseParameterObject(invocationArguments, addedInfo, parameterInfos, enclosingMethod)) {
@@ -136,8 +115,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 			return fParameterObjectFactory.createType(fCreateAsTopLevel, cuRewrite, startPosition);
 		}
 
-		private boolean canReuseParameterObject(List invocationArguments, ParameterInfo addedInfo, List parameterInfos,
-				MethodDeclaration enclosingMethod) {
+		private boolean canReuseParameterObject(List invocationArguments, ParameterInfo addedInfo, List parameterInfos, MethodDeclaration enclosingMethod) {
 			Assert.isNotNull(enclosingMethod);
 			List parameters= enclosingMethod.parameters();
 			for (Iterator iter= parameterInfos.iterator(); iter.hasNext();) {
@@ -282,7 +260,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 				}
 			} else {
 				ASTNode parent= node.getParent();
-				if (! (parent instanceof QualifiedName || parent instanceof FieldAccess || parent instanceof SuperFieldAccess)) {
+				if (!(parent instanceof QualifiedName || parent instanceof FieldAccess || parent instanceof SuperFieldAccess)) {
 					if (node.getIdentifier().equals(getNameInScope(pi, enclosingParameters))) {
 						rewriter.replace(node, replacementNode, null);
 					}
@@ -351,9 +329,9 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 			ref.setParameterName(parameter.getParameterName());
 		List pis= ref.getParameterInfos();
 		Parameter[] parameters= parameter.getParameters();
-		if (parameters==null)
-			parameters=IntroduceParameterObjectDescriptor.createParameters(getMethod());
-		Map paramIndex=new HashMap();
+		if (parameters == null)
+			parameters= IntroduceParameterObjectDescriptor.createParameters(getMethod());
+		Map paramIndex= new HashMap();
 		for (Iterator iter= pis.iterator(); iter.hasNext();) {
 			ParameterInfo pi= (ParameterInfo) iter.next();
 			paramIndex.put(new Integer(pi.getOldIndex()), pi);
@@ -364,11 +342,11 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 			Parameter param= parameters[i];
 			ParameterInfo pi= (ParameterInfo) paramIndex.get(new Integer(param.getIndex()));
 			pis.add(pi);
-			if (param!=IntroduceParameterObjectDescriptor.PARAMETER_OBJECT) {
+			if (param != IntroduceParameterObjectDescriptor.PARAMETER_OBJECT) {
 				pi.setCreateField(param.isCreateField());
 				if (pi.isCreateField()) {
 					String fieldName= param.getFieldName();
-					if (fieldName!=null)
+					if (fieldName != null)
 						pi.setNewName(fieldName);
 				}
 			}
@@ -524,7 +502,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 				parameters.add(IntroduceParameterObjectDescriptor.PARAMETER_OBJECT);
 			} else {
 				IntroduceParameterObjectDescriptor.Parameter parameter= new IntroduceParameterObjectDescriptor.Parameter(pi.getOldIndex());
-				if (pi.isCreateField()){
+				if (pi.isCreateField()) {
 					parameter.setCreateField(true);
 					parameter.setFieldName(pi.getNewName());
 				}
@@ -680,113 +658,18 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 
 	private void createParameterClass(MethodDeclaration methodDeclaration, CompilationUnitRewrite cuRewrite) throws CoreException {
 		if (fCreateAsTopLevel) {
-			IJavaProject javaProject= getCompilationUnit().getJavaProject();
-			IPackageFragment packageFragment= getPackageFragmentRoot().getPackageFragment(fParameterObjectFactory.getPackage());
-			if (!packageFragment.exists()) {
-				fOtherChanges.add(new CreatePackageChange(packageFragment));
-			}
-
-			ICompilationUnit unit= packageFragment.getCompilationUnit(fParameterObjectFactory.getClassName() + ".java"); //$NON-NLS-1$
-			Assert.isTrue(!unit.exists());
-			createTopLevelParameterObject(javaProject, unit);
+			IPackageFragmentRoot root= (IPackageFragmentRoot) cuRewrite.getCu().getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+			fOtherChanges.addAll(fParameterObjectFactory.createTopLevelParameterObject(root));
 		} else {
 			ASTRewrite rewriter= cuRewrite.getASTRewrite();
 			TypeDeclaration enclosingType= (TypeDeclaration) methodDeclaration.getParent();
 			ListRewrite bodyRewrite= rewriter.getListRewrite(enclosingType, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
-			TypeDeclaration classDeclaration= fParameterObjectFactory.createClassDeclaration(enclosingType.getName().getFullyQualifiedName(),
-					cuRewrite);
+			String fqn= enclosingType.getName().getFullyQualifiedName();
+			TypeDeclaration classDeclaration= fParameterObjectFactory.createClassDeclaration(fqn, cuRewrite, null, null);
 			classDeclaration.modifiers().add(rewriter.getAST().newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 			classDeclaration.modifiers().add(rewriter.getAST().newModifier(ModifierKeyword.STATIC_KEYWORD));
 			bodyRewrite.insertBefore(classDeclaration, methodDeclaration, null);
 		}
-	}
-
-	private void createTopLevelParameterObject(IJavaProject javaProject, ICompilationUnit unit) throws JavaModelException, CoreException {
-		ICompilationUnit workingCopy= unit.getWorkingCopy(null);
-
-		try {
-			// create stub with comments and dummy type
-			String lineDelimiter= StubUtility.getLineDelimiterUsed(javaProject);
-			String fileComment= getFileComment(workingCopy, lineDelimiter);
-			String typeComment= getTypeComment(workingCopy, lineDelimiter);
-			String content= CodeGeneration.getCompilationUnitContent(workingCopy, fileComment, typeComment,
-					"class " + getClassName() + "{}", lineDelimiter); //$NON-NLS-1$ //$NON-NLS-2$
-			workingCopy.getBuffer().setContents(content);
-
-			CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite(workingCopy);
-			ASTRewrite rewriter= cuRewrite.getASTRewrite();
-			CompilationUnit root= cuRewrite.getRoot();
-			AST ast= cuRewrite.getAST();
-			ImportRewrite importRewrite= cuRewrite.getImportRewrite();
-
-			// retrieve&replace dummy type with real class
-			ListRewrite types= rewriter.getListRewrite(root, CompilationUnit.TYPES_PROPERTY);
-			ASTNode dummyType= (ASTNode) types.getOriginalList().get(0);
-			String newTypeName= JavaModelUtil.concatenateName(fParameterObjectFactory.getPackage(), fParameterObjectFactory.getClassName());
-			TypeDeclaration classDeclaration= fParameterObjectFactory.createClassDeclaration(newTypeName, cuRewrite);
-			classDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
-			Javadoc javadoc= (Javadoc) dummyType.getStructuralProperty(TypeDeclaration.JAVADOC_PROPERTY);
-			rewriter.set(classDeclaration, TypeDeclaration.JAVADOC_PROPERTY, javadoc, null);
-			types.replace(dummyType, classDeclaration, null);
-
-			// Apply rewrites and discard workingcopy
-			// Using CompilationUnitRewrite.createChange() leads to strange
-			// results
-			String charset= ResourceUtil.getFile(getCompilationUnit()).getCharset(false);
-			Document document= new Document(content);
-			try {
-				rewriter.rewriteAST().apply(document);
-				TextEdit rewriteImports= importRewrite.rewriteImports(null);
-				rewriteImports.apply(document);
-			} catch (BadLocationException e) {
-				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
-						RefactoringCoreMessages.IntroduceParameterObjectRefactoring_parameter_object_creation_error, e));
-			}
-			String docContent= document.get();
-			CreateCompilationUnitChange compilationUnitChange= new CreateCompilationUnitChange(unit, docContent, charset);
-			fOtherChanges.add(compilationUnitChange);
-		} finally {
-			workingCopy.discardWorkingCopy();
-		}
-	}
-
-	public IPackageFragmentRoot getPackageFragmentRoot() {
-		return (IPackageFragmentRoot) getCompilationUnit().getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-	}
-
-	protected String getFileComment(ICompilationUnit parentCU, String lineDelimiter) throws CoreException {
-		if (StubUtility.doAddComments(parentCU.getJavaProject())) {
-			return CodeGeneration.getFileComment(parentCU, lineDelimiter);
-		}
-		return null;
-
-	}
-
-	protected String getTypeComment(ICompilationUnit parentCU, String lineDelimiter) throws CoreException {
-		if (StubUtility.doAddComments(parentCU.getJavaProject())) {
-			StringBuffer typeName= new StringBuffer();
-			typeName.append(fParameterObjectFactory.getClassName());
-			String[] typeParamNames= new String[0];
-			String comment= CodeGeneration.getTypeComment(parentCU, typeName.toString(), typeParamNames, lineDelimiter);
-			if (comment != null && isValidComment(comment)) {
-				return comment;
-			}
-		}
-		return null;
-	}
-
-	private boolean isValidComment(String template) {
-		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
-		scanner.setSource(template.toCharArray());
-		try {
-			int next= scanner.getNextToken();
-			while (TokenScanner.isComment(next)) {
-				next= scanner.getNextToken();
-			}
-			return next == ITerminalSymbols.TokenNameEOF;
-		} catch (InvalidInputException e) {
-		}
-		return false;
 	}
 
 	public String getPackage() {
@@ -813,6 +696,10 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 
 	public ICompilationUnit getCompilationUnit() {
 		return getBaseCuRewrite().getCu();
+	}
+	
+	protected int getDescriptorFlags() {
+		return super.getDescriptorFlags() | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 	}
 
 }

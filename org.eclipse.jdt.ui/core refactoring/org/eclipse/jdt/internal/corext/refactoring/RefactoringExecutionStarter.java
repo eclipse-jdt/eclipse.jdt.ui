@@ -56,6 +56,7 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.refactoring.descriptors.ExtractClassDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
@@ -82,6 +83,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolic
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractClassRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeProcessor;
@@ -109,6 +111,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeSignatureWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeTypeWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ConvertAnonymousToNestedWizard;
+import org.eclipse.jdt.internal.ui.refactoring.ExtractClassWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ExtractInterfaceWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ExtractSupertypeWizard;
 import org.eclipse.jdt.internal.ui.refactoring.InferTypeArgumentsWizard;
@@ -504,5 +507,12 @@ public final class RefactoringExecutionStarter {
 		}
 		if (refactoring!=null)
 			new RefactoringStarter().activate(refactoring, new IntroduceParameterObjectWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
+	}
+	
+	public static void startExtractClassRefactoring(IType type, Shell shell) throws CoreException{
+		ExtractClassDescriptor descriptor= new ExtractClassDescriptor();
+		descriptor.setType(type);
+		ExtractClassRefactoring refactoring= new ExtractClassRefactoring(descriptor);
+		new RefactoringStarter().activate(refactoring, new ExtractClassWizard(descriptor, refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
 	}
 }

@@ -2194,8 +2194,9 @@
             <separator name="codingGroup"/>
             <separator name="reorgGroup2"/>
             <separator name="typeGroup"/>
-            <separator name="codingGroup2"/>
             <separator name="typeGroup2"/>
+            <separator name="codingGroup2"/>
+            <separator name="typeGroup3"/>
             <separator name="scriptGroup"/>
          </menu>
          
@@ -2339,13 +2340,6 @@
                id="org.eclipse.jdt.ui.actions.IntroduceParameter">
          </action>
          <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.introduce.parameter.object"
-               label="%Refactoring.introduceParameterObject.label"
-               retarget="true"
-               menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup2"
-               id="org.eclipse.jdt.ui.actions.IntroduceParameterObject">
-         </action>         
-         <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.introduce.factory"
                label="%Refactoring.introduceFactoryAction.label"
                retarget="true"
@@ -2359,20 +2353,36 @@
                menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup2"
                id="org.eclipse.jdt.ui.actions.IntroduceIndirection">
          </action>
-
+         
 <!-- type group 2 -->
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.introduce.parameter.object"
+               label="%Refactoring.introduceParameterObject.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.refactoring.menu/typeGroup2"
+               id="org.eclipse.jdt.ui.actions.IntroduceParameterObject">
+         </action>
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.extract.class"
+               label="%Refactoring.extractClassAction.label"
+               retarget="true"
+               menubarPath="org.eclipse.jdt.ui.refactoring.menu/typeGroup2"
+               id="org.eclipse.jdt.ui.actions.ExtractClass">
+         </action>  
+
+<!-- type group 3 -->
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.infer.type.arguments"
                label="%Refactoring.inferTypeArgumentsAction.label"
                retarget="true"
-               menubarPath="org.eclipse.jdt.ui.refactoring.menu/typeGroup2"
+               menubarPath="org.eclipse.jdt.ui.refactoring.menu/typeGroup3"
                id="org.eclipse.jdt.ui.actions.InferTypeArguments">
          </action>
          <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.change.type"
                label="%Refactoring.changeTypeAction.label"
                retarget="true"
-               menubarPath="org.eclipse.jdt.ui.refactoring.menu/typeGroup2"
+               menubarPath="org.eclipse.jdt.ui.refactoring.menu/typeGroup3"
                id="org.eclipse.jdt.ui.actions.ChangeType">
          </action>
 
@@ -3573,6 +3583,12 @@
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.eclipse.jdt.ui.edit.text.java.extract.constant">
       </command>
+      <command
+            name="%ActionDefinition.extractClass.name"
+            description="%ActionDefinition.extractClass.description"
+            categoryId="org.eclipse.jdt.ui.category.refactoring"
+            id="org.eclipse.jdt.ui.edit.text.java.extract.class">
+      </command>      
       <command
             name="%ActionDefinition.replaceInvocations.name"
             description="%ActionDefinition.replaceInvocations.description"
@@ -5014,6 +5030,10 @@
       <contribution
             class="org.eclipse.jdt.internal.corext.refactoring.scripting.ExtractConstantRefactoringContribution"
             id="org.eclipse.jdt.ui.extract.constant"/>
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.ExtractClassContribution"
+            id="org.eclipse.jdt.ui.extract.class">
+      </contribution>
       <contribution
             class="org.eclipse.jdt.internal.corext.refactoring.scripting.IntroduceParameterRefactoringContribution"
             id="org.eclipse.jdt.ui.introduce.parameter"/>

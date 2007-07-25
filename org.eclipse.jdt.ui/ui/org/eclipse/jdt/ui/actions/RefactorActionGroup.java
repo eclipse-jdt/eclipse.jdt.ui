@@ -134,6 +134,14 @@ public class RefactorActionGroup extends ActionGroup {
 	 */
 	private static final String GROUP_TYPE2= "typeGroup2"; //$NON-NLS-1$ //TODO(3.3): make public
 	
+	/**
+	 * Pop-up menu: id of the type group 2 of the refactor sub menu (value
+	 * <code>typeGroup3</code>).
+	 * 
+	 * @since 3.4
+	 */
+	private static final String GROUP_TYPE3= "typeGroup3"; //$NON-NLS-1$ //TODO(3.3): make public
+	
 	private IWorkbenchSite fSite;
 	private JavaEditor fEditor;
 	private String fGroupName= IContextMenuConstants.GROUP_REORGANIZE;
@@ -159,6 +167,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fExtractMethodAction;
 	private SelectionDispatchAction fExtractTempAction;
 	private SelectionDispatchAction fExtractConstantAction;
+	private SelectionDispatchAction fExtractClassAction;
 	private SelectionDispatchAction fIntroduceParameterAction;
 	private SelectionDispatchAction fIntroduceParameterObjectAction; 
 	private SelectionDispatchAction fIntroduceFactoryAction;
@@ -272,6 +281,10 @@ public class RefactorActionGroup extends ActionGroup {
 			fExtractInterfaceAction= new ExtractInterfaceAction(editor);
 			initAction(fExtractInterfaceAction, selection, IJavaEditorActionDefinitionIds.EXTRACT_INTERFACE);
 			editor.setAction("ExtractInterface", fExtractInterfaceAction); //$NON-NLS-1$
+			
+			fExtractClassAction= new ExtractClassAction(editor);
+			initAction(fExtractClassAction, selection, IJavaEditorActionDefinitionIds.EXTRACT_CLASS);
+			editor.setAction("ExtractClass", fExtractClassAction); //$NON-NLS-1$
 	
 			fChangeTypeAction= new ChangeTypeAction(editor);
 			initUpdatingAction(fChangeTypeAction, provider, selection, IJavaEditorActionDefinitionIds.CHANGE_TYPE);
@@ -368,6 +381,9 @@ public class RefactorActionGroup extends ActionGroup {
 			fExtractInterfaceAction= new ExtractInterfaceAction(fSite);
 			initUpdatingAction(fExtractInterfaceAction, provider, selection, IJavaEditorActionDefinitionIds.EXTRACT_INTERFACE);
 	
+			fExtractClassAction= new ExtractClassAction(fSite);
+			initUpdatingAction(fExtractClassAction, provider, selection, IJavaEditorActionDefinitionIds.EXTRACT_CLASS);
+			
 			fChangeTypeAction= new ChangeTypeAction(fSite);
 			initUpdatingAction(fChangeTypeAction, provider, selection, IJavaEditorActionDefinitionIds.CHANGE_TYPE);
 	
@@ -445,6 +461,7 @@ public class RefactorActionGroup extends ActionGroup {
 			actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_METHOD, fExtractMethodAction);
 			//	actionBars.setGlobalActionHandler(JdtActionConstants.REPLACE_INVOCATIONS, fReplaceInvocationsAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_INTERFACE, fExtractInterfaceAction);
+			actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_CLASS, fExtractClassAction);
 			actionBars.setGlobalActionHandler(ExtractSuperClassAction.EXTRACT_SUPERTYPES, fExtractSupertypeAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.CHANGE_TYPE, fChangeTypeAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.CONVERT_NESTED_TO_TOP, fConvertNestedToTopAction);
@@ -499,6 +516,7 @@ public class RefactorActionGroup extends ActionGroup {
 			disposeAction(fExtractMethodAction, provider);
 			//	disposeAction(fReplaceInvocationsAction, provider);
 			disposeAction(fExtractInterfaceAction, provider);
+			disposeAction(fExtractClassAction, provider);
 			disposeAction(fExtractSupertypeAction, provider);
 			disposeAction(fChangeTypeAction, provider);
 			disposeAction(fConvertNestedToTopAction, provider);
@@ -571,14 +589,19 @@ public class RefactorActionGroup extends ActionGroup {
 		added+= addAction(refactorSubmenu, fUseSupertypeAction);
 		added+= addAction(refactorSubmenu, fPullUpAction);
 		added+= addAction(refactorSubmenu, fPushDownAction);
+		
+		refactorSubmenu.add(new Separator(GROUP_TYPE2));
+		added+= addAction(refactorSubmenu, fExtractClassAction);
+		added+= addAction(refactorSubmenu, fIntroduceParameterObjectAction);
+		
 		refactorSubmenu.add(new Separator(GROUP_CODING2));
 		added+= addAction(refactorSubmenu, fIntroduceIndirectionAction);
 		added+= addAction(refactorSubmenu, fIntroduceFactoryAction);
 		added+= addAction(refactorSubmenu, fIntroduceParameterAction);
-		added+= addAction(refactorSubmenu, fIntroduceParameterObjectAction);
 		added+= addAction(refactorSubmenu, fSelfEncapsulateField);
 //		added+= addAction(refactorSubmenu, fReplaceInvocationsAction);
-		refactorSubmenu.add(new Separator(GROUP_TYPE2));
+		
+		refactorSubmenu.add(new Separator(GROUP_TYPE3));
 		added+= addAction(refactorSubmenu, fChangeTypeAction);
 		added+= addAction(refactorSubmenu, fInferTypeArgumentsAction);
 		return added;
