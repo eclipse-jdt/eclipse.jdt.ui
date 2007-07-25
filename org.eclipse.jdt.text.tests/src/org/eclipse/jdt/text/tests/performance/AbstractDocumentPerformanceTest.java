@@ -66,15 +66,6 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 		LOCAL_FINGERPRINTS.put("measureInsertAtEnd", "Document: insert at end");
 		LOCAL_FINGERPRINTS.put("measureRandomReplace", "Document: random replace");
 		LOCAL_FINGERPRINTS.put("measureRepeatedReplace", "Document: repeated replace");
-		
-		// Set degradation comments
-		DEGRADATION_COMMENTS.put("measureGetChar", "Test fails because document implementation got optimized for most common scenarios.");
-		DEGRADATION_COMMENTS.put("measureGetLength", "Test fails because document implementation got optimized for most common scenarios.");
-		DEGRADATION_COMMENTS.put("measureGetLine", "Test fails because document implementation got optimized for most common scenarios.");
-		DEGRADATION_COMMENTS.put("measureGetNumberOfLines", "Test fails because document implementation got optimized for most common scenarios.");
-		DEGRADATION_COMMENTS.put("measureLineByIndex", "Test fails because document implementation got optimized for most common scenarios.");
-		DEGRADATION_COMMENTS.put("measureLineDelimiterByIndex", "Test fails because document implementation got optimized for most common scenarios.");
-		DEGRADATION_COMMENTS.put("measureLineLengthByIndex", "Test fails because document implementation got optimized for most common scenarios.");
 	}
 	
 

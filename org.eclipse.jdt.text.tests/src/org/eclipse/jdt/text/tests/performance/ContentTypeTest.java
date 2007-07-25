@@ -132,7 +132,6 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 	public void testPluginXMLDirty() throws Exception {
 		measure(PLUGIN_XML_FILE, PLUGIN_XML_CONTENT_TYPE, true, getNullPerformanceMeter(), getWarmUpRuns(), PLUGIN_XML_ITERATIONS);
 		final PerformanceMeter performanceMeter= createPerformanceMeter();
-		explainDegradation("The performance of this test has degraded due to Platform bug 182337.", performanceMeter);
 		measure(PLUGIN_XML_FILE, PLUGIN_XML_CONTENT_TYPE, true, performanceMeter, getMeasuredRuns(), PLUGIN_XML_ITERATIONS);
 		commitAllMeasurements();
 		assertAllPerformance();

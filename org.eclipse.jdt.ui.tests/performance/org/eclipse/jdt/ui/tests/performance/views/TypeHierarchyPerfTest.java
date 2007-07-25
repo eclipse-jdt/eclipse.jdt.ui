@@ -24,7 +24,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 
 import org.eclipse.test.performance.Dimension;
-import org.eclipse.test.performance.Performance;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -78,7 +77,6 @@ public class TypeHierarchyPerfTest extends JdtPerformanceTestCase {
 	public void testOpenObjectHierarchy2() throws Exception {
 		//warm
 		tagAsSummary("Open type hierarchy on Object", Dimension.ELAPSED_PROCESS);
-		setComment(Performance.EXPLAINS_DEGRADATION_COMMENT, "Enhanced rendering of type labels");
 		measureOpenHierarchy(MyTestSetup.fJProject1.findType("java.lang.Object"));
 	}
 	
