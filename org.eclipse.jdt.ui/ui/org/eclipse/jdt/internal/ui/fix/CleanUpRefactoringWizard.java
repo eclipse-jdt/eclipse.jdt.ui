@@ -174,6 +174,39 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 	
 	private static class CleanUpConfigurationPage extends UserInputWizardPage implements IModificationListener {
 
+		private static final class WizardCleanUpSelectionDialog extends CleanUpSelectionDialog {
+			
+			private static final String CLEAN_UP_SELECTION_PREFERENCE_KEY= "clean_up_selection_dialog"; //$NON-NLS-1$
+
+			private WizardCleanUpSelectionDialog(Shell parent, Map settings) {
+				super(parent, settings, MultiFixMessages.CleanUpRefactoringWizard_CustomCleanUpsDialog_title);
+			}
+
+			protected CleanUpTabPage[] createTabPages(Map workingValues) {
+				CleanUpTabPage[] result= new CleanUpTabPage[5];
+				
+				result[0]= new CodeStyleTabPage(this, workingValues, false, MultiFixMessages.CleanUpRefactoringWizard_code_style_tab);
+				result[1]= new MemberAccessesTabPage(this, workingValues, false, MultiFixMessages.CleanUpRefactoringWizard_member_accesses_tab);
+				result[2]= new UnnecessaryCodeTabPage(this, workingValues, false, MultiFixMessages.CleanUpRefactoringWizard_unnecessary_code_tab);
+				result[3]= new MissingCodeTabPage(this, workingValues, false, MultiFixMessages.CleanUpRefactoringWizard_missing_code_tab);
+				result[4]= new CodeFormatingTabPage(this, workingValues, false, MultiFixMessages.CleanUpRefactoringWizard_code_organizing_tab);
+				
+				return result;
+			}
+
+			protected String getPreferenceKeyPrefix() {
+				return CLEAN_UP_SELECTION_PREFERENCE_KEY;
+			}
+
+			protected String getSelectionCountMessage(int selectionCount, int size) {
+				return Messages.format(MultiFixMessages.CleanUpRefactoringWizard_XofYCleanUpsSelected_message, new Object[] {new Integer(selectionCount), new Integer(size)});
+			}
+			
+			protected String getEmptySelectionMessage() {
+				return MultiFixMessages.CleanUpRefactoringWizard_EmptySelection_message;
+			}
+		}
+
 		private static final class ProfileTableAdapter implements IListAdapter {
 	        private final ProjectProfileLableProvider fProvider;
 			private final Shell fShell;
@@ -258,7 +291,6 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				 */
 				protected int getListStyle() {
 					return super.getListStyle() | SWT.SINGLE;
-//					return  SWT.BORDER | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION;
 				}
 			};
 			
@@ -329,24 +361,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				 * {@inheritDoc}
 				 */
 				public void widgetSelected(SelectionEvent e) {
-					CleanUpSaveParticipantConfigurationModifyDialog dialog= new CleanUpSaveParticipantConfigurationModifyDialog(getShell(), fCustomSettings, MultiFixMessages.CleanUpRefactoringWizard_CustomCleanUpsDialog_title) {
-						protected CleanUpTabPage[] createTabPages(Map workingValues) {
-							CleanUpTabPage[] result= new CleanUpTabPage[5];
-							result[0]= new CodeStyleTabPage(this, workingValues, false);
-							result[1]= new MemberAccessesTabPage(this, workingValues, false);
-							result[2]= new UnnecessaryCodeTabPage(this, workingValues, false);
-							result[3]= new MissingCodeTabPage(this, workingValues, false);
-							result[4]= new CodeFormatingTabPage(this, workingValues, false);
-							
-							addTabPage(MultiFixMessages.CleanUpRefactoringWizard_code_style_tab, result[0]);
-							addTabPage(MultiFixMessages.CleanUpRefactoringWizard_member_accesses_tab, result[1]);
-							addTabPage(MultiFixMessages.CleanUpRefactoringWizard_unnecessary_code_tab, result[2]);
-							addTabPage(MultiFixMessages.CleanUpRefactoringWizard_missing_code_tab, result[3]);
-							addTabPage(MultiFixMessages.CleanUpRefactoringWizard_code_organizing_tab, result[4]);
-							
-							return result;
-						}
-					};
+					CleanUpSelectionDialog dialog= new WizardCleanUpSelectionDialog(getShell(), fCustomSettings);
 					dialog.open();
 					showCustomSettings(bulletListBlock);
 				}

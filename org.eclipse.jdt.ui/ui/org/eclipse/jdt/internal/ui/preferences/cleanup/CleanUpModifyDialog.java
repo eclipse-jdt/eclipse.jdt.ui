@@ -54,17 +54,15 @@ public class CleanUpModifyDialog extends ModifyDialog {
 	 */
 	protected void addPages(final Map values) {
 		fPages= new CleanUpTabPage[5];
-		fPages[0]= new CodeStyleTabPage(this, values);
-		fPages[1]= new MemberAccessesTabPage(this, values);
-		fPages[2]= new UnnecessaryCodeTabPage(this, values);
-		fPages[3]= new MissingCodeTabPage(this, values);
-		fPages[4]= new CodeFormatingTabPage(this, values);
+		fPages[0]= new CodeStyleTabPage(this, values, false, CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeStyle);
+		fPages[1]= new MemberAccessesTabPage(this, values, false, CleanUpMessages.CleanUpModifyDialog_TabPageName_MemberAccesses);
+		fPages[2]= new UnnecessaryCodeTabPage(this, values, false, CleanUpMessages.CleanUpModifyDialog_TabPageName_UnnecessaryCode);
+		fPages[3]= new MissingCodeTabPage(this, values, false, CleanUpMessages.CleanUpModifyDialog_TabPageName_MissingCode);
+		fPages[4]= new CodeFormatingTabPage(this, values, false, CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeFormating);
 		
-		addTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeStyle, fPages[0]);
-		addTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_MemberAccesses, fPages[1]);
-		addTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_UnnecessaryCode, fPages[2]);
-		addTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_MissingCode, fPages[3]);
-		addTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeFormating, fPages[4]);
+		for (int i= 0; i < fPages.length; i++) {
+			addTabPage(fPages[i].getTitle(), fPages[i]);
+		}
 	}
 	
 	protected Control createDialogArea(Composite parent) {

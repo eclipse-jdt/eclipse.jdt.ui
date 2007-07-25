@@ -32,19 +32,14 @@ import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
 import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
 
 public final class CodeFormatingTabPage extends CleanUpTabPage {
 
 	private final Map fValues;
 	private CleanUpPreview fPreview;
 
-	public CodeFormatingTabPage(ModifyDialog dialog, Map values) {
-		this(dialog, values, false);
-	}
-
-	public CodeFormatingTabPage(IModificationListener listener, Map values, boolean isSaveParticipantConfiguration) {
-		super(listener, values, isSaveParticipantConfiguration);
+	public CodeFormatingTabPage(IModificationListener listener, Map values, boolean isSaveParticipantConfiguration, String title) {
+		super(listener, values, isSaveParticipantConfiguration, title);
 		fValues= values;
 	}
 

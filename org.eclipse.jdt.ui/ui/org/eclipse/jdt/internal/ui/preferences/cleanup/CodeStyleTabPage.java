@@ -22,16 +22,11 @@ import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
 
 public final class CodeStyleTabPage extends CleanUpTabPage {
-	
-    public CodeStyleTabPage(ModifyDialog dialog, Map values) {
-	    this(dialog, values, false);
-    }
 
-    public CodeStyleTabPage(IModificationListener listener, Map values, boolean isSaveParticipantConfiguration) {
-    	super(listener, values, isSaveParticipantConfiguration);
+    public CodeStyleTabPage(IModificationListener listener, Map values, boolean isSaveParticipantConfiguration, String title) {
+    	super(listener, values, isSaveParticipantConfiguration, title);
     }
     
     protected ICleanUp[] createPreviewCleanUps(Map values) {

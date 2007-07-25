@@ -21,16 +21,11 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
 
 public final class MemberAccessesTabPage extends CleanUpTabPage {
 
-    public MemberAccessesTabPage(ModifyDialog dialog, Map values) {
-	    this(dialog, values, false);
-    }
-
-    public MemberAccessesTabPage(IModificationListener listener, Map values, boolean isSaveParticipantConfiguration) {
-    	super(listener, values, isSaveParticipantConfiguration);
+    public MemberAccessesTabPage(IModificationListener listener, Map values, boolean isSaveParticipantConfiguration, String title) {
+    	super(listener, values, isSaveParticipantConfiguration, title);
     }
     
     protected ICleanUp[] createPreviewCleanUps(Map values) {

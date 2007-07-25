@@ -30,13 +30,19 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage {
 	private final boolean fIsSaveAction;
 	private int fCount;
 	private int fSelectedCount;
+	private final String fTitle;
 	
-	public CleanUpTabPage(IModificationListener listener, Map values, boolean isSaveAction) {
+	public CleanUpTabPage(IModificationListener listener, Map values, boolean isSaveAction, String title) {
 		super(listener, values);
 		fValues= values;
 		fIsSaveAction= isSaveAction;
 		fCount= 0;
 		fSelectedCount= 0;
+		fTitle= title;
+	}
+	
+	public String getTitle() {
+		return fTitle;
 	}
 	
 	/**

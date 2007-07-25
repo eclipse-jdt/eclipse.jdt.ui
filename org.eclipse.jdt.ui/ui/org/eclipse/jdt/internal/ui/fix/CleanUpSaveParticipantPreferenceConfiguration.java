@@ -170,7 +170,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 			 * {@inheritDoc}
 			 */
 			public void widgetSelected(SelectionEvent e) {
-				new CleanUpSaveParticipantConfigurationModifyDialog(parent.getShell(), fSettings, SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_CleanUpSaveParticipantConfiguration_Title).open();
+				new SaveActionSelectionDialog(parent.getShell(), fSettings).open();
 				settingsChanged();
 			}
 			

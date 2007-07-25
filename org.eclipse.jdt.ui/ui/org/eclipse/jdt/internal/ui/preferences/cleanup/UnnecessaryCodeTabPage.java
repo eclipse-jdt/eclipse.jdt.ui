@@ -21,16 +21,11 @@ import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
 
 public final class UnnecessaryCodeTabPage extends CleanUpTabPage {
 	
-    public UnnecessaryCodeTabPage(ModifyDialog dialog, Map values) {
-	    this(dialog, values, false);
-    }
-
-    public UnnecessaryCodeTabPage(IModificationListener listener, Map values, boolean isSaveParticipantConfiguration) {
-    	super(listener, values, isSaveParticipantConfiguration);
+    public UnnecessaryCodeTabPage(IModificationListener listener, Map values, boolean isSaveParticipantConfiguration, String title) {
+    	super(listener, values, isSaveParticipantConfiguration, title);
     }
     
     protected ICleanUp[] createPreviewCleanUps(Map values) {
