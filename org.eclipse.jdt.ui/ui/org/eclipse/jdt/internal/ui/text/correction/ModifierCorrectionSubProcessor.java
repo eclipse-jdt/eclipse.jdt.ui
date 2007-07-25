@@ -1068,7 +1068,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 		ITypeBinding type= context.variableBinding.getType();
 		boolean is50OrHigher= JavaModelUtil.is50OrHigher(javaProject);
-		return ASTNodes.getAssignedValue(parent, astRewrite, getterExpression, type, is50OrHigher);
+		return GetterSetterUtil.getAssignedValue(parent, astRewrite, getterExpression, type, is50OrHigher);
 	}
 
 }

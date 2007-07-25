@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
@@ -52,8 +53,6 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 
 	private static final String CREATE_SETTER= "createSetter"; //$NON-NLS-1$
 
-	private static final String ENCLOSING_TYPE= "enclosingType"; //$NON-NLS-1$
-
 	private static final String NEW_FIELD_COUNT= "newFieldCount"; //$NON-NLS-1$
 
 	private static final String CREATE_FIELD_COUNT= "createFieldCount"; //$NON-NLS-1$
@@ -78,6 +77,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 
 		private Field(String fieldName) {
 			super();
+			Assert.isNotNull(fieldName);
 			this.fFieldName= fieldName;
 			this.fNewFieldName= fieldName;
 		}
@@ -187,7 +187,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 	 *            the flags of the refactoring descriptor
 	 * @throws IllegalArgumentException if the argument map contains invalid keys/values            
 	 */
-	public ExtractClassDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public ExtractClassDescriptor(String project, String description, String comment, Map arguments, int flags) throws IllegalArgumentException {
 		super(IJavaRefactorings.EXTRACT_CLASS, project, description, comment, arguments, flags);
 		if (JavaRefactoringDescriptorUtil.getString(arguments, OLD_FIELD_COUNT, true) != null) {
 			String[] oldFieldNames= JavaRefactoringDescriptorUtil.getStringArray(arguments, OLD_FIELD_COUNT, OLD_FIELD_NAME, 0);
@@ -221,21 +221,47 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 	}
 
 	/**
+	 * Sets the fields. The order is important and should be the same as the order
+	 * returned from {@link #getFields(IType)}. Changing the order can have side effects because of different initialization order.
+	 * Only fields which return <code>true</code> for {@link Field#isCreateField()} are created in the extracted class. Can be 
+	 * <code>null</code> to indicate that all instance fields should be moved
 	 * 
-	 * @param fields
+	 * @param fields the fields to move to the extracted class. Can be <code>null</code> to indicate that all instance fields should
+	 *  be moved
+	 * @throws IllegalArgumentException if one of the fields is <code>null</code> 
 	 */
-	public void setFields(Field[] fields) {
+	public void setFields(Field[] fields) throws IllegalArgumentException {
+		for (int i= 0; i < fields.length; i++) {
+			Field field= fields[i];
+			if (field == null)
+				throw new IllegalArgumentException("Field can not be null"); //$NON-NLS-1$
+		}
 		fFields= fields;
 	}
 
+	/**
+	 * Returns the fields. The order of the fields is the same as they will appear in the extracted class if {@link Field#isCreateField()}
+	 * returns <code>true</code>.
+	 * 
+	 * @return the fields or <code>null</code>. If <code>null</code> all instance fields from the selected type will be moved
+	 */
 	public Field[] getFields() {
 		return fFields;
 	}
 
+	/**
+	 * Returns the type from which the fields are moved
+	 * 
+	 * @return the type
+	 */
 	public IType getType() {
 		return (IType) JavaRefactoringDescriptorUtil.getJavaElement(fArguments, ATTRIBUTE_INPUT, getProject());
 	}
 
+	/**
+	 * Sets the type to extract class from
+	 * @param type the type to extract class from
+	 */
 	public void setType(IType type) {
 		Assert.isNotNull(type);
 		String project= type.getJavaProject().getElementName();
@@ -243,60 +269,119 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 		JavaRefactoringDescriptorUtil.setJavaElement(fArguments, ATTRIBUTE_INPUT, project, type);
 	}
 
+	/**
+	 * Returns the package where the extracted class will be created in if {{@link #isCreateTopLevel()} returns <code>true</code>.
+	 * Can return <code>null</code> to indicate that the package will be the same as the type
+	 * 
+	 * @return the package for the toplevel extracted class or <code>null</code>. If <code>null</code> the package will be the same
+	 *  as the type
+	 */
 	public String getPackage() {
 		return JavaRefactoringDescriptorUtil.getString(fArguments, PACKAGE_NAME, true);
 	}
 
+	/**
+	 * Sets the package in which the top level class will be created. Can be <code>null</code> to indicate that the 
+	 *  package will be the same as the type
+	 * 
+	 * @param packageName the package in which the top level class will be created. Can be <code>null</code> to indicate that the 
+	 *  package will be the same as the type
+	 */
 	public void setPackage(String packageName) {
 		JavaRefactoringDescriptorUtil.setString(fArguments, PACKAGE_NAME, packageName);
 	}
 
+	/**
+	 * Returns the class name for the extracted class or <code>null</code> if the refactoring should choose a name
+	 * 
+	 * @return the class name for the extracted class or <code>null</code> if the refactoring should choose a name
+	 */
 	public String getClassName() {
 		return JavaRefactoringDescriptorUtil.getString(fArguments, CLASS_NAME, true);
 	}
 
+	/**
+	 * Sets the class name for the extracted class or <code>null</code> if the refactoring should choose a name
+	 * 
+	 * @param className the class name for the extracted class or <code>null</code> if the refactoring should choose a name
+	 */
 	public void setClassName(String className) {
 		JavaRefactoringDescriptorUtil.setString(fArguments, CLASS_NAME, className);
 	}
 
+	/**
+	 * Returns the field name for the generated field or <code>null</code> if the refactoring should choose a name
+	 * 
+	 * @return the field name for the generated field or <code>null</code> if the refactoring should choose a name
+	 */
 	public String getFieldName() {
 		return JavaRefactoringDescriptorUtil.getString(fArguments, FIELD_NAME, true);
 	}
 
+	/**
+	 * Sets the field name for the generated field or <code>null</code> if the refactoring should choose a name
+	 * 
+	 * @param fieldName the field name for the generated field or <code>null</code> if the refactoring should choose a name
+	 */
 	public void setFieldName(String fieldName) {
 		JavaRefactoringDescriptorUtil.setString(fArguments, FIELD_NAME, fieldName);
 	}
 
+	/**
+	 * Returns whether the extracted class will be created as top level class or as nested class. If <code>true</code> the
+	 * extracted class will be generated as top level class. The default is <code>true</code>
+	 * 
+	 * @return if <code>true</code> the extracted class will be generated as top level class. The default is <code>true</code>
+	 */
 	public boolean isCreateTopLevel() {
 		return JavaRefactoringDescriptorUtil.getBoolean(fArguments, CREATE_TOP_LEVEL, true);
 	}
 
+	/**
+	 * Sets whether the extracted class will be created as top level class or as nested class. If <code>true</code> the
+	 * extracted class will be generated as top level class. Else the class will be created as nested class in the type.
+	 * The default is <code>true</code>
+	 * 
+	 * @param createTopLevel <code>true</code> to generated as top level class. The default is <code>true</code>
+	 */
 	public void setCreateTopLevel(boolean createTopLevel) {
 		JavaRefactoringDescriptorUtil.setBoolean(fArguments, CREATE_TOP_LEVEL, createTopLevel);
 	}
 
+	/**
+	 * Returns <code>true</code> if getters are generated for fields. Default is <code>false</code>.
+	 * 
+	 * @return <code>true</code> if getters are generated for fields. Default is <code>false</code>
+	 */
 	public boolean isCreateGetter() {
 		return JavaRefactoringDescriptorUtil.getBoolean(fArguments, CREATE_GETTER, false);
 	}
 
+	/**
+	 * Sets whether getters will be created for all fields.
+	 * 
+	 * @param createGetter <code>true</code> to create getters. Default is <code>false</code>.
+	 */
 	public void setCreateGetter(boolean createGetter) {
 		JavaRefactoringDescriptorUtil.setBoolean(fArguments, CREATE_GETTER, createGetter);
 	}
 
+	/**
+	 * Returns <code>true</code> if setters are generated for fields. Default is <code>false</code>.
+	 * 
+	 * @return <code>true</code> if setters are generated for fields. Default is <code>false</code>
+	 */
 	public boolean isCreateSetter() {
 		return JavaRefactoringDescriptorUtil.getBoolean(fArguments, CREATE_SETTER, false);
 	}
 
+	/**
+	 * Sets whether setters will be created for all fields.
+	 * 
+	 * @param createSetter <code>true</code> to create setters. Default is <code>false</code>.
+	 */
 	public void setCreateSetter(boolean createSetter) {
 		JavaRefactoringDescriptorUtil.setBoolean(fArguments, CREATE_SETTER, createSetter);
-	}
-
-	public String getEnclosingType() {
-		return JavaRefactoringDescriptorUtil.getString(fArguments, ENCLOSING_TYPE, true);
-	}
-
-	public void setEnclosingType(String enclosingType) {
-		JavaRefactoringDescriptorUtil.setString(fArguments, ENCLOSING_TYPE, enclosingType);
 	}
 
 	protected void populateArgumentMap() {
@@ -317,6 +402,16 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 			JavaRefactoringDescriptorUtil.setStringArray(fArguments, NEW_FIELD_COUNT, NEW_FIELD_NAME, newFieldNames, 0);
 			JavaRefactoringDescriptorUtil.setBooleanArray(fArguments, CREATE_FIELD_COUNT, CREATE_FIELD, createField, 0);
 		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor#validateDescriptor()
+	 */
+	public RefactoringStatus validateDescriptor() {
+		RefactoringStatus status= super.validateDescriptor();
+		if (getType() == null)
+			status.addFatalError("The type may not be null"); //$NON-NLS-1$
+		return status;
 	}
 
 }

@@ -20,8 +20,23 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.Assignment.Operator;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
@@ -216,5 +231,117 @@ public class GetterSetterUtil {
 		return buf.toString(); 
 	}
 
+	/**
+	 * Converts an assignment, postfix expression or prefix expression into an assignable equivalent expression using the getter.
+	 * 
+	 * @param node the assignment/prefix/postfix node
+	 * @param astRewrite the astRewrite to use
+	 * @param getterExpression the expression to insert for read accesses
+	 * @param variableType the type of the variable that the result will be assigned to
+	 * @param is50OrHigher <code>true</code> if a 5.0 or higher environment can be used
+	 * @return an expression that can be assigned to the type variableType with node being replaced by a equivalent expression using the getter
+	 */
+	public static Expression getAssignedValue(ASTNode node, ASTRewrite astRewrite, Expression getterExpression, ITypeBinding variableType, boolean is50OrHigher) {
+		InfixExpression.Operator op= null;
+		AST ast= astRewrite.getAST();
+		if (node.getNodeType() == ASTNode.ASSIGNMENT) { 
+			Assignment assignment= ((Assignment) node);
+			Expression rightHandSide= assignment.getRightHandSide();
+			Expression copiedRightOp= (Expression) astRewrite.createCopyTarget(rightHandSide);
+			if (isNotInBlock(node))
+				return null;
+			if (assignment.getOperator() == Operator.ASSIGN) {
+				ITypeBinding rightHandSideType= rightHandSide.resolveTypeBinding();
+				copiedRightOp= createNarrowCastIfNessecary(copiedRightOp, rightHandSideType, ast, variableType, is50OrHigher);
+				return copiedRightOp;
+			}
+			if (getterExpression != null) { 
+				InfixExpression infix= ast.newInfixExpression();
+				infix.setLeftOperand(getterExpression);
+				infix.setOperator(ASTNodes.convertToInfixOperator(assignment.getOperator()));
+				infix.setRightOperand(copiedRightOp);
+				ITypeBinding infixType= infix.resolveTypeBinding();
+				return createNarrowCastIfNessecary(infix, infixType, ast, variableType, is50OrHigher);
+			}
+		} else if (node.getNodeType() == ASTNode.POSTFIX_EXPRESSION) {
+			PostfixExpression po= (PostfixExpression) node;
+			if (isNotInBlock(node))
+				return null;
+			if (po.getOperator() == PostfixExpression.Operator.INCREMENT)
+				op= InfixExpression.Operator.PLUS;
+			if (po.getOperator() == PostfixExpression.Operator.DECREMENT)
+				op= InfixExpression.Operator.MINUS;
+		} else if (node.getNodeType() == ASTNode.PREFIX_EXPRESSION) {
+			PrefixExpression pe= (PrefixExpression) node;
+			if (isNotInBlock(node))
+				return null;
+			if (pe.getOperator() == PrefixExpression.Operator.INCREMENT)
+				op= InfixExpression.Operator.PLUS;
+			if (pe.getOperator() == PrefixExpression.Operator.DECREMENT)
+				op= InfixExpression.Operator.MINUS;
+		}
+		if (op != null) {
+			return createInfixInvocationFromPostPrefixExpression(op, getterExpression, ast, variableType, is50OrHigher);
+		}
+		return null;
+	}
+
+	private static boolean isNotInBlock(ASTNode parent) {
+		ASTNode grandParent= parent.getParent();
+		return (grandParent.getNodeType() != ASTNode.EXPRESSION_STATEMENT) || (grandParent.getParent().getNodeType() != ASTNode.BLOCK);
+	}
+
+	private static Expression createInfixInvocationFromPostPrefixExpression(InfixExpression.Operator operator, Expression getterExpression, AST ast, ITypeBinding variableType, boolean is50OrHigher) {
+		InfixExpression infix= ast.newInfixExpression();
+		infix.setLeftOperand(getterExpression);
+		infix.setOperator(operator);
+		NumberLiteral number= ast.newNumberLiteral();
+		number.setToken("1"); //$NON-NLS-1$
+		infix.setRightOperand(number);
+		ITypeBinding infixType= infix.resolveTypeBinding();
+		return createNarrowCastIfNessecary(infix, infixType, ast, variableType, is50OrHigher);
+	}
+	
+	/**
+	 * Checks if the assignment needs a downcast and inserts it if necessary
+	 * 
+	 * @param expression the right hand-side
+	 * @param expressionType the type of the right hand-side. Can be null
+	 * @param ast the AST
+	 * @param variableType the Type of the variable the expression will be assigned to
+	 * @param is50OrHigher if <code>true</code> java 5.0 code will be assumed
+	 * @return the casted expression if necessary
+	 */
+	private static Expression createNarrowCastIfNessecary(Expression expression, ITypeBinding expressionType, AST ast, ITypeBinding variableType, boolean is50OrHigher) {
+		PrimitiveType castTo= null;
+		if (variableType.isEqualTo(expressionType))
+			return expression; //no cast for same type
+		if (is50OrHigher) {
+			if (ast.resolveWellKnownType("java.lang.Character").isEqualTo(variableType)) //$NON-NLS-1$
+				castTo= ast.newPrimitiveType(PrimitiveType.CHAR);
+			if (ast.resolveWellKnownType("java.lang.Byte").isEqualTo(variableType)) //$NON-NLS-1$
+				castTo= ast.newPrimitiveType(PrimitiveType.BYTE);
+			if (ast.resolveWellKnownType("java.lang.Short").isEqualTo(variableType)) //$NON-NLS-1$
+				castTo= ast.newPrimitiveType(PrimitiveType.SHORT);
+		}
+		if (ast.resolveWellKnownType("char").isEqualTo(variableType)) //$NON-NLS-1$
+			castTo= ast.newPrimitiveType(PrimitiveType.CHAR);
+		if (ast.resolveWellKnownType("byte").isEqualTo(variableType)) //$NON-NLS-1$
+			castTo= ast.newPrimitiveType(PrimitiveType.BYTE);
+		if (ast.resolveWellKnownType("short").isEqualTo(variableType)) //$NON-NLS-1$
+			castTo= ast.newPrimitiveType(PrimitiveType.SHORT);
+		if (castTo != null) {
+			CastExpression cast= ast.newCastExpression();
+			if (ASTNodes.needsParentheses(expression)) {
+				ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
+				parenthesized.setExpression(expression);
+				cast.setExpression(parenthesized);
+			} else
+				cast.setExpression(expression);
+			cast.setType(castTo);
+			return cast;
+		}
+		return expression;
+	}
 
 }

@@ -78,7 +78,7 @@ public abstract class RefactoringTest extends TestCase {
 	 * and run the refactoring. As this is very time consuming this should 
 	 * be <code>false</code> by default.
 	 */
-	private static final boolean DESCRIPTOR_TEST= false;
+	private static final boolean DESCRIPTOR_TEST= true;
 
 	private IPackageFragmentRoot fRoot;
 	private IPackageFragment fPackageP;

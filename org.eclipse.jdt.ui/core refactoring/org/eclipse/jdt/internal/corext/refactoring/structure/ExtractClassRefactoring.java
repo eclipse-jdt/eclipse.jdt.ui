@@ -68,6 +68,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
@@ -255,9 +256,6 @@ public class ExtractClassRefactoring extends Refactoring {
 		if (fDescriptor.getPackage() == null) {
 			fDescriptor.setPackage(type.getPackageFragment().getElementName());
 		}
-		if (fDescriptor.getEnclosingType() == null) {
-			fDescriptor.setEnclosingType(type.getFullyQualifiedName());
-		}
 		if (fDescriptor.getClassName() == null) {
 			fDescriptor.setClassName(type.getElementName() + "Parameter"); //$NON-NLS-1$
 		}
@@ -274,7 +272,7 @@ public class ExtractClassRefactoring extends Refactoring {
 		fVerification= new ExtractClassDescriptorVerification(descriptor);
 	}
 
-	
+
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		RefactoringStatus result= new RefactoringStatus();
 		pm.beginTask(RefactoringCoreMessages.ExtractClassRefactoring_progress_msg_check_initial_condition, 5);
@@ -383,8 +381,6 @@ public class ExtractClassRefactoring extends Refactoring {
 
 		if (fDescriptor.isCreateTopLevel())
 			comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_package, fDescriptor.getPackage()));
-		else
-			comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_enclosing_type, fDescriptor.getEnclosingType()));
 		
 		Field[] fields= fDescriptor.getFields();
 		ArrayList strings= new ArrayList();
@@ -462,7 +458,7 @@ public class ExtractClassRefactoring extends Refactoring {
 		ParameterObjectFactory pof= new ParameterObjectFactory();
 		pof.setClassName(fDescriptor.getClassName());
 		pof.setPackage(fDescriptor.getPackage());
-		pof.setEnclosingType(fDescriptor.getEnclosingType());
+		pof.setEnclosingType(fDescriptor.getType().getFullyQualifiedName());
 		pof.setCreateGetter(fDescriptor.isCreateGetter());
 		pof.setCreateSetter(fDescriptor.isCreateSetter());
 		List variables= new ArrayList();
@@ -564,7 +560,7 @@ public class ExtractClassRefactoring extends Refactoring {
 				Expression fieldReadAccess= pof.createFieldReadAccess(pi, parameterName, ast, javaProject);
 				if (writeAccess && (fDescriptor.isCreateGetter() || fDescriptor.isCreateSetter())) {
 					ITypeBinding typeBinding= name.resolveTypeBinding();
-					Expression assignedValue= ASTNodes.getAssignedValue(parent, rewrite, fieldReadAccess, typeBinding, is50OrHigher);
+					Expression assignedValue= GetterSetterUtil.getAssignedValue(parent, rewrite, fieldReadAccess, typeBinding, is50OrHigher);
 					Expression access= pof.createFieldWriteAccess(pi, parameterName, ast, javaProject, assignedValue);
 					rewrite.replace(name.getParent(), access, writeGroup);
 				} else {
