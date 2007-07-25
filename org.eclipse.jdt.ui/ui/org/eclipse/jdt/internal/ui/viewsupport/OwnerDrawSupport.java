@@ -28,6 +28,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.TreeItem;
 
+import org.eclipse.jface.window.Window;
+
 /**
  * Adding owner draw support to a control
  */
@@ -39,6 +41,7 @@ public abstract class OwnerDrawSupport implements Listener {
 	public OwnerDrawSupport(Control control) {
 		fControl= control;
 		fTextLayout= new TextLayout(control.getDisplay());
+		fTextLayout.setOrientation(Window.getDefaultOrientation());
 		
 		control.addListener(SWT.PaintItem, this);
 		control.addListener(SWT.EraseItem, this);
