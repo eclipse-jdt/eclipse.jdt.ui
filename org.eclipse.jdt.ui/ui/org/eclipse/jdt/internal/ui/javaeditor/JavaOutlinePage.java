@@ -43,10 +43,9 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.DelegatingDropAdapter;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.util.TransferDragSourceListener;
-import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.IPostSelectionProvider;
 import org.eclipse.jface.viewers.ISelection;
@@ -121,7 +120,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
 import org.eclipse.jdt.internal.ui.actions.CategoryFilterActionGroup;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
@@ -1348,16 +1346,18 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			};
 
 		// Drop Adapter
-		TransferDropTargetListener[] dropListeners= new TransferDropTargetListener[] {
-			new SelectionTransferDropAdapter(fOutlineViewer)
-		};
-		fOutlineViewer.addDropSupport(ops | DND.DROP_DEFAULT, transfers, new DelegatingDropAdapter(dropListeners));
+		DelegatingDropAdapter delegatingDropAdapter= new DelegatingDropAdapter();
+		delegatingDropAdapter.addDropTargetListener(
+			new SelectionTransferDropAdapter(fOutlineViewer)			
+		);
+		fOutlineViewer.addDropSupport(ops | DND.DROP_DEFAULT, transfers, delegatingDropAdapter);
 
 		// Drag Adapter
-		TransferDragSourceListener[] dragListeners= new TransferDragSourceListener[] {
+		JdtViewerDragAdapter dragAdapter= new JdtViewerDragAdapter(fOutlineViewer);
+		dragAdapter.addDragSourceListener(
 			new SelectionTransferDragAdapter(fOutlineViewer)
-		};
-		fOutlineViewer.addDragSupport(ops, transfers, new JdtViewerDragAdapter(fOutlineViewer, dragListeners));
+		);
+		fOutlineViewer.addDragSupport(ops, transfers, dragAdapter);
 	}
 	
 	/**

@@ -43,10 +43,9 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.util.DelegatingDropAdapter;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.util.TransferDragSourceListener;
-import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
@@ -120,7 +119,6 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
-import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView;
@@ -438,20 +436,25 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		Transfer[] dropTransfers= new Transfer[] {
 			LocalSelectionTransfer.getInstance()
 		};
-		TransferDropTargetListener[] dropListeners= new TransferDropTargetListener[] {
+		DelegatingDropAdapter delegatingDropAdapter= new DelegatingDropAdapter();
+		delegatingDropAdapter.addDropTargetListener(
 			new SelectionTransferDropAdapter(fViewer)
-		};
-		fViewer.addDropSupport(ops | DND.DROP_DEFAULT, dropTransfers, new DelegatingDropAdapter(dropListeners));
+		);
+		fViewer.addDropSupport(ops | DND.DROP_DEFAULT, dropTransfers, delegatingDropAdapter);
 
 		// Drag
 		Transfer[] dragTransfers= new Transfer[] {
 			LocalSelectionTransfer.getInstance(),
 			ResourceTransfer.getInstance()};
-		TransferDragSourceListener[] dragListeners= new TransferDragSourceListener[] {
-			new SelectionTransferDragAdapter(fViewer),
+		
+		JdtViewerDragAdapter dragAdapter= new JdtViewerDragAdapter(fViewer);
+		dragAdapter.addDragSourceListener(
+			new SelectionTransferDragAdapter(fViewer)
+		);
+		dragAdapter.addDragSourceListener(
 			new ResourceTransferDragAdapter(fViewer)
-		};
-		fViewer.addDragSupport(ops, dragTransfers, new JdtViewerDragAdapter(fViewer, dragListeners));
+		);
+		fViewer.addDragSupport(ops, dragTransfers, dragAdapter);
 	}
 
 	protected void fillActionBars(IActionBars actionBars) {

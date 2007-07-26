@@ -18,6 +18,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.util.TransferDropTargetListener;
@@ -52,18 +53,26 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	private int fCanCopyElements;
 	private ISelection fSelection;
 
-	private static final long DROP_TIME_DIFF_TRESHOLD= 150;
-
 	public SelectionTransferDropAdapter(StructuredViewer viewer) {
-		super(viewer, DND.FEEDBACK_SCROLL | DND.FEEDBACK_EXPAND);
+		super(viewer);
+		
+		setScrollEnabled(true);
+		setExpandEnabled(true);
+		setFeedbackEnabled(false);
 	}
 
 	//---- TransferDropTargetListener interface ---------------------------------------
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	public Transfer getTransfer() {
 		return LocalSelectionTransfer.getInstance();
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	public boolean isEnabled(DropTargetEvent event) {
 		Object target= event.item != null ? event.item.getData() : null;
 		if (target == null)
@@ -73,11 +82,17 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 
 	//---- Actual DND -----------------------------------------------------------------
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	public void dragEnter(DropTargetEvent event) {
 		clear();
 		super.dragEnter(event);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	public void dragLeave(DropTargetEvent event) {
 		clear();
 		super.dragLeave(event);
@@ -92,24 +107,42 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		fCanCopyElements= 0;
 	}
 	
-	public void validateDrop(Object target, DropTargetEvent event, int operation) {
-		event.detail= DND.DROP_NONE;
-		
-		if (tooFast(event)) 
-			return;
+	/**
+	 * {@inheritDoc}
+	 */
+	public int validateDrop(Object target, int operation, TransferData transferType) {
 		
 		initializeSelection();
+		
+		if (target == null)
+			return DND.DROP_NONE;
+		
+		//Do not allow to drop on itself, bug 14228
+		if (fElements.size() == 1) {
+			IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
+			IResource[] resources= ReorgUtils.getResources(fElements);
+			
+			if (javaElements.length == 1 && javaElements[0].equals(target))
+				return DND.DROP_NONE;
+			
+			if (resources.length == 1 && resources[0].equals(target))
+				return DND.DROP_NONE;
+		}
 				
 		try {
 			switch(operation) {
-				case DND.DROP_DEFAULT:	event.detail= handleValidateDefault(target, event); break;
-				case DND.DROP_COPY: 	event.detail= handleValidateCopy(target, event); break;
-				case DND.DROP_MOVE: 	event.detail= handleValidateMove(target, event); break;
+				case DND.DROP_DEFAULT:
+					return handleValidateDefault(target);
+				case DND.DROP_COPY: 
+					return handleValidateCopy(target);
+				case DND.DROP_MOVE: 	
+					return handleValidateMove(target);
 			}
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, PackagesMessages.SelectionTransferDropAdapter_error_title, PackagesMessages.SelectionTransferDropAdapter_error_message); 
-			event.detail= DND.DROP_NONE;
-		}	
+		}
+		
+		return DND.DROP_NONE;
 	}
 
 	protected void initializeSelection(){
@@ -125,16 +158,15 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	protected ISelection getSelection(){
 		return fSelection;
 	}
-	
-	private boolean tooFast(DropTargetEvent event) {
-		return Math.abs(LocalSelectionTransfer.getInstance().getSelectionSetTime() - (event.time & 0xFFFFFFFFL)) < DROP_TIME_DIFF_TRESHOLD;
-	}	
 
-	public void drop(Object target, DropTargetEvent event) {
+	/**
+	 * {@inheritDoc}
+	 */
+	public int performDrop(Object data) {
 		try{
-			switch(event.detail) {
-				case DND.DROP_MOVE: handleDropMove(target, event); break;
-				case DND.DROP_COPY: handleDropCopy(target, event); break;
+			switch(getCurrentOperation()) {
+				case DND.DROP_MOVE: handleDropMove(getCurrentTarget()); break;
+				case DND.DROP_COPY: handleDropCopy(getCurrentTarget()); break;
 			}
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, PackagesMessages.SelectionTransferDropAdapter_error_title, PackagesMessages.SelectionTransferDropAdapter_error_message); 
@@ -142,31 +174,23 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		} catch (InterruptedException e) {
 			//ok
-		} finally {
-			// The drag source listener must not perform any operation
-			// since this drop adapter did the remove of the source even
-			// if we moved something.
-			event.detail= DND.DROP_NONE;
 		}
-	}
-	
-	private int handleValidateDefault(Object target, DropTargetEvent event) throws JavaModelException{
-		if (target == null)
-			return DND.DROP_NONE;
-		
-		if ((event.operations & DND.DROP_MOVE) != 0) {
-			return handleValidateMove(target, event);
-		}
-		if ((event.operations & DND.DROP_COPY) != 0) {
-			return handleValidateCopy(target, event);
-		}
+		// The drag source listener must not perform any operation
+		// since this drop adapter did the remove of the source even
+		// if we moved something.
 		return DND.DROP_NONE;
+		
 	}
 	
-	private int handleValidateMove(Object target, DropTargetEvent event) throws JavaModelException{
-		if (target == null)
-			return DND.DROP_NONE;
-		
+	private int handleValidateDefault(Object target) throws JavaModelException{
+		int result= handleValidateMove(target);
+		if (result != DND.DROP_NONE)
+			return result;
+			
+		return handleValidateCopy(target);
+	}
+	
+	private int handleValidateMove(Object target) throws JavaModelException{		
 		if (fMoveProcessor == null) {
 			IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(ReorgUtils.getResources(fElements), ReorgUtils.getJavaElements(fElements));
 			if (policy.canEnable())
@@ -193,7 +217,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		return fCanMoveElements == 2;
 	}
 
-	private void handleDropMove(final Object target, DropTargetEvent event) throws JavaModelException, InvocationTargetException, InterruptedException{
+	private void handleDropMove(final Object target) throws JavaModelException, InvocationTargetException, InterruptedException{
 		IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
 		IResource[] resources= ReorgUtils.getResources(fElements);
 		ReorgMoveStarter starter= null;
@@ -205,7 +229,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			starter.run(getShell());
 	}
 
-	private int handleValidateCopy(Object target, DropTargetEvent event) throws JavaModelException{
+	private int handleValidateCopy(Object target) throws JavaModelException{
 
 		if (fCopyProcessor == null) {
 			final ICopyPolicy policy= ReorgPolicyFactory.createCopyPolicy(ReorgUtils.getResources(fElements), ReorgUtils.getJavaElements(fElements));
@@ -232,7 +256,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		return fCanCopyElements == 2;
 	}		
 	
-	private void handleDropCopy(final Object target, DropTargetEvent event) throws JavaModelException, InvocationTargetException, InterruptedException{
+	private void handleDropCopy(final Object target) throws JavaModelException, InvocationTargetException, InterruptedException{
 		IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
 		IResource[] resources= ReorgUtils.getResources(fElements);
 		ReorgCopyStarter starter= null;

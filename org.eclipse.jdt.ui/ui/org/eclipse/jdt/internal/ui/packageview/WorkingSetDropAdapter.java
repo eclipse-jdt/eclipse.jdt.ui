@@ -26,6 +26,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
 
 import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -55,16 +56,26 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 	private IWorkingSet fWorkingSet;
 
 	public WorkingSetDropAdapter(PackageExplorerPart part) {
-		super(part.getTreeViewer(), DND.FEEDBACK_SCROLL | DND.FEEDBACK_EXPAND);
+		super(part.getTreeViewer());
 		fPackageExplorer= part;
+		
+		setScrollEnabled(true);
+		setExpandEnabled(true);
+		setFeedbackEnabled(false);
 	}
 
 	//---- TransferDropTargetListener interface ---------------------------------------
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	public Transfer getTransfer() {
 		return LocalSelectionTransfer.getInstance();
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	public boolean isEnabled(DropTargetEvent event) {
 		Object target= event.item != null ? event.item.getData() : null;
 		if (target == null)
@@ -82,23 +93,25 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 
 	//---- Actual DND -----------------------------------------------------------------
 	
-	public void validateDrop(Object target, DropTargetEvent event, int operation) {
-		event.detail= DND.DROP_NONE;
+	/**
+	 * {@inheritDoc}
+	 */
+	public int validateDrop(Object target, int operation, TransferData transferType) {
 		switch(operation) {
 			case DND.DROP_DEFAULT:
 			case DND.DROP_COPY:
 			case DND.DROP_MOVE:
-				event.detail= validateTarget(target, operation); 
-				break;
-			case DND.DROP_LINK:
-				event.detail= DND.DROP_NONE; 
-				break;
+				return validateTarget(target, operation);
+			default:
+				return DND.DROP_NONE;
 		}
+		
 	}
 	
 	private int validateTarget(Object target, int operation) {
-		showInsertionFeedback(false);
-		setDefaultFeedback(DND.FEEDBACK_SCROLL | DND.FEEDBACK_EXPAND);
+		setFeedbackEnabled(false);
+		setScrollEnabled(true);
+		setExpandEnabled(true);
 		if (!isValidTarget(target))
 			return DND.DROP_NONE;
 		ISelection s= LocalSelectionTransfer.getInstance().getSelection();
@@ -109,9 +122,9 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 		initializeState(target, s);
 		
 		if (isWorkingSetSelection()) {
-			setDefaultFeedback(DND.FEEDBACK_SCROLL);
-			if (fLocation == LOCATION_BEFORE || fLocation == LOCATION_AFTER) {
-				showInsertionFeedback(true);
+			setExpandEnabled(false);
+			if (getCurrentLocation() == LOCATION_BEFORE || getCurrentLocation() == LOCATION_AFTER) {
+				setFeedbackEnabled(true);
 				return DND.DROP_MOVE;
 			}
 			return DND.DROP_NONE;
@@ -184,14 +197,17 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 		return true;
 	}
 
-	public void drop(Object target, final DropTargetEvent event) {
+	/**
+	 * {@inheritDoc}
+	 */
+	public int performDrop(Object data) {
 		if (isWorkingSetSelection()) {
 			performWorkingSetReordering();
 		} else {
-			performElementRearrange(event.detail);
+			performElementRearrange(getCurrentOperation());
 		}
 		// drag adapter has nothing to do, even on move.
-		event.detail= DND.DROP_NONE;
+		return DND.DROP_NONE;
 	}
 
 	private void performWorkingSetReordering() {
@@ -199,7 +215,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 		List activeWorkingSets= new ArrayList(Arrays.asList(model.getActiveWorkingSets()));
 		int index= activeWorkingSets.indexOf(fWorkingSet);
 		if (index != -1) {
-			if (fLocation == LOCATION_AFTER)
+			if (getCurrentLocation() == LOCATION_AFTER)
 				index++;
 			List result= new ArrayList(activeWorkingSets.size());
 			List selected= new ArrayList(Arrays.asList(fElementsToAdds));
@@ -266,5 +282,9 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 		} else {
 			performElementRearrange(eventDetail);
 		}
+	}
+
+	public void internalTestSetLocation(int location) {
+		setCurrentLocation(location);
 	}
 }

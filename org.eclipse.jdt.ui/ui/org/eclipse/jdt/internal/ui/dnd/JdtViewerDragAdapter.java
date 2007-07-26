@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.swt.dnd.DragSourceEvent;
 
-import org.eclipse.jface.util.TransferDragSourceListener;
+import org.eclipse.jface.util.DelegatingDragAdapter;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 
@@ -22,8 +22,8 @@ public class JdtViewerDragAdapter extends DelegatingDragAdapter {
 
 	private StructuredViewer fViewer;
 
-	public JdtViewerDragAdapter(StructuredViewer viewer, TransferDragSourceListener[] listeners) {
-		super(listeners);
+	public JdtViewerDragAdapter(StructuredViewer viewer) {
+		super();
 		Assert.isNotNull(viewer);
 		fViewer= viewer;
 	}

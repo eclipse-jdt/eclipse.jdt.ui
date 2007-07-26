@@ -55,10 +55,9 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.DelegatingDropAdapter;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.util.TransferDragSourceListener;
-import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -137,7 +136,6 @@ import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.filters.OutputFolderFilter;
@@ -893,12 +891,18 @@ public class PackageExplorerPart extends ViewPart
 			LocalSelectionTransfer.getInstance(), 
 			ResourceTransfer.getInstance(),
 			FileTransfer.getInstance()};
-		TransferDragSourceListener[] dragListeners= new TransferDragSourceListener[] {
-			new SelectionTransferDragAdapter(fViewer),
-			new ResourceTransferDragAdapter(fViewer),
+
+		JdtViewerDragAdapter dragAdapter= new JdtViewerDragAdapter(fViewer);
+		dragAdapter.addDragSourceListener(
+			new SelectionTransferDragAdapter(fViewer)
+		);
+		dragAdapter.addDragSourceListener(
+			new ResourceTransferDragAdapter(fViewer)
+		);
+		dragAdapter.addDragSourceListener(
 			new FileTransferDragAdapter(fViewer)
-		};
-		fViewer.addDragSupport(ops, transfers, new JdtViewerDragAdapter(fViewer, dragListeners));
+		);
+		fViewer.addDragSupport(ops, transfers, dragAdapter);
 	}
 
 	private void initDrop() {
@@ -906,12 +910,17 @@ public class PackageExplorerPart extends ViewPart
 		Transfer[] transfers= new Transfer[] {
 			LocalSelectionTransfer.getInstance(), 
 			FileTransfer.getInstance()};
-		TransferDropTargetListener[] dropListeners= new TransferDropTargetListener[] {
-			new SelectionTransferDropAdapter(fViewer),
-			new FileTransferDropAdapter(fViewer),
+		DelegatingDropAdapter delegatingDropAdapter= new DelegatingDropAdapter();
+		delegatingDropAdapter.addDropTargetListener(
+			new SelectionTransferDropAdapter(fViewer)
+		);
+		delegatingDropAdapter.addDropTargetListener(
+			new FileTransferDropAdapter(fViewer)
+		);
+		delegatingDropAdapter.addDropTargetListener(	
 			new WorkingSetDropAdapter(this)
-		};
-		fViewer.addDropSupport(ops, transfers, new DelegatingDropAdapter(dropListeners));
+		);
+		fViewer.addDropSupport(ops, transfers, delegatingDropAdapter);
 	}
 
 	/**

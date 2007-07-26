@@ -11,69 +11,45 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
-import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.DropTargetEvent;
-
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 
 import org.eclipse.jdt.core.IMethod;
 
-import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
+import org.eclipse.jdt.internal.ui.dnd.ViewerInputDropAdapter;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
-class CallHierarchyTransferDropAdapter extends SelectionTransferDropAdapter {
-
-	private static final int OPERATION = DND.DROP_LINK;
+class CallHierarchyTransferDropAdapter extends ViewerInputDropAdapter {
+	
 	private CallHierarchyViewPart fCallHierarchyViewPart;
 
 	public CallHierarchyTransferDropAdapter(CallHierarchyViewPart viewPart, StructuredViewer viewer) {
 		super(viewer);
-		setFullWidthMatchesItem(false);
 		fCallHierarchyViewPart= viewPart;
-	}
-
-	public void validateDrop(Object target, DropTargetEvent event, int operation) {
-		event.detail= DND.DROP_NONE;
-		initializeSelection();
-		if (target != null){
-			super.validateDrop(target, event, operation);
-			return;
-		}	
-		if (getInputElement(getSelection()) != null) 
-			event.detail= OPERATION;
-	}
+	}	
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter#isEnabled(org.eclipse.swt.dnd.DropTargetEvent)
+	/**
+	 * {@inheritDoc}
 	 */
-	public boolean isEnabled(DropTargetEvent event) {
-		return true;
-	}
-
-	public void drop(Object target, DropTargetEvent event) {
-		if (target != null || event.detail != OPERATION){
-			super.drop(target, event);
-			return;
-		}	
-		IMethod input= getInputElement(getSelection());
-		fCallHierarchyViewPart.setMethod(input);
+	protected void doInputView(Object inputElement) {
+		fCallHierarchyViewPart.setMethod((IMethod) inputElement);
 	}
 	
-	private static IMethod getInputElement(ISelection selection) {
+	/**
+	 * {@inheritDoc}
+	 */
+	protected Object getInputElement(ISelection selection) {
 		Object single= SelectionUtil.getSingleElement(selection);
 		if (single == null)
 			return null;
+		
 		return getCandidate(single);
 	}
     
-    /**
-     * Converts the input to a possible input candidates
-     */ 
-    public static IMethod getCandidate(Object input) {
-        if (!(input instanceof IMethod)) {
+    private static IMethod getCandidate(Object input) {
+        if (!(input instanceof IMethod))
             return null;
-        }
+        
         return (IMethod) input;
     }
 }

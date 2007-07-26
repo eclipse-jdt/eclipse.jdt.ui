@@ -17,6 +17,7 @@ import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -42,15 +43,25 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 class FileTransferDropAdapter extends JdtViewerDropAdapter implements TransferDropTargetListener {
 	
 	FileTransferDropAdapter(AbstractTreeViewer viewer) {
-		super(viewer, DND.FEEDBACK_SCROLL | DND.FEEDBACK_EXPAND);
+		super(viewer);
+		
+		setScrollEnabled(true);
+		setExpandEnabled(true);
+		setFeedbackEnabled(false);
 	}
 
 	//---- TransferDropTargetListener interface ---------------------------------------
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	public Transfer getTransfer() {
 		return FileTransfer.getInstance();
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	public boolean isEnabled(DropTargetEvent event) {
 		Object target= event.item != null ? event.item.getData() : null;
 		if (target == null)
@@ -60,43 +71,46 @@ class FileTransferDropAdapter extends JdtViewerDropAdapter implements TransferDr
 
 	//---- Actual DND -----------------------------------------------------------------
 	
-	public void validateDrop(Object target, DropTargetEvent event, int operation) {
-		event.detail= DND.DROP_NONE;
-		
+	/**
+	 * {@inheritDoc}
+	 */
+	public int validateDrop(Object target, int operation, TransferData transferType) {
+	
 		boolean isPackageFragment= target instanceof IPackageFragment;
 		boolean isJavaProject= target instanceof IJavaProject;
 		boolean isPackageFragmentRoot= target instanceof IPackageFragmentRoot;
 		boolean isContainer= target instanceof IContainer;
 		
 		if (!(isPackageFragment || isJavaProject || isPackageFragmentRoot || isContainer)) 
-			return;
+			return DND.DROP_NONE;
 			
 		if (isContainer) {
 			IContainer container= (IContainer)target;
 			if (container.isAccessible() && !Resources.isReadOnly(container))
-				event.detail= DND.DROP_COPY;
+				return DND.DROP_COPY;
 		} else {
 			IJavaElement element= (IJavaElement)target;
 			if (!element.isReadOnly()) 
-				event.detail= DND.DROP_COPY;
+				return DND.DROP_COPY;
 		}
 			
-		return;	
+		return DND.DROP_NONE;	
 	}
 
-	public void drop(Object dropTarget, final DropTargetEvent event) {
+	/**
+	 * {@inheritDoc}
+	 */
+	public int performDrop(final Object data) {
 		try {
-			int operation= event.detail;
+			int operation= getCurrentOperation();
 
-			event.detail= DND.DROP_NONE;
-			final Object data= event.data;
 			if (data == null || !(data instanceof String[]) || operation != DND.DROP_COPY)
-				return;
+				return DND.DROP_NONE;
 
-			final IContainer target= getActualTarget(dropTarget);
+			final IContainer target= getActualTarget(getCurrentTarget());
 			if (target == null)
-				return;
-
+				return DND.DROP_NONE;
+			
 			// Run the import operation asynchronously. 
 			// Otherwise the drag source (e.g., Windows Explorer) will be blocked 
 			// while the operation executes. Fixes bug 35796.
@@ -104,15 +118,17 @@ class FileTransferDropAdapter extends JdtViewerDropAdapter implements TransferDr
 				public void run() {
 					getShell().forceActive();
 					new CopyFilesAndFoldersOperation(getShell()).copyFiles((String[]) data, target);
-					// Import always performs a copy.
-					event.detail= DND.DROP_COPY;
 				}
 			});
+			
+			return DND.DROP_COPY;
 		} catch (JavaModelException e) {
 			String title= PackagesMessages.DropAdapter_errorTitle; 
 			String message= PackagesMessages.DropAdapter_errorMessage; 
 			ExceptionHandler.handle(e, getShell(), title, message);
 		}
+		
+		return DND.DROP_NONE;
 	}
 	
 	private IContainer getActualTarget(Object dropTarget) throws JavaModelException{

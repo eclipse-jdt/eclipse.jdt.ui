@@ -31,7 +31,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.util.TransferDragSourceListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -301,12 +300,14 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance(), ResourceTransfer.getInstance() };
 		int ops= DND.DROP_COPY | DND.DROP_LINK;
 		
-		TransferDragSourceListener[] dragListeners= new TransferDragSourceListener[] {
-			new SelectionTransferDragAdapter(viewer),
+		JdtViewerDragAdapter dragAdapter= new JdtViewerDragAdapter(viewer);
+		dragAdapter.addDragSourceListener(
+			new SelectionTransferDragAdapter(viewer)
+		);
+		dragAdapter.addDragSourceListener(
 			new ResourceTransferDragAdapter(viewer)
-		};
-		
-		viewer.addDragSupport(ops, transfers, new JdtViewerDragAdapter(viewer, dragListeners));
+		);
+		viewer.addDragSupport(ops, transfers, dragAdapter);
 	}	
 
 	protected void configureTableViewer(TableViewer viewer) {
