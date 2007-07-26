@@ -123,18 +123,8 @@ public class ExtractClassRefactoring extends Refactoring {
 			IType type= fDescriptor.getType();
 			IPackageFragmentRoot ancestor= (IPackageFragmentRoot) type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 			IPackageFragment packageFragment= ancestor.getPackageFragment(fDescriptor.getPackage());
-			try {
-				ICompilationUnit[] compilationUnits= packageFragment.getCompilationUnits();
-				for (int i= 0; i < compilationUnits.length; i++) {
-					ICompilationUnit cu= compilationUnits[i];
-					if (cu.getType(fDescriptor.getClassName()).exists()) {
-						status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_toplevel_name_clash,
-								new Object[] { fDescriptor.getClassName(), fDescriptor.getPackage() }));
-					}
-				}
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-			}
+			if (packageFragment.getCompilationUnit(fDescriptor.getClassName() + JavaModelUtil.DEFAULT_CU_SUFFIX).exists())
+				status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_toplevel_name_clash, new Object[] { fDescriptor.getClassName(), fDescriptor.getPackage() }));
 			return status;
 		}
 
