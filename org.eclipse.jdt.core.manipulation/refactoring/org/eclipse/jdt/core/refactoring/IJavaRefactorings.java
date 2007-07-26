@@ -148,6 +148,8 @@ public interface IJavaRefactorings {
 	 * Clients may safely cast the obtained refactoring descriptor to
 	 * {@link ExtractClassDescriptor}.
 	 * </p>
+	 * 
+	 * @since 3.4
 	 */
 	public static final String EXTRACT_CLASS= "org.eclipse.jdt.ui.extract.class"; //$NON-NLS-1$
 	
