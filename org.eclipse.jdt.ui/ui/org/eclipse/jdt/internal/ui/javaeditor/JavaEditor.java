@@ -165,6 +165,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.core.util.IModifierConstants;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
@@ -1790,6 +1791,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 
 		if (required == IShowInSource.class) {
+			IJavaElement inputJE= getInputJavaElement();
+			if (inputJE instanceof ICompilationUnit && !JavaModelUtil.isPrimary((ICompilationUnit) inputJE))
+				return null;
+			
 			return new IShowInSource() {
 				public ShowInContext getShowInContext() {
 					return new ShowInContext(getEditorInput(), null) {
@@ -1798,10 +1803,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 						 * @since 3.3
 						 */
 						public ISelection getSelection() {
-							IJavaElement je= null;
 							try {
-								je= SelectionConverter.getElementAtOffset(JavaEditor.this);
-								return new StructuredSelection(je);
+								IJavaElement je= SelectionConverter.getElementAtOffset(JavaEditor.this);
+								if (je != null)
+									return new StructuredSelection(je);
+								return null;
 							} catch (JavaModelException ex) {
 								return null;
 							}
