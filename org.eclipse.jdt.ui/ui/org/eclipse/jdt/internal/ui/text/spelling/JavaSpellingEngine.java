@@ -25,7 +25,6 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
-import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener;
 
 
 /**
@@ -40,7 +39,7 @@ public class JavaSpellingEngine extends SpellingEngine {
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.SpellingEngine#check(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IRegion[], org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker, org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	protected void check(IDocument document, IRegion[] regions, ISpellChecker checker, ISpellingProblemCollector collector, IProgressMonitor monitor) {
-		ISpellEventListener listener= new SpellEventListener(collector, document);
+		SpellEventListener listener= new SpellEventListener(collector, document);
 		boolean isIgnoringJavaStrings= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SPELLING_IGNORE_JAVA_STRINGS);
 		try {
 			checker.addListener(listener);
@@ -50,6 +49,9 @@ public class JavaSpellingEngine extends SpellingEngine {
 					ITypedRegion[] partitions= TextUtilities.computePartitioning(document, IJavaPartitions.JAVA_PARTITIONING, region.getOffset(), region.getLength(), false);
 					for (int index= 0; index < partitions.length; index++) {
 						if (monitor != null && monitor.isCanceled())
+							return;
+
+						if (listener.isProblemsThresholdReached())
 							return;
 
 						ITypedRegion partition= partitions[index];

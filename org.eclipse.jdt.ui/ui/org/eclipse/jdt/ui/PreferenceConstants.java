@@ -2602,6 +2602,16 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public final static String SPELLING_PROPOSAL_THRESHOLD= "spelling_proposal_threshold"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that controls the maximum number of problems reported during spell checking.
+	 * <p>
+	 * Value is of type <code>Integer</code>.
+	 * </p>
+	 * 
+	 * @since 3.4
+	 */
+	public final static String SPELLING_PROBLEMS_THRESHOLD= "spelling_problems_threshold"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that specifies the workspace user dictionary.
@@ -3833,6 +3843,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.SPELLING_USER_DICTIONARY_ENCODING, System.getProperty("file.encoding")); //$NON-NLS-1$
 		
 		store.setDefault(PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD, 20);
+		store.setDefault(PreferenceConstants.SPELLING_PROBLEMS_THRESHOLD, 100);
 		/*
 		 * XXX: This is currently disabled because the spelling engine
 		 * cannot return word proposals but only correction proposals.
