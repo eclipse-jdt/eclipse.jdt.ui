@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.text.spelling.engine;
 
 import java.util.Collections;
@@ -22,6 +21,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+
 
 /**
  * Default spell checker for standard text.
@@ -240,6 +240,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 		final boolean ignoreURLS= fPreferences.getBoolean(PreferenceConstants.SPELLING_IGNORE_URLS);
 		final boolean ignoreNonLetters= fPreferences.getBoolean(PreferenceConstants.SPELLING_IGNORE_NON_LETTERS);
 		final boolean ignoreSingleLetters= fPreferences.getBoolean(PreferenceConstants.SPELLING_IGNORE_SINGLE_LETTERS);
+		final int problemsThreshold= PreferenceConstants.getPreferenceStore().getInt(PreferenceConstants.SPELLING_PROBLEMS_THRESHOLD);
 		
 		iterator.setIgnoreSingleLetters(ignoreSingleLetters);
 		
@@ -249,8 +250,9 @@ public class DefaultSpellChecker implements ISpellChecker {
 
 		String word= null;
 		boolean starts= false;
+		int problemCount= 0;
 
-		while (iterator.hasNext()) {
+		while (problemCount <= problemsThreshold && iterator.hasNext()) {
 
 			word= (String)iterator.next();
 			if (word != null) {
@@ -266,13 +268,17 @@ public class DefaultSpellChecker implements ISpellChecker {
 					    boolean isDigits= isDigits(word);
 					    boolean isURL= isUrl(word);
 
-					    if ( !ignoreMixed && isMixed || !ignoreUpper && isUpper || !ignoreDigits && isDigits || !ignoreURLS && isURL || !(isMixed || isUpper || isDigits || isURL))
+					    if ( !ignoreMixed && isMixed || !ignoreUpper && isUpper || !ignoreDigits && isDigits || !ignoreURLS && isURL || !(isMixed || isUpper || isDigits || isURL)) {
 					        fireEvent(new SpellEvent(this, word, iterator.getBegin(), iterator.getEnd(), starts, false));
+					        problemCount++;
+					    }
 
 					} else {
 
-						if (!ignoreSentence && starts && Character.isLowerCase(word.charAt(0)))
+						if (!ignoreSentence && starts && Character.isLowerCase(word.charAt(0))) {
 							fireEvent(new SpellEvent(this, word, iterator.getBegin(), iterator.getEnd(), true, true));
+							problemCount++;
+						}
 					}
 				}
 			}
