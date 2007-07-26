@@ -91,10 +91,38 @@ public class ParameterObjectFactory {
 	}
 
 	public static class CreationListener {
+		/**
+		 * Notifies that a getter has been created
+		 * @param cuRewrite the rewriter
+		 * @param getter the new getter
+		 * @param pi the parameter info
+		 */
 		public void getterCreated(CompilationUnitRewrite cuRewrite, MethodDeclaration getter, ParameterInfo pi){}
+		/**
+		 * Notifies that a setter has been created
+		 * @param cuRewrite the rewriter
+		 * @param setter the new setter
+		 * @param pi the parameter info
+		 */
 		public void setterCreated(CompilationUnitRewrite cuRewrite, MethodDeclaration setter, ParameterInfo pi){}
+		/**
+		 * Notifies that a field has been created
+		 * @param cuRewrite the rewriter
+		 * @param field the new field
+		 * @param pi the parameter info
+		 */
 		public void fieldCreated(CompilationUnitRewrite cuRewrite, FieldDeclaration field, ParameterInfo pi){}
+		/**
+		 * Notifies that a constructor has been created
+		 * @param cuRewrite the rewriter
+		 * @param constructor the new constructor
+		 */
 		public void constructorCreated(CompilationUnitRewrite cuRewrite, MethodDeclaration constructor){}
+		/**
+		 * Notifies that a type declaration has been created
+		 * @param cuRewrite the rewriter
+		 * @param declaration the new declaration
+		 */
 		public void typeCreated(CompilationUnitRewrite cuRewrite, TypeDeclaration declaration) {}
 		
 		protected static ASTNode moveNode(CompilationUnitRewrite cuRewrite, ASTNode node) {
@@ -110,7 +138,8 @@ public class ParameterObjectFactory {
 	 * @param declaringType
 	 * @param cuRewrite
 	 * @param constructorInitilized names of parameterInfos that should be used in the constructor, or <code>null</code> if all should be used
-	 * @return
+	 * @param listener the creation listener or null
+	 * @return the new declaration
 	 * @throws CoreException
 	 */
 	public TypeDeclaration createClassDeclaration(String declaringType, CompilationUnitRewrite cuRewrite, Set constructorInitilized, CreationListener listener) throws CoreException {
@@ -513,7 +542,7 @@ public class ParameterObjectFactory {
 		if (!packageFragment.exists()) {
 			changes.add(new CreatePackageChange(packageFragment));
 		}
-		ICompilationUnit unit= packageFragment.getCompilationUnit(getClassName() + ".java"); //$NON-NLS-1$
+		ICompilationUnit unit= packageFragment.getCompilationUnit(getClassName() + JavaModelUtil.DEFAULT_CU_SUFFIX);
 		Assert.isTrue(!unit.exists());
 		IJavaProject javaProject= unit.getJavaProject();
 		ICompilationUnit workingCopy= unit.getWorkingCopy(null);
