@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Operation, which run, creates source code for a list of binary package
@@ -71,7 +72,7 @@ public class SourceCreationOperation extends AbstractCodeCreationOperation {
 			if (type.isAnonymous() || type.isLocal() || type.isMember())
 				return;
 			final String source= file.getSource();
-			createCompilationUnit(parent, type.getElementName() + ".java", source != null ? source : "", monitor); //$NON-NLS-1$ //$NON-NLS-2$
+			createCompilationUnit(parent, type.getElementName() + JavaModelUtil.DEFAULT_CU_SUFFIX, source != null ? source : "", monitor); //$NON-NLS-1$
 		} finally {
 			monitor.done();
 		}

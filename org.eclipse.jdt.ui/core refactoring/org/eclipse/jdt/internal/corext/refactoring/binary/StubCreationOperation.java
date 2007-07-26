@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Operation, which run, creates structurally equivalent stub types for a list
@@ -90,7 +91,7 @@ public class StubCreationOperation extends AbstractCodeCreationOperation {
 			if (type.isAnonymous() || type.isLocal() || type.isMember())
 				return;
 			String source= new StubCreator(fStubInvisible).createStub(type, subProgressMonitor);
-			createCompilationUnit(parent, type.getElementName() + ".java", source, monitor); //$NON-NLS-1$
+			createCompilationUnit(parent, type.getElementName() + JavaModelUtil.DEFAULT_CU_SUFFIX, source, monitor);
 		} finally {
 			monitor.done();
 		}
