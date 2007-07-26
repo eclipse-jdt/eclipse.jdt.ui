@@ -106,11 +106,18 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		fCopyProcessor= null;
 		fCanCopyElements= 0;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean validateDrop(Object target, int operation, TransferData transferType) {
+		return getDefaultDropOperation(target, operation, transferType) != DND.DROP_NONE;
+	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	public int validateDrop(Object target, int operation, TransferData transferType) {
+	protected int getDefaultDropOperation(Object target, int operation, TransferData transferType) {
 		
 		initializeSelection();
 		
@@ -162,7 +169,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	/**
 	 * {@inheritDoc}
 	 */
-	public int performDrop(Object data) {
+	public boolean performDrop(Object data) {
 		try{
 			switch(getCurrentOperation()) {
 				case DND.DROP_MOVE: handleDropMove(getCurrentTarget()); break;
@@ -178,7 +185,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		// The drag source listener must not perform any operation
 		// since this drop adapter did the remove of the source even
 		// if we moved something.
-		return DND.DROP_NONE;
+		return false;
 		
 	}
 	

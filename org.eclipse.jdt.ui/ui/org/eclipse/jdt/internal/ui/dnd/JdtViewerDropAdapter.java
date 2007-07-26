@@ -181,7 +181,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      * that it is still enabled.
      */
     private void doDropValidation(DropTargetEvent event) {
-        currentOperation= validateDrop(currentTarget, lastValidOperation, event.currentDataType);
+        currentOperation= getDefaultDropOperation(currentTarget, lastValidOperation, event.currentDataType);
         event.detail = currentOperation;
     }
 
@@ -237,8 +237,10 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
         currentLocation = determineLocation(event);
 
         //perform the drop behavior
-        currentOperation= performDrop(event.data);
-        event.detail= currentOperation;
+        if (!performDrop(event.data)) {
+            event.detail = DND.DROP_NONE;
+        }
+        currentOperation = event.detail;
     }
 
     /* (non-Javadoc)
@@ -246,7 +248,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      * Last chance for the action to disable itself
      */
     public void dropAccept(DropTargetEvent event) {
-    	event.detail= validateDrop(currentTarget, event.detail, event.currentDataType);
+        event.detail= getDefaultDropOperation(currentTarget, event.detail, event.currentDataType);
     }
 
     /**
@@ -367,7 +369,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      * @return <code>true</code> if the drop was successful, and 
      *   <code>false</code> otherwise
      */
-    public abstract int performDrop(Object data);
+    public abstract boolean performDrop(Object data);
 
     /* (non-Javadoc)
      * Method declared on DropTargetAdapter.
@@ -479,14 +481,37 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      * @return <code>true</code> if the drop is valid, and <code>false</code>
      *   otherwise
      */
-    public abstract int validateDrop(Object target, int operation,
+    public abstract boolean validateDrop(Object target, int operation,
             TransferData transferType);
     
     /**
-     * For testing only. The location should not be set otherwise.
-     * @param location the location to assume
+     * Get the default drop operation on the given object. This method is called whenever some 
+     * aspect of the drop operation changes.
+     * <p>
+     * The default operation is the one used when no modifier key is pressed by the user. 
+     * </p>
+     * <p>
+     * Subclasses can overwrite this method to define which operation does make
+     * sense on the drop target.
+     * </p>
+     * 
+     * @param target the object that the mouse is currently hovering over, or
+     *   <code>null</code> if the mouse is hovering over empty space
+     * @param operation the current drag operation (copy, move, etc.)
+     * @param transferType the current transfer type
+     * @return the operation which will be executed if no modifier key is pressed
+     * 		by the user
+     * 
+     * @see DND#DROP_NONE
+	 * @see DND#DROP_MOVE
+	 * @see DND#DROP_COPY
+	 * @see DND#DROP_LINK
      */
-    protected void setCurrentLocation(int location) {
-    	currentLocation= location;
-	}
+    protected int getDefaultDropOperation(Object target, int operation, TransferData transferType) {
+    	if (!validateDrop(target, operation, transferType)) {
+    		return DND.DROP_NONE;
+    	}
+    		
+    	return operation;
+    }
 }

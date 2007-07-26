@@ -74,7 +74,14 @@ class FileTransferDropAdapter extends JdtViewerDropAdapter implements TransferDr
 	/**
 	 * {@inheritDoc}
 	 */
-	public int validateDrop(Object target, int operation, TransferData transferType) {
+	public boolean validateDrop(Object target, int operation, TransferData transferType) {
+		return getDefaultDropOperation(target, operation, transferType) != DND.DROP_NONE;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	protected int getDefaultDropOperation(Object target, int operation, TransferData transferType) {
 	
 		boolean isPackageFragment= target instanceof IPackageFragment;
 		boolean isJavaProject= target instanceof IJavaProject;
@@ -100,16 +107,16 @@ class FileTransferDropAdapter extends JdtViewerDropAdapter implements TransferDr
 	/**
 	 * {@inheritDoc}
 	 */
-	public int performDrop(final Object data) {
+	public boolean performDrop(final Object data) {
 		try {
 			int operation= getCurrentOperation();
 
 			if (data == null || !(data instanceof String[]) || operation != DND.DROP_COPY)
-				return DND.DROP_NONE;
+				return false;
 
 			final IContainer target= getActualTarget(getCurrentTarget());
 			if (target == null)
-				return DND.DROP_NONE;
+				return false;
 			
 			// Run the import operation asynchronously. 
 			// Otherwise the drag source (e.g., Windows Explorer) will be blocked 
@@ -121,14 +128,14 @@ class FileTransferDropAdapter extends JdtViewerDropAdapter implements TransferDr
 				}
 			});
 			
-			return DND.DROP_COPY;
+			return false;
 		} catch (JavaModelException e) {
 			String title= PackagesMessages.DropAdapter_errorTitle; 
 			String message= PackagesMessages.DropAdapter_errorMessage; 
 			ExceptionHandler.handle(e, getShell(), title, message);
 		}
 		
-		return DND.DROP_NONE;
+		return true;
 	}
 	
 	private IContainer getActualTarget(Object dropTarget) throws JavaModelException{

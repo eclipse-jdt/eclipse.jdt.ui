@@ -40,7 +40,7 @@ public abstract class ViewerInputDropAdapter extends SelectionTransferDropAdapte
 	/**
 	 * {@inheritDoc}
 	 */
-	public int validateDrop(Object target, int operation, TransferData transferType) {
+	protected int getDefaultDropOperation(Object target, int operation, TransferData transferType) {
 
 		setSelectionFeedbackEnabled(true);
 		setExpandEnabled(true);
@@ -48,7 +48,7 @@ public abstract class ViewerInputDropAdapter extends SelectionTransferDropAdapte
 		initializeSelection();
 
 		if (target != null) {
-			return super.validateDrop(target, operation, transferType);
+			return super.getDefaultDropOperation(target, operation, transferType);
 		} else if (getInputElement(getSelection()) != null) {
 			setSelectionFeedbackEnabled(false);
 			setExpandEnabled(false);
@@ -61,7 +61,7 @@ public abstract class ViewerInputDropAdapter extends SelectionTransferDropAdapte
 	/**
 	 * {@inheritDoc}
 	 */
-	public int performDrop(Object data) {
+	public boolean performDrop(Object data) {
 		setSelectionFeedbackEnabled(true);
 		setExpandEnabled(true);
 
@@ -73,7 +73,7 @@ public abstract class ViewerInputDropAdapter extends SelectionTransferDropAdapte
 		if (input != null)
 			doInputView(input);
 
-		return DND.DROP_NONE;
+		return false;
 	}
 
 	/**

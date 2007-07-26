@@ -55,9 +55,13 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 	private Set fCurrentElements;
 	private IWorkingSet fWorkingSet;
 
+	private int fLocation;
+
 	public WorkingSetDropAdapter(PackageExplorerPart part) {
 		super(part.getTreeViewer());
 		fPackageExplorer= part;
+		
+		fLocation= -1;
 		
 		setScrollEnabled(true);
 		setExpandEnabled(true);
@@ -96,7 +100,14 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 	/**
 	 * {@inheritDoc}
 	 */
-	public int validateDrop(Object target, int operation, TransferData transferType) {
+	public boolean validateDrop(Object target, int operation, TransferData transferType) {
+		return getDefaultDropOperation(target, operation, transferType) != DND.DROP_NONE;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	protected int getDefaultDropOperation(Object target, int operation, TransferData transferType) {
 		switch(operation) {
 			case DND.DROP_DEFAULT:
 			case DND.DROP_COPY:
@@ -200,14 +211,14 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 	/**
 	 * {@inheritDoc}
 	 */
-	public int performDrop(Object data) {
+	public boolean performDrop(Object data) {
 		if (isWorkingSetSelection()) {
 			performWorkingSetReordering();
 		} else {
 			performElementRearrange(getCurrentOperation());
 		}
 		// drag adapter has nothing to do, even on move.
-		return DND.DROP_NONE;
+		return false;
 	}
 
 	private void performWorkingSetReordering() {
@@ -285,6 +296,16 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 	}
 
 	public void internalTestSetLocation(int location) {
-		setCurrentLocation(location);
+		fLocation= location;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	protected int getCurrentLocation() {
+		if (fLocation == -1)
+			return super.getCurrentLocation();
+		
+		return fLocation;
 	}
 }
