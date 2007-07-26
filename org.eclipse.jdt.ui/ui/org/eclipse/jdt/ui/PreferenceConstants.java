@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager
 import org.eclipse.jdt.internal.ui.text.java.ProposalSorterRegistry;
 import org.eclipse.jdt.internal.ui.text.spelling.JavaSpellingEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
+import org.eclipse.jdt.internal.ui.text.spelling.SpellingEngine;
 
 /**
  * Preference constants used in the JDT-UI preference store. Clients should only read the
@@ -2591,7 +2592,7 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public final static String SPELLING_PROPOSAL_THRESHOLD= "spelling_proposal_threshold"; //$NON-NLS-1$
-
+	
 	/**
 	 * A named preference that specifies the workspace user dictionary.
 	 * <p>
@@ -3822,6 +3823,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.SPELLING_USER_DICTIONARY_ENCODING, System.getProperty("file.encoding")); //$NON-NLS-1$
 		
 		store.setDefault(PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD, 20);
+		store.setDefault(SpellingEngine.SPELLING_PROBLEMS_THRESHOLD, 100);
 		/*
 		 * XXX: This is currently disabled because the spelling engine
 		 * cannot return word proposals but only correction proposals.

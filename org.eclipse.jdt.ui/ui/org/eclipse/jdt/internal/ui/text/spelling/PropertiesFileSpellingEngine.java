@@ -32,7 +32,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
-import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener;
 
 /**
  * Properties file spelling engine
@@ -45,7 +44,7 @@ public class PropertiesFileSpellingEngine extends SpellingEngine {
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.SpellingEngine#check(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IRegion[], org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker, org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	protected void check(IDocument document, IRegion[] regions, ISpellChecker checker, ISpellingProblemCollector collector, IProgressMonitor monitor) {
-		ISpellEventListener listener= new SpellEventListener(collector, document);
+		SpellEventListener listener= new SpellEventListener(collector, document);
 		boolean isIgnoringAmpersand= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SPELLING_IGNORE_AMPERSAND_IN_PROPERTIES);
 		try {
 			checker.addListener(listener);
@@ -55,6 +54,11 @@ public class PropertiesFileSpellingEngine extends SpellingEngine {
 			ITypedRegion[] partitions= (ITypedRegion[]) partitionList.toArray(new ITypedRegion[partitionList.size()]);
 
 			for (int i= 0; i < partitions.length; i++) {
+				if (monitor != null && monitor.isCanceled())
+					return;
+				if (listener.isProblemsThresholdReached())
+					return;
+				
 				ITypedRegion partition= partitions[i];
 				if (IPropertiesFilePartitions.COMMENT.equals(partition.getType())) {
 					for (; i < partitions.length - 1; i++) {

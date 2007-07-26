@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,8 @@ import org.eclipse.ui.texteditor.spelling.ISpellingEngine;
 import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
 import org.eclipse.ui.texteditor.spelling.SpellingContext;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent;
@@ -32,6 +34,18 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener;
  */
 public abstract class SpellingEngine implements ISpellingEngine {
 
+	/**
+	 * A named preference that controls the maximum number of problems reported during spell checking.
+	 * <p>
+	 * Value is of type <code>Integer</code>.
+	 * </p>
+	 * XXX: will become API in 3.4
+	 * 
+	 * @since 3.3.1
+	 */
+	public final static String SPELLING_PROBLEMS_THRESHOLD= "spelling_problems_threshold"; //$NON-NLS-1$
+
+	
 	/**
 	 * {@link ISpellEvent}listener that forwards events as
 	 * {@link org.eclipse.ui.texteditor.spelling.SpellingProblem}.
@@ -47,6 +61,9 @@ public abstract class SpellingEngine implements ISpellingEngine {
 		 */
 		private IDocument fDocument;
 
+		private int fProblemsThreshold;
+		private int fProblemCount;
+
 		/**
 		 * Initialize with the given spelling problem collector.
 		 *
@@ -56,13 +73,21 @@ public abstract class SpellingEngine implements ISpellingEngine {
 		public SpellEventListener(ISpellingProblemCollector collector, IDocument document) {
 			fCollector= collector;
 			fDocument= document;
+			fProblemsThreshold= PreferenceConstants.getPreferenceStore().getInt(SpellingEngine.SPELLING_PROBLEMS_THRESHOLD);
 		}
 
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener#handle(org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent)
 		 */
 		public void handle(ISpellEvent event) {
+			if (isProblemsThresholdReached())
+				return;
+			fProblemCount++;
 			fCollector.accept(new JavaSpellingProblem(event, fDocument));
+		}
+		
+		boolean isProblemsThresholdReached() {
+			return fProblemCount >= fProblemsThreshold;
 		}
 	}
 

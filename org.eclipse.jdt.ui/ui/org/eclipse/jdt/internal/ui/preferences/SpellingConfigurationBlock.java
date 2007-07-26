@@ -57,6 +57,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.text.spelling.JavaSpellingEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
+import org.eclipse.jdt.internal.ui.text.spelling.SpellingEngine;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -90,6 +91,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_SPELLING_IGNORE_AMPERSAND_IN_PROPERTIES= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_AMPERSAND_IN_PROPERTIES);
 	private static final Key PREF_SPELLING_LOCALE= getJDTUIKey(PreferenceConstants.SPELLING_LOCALE);
 	private static final Key PREF_SPELLING_PROPOSAL_THRESHOLD= getJDTUIKey(PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD);
+	private static final Key PREF_SPELLING_PROBLEMS_THRESHOLD= getJDTUIKey(SpellingEngine.SPELLING_PROBLEMS_THRESHOLD);
 	private static final Key PREF_SPELLING_USER_DICTIONARY= getJDTUIKey(PreferenceConstants.SPELLING_USER_DICTIONARY);
 	private static final Key PREF_SPELLING_USER_DICTIONARY_ENCODING= getJDTUIKey(PreferenceConstants.SPELLING_USER_DICTIONARY_ENCODING);
 	private static final Key PREF_SPELLING_ENABLE_CONTENTASSIST= getJDTUIKey(PreferenceConstants.SPELLING_ENABLE_CONTENTASSIST);
@@ -209,16 +211,14 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		
 		return new StatusInfo(IStatus.ERROR, PreferencesMessages.SpellingPreferencePage_locale_error);
 	}
-
+	
 	/**
 	 * Validates that the specified number is positive.
 	 * 
-	 * @param number
-	 *                   The number to validate
+	 * @param number the number to validate
 	 * @return The status of the validation
 	 */
 	protected static IStatus validatePositiveNumber(final String number) {
-
 		final StatusInfo status= new StatusInfo();
 		if (number.length() == 0) {
 			status.setError(PreferencesMessages.SpellingPreferencePage_empty_threshold); 
@@ -242,7 +242,10 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	private IStatus fFileStatus= new StatusInfo();
 
 	/** The status for the proposal threshold */
-	private IStatus fThresholdStatus= new StatusInfo();
+	private IStatus fProposalsThresholdStatus= new StatusInfo();
+	
+	/** The status for the problems threshold */
+	private IStatus fProblemsThresholdStatus= new StatusInfo();
 	
 	/** The status for the encoding field editor */
 	private IStatus fEncodingFieldEditorStatus= new StatusInfo();
@@ -431,12 +434,17 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		advanced.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		allControls.add(advanced);
 
+		label= PreferencesMessages.SpellingPreferencePage_problems_threshold; 
+		int digits= 4;
+		Text text= addTextField(advanced, label, PREF_SPELLING_PROBLEMS_THRESHOLD, 0, converter.convertWidthInCharsToPixels(digits+1));
+		text.setTextLimit(digits);
+		allControls.add(text);
+		allControls.add(fLabels.get(text));
+
 		label= PreferencesMessages.SpellingPreferencePage_proposals_threshold; 
-		Text text= addTextField(advanced, label, PREF_SPELLING_PROPOSAL_THRESHOLD, 0, 0);
-		text.setTextLimit(3);
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		gd.widthHint= converter.convertWidthInCharsToPixels(4);
-		text.setLayoutData(gd);
+		digits= 3;
+		text= addTextField(advanced, label, PREF_SPELLING_PROPOSAL_THRESHOLD, 0, converter.convertWidthInCharsToPixels(digits+1));
+		text.setTextLimit(digits);
 		allControls.add(text);
 		allControls.add(fLabels.get(text));
 
@@ -499,7 +507,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 				if (newMessage != null)
 					status.setError(newMessage);
 				fEncodingFieldEditorStatus= status;
-				fContext.statusChanged(StatusUtil.getMostSevere(new IStatus[] { fThresholdStatus, fFileStatus, fEncodingFieldEditorStatus }));
+				fContext.statusChanged(StatusUtil.getMostSevere(new IStatus[] { fProblemsThresholdStatus, fProposalsThresholdStatus, fFileStatus, fEncodingFieldEditorStatus }));
 			}
 		};
 		fEncodingEditor.setPage(fakePage);
@@ -513,9 +521,9 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 
 	private static Key[] getAllKeys() {
 		if (SUPPORT_CONTENT_ASSIST_PROPOSALS)
-			return new Key[] { PREF_SPELLING_USER_DICTIONARY, PREF_SPELLING_USER_DICTIONARY_ENCODING, PREF_SPELLING_IGNORE_DIGITS, PREF_SPELLING_IGNORE_MIXED, PREF_SPELLING_IGNORE_SENTENCE, PREF_SPELLING_IGNORE_UPPER, PREF_SPELLING_IGNORE_URLS, PREF_SPELLING_IGNORE_AMPERSAND_IN_PROPERTIES, PREF_SPELLING_IGNORE_NON_LETTERS, PREF_SPELLING_IGNORE_SINGLE_LETTERS, PREF_SPELLING_LOCALE, PREF_SPELLING_PROPOSAL_THRESHOLD, PREF_SPELLING_ENABLE_CONTENTASSIST, PREF_SPELLING_IGNORE_JAVA_STRINGS };
+			return new Key[] { PREF_SPELLING_USER_DICTIONARY, PREF_SPELLING_USER_DICTIONARY_ENCODING, PREF_SPELLING_IGNORE_DIGITS, PREF_SPELLING_IGNORE_MIXED, PREF_SPELLING_IGNORE_SENTENCE, PREF_SPELLING_IGNORE_UPPER, PREF_SPELLING_IGNORE_URLS, PREF_SPELLING_IGNORE_AMPERSAND_IN_PROPERTIES, PREF_SPELLING_IGNORE_NON_LETTERS, PREF_SPELLING_IGNORE_SINGLE_LETTERS, PREF_SPELLING_LOCALE, PREF_SPELLING_PROPOSAL_THRESHOLD, PREF_SPELLING_PROBLEMS_THRESHOLD, PREF_SPELLING_ENABLE_CONTENTASSIST, PREF_SPELLING_IGNORE_JAVA_STRINGS };
 		else
-			return new Key[] { PREF_SPELLING_USER_DICTIONARY, PREF_SPELLING_USER_DICTIONARY_ENCODING, PREF_SPELLING_IGNORE_DIGITS, PREF_SPELLING_IGNORE_MIXED, PREF_SPELLING_IGNORE_SENTENCE, PREF_SPELLING_IGNORE_UPPER, PREF_SPELLING_IGNORE_URLS, PREF_SPELLING_IGNORE_AMPERSAND_IN_PROPERTIES, PREF_SPELLING_IGNORE_NON_LETTERS, PREF_SPELLING_IGNORE_SINGLE_LETTERS, PREF_SPELLING_LOCALE, PREF_SPELLING_PROPOSAL_THRESHOLD, PREF_SPELLING_IGNORE_JAVA_STRINGS };
+			return new Key[] { PREF_SPELLING_USER_DICTIONARY, PREF_SPELLING_USER_DICTIONARY_ENCODING, PREF_SPELLING_IGNORE_DIGITS, PREF_SPELLING_IGNORE_MIXED, PREF_SPELLING_IGNORE_SENTENCE, PREF_SPELLING_IGNORE_UPPER, PREF_SPELLING_IGNORE_URLS, PREF_SPELLING_IGNORE_AMPERSAND_IN_PROPERTIES, PREF_SPELLING_IGNORE_NON_LETTERS, PREF_SPELLING_IGNORE_SINGLE_LETTERS, PREF_SPELLING_LOCALE, PREF_SPELLING_PROPOSAL_THRESHOLD, PREF_SPELLING_PROBLEMS_THRESHOLD, PREF_SPELLING_IGNORE_JAVA_STRINGS };
 	}
 
 	/*
@@ -583,14 +591,16 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(java.lang.String,java.lang.String)
 	 */
 	protected void validateSettings(final Key key, final String oldValue, final String newValue) {
-
 		if (key == null || PREF_SPELLING_PROPOSAL_THRESHOLD.equals(key))
-			fThresholdStatus= validatePositiveNumber(getValue(PREF_SPELLING_PROPOSAL_THRESHOLD));
+			fProposalsThresholdStatus= validatePositiveNumber(getValue(PREF_SPELLING_PROPOSAL_THRESHOLD));
+		
+		if (key == null || PREF_SPELLING_PROBLEMS_THRESHOLD.equals(key))
+			fProblemsThresholdStatus= validatePositiveNumber(getValue(PREF_SPELLING_PROBLEMS_THRESHOLD)); 
 
 		if (key == null || PREF_SPELLING_USER_DICTIONARY.equals(key))
 			fFileStatus= validateAbsoluteFilePath(getValue(PREF_SPELLING_USER_DICTIONARY));
 
-		fContext.statusChanged(StatusUtil.getMostSevere(new IStatus[] { fThresholdStatus, fFileStatus, fEncodingFieldEditorStatus }));
+		fContext.statusChanged(StatusUtil.getMostSevere(new IStatus[] { fProblemsThresholdStatus, fProposalsThresholdStatus, fFileStatus, fEncodingFieldEditorStatus }));
 	}
 	
 	/*
