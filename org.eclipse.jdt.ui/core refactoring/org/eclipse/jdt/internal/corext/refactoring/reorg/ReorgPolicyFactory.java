@@ -577,7 +577,7 @@ public final class ReorgPolicyFactory {
 		public Change createChange(IProgressMonitor pm, INewNameQueries copyQueries) throws JavaModelException {
 			try {
 				CompilationUnit sourceCuNode= createSourceCuNode();
-				ICompilationUnit targetCu= getDestinationCu();
+				ICompilationUnit targetCu= getEnclosingCompilationUnit(getJavaElementDestination());
 				CompilationUnitRewrite targetRewriter= new CompilationUnitRewrite(targetCu);
 				IJavaElement[] javaElements= getJavaElements();
 				for (int i= 0; i < javaElements.length; i++) {
@@ -611,49 +611,47 @@ public final class ReorgPolicyFactory {
 		}
 
 		public IFile[] getAllModifiedFiles() {
-			return ReorgUtils.getFiles(new IResource[] { ReorgUtils.getResource(getDestinationCu())});
+			return ReorgUtils.getFiles(new IResource[] { ReorgUtils.getResource(getEnclosingCompilationUnit(getJavaElementDestination()))});
 		}
 
 		protected String getDescriptionPlural() {
-			final int kind= getContentKind();
-			switch (kind) {
-				case ONLY_TYPES:
-					return RefactoringCoreMessages.ReorgPolicyFactory_copy_types;
-				case ONLY_FIELDS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_copy_fields;
-				case ONLY_METHODS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_copy_methods;
-				case ONLY_INITIALIZERS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_copy_initializers;
-				case ONLY_PACKAGE_DECLARATIONS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_copy_package_declarations;
-				case ONLY_IMPORT_CONTAINERS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_copy_import_containers;
-				case ONLY_IMPORT_DECLARATIONS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_copy_imports;
-			}
-			return RefactoringCoreMessages.ReorgPolicyFactory_move_elements_plural;
+			if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.TYPE)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_copy_types;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.FIELD)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_copy_fields;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.METHOD)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_copy_methods;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.INITIALIZER)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_copy_initializers;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.PACKAGE_DECLARATION)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_copy_package_declarations;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_CONTAINER)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_copy_import_containers;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_DECLARATION)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_copy_imports;
+			} else {
+				return RefactoringCoreMessages.ReorgPolicyFactory_copy_elements_plural;				
+			} 
 		}
-
+		
 		protected String getDescriptionSingular() {
-			final int kind= getContentKind();
-			switch (kind) {
-				case ONLY_TYPES:
-					return RefactoringCoreMessages.ReorgPolicyFactory_copy_type;
-				case ONLY_FIELDS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_copy_field;
-				case ONLY_METHODS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_copy_method;
-				case ONLY_INITIALIZERS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_copy_initializer;
-				case ONLY_PACKAGE_DECLARATIONS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_copy_package;
-				case ONLY_IMPORT_CONTAINERS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_copy_import_section;
-				case ONLY_IMPORT_DECLARATIONS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_copy_import;
+			if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.TYPE)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_copy_type;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.FIELD)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_copy_field;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.METHOD)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_copy_method;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.INITIALIZER)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_copy_initializer;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.PACKAGE_DECLARATION)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_copy_package;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_CONTAINER)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_copy_import_section;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_DECLARATION)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_copy_import;
+			} else {				
+				return RefactoringCoreMessages.ReorgPolicyFactory_copy_elements_singular;
 			}
-			return RefactoringCoreMessages.ReorgPolicyFactory_copy_elements_singular;
 		}
 
 		protected String getHeaderPattern() {
@@ -1957,7 +1955,7 @@ public final class ReorgPolicyFactory {
 				final ICompilationUnit sourceCu= getSourceCu();
 				CompilationUnit sourceCuNode= RefactoringASTParser.parseWithASTProvider(sourceCu, true, new SubProgressMonitor(pm, 1));
 				CompilationUnitRewrite sourceRewriter= new CompilationUnitRewrite(sourceCu, sourceCuNode);
-				ICompilationUnit destinationCu= getDestinationCu();
+				ICompilationUnit destinationCu= getEnclosingCompilationUnit(getJavaElementDestination());
 				CompilationUnitRewrite targetRewriter;
 				if (sourceCu.equals(destinationCu)) {
 					targetRewriter= sourceRewriter;
@@ -2001,7 +1999,7 @@ public final class ReorgPolicyFactory {
 		}
 
 		public IFile[] getAllModifiedFiles() {
-			return ReorgUtils.getFiles(new IResource[] { ReorgUtils.getResource(getSourceCu()), ReorgUtils.getResource(getDestinationCu())});
+			return ReorgUtils.getFiles(new IResource[] { ReorgUtils.getResource(getSourceCu()), ReorgUtils.getResource(getEnclosingCompilationUnit(getJavaElementDestination()))});
 		}
 
 		public CreateTargetExecutionLog getCreateTargetExecutionLog() {
@@ -2013,45 +2011,43 @@ public final class ReorgPolicyFactory {
 		}
 
 		protected String getDescriptionPlural() {
-			final int kind= getContentKind();
-			switch (kind) {
-				case ONLY_TYPES:
-					return RefactoringCoreMessages.ReorgPolicyFactory_move_types;
-				case ONLY_FIELDS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_move_fields;
-				case ONLY_METHODS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_move_methods;
-				case ONLY_INITIALIZERS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_move_initializers;
-				case ONLY_PACKAGE_DECLARATIONS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_move_package_declarations;
-				case ONLY_IMPORT_CONTAINERS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_move_import_containers;
-				case ONLY_IMPORT_DECLARATIONS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_move_import_declarations;
+			if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.TYPE)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_move_types;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.FIELD)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_move_fields;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.METHOD)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_move_methods;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.INITIALIZER)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_move_initializers;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.PACKAGE_DECLARATION)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_move_package_declarations;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_CONTAINER)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_move_import_containers;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_DECLARATION)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_move_import_declarations;
+			} else {				
+				return RefactoringCoreMessages.ReorgPolicyFactory_move_elements_plural;
 			}
-			return RefactoringCoreMessages.ReorgPolicyFactory_move_elements_plural;
 		}
 
 		protected String getDescriptionSingular() {
-			final int kind= getContentKind();
-			switch (kind) {
-				case ONLY_TYPES:
-					return RefactoringCoreMessages.ReorgPolicyFactory_move_type;
-				case ONLY_FIELDS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_move_field;
-				case ONLY_METHODS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_move_method;
-				case ONLY_INITIALIZERS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_move_initializer;
-				case ONLY_PACKAGE_DECLARATIONS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_move_package_declaration;
-				case ONLY_IMPORT_CONTAINERS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_move_import_section;
-				case ONLY_IMPORT_DECLARATIONS:
-					return RefactoringCoreMessages.ReorgPolicyFactory_move_import_declaration;
+			if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.TYPE)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_move_type;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.FIELD)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_move_field;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.METHOD)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_move_method;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.INITIALIZER)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_move_initializer;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.PACKAGE_DECLARATION)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_move_package_declaration;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_CONTAINER)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_move_import_section;
+			} else if (!ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_DECLARATION)) {
+				return RefactoringCoreMessages.ReorgPolicyFactory_move_import_declaration;
+			} else {				
+				return RefactoringCoreMessages.ReorgPolicyFactory_move_elements_singular;
 			}
-			return RefactoringCoreMessages.ReorgPolicyFactory_move_elements_singular;
 		}
 
 		protected String getHeaderPattern() {
@@ -2833,9 +2829,7 @@ public final class ReorgPolicyFactory {
 
 		protected boolean fCheckDestination= true;
 
-		private IJavaElement fJavaElementDestination;
-
-		private IResource fResourceDestination;
+		private IReorgDestination fDestination;
 		
 		/**
 		 * {@inheritDoc}
@@ -2962,7 +2956,11 @@ public final class ReorgPolicyFactory {
 		protected abstract String getHeaderPattern();
 
 		public final IJavaElement getJavaElementDestination() {
-			return fJavaElementDestination;
+			if (!(fDestination instanceof JavaElementDestination))
+				return null;
+			
+			JavaElementDestination javaElementDestination= (JavaElementDestination) fDestination;
+			return javaElementDestination.getJavaElement();
 		}
 
 		protected RefactoringModifications getModifications() throws CoreException {
@@ -2988,7 +2986,11 @@ public final class ReorgPolicyFactory {
 		protected abstract String getRefactoringId();
 
 		public final IResource getResourceDestination() {
-			return fResourceDestination;
+			if (!(fDestination instanceof ResourceDestination))
+				return null;
+			
+			ResourceDestination resourceDestination= (ResourceDestination) fDestination;
+			return resourceDestination.getResource();
 		}
 
 		public RefactoringStatus initialize(RefactoringArguments arguments) {
@@ -3002,7 +3004,7 @@ public final class ReorgPolicyFactory {
 							return ScriptableRefactoring.createInputFatalStatus(element, getProcessorId(), getRefactoringId());
 						else {
 							try {
-								setDestination(element);
+								setDestination(ReorgDestinationFactory.createDestination(element));
 								return verifyDestination(element);
 							} catch (JavaModelException exception) {
 								JavaPlugin.log(exception);
@@ -3017,7 +3019,7 @@ public final class ReorgPolicyFactory {
 							return ScriptableRefactoring.createInputFatalStatus(resource, getProcessorId(), getRefactoringId());
 						else {
 							try {
-								setDestination(resource);
+								setDestination(ReorgDestinationFactory.createDestination(resource));
 								return verifyDestination(resource);
 							} catch (JavaModelException exception) {
 								JavaPlugin.log(exception);
@@ -3034,7 +3036,7 @@ public final class ReorgPolicyFactory {
 							return ScriptableRefactoring.createInputFatalStatus(resource, getProcessorId(), getRefactoringId());
 						else {
 							try {
-								setDestination(resource);
+								setDestination(ReorgDestinationFactory.createDestination(resource));
 								return verifyDestination(resource);
 							} catch (JavaModelException exception) {
 								JavaPlugin.log(exception);
@@ -3057,26 +3059,11 @@ public final class ReorgPolicyFactory {
 			}
 		}
 		
-		public void setDestination(IReorgDestination destination) {
-			if (destination instanceof JavaElementDestination) {
-				setDestination(((JavaElementDestination)destination).getJavaElement());
-			} else if (destination instanceof ResourceDestination) {
-				setDestination(((ResourceDestination)destination).getResource());
-			} else {
-				Assert.isLegal(false);
-			}
-		}
-
-		public final void setDestination(IJavaElement destination) {
-			Assert.isNotNull(destination);
-			fResourceDestination= null;
-			fJavaElementDestination= destination;
-		}
-
-		public final void setDestination(IResource destination) { 
-			Assert.isNotNull(destination);
-			fJavaElementDestination= null;
-			fResourceDestination= destination;
+		/**
+		 * {@inheritDoc}
+		 */
+		public final void setDestination(IReorgDestination destination) {
+			fDestination= destination;
 		}
 		
 		/**
@@ -3113,20 +3100,6 @@ public final class ReorgPolicyFactory {
 
 	private static abstract class SubCuElementReorgPolicy extends ReorgPolicy {
 
-		protected static final int ONLY_FIELDS= 1;
-
-		protected static final int ONLY_IMPORT_CONTAINERS= 5;
-
-		protected static final int ONLY_IMPORT_DECLARATIONS= 6;
-
-		protected static final int ONLY_INITIALIZERS= 3;
-
-		protected static final int ONLY_METHODS= 2;
-
-		protected static final int ONLY_PACKAGE_DECLARATIONS= 4;
-
-		protected static final int ONLY_TYPES= 0;
-
 		protected static CompilationUnitChange createCompilationUnitChange(ICompilationUnit cu, CompilationUnitRewrite rewrite) throws CoreException {
 			CompilationUnitChange change= rewrite.createChange();
 			if (change != null) {
@@ -3136,26 +3109,25 @@ public final class ReorgPolicyFactory {
 			return change;
 		}
 
-		protected static final ICompilationUnit getDestinationCu(IJavaElement destination) {
-			if (destination instanceof ICompilationUnit)
-				return (ICompilationUnit) destination;
-			return (ICompilationUnit) destination.getAncestor(IJavaElement.COMPILATION_UNIT);
+		/*
+		 * The CU which does contain element
+		 */
+		protected static final ICompilationUnit getEnclosingCompilationUnit(IJavaElement element) {
+			if (element instanceof ICompilationUnit)
+				return (ICompilationUnit) element;
+			
+			return (ICompilationUnit) element.getAncestor(IJavaElement.COMPILATION_UNIT);
 		}
 
-		private static ICompilationUnit getEnclosingCu(IJavaElement destination) {
-			if (destination instanceof ICompilationUnit)
-				return (ICompilationUnit) destination;
-			return (ICompilationUnit) destination.getAncestor(IJavaElement.COMPILATION_UNIT);
-		}
-
-		private static IType getEnclosingType(IJavaElement destination) {
-			if (destination instanceof IType)
-				return (IType) destination;
-			return (IType) destination.getAncestor(IJavaElement.TYPE);
+		private static IType getEnclosingType(IJavaElement element) {
+			if (element instanceof IType)
+				return (IType) element;
+			
+			return (IType) element.getAncestor(IJavaElement.TYPE);
 		}
 
 		private static String getUnindentedSource(ISourceReference sourceReference) throws JavaModelException {
-			Assert.isTrue(sourceReference instanceof IJavaElement);
+			
 			String[] lines= Strings.convertIntoLines(sourceReference.getSource());
 			final IJavaProject project= ((IJavaElement) sourceReference).getJavaProject();
 			Strings.trimIndentation(lines, project, false);
@@ -3167,18 +3139,18 @@ public final class ReorgPolicyFactory {
 		SubCuElementReorgPolicy(IJavaElement[] javaElements) {
 			fJavaElements= javaElements;
 		}
-
-		public boolean canChildrenBeDestinations(IResource resource) {
-			return false;
-		}
-
-		public boolean canElementBeDestination(IResource resource) {
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canChildrenBeDestinations(IReorgDestination destination) {
 			return false;
 		}
 
 		public boolean canEnable() throws JavaModelException {
 			if (!super.canEnable())
 				return false;
+			
 			for (int i= 0; i < fJavaElements.length; i++) {
 				if (fJavaElements[i] instanceof IMember) {
 					IMember member= (IMember) fJavaElements[i];
@@ -3187,13 +3159,13 @@ public final class ReorgPolicyFactory {
 						return false;
 				}
 			}
+			
 			return true;
 		}
 
 		private void copyImportsToDestination(IImportContainer container, ASTRewrite rewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
 			IJavaElement[] importDeclarations= container.getChildren();
 			for (int i= 0; i < importDeclarations.length; i++) {
-				Assert.isTrue(importDeclarations[i] instanceof IImportDeclaration);
 				IImportDeclaration importDeclaration= (IImportDeclaration) importDeclarations[i];
 				copyImportToDestination(importDeclaration, rewrite, sourceCuNode, destinationCuNode);
 			}
@@ -3367,32 +3339,6 @@ public final class ReorgPolicyFactory {
 
 		protected abstract JavaRefactoringDescriptor createRefactoringDescriptor(final JDTRefactoringDescriptorComment comment, final Map arguments, final String description, final String project, int flags);
 
-		protected final int getContentKind() {
-			final int types= ReorgUtils.getElementsOfType(fJavaElements, IJavaElement.TYPE).size();
-			final int fields= ReorgUtils.getElementsOfType(fJavaElements, IJavaElement.FIELD).size();
-			final int methods= ReorgUtils.getElementsOfType(fJavaElements, IJavaElement.METHOD).size();
-			final int initializers= ReorgUtils.getElementsOfType(fJavaElements, IJavaElement.INITIALIZER).size();
-			final int packages= ReorgUtils.getElementsOfType(fJavaElements, IJavaElement.PACKAGE_DECLARATION).size();
-			final int container= ReorgUtils.getElementsOfType(fJavaElements, IJavaElement.IMPORT_CONTAINER).size();
-			final int imp= ReorgUtils.getElementsOfType(fJavaElements, IJavaElement.IMPORT_DECLARATION).size();
-			final int length= types + fields + methods + initializers + packages + container + imp;
-			if (length == types)
-				return ONLY_TYPES;
-			else if (length == fields)
-				return ONLY_FIELDS;
-			else if (length == methods)
-				return ONLY_METHODS;
-			else if (length == initializers)
-				return ONLY_INITIALIZERS;
-			else if (length == packages)
-				return ONLY_PACKAGE_DECLARATIONS;
-			else if (length == container)
-				return ONLY_IMPORT_CONTAINERS;
-			else if (length == imp)
-				return ONLY_IMPORT_DECLARATIONS;
-			return -1;
-		}
-
 		public final ChangeDescriptor getDescriptor() {
 			final Map arguments= new HashMap();
 			final int length= fJavaElements.length;
@@ -3416,15 +3362,11 @@ public final class ReorgPolicyFactory {
 			IType enclosingType= getEnclosingType(destination);
 			if (enclosingType != null)
 				return enclosingType;
-			ICompilationUnit enclosingCu= getEnclosingCu(destination);
+			ICompilationUnit enclosingCu= getEnclosingCompilationUnit(destination);
 			Assert.isNotNull(enclosingCu);
 			IType mainType= JavaElementUtil.getMainType(enclosingCu);
 			Assert.isNotNull(mainType);
 			return mainType;
-		}
-
-		protected final ICompilationUnit getDestinationCu() {
-			return getDestinationCu(getJavaElementDestination());
 		}
 
 		public final IJavaElement[] getJavaElements() {
@@ -3449,7 +3391,7 @@ public final class ReorgPolicyFactory {
 		protected final ICompilationUnit getSourceCu() {
 			// all have a common parent, so all must be in the same cu
 			// we checked before that the array in not null and not empty
-			return (ICompilationUnit) fJavaElements[0].getAncestor(IJavaElement.COMPILATION_UNIT);
+			return getEnclosingCompilationUnit(fJavaElements[0]);
 		}
 
 		public RefactoringStatus initialize(RefactoringArguments arguments) {
@@ -3498,7 +3440,7 @@ public final class ReorgPolicyFactory {
 			if (!(destination instanceof ICompilationUnit) && !ReorgUtils.isInsideCompilationUnit(destination))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
 
-			ICompilationUnit destinationCu= getDestinationCu(destination);
+			ICompilationUnit destinationCu= getEnclosingCompilationUnit(destination);
 			Assert.isNotNull(destinationCu);
 			if (destinationCu.isReadOnly())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot_modify);
