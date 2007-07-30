@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
@@ -111,13 +112,13 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	 * {@inheritDoc}
 	 */
 	public boolean validateDrop(Object target, int operation, TransferData transferType) {
-		return getDefaultDropOperation(target, operation, transferType) != DND.DROP_NONE;
+		return determineOperation(target, operation, transferType) != DND.DROP_NONE;
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	protected int getDefaultDropOperation(Object target, int operation, TransferData transferType) {
+	protected int determineOperation(Object target, int operation, TransferData transferType) {
 		
 		initializeSelection();
 		
@@ -206,13 +207,14 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 
 		if (!canMoveElements())
 			return DND.DROP_NONE;	
+		
+		if (fMoveProcessor == null)
+			return DND.DROP_NONE;
 
-		if (target instanceof IResource && fMoveProcessor != null && fMoveProcessor.setDestination((IResource)target).isOK())
-			return DND.DROP_MOVE;
-		else if (target instanceof IJavaElement && fMoveProcessor != null && fMoveProcessor.setDestination((IJavaElement)target).isOK())
-			return DND.DROP_MOVE;
-		else
+		if (!fMoveProcessor.setDestination(ReorgDestinationFactory.createDestination(target)).isOK())
 			return DND.DROP_NONE;	
+
+		return DND.DROP_MOVE;
 	}
 	
 	private boolean canMoveElements() {
@@ -227,11 +229,8 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	private void handleDropMove(final Object target) throws JavaModelException, InvocationTargetException, InterruptedException{
 		IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
 		IResource[] resources= ReorgUtils.getResources(fElements);
-		ReorgMoveStarter starter= null;
-		if (target instanceof IResource) 
-			starter= ReorgMoveStarter.create(javaElements, resources, (IResource)target);
-		else if (target instanceof IJavaElement)
-			starter= ReorgMoveStarter.create(javaElements, resources, (IJavaElement)target);
+		ReorgMoveStarter starter= ReorgMoveStarter.create(javaElements, resources, ReorgDestinationFactory.createDestination(target));
+
 		if (starter != null)
 			starter.run(getShell());
 	}
@@ -244,14 +243,15 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		}
 
 		if (!canCopyElements())
-			return DND.DROP_NONE;	
-
-		if (target instanceof IResource && fCopyProcessor != null && fCopyProcessor.setDestination((IResource)target).isOK())
-			return DND.DROP_COPY;
-		else if (target instanceof IJavaElement && fCopyProcessor != null && fCopyProcessor.setDestination((IJavaElement)target).isOK())
-			return DND.DROP_COPY;
-		else
-			return DND.DROP_NONE;					
+			return DND.DROP_NONE;
+		
+		if (fCopyProcessor == null)
+			return DND.DROP_NONE;
+		
+		if (!fCopyProcessor.setDestination(ReorgDestinationFactory.createDestination(target)).isOK())
+			return DND.DROP_NONE;
+			
+		return DND.DROP_COPY;					
 	}
 			
 	private boolean canCopyElements() {
@@ -266,11 +266,8 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	private void handleDropCopy(final Object target) throws JavaModelException, InvocationTargetException, InterruptedException{
 		IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
 		IResource[] resources= ReorgUtils.getResources(fElements);
-		ReorgCopyStarter starter= null;
-		if (target instanceof IResource) 
-			starter= ReorgCopyStarter.create(javaElements, resources, (IResource)target);
-		else if (target instanceof IJavaElement)
-			starter= ReorgCopyStarter.create(javaElements, resources, (IJavaElement)target);
+		ReorgCopyStarter starter= ReorgCopyStarter.create(javaElements, resources, ReorgDestinationFactory.createDestination(target));
+		
 		if (starter != null)
 			starter.run(getShell());
 	}

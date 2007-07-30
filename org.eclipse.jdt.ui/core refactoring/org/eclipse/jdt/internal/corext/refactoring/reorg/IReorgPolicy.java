@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatin
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 
-public interface IReorgPolicy extends IScriptableRefactoring {
+public interface IReorgPolicy extends IScriptableRefactoring, IReorgDestinationValidator {
 	
 	/**
 	 * @return the unique id of this policy
@@ -55,72 +55,18 @@ public interface IReorgPolicy extends IScriptableRefactoring {
 	public boolean canEnable() throws JavaModelException;
 	
 	/**
-	 * Is it possible, that resource contains valid destinations
-	 * as children?
-	 * 
-	 * @param resource the resource to verify
-	 * @return true if resource can have valid destinations
-	 */
-	public boolean canChildrenBeDestinations(IResource resource);
-	
-	/**
-	 * Is it possible, that resource contains valid destinations
-	 * as children?
-	 * 
-	 * @param javaElement the java element to verify
-	 * @return true if resource can have valid destinations
-	 */
-	public boolean canChildrenBeDestinations(IJavaElement javaElement);
-	
-	/**
-	 * Is it possible, that sources can be reorged to this kind of resource?
-	 * 
-	 * This is less strict then {@link #verifyDestination(IResource)} where
-	 * the resource itself is verified to be a valid destination.
-	 * 
-	 * @param resource the resource to move to
-	 * @return true if possible
-	 */
-	public boolean canElementBeDestination(IResource resource);
-	
-	/**
-	 * Is it possible, that sources can be reorged to this kind of javaElement?
-	 * 
-	 * This is less strict then {@link #verifyDestination(IJavaElement)} where
-	 * the java element itself is verified to be a valid destination.
-	 * 
-	 * @param javaElement the java element to move to
-	 * @return true if possible
-	 */
-	public boolean canElementBeDestination(IJavaElement javaElement);
-	
-	/**
 	 * Can destination be a target for the given source elements?
 	 * 
 	 * @param destination the destination to verify
 	 * @return OK status if valid destination
 	 * @throws JavaModelException
 	 */
-	public RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException;
-	
-	/**
-	 * Can destination be a target for the given source elements?
-	 * 
-	 * @param destination the destination to verify
-	 * @return OK status if valid destination
-	 * @throws JavaModelException
-	 */
-	public RefactoringStatus verifyDestination(IResource destination) throws JavaModelException;
+	public RefactoringStatus verifyDestination(IReorgDestination destination) throws JavaModelException;
 
 	/**
-	 * @param resource the destination for this reorg
+	 * @param destination the destination for this reorg
 	 */
-	public void setDestination(IResource resource);
-	
-	/**
-	 * @param javaElement the destination for this reorg
-	 */
-	public void setDestination(IJavaElement javaElement);
+	public void setDestination(IReorgDestination destination);
 	
 	/**
 	 * @return the destination of this reorg or null if not a resource

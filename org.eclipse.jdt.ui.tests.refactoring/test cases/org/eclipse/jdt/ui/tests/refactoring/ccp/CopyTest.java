@@ -56,6 +56,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
@@ -130,23 +131,13 @@ public class CopyTest extends RefactoringTest {
 	}
 	
 	private void verifyInvalidDestination(JavaCopyProcessor processor, Object destination) throws Exception {
-		RefactoringStatus status= null;
-		if (destination instanceof IResource)
-			status= processor.setDestination((IResource)destination);
-		else if (destination instanceof IJavaElement)
-			status= processor.setDestination((IJavaElement)destination);
-		else assertTrue(false);
+		RefactoringStatus status= processor.setDestination(ReorgDestinationFactory.createDestination(destination));
 		
 		assertEquals("destination was expected to be not valid",  RefactoringStatus.FATAL, status.getSeverity());
 	}
 	
 	private void verifyValidDestination(JavaCopyProcessor processor, Object destination) throws Exception {
-		RefactoringStatus status= null;
-		if (destination instanceof IResource)
-			status= processor.setDestination((IResource)destination);
-		else if (destination instanceof IJavaElement)
-			status= processor.setDestination((IJavaElement)destination);
-		else assertTrue(false);
+		RefactoringStatus status= processor.setDestination(ReorgDestinationFactory.createDestination(destination));
 		
 		assertEquals("destination was expected to be valid: " + status.getMessageMatchingSeverity(status.getSeverity()), RefactoringStatus.OK, status.getSeverity());
 	}

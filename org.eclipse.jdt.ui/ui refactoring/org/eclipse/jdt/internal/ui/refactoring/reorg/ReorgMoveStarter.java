@@ -27,6 +27,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestination;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
@@ -47,20 +48,7 @@ public class ReorgMoveStarter {
 		fMoveProcessor= moveProcessor;
 	}
 	
-	public static ReorgMoveStarter create(IJavaElement[] javaElements, IResource[] resources, IJavaElement destination) throws JavaModelException {
-		Assert.isNotNull(javaElements);
-		Assert.isNotNull(resources);
-		Assert.isNotNull(destination);
-		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(resources, javaElements);
-		if (!policy.canEnable())
-			return null;
-		JavaMoveProcessor processor= new JavaMoveProcessor(policy);
-		if (! processor.setDestination(destination).isOK())
-			return null;
-		return new ReorgMoveStarter(processor);
-	}
-
-	public static ReorgMoveStarter create(IJavaElement[] javaElements, IResource[] resources, IResource destination) throws JavaModelException {
+	public static ReorgMoveStarter create(IJavaElement[] javaElements, IResource[] resources, IReorgDestination destination) throws JavaModelException {
 		Assert.isNotNull(javaElements);
 		Assert.isNotNull(resources);
 		Assert.isNotNull(destination);

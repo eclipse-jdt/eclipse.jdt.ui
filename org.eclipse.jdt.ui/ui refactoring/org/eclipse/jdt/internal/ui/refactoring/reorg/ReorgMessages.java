@@ -138,7 +138,6 @@ public final class ReorgMessages extends NLS {
 	public static String ReorgCopyAction_3;
 	public static String ReorgCopyAction_4;
 	public static String ReorgCopyWizard_1;
-	public static String ReorgCopyWizard_2;
 	public static String ReorgMoveAction_3;
 	public static String ReorgMoveAction_4;
 	public static String ReorgMoveWizard_3;

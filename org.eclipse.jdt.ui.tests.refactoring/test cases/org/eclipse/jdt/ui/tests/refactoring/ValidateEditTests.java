@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 
@@ -304,7 +305,7 @@ public class ValidateEditTests extends RefactoringTest {
 		assertTrue(policy.canEnable());
 		
 		JavaMoveProcessor javaMoveProcessor= new JavaMoveProcessor(policy);
-		javaMoveProcessor.setDestination(otherFragment);
+		javaMoveProcessor.setDestination(ReorgDestinationFactory.createDestination(otherFragment));
 		javaMoveProcessor.setReorgQueries(new MockReorgQueries());
 		RefactoringStatus status= performRefactoring(new MoveRefactoring(javaMoveProcessor), false);
 		if (status != null)

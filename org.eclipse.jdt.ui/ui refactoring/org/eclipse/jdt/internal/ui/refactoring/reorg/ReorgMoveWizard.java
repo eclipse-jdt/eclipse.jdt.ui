@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICreateTargetQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 
 import org.eclipse.jdt.internal.ui.refactoring.QualifiedNameComponent;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -110,12 +111,7 @@ public class ReorgMoveWizard extends RefactoringWizard {
 		
 		protected RefactoringStatus verifyDestination(Object selected) throws JavaModelException{
 			JavaMoveProcessor processor= getJavaMoveProcessor();
-			final RefactoringStatus refactoringStatus;
-			if (selected instanceof IJavaElement)
-				refactoringStatus= processor.setDestination((IJavaElement)selected);
-			else if (selected instanceof IResource)
-				refactoringStatus= processor.setDestination((IResource)selected);
-			else refactoringStatus= RefactoringStatus.createFatalErrorStatus(ReorgMessages.ReorgMoveWizard_4); 
+			final RefactoringStatus refactoringStatus= processor.setDestination(ReorgDestinationFactory.createDestination(selected));
 			
 			updateUIStatus();
 			fDestination= selected;

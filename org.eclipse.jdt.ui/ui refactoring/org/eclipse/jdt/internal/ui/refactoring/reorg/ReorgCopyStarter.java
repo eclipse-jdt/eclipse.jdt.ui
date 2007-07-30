@@ -26,6 +26,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestination;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
@@ -36,20 +37,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 
 public class ReorgCopyStarter {
 
-	public static ReorgCopyStarter create(IJavaElement[] javaElements, IResource[] resources, IJavaElement destination) throws JavaModelException {
-		Assert.isNotNull(javaElements);
-		Assert.isNotNull(resources);
-		Assert.isNotNull(destination);
-		ICopyPolicy copyPolicy= ReorgPolicyFactory.createCopyPolicy(resources, javaElements);
-		if (!copyPolicy.canEnable())
-			return null;
-		JavaCopyProcessor copyProcessor= new JavaCopyProcessor(copyPolicy);
-		if (!copyProcessor.setDestination(destination).isOK())
-			return null;
-		return new ReorgCopyStarter(copyProcessor);
-	}
-
-	public static ReorgCopyStarter create(IJavaElement[] javaElements, IResource[] resources, IResource destination) throws JavaModelException {
+	public static ReorgCopyStarter create(IJavaElement[] javaElements, IResource[] resources, IReorgDestination destination) throws JavaModelException {
 		Assert.isNotNull(javaElements);
 		Assert.isNotNull(resources);
 		Assert.isNotNull(destination);

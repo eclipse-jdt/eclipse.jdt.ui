@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 
@@ -37,7 +38,7 @@ public class AbstractMoveCompilationUnitPrefTest extends RepeatingRefactoringPer
 		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy((new IResource[0]), (new IJavaElement[] {cunit}));
 		JavaMoveProcessor processor= (policy.canEnable() ? new JavaMoveProcessor(policy) : null);
 		IPackageFragment destination= fTestProject.getSourceFolder().createPackageFragment("destination", false, null); 
-		processor.setDestination(destination);
+		processor.setDestination(ReorgDestinationFactory.createDestination(destination));
 		processor.setReorgQueries(new MockReorgQueries());
 		processor.setUpdateReferences(true);
 		executeRefactoring(new MoveRefactoring(processor), measure, RefactoringStatus.WARNING, false);

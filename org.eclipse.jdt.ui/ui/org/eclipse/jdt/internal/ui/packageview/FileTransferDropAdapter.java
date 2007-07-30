@@ -75,13 +75,13 @@ class FileTransferDropAdapter extends JdtViewerDropAdapter implements TransferDr
 	 * {@inheritDoc}
 	 */
 	public boolean validateDrop(Object target, int operation, TransferData transferType) {
-		return getDefaultDropOperation(target, operation, transferType) != DND.DROP_NONE;
+		return determineOperation(target, operation, transferType) != DND.DROP_NONE;
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	protected int getDefaultDropOperation(Object target, int operation, TransferData transferType) {
+	protected int determineOperation(Object target, int operation, TransferData transferType) {
 	
 		boolean isPackageFragment= target instanceof IPackageFragment;
 		boolean isJavaProject= target instanceof IJavaProject;

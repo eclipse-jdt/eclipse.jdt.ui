@@ -66,20 +66,12 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 		fCopyPolicy= copyPolicy;
 	}
 
-	public boolean canChildrenBeDestinations(IJavaElement javaElement) {
-		return fCopyPolicy.canChildrenBeDestinations(javaElement);
+	public boolean canChildrenBeDestinations(IReorgDestination destination) {
+		return fCopyPolicy.canChildrenBeDestinations(destination);
 	}
 
-	public boolean canChildrenBeDestinations(IResource resource) {
-		return fCopyPolicy.canChildrenBeDestinations(resource);
-	}
-
-	public boolean canElementBeDestination(IJavaElement javaElement) {
-		return fCopyPolicy.canElementBeDestination(javaElement);
-	}
-
-	public boolean canElementBeDestination(IResource resource) {
-		return fCopyPolicy.canElementBeDestination(resource);
+	public boolean canElementBeDestination(IReorgDestination destination) {
+		return fCopyPolicy.canElementBeDestination(destination);
 	}
 
 	public boolean canEnableComment() {
@@ -221,13 +213,8 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 	public void setComment(String comment) {
 		fComment= comment;
 	}
-
-	public RefactoringStatus setDestination(IJavaElement destination) throws JavaModelException {
-		fCopyPolicy.setDestination(destination);
-		return fCopyPolicy.verifyDestination(destination);
-	}
-
-	public RefactoringStatus setDestination(IResource destination) throws JavaModelException {
+	
+	public RefactoringStatus setDestination(IReorgDestination destination) throws JavaModelException {
 		fCopyPolicy.setDestination(destination);
 		return fCopyPolicy.verifyDestination(destination);
 	}

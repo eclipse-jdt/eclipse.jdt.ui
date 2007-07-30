@@ -181,7 +181,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      * that it is still enabled.
      */
     private void doDropValidation(DropTargetEvent event) {
-        currentOperation= getDefaultDropOperation(currentTarget, lastValidOperation, event.currentDataType);
+        currentOperation= determineOperation(currentTarget, lastValidOperation, event.currentDataType);
         event.detail = currentOperation;
     }
 
@@ -248,7 +248,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      * Last chance for the action to disable itself
      */
     public void dropAccept(DropTargetEvent event) {
-        event.detail= getDefaultDropOperation(currentTarget, event.detail, event.currentDataType);
+        event.detail= determineOperation(currentTarget, event.detail, event.currentDataType);
     }
 
     /**
@@ -485,14 +485,16 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
             TransferData transferType);
     
     /**
-     * Get the default drop operation on the given object. This method is called whenever some 
-     * aspect of the drop operation changes.
+     * Determine the operation which should be executed given the target and the operation
+     * requested by the user. This method is called whenever some aspect of the drop operation 
+     * changes. The operation is one of DND#DROP_DEFAULT, DND#DROP_COPY, DND#DROP_MOVE, DND#DROP_LINK.
      * <p>
-     * The default operation is the one used when no modifier key is pressed by the user. 
+     * The method returns the operation valid in the given context. The result is one of
+     * DND#DROP_NONE, DND#DROP_COPY, DND#DROP_MOVE, DND#DROP_LINK, DND#DROP_DEFAULT.
      * </p>
      * <p>
      * Subclasses can overwrite this method to define which operation does make
-     * sense on the drop target.
+     * sense in the given context.
      * </p>
      * 
      * @param target the object that the mouse is currently hovering over, or
@@ -507,11 +509,11 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
 	 * @see DND#DROP_COPY
 	 * @see DND#DROP_LINK
      */
-    protected int getDefaultDropOperation(Object target, int operation, TransferData transferType) {
+    protected int determineOperation(Object target, int operation, TransferData transferType) {
     	if (!validateDrop(target, operation, transferType)) {
     		return DND.DROP_NONE;
     	}
-    		
+
     	return operation;
     }
 }

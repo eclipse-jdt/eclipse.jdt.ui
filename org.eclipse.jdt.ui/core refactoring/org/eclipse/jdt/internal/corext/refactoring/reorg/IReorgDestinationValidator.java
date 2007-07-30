@@ -10,14 +10,23 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
-import org.eclipse.core.resources.IResource;
-
-import org.eclipse.jdt.core.IJavaElement;
-
 public interface IReorgDestinationValidator {
 
-	public boolean canChildrenBeDestinations(IResource resource);
-	public boolean canChildrenBeDestinations(IJavaElement javaElement);
-	public boolean canElementBeDestination(IResource resource);
-	public boolean canElementBeDestination(IJavaElement javaElement);
+	/**
+	 * Is it possible, that destination contains valid destinations
+	 * as children?
+	 * 
+	 * @param destination the destination to verify
+	 * @return true if destination can have valid destinations
+	 */
+	public boolean canChildrenBeDestinations(IReorgDestination destination);
+	
+	/**
+	 * Is it possible, that the given kind of destination is a target for
+	 * the reorg?
+	 * 
+	 * @param destination the destination to verify
+	 * @return true if possible
+	 */
+	public boolean canElementBeDestination(IReorgDestination destination);
 }

@@ -105,6 +105,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.IConfirmQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ParentChecker;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
@@ -948,10 +949,7 @@ public class PasteAction extends SelectionDispatchAction{
 				clipboardJavaElements= new IJavaElement[0];
 
 			Object destination= getTarget(javaElements, resources);
-			if (destination instanceof IJavaElement)
-				ReorgCopyStarter.create(clipboardJavaElements, clipboardResources, (IJavaElement)destination).run(getShell());
-			else if (destination instanceof IResource)
-				ReorgCopyStarter.create(clipboardJavaElements, clipboardResources, (IResource)destination).run(getShell());
+			ReorgCopyStarter.create(clipboardJavaElements, clipboardResources, ReorgDestinationFactory.createDestination(destination)).run(getShell());
 		}
 
 		private Object getTarget(IJavaElement[] javaElements, IResource[] resources) {
@@ -978,11 +976,7 @@ public class PasteAction extends SelectionDispatchAction{
 			if (clipboardJavaElements == null) 
 				clipboardJavaElements= new IJavaElement[0];
 			Object destination= getTarget(javaElements, resources);
-			if (destination instanceof IJavaElement)
-				return ReorgCopyStarter.create(clipboardJavaElements, clipboardResources, (IJavaElement)destination) != null;
-			if (destination instanceof IResource)
-				return ReorgCopyStarter.create(clipboardJavaElements, clipboardResources, (IResource)destination) != null;
-			return false;
+			return ReorgCopyStarter.create(clipboardJavaElements, clipboardResources, ReorgDestinationFactory.createDestination(destination)) != null;
 		}
 		
 		public boolean canEnable(TransferData[] availableTypes) {

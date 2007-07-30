@@ -35,6 +35,7 @@ import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 
@@ -128,7 +129,7 @@ public class MultiMoveTest extends RefactoringTest {
 			IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(resources, javaElements);
 			JavaMoveProcessor processor= (policy.canEnable() ? new JavaMoveProcessor(policy) : null);
 			processor.setReorgQueries(new MockReorgQueries());
-			processor.setDestination(packP2);
+			processor.setDestination(ReorgDestinationFactory.createDestination(packP2));
 			processor.setUpdateReferences(true);
 		    performDummySearch();
 			RefactoringStatus status= performRefactoring(processor, true);
@@ -192,7 +193,7 @@ public class MultiMoveTest extends RefactoringTest {
 			IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(resources, javaElements);
 			JavaMoveProcessor processor= (policy.canEnable() ? new JavaMoveProcessor(policy) : null);
 			processor.setReorgQueries(new MockReorgQueries());
-			processor.setDestination(packP2);
+			processor.setDestination(ReorgDestinationFactory.createDestination(packP2));
 			processor.setUpdateReferences(true);
 		    performDummySearch();
 			RefactoringStatus status= performRefactoring(processor, true);
@@ -253,7 +254,7 @@ public class MultiMoveTest extends RefactoringTest {
 			IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(resources, javaElements);
 			JavaMoveProcessor processor= (policy.canEnable() ? new JavaMoveProcessor(policy) : null);
 			processor.setReorgQueries(new MockReorgQueries());
-			processor.setDestination(packP2);
+			processor.setDestination(ReorgDestinationFactory.createDestination(packP2));
 			processor.setUpdateReferences(true);
 		    performDummySearch();
 			RefactoringStatus status= performRefactoring(processor, true);
@@ -314,7 +315,7 @@ public class MultiMoveTest extends RefactoringTest {
 			IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(resources, javaElements);
 			JavaMoveProcessor processor= (policy.canEnable() ? new JavaMoveProcessor(policy) : null);
 			processor.setReorgQueries(new MockReorgQueries());
-			processor.setDestination(packP2);
+			processor.setDestination(ReorgDestinationFactory.createDestination(packP2));
 			processor.setUpdateReferences(true);
 		    performDummySearch();
 			RefactoringStatus status= performRefactoring(processor, true);
@@ -364,7 +365,7 @@ public class MultiMoveTest extends RefactoringTest {
 			IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(resources, javaElements);
 			JavaMoveProcessor processor= (policy.canEnable() ? new JavaMoveProcessor(policy) : null);
 			processor.setReorgQueries(new MockReorgQueries());
-			processor.setDestination(r2);
+			processor.setDestination(ReorgDestinationFactory.createDestination(r2));
 		    performDummySearch();
 			RefactoringStatus status= performRefactoring(processor, false);
 			
@@ -405,7 +406,7 @@ public class MultiMoveTest extends RefactoringTest {
 			IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(resources, javaElements);
 			JavaMoveProcessor processor= (policy.canEnable() ? new JavaMoveProcessor(policy) : null);
 			processor.setReorgQueries(new MockReorgQueries());
-			processor.setDestination(r2);
+			processor.setDestination(ReorgDestinationFactory.createDestination(r2));
 		    performDummySearch();
 			RefactoringStatus status= performRefactoring(processor, false);
 			
@@ -452,7 +453,7 @@ public class MultiMoveTest extends RefactoringTest {
 			IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(resources, javaElements);
 			JavaMoveProcessor processor= (policy.canEnable() ? new JavaMoveProcessor(policy) : null);
 			processor.setReorgQueries(new MockReorgQueries());
-			processor.setDestination(r2);
+			processor.setDestination(ReorgDestinationFactory.createDestination(r2));
 		    performDummySearch();
 			RefactoringStatus status= performRefactoring(processor, false);
 			

@@ -26,7 +26,9 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestination;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
@@ -43,19 +45,18 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 	}
 	
 	public boolean hasChildren(Object element) {
+		IReorgDestination destination= ReorgDestinationFactory.createDestination(element);
+		if (!fValidator.canChildrenBeDestinations(destination))
+				return false;
+		
 		if (element instanceof IJavaElement){
 			IJavaElement javaElement= (IJavaElement) element;
-			if (! fValidator.canChildrenBeDestinations(javaElement))
-				return false;
 			if (javaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT){
 				if (((IPackageFragmentRoot)javaElement).isArchive())
 					return false;
 			}
-		} else if (element instanceof IResource) {
-			IResource resource= (IResource) element;
-			if (! fValidator.canChildrenBeDestinations(resource))
-				return false;
 		}
+		
 		return super.hasChildren(element);
 	}
 	
@@ -67,15 +68,9 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 				Object[] children= doGetChildren(element);
 				ArrayList result= new ArrayList(children.length);
 				for (int i= 0; i < children.length; i++) {
-					if (children[i] instanceof IJavaElement) {
-						IJavaElement javaElement= (IJavaElement) children[i];
-						if (fValidator.canElementBeDestination(javaElement) || fValidator.canChildrenBeDestinations(javaElement))
-							result.add(javaElement);
-					} else if (children[i] instanceof IResource) {
-						IResource resource= (IResource) children[i];
-						if (fValidator.canElementBeDestination(resource) || fValidator.canChildrenBeDestinations(resource))
-							result.add(resource);
-					}
+					IReorgDestination destination= ReorgDestinationFactory.createDestination(children[i]);
+					if (fValidator.canElementBeDestination(destination) || fValidator.canChildrenBeDestinations(destination))
+						result.add(children[i]);
 				}
 				return result.toArray();
 			}

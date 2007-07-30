@@ -66,20 +66,12 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 		fMovePolicy= policy;
 	}
 
-	public boolean canChildrenBeDestinations(IJavaElement javaElement) {
-		return fMovePolicy.canChildrenBeDestinations(javaElement);
+	public boolean canChildrenBeDestinations(IReorgDestination destination) {
+		return fMovePolicy.canChildrenBeDestinations(destination);
 	}
-
-	public boolean canChildrenBeDestinations(IResource resource) {
-		return fMovePolicy.canChildrenBeDestinations(resource);
-	}
-
-	public boolean canElementBeDestination(IJavaElement javaElement) {
-		return fMovePolicy.canElementBeDestination(javaElement);
-	}
-
-	public boolean canElementBeDestination(IResource resource) {
-		return fMovePolicy.canElementBeDestination(resource);
+	
+	public boolean canElementBeDestination(IReorgDestination destination) {
+		return fMovePolicy.canElementBeDestination(destination);
 	}
 
 	public boolean canEnableComment() {
@@ -284,13 +276,8 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 		Assert.isNotNull(queries);
 		fCreateTargetQueries= new MonitoringCreateTargetQueries(queries, fMovePolicy.getCreateTargetExecutionLog());
 	}
-
-	public RefactoringStatus setDestination(IJavaElement destination) throws JavaModelException {
-		fMovePolicy.setDestination(destination);
-		return fMovePolicy.verifyDestination(destination);
-	}
-
-	public RefactoringStatus setDestination(IResource destination) throws JavaModelException {
+	
+	public RefactoringStatus setDestination(IReorgDestination destination) throws JavaModelException {
 		fMovePolicy.setDestination(destination);
 		return fMovePolicy.verifyDestination(destination);
 	}

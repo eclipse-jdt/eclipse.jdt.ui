@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 
 
 public class ReorgCopyWizard extends RefactoringWizard {
@@ -66,11 +67,7 @@ public class ReorgCopyWizard extends RefactoringWizard {
 		}
 		
 		protected RefactoringStatus verifyDestination(Object selected) throws JavaModelException{
-			if (selected instanceof IJavaElement)
-				return getCopyProcessor().setDestination((IJavaElement)selected);
-			if (selected instanceof IResource)
-				return getCopyProcessor().setDestination((IResource)selected);
-			return RefactoringStatus.createFatalErrorStatus(ReorgMessages.ReorgCopyWizard_2); 
+			return getCopyProcessor().setDestination(ReorgDestinationFactory.createDestination(selected));
 		}		
 	}
 }

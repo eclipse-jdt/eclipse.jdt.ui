@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IConfirmQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.structure.JavaMoveRefactoring;
@@ -184,23 +185,13 @@ public class MoveTest extends RefactoringTest {
 	}
 	
 	private void verifyValidDestination(JavaMoveProcessor ref, Object destination) throws Exception {
-		RefactoringStatus status= null;
-		if (destination instanceof IResource)
-			status= ref.setDestination((IResource)destination);
-		else if (destination instanceof IJavaElement)
-			status= ref.setDestination((IJavaElement)destination);
-		else assertTrue(false);
-		
+		RefactoringStatus status= ref.setDestination(ReorgDestinationFactory.createDestination(destination));
+				
 		assertEquals("destination was expected to be valid: " + status.getMessageMatchingSeverity(status.getSeverity()), RefactoringStatus.OK, status.getSeverity());
 	}
 
 	private void verifyInvalidDestination(JavaMoveProcessor ref, Object destination) throws Exception {
-		RefactoringStatus status= null;
-		if (destination instanceof IResource)
-			status= ref.setDestination((IResource)destination);
-		else if (destination instanceof IJavaElement)
-			status= ref.setDestination((IJavaElement)destination);
-		else assertTrue(false);
+		RefactoringStatus status= ref.setDestination(ReorgDestinationFactory.createDestination(destination));
 		
 		assertEquals("destination was expected to be not valid",  RefactoringStatus.FATAL, status.getSeverity());
 	}
@@ -2044,9 +2035,9 @@ public class MoveTest extends RefactoringTest {
 		
 		JavaMoveProcessor processor= new JavaMoveProcessor(policy);
 		if (javaDestination != null) {
-			assertTrue(processor.setDestination(javaDestination).isOK());
+			assertTrue(processor.setDestination(ReorgDestinationFactory.createDestination(javaDestination)).isOK());
 		} else {
-			assertTrue(processor.setDestination(destination).isOK());
+			assertTrue(processor.setDestination(ReorgDestinationFactory.createDestination(destination)).isOK());
 		}
 		
 		JavaMoveRefactoring ref= new JavaMoveRefactoring(processor);

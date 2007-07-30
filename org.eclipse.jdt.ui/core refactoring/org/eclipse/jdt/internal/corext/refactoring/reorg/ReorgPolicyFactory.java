@@ -124,6 +124,8 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.MoveResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory.JavaElementDestination;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory.ResourceDestination;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRewriteUtil;
@@ -2834,20 +2836,78 @@ public final class ReorgPolicyFactory {
 		private IJavaElement fJavaElementDestination;
 
 		private IResource fResourceDestination;
-
-		public boolean canChildrenBeDestinations(IJavaElement javaElement) {
-			return true;
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canChildrenBeDestinations(IReorgDestination destination) {
+			if (destination instanceof JavaElementDestination) {
+				return canChildrenBeDestinations(((JavaElementDestination)destination).getJavaElement());
+			} else if (destination instanceof ResourceDestination) {
+				return canChildrenBeDestinations(((ResourceDestination)destination).getResource());
+			}
+			
+			return false;
 		}
-
+		
+		/**
+		 * Is it possible, that resource contains valid destinations
+		 * as children?
+		 * 
+		 * @param resource the resource to verify
+		 * @return true if resource can have valid destinations
+		 */
 		public boolean canChildrenBeDestinations(IResource resource) {
 			return true;
 		}
-
-		public boolean canElementBeDestination(IJavaElement javaElement) {
+		
+		/**
+		 * Is it possible, that resource contains valid destinations
+		 * as children?
+		 * 
+		 * @param javaElement the java element to verify
+		 * @return true if resource can have valid destinations
+		 */
+		public boolean canChildrenBeDestinations(IJavaElement javaElement) {
 			return true;
 		}
-
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canElementBeDestination(IReorgDestination destination) {
+			if (destination instanceof JavaElementDestination) {
+				return canElementBeDestination(((JavaElementDestination)destination).getJavaElement());
+			} else if (destination instanceof ResourceDestination) {
+				return canElementBeDestination(((ResourceDestination)destination).getResource());
+			}
+			
+			return false;
+		}
+		
+		/**
+		 * Is it possible, that sources can be reorged to this kind of resource?
+		 * 
+		 * This is less strict then {@link #verifyDestination(IResource)} where
+		 * the resource itself is verified to be a valid destination.
+		 * 
+		 * @param resource the resource to move to
+		 * @return true if possible
+		 */
 		public boolean canElementBeDestination(IResource resource) {
+			return true;
+		}
+		
+		/**
+		 * Is it possible, that sources can be reorged to this kind of javaElement?
+		 * 
+		 * This is less strict then {@link #verifyDestination(IJavaElement)} where
+		 * the java element itself is verified to be a valid destination.
+		 * 
+		 * @param javaElement the java element to move to
+		 * @return true if possible
+		 */
+		public boolean canElementBeDestination(IJavaElement javaElement) {
 			return true;
 		}
 
@@ -2996,6 +3056,16 @@ public final class ReorgPolicyFactory {
 				return new RefactoringParticipant[0];
 			}
 		}
+		
+		public void setDestination(IReorgDestination destination) {
+			if (destination instanceof JavaElementDestination) {
+				setDestination(((JavaElementDestination)destination).getJavaElement());
+			} else if (destination instanceof ResourceDestination) {
+				setDestination(((ResourceDestination)destination).getResource());
+			} else {
+				Assert.isLegal(false);
+			}
+		}
 
 		public final void setDestination(IJavaElement destination) {
 			Assert.isNotNull(destination);
@@ -3008,6 +3078,37 @@ public final class ReorgPolicyFactory {
 			fJavaElementDestination= null;
 			fResourceDestination= destination;
 		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public RefactoringStatus verifyDestination(IReorgDestination destination) throws JavaModelException {
+			if (destination instanceof JavaElementDestination) {
+				return verifyDestination(((JavaElementDestination)destination).getJavaElement());
+			} else if (destination instanceof ResourceDestination) {
+				return verifyDestination(((ResourceDestination)destination).getResource());
+			}
+			
+			return RefactoringStatus.createErrorStatus("The selected element cannot be the destination of this operation.");
+		}
+		
+		/**
+		 * Can destination be a target for the given source elements?
+		 * 
+		 * @param destination the destination to verify
+		 * @return OK status if valid destination
+		 * @throws JavaModelException
+		 */
+		public abstract RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException;
+		
+		/**
+		 * Can destination be a target for the given source elements?
+		 * 
+		 * @param destination the destination to verify
+		 * @return OK status if valid destination
+		 * @throws JavaModelException
+		 */
+		public abstract RefactoringStatus verifyDestination(IResource destination) throws JavaModelException;
 	}
 
 	private static abstract class SubCuElementReorgPolicy extends ReorgPolicy {
