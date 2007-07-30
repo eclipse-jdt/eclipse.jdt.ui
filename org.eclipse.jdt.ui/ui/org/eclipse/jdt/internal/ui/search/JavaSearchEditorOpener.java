@@ -47,10 +47,16 @@ public class JavaSearchEditorOpener {
 
 	public IEditorPart openElement(Object element) throws PartInitException, JavaModelException {
 		IWorkbenchPage wbPage= JavaPlugin.getActivePage();
+		IEditorPart editor;
 		if (NewSearchUI.reuseEditor())
-			return showWithReuse(element, wbPage);
+			editor= showWithReuse(element, wbPage);
 		else
-			return showWithoutReuse(element, wbPage);
+			editor= showWithoutReuse(element);
+		
+		if (element instanceof IJavaElement)
+			EditorUtility.revealInEditor(editor, (IJavaElement) element);
+		
+		return editor;
 	}
 		
 	public IEditorPart openMatch(Match match) throws PartInitException, JavaModelException {
@@ -62,7 +68,7 @@ public class JavaSearchEditorOpener {
 		return match.getElement();
 	}
 
-	private IEditorPart showWithoutReuse(Object element, IWorkbenchPage wbPage) throws PartInitException, JavaModelException {
+	private IEditorPart showWithoutReuse(Object element) throws PartInitException, JavaModelException {
 		return EditorUtility.openInEditor(element, false);
 	}
 
