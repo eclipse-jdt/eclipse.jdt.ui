@@ -809,6 +809,12 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			} else
 				postAdd(parent, resource, runnables);
 		}
+		if ((status & IResourceDelta.CHANGED) != 0) {
+			if ((flags & IResourceDelta.TYPE) != 0) {
+				postRefresh(parent, PARENT, resource, runnables);
+				return true;
+			}
+		}
 		// open/close state change of a project
 		if ((flags & IResourceDelta.OPEN) != 0) {
 			postProjectStateChanged(internalGetParent(parent), runnables);
