@@ -2014,6 +2014,10 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ReorgPolicyFactory_cannot_modify;
 
+	public static String ReorgPolicyFactory_cannot_move_package_to_parent;
+
+	public static String ReorgPolicyFactory_cannot_move_source_to_parent;
+
 	public static String ReorgPolicyFactory_cannot1;
 
 	public static String ReorgPolicyFactory_copy_compilation_unit;

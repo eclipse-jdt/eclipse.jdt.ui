@@ -84,13 +84,7 @@ class OverwriteHelper {
 		return fPackageFragments;
 	}
 
-	public void confirmOverwriting(IReorgQueries reorgQueries, IJavaElement destination) {
-		Assert.isNotNull(destination);
-		fDestination= destination;
-		confirmOverwritting(reorgQueries);
-	}
-
-	public void confirmOverwriting(IReorgQueries reorgQueries, IResource destination) {
+	public void confirmOverwriting(IReorgQueries reorgQueries, Object destination) {
 		Assert.isNotNull(destination);
 		Assert.isNotNull(reorgQueries);
 		fDestination= destination;
@@ -171,9 +165,12 @@ class OverwriteHelper {
 	}
 
 	private boolean canOverwrite(IPackageFragment pack) {
-		Assert.isTrue(fDestination instanceof IPackageFragmentRoot);
-		IPackageFragmentRoot destination= (IPackageFragmentRoot)fDestination;
-		return ! destination.equals(pack.getParent()) && destination.getPackageFragment(pack.getElementName()).exists();
+		if (fDestination instanceof IPackageFragmentRoot) {
+			IPackageFragmentRoot destination= (IPackageFragmentRoot)fDestination;
+			return ! destination.equals(pack.getParent()) && destination.getPackageFragment(pack.getElementName()).exists();
+		} else {
+			return willOverwrite(pack.getResource());
+		}
 	}
 
 	/*
@@ -199,13 +196,16 @@ class OverwriteHelper {
 	}
 	
 	private boolean canOverwrite(IPackageFragmentRoot root) {
-		Assert.isTrue(fDestination instanceof IJavaProject);
-		IJavaProject destination= (IJavaProject)fDestination;
-		IFolder conflict= destination.getProject().getFolder(root.getElementName());
-		try {
-			return !destination.equals(root.getParent()) && conflict.exists() &&  conflict.members().length > 0;
-		} catch (CoreException e) {
-			return true;
+		if (fDestination instanceof IJavaProject) {
+			IJavaProject destination= (IJavaProject)fDestination;
+			IFolder conflict= destination.getProject().getFolder(root.getElementName());
+			try {
+				return !destination.equals(root.getParent()) && conflict.exists() &&  conflict.members().length > 0;
+			} catch (CoreException e) {
+				return true;
+			}
+		} else {
+			return willOverwrite(root.getResource());
 		}
 	}
 

@@ -579,7 +579,7 @@ public class CopyTest extends RefactoringTest {
 			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= folder;
-			verifyInvalidDestination(ref, destination);
+			verifyValidDestination(ref, destination);
 		} finally {
 			performDummySearch();
 			folder.delete(true, new NullProgressMonitor());			
@@ -757,7 +757,7 @@ public class CopyTest extends RefactoringTest {
 			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
 			Object destination= folder;
-			verifyInvalidDestination(ref, destination);
+			verifyValidDestination(ref, destination);
 		} finally {
 			performDummySearch();
 			folder.delete(true, new NullProgressMonitor());

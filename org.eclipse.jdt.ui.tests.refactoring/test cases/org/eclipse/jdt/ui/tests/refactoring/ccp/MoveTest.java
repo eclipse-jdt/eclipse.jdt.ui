@@ -700,7 +700,7 @@ public class MoveTest extends RefactoringTest {
 			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= folder;
-			verifyInvalidDestination(ref, destination);
+			verifyValidDestination(ref, destination);
 		} finally{
 			performDummySearch();
 			safeDelete(pack1);
@@ -720,7 +720,7 @@ public class MoveTest extends RefactoringTest {
 			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
 			Object destination= simpleProject;
-			verifyInvalidDestination(ref, destination);
+			verifyValidDestination(ref, destination);
 		} finally{
 			performDummySearch();
 			safeDelete(pack1);
@@ -825,7 +825,7 @@ public class MoveTest extends RefactoringTest {
 			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= folder;
-			verifyInvalidDestination(ref, destination);
+			verifyValidDestination(ref, destination);
 		} finally{
 			performDummySearch();
 			sourceFolder.delete(0, 0, new NullProgressMonitor());
@@ -860,7 +860,7 @@ public class MoveTest extends RefactoringTest {
 			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
 			Object destination= simpleProject;
-			verifyInvalidDestination(ref, destination);
+			verifyValidDestination(ref, destination);
 		} finally{
 			performDummySearch();
 			sourceFolder.delete(0, 0, new NullProgressMonitor());
