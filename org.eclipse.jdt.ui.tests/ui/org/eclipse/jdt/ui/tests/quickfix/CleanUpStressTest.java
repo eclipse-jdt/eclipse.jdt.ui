@@ -2515,7 +2515,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("     * Asserts that a condition is false. If it isn't it throws an\n");
         buf.append("     * AssertionFailedError with the given message.\n");
         buf.append("     */\n");
-        buf.append("    static public void assertFalse(final String message, boolean condition) {\n");
+        buf.append("    static public void assertFalse(final String message, final boolean condition) {\n");
         buf.append("        Assert.assertTrue(message, !condition);\n");
         buf.append("    }\n");
         buf.append("    /**\n");
@@ -2590,7 +2590,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("     * Asserts that a condition is true. If it isn't it throws an\n");
         buf.append("     * AssertionFailedError with the given message.\n");
         buf.append("     */\n");
-        buf.append("    static public void assertTrue(final String message, boolean condition) {\n");
+        buf.append("    static public void assertTrue(final String message, final boolean condition) {\n");
         buf.append("        if (!condition) {\n");
         buf.append("            Assert.fail(message);\n");
         buf.append("        }\n");
@@ -3028,7 +3028,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("        return new StandardTestSuiteLoader();\n");
         buf.append("    }\n");
         buf.append("\n");
-        buf.append("    protected void pause(boolean wait) {\n");
+        buf.append("    protected void pause(final boolean wait) {\n");
         buf.append("        if (!wait) {\n");
         buf.append("            return;\n");
         buf.append("        }\n");
