@@ -18,8 +18,9 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
+
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
@@ -58,7 +59,7 @@ public class ReorgCopyStarter {
 	}
 
 	public void run(Shell parent) throws InterruptedException, InvocationTargetException {
-		IRunnableContext context= new ProgressMonitorDialog(parent);
+		IRunnableContext context= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		fCopyProcessor.setNewNameQueries(new NewNameQueries(parent));
 		fCopyProcessor.setReorgQueries(new ReorgQueries(parent));
 		new RefactoringExecutionHelper(new JavaCopyRefactoring(fCopyProcessor), RefactoringCore.getConditionCheckingFailedSeverity(), RefactoringSaveHelper.SAVE_ALL, parent, context).perform(false, false);

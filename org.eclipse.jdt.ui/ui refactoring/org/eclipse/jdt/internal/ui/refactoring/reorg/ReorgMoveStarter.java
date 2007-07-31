@@ -18,8 +18,9 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
+
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
@@ -65,7 +66,7 @@ public class ReorgMoveStarter {
 		try {
 			JavaMoveRefactoring ref= new JavaMoveRefactoring(fMoveProcessor);
 			if (fMoveProcessor.hasAllInputSet()) {
-				IRunnableContext context= new ProgressMonitorDialog(parent);
+				IRunnableContext context= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 				fMoveProcessor.setCreateTargetQueries(new CreateTargetQueries(parent));
 				fMoveProcessor.setReorgQueries(new ReorgQueries(parent));
 				new RefactoringExecutionHelper(ref, RefactoringCore.getConditionCheckingFailedSeverity(), RefactoringSaveHelper.SAVE_ALL, parent, context).perform(false, false);
