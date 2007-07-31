@@ -59,6 +59,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		
 		setScrollEnabled(true);
 		setExpandEnabled(true);
+		setSelectionFeedbackEnabled(false);
 		setFeedbackEnabled(false);
 	}
 
@@ -100,6 +101,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}
 	
 	private void clear() {
+		setSelectionFeedbackEnabled(false);
 		fElements= null;
 		fSelection= null;
 		fMoveProcessor= null;
@@ -119,6 +121,18 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	 * {@inheritDoc}
 	 */
 	protected int determineOperation(Object target, int operation, TransferData transferType) {
+		int result= internalDetermineOperation(target, operation);
+		
+		if (result == DND.DROP_NONE) {
+			setSelectionFeedbackEnabled(false);
+		} else {
+			setSelectionFeedbackEnabled(true);
+		}
+		
+		return result;
+	}
+		
+	private int internalDetermineOperation(Object target, int operation) {
 		
 		initializeSelection();
 		
