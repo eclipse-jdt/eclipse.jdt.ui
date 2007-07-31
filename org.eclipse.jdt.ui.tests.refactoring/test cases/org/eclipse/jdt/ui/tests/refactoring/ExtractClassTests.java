@@ -11,6 +11,8 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -21,8 +23,10 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractClassDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractClassDescriptor.Field;
@@ -170,7 +174,7 @@ public class ExtractClassTests extends RefactoringTest {
 		runRefactoring(false);
 		checkAdditionalFile("InheritanceUpdateImplGetterSetter");
 	}
-	
+
 	public void testComplexExtractGetterSetter() throws Exception {
 		fDescriptor.setType(setupType());
 		fDescriptor.setCreateGetterSetter(true);
@@ -191,15 +195,15 @@ public class ExtractClassTests extends RefactoringTest {
 		assertEquals(1, entries.length);
 		for (int i= 0; i < entries.length; i++) {
 			RefactoringStatusEntry refactoringStatusEntry= entries[i];
-			assertEquals("Status was:"+refactoringStatusEntry, true, refactoringStatusEntry.isFatalError());
+			assertEquals("Status was:" + refactoringStatusEntry, true, refactoringStatusEntry.isFatalError());
 		}
 	}
-	
+
 	public void testImportRemove() throws Exception {
 		fDescriptor.setType(setupType());
 		runRefactoring(false);
 	}
-	
+
 	public void testSwitchCase() throws Exception {
 		fDescriptor.setType(setupType());
 		RefactoringStatus status= runRefactoring(true);
@@ -211,7 +215,7 @@ public class ExtractClassTests extends RefactoringTest {
 			assertEquals(true, refactoringStatusEntry.isError());
 		}
 	}
-	
+
 	public void testCopyModifierAnnotations() throws Exception {
 		fDescriptor.setType(setupType());
 		RefactoringStatus status= runRefactoring(true);
@@ -224,7 +228,7 @@ public class ExtractClassTests extends RefactoringTest {
 			assertEquals(true, refactoringStatusEntry.isWarning());
 		}
 	}
-	
+
 	public void testUFOGetter() throws Exception {
 		fDescriptor.setType(setupType());
 		Field[] fields= ExtractClassDescriptor.getFields(fDescriptor.getType());
@@ -238,6 +242,21 @@ public class ExtractClassTests extends RefactoringTest {
 		fDescriptor.setFieldName("position");
 		fDescriptor.setCreateGetterSetter(true);
 		runRefactoring(false);
+	}
+
+	public void testControlBodyUpdates() throws Exception {
+		IJavaProject javaProject= getRoot().getJavaProject();
+		Map originalOptions= javaProject.getOptions(true);
+		try {
+			HashMap newOptions= new HashMap(originalOptions);
+			newOptions.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
+			javaProject.setOptions(newOptions);
+			fDescriptor.setType(setupType());
+			fDescriptor.setCreateGetterSetter(true);
+			runRefactoring(false);
+		} finally {
+			javaProject.setOptions(originalOptions);
+		}
 	}
 
 }

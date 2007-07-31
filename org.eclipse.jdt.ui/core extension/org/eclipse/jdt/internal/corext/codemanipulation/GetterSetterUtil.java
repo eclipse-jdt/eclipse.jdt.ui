@@ -286,9 +286,12 @@ public class GetterSetterUtil {
 		return null;
 	}
 
+	/*
+	 * Check if the node is in a block. We don't want to update declarations
+	 */
 	private static boolean isNotInBlock(ASTNode parent) {
 		ASTNode grandParent= parent.getParent();
-		return (grandParent.getNodeType() != ASTNode.EXPRESSION_STATEMENT) || (grandParent.getParent().getNodeType() != ASTNode.BLOCK);
+		return (grandParent.getNodeType() != ASTNode.EXPRESSION_STATEMENT) || (ASTNodes.isControlStatementBody(grandParent.getParent().getLocationInParent()));
 	}
 
 	private static Expression createInfixInvocationFromPostPrefixExpression(InfixExpression.Operator operator, Expression getterExpression, AST ast, ITypeBinding variableType, boolean is50OrHigher) {
