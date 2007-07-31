@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractClassDescriptor;
+import org.eclipse.jdt.core.refactoring.descriptors.ExtractClassDescriptor.Field;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -162,10 +163,17 @@ public class ExtractClassTests extends RefactoringTest {
 		checkAdditionalFile("InheritanceUpdateImpl");
 	}
 
+	public void testInheritanceUpdateGetterSetter() throws Exception {
+		createAdditionalFile("InheritanceUpdateImplGetterSetter");
+		fDescriptor.setType(setupType());
+		fDescriptor.setCreateGetterSetter(true);
+		runRefactoring(false);
+		checkAdditionalFile("InheritanceUpdateImplGetterSetter");
+	}
+	
 	public void testComplexExtractGetterSetter() throws Exception {
 		fDescriptor.setType(setupType());
-		fDescriptor.setCreateGetter(true);
-		fDescriptor.setCreateSetter(true);
+		fDescriptor.setCreateGetterSetter(true);
 		runRefactoring(false);
 	}
 
@@ -215,6 +223,21 @@ public class ExtractClassTests extends RefactoringTest {
 			RefactoringStatusEntry refactoringStatusEntry= entries[i];
 			assertEquals(true, refactoringStatusEntry.isWarning());
 		}
+	}
+	
+	public void testUFOGetter() throws Exception {
+		fDescriptor.setType(setupType());
+		Field[] fields= ExtractClassDescriptor.getFields(fDescriptor.getType());
+		for (int i= 0; i < fields.length; i++) {
+			Field field= fields[i];
+			if ("homePlanet".equals(field.getFieldName()))
+				field.setCreateField(false);
+		}
+		fDescriptor.setFields(fields);
+		fDescriptor.setClassName("Position");
+		fDescriptor.setFieldName("position");
+		fDescriptor.setCreateGetterSetter(true);
+		runRefactoring(false);
 	}
 
 }

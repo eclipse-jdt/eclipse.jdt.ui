@@ -41,6 +41,8 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  */
 public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 
+	private static final String CREATE_GETTER_SETTER= "createGetterSetter"; //$NON-NLS-1$
+
 	private static final String PACKAGE_NAME= "packageName"; //$NON-NLS-1$
 
 	private static final String CLASS_NAME= "className"; //$NON-NLS-1$
@@ -48,10 +50,6 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 	private static final String FIELD_NAME= "fieldName"; //$NON-NLS-1$
 
 	private static final String CREATE_TOP_LEVEL= "createTopLevel"; //$NON-NLS-1$
-
-	private static final String CREATE_GETTER= "createGetter"; //$NON-NLS-1$
-
-	private static final String CREATE_SETTER= "createSetter"; //$NON-NLS-1$
 
 	private static final String NEW_FIELD_COUNT= "newFieldCount"; //$NON-NLS-1$
 
@@ -348,42 +346,28 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 		JavaRefactoringDescriptorUtil.setBoolean(fArguments, CREATE_TOP_LEVEL, createTopLevel);
 	}
 
-	/**
-	 * Returns <code>true</code> if getters are generated for fields. Default is <code>false</code>.
-	 * 
-	 * @return <code>true</code> if getters are generated for fields. Default is <code>false</code>
-	 */
-	public boolean isCreateGetter() {
-		return JavaRefactoringDescriptorUtil.getBoolean(fArguments, CREATE_GETTER, false);
-	}
 
 	/**
-	 * Sets whether getters will be created for all fields.
+	 * Sets whether getters and setters will be created for all fields.
 	 * 
-	 * @param createGetter <code>true</code> to create getters. Default is <code>false</code>.
+	 * @param createGetterSetter <code>true</code> to create getters and setters. Default is <code>false</code>.
 	 */
-	public void setCreateGetter(boolean createGetter) {
-		JavaRefactoringDescriptorUtil.setBoolean(fArguments, CREATE_GETTER, createGetter);
+	public void setCreateGetterSetter(boolean createGetterSetter) {
+		JavaRefactoringDescriptorUtil.setBoolean(fArguments, CREATE_GETTER_SETTER, createGetterSetter);
 	}
-
+	
 	/**
-	 * Returns <code>true</code> if setters are generated for fields. Default is <code>false</code>.
+	 * Returns <code>true</code> if getters and setters are generated for fields. Default is <code>false</code>.
 	 * 
-	 * @return <code>true</code> if setters are generated for fields. Default is <code>false</code>
+	 * @return <code>true</code> if getters and setters are generated for fields. Default is <code>false</code>
 	 */
-	public boolean isCreateSetter() {
-		return JavaRefactoringDescriptorUtil.getBoolean(fArguments, CREATE_SETTER, false);
+	public boolean isCreateGetterSetter() {
+		return JavaRefactoringDescriptorUtil.getBoolean(fArguments, CREATE_GETTER_SETTER, false);
 	}
-
-	/**
-	 * Sets whether setters will be created for all fields.
-	 * 
-	 * @param createSetter <code>true</code> to create setters. Default is <code>false</code>.
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor#populateArgumentMap()
 	 */
-	public void setCreateSetter(boolean createSetter) {
-		JavaRefactoringDescriptorUtil.setBoolean(fArguments, CREATE_SETTER, createSetter);
-	}
-
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
 		if (fFields != null) {

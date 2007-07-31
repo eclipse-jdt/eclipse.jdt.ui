@@ -414,8 +414,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractClassRefactoring_comment_package;
 
-	public static String ExtractClassRefactoring_comment_setters;
-
 	public static String ExtractClassRefactoring_error_duplicate_field_name;
 
 	public static String ExtractClassRefactoring_error_field_already_exists;

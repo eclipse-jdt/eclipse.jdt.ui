@@ -51,9 +51,9 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -132,7 +132,7 @@ public class ParameterObjectFactory {
 			return rewrite.createMoveTarget(node);
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param declaringType
@@ -191,7 +191,7 @@ public class ParameterObjectFactory {
 		AST ast= cuRewrite.getAST();
 		ICompilationUnit unit= cuRewrite.getCu();
 		IJavaProject project= unit.getJavaProject();
-		
+
 		MethodDeclaration methodDeclaration= ast.newMethodDeclaration();
 		methodDeclaration.setName(ast.newSimpleName(fClassName));
 		methodDeclaration.setConstructor(true);
@@ -212,12 +212,12 @@ public class ParameterObjectFactory {
 		for (Iterator iter= fVariables.iterator(); iter.hasNext();) {
 			ParameterInfo pi= (ParameterInfo) iter.next();
 			if (isValidField(pi)) {
-				if ((namesToInitializers== null) || namesToInitializers.contains(pi.getOldName()))
+				if ((namesToInitializers == null) || namesToInitializers.contains(pi.getOldName()))
 					validParameter.add(pi);
 			}
 		}
-		
-		
+
+
 		for (Iterator iter= validParameter.iterator(); iter.hasNext();) {
 			ParameterInfo pi= (ParameterInfo) iter.next();
 			SingleVariableDeclaration svd= ast.newSingleVariableDeclaration();
@@ -231,9 +231,9 @@ public class ParameterObjectFactory {
 				}
 				svd.setVarargs(true);
 			}
-			
+
 			String paramName= getParameterName(pi, project);
-			
+
 			Type fieldType= importBinding(typeBinding, cuRewrite);
 			svd.setType(fieldType);
 			svd.setName(ast.newSimpleName(paramName));
@@ -256,7 +256,7 @@ public class ParameterObjectFactory {
 	}
 
 	private String getParameterName(ParameterInfo pi, IJavaProject project) {
-		String fieldName = pi.getNewName();
+		String fieldName= pi.getNewName();
 		String strippedName= NamingConventions.removePrefixAndSuffixForFieldName(project, fieldName, 0);
 		String[] suggestions= StubUtility.getVariableNameSuggestions(StubUtility.PARAMETER, project, strippedName, 0, null, true);
 		return suggestions[0];
@@ -272,7 +272,7 @@ public class ParameterObjectFactory {
 	private FieldDeclaration createField(ParameterInfo pi, CompilationUnitRewrite cuRewrite) throws CoreException {
 		AST ast= cuRewrite.getAST();
 		ICompilationUnit unit= cuRewrite.getCu();
-		
+
 		VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 		String lineDelim= StubUtility.getLineDelimiterUsed(unit);
 		SimpleName fieldName= ast.newSimpleName(pi.getNewName());
@@ -296,33 +296,85 @@ public class ParameterObjectFactory {
 		return declaration;
 	}
 
-	public Expression createFieldReadAccess(ParameterInfo pi, String paramName, AST ast, IJavaProject project) {
+	public Expression createFieldReadAccess(ParameterInfo pi, String paramName, AST ast, IJavaProject project, boolean useSuper) {
+		SuperFieldAccess sf= null;
+		if (useSuper) {
+			sf= ast.newSuperFieldAccess();
+			sf.setName(ast.newSimpleName(paramName));
+		}
 		if (!fCreateGetter) {
-			return ast.newName(new String[] { paramName, pi.getNewName() });
+			return createFieldAccess(pi, paramName, ast, useSuper, sf);
 		} else {
 			MethodInvocation method= ast.newMethodInvocation();
 			method.setName(ast.newSimpleName(getGetterName(pi, ast, project)));
-			method.setExpression(ast.newSimpleName(paramName));
+			if (useSuper)
+				method.setExpression(sf);
+			else
+				method.setExpression(ast.newSimpleName(paramName));
 			return method;
 		}
 	}
 
-	public Expression createFieldWriteAccess(ParameterInfo pi, String paramName, AST ast, IJavaProject project, Expression assignedValue) {
+	private Expression createFieldAccess(ParameterInfo pi, String paramName, AST ast, boolean useSuper, SuperFieldAccess sf) {
+		if (useSuper) {
+			FieldAccess fa;
+			fa= ast.newFieldAccess();
+			fa.setExpression(sf);
+			fa.setName(ast.newSimpleName(pi.getNewName()));
+			return fa;
+		}
+		return ast.newName(new String[] { paramName, pi.getNewName() });
+	}
+
+	public Expression createFieldWriteAccess(ParameterInfo pi, String paramName, AST ast, IJavaProject project, Expression assignedValue, Expression qualifier, boolean useSuper) {
+		SuperFieldAccess sf= null;
+		if (useSuper) {
+			sf= ast.newSuperFieldAccess();
+			sf.setName(ast.newSimpleName(paramName));
+		}
 		if (!fCreateSetter) {
-			Name leftHandSide= ast.newName(new String[]{ paramName, pi.getNewName()});
-			Assignment assignment= ast.newAssignment();
-			assignment.setRightHandSide(assignedValue);
-			assignment.setLeftHandSide(leftHandSide);
-			return assignment;
+			if (qualifier != null) {
+				FieldAccess fa2= ast.newFieldAccess();
+				if (useSuper) {
+					fa2.setExpression(sf);
+				} else {
+					fa2.setExpression(createParamAccess(paramName, ast, qualifier));
+				}
+				fa2.setName(ast.newSimpleName(pi.getNewName()));
+				Assignment assignment= ast.newAssignment();
+				assignment.setLeftHandSide(fa2);
+				assignment.setRightHandSide(assignedValue);
+				return assignment;
+			} else {
+				return createFieldAccess(pi, paramName, ast, useSuper, sf);
+			}
 		} else {
+			SimpleName setterName= ast.newSimpleName(getSetterName(pi, ast, project));
 			MethodInvocation method= ast.newMethodInvocation();
-			method.setName(ast.newSimpleName(getSetterName(pi, ast, project)));
-			method.setExpression(ast.newSimpleName(paramName));
+			method.setName(setterName);
+			Expression qualifierExpression;
+			if (useSuper) {
+				qualifierExpression= sf;
+			} else {
+				if (qualifier != null) {
+					qualifierExpression= createParamAccess(paramName, ast, qualifier);
+				} else {
+					qualifierExpression= ast.newSimpleName(paramName);
+				}
+			}
+			method.setExpression(qualifierExpression);
 			method.arguments().add(assignedValue);
 			return method;
 		}
 	}
-	
+
+	private FieldAccess createParamAccess(String paramName, AST ast, Expression qualifier) {
+		FieldAccess fa= ast.newFieldAccess();
+		fa.setExpression(qualifier);
+		fa.setName(ast.newSimpleName(paramName));
+		return fa;
+	}
+
 	private MethodDeclaration createGetter(ParameterInfo pi, String declaringType, CompilationUnitRewrite cuRewrite) throws CoreException {
 		AST ast= cuRewrite.getAST();
 		ICompilationUnit cu= cuRewrite.getCu();
@@ -355,10 +407,10 @@ public class ParameterObjectFactory {
 
 	public ExpressionStatement createInitializer(ParameterInfo pi, String paramName, CompilationUnitRewrite cuRewrite) {
 		AST ast= cuRewrite.getAST();
-		
+
 		VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 		fragment.setName(ast.newSimpleName(pi.getOldName()));
-		fragment.setInitializer(createFieldReadAccess(pi, paramName, ast, cuRewrite.getCu().getJavaProject()));
+		fragment.setInitializer(createFieldReadAccess(pi, paramName, ast, cuRewrite.getCu().getJavaProject(), false));
 		VariableDeclarationExpression declaration= ast.newVariableDeclarationExpression(fragment);
 		IVariableBinding variable= pi.getOldBinding();
 		declaration.setType(importBinding(pi.getNewTypeBinding(), cuRewrite));
@@ -372,7 +424,7 @@ public class ParameterObjectFactory {
 		AST ast= cuRewrite.getAST();
 		ICompilationUnit cu= cuRewrite.getCu();
 		IJavaProject project= cu.getJavaProject();
-		
+
 		MethodDeclaration methodDeclaration= ast.newMethodDeclaration();
 		String fieldName= pi.getNewName();
 		String setterName= getSetterName(pi, ast, project);
@@ -536,8 +588,8 @@ public class ParameterObjectFactory {
 	}
 
 
-	public List/*<Change>*/ createTopLevelParameterObject(IPackageFragmentRoot packageFragmentRoot, Set namesToInitializers, CreationListener listener) throws CoreException {
-		List changes=new ArrayList();
+	public List/*<Change>*/createTopLevelParameterObject(IPackageFragmentRoot packageFragmentRoot, Set namesToInitializers, CreationListener listener) throws CoreException {
+		List changes= new ArrayList();
 		IPackageFragment packageFragment= packageFragmentRoot.getPackageFragment(getPackage());
 		if (!packageFragment.exists()) {
 			changes.add(new CreatePackageChange(packageFragment));
@@ -552,8 +604,7 @@ public class ParameterObjectFactory {
 			String lineDelimiter= StubUtility.getLineDelimiterUsed(javaProject);
 			String fileComment= getFileComment(workingCopy, lineDelimiter);
 			String typeComment= getTypeComment(workingCopy, lineDelimiter);
-			String content= CodeGeneration.getCompilationUnitContent(workingCopy, fileComment, typeComment,
-					"class " + getClassName() + "{}", lineDelimiter); //$NON-NLS-1$ //$NON-NLS-2$
+			String content= CodeGeneration.getCompilationUnitContent(workingCopy, fileComment, typeComment, "class " + getClassName() + "{}", lineDelimiter); //$NON-NLS-1$ //$NON-NLS-2$
 			workingCopy.getBuffer().setContents(content);
 
 			CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite(workingCopy);
@@ -582,8 +633,7 @@ public class ParameterObjectFactory {
 				TextEdit rewriteImports= importRewrite.rewriteImports(null);
 				rewriteImports.apply(document);
 			} catch (BadLocationException e) {
-				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
-						RefactoringCoreMessages.IntroduceParameterObjectRefactoring_parameter_object_creation_error, e));
+				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), RefactoringCoreMessages.IntroduceParameterObjectRefactoring_parameter_object_creation_error, e));
 			}
 			String docContent= document.get();
 			CreateCompilationUnitChange compilationUnitChange= new CreateCompilationUnitChange(unit, docContent, charset);
@@ -593,11 +643,11 @@ public class ParameterObjectFactory {
 		}
 		return changes;
 	}
-	
-	public List/*<Change>*/ createTopLevelParameterObject(IPackageFragmentRoot packageFragmentRoot) throws CoreException {
+
+	public List/*<Change>*/createTopLevelParameterObject(IPackageFragmentRoot packageFragmentRoot) throws CoreException {
 		return createTopLevelParameterObject(packageFragmentRoot, null, null);
 	}
-	
+
 	protected String getFileComment(ICompilationUnit parentCU, String lineDelimiter) throws CoreException {
 		if (StubUtility.doAddComments(parentCU.getJavaProject())) {
 			return CodeGeneration.getFileComment(parentCU, lineDelimiter);
@@ -632,5 +682,5 @@ public class ParameterObjectFactory {
 		}
 		return false;
 	}
-	
+
 }

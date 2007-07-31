@@ -176,7 +176,7 @@ public final class RefactoringMessages extends NLS {
 
 	public static String ExtractClassWizard_button_up;
 
-	public static String ExtractClassWizard_check_getters;
+	public static String ExtractClassWizard_checkbox_create_gettersetter;
 
 	public static String ExtractClassWizard_checke_setters;
 

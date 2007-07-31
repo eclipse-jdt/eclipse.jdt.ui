@@ -105,9 +105,8 @@ public class ExtractClassWizard extends RefactoringWizard {
 
 	private class ExtractClassUserInputWizardPage extends UserInputWizardPage {
 
+		private static final String CREATE_GETTER_SETTER= "CREATE_GETTER_SETTER"; //$NON-NLS-1$
 		private static final String CREATE_TOP_LEVEL_SETTING= "CREATE_TOPLEVEL"; //$NON-NLS-1$
-		private static final String CREATE_SETTERS_SETTING= "CREATE_SETTERS"; //$NON-NLS-1$
-		private static final String CREATE_GETTERS_SETTING= "CREATE_GETTERS"; //$NON-NLS-1$
 		private ControlDecoration fClassNameDecoration;
 		private ControlDecoration fParameterNameDecoration;
 
@@ -123,8 +122,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 			createClassNameInput(result);
 			createLocationInput(result);
 			createTable(result);
-			createGetterInput(result);
-			createSetterInput(result);
+			createGetterSetterInput(result);
 			createParameterNameInput(result);
 			setControl(result);
 			validateRefactoring();
@@ -164,37 +162,19 @@ public class ExtractClassWizard extends RefactoringWizard {
 
 		}
 
-		private void createGetterInput(Composite result) {
+		private void createGetterSetterInput(Composite result) {
 			final Button button= new Button(result, SWT.CHECK);
-			button.setText(RefactoringMessages.ExtractClassWizard_check_getters);
+			button.setText(RefactoringMessages.ExtractClassWizard_checkbox_create_gettersetter);
 			button.addSelectionListener(new SelectionAdapter() {
 
 				public void widgetSelected(SelectionEvent e) {
-					fDescriptor.setCreateGetter(button.getSelection());
+					fDescriptor.setCreateGetterSetter(button.getSelection());
 					validateRefactoring();
 				}
 
 			});
-			button.setSelection(getBooleanSetting(CREATE_GETTERS_SETTING, fDescriptor.isCreateGetter()));
-			fDescriptor.setCreateGetter(button.getSelection());
-			GridData gridData= new GridData();
-			gridData.horizontalSpan= 2;
-			button.setLayoutData(gridData);
-		}
-
-		private void createSetterInput(Composite result) {
-			final Button button= new Button(result, SWT.CHECK);
-			button.setText(RefactoringMessages.ExtractClassWizard_checke_setters);
-			button.addSelectionListener(new SelectionAdapter() {
-
-				public void widgetSelected(SelectionEvent e) {
-					fDescriptor.setCreateSetter(button.getSelection());
-					validateRefactoring();
-				}
-
-			});
-			button.setSelection(getBooleanSetting(CREATE_SETTERS_SETTING, fDescriptor.isCreateSetter()));
-			fDescriptor.setCreateSetter(button.getSelection());
+			button.setSelection(getBooleanSetting(CREATE_GETTER_SETTER, fDescriptor.isCreateGetterSetter()));
+			fDescriptor.setCreateGetterSetter(button.getSelection());
 			GridData gridData= new GridData();
 			gridData.horizontalSpan= 2;
 			button.setLayoutData(gridData);
@@ -584,8 +564,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 
 		public void dispose() {
 			IDialogSettings settings= getRefactoringSettings();
-			settings.put(CREATE_GETTERS_SETTING, fDescriptor.isCreateGetter());
-			settings.put(CREATE_SETTERS_SETTING, fDescriptor.isCreateSetter());
+			settings.put(CREATE_GETTER_SETTER, fDescriptor.isCreateGetterSetter());
 			settings.put(CREATE_TOP_LEVEL_SETTING, fDescriptor.isCreateTopLevel());
 			super.dispose();
 		}

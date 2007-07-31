@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -329,7 +330,7 @@ public class ExtractClassRefactoring extends Refactoring {
 			IType type= fDescriptor.getType();
 			pm.worked(5);
 
-			FieldDeclaration field= performFieldRewrite(type, fParameterObjectFactory, new SubProgressMonitor(pm, 20));
+			FieldDeclaration field= performFieldRewrite(type, fParameterObjectFactory);
 			int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 			if (!Modifier.isPrivate(field.getModifiers()))
 				flags|= RefactoringDescriptor.MULTI_CHANGE;
@@ -349,7 +350,7 @@ public class ExtractClassRefactoring extends Refactoring {
 			IPackageFragmentRoot packageRoot= (IPackageFragmentRoot) typeCU.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 			ArrayList changes= new ArrayList();
 
-			changes.addAll(createParameterObject(fParameterObjectFactory, packageRoot, new SubProgressMonitor(pm, 10)));
+			changes.addAll(createParameterObject(fParameterObjectFactory, packageRoot));
 			fChangeManager.manage(typeCU, fBaseCURewrite.createChange(true, pm));
 			changes.addAll(Arrays.asList(fChangeManager.getAllChanges()));
 			String project= fDescriptor.getType().getJavaProject().getElementName();
@@ -367,29 +368,27 @@ public class ExtractClassRefactoring extends Refactoring {
 	private String createComment() {
 		String header= Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_change_comment_header, new Object[] { fDescriptor.getClassName(), fDescriptor.getType().getElementName() });
 		JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(fDescriptor.getType().getJavaProject().getElementName(), this, header);
-		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_extracted_class,fDescriptor.getClassName()));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_extracted_class, fDescriptor.getClassName()));
 
 		if (fDescriptor.isCreateTopLevel())
 			comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_package, fDescriptor.getPackage()));
-		
+
 		Field[] fields= fDescriptor.getFields();
 		ArrayList strings= new ArrayList();
 		for (int i= 0; i < fields.length; i++) {
 			Field field= fields[i];
-			if (field.isCreateField()){
-				strings.add(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_field_renamed, new Object[]{field.getFieldName(),field.getNewFieldName()}));
+			if (field.isCreateField()) {
+				strings.add(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_field_renamed, new Object[] { field.getFieldName(), field.getNewFieldName() }));
 			}
 		}
-		String fieldString=JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ExtractClassRefactoring_comment_move_field, (String[]) strings.toArray(new String[strings.size()]));
+		String fieldString= JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ExtractClassRefactoring_comment_move_field, (String[]) strings.toArray(new String[strings
+				.size()]));
 		comment.addSetting(fieldString);
-		
-		if (fDescriptor.isCreateGetter())
+
+		if (fDescriptor.isCreateGetterSetter())
 			comment.addSetting(RefactoringCoreMessages.ExtractClassRefactoring_comment_getters);
 
-		if (fDescriptor.isCreateSetter())
-			comment.addSetting(RefactoringCoreMessages.ExtractClassRefactoring_comment_setters);
-		
-		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_fieldname,fDescriptor.getFieldName()));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_fieldname, fDescriptor.getFieldName()));
 		return comment.asString();
 	}
 
@@ -420,7 +419,7 @@ public class ExtractClassRefactoring extends Refactoring {
 		}
 	}
 
-	private List createParameterObject(ParameterObjectFactory pof, IPackageFragmentRoot packageRoot, IProgressMonitor monitor) throws CoreException {
+	private List createParameterObject(ParameterObjectFactory pof, IPackageFragmentRoot packageRoot) throws CoreException {
 		FieldUpdate fieldUpdate= new FieldUpdate();
 		Set constructorFields= new HashSet();
 		for (Iterator iter= fVariables.values().iterator(); iter.hasNext();) {
@@ -449,8 +448,8 @@ public class ExtractClassRefactoring extends Refactoring {
 		pof.setClassName(fDescriptor.getClassName());
 		pof.setPackage(fDescriptor.getPackage());
 		pof.setEnclosingType(fDescriptor.getType().getFullyQualifiedName());
-		pof.setCreateGetter(fDescriptor.isCreateGetter());
-		pof.setCreateSetter(fDescriptor.isCreateSetter());
+		pof.setCreateGetter(fDescriptor.isCreateGetterSetter());
+		pof.setCreateSetter(fDescriptor.isCreateGetterSetter());
 		List variables= new ArrayList();
 		for (Iterator iterator= fVariables.values().iterator(); iterator.hasNext();) {
 			FieldInfo info= (FieldInfo) iterator.next();
@@ -540,20 +539,35 @@ public class ExtractClassRefactoring extends Refactoring {
 			ASTNode node= NodeFinder.perform(cuRewrite.getRoot(), searchMatch.getOffset(), searchMatch.getLength());
 			ASTNode parent= node.getParent();
 			if (!(parent instanceof VariableDeclaration) && node instanceof SimpleName) {
+				ASTRewrite rewrite= cuRewrite.getASTRewrite();
 				if (parent.getNodeType() == ASTNode.SWITCH_CASE)
 					status.addError(RefactoringCoreMessages.ExtractClassRefactoring_error_switch, JavaStatusContext.create(fDescriptor.getType().getTypeRoot(), node));
 				SimpleName name= (SimpleName) node;
 				ParameterInfo pi= getFieldInfo(name.getIdentifier()).pi;
-				ASTRewrite rewrite= cuRewrite.getASTRewrite();
 				boolean writeAccess= ASTResolving.isWriteAccess(name);
 
-				Expression fieldReadAccess= pof.createFieldReadAccess(pi, parameterName, ast, javaProject);
-				if (writeAccess && (fDescriptor.isCreateGetter() || fDescriptor.isCreateSetter())) {
+				boolean useSuper= parent.getNodeType() == ASTNode.SUPER_FIELD_ACCESS;
+				if (writeAccess && fDescriptor.isCreateGetterSetter()) {
+					Expression fieldReadAccess= pof.createFieldReadAccess(pi, parameterName, ast, javaProject, useSuper);
 					ITypeBinding typeBinding= name.resolveTypeBinding();
-					Expression assignedValue= GetterSetterUtil.getAssignedValue(parent, rewrite, fieldReadAccess, typeBinding, is50OrHigher);
-					Expression access= pof.createFieldWriteAccess(pi, parameterName, ast, javaProject, assignedValue);
-					rewrite.replace(name.getParent(), access, writeGroup);
+					Expression qualifier= null;
+					if (parent.getNodeType() == ASTNode.FIELD_ACCESS) {
+						qualifier= (Expression) rewrite.createMoveTarget(((FieldAccess) parent).getExpression());
+					}
+					ASTNode replaceNode;
+					Expression assignedValue=null;
+					if (qualifier != null || useSuper) {
+						replaceNode= parent.getParent();
+						assignedValue= handleSimpleNameAssignment(fieldReadAccess, replaceNode, assignedValue);
+					} else {
+						replaceNode= parent;
+					}
+					if (assignedValue == null)
+						assignedValue= GetterSetterUtil.getAssignedValue(replaceNode, rewrite, fieldReadAccess, typeBinding, is50OrHigher);
+					Expression access= pof.createFieldWriteAccess(pi, parameterName, ast, javaProject, assignedValue, qualifier, useSuper);
+					rewrite.replace(replaceNode, access, writeGroup);
 				} else {
+					Expression fieldReadAccess= pof.createFieldReadAccess(pi, parameterName, ast, javaProject, false);
 					rewrite.replace(name, fieldReadAccess, readGroup);
 				}
 			}
@@ -561,11 +575,32 @@ public class ExtractClassRefactoring extends Refactoring {
 		return status;
 	}
 
+
+	private Expression handleSimpleNameAssignment(Expression fieldReadAccess, ASTNode replaceNode, Expression assignedValue) {
+		if (replaceNode instanceof Assignment) {
+			Assignment assignment= (Assignment) replaceNode;
+			Expression rightHandSide= assignment.getRightHandSide();
+			if (rightHandSide.getNodeType() == ASTNode.SIMPLE_NAME) {
+				SimpleName sn= (SimpleName) rightHandSide;
+				IVariableBinding binding= ASTNodes.getVariableBinding(sn);
+				if (binding != null && binding.isField()) {
+					if (fDescriptor.getType().getFullyQualifiedName().equals(binding.getDeclaringClass().getQualifiedName())) {
+						FieldInfo fieldInfo= getFieldInfo(binding.getName());
+						if (fieldInfo != null && binding == fieldInfo.pi.getOldBinding()) {
+							assignedValue= fieldReadAccess;
+						}
+					}
+				}
+			}
+		}
+		return assignedValue;
+	}
+
 	private FieldInfo getFieldInfo(String identifier) {
 		return (FieldInfo) fVariables.get(identifier);
 	}
 
-	private FieldDeclaration performFieldRewrite(IType type, ParameterObjectFactory pof, IProgressMonitor monitor) throws CoreException {
+	private FieldDeclaration performFieldRewrite(IType type, ParameterObjectFactory pof) throws CoreException {
 		fBaseCURewrite= new CompilationUnitRewrite(type.getCompilationUnit());
 		TypeDeclaration typeNode= (TypeDeclaration) NodeFinder.perform(fBaseCURewrite.getRoot(), type.getSourceRange());
 		ASTRewrite rewrite= fBaseCURewrite.getASTRewrite();
