@@ -564,8 +564,12 @@ public class ExtractClassRefactoring extends Refactoring {
 					}
 					if (assignedValue == null)
 						assignedValue= GetterSetterUtil.getAssignedValue(replaceNode, rewrite, fieldReadAccess, typeBinding, is50OrHigher);
-					Expression access= pof.createFieldWriteAccess(pi, parameterName, ast, javaProject, assignedValue, qualifier, useSuper);
-					rewrite.replace(replaceNode, access, writeGroup);
+					if (assignedValue == null) {
+						status.addError(RefactoringCoreMessages.ExtractClassRefactoring_error_unable_to_convert_node, JavaStatusContext.create(fDescriptor.getType().getTypeRoot(), replaceNode));
+					} else {
+						Expression access= pof.createFieldWriteAccess(pi, parameterName, ast, javaProject, assignedValue, qualifier, useSuper);
+						rewrite.replace(replaceNode, access, writeGroup);
+					}
 				} else {
 					Expression fieldReadAccess= pof.createFieldReadAccess(pi, parameterName, ast, javaProject, false);
 					rewrite.replace(name, fieldReadAccess, readGroup);
@@ -622,7 +626,6 @@ public class ExtractClassRefactoring extends Refactoring {
 				removeNode(vdf, removeFieldGroup, fBaseCURewrite);
 				if (listRewrite.getRewrittenList().size() == 0) {
 					removeNode(parent, removeFieldGroup, fBaseCURewrite);
-					fBaseCURewrite.getImportRewrite().removeImport(parent.getType().resolveBinding().getQualifiedName());
 				}
 
 				Expression initializer= vdf.getInitializer();

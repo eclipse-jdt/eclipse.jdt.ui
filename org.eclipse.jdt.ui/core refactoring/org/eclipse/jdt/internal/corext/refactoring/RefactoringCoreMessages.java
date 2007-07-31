@@ -428,6 +428,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractClassRefactoring_error_toplevel_name_clash;
 
+	public static String ExtractClassRefactoring_error_unable_to_convert_node;
+
 	public static String ExtractClassRefactoring_errror_nested_name_clash;
 
 	public static String ExtractClassRefactoring_group_insert_parameter;
