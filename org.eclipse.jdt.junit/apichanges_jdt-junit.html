@@ -1,0 +1,76 @@
+<!DOCTYPE doctype PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=iso-8859-1">
+  <meta name="Author" content="IBM">
+  <title>JDT JUnit Breaking API changes</title>
+  <link rel="stylesheet" href="http://dev.eclipse.org/default_style.css"
+ type="text/css">
+</head>
+<body style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<font color="#8080ff" size="-2">java development tooling junit</font>
+<p>This document lists the breaking API changes that occurred between
+R3.3 and R3.4 and
+how to migrate from the R3.3 API to the R3.4 API.
+</p>
+<table border="0" cellpadding="2" cellspacing="5" width="100%" summary="Breaking API changes">
+  <tbody>
+    <tr>
+      <td align="left" width="72%"> <font size="+3"><b>jdt junit -
+Breaking API changes from R3.3 to R3.4</b></font> <br>
+      </td>
+    </tr>
+    <tr>
+      <td>
+      None
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p> </p>
+<table border="0" cellpadding="2" cellspacing="5" width="100%" summary="Non-breaking API changes">
+  <tbody>
+    <tr>
+      <td align="left" width="72%"> <font size="+3"><b>jdt junit -
+Non-breaking API changes from R3.3 to R3.4</b></font> <br>
+      </td>
+    </tr>
+    <tr>
+      <td>New API in <code>org.eclipse.jdt.junit.launching</code>:
+      <ul>
+      	<li>JUnitLaunchShortcut: JUnit launch shortcut</li>
+      	<li>JUnitLaunchConfigurationTab: JUnit launch configuration tab</li>
+      	<li>JUnitLaunchConfigurationDelegate: JUnit launch configuration delegate</li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>New API in <code>org.eclipse.jdt.junit</code>:
+      <ul>
+      	<li>TestRunListener: listener for started and finished test run sessions and test case runs. Use JavaCore.addTestRunListener to register
+      	a listener</li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      	<td>Deprecated ITestRunListener API and extension point: Use org.eclipse.jdt.junit.TestRunListener instead</td>
+    </tr>    
+    <tr>
+      <td>New API in <code>org.eclipse.jdt.junit.model</code>:
+      <ul>
+      	<li>ITestElement: base interface for all test elements</li>
+      	<li>ITestElementContainer: test element with children</li>
+      	<li>ITestRunSession: test run session</li>
+      	<li>ITestSuiteElement: test suite elementn</li>
+      	<li>ITestCaseElement: test case element</li>        	    	
+      </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>
+API changes from 3.2 to 3.3 can be found <a href="./notes/r3.3/apichanges_jdt-junit.html?view=co">here</a>.
+</p>
+</body>
+</html>
