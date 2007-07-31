@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.util.TransferDropTargetListener;
-import org.eclipse.jface.viewers.AbstractTreeViewer;
+import org.eclipse.jface.viewers.StructuredViewer;
 
 import org.eclipse.ui.actions.CopyFilesAndFoldersOperation;
 
@@ -40,9 +40,9 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * Adapter to handle file drop from other applications.
  */ 
-class FileTransferDropAdapter extends JdtViewerDropAdapter implements TransferDropTargetListener {
+public class FileTransferDropAdapter extends JdtViewerDropAdapter implements TransferDropTargetListener {
 	
-	FileTransferDropAdapter(AbstractTreeViewer viewer) {
+	public FileTransferDropAdapter(StructuredViewer viewer) {
 		super(viewer);
 		
 		setScrollEnabled(true);

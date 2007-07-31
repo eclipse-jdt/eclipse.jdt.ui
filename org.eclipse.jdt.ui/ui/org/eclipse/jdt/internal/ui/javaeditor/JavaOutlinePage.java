@@ -24,8 +24,6 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
-import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -43,7 +41,6 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.util.DelegatingDropAdapter;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
@@ -79,7 +76,6 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClassFile;
@@ -120,9 +116,8 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
 import org.eclipse.jdt.internal.ui.actions.CategoryFilterActionGroup;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
-import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
-import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragSupport;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropSupport;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
@@ -786,10 +781,10 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 						public void run() {
 							if (on) {
 								fOutlineViewer.setComparator(fComparator);
-								fReorgDropListener.setFeedbackEnabled(false);
+								fDropSupport.setFeedbackEnabled(false);
 							} else {
 								fOutlineViewer.setComparator(fSourcePositonComparator);
-								fReorgDropListener.setFeedbackEnabled(true);
+								fDropSupport.setFeedbackEnabled(true);
 							}
 						}
 					});
@@ -913,8 +908,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	 * @since 3.2
 	 */
 	private CategoryFilterActionGroup fCategoryFilterActionGroup;
-
-	private SelectionTransferDropAdapter fReorgDropListener;
+	
+	private JdtViewerDropSupport fDropSupport;
 
 	public JavaOutlinePage(String contextMenuID, JavaEditor editor) {
 		super();
@@ -1345,23 +1340,10 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	}
 
 	private void initDragAndDrop() {
-		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK;
-		Transfer[] transfers= new Transfer[] {
-			LocalSelectionTransfer.getInstance()
-			};
-
-		// Drop Adapter
-		DelegatingDropAdapter delegatingDropAdapter= new DelegatingDropAdapter();
-		fReorgDropListener= new SelectionTransferDropAdapter(fOutlineViewer);
-		delegatingDropAdapter.addDropTargetListener(fReorgDropListener);
-		fOutlineViewer.addDropSupport(ops | DND.DROP_DEFAULT, transfers, delegatingDropAdapter);
-
-		// Drag Adapter
-		JdtViewerDragAdapter dragAdapter= new JdtViewerDragAdapter(fOutlineViewer);
-		dragAdapter.addDragSourceListener(
-			new SelectionTransferDragAdapter(fOutlineViewer)
-		);
-		fOutlineViewer.addDragSupport(ops, transfers, dragAdapter);
+		fDropSupport= new JdtViewerDropSupport(fOutlineViewer);
+		fDropSupport.start();
+		
+		new JdtViewerDragSupport(fOutlineViewer).start();
 	}
 	
 	/**

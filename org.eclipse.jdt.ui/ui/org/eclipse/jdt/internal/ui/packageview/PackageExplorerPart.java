@@ -34,9 +34,6 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.FileTransfer;
-import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
@@ -55,7 +52,6 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.util.DelegatingDropAdapter;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
@@ -101,8 +97,6 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.IShowInTargetList;
-import org.eclipse.ui.part.PluginTransfer;
-import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 
@@ -111,7 +105,6 @@ import org.eclipse.ui.views.framelist.FrameAction;
 import org.eclipse.ui.views.framelist.FrameList;
 import org.eclipse.ui.views.framelist.IFrameSource;
 import org.eclipse.ui.views.framelist.TreeFrame;
-import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -137,8 +130,8 @@ import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
-import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragSupport;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropSupport;
 import org.eclipse.jdt.internal.ui.filters.OutputFolderFilter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
@@ -887,40 +880,13 @@ public class PackageExplorerPart extends ViewPart
 	}
 
 	private void initDrag() {
-		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK;
-		Transfer[] transfers= new Transfer[] {
-			LocalSelectionTransfer.getInstance(), 
-			ResourceTransfer.getInstance(),
-			FileTransfer.getInstance()};
-
-		JdtViewerDragAdapter dragAdapter= new JdtViewerDragAdapter(fViewer);
-		dragAdapter.addDragSourceListener(
-			new SelectionTransferDragAdapter(fViewer)
-		);
-		dragAdapter.addDragSourceListener(
-			new ResourceTransferDragAdapter(fViewer)
-		);
-		dragAdapter.addDragSourceListener(
-			new FileTransferDragAdapter(fViewer)
-		);
-		fViewer.addDragSupport(ops, transfers, dragAdapter);
+		new JdtViewerDragSupport(fViewer).start();
 	}
 
 	private void initDrop() {
-		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK | DND.DROP_DEFAULT;
-		
-		Transfer[] transfers= new Transfer[] {
-			LocalSelectionTransfer.getInstance(), 
-			FileTransfer.getInstance(),
-			PluginTransfer.getInstance()};
-		
-		DelegatingDropAdapter delegatingDropAdapter= new DelegatingDropAdapter();
-		delegatingDropAdapter.addDropTargetListener(new SelectionTransferDropAdapter(fViewer));
-		delegatingDropAdapter.addDropTargetListener(new FileTransferDropAdapter(fViewer));
-		delegatingDropAdapter.addDropTargetListener(new WorkingSetDropAdapter(this));
-		delegatingDropAdapter.addDropTargetListener(new PluginTransferDropAdapter(fViewer));
-		
-		fViewer.addDropSupport(ops, transfers, delegatingDropAdapter);
+		JdtViewerDropSupport dropSupport= new JdtViewerDropSupport(fViewer);
+		dropSupport.addDropTargetListener(new WorkingSetDropAdapter(this));
+		dropSupport.start();
 	}
 
 	/**

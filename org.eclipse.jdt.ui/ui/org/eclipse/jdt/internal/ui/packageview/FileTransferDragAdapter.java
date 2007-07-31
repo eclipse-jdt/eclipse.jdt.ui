@@ -55,11 +55,11 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * Drag support class to allow dragging of files and folder from
  * the packages view to another application.
  */
-class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragSourceListener {
+public class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragSourceListener {
 	
 	private ISelectionProvider fProvider;
 	
-	FileTransferDragAdapter(ISelectionProvider provider) {
+	public FileTransferDragAdapter(ISelectionProvider provider) {
 		fProvider= provider;
 		Assert.isNotNull(fProvider);
 	}

@@ -29,6 +29,7 @@ import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
@@ -88,6 +89,7 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.PageBook;
+import org.eclipse.ui.part.PluginTransfer;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
@@ -124,6 +126,8 @@ import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.packageview.FileTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.packageview.PluginTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -731,27 +735,25 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 	
 	private void addDropAdapters(AbstractTreeViewer viewer) {
-		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance() };
+		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance(), PluginTransfer.getInstance() };
 		int ops= DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT;
 		
 		DelegatingDropAdapter delegatingDropAdapter= new DelegatingDropAdapter();
-		delegatingDropAdapter.addDropTargetListener(
-			new TypeHierarchyTransferDropAdapter(this, viewer)				
-		);
+		delegatingDropAdapter.addDropTargetListener(new TypeHierarchyTransferDropAdapter(this, viewer));
+		delegatingDropAdapter.addDropTargetListener(new PluginTransferDropAdapter(viewer));
+		
 		viewer.addDropSupport(ops, transfers, delegatingDropAdapter);
 	}
 
 	private void addDragAdapters(StructuredViewer viewer) {
 		int ops= DND.DROP_COPY | DND.DROP_LINK;
-		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance(), ResourceTransfer.getInstance()};
+		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance(), ResourceTransfer.getInstance(), FileTransfer.getInstance()};
 
 		JdtViewerDragAdapter dragAdapter= new JdtViewerDragAdapter(viewer);
-		dragAdapter.addDragSourceListener(
-			new SelectionTransferDragAdapter(viewer)
-		);
-		dragAdapter.addDragSourceListener(
-			new ResourceTransferDragAdapter(viewer)
-		);
+		dragAdapter.addDragSourceListener(new SelectionTransferDragAdapter(viewer));
+		dragAdapter.addDragSourceListener(new ResourceTransferDragAdapter(viewer));
+		dragAdapter.addDragSourceListener(new FileTransferDragAdapter(viewer));
+		
 		viewer.addDragSupport(ops, transfers, dragAdapter);
 	}	
 			

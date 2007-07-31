@@ -26,8 +26,6 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
@@ -43,7 +41,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.util.DelegatingDropAdapter;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -79,12 +76,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.IShowInSource;
-import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditor;
-
-import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.search.ui.ISearchResultViewPart;
 
@@ -119,13 +113,11 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
-import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
-import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragSupport;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropSupport;
 import org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
-import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
-import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
@@ -431,30 +423,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	protected void initDragAndDrop() {
-		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK;
-		// drop
-		Transfer[] dropTransfers= new Transfer[] {
-			LocalSelectionTransfer.getInstance()
-		};
-		DelegatingDropAdapter delegatingDropAdapter= new DelegatingDropAdapter();
-		delegatingDropAdapter.addDropTargetListener(
-			new SelectionTransferDropAdapter(fViewer)
-		);
-		fViewer.addDropSupport(ops | DND.DROP_DEFAULT, dropTransfers, delegatingDropAdapter);
-
-		// Drag
-		Transfer[] dragTransfers= new Transfer[] {
-			LocalSelectionTransfer.getInstance(),
-			ResourceTransfer.getInstance()};
-		
-		JdtViewerDragAdapter dragAdapter= new JdtViewerDragAdapter(fViewer);
-		dragAdapter.addDragSourceListener(
-			new SelectionTransferDragAdapter(fViewer)
-		);
-		dragAdapter.addDragSourceListener(
-			new ResourceTransferDragAdapter(fViewer)
-		);
-		fViewer.addDragSupport(ops, dragTransfers, dragAdapter);
+		new JdtViewerDropSupport(fViewer).start();
+		new JdtViewerDragSupport(fViewer).start();
 	}
 
 	protected void fillActionBars(IActionBars actionBars) {
