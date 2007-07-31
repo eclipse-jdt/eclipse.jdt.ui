@@ -3562,6 +3562,8 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.BROWSING_STACK_VERTICALLY, false);
 		store.setDefault(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, true);
+		store.setDefault("colored_labels_in_views", true); //$NON-NLS-1$
+		
 
 		// ImportOrganizePreferencePage
 		store.setDefault(PreferenceConstants.ORGIMPORTS_IMPORTORDER, "java;javax;org;com"); //$NON-NLS-1$
