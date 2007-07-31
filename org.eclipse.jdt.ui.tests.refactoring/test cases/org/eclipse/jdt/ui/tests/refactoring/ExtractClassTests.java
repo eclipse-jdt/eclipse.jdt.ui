@@ -258,5 +258,17 @@ public class ExtractClassTests extends RefactoringTest {
 			javaProject.setOptions(originalOptions);
 		}
 	}
+	
+	public void testArrayInitializer() throws Exception {
+		fDescriptor.setType(setupType());
+		fDescriptor.setCreateGetterSetter(true);
+		runRefactoring(false);
+	}
+	
+	public void testVariableDeclarationInitializer() throws Exception {
+		fDescriptor.setType(setupType());
+		fDescriptor.setCreateGetterSetter(true);
+		runRefactoring(false);		
+	}
 
 }

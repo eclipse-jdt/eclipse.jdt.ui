@@ -541,7 +541,8 @@ public class ExtractClassRefactoring extends Refactoring {
 			SearchMatch searchMatch= searchResults[j];
 			ASTNode node= NodeFinder.perform(cuRewrite.getRoot(), searchMatch.getOffset(), searchMatch.getLength());
 			ASTNode parent= node.getParent();
-			if (!(parent instanceof VariableDeclaration) && node instanceof SimpleName) {
+			boolean isDeclaration= parent instanceof VariableDeclaration && ((VariableDeclaration)parent).getInitializer() != node;
+			if (!(isDeclaration) && node instanceof SimpleName) {
 				ASTRewrite rewrite= cuRewrite.getASTRewrite();
 				if (parent.getNodeType() == ASTNode.SWITCH_CASE)
 					status.addError(RefactoringCoreMessages.ExtractClassRefactoring_error_switch, JavaStatusContext.create(fDescriptor.getType().getTypeRoot(), node));
