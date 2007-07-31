@@ -45,6 +45,8 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -56,6 +58,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -675,8 +678,21 @@ public class ExtractClassRefactoring extends Refactoring {
 			FieldInfo fi= (FieldInfo) iter.next();
 			if (isCreateField(fi)) {
 				Expression expression= fi.initializer;
-				if (expression != null && !fi.hasFieldReference())
-					listRewrite.insertLast(fBaseCURewrite.getASTRewrite().createMoveTarget(expression), null);
+				if (expression != null && !fi.hasFieldReference()) {
+					ASTNode createMoveTarget= fBaseCURewrite.getASTRewrite().createMoveTarget(expression);
+					if (expression instanceof ArrayInitializer) {
+						ArrayInitializer ai= (ArrayInitializer) expression;
+						ITypeBinding componentType= ai.resolveTypeBinding().getComponentType();
+						ArrayCreation arrayCreation= ast.newArrayCreation();
+						Type addImport= fBaseCURewrite.getImportRewrite().addImport(componentType, ast);
+						fBaseCURewrite.getImportRemover().registerAddedImports(addImport);
+						arrayCreation.setType(ast.newArrayType(addImport));
+						arrayCreation.setInitializer((ArrayInitializer) createMoveTarget);
+						listRewrite.insertLast(arrayCreation, null);
+					} else {
+						listRewrite.insertLast(createMoveTarget, null);
+					}
+				}
 			}
 		}
 
