@@ -31,6 +31,8 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatin
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
+
 public interface IReorgPolicy extends IScriptableRefactoring, IReorgDestinationValidator {
 	
 	/**
@@ -53,6 +55,15 @@ public interface IReorgPolicy extends IScriptableRefactoring, IReorgDestinationV
 	 * @throws JavaModelException
 	 */
 	public boolean canEnable() throws JavaModelException;
+	
+	/**
+	 * @return the save mode required for this reorg policy
+	 * 
+	 * @see RefactoringSaveHelper#SAVE_ALL
+	 * @see RefactoringSaveHelper#SAVE_JAVA_ONLY_UPDATES
+	 * @see RefactoringSaveHelper#SAVE_NON_JAVA_UPDATES
+	 */
+	public int getSaveMode();
 	
 	/**
 	 * Can destination be a target for the given source elements?

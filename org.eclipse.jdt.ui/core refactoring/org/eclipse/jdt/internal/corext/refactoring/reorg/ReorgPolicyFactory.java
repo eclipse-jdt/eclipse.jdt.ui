@@ -147,6 +147,7 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 
 public final class ReorgPolicyFactory {
 
@@ -2922,6 +2923,13 @@ public final class ReorgPolicyFactory {
 			}
 			return true;
 		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public int getSaveMode() {
+			return RefactoringSaveHelper.SAVE_ALL;
+		}
 
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws CoreException {
 			Assert.isNotNull(reorgQueries);
@@ -3111,10 +3119,9 @@ public final class ReorgPolicyFactory {
 
 		protected static CompilationUnitChange createCompilationUnitChange(ICompilationUnit cu, CompilationUnitRewrite rewrite) throws CoreException {
 			CompilationUnitChange change= rewrite.createChange();
-			if (change != null) {
-				if (cu.isWorkingCopy())
-					change.setSaveMode(TextFileChange.LEAVE_DIRTY);
-			}
+			if (change != null)
+				change.setSaveMode(TextFileChange.KEEP_SAVE_STATE);
+			
 			return change;
 		}
 
@@ -3170,6 +3177,13 @@ public final class ReorgPolicyFactory {
 			}
 			
 			return true;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public int getSaveMode() {
+			return RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES;
 		}
 
 		private void copyImportsToDestination(IImportContainer container, ASTRewrite rewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {

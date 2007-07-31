@@ -228,4 +228,8 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 		Assert.isNotNull(queries);
 		fReorgQueries= queries;
 	}
+
+	public int getSaveMode() {
+		return fCopyPolicy.getSaveMode();
+	}
 }

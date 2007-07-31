@@ -277,7 +277,7 @@ public final class RefactoringExecutionStarter {
 			RefactoringWizard wizard= new ReorgCopyWizard(refactoring);
 			processor.setNewNameQueries(new NewNameQueries(wizard));
 			processor.setReorgQueries(new ReorgQueries(wizard));
-			new RefactoringStarter().activate(refactoring, wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_ALL);
+			new RefactoringStarter().activate(refactoring, wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, processor.getSaveMode());
 		}
 	}
 
@@ -391,7 +391,7 @@ public final class RefactoringExecutionStarter {
 			final RefactoringWizard wizard= new ReorgMoveWizard(refactoring);
 			processor.setCreateTargetQueries(new CreateTargetQueries(wizard));
 			processor.setReorgQueries(new ReorgQueries(wizard));
-			new RefactoringStarter().activate(refactoring, wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_ALL);
+			new RefactoringStarter().activate(refactoring, wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, processor.getSaveMode());
 		}
 	}
 

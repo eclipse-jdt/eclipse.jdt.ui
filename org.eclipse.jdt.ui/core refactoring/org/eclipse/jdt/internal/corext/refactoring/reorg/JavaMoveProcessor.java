@@ -302,4 +302,8 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 	public boolean wasCanceled() {
 		return fWasCanceled;
 	}
+
+	public int getSaveMode() {
+		return fMovePolicy.getSaveMode();
+	}
 }
