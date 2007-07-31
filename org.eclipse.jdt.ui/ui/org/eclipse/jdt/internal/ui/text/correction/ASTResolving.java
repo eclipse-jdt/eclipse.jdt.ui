@@ -775,8 +775,10 @@ public class ASTResolving {
 				case ASTNode.SINGLE_VARIABLE_DECLARATION:
 					return ((VariableDeclaration) parent).getName() == curr;
 				case ASTNode.POSTFIX_EXPRESSION:
-				case ASTNode.PREFIX_EXPRESSION:
 					return true;
+				case ASTNode.PREFIX_EXPRESSION:
+					PrefixExpression.Operator op= ((PrefixExpression) parent).getOperator();
+					return op == PrefixExpression.Operator.DECREMENT || op == PrefixExpression.Operator.INCREMENT;
 				default:
 					return false;
 			}
