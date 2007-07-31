@@ -101,6 +101,7 @@ import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.IShowInTargetList;
+import org.eclipse.ui.part.PluginTransfer;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
@@ -907,19 +908,18 @@ public class PackageExplorerPart extends ViewPart
 
 	private void initDrop() {
 		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK | DND.DROP_DEFAULT;
+		
 		Transfer[] transfers= new Transfer[] {
 			LocalSelectionTransfer.getInstance(), 
-			FileTransfer.getInstance()};
+			FileTransfer.getInstance(),
+			PluginTransfer.getInstance()};
+		
 		DelegatingDropAdapter delegatingDropAdapter= new DelegatingDropAdapter();
-		delegatingDropAdapter.addDropTargetListener(
-			new SelectionTransferDropAdapter(fViewer)
-		);
-		delegatingDropAdapter.addDropTargetListener(
-			new FileTransferDropAdapter(fViewer)
-		);
-		delegatingDropAdapter.addDropTargetListener(	
-			new WorkingSetDropAdapter(this)
-		);
+		delegatingDropAdapter.addDropTargetListener(new SelectionTransferDropAdapter(fViewer));
+		delegatingDropAdapter.addDropTargetListener(new FileTransferDropAdapter(fViewer));
+		delegatingDropAdapter.addDropTargetListener(new WorkingSetDropAdapter(this));
+		delegatingDropAdapter.addDropTargetListener(new PluginTransferDropAdapter(fViewer));
+		
 		fViewer.addDropSupport(ops, transfers, delegatingDropAdapter);
 	}
 
