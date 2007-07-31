@@ -10,10 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
+
 /**
  * {@link ReorgDestinationFactory} can create concrete 
  * instances 
  */
 public interface IReorgDestination {
+	
+    public static final int LOCATION_BEFORE = JdtViewerDropAdapter.LOCATION_BEFORE;
+    public static final int LOCATION_AFTER = JdtViewerDropAdapter.LOCATION_AFTER;
+    public static final int LOCATION_ON = JdtViewerDropAdapter.LOCATION_ON;
+    
 	public Object getDestination();
+	
+	public int getLocation();
 }

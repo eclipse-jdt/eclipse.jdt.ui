@@ -192,6 +192,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      */
     public void dragEnter(DropTargetEvent event) {
         currentTarget = determineTarget(event);
+        currentLocation = determineLocation(event);
         lastValidOperation = event.detail;
         doDropValidation(event);
     }

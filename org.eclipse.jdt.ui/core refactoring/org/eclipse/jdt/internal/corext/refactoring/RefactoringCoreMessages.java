@@ -2094,6 +2094,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ReorgPolicyFactory_inconsistent;
 
+	public static String ReorgPolicyFactory_invalidDestinationKind;
+
 	public static String ReorgPolicyFactory_jmodel;
 
 	public static String ReorgPolicyFactory_linked;
@@ -2161,6 +2163,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ReorgPolicyFactory_move_type;
 
 	public static String ReorgPolicyFactory_move_types;
+
+	public static String ReorgPolicyFactory_no_java_element;
 
 	public static String ReorgPolicyFactory_no_resource;
 

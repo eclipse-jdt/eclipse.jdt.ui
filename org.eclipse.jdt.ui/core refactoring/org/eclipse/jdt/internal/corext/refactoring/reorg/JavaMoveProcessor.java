@@ -240,7 +240,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
 			fMovePolicy= ReorgPolicyFactory.createMovePolicy(status, arguments);
 			if (fMovePolicy != null && !status.hasFatalError()) {
-				final CreateTargetExecutionLog log= ReorgPolicyFactory.loadCreateTargetExecutionLog(status, extended);
+				final CreateTargetExecutionLog log= ReorgPolicyFactory.loadCreateTargetExecutionLog(extended);
 				if (log != null && !status.hasFatalError()) {
 					fMovePolicy.setDestinationCheck(false);
 					fCreateTargetQueries= new MonitoringCreateTargetQueries(new LoggedCreateTargetQueries(log), log);

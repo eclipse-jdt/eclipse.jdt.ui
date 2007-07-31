@@ -97,7 +97,7 @@ public class ReorgUtils {
 		return element.getAncestor(type) != null;
 	}
 	
-	/**
+	/*
 	 * May be <code>null</code>.
 	 */
 	public static ICompilationUnit getCompilationUnit(IJavaElement javaElement){
@@ -106,7 +106,7 @@ public class ReorgUtils {
 		return (ICompilationUnit) javaElement.getAncestor(IJavaElement.COMPILATION_UNIT);
 	}
 
-	/**
+	/*
 	 * some of the returned elements may be <code>null</code>.
 	 */
 	public static ICompilationUnit[] getCompilationUnits(IJavaElement[] javaElements){
@@ -401,6 +401,22 @@ public class ReorgUtils {
 			if (hasElementsOfType(javaElements, types[i])) return true;
 		}
 		return false;
+	}
+	
+
+	public static boolean hasOnlyElementsOfType(IJavaElement[] javaElements, int[] types) {
+		for (int i= 0; i < javaElements.length; i++) {
+			IJavaElement element= javaElements[i];
+			boolean found= false;
+			for (int j= 0; j < types.length && !found; j++) {
+				if (isOfType(element, types[j]))
+					found= true;
+			}
+			if (!found)
+				return false;
+		}
+		
+		return true;
 	}
 
 	public static boolean hasElementsOfType(IResource[] resources, int typeMask) {

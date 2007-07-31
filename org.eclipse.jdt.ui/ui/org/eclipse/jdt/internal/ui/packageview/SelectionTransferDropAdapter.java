@@ -211,7 +211,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		if (fMoveProcessor == null)
 			return DND.DROP_NONE;
 
-		if (!fMoveProcessor.setDestination(ReorgDestinationFactory.createDestination(target)).isOK())
+		if (!fMoveProcessor.setDestination(ReorgDestinationFactory.createDestination(target, getCurrentLocation())).isOK())
 			return DND.DROP_NONE;	
 
 		return DND.DROP_MOVE;
@@ -229,7 +229,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	private void handleDropMove(final Object target) throws JavaModelException, InvocationTargetException, InterruptedException{
 		IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
 		IResource[] resources= ReorgUtils.getResources(fElements);
-		ReorgMoveStarter starter= ReorgMoveStarter.create(javaElements, resources, ReorgDestinationFactory.createDestination(target));
+		ReorgMoveStarter starter= ReorgMoveStarter.create(javaElements, resources, ReorgDestinationFactory.createDestination(target, getCurrentLocation()));
 
 		if (starter != null)
 			starter.run(getShell());
@@ -248,7 +248,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		if (fCopyProcessor == null)
 			return DND.DROP_NONE;
 		
-		if (!fCopyProcessor.setDestination(ReorgDestinationFactory.createDestination(target)).isOK())
+		if (!fCopyProcessor.setDestination(ReorgDestinationFactory.createDestination(target, getCurrentLocation())).isOK())
 			return DND.DROP_NONE;
 			
 		return DND.DROP_COPY;					
@@ -266,7 +266,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	private void handleDropCopy(final Object target) throws JavaModelException, InvocationTargetException, InterruptedException{
 		IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
 		IResource[] resources= ReorgUtils.getResources(fElements);
-		ReorgCopyStarter starter= ReorgCopyStarter.create(javaElements, resources, ReorgDestinationFactory.createDestination(target));
+		ReorgCopyStarter starter= ReorgCopyStarter.create(javaElements, resources, ReorgDestinationFactory.createDestination(target, getCurrentLocation()));
 		
 		if (starter != null)
 			starter.run(getShell());
@@ -274,5 +274,16 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 
 	private Shell getShell() {
 		return getViewer().getControl().getShell();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	protected int getCurrentLocation() {
+		if (getFeedbackEnabled()) {
+			return super.getCurrentLocation();
+		} else {
+			return LOCATION_ON;
+		}
 	}
 }

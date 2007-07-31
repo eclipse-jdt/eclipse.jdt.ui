@@ -190,7 +190,7 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 			if (fCopyPolicy != null && !status.hasFatalError()) {
 				status.merge(fCopyPolicy.initialize(arguments));
 				if (!status.hasFatalError()) {
-					final ReorgExecutionLog log= ReorgPolicyFactory.loadReorgExecutionLog(status, extended);
+					final ReorgExecutionLog log= ReorgPolicyFactory.loadReorgExecutionLog(extended);
 					if (log != null && !status.hasFatalError())
 						setNewNameQueries(new LoggedNewNameQueries(log));
 				}

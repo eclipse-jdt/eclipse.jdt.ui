@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestination;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
@@ -137,14 +138,22 @@ public class CopyTest extends RefactoringTest {
 	}
 	
 	private void verifyValidDestination(JavaCopyProcessor processor, Object destination) throws Exception {
-		RefactoringStatus status= processor.setDestination(ReorgDestinationFactory.createDestination(destination));
+		verifyValidDestination(processor, destination, IReorgDestination.LOCATION_ON);
+	}
+	
+	private void verifyValidDestination(JavaCopyProcessor processor, Object destination, int location) throws Exception {
+		RefactoringStatus status= processor.setDestination(ReorgDestinationFactory.createDestination(destination, location));
 		
 		assertEquals("destination was expected to be valid: " + status.getMessageMatchingSeverity(status.getSeverity()), RefactoringStatus.OK, status.getSeverity());
 	}
 
 	private void verifyCopyingOfSubCuElements(ICompilationUnit[] cus, Object destination, IJavaElement[] javaElements) throws JavaModelException, Exception, IOException {
+		verifyCopyingOfSubCuElements(cus, destination, IReorgDestination.LOCATION_ON, javaElements);
+	}
+	
+	private void verifyCopyingOfSubCuElements(ICompilationUnit[] cus, Object destination, int location, IJavaElement[] javaElements) throws JavaModelException, Exception, IOException {
 		JavaCopyProcessor processor= verifyEnabled(new IResource[0], javaElements, new MockNewNameQueries(), createReorgQueries());
-		verifyValidDestination(processor, destination);
+		verifyValidDestination(processor, destination, location);
 		RefactoringStatus status= performRefactoring(new CopyRefactoring(processor), false);
 		assertNull("failed precondition", status);
 		for (int i= 0; i < cus.length; i++) {
@@ -1507,7 +1516,23 @@ public class CopyTest extends RefactoringTest {
 			IJavaElement[] javaElements= { method };
 			Object destination= otherMethod;
 
-			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, IReorgDestination.LOCATION_AFTER, javaElements);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+	
+	public void test_method_yes_other_method_back() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IMethod otherMethod= cu.getType("A").getMethod("bar", new String[0]);
+			IJavaElement[] javaElements= { method };
+			Object destination= otherMethod;
+
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, IReorgDestination.LOCATION_BEFORE, javaElements);
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
@@ -1522,7 +1547,22 @@ public class CopyTest extends RefactoringTest {
 			IField field= cu.getType("A").getField("bar");
 			IJavaElement[] javaElements= { method };
 			Object destination= field;
-			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, IReorgDestination.LOCATION_AFTER, javaElements);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+	
+	public void test_method_yes_field_back() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IField field= cu.getType("A").getField("bar");
+			IJavaElement[] javaElements= { method };
+			Object destination= field;
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, IReorgDestination.LOCATION_BEFORE, javaElements);
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
@@ -1552,7 +1592,22 @@ public class CopyTest extends RefactoringTest {
 			IJavaElement[] javaElements= { method };
 			Object destination= cu.getType("A").getInitializer(1);
 
-			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, IReorgDestination.LOCATION_AFTER, javaElements);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+	
+	public void test_method_yes_initializer_back() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IMethod method= cu.getType("A").getMethod("foo", new String[0]);
+			IJavaElement[] javaElements= { method };
+			Object destination= cu.getType("A").getInitializer(1);
+
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, IReorgDestination.LOCATION_BEFORE, javaElements);
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
@@ -1567,7 +1622,22 @@ public class CopyTest extends RefactoringTest {
 			IField otherField= cu.getType("A").getField("baz");
 			IJavaElement[] javaElements= { field };
 			Object destination= otherField;
-			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, IReorgDestination.LOCATION_AFTER, javaElements);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+	
+	public void test_field_yes_field_back() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IField field= cu.getType("A").getField("bar");
+			IField otherField= cu.getType("A").getField("baz");
+			IJavaElement[] javaElements= { field };
+			Object destination= otherField;
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, IReorgDestination.LOCATION_BEFORE, javaElements);
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
@@ -1737,7 +1807,22 @@ public class CopyTest extends RefactoringTest {
 			IJavaElement[] javaElements= { initializer };
 			Object destination= cu.getType("A").getMethod("foo", new String[0]);
 
-			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, javaElements);
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, IReorgDestination.LOCATION_AFTER, javaElements);
+		} finally {
+			performDummySearch();
+			cu.delete(true, new NullProgressMonitor());
+		}
+	}
+	
+	public void test_initializer_yes_method_back() throws Exception{
+		ICompilationUnit cu= null;
+		try {
+			cu= createCUfromTestFile(getPackageP(), "A");
+			IInitializer initializer= cu.getType("A").getInitializer(1);
+			IJavaElement[] javaElements= { initializer };
+			Object destination= cu.getType("A").getMethod("foo", new String[0]);
+
+			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu}, destination, IReorgDestination.LOCATION_BEFORE, javaElements);
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());
@@ -1769,7 +1854,7 @@ public class CopyTest extends RefactoringTest {
 			cu= createCUfromTestFile(getPackageP(), "A");
 			IImportContainer container= cu.getImportContainer();
 			IJavaElement[] javaElements= { container };
-			Object destination= otherCu.getType("C");
+			Object destination= otherCu;
 			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu, otherCu}, destination, javaElements);
 		} finally {
 			performDummySearch();
@@ -1786,7 +1871,7 @@ public class CopyTest extends RefactoringTest {
 			cu= createCUfromTestFile(getPackageP(), "A");
 			IImportContainer container= cu.getImportContainer();
 			IJavaElement[] javaElements= { container };
-			Object destination= otherCu.getType("C").getMethod("foo", new String[0]);
+			Object destination= otherCu;
 			verifyCopyingOfSubCuElements(new ICompilationUnit[]{cu, otherCu}, destination, javaElements);
 		} finally {
 			performDummySearch();

@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IConfirmQuery;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestination;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
@@ -1945,7 +1946,7 @@ public class MoveTest extends RefactoringTest {
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
 			
-			move(javaElements, resources, superFolder, null, true);
+			move(javaElements, resources, superFolder, null, IReorgDestination.LOCATION_ON, true);
 			
 			assertIsParent(folder, file);
 			assertIsParent(superFolder, folder);
@@ -1969,7 +1970,7 @@ public class MoveTest extends RefactoringTest {
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
 			
-			move(javaElements, resources, superFolder, null, false);
+			move(javaElements, resources, superFolder, null, IReorgDestination.LOCATION_ON, false);
 			
 			assertIsParent(folder, file);
 			assertIsParent(superFolder, folder);
@@ -1986,7 +1987,22 @@ public class MoveTest extends RefactoringTest {
 			IJavaElement fieldF= typeA.getField("f");
 			IJavaElement fieldG= typeA.getField("g");
 			
-			move(new IJavaElement[] {fieldF} , new IResource[0], null, fieldG, true);
+			move(new IJavaElement[] {fieldF} , new IResource[0], null, fieldG, IReorgDestination.LOCATION_AFTER, true);
+			
+			compareContents("A");
+		} finally{
+			delete(cuA);
+		}
+	}
+	
+	public void testDestination_fieldWithImport_back() throws Exception {
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		try {
+			IType typeA= cuA.getType("A");
+			IJavaElement fieldF= typeA.getField("f");
+			IJavaElement fieldG= typeA.getField("g");
+			
+			move(new IJavaElement[] {fieldF} , new IResource[0], null, fieldG, IReorgDestination.LOCATION_BEFORE, true);
 			
 			compareContents("A");
 		} finally{
@@ -2003,7 +2019,7 @@ public class MoveTest extends RefactoringTest {
 			
 			IType typeB= cuB.getType("B");
 			
-			move(new IJavaElement[] {fieldF} , new IResource[0], null, typeB, true);
+			move(new IJavaElement[] {fieldF} , new IResource[0], null, typeB, IReorgDestination.LOCATION_ON, true);
 			
 			compareContents("A");
 			compareContents("B");
@@ -2016,7 +2032,7 @@ public class MoveTest extends RefactoringTest {
 		assertTrue(child.getParent().equals(parent));
 	}
 
-	public void move(IJavaElement[] javaElements, IResource[] resources, IResource destination, IJavaElement javaDestination, boolean confirmAll) throws Exception {
+	public void move(IJavaElement[] javaElements, IResource[] resources, IResource destination, IJavaElement javaDestination, int location, boolean confirmAll) throws Exception {
 		assertNotNull(javaElements);
 		assertNotNull(resources);
 		assertTrue((destination != null || javaDestination != null) && (destination == null || javaDestination == null));
@@ -2035,9 +2051,9 @@ public class MoveTest extends RefactoringTest {
 		
 		JavaMoveProcessor processor= new JavaMoveProcessor(policy);
 		if (javaDestination != null) {
-			assertTrue(processor.setDestination(ReorgDestinationFactory.createDestination(javaDestination)).isOK());
+			assertTrue(processor.setDestination(ReorgDestinationFactory.createDestination(javaDestination, location)).isOK());
 		} else {
-			assertTrue(processor.setDestination(ReorgDestinationFactory.createDestination(destination)).isOK());
+			assertTrue(processor.setDestination(ReorgDestinationFactory.createDestination(destination, location)).isOK());
 		}
 		
 		JavaMoveRefactoring ref= new JavaMoveRefactoring(processor);

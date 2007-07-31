@@ -784,10 +784,13 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					setChecked(on);
 					BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), new Runnable() {
 						public void run() {
-							if (on)
+							if (on) {
 								fOutlineViewer.setComparator(fComparator);
-							else
+								fReorgDropListener.setFeedbackEnabled(false);
+							} else {
 								fOutlineViewer.setComparator(fSourcePositonComparator);
+								fReorgDropListener.setFeedbackEnabled(true);
+							}
 						}
 					});
 
@@ -910,6 +913,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	 * @since 3.2
 	 */
 	private CategoryFilterActionGroup fCategoryFilterActionGroup;
+
+	private SelectionTransferDropAdapter fReorgDropListener;
 
 	public JavaOutlinePage(String contextMenuID, JavaEditor editor) {
 		super();
@@ -1347,9 +1352,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 		// Drop Adapter
 		DelegatingDropAdapter delegatingDropAdapter= new DelegatingDropAdapter();
-		delegatingDropAdapter.addDropTargetListener(
-			new SelectionTransferDropAdapter(fOutlineViewer)			
-		);
+		fReorgDropListener= new SelectionTransferDropAdapter(fOutlineViewer);
+		delegatingDropAdapter.addDropTargetListener(fReorgDropListener);
 		fOutlineViewer.addDropSupport(ops | DND.DROP_DEFAULT, transfers, delegatingDropAdapter);
 
 		// Drag Adapter

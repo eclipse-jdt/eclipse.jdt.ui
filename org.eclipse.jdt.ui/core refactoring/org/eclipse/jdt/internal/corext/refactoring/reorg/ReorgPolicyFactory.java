@@ -92,6 +92,7 @@ import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
@@ -1004,7 +1005,7 @@ public final class ReorgPolicyFactory {
 			return false;
 		}
 
-		public RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
+		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			Assert.isNotNull(javaElement);
 			if (!fCheckDestination)
 				return new RefactoringStatus();
@@ -1046,7 +1047,7 @@ public final class ReorgPolicyFactory {
 			return new RefactoringStatus();
 		}
 
-		public RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
+		protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
 			Assert.isNotNull(resource);
 			if (!resource.exists() || resource.isPhantom())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_phantom);
@@ -1468,7 +1469,7 @@ public final class ReorgPolicyFactory {
 			fUpdateReferences= update;
 		}
 
-		public RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
+		protected RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
 			RefactoringStatus superStatus= super.verifyDestination(destination);
 			if (superStatus.hasFatalError())
 				return superStatus;
@@ -1486,7 +1487,7 @@ public final class ReorgPolicyFactory {
 			return superStatus;
 		}
 
-		public RefactoringStatus verifyDestination(IResource destination) throws JavaModelException {
+		protected RefactoringStatus verifyDestination(IResource destination) throws JavaModelException {
 			RefactoringStatus superStatus= super.verifyDestination(destination);
 			if (superStatus.hasFatalError())
 				return superStatus;
@@ -1642,7 +1643,7 @@ public final class ReorgPolicyFactory {
 			fCheckDestination= check;
 		}
 
-		public RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
+		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			RefactoringStatus superStatus= super.verifyDestination(javaElement);
 			if (superStatus.hasFatalError())
 				return superStatus;
@@ -1849,7 +1850,7 @@ public final class ReorgPolicyFactory {
 			fCheckDestination= check;
 		}
 
-		public RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
+		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			RefactoringStatus superStatus= super.verifyDestination(javaElement);
 			if (superStatus.hasFatalError())
 				return superStatus;
@@ -2078,7 +2079,7 @@ public final class ReorgPolicyFactory {
 			fCheckDestination= check;
 		}
 
-		public RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
+		protected RefactoringStatus verifyDestination(IJavaElement destination, int location) throws JavaModelException {
 			IJavaElement[] elements= getJavaElements();
 			for (int i= 0; i < elements.length; i++) {
 				IJavaElement parent= destination.getParent();
@@ -2089,7 +2090,7 @@ public final class ReorgPolicyFactory {
 				}
 			}
 
-			RefactoringStatus superStatus= super.verifyDestination(destination);
+			RefactoringStatus superStatus= super.verifyDestination(destination, location);
 			if (superStatus.hasFatalError())
 				return superStatus;
 
@@ -2305,11 +2306,11 @@ public final class ReorgPolicyFactory {
 			return new RefactoringStatus();
 		}
 
-		public RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
+		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_noCopying);
 		}
 
-		public RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
+		protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_noCopying);
 		}
 	}
@@ -2384,11 +2385,11 @@ public final class ReorgPolicyFactory {
 			fCheckDestination= check;
 		}
 
-		public RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
+		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_noMoving);
 		}
 
-		public RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
+		protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_noMoving);
 		}
 		
@@ -2616,7 +2617,7 @@ public final class ReorgPolicyFactory {
 			return status;
 		}
 
-		public RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
+		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			Assert.isNotNull(javaElement);
 			if (!fCheckDestination)
 				return new RefactoringStatus();
@@ -2633,7 +2634,7 @@ public final class ReorgPolicyFactory {
 			return new RefactoringStatus();
 		}
 
-		public RefactoringStatus verifyDestination(IResource resource) {
+		protected RefactoringStatus verifyDestination(IResource resource) {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_src2proj);
 		}
 	}
@@ -2802,7 +2803,7 @@ public final class ReorgPolicyFactory {
 			return status;
 		}
 
-		public RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
+		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			Assert.isNotNull(javaElement);
 			if (!fCheckDestination)
 				return new RefactoringStatus();
@@ -2816,7 +2817,7 @@ public final class ReorgPolicyFactory {
 			return new RefactoringStatus();
 		}
 
-		public RefactoringStatus verifyDestination(IResource resource) {
+		protected RefactoringStatus verifyDestination(IResource resource) {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_packages);
 		}
 	}
@@ -2962,6 +2963,10 @@ public final class ReorgPolicyFactory {
 			JavaElementDestination javaElementDestination= (JavaElementDestination) fDestination;
 			return javaElementDestination.getJavaElement();
 		}
+		
+		public final int getLocation() {
+			return fDestination.getLocation();
+		}
 
 		protected RefactoringModifications getModifications() throws CoreException {
 			return null;
@@ -3076,7 +3081,7 @@ public final class ReorgPolicyFactory {
 				return verifyDestination(((ResourceDestination)destination).getResource());
 			}
 			
-			return RefactoringStatus.createErrorStatus("The selected element cannot be the destination of this operation.");
+			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_invalidDestinationKind);
 		}
 		
 		/**
@@ -3086,7 +3091,9 @@ public final class ReorgPolicyFactory {
 		 * @return OK status if valid destination
 		 * @throws JavaModelException
 		 */
-		public abstract RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException;
+		protected RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_no_java_element);
+		}
 		
 		/**
 		 * Can destination be a target for the given source elements?
@@ -3095,7 +3102,9 @@ public final class ReorgPolicyFactory {
 		 * @return OK status if valid destination
 		 * @throws JavaModelException
 		 */
-		public abstract RefactoringStatus verifyDestination(IResource destination) throws JavaModelException;
+		protected RefactoringStatus verifyDestination(IResource destination) throws JavaModelException {
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_no_resource);
+		}
 	}
 
 	private static abstract class SubCuElementReorgPolicy extends ReorgPolicy {
@@ -3164,17 +3173,35 @@ public final class ReorgPolicyFactory {
 		}
 
 		private void copyImportsToDestination(IImportContainer container, ASTRewrite rewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
+			ListRewrite listRewrite= rewrite.getListRewrite(destinationCuNode, CompilationUnit.IMPORTS_PROPERTY);
+			
 			IJavaElement[] importDeclarations= container.getChildren();
 			for (int i= 0; i < importDeclarations.length; i++) {
-				IImportDeclaration importDeclaration= (IImportDeclaration) importDeclarations[i];
-				copyImportToDestination(importDeclaration, rewrite, sourceCuNode, destinationCuNode);
+				IImportDeclaration declaration= (IImportDeclaration) importDeclarations[i];
+			
+				ImportDeclaration sourceNode= ASTNodeSearchUtil.getImportDeclarationNode(declaration, sourceCuNode);
+				ImportDeclaration copiedNode= (ImportDeclaration) ASTNode.copySubtree(rewrite.getAST(), sourceNode);
+				
+				if (getLocation() == IReorgDestination.LOCATION_BEFORE) {
+					listRewrite.insertFirst(copiedNode, null);
+				} else {
+					listRewrite.insertLast(copiedNode, null);
+				}
 			}
 		}
 
 		private void copyImportToDestination(IImportDeclaration declaration, ASTRewrite targetRewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
 			ImportDeclaration sourceNode= ASTNodeSearchUtil.getImportDeclarationNode(declaration, sourceCuNode);
 			ImportDeclaration copiedNode= (ImportDeclaration) ASTNode.copySubtree(targetRewrite.getAST(), sourceNode);
-			targetRewrite.getListRewrite(destinationCuNode, CompilationUnit.IMPORTS_PROPERTY).insertLast(copiedNode, null);
+			ListRewrite listRewrite= targetRewrite.getListRewrite(destinationCuNode, CompilationUnit.IMPORTS_PROPERTY);
+			
+			if (getJavaElementDestination() instanceof IImportDeclaration) {
+				ImportDeclaration destinationNode= ASTNodeSearchUtil.getImportDeclarationNode((IImportDeclaration) getJavaElementDestination(), destinationCuNode);
+				insertRelative(copiedNode, destinationNode, listRewrite);
+			} else {
+				//dropped on container, we could be better here
+				listRewrite.insertLast(copiedNode, null);
+			}
 		}
 
 		private void copyInitializerToDestination(IInitializer initializer, CompilationUnitRewrite targetRewriter, CompilationUnit sourceCuNode, CompilationUnit targetCuNode) throws JavaModelException {
@@ -3200,12 +3227,17 @@ public final class ReorgPolicyFactory {
 					destinationContainer= nodeDestination.getParent();
 					break;
 				case IJavaElement.TYPE:
-					nodeDestination= null;
-					IType typeDestination= (IType) javaElementDestination;
-					if (typeDestination.isAnonymous())
-						destinationContainer= ASTNodeSearchUtil.getClassInstanceCreationNode(typeDestination, targetCuNode).getAnonymousClassDeclaration();
-					else
-						destinationContainer= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(typeDestination, targetCuNode);
+					if (getLocation() == IReorgDestination.LOCATION_ON) {//into type
+						nodeDestination= null;
+						IType typeDestination= (IType) javaElementDestination;
+						if (typeDestination.isAnonymous())
+							destinationContainer= ASTNodeSearchUtil.getClassInstanceCreationNode(typeDestination, targetCuNode).getAnonymousClassDeclaration();
+						else
+							destinationContainer= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(typeDestination, targetCuNode);
+					} else {
+						nodeDestination= ASTNodeSearchUtil.getTypeDeclarationNode((IType) javaElementDestination, targetCuNode);
+						destinationContainer= nodeDestination.getParent();
+					}
 					break;
 				default:
 					nodeDestination= null;
@@ -3219,31 +3251,45 @@ public final class ReorgPolicyFactory {
 			if (destinationContainer != null) {
 				ListRewrite listRewrite;
 				if (destinationContainer instanceof AbstractTypeDeclaration) {
-					if (newMember instanceof EnumConstantDeclaration && destinationContainer instanceof EnumDeclaration)
+					if (newMember instanceof EnumConstantDeclaration && destinationContainer instanceof EnumDeclaration) {
 						listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, EnumDeclaration.ENUM_CONSTANTS_PROPERTY);
-					else
+					} else {
 						listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, ((AbstractTypeDeclaration) destinationContainer).getBodyDeclarationsProperty());
-				} else
+					}
+				} else if (destinationContainer instanceof CompilationUnit) {
+					listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, CompilationUnit.TYPES_PROPERTY);
+				} else {
 					listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
+				}
 
 				if (nodeDestination != null) {
-					final List list= listRewrite.getOriginalList();
-					final int index= list.indexOf(nodeDestination);
-					if (index > 0 && index < list.size() - 1) {
-						listRewrite.insertBefore(newMember, (ASTNode) list.get(index), null);
-					} else
-						listRewrite.insertLast(newMember, null);
-				} else
+					insertRelative(newMember, nodeDestination, listRewrite);
+				} else {
 					listRewrite.insertAt(newMember, ASTNodes.getInsertionIndex(newMember, listRewrite.getRewrittenList()), null);
-				return; // could insert into/after destination
+				}
+			} else {
+				// fall-back / default:
+				final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getDestinationAsType(), targetCuNode);
+				targetRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertLast(newMember, null);
 			}
-			// fall-back / default:
-			final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getDestinationAsType(), targetCuNode);
-			targetRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertLast(newMember, null);
+		}
+
+		private void insertRelative(ASTNode newNode, ASTNode relativeNode, ListRewrite listRewrite) {
+			final List list= listRewrite.getOriginalList();
+			final int index= list.indexOf(relativeNode);
+			
+			if (getLocation() == IReorgDestination.LOCATION_BEFORE) {
+				listRewrite.insertBefore(newNode, (ASTNode) list.get(index), null);
+			} else if (index + 1 < list.size()) {
+				listRewrite.insertBefore(newNode, (ASTNode) list.get(index + 1), null);
+			} else {
+				listRewrite.insertLast(newNode, null);
+			}
 		}
 
 		private void copyMethodToDestination(IMethod method, CompilationUnitRewrite targetRewriter, CompilationUnit sourceCuNode, CompilationUnit targetCuNode) throws JavaModelException {
-			BodyDeclaration newMethod= (BodyDeclaration) targetRewriter.getASTRewrite().createStringPlaceholder(getUnindentedSource(method), ASTNode.METHOD_DECLARATION);
+			MethodDeclaration newMethod= (MethodDeclaration) targetRewriter.getASTRewrite().createStringPlaceholder(getUnindentedSource(method), ASTNode.METHOD_DECLARATION);
+			newMethod.setConstructor(method.isConstructor());
 			copyMemberToDestination(method, targetRewriter, sourceCuNode, targetCuNode, newMethod);
 		}
 
@@ -3429,7 +3475,7 @@ public final class ReorgPolicyFactory {
 			return status;
 		}
 
-		private RefactoringStatus recursiveVerifyDestination(IJavaElement destination) throws JavaModelException {
+		protected RefactoringStatus verifyDestination(IJavaElement destination, int location) throws JavaModelException {
 			Assert.isNotNull(destination);
 			if (!fCheckDestination)
 				return new RefactoringStatus();
@@ -3446,46 +3492,79 @@ public final class ReorgPolicyFactory {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot_modify);
 
 			switch (destination.getElementType()) {
-				case IJavaElement.COMPILATION_UNIT:
-					int[] types0= new int[] { IJavaElement.FIELD, IJavaElement.INITIALIZER, IJavaElement.METHOD};
-					if (ReorgUtils.hasElementsOfType(getJavaElements(), types0))
+				case IJavaElement.COMPILATION_UNIT: 
+					if (location != IReorgDestination.LOCATION_ON)
 						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+					
+					int[] types0= new int[] {IJavaElement.TYPE, IJavaElement.PACKAGE_DECLARATION, IJavaElement.IMPORT_CONTAINER, IJavaElement.IMPORT_DECLARATION};
+					if (!ReorgUtils.hasOnlyElementsOfType(getJavaElements(), types0))
+						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+					
 					break;
-				case IJavaElement.PACKAGE_DECLARATION:
+				case IJavaElement.PACKAGE_DECLARATION: //drop nothing
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_package_decl);
-
 				case IJavaElement.IMPORT_CONTAINER:
+					if (location == IReorgDestination.LOCATION_ON) {
+						if (ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_DECLARATION))
+							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+					} else {
+						if (ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_CONTAINER))
+							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+					}
+					
+					break;
+				case IJavaElement.IMPORT_DECLARATION: //drop import declarations before/after
+					if (location == IReorgDestination.LOCATION_ON)
+						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+					
 					if (ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_DECLARATION))
 						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+					
 					break;
-
-				case IJavaElement.IMPORT_DECLARATION:
-					if (ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.IMPORT_DECLARATION))
-						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
-					break;
-
 				case IJavaElement.FIELD:// fall thru
 				case IJavaElement.INITIALIZER:// fall thru
 				case IJavaElement.METHOD:// fall thru
-					return recursiveVerifyDestination(destination.getParent());
-
+					if (location == IReorgDestination.LOCATION_ON) {
+						//can paste on itself (drop on itself is disabled in the SelectionTransferDropAdapter)
+						if (getJavaElements().length != 1)
+							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+						
+						if (!(destination.equals(getJavaElements()[0])))
+							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+					} else {
+						int[] types= new int[] {IJavaElement.FIELD, IJavaElement.INITIALIZER, IJavaElement.METHOD, IJavaElement.TYPE};
+						if (!ReorgUtils.hasOnlyElementsOfType(getJavaElements(), types))
+							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+					}
+					
+					break;
 				case IJavaElement.TYPE:
-					int[] types1= new int[] { IJavaElement.IMPORT_DECLARATION, IJavaElement.IMPORT_CONTAINER, IJavaElement.PACKAGE_DECLARATION};
-					if (ReorgUtils.hasElementsOfType(getJavaElements(), types1))
-						return recursiveVerifyDestination(destination.getParent());
+					if (location == IReorgDestination.LOCATION_ON) {//can drop type members
+						int[] types1= new int[] {IJavaElement.FIELD, IJavaElement.INITIALIZER, IJavaElement.METHOD, IJavaElement.TYPE};
+						if (!ReorgUtils.hasOnlyElementsOfType(getJavaElements(), types1))
+							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);	
+					} else {//can drop type before/after
+						if (ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.TYPE))
+							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+					}
+					
 					break;
 			}
 
 			return new RefactoringStatus();
 		}
-
-		public RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
-			return recursiveVerifyDestination(destination);
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public RefactoringStatus verifyDestination(IReorgDestination destination) throws JavaModelException {
+			if (!(destination instanceof JavaElementDestination))
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_invalidDestinationKind);
+			
+			JavaElementDestination javaElementDestination= (JavaElementDestination) destination;
+			return verifyDestination(javaElementDestination.getJavaElement(), javaElementDestination.getLocation());
 		}
 
-		public final RefactoringStatus verifyDestination(IResource destination) throws JavaModelException {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_no_resource);
-		}
 	}
 
 	private static final String ATTRIBUTE_FILES= "files"; //$NON-NLS-1$
@@ -3674,7 +3753,7 @@ public final class ReorgPolicyFactory {
 		return false;
 	}
 
-	public static CreateTargetExecutionLog loadCreateTargetExecutionLog(RefactoringStatus status, JavaRefactoringArguments arguments) {
+	public static CreateTargetExecutionLog loadCreateTargetExecutionLog(JavaRefactoringArguments arguments) {
 		CreateTargetExecutionLog log= new CreateTargetExecutionLog();
 		final String value= arguments.getAttribute(ATTRIBUTE_LOG);
 		if (value != null) {
@@ -3687,7 +3766,7 @@ public final class ReorgPolicyFactory {
 		return log;
 	}
 
-	public static ReorgExecutionLog loadReorgExecutionLog(RefactoringStatus status, JavaRefactoringArguments arguments) {
+	public static ReorgExecutionLog loadReorgExecutionLog(JavaRefactoringArguments arguments) {
 		ReorgExecutionLog log= new ReorgExecutionLog();
 		final String value= arguments.getAttribute(ATTRIBUTE_LOG);
 		if (value != null) {
