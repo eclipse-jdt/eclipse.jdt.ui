@@ -532,6 +532,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 			RefactoringStatus status= new RefactoringStatus();
 			setErrorMessage(null);
 			setMessage(null);
+			setPageComplete(true);
 			status.merge(validateTopLevel());
 			status.merge(validateClassName());
 			status.merge(validateParameterName());
@@ -542,6 +543,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 					case RefactoringStatus.ERROR:
 					case RefactoringStatus.FATAL:
 						setErrorMessage(highestSeverity.getMessage());
+						setPageComplete(false);
 						break;
 					case RefactoringStatus.WARNING:
 						setMessage(highestSeverity.getMessage(), IMessageProvider.WARNING);
