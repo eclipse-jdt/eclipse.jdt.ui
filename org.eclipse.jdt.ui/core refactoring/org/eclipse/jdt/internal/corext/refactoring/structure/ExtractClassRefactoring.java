@@ -553,22 +553,22 @@ public class ExtractClassRefactoring extends Refactoring {
 
 				boolean useSuper= parent.getNodeType() == ASTNode.SUPER_FIELD_ACCESS;
 				if (writeAccess && fDescriptor.isCreateGetterSetter()) {
-					Expression fieldReadAccess= pof.createFieldReadAccess(pi, parameterName, ast, javaProject, useSuper);
 					ITypeBinding typeBinding= name.resolveTypeBinding();
 					Expression qualifier= null;
 					if (parent.getNodeType() == ASTNode.FIELD_ACCESS) {
 						qualifier= (Expression) rewrite.createMoveTarget(((FieldAccess) parent).getExpression());
 					}
 					ASTNode replaceNode;
-					Expression assignedValue=null;
 					if (qualifier != null || useSuper) {
 						replaceNode= parent.getParent();
-						assignedValue= handleSimpleNameAssignment(fieldReadAccess, replaceNode, assignedValue);
 					} else {
 						replaceNode= parent;
 					}
-					if (assignedValue == null)
+					Expression assignedValue=handleSimpleNameAssignment(replaceNode, pof, parameterName, ast, javaProject, useSuper);
+					if (assignedValue == null) {
+						Expression fieldReadAccess= pof.createFieldReadAccess(pi, parameterName, ast, javaProject, useSuper);
 						assignedValue= GetterSetterUtil.getAssignedValue(replaceNode, rewrite, fieldReadAccess, typeBinding, is50OrHigher);
+					}
 					if (assignedValue == null) {
 						status.addError(RefactoringCoreMessages.ExtractClassRefactoring_error_unable_to_convert_node, JavaStatusContext.create(fDescriptor.getType().getTypeRoot(), replaceNode));
 					} else {
@@ -585,7 +585,7 @@ public class ExtractClassRefactoring extends Refactoring {
 	}
 
 
-	private Expression handleSimpleNameAssignment(Expression fieldReadAccess, ASTNode replaceNode, Expression assignedValue) {
+	private Expression handleSimpleNameAssignment(ASTNode replaceNode, ParameterObjectFactory pof, String parameterName, AST ast, IJavaProject javaProject, boolean useSuper) {
 		if (replaceNode instanceof Assignment) {
 			Assignment assignment= (Assignment) replaceNode;
 			Expression rightHandSide= assignment.getRightHandSide();
@@ -596,13 +596,13 @@ public class ExtractClassRefactoring extends Refactoring {
 					if (fDescriptor.getType().getFullyQualifiedName().equals(binding.getDeclaringClass().getQualifiedName())) {
 						FieldInfo fieldInfo= getFieldInfo(binding.getName());
 						if (fieldInfo != null && binding == fieldInfo.pi.getOldBinding()) {
-							assignedValue= fieldReadAccess;
+							return pof.createFieldReadAccess(fieldInfo.pi, parameterName, ast, javaProject, useSuper);
 						}
 					}
 				}
 			}
 		}
-		return assignedValue;
+		return null;
 	}
 
 	private FieldInfo getFieldInfo(String identifier) {
