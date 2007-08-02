@@ -904,8 +904,14 @@ public class PasteAction extends SelectionDispatchAction{
 				return false;
 
 			if (isContainer) {
+				if (target instanceof IProject)
+					return ((IProject)target).isOpen();
+				
 				return true;
 			} else {
+				if (isJavaProject && !((IJavaProject)target).isOpen())
+					return false;
+				
 				IJavaElement element= (IJavaElement)target;
 				return !element.isReadOnly();
 			}
