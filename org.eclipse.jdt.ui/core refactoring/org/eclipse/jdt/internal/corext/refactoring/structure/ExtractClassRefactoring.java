@@ -76,6 +76,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
@@ -680,6 +681,7 @@ public class ExtractClassRefactoring extends Refactoring {
 			if (isCreateField(fi)) {
 				Expression expression= fi.initializer;
 				if (expression != null && !fi.hasFieldReference()) {
+					importNodeTypes(expression, fBaseCURewrite);
 					ASTNode createMoveTarget= fBaseCURewrite.getASTRewrite().createMoveTarget(expression);
 					if (expression instanceof ArrayInitializer) {
 						ArrayInitializer ai= (ArrayInitializer) expression;
@@ -717,6 +719,21 @@ public class ExtractClassRefactoring extends Refactoring {
 		return fieldDeclaration;
 	}
 
+	public Type importBinding(ITypeBinding newTypeBinding, CompilationUnitRewrite cuRewrite) {
+		Type type= cuRewrite.getImportRewrite().addImport(newTypeBinding, cuRewrite.getAST());
+		cuRewrite.getImportRemover().registerAddedImports(type);
+		return type;
+	}
+
+	private void importNodeTypes(ASTNode node, final CompilationUnitRewrite cuRewrite) {
+		ASTResolving.visitAllBindings(node, new TypeBindingVisitor() {
+			public boolean visit(ITypeBinding nodeBinding) {
+				importBinding(nodeBinding, cuRewrite);
+				return false;
+			}
+		});
+	}
+	
 	private boolean isCreateField(FieldInfo fi) {
 		return getField(fi.name).isCreateField();
 	}

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package p;
 
+import java.util.ArrayList;
+
 class A {
 	public int foo() {
 		return 5;
@@ -19,4 +21,5 @@ class A {
 public class InitializerProblem extends A{
 	public int test= foo();
 	public int test2= test;
+	public ArrayList list= new ArrayList();
 }
