@@ -8,5 +8,9 @@ public class UpdateSimpleName {
 		this.foo=foo2;
 		foo=this.foo2;
 		foo=Math.abs(foo);
+		UpdateSimpleName usn= new UpdateSimpleName();
+		usn.foo= usn.foo2;
+		usn.foo= foo;
+		usn.foo2++;
 	}
 }

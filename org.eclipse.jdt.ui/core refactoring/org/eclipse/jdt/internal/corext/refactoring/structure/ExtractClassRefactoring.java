@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -557,6 +558,9 @@ public class ExtractClassRefactoring extends Refactoring {
 					Expression qualifier= null;
 					if (parent.getNodeType() == ASTNode.FIELD_ACCESS) {
 						qualifier= (Expression) rewrite.createMoveTarget(((FieldAccess) parent).getExpression());
+					}
+					if (parent.getNodeType() ==  ASTNode.QUALIFIED_NAME) {
+						qualifier= (Expression) rewrite.createMoveTarget(((QualifiedName)parent).getQualifier());
 					}
 					ASTNode replaceNode;
 					if (qualifier != null || useSuper) {
