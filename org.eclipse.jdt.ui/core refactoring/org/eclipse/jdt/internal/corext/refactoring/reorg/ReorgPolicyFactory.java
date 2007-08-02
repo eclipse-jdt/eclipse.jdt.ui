@@ -3340,8 +3340,15 @@ public final class ReorgPolicyFactory {
 		/**
 		 * {@inheritDoc}
 		 */
-		public boolean canChildrenBeDestinations(IReorgDestination destination) {
+		public boolean canChildrenBeDestinations(IResource resource) {
 			return false;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean canElementBeDestination(IJavaElement javaElement) {
+			return true;
 		}
 
 		public boolean canEnable() throws JavaModelException {
