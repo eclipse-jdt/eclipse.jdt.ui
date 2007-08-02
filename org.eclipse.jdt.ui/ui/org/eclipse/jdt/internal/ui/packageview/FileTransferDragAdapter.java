@@ -58,10 +58,12 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragSourceListener {
 	
 	private ISelectionProvider fProvider;
+	private boolean fWasDataRequested;
 	
 	public FileTransferDragAdapter(ISelectionProvider provider) {
 		fProvider= provider;
 		Assert.isNotNull(fProvider);
+		fWasDataRequested= false;
 	}
 
 	public Transfer getTransfer() {
@@ -70,6 +72,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 	
 	public void dragStart(DragSourceEvent event) {
 		event.doit= isDragable(fProvider.getSelection());
+		fWasDataRequested= false;
 	}
 	
 	private boolean isDragable(ISelection s) {
@@ -103,6 +106,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		}
 		
 		event.data= getResourceLocations(elements);
+		fWasDataRequested= true;
 	}
 
 	private static String[] getResourceLocations(List resources) {
@@ -111,6 +115,9 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 	
 	public void dragFinished(DragSourceEvent event) {
 		if (!event.doit)
+			return;
+		
+		if (!fWasDataRequested)
 			return;
 		
 		if (event.detail == DND.DROP_MOVE) {
