@@ -14,7 +14,6 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CastExpression;
@@ -29,8 +28,11 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class CastCompletionProposal extends LinkedCorrectionProposal {
@@ -56,11 +58,14 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 
 	private Type getNewCastTypeNode(ASTRewrite rewrite, ImportRewrite importRewrite) throws CoreException {
 		AST ast= rewrite.getAST();
+		
+		ImportRewriteContext context= new ContextSensitiveImportRewriteContext((CompilationUnit) fNodeToCast.getRoot(), fNodeToCast.getStartPosition(), importRewrite);
+		
 		if (fCastType != null) {
 			if (fCastType instanceof ITypeBinding) {
-				return importRewrite.addImport((ITypeBinding) fCastType, ast);
+				return importRewrite.addImport((ITypeBinding) fCastType, ast, context);
 			} else {
-				String string= importRewrite.addImport((String) fCastType);
+				String string= importRewrite.addImport((String) fCastType, context);
 				return ASTNodeFactory.newType(ast, string);
 			}
 		}
@@ -83,7 +88,7 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 				if (bindings.length > 0) {
 					ITypeBinding first= getCastFavorite(bindings, fNodeToCast.resolveTypeBinding());
 
-					Type newTypeNode= importRewrite.addImport(first, ast);
+					Type newTypeNode= importRewrite.addImport(first, ast, context);
 					addLinkedPosition(rewrite.track(newTypeNode), true, "casttype"); //$NON-NLS-1$
 					for (int i= 0; i < bindings.length; i++) {
 						addLinkedPositionProposal("casttype", bindings[i]); //$NON-NLS-1$

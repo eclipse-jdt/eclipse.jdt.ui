@@ -1778,5 +1778,53 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
+	
+	public void testTypeMismatchWithTypeInSamePackage() throws Exception {
+		// test for bug 198586
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {}\n");
+		pack2.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {}\n");
+		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Test {\n");
+		buf.append("    test2.E e2= new Object();\n");
+		buf.append("    E e1;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Test {\n");
+		buf.append("    test2.E e2= (test2.E) new Object();\n");
+		buf.append("    E e1;\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Test {\n");
+		buf.append("    Object e2= new Object();\n");
+		buf.append("    E e1;\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
 
 }
