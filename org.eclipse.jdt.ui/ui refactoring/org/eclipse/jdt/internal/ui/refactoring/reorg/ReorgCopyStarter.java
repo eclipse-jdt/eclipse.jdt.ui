@@ -40,7 +40,10 @@ public class ReorgCopyStarter {
 	public static ReorgCopyStarter create(IJavaElement[] javaElements, IResource[] resources, IReorgDestination destination) throws JavaModelException {
 		Assert.isNotNull(javaElements);
 		Assert.isNotNull(resources);
-		Assert.isNotNull(destination);
+		
+		if (destination == null)
+			return null;
+		
 		ICopyPolicy copyPolicy= ReorgPolicyFactory.createCopyPolicy(resources, javaElements);
 		if (!copyPolicy.canEnable())
 			return null;
