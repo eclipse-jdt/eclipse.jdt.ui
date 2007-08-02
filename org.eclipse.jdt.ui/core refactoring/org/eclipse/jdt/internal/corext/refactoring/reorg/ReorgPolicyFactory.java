@@ -2766,8 +2766,8 @@ public final class ReorgPolicyFactory {
 		
 		private boolean isChildOfOrEqualToAnyFolder(IResource resource) {
 			for (int i= 0; i < fPackageFragmentRoots.length; i++) {
-				IContainer folder= (IContainer) fPackageFragmentRoots[i].getResource();
-				if (folder.equals(resource) || ParentChecker.isDescendantOf(resource, folder))
+				IResource fragmentRootResource= fPackageFragmentRoots[i].getResource();
+				if (fragmentRootResource.equals(resource) || ParentChecker.isDescendantOf(resource, fragmentRootResource))
 					return true;
 			}
 			return false;

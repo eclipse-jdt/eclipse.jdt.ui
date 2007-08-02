@@ -1946,7 +1946,7 @@ public class MoveTest extends RefactoringTest {
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
 			
-			move(javaElements, resources, superFolder, null, IReorgDestination.LOCATION_ON, true);
+			move(javaElements, resources, superFolder, null, IReorgDestination.LOCATION_ON, true, true);
 			
 			assertIsParent(folder, file);
 			assertIsParent(superFolder, folder);
@@ -1970,7 +1970,7 @@ public class MoveTest extends RefactoringTest {
 			IJavaElement[] javaElements= {};
 			IResource[] resources= {file};
 			
-			move(javaElements, resources, superFolder, null, IReorgDestination.LOCATION_ON, false);
+			move(javaElements, resources, superFolder, null, IReorgDestination.LOCATION_ON, false, true);
 			
 			assertIsParent(folder, file);
 			assertIsParent(superFolder, folder);
@@ -1987,7 +1987,7 @@ public class MoveTest extends RefactoringTest {
 			IJavaElement fieldF= typeA.getField("f");
 			IJavaElement fieldG= typeA.getField("g");
 			
-			move(new IJavaElement[] {fieldF} , new IResource[0], null, fieldG, IReorgDestination.LOCATION_AFTER, true);
+			move(new IJavaElement[] {fieldF} , new IResource[0], null, fieldG, IReorgDestination.LOCATION_AFTER, true, true);
 			
 			compareContents("A");
 		} finally{
@@ -2002,7 +2002,7 @@ public class MoveTest extends RefactoringTest {
 			IJavaElement fieldF= typeA.getField("f");
 			IJavaElement fieldG= typeA.getField("g");
 			
-			move(new IJavaElement[] {fieldF} , new IResource[0], null, fieldG, IReorgDestination.LOCATION_BEFORE, true);
+			move(new IJavaElement[] {fieldF} , new IResource[0], null, fieldG, IReorgDestination.LOCATION_BEFORE, true, true);
 			
 			compareContents("A");
 		} finally{
@@ -2019,7 +2019,7 @@ public class MoveTest extends RefactoringTest {
 			
 			IType typeB= cuB.getType("B");
 			
-			move(new IJavaElement[] {fieldF} , new IResource[0], null, typeB, IReorgDestination.LOCATION_ON, true);
+			move(new IJavaElement[] {fieldF} , new IResource[0], null, typeB, IReorgDestination.LOCATION_ON, true, true);
 			
 			compareContents("A");
 			compareContents("B");
@@ -2028,11 +2028,29 @@ public class MoveTest extends RefactoringTest {
 		}
 	}
 	
+	public void testDestination_bug31125() throws Exception {
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
+		IFolder destination= superFolder.getFolder("folder");
+		destination.create(true, true, null);
+		
+		IFile file= superFolder.getFile("archive.jar");
+		file.create(getStream("123"), true, null);
+		
+		IPackageFragmentRoot source= JavaProjectHelper.addLibrary(RefactoringTestSetup.getProject(), file.getFullPath());
+		
+		try {
+			fIsPreDeltaTest= false;
+			move(new IJavaElement[] {source} , new IResource[0], destination, null, IReorgDestination.LOCATION_ON, true, false);
+		} finally{
+			fIsPreDeltaTest= true;
+		}
+	}
+	
 	private static void assertIsParent(IContainer parent, IResource child) {
 		assertTrue(child.getParent().equals(parent));
 	}
 
-	public void move(IJavaElement[] javaElements, IResource[] resources, IResource destination, IJavaElement javaDestination, int location, boolean confirmAll) throws Exception {
+	public void move(IJavaElement[] javaElements, IResource[] resources, IResource destination, IJavaElement javaDestination, int location, boolean confirmAll, boolean providesUndo) throws Exception {
 		assertNotNull(javaElements);
 		assertNotNull(resources);
 		assertTrue((destination != null || javaDestination != null) && (destination == null || javaDestination == null));
@@ -2065,7 +2083,7 @@ public class MoveTest extends RefactoringTest {
 			processor.setReorgQueries(new ConfirmNoneQuery());
 		}
 		
-		performRefactoring(ref);
+		performRefactoring(ref, providesUndo);
 	}
 	
 	private void delete(ICompilationUnit cu) throws Exception {

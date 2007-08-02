@@ -97,16 +97,23 @@ class OverwriteHelper {
 		confirmFileOverwritting(overwriteQuery, skipQuery);
 		confirmFolderOverwritting(skipQuery);
 		confirmCuOverwritting(overwriteQuery);	
-		confirmPackageFragmentRootOverwritting(skipQuery);	
+		confirmPackageFragmentRootOverwritting(skipQuery, overwriteQuery);	
 		confirmPackageOverwritting(overwriteQuery);	
 	}
 
-	private void confirmPackageFragmentRootOverwritting(IConfirmQuery overwriteQuery) {
+	private void confirmPackageFragmentRootOverwritting(IConfirmQuery skipQuery, IConfirmQuery overwriteQuery) {
 		List toNotOverwrite= new ArrayList(1);
 		for (int i= 0; i < fRoots.length; i++) {
 			IPackageFragmentRoot root= fRoots[i];
-			if (canOverwrite(root) && ! skip(root.getElementName(), overwriteQuery))
-				toNotOverwrite.add(root);
+			if (canOverwrite(root)) {
+				if (root.getResource() instanceof IContainer) {
+					if (!skip(root.getElementName(), skipQuery))
+						toNotOverwrite.add(root);
+				} else {
+					if (!overwrite(root.getResource(), overwriteQuery))
+						toNotOverwrite.add(root);
+				}
+			}
 		}
 		IPackageFragmentRoot[] roots= (IPackageFragmentRoot[]) toNotOverwrite.toArray(new IPackageFragmentRoot[toNotOverwrite.size()]);
 		fRoots= ArrayTypeConverter.toPackageFragmentRootArray(ReorgUtils.setMinus(fRoots, roots));
