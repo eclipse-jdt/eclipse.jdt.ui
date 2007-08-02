@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.browsing.JavaBrowsingMessages;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropSupport;
 import org.eclipse.jdt.internal.ui.viewsupport.SourcePositionComparator;
 
 /*
@@ -34,10 +35,12 @@ public class LexicalSortingAction extends Action {
 	private SourcePositionComparator fSourcePositonComparator= new SourcePositionComparator();
 	private StructuredViewer fViewer;
 	private String fPreferenceKey;
+	private final JdtViewerDropSupport fDropSupport;
 
-	public LexicalSortingAction(StructuredViewer viewer, String id) {
+	public LexicalSortingAction(StructuredViewer viewer, String id, JdtViewerDropSupport dropSupport) {
 		super();
 		fViewer= viewer;
+		fDropSupport= dropSupport;
 		fPreferenceKey= "LexicalSortingAction." + id + ".isChecked"; //$NON-NLS-1$ //$NON-NLS-2$
 		setText(JavaBrowsingMessages.LexicalSortingAction_label); 
 		JavaPluginImages.setLocalImageDescriptors(this, "alphab_sort_co.gif"); //$NON-NLS-1$
@@ -56,10 +59,13 @@ public class LexicalSortingAction extends Action {
 		setChecked(on);
 		BusyIndicator.showWhile(fViewer.getControl().getDisplay(), new Runnable() {
 			public void run() {
-				if (on)
+				if (on) {
 					fViewer.setComparator(fComparator);
-				else
+					fDropSupport.setFeedbackEnabled(false);
+				} else {
 					fViewer.setComparator(fSourcePositonComparator);
+					fDropSupport.setFeedbackEnabled(true);
+				}
 			}
 		});
 		

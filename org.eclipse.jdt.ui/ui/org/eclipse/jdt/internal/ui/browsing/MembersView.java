@@ -119,7 +119,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	}
 
 	protected void fillToolBar(IToolBarManager tbm) {
-		tbm.add(new LexicalSortingAction(getViewer(), JavaUI.ID_MEMBERS_VIEW));
+		tbm.add(new LexicalSortingAction(getViewer(), JavaUI.ID_MEMBERS_VIEW, getDropSupport()));
 		fMemberFilterActionGroup.contributeToToolBar(tbm);
 		super.fillToolBar(tbm);
 	}

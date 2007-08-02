@@ -142,6 +142,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	private StructuredViewer fViewer;
 	private IMemento fMemento;
 	private JavaElementTypeComparator fTypeComparator;
+	private JdtViewerDropSupport fDropSupport;
 
 	// Actions
 	private WorkingSetFilterActionGroup fWorkingSetFilterActionGroup;
@@ -423,8 +424,13 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	protected void initDragAndDrop() {
-		new JdtViewerDropSupport(fViewer).start();
+		fDropSupport= new JdtViewerDropSupport(fViewer);
+		fDropSupport.start();
 		new JdtViewerDragSupport(fViewer).start();
+	}
+	
+	protected JdtViewerDropSupport getDropSupport() {
+		return fDropSupport;
 	}
 
 	protected void fillActionBars(IActionBars actionBars) {
