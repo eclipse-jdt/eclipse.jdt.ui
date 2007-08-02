@@ -137,8 +137,7 @@ class DeleteChangeCreator {
 			TextChange textChange= manager.get(cu);
 			if (textChange instanceof TextFileChange) {
 				TextFileChange tfc= (TextFileChange) textChange;
-				if (cu.isWorkingCopy())
-					tfc.setSaveMode(TextFileChange.LEAVE_DIRTY);
+				tfc.setSaveMode(TextFileChange.KEEP_SAVE_STATE);
 			}
 			String message= RefactoringCoreMessages.DeleteChangeCreator_1; 
 			TextChangeCompatibility.addTextEdit(textChange, message, resultingEdits);
