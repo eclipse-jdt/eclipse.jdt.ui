@@ -270,5 +270,11 @@ public class ExtractClassTests extends RefactoringTest {
 		fDescriptor.setCreateGetterSetter(true);
 		runRefactoring(false);		
 	}
+	
+	public void testUpdateSimpleName() throws Exception {
+		fDescriptor.setType(setupType());
+		fDescriptor.setCreateGetterSetter(true);
+		runRefactoring(false);	
+	}
 
 }
