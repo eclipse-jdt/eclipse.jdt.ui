@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
 import org.eclipse.jdt.internal.ui.text.java.ProposalSorterRegistry;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 
 
 /**
@@ -3562,7 +3563,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.BROWSING_STACK_VERTICALLY, false);
 		store.setDefault(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, true);
-		store.setDefault("colored_labels_in_views", true); //$NON-NLS-1$
+		store.setDefault(ColoredViewersManager.PREF_COLORED_LABELS, true);
 		
 
 		// ImportOrganizePreferencePage

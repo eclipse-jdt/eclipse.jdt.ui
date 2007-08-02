@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
@@ -51,10 +52,8 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	private static final String STACK_BROWSING_VIEWS_VERTICALLY= PreferenceConstants.BROWSING_STACK_VERTICALLY;
 	private static final String PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER;
 	private static final String PREF_CATEGORY= PreferenceConstants.APPEARANCE_CATEGORY;
+	private static final String PREF_COLORED_LABELS= ColoredViewersManager.PREF_COLORED_LABELS; 
 	
-	public static final String PREF_COLORED_LABELS= "colored_labels_in_views"; //$NON-NLS-1$
-
-
 	private SelectionButtonDialogField fShowMethodReturnType;
 	private SelectionButtonDialogField fShowCategory;
 	private SelectionButtonDialogField fCompressPackageNames;
@@ -237,7 +236,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fPackageNamePattern.setText(prefs.getDefaultString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW));
 		fCompressPackageNames.setSelection(prefs.getDefaultBoolean(PREF_COMPRESS_PACKAGE_NAMES));
 		fFoldPackagesInPackageExplorer.setSelection(prefs.getDefaultBoolean(PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER));
-		fShowColoredLabels.setSelection(false);
+		fShowColoredLabels.setSelection(prefs.getDefaultBoolean(PREF_COLORED_LABELS));
 		super.performDefaults();
 	}
 }

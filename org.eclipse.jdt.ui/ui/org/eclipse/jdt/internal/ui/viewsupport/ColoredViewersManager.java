@@ -33,9 +33,13 @@ import org.eclipse.jface.viewers.StructuredViewer;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 
 public class ColoredViewersManager implements IPropertyChangeListener {
+	
+	/**
+	 * XXX: will probably be moved to {@link PreferenceConstants}.
+	 */
+	public static final String PREF_COLORED_LABELS= "colored_labels_in_views"; //$NON-NLS-1$
 	
 	public static final String QUALIFIER_COLOR_NAME= "org.eclipse.jdt.ui.ColoredLabels.qualifier"; //$NON-NLS-1$
 	public static final String DECORATIONS_COLOR_NAME= "org.eclipse.jdt.ui.ColoredLabels.decorations"; //$NON-NLS-1$
@@ -85,7 +89,7 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 	public void propertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
 		if (property.equals(QUALIFIER_COLOR_NAME) || property.equals(COUNTER_COLOR_NAME) || property.equals(DECORATIONS_COLOR_NAME)
-				|| property.equals(AppearancePreferencePage.PREF_COLORED_LABELS)) {
+				|| property.equals(PREF_COLORED_LABELS)) {
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
 					refreshAllViewers();
@@ -209,7 +213,7 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 	}
 	
 	public static boolean showColoredLabels() {
-		String preference= PreferenceConstants.getPreference(AppearancePreferencePage.PREF_COLORED_LABELS, null);
+		String preference= PreferenceConstants.getPreference(PREF_COLORED_LABELS, null);
 		return preference != null && Boolean.valueOf(preference).booleanValue();
 	}
 	
