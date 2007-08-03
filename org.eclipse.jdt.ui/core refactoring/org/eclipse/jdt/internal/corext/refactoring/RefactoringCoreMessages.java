@@ -424,6 +424,10 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractClassRefactoring_error_no_usable_fields;
 
+	public static String ExtractClassRefactoring_error_referencing_private_class;
+
+	public static String ExtractClassRefactoring_error_referencing_protected_class;
+
 	public static String ExtractClassRefactoring_error_switch;
 
 	public static String ExtractClassRefactoring_error_toplevel_name_clash;
@@ -431,6 +435,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractClassRefactoring_error_unable_to_convert_node;
 
 	public static String ExtractClassRefactoring_errror_nested_name_clash;
+
+	public static String ExtractClassRefactoring_fatal_error_cannot_resolve_binding;
 
 	public static String ExtractClassRefactoring_group_insert_parameter;
 

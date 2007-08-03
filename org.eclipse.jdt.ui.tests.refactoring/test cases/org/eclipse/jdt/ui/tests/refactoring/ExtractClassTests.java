@@ -17,6 +17,8 @@ import java.util.Map;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -78,6 +80,28 @@ public class ExtractClassTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(fPack, fileName, true);
 		assertNotNull(cu);
 		assertTrue(cu.exists());
+	}
+	
+	private void createAdditionalFile(String subDir, String fileName) throws Exception {
+		IPackageFragment pack= getSubPackage(subDir);
+		ICompilationUnit cu= createCUfromTestFile(pack, fileName, true);
+		assertNotNull(cu);
+		assertTrue(cu.exists());
+	}
+	
+	private IPackageFragment getSubPackage(String subDir) throws Exception {
+		IPackageFragment pack= getPackageP();
+		if (subDir != null) {
+			String packageName= pack.getElementName() + "." + subDir;
+			pack= getRoot().getPackageFragment(packageName);
+			if (!pack.exists()) {
+				IPackageFragment create= getRoot().createPackageFragment(packageName, true, new NullProgressMonitor());
+				assertNotNull(create);
+				assertTrue(create.exists());
+				return create;
+			}
+		}
+		return pack;
 	}
 
 	private String getCUName() {
@@ -290,6 +314,21 @@ public class ExtractClassTests extends RefactoringTest {
 		fDescriptor.setType(inner);
 		fDescriptor.setCreateGetterSetter(true);
 		runRefactoring(false);
+	}
+	
+	public void testPackageReferences() throws Exception {
+		createAdditionalFile("subPack","PackEx");
+		fDescriptor.setType(setupType());
+		fDescriptor.setCreateGetterSetter(true);
+		RefactoringStatus status= runRefactoring(true);
+		RefactoringStatusEntry[] entries= status.getEntries();
+		//Error for privateInner reference
+		//Error for OtherPackageProteced reference
+		assertEquals(2, entries.length);
+		for (int i= 0; i < entries.length; i++) {
+			RefactoringStatusEntry refactoringStatusEntry= entries[i];
+			assertEquals(true, refactoringStatusEntry.isError());
+		}
 	}
 
 }

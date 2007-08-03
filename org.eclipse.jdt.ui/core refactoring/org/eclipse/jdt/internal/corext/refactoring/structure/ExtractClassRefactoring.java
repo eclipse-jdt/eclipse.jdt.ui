@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
@@ -54,6 +55,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -336,7 +338,7 @@ public class ExtractClassRefactoring extends Refactoring {
 			IType type= fDescriptor.getType();
 			pm.worked(5);
 
-			FieldDeclaration field= performFieldRewrite(type, fParameterObjectFactory);
+			FieldDeclaration field= performFieldRewrite(type, fParameterObjectFactory, result);
 			int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 			if (!Modifier.isPrivate(field.getModifiers()))
 				flags|= RefactoringDescriptor.MULTI_CHANGE;
@@ -582,7 +584,8 @@ public class ExtractClassRefactoring extends Refactoring {
 							status.addError(RefactoringCoreMessages.ExtractClassRefactoring_error_unable_to_convert_node, JavaStatusContext.create(primaryType.getTypeRoot(), replaceNode));
 						}
 					} else {
-						qualifier= (Expression) rewrite.createMoveTarget(qualifier);
+						if (qualifier != null)
+							qualifier= (Expression) rewrite.createMoveTarget(qualifier);
 						Expression access= pof.createFieldWriteAccess(pi, parameterName, ast, javaProject, assignedValue, qualifier, useSuper);
 						rewrite.replace(replaceNode, access, writeGroup);
 					}
@@ -620,7 +623,7 @@ public class ExtractClassRefactoring extends Refactoring {
 		return (FieldInfo) fVariables.get(identifier);
 	}
 
-	private FieldDeclaration performFieldRewrite(IType type, ParameterObjectFactory pof) throws CoreException {
+	private FieldDeclaration performFieldRewrite(IType type, ParameterObjectFactory pof, RefactoringStatus status) throws CoreException {
 		fBaseCURewrite= new CompilationUnitRewrite(type.getCompilationUnit());
 		SimpleName name= (SimpleName) NodeFinder.perform(fBaseCURewrite.getRoot(), type.getNameRange());
 		TypeDeclaration typeNode= (TypeDeclaration) ASTNodes.getParent(name, ASTNode.TYPE_DECLARATION);
@@ -645,6 +648,26 @@ public class ExtractClassRefactoring extends Refactoring {
 					removeNode(parent, removeFieldGroup, fBaseCURewrite);
 				}
 
+				if (fDescriptor.isCreateTopLevel()) {
+					IVariableBinding binding= vdf.resolveBinding();
+					ITypeRoot typeRoot= fBaseCURewrite.getCu().findPrimaryType().getTypeRoot();
+					if (binding == null || binding.getType() == null){
+						status.addFatalError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_fatal_error_cannot_resolve_binding, pi.name), JavaStatusContext.create(typeRoot, vdf));
+					} else {
+						ITypeBinding typeBinding= binding.getType();
+						if (Modifier.isPrivate(typeBinding.getDeclaredModifiers())){
+							status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_referencing_private_class, typeBinding.getName()), JavaStatusContext.create(typeRoot, vdf));
+						} else if (Modifier.isProtected(typeBinding.getDeclaredModifiers())){
+							ITypeBinding declaringClass= typeBinding.getDeclaringClass();
+							if (declaringClass != null) {
+								IPackageBinding package1= declaringClass.getPackage();
+								if (package1 != null && !fDescriptor.getPackage().equals(package1.getName())){
+									status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_referencing_protected_class, new String[] {typeBinding.getName(),fDescriptor.getPackage()}), JavaStatusContext.create(typeRoot, vdf));
+								}
+							} 
+						}
+					}
+				}
 				Expression initializer= vdf.getInitializer();
 				if (initializer != null)
 					pi.initializer= initializer;
@@ -731,16 +754,10 @@ public class ExtractClassRefactoring extends Refactoring {
 		return fieldDeclaration;
 	}
 
-	public Type importBinding(ITypeBinding newTypeBinding, CompilationUnitRewrite cuRewrite) {
-		Type type= cuRewrite.getImportRewrite().addImport(newTypeBinding, cuRewrite.getAST());
-		cuRewrite.getImportRemover().registerAddedImports(type);
-		return type;
-	}
-
 	private void importNodeTypes(ASTNode node, final CompilationUnitRewrite cuRewrite) {
 		ASTResolving.visitAllBindings(node, new TypeBindingVisitor() {
 			public boolean visit(ITypeBinding nodeBinding) {
-				importBinding(nodeBinding, cuRewrite);
+				ParameterObjectFactory.importBinding(nodeBinding, cuRewrite);
 				return false;
 			}
 		});

@@ -263,7 +263,12 @@ public class ParameterObjectFactory {
 	}
 
 
-	private Type importBinding(ITypeBinding typeBinding, CompilationUnitRewrite cuRewrite) {
+	public static Type importBinding(ITypeBinding typeBinding, CompilationUnitRewrite cuRewrite) {
+		int declaredModifiers= typeBinding.getDeclaredModifiers();
+		AST ast= cuRewrite.getAST();
+		if (Modifier.isPrivate(declaredModifiers) || Modifier.isProtected(declaredModifiers)) {
+			return ast.newSimpleType(ast.newSimpleName(typeBinding.getName()));
+		}
 		Type type= cuRewrite.getImportRewrite().addImport(typeBinding, cuRewrite.getAST());
 		cuRewrite.getImportRemover().registerAddedImports(type);
 		return type;
