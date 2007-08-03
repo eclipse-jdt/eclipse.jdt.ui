@@ -621,7 +621,8 @@ public class ExtractClassRefactoring extends Refactoring {
 
 	private FieldDeclaration performFieldRewrite(IType type, ParameterObjectFactory pof) throws CoreException {
 		fBaseCURewrite= new CompilationUnitRewrite(type.getCompilationUnit());
-		TypeDeclaration typeNode= (TypeDeclaration) NodeFinder.perform(fBaseCURewrite.getRoot(), type.getSourceRange());
+		SimpleName name= (SimpleName) NodeFinder.perform(fBaseCURewrite.getRoot(), type.getNameRange());
+		TypeDeclaration typeNode= (TypeDeclaration) ASTNodes.getParent(name, ASTNode.TYPE_DECLARATION);
 		ASTRewrite rewrite= fBaseCURewrite.getASTRewrite();
 		int modifier= 0;
 		TextEditGroup removeFieldGroup= fBaseCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractClassRefactoring_group_remove_field);

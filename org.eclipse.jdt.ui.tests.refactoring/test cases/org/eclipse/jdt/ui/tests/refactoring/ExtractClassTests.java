@@ -282,5 +282,14 @@ public class ExtractClassTests extends RefactoringTest {
 		fDescriptor.setCreateGetterSetter(true);
 		runRefactoring(false);
 	}
+	
+	public void testInnerDocumentedClass() throws Exception {
+		IType outer= setupType();
+		IType inner= outer.getType("InnerClass");
+		assertTrue(inner.exists());
+		fDescriptor.setType(inner);
+		fDescriptor.setCreateGetterSetter(true);
+		runRefactoring(false);
+	}
 
 }
