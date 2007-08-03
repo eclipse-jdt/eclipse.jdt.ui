@@ -558,10 +558,10 @@ public class ExtractClassRefactoring extends Refactoring {
 					ITypeBinding typeBinding= name.resolveTypeBinding();
 					Expression qualifier= null;
 					if (parent.getNodeType() == ASTNode.FIELD_ACCESS) {
-						qualifier= (Expression) rewrite.createMoveTarget(((FieldAccess) parent).getExpression());
+						qualifier= ((FieldAccess) parent).getExpression();
 					}
 					if (parent.getNodeType() ==  ASTNode.QUALIFIED_NAME) {
-						qualifier= (Expression) rewrite.createMoveTarget(((QualifiedName)parent).getQualifier());
+						qualifier= ((QualifiedName)parent).getQualifier();
 					}
 					ASTNode replaceNode;
 					if (qualifier != null || useSuper) {
@@ -582,6 +582,7 @@ public class ExtractClassRefactoring extends Refactoring {
 							status.addError(RefactoringCoreMessages.ExtractClassRefactoring_error_unable_to_convert_node, JavaStatusContext.create(primaryType.getTypeRoot(), replaceNode));
 						}
 					} else {
+						qualifier= (Expression) rewrite.createMoveTarget(qualifier);
 						Expression access= pof.createFieldWriteAccess(pi, parameterName, ast, javaProject, assignedValue, qualifier, useSuper);
 						rewrite.replace(replaceNode, access, writeGroup);
 					}
