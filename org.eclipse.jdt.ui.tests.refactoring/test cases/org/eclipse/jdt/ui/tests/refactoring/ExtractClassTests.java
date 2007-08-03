@@ -276,5 +276,11 @@ public class ExtractClassTests extends RefactoringTest {
 		fDescriptor.setCreateGetterSetter(true);
 		runRefactoring(false);	
 	}
+	
+	public void testArrayLengthAccess() throws Exception {
+		fDescriptor.setType(setupType());
+		fDescriptor.setCreateGetterSetter(true);
+		runRefactoring(false);
+	}
 
 }

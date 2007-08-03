@@ -197,7 +197,8 @@ public class ExtractClassRefactoring extends Refactoring {
 		private boolean checkVariableBinding(IVariableBinding fieldBinding) {
 			if (fieldBinding != null) {
 				if (fieldBinding.isField()) {
-					if (fieldBinding.getDeclaringClass().getQualifiedName().equals(fDescriptor.getType().getFullyQualifiedName())) {
+					ITypeBinding declaringClass= fieldBinding.getDeclaringClass();
+					if ((declaringClass != null) && declaringClass.getQualifiedName().equals(fDescriptor.getType().getFullyQualifiedName())) {
 						FieldInfo fi= (FieldInfo) fVariables.get(fieldBinding.getName());
 						if (fi != null && isCreateField(fi) && Bindings.equals(fieldBinding, fi.pi.getOldBinding())) {
 							fFieldRefFound= true;
