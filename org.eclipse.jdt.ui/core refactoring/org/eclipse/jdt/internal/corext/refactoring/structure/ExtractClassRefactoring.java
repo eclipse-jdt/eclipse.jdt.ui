@@ -574,7 +574,12 @@ public class ExtractClassRefactoring extends Refactoring {
 						assignedValue= GetterSetterUtil.getAssignedValue(replaceNode, rewrite, fieldReadAccess, typeBinding, is50OrHigher);
 					}
 					if (assignedValue == null) {
-						status.addError(RefactoringCoreMessages.ExtractClassRefactoring_error_unable_to_convert_node, JavaStatusContext.create(fDescriptor.getType().getTypeRoot(), replaceNode));
+						IType primaryType= cuRewrite.getCu().findPrimaryType();
+						if (primaryType == null) {
+							status.addError(RefactoringCoreMessages.ExtractClassRefactoring_error_unable_to_convert_node, JavaStatusContext.create(fDescriptor.getType().getTypeRoot(), replaceNode));
+						} else {
+							status.addError(RefactoringCoreMessages.ExtractClassRefactoring_error_unable_to_convert_node, JavaStatusContext.create(primaryType.getTypeRoot(), replaceNode));
+						}
 					} else {
 						Expression access= pof.createFieldWriteAccess(pi, parameterName, ast, javaProject, assignedValue, qualifier, useSuper);
 						rewrite.replace(replaceNode, access, writeGroup);
