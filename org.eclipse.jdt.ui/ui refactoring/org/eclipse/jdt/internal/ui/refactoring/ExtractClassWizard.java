@@ -296,22 +296,6 @@ public class ExtractClassWizard extends RefactoringWizard {
 			gridLayout.marginWidth= 0;
 			controls.setLayout(gridLayout);
 
-/*			final Button upButton= new Button(controls, SWT.NONE);
-			upButton.setText(RefactoringMessages.ExtractClassWizard_button_up);
-			gridData= new GridData(GridData.FILL_HORIZONTAL);
-			upButton.setLayoutData(gridData);
-			SWTUtil.setButtonDimensionHint(upButton);
-			upButton.setEnabled(false);
-
-			final Button downButton= new Button(controls, SWT.NONE);
-			downButton.setText(RefactoringMessages.ExtractClassWizard_button_down);
-			gridData= new GridData(GridData.FILL_HORIZONTAL);
-			downButton.setLayoutData(gridData);
-			SWTUtil.setButtonDimensionHint(downButton);
-			downButton.setEnabled(false);
-
-			addSpacer(controls); */
-
 			final Button editButton= new Button(controls, SWT.NONE);
 			editButton.setText(RefactoringMessages.ExtractClassWizard_button_edit);
 			editButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -343,73 +327,27 @@ public class ExtractClassWizard extends RefactoringWizard {
 					}
 				}
 			});
-
-/*			downButton.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					int[] indices= tv.getTable().getSelectionIndices();
-					Arrays.sort(indices);
-					for (int i= indices.length - 1; i >= 0; i--) {
-						int idx= indices[i];
-						Field temp= fields[idx];
-						fields[idx]= fields[idx + 1];
-						fields[idx + 1]= temp;
-					}
-					tv.refresh();
-					updateButtons(tv, upButton, downButton, editButton);
-				}
-
-			});
-			upButton.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					int[] indices= tv.getTable().getSelectionIndices();
-					Arrays.sort(indices);
-					for (int i= 0; i < indices.length; i++) {
-						int idx= indices[i];
-						Field temp= fields[idx];
-						fields[idx]= fields[idx - 1];
-						fields[idx - 1]= temp;
-					}
-					tv.refresh();
-					updateButtons(tv, upButton, downButton, editButton);
-				}
-
-			});*/
 			tv.addCheckStateListener(new ICheckStateListener() {
 				public void checkStateChanged(CheckStateChangedEvent event) {
 					Field element= (Field) event.getElement();
 					element.setCreateField(event.getChecked());
 					validateRefactoring();
+					tv.refresh(element, true);
 				}
 
 			});
 			tv.addSelectionChangedListener(new ISelectionChangedListener() {
 				public void selectionChanged(SelectionChangedEvent event) {
 					IStructuredSelection selection= (IStructuredSelection) tv.getSelection();
-					Field firstElement= (Field) selection.getFirstElement();
+					Field field= (Field) selection.getFirstElement();
 					if (selection.isEmpty()) {
 						editButton.setEnabled(false);
 					} else {
-						editButton.setEnabled(firstElement.isCreateField());
+						editButton.setEnabled(tv.getChecked(field));
 					}
 				}
 			});
 		}
-
-/*		private void updateButtons(final TableViewer tv, Button upButton, Button downButton, Button editButton) {
-			IStructuredSelection selection= (IStructuredSelection) tv.getSelection();
-			Field firstElement= (Field) selection.getFirstElement();
-			if (selection.isEmpty()) {
-				upButton.setEnabled(false);
-				downButton.setEnabled(false);
-				editButton.setEnabled(false);
-			} else {
-				int[] selectionIndex= tv.getTable().getSelectionIndices();
-				Arrays.sort(selectionIndex);
-				upButton.setEnabled(selectionIndex[0] != 0);
-				downButton.setEnabled(selectionIndex[selectionIndex.length - 1] != tv.getTable().getItemCount() - 1);
-				editButton.setEnabled(firstElement.isCreateField());
-			}
-		}*/
 
 		private abstract class FieldInfoLabelProvider extends CellLabelProvider {
 			public void update(ViewerCell cell) {
@@ -481,7 +419,10 @@ public class ExtractClassWizard extends RefactoringWizard {
 			viewerColumn= new TableViewerColumn(tv, SWT.LEAD);
 			viewerColumn.setLabelProvider(new FieldInfoLabelProvider() {
 				protected String doGetValue(Field pi) {
-					return pi.getNewFieldName();
+					if (pi.isCreateField())
+						return pi.getNewFieldName();
+					else
+						return pi.getFieldName();
 				}
 			});
 			viewerColumn.setEditingSupport(new FieldInfoEditingSupport(cellEditor, tv) {
@@ -491,6 +432,14 @@ public class ExtractClassWizard extends RefactoringWizard {
 
 				public void doSetValue(Field pi, String string) {
 					pi.setNewFieldName(string);
+				}
+				
+				protected boolean canEdit(Object element) {
+					if (element instanceof Field) {
+						Field field= (Field) element;
+						return field.isCreateField();
+					}
+					return super.canEdit(element);
 				}
 			});
 			column= viewerColumn.getColumn();
