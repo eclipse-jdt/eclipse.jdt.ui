@@ -421,11 +421,12 @@ public class ExtractClassRefactoring extends Refactoring {
 			ListRewrite listRewrite= cuRewrite.getASTRewrite().getListRewrite(field, FieldDeclaration.MODIFIERS2_PROPERTY);
 			for (Iterator iterator= modifiers.iterator(); iterator.hasNext();) {
 				IExtendedModifier mod= (IExtendedModifier) iterator.next();
-				if (mod.isModifier()) {
-					Modifier modifier= (Modifier) mod;
-					if (modifier.isFinal())
-						listRewrite.insertLast(moveNode(cuRewrite, modifier), null);
-				}
+				//Temporarily disabled until initialization of final fields is handled correctly
+//				if (mod.isModifier()) {
+//					Modifier modifier= (Modifier) mod;
+//					if (modifier.isFinal())
+//						listRewrite.insertLast(moveNode(cuRewrite, modifier), null);
+//				}
 				if (mod.isAnnotation()) {
 					listRewrite.insertFirst(moveNode(cuRewrite, (ASTNode) mod), null);
 				}
@@ -438,24 +439,27 @@ public class ExtractClassRefactoring extends Refactoring {
 				}
 			}
 		}
+		
+		public boolean isCreateSetter(ParameterInfo pi) {
+			return true; //ignore that the original variable was final
+		}
+		
+		public boolean isUseInConstructor(ParameterInfo pi) {
+			FieldInfo fi= getFieldInfo(pi.getOldName());
+			return fi.initializer != null && !fi.hasFieldReference();
+		}
 	}
 
 	private List createParameterObject(ParameterObjectFactory pof, IPackageFragmentRoot packageRoot) throws CoreException {
 		FieldUpdate fieldUpdate= new FieldUpdate();
-		Set constructorFields= new HashSet();
-		for (Iterator iter= fVariables.values().iterator(); iter.hasNext();) {
-			FieldInfo fi= (FieldInfo) iter.next();
-			if (fi.initializer != null && !fi.hasFieldReference())
-				constructorFields.add(fi.name);
-		}
 		if (fDescriptor.isCreateTopLevel())
-			return pof.createTopLevelParameterObject(packageRoot, constructorFields, fieldUpdate);
+			return pof.createTopLevelParameterObject(packageRoot, fieldUpdate);
 		else {
 			CompilationUnit root= fBaseCURewrite.getRoot();
 			TypeDeclaration typeDecl= (TypeDeclaration) NodeFinder.perform(root, fDescriptor.getType().getSourceRange());
 			ASTRewrite rewrite= fBaseCURewrite.getASTRewrite();
 			ListRewrite listRewrite= rewrite.getListRewrite(typeDecl, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
-			TypeDeclaration paramClass= pof.createClassDeclaration(typeDecl.getName().getFullyQualifiedName(), fBaseCURewrite, constructorFields, fieldUpdate);
+			TypeDeclaration paramClass= pof.createClassDeclaration(typeDecl.getName().getFullyQualifiedName(), fBaseCURewrite, fieldUpdate);
 			paramClass.modifiers().add(rewrite.getAST().newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 			paramClass.modifiers().add(rewrite.getAST().newModifier(ModifierKeyword.STATIC_KEYWORD));
 			listRewrite.insertFirst(paramClass, fBaseCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractClassRefactoring_group_insert_parameter));

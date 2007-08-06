@@ -665,7 +665,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 			TypeDeclaration enclosingType= (TypeDeclaration) methodDeclaration.getParent();
 			ListRewrite bodyRewrite= rewriter.getListRewrite(enclosingType, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 			String fqn= enclosingType.getName().getFullyQualifiedName();
-			TypeDeclaration classDeclaration= fParameterObjectFactory.createClassDeclaration(fqn, cuRewrite, null, null);
+			TypeDeclaration classDeclaration= fParameterObjectFactory.createClassDeclaration(fqn, cuRewrite, null);
 			classDeclaration.modifiers().add(rewriter.getAST().newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 			classDeclaration.modifiers().add(rewriter.getAST().newModifier(ModifierKeyword.STATIC_KEYWORD));
 			bodyRewrite.insertBefore(classDeclaration, methodDeclaration, null);

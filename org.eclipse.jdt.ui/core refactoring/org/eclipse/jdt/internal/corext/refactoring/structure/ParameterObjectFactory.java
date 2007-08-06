@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Set;
 
 import org.eclipse.text.edits.TextEdit;
 
@@ -131,19 +130,47 @@ public class ParameterObjectFactory {
 				return ASTNode.copySubtree(rewrite.getAST(), node);
 			return rewrite.createMoveTarget(node);
 		}
+		/**
+		 * Return whether the setter should be created for this field. This method is only called when 
+		 * the global createSetters is set and the parameterInfo is marked for field creation.
+		 * @param pi the parameter info
+		 * @return <code>true</code> if a setter should be created
+		 */
+		public boolean isCreateSetter(ParameterInfo pi) {
+			return !Modifier.isFinal(pi.getOldBinding().getModifiers());
+		}
+		/**
+		 * Return whether the getter should be created for this field. This method is only called when 
+		 * the global createGetters is set and the parameterInfo is marked for field creation.
+		 * @param pi the parameter info
+		 * @return <code>true</code> if a getter should be created
+		 */
+		public boolean isCreateGetter(ParameterInfo pi) {
+			return true;
+		}
+		/**
+		 * Return whether the field should appear in the constructor
+		 * @param pi the parameter info
+		 * @return <code>true</code> if the field should appear
+		 */
+		public boolean isUseInConstructor(ParameterInfo pi) {
+			return true;
+		}
 	}
 
 	/**
+	 * Creates a new TypeDeclaration for the parameterInfo objects.
 	 * 
-	 * @param declaringType
-	 * @param cuRewrite
-	 * @param constructorInitilized names of parameterInfos that should be used in the constructor, or <code>null</code> if all should be used
+	 * @param declaringType the fully qualified name of the type
+	 * @param cuRewrite the {@link CompilationUnitRewrite} that will be used for creation
 	 * @param listener the creation listener or null
 	 * @return the new declaration
 	 * @throws CoreException
 	 */
-	public TypeDeclaration createClassDeclaration(String declaringType, CompilationUnitRewrite cuRewrite, Set constructorInitilized, CreationListener listener) throws CoreException {
+	public TypeDeclaration createClassDeclaration(String declaringType, CompilationUnitRewrite cuRewrite, CreationListener listener) throws CoreException {
 		AST ast= cuRewrite.getAST();
+		if (listener == null)
+			listener= new CreationListener();
 		TypeDeclaration typeDeclaration= ast.newTypeDeclaration();
 		typeDeclaration.setName(ast.newSimpleName(fClassName));
 		List body= typeDeclaration.bodyDeclarations();
@@ -151,43 +178,31 @@ public class ParameterObjectFactory {
 			ParameterInfo pi= (ParameterInfo) iter.next();
 			if (isValidField(pi)) {
 				FieldDeclaration declaration= createField(pi, cuRewrite);
-				if (listener != null) {
-					listener.fieldCreated(cuRewrite, declaration, pi);
-				}
+				listener.fieldCreated(cuRewrite, declaration, pi);
 				body.add(declaration);
 			}
 		}
-		MethodDeclaration constructor= createConstructor(declaringType, cuRewrite, constructorInitilized);
-		if (listener != null) {
-			listener.constructorCreated(cuRewrite, constructor);
-		}
+		MethodDeclaration constructor= createConstructor(declaringType, cuRewrite, listener);
+		listener.constructorCreated(cuRewrite, constructor);
 		body.add(constructor);
 		for (Iterator iter= fVariables.iterator(); iter.hasNext();) {
 			ParameterInfo pi= (ParameterInfo) iter.next();
-			if (fCreateGetter && isValidField(pi)) {
+			if (fCreateGetter && isValidField(pi) && listener.isCreateGetter(pi)) {
 				MethodDeclaration getter= createGetter(pi, declaringType, cuRewrite);
-				if (listener != null) {
-					listener.getterCreated(cuRewrite, getter, pi);
-				}
+				listener.getterCreated(cuRewrite, getter, pi);
 				body.add(getter);
 			}
-			if (fCreateSetter && isValidField(pi)) {
-				if (!Modifier.isFinal(pi.getOldBinding().getModifiers())) {
-					MethodDeclaration setter= createSetter(pi, declaringType, cuRewrite);
-					if (listener != null) {
-						listener.setterCreated(cuRewrite, setter, pi);
-					}
-					body.add(setter);
-				}
+			if (fCreateSetter && isValidField(pi) && listener.isCreateSetter(pi)) {
+				MethodDeclaration setter= createSetter(pi, declaringType, cuRewrite);
+				listener.setterCreated(cuRewrite, setter, pi);
+				body.add(setter);
 			}
 		}
-		if (listener != null) {
-			listener.typeCreated(cuRewrite, typeDeclaration);
-		}
+		listener.typeCreated(cuRewrite, typeDeclaration);
 		return typeDeclaration;
 	}
 
-	private MethodDeclaration createConstructor(String declaringTypeName, CompilationUnitRewrite cuRewrite, Set namesToInitializers) throws CoreException {
+	private MethodDeclaration createConstructor(String declaringTypeName, CompilationUnitRewrite cuRewrite, CreationListener listener) throws CoreException {
 		AST ast= cuRewrite.getAST();
 		ICompilationUnit unit= cuRewrite.getCu();
 		IJavaProject project= unit.getJavaProject();
@@ -211,8 +226,7 @@ public class ParameterObjectFactory {
 		List validParameter= new ArrayList();
 		for (Iterator iter= fVariables.iterator(); iter.hasNext();) {
 			ParameterInfo pi= (ParameterInfo) iter.next();
-			if (isValidField(pi)) {
-				if ((namesToInitializers == null) || namesToInitializers.contains(pi.getOldName()))
+			if (isValidField(pi) && listener.isUseInConstructor(pi)) {
 					validParameter.add(pi);
 			}
 		}
@@ -593,7 +607,7 @@ public class ParameterObjectFactory {
 	}
 
 
-	public List/*<Change>*/createTopLevelParameterObject(IPackageFragmentRoot packageFragmentRoot, Set namesToInitializers, CreationListener listener) throws CoreException {
+	public List/*<Change>*/createTopLevelParameterObject(IPackageFragmentRoot packageFragmentRoot, CreationListener listener) throws CoreException {
 		List changes= new ArrayList();
 		IPackageFragment packageFragment= packageFragmentRoot.getPackageFragment(getPackage());
 		if (!packageFragment.exists()) {
@@ -622,7 +636,7 @@ public class ParameterObjectFactory {
 			ListRewrite types= rewriter.getListRewrite(root, CompilationUnit.TYPES_PROPERTY);
 			ASTNode dummyType= (ASTNode) types.getOriginalList().get(0);
 			String newTypeName= JavaModelUtil.concatenateName(getPackage(), getClassName());
-			TypeDeclaration classDeclaration= createClassDeclaration(newTypeName, cuRewrite, namesToInitializers, listener);
+			TypeDeclaration classDeclaration= createClassDeclaration(newTypeName, cuRewrite, listener);
 			classDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 			Javadoc javadoc= (Javadoc) dummyType.getStructuralProperty(TypeDeclaration.JAVADOC_PROPERTY);
 			rewriter.set(classDeclaration, TypeDeclaration.JAVADOC_PROPERTY, javadoc, null);
@@ -650,7 +664,7 @@ public class ParameterObjectFactory {
 	}
 
 	public List/*<Change>*/createTopLevelParameterObject(IPackageFragmentRoot packageFragmentRoot) throws CoreException {
-		return createTopLevelParameterObject(packageFragmentRoot, null, null);
+		return createTopLevelParameterObject(packageFragmentRoot, null);
 	}
 
 	protected String getFileComment(ICompilationUnit parentCU, String lineDelimiter) throws CoreException {
