@@ -331,4 +331,19 @@ public class ExtractClassTests extends RefactoringTest {
 		}
 	}
 
+	public void testDuplicateParamName() throws Exception {
+		IJavaProject javaProject= getRoot().getJavaProject();
+		Map originalOptions= javaProject.getOptions(true);
+		try {
+			HashMap newOptions= new HashMap(originalOptions);
+			newOptions.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
+			javaProject.setOptions(newOptions);
+			fDescriptor.setType(setupType());
+			fDescriptor.setCreateGetterSetter(true);
+			runRefactoring(false);
+		} finally {
+			javaProject.setOptions(originalOptions);
+		}
+	}
+	
 }
