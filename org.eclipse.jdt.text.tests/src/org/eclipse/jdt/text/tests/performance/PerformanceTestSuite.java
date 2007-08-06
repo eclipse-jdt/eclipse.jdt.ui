@@ -48,7 +48,6 @@ public class PerformanceTestSuite extends TestSuite {
 		addTest(DocumentLineDifferInitializationTest.suite());
 		addTest(SynchronizedLineDifferInitializationTest.suite());
 		addTest(DocumentLineDifferModificationTest.suite());
-		addTest(LineTrackerPerformanceTest.suite());
 		addTest(new OpenJavaEditorTest.Setup(EmptyTestCase.suite(), false)); // the actual test runs in its own workbench (see test.xml)
 	}
 }
