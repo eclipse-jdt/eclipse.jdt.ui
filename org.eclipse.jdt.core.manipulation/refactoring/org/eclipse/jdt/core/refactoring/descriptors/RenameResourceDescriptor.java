@@ -13,8 +13,8 @@ package org.eclipse.jdt.core.refactoring.descriptors;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
@@ -46,8 +46,8 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	/** The name attribute */
 	private String fName= null;
 
-	/** The resource attribute */
-	private IResource fResource= null;
+	/** The resource path attribute (full path) */
+	private IPath fResourcePath= null;
 
 	/**
 	 * Creates a new refactoring descriptor.
@@ -79,7 +79,7 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 */
 	public RenameResourceDescriptor(String project, String description, String comment, Map arguments, int flags) {
 		super(IJavaRefactorings.RENAME_RESOURCE, project, description, comment, arguments, flags);
-		fResource= JavaRefactoringDescriptorUtil.getResource(arguments, ATTRIBUTE_INPUT, project);
+		fResourcePath= JavaRefactoringDescriptorUtil.getResourcePath(arguments, ATTRIBUTE_INPUT, project);
 		fName= JavaRefactoringDescriptorUtil.getString(arguments, ATTRIBUTE_NAME);
 	}
 
@@ -88,7 +88,7 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 */
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
-		JavaRefactoringDescriptorUtil.setResource(fArguments, ATTRIBUTE_INPUT, getProject(), fResource);
+		JavaRefactoringDescriptorUtil.setResourcePath(fArguments, ATTRIBUTE_INPUT, getProject(), fResourcePath);
 		JavaRefactoringDescriptorUtil.setString(fArguments, ATTRIBUTE_NAME, fName);
 	}
 
@@ -136,7 +136,7 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 */
 	public void setResource(final IResource resource) {
 		Assert.isNotNull(resource);
-		fResource= resource;
+		fResourcePath= resource.getFullPath();
 	}
 
 	/**
@@ -144,11 +144,11 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 */
 	public RefactoringStatus validateDescriptor() {
 		RefactoringStatus status= super.validateDescriptor();
-		if (fResource == null)
+		if (fResourcePath == null)
 			status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameResourceDescriptor_no_resource));
 		if (fName == null || "".equals(fName)) //$NON-NLS-1$
 			status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameResourceDescriptor_no_new_name));
-		if (fResource instanceof IProject && getProject() != null)
+		if (fResourcePath.segmentCount() == 1 && getProject() != null)
 			status.merge(RefactoringStatus.createFatalErrorStatus(DescriptorMessages.RenameResourceDescriptor_project_constraint));
 		return status;
 	}

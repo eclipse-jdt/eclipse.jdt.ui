@@ -107,7 +107,11 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	/** The hierarchical attribute */
 	private boolean fHierarchical= false;
 
-	/** The java element attribute */
+	/**
+	 * The java element attribute.
+	 * WARNING: may not exist, see comment in
+	 * {@link JavaRefactoringDescriptorUtil#handleToElement(org.eclipse.jdt.core.WorkingCopyOwner, String, String, boolean)}.
+	 */
 	private IJavaElement fJavaElement= null;
 
 	/** The match strategy */

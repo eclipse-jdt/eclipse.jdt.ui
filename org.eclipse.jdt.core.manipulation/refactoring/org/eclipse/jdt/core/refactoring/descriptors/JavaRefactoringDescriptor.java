@@ -240,7 +240,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * @return the input handle
 	 */
 	protected static String resourceToHandle(final String project, final IResource resource) {
-		return JavaRefactoringDescriptorUtil.resourceToHandle(project, resource);
+		return JavaRefactoringDescriptorUtil.resourcePathToHandle(project, resource.getFullPath());
 	}
 
 	/**

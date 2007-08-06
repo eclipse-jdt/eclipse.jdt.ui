@@ -14,6 +14,10 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 
 public class JavaRefactoringDescriptorUtil {
+	/* TODO: share implementation with
+	 * org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDescriptorUtil
+	 */
+	
 	private JavaRefactoringDescriptorUtil(){}
 
 	/**
@@ -80,12 +84,16 @@ public class JavaRefactoringDescriptorUtil {
 	 * @param element
 	 *            the element
 	 * @return a corresponding input handle
+	 *         Note: if the given project is not the element's project, then the full handle is returned 
 	 */
 	public static String elementToHandle(final String project, final IJavaElement element) {
 		final String handle= element.getHandleIdentifier();
-		if (project != null && !(element instanceof IJavaProject)) {
-			final String id= element.getJavaProject().getHandleIdentifier();
-			return handle.substring(id.length());
+		if (project != null && ! (element instanceof IJavaProject)) {
+			IJavaProject javaProject= element.getJavaProject();
+			if (project.equals(javaProject.getElementName())) {
+				final String id= javaProject.getHandleIdentifier();
+				return handle.substring(id.length());
+			}
 		}
 		return handle;
 	}
@@ -151,6 +159,11 @@ public class JavaRefactoringDescriptorUtil {
 				element= JavaCore.create(identifier + handle);
 		}
 		if (check && element instanceof IMethod) {
+			/*
+			 * Resolve the method based on simple names of parameter types
+			 * (to accommodate for different qualifications when refactoring is e.g.
+			 * recorded in source but applied on binary method):
+			 */
 			final IMethod method= (IMethod) element;
 			final IMethod[] methods= method.getDeclaringType().findMethods(method);
 			if (methods != null && methods.length > 0)
@@ -171,7 +184,8 @@ public class JavaRefactoringDescriptorUtil {
 	 *            the input handle
 	 * 
 	 * @return the corresponding resource, or <code>null</code> if no such
-	 *         resource exists
+	 *         resource exists.
+	 *         Note: if the given handle is absolute, the project is not used to resolve.
 	 */
 	public static IResource handleToResource(final String project, final String handle) {
 		final IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
@@ -180,7 +194,7 @@ public class JavaRefactoringDescriptorUtil {
 		final IPath path= Path.fromPortableString(handle);
 		if (path == null)
 			return null;
-		if (project != null && !"".equals(project)) //$NON-NLS-1$
+		if (project != null && !"".equals(project) && ! path.isAbsolute()) //$NON-NLS-1$
 			return root.getProject(project).findMember(path);
 		return root.findMember(path);
 	}
@@ -193,10 +207,11 @@ public class JavaRefactoringDescriptorUtil {
 	 * @param resource
 	 *            the resource
 	 * 
-	 * @return the input handle
+	 * @return the input handle.
+	 *         Note: if the given project is not the resource's project, then the full handle is returned. 
 	 */
 	public static String resourceToHandle(final String project, final IResource resource) {
-		if (project != null && !"".equals(project)) //$NON-NLS-1$
+		if (project != null && !"".equals(project) && project.equals(resource.getProject().getName())) //$NON-NLS-1$
 			return resource.getProjectRelativePath().toPortableString();
 		return resource.getFullPath().toPortableString();
 	}

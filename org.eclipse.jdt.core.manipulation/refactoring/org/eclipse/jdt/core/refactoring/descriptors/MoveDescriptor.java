@@ -13,6 +13,7 @@ package org.eclipse.jdt.core.refactoring.descriptors;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -49,7 +50,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  */
 public final class MoveDescriptor extends JavaRefactoringDescriptor {
 
-	/** The destination attribute */
+	/** The destination attribute (a java element) */
 	private static final String ATTRIBUTE_DESTINATION= "destination"; //$NON-NLS-1$
 
 	/** The files attribute */
@@ -76,7 +77,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 	/** The roots attribute */
 	private static final String ATTRIBUTE_ROOTS= "roots"; //$NON-NLS-1$
 
-	/** The target attribute */
+	/** The target attribute (a resource) */
 	private static final String ATTRIBUTE_TARGET= "target"; //$NON-NLS-1$
 
 	/** The units attribute */
@@ -94,14 +95,14 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 	/** The move package fragment roots policy */
 	private static final String POLICY_MOVE_ROOTS= "org.eclipse.jdt.ui.moveRoots"; //$NON-NLS-1$
 
-	/** The destination */
+	/** The destination, either an IJavaElement, or a full IPath */
 	private Object fDestination;
 
 	/** The files */
-	private IFile[] fFiles;
+	private IPath[] fFiles;
 
 	/** The folders */
-	private IFolder[] fFolders;
+	private IPath[] fFolders;
 
 	/** The package fragments */
 	private IPackageFragment[] fFragments;
@@ -161,16 +162,16 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 		
 		fDestination= JavaRefactoringDescriptorUtil.getJavaElement(fArguments, ATTRIBUTE_DESTINATION, project, true);
 		if (fDestination == null)
-			fDestination= JavaRefactoringDescriptorUtil.getResource(fArguments, ATTRIBUTE_TARGET, null);
+			fDestination= JavaRefactoringDescriptorUtil.getResourcePath(fArguments, ATTRIBUTE_TARGET, project);
 		
 		if (POLICY_MOVE_RESOURCES.equals(fMovePolicy)) {
 			fReferences= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_REFERENCES);
 			fQualified= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_QUALIFIED);
 			fPatterns= JavaRefactoringDescriptorUtil.getString(fArguments, ATTRIBUTE_PATTERNS, true);
 			int offset= 1;
-			fFiles= (IFile[]) JavaRefactoringDescriptorUtil.getResourceArray(fArguments, ATTRIBUTE_FILES, ATTRIBUTE_ELEMENT, offset, project, IFile.class);
+			fFiles= JavaRefactoringDescriptorUtil.getResourcePathArray(fArguments, ATTRIBUTE_FILES, ATTRIBUTE_ELEMENT, offset, project);
 			offset+= fFiles.length;
-			fFolders= (IFolder[]) JavaRefactoringDescriptorUtil.getResourceArray(fArguments, ATTRIBUTE_FOLDERS, ATTRIBUTE_ELEMENT, offset, project, IFolder.class);
+			fFolders= JavaRefactoringDescriptorUtil.getResourcePathArray(fArguments, ATTRIBUTE_FOLDERS, ATTRIBUTE_ELEMENT, offset, project);
 			offset+= fFolders.length;
 			fUnits= (ICompilationUnit[]) JavaRefactoringDescriptorUtil.getJavaElementArray(fArguments, ATTRIBUTE_UNITS, ATTRIBUTE_ELEMENT, offset, project, ICompilationUnit.class);
 		} else if (POLICY_MOVE_ROOTS.equals(fMovePolicy)) {
@@ -191,16 +192,16 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 		final String project= getProject();
 		if (fDestination instanceof IJavaElement)
 			JavaRefactoringDescriptorUtil.setJavaElement(fArguments, ATTRIBUTE_DESTINATION, project, (IJavaElement) fDestination);
-		else if (fDestination instanceof IResource)
-			JavaRefactoringDescriptorUtil.setResource(fArguments, ATTRIBUTE_TARGET, null, (IResource) fDestination);
+		else if (fDestination instanceof IPath)
+			JavaRefactoringDescriptorUtil.setResourcePath(fArguments, ATTRIBUTE_TARGET, project, (IPath) fDestination);
 		if (POLICY_MOVE_RESOURCES.equals(fMovePolicy)) {
 			JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_REFERENCES, fReferences);
 			JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_QUALIFIED, fQualified);
 			JavaRefactoringDescriptorUtil.setString(fArguments, ATTRIBUTE_PATTERNS, fPatterns);
 			int offset= 1;
-			JavaRefactoringDescriptorUtil.setResourceArray(fArguments, ATTRIBUTE_FILES, ATTRIBUTE_ELEMENT, project, fFiles, offset);
+			JavaRefactoringDescriptorUtil.setResourcePathArray(fArguments, ATTRIBUTE_FILES, ATTRIBUTE_ELEMENT, project, fFiles, offset);
 			offset+= fFiles.length;
-			JavaRefactoringDescriptorUtil.setResourceArray(fArguments, ATTRIBUTE_FOLDERS, ATTRIBUTE_ELEMENT, project, fFolders, offset);
+			JavaRefactoringDescriptorUtil.setResourcePathArray(fArguments, ATTRIBUTE_FOLDERS, ATTRIBUTE_ELEMENT, project, fFolders, offset);
 			offset+= fFolders.length;
 			JavaRefactoringDescriptorUtil.setJavaElementArray(fArguments, ATTRIBUTE_UNITS, ATTRIBUTE_ELEMENT, project, fUnits, offset);
 		} else if (POLICY_MOVE_ROOTS.equals(fMovePolicy)) {
@@ -239,7 +240,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 	 */
 	public void setDestination(IResource resource) {
 		Assert.isNotNull(resource);
-		fDestination= resource;
+		fDestination= resource.getFullPath();
 	}
 
 	/**
@@ -337,8 +338,14 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 		Assert.isNotNull(folders);
 		Assert.isNotNull(units);
 		Assert.isTrue(fMovePolicy == null, "Clients must only call one of the 'setMoveXXX' methods."); //$NON-NLS-1$
-		fFiles= files;
-		fFolders= folders;
+		fFiles= new IPath[files.length];
+		for (int i= 0; i < files.length; i++) {
+			fFiles[i]= files[i].getFullPath();
+		}
+		fFolders= new IPath[folders.length];
+		for (int i= 0; i < folders.length; i++) {
+			fFolders[i]= folders[i].getFullPath();
+		}
 		fUnits= units;
 		fMovePolicy= POLICY_MOVE_RESOURCES;
 	}

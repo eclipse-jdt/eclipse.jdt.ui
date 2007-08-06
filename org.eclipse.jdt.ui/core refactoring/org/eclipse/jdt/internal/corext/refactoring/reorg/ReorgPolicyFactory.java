@@ -3223,7 +3223,7 @@ public final class ReorgPolicyFactory {
 					// https://bugs.eclipse.org/bugs/show_bug.cgi?id=157479
 					handle= extended.getAttribute(ATTRIBUTE_TARGET);
 					if (handle != null) {
-						final IResource resource= JavaRefactoringDescriptorUtil.handleToResource(null, handle);
+						final IResource resource= JavaRefactoringDescriptorUtil.handleToResource(extended.getProject(), handle);
 						if (resource == null || (fCheckDestination && !resource.exists()))
 							return ScriptableRefactoring.createInputFatalStatus(resource, getProcessorId(), getRefactoringId());
 						else {
