@@ -24,6 +24,7 @@ import org.eclipse.jdt.ui.tests.core.CoreTests;
 import org.eclipse.jdt.ui.tests.packageview.PackageExplorerTests;
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
 import org.eclipse.jdt.ui.tests.search.SearchTest;
+import org.eclipse.jdt.ui.tests.templates.TemplatesTestSuite;
 import org.eclipse.jdt.ui.tests.wizardapi.NewJavaProjectWizardTest;
 import org.eclipse.jdt.ui.tests.wizardapi.NewTypeWizardTest;
 
@@ -67,6 +68,8 @@ public class AutomatedSuite extends TestSuite {
 		addTest(JUnitJUnitTests.suite());
 		
 		addTest(BuildpathModifierActionTest.suite());
+		
+		addTest(TemplatesTestSuite.suite());
 	}
 }
 

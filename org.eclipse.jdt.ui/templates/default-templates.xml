@@ -25,7 +25,7 @@
 }</template>
 
 <template name="for" description="%Templates.for_collection" id="org.eclipse.jdt.ui.templates.for_collection" context="java" enabled="true" autoinsert="false">for (Iterator ${iterator} = ${collection}.iterator(); ${iterator}.hasNext(); ) {
-	${type:elem(collection)} ${name:name(type)} = (${type}) ${iterator}.next();
+	${type:elemType(collection)} ${name:newName(type)} = (${type}) ${iterator}.next();
 	${cursor}
 }</template>
 
@@ -34,12 +34,12 @@
 }</template>
 
 <template name="while" description="%Templates.while_enumeration" id="org.eclipse.jdt.ui.templates.while_enumeration" context="java" enabled="true" autoinsert="false">while (${en:var(java.util.Enumeration)}.hasMoreElements()) {
-	${type:arg(en)} ${elem:name(type)} = (${type}) ${en}.nextElement();
+	${type:argType(en)} ${elem:newName(type)} = (${type}) ${en}.nextElement();
 	${cursor}
 }</template>
 
 <template name="while" description="%Templates.while_iterator" id="org.eclipse.jdt.ui.templates.while_iterator" context="java" enabled="true" autoinsert="false">while (${it:var(java.util.Iterator)}.hasNext()) {
-	${type:arg(it)} ${elem:name(type)} = (${type}) ${it}.next();
+	${type:argType(it)} ${elem:newName(type)} = (${type}) ${it}.next();
 	${cursor}
 }</template>
 
@@ -120,7 +120,7 @@
 
 return ${name};</template>
 
-<template name="toarray" description="%Templates.toarray" id="org.eclipse.jdt.ui.templates.toarray" context="java" enabled="true" autoinsert="false">(${type:elem(collection)}[]) ${collection}.toArray(new ${type}[${collection}.size()])</template>
+<template name="toarray" description="%Templates.toarray" id="org.eclipse.jdt.ui.templates.toarray" context="java" enabled="true" autoinsert="false">(${type:elemType(collection)}[]) ${collection}.toArray(new ${type}[${collection}.size()])</template>
 
 <template name="sysout" description="%Templates.sysout" id="org.eclipse.jdt.ui.templates.sysout" context="java" enabled="true" autoinsert="true">System.out.println(${word_selection}${});${cursor}</template>
 
