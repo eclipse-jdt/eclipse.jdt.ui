@@ -37,7 +37,7 @@ public class CopyPackageFragmentRootChange extends PackageFragmentRootReorgChang
 	}
 
 	public String getName() {
-		String[] keys= {getRoot().getElementName(), getDestinationProject().getName()};
+		String[] keys= {getRoot().getElementName(), getDestination().getName()};
 		return Messages.format(RefactoringCoreMessages.CopyPackageFragmentRootChange_copy, keys); 
 	}
 }

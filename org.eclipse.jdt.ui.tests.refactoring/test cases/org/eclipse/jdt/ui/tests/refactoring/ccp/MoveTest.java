@@ -2037,13 +2037,10 @@ public class MoveTest extends RefactoringTest {
 		file.create(getStream("123"), true, null);
 		
 		IPackageFragmentRoot source= JavaProjectHelper.addLibrary(RefactoringTestSetup.getProject(), file.getFullPath());
+
+		move(new IJavaElement[] {source} , new IResource[] {}, destination, null, IReorgDestination.LOCATION_ON, true, false);
 		
-		try {
-			fIsPreDeltaTest= false;
-			move(new IJavaElement[] {source} , new IResource[0], destination, null, IReorgDestination.LOCATION_ON, true, false);
-		} finally{
-			fIsPreDeltaTest= true;
-		}
+		assertTrue(destination.findMember(file.getName()).exists());
 	}
 	
 	private static void assertIsParent(IContainer parent, IResource child) {

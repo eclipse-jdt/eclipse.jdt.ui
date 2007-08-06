@@ -17,7 +17,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.mapping.ResourceMapping;
@@ -26,6 +26,7 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -42,9 +43,9 @@ abstract class PackageFragmentRootReorgChange extends JDTChange {
 	private final String fRootHandle;
 	private final INewNameQuery fNewNameQuery;
 	private final IPackageFragmentRootManipulationQuery fUpdateClasspathQuery;
-	private final IProject fDestination;
+	private final IContainer fDestination;
 	
-	PackageFragmentRootReorgChange(IPackageFragmentRoot root, IProject destination, INewNameQuery newNameQuery, 
+	PackageFragmentRootReorgChange(IPackageFragmentRoot root, IContainer destination, INewNameQuery newNameQuery, 
 			IPackageFragmentRootManipulationQuery updateClasspathQuery) {
 		Assert.isTrue(! root.isExternal());
 		fRootHandle= root.getHandleIdentifier();
@@ -89,7 +90,7 @@ abstract class PackageFragmentRootReorgChange extends JDTChange {
 		return fDestination.getFullPath().removeFirstSegments(ResourcesPlugin.getWorkspace().getRoot().getFullPath().segmentCount());
 	}
 
-	protected IProject getDestinationProject(){
+	protected IContainer getDestination() {
 		return fDestination;
 	}
 	
@@ -115,7 +116,8 @@ abstract class PackageFragmentRootReorgChange extends JDTChange {
 			otherProjects= IPackageFragmentRoot.OTHER_REFERRING_PROJECTS_CLASSPATH;
 		}
 		
-		if (! JavaCore.create(getDestinationProject()).exists())
+		IJavaElement javaElement= JavaCore.create(getDestination());
+		if (javaElement == null || !javaElement.exists())
 			return replace | originating;
 
 		if (fUpdateClasspathQuery == null)

@@ -117,7 +117,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CopyCompilationUnitCh
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyPackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyPackageFragmentRootChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyResourceChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DeletePackageFragmentRootChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageChange;
@@ -1619,8 +1618,7 @@ public final class ReorgPolicyFactory {
 			IJavaProject destination= getDestinationJavaProject();
 			for (int i= 0; i < roots.length; i++) {
 				if (destination == null) {
-					composite.add(new CopyResourceChange(roots[i].getResource(), (IContainer) getResourceDestination(), null));
-					composite.add(new DeletePackageFragmentRootChange(roots[i], true, null));
+					composite.add(new MovePackageFragmentRootChange(roots[i], (IContainer) getResourceDestination(), null));
 				} else {
 					composite.add(createChange(roots[i], destination));
 				}
@@ -1671,7 +1669,7 @@ public final class ReorgPolicyFactory {
 			} else {
 				IPackageFragmentRoot[] roots= getPackageFragmentRoots();
 				for (int i= 0; i < roots.length; i++) {
-					fModifications.move(roots[i].getResource(), new MoveArguments(getResourceDestination(), updateReferences));
+					fModifications.move(roots[i], new MoveArguments(getResourceDestination(), updateReferences));
 				}
 			}
 			return fModifications;
