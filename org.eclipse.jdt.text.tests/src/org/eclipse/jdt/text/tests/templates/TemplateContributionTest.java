@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.templates;
+package org.eclipse.jdt.text.tests.templates;
 
 import java.util.Iterator;
 
@@ -30,6 +30,12 @@ import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+
+/**
+ * Template contribution tests.
+ * 
+ * @since 3.4
+ */
 public class TemplateContributionTest extends TestCase {
 
 	public static Test suite() {
