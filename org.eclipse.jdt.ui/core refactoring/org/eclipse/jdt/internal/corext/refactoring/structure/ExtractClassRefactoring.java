@@ -145,9 +145,21 @@ public class ExtractClassRefactoring extends Refactoring {
 			String parameterName= fDescriptor.getFieldName();
 			IType type= fDescriptor.getType();
 			status.merge(Checks.checkFieldName(parameterName, type));
-			if (type.getType(parameterName).exists())
-				status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_field_already_exists, parameterName));
+			validateFieldNames(status, parameterName, type);
 			return status;
+		}
+
+		private void validateFieldNames(RefactoringStatus status, String parameterName, IType type) {
+			if (type.getField(parameterName).exists()) {
+				Field[] fields= fDescriptor.getFields();
+				for (int i= 0; i < fields.length; i++) {
+					Field field= fields[i];
+					if (parameterName.equals(field.getFieldName())){
+						if (!field.isCreateField())
+							status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_field_already_exists, parameterName));
+					}
+				}
+			}
 		}
 
 		public RefactoringStatus validateFields() {
@@ -167,6 +179,7 @@ public class ExtractClassRefactoring extends Refactoring {
 			if (names.size() == 0) {
 				status.addError(RefactoringCoreMessages.ExtractClassRefactoring_error_msg_one_field);
 			}
+			validateFieldNames(status, fDescriptor.getFieldName(), fDescriptor.getType());
 			return status;
 		}
 
