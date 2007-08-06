@@ -645,7 +645,7 @@ public class ExtractClassRefactoring extends Refactoring {
 		SimpleName name= (SimpleName) NodeFinder.perform(fBaseCURewrite.getRoot(), type.getNameRange());
 		TypeDeclaration typeNode= (TypeDeclaration) ASTNodes.getParent(name, ASTNode.TYPE_DECLARATION);
 		ASTRewrite rewrite= fBaseCURewrite.getASTRewrite();
-		int modifier= 0;
+		int modifier= Modifier.PRIVATE;
 		TextEditGroup removeFieldGroup= fBaseCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractClassRefactoring_group_remove_field);
 		FieldDeclaration lastField= null;
 		initializeDeclaration(typeNode);
@@ -689,7 +689,9 @@ public class ExtractClassRefactoring extends Refactoring {
 				if (initializer != null)
 					pi.initializer= initializer;
 				int modifiers= parent.getModifiers();
-				modifier|= modifiers;
+				if (!MemberVisibilityAdjustor.hasLowerVisibility(modifiers, modifier)){
+					modifier= modifiers;
+				}
 			}
 		}
 		FieldDeclaration fieldDeclaration= createParameterObjectField(pof, typeNode, modifier);

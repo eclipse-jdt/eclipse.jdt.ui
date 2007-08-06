@@ -346,4 +346,10 @@ public class ExtractClassTests extends RefactoringTest {
 		}
 	}
 	
+	public void testLowestVisibility() throws Exception {
+		fDescriptor.setType(setupType());
+		fDescriptor.setCreateGetterSetter(true);
+		runRefactoring(false);
+	}
+	
 }

@@ -3,7 +3,7 @@ package p;
 import java.util.ArrayList;
 
 public class ControlBodyUpdates {
-	private ControlBodyUpdatesParameter parameterObject = new ControlBodyUpdatesParameter();
+	ControlBodyUpdatesParameter parameterObject = new ControlBodyUpdatesParameter();
 
 	private void foo() {
 		for (int i = 0; i < parameterObject.getArraylists().get(0); i++)
