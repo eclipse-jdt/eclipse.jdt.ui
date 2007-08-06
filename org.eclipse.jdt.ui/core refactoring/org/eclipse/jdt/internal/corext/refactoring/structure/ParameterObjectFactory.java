@@ -231,7 +231,7 @@ public class ParameterObjectFactory {
 			}
 		}
 
-
+		ArrayList usedParameter= new ArrayList();
 		for (Iterator iter= validParameter.iterator(); iter.hasNext();) {
 			ParameterInfo pi= (ParameterInfo) iter.next();
 			SingleVariableDeclaration svd= ast.newSingleVariableDeclaration();
@@ -246,8 +246,9 @@ public class ParameterObjectFactory {
 				svd.setVarargs(true);
 			}
 
-			String paramName= getParameterName(pi, project);
-
+			String paramName= getParameterName(pi, project, usedParameter);
+			usedParameter.add(paramName);
+			
 			Type fieldType= importBinding(typeBinding, cuRewrite);
 			svd.setType(fieldType);
 			svd.setName(ast.newSimpleName(paramName));
@@ -269,10 +270,10 @@ public class ParameterObjectFactory {
 		return methodDeclaration;
 	}
 
-	private String getParameterName(ParameterInfo pi, IJavaProject project) {
+	private String getParameterName(ParameterInfo pi, IJavaProject project, ArrayList usedParameter) {
 		String fieldName= pi.getNewName();
 		String strippedName= NamingConventions.removePrefixAndSuffixForFieldName(project, fieldName, 0);
-		String[] suggestions= StubUtility.getVariableNameSuggestions(StubUtility.PARAMETER, project, strippedName, 0, null, true);
+		String[] suggestions= StubUtility.getVariableNameSuggestions(StubUtility.PARAMETER, project, strippedName, 0, usedParameter, true);
 		return suggestions[0];
 	}
 
