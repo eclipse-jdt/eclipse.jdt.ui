@@ -181,7 +181,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      * that it is still enabled.
      */
     private void doDropValidation(DropTargetEvent event) {
-        currentOperation= determineOperation(currentTarget, lastValidOperation, event.currentDataType);
+        currentOperation= determineOperation(currentTarget, lastValidOperation, event.currentDataType, event.operations);
         event.detail = currentOperation;
         setFeedback(event, currentLocation);
     }
@@ -250,7 +250,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      * Last chance for the action to disable itself
      */
     public void dropAccept(DropTargetEvent event) {
-        event.detail= determineOperation(currentTarget, event.detail, event.currentDataType);
+        event.detail= determineOperation(currentTarget, event.detail, event.currentDataType, event.operations);
     }
 
     /**
@@ -503,6 +503,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      *   <code>null</code> if the mouse is hovering over empty space
      * @param operation the current drag operation (copy, move, etc.)
      * @param transferType the current transfer type
+     * @param operations a bitwise OR'ing of the operations that the DragSource can support
      * @return the operation which will be executed if no modifier key is pressed
      * 		by the user
      * 
@@ -511,7 +512,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
 	 * @see DND#DROP_COPY
 	 * @see DND#DROP_LINK
      */
-    protected int determineOperation(Object target, int operation, TransferData transferType) {
+    protected int determineOperation(Object target, int operation, TransferData transferType, int operations) {
     	if (!validateDrop(target, operation, transferType)) {
     		return DND.DROP_NONE;
     	}

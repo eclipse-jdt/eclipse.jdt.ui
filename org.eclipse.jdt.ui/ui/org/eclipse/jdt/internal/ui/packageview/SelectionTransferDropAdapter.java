@@ -114,14 +114,14 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	 * {@inheritDoc}
 	 */
 	public boolean validateDrop(Object target, int operation, TransferData transferType) {
-		return determineOperation(target, operation, transferType) != DND.DROP_NONE;
+		return determineOperation(target, operation, transferType, DND.DROP_MOVE | DND.DROP_LINK | DND.DROP_COPY) != DND.DROP_NONE;
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	protected int determineOperation(Object target, int operation, TransferData transferType) {
-		int result= internalDetermineOperation(target, operation);
+	protected int determineOperation(Object target, int operation, TransferData transferType, int operations) {
+		int result= internalDetermineOperation(target, operation, operations);
 		
 		if (result == DND.DROP_NONE) {
 			setSelectionFeedbackEnabled(false);
@@ -132,7 +132,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		return result;
 	}
 		
-	private int internalDetermineOperation(Object target, int operation) {
+	private int internalDetermineOperation(Object target, int operation, int operations) {
 		
 		initializeSelection();
 		
@@ -154,7 +154,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		try {
 			switch(operation) {
 				case DND.DROP_DEFAULT:
-					return handleValidateDefault(target);
+					return handleValidateDefault(target, operations);
 				case DND.DROP_COPY: 
 					return handleValidateCopy(target);
 				case DND.DROP_MOVE: 	
@@ -204,10 +204,12 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		
 	}
 	
-	private int handleValidateDefault(Object target) throws JavaModelException{
-		int result= handleValidateMove(target);
-		if (result != DND.DROP_NONE)
-			return result;
+	private int handleValidateDefault(Object target, int operations) throws JavaModelException{
+		if ((operations & DND.DROP_MOVE) != 0) {			
+			int result= handleValidateMove(target);
+			if (result != DND.DROP_NONE)
+				return result;
+		}
 			
 		return handleValidateCopy(target);
 	}
