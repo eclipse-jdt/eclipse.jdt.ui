@@ -1168,6 +1168,56 @@ public class RenamePackageTests extends RefactoringTest {
 		helper2(new String[]{"r.p1", "fred"}, new String[][] {{"A"}, {}}, "fred");
 	}	
 	
+	public void testToEmptySubPack() throws Exception{
+		fRenameSubpackages= true;
+		
+		PackageRename rename= new PackageRename(new String[]{"p", "p.q"}, new String[][] {{}, {}}, "p.q");
+		IPackageFragment p= rename.fPackages[0];
+		IPackageFragment pq= rename.fPackages[1];
+		
+		ParticipantTesting.reset();
+		String[] renameHandles= ParticipantTesting.createHandles(p, pq);
+		
+		rename.createAndPerform(RefactoringStatus.OK);
+		assertTrue(p.exists());
+		assertTrue(pq.exists());
+		IPackageFragment ppq= getRoot().getPackageFragment("p.q.q");
+		assertTrue(ppq.exists());
+		
+		ParticipantTesting.testRename(renameHandles, new RenameArguments[] {
+				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[0]), true),
+				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[1]), true),
+		});
+		ParticipantTesting.testCreate(ParticipantTesting.createHandles(
+				ppq.getResource()
+		));
+	}	
+	
+	public void testWithEmptySubPack() throws Exception{
+		fRenameSubpackages= true;
+		
+		PackageRename rename= new PackageRename(new String[]{"p", "p.q"}, new String[][] {{}, {}}, "p1");
+		IPackageFragment p= rename.fPackages[0];
+		IPackageFragment pq= rename.fPackages[1];
+		
+		ParticipantTesting.reset();
+		String[] renameHandles= ParticipantTesting.createHandles(p, pq, p.getResource());
+		
+		rename.createAndPerform(RefactoringStatus.OK);
+		assertFalse(p.exists());
+		assertFalse(pq.exists());
+		IPackageFragment p1= getRoot().getPackageFragment("p1");
+		IPackageFragment p1q= getRoot().getPackageFragment("p1.q");
+		assertTrue(p1.exists());
+		assertTrue(p1q.exists());
+		
+		ParticipantTesting.testRename(renameHandles, new RenameArguments[] {
+				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[0]), true),
+				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[1]), true),
+				new RenameArguments("p1", true)
+		});
+	}	
+	
 	public void testReadOnly() throws Exception{
 		if (BUG_6054) {
 			printTestDisabledMessage("see bug#6054 (renaming a read-only package resets the read-only flag)");

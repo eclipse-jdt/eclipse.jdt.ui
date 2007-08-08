@@ -195,6 +195,8 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 	}
 
 	private void renamePackage(IPackageFragment pack, IProgressMonitor pm, IPath newPath, String newName) throws JavaModelException, CoreException {
+		if (! pack.exists())
+			return; // happens if empty parent with single subpackage is renamed, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=199045
 		pack.rename(newName, false, pm);
 		if (fCompilationUnitStamps != null) {
 			IPackageFragment newPack= (IPackageFragment) JavaCore.create(ResourcesPlugin.getWorkspace().getRoot().getFolder(newPath));
