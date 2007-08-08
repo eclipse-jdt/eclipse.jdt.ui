@@ -462,6 +462,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractClassRefactoring_warning_no_fields_moved;
 
+	public static String ExtractClassRefactoring_warning_semantic_change;
+
 	public static String ExtractConstantRefactoring_another_variable;
 
 	public static String ExtractConstantRefactoring_change_name;

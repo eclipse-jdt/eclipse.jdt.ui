@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
@@ -590,8 +591,20 @@ public class ExtractClassRefactoring extends Refactoring {
 					}
 					Expression assignedValue=handleSimpleNameAssignment(replaceNode, pof, parameterName, ast, javaProject, useSuper);
 					if (assignedValue == null) {
-						Expression fieldReadAccess= pof.createFieldReadAccess(pi, parameterName, ast, javaProject, useSuper);
+						final NullLiteral marker= qualifier == null ? null : ast.newNullLiteral();
+						Expression fieldReadAccess= pof.createFieldReadAccess(pi, parameterName, ast, javaProject, useSuper, marker);
 						assignedValue= GetterSetterUtil.getAssignedValue(replaceNode, rewrite, fieldReadAccess, typeBinding, is50OrHigher);
+						boolean markerReplaced= replaceMarkerWithQualifier(rewrite, qualifier, assignedValue, marker);
+						if (markerReplaced) {
+							switch (qualifier.getNodeType()) {
+								case ASTNode.METHOD_INVOCATION:
+								case ASTNode.CLASS_INSTANCE_CREATION:
+								case ASTNode.SUPER_METHOD_INVOCATION:
+								case ASTNode.PARENTHESIZED_EXPRESSION:
+									status.addWarning(RefactoringCoreMessages.ExtractClassRefactoring_warning_semantic_change, JavaStatusContext.create(fDescriptor.getType().getTypeRoot(), replaceNode));
+									break;
+							}
+						}
 					}
 					if (assignedValue == null) {
 						IType primaryType= cuRewrite.getCu().findPrimaryType();
@@ -601,13 +614,13 @@ public class ExtractClassRefactoring extends Refactoring {
 							status.addError(RefactoringCoreMessages.ExtractClassRefactoring_error_unable_to_convert_node, JavaStatusContext.create(primaryType.getTypeRoot(), replaceNode));
 						}
 					} else {
-						if (qualifier != null)
-							qualifier= (Expression) rewrite.createMoveTarget(qualifier);
-						Expression access= pof.createFieldWriteAccess(pi, parameterName, ast, javaProject, assignedValue, qualifier, useSuper);
+						NullLiteral marker= qualifier == null ? null : ast.newNullLiteral();
+						Expression access= pof.createFieldWriteAccess(pi, parameterName, ast, javaProject, assignedValue, marker, useSuper);
+						replaceMarkerWithQualifier(rewrite, qualifier, access, marker);
 						rewrite.replace(replaceNode, access, writeGroup);
 					}
 				} else {
-					Expression fieldReadAccess= pof.createFieldReadAccess(pi, parameterName, ast, javaProject, false);
+					Expression fieldReadAccess= pof.createFieldReadAccess(pi, parameterName, ast, javaProject, false, null); //qualifier is already there
 					rewrite.replace(name, fieldReadAccess, readGroup);
 				}
 			}
@@ -615,6 +628,32 @@ public class ExtractClassRefactoring extends Refactoring {
 		return status;
 	}
 
+	/*
+	 * Replaces the NullLiteral dummy with the copied qualifier
+	 */
+	private boolean replaceMarkerWithQualifier(final ASTRewrite rewrite, final Expression qualifier, Expression assignedValue, final NullLiteral marker) {
+		final boolean[] replaced= new boolean[]{false};
+		if (assignedValue != null && qualifier != null) {
+			assignedValue.accept(new ASTVisitor() {
+				
+				public boolean visit(NullLiteral node) {
+					if (node == marker) {
+						rewrite.replace(node, copyQualifier(rewrite, qualifier), null);
+						replaced[0]= true;
+						return false;
+					}
+					return true;
+				}
+			});
+		}
+		return replaced[0];
+	}
+
+	private Expression copyQualifier(ASTRewrite rewrite, Expression qualifier) {
+		if (qualifier != null)
+			qualifier= (Expression) rewrite.createCopyTarget(qualifier);
+		return qualifier;
+	}
 
 	private Expression handleSimpleNameAssignment(ASTNode replaceNode, ParameterObjectFactory pof, String parameterName, AST ast, IJavaProject javaProject, boolean useSuper) {
 		if (replaceNode instanceof Assignment) {
@@ -627,7 +666,7 @@ public class ExtractClassRefactoring extends Refactoring {
 					if (fDescriptor.getType().getFullyQualifiedName().equals(binding.getDeclaringClass().getQualifiedName())) {
 						FieldInfo fieldInfo= getFieldInfo(binding.getName());
 						if (fieldInfo != null && binding == fieldInfo.pi.getOldBinding()) {
-							return pof.createFieldReadAccess(fieldInfo.pi, parameterName, ast, javaProject, useSuper);
+							return pof.createFieldReadAccess(fieldInfo.pi, parameterName, ast, javaProject, useSuper, null);
 						}
 					}
 				}

@@ -252,7 +252,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		private void updateSimpleName(ASTRewrite rewriter, ParameterInfo pi, SimpleName node, List enclosingParameters, IJavaProject project) {
 			AST ast= rewriter.getAST();
 			IBinding binding= node.resolveBinding();
-			Expression replacementNode= fParameterObjectFactory.createFieldReadAccess(pi, getParameterName(), ast, project, false);
+			Expression replacementNode= fParameterObjectFactory.createFieldReadAccess(pi, getParameterName(), ast, project, false, null);
 			if (binding instanceof IVariableBinding) {
 				IVariableBinding variable= (IVariableBinding) binding;
 				if (variable.isParameter() && variable.getName().equals(getNameInScope(pi, enclosingParameters))) {

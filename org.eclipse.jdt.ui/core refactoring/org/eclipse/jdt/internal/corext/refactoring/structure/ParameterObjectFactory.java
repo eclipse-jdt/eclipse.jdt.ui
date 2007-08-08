@@ -316,21 +316,38 @@ public class ParameterObjectFactory {
 		return declaration;
 	}
 
-	public Expression createFieldReadAccess(ParameterInfo pi, String paramName, AST ast, IJavaProject project, boolean useSuper) {
+	public Expression createFieldReadAccess(ParameterInfo pi, String paramName, AST ast, IJavaProject project, boolean useSuper, Expression qualifier) {
 		SuperFieldAccess sf= null;
 		if (useSuper) {
 			sf= ast.newSuperFieldAccess();
 			sf.setName(ast.newSimpleName(paramName));
 		}
 		if (!fCreateGetter) {
-			return createFieldAccess(pi, paramName, ast, useSuper, sf);
+			if (qualifier == null)
+			//(super.)paramName.field
+				return createFieldAccess(pi, paramName, ast, useSuper, sf);
+			else{
+				FieldAccess paramAccess= createParamAccess(paramName, ast, qualifier);
+				FieldAccess fieldAccess= ast.newFieldAccess();
+				fieldAccess.setExpression(paramAccess);
+				fieldAccess.setName(ast.newSimpleName(paramName));
+				return fieldAccess;
+			}
 		} else {
 			MethodInvocation method= ast.newMethodInvocation();
 			method.setName(ast.newSimpleName(getGetterName(pi, ast, project)));
-			if (useSuper)
+			if (useSuper) {
+				//super.paramName.getter()
 				method.setExpression(sf);
-			else
-				method.setExpression(ast.newSimpleName(paramName));
+			} else {
+				if (qualifier == null) {
+					//paramName.getter()
+					method.setExpression(ast.newSimpleName(paramName));
+				} else {
+					FieldAccess fa= createParamAccess(paramName, ast, qualifier);
+					method.setExpression(fa);
+				}
+			}
 			return method;
 		}
 	}
@@ -430,7 +447,7 @@ public class ParameterObjectFactory {
 
 		VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 		fragment.setName(ast.newSimpleName(pi.getOldName()));
-		fragment.setInitializer(createFieldReadAccess(pi, paramName, ast, cuRewrite.getCu().getJavaProject(), false));
+		fragment.setInitializer(createFieldReadAccess(pi, paramName, ast, cuRewrite.getCu().getJavaProject(), false, null));
 		VariableDeclarationExpression declaration= ast.newVariableDeclarationExpression(fragment);
 		IVariableBinding variable= pi.getOldBinding();
 		declaration.setType(importBinding(pi.getNewTypeBinding(), cuRewrite));

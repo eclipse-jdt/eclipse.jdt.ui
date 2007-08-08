@@ -10,6 +10,6 @@ public class UpdateSimpleName {
 		UpdateSimpleName usn= new UpdateSimpleName();
 		usn.parameterObject.setFoo(usn.parameterObject.getFoo2());
 		usn.parameterObject.setFoo(parameterObject.getFoo());
-		usn.parameterObject.setFoo2(parameterObject.getFoo2() + 1);
+		usn.parameterObject.setFoo2(usn.parameterObject.getFoo2() + 1);
 	}
 }

@@ -120,13 +120,14 @@ public class ExtractClassTests extends RefactoringTest {
 		return sb.toString();
 	}
 
-	private RefactoringStatus runRefactoring(boolean expectFailure) throws Exception {
+	private RefactoringStatus runRefactoring(boolean expectError) throws Exception {
 		RefactoringStatus status= performRefactoring(fDescriptor);
-		if (expectFailure) {
+		if (expectError) {
 			assertNotNull(status + "", status);
 			return status;
 		} else {
-			assertNull(status + "", status);
+			if (status!=null)
+				assertTrue(status+"",status.getEntryWithHighestSeverity().getSeverity() <= RefactoringStatus.WARNING);
 		}
 		String expected= getFileContents(getOutputTestFileName(getCUName()));
 		assertNotNull(expected);
@@ -136,7 +137,7 @@ public class ExtractClassTests extends RefactoringTest {
 		String result= resultCU.getSource();
 		assertNotNull(result);
 		assertEqualLines(expected, result);
-		if (fDescriptor.isCreateTopLevel() && !expectFailure) {
+		if (fDescriptor.isCreateTopLevel() && !expectError) {
 			String packageName= fDescriptor.getPackage();
 			if (packageName != null)
 				fPack= getRoot().getPackageFragment(packageName);
@@ -150,7 +151,7 @@ public class ExtractClassTests extends RefactoringTest {
 			assertNotNull(result);
 			assertEqualLines(expected, result);
 		}
-		return null;
+		return status;
 	}
 
 	protected void setUp() throws Exception {
@@ -356,6 +357,19 @@ public class ExtractClassTests extends RefactoringTest {
 		fDescriptor.setType(setupType());
 		fDescriptor.setCreateGetterSetter(true);
 		runRefactoring(false);
+	}
+	
+	public void testQualifiedIncrements() throws Exception {
+		fDescriptor.setType(setupType());
+		fDescriptor.setCreateGetterSetter(true);
+		RefactoringStatus status= runRefactoring(false);
+		RefactoringStatusEntry[] entries= status.getEntries();
+		//3*Warning for semantic change
+		assertEquals(3, entries.length);
+		for (int i= 0; i < entries.length; i++) {
+			RefactoringStatusEntry refactoringStatusEntry= entries[i];
+			assertEquals(true, refactoringStatusEntry.isWarning());
+		}
 	}
 	
 }
