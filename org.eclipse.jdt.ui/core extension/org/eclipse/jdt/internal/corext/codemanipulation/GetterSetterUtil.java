@@ -293,7 +293,7 @@ public class GetterSetterUtil {
 		ASTNode statement= parent.getParent();
 		boolean isStatement= statement.getNodeType() != ASTNode.EXPRESSION_STATEMENT;
 		ASTNode block= statement.getParent();
-		boolean isBlock= block.getNodeType() == ASTNode.BLOCK;
+		boolean isBlock= block.getNodeType() == ASTNode.BLOCK || block.getNodeType() == ASTNode.SWITCH_STATEMENT;
 		boolean isControlStatemenBody= ASTNodes.isControlStatementBody(statement.getLocationInParent());
 		return isStatement || !(isBlock || isControlStatemenBody);
 	}

@@ -352,4 +352,10 @@ public class ExtractClassTests extends RefactoringTest {
 		runRefactoring(false);
 	}
 	
+	public void testSwitchCaseUpdates() throws Exception {
+		fDescriptor.setType(setupType());
+		fDescriptor.setCreateGetterSetter(true);
+		runRefactoring(false);
+	}
+	
 }
