@@ -3953,22 +3953,33 @@ public final class ReorgPolicyFactory {
 			else
 				return new MoveFilesFoldersAndCusPolicy(ReorgUtils.getFiles(resources), ReorgUtils.getFolders(resources), ArrayTypeConverter.toCuArray(javaElements));
 		}
-
-		if (hasOnlyMembers(javaElements) || hasOnlyImportDeclarations(javaElements)) {
+		
+		if (copy && hasElementsSmallerThanCuOrClassFile(javaElements)) {
 			Assert.isTrue(resources.length == 0);
-			if (copy) {
-				return new CopySubCuElementsPolicy(javaElements);
-			} else {
-				if (hasOnlyMembers(javaElements)) {
-					List members= Arrays.asList(javaElements);
-					return new MoveMembersPolicy((IMember[]) members.toArray(new IMember[members.size()]));
-				} else {
-					List declarations= ReorgUtils.getElementsOfType(javaElements, IJavaElement.IMPORT_DECLARATION);
-					return new MoveImportDeclarationsPolicy((IImportDeclaration[]) declarations.toArray(new IImportDeclaration[declarations.size()]));
-				}
-			}
+			return new CopySubCuElementsPolicy(javaElements);
 		}
+
+		if (!copy && hasOnlyMembers(javaElements)) {
+			List members= Arrays.asList(javaElements);
+			return new MoveMembersPolicy((IMember[]) members.toArray(new IMember[members.size()]));
+		}
+		
+		if (!copy && hasOnlyImportDeclarations(javaElements)) {			
+			List declarations= ReorgUtils.getElementsOfType(javaElements, IJavaElement.IMPORT_DECLARATION);
+			return new MoveImportDeclarationsPolicy((IImportDeclaration[]) declarations.toArray(new IImportDeclaration[declarations.size()]));
+		}
+		
 		return NO;
+	}
+	
+	private static boolean hasElementsSmallerThanCuOrClassFile(IJavaElement[] javaElements) {
+		for (int i= 0; i < javaElements.length; i++) {
+			if (ReorgUtils.isInsideCompilationUnit(javaElements[i]))
+				return true;
+			if (ReorgUtils.isInsideClassFile(javaElements[i]))
+				return true;
+		}
+		return false;
 	}
 
 	private static boolean hasOnlyImportDeclarations(IJavaElement[] javaElements) {
