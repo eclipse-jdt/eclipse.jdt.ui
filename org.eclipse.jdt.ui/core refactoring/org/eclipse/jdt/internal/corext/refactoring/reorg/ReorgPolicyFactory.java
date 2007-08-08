@@ -3584,7 +3584,7 @@ public final class ReorgPolicyFactory {
 				if (bodyDeclaration instanceof FieldDeclaration) {
 					FieldDeclaration fieldDeclaration= (FieldDeclaration) bodyDeclaration;
 					if (fieldDeclaration.fragments().size() == 1)
-						return (FieldDeclaration) ASTNode.copySubtree(targetAst, fieldDeclaration);
+						return (FieldDeclaration) rewrite.createStringPlaceholder(getUnindentedSource(field), ASTNode.FIELD_DECLARATION);
 					VariableDeclarationFragment originalFragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, sourceCuNode);
 					VariableDeclarationFragment copiedFragment= (VariableDeclarationFragment) ASTNode.copySubtree(targetAst, originalFragment);
 					newDeclaration= targetAst.newFieldDeclaration(copiedFragment);

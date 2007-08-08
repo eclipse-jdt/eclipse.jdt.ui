@@ -4,5 +4,6 @@ class A {
 }
 class B{
 
+	/** a field */
 	int f;
 }
