@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.swt.graphics.RGB;
@@ -18,6 +17,7 @@ import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.ui.JavaUI;
+
 
 /**
  * Semantic highlighting
@@ -39,9 +39,7 @@ public abstract class SemanticHighlighting {
 	 * @return the default default text color
 	 */
 	public RGB getDefaultTextColor() {
-		return findRGB(PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry(),
-			getThemeColorKey(),
-			getDefaultDefaultTextColor());
+		return findRGB(getThemeColorKey(), getDefaultDefaultTextColor());
 	}
 
 	/**
@@ -117,13 +115,16 @@ public abstract class SemanticHighlighting {
 	/**
 	 * Returns the RGB for the given key in the given color registry.
 	 * 
-	 * @param registry the color registry
 	 * @param key the key for the constant in the registry
 	 * @param defaultRGB the default RGB if no entry is found
 	 * @return RGB the RGB
 	 * @since 3.3
 	 */
-	private static RGB findRGB(ColorRegistry registry, String key, RGB defaultRGB) {
+	private static RGB findRGB(String key, RGB defaultRGB) {
+		if (!PlatformUI.isWorkbenchRunning())
+			return defaultRGB;
+		
+		ColorRegistry registry= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry();
 		RGB rgb= registry.getRGB(key);
 		if (rgb != null)
 			return rgb;
