@@ -357,24 +357,24 @@ public class JavaPlugin extends AbstractUIPlugin {
 		});
 
 		ensurePreferenceStoreBackwardsCompatibility();
-		
-		// Initialize AST provider
-		getASTProvider();
-		
-		new InitializeAfterLoadJob().schedule();
+
+		if (PlatformUI.isWorkbenchRunning()) {
+			// Initialize AST provider
+			getASTProvider();
+			new InitializeAfterLoadJob().schedule();
+			
+			fThemeListener= new IPropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent event) {
+					if (IThemeManager.CHANGE_CURRENT_THEME.equals(event.getProperty()))
+						new JavaUIPreferenceInitializer().initializeDefaultPreferences();
+				}
+			};
+			PlatformUI.getWorkbench().getThemeManager().addPropertyChangeListener(fThemeListener);
+		}
 		
 		// make sure is loaded too for org.eclipse.jdt.core.manipulation
 		// can be removed if JavaElementPropertyTester is moved down to jdt.core (bug 127085)
 		JavaManipulation.class.toString();
-		
-		fThemeListener= new IPropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent event) {
-				if (IThemeManager.CHANGE_CURRENT_THEME.equals(event.getProperty()))
-					new JavaUIPreferenceInitializer().initializeDefaultPreferences();
-			}
-		};
-		PlatformUI.getWorkbench().getThemeManager().addPropertyChangeListener(fThemeListener);
-		
 	}
 
 	/* package */ static void initializeAfterLoad(IProgressMonitor monitor) {

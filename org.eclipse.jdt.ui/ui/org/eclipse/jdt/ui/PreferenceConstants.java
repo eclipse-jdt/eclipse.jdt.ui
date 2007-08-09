@@ -3538,7 +3538,10 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 */
 	public static void initializeDefaultValues(IPreferenceStore store) {
-		ColorRegistry registry= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry();
+		ColorRegistry registry= null;
+		if (PlatformUI.isWorkbenchRunning())
+			registry= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry();
+		
 		store.setDefault(PreferenceConstants.EDITOR_SHOW_SEGMENTS, false);
 
 		// JavaBasePreferencePage
@@ -4051,9 +4054,13 @@ public class PreferenceConstants {
 	 * @since 3.3
 	 */
 	private static RGB findRGB(ColorRegistry registry, String key, RGB defaultRGB) {
+		if (registry == null)
+			return defaultRGB;
+			
 		RGB rgb= registry.getRGB(key);
 		if (rgb != null)
 			return rgb;
+		
 		return defaultRGB;
 	}
 
