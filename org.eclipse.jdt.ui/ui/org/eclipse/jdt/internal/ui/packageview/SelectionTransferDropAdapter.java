@@ -140,16 +140,13 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			return DND.DROP_NONE;
 		
 		//Do not allow to drop on itself, bug 14228
-		if (fElements.size() == 1) {
-			IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
-			IResource[] resources= ReorgUtils.getResources(fElements);
-			
-			if (javaElements.length == 1 && javaElements[0].equals(target))
-				return DND.DROP_NONE;
-			
-			if (resources.length == 1 && resources[0].equals(target))
-				return DND.DROP_NONE;
-		}
+		IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
+		if (contains(javaElements, target)) 
+			return DND.DROP_NONE;
+		
+		IResource[] resources= ReorgUtils.getResources(fElements);
+		if (contains(resources, target))
+			return DND.DROP_NONE;
 				
 		try {
 			switch(operation) {
@@ -165,6 +162,24 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		}
 		
 		return DND.DROP_NONE;
+	}
+
+	private boolean contains(IResource[] resources, Object target) {
+		for (int i= 0; i < resources.length; i++) {
+			if (resources[i].equals(target))
+				return true;
+		}
+		
+		return false;
+	}
+
+	private boolean contains(IJavaElement[] elements, Object target) {
+		for (int i= 0; i < elements.length; i++) {
+			if (elements[i].equals(target))
+				return true;
+		}
+		
+		return false;
 	}
 
 	protected void initializeSelection(){
