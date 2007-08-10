@@ -85,6 +85,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
@@ -632,7 +633,7 @@ public final class ReorgPolicyFactory {
 				for (int i= 0; i < javaElements.length; i++) {
 					copyToDestination(javaElements[i], targetRewriter, sourceCuNode, targetRewriter.getRoot());
 				}
-				return createCompilationUnitChange(targetCu, targetRewriter);
+				return createCompilationUnitChange(targetRewriter);
 			} catch (JavaModelException e) {
 				throw e;
 			} catch (CoreException e) {
@@ -2070,7 +2071,7 @@ public final class ReorgPolicyFactory {
 					copyToDestination(javaElements[i], targetRewriter, sourceRewriter.getRoot(), targetRewriter.getRoot());
 				}
 				ASTNodeDeleteUtil.markAsDeleted(javaElements, sourceRewriter, null);
-				Change targetCuChange= createCompilationUnitChange(destinationCu, targetRewriter);
+				Change targetCuChange= createCompilationUnitChange(targetRewriter);
 				if (sourceCu.equals(destinationCu)) {
 					return targetCuChange;
 				} else {
@@ -2080,7 +2081,7 @@ public final class ReorgPolicyFactory {
 					if (Arrays.asList(getJavaElements()).containsAll(Arrays.asList(sourceCu.getTypes()))) {
 						result.add(DeleteChangeCreator.createDeleteChange(null, new IResource[0], new ICompilationUnit[] {sourceCu}, RefactoringCoreMessages.ReorgPolicy_move, Collections.EMPTY_LIST));
 					} else {
-						result.add(createCompilationUnitChange(sourceCu, sourceRewriter));
+						result.add(createCompilationUnitChange(sourceRewriter));
 					}
 					return result;
 				}
@@ -2189,10 +2190,13 @@ public final class ReorgPolicyFactory {
 			RefactoringStatus superStatus= super.verifyDestination(destination, location);
 			if (superStatus.hasFatalError())
 				return superStatus;
-
-			Object commonParent= new ParentChecker(new IResource[0], getJavaElements()).getCommonParent();
-			if (destination.equals(commonParent) || Arrays.asList(getJavaElements()).contains(destination))
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_element2parent);
+			
+			if (location == IReorgDestination.LOCATION_ON) { 
+				Object commonParent= new ParentChecker(new IResource[0], getJavaElements()).getCommonParent();
+				if (destination.equals(commonParent) || Arrays.asList(getJavaElements()).contains(destination))
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_element2parent);	
+			}
+			
 			return superStatus;
 		}
 		
@@ -3327,7 +3331,7 @@ public final class ReorgPolicyFactory {
 
 	private static abstract class SubCuElementReorgPolicy extends ReorgPolicy {
 
-		protected static CompilationUnitChange createCompilationUnitChange(ICompilationUnit cu, CompilationUnitRewrite rewrite) throws CoreException {
+		protected static CompilationUnitChange createCompilationUnitChange(CompilationUnitRewrite rewrite) throws CoreException {
 			CompilationUnitChange change= rewrite.createChange();
 			if (change != null)
 				change.setSaveMode(TextFileChange.KEEP_SAVE_STATE);
@@ -3442,66 +3446,65 @@ public final class ReorgPolicyFactory {
 
 		private void copyMemberToDestination(IMember member, CompilationUnitRewrite targetRewriter, CompilationUnit sourceCuNode, CompilationUnit targetCuNode, BodyDeclaration newMember) throws JavaModelException {
 			IJavaElement javaElementDestination= getJavaElementDestination();
-			ASTNode nodeDestination;
-			ASTNode destinationContainer;
-			switch (javaElementDestination.getElementType()) {
-				case IJavaElement.INITIALIZER:
-					nodeDestination= ASTNodeSearchUtil.getInitializerNode((IInitializer) javaElementDestination, targetCuNode);
-					destinationContainer= nodeDestination.getParent();
-					break;
-				case IJavaElement.FIELD:
-					nodeDestination= ASTNodeSearchUtil.getFieldOrEnumConstantDeclaration((IField) javaElementDestination, targetCuNode);
-					destinationContainer= nodeDestination.getParent();
-					break;
-				case IJavaElement.METHOD:
-					nodeDestination= ASTNodeSearchUtil.getMethodOrAnnotationTypeMemberDeclarationNode((IMethod) javaElementDestination, targetCuNode);
-					destinationContainer= nodeDestination.getParent();
-					break;
-				case IJavaElement.TYPE:
-					if (getLocation() == IReorgDestination.LOCATION_ON) {//into type
-						nodeDestination= null;
-						IType typeDestination= (IType) javaElementDestination;
-						if (typeDestination.isAnonymous())
-							destinationContainer= ASTNodeSearchUtil.getClassInstanceCreationNode(typeDestination, targetCuNode).getAnonymousClassDeclaration();
-						else
-							destinationContainer= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(typeDestination, targetCuNode);
-					} else {
-						nodeDestination= ASTNodeSearchUtil.getTypeDeclarationNode((IType) javaElementDestination, targetCuNode);
-						destinationContainer= nodeDestination.getParent();
-					}
-					break;
-				default:
-					nodeDestination= null;
-					destinationContainer= null;
+			ASTNode nodeDestination= getDestinationNode(javaElementDestination, targetCuNode);
+			ASTNode destinationContainer; 
+			if (getLocation() == IReorgDestination.LOCATION_ON && javaElementDestination instanceof IType) {
+				destinationContainer= nodeDestination;
+			} else {
+				destinationContainer= nodeDestination.getParent();				
 			}
+				
+			ListRewrite listRewrite;
+			if (destinationContainer instanceof AbstractTypeDeclaration) {
+				if (newMember instanceof EnumConstantDeclaration && destinationContainer instanceof EnumDeclaration) {
+					listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, EnumDeclaration.ENUM_CONSTANTS_PROPERTY);
+				} else {
+					listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, ((AbstractTypeDeclaration) destinationContainer).getBodyDeclarationsProperty());
+				}
+			} else if (destinationContainer instanceof CompilationUnit) {
+				listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, CompilationUnit.TYPES_PROPERTY);
+			} else if (destinationContainer instanceof Block) {
+				listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, Block.STATEMENTS_PROPERTY);
+			} else if (destinationContainer instanceof AnonymousClassDeclaration) {
+				listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
+			} else {
+				listRewrite= null;
+				Assert.isLegal(false);
+			}
+
+			if (getLocation() == IReorgDestination.LOCATION_ON) {
+				listRewrite.insertAt(newMember, ASTNodes.getInsertionIndex(newMember, listRewrite.getRewrittenList()), null);						
+			} else {						
+				insertRelative(newMember, nodeDestination, listRewrite);
+			}
+			
 			if (!(member instanceof IInitializer)) {
 				BodyDeclaration decl= ASTNodeSearchUtil.getBodyDeclarationNode(member, sourceCuNode);
 				if (decl != null)
 					ImportRewriteUtil.addImports(targetRewriter, decl, new HashMap(), new HashMap(), false);
 			}
-			if (destinationContainer != null) {
-				ListRewrite listRewrite;
-				if (destinationContainer instanceof AbstractTypeDeclaration) {
-					if (newMember instanceof EnumConstantDeclaration && destinationContainer instanceof EnumDeclaration) {
-						listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, EnumDeclaration.ENUM_CONSTANTS_PROPERTY);
-					} else {
-						listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, ((AbstractTypeDeclaration) destinationContainer).getBodyDeclarationsProperty());
-					}
-				} else if (destinationContainer instanceof CompilationUnit) {
-					listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, CompilationUnit.TYPES_PROPERTY);
-				} else {
-					listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
-				}
+		}
 
-				if (nodeDestination != null) {
-					insertRelative(newMember, nodeDestination, listRewrite);
-				} else {
-					listRewrite.insertAt(newMember, ASTNodes.getInsertionIndex(newMember, listRewrite.getRewrittenList()), null);
-				}
-			} else {
-				// fall-back / default:
-				final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getDestinationAsType(), targetCuNode);
-				targetRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertLast(newMember, null);
+		/*
+		 * Get the 'destination' in 'target' as ASTNode or 'null' 
+		 */
+		private ASTNode getDestinationNode(IJavaElement destination, CompilationUnit target) throws JavaModelException {
+			switch (destination.getElementType()) {
+				case IJavaElement.INITIALIZER:
+					return ASTNodeSearchUtil.getInitializerNode((IInitializer) destination, target);
+				case IJavaElement.FIELD:
+					return ASTNodeSearchUtil.getFieldOrEnumConstantDeclaration((IField) destination, target);
+				case IJavaElement.METHOD:
+					return ASTNodeSearchUtil.getMethodOrAnnotationTypeMemberDeclarationNode((IMethod) destination, target);
+				case IJavaElement.TYPE:
+					IType typeDestination= (IType) destination;
+					if (typeDestination.isAnonymous()) {
+						return ASTNodeSearchUtil.getClassInstanceCreationNode(typeDestination, target).getAnonymousClassDeclaration();
+					} else {
+						return ASTNodeSearchUtil.getAbstractTypeDeclarationNode(typeDestination, target);
+					}
+				default:
+					return null;
 			}
 		}
 
@@ -3634,18 +3637,6 @@ public final class ReorgPolicyFactory {
 			return new RefactoringChangeDescriptor(descriptor);
 		}
 
-		private IType getDestinationAsType() throws JavaModelException {
-			IJavaElement destination= getJavaElementDestination();
-			IType enclosingType= getEnclosingType(destination);
-			if (enclosingType != null)
-				return enclosingType;
-			ICompilationUnit enclosingCu= getEnclosingCompilationUnit(destination);
-			Assert.isNotNull(enclosingCu);
-			IType mainType= JavaElementUtil.getMainType(enclosingCu);
-			Assert.isNotNull(mainType);
-			return mainType;
-		}
-
 		public final IJavaElement[] getJavaElements() {
 			return fJavaElements;
 		}
@@ -3775,7 +3766,11 @@ public final class ReorgPolicyFactory {
 						if (!ReorgUtils.hasOnlyElementsOfType(getJavaElements(), types1))
 							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);	
 					} else {//can drop type before/after
-						if (ReorgUtils.hasElementsNotOfType(getJavaElements(), IJavaElement.TYPE))
+						if (destination.getParent() instanceof IMethod)
+							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+						
+						int[] types= new int[] {IJavaElement.FIELD, IJavaElement.INITIALIZER, IJavaElement.METHOD, IJavaElement.TYPE};
+						if (!ReorgUtils.hasOnlyElementsOfType(getJavaElements(), types))
 							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
 					}
 					
@@ -3953,25 +3948,53 @@ public final class ReorgPolicyFactory {
 			else
 				return new MoveFilesFoldersAndCusPolicy(ReorgUtils.getFiles(resources), ReorgUtils.getFolders(resources), ArrayTypeConverter.toCuArray(javaElements));
 		}
+
+		if (hasOnlyMembers(javaElements)) {
+			if (hasAnonymousClassDeclarations(javaElements))
+				return NO;
+			
+			if (copy) {
+				return new CopySubCuElementsPolicy(javaElements);	
+			} else {
+				List members= Arrays.asList(javaElements);
+				return new MoveMembersPolicy((IMember[]) members.toArray(new IMember[members.size()]));
+			}
+		}
 		
-		if (copy && hasElementsSmallerThanCuOrClassFile(javaElements) && ReorgUtils.hasElementsNotOfType(javaElements, IJavaElement.PACKAGE_DECLARATION)) {
+		if (hasOnlyImportDeclarations(javaElements)) {
+			if (copy) {
+				return new CopySubCuElementsPolicy(javaElements);
+			} else {
+				List declarations= ReorgUtils.getElementsOfType(javaElements, IJavaElement.IMPORT_DECLARATION);
+				return new MoveImportDeclarationsPolicy((IImportDeclaration[]) declarations.toArray(new IImportDeclaration[declarations.size()]));
+			}
+		}
+		
+		if (copy && hasElementsSmallerThanCuOrClassFile(javaElements)) {
+			if (ReorgUtils.hasElementsOfType(javaElements, IJavaElement.PACKAGE_DECLARATION))
+				return NO;
+			
+			if (hasAnonymousClassDeclarations(javaElements))
+				return NO;
+			
 			Assert.isTrue(resources.length == 0);
 			return new CopySubCuElementsPolicy(javaElements);
-		}
-
-		if (!copy && hasOnlyMembers(javaElements)) {
-			List members= Arrays.asList(javaElements);
-			return new MoveMembersPolicy((IMember[]) members.toArray(new IMember[members.size()]));
-		}
-		
-		if (!copy && hasOnlyImportDeclarations(javaElements)) {			
-			List declarations= ReorgUtils.getElementsOfType(javaElements, IJavaElement.IMPORT_DECLARATION);
-			return new MoveImportDeclarationsPolicy((IImportDeclaration[]) declarations.toArray(new IImportDeclaration[declarations.size()]));
 		}
 		
 		return NO;
 	}
 	
+	private static boolean hasAnonymousClassDeclarations(IJavaElement[] javaElements) throws JavaModelException {
+		for (int i= 0; i < javaElements.length; i++) {
+			if (javaElements[i] instanceof IType) {
+				IType type= (IType) javaElements[i];
+				if (type.isAnonymous())
+					return true;
+			}
+		}
+		return false;
+	}
+
 	private static boolean hasElementsSmallerThanCuOrClassFile(IJavaElement[] javaElements) {
 		for (int i= 0; i < javaElements.length; i++) {
 			if (ReorgUtils.isInsideCompilationUnit(javaElements[i]))
