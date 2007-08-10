@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -76,6 +77,7 @@ import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -2194,12 +2196,81 @@ public final class ReorgPolicyFactory {
 			if (location == IReorgDestination.LOCATION_ON) { 
 				Object commonParent= new ParentChecker(new IResource[0], getJavaElements()).getCommonParent();
 				if (destination.equals(commonParent) || Arrays.asList(getJavaElements()).contains(destination))
-					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_element2parent);	
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_element2parent);
+				
+				return superStatus;
+			} else {
+				if (contains(elements, destination))
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+				
+				IJavaElement parent= destination.getParent();
+				if (!(parent instanceof IType))
+					return superStatus;
+				
+				if (!allInSameParent(elements, parent))
+					return superStatus;
+				
+				ArrayList sortedChildren= getSortedChildren((IType) parent);
+				
+				int destinationIndex= sortedChildren.indexOf(destination);
+				
+				for (int i= 0; i < elements.length; i++) {
+					int elementIndex= sortedChildren.indexOf(elements[i]);
+					if (location == IReorgDestination.LOCATION_AFTER && elementIndex == destinationIndex + 1)
+						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+					
+					if (location == IReorgDestination.LOCATION_BEFORE && elementIndex == destinationIndex - 1)
+						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+				}
+				
+				return superStatus;
 			}
-			
-			return superStatus;
+		}
+
+		private ArrayList getSortedChildren(IType parent) throws JavaModelException {
+			IJavaElement[] children= parent.getChildren();
+			ArrayList sortedChildren= new ArrayList(Arrays.asList(children));
+			Collections.sort(sortedChildren, new Comparator() {
+				public int compare(Object e1, Object e2) {
+					if (!(e1 instanceof ISourceReference))
+						return 0;
+					if (!(e2 instanceof ISourceReference))
+						return 0;
+					
+					try {
+						ISourceRange sr1= ((ISourceReference)e1).getSourceRange();
+						ISourceRange sr2= ((ISourceReference)e2).getSourceRange();
+						if (sr1 == null || sr2 == null)
+							return 0;
+						
+						return sr1.getOffset() - sr2.getOffset();
+						
+					} catch (JavaModelException e) {
+						return 0;
+					}
+				}
+			});
+			return sortedChildren;
 		}
 		
+		private boolean contains(IJavaElement[] elements, IJavaElement element) {
+			for (int i= 0; i < elements.length; i++) {
+				if (element.equals(elements[i]))
+					return true;
+			}
+			
+			return false;
+		}
+
+		private boolean allInSameParent(IJavaElement[] elements, IJavaElement parent) {
+			for (int i= 0; i < elements.length; i++) {
+				if (!elements[i].getParent().equals(parent))
+					return false;
+			}
+			
+			return true;
+		}
+
 		/**
 		 * {@inheritDoc}
 		 */

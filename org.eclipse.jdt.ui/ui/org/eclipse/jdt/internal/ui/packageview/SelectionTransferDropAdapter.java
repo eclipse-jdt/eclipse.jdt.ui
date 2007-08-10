@@ -140,13 +140,15 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			return DND.DROP_NONE;
 		
 		//Do not allow to drop on itself, bug 14228
-		IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
-		if (contains(javaElements, target)) 
-			return DND.DROP_NONE;
-		
-		IResource[] resources= ReorgUtils.getResources(fElements);
-		if (contains(resources, target))
-			return DND.DROP_NONE;
+		if (getCurrentLocation() == LOCATION_ON) {
+			IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
+			if (contains(javaElements, target)) 
+				return DND.DROP_NONE;
+			
+			IResource[] resources= ReorgUtils.getResources(fElements);
+			if (contains(resources, target))
+				return DND.DROP_NONE;
+		}
 				
 		try {
 			switch(operation) {
