@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.reorg;
 
+import org.eclipse.test.performance.Dimension;
+
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestCase;
 
 
@@ -34,6 +36,16 @@ public abstract class RepeatingRefactoringPerformanceTestCase extends Refactorin
 				fTestProject.delete();
  			}
 		}
+		commitMeasurements();
+		assertMeasurements();
+	}
+	
+	protected void finishMeasurements() {
+		stopMeasuring();
+	}
+	
+	protected void assertMeasurements() {
+		assertPerformanceInRelativeBand(Dimension.ELAPSED_PROCESS, -100, +10);;
 	}
 	
 	protected abstract void doExecuteRefactoring(int numberOfCus, int numberOfRefs, boolean measure) throws Exception;

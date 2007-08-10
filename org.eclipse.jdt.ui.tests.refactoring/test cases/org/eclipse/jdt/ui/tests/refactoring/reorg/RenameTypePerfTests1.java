@@ -54,9 +54,7 @@ public class RenameTypePerfTests1 extends AbstractRenameTypePerfTest {
 		executeRefactoring(1000, 10, true, 1);
 	}
 
-	protected void finishMeasurements() {
-		stopMeasuring();
-		commitMeasurements();
+	protected void assertMeasurements() {
 		assertPerformanceInRelativeBand(Dimension.CPU_TIME, -100, +10);
 	}
 }

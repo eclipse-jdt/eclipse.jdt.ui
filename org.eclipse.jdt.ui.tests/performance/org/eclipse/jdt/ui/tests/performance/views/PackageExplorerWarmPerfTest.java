@@ -56,14 +56,10 @@ public class PackageExplorerWarmPerfTest extends JdtPerformanceTestCase {
 			joinBackgroudActivities();
 			startMeasuring();
 			page.showView(JavaUI.ID_PACKAGES);
-			finishMeasurements();
+			stopMeasuring();
 		}
-	}
-	
-	protected void finishMeasurements() {
-		stopMeasuring();
 		commitMeasurements();
 		// don't spend more than 500 ms.
-		Performance.getDefault().assertPerformanceInAbsoluteBand(fPerformanceMeter, Dimension.ELAPSED_PROCESS, 0, 500);		
+		Performance.getDefault().assertPerformanceInAbsoluteBand(fPerformanceMeter, Dimension.ELAPSED_PROCESS, 0, 500);
 	}
 }

@@ -24,9 +24,15 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
+import org.eclipse.ltk.core.refactoring.PerformRefactoringOperation;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -194,16 +200,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 			}
 		});
 		
-		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-		cleanUpRefactoring.createChange(null);
-		
-		joinBackgroudActivities();
-		for (int i= 0; i < 10; i++) {
-			startMeasuring();
-			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-			cleanUpRefactoring.createChange(null);
-			finishMeasurements();
-		}
+		doCleanUp(cleanUpRefactoring);
 	}
 	
 	public void testAllCleanUps() throws Exception {
@@ -265,16 +262,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		//See https://bugs.eclipse.org/bugs/show_bug.cgi?id=135219
 		//		tagAsSummary("Code Clean Up - 25 clean-ups", Dimension.ELAPSED_PROCESS);
 		
-		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-		cleanUpRefactoring.createChange(null);
-		
-		joinBackgroudActivities();
-		for (int i= 0; i < 10; i++) {
-			startMeasuring();
-			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-			cleanUpRefactoring.createChange(null);
-			finishMeasurements();
-		}
+		doCleanUp(cleanUpRefactoring);
 	}
 	
 	public void testCodeStyleCleanUp() throws Exception {		
@@ -299,16 +287,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		
 		cleanUpRefactoring.addCleanUp(new CodeStyleCleanUp());
 		
-		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-		cleanUpRefactoring.createChange(null);
-		
-		joinBackgroudActivities();
-		for (int i= 0; i < 10; i++) {
-			startMeasuring();
-			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-			cleanUpRefactoring.createChange(null);
-			finishMeasurements();
-		}
+		doCleanUp(cleanUpRefactoring);
 	}
 	
 	public void testControlStatementsCleanUp() throws Exception {
@@ -325,16 +304,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		cleanUpRefactoring.addCleanUp(new ControlStatementsCleanUp());
 		cleanUpRefactoring.addCleanUp(new ConvertLoopCleanUp());
 		
-		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-		cleanUpRefactoring.createChange(null);
-		
-		joinBackgroudActivities();
-		for (int i= 0; i < 10; i++) {
-			startMeasuring();
-			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-			cleanUpRefactoring.createChange(null);
-			finishMeasurements();
-		}
+		doCleanUp(cleanUpRefactoring);
 	}
 	
 	public void testConvertLoopCleanUp() throws Exception {
@@ -350,16 +320,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		cleanUpRefactoring.addCleanUp(new ControlStatementsCleanUp());
 		cleanUpRefactoring.addCleanUp(new ConvertLoopCleanUp());
 		
-		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-		cleanUpRefactoring.createChange(null);
-		
-		joinBackgroudActivities();
-		for (int i= 0; i < 10; i++) {
-			startMeasuring();
-			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-			cleanUpRefactoring.createChange(null);
-			finishMeasurements();
-		}
+		doCleanUp(cleanUpRefactoring);
 	}
 	
 	public void testExpressionsCleanUp() throws Exception {
@@ -375,16 +336,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		
 		cleanUpRefactoring.addCleanUp(new ExpressionsCleanUp());
 		
-		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-		cleanUpRefactoring.createChange(null);
-		
-		joinBackgroudActivities();
-		for (int i= 0; i < 10; i++) {
-			startMeasuring();
-			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-			cleanUpRefactoring.createChange(null);
-			finishMeasurements();
-		}
+		doCleanUp(cleanUpRefactoring);
 	}
 	
 	public void testJava50CleanUp() throws Exception {
@@ -401,16 +353,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		
 		cleanUpRefactoring.addCleanUp(new Java50CleanUp());
 		
-		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-		cleanUpRefactoring.createChange(null);
-		
-		joinBackgroudActivities();
-		for (int i= 0; i < 10; i++) {
-			startMeasuring();
-			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-			cleanUpRefactoring.createChange(null);
-			finishMeasurements();
-		}
+		doCleanUp(cleanUpRefactoring);
 	}
 	
 	public void testStringCleanUp() throws Exception {
@@ -425,16 +368,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		
 		cleanUpRefactoring.addCleanUp(new StringCleanUp());
 		
-		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-		cleanUpRefactoring.createChange(null);
-		
-		joinBackgroudActivities();
-		for (int i= 0; i < 10; i++) {
-			startMeasuring();
-			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-			cleanUpRefactoring.createChange(null);
-			finishMeasurements();
-		}
+		doCleanUp(cleanUpRefactoring);
 	}
 	
 	public void testSortMembersCleanUp() throws Exception {
@@ -450,16 +384,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		
 		cleanUpRefactoring.addCleanUp(new SortMembersCleanUp());
 		
-		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-		cleanUpRefactoring.createChange(null);
-		
-		joinBackgroudActivities();
-		for (int i= 0; i < 10; i++) {
-			startMeasuring();
-			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-			cleanUpRefactoring.createChange(null);
-			finishMeasurements();
-		}
+		doCleanUp(cleanUpRefactoring);
 	}
 	
 	public void testUnnecessaryCodeCleanUp() throws Exception {
@@ -472,16 +397,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		
 		cleanUpRefactoring.addCleanUp(new UnnecessaryCodeCleanUp());
 		
-		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-		cleanUpRefactoring.createChange(null);
-		
-		joinBackgroudActivities();
-		for (int i= 0; i < 10; i++) {
-			startMeasuring();
-			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-			cleanUpRefactoring.createChange(null);
-			finishMeasurements();
-		}
+		doCleanUp(cleanUpRefactoring);
 	}
 	
 	public void testUnusedCodeCleanUp() throws Exception {
@@ -502,16 +418,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		
 		cleanUpRefactoring.addCleanUp(new UnusedCodeCleanUp());
 		
-		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-		cleanUpRefactoring.createChange(null);
-		
-		joinBackgroudActivities();
-		for (int i= 0; i < 10; i++) {
-			startMeasuring();
-			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-			cleanUpRefactoring.createChange(null);
-			finishMeasurements();
-		}
+		doCleanUp(cleanUpRefactoring);
 	}
 	
 	public void testVariableDeclarationCleanUp() throws Exception {
@@ -529,15 +436,43 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		
 		cleanUpRefactoring.addCleanUp(new VariableDeclarationCleanUp());
 		
-		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-		cleanUpRefactoring.createChange(null);
+		doCleanUp(cleanUpRefactoring);
+	}
+	
+	private void doCleanUp(CleanUpRefactoring refactoring) throws CoreException {
 		
-		joinBackgroudActivities();
+		performRefactoring(refactoring, false, IStatus.WARNING, true);
+		performRefactoring(refactoring, false, IStatus.WARNING, true);
+		
 		for (int i= 0; i < 10; i++) {
 			startMeasuring();
-			cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
-			cleanUpRefactoring.createChange(null);
-			finishMeasurements();
+			performRefactoring(refactoring, false, IStatus.WARNING, true);
+			stopMeasuring();
 		}
+		
+		commitMeasurements();
+		assertPerformanceInRelativeBand(Dimension.ELAPSED_PROCESS, -100, +10);
 	}
+	
+	private void performRefactoring(Refactoring refactoring, boolean measure, int maxSeverity, boolean checkUndo) throws CoreException {
+		PerformRefactoringOperation operation= new PerformRefactoringOperation(refactoring, CheckConditionsOperation.ALL_CONDITIONS);
+		joinBackgroudActivities();
+		// Flush the undo manager to not count any already existing undo objects
+		// into the heap consumption
+		RefactoringCore.getUndoManager().flush();
+		System.gc();
+		if (measure)
+			startMeasuring();
+		ResourcesPlugin.getWorkspace().run(operation, null);
+		if (measure)
+			stopMeasuring();
+		assertEquals(true, operation.getConditionStatus().getSeverity() <= maxSeverity);
+		assertEquals(true, operation.getValidationStatus().isOK());
+		if (checkUndo) {
+			assertNotNull(operation.getUndoChange());
+		}
+		RefactoringCore.getUndoManager().flush();
+		System.gc();
+	}
+	
 }
