@@ -3954,7 +3954,7 @@ public final class ReorgPolicyFactory {
 				return new MoveFilesFoldersAndCusPolicy(ReorgUtils.getFiles(resources), ReorgUtils.getFolders(resources), ArrayTypeConverter.toCuArray(javaElements));
 		}
 		
-		if (copy && hasElementsSmallerThanCuOrClassFile(javaElements)) {
+		if (copy && hasElementsSmallerThanCuOrClassFile(javaElements) && ReorgUtils.hasElementsNotOfType(javaElements, IJavaElement.PACKAGE_DECLARATION)) {
 			Assert.isTrue(resources.length == 0);
 			return new CopySubCuElementsPolicy(javaElements);
 		}
