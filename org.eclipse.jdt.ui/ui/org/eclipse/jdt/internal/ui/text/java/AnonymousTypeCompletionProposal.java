@@ -189,14 +189,12 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 						ASTRewrite rewrite= ASTRewrite.create(unit.getAST());
 						ListRewrite rewriter= rewrite.getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
 						String key= null;
-						MethodDeclaration stub= null;
 						for (int index= 0; index < keys.length; index++) {
 							key= keys[index];
 							for (int offset= 0; offset < bindings.length; offset++) {
 								if (key.equals(bindings[offset].getKey())) {
-									stub= StubUtility2.createImplementationStub(copy, rewrite, importRewrite, bindings[offset], binding.getName(), binding.isInterface(), settings);
-									if (stub != null)
-										rewriter.insertFirst(stub, null);
+									MethodDeclaration stub= StubUtility2.createImplementationStub(copy, rewrite, importRewrite, null, bindings[offset], binding.getName(), settings, binding.isInterface());
+									rewriter.insertFirst(stub, null);
 									break;
 								}
 							}

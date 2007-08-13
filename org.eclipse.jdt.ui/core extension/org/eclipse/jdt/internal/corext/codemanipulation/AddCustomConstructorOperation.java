@@ -225,7 +225,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 					ASTNode insertion= null;
 					if (fInsert instanceof IMethod)
 						insertion= ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
-					MethodDeclaration stub= StubUtility2.createConstructorStub(rewrite.getCu(), rewrite.getASTRewrite(), rewrite.getImportRewrite(), binding, rewrite.getAST(), fOmitSuper ? null : fBinding, fBindings, fVisibility, fSettings);
+					MethodDeclaration stub= StubUtility2.createConstructorStub(rewrite.getCu(), rewrite.getASTRewrite(), rewrite.getImportRewrite(), binding, fOmitSuper ? null : fBinding, fBindings, fVisibility, fSettings);
 					if (stub != null) {
 						fCreated.addAll(Arrays.asList(fBindings));
 						if (insertion != null)

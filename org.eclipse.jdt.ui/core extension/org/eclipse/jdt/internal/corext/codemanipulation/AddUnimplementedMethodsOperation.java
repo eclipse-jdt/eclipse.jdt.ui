@@ -205,7 +205,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 
 			for (int i= 0; i < methodsToImplement.length; i++) {
 				IMethodBinding curr= methodsToImplement[i];
-				MethodDeclaration stub= StubUtility2.createImplementationStub(cu, astRewrite, importRewrite, ast, curr, currTypeBinding.getName(), settings, currTypeBinding.isInterface(), context);
+				MethodDeclaration stub= StubUtility2.createImplementationStub(cu, astRewrite, importRewrite, context, curr, currTypeBinding.getName(), settings, currTypeBinding.isInterface());
 				if (stub != null) {
 					fCreatedMethods.add(curr.getKey());
 					if (insertion != null)

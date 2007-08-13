@@ -10,11 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -35,9 +31,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -45,13 +39,15 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -87,93 +83,93 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		return fMethodName;
 	}
+	
+	private CompilationUnit getRecoveredAST(IDocument document, int offset, Document recoveredDocument) {
+		char[] content= document.get().toCharArray();
+		
+		// clear prefix to avoid compile errors
+		int index= offset - 1;
+		while (index >= 0 && Character.isJavaIdentifierPart(content[index])) {
+			content[index]= ' ';
+			index--;
+		}
+		
+		recoveredDocument.set(new String(content));
 
+		final ASTParser parser= ASTParser.newParser(AST.JLS3);
+		parser.setResolveBindings(true);
+		parser.setStatementsRecovery(true);
+		parser.setSource(content);
+		parser.setUnitName(fCompilationUnit.getElementName());
+		parser.setProject(fCompilationUnit.getJavaProject());
+		return (CompilationUnit) parser.createAST(new NullProgressMonitor());
+	}
+	
 	/*
 	 * @see JavaTypeCompletionProposal#updateReplacementString(IDocument,char,int,ImportRewrite)
 	 */
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportRewrite importRewrite) throws CoreException, BadLocationException {
-		final IDocument buffer= new Document(document.get());
-		int index= offset - 1;
-		while (index >= 0 && Character.isJavaIdentifierPart(buffer.getChar(index)))
-			index--;
-		final int length= offset - index - 1;
-		buffer.replace(index + 1, length, " "); //$NON-NLS-1$
-		final ASTParser parser= ASTParser.newParser(AST.JLS3);
-		parser.setResolveBindings(true);
-		parser.setStatementsRecovery(true);
-		parser.setSource(buffer.get().toCharArray());
-		parser.setUnitName(fCompilationUnit.getResource().getFullPath().toString());
-		parser.setProject(fCompilationUnit.getJavaProject());
-		final CompilationUnit unit= (CompilationUnit) parser.createAST(new NullProgressMonitor());
-		ITypeBinding binding= null;
+		Document recoveredDocument= new Document();
+		CompilationUnit unit= getRecoveredAST(document, offset, recoveredDocument);
+		ImportRewriteContext context;
+		if (importRewrite != null) {
+			context= new ContextSensitiveImportRewriteContext(unit, offset, importRewrite);
+		} else {
+			importRewrite= StubUtility.createImportRewrite(unit, true); // create a dummy import rewriter to have one 
+			context= new ImportRewriteContext() { // forces that all imports are fully qualified
+				public int findInContext(String qualifier, String name, int kind) {
+					return RES_NAME_CONFLICT;
+				}
+			};
+		}
+
+		ITypeBinding declaringType= null;
 		ChildListPropertyDescriptor descriptor= null;
-		ASTNode node= NodeFinder.perform(unit, index + 1, 0);
+		ASTNode node= NodeFinder.perform(unit, offset, 0);
 		if (node instanceof AnonymousClassDeclaration) {
-			switch (node.getParent().getNodeType()) {
-				case ASTNode.CLASS_INSTANCE_CREATION:
-					binding= ((ClassInstanceCreation) node.getParent()).resolveTypeBinding();
-					break;
-				case ASTNode.ENUM_CONSTANT_DECLARATION:
-					IMethodBinding methodBinding= ((EnumConstantDeclaration) node.getParent()).resolveConstructorBinding();
-					if (methodBinding != null) {
-						binding= methodBinding.getDeclaringClass();
-					}
-			}
+			declaringType= ((AnonymousClassDeclaration) node).resolveBinding();
 			descriptor= AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY;
 		} else if (node instanceof AbstractTypeDeclaration) {
-			final AbstractTypeDeclaration declaration= ((AbstractTypeDeclaration) node);
+			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) node;
 			descriptor= declaration.getBodyDeclarationsProperty();
-			binding= declaration.resolveBinding();
+			declaringType= declaration.resolveBinding();
 		}
-		if (binding != null) {
+		if (declaringType != null) {
 			ASTRewrite rewrite= ASTRewrite.create(unit.getAST());
-			IMethodBinding[] bindings= StubUtility2.getOverridableMethods(rewrite.getAST(), binding, true);
-			if (bindings != null && bindings.length > 0) {
-				List candidates= new ArrayList(bindings.length);
-				IMethodBinding method= null;
-				for (index= 0; index < bindings.length; index++) {
-					if (bindings[index].getName().equals(fMethodName) && bindings[index].getParameterTypes().length == fParamTypes.length)
-						candidates.add(bindings[index]);
-				}
-				if (candidates.size() > 1) {
-					method= Bindings.findMethodInHierarchy(binding, fMethodName, fParamTypes);
-					if (method == null) {
-						ITypeBinding objectType= rewrite.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
-						method= Bindings.findMethodInType(objectType, fMethodName, fParamTypes);
-					}
-				} else if (candidates.size() == 1)
-					method= (IMethodBinding) candidates.get(0);
-				if (method != null) {
-					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject);
-					ListRewrite rewriter= rewrite.getListRewrite(node, descriptor);
-					String key= method.getKey();
-					MethodDeclaration stub= null;
-					for (index= 0; index < bindings.length; index++) {
-						if (key.equals(bindings[index].getKey())) {
-							stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, importRewrite, bindings[index], binding.getName(), binding.isInterface(), settings);
-							if (stub != null)
-								rewriter.insertFirst(stub, null);
-							break;
-						}
-					}
-					if (stub != null) {
-						IDocument contents= new Document(fCompilationUnit.getBuffer().getContents());
-						IRegion region= contents.getLineInformationOfOffset(getReplacementOffset());
-						ITrackedNodePosition position= rewrite.track(stub);
-						String indent= IndentManipulation.extractIndentString(contents.get(region.getOffset(), region.getLength()), settings.tabWidth, settings.indentWidth);
-						try {
-							rewrite.rewriteAST(contents, fJavaProject.getOptions(true)).apply(contents, TextEdit.UPDATE_REGIONS);
-						} catch (MalformedTreeException exception) {
-							JavaPlugin.log(exception);
-						} catch (BadLocationException exception) {
-							JavaPlugin.log(exception);
-						}
-						setReplacementString(IndentManipulation.changeIndent(Strings.trimIndentation(contents.get(position.getStartPosition(), position.getLength()), settings.tabWidth, settings.indentWidth, false), 0, settings.tabWidth, settings.indentWidth, indent, TextUtilities.getDefaultLineDelimiter(contents)));
-					}
+			IMethodBinding methodToOverride= Bindings.findMethodInHierarchy(declaringType, fMethodName, fParamTypes);
+			if (methodToOverride != null) {
+				CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject);
+				MethodDeclaration stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, importRewrite, context, methodToOverride, declaringType.getName(), settings, declaringType.isInterface());
+				ListRewrite rewriter= rewrite.getListRewrite(node, descriptor);
+				rewriter.insertFirst(stub, null);
+
+				ITrackedNodePosition position= rewrite.track(stub);
+				try {
+					rewrite.rewriteAST(recoveredDocument, fJavaProject.getOptions(true)).apply(recoveredDocument);
+					
+					String generatedCode= recoveredDocument.get(position.getStartPosition(), position.getLength());
+					int generatedIndent= IndentManipulation.measureIndentUnits(getIndentAt(recoveredDocument, position.getStartPosition(), settings), settings.tabWidth, settings.indentWidth);
+					
+					String indent= getIndentAt(document, getReplacementOffset(), settings);
+					setReplacementString(IndentManipulation.changeIndent(generatedCode, generatedIndent, settings.tabWidth, settings.indentWidth, indent, TextUtilities.getDefaultLineDelimiter(document)));
+
+				} catch (MalformedTreeException exception) {
+					JavaPlugin.log(exception);
+				} catch (BadLocationException exception) {
+					JavaPlugin.log(exception);
 				}
 			}
 		}
 		return true;
+	}
+	
+	private static String getIndentAt(IDocument document, int offset, CodeGenerationSettings settings) {
+		try {
+			IRegion region= document.getLineInformationOfOffset(offset);
+			return IndentManipulation.extractIndentString(document.get(region.getOffset(), region.getLength()), settings.tabWidth, settings.indentWidth);
+		} catch (BadLocationException e) {
+			return ""; //$NON-NLS-1$
+		}
 	}
 
 	/*

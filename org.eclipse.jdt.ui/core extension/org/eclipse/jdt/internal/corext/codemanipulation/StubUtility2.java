@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
@@ -40,7 +41,6 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -49,7 +49,6 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
-import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
@@ -100,7 +99,7 @@ public final class StubUtility2 {
 			typeParameters.add(newTypeParam);
 		}
 
-		List parameters= createParameters(unit, imports, ast, binding, decl, null);
+		List parameters= createParameters(unit.getJavaProject(), imports, null, ast, binding, decl);
 
 		List thrownExceptions= decl.thrownExceptions();
 		ITypeBinding[] excTypes= binding.getExceptionTypes();
@@ -145,8 +144,9 @@ public final class StubUtility2 {
 		return decl;
 	}
 
-	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ITypeBinding typeBinding, AST ast, IMethodBinding superConstructor, IVariableBinding[] variableBindings, int modifiers, CodeGenerationSettings settings) throws CoreException {
-
+	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ITypeBinding typeBinding, IMethodBinding superConstructor, IVariableBinding[] variableBindings, int modifiers, CodeGenerationSettings settings) throws CoreException {
+		AST ast= rewrite.getAST();
+		
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
 		decl.setName(ast.newSimpleName(typeBinding.getName()));
@@ -170,7 +170,7 @@ public final class StubUtility2 {
 				typeParameters.add(newTypeParam);
 			}
 
-			createParameters(unit, imports, ast, superConstructor, decl, null);
+			createParameters(unit.getJavaProject(), imports, null, ast, superConstructor, decl);
 
 			List thrownExceptions= decl.thrownExceptions();
 			ITypeBinding[] excTypes= superConstructor.getExceptionTypes();
@@ -364,8 +364,12 @@ public final class StubUtility2 {
 		return decl;
 	}
 
-	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, AST ast, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean deferred, ImportRewriteContext context) throws CoreException {
-
+	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean deferred) throws CoreException {
+		Assert.isNotNull(imports);
+		Assert.isNotNull(rewrite);
+		
+		AST ast= rewrite.getAST();
+		
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.modifiers().addAll(getImplementationModifiers(ast, binding, deferred));
 
@@ -390,7 +394,7 @@ public final class StubUtility2 {
 
 		decl.setReturnType2(imports.addImport(binding.getReturnType(), ast, context));
 
-		List parameters= createParameters(unit, imports, ast, binding, decl, context);
+		List parameters= createParameters(unit.getJavaProject(), imports, context, ast, binding, decl);
 
 		List thrownExceptions= decl.thrownExceptions();
 		ITypeBinding[] excTypes= binding.getExceptionTypes();
@@ -399,99 +403,10 @@ public final class StubUtility2 {
 			thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
 		}
 
-		String delimiter= StubUtility.getLineDelimiterUsed(unit);
+		String delimiter= unit.findRecommendedLineSeparator();
 		if (!deferred) {
 			Map options= unit.getJavaProject().getOptions(true);
 
-			Block body= ast.newBlock();
-			decl.setBody(body);
-
-			String bodyStatement= ""; //$NON-NLS-1$
-			ITypeBinding declaringType= binding.getDeclaringClass();
-			if (Modifier.isAbstract(binding.getModifiers()) || declaringType.isAnnotation() || declaringType.isInterface()) {
-				Expression expression= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType2(), decl.getExtraDimensions());
-				if (expression != null) {
-					ReturnStatement returnStatement= ast.newReturnStatement();
-					returnStatement.setExpression(expression);
-					bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter, options);
-				}
-			} else {
-				SuperMethodInvocation invocation= ast.newSuperMethodInvocation();
-				invocation.setName(ast.newSimpleName(binding.getName()));
-				SingleVariableDeclaration varDecl= null;
-				for (Iterator iterator= parameters.iterator(); iterator.hasNext();) {
-					varDecl= (SingleVariableDeclaration) iterator.next();
-					invocation.arguments().add(ast.newSimpleName(varDecl.getName().getIdentifier()));
-				}
-				Expression expression= invocation;
-				Type returnType= decl.getReturnType2();
-				if (returnType != null && (returnType instanceof PrimitiveType) && ((PrimitiveType) returnType).getPrimitiveTypeCode().equals(PrimitiveType.VOID)) {
-					bodyStatement= ASTNodes.asFormattedString(ast.newExpressionStatement(expression), 0, delimiter, options);
-				} else {
-					ReturnStatement returnStatement= ast.newReturnStatement();
-					returnStatement.setExpression(expression);
-					bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter, options);
-				}
-			}
-
-			String placeHolder= CodeGeneration.getMethodBodyContent(unit, type, binding.getName(), false, bodyStatement, delimiter);
-			if (placeHolder != null) {
-				ASTNode todoNode= rewrite.createStringPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
-				body.statements().add(todoNode);
-			}
-		}
-
-		if (settings.createComments) {
-			String string= CodeGeneration.getMethodComment(unit, type, decl, binding, delimiter);
-			if (string != null) {
-				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
-				decl.setJavadoc(javadoc);
-			}
-		}
-		if (settings.overrideAnnotation && JavaModelUtil.is50OrHigher(unit.getJavaProject())) {
-			addOverrideAnnotation(rewrite, decl, binding);
-		}
-
-		return decl;
-	}
-
-	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite importRewrite, IMethodBinding binding, String type, boolean deferred, CodeGenerationSettings settings) throws CoreException {
-		AST ast= rewrite.getAST();
-		MethodDeclaration decl= ast.newMethodDeclaration();
-		decl.modifiers().addAll(getImplementationModifiers(ast, binding, deferred));
-
-		decl.setName(ast.newSimpleName(binding.getName()));
-		decl.setConstructor(false);
-
-		ITypeBinding[] typeParams= binding.getTypeParameters();
-		List typeParameters= decl.typeParameters();
-		for (int index= 0; index < typeParams.length; index++) {
-			ITypeBinding curr= typeParams[index];
-			TypeParameter newTypeParam= ast.newTypeParameter();
-			newTypeParam.setName(ast.newSimpleName(curr.getName()));
-			ITypeBinding[] typeBounds= curr.getTypeBounds();
-			if (typeBounds.length != 1 || !"java.lang.Object".equals(typeBounds[0].getQualifiedName())) {//$NON-NLS-1$
-				List newTypeBounds= newTypeParam.typeBounds();
-				for (int offset= 0; offset < typeBounds.length; offset++) {
-					newTypeBounds.add(createTypeNode(importRewrite, typeBounds[offset], ast));
-				}
-			}
-			typeParameters.add(newTypeParam);
-		}
-
-		decl.setReturnType2(createTypeNode(importRewrite, binding.getReturnType(), ast));
-
-		List parameters= createParameters(unit, importRewrite, ast, binding, decl);
-
-		List thrownExceptions= decl.thrownExceptions();
-		ITypeBinding[] excTypes= binding.getExceptionTypes();
-		for (int index= 0; index < excTypes.length; index++)
-			thrownExceptions.add(ASTNodeFactory.newName(ast, importRewrite != null ? importRewrite.addImport(excTypes[index]) : excTypes[index].getQualifiedName()));
-
-		String delimiter= StubUtility.getLineDelimiterUsed(unit);
-		if (!deferred) {
-			Map options= unit.getJavaProject().getOptions(true);
-			
 			Block body= ast.newBlock();
 			decl.setBody(body);
 
@@ -540,13 +455,14 @@ public final class StubUtility2 {
 		if (settings != null && settings.overrideAnnotation && JavaModelUtil.is50OrHigher(unit.getJavaProject())) {
 			addOverrideAnnotation(rewrite, decl, binding);
 		}
+
 		return decl;
 	}
 
-	private static List createParameters(ICompilationUnit unit, ImportRewrite imports, AST ast, IMethodBinding binding, MethodDeclaration decl, ImportRewriteContext context) {
+	private static List createParameters(IJavaProject project, ImportRewrite imports, ImportRewriteContext context, AST ast, IMethodBinding binding, MethodDeclaration decl) {
 		List parameters= decl.parameters();
 		ITypeBinding[] params= binding.getParameterTypes();
-		String[] paramNames= StubUtility.suggestArgumentNames(unit.getJavaProject(), binding);
+		String[] paramNames= StubUtility.suggestArgumentNames(project, binding);
 		for (int i= 0; i < params.length; i++) {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 			if (binding.isVarargs() && params[i].isArray() && i == params.length - 1) {
@@ -561,64 +477,6 @@ public final class StubUtility2 {
 			parameters.add(var);
 		}
 		return parameters;
-	}
-
-	private static List createParameters(ICompilationUnit unit, ImportRewrite imports, AST ast, IMethodBinding binding, MethodDeclaration decl) {
-		List parameters= decl.parameters();
-		ITypeBinding[] params= binding.getParameterTypes();
-		String[] paramNames= StubUtility.suggestArgumentNames(unit.getJavaProject(), binding);
-		for (int i= 0; i < params.length; i++) {
-			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-			if (binding.isVarargs() && params[i].isArray() && i == params.length - 1) {
-				final ITypeBinding elementType= params[i].getElementType();
-				StringBuffer buffer= new StringBuffer(imports != null ? imports.addImport(elementType) : elementType.getQualifiedName());
-				for (int dim= 1; dim < params[i].getDimensions(); dim++)
-					buffer.append("[]"); //$NON-NLS-1$
-				var.setType(ASTNodeFactory.newType(ast, buffer.toString()));
-				var.setVarargs(true);
-			} else
-				var.setType(createTypeNode(imports, params[i], ast));
-			var.setName(ast.newSimpleName(paramNames[i]));
-			parameters.add(var);
-		}
-		return parameters;
-	}
-
-	private static Type createTypeNode(ImportRewrite importRewrite, ITypeBinding binding, AST ast) {
-		if (importRewrite != null)
-			return importRewrite.addImport(binding, ast);
-		return createTypeNode(binding, ast);
-	}
-
-	private static Type createTypeNode(ITypeBinding binding, AST ast) {
-		if (binding.isPrimitive())
-			return ast.newPrimitiveType(PrimitiveType.toCode(binding.getName()));
-		ITypeBinding normalized= Bindings.normalizeTypeBinding(binding);
-		if (normalized == null)
-			return ast.newSimpleType(ast.newSimpleName("invalid")); //$NON-NLS-1$
-		else if (normalized.isTypeVariable())
-			return ast.newSimpleType(ast.newSimpleName(binding.getName()));
-		else if (normalized.isWildcardType()) {
-			WildcardType type= ast.newWildcardType();
-			ITypeBinding bound= normalized.getBound();
-			if (bound != null)
-				type.setBound(createTypeNode(bound, ast), normalized.isUpperbound());
-			return type;
-		} else if (normalized.isArray())
-			return ast.newArrayType(createTypeNode(normalized.getElementType(), ast), normalized.getDimensions());
-		String qualified= Bindings.getRawQualifiedName(normalized);
-		if (qualified.length() > 0) {
-			ITypeBinding[] typeArguments= normalized.getTypeArguments();
-			if (typeArguments.length > 0) {
-				ParameterizedType type= ast.newParameterizedType(ast.newSimpleType(ASTNodeFactory.newName(ast, qualified)));
-				List arguments= type.typeArguments();
-				for (int index= 0; index < typeArguments.length; index++)
-					arguments.add(createTypeNode(typeArguments[index], ast));
-				return type;
-			}
-			return ast.newSimpleType(ASTNodeFactory.newName(ast, qualified));
-		}
-		return ast.newSimpleType(ASTNodeFactory.newName(ast, Bindings.getRawName(normalized)));
 	}
 
 	private static IMethodBinding findMethodBinding(IMethodBinding method, List allMethods) {

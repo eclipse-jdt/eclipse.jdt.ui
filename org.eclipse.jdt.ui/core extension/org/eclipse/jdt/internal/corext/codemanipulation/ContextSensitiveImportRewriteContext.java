@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -118,9 +119,9 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 		
 		if (qualifier.equals("java.lang")) { //$NON-NLS-1$
 			//No explicit import statement required
-			IJavaElement parent= fCompilationUnit.getJavaElement().getParent();
-			if (parent instanceof IPackageFragment) {
-				IPackageFragment packageFragment= (IPackageFragment)parent;
+			ITypeRoot typeRoot= fCompilationUnit.getTypeRoot();
+			if (typeRoot != null) {
+				IPackageFragment packageFragment= (IPackageFragment) typeRoot.getParent();
 				try {
 					ICompilationUnit[] compilationUnits= packageFragment.getCompilationUnits();
 					for (int i= 0; i < compilationUnits.length; i++) {
