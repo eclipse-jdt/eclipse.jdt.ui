@@ -831,6 +831,9 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 	}
 	
 	private static TextEdit pack(TextEdit edit) {
+		if (!edit.hasChildren())
+			return edit;
+		
 		final List edits= new ArrayList();
 		edit.accept(new TextEditVisitor() {
 			public boolean visitNode(TextEdit node) {

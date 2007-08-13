@@ -45,7 +45,11 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 			return null;
 		
 		boolean removeWhitespaces= isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
-		return CodeFormatFix.createCleanUp(compilationUnit, isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE), removeWhitespaces && isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL), removeWhitespaces && isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY));
+		return CodeFormatFix.createCleanUp(compilationUnit, 
+				isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE), 
+				removeWhitespaces && isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL), 
+				removeWhitespaces && isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY), 
+				isEnabled(CleanUpConstants.FORMAT_CORRECT_INDENTATION));
 	}
 	
 	/**
@@ -84,6 +88,9 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 				result.add(MultiFixMessages.CodeFormatCleanUp_RemoveTrailingNoEmpty_description);
 			}
 		}
+		
+		if (isEnabled(CleanUpConstants.FORMAT_CORRECT_INDENTATION))
+			result.add(MultiFixMessages.CodeFormatCleanUp_correctIndentation_description);
 		
 		return (String[])result.toArray(new String[result.size()]);
 	}

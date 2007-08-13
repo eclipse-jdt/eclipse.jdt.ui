@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.ResourceBundle;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
@@ -63,6 +69,40 @@ import org.eclipse.jdt.internal.ui.text.JavaIndenter;
  * @since 3.0
  */
 public class IndentAction extends TextEditorAction {
+	
+	/**
+	 * @since 3.4
+	 */
+	private static final class ReplaceData {
+		
+		/**
+		 * The replacement
+		 */
+		public final String indent;
+		
+		/**
+		 * The start of the replacement
+		 */
+		public final int offset;
+		
+		/**
+		 * The end of the replacement
+		 */
+		public final int end;
+		
+		/**
+		 * Replace string in document from offset to end with indent
+		 * @param offset the start of the replacement
+		 * @param end the end of the replacement
+		 * @param indent the replacement
+		 */
+		public ReplaceData(int offset, int end, String indent) {
+			this.indent= indent;
+			this.end= end;
+			this.offset= offset;
+		}
+		
+	}
 	
 	/** The caret offset after an indent operation. */
 	private int fCaretOffset;
@@ -190,19 +230,85 @@ public class IndentAction extends TextEditorAction {
 	}
 
 	/**
+	 * Indent the given <code>document</code> based on the <code>project</code> settings and
+	 * return a text edit describing the changes applied to the document. Returns <b>null</b>
+	 * if no changes have been applied.
+	 * <p>
+	 * WARNING: This method does change the content of the given document.
+	 * </p>
+	 * <p>
+	 * This method is for internal use only, it should not be called.
+	 * </p>
+	 * 
+	 * @param document the document to indent
+	 * @param project the project to retrieve the indentation settings from, <b>null</b> for workspace settings
+	 * @return a text edit describing the changes or <b>null</b> if no changes required
+	 * @throws BadLocationException if the document got modified concurrently
+	 * 
+	 * @since 3.4
+	 */
+	public static TextEdit indent(IDocument document, IJavaProject project) throws BadLocationException {
+		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
+		
+		int offset= 0;
+		int length= document.getLength();
+		
+		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
+		JavaIndenter indenter= new JavaIndenter(document, scanner, project);
+		
+		ArrayList edits= new ArrayList();
+			
+		int firstLine= document.getLineOfOffset(offset);
+		// check for marginal (zero-length) lines
+		int minusOne= length == 0 ? 0 : 1;
+		int numberOfLines= document.getLineOfOffset(offset + length - minusOne) - firstLine + 1;	
+
+		int shift= 0;
+		for (int i= 0; i < numberOfLines; i++) {
+			ReplaceData data= computeReplaceData(document, firstLine + i, indenter, scanner, numberOfLines > 1, false, project);
+
+			int replaceLength= data.end - data.offset;
+			String currentIndent= document.get(data.offset, replaceLength);
+
+			// only change the document if it is a real change
+			if (!data.indent.equals(currentIndent)) {
+				edits.add(new ReplaceEdit(data.offset + shift, replaceLength, data.indent));
+				//We need to change the document, the indenter depends on it.
+				document.replace(data.offset, replaceLength, data.indent);
+				shift-= data.indent.length() - replaceLength;
+			}
+		}
+		
+		if (edits.size() == 0)
+			return null;
+		
+		if (edits.size() == 1)
+			return (TextEdit) edits.get(0);
+		
+		MultiTextEdit result= new MultiTextEdit();
+		for (Iterator iterator= edits.iterator(); iterator.hasNext();) {
+			TextEdit edit= (TextEdit) iterator.next();
+			result.addChild(edit);
+		}
+		
+		return result;
+	}
+	
+	/**
 	 * Indents a single line using the java heuristic scanner. Javadoc and multiline comments are 
 	 * indented as specified by the <code>JavaDocAutoIndentStrategy</code>.
 	 * 
 	 * @param document the document
 	 * @param line the line to be indented
-	 * @param caret the caret position
 	 * @param indenter the java indenter
 	 * @param scanner the heuristic scanner
-	 * @param multiLine <code>true</code> if more than one line is being indented 
+	 * @param multiLine <code>true</code> if more than one line is being indented
+	 * @param isTabAction <code>true</code> if this action has been invoked by TAB
+	 * @param project the project to retrieve the indentation settings from, <b>null</b> for workspace settings 
 	 * @return <code>true</code> if <code>document</code> was modified, <code>false</code> otherwise
 	 * @throws BadLocationException if the document got changed concurrently 
 	 */
-	private boolean indentLine(IDocument document, int line, int caret, JavaIndenter indenter, JavaHeuristicScanner scanner, boolean multiLine) throws BadLocationException {
+	private static ReplaceData computeReplaceData(IDocument document, int line, JavaIndenter indenter, JavaHeuristicScanner scanner, boolean multiLine, boolean isTabAction, IJavaProject project) throws BadLocationException {
 		IRegion currentLine= document.getLineInformation(line);
 		int offset= currentLine.getOffset();
 		int wsStart= offset; // where we start searching for non-WS; after the "//" in single line comments
@@ -214,7 +320,7 @@ public class IndentAction extends TextEditorAction {
 			String type= partition.getType();
 			if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT)) {
 				indent= computeJavadocIndent(document, line, scanner, startingPartition);
-			} else if (!fIsTabAction && startingPartition.getOffset() == offset && startingPartition.getType().equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)) {
+			} else if (!isTabAction && startingPartition.getOffset() == offset && startingPartition.getType().equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)) {
 				
 				// line comment starting at position 0 -> indent inside
 				int max= document.getLength() - offset;
@@ -227,7 +333,7 @@ public class IndentAction extends TextEditorAction {
 				StringBuffer computed= indenter.computeIndentation(offset);
 				if (computed == null)
 					computed= new StringBuffer(0);
-				int tabSize= getTabSize();
+				int tabSize= getTabSize(project);
 				while (slashes > 0 && computed.length() > 0) {
 					char c= computed.charAt(0);
 					if (c == '\t')
@@ -263,16 +369,41 @@ public class IndentAction extends TextEditorAction {
 		if (end == JavaHeuristicScanner.NOT_FOUND) {
 			// an empty line
 			end= offset + lineLength;
-			if (multiLine && !indentEmptyLines())
+			if (multiLine && !indentEmptyLines(project))
 				indent= ""; //$NON-NLS-1$
 		}
+		
+		return new ReplaceData(offset, end, indent);
+	}
+
+	/**
+	 * Indents a single line using the java heuristic scanner. Javadoc and multiline comments are 
+	 * indented as specified by the <code>JavaDocAutoIndentStrategy</code>.
+	 * 
+	 * @param document the document
+	 * @param line the line to be indented
+	 * @param caret the caret position
+	 * @param indenter the java indenter
+	 * @param scanner the heuristic scanner
+	 * @param multiLine <code>true</code> if more than one line is being indented 
+	 * @return <code>true</code> if <code>document</code> was modified, <code>false</code> otherwise
+	 * @throws BadLocationException if the document got changed concurrently 
+	 */
+	private boolean indentLine(IDocument document, int line, int caret, JavaIndenter indenter, JavaHeuristicScanner scanner, boolean multiLine) throws BadLocationException {
+		IJavaProject project= getJavaProject();
+		ReplaceData data= computeReplaceData(document, line, indenter, scanner, multiLine, fIsTabAction, project);
+		
+		String indent= data.indent;
+		int end= data.end;
+		int offset= data.offset;
+		
 		int length= end - offset;
 		String currentIndent= document.get(offset, length);
 		
 		// if we are right before the text start / line end, and already after the insertion point
 		// then just insert a tab.
-		if (fIsTabAction && caret == end && whiteSpaceLength(currentIndent) >= whiteSpaceLength(indent)) {
-			String tab= getTabEquivalent();
+		if (fIsTabAction && caret == end && whiteSpaceLength(currentIndent, project) >= whiteSpaceLength(indent, project)) {
+			String tab= getTabEquivalent(project);
 			document.replace(caret, 0, tab);
 			fCaretOffset= caret + tab.length();
 			return true;
@@ -304,7 +435,7 @@ public class IndentAction extends TextEditorAction {
 	 * @throws BadLocationException
 	 * @since 3.1
 	 */
-	private String computeJavadocIndent(IDocument document, int line, JavaHeuristicScanner scanner, ITypedRegion partition) throws BadLocationException {
+	private static String computeJavadocIndent(IDocument document, int line, JavaHeuristicScanner scanner, ITypedRegion partition) throws BadLocationException {
 		if (line == 0) // impossible - the first line is never inside a javadoc comment
 			return null;
 		
@@ -354,15 +485,16 @@ public class IndentAction extends TextEditorAction {
 	 * preference for the tab display 
 	 * 
 	 * @param indent the string to be measured.
+	 * @param project the project to retrieve the indentation settings from, <b>null</b> for workspace settings
 	 * @return the size in characters of a string
 	 */
-	private int whiteSpaceLength(String indent) {
+	private static int whiteSpaceLength(String indent, IJavaProject project) {
 		if (indent == null)
 			return 0;
 		else {
 			int size= 0;
 			int l= indent.length();
-			int tabSize= getTabSize();
+			int tabSize= getTabSize(project);
 			
 			for (int i= 0; i < l; i++)
 				size += indent.charAt(i) == '\t' ? tabSize : 1;
@@ -374,12 +506,13 @@ public class IndentAction extends TextEditorAction {
 	 * Returns a tab equivalent, either as a tab character or as spaces, depending on the editor and
 	 * formatter preferences.
 	 * 
+	 * @param project the project to retrieve the indentation settings from, <b>null</b> for workspace settings
 	 * @return a string representing one tab in the editor, never <code>null</code>
 	 */
-	private String getTabEquivalent() {
+	private static String getTabEquivalent(IJavaProject project) {
 		String tab;
-		if (JavaCore.SPACE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR))) {
-			int size= getTabSize();
+		if (JavaCore.SPACE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, project))) {
+			int size= getTabSize(project);
 			StringBuffer buf= new StringBuffer();
 			for (int i= 0; i< size; i++)
 				buf.append(' ');
@@ -394,31 +527,33 @@ public class IndentAction extends TextEditorAction {
 	 * Returns the tab size used by the java editor, which is deduced from the
 	 * formatter preferences.
 	 * 
+	 * @param project the project to retrieve the indentation settings from, <b>null</b> for workspace settings
 	 * @return the tab size as defined in the current formatter preferences
 	 */
-	private int getTabSize() {
-		return getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 4);
+	private static int getTabSize(IJavaProject project) {
+		return getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 4, project);
 	}
 
 	/**
 	 * Returns <code>true</code> if empty lines should be indented, false otherwise.
 	 * 
+	 * @param project the project to retrieve the indentation settings from, <b>null</b> for workspace settings
 	 * @return <code>true</code> if empty lines should be indented, false otherwise
 	 * @since 3.2
 	 */
-	private boolean indentEmptyLines() {
-		return DefaultCodeFormatterConstants.TRUE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES));
+	private static boolean indentEmptyLines(IJavaProject project) {
+		return DefaultCodeFormatterConstants.TRUE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES, project));
 	}
 	
 	/**
 	 * Returns the possibly project-specific core preference defined under <code>key</code>.
 	 * 
 	 * @param key the key of the preference
+	 * @param project the project to retrieve the indentation settings from, <b>null</b> for workspace settings
 	 * @return the value of the preference
 	 * @since 3.1
 	 */
-	private String getCoreFormatterOption(String key) {
-		IJavaProject project= getJavaProject();
+	private static String getCoreFormatterOption(String key, IJavaProject project) {
 		if (project == null)
 			return JavaCore.getOption(key);
 		return project.getOption(key, true);
@@ -430,12 +565,13 @@ public class IndentAction extends TextEditorAction {
 	 * 
 	 * @param key the key of the preference
 	 * @param def the default value
+	 * @param project the project to retrieve the indentation settings from, <b>null</b> for workspace settings
 	 * @return the value of the preference
 	 * @since 3.1
 	 */
-	private int getCoreFormatterOption(String key, int def) {
+	private static int getCoreFormatterOption(String key, int def, IJavaProject project) {
 		try {
-			return Integer.parseInt(getCoreFormatterOption(key));
+			return Integer.parseInt(getCoreFormatterOption(key, project));
 		} catch (NumberFormatException e) {
 			return def;
 		}

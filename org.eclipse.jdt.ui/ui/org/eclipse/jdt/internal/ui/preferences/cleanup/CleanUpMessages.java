@@ -32,6 +32,8 @@ public class CleanUpMessages extends NLS {
 	public static String CleanUpProfileManager_ProfileName_EclipseBuildIn;
 
 	public static String CodeFormatingTabPage_CheckboxName_FormatSourceCode;
+
+	public static String CodeFormatingTabPage_correctIndentation_checkbox_text;
 	public static String CodeFormatingTabPage_FormatterSettings_Description;
 	public static String CodeFormatingTabPage_GroupName_Formatter;
 	public static String CodeFormatingTabPage_Imports_GroupName;

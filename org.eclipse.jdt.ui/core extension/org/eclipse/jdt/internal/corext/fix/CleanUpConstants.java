@@ -157,6 +157,20 @@ public class CleanUpConstants {
 	public static final String FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY= "cleanup.remove_trailing_whitespaces_ignore_empty"; //$NON-NLS-1$
 	
 	/**
+	 * Correct indentation in compilation units on all lines
+	 * <br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * Default value: Value returned by {@link #getEclipseDefaultSettings()}<br>
+	 * <br>
+	 * 
+	 * @see #TRUE
+	 * @see #FALSE
+	 * @since 3.4
+	 */
+	public static final String FORMAT_CORRECT_INDENTATION= "cleanup.correct_indentation"; //$NON-NLS-1$
+	
+	/**
 	 * Controls access qualifiers for instance fields. For detailed settings use<br>
 	 * {@link #MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS}<br>
 	 * {@link #MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY} <br>
@@ -1142,12 +1156,14 @@ public class CleanUpConstants {
 		
 		result.put(ADD_MISSING_NLS_TAGS, FALSE);
 		
-		//Code Organising
+		//Code Organizing
 		result.put(FORMAT_SOURCE_CODE, FALSE);
 		
 		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES, FALSE);
 		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES_ALL, TRUE);
 		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY, FALSE);
+		
+		result.put(FORMAT_CORRECT_INDENTATION, FALSE);
 		
 		result.put(ORGANIZE_IMPORTS, FALSE);
 
@@ -1218,12 +1234,14 @@ public class CleanUpConstants {
 		
 		result.put(ADD_MISSING_NLS_TAGS, FALSE);
 		
-		//Code Organising
+		//Code Organizing
 		result.put(FORMAT_SOURCE_CODE, FALSE);
 		
 		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES, FALSE);
 		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES_ALL, TRUE);
 		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY, FALSE);
+		
+		result.put(FORMAT_CORRECT_INDENTATION, FALSE);
 		
 		result.put(ORGANIZE_IMPORTS, TRUE);
 

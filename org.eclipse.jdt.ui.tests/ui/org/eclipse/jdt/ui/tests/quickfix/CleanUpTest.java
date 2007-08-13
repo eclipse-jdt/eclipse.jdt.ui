@@ -5913,10 +5913,11 @@ public class CleanUpTest extends CleanUpTestCase {
 		
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
+		enable(CleanUpConstants.FORMAT_CORRECT_INDENTATION);
 		
 		buf= new StringBuffer();
 		buf.append("package    test1;\n");
-		buf.append("   public class E1 {\n");
+		buf.append("public class E1 {\n");
 		buf.append("\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -5964,6 +5965,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY);
+		enable(CleanUpConstants.FORMAT_CORRECT_INDENTATION);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -5974,7 +5976,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("public class E1 {\n");
 		buf.append("    /**\n");
 		buf.append("     * \n");
-		buf.append("	 * \n");
+		buf.append("     * \n");
 		buf.append("     */\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -6085,6 +6087,65 @@ public class CleanUpTest extends CleanUpTestCase {
 		String message= entries[0].getMessage();
 		assertTrue(message, entries[0].isInfo());
 		assertTrue(message, message.indexOf("parse") != -1);
+	}
+	
+	public void testCorrectIndetation01() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("/**\n");
+		buf.append("* \n");
+		buf.append("*/\n");
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" * \n");
+		buf.append("* \n");
+		buf.append(" */\n");
+		buf.append("        public class E1 {\n");
+		buf.append("    /**\n");
+		buf.append("         * \n");
+		buf.append(" * \n");
+		buf.append("     */\n");
+		buf.append("            public void foo() {\n");
+		buf.append("            //a\n");
+		buf.append("        //b\n");
+		buf.append("            }\n");
+		buf.append("    /*\n");
+		buf.append("     *\n");
+		buf.append("           *\n");
+		buf.append("* \n");
+		buf.append("     */\n");
+		buf.append("        }\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.FORMAT_CORRECT_INDENTATION);
+		
+		buf= new StringBuffer();
+		buf.append("/**\n");
+		buf.append(" * \n");
+		buf.append(" */\n");
+		buf.append("package test1;\n");
+		buf.append("/**\n");
+		buf.append(" * \n");
+		buf.append(" * \n");
+		buf.append(" */\n");
+		buf.append("public class E1 {\n");
+		buf.append("    /**\n");
+		buf.append("     * \n");
+		buf.append("     * \n");
+		buf.append("     */\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        //a\n");
+		buf.append("        //b\n");
+		buf.append("    }\n");
+		buf.append("    /*\n");
+		buf.append("     *\n");
+		buf.append("     *\n");
+		buf.append("     * \n");
+		buf.append("     */\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
 }

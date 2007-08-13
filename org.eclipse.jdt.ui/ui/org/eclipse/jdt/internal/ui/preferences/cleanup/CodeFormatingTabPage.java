@@ -56,6 +56,7 @@ public final class CodeFormatingTabPage extends CleanUpTabPage {
 		fPreview= (CleanUpPreview)super.doCreateJavaPreview(parent);
 		fPreview.showInvisibleCharacters(true);
         fPreview.setFormat(CleanUpConstants.TRUE.equals(fValues.get(CleanUpConstants.FORMAT_SOURCE_CODE)));
+        fPreview.setCorrectIndentation(CleanUpConstants.TRUE.equals(fValues.get(CleanUpConstants.FORMAT_CORRECT_INDENTATION)));
 		return fPreview;
 	}
 
@@ -79,7 +80,16 @@ public final class CodeFormatingTabPage extends CleanUpTabPage {
 		final RadioPreference allPref= createRadioPref(group, 1, CleanUpMessages.CodeFormatingTabPage_RemoveTrailingWhitespace_all_radio, CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL, CleanUpModifyDialog.FALSE_TRUE);
 		final RadioPreference ignoreEmptyPref= createRadioPref(group, 1, CleanUpMessages.CodeFormatingTabPage_RemoveTrailingWhitespace_ignoreEmpty_radio, CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY, CleanUpModifyDialog.FALSE_TRUE);
 		registerSlavePreference(whiteSpace, new RadioPreference[] {allPref, ignoreEmptyPref});
-
+		
+		final CheckboxPreference correctIndentation= createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_correctIndentation_checkbox_text, CleanUpConstants.FORMAT_CORRECT_INDENTATION, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(correctIndentation);
+		correctIndentation.addObserver(new Observer() {
+			public void update(Observable o, Object arg) {
+				fPreview.setCorrectIndentation(correctIndentation.getChecked());
+				fPreview.update();
+			}
+		});
+		
 		if (!isSaveAction()) {
 			createLabel(numColumns, group, CleanUpMessages.CodeFormatingTabPage_FormatterSettings_Description).setFont(composite.getFont());
 

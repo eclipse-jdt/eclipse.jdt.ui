@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IContentFormatter;
@@ -28,6 +29,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.IndentAction;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
@@ -38,6 +40,7 @@ public class CleanUpPreview extends JavaPreview {
 
 	private ICleanUp[] fPreviewCleanUps;
 	private boolean fFormat;
+	private boolean fCorrectIndentation;
 	public CleanUpPreview(Composite parent, ICleanUp[] cleanUps) {
 		super(JavaCore.getDefaultOptions(), parent);
 		fPreviewCleanUps= cleanUps;
@@ -50,6 +53,10 @@ public class CleanUpPreview extends JavaPreview {
 	
 	public void setFormat(boolean enable) {
 		fFormat= enable;
+	}
+	
+	public void setCorrectIndentation(boolean enabled) {
+		fCorrectIndentation= enabled;
 	}
 
 	/**
@@ -72,8 +79,21 @@ public class CleanUpPreview extends JavaPreview {
         }
         fPreviewDocument.set(text);
 		
-        if (!fFormat)
-        	return;
+        if (!fFormat) {
+        	if (!fCorrectIndentation)
+        		return;
+        	
+        	fSourceViewer.setRedraw(false);
+        	try {
+        		IndentAction.indent(fPreviewDocument, null);
+        	} catch (BadLocationException e) {
+				JavaPlugin.log(e);
+			} finally {
+        		fSourceViewer.setRedraw(true);	
+        	}
+			
+			return;
+        }
         
 		fSourceViewer.setRedraw(false);
 		final IFormattingContext context = new CommentFormattingContext();

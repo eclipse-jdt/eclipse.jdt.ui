@@ -39,12 +39,13 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.IndentAction;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 public class CodeFormatFix implements IFix {
 	
-	public static IFix createCleanUp(ICompilationUnit cu, boolean format, boolean removeTrailingWhitespacesAll, boolean removeTrailingWhitespacesIgnorEmpty) throws CoreException {
-		if (!format && !removeTrailingWhitespacesAll && !removeTrailingWhitespacesIgnorEmpty)
+	public static IFix createCleanUp(ICompilationUnit cu, boolean format, boolean removeTrailingWhitespacesAll, boolean removeTrailingWhitespacesIgnorEmpty, boolean correctIndentation) throws CoreException {
+		if (!format && !removeTrailingWhitespacesAll && !removeTrailingWhitespacesIgnorEmpty && !correctIndentation)
 			return null;
 		
 		if (format) {
@@ -66,48 +67,85 @@ public class CodeFormatFix implements IFix {
 			change.addTextEditGroup(group);
 			
 			return new CodeFormatFix(change, cu);
-		} else if (removeTrailingWhitespacesAll || removeTrailingWhitespacesIgnorEmpty) {
+		} else if (removeTrailingWhitespacesAll || removeTrailingWhitespacesIgnorEmpty || correctIndentation) {
 			try {
+				CompilationUnitChange change= new CompilationUnitChange("", cu); //$NON-NLS-1$
 				MultiTextEdit multiEdit= new MultiTextEdit();
-				Document document= new Document(cu.getBuffer().getContents());
+				change.setEdit(multiEdit);
 				
-				int lineCount= document.getNumberOfLines();
-				for (int i= 0; i < lineCount; i++) {
+				if (correctIndentation && removeTrailingWhitespacesAll) {
+					removeTrailingWhitespacesAll= false;
+					removeTrailingWhitespacesIgnorEmpty= true;
+				}
+				
+				Document document= new Document(cu.getBuffer().getContents());
+				if (removeTrailingWhitespacesAll || removeTrailingWhitespacesIgnorEmpty) {
+					String label= MultiFixMessages.CodeFormatFix_RemoveTrailingWhitespace_changeDescription;
+					CategorizedTextEditGroup group= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
 					
-					IRegion region= document.getLineInformation(i);
-					if (region.getLength() == 0)
-						continue;
-					
-					int lineStart= region.getOffset();
-					int lineExclusiveEnd= lineStart + region.getLength();
-					int j= getIndexOfRightMostNoneWhitspaceCharacter(lineStart, lineExclusiveEnd - 1, document);
-					
-					if (removeTrailingWhitespacesAll) {
-						j++;
-						if (j < lineExclusiveEnd)
-							multiEdit.addChild(new DeleteEdit(j, lineExclusiveEnd - j));
-					} else if (removeTrailingWhitespacesIgnorEmpty) {
-						if (j >= lineStart) {
-							if (document.getChar(j) == '*' && getIndexOfRightMostNoneWhitspaceCharacter(lineStart, j - 1, document) < lineStart) {
-								j++;
-							}
+					int lineCount= document.getNumberOfLines();
+					for (int i= 0; i < lineCount; i++) {
+						
+						IRegion region= document.getLineInformation(i);
+						if (region.getLength() == 0)
+							continue;
+						
+						int lineStart= region.getOffset();
+						int lineExclusiveEnd= lineStart + region.getLength();
+						int j= getIndexOfRightMostNoneWhitspaceCharacter(lineStart, lineExclusiveEnd - 1, document);
+						
+						if (removeTrailingWhitespacesAll) {
 							j++;
-							if (j < lineExclusiveEnd)
-								multiEdit.addChild(new DeleteEdit(j, lineExclusiveEnd - j));							
+							if (j < lineExclusiveEnd) {
+								DeleteEdit edit= new DeleteEdit(j, lineExclusiveEnd - j);
+								multiEdit.addChild(edit);
+								group.addTextEdit(edit);
+							}
+						} else if (removeTrailingWhitespacesIgnorEmpty) {
+							if (j >= lineStart) {
+								if (document.getChar(j) == '*' && getIndexOfRightMostNoneWhitspaceCharacter(lineStart, j - 1, document) < lineStart) {
+									j++;
+								}
+								j++;
+								if (j < lineExclusiveEnd) {
+									DeleteEdit edit= new DeleteEdit(j, lineExclusiveEnd - j);
+									multiEdit.addChild(edit);
+									group.addTextEdit(edit);
+								}
+							}
 						}
+					}
+					
+					if (multiEdit.hasChildren()) {
+						change.addTextEditGroup(group);
+					}
+				} 
+					
+				if (correctIndentation) {
+					TextEdit edit= IndentAction.indent(document, cu.getJavaProject());
+					if (edit != null) {
+						
+						String label= MultiFixMessages.CodeFormatFix_correctIndentation_changeGroupLabel;
+						CategorizedTextEditGroup group= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
+						
+						if (edit instanceof MultiTextEdit) {
+							TextEdit[] children= ((MultiTextEdit)edit).getChildren();
+							for (int i= 0; i < children.length; i++) {
+								edit.removeChild(children[i]);
+								multiEdit.addChild(children[i]);
+								group.addTextEdit(children[i]);
+							}
+						} else {
+							multiEdit.addChild(edit);
+							group.addTextEdit(edit);
+						}
+						
+						change.addTextEditGroup(group);
 					}
 				}
 				
-				if (multiEdit.getChildrenSize() == 0)
+				if (!multiEdit.hasChildren())
 					return null;
-				
-				String label= MultiFixMessages.CodeFormatFix_RemoveTrailingWhitespace_changeDescription;
-				CompilationUnitChange change= new CompilationUnitChange(label, cu);
-				change.setEdit(multiEdit);
-				
-				CategorizedTextEditGroup group= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
-				group.addTextEdit(multiEdit);
-				change.addTextEditGroup(group);
 				
 				return new CodeFormatFix(change, cu);
 			} catch (BadLocationException x) {
