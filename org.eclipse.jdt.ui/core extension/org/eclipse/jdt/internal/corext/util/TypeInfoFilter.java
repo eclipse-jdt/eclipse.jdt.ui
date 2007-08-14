@@ -27,13 +27,14 @@ public class TypeInfoFilter {
 		
 		private String fPattern;
 		private int fMatchKind;
+		private boolean fCamelCaseExact; //https://bugs.eclipse.org/bugs/show_bug.cgi?id=174349
 		private StringMatcher fStringMatcher;
 
 		private static final char END_SYMBOL= '<';
 		private static final char ANY_STRING= '*';
 		private static final char BLANK= ' ';
 		
-		public PatternMatcher(String pattern, boolean ignoreCase) {
+		public PatternMatcher(String pattern) {
 			this(pattern, SearchPattern.R_EXACT_MATCH | SearchPattern.R_PREFIX_MATCH |
 				SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CAMELCASE_MATCH);
 		}
@@ -97,15 +98,15 @@ public class TypeInfoFilter {
 				return;
 			}
 			
-			if (last == END_SYMBOL) {
-				fMatchKind= SearchPattern.R_EXACT_MATCH;
+			if (last == END_SYMBOL || last == BLANK) {
 				fPattern= pattern.substring(0, length - 1);
-				return;
-			}
-			
-			if (last == BLANK) {
-				fMatchKind= SearchPattern.R_EXACT_MATCH;
-				fPattern= pattern.trim();
+				if (SearchUtils.isCamelCasePattern(fPattern)) {
+					// https://bugs.eclipse.org/bugs/show_bug.cgi?id=174349
+					fCamelCaseExact= true;
+					fMatchKind= SearchPattern.R_CAMELCASE_MATCH;
+				} else {
+					fMatchKind= SearchPattern.R_EXACT_MATCH;
+				}
 				return;
 			}
 			
@@ -120,15 +121,15 @@ public class TypeInfoFilter {
 		}		
 	}
 	
-	private String fText;
-	private IJavaSearchScope fSearchScope;
-	private boolean fIsWorkspaceScope;
-	private int fElementKind;
-	private ITypeInfoFilterExtension fFilterExtension;
-	private TypeInfoRequestorAdapter fAdapter= new TypeInfoRequestorAdapter();
+	private final String fText;
+	private final IJavaSearchScope fSearchScope;
+	private final boolean fIsWorkspaceScope;
+	private final int fElementKind;
+	private final ITypeInfoFilterExtension fFilterExtension;
+	private final TypeInfoRequestorAdapter fAdapter= new TypeInfoRequestorAdapter();
 
-	private PatternMatcher fPackageMatcher;
-	private PatternMatcher fNameMatcher;
+	private final PatternMatcher fPackageMatcher;
+	private final PatternMatcher fNameMatcher;
 	
 	private static final int TYPE_MODIFIERS= Flags.AccEnum | Flags.AccAnnotation | Flags.AccInterface;
 	
@@ -141,13 +142,14 @@ public class TypeInfoFilter {
 		
 		int index= text.lastIndexOf("."); //$NON-NLS-1$
 		if (index == -1) {
-			fNameMatcher= new PatternMatcher(text, true);
+			fNameMatcher= new PatternMatcher(text);
+			fPackageMatcher= null;
 		} else {
-			fPackageMatcher= new PatternMatcher(evaluatePackagePattern(text.substring(0, index)), true);
+			fPackageMatcher= new PatternMatcher(evaluatePackagePattern(text.substring(0, index)));
 			String name= text.substring(index + 1);
 			if (name.length() == 0)
 				name= "*"; //$NON-NLS-1$
-			fNameMatcher= new PatternMatcher(name, true);
+			fNameMatcher= new PatternMatcher(name);
 		}
 	}
 	
@@ -179,6 +181,20 @@ public class TypeInfoFilter {
 		return fText;
 	}
 
+	/**
+	 * Checks whether <code>this</code> filter is a subFilter of the given <code>text</code>.
+	 * <p>
+	 * <i>WARNING: This is the <b>reverse</b> interpretation compared to
+	 * {@link org.eclipse.ui.dialogs.SearchPattern#isSubPattern(org.eclipse.ui.dialogs.SearchPattern)} and
+	 * {@link org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter#isSubFilter}.
+	 * </i>
+	 * </p>
+	 * 
+	 * @param text another filter text
+	 * @return <code>true</code> if <code>this</code> filter is a subFilter of <code>text</code>
+	 * e.g. "List" is a subFilter of "L". In this case, the filters matches a proper subset of
+	 * the items matched by <code>text</code>.
+	 */
 	public boolean isSubFilter(String text) {
 		if (! fText.startsWith(text))
 			return false;
@@ -190,6 +206,10 @@ public class TypeInfoFilter {
 		return fNameMatcher.getMatchKind() == SearchPattern.R_CAMELCASE_MATCH;
 	}
 
+	public boolean isCamelCaseExactPattern() {
+		return fNameMatcher.fCamelCaseExact;
+	}
+	
 	public String getPackagePattern() {
 		if (fPackageMatcher == null)
 			return null;
@@ -202,6 +222,14 @@ public class TypeInfoFilter {
 
 	public int getSearchFlags() {
 		return fNameMatcher.getMatchKind();
+	}
+	
+	public int getElementKind() {
+		return fElementKind;
+	}
+	
+	public IJavaSearchScope getSearchScope() {
+		return fSearchScope;
 	}
 	
 	public int getPackageFlags() {
@@ -235,6 +263,9 @@ public class TypeInfoFilter {
 	}
 	
 	private boolean matchesName(TypeNameMatch type) {
+		if (fText.length() == 0) {
+			return true; //empty pattern matches all names
+		}
 		return fNameMatcher.matches(type.getSimpleTypeName());
 	}
 

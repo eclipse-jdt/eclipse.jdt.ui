@@ -68,9 +68,7 @@ import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.PreferencesUtil;
-import org.eclipse.ui.dialogs.SearchPattern;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
@@ -80,6 +78,7 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.core.search.TypeNameMatchRequestor;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
@@ -88,6 +87,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
+import org.eclipse.jdt.internal.corext.util.TypeInfoFilter;
 import org.eclipse.jdt.internal.corext.util.TypeInfoRequestorAdapter;
 
 import org.eclipse.jdt.launching.IVMInstall;
@@ -148,6 +148,16 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	
 	private boolean fAllowScopeSwitching;
 
+	/**
+	 * Flags defining nature of searched elements; the only valid
+	 * values are:
+	 *  {@link IJavaSearchConstants#TYPE}, 
+	 * 	{@link IJavaSearchConstants#ANNOTATION_TYPE}, 
+	 * 	{@link IJavaSearchConstants#INTERFACE}, 
+	 * 	{@link IJavaSearchConstants#ENUM}, 
+	 * 	{@link IJavaSearchConstants#CLASS_AND_INTERFACE}, 
+	 * 	{@link IJavaSearchConstants#CLASS_AND_ENUM}.
+	 */
 	private final int fElementKinds;
 
 	private final ITypeInfoFilterExtension fFilterExtension;
@@ -581,26 +591,19 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		 * a terminator, the filter is not set to match everything mode because
 		 * jdt.core's SearchPattern does not support that case.
 		 */ 
-		String typePattern= itemsFilter.getPattern();
+		String typePattern= typeSearchFilter.getNamePattern();
 		int matchRule= typeSearchFilter.getMatchRule();
-		if (matchRule == SearchPattern.RULE_CAMELCASE_MATCH) {
-			 // If the pattern is empty, the RULE_BLANK_MATCH will be chosen, so we don't have to check the pattern length
-			char lastChar= typePattern.charAt(typePattern.length() - 1);
-
-			if (lastChar == '<' || lastChar == ' ') {
-				typePattern= typePattern.substring(0, typePattern.length() - 1);
-			} else {
-				typeSearchFilter.setMatchEverythingMode(true);
-			}
+		if (typeSearchFilter.isCamelCaseExactPattern()) {
+			matchRule= SearchPattern.R_CAMELCASE_MATCH;
 		} else {
 			typeSearchFilter.setMatchEverythingMode(true);
 		}
 
 		try {
 			engine.searchAllTypeNames(packPattern == null ? null : packPattern.toCharArray(),
-					typeSearchFilter.getPackageFlags(), //TODO: https://bugs.eclipse.org/bugs/show_bug.cgi?id=176017
+					typeSearchFilter.getPackageFlags(),
 					typePattern.toCharArray(),
-					matchRule, //TODO: https://bugs.eclipse.org/bugs/show_bug.cgi?id=176017
+					matchRule,
 					typeSearchFilter.getElementKind(),
 					typeSearchFilter.getSearchScope(),
 					requestor,
@@ -697,7 +700,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 						0,
 						// make sure we search a concrete name. This is faster according to Kent  
 						"_______________".toCharArray(), //$NON-NLS-1$
-						SearchPattern.RULE_EXACT_MATCH | SearchPattern.RULE_CASE_SENSITIVE, 
+						SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, 
 						IJavaSearchConstants.ENUM,
 						SearchEngine.createWorkspaceScope(), 
 						new TypeNameRequestor() {}, 
@@ -1116,24 +1119,12 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	 */
 	private class TypeItemsFilter extends ItemsFilter {
 
-		private static final int TYPE_MODIFIERS= Flags.AccEnum | Flags.AccAnnotation | Flags.AccInterface;
-
-		private final IJavaSearchScope fScope;
-
-		private final boolean fIsWorkspaceScope;
-
-		private final int fElemKind;
-
-		private final ITypeInfoFilterExtension fFilterExt;
-
-		private final TypeInfoRequestorAdapter fAdapter= new TypeInfoRequestorAdapter();
-
-		private SearchPattern fPackageMatcher;
-		
 		private boolean fMatchEverything= false;
 		
 		private final int fMyTypeFilterVersion= fTypeFilterVersion;
 
+		private final TypeInfoFilter fTypeInfoFilter;
+		
 		/**
 		 * Creates instance of TypeItemsFilter
 		 * 
@@ -1142,18 +1133,17 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		 * @param extension
 		 */
 		public TypeItemsFilter(IJavaSearchScope scope, int elementKind, ITypeInfoFilterExtension extension) {
+			/*
+			 * Horribly convoluted initialization:
+			 * FilteredItemsSelectionDialog.ItemsFilter#ItemsFilter(SearchPattern)
+			 * fetches the pattern string from the Text widget of the outer class and
+			 * initializes the given SearchPattern with that string.
+			 * The default SearchPattern also removes whitespace from the pattern string,
+			 * which is why we have to supply our own (dummy) implementation.
+			 */
 			super(new TypeSearchPattern());
-			fScope= scope;
-			fIsWorkspaceScope= scope == null ? false : scope.equals(SearchEngine.createWorkspaceScope());
-			fElemKind= elementKind;
-			fFilterExt= extension;
-			String stringPackage= ((TypeSearchPattern) patternMatcher).getPackagePattern();
-			if (stringPackage != null) {
-				fPackageMatcher= new SearchPattern();
-				fPackageMatcher.setPattern(stringPackage);
-			} else {
-				fPackageMatcher= null;
-			}
+			String pattern= patternMatcher.getPattern();
+			fTypeInfoFilter= new TypeInfoFilter(pattern, scope, elementKind, extension);
 		}
 
 		/*
@@ -1162,23 +1152,24 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter#isSubFilter(org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter)
 		 */
 		public boolean isSubFilter(ItemsFilter filter) {
-			if (!super.isSubFilter(filter))
+			if (! (filter instanceof TypeItemsFilter))
 				return false;
 			TypeItemsFilter typeItemsFilter= (TypeItemsFilter) filter;
-			if (fScope != typeItemsFilter.getSearchScope())
-				return false;
 			if (fMyTypeFilterVersion != typeItemsFilter.getMyTypeFilterVersion())
 				return false;
-			return getPattern().indexOf('.', filter.getPattern().length()) == -1;
+			
+			//Caveat: This method is defined the wrong way 'round in FilteredItemsSelectionDialog!
+			//WRONG (has reverse meaning!): return fTypeInfoFilter.isSubFilter(filter.getPattern());
+			return typeItemsFilter.fTypeInfoFilter.isSubFilter(fTypeInfoFilter.getText());
 		}
 
 		public boolean equalsFilter(ItemsFilter iFilter) {
-			if (!super.equalsFilter(iFilter))
-				return false;
 			if (!(iFilter instanceof TypeItemsFilter))
 				return false;
 			TypeItemsFilter typeItemsFilter= (TypeItemsFilter) iFilter;
-			if (fScope != typeItemsFilter.getSearchScope())
+			if (! getPattern().equals(typeItemsFilter.getPattern()))
+				return false;
+			if (getSearchScope() != typeItemsFilter.getSearchScope())
 				return false;
 			if (fMyTypeFilterVersion != typeItemsFilter.getMyTypeFilterVersion())
 				return false;
@@ -1186,95 +1177,37 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		}
 
 		public int getElementKind() {
-			return fElemKind;
-		}
-
-		public ITypeInfoFilterExtension getFilterExtension() {
-			return fFilterExt;
+			return fTypeInfoFilter.getElementKind();
 		}
 
 		public IJavaSearchScope getSearchScope() {
-			return fScope;
+			return fTypeInfoFilter.getSearchScope();
 		}
 
 		public int getMyTypeFilterVersion() {
 			return fMyTypeFilterVersion;
 		}
 		
+		public String getNamePattern() {
+			return fTypeInfoFilter.getNamePattern();
+		}
+		
 		public String getPackagePattern() {
-			if (fPackageMatcher == null)
-				return null;
-			return fPackageMatcher.getPattern();
+			return fTypeInfoFilter.getPackagePattern();
 		}
 
 		public int getPackageFlags() {
-			if (fPackageMatcher == null)
-				return SearchPattern.RULE_EXACT_MATCH;
-
-			return fPackageMatcher.getMatchRule();
+			return fTypeInfoFilter.getPackageFlags();
 		}
 
 		public boolean matchesRawNamePattern(TypeNameMatch type) {
-			return Strings.startsWithIgnoreCase(type.getSimpleTypeName(), getPattern());
-		}
-
-		public boolean matchesCachedResult(TypeNameMatch type) {
-			if (!(matchesPackage(type) && matchesFilterExtension(type)))
-				return false;
-			return matchesName(type);
-		}
-
-		public boolean matchesHistoryElement(TypeNameMatch type) {
-			if (!(matchesPackage(type) && matchesModifiers(type) && matchesScope(type) && matchesFilterExtension(type)))
-				return false;
-			return matchesName(type);
+			return fTypeInfoFilter.matchesRawNamePattern(type);
 		}
 
 		public boolean matchesFilterExtension(TypeNameMatch type) {
-			if (fFilterExt == null)
-				return true;
-			fAdapter.setMatch(type);
-			return fFilterExt.select(fAdapter);
+			return fTypeInfoFilter.matchesFilterExtension(type);
 		}
 
-		private boolean matchesName(TypeNameMatch type) {
-			return matches(type.getSimpleTypeName());
-		}
-
-		private boolean matchesPackage(TypeNameMatch type) {
-			if (fPackageMatcher == null)
-				return true;
-			return fPackageMatcher.matches(type.getPackageName());
-		}
-
-		private boolean matchesScope(TypeNameMatch type) {
-			if (fIsWorkspaceScope)
-				return true;
-			return fScope.encloses(type.getType());
-
-		}
-
-		private boolean matchesModifiers(TypeNameMatch type) {
-			if (fElemKind == IJavaSearchConstants.TYPE)
-				return true;
-			int modifiers= type.getModifiers() & TYPE_MODIFIERS;
-			switch (fElemKind) {
-			case IJavaSearchConstants.CLASS:
-				return modifiers == 0;
-			case IJavaSearchConstants.ANNOTATION_TYPE:
-				return Flags.isAnnotation(modifiers);
-			case IJavaSearchConstants.INTERFACE:
-				return Flags.isInterface(modifiers);
-			case IJavaSearchConstants.ENUM:
-				return Flags.isEnum(modifiers);
-			case IJavaSearchConstants.CLASS_AND_INTERFACE:
-				return modifiers == 0 || Flags.isInterface(modifiers);
-			case IJavaSearchConstants.CLASS_AND_ENUM:
-				return modifiers == 0 || Flags.isEnum(modifiers);
-			}
-			return false;
-		}
-		
 		/**
 		 * Set filter to "match everything" mode.
 		 * 
@@ -1282,7 +1215,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		 * 					If <code>false</code>, the filter is enabled.
 		 */
 		public void setMatchEverythingMode(boolean matchEverything) {
-			this.fMatchEverything= matchEverything;
+			fMatchEverything= matchEverything;
 		}
 
 		/*
@@ -1300,14 +1233,18 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter#matchItem(java.lang.Object)
 		 */
 		public boolean matchItem(Object item) {
-
 			if (fMatchEverything) 
 				return true;
-
+			
 			TypeNameMatch type= (TypeNameMatch) item;
-			if (!(matchesPackage(type) && matchesModifiers(type) && matchesScope(type) && matchesFilterExtension(type)))
-				return false;
-			return matchesName(type);
+			boolean matches= fTypeInfoFilter.matchesHistoryElement(type);
+			if (matches && fTypeInfoFilter.isCamelCaseExactPattern()) {
+				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=174349 :
+				org.eclipse.ui.dialogs.SearchPattern uiPattern= new org.eclipse.ui.dialogs.SearchPattern();
+				uiPattern.setPattern(fTypeInfoFilter.getNamePattern() + "<"); //$NON-NLS-1$
+				return uiPattern.matches(type.getSimpleTypeName());
+			}
+			return matches;
 		}
 		
 		/*
@@ -1320,92 +1257,53 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			return matchesRawNamePattern(type); 
 		}
 
-	}
-
-	/**
-	 * Extends functionality of SearchPatterns
-	 */
-	private static class TypeSearchPattern extends SearchPattern {
-
-		private String packagePattern;
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.ui.dialogs.SearchPattern#setPattern(java.lang.String)
+		/**
+		 * @return search flags
+		 * @see org.eclipse.jdt.core.search.SearchPattern#getMatchRule()
 		 */
-		public void setPattern(String stringPattern) {
-			String pattern= stringPattern;
-			String packPattern= null;
-			int index= stringPattern.lastIndexOf("."); //$NON-NLS-1$
-			if (index != -1) {
-				packPattern= evaluatePackagePattern(stringPattern.substring(0, index));
-				pattern= stringPattern.substring(index + 1);
-				if (pattern.length() == 0)
-					pattern= "**"; //$NON-NLS-1$
-			}
-			super.setPattern(pattern);
-			packagePattern= packPattern;
+		public int getMatchRule() {
+			return fTypeInfoFilter.getSearchFlags();
 		}
 
-		/*
-		 * Transforms o.e.j to o*.e*.j*
-		 */
-		private String evaluatePackagePattern(String s) {
-			StringBuffer buf= new StringBuffer();
-			boolean hasWildCard= false;
-			for (int i= 0; i < s.length(); i++) {
-				char ch= s.charAt(i);
-				if (ch == '.') {
-					if (!hasWildCard) {
-						buf.append('*');
-					}
-					hasWildCard= false;
-				} else if (ch == '*' || ch == '?') {
-					hasWildCard= true;
-				}
-				buf.append(ch);
-			}
-			if (!hasWildCard) {
-				buf.append('*');
-			}
-			return buf.toString();
+		public boolean isCamelCaseExactPattern() {
+			return fTypeInfoFilter.isCamelCaseExactPattern();
+		}
+		
+		public String getPattern() {
+			return fTypeInfoFilter.getText();
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.ui.dialogs.SearchPattern#isNameCharAllowed(char)
-		 */
-		protected boolean isNameCharAllowed(char nameChar) {
-			return super.isNameCharAllowed(nameChar);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.ui.dialogs.SearchPattern#isPatternCharAllowed(char)
-		 */
-		protected boolean isPatternCharAllowed(char patternChar) {
-			return super.isPatternCharAllowed(patternChar);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.ui.dialogs.SearchPattern#isValidCamelCaseChar(char)
-		 */
-		protected boolean isValidCamelCaseChar(char ch) {
-			return super.isValidCamelCaseChar(ch);
+		public boolean isCamelCasePattern() {
+			return fTypeInfoFilter.isCamelCasePattern();
 		}
 
 		/**
-		 * @return the packagePattern
+		 * @param text 
+		 * @return never returns
+		 * @throws UnsupportedOperationException always
+		 *         
+		 * @deprecated not used
 		 */
-		public String getPackagePattern() {
-			return packagePattern;
+		protected boolean matches(String text) {
+			throw new UnsupportedOperationException();
 		}
+	}
 
+	/**
+	 * Replaces functionality of {@link org.eclipse.ui.dialogs.SearchPattern} with an
+	 * adapter implementation that delegates to {@link TypeInfoFilter}.
+	 */
+	private static class TypeSearchPattern extends org.eclipse.ui.dialogs.SearchPattern {
+
+		private String fPattern;	
+		
+		public void setPattern(String stringPattern) {
+			fPattern= stringPattern;
+		}
+		
+		public String getPattern() {
+			return fPattern;
+		}
 	}
 
 	/**
