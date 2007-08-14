@@ -11,13 +11,17 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -30,13 +34,18 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
@@ -76,6 +85,8 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 
 	//TODO: Add to API: JdtActionConstants
 	public static final String ACTION_HANDLER_ID= "org.eclipse.jdt.ui.actions.FindNLSProblems"; //$NON-NLS-1$
+	
+	private static final String JAVA_LANG_STRING= "QString;"; //$NON-NLS-1$
 	
 	private JavaEditor fEditor;
 	
@@ -177,9 +188,13 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 	
 	private SearchPatternData[] getNLSFiles(IStructuredSelection selection) {
 		Object[] selectedElements= selection.toArray();
-		List result= new ArrayList();
-		collectNLSFiles(selectedElements, result);
-		return (SearchPatternData[])result.toArray(new SearchPatternData[result.size()]);
+		HashMap result= new HashMap();
+		
+		collectNLSFilesFromResources(selectedElements, result);
+		collectNLSFilesFromJavaElements(selectedElements, result);
+		
+		Collection values= result.values();
+		return (SearchPatternData[])values.toArray(new SearchPatternData[values.size()]);
 	}
 	
 	private boolean canEnable(IStructuredSelection selection) {
@@ -223,7 +238,40 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 		return false;
 	}
 
-	private void collectNLSFiles(Object[] objects, List result) {
+	private void collectNLSFilesFromResources(Object[] objects, HashMap result) {
+		try {
+			for (int i= 0; i < objects.length; i++) {
+				Object object= objects[i];
+				
+				IResource resource= null;
+				if (object instanceof IJavaElement) {
+					resource= ((IJavaElement) object).getCorrespondingResource();
+				} else if (object instanceof IResource) {
+					resource= (IResource) object;
+				} else if (object instanceof LogicalPackage) {
+					LogicalPackage logicalPackage= (LogicalPackage)object;
+					resource= logicalPackage.getJavaProject().getProject();
+				}
+				
+				if (resource instanceof IContainer) {
+					collectNLSFilesFromResources(((IContainer)resource).members(), result);
+				} else if (resource instanceof IFile) {
+					SearchPatternData data= tryIfPropertyFileSelected((IFile) resource);
+					if (data != null && !result.containsKey(data.fAccessorType)) {
+						result.put(data.fAccessorType, data);
+					}
+				}
+			}
+		} catch (JavaModelException e) {
+			if (!e.isDoesNotExist()) {
+				JavaPlugin.log(e);
+			}
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		}
+	}
+	
+	private void collectNLSFilesFromJavaElements(Object[] objects, HashMap result) {
 		try {
 			for (int i= 0; i < objects.length; i++) {
 				if (objects[i] instanceof IJavaElement) {
@@ -232,30 +280,32 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 						switch (elem.getElementType()) {
 							case IJavaElement.TYPE:
 								if (elem.getParent().getElementType() == IJavaElement.COMPILATION_UNIT) {
-									SearchPatternData data= tryIfPropertyCuSelected((ICompilationUnit)elem.getParent());
-									if (data != null) {
-										result.add(data);
+									ICompilationUnit unit= (ICompilationUnit)elem.getParent();
+									if (!result.containsKey(unit.getTypes()[0])) {
+										SearchPatternData data= tryIfPropertyCuSelected(unit);
+										if (data != null)
+											result.put(data.fAccessorType, data);
 									}
 								}
 								break;
 							case IJavaElement.COMPILATION_UNIT:
-								SearchPatternData data= tryIfPropertyCuSelected((ICompilationUnit)elem);
-								if (data != null) {
-									result.add(data);
+								ICompilationUnit unit= (ICompilationUnit)elem;
+								if (!result.containsKey(unit.getTypes()[0])) {
+									SearchPatternData data= tryIfPropertyCuSelected(unit);
+									if (data != null)
+										result.put(data.fAccessorType, data);
 								}
-								break;
-							case IJavaElement.IMPORT_CONTAINER:
 								break;
 							case IJavaElement.PACKAGE_FRAGMENT:
 								IPackageFragment fragment= (IPackageFragment)elem;
 								if (fragment.getKind() == IPackageFragmentRoot.K_SOURCE)
-									collectNLSFiles(new Object[] {fragment.getCorrespondingResource()}, result);
+									collectNLSFilesFromJavaElements(fragment.getChildren(), result);
 								break;
 							case IJavaElement.PACKAGE_FRAGMENT_ROOT: 
 							{
 								IPackageFragmentRoot root= (IPackageFragmentRoot) elem;
 								if (root.getKind() == IPackageFragmentRoot.K_SOURCE)
-									collectNLSFiles(new Object[] {root.getCorrespondingResource()}, result);
+									collectNLSFilesFromJavaElements(root.getChildren(), result);
 								break;
 							}
 							case IJavaElement.JAVA_PROJECT: 
@@ -266,7 +316,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 									IPackageFragmentRoot root= allPackageFragmentRoots[j];
 									if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
 										if (javaProject.equals(root.getJavaProject())) {
-											collectNLSFiles(new Object[] {root.getCorrespondingResource()}, result);
+											collectNLSFilesFromJavaElements(new Object[] {root}, result);
 										}
 									}
 								}
@@ -276,22 +326,13 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 					}
 				} else if (objects[i] instanceof LogicalPackage) {
 					LogicalPackage logicalPackage= (LogicalPackage)objects[i];
-					collectNLSFiles(new Object[] {logicalPackage.getJavaProject()}, result);
-				} else if (objects[i] instanceof IFolder) {
-					collectNLSFiles(((IFolder)objects[i]).members(), result);
-				} else if (objects[i] instanceof IFile) {
-					SearchPatternData data= tryIfPropertyFileSelected((IFile)objects[i]);
-					if (data != null) {
-						result.add(data);
-					}
+					collectNLSFilesFromJavaElements(new Object[] {logicalPackage.getJavaProject()}, result);
 				}
 			}
 		} catch (JavaModelException e) {
 			if (!e.isDoesNotExist()) {
 				JavaPlugin.log(e);
 			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
 		}
 	}
 	
@@ -306,11 +347,82 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 		if (types.length > 1)
 			return null;
 		
+		if (!isPotentialNLSAccessor(compilationUnit))
+			return null;
+		
 		IStorage bundle= NLSHintHelper.getResourceBundle(compilationUnit);
 		if (!(bundle instanceof IFile))
 			return null;
 
 		return new SearchPatternData(types[0], (IFile)bundle);
+	}
+
+	/*
+	 * Be conservative, for every unit this returns true an AST will to be created!
+	 */
+	private static boolean isPotentialNLSAccessor(ICompilationUnit unit) throws JavaModelException {
+		IType type= unit.getTypes()[0];
+		if (!type.exists())
+			return false;
+		
+		IField bundleNameField= getBundleNameField(type.getFields());
+		if (bundleNameField == null)
+			return false;
+		
+		if (importsOSGIUtil(unit)) { //new school
+			IInitializer[] initializers= type.getInitializers();
+			for (int i= 0; i < initializers.length; i++) {
+				if (Modifier.isStatic(initializers[0].getFlags()))
+					return true;
+			}			
+		} else { //old school
+			IMethod[] methods= type.getMethods();
+			for (int i= 0; i < methods.length; i++) {
+				IMethod method= methods[i];			
+				if (isValueAccessor(method))
+					return true;
+			}
+		}
+		
+		return false;
+	}
+
+	private static boolean importsOSGIUtil(ICompilationUnit unit) throws JavaModelException {
+		IImportDeclaration[] imports= unit.getImports();
+		for (int i= 0; i < imports.length; i++) {
+			if (imports[i].getElementName().startsWith("org.eclipse.osgi.util.")) //$NON-NLS-1$
+				return true;
+		}
+		
+		return false;
+	}
+
+	private static boolean isValueAccessor(IMethod method) throws JavaModelException {
+		if (!"getString".equals(method.getElementName())) //$NON-NLS-1$
+			return false;
+		
+		int flags= method.getFlags();
+		if (!Modifier.isStatic(flags) || !Modifier.isPublic(flags))
+			return false;
+ 		
+		String returnType= method.getReturnType();
+		if (!JAVA_LANG_STRING.equals(returnType))
+			return false;
+		
+		String[] parameters= method.getParameterTypes();
+		if (parameters.length != 1 || !JAVA_LANG_STRING.equals(parameters[0]))
+			return false;
+		
+		return true;
+	}
+	
+	private static IField getBundleNameField(IField[] fields) {
+		for (int i= 0; i < fields.length; i++) {
+			if ("BUNDLE_NAME".equals(fields[i].getElementName())) //$NON-NLS-1$
+				return fields[i];
+		}
+		
+		return null;
 	}
 	
 	private SearchPatternData tryIfPropertyFileSelected(IFile file) throws JavaModelException {
