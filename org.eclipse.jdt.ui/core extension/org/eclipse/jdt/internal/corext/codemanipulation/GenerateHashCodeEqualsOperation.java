@@ -495,7 +495,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			ce.setThenExpression(fAst.newNumberLiteral(BOOLEAN_TRUE_CONSTANT));
 			ce.setElseExpression(fAst.newNumberLiteral(BOOLEAN_FALSE_CONSTANT));
 			statements.add(prepareAssignment(parenthesize(ce)));
-		} else if (isPrimitiveType(type, new PrimitiveType.Code[] { PrimitiveType.CHAR, PrimitiveType.INT, PrimitiveType.SHORT })) {
+		} else if (isPrimitiveType(type, new PrimitiveType.Code[] { PrimitiveType.CHAR, PrimitiveType.INT, PrimitiveType.SHORT, PrimitiveType.BYTE })) {
 			statements.add(prepareAssignment(provider.getThisAccess(name)));
 		} else if (isPrimitiveType(type, PrimitiveType.FLOAT)) {
 			// Float.floatToIntBits(aFloat)

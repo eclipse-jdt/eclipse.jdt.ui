@@ -139,6 +139,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"		final int prime = 31;\r\n" + 
 				"		int result = 1;\r\n" + 
 				"		result = prime * result + (aBool ? 1231 : 1237);\r\n" + 
+				"		result = prime * result + aByte;\r\n" + 
 				"		result = prime * result + aChar;\r\n" + 
 				"		result = prime * result + anInt;\r\n" + 
 				"		long temp;\r\n" + 
@@ -783,6 +784,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"		final int prime = 31;\r\n" + 
 				"		int result = 1;\r\n" + 
 				"		result = prime * result + (aBool ? 1231 : 1237);\r\n" + 
+				"		result = prime * result + aByte;\r\n" + 
 				"		result = prime * result + aChar;\r\n" + 
 				"		result = prime * result + anInt;\r\n" + 
 				"		long temp;\r\n" + 
