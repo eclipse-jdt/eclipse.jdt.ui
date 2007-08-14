@@ -10,12 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
+import com.ibm.icu.text.Collator;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.text.edits.InsertEdit;
@@ -208,5 +211,64 @@ public class NLSUtil {
 			}
 		}
 		return length;
+	}
+
+	/**
+	 * Determine a good insertion position for <code>key</code> into the list of given
+	 * <code>keys</code>.
+	 * 
+	 * @param key the key to insert
+	 * @param keys a list of {@link String}s
+	 * @return the position in <code>keys</code> after which key must be inserted, returns -1 for before
+	 * @since 3.4
+	 */
+	public static int getInsertionPosition(String key, List keys) {
+		int result= 0;
+		
+		int invertDistance= Integer.MIN_VALUE;
+		int i= 0;
+		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
+			String string= (String) iterator.next();
+	
+			int currentInvertDistance= compareTo(key, string);
+			if (currentInvertDistance > invertDistance) {
+				invertDistance= currentInvertDistance;
+				if (Collator.getInstance().compare(key, string) >= 0) {
+					result= i;
+				} else {
+					result= i - 1;
+				}
+			} else if (currentInvertDistance == invertDistance) {
+				if (Collator.getInstance().compare(key, string) >= 0) {
+					result= i;
+				}
+			}
+			
+			i++;
+		}
+		
+		return result;
+	}
+
+	/**
+	 * @param key1
+	 * @param key2
+	 * @return the invert distance between <code>key1</code> and <code>key2</cod>, the higher to closer
+	 * @since 3.4
+	 */
+	public static int compareTo(String key1, String key2) {
+	    int counter = 0;
+	    
+	    int minLen = Math.min(key1.length(), key2.length());
+	    int diffLen = Math.abs(key1.length() - key2.length());
+	    
+	    for (int i= 0; i < minLen; i++) {
+	        if (key1.charAt(i) == key2.charAt(i)) {
+	            counter++;                    
+	        } else {
+	            break;
+	        }
+	    }            
+	    return counter - diffLen;
 	}
 }

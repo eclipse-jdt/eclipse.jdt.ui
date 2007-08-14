@@ -62,7 +62,17 @@ public class PropertyFileDocumentModellTest extends TestCase {
 		InsertEdit insertEdit= modell.insert("arg.1", "value");
 		insertEdit.apply(props);
 
-		assertEquals("org.1=value\n" + "org.2=value\n" + "arg.1=value\n", props.get());
+		assertEquals("arg.1=value\n" + "org.1=value\n" + "org.2=value\n", props.get());
+	}
+	
+	public void testInsertIntoDoc3() throws Exception {
+		Document props= new Document("Test_B_1=value\n" + "Test_A_1=value\n");
+		PropertyFileDocumentModel modell= new PropertyFileDocumentModel(props);
+
+		InsertEdit insertEdit= modell.insert("Test_B_2", "value");
+		insertEdit.apply(props);
+
+		assertEquals("Test_B_1=value\n" + "Test_B_2=value\n" + "Test_A_1=value\n", props.get());
 	}
 
 	public void testManyInsertsIntoDoc() throws Exception {
@@ -79,6 +89,22 @@ public class PropertyFileDocumentModellTest extends TestCase {
 		multiEdit.apply(props);
 
 		assertEquals("org.eclipse.nls.1=value\n" + "org.eclipse.nls.2=value\n" + "\n" + "org.eclipse=value\n" + "org.eclipse.2=value\n", props.get());
+	}
+	
+	public void testManyInsertsIntoDoc2() throws Exception {
+		Document props= new Document("key_b=value\n" + "\n" + "key_y=value\n");
+		PropertyFileDocumentModel modell= new PropertyFileDocumentModel(props);
+
+		KeyValuePair[] keyValuePairs= {new KeyValuePair("key_h", "value"), new KeyValuePair("key_a", "value"), new KeyValuePair("key_z", "value")};
+
+		InsertEdit[] insertEdit= modell.insert(keyValuePairs);
+		MultiTextEdit multiEdit= new MultiTextEdit();
+		for (int i= 0; i < insertEdit.length; i++) {
+			multiEdit.addChild(insertEdit[i]);
+		}
+		multiEdit.apply(props);
+
+		assertEquals("key_a=value\n" + "key_b=value\n" + "key_h=value\n" + "\n" + "key_y=value\n" + "key_z=value\n", props.get());
 	}
 
 	public void testBlockInsertsIntoDoc() throws Exception {
@@ -124,7 +150,7 @@ public class PropertyFileDocumentModellTest extends TestCase {
 		InsertEdit insertEdit= modell.insert(new KeyValuePair("org.eclipse.nix", "value"));
 		insertEdit.apply(props);
 
-		assertEquals("org.eclipse.ok:value\n" + "org.eclipse.what value\n" + "org.eclipse.nix=value\n", props.get());
+		assertEquals("org.eclipse.nix=value\n" + "org.eclipse.ok:value\n" + "org.eclipse.what value\n", props.get());
 	}
 
 	public void testRemovingOfKey() throws Exception {

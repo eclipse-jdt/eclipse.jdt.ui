@@ -52,6 +52,7 @@ public class PropertyFileDocumentModel {
         KeyValuePairModell keyValuePairModell = new KeyValuePairModell(keyValuePair); 
         int index = findInsertPosition(keyValuePairModell);
         KeyValuePairModell insertHere = (KeyValuePairModell) fKeyValuePairs.get(index);
+        fKeyValuePairs.add(index, keyValuePairModell);
         int offset = insertHere.fOffset - insertHere.fLeadingWhiteSpaces;
         
         String extra= ""; //$NON-NLS-1$
@@ -59,6 +60,8 @@ public class PropertyFileDocumentModel {
         	extra= fLineDelimiter;
         	((LastKeyValuePair)insertHere).resetNeedsNewLine();
         }
+        
+        keyValuePairModell.fOffset= offset;
         return new InsertEdit(offset, extra + keyValuePairModell.getEncodedText(fLineDelimiter));
     }
 
@@ -95,16 +98,12 @@ public class PropertyFileDocumentModel {
     }
     
     private int findInsertPosition(KeyValuePairModell keyValuePair) {
-        int insertIndex = 0;
-        int maxMatch = Integer.MIN_VALUE;
-        for (int i=0; i<fKeyValuePairs.size(); i++) {
+    	ArrayList keys= new ArrayList();
+        for (int i= 0; i < fKeyValuePairs.size(); i++) {
             KeyValuePairModell element = (KeyValuePairModell) fKeyValuePairs.get(i);
-            int match = element.compareTo(keyValuePair);
-            if (match >= maxMatch) {
-                insertIndex = i;
-                maxMatch = match;
-            }            
+            keys.add(element.getKey());
         }
+        int insertIndex= NLSUtil.getInsertionPosition(keyValuePair.getKey(), keys);
         
         if (insertIndex < fKeyValuePairs.size() - 1) {
             insertIndex++;
@@ -258,7 +257,8 @@ public class PropertyFileDocumentModel {
 	}
 
 	/**
-	 *  returns the length if only whitespaces
+	 * @param s the string to inspect
+	 * @return the first non whitespace character, the length if only whitespace characters
 	 */
 	private static int findFirstNonWhiteSpace(String s) {
 		for (int i = 0; i < s.length(); i++) {
@@ -288,18 +288,7 @@ public class PropertyFileDocumentModel {
         }
         
 		public int compareTo(Object o) {
-            int counter = 0;
-            String key = ((KeyValuePair) o).fKey;
-            int minLen = Math.min(key.length(), fKey.length());
-            int diffLen = Math.abs(key.length() - fKey.length());
-            for (int i=0; i<minLen; i++) {
-                if (key.charAt(i) == fKey.charAt(i)) {
-                    counter++;                    
-                } else {
-                    break;
-                }
-            }            
-            return counter - diffLen;
+            return NLSUtil.compareTo(((KeyValuePair) o).fKey, fKey);
         }
     }
 

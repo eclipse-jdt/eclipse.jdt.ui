@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
-import com.ibm.icu.text.Collator;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -197,7 +196,7 @@ public class AccessorClassModifier {
 		fListRewrite.remove(node, editGroup);
 		fFields.remove(node);
 		
-		addKey(sub, change, editGroup);
+		addKey(sub, editGroup);
 		
 		change.addTextEditGroup(editGroup);
 	}
@@ -232,10 +231,10 @@ public class AccessorClassModifier {
 		String name= Messages.format(NLSMessages.AccessorClassModifier_add_entry, sub.getKey()); 
 		TextEditGroup editGroup= new TextEditGroup(name);
 		change.addTextEditGroup(editGroup);
-		addKey(sub, change, editGroup);
+		addKey(sub, editGroup);
 	}
 		
-	private void addKey(NLSSubstitution sub, TextChange change, TextEditGroup editGroup) throws CoreException {	
+	private void addKey(NLSSubstitution sub, TextEditGroup editGroup) throws CoreException {	
 		
 		if (fListRewrite == null)
 			return;
@@ -243,35 +242,26 @@ public class AccessorClassModifier {
 		String key= sub.getKey();
 		FieldDeclaration fieldDeclaration= getNewFinalStringFieldDeclaration(key);
 
-		Iterator iter= fFields.iterator();
-		int insertionPosition= 0;
-		if (iter.hasNext()) {
-			Collator collator= Collator.getInstance();
-			FieldDeclaration existingFieldDecl= (FieldDeclaration)iter.next();
-			VariableDeclarationFragment fragment= (VariableDeclarationFragment)existingFieldDecl.fragments().get(0);
-			String identifier= fragment.getName().getIdentifier();
-			if (collator.compare(key, identifier) != 1) {
-				insertionPosition= 0;
-				fListRewrite.insertBefore(fieldDeclaration, existingFieldDecl, editGroup);
-			} else {
-				insertionPosition++;
-				while (iter.hasNext()) {
-					FieldDeclaration next= (FieldDeclaration)iter.next();
-					fragment= (VariableDeclarationFragment)next.fragments().get(0);
-					identifier= fragment.getName().getIdentifier();
-					if (collator.compare(key, identifier) == -1) {
-						break;
-					}
-					insertionPosition++;
-					existingFieldDecl= next;
-				}
-				fListRewrite.insertAfter(fieldDeclaration, existingFieldDecl, editGroup);
-			}
-		} else {
-			insertionPosition= 0;
+		if (fFields.size() == 0) {
 			fListRewrite.insertLast(fieldDeclaration, editGroup);
+			fFields.add(fieldDeclaration);
+		} else {
+			ArrayList identifiers= new ArrayList();
+			for (Iterator iterator= fFields.iterator(); iterator.hasNext();) {
+				FieldDeclaration field= (FieldDeclaration) iterator.next();
+				VariableDeclarationFragment fragment= (VariableDeclarationFragment) field.fragments().get(0);
+				identifiers.add(fragment.getName().getIdentifier());
+			}
+			
+			int insertionPosition= NLSUtil.getInsertionPosition(key, identifiers);
+			if (insertionPosition < 0) {
+				fListRewrite.insertBefore(fieldDeclaration, (ASTNode) fFields.get(0), editGroup);
+				fFields.add(0, fieldDeclaration);
+			} else {
+				fListRewrite.insertAfter(fieldDeclaration, (ASTNode) fFields.get(insertionPosition), editGroup);
+				fFields.add(insertionPosition + 1, fieldDeclaration);
+			}
 		}
-		fFields.add(insertionPosition, fieldDeclaration);
 	}
 
 	private FieldDeclaration getNewFinalStringFieldDeclaration(String name) {
