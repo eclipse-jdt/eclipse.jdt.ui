@@ -368,11 +368,11 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 		setClassName(JavaRefactoringDescriptorUtil.getString(map, CLASS_NAME, true));
 		setPackageName(JavaRefactoringDescriptorUtil.getString(map, PACKAGE_NAME, true));
 		setParameterName(JavaRefactoringDescriptorUtil.getString(map, PARAMETER_NAME, true));
-		setDelegate(JavaRefactoringDescriptorUtil.getBoolean(map, DELEGATE));
-		setDeprecateDelegate(JavaRefactoringDescriptorUtil.getBoolean(map, DEPRECATE_DELEGATE));
-		setGetters(JavaRefactoringDescriptorUtil.getBoolean(map, GETTERS));
-		setSetters(JavaRefactoringDescriptorUtil.getBoolean(map, SETTERS));
-		setTopLevel(JavaRefactoringDescriptorUtil.getBoolean(map, TOP_LEVEL));
+		setDelegate(JavaRefactoringDescriptorUtil.getBoolean(map, DELEGATE, fDelegate));
+		setDeprecateDelegate(JavaRefactoringDescriptorUtil.getBoolean(map, DEPRECATE_DELEGATE, fDeprecateDelegate));
+		setGetters(JavaRefactoringDescriptorUtil.getBoolean(map, GETTERS, fGetters));
+		setSetters(JavaRefactoringDescriptorUtil.getBoolean(map, SETTERS, fSetters));
+		setTopLevel(JavaRefactoringDescriptorUtil.getBoolean(map, TOP_LEVEL, fTopLevel));
 	}
 
 	private void initializeParameter(Map map) throws IllegalArgumentException {

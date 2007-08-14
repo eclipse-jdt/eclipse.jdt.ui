@@ -165,8 +165,8 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 			fDestination= JavaRefactoringDescriptorUtil.getResourcePath(fArguments, ATTRIBUTE_TARGET, project);
 		
 		if (POLICY_MOVE_RESOURCES.equals(fMovePolicy)) {
-			fReferences= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_REFERENCES);
-			fQualified= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_QUALIFIED);
+			fReferences= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_REFERENCES, fReferences);
+			fQualified= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_QUALIFIED, fQualified);
 			fPatterns= JavaRefactoringDescriptorUtil.getString(fArguments, ATTRIBUTE_PATTERNS, true);
 			int offset= 1;
 			fFiles= JavaRefactoringDescriptorUtil.getResourcePathArray(fArguments, ATTRIBUTE_FILES, ATTRIBUTE_ELEMENT, offset, project);

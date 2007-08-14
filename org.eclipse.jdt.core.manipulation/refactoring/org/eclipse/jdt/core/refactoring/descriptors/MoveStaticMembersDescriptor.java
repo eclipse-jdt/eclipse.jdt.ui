@@ -91,8 +91,8 @@ public final class MoveStaticMembersDescriptor extends JavaRefactoringDescriptor
 	public MoveStaticMembersDescriptor(String project, String description, String comment, Map arguments, int flags) {
 		super(IJavaRefactorings.MOVE_STATIC_MEMBERS, project, description, comment, arguments, flags);
 		fType= (IType) JavaRefactoringDescriptorUtil.getJavaElement(fArguments, ATTRIBUTE_INPUT, project);
-		fDelegate= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_DELEGATE);
-		fDeprecate= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_DEPRECATE);
+		fDelegate= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_DELEGATE, fDelegate);
+		fDeprecate= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_DEPRECATE, fDeprecate);
 		fMembers= (IMember[]) JavaRefactoringDescriptorUtil.getJavaElementArray(fArguments, null, ATTRIBUTE_ELEMENT, 1, project, IMember.class);
 	}
 

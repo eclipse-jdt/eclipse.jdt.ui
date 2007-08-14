@@ -83,7 +83,7 @@ public final class UseSupertypeDescriptor extends JavaRefactoringDescriptor {
 	 */
 	public UseSupertypeDescriptor(String project, String description, String comment, Map arguments, int flags) {
 		super(IJavaRefactorings.USE_SUPER_TYPE, project, description, comment, arguments, flags);
-		fInstanceof= JavaRefactoringDescriptorUtil.getBoolean(arguments, ATTRIBUTE_INSTANCEOF);
+		fInstanceof= JavaRefactoringDescriptorUtil.getBoolean(arguments, ATTRIBUTE_INSTANCEOF, fInstanceof);
 		fSubType= (IType) JavaRefactoringDescriptorUtil.getJavaElement(arguments, ATTRIBUTE_INPUT, project);
 		fSupertype= (IType) JavaRefactoringDescriptorUtil.getJavaElement(arguments, JavaRefactoringDescriptorUtil.getAttributeName(ATTRIBUTE_ELEMENT, 1), project);
 	}

@@ -240,6 +240,27 @@ public class JavaRefactoringDescriptorUtil {
 	}
 	
 	/**
+	 * Retrieves an <code>int</code> attribute from map. If the attribute does not exist it returns the default value.
+	 * 
+	 * @param map the map with <code>&lt;String, String&gt;</code> mapping
+	 * @param attribute the key in the map
+	 * @param defaultValue the default value to use if the attribute does not exist
+	 * @return the <code>int</code> value of the attribute or the specified default value if the attribute does not exist
+	 * 
+	 * @throws IllegalArgumentException if the attribute exists but is not a number
+	 */
+	public static int getInt(Map map, String attribute, int defaultValue)  throws IllegalArgumentException{
+		String value= getString(map, attribute, true);
+		if (value == null)
+			return defaultValue;
+		try {
+			return Integer.parseInt(value);
+		} catch (NumberFormatException e) {
+			throw new IllegalArgumentException("The attribute '" + attribute + "' does not contain a valid int '" + value + "'"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+		}
+	}
+	
+	/**
 	 * Retrieves an <code>int[]</code> attribute from map.
 	 * 
 	 * @param countAttribute the attribute that contains the number of elements

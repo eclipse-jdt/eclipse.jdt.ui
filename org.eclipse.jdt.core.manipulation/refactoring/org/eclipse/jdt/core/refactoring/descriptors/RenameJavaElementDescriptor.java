@@ -191,45 +191,45 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 			fJavaElement= JavaRefactoringDescriptorUtil.getJavaElement(fArguments, ATTRIBUTE_INPUT, getProject());
 		final int type= fJavaElement.getElementType();
 		if (type != IJavaElement.PACKAGE_FRAGMENT_ROOT)
-			fReferences= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_REFERENCES);
+			fReferences= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_REFERENCES, fReferences);
 		if (type == IJavaElement.FIELD) {
-			fRenameGetter= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_RENAME_GETTER);
-			fRenameSetter= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_RENAME_SETTER);
+			fRenameGetter= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_RENAME_GETTER, fRenameGetter);
+			fRenameSetter= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_RENAME_SETTER, fRenameSetter);
 		}
 		switch (type) {
 			case IJavaElement.PACKAGE_FRAGMENT:
 			case IJavaElement.TYPE:
 			case IJavaElement.FIELD:
-				fTextual= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_TEXTUAL_MATCHES);
+				fTextual= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_TEXTUAL_MATCHES, fTextual);
 			default:
 				break;
 		}
 		switch (type) {
 			case IJavaElement.METHOD:
 			case IJavaElement.FIELD:
-				fDeprecate= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_DEPRECATE);
-				fDelegate= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_DELEGATE);
+				fDeprecate= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_DEPRECATE, fDeprecate);
+				fDelegate= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_DELEGATE, fDelegate);
 			default:
 				break;
 		}
 		switch (type) {
 			case IJavaElement.PACKAGE_FRAGMENT:
 			case IJavaElement.TYPE:
-				fQualified= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_QUALIFIED);
+				fQualified= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_QUALIFIED, fQualified);
 				fPatterns= JavaRefactoringDescriptorUtil.getString(fArguments, ATTRIBUTE_PATTERNS, true);
 			default:
 				break;
 		}
 		switch (type) {
 			case IJavaElement.TYPE:
-				fSimilarDeclarations= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_SIMILAR_DECLARATIONS);
-				fMatchStrategy= JavaRefactoringDescriptorUtil.getInt(fArguments, ATTRIBUTE_MATCH_STRATEGY);
+				fSimilarDeclarations= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_SIMILAR_DECLARATIONS, fSimilarDeclarations);
+				fMatchStrategy= JavaRefactoringDescriptorUtil.getInt(fArguments, ATTRIBUTE_MATCH_STRATEGY, fMatchStrategy);
 			default:
 				break;
 		}
 		switch (type) {
 			case IJavaElement.PACKAGE_FRAGMENT:
-				fHierarchical= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_HIERARCHICAL);
+				fHierarchical= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_HIERARCHICAL, fHierarchical);
 			default:
 				break;
 		}
