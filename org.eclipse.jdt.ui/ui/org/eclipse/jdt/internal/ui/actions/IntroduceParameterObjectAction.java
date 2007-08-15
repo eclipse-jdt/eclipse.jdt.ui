@@ -134,7 +134,7 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 	private void run(IMethod method) throws CoreException {
 		if (method == null) {
 			MessageDialog.openError(getShell(), ActionMessages.IntroduceParameterObjectAction_exceptiondialog_title, ActionMessages.IntroduceParameterObjectAction_can_not_run_refactoring_message);
-		} else if (ActionUtil.isEditable(fEditor)) {
+		} else if (fEditor == null || ActionUtil.isEditable(fEditor)) {
 			RefactoringExecutionStarter.startIntroduceParameterObject(method, getShell());
 		}
 	}

@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -448,7 +449,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			TableLayoutComposite layoutComposite= new TableLayoutComposite(result, SWT.NONE);
 			layoutComposite.addColumnData(new ColumnWeightData(40, convertWidthInCharsToPixels(20), true));
 			layoutComposite.addColumnData(new ColumnWeightData(60, convertWidthInCharsToPixels(20), true));
-			final CheckboxTableViewer tv= CheckboxTableViewer.newCheckList(layoutComposite, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
+			final CheckboxTableViewer tv= CheckboxTableViewer.newCheckList(layoutComposite, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
 			tv.setContentProvider(new ParameterObjectCreatorContentProvider());
 			createColumns(tv);
 
@@ -526,27 +527,29 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 
 			downButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					ISelection selection= tv.getSelection();
-					if (selection instanceof IStructuredSelection) {
-						IStructuredSelection ss= (IStructuredSelection) selection;
-						ParameterInfo selected= (ParameterInfo) ss.getFirstElement();
-						fRefactoring.moveFieldDown(selected);
-						tv.refresh();
-						updateButtons(tv, upButton, downButton, editButton);
+					int[] indices= tv.getTable().getSelectionIndices();
+					Arrays.sort(indices);
+					for (int i= indices.length-1; i >=0; i--) {
+						int idx= indices[i];
+						ParameterInfo pi= (ParameterInfo) tv.getElementAt(idx);
+						fRefactoring.moveFieldDown(pi);
 					}
+					tv.refresh();
+					updateButtons(tv, upButton, downButton, editButton);
 				}
 
 			});
 			upButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					ISelection selection= tv.getSelection();
-					if (selection instanceof IStructuredSelection) {
-						IStructuredSelection ss= (IStructuredSelection) selection;
-						ParameterInfo selected= (ParameterInfo) ss.getFirstElement();
-						fRefactoring.moveFieldUp(selected);
-						tv.refresh();
-						updateButtons(tv, upButton, downButton, editButton);
+					int[] indices= tv.getTable().getSelectionIndices();
+					Arrays.sort(indices);
+					for (int i= 0; i <indices.length; i++) {
+						int idx= indices[i];
+						ParameterInfo pi= (ParameterInfo) tv.getElementAt(idx);
+						fRefactoring.moveFieldUp(pi);
 					}
+					tv.refresh();
+					updateButtons(tv, upButton, downButton, editButton);
 				}
 
 			});
@@ -685,10 +688,10 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 				downButton.setEnabled(false);
 				editButton.setEnabled(false);
 			} else {
-				int selectionIndex= tv.getTable().getSelectionIndex();
-				upButton.setEnabled(selectionIndex != 0);
-				downButton.setEnabled(selectionIndex != tv.getTable().getItemCount() - 1);
-				editButton.setEnabled(firstElement.isCreateField());
+				int[] selectionIndex= tv.getTable().getSelectionIndices();
+				upButton.setEnabled(selectionIndex[0] != 0);
+				downButton.setEnabled(selectionIndex[selectionIndex.length-1] != tv.getTable().getItemCount() - 1);
+				editButton.setEnabled(firstElement.isCreateField() && selectionIndex.length==1);
 			}
 			fRefactoring.updateParameterPosition();
 			updateSignaturePreview();
