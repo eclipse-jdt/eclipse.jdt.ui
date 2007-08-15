@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.astview.views;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import org.eclipse.swt.graphics.Image;
@@ -44,6 +45,7 @@ public class ProblemNode extends ASTAttribute {
 		String[] arguments= fProblem.getArguments();
 		ArrayList children= new ArrayList();
 		
+		children.add(new GeneralAttribute(this, "CONSTANT NAME", getConstantName()));
 		children.add(new GeneralAttribute(this, "ID", getErrorLabel()));
 		if (fProblem instanceof CategorizedProblem) {
 			children.add(new GeneralAttribute(this, "CATEGORY ID", getCategoryCode()));
@@ -106,6 +108,22 @@ public class ProblemNode extends ASTAttribute {
 		buf.append(" = 0x").append(Integer.toHexString(id)).append(" = ").append(id);
 		
 		return buf.toString();
+	}
+	
+	private String getConstantName() {
+		int id= fProblem.getID();
+		Field[] fields= IProblem.class.getFields();
+		for (int i= 0; i < fields.length; i++) {
+			Field f= fields[i];
+			try {
+				if (f.getType() == int.class && f.getInt(f) == id) {
+					return "IProblem." + f.getName();
+				}
+			} catch (IllegalArgumentException e) {
+			} catch (IllegalAccessException e) {
+			}
+		}
+		return "<UNKNOWN CONSTANT>";
 	}
 	
 	private String getCategoryCode() {
