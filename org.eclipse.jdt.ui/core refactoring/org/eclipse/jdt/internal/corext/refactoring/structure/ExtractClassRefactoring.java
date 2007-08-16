@@ -62,6 +62,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -77,6 +78,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
@@ -270,10 +272,10 @@ public class ExtractClassRefactoring extends Refactoring {
 			fDescriptor.setPackage(type.getPackageFragment().getElementName());
 		}
 		if (fDescriptor.getClassName() == null) {
-			fDescriptor.setClassName(type.getElementName() + "Parameter"); //$NON-NLS-1$
+			fDescriptor.setClassName(type.getElementName() + "Data"); //$NON-NLS-1$
 		}
 		if (fDescriptor.getFieldName() == null) {
-			fDescriptor.setFieldName("parameterObject"); //$NON-NLS-1$
+			fDescriptor.setFieldName(StubUtility.getVariableNameSuggestions(StubUtility.INSTANCE_FIELD, type.getJavaProject(), "data", 0, null, true)[0]); //$NON-NLS-1$
 		}
 		if (fDescriptor.getFields() == null) {
 			try {
@@ -553,11 +555,12 @@ public class ExtractClassRefactoring extends Refactoring {
 	private RefactoringStatus replaceReferences(ParameterObjectFactory pof, SearchResultGroup group, CompilationUnitRewrite cuRewrite) {
 		TextEditGroup writeGroup= cuRewrite.createGroupDescription(RefactoringCoreMessages.ExtractClassRefactoring_group_replace_write);
 		TextEditGroup readGroup= cuRewrite.createGroupDescription(RefactoringCoreMessages.ExtractClassRefactoring_group_replace_read);
-		String parameterName= fDescriptor.getFieldName();
-		IJavaProject javaProject= cuRewrite.getCu().getJavaProject();
-		boolean is50OrHigher= JavaModelUtil.is50OrHigher(javaProject);
+		ITypeRoot typeRoot= cuRewrite.getCu();
+		IJavaProject javaProject= typeRoot.getJavaProject();
 		AST ast= cuRewrite.getAST();
+
 		RefactoringStatus status= new RefactoringStatus();
+		String parameterName= fDescriptor.getFieldName();
 
 		SearchMatch[] searchResults= group.getSearchResults();
 		for (int j= 0; j < searchResults.length; j++) {
@@ -565,58 +568,25 @@ public class ExtractClassRefactoring extends Refactoring {
 			ASTNode node= NodeFinder.perform(cuRewrite.getRoot(), searchMatch.getOffset(), searchMatch.getLength());
 			ASTNode parent= node.getParent();
 			boolean isDeclaration= parent instanceof VariableDeclaration && ((VariableDeclaration)parent).getInitializer() != node;
-			if (!(isDeclaration) && node instanceof SimpleName) {
+			if (!isDeclaration && node instanceof SimpleName) {
 				ASTRewrite rewrite= cuRewrite.getASTRewrite();
 				if (parent.getNodeType() == ASTNode.SWITCH_CASE)
-					status.addError(RefactoringCoreMessages.ExtractClassRefactoring_error_switch, JavaStatusContext.create(fDescriptor.getType().getTypeRoot(), node));
+					status.addError(RefactoringCoreMessages.ExtractClassRefactoring_error_switch, JavaStatusContext.create(typeRoot, node));
+
 				SimpleName name= (SimpleName) node;
 				ParameterInfo pi= getFieldInfo(name.getIdentifier()).pi;
 				boolean writeAccess= ASTResolving.isWriteAccess(name);
-
-				boolean useSuper= parent.getNodeType() == ASTNode.SUPER_FIELD_ACCESS;
 				if (writeAccess && fDescriptor.isCreateGetterSetter()) {
-					ITypeBinding typeBinding= name.resolveTypeBinding();
-					Expression qualifier= null;
-					if (parent.getNodeType() == ASTNode.FIELD_ACCESS) {
-						qualifier= ((FieldAccess) parent).getExpression();
-					}
-					if (parent.getNodeType() ==  ASTNode.QUALIFIED_NAME) {
-						qualifier= ((QualifiedName)parent).getQualifier();
-					}
-					ASTNode replaceNode;
-					if (qualifier != null || useSuper) {
-						replaceNode= parent.getParent();
-					} else {
-						replaceNode= parent;
-					}
-					Expression assignedValue=handleSimpleNameAssignment(replaceNode, pof, parameterName, ast, javaProject, useSuper);
+					boolean useSuper= parent.getNodeType() == ASTNode.SUPER_FIELD_ACCESS;
+					Expression qualifier= getQualifier(parent);
+					ASTNode replaceNode= getReplacementNode(parent, useSuper, qualifier);
+					Expression assignedValue= getAssignedValue(pof, parameterName, javaProject, status, rewrite, pi, useSuper, name.resolveTypeBinding(), qualifier, replaceNode, typeRoot);
 					if (assignedValue == null) {
-						final NullLiteral marker= qualifier == null ? null : ast.newNullLiteral();
-						Expression fieldReadAccess= pof.createFieldReadAccess(pi, parameterName, ast, javaProject, useSuper, marker);
-						assignedValue= GetterSetterUtil.getAssignedValue(replaceNode, rewrite, fieldReadAccess, typeBinding, is50OrHigher);
-						boolean markerReplaced= replaceMarkerWithQualifier(rewrite, qualifier, assignedValue, marker);
-						if (markerReplaced) {
-							switch (qualifier.getNodeType()) {
-								case ASTNode.METHOD_INVOCATION:
-								case ASTNode.CLASS_INSTANCE_CREATION:
-								case ASTNode.SUPER_METHOD_INVOCATION:
-								case ASTNode.PARENTHESIZED_EXPRESSION:
-									status.addWarning(RefactoringCoreMessages.ExtractClassRefactoring_warning_semantic_change, JavaStatusContext.create(fDescriptor.getType().getTypeRoot(), replaceNode));
-									break;
-							}
-						}
-					}
-					if (assignedValue == null) {
-						IType primaryType= cuRewrite.getCu().findPrimaryType();
-						if (primaryType == null) {
-							status.addError(RefactoringCoreMessages.ExtractClassRefactoring_error_unable_to_convert_node, JavaStatusContext.create(fDescriptor.getType().getTypeRoot(), replaceNode));
-						} else {
-							status.addError(RefactoringCoreMessages.ExtractClassRefactoring_error_unable_to_convert_node, JavaStatusContext.create(primaryType.getTypeRoot(), replaceNode));
-						}
+						status.addError(RefactoringCoreMessages.ExtractClassRefactoring_error_unable_to_convert_node, JavaStatusContext.create(typeRoot, replaceNode));
 					} else {
 						NullLiteral marker= qualifier == null ? null : ast.newNullLiteral();
-						Expression access= pof.createFieldWriteAccess(pi, parameterName, ast, javaProject, assignedValue, marker, useSuper);
-						replaceMarkerWithQualifier(rewrite, qualifier, access, marker);
+						Expression access= pof.createFieldWriteAccess(pi, parameterName, ast, javaProject, assignedValue, useSuper, marker);
+						replaceMarker(rewrite, qualifier, access, marker);
 						rewrite.replace(replaceNode, access, writeGroup);
 					}
 				} else {
@@ -628,31 +598,73 @@ public class ExtractClassRefactoring extends Refactoring {
 		return status;
 	}
 
+	private Expression getAssignedValue(ParameterObjectFactory pof, String parameterName, IJavaProject javaProject, RefactoringStatus status, ASTRewrite rewrite, ParameterInfo pi, boolean useSuper, ITypeBinding typeBinding, Expression qualifier, ASTNode replaceNode, ITypeRoot typeRoot) {
+		AST ast= rewrite.getAST();
+		boolean is50OrHigher= JavaModelUtil.is50OrHigher(javaProject);
+		Expression assignedValue= handleSimpleNameAssignment(replaceNode, pof, parameterName, ast, javaProject, useSuper);
+		if (assignedValue == null) {
+			NullLiteral marker= qualifier == null ? null : ast.newNullLiteral();
+			Expression fieldReadAccess= pof.createFieldReadAccess(pi, parameterName, ast, javaProject, useSuper, marker);
+			assignedValue= GetterSetterUtil.getAssignedValue(replaceNode, rewrite, fieldReadAccess, typeBinding, is50OrHigher);
+			boolean markerReplaced= replaceMarker(rewrite, qualifier, assignedValue, marker);
+			if (markerReplaced) {
+				switch (qualifier.getNodeType()) {
+					case ASTNode.METHOD_INVOCATION:
+					case ASTNode.CLASS_INSTANCE_CREATION:
+					case ASTNode.SUPER_METHOD_INVOCATION:
+					case ASTNode.PARENTHESIZED_EXPRESSION:
+						status.addWarning(RefactoringCoreMessages.ExtractClassRefactoring_warning_semantic_change, JavaStatusContext.create(typeRoot, replaceNode));
+						break;
+				}
+			}
+		}
+		return assignedValue;
+	}
+
+	private ASTNode getReplacementNode(ASTNode parent, boolean useSuper, Expression qualifier) {
+		if (qualifier != null || useSuper) {
+			return parent.getParent();
+		} else {
+			return parent;
+		}
+	}
+
+	private Expression getQualifier(ASTNode parent) {
+		switch (parent.getNodeType()) {
+			case ASTNode.FIELD_ACCESS:
+				return ((FieldAccess) parent).getExpression();
+			case ASTNode.QUALIFIED_NAME:
+				return ((QualifiedName)parent).getQualifier();
+			case ASTNode.SUPER_FIELD_ACCESS:
+				return ((SuperFieldAccess)parent).getQualifier();
+			default:
+				return null;
+		}
+	}
+
 	/*
 	 * Replaces the NullLiteral dummy with the copied qualifier
 	 */
-	private boolean replaceMarkerWithQualifier(final ASTRewrite rewrite, final Expression qualifier, Expression assignedValue, final NullLiteral marker) {
-		final boolean[] replaced= new boolean[]{false};
-		if (assignedValue != null && qualifier != null) {
-			assignedValue.accept(new ASTVisitor() {
-				
-				public boolean visit(NullLiteral node) {
-					if (node == marker) {
-						rewrite.replace(node, copyQualifier(rewrite, qualifier), null);
-						replaced[0]= true;
-						return false;
-					}
-					return true;
-				}
-			});
-		}
-		return replaced[0];
-	}
+	private boolean replaceMarker(final ASTRewrite rewrite, final Expression qualifier, Expression assignedValue, final NullLiteral marker) {
+		class MarkerReplacer extends ASTVisitor {
 
-	private Expression copyQualifier(ASTRewrite rewrite, Expression qualifier) {
-		if (qualifier != null)
-			qualifier= (Expression) rewrite.createCopyTarget(qualifier);
-		return qualifier;
+			private boolean fReplaced= false;
+
+			public boolean visit(NullLiteral node) {
+				if (node == marker) {
+					rewrite.replace(node, rewrite.createCopyTarget(qualifier), null);
+					fReplaced= true;
+					return false;
+				}
+				return true;
+			}
+		}
+		if (assignedValue != null && qualifier != null) {
+			MarkerReplacer visitor= new MarkerReplacer();
+			assignedValue.accept(visitor);
+			return visitor.fReplaced;
+		}
+		return false;
 	}
 
 	private Expression handleSimpleNameAssignment(ASTNode replaceNode, ParameterObjectFactory pof, String parameterName, AST ast, IJavaProject javaProject, boolean useSuper) {
@@ -706,7 +718,7 @@ public class ExtractClassRefactoring extends Refactoring {
 
 				if (fDescriptor.isCreateTopLevel()) {
 					IVariableBinding binding= vdf.resolveBinding();
-					ITypeRoot typeRoot= fBaseCURewrite.getCu().findPrimaryType().getTypeRoot();
+					ITypeRoot typeRoot= fBaseCURewrite.getCu();
 					if (binding == null || binding.getType() == null){
 						status.addFatalError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_fatal_error_cannot_resolve_binding, pi.name), JavaStatusContext.create(typeRoot, vdf));
 					} else {

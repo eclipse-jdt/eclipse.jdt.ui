@@ -244,12 +244,12 @@ public class GetterSetterUtil {
 	public static Expression getAssignedValue(ASTNode node, ASTRewrite astRewrite, Expression getterExpression, ITypeBinding variableType, boolean is50OrHigher) {
 		InfixExpression.Operator op= null;
 		AST ast= astRewrite.getAST();
+		if (isNotInBlock(node))
+			return null;
 		if (node.getNodeType() == ASTNode.ASSIGNMENT) { 
 			Assignment assignment= ((Assignment) node);
 			Expression rightHandSide= assignment.getRightHandSide();
 			Expression copiedRightOp= (Expression) astRewrite.createCopyTarget(rightHandSide);
-			if (isNotInBlock(node))
-				return null;
 			if (assignment.getOperator() == Operator.ASSIGN) {
 				ITypeBinding rightHandSideType= rightHandSide.resolveTypeBinding();
 				copiedRightOp= createNarrowCastIfNessecary(copiedRightOp, rightHandSideType, ast, variableType, is50OrHigher);
@@ -265,16 +265,12 @@ public class GetterSetterUtil {
 			}
 		} else if (node.getNodeType() == ASTNode.POSTFIX_EXPRESSION) {
 			PostfixExpression po= (PostfixExpression) node;
-			if (isNotInBlock(node))
-				return null;
 			if (po.getOperator() == PostfixExpression.Operator.INCREMENT)
 				op= InfixExpression.Operator.PLUS;
 			if (po.getOperator() == PostfixExpression.Operator.DECREMENT)
 				op= InfixExpression.Operator.MINUS;
 		} else if (node.getNodeType() == ASTNode.PREFIX_EXPRESSION) {
 			PrefixExpression pe= (PrefixExpression) node;
-			if (isNotInBlock(node))
-				return null;
 			if (pe.getOperator() == PrefixExpression.Operator.INCREMENT)
 				op= InfixExpression.Operator.PLUS;
 			if (pe.getOperator() == PrefixExpression.Operator.DECREMENT)

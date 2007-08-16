@@ -50,6 +50,7 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
@@ -317,98 +318,57 @@ public class ParameterObjectFactory {
 	}
 
 	public Expression createFieldReadAccess(ParameterInfo pi, String paramName, AST ast, IJavaProject project, boolean useSuper, Expression qualifier) {
-		SuperFieldAccess sf= null;
-		if (useSuper) {
-			sf= ast.newSuperFieldAccess();
-			sf.setName(ast.newSimpleName(paramName));
+		Expression completeQualifier= generateQualifier(paramName, ast, useSuper, qualifier);
+		if (fCreateGetter) {
+			MethodInvocation mi= ast.newMethodInvocation();
+			mi.setName(ast.newSimpleName(getGetterName(pi, ast, project)));
+			mi.setExpression(completeQualifier);
+			return mi;
 		}
-		if (!fCreateGetter) {
-			if (qualifier == null)
-			//(super.)paramName.field
-				return createFieldAccess(pi, paramName, ast, useSuper, sf);
-			else{
-				FieldAccess paramAccess= createParamAccess(paramName, ast, qualifier);
-				FieldAccess fieldAccess= ast.newFieldAccess();
-				fieldAccess.setExpression(paramAccess);
-				fieldAccess.setName(ast.newSimpleName(paramName));
-				return fieldAccess;
-			}
-		} else {
-			MethodInvocation method= ast.newMethodInvocation();
-			method.setName(ast.newSimpleName(getGetterName(pi, ast, project)));
-			if (useSuper) {
-				//super.paramName.getter()
-				method.setExpression(sf);
-			} else {
-				if (qualifier == null) {
-					//paramName.getter()
-					method.setExpression(ast.newSimpleName(paramName));
-				} else {
-					FieldAccess fa= createParamAccess(paramName, ast, qualifier);
-					method.setExpression(fa);
-				}
-			}
-			return method;
+		return createFieldAccess(pi, ast, completeQualifier);
+	}
+	
+	public Expression createFieldWriteAccess(ParameterInfo pi, String paramName, AST ast, IJavaProject project, Expression assignedValue, boolean useSuper, Expression qualifier) {
+		Expression completeQualifier= generateQualifier(paramName, ast, useSuper, qualifier);
+		if (fCreateSetter) {
+			MethodInvocation mi= ast.newMethodInvocation();
+			mi.setName(ast.newSimpleName(getSetterName(pi, ast, project)));
+			mi.setExpression(completeQualifier);
+			mi.arguments().add(assignedValue);
+			return mi;
 		}
+		return createFieldAccess(pi, ast, completeQualifier);
 	}
 
-	private Expression createFieldAccess(ParameterInfo pi, String paramName, AST ast, boolean useSuper, SuperFieldAccess sf) {
+	private Expression generateQualifier(String paramName, AST ast, boolean useSuper, Expression qualifier) {
+		SimpleName paramSimpleName= ast.newSimpleName(paramName);
 		if (useSuper) {
-			FieldAccess fa;
-			fa= ast.newFieldAccess();
-			fa.setExpression(sf);
-			fa.setName(ast.newSimpleName(pi.getNewName()));
-			return fa;
+			SuperFieldAccess sf= ast.newSuperFieldAccess();
+			sf.setName(paramSimpleName);
+			if (qualifier instanceof Name) {
+				sf.setQualifier((Name) qualifier);
+			}
+			return sf;
 		}
-		return ast.newName(new String[] { paramName, pi.getNewName() });
+		if (qualifier != null) {
+			FieldAccess parameterAccess= ast.newFieldAccess();
+			parameterAccess.setExpression(qualifier);
+			parameterAccess.setName(paramSimpleName);
+			return parameterAccess;
+		}
+		return paramSimpleName;
 	}
 
-	public Expression createFieldWriteAccess(ParameterInfo pi, String paramName, AST ast, IJavaProject project, Expression assignedValue, Expression qualifier, boolean useSuper) {
-		SuperFieldAccess sf= null;
-		if (useSuper) {
-			sf= ast.newSuperFieldAccess();
-			sf.setName(ast.newSimpleName(paramName));
-		}
-		if (!fCreateSetter) {
-			if (qualifier != null) {
-				FieldAccess fa2= ast.newFieldAccess();
-				if (useSuper) {
-					fa2.setExpression(sf);
-				} else {
-					fa2.setExpression(createParamAccess(paramName, ast, qualifier));
-				}
-				fa2.setName(ast.newSimpleName(pi.getNewName()));
-				Assignment assignment= ast.newAssignment();
-				assignment.setLeftHandSide(fa2);
-				assignment.setRightHandSide(assignedValue);
-				return assignment;
-			} else {
-				return createFieldAccess(pi, paramName, ast, useSuper, sf);
-			}
-		} else {
-			SimpleName setterName= ast.newSimpleName(getSetterName(pi, ast, project));
-			MethodInvocation method= ast.newMethodInvocation();
-			method.setName(setterName);
-			Expression qualifierExpression;
-			if (useSuper) {
-				qualifierExpression= sf;
-			} else {
-				if (qualifier != null) {
-					qualifierExpression= createParamAccess(paramName, ast, qualifier);
-				} else {
-					qualifierExpression= ast.newSimpleName(paramName);
-				}
-			}
-			method.setExpression(qualifierExpression);
-			method.arguments().add(assignedValue);
-			return method;
-		}
-	}
 
-	private FieldAccess createParamAccess(String paramName, AST ast, Expression qualifier) {
+
+	private Expression createFieldAccess(ParameterInfo pi, AST ast, Expression qualifier) {
+		if (qualifier instanceof Name) {
+			Name name= (Name) qualifier; //create FQN for IPOR
+			return ast.newName(JavaModelUtil.concatenateName(name.getFullyQualifiedName(), pi.getNewName()));
+		}
 		FieldAccess fa= ast.newFieldAccess();
+		fa.setName(ast.newSimpleName(pi.getNewName()));
 		fa.setExpression(qualifier);
-		fa.setName(ast.newSimpleName(paramName));
 		return fa;
 	}
 
