@@ -419,11 +419,29 @@
    <extension
          point="org.eclipse.ui.bindings">
       <key
-            sequence="M3+M2+D T"
+            sequence="M2+M3+D T"
             commandId="org.eclipse.jdt.junit.junitShortcut.debug"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
-            sequence="M3+M2+X T"
+            platform="carbon"
+            sequence="M2+M3+D T"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M1+M3+D T"
+            commandId="org.eclipse.jdt.junit.junitShortcut.debug"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M2+M3+X T"
+            commandId="org.eclipse.jdt.junit.junitShortcut.run"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M2+M3+X T"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            sequence="M1+M3+X T"
             commandId="org.eclipse.jdt.junit.junitShortcut.run"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
    </extension>
