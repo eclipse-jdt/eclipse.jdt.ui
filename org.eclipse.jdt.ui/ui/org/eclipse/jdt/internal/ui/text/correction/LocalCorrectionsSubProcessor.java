@@ -54,6 +54,8 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -380,6 +382,10 @@ public class LocalCorrectionsSubProcessor {
 		if (selectedNode == null) {
 			return;
 		}
+		if (selectedNode.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION) { // bug 200016
+			selectedNode= selectedNode.getParent();
+		}
+		
 		ASTNode typeNode= null;
 		ITypeBinding binding= null;
 		if (selectedNode.getNodeType() == ASTNode.SIMPLE_NAME && selectedNode.getParent() instanceof AbstractTypeDeclaration) {
@@ -387,13 +393,22 @@ public class LocalCorrectionsSubProcessor {
 			binding= typeDecl.resolveBinding();
 			typeNode= typeDecl;
 		} else if (selectedNode.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
-			ClassInstanceCreation creation= (ClassInstanceCreation) selectedNode;
-			AnonymousClassDeclaration anonymDecl= creation.getAnonymousClassDeclaration();
+			AnonymousClassDeclaration anonymDecl= ((ClassInstanceCreation) selectedNode).getAnonymousClassDeclaration();
 			binding= anonymDecl.resolveBinding();
 			typeNode= anonymDecl;
+		} else if (selectedNode.getNodeType() == ASTNode.ENUM_CONSTANT_DECLARATION) {
+			AnonymousClassDeclaration anonymDecl= ((EnumConstantDeclaration) selectedNode).getAnonymousClassDeclaration();
+			binding= anonymDecl.resolveBinding();
+			typeNode= anonymDecl;
+		} else if (selectedNode.getNodeType() == ASTNode.METHOD_DECLARATION && problem.getProblemId() == IProblem.EnumAbstractMethodMustBeImplemented) {
+			EnumDeclaration enumDecl= (EnumDeclaration) selectedNode.getParent(); // bug 200026
+			if (!enumDecl.enumConstants().isEmpty()) {
+				binding= enumDecl.resolveBinding();
+				typeNode= enumDecl;
+			}
 		}
 		if (typeNode != null && binding != null) {
-			UnimplementedMethodsCompletionProposal proposal= new UnimplementedMethodsCompletionProposal(cu, typeNode, 10);
+			UnimplementedMethodsCorrectionProposal proposal= new UnimplementedMethodsCorrectionProposal(cu, typeNode, problem.getProblemId(), 10);
 			proposals.add(proposal);
 		}
 		if (typeNode instanceof TypeDeclaration) {

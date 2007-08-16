@@ -71,6 +71,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.BodyForAbstractMethod:
 			case IProblem.AbstractMethodInAbstractClass:
 			case IProblem.AbstractMethodMustBeImplemented:
+			case IProblem.EnumAbstractMethodMustBeImplemented:
 			case IProblem.BodyForNativeMethod:
 			case IProblem.OuterLocalMustBeFinal:
 			case IProblem.UninitializedLocalVariable:
@@ -384,6 +385,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				ModifierCorrectionSubProcessor.addAbstractMethodProposals(context, problem, proposals);
 				break;
 			case IProblem.AbstractMethodMustBeImplemented:
+			case IProblem.EnumAbstractMethodMustBeImplemented:
 				LocalCorrectionsSubProcessor.addUnimplementedMethodsProposals(context, problem, proposals);
 				break;
 			case IProblem.MissingValueForAnnotationMember:

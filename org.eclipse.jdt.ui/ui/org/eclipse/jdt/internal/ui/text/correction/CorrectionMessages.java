@@ -144,6 +144,9 @@ public final class CorrectionMessages extends NLS {
 	public static String MissingReturnTypeCorrectionProposal_addreturnstatement_description;
 	public static String MissingReturnTypeCorrectionProposal_changereturnstatement_description;
 	public static String TypeParameterMismatchSubProcessor_removeTypeParameter;
+	public static String UnimplementedMethodsCorrectionProposal_description;
+	public static String UnimplementedMethodsCorrectionProposal_enum_info;
+	public static String UnimplementedMethodsCorrectionProposal_info;
 	public static String UnresolvedElementsSubProcessor_swaparguments_description;
 	public static String UnresolvedElementsSubProcessor_addargumentcast_description;
 	public static String UnresolvedElementsSubProcessor_changemethod_description;
@@ -221,8 +224,6 @@ public final class CorrectionMessages extends NLS {
 	public static String NewCUCompletionUsingWizardProposal_createenum_info;
 	public static String NewCUCompletionUsingWizardProposal_createinterface_info;
 	public static String NewCUCompletionUsingWizardProposal_createannotation_info;
-	public static String UnimplementedMethodsCompletionProposal_description;
-	public static String UnimplementedMethodsCompletionProposal_info;
 	public static String ConstructorFromSuperclassProposal_description;
 	public static String AssignToVariableAssistProposal_assigntolocal_description;
 	public static String AssignToVariableAssistProposal_assigntofield_description;

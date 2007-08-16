@@ -2392,7 +2392,129 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
+	
+	public void testUnimplementedMethodsInEnumConstant1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("enum TestEnum {\n");
+		buf.append("    A {\n");
+		buf.append("        @Override\n");
+		buf.append("        public boolean foo() {\n");
+		buf.append("            return false;\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("    public abstract boolean foo();\n");
+		buf.append("    public abstract void bar();\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("TestEnum.java", buf.toString(), false, null);
 
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("enum TestEnum {\n");
+		buf.append("    A {\n");
+		buf.append("        @Override\n");
+		buf.append("        public boolean foo() {\n");
+		buf.append("            return false;\n");
+		buf.append("        }\n");
+		buf.append("\n");
+		buf.append("        @Override\n");
+		buf.append("        public void bar() {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("    public abstract boolean foo();\n");
+		buf.append("    public abstract void bar();\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	public void testUnimplementedMethodsInEnumConstant2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("enum TestEnum {\n");
+		buf.append("    A {\n");
+		buf.append("    };\n");
+		buf.append("    public abstract boolean foo();\n");
+		buf.append("    public abstract void bar();\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("TestEnum.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("enum TestEnum {\n");
+		buf.append("    A {\n");
+		buf.append("\n");
+		buf.append("        @Override\n");
+		buf.append("        public void bar() {\n");
+		buf.append("        }\n");
+		buf.append("\n");
+		buf.append("        @Override\n");
+		buf.append("        public boolean foo() {\n");
+		buf.append("            return false;\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("    public abstract boolean foo();\n");
+		buf.append("    public abstract void bar();\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	public void testUnimplementedMethodsInEnumConstant3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("enum TestEnum {\n");
+		buf.append("    A, B;\n");
+		buf.append("    public abstract boolean foo();\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("TestEnum.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("enum TestEnum {\n");
+		buf.append("    A {\n");
+		buf.append("        @Override\n");
+		buf.append("        public boolean foo() {\n");
+		buf.append("            return false;\n");
+		buf.append("        }\n");
+		buf.append("    }, B {\n");
+		buf.append("        @Override\n");
+		buf.append("        public boolean foo() {\n");
+		buf.append("            return false;\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("    public abstract boolean foo();\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
 	
 	public void testUnitializedVariable() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
