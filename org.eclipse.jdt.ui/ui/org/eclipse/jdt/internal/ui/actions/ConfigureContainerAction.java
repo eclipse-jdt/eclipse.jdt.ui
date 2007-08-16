@@ -32,6 +32,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
+import org.eclipse.jdt.internal.ui.preferences.ClasspathContainerPreferencePage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
@@ -39,6 +40,8 @@ import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 /**
  * Action to open a dialog to configure classpath containers. Added as a <code>objectContribution</code>
  * to {@link ClassPathContainer}.
+ * 
+ * @deprecated DO NOT USE this class will be removed soon, it is replaced by {@link ClasspathContainerPreferencePage}
  */
 public class ConfigureContainerAction implements IObjectActionDelegate {
 

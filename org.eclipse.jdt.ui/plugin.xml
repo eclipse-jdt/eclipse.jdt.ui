@@ -807,6 +807,16 @@
          </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.saveparticipant"/>
       </page>
+      
+      <page
+            name="%classpathContainerPageName"
+            class="org.eclipse.jdt.internal.ui.preferences.ClasspathContainerPreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.ClasspathContainerPreferencePage">
+         <enabledWhen>
+         	<adapt type="org.eclipse.jdt.internal.ui.packageview.ClassPathContainer" />
+         </enabledWhen>
+         <keywordReference id="org.eclipse.jdt.ui.classpathcontainer" />
+      </page>
 
    </extension>
    <extension
@@ -1523,6 +1533,9 @@
      <keyword
             label="%preferenceKeywords.saveparticipant"
             id="org.eclipse.jdt.ui.saveparticipant"/>
+     <keyword
+            label="%preferenceKeywords.classpathcontainer"
+            id="org.eclipse.jdt.ui.classpathcontainer"/>
    </extension>  
 <!-- =========================================================================== -->
 <!-- Work in Progress                                                            -->
@@ -5104,22 +5117,6 @@
             class="org.eclipse.jdt.internal.ui.wizards.buildpaths.UserLibraryWizardPage"
             id="org.eclipse.jdt.USER_LIBRARY">
       </classpathContainerPage>
-   </extension>
-   
-   <extension
-         point="org.eclipse.ui.popupMenus">    
-      <objectContribution
-            objectClass="org.eclipse.jdt.internal.ui.packageview.ClassPathContainer"
-            id="org.eclipse.jdt.ui.configure.classpathcontainer">
-         <action
-               label="%ConfigClasspathContainer.label"
-               tooltip="%ConfigClasspathContainer.tooltip"
-               class="org.eclipse.jdt.internal.ui.actions.ConfigureContainerAction"
-               menubarPath="additions"
-               enablesFor="1"
-               id="ConfigureContainer">
-         </action>
-      </objectContribution>
    </extension>
    
 	<extension
