@@ -422,13 +422,14 @@
             sequence="M2+M3+D T"
             commandId="org.eclipse.jdt.junit.junitShortcut.debug"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <!-- On carbon: Shift+Option+D is a character, Command+Option+D is Show/Hide Dock, Command+Control+D is dictionary lookup -->
       <key
             platform="carbon"
             sequence="M2+M3+D T"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             platform="carbon"
-            sequence="M1+M3+D T"
+            sequence="M1+M3+M4+D T"
             commandId="org.eclipse.jdt.junit.junitShortcut.debug"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
