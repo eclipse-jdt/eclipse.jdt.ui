@@ -970,6 +970,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String IntroduceFactoryRefactoring_owner_pattern;
 
+	public static String IntroduceFactoryRefactoring_replaceJavadocReference;
+
 	public static String IntroduceIndirectionRefactoring_adjusting_visibility;
 
 	public static String IntroduceIndirectionRefactoring_call_warning_anonymous_cannot_qualify;

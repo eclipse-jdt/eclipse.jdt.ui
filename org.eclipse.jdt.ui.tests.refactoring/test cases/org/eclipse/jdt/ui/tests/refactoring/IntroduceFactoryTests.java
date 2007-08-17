@@ -494,7 +494,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 		return proj2Pkgs;
 	}
 
-	private void failHelper(boolean staticFactory, int expectedStatus) throws Exception {
+	private void failHelper(int expectedStatus) throws Exception {
 		ICompilationUnit	cu= createCUForSimpleTest(getPackageP(), false, true);
 		ISourceRange		selection= findSelectionInSource(cu.getSource());
 		IntroduceFactoryRefactoring	ref= new IntroduceFactoryRefactoring(cu, selection.getOffset(), selection.getLength());
@@ -595,9 +595,18 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	//
 	// ================================================================================
 	//
-	public void testNestedClass() throws Exception {
-		failHelper(false, RefactoringStatus.FATAL);
+	public void testJavadocRef() throws Exception {
+		singleUnitHelper(true);
 	}
+	//
+	// ================================================================================
+	//
+	public void testNestedClass() throws Exception {
+		failHelper(RefactoringStatus.FATAL);
+	}
+	
+	
+	
     //
     // ================================================================================
     // Generics-related tests
@@ -628,7 +637,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	// ================================================================================
 	// Other J2SE 5.0 tests
     public void testEnum() throws Exception {
-    	failHelper(true, RefactoringStatus.FATAL);
+    	failHelper(RefactoringStatus.FATAL);
     }
 
     public void testAnnotation1() throws Exception {

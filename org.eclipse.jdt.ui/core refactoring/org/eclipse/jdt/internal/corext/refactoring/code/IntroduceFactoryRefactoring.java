@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
@@ -783,49 +784,38 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 	}
 
 	/**
-	 * Creates and returns a new MethodInvocation node to represent a call to
-	 * the factory method that replaces a direct constructor call.<br>
-	 * The original constructor call is marked as replaced by the new method
-	 * call with the ASTRewrite instance fCtorCallRewriter.
-	 * @param ast utility object used to create AST nodes
+	 * Updates the constructor call.
+	 * 
 	 * @param ctorCall the ClassInstanceCreation to be marked as replaced
-	 * @param unitRewriter 
-	 * @param gd 
-	 * @return the new method invocation
+	 * @param unitRewriter the AST rewriter
+	 * @param gd the edit group to use
 	 */
-	private MethodInvocation createFactoryMethodCall(AST ast, ClassInstanceCreation ctorCall,
-													 ASTRewrite unitRewriter, TextEditGroup gd) {
-		MethodInvocation	factoryMethodCall= ast.newMethodInvocation();
+	private void rewriteFactoryMethodCall(ClassInstanceCreation ctorCall, ASTRewrite unitRewriter, TextEditGroup gd) {
+		AST ast= unitRewriter.getAST();
+		MethodInvocation factoryMethodCall= ast.newMethodInvocation();
 
-		List	actualFactoryArgs= factoryMethodCall.arguments();
-		List	actualCtorArgs= ctorCall.arguments();
+		List actualFactoryArgs= factoryMethodCall.arguments();
+		List actualCtorArgs= ctorCall.arguments();
 
 		// Need to use a qualified name for the factory method if we're not
 		// in the context of the class holding the factory.
 		AbstractTypeDeclaration	callOwner= (AbstractTypeDeclaration) ASTNodes.getParent(ctorCall, AbstractTypeDeclaration.class);
 		ITypeBinding callOwnerBinding= callOwner.resolveBinding();
 
-		if (callOwnerBinding == null ||
-			!Bindings.equals(callOwner.resolveBinding(), fFactoryOwningClass.resolveBinding())) {
+		if (callOwnerBinding == null || !Bindings.equals(callOwner.resolveBinding(), fFactoryOwningClass.resolveBinding())) {
 			String qualifier= fImportRewriter.addImport(fFactoryOwningClass.resolveBinding());
 			factoryMethodCall.setExpression(ASTNodeFactory.newName(ast, qualifier));
 		}
 		
 		factoryMethodCall.setName(ast.newSimpleName(fNewMethodName));
 
-		for(int i=0; i < actualCtorArgs.size(); i++) {
+		for (int i=0; i < actualCtorArgs.size(); i++) {
 			Expression	actualCtorArg= (Expression) actualCtorArgs.get(i);
-			ASTNode		movedArg= unitRewriter.createMoveTarget(actualCtorArg);
-
+			ASTNode movedArg= unitRewriter.createMoveTarget(actualCtorArg);
 			actualFactoryArgs.add(movedArg);
-//			unitRewriter.createMove(actualCtorArg);
-//			ASTNode		rewrittenArg= rewriteArgument(actualCtorArg);
-//			actualFactoryArgs.add(rewrittenArg);
 		}
 
 		unitRewriter.replace(ctorCall, factoryMethodCall, gd);
-
-		return factoryMethodCall;
 	}
 
 	/**
@@ -950,21 +940,24 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 	 * @throws CoreException
 	 * @return true iff at least one constructor call site was rewritten.
 	 */
-	private boolean replaceConstructorCalls(SearchResultGroup rg, CompilationUnit unit,
-											ASTRewrite unitRewriter, CompilationUnitChange unitChange)
-	throws CoreException {
+	private boolean replaceConstructorCalls(SearchResultGroup rg, CompilationUnit unit, ASTRewrite unitRewriter, CompilationUnitChange unitChange) throws CoreException {
 		Assert.isTrue(ASTCreator.getCu(unit).equals(rg.getCompilationUnit()));
-		SearchMatch[]	hits= rg.getSearchResults();
-		AST	ctorCallAST= unit.getAST();
+		SearchMatch[] hits= rg.getSearchResults();
 		boolean someCallPatched= false;
 
-		for(int i=0; i < hits.length; i++) {
-			ClassInstanceCreation	creation= getCtorCallAt(hits[i].getOffset(), hits[i].getLength(), unit);
+		for (int i=0; i < hits.length; i++) {
+			ASTNode ctrCall= getCtorCallAt(hits[i].getOffset(), hits[i].getLength(), unit);
 
-			if (creation != null) {
+			if (ctrCall instanceof ClassInstanceCreation) {
 				TextEditGroup gd= new TextEditGroup(RefactoringCoreMessages.IntroduceFactory_replaceCalls); 
 
-				createFactoryMethodCall(ctorCallAST, creation, unitRewriter, gd);
+				rewriteFactoryMethodCall((ClassInstanceCreation) ctrCall, unitRewriter, gd);
+				unitChange.addTextEditGroup(gd);
+				someCallPatched= true;
+			} else if (ctrCall instanceof MethodRef) {
+				TextEditGroup gd= new TextEditGroup(RefactoringCoreMessages.IntroduceFactoryRefactoring_replaceJavadocReference);
+
+				rewriteJavadocReference((MethodRef) ctrCall, unitRewriter, gd);
 				unitChange.addTextEditGroup(gd);
 				someCallPatched= true;
 			}
@@ -972,6 +965,11 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 		return someCallPatched;
 	}
 
+	private void rewriteJavadocReference(MethodRef javadocRef, ASTRewrite unitRewriter, TextEditGroup gd) {
+		AST ast= unitRewriter.getAST();
+		unitRewriter.replace(javadocRef.getName(), ast.newSimpleName(fNewMethodName), gd);
+	}
+	
 	/**
 	 * Look "in the vicinity" of the given range to find the <code>ClassInstanceCreation</code>
 	 * node that this search hit identified. Necessary because the <code>SearchEngine</code>
@@ -979,10 +977,10 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 	 * @param start
 	 * @param length
 	 * @param unitAST
-	 * @return may return null if this is really a constructor->constructor call (e.g. "this(...)")
+	 * @return return a {@link ClassInstanceCreation} or a {@link MethodRef} or <code>null</code> if this is really a constructor->constructor call (e.g. "this(...)")
 	 * @throws CoreException 
 	 */
-	private ClassInstanceCreation getCtorCallAt(int start, int length, CompilationUnit unitAST) throws CoreException {
+	private ASTNode getCtorCallAt(int start, int length, CompilationUnit unitAST) throws CoreException {
 		ICompilationUnit unitHandle= ASTCreator.getCu(unitAST);
 		ASTNode node= NodeFinder.perform(unitAST, start, length);
 
@@ -995,12 +993,12 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 					null));
 
 		if (node instanceof ClassInstanceCreation) {
-			return (ClassInstanceCreation) node;
+			return node;
 		} else if (node instanceof VariableDeclaration) {
 			Expression	init= ((VariableDeclaration) node).getInitializer();
 
 			if (init instanceof ClassInstanceCreation) {
-				return (ClassInstanceCreation) init;
+				return init;
 			} else if (init != null)
 				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR,
 						Messages.format(RefactoringCoreMessages.IntroduceFactory_unexpectedInitializerNodeType, 
@@ -1024,7 +1022,7 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 			Expression	expr= ((ExpressionStatement) node).getExpression();
 
 			if (expr instanceof ClassInstanceCreation)
-				return (ClassInstanceCreation) expr;
+				return expr;
 			else
 				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR,
 						Messages.format(RefactoringCoreMessages.IntroduceFactory_unexpectedASTNodeTypeForConstructorSearchHit, 
@@ -1036,6 +1034,8 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 			// doesn't lose access to the base-class constructor (so make it 'protected', not 'private').
 			fConstructorVisibility= Modifier.PROTECTED;
 			return null;
+		} else if (node instanceof MethodRef) {
+			return node;
 		} else
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR,
 					Messages.format(RefactoringCoreMessages.IntroduceFactory_unexpectedASTNodeTypeForConstructorSearchHit, 
