@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.wizards;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -813,7 +814,13 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			if (o instanceof LocationGroup) {
 				boolean oldDetectState= fDetect;
 				if (fLocationGroup.isInWorkspace()) {
-					fDetect= false;
+					String name= getProjectName();
+					if (name.length() == 0 || JavaPlugin.getWorkspace().getRoot().findMember(name) != null) {
+						fDetect= false;
+					} else {
+						final File directory= fLocationGroup.getLocation().append(getProjectName()).toFile();
+						fDetect= directory.isDirectory();
+					}
 				} else {
 					final File directory= fLocationGroup.getLocation().toFile();
 					fDetect= directory.isDirectory();
@@ -896,6 +903,25 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 				setPageComplete(false);
 				return;
 			}
+			
+			IPath projectLocation= ResourcesPlugin.getWorkspace().getRoot().getLocation().append(getProjectName());
+			if (projectLocation.toFile().exists()) {
+				try {
+					//correct casing
+					String canonicalPath= projectLocation.toFile().getCanonicalPath();
+					projectLocation= new Path(canonicalPath);
+				} catch (IOException e) {
+					JavaPlugin.log(e);
+				}
+				
+				String existingName= projectLocation.lastSegment();
+				if (!existingName.equals(fNameGroup.getName())) {
+					setErrorMessage(Messages.format(NewWizardMessages.JavaProjectWizardFirstPage_Message_invalidProjectNameForWorkspaceRoot, existingName));
+					setPageComplete(false);
+					return;
+				}
+				
+			}
 
 			final String location= fLocationGroup.getLocation().toOSString();
 
@@ -915,47 +941,36 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			}
 
 			IPath projectPath= Path.fromOSString(location);
-			// check external location
-			if (!fLocationGroup.isInWorkspace()) {				
-				if (!canCreate(projectPath.toFile())) {
-					setErrorMessage(NewWizardMessages.JavaProjectWizardFirstPage_Message_cannotCreateAtExternalLocation); 
-					setPageComplete(false);
-					return;
-				}
-
-				if (!Platform.getLocation().equals(projectPath) && Platform.getLocation().isPrefixOf(projectPath)) {
+			
+			if (fLocationGroup.isInWorkspace())		
+				projectPath= projectPath.append(fNameGroup.getName());
+			
+			if (projectPath.toFile().exists()) {//create from existing source			
+				if (Platform.getLocation().isPrefixOf(projectPath)) { //create from existing source in workspace
 					if (!Platform.getLocation().equals(projectPath.removeLastSegments(1))) {
 						setErrorMessage(NewWizardMessages.JavaProjectWizardFirstPage_Message_notOnWorkspaceRoot);
 						setPageComplete(false);
 						return;
 					}
-					
+	
 					if (!projectPath.toFile().exists()) {
 						setErrorMessage(NewWizardMessages.JavaProjectWizardFirstPage_Message_notExisingProjectOnWorkspaceRoot);
 						setPageComplete(false);
 						return;
 					}
-					
-					String existingName= projectPath.lastSegment();
-					if (!existingName.equals(fNameGroup.getName())) {
-						setErrorMessage(Messages.format(NewWizardMessages.JavaProjectWizardFirstPage_Message_invalidProjectNameForWorkspaceRoot, existingName));
-						setPageComplete(false);
-						return;
-					}
-				} else {
-					// If we do not place the contents in the workspace validate the
-					// location.
-					final IStatus locationStatus= workspace.validateProjectLocation(handle, projectPath);
-					if (!locationStatus.isOK()) {
-						setErrorMessage(locationStatus.getMessage());
-						setPageComplete(false);
-						return;
-					}
 				}
-			} else {
-				IPath projectFolder= projectPath.append(fNameGroup.getName());
-				if (projectFolder.toFile().exists()) {
-					setErrorMessage(NewWizardMessages.JavaProjectWizardFirstPage_Message_existingFolderInWorkspace); 
+			} else if (!fLocationGroup.isInWorkspace()) {//create at non existing external location
+				if (!canCreate(projectPath.toFile())) {
+					setErrorMessage(NewWizardMessages.JavaProjectWizardFirstPage_Message_cannotCreateAtExternalLocation); 
+					setPageComplete(false);
+					return;
+				}
+				
+				// If we do not place the contents in the workspace validate the
+				// location.
+				final IStatus locationStatus= workspace.validateProjectLocation(handle, projectPath);
+				if (!locationStatus.isOK()) {
+					setErrorMessage(locationStatus.getMessage());
 					setPageComplete(false);
 					return;
 				}
