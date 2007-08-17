@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,7 @@ import org.eclipse.ui.ISharedImages;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -351,6 +352,38 @@ public class JavadocTagsSubProcessor {
 	 	String label2= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_allmissing_description;
 	 	ASTRewriteCorrectionProposal addAllMissing= new AddAllMissingJavadocTagsProposal(label2, context.getCompilationUnit(), bodyDeclaration, 5); 
 	 	proposals.add(addAllMissing);
+	}
+	
+	public static void getUnusedAndUndocumentedParameterProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
+		
+		if (!JavaCore.ENABLED.equals(cu.getJavaProject().getOption(JavaCore.COMPILER_PB_UNUSED_PARAMETER_INCLUDE_DOC_COMMENT_REFERENCE, true))) {
+			return;
+		}
+		
+	 	ASTNode node= problem.getCoveringNode(context.getASTRoot());
+	 	if (node == null) {
+	 		return;
+	 	}
+		
+		MethodDeclaration methodDecl= (MethodDeclaration) ASTNodes.getParent(node, ASTNode.METHOD_DECLARATION);
+		if (methodDecl == null || methodDecl.resolveBinding() == null) {
+			return;
+		}
+			
+		if (methodDecl.getJavadoc() == null) {
+
+			String declaringTypeName= methodDecl.resolveBinding().getDeclaringClass().getName();
+			String string= CodeGeneration.getMethodComment(cu, declaringTypeName, methodDecl, null, String.valueOf('\n'));
+			if (string != null) {
+				String label= CorrectionMessages.JavadocTagsSubProcessor_document_parameter_description;
+				proposals.add(new AddJavadocCommentProposal(label, cu, 1, methodDecl.getStartPosition(), string));
+			}
+		} else {
+			String label= CorrectionMessages.JavadocTagsSubProcessor_document_parameter_description;
+		 	ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), methodDecl, node, 1); 
+		 	proposals.add(proposal);
+		}
 	}
 
 	public static void getMissingJavadocCommentProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {

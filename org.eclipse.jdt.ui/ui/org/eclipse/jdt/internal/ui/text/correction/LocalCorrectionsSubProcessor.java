@@ -487,7 +487,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
-	public static void addUnusedMemberProposal(IInvocationContext context, IProblemLocation problem,  Collection proposals) {
+	public static void addUnusedMemberProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		int problemId = problem.getProblemId();
 		UnusedCodeFix fix= UnusedCodeFix.createUnusedMemberFix(context.getASTRoot(), problem, false);
 		if (fix != null) {
@@ -499,6 +499,9 @@ public class LocalCorrectionsSubProcessor {
 			addProposal(context, proposals, fix);
 		}
 		
+		if (problemId == IProblem.ArgumentIsNeverUsed) {
+			JavadocTagsSubProcessor.getUnusedAndUndocumentedParameterProposals(context, problem, proposals);
+		}
 	}
 
 	private static void addProposal(IInvocationContext context, Collection proposals, final UnusedCodeFix fix) {
