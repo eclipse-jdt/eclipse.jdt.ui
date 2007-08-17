@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -43,12 +44,14 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -133,19 +136,36 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		newDeclFrag.setName(ast.newSimpleName(varNames[0]));
 		newDeclFrag.setInitializer((Expression) rewrite.createCopyTarget(expression));
 
-		// trick for bug 43248: use an VariableDeclarationExpression and keep the ExpressionStatement
-		VariableDeclarationExpression newDecl= ast.newVariableDeclarationExpression(newDeclFrag);
-
 		Type type= evaluateType(ast);
-		newDecl.setType(type);
-
-		rewrite.replace(expression, newDecl, null);
+		
+		if (needsSemicolon(expression)) {
+			VariableDeclarationStatement varStatement= ast.newVariableDeclarationStatement(newDeclFrag);
+			varStatement.setType(type);
+			rewrite.replace(expression, varStatement, null);
+		} else {
+			// trick for bug 43248: use an VariableDeclarationExpression and keep the ExpressionStatement
+			VariableDeclarationExpression varExpression= ast.newVariableDeclarationExpression(newDeclFrag);
+			varExpression.setType(type);
+			rewrite.replace(expression, varExpression, null);
+		}
 
 		addLinkedPosition(rewrite.track(newDeclFrag.getName()), true, KEY_NAME);
-		addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
+		addLinkedPosition(rewrite.track(type), false, KEY_TYPE);
 		setEndPosition(rewrite.track(fNodeToAssign)); // set cursor after expression statement
 
 		return rewrite;
+	}
+	
+	private boolean needsSemicolon(Expression expression) {
+		if ((expression.getParent().getFlags() & ASTNode.RECOVERED) != 0) {
+			try {
+				TokenScanner scanner= new TokenScanner(getCompilationUnit());
+				return scanner.readNext(expression.getStartPosition() + expression.getLength(), true) != ITerminalSymbols.TokenNameSEMICOLON;
+			} catch (CoreException e) {
+				// ignore
+			}
+		}
+		return false;
 	}
 
 	private ASTRewrite doAddField() throws CoreException {
@@ -213,12 +233,15 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		if (isParamToField) {
 			// assign parameter to field
 			ExpressionStatement statement= ast.newExpressionStatement(assignment);
-			int insertIdx=  findAssignmentInsertIndex(body.statements());
+			int insertIdx= findAssignmentInsertIndex(body.statements());
 			rewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY).insertAt(statement, insertIdx, null);
 			selectionNode= statement;
-
 		} else {
-			rewrite.replace(expression, assignment, null);
+			if (needsSemicolon(expression)) {
+				rewrite.replace(expression, ast.newExpressionStatement(assignment), null);
+			} else {
+				rewrite.replace(expression, assignment, null);
+			}
 			selectionNode= fNodeToAssign;
 		}
 
