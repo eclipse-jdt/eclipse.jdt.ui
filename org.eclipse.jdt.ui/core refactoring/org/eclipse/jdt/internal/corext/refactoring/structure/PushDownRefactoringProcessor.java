@@ -631,7 +631,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 						} else {
 							final MethodDeclaration oldMethod= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) infos[offset].getMember(), sourceRewriter.getRoot());
 							if (oldMethod != null) {
-								MethodDeclaration newMethod= createNewMethodDeclarationNode(infos[offset], sourceRewriter.getRoot(), mapping, unitRewriter, oldMethod);
+								MethodDeclaration newMethod= createNewMethodDeclarationNode(infos[offset], mapping, unitRewriter, oldMethod);
 								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, declaration.bodyDeclarations()), unitRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PUSH_DOWN));
 								ImportRewriteUtil.addImports(unitRewriter, oldMethod, new HashMap(), new HashMap(), false);
 							}
@@ -777,7 +777,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		FieldDeclaration newField= ast.newFieldDeclaration(newFragment);
 		FieldDeclaration oldField= ASTNodeSearchUtil.getFieldDeclarationNode(field, declaringCuNode);
 		if (info.copyJavadocToCopiesInSubclasses())
-			copyJavadocNode(rewrite, field, oldField, newField);
+			copyJavadocNode(rewrite, oldField, newField);
 		copyAnnotations(oldField, newField);
 		newField.modifiers().addAll(ASTNodeFactory.newModifiers(ast, info.getNewModifiersForCopyInSubclass(oldField.getModifiers())));
 		Type oldType= oldField.getType();
@@ -791,7 +791,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		return newField;
 	}
 
-	private MethodDeclaration createNewMethodDeclarationNode(MemberActionInfo info, CompilationUnit declaringCuNode, TypeVariableMaplet[] mapping, CompilationUnitRewrite rewriter, MethodDeclaration oldMethod) throws JavaModelException {
+	private MethodDeclaration createNewMethodDeclarationNode(MemberActionInfo info, TypeVariableMaplet[] mapping, CompilationUnitRewrite rewriter, MethodDeclaration oldMethod) throws JavaModelException {
 		Assert.isTrue(!info.isFieldInfo());
 		IMethod method= (IMethod) info.getMember();
 		ASTRewrite rewrite= rewriter.getASTRewrite();
@@ -801,7 +801,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		newMethod.setConstructor(oldMethod.isConstructor());
 		newMethod.setExtraDimensions(oldMethod.getExtraDimensions());
 		if (info.copyJavadocToCopiesInSubclasses())
-			copyJavadocNode(rewrite, method, oldMethod, newMethod);
+			copyJavadocNode(rewrite, oldMethod, newMethod);
 		final IJavaProject project= rewriter.getCu().getJavaProject();
 		if (info.isNewMethodToBeDeclaredAbstract() && JavaModelUtil.is50OrHigher(project) && JavaPreferencesSettings.getCodeGenerationSettings(project).overrideAnnotation) {
 			final MarkerAnnotation annotation= ast.newMarkerAnnotation();

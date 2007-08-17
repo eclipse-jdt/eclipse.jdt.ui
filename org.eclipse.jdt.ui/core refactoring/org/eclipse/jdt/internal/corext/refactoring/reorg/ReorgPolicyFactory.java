@@ -30,8 +30,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -39,9 +37,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.mapping.IResourceChangeDescriptionFactory;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
@@ -138,7 +133,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
@@ -3648,43 +3642,42 @@ public final class ReorgPolicyFactory {
 
 		private BodyDeclaration createNewFieldDeclarationNode(IField field, ASTRewrite rewrite, CompilationUnit sourceCuNode) throws CoreException {
 			AST targetAst= rewrite.getAST();
-			ITextFileBuffer buffer= null;
 			BodyDeclaration newDeclaration= null;
-			ICompilationUnit unit= field.getCompilationUnit();
-			try {
-				buffer= RefactoringFileBuffers.acquire(unit);
-				IDocument document= buffer.getDocument();
-				BodyDeclaration bodyDeclaration= ASTNodeSearchUtil.getFieldOrEnumConstantDeclaration(field, sourceCuNode);
-				if (bodyDeclaration instanceof FieldDeclaration) {
-					FieldDeclaration fieldDeclaration= (FieldDeclaration) bodyDeclaration;
-					if (fieldDeclaration.fragments().size() == 1)
-						return (FieldDeclaration) rewrite.createStringPlaceholder(getUnindentedSource(field), ASTNode.FIELD_DECLARATION);
-					VariableDeclarationFragment originalFragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, sourceCuNode);
-					VariableDeclarationFragment copiedFragment= (VariableDeclarationFragment) ASTNode.copySubtree(targetAst, originalFragment);
-					newDeclaration= targetAst.newFieldDeclaration(copiedFragment);
-					((FieldDeclaration) newDeclaration).setType((Type) ASTNode.copySubtree(targetAst, fieldDeclaration.getType()));
-				} else if (bodyDeclaration instanceof EnumConstantDeclaration) {
-					EnumConstantDeclaration constantDeclaration= (EnumConstantDeclaration) bodyDeclaration;
-					EnumConstantDeclaration newConstDeclaration= targetAst.newEnumConstantDeclaration();
-					newConstDeclaration.setName((SimpleName) ASTNode.copySubtree(targetAst, constantDeclaration.getName()));
-					AnonymousClassDeclaration anonymousDeclaration= constantDeclaration.getAnonymousClassDeclaration();
-					if (anonymousDeclaration != null)
-						newConstDeclaration.setAnonymousClassDeclaration((AnonymousClassDeclaration) rewrite.createStringPlaceholder(document.get(anonymousDeclaration.getStartPosition(), anonymousDeclaration.getLength()), ASTNode.ANONYMOUS_CLASS_DECLARATION));
-					newDeclaration= newConstDeclaration;
-				} else
-					Assert.isTrue(false);
-				if (newDeclaration != null) {
-					newDeclaration.modifiers().addAll(ASTNodeFactory.newModifiers(targetAst, bodyDeclaration.getModifiers()));
-					Javadoc javadoc= bodyDeclaration.getJavadoc();
-					if (javadoc != null)
-						newDeclaration.setJavadoc((Javadoc) rewrite.createStringPlaceholder(document.get(javadoc.getStartPosition(), javadoc.getLength()), ASTNode.JAVADOC));
+
+			BodyDeclaration bodyDeclaration= ASTNodeSearchUtil.getFieldOrEnumConstantDeclaration(field, sourceCuNode);
+			if (bodyDeclaration instanceof FieldDeclaration) {
+				FieldDeclaration fieldDeclaration= (FieldDeclaration) bodyDeclaration;
+				if (fieldDeclaration.fragments().size() == 1)
+					return (FieldDeclaration) rewrite.createStringPlaceholder(getUnindentedSource(field), ASTNode.FIELD_DECLARATION);
+				VariableDeclarationFragment originalFragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, sourceCuNode);
+				VariableDeclarationFragment copiedFragment= (VariableDeclarationFragment) ASTNode.copySubtree(targetAst, originalFragment);
+				newDeclaration= targetAst.newFieldDeclaration(copiedFragment);
+				((FieldDeclaration) newDeclaration).setType((Type) ASTNode.copySubtree(targetAst, fieldDeclaration.getType()));
+			} else if (bodyDeclaration instanceof EnumConstantDeclaration) {
+				EnumConstantDeclaration constantDeclaration= (EnumConstantDeclaration) bodyDeclaration;
+				EnumConstantDeclaration newConstDeclaration= targetAst.newEnumConstantDeclaration();
+				newConstDeclaration.setName((SimpleName) ASTNode.copySubtree(targetAst, constantDeclaration.getName()));
+				AnonymousClassDeclaration anonymousDeclaration= constantDeclaration.getAnonymousClassDeclaration();
+				if (anonymousDeclaration != null) {
+					String content= ASTNodes.getNodeSource(anonymousDeclaration, false, true);
+					if (content != null) {
+						newConstDeclaration.setAnonymousClassDeclaration((AnonymousClassDeclaration) rewrite.createStringPlaceholder(content, ASTNode.ANONYMOUS_CLASS_DECLARATION));
+					}
 				}
-			} catch (BadLocationException exception) {
-				JavaPlugin.log(exception);
-			} finally {
-				if (buffer != null)
-					RefactoringFileBuffers.release(unit);
+				newDeclaration= newConstDeclaration;
+			} else
+				Assert.isTrue(false);
+			if (newDeclaration != null) {
+				newDeclaration.modifiers().addAll(ASTNodeFactory.newModifiers(targetAst, bodyDeclaration.getModifiers()));
+				Javadoc javadoc= bodyDeclaration.getJavadoc();
+				if (javadoc != null) {
+					String content= ASTNodes.getNodeSource(javadoc, false, true);
+					if (content != null) {
+						newDeclaration.setJavadoc((Javadoc) rewrite.createStringPlaceholder(content, ASTNode.JAVADOC));
+					}
+				}
 			}
+
 			return newDeclaration;
 		}
 

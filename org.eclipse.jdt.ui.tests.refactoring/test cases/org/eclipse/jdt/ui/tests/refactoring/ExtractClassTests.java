@@ -381,6 +381,13 @@ public class ExtractClassTests extends RefactoringTest {
 		runRefactoring(false);
 	}
 	
+	public void testFieldsWithJavadoc() throws Exception {
+		fDescriptor.setType(setupType());
+		fDescriptor.setFieldName("data");
+		fDescriptor.setCreateGetterSetter(true);
+		runRefactoring(false);
+	}
+	
 	public void testQualifiedIncrements() throws Exception {
 		fDescriptor.setType(setupType());
 		fDescriptor.setCreateGetterSetter(true);

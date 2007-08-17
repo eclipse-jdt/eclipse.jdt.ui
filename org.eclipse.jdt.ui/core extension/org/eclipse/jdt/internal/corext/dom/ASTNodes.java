@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,11 +28,14 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -78,7 +81,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
@@ -122,7 +127,40 @@ public class ASTNodes {
 			return document.get();
 		}
 		return unformatted; // unknown node
-	}	
+	}
+	
+	
+	/**
+	 * Returns the source of the given node from the location where it was parsed. 
+	 * @param node the node to get the source from
+	 * @param extendedRange if set, the extended ranges of the nodes should ne used
+	 * @param removeIndent if set, the indentation is removed.
+	 * @return return the source for the given node or null if accessing the source failed.
+	 */
+	public static String getNodeSource(ASTNode node, boolean extendedRange, boolean removeIndent) {
+		ASTNode root= node.getRoot();
+		if (root instanceof CompilationUnit) {
+			CompilationUnit astRoot= (CompilationUnit) root;
+			ITypeRoot typeRoot= astRoot.getTypeRoot();
+			try {
+				if (typeRoot != null && typeRoot.getBuffer() != null) {
+					IBuffer buffer= typeRoot.getBuffer();
+					int offset= extendedRange ? astRoot.getExtendedStartPosition(node) : node.getStartPosition();
+					int length= extendedRange ? astRoot.getExtendedLength(node) : node.getLength();
+					String str= buffer.getText(offset, length);
+					if (removeIndent) {
+						IJavaProject project= typeRoot.getJavaProject();
+						int indent= StubUtility.getIndentUsed(buffer, node.getStartPosition(), project);
+						str= Strings.changeIndent(str, indent, project, new String(), typeRoot.findRecommendedLineSeparator());
+					}
+					return str;
+				}
+			} catch (JavaModelException e) {
+				// ignore
+			}
+		}
+		return null;
+	}
 
     /**
      * Returns the list that contains the given ASTNode. If the node

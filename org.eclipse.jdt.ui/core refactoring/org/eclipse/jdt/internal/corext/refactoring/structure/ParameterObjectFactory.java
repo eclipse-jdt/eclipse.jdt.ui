@@ -65,6 +65,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -127,8 +128,13 @@ public class ParameterObjectFactory {
 		
 		protected static ASTNode moveNode(CompilationUnitRewrite cuRewrite, ASTNode node) {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			if (rewrite.getAST() != node.getAST())
+			if (rewrite.getAST() != node.getAST()) {
+				String str= ASTNodes.getNodeSource(node, true, true);
+				if (str != null) {
+					return rewrite.createStringPlaceholder(str, node.getNodeType());
+				}
 				return ASTNode.copySubtree(rewrite.getAST(), node);
+			}
 			return rewrite.createMoveTarget(node);
 		}
 		/**

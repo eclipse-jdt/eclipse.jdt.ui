@@ -61,6 +61,7 @@ import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -371,6 +372,13 @@ public class StubUtility {
 
 	/**
      * Don't use this method directly, use CodeGeneration.
+	 * @param templateID the template id of the type body to get. Valid id's are {@link CodeTemplateContextType#CLASSBODY_ID},
+	 * {@link CodeTemplateContextType#INTERFACEBODY_ID}, {@link CodeTemplateContextType#ENUMBODY_ID},{@link CodeTemplateContextType#ANNOTATIONBODY_ID},
+	 * @param cu the compilation unit to which the template is added
+	 * @param typeName the type name
+	 * @param lineDelim the line delimiter to use
+	 * @return return the type body template or <code>null</code>
+	 * @throws CoreException thrown if the template could not be evaluated
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getTypeBody(String, ICompilationUnit, String, String)
 	 */		
 	public static String getTypeBody(String templateID, ICompilationUnit cu, String typeName, String lineDelim) throws CoreException {
@@ -673,6 +681,8 @@ public class StubUtility {
 	}
 	
 	/**
+	 * @param decl the method declaration
+	 * @return the return type
 	 * @deprecated Deprecated to avoid deprecated warnings
 	 */
 	private static ASTNode getReturnType(MethodDeclaration decl) {
@@ -794,14 +804,14 @@ public class StubUtility {
 	
 	/**
 	 * Examines a string and returns the first line delimiter found.
+	 * @param elem the element
+	 * @return the line delimiter used for the element
 	 */
 	public static String getLineDelimiterUsed(IJavaElement elem) {
-		while (elem != null && !(elem instanceof IOpenable)) {
-			elem= elem.getParent();
-		}
-		if (elem != null) {
+		IOpenable openable= elem.getOpenable();
+		if (openable instanceof ITypeRoot) {
 			try {
-				return ((IOpenable) elem).findRecommendedLineSeparator();
+				return openable.findRecommendedLineSeparator();
 			} catch (JavaModelException exception) {
 				// Use project setting
 			}
@@ -811,26 +821,38 @@ public class StubUtility {
 
 	/**
 	 * Evaluates the indentation used by a Java element. (in tabulators)
+	 * @param elem the element to get the indent of
+	 * @return return the indent unit
+	 * @throws JavaModelException thrown if the element could not be accessed
 	 */	
 	public static int getIndentUsed(IJavaElement elem) throws JavaModelException {
-		if (elem instanceof ISourceReference) {
-			ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
-			if (cu != null) {
-				IBuffer buf= cu.getBuffer();
+		IOpenable openable= elem.getOpenable();
+		if (openable instanceof ITypeRoot) {
+			IBuffer buf= openable.getBuffer();
+			if (buf != null) {
 				int offset= ((ISourceReference)elem).getSourceRange().getOffset();
-				int i= offset;
-				// find beginning of line
-				while (i > 0 && !IndentManipulation.isLineDelimiterChar(buf.getChar(i - 1)) ){
-					i--;
-				}
-				return Strings.computeIndentUnits(buf.getText(i, offset - i), elem.getJavaProject());
+				return getIndentUsed(buf, offset, elem.getJavaProject());
 			}
 		}
 		return 0;
 	}
+	
+	public static int getIndentUsed(IBuffer buffer, int offset, IJavaProject project) throws JavaModelException {
+		int i= offset;
+		// find beginning of line
+		while (i > 0 && !IndentManipulation.isLineDelimiterChar(buffer.getChar(i - 1)) ){
+			i--;
+		}
+		return Strings.computeIndentUnits(buffer.getText(i, offset - i), project);
+	}
+	
+	
 		
 	/**
 	 * Returns the element after the give element.
+	 * @param member a Java element
+	 * @return  the next sibling of the given element or <code>null</code>
+	 * @throws JavaModelException thrown if the element could not be accessed
 	 */
 	public static IJavaElement findNextSibling(IJavaElement member) throws JavaModelException {
 		IJavaElement parent= member.getParent();
@@ -912,7 +934,7 @@ public class StubUtility {
 		}
 		if (assignedExpression != null) {
 			// add at end, less important
-			String nameFromParent= getBaseNameFromLocationInParent(project, assignedExpression);
+			String nameFromParent= getBaseNameFromLocationInParent(assignedExpression);
 			if (nameFromParent != null) {
 				add(getVariableNameSuggestions(variableKind, project, nameFromParent, 0, excluded, false), res); // pass 0 as dimension, base name already contains plural.
 			}
@@ -953,7 +975,7 @@ public class StubUtility {
 		}
 		if (assignedExpression != null) {
 			// add at end, less important
-			String nameFromParent= getBaseNameFromLocationInParent(project, assignedExpression);
+			String nameFromParent= getBaseNameFromLocationInParent(assignedExpression);
 			if (nameFromParent != null) {
 				add(getVariableNameSuggestions(variableKind, project, nameFromParent, 0, excluded, false), res); // pass 0 as dimension, base name already contains plural.
 			}
@@ -995,7 +1017,7 @@ public class StubUtility {
 		
 		switch (variableKind) {
 			case CONSTANT_FIELD:
-				result= getConstantSuggestions(project, packageName, name, dimensions, excluded);
+				result= getConstantSuggestions(project, name, excluded);
 				break;
 			case STATIC_FIELD:
 				result= sortByLength(NamingConventions.suggestFieldNames(project, packageName, name, dimensions, Flags.AccStatic, getExcludedArray(excluded)));
@@ -1096,7 +1118,7 @@ public class StubUtility {
 		return name;
 	}
 	
-	private static String getBaseNameFromLocationInParent(IJavaProject project, Expression assignedExpression) {
+	private static String getBaseNameFromLocationInParent(Expression assignedExpression) {
 		StructuralPropertyDescriptor location= assignedExpression.getLocationInParent();
 		if (location == MethodInvocation.ARGUMENTS_PROPERTY) {
 			MethodInvocation parent= (MethodInvocation) assignedExpression.getParent();
@@ -1193,7 +1215,7 @@ public class StubUtility {
 		return getVariableNameSuggestions(INSTANCE_FIELD, project, baseName, dimensions, new ExcludedCollection(excluded), true);
 	}
 
-	private static String[] getConstantSuggestions(IJavaProject project, String packageName, String typeName, int dimensions, Collection excluded) {
+	private static String[] getConstantSuggestions(IJavaProject project, String typeName, Collection excluded) {
 		//TODO: workaround JDT/Core bug 85946
 		
 		String string= Signature.getSimpleName(typeName);
@@ -1473,6 +1495,12 @@ public class StubUtility {
 		return Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_ADD_COMMENTS, project)).booleanValue(); 
 	}
 	
+	/**
+	 * Only to be used by tests
+	 * @param templateId the template id
+	 * @param pattern the new pattern
+	 * @param project not used
+	 */
 	public static void setCodeTemplate(String templateId, String pattern, IJavaProject project) {
 		TemplateStore codeTemplateStore= JavaPlugin.getDefault().getCodeTemplateStore();
 		TemplatePersistenceData data= codeTemplateStore.getTemplateData(templateId);

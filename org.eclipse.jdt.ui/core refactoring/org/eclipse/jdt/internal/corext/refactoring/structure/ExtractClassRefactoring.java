@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -440,6 +441,9 @@ public class ExtractClassRefactoring extends Refactoring {
 					VariableDeclarationFragment vdf= (VariableDeclarationFragment) iterator.next();
 					vdf.setInitializer((Expression) moveNode(cuRewrite, fieldInfo.initializer));
 				}
+			}
+			if (parent.getJavadoc() != null) {
+				field.setJavadoc((Javadoc) moveNode(cuRewrite, parent.getJavadoc()));
 			}
 		}
 		

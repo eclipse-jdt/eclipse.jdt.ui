@@ -1279,7 +1279,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			copyBodyOfPulledUpMethod(sourceRewrite, targetRewrite, sourceMethod, oldMethod, newMethod, mapping, monitor);
 		newMethod.setConstructor(oldMethod.isConstructor());
 		newMethod.setExtraDimensions(oldMethod.getExtraDimensions());
-		copyJavadocNode(rewrite, sourceMethod, oldMethod, newMethod);
+		copyJavadocNode(rewrite, oldMethod, newMethod);
 		int modifiers= getModifiersWithUpdatedVisibility(sourceMethod, sourceMethod.getFlags(), adjustments, monitor, true, status);
 		if (oldMethod.isVarargs())
 			modifiers&= ~Flags.AccVarargs;

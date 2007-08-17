@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -230,18 +229,13 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		}
 	}
 
-	protected static void copyJavadocNode(final ASTRewrite rewrite, final IMember member, final BodyDeclaration oldDeclaration, final BodyDeclaration newDeclaration) throws JavaModelException {
+	protected static void copyJavadocNode(final ASTRewrite rewrite, final BodyDeclaration oldDeclaration, final BodyDeclaration newDeclaration) throws JavaModelException {
 		final Javadoc predecessor= oldDeclaration.getJavadoc();
 		if (predecessor != null) {
-			final IDocument buffer= new Document(member.getCompilationUnit().getBuffer().getContents());
-			try {
-				final String[] lines= Strings.convertIntoLines(buffer.get(predecessor.getStartPosition(), predecessor.getLength()));
-				Strings.trimIndentation(lines, member.getJavaProject(), false);
-				final Javadoc successor= (Javadoc) rewrite.createStringPlaceholder(Strings.concatenate(lines, TextUtilities.getDefaultLineDelimiter(buffer)), ASTNode.JAVADOC);
-				newDeclaration.setJavadoc(successor);
-			} catch (BadLocationException exception) {
-				JavaPlugin.log(exception);
-			}
+			String newString= ASTNodes.getNodeSource(predecessor, false, true);
+			if (newString != null) {
+				newDeclaration.setJavadoc((Javadoc) rewrite.createStringPlaceholder(newString, ASTNode.JAVADOC));
+			}			
 		}
 	}
 
@@ -284,7 +278,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		newFragment.setName(((SimpleName) ASTNode.copySubtree(rewrite.getAST(), oldFieldFragment.getName())));
 		final FieldDeclaration newField= rewrite.getAST().newFieldDeclaration(newFragment);
 		final FieldDeclaration oldField= ASTNodeSearchUtil.getFieldDeclarationNode(field, unit);
-		copyJavadocNode(rewrite, field, oldField, newField);
+		copyJavadocNode(rewrite, oldField, newField);
 		copyAnnotations(oldField, newField);
 		newField.modifiers().addAll(ASTNodeFactory.newModifiers(rewrite.getAST(), modifiers));
 		final Type oldType= oldField.getType();
@@ -513,6 +507,8 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	 * 
 	 * @param members
 	 *            the members, or <code>null</code> if invoked by scripting
+	 * @param settings 
+	 *            the code generation settings to use
 	 * @param layer
 	 *            <code>true</code> to create a working copy layer,
 	 *            <code>false</code> otherwise
@@ -578,18 +574,23 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	}
 
 	protected RefactoringStatus checkDeclaringType(final IProgressMonitor monitor) throws JavaModelException {
-		final IType type= getDeclaringType();
-		if (type.isEnum())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.HierarchyRefactoring_enum_members);
-		if (type.isAnnotation())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.HierarchyRefactoring_annotation_members);
-		if (type.isInterface())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.HierarchyRefactoring_interface_members);
-		if (type.isBinary())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.HierarchyRefactoring_members_of_binary);
-		if (type.isReadOnly())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.HierarchyRefactoring_members_of_read_only);
-		return new RefactoringStatus();
+		try {
+			final IType type= getDeclaringType();
+			if (type.isEnum())
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.HierarchyRefactoring_enum_members);
+			if (type.isAnnotation())
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.HierarchyRefactoring_annotation_members);
+			if (type.isInterface())
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.HierarchyRefactoring_interface_members);
+			if (type.isBinary())
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.HierarchyRefactoring_members_of_binary);
+			if (type.isReadOnly())
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.HierarchyRefactoring_members_of_read_only);
+			return new RefactoringStatus();
+		} finally {
+			if (monitor != null)
+				monitor.done();
+		}
 	}
 
 	protected RefactoringStatus checkIfMembersExist() {
