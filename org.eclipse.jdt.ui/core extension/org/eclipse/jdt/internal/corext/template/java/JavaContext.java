@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -94,6 +95,7 @@ public class JavaContext extends CompilationUnitContext {
 	 */
 	private Set fUsedNames= new HashSet();
 	private Map fVariables= new HashMap();
+	private Set fAddedImports= new HashSet();
 	
 	/**
 	 * Creates a java template context.
@@ -161,6 +163,8 @@ public class JavaContext extends CompilationUnitContext {
 		TemplateBuffer buffer= translator.translate(template);
 
 		getContextType().resolve(buffer, this);
+		
+		rewriteImports();
 
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		boolean useCodeFormatter= prefs.getBoolean(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER);
@@ -176,6 +180,7 @@ public class JavaContext extends CompilationUnitContext {
 
 	private void clear() {
 		fUsedNames.clear();
+		fAddedImports.clear();
 	}
 	
 	/*
@@ -357,6 +362,7 @@ public class JavaContext extends CompilationUnitContext {
 	/**
 	 * Returns the names of local variables matching <code>type</code>.
 	 * 
+	 * @param type the type of the variables 
 	 * @return the names of local variables matching <code>type</code>
 	 * @since 3.3
 	 */
@@ -369,6 +375,7 @@ public class JavaContext extends CompilationUnitContext {
 	/**
 	 * Returns the names of fields matching <code>type</code>.
 	 * 
+	 * @param type the type of the fields
 	 * @return the names of fields matching <code>type</code>
 	 * @since 3.3
 	 */
@@ -445,6 +452,21 @@ public class JavaContext extends CompilationUnitContext {
 				type= matches[0].getFullyQualifiedName();
 			}
 			
+			fAddedImports.add(type);
+		} catch (JavaModelException e) {
+			handleException(null, e);
+		}
+	}
+
+	private void rewriteImports() {
+		if (isReadOnly())
+			return;
+
+		ICompilationUnit cu= getCompilationUnit();
+		if (cu == null)
+			return;
+
+		try {
 			Position position= new Position(getCompletionOffset(), getCompletionLength());
 			IDocument document= getDocument();
 			final String category= "__template_position_importer" + System.currentTimeMillis(); //$NON-NLS-1$
@@ -454,7 +476,6 @@ public class JavaContext extends CompilationUnitContext {
 			document.addPosition(position);
 
 			try {
-				
 				ImportRewrite rewrite= StubUtility.createImportRewrite(cu, true);
 				CompilationUnit root= getASTRoot(cu);
 				ImportRewriteContext context;
@@ -462,12 +483,17 @@ public class JavaContext extends CompilationUnitContext {
 					context= null;
 				else
 					context= new ContextSensitiveImportRewriteContext(root, getCompletionOffset(), rewrite);
-				rewrite.addImport(type, context);
-				JavaModelUtil.applyEdit(cu, rewrite.rewriteImports(null), false, null);
+
+				for (Iterator iterator= fAddedImports.iterator(); iterator.hasNext();) {
+					String type= (String) iterator.next();
+					rewrite.addImport(type, context);
+				}
 				
+				JavaModelUtil.applyEdit(cu, rewrite.rewriteImports(null), false, null);
+
 				setCompletionOffset(position.getOffset());
 				setCompletionLength(position.getLength());
-				
+
 			} catch (CoreException e) {
 				handleException(null, e);
 			} finally {
@@ -475,12 +501,9 @@ public class JavaContext extends CompilationUnitContext {
 				document.removePositionUpdater(updater);
 				document.removePositionCategory(category);
 			}
-			
 		} catch (BadLocationException e) {
 			handleException(null, e);
 		} catch (BadPositionCategoryException e) {
-			handleException(null, e);
-		} catch (JavaModelException e) {
 			handleException(null, e);
 		}
 	}

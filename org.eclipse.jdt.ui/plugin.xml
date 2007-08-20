@@ -4934,6 +4934,18 @@
             description="%templates.java.resolvers.ArgumentType.description"
             name="%templates.java.resolvers.ArgumentType.name"
             type="argType"/>
+	  <resolver
+            class="org.eclipse.jdt.internal.corext.template.java.LinkResolver"
+            contextTypeId="java"
+            description="%templates.java.resolvers.Link.description"
+            name="%templates.java.resolvers.Link.name"
+            type="link"/>
+      <resolver
+            class="org.eclipse.jdt.internal.corext.template.java.ImportsResolver"
+            contextTypeId="java"
+            description="%templates.java.resolvers.Imports.description"
+            name="%templates.java.resolvers.Imports.name"
+            type="imports"/>
    </extension>
 
 <!-- =========================================================================== -->
