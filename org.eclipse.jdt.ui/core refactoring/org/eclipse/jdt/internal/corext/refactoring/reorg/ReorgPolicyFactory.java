@@ -773,8 +773,9 @@ public final class ReorgPolicyFactory {
 			switch (javaElement.getElementType()) {
 				case IJavaElement.JAVA_MODEL:
 				case IJavaElement.JAVA_PROJECT:
-				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 					return true;
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+					return !((IPackageFragmentRoot) javaElement).isArchive();
 				default:
 					return false;
 			}
@@ -875,7 +876,7 @@ public final class ReorgPolicyFactory {
 			return getAsContainer(ReorgUtils.getResource(jelDest));
 		}
 
-		protected final IPackageFragment getDestinationAsPackageFragment() {
+		protected IPackageFragment getDestinationAsPackageFragment() {
 			IPackageFragment javaAsPackage= getJavaDestinationAsPackageFragment(getJavaElementDestination());
 			if (javaAsPackage != null)
 				return javaAsPackage;
@@ -1161,16 +1162,36 @@ public final class ReorgPolicyFactory {
 		}
 
 		public boolean canUpdateQualifiedNames() {
+			if (!canEnableQualifiedNameUpdating())
+				return false;
+			
 			IPackageFragment pack= getDestinationAsPackageFragment();
-			return (canEnableQualifiedNameUpdating() && pack != null && !pack.isDefaultPackage());
+			if (pack == null)
+				return false;
+
+			if (pack.isDefaultPackage())
+				return false;
+
+			IJavaElement destination= getJavaElementDestination();
+			if (destination instanceof IPackageFragmentRoot && getCus().length > 0) {
+				return false;
+			}
+
+			return true;
 		}
 
 		public boolean canUpdateReferences() {
 			if (getCus().length == 0)
 				return false;
 			IPackageFragment pack= getDestinationAsPackageFragment();
-			if (pack != null && pack.isDefaultPackage())
+			if (pack == null || pack.isDefaultPackage())
 				return false;
+			
+			IJavaElement destination= getJavaElementDestination();
+			if (destination instanceof IPackageFragmentRoot && getCus().length > 0) {
+				return false;
+			}
+			
 			Object commonParent= getCommonParent();
 			if (JavaElementUtil.isDefaultPackage(commonParent))
 				return false;
@@ -1194,6 +1215,19 @@ public final class ReorgPolicyFactory {
 			} finally {
 				pm.done();
 			}
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		protected IPackageFragment getDestinationAsPackageFragment() {
+			IJavaElement destination= getJavaElementDestination();
+			if (destination instanceof IPackageFragmentRoot && getCus().length > 0) {
+				String packageName= ((IPackageFragment) getCus()[0].getParent()).getElementName();
+				return ((IPackageFragmentRoot) destination).getPackageFragment(packageName);
+			}
+
+			return super.getDestinationAsPackageFragment();
 		}
 
 		private void computeQualifiedNameMatches(IProgressMonitor pm) throws JavaModelException {
@@ -1334,7 +1368,7 @@ public final class ReorgPolicyFactory {
 			Set result= new HashSet();
 			result.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
 			result.addAll(Arrays.asList(fQualifiedNameSearchResult.getAllFiles()));
-			if (getDestinationAsPackageFragment() != null && getUpdateReferences())
+			if (!(getJavaElementDestination() instanceof IPackageFragmentRoot) && getDestinationAsPackageFragment() != null && getUpdateReferences())
 				result.addAll(Arrays.asList(ResourceUtil.getFiles(getCus())));
 			return (IFile[]) result.toArray(new IFile[result.size()]);
 		}

@@ -1109,9 +1109,10 @@ public class MoveTest extends RefactoringTest {
 	
 	public void testDestination_yes_cuToRoot() throws Exception{
 		ParticipantTesting.reset();
-		String newSource= "class A{void foo(){}class Inner{}}";
+		String newSource= "package p;class A{void foo(){}class Inner{}}";
 		String oldSource= "package p;class A{void foo(){}class Inner{}}";
 		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", oldSource, false, new NullProgressMonitor());
+		IPackageFragmentRoot destination= JavaProjectHelper.addSourceContainer(getRoot().getJavaProject(), "src2");
 		ICompilationUnit newCu= null;
 		try{
 			IJavaElement[] javaElements= { cu1};
@@ -1119,23 +1120,22 @@ public class MoveTest extends RefactoringTest {
 			String[] handles= ParticipantTesting.createHandles(new Object[] {cu1, cu1.getTypes()[0], cu1.getResource()});
 			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
-			Object destination= getRoot();
 			verifyValidDestination(ref, destination);			
 			
 			assertTrue("source file does not exist before moving", cu1.exists());
 			RefactoringStatus status= performRefactoring(ref, true);
 			assertEquals(null, status);
 			assertTrue("source file exists after moving", ! cu1.exists());
-			newCu= getRoot().getPackageFragment("").getCompilationUnit(cu1.getElementName());
+			newCu= destination.getPackageFragment("p").getCompilationUnit(cu1.getElementName());
 			assertTrue("new file does not exist after moving", newCu.exists());
 			assertEqualLines("source differs", newSource, newCu.getSource());
 
 			ParticipantTesting.testMove(
 				handles,
 				new MoveArguments[] {
-					new MoveArguments(getRoot().getPackageFragment(""), ref.getUpdateReferences()),
-					new MoveArguments(getRoot().getPackageFragment(""), ref.getUpdateReferences()),
-					new MoveArguments(getRoot().getResource(), ref.getUpdateReferences())});
+					new MoveArguments(destination.getPackageFragment("p"), ref.getUpdateReferences()),
+							new MoveArguments(destination.getPackageFragment("p"), ref.getUpdateReferences()),
+							new MoveArguments(destination.getPackageFragment("p").getResource(), ref.getUpdateReferences()) });
 			
 		}finally{
 			performDummySearch();

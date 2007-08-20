@@ -124,7 +124,13 @@ public class MoveModifications extends RefactoringModifications {
 		}
 		IResource resourceDestination= getResourceDestination(args);
 		if (resourceDestination != null && unit.getResource() != null) {
-			getResourceModifications().addMove(unit.getResource(), new MoveArguments(resourceDestination, args.getUpdateReferences()));
+			IResource parent= resourceDestination;
+			while (!parent.exists()) {
+				getResourceModifications().addCreate(parent);
+				parent= parent.getParent();
+			}
+
+			getResourceModifications().addMove(unit.getResource(), new MoveArguments(resourceDestination, args.getUpdateReferences()));			
 		}
 	}
 

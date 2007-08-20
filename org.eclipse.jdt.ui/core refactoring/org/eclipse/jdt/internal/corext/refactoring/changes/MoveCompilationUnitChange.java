@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import java.util.ArrayList;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -21,6 +23,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -29,15 +33,18 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 
 	private boolean fUndoable;
 	private long fStampToRestore;
+	private final IPackageFragment[] fDeletePackages;
 	
 	public MoveCompilationUnitChange(ICompilationUnit cu, IPackageFragment newPackage){
 		super(cu, newPackage);
 		fStampToRestore= IResource.NULL_STAMP;
+		fDeletePackages= null;
 	}
 	
-	private MoveCompilationUnitChange(IPackageFragment oldPackage, String cuName, IPackageFragment newPackage, long stampToRestore) {
+	private MoveCompilationUnitChange(IPackageFragment oldPackage, String cuName, IPackageFragment newPackage, long stampToRestore, IPackageFragment[] deletePackages) {
 		super(oldPackage.getHandleIdentifier(), newPackage.getHandleIdentifier(), oldPackage.getCompilationUnit(cuName).getHandleIdentifier());
 		fStampToRestore= stampToRestore;
+		fDeletePackages= deletePackages;
 	}
 	
 	public String getName() {
@@ -64,22 +71,61 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 			currentStamp= resource.getModificationStamp();
 		}
 		
-		fUndoable= ! getDestinationPackage().getCompilationUnit(name).exists();
+		IPackageFragment destination= getDestinationPackage();
+		fUndoable= !destination.exists() || !destination.getCompilationUnit(name).exists();
 		
+		IPackageFragment[] createdPackages= null;
+		if (!destination.exists()) {
+			IPackageFragmentRoot packageFragmentRoot= (IPackageFragmentRoot) destination.getParent();
+			createdPackages= createDestination(packageFragmentRoot, destination, pm);
+		}
+
 		// perform the move and restore modification stamp
-		getCu().move(getDestinationPackage(), null, newName, true, pm);
+		getCu().move(destination, null, newName, true, pm);
 		if (fStampToRestore != IResource.NULL_STAMP) {
-			ICompilationUnit moved= getDestinationPackage().getCompilationUnit(name);
+			ICompilationUnit moved= destination.getCompilationUnit(name);
 			IResource movedResource= moved.getResource();
 			if (movedResource != null) {
 				movedResource.revertModificationStamp(fStampToRestore);
 			}
 		}
 		
+		if (fDeletePackages != null) {
+			for (int i= fDeletePackages.length - 1; i >= 0; i--) {
+				fDeletePackages[i].delete(true, pm);
+			}
+		}
+		
 		if (fUndoable) {
-			return new MoveCompilationUnitChange(getDestinationPackage(), getCu().getElementName(), getOldPackage(), currentStamp);
+			return new MoveCompilationUnitChange(destination, getCu().getElementName(), getOldPackage(), currentStamp, createdPackages);
 		} else {
 			return null;
 		}
+	}
+
+	private IPackageFragment[] createDestination(IPackageFragmentRoot root, IPackageFragment destination, IProgressMonitor pm) throws JavaModelException {
+		String packageName= destination.getElementName();
+		String[] split= packageName.split("\\."); //$NON-NLS-1$
+
+		ArrayList created= new ArrayList();
+
+		StringBuffer name= new StringBuffer();
+		name.append(split[0]);
+		for (int i= 0; i < split.length; i++) {
+			IPackageFragment fragment= root.getPackageFragment(name.toString());
+			if (!fragment.exists()) {
+				created.add(fragment);
+			}
+
+			if (fragment.equals(destination)) {
+				root.createPackageFragment(name.toString(), true, pm);
+				return (IPackageFragment[]) created.toArray(new IPackageFragment[created.size()]);
+			}
+
+			name.append("."); //$NON-NLS-1$
+			name.append(split[i + 1]);
+		}
+
+		return null;
 	}
 }
