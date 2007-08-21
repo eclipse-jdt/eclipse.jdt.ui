@@ -309,7 +309,11 @@ public class JavaContext extends CompilationUnitContext {
 			ExceptionHandler.handle((InvocationTargetException)e, shell, title, null);
 		else {
 			JavaPlugin.log(e);
-			MessageDialog.openError(shell, title, e.getMessage());
+			String message= e.getMessage();
+			if (message == null) {
+				message= JavaTemplateMessages.JavaContext_unexpected_error_message;
+			}
+			MessageDialog.openError(shell, title, message);
 		}
 	}	
 

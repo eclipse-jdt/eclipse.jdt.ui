@@ -44,6 +44,7 @@ final class JavaTemplateMessages extends NLS {
 	public static String JavaContextType_variable_description_todo;
 	public static String JavaContext_error_title;
 	public static String JavaContext_error_message;
+	public static String JavaContext_unexpected_error_message;
 	public static String CodeTemplateContextType_variable_description_todo;
 	public static String CodeTemplateContextType_variable_description_packdeclaration;
 	public static String CodeTemplateContextType_variable_description_typedeclaration;
