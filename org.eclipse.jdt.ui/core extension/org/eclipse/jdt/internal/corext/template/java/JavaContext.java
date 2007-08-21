@@ -463,6 +463,9 @@ public class JavaContext extends CompilationUnitContext {
 	}
 
 	private void rewriteImports() {
+		if (fAddedImports.isEmpty())
+			return;
+		
 		if (isReadOnly())
 			return;
 
@@ -471,7 +474,7 @@ public class JavaContext extends CompilationUnitContext {
 			return;
 
 		try {
-			Position position= new Position(getCompletionOffset(), getCompletionLength());
+			Position position= new Position(getCompletionOffset(), 0);
 			IDocument document= getDocument();
 			final String category= "__template_position_importer" + System.currentTimeMillis(); //$NON-NLS-1$
 			IPositionUpdater updater= new DefaultPositionUpdater(category);
@@ -496,7 +499,6 @@ public class JavaContext extends CompilationUnitContext {
 				JavaModelUtil.applyEdit(cu, rewrite.rewriteImports(null), false, null);
 
 				setCompletionOffset(position.getOffset());
-				setCompletionLength(position.getLength());
 
 			} catch (CoreException e) {
 				handleException(null, e);
