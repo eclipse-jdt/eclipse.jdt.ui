@@ -104,6 +104,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 	 * 
 	 * @param type the type to add the methods to
 	 * @param insert the insertion point, or <code>null</code>
+	 * @param unit the AST of the current compilation unit
 	 * @param variableKeys the variable binding keys to implement
 	 * @param methodKeys the method binding keys to implement
 	 * @param settings the code generation settings to use
