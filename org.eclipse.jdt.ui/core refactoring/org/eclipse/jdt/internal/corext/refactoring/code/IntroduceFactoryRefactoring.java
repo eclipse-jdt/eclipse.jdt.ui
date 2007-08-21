@@ -44,7 +44,6 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -1174,28 +1173,12 @@ public class IntroduceFactoryRefactoring extends ScriptableRefactoring {
 	 * user options).
 	 */
 	private RefactoringStatus isUniqueMethodName(String methodName) {
-		boolean	conflict= hasMethod(fFactoryOwningClass, methodName);
-
-		return conflict ? RefactoringStatus.createErrorStatus(RefactoringCoreMessages.IntroduceFactory_duplicateMethodName + methodName) : new RefactoringStatus(); 
-	}
-
-	/**
-	 * @param type
-	 * @param name
-	 * @return true iff the given <code>AbstractTypeDeclaration</code> has a method with
-	 * the given name
-	 */
-	private boolean hasMethod(AbstractTypeDeclaration type, String name) {
-		List	decls= type.bodyDeclarations();
-
-		for (Iterator iter = decls.iterator(); iter.hasNext();) {
-			BodyDeclaration decl = (BodyDeclaration) iter.next();
-			if (decl instanceof MethodDeclaration) {
-				if (((MethodDeclaration) decl).getName().getIdentifier().equals(name))
-					return true;
-			}
+		ITypeBinding declaringClass= fCtorBinding.getDeclaringClass();
+		if (Bindings.findMethodInType(declaringClass, methodName, fCtorBinding.getParameterTypes()) != null) {
+			String format= Messages.format(RefactoringCoreMessages.IntroduceFactory_duplicateMethodName, methodName);
+			return RefactoringStatus.createErrorStatus(format);
 		}
-		return false;
+ 		return new RefactoringStatus(); 
 	}
 
 	/**
