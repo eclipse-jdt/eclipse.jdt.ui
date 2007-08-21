@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,10 +21,13 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -148,13 +151,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getCreateInSuperClassProposals(context, coveringNode, null)
 				|| getInvertEqualsProposal(context, coveringNode, null)
 				|| getConvertForLoopProposal(context, coveringNode, null)
-				|| getExtractLocalProposal(context, coveringNode, null)
+				|| getExtractLocalProposal(context, null)
 				|| getInlineLocalProposal(context, coveringNode, null)
 				|| getConvertLocalToFieldProposal(context, coveringNode, null)
 				|| getConvertAnonymousToNestedProposal(context, coveringNode, null)
 				|| getConvertIterableLoopProposal(context, coveringNode, null)
 				|| getRemoveBlockProposals(context, coveringNode, null)
-				|| getMakeVariableDeclarationFinalProposals(context, coveringNode, null);
+				|| getMakeVariableDeclarationFinalProposals(context, null);
 		}
 		return false;
 	}
@@ -181,14 +184,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getInvertEqualsProposal(context, coveringNode, resultingCollections);
 				getArrayInitializerToArrayCreation(context, coveringNode, resultingCollections);
 				getCreateInSuperClassProposals(context, coveringNode, resultingCollections);
-				getExtractLocalProposal(context, coveringNode, resultingCollections);
+				getExtractLocalProposal(context, resultingCollections);
 				getInlineLocalProposal(context, coveringNode, resultingCollections);
 				getConvertLocalToFieldProposal(context, coveringNode, resultingCollections);				
 				getConvertAnonymousToNestedProposal(context, coveringNode, resultingCollections);
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
 				getRemoveBlockProposals(context, coveringNode, resultingCollections);
-				getMakeVariableDeclarationFinalProposals(context, coveringNode, resultingCollections);
+				getMakeVariableDeclarationFinalProposals(context, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -206,7 +209,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 	
-	private static boolean getExtractLocalProposal(IInvocationContext context, ASTNode covering, Collection proposals) throws CoreException {
+	private static boolean getExtractLocalProposal(IInvocationContext context, Collection proposals) throws CoreException {
 		ASTNode node= context.getCoveredNode();
 		
 		if (!(node instanceof Expression)) {
@@ -223,32 +226,40 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		
 		final ICompilationUnit cu= context.getCompilationUnit();
-		final ExtractTempRefactoring extractTempRefactoring= new ExtractTempRefactoring(context.getASTRoot(), expression.getStartPosition(), expression.getLength());
+		ExtractTempRefactoring extractTempRefactoring= new ExtractTempRefactoring(context.getASTRoot(), expression.getStartPosition(), expression.getLength());
 		if (extractTempRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
+			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			extractTempRefactoring.setLinkedProposalModel(linkedProposalModel);
+			extractTempRefactoring.setCheckResultForCompileProblems(false);
+			
 			String label= CorrectionMessages.QuickAssistProcessor_extract_to_local_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, 5, image) {
-				protected TextChange createTextChange() throws CoreException {
-					extractTempRefactoring.setTempName(extractTempRefactoring.guessTempName()); // expensive
-					extractTempRefactoring.setLinkedProposalModel(getLinkedProposalModel());
-					return extractTempRefactoring.createTextChange(new NullProgressMonitor());
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractTempRefactoring, 5, image) {
+				protected void init(Refactoring refactoring) throws CoreException {
+					ExtractTempRefactoring etr= (ExtractTempRefactoring) refactoring;
+					etr.setTempName(etr.guessTempName()); // expensive
 				}
 			};
 			proposal.setCommandId(EXTRACT_LOCAL_ID);
+			proposal.setLinkedProposalModel(linkedProposalModel);
 			proposals.add(proposal);
 		}
-		final ExtractConstantRefactoring extractConstRefactoring= new ExtractConstantRefactoring(context.getASTRoot(), expression.getStartPosition(), expression.getLength());
+		ExtractConstantRefactoring extractConstRefactoring= new ExtractConstantRefactoring(context.getASTRoot(), expression.getStartPosition(), expression.getLength());
 		if (extractConstRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
+			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			extractConstRefactoring.setLinkedProposalModel(linkedProposalModel);
+			extractConstRefactoring.setCheckResultForCompileProblems(false);
+			
 			String label= CorrectionMessages.QuickAssistProcessor_extract_to_constant_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, 4, image) {
-				protected TextChange createTextChange() throws CoreException {
-					extractConstRefactoring.setConstantName(extractConstRefactoring.guessConstantName()); // expensive
-					extractConstRefactoring.setLinkedProposalModel(getLinkedProposalModel());
-					return extractConstRefactoring.createTextChange(new NullProgressMonitor());
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractConstRefactoring, 4, image) {
+				protected void init(Refactoring refactoring) throws CoreException {
+					ExtractConstantRefactoring etr= (ExtractConstantRefactoring) refactoring;
+					etr.setConstantName(etr.guessConstantName()); // expensive
 				}
 			};
 			proposal.setCommandId(EXTRACT_CONSTANT_ID);
+			proposal.setLinkedProposalModel(linkedProposalModel);
 			proposals.add(proposal);
 		}
 		return false;
@@ -1281,7 +1292,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return null;
 	}
 	
-	private static boolean getMakeVariableDeclarationFinalProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
+	private static boolean getMakeVariableDeclarationFinalProposals(IInvocationContext context, Collection resultingCollections) {
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(context.getSelectionOffset(), context.getSelectionLength()), false);
 		context.getASTRoot().accept(analyzer);
 		ASTNode[] selectedNodes= analyzer.getSelectedNodes();
@@ -1380,7 +1391,19 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			fRefactoring= refactoring;
 		}
 		
+		/**
+		 * Can be overridden by clients to perform expensive initializations of the refactoring
+		 * @param refactoring the refactoring
+		 * @throws CoreException 
+		 */
+		protected void init(Refactoring refactoring) throws CoreException {
+		}
+		
 		protected TextChange createTextChange() throws CoreException {
+			init(fRefactoring);
+			if (fRefactoring.checkFinalConditions(new NullProgressMonitor()).hasFatalError()) {
+				return new TextFileChange("fatal error", (IFile) getCompilationUnit().getResource()); //$NON-NLS-1$
+			}
 			return (TextChange) fRefactoring.createChange(new NullProgressMonitor());
 		}
 	}

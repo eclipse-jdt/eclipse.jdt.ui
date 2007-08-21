@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
@@ -84,7 +85,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.RefactoringDescriptorChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -139,6 +139,7 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 	private String[] fGuessedConstNames;
 	
 	private LinkedProposalModel fLinkedProposalModel;
+	private boolean fCheckResultForCompileProblems;
 
 	/**
 	 * Creates a new extract constant refactoring
@@ -155,6 +156,7 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 		fCuRewrite= null;
 		fLinkedProposalModel= null;
 		fConstantName= ""; //$NON-NLS-1$
+		fCheckResultForCompileProblems= true;
 	}
 	
 	public ExtractConstantRefactoring(CompilationUnit astRoot, int selectionStart, int selectionLength) {
@@ -168,8 +170,13 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 		fCuRewrite= new CompilationUnitRewrite(fCu, astRoot);
 		fLinkedProposalModel= null;
 		fConstantName= ""; //$NON-NLS-1$
+		fCheckResultForCompileProblems= true;
 	}
-		
+	
+	public void setCheckResultForCompileProblems(boolean checkResultForCompileProblems) {
+		fCheckResultForCompileProblems= checkResultForCompileProblems;
+	}
+	
 	public void setLinkedProposalModel(LinkedProposalModel linkedProposalModel) {
 		fLinkedProposalModel= linkedProposalModel;
 	}
@@ -418,35 +425,42 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 	
 
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.ExtractConstantRefactoring_checking_preconditions, 4); 
+		pm.beginTask(RefactoringCoreMessages.ExtractConstantRefactoring_checking_preconditions, 2); 
 		
 		/* Note: some checks are performed on change of input widget
 		 * values. (e.g. see ExtractConstantRefactoring.checkConstantNameOnChange())
 		 */ 
 		
 		//TODO: possibly add more checking for name conflicts that might
-		//      lead to a change in behaviour
+		//      lead to a change in behavior
 		
 		try {
 			RefactoringStatus result= new RefactoringStatus();
-			fChange= createTextChange(new SubProgressMonitor(pm, 2));
 			
-			String newCuSource= fChange.getPreviewContent(new NullProgressMonitor());
-			CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, fCu, true, true, null);
+			createConstantDeclaration();
+			replaceExpressionsWithConstant();
+			fChange= fCuRewrite.createChange(RefactoringCoreMessages.ExtractConstantRefactoring_change_name, true, new SubProgressMonitor(pm, 1));
 			
-			IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCuRewrite.getRoot());
-			for (int i= 0; i < newProblems.length; i++) {
-				IProblem problem= newProblems[i];
-				if (problem.isError())
-					result.addEntry(new RefactoringStatusEntry((problem.isError() ? RefactoringStatus.ERROR : RefactoringStatus.WARNING), problem.getMessage(), new JavaStringStatusContext(newCuSource, new SourceRange(problem))));
+			if (fCheckResultForCompileProblems) {
+				checkSource(new SubProgressMonitor(pm, 1), result);
 			}
-			
-			fConstantTypeCache= null;
-			fCuRewrite.clearASTAndImportRewrites();
-
 			return result;
 		} finally {
+			fConstantTypeCache= null;
+			fCuRewrite.clearASTAndImportRewrites();
 			pm.done();
+		}
+	}
+
+	private void checkSource(SubProgressMonitor monitor, RefactoringStatus result) throws CoreException {
+		String newCuSource= fChange.getPreviewContent(new NullProgressMonitor());
+		CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, fCu, true, true, monitor);
+		
+		IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCuRewrite.getRoot());
+		for (int i= 0; i < newProblems.length; i++) {
+			IProblem problem= newProblems[i];
+			if (problem.isError())
+				result.addEntry(new RefactoringStatusEntry((problem.isError() ? RefactoringStatus.ERROR : RefactoringStatus.WARNING), problem.getMessage(), new JavaStringStatusContext(newCuSource, new SourceRange(problem))));
 		}
 	}
 
@@ -527,6 +541,12 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 	}
 
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
+		ExtractConstantDescriptor descriptor= createRefactoringDescriptor();
+		fChange.setDescriptor(new RefactoringChangeDescriptor(descriptor));
+		return fChange;
+	}
+
+	private ExtractConstantDescriptor createRefactoringDescriptor() {
 		final Map arguments= new HashMap();
 		String project= null;
 		IJavaProject javaProject= fCu.getJavaProject();
@@ -563,7 +583,7 @@ public class ExtractConstantRefactoring extends ScriptableRefactoring {
 		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(JdtFlags.getVisibilityCode(fVisibility)).toString());
 		
 		ExtractConstantDescriptor descriptor= new ExtractConstantDescriptor(project, description, comment.asString(), arguments, flags);
-		return new RefactoringDescriptorChange(descriptor, RefactoringCoreMessages.ExtractConstantRefactoring_name, new Change[] { fChange});
+		return descriptor;
 	}
 
 	private void replaceExpressionsWithConstant() throws JavaModelException {

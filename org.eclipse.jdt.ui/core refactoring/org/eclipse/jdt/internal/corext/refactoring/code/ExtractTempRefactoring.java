@@ -31,10 +31,10 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
-import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -109,7 +109,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
-import org.eclipse.jdt.internal.corext.refactoring.changes.RefactoringDescriptorChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
@@ -334,7 +334,9 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 	private String fTempName;
 	private String[] fGuessedTempNames;
 
-	private TextChange fChange;
+	private boolean fCheckResultForCompileProblems;
+	
+	private CompilationUnitChange fChange;
 	
 	private LinkedProposalModel fLinkedProposalModel;
 	
@@ -361,6 +363,7 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 		fTempName= ""; //$NON-NLS-1$
 		
 		fLinkedProposalModel= null;
+		fCheckResultForCompileProblems= true;
 	}
 	
 	public ExtractTempRefactoring(CompilationUnit astRoot, int selectionStart, int selectionLength) {
@@ -378,7 +381,13 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 		fTempName= ""; //$NON-NLS-1$
 		
 		fLinkedProposalModel= null;
+		fCheckResultForCompileProblems= true;
 	}
+	
+	public void setCheckResultForCompileProblems(boolean checkResultForCompileProblems) {
+		fCheckResultForCompileProblems= checkResultForCompileProblems;
+	}
+	
 	
 	public void setLinkedProposalModel(LinkedProposalModel linkedProposalModel) {
 		fLinkedProposalModel= linkedProposalModel;
@@ -440,37 +449,35 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 				Assert.isTrue(false);
 				return null;
 		}
-	}
-	
-	public TextChange createTextChange(IProgressMonitor pm) throws CoreException {
+	}	
+
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		try {
-			pm.beginTask(RefactoringCoreMessages.ExtractTempRefactoring_checking_preconditions, 3);
+			pm.beginTask(RefactoringCoreMessages.ExtractTempRefactoring_checking_preconditions, 4);
 			
 			fCURewrite= new CompilationUnitRewrite(fCu, fCompilationUnitNode);
 			fCURewrite.getASTRewrite().setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 			
 			doCreateChange(new SubProgressMonitor(pm, 2));
 			
-			return fCURewrite.createChange(RefactoringCoreMessages.ExtractTempRefactoring_change_name, true, new SubProgressMonitor(pm, 1));
+			fChange= fCURewrite.createChange(RefactoringCoreMessages.ExtractTempRefactoring_change_name, true, new SubProgressMonitor(pm, 1));
+	
+			RefactoringStatus result= new RefactoringStatus();
+			if (Arrays.asList(getExcludedVariableNames()).contains(fTempName))
+				result.addWarning(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_another_variable, fTempName)); 
+	
+			result.merge(checkMatchingFragments());
+			
+			fChange.setKeepPreviewEdits(true);
+			
+			if (fCheckResultForCompileProblems) {
+				checkNewSource(new SubProgressMonitor(pm, 1), result);
+			}
+			
+			return result;
 		} finally {
 			pm.done();
 		}
-	}
-	
-
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-		fChange= createTextChange(pm);
-
-		RefactoringStatus result= new RefactoringStatus();
-		if (Arrays.asList(getExcludedVariableNames()).contains(fTempName))
-			result.addWarning(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_another_variable, fTempName)); 
-
-		result.merge(checkMatchingFragments());
-		
-		fChange.setKeepPreviewEdits(true);
-		checkNewSource(result);
-		
-		return result;
 	}
 	
 	private final ExtractLocalDescriptor createRefactoringDescriptor() {
@@ -518,9 +525,9 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	private void checkNewSource(RefactoringStatus result) throws CoreException {
+	private void checkNewSource(SubProgressMonitor monitor, RefactoringStatus result) throws CoreException {
 		String newCuSource= fChange.getPreviewContent(new NullProgressMonitor());
-		CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, fCu, true, true, null);
+		CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, fCu, true, true, monitor);
 		IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCompilationUnitNode);
 		for (int i= 0; i < newProblems.length; i++) {
 			IProblem problem= newProblems[i];
@@ -624,7 +631,7 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 	}
 
 	private void createAndInsertTempDeclaration() throws CoreException {
-		Expression initializer= getSelectedExpression().createCopyTarget(fCURewrite.getASTRewrite());
+		Expression initializer= getSelectedExpression().createCopyTarget(fCURewrite.getASTRewrite(), true);
 		VariableDeclarationStatement vds= createTempDeclaration(initializer);
 		
 		if ((!fReplaceAllOccurrences) || (retainOnlyReplacableMatches(getMatchingFragments()).length <= 1)) {
@@ -702,8 +709,10 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.ExtractTempRefactoring_checking_preconditions, 1);
+			
 			ExtractLocalDescriptor descriptor= createRefactoringDescriptor();
-			return new RefactoringDescriptorChange(descriptor, RefactoringCoreMessages.ExtractTempRefactoring_extract_temp, new Change[] { fChange});
+			fChange.setDescriptor(new RefactoringChangeDescriptor(descriptor));
+			return fChange;
 		} finally {
 			pm.done();
 		}
