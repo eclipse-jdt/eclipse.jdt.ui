@@ -15,9 +15,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
@@ -30,15 +28,15 @@ import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer {
 
 	private ASTNode[] fSelectedNodes;
-	private IDocument fDocument;
+	private IBuffer fBuffer;
 	private int fSelectionStart;
 	private int fSelectionLength;
 	
 	private Map/*<ASTNode, SourceRange>*/ fRanges;
 	
-	public SelectionAwareSourceRangeComputer(ASTNode[] selectedNodes, IDocument document, int selectionStart, int selectionLength) throws BadLocationException, CoreException {
+	public SelectionAwareSourceRangeComputer(ASTNode[] selectedNodes, IBuffer buffer, int selectionStart, int selectionLength) {
 		fSelectedNodes= selectedNodes;
-		fDocument= document;
+		fBuffer= buffer;
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 	}
@@ -51,9 +49,6 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 			if (result != null)
 				return result;
 			return super.computeSourceRange(node);
-		} catch (BadLocationException e) {
-			// fall back to standard implementation
-			fRanges= new HashMap();
 		} catch (CoreException e) {
 			// fall back to standard implementation
 			fRanges= new HashMap();
@@ -61,7 +56,7 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 		return super.computeSourceRange(node);
 	}
 
-	private void initializeRanges() throws BadLocationException, CoreException {
+	private void initializeRanges() throws CoreException {
 		fRanges= new HashMap();
 		if (fSelectedNodes.length == 0)
 			return;
@@ -71,7 +66,7 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 		fRanges.put(fSelectedNodes[last], super.computeSourceRange(fSelectedNodes[last]));
 		
 		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
-		String documentPortionToScan= fDocument.get(fSelectionStart, fSelectionLength);
+		String documentPortionToScan= fBuffer.getText(fSelectionStart, fSelectionLength);
 		scanner.setSource(documentPortionToScan.toCharArray());
 		TokenScanner tokenizer= new TokenScanner(scanner);
 		int pos= tokenizer.getNextStartOffset(0, false);

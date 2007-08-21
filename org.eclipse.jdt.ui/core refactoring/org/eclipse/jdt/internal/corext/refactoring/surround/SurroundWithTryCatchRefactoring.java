@@ -19,21 +19,9 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
-import org.eclipse.core.filebuffers.LocationKind;
-
-import org.eclipse.core.resources.IFile;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ltk.core.refactoring.Change;
@@ -77,8 +65,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAwareSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.Strings;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Surround a set of statements with a try/catch block.
@@ -174,12 +160,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		final String NN= ""; //$NON-NLS-1$
 		if (pm == null) pm= new NullProgressMonitor();
 		pm.beginTask(NN, 2);
-		// This is cheap since the compilation unit is already open in a editor.
-		IPath path= getFile().getFullPath();
-		ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
 		try {
-			bufferManager.connect(path, LocationKind.IFILE, new SubProgressMonitor(pm, 1));
-			IDocument document= bufferManager.getTextFileBuffer(path, LocationKind.IFILE).getDocument();
 			final CompilationUnitChange result= new CompilationUnitChange(getName(), fCUnit);
 			if (fLeaveDirty)
 				result.setSaveMode(TextFileChange.LEAVE_DIRTY);
@@ -187,7 +168,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			result.setEdit(root);
 			fRewriter= ASTRewrite.create(fAnalyzer.getEnclosingBodyDeclaration().getAST());
 			fRewriter.setTargetSourceRangeComputer(new SelectionAwareSourceRangeComputer(
-				fAnalyzer.getSelectedNodes(), document, fSelection.getOffset(), fSelection.getLength()));
+				fAnalyzer.getSelectedNodes(), fCUnit.getBuffer(), fSelection.getOffset(), fSelection.getLength()));
 			fImportRewrite= StubUtility.createImportRewrite(fRootNode, true);
 			
 			fScope= CodeScopeBuilder.perform(fAnalyzer.getEnclosingBodyDeclaration(), fSelection).
@@ -196,22 +177,18 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			
 			fSelectedNodes= fAnalyzer.getSelectedNodes();
 			
-			createTryCatchStatement(document);
+			createTryCatchStatement(fCUnit.getBuffer(), fCUnit.findRecommendedLineSeparator());
 			
 			if (fImportRewrite.hasRecordedChanges()) {
 				TextEdit edit= fImportRewrite.rewriteImports(null);
 				root.addChild(edit);
 				result.addTextEditGroup(new TextEditGroup(NN, new TextEdit[] {edit} ));
 			}
-			TextEdit change= fRewriter.rewriteAST(document, fCUnit.getJavaProject().getOptions(true));
+			TextEdit change= fRewriter.rewriteAST();
 			root.addChild(change);
 			result.addTextEditGroup(new TextEditGroup(NN, new TextEdit[] {change} ));
 			return result;
-		} catch (BadLocationException e) {
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
-				e.getMessage(), e));
 		} finally {
-			bufferManager.disconnect(path, LocationKind.IFILE, new SubProgressMonitor(pm, 1));
 			pm.done();
 		}
 	}
@@ -220,8 +197,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		return fRootNode.getAST();
 	}
 	
-	private void createTryCatchStatement(IDocument document) throws CoreException, BadLocationException {
-		String lineDelimiter= document.getLineDelimiter(0);
+	private void createTryCatchStatement(org.eclipse.jdt.core.IBuffer buffer, String lineDelimiter) throws CoreException {
 		List result= new ArrayList(1);
 		TryStatement tryStatement= getAST().newTryStatement();
 		ITypeBinding[] exceptions= fAnalyzer.getExceptions();
@@ -276,10 +252,10 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				int extendedStart= root.getExtendedStartPosition(statement);
 				// we have a leading comment and the comment is covered by the selection
 				if (extendedStart != statement.getStartPosition() && extendedStart >= fSelection.getOffset()) {
-					String commentToken= document.get(extendedStart, statement.getStartPosition() - extendedStart);
+					String commentToken= buffer.getText(extendedStart, statement.getStartPosition() - extendedStart);
 					commentToken= Strings.trimTrailingTabsAndSpaces(commentToken);
 					Type type= statement.getType();
-					String typeName= document.get(type.getStartPosition(), type.getLength());
+					String typeName= buffer.getText(type.getStartPosition(), type.getLength());
 					copy.setType((Type)fRewriter.createStringPlaceholder(commentToken + typeName, type.getNodeType()));
 				}
 				result.add(copy);
@@ -361,9 +337,5 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		} else {
 			return (Statement)fRewriter.createStringPlaceholder(s, ASTNode.RETURN_STATEMENT);
 		}
-	}
-	
-	private IFile getFile() {
-		return (IFile) fCUnit.getPrimary().getResource();
 	}
 }
