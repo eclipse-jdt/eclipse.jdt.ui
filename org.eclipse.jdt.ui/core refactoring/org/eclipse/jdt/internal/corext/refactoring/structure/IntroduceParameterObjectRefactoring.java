@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -21,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
@@ -304,6 +306,8 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 	private boolean fCreateAsTopLevel= true;
 
 	private ParameterInfo fParameterObjectReference;
+	
+	private List/*<Change>*/ fOtherChanges;
 
 	public IntroduceParameterObjectRefactoring(IntroduceParameterObjectDescriptor descriptor) throws JavaModelException {
 		super(descriptor.getMethod());
@@ -477,7 +481,18 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		return StubUtility.getVariableNameSuggestions(StubUtility.INSTANCE_FIELD, javaProject, stripped, dim, null, true)[0];
 	}
 
-
+	public Change[] getAllChanges() {
+		ArrayList changes= new ArrayList();
+		changes.addAll(Arrays.asList(super.getAllChanges()));
+		changes.addAll(fOtherChanges);
+		return (Change[]) changes.toArray(new Change[changes.size()]);
+	}
+		
+	protected void clearManagers() {
+		super.clearManagers();
+		fOtherChanges= new ArrayList();
+	}
+	
 	public String getName() {
 		return RefactoringCoreMessages.IntroduceParameterObjectRefactoring_refactoring_name;
 	}

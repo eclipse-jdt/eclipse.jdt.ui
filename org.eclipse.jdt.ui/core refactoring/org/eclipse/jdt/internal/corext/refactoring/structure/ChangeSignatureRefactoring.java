@@ -154,8 +154,8 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 
 	private CompilationUnitRewrite fBaseCuRewrite;
 	private List fExceptionInfos;
-	protected TextChangeManager fChangeManager;
-	protected List/*<Change>*/ fOtherChanges;
+	private TextChangeManager fChangeManager;
+
 	private IMethod fMethod;
 	private IMethod fTopMethod;
 	private IMethod[] fRippleMethods;
@@ -831,9 +831,8 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		}
 	}
 
-	private void clearManagers() {
+	protected void clearManagers() {
 		fChangeManager= null;
-		fOtherChanges= new ArrayList();
 	}
 	
 	private RefactoringStatus checkVisibilityChanges() throws JavaModelException {
@@ -973,7 +972,13 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		}
 		return result;
 	}
-		
+	
+	/**
+	 * Evaluates if a problem needs to be reported.
+	 * @param problem the problem
+	 * @param cu the AST containing the new source
+	 * @return return <code>true</code> if the problem needs to be reported
+	 */
 	protected boolean shouldReport(IProblem problem, CompilationUnit cu) {
 		if (! problem.isError())
 			return false;
@@ -1140,17 +1145,18 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		return Checks.validateModifiesFiles(getAllFilesToModify(), getValidationContext());
 	}
 
+	public Change[] getAllChanges() {
+		return fChangeManager.getAllChanges();
+	}
+	
+	
 	public Change createChange(IProgressMonitor pm) {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try {
-			final TextChange[] changes= fChangeManager.getAllChanges();
-			final List list= new ArrayList(changes.length);
-			list.addAll(fOtherChanges);
-			list.addAll(Arrays.asList(changes));
-			return new DynamicValidationRefactoringChange(createDescriptor(), doGetRefactoringChangeName(), (Change[]) list.toArray(new Change[list.size()]));
+			return new DynamicValidationRefactoringChange(createDescriptor(), doGetRefactoringChangeName(), getAllChanges());
 		} finally {
-			pm.done();
 			clearManagers();
+			pm.done();
 		}
 	}
 

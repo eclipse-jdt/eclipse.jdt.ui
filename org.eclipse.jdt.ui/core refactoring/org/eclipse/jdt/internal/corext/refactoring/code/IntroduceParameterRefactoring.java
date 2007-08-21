@@ -30,9 +30,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.text.TextSelection;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -77,7 +74,7 @@ import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
-import org.eclipse.jdt.internal.corext.refactoring.changes.RefactoringDescriptorChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.BodyUpdater;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -291,27 +288,28 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 	}
 	
 	private RefactoringStatus checkSelection(CompilationUnitRewrite cuRewrite, IProgressMonitor pm) {
-		if (fSelectedExpression == null){
-			String message= RefactoringCoreMessages.IntroduceParameterRefactoring_select;
-			return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, cuRewrite.getRoot(), message);
-		}	
-		
-		MethodDeclaration methodDeclaration= (MethodDeclaration) ASTNodes.getParent(fSelectedExpression, MethodDeclaration.class);
-		if (methodDeclaration == null)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method); 
-		if (methodDeclaration.resolveBinding() == null)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_no_binding); 
-		//TODO: check for rippleMethods -> find matching fragments, consider callers of all rippleMethods
-		
-		RefactoringStatus result= new RefactoringStatus();
-		result.merge(checkExpression());
-		if (result.hasFatalError())
-			return result;
-		
-		result.merge(checkExpressionBinding());
-		if (result.hasFatalError())
-			return result;				
-		
+		try {
+			if (fSelectedExpression == null){
+				String message= RefactoringCoreMessages.IntroduceParameterRefactoring_select;
+				return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, cuRewrite.getRoot(), message);
+			}	
+			
+			MethodDeclaration methodDeclaration= (MethodDeclaration) ASTNodes.getParent(fSelectedExpression, MethodDeclaration.class);
+			if (methodDeclaration == null)
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method); 
+			if (methodDeclaration.resolveBinding() == null)
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_no_binding); 
+			//TODO: check for rippleMethods -> find matching fragments, consider callers of all rippleMethods
+			
+			RefactoringStatus result= new RefactoringStatus();
+			result.merge(checkExpression());
+			if (result.hasFatalError())
+				return result;
+			
+			result.merge(checkExpressionBinding());
+			if (result.hasFatalError())
+				return result;				
+			
 //			if (isUsedInForInitializerOrUpdater(getSelectedExpression().getAssociatedExpression()))
 //				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.for_initializer_updater")); //$NON-NLS-1$
 //			pm.worked(1);				
@@ -319,8 +317,12 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 //			if (isReferringToLocalVariableFromFor(getSelectedExpression().getAssociatedExpression()))
 //				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.refers_to_for_variable")); //$NON-NLS-1$
 //			pm.worked(1);
-		
-		return result;		
+			
+			return result;
+		} finally {
+			if (pm != null)
+				pm.done();
+		}		
 	}
 
 	private RefactoringStatus checkExpression() {
@@ -481,51 +483,45 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 	
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		fChangeSignatureRefactoring.setValidationContext(getValidationContext());
-		RefactoringStatus result;
 		try {
-			result= fChangeSignatureRefactoring.checkFinalConditions(pm);
+			return fChangeSignatureRefactoring.checkFinalConditions(pm);
 		} finally {
 			fChangeSignatureRefactoring.setValidationContext(null);
 		}
-		return result;
 	}
 	
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		fChangeSignatureRefactoring.setValidationContext(getValidationContext());
-		Change result;
 		try {
-			result= fChangeSignatureRefactoring.createChange(pm);
+			Change[] changes= fChangeSignatureRefactoring.getAllChanges();
+			return new DynamicValidationRefactoringChange(getRefactoringDescriptor(), RefactoringCoreMessages.IntroduceParameterRefactoring_name, changes);
 		} finally {
 			fChangeSignatureRefactoring.setValidationContext(null);
+			pm.done();
 		}
-		if (result != null) {
-			final ChangeDescriptor descriptor= result.getDescriptor();
-			if (descriptor instanceof RefactoringChangeDescriptor) {
-				final RefactoringDescriptor refactoringDescriptor= ((RefactoringChangeDescriptor) descriptor).getRefactoringDescriptor();
-				if (refactoringDescriptor instanceof ChangeMethodSignatureDescriptor) {
-					final ChangeMethodSignatureDescriptor extended= (ChangeMethodSignatureDescriptor) refactoringDescriptor;
-					final Map arguments= new HashMap();
-					arguments.put(ATTRIBUTE_ARGUMENT, fParameter.getNewName());
-					arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
-					arguments.putAll(extended.getArguments()); //REVIEW Is this the correct order?
-					String signature= fChangeSignatureRefactoring.getMethodName();
-					try {
-						signature= fChangeSignatureRefactoring.getOldMethodSignature();
-					} catch (JavaModelException exception) {
-						JavaPlugin.log(exception);
-					}
-					final String description= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description_short, fChangeSignatureRefactoring.getMethod().getElementName());
-					final String header= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description, new String[] { fParameter.getNewName(), signature, ASTNodes.asString(fSelectedExpression)});
-					final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(extended.getProject(), this, header);
-					comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_original_pattern, JavaElementLabels.getTextLabel(fChangeSignatureRefactoring.getMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)));
-					comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_pattern, ASTNodes.asString(fSelectedExpression)));
-					comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_parameter_pattern, getAddedParameterInfo().getNewName()));
-					result= new RefactoringDescriptorChange(new IntroduceParameterDescriptor(extended.getProject(), description, comment.asString(), arguments, extended.getFlags()), RefactoringCoreMessages.IntroduceParameterRefactoring_name, new Change[] { result});
-				}
-			}
-		}
-		return result;
 	}
+	
+	private IntroduceParameterDescriptor getRefactoringDescriptor() {
+		ChangeMethodSignatureDescriptor extended= (ChangeMethodSignatureDescriptor) fChangeSignatureRefactoring.createDescriptor();
+
+		final Map arguments= new HashMap();
+		arguments.put(ATTRIBUTE_ARGUMENT, fParameter.getNewName());
+		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+		arguments.putAll(extended.getArguments()); //REVIEW Is this the correct order?
+		String signature= fChangeSignatureRefactoring.getMethodName();
+		try {
+			signature= fChangeSignatureRefactoring.getOldMethodSignature();
+		} catch (JavaModelException exception) {
+			JavaPlugin.log(exception);
+		}
+		final String description= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description_short, fChangeSignatureRefactoring.getMethod().getElementName());
+		final String header= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description, new String[] { fParameter.getNewName(), signature, ASTNodes.asString(fSelectedExpression)});
+		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(extended.getProject(), this, header);
+		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_original_pattern, JavaElementLabels.getTextLabel(fChangeSignatureRefactoring.getMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_pattern, ASTNodes.asString(fSelectedExpression)));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_parameter_pattern, getAddedParameterInfo().getNewName()));
+		return new IntroduceParameterDescriptor(extended.getProject(), description, comment.asString(), arguments, extended.getFlags());
+	}	
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		fArguments= arguments;
