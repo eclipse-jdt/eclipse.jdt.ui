@@ -11,9 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -34,7 +32,6 @@ import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.changes.RefactoringDescriptorChange;
 import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -81,45 +78,36 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 			result.addFatalError(RefactoringCoreMessages.RenameEnumConstRefactoring_const_already_defined);
 		return result;
 	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor#createChange(org.eclipse.core.runtime.IProgressMonitor)
-	 */
-	public Change createChange(final IProgressMonitor monitor) throws CoreException {
-		Change change= super.createChange(monitor);
-		if (change != null) {
-			final IField field= getField();
-			String project= null;
-			IJavaProject javaProject= field.getJavaProject();
-			if (javaProject != null)
-				project= javaProject.getElementName();
-			int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE;
-			final IType declaring= field.getDeclaringType();
-			try {
-				if (!Flags.isPrivate(declaring.getFlags()))
-					flags|= RefactoringDescriptor.MULTI_CHANGE;
-				if (declaring.isAnonymous() || declaring.isLocal())
-					flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-			} catch (JavaModelException exception) {
-				JavaPlugin.log(exception);
-			}
-			final String description= Messages.format(RefactoringCoreMessages.RenameEnumConstProcessor_descriptor_description_short, fField.getElementName());
-			final String header= Messages.format(RefactoringCoreMessages.RenameEnumConstProcessor_descriptor_description, new String[] { field.getElementName(), JavaElementLabels.getElementLabel(field.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()});
-			final String comment= new JDTRefactoringDescriptorComment(project, this, header).asString();
-			final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_ENUM_CONSTANT);
-			descriptor.setProject(project);
-			descriptor.setDescription(description);
-			descriptor.setComment(comment);
-			descriptor.setFlags(flags);
-			descriptor.setJavaElement(field);
-			descriptor.setNewName(getNewElementName());
-			descriptor.setUpdateReferences(fUpdateReferences);
-			descriptor.setUpdateTextualOccurrences(fUpdateTextualMatches);
-			final RefactoringDescriptorChange extended= new RefactoringDescriptorChange(descriptor, RefactoringCoreMessages.RenameEnumConstProcessor_change_name, new Change[] { change});
-			extended.markAsSynthetic();
-			return extended;
+	
+	protected RenameJavaElementDescriptor createRefactoringDescriptor() {
+		final IField field= getField();
+		String project= null;
+		IJavaProject javaProject= field.getJavaProject();
+		if (javaProject != null)
+			project= javaProject.getElementName();
+		int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE;
+		final IType declaring= field.getDeclaringType();
+		try {
+			if (!Flags.isPrivate(declaring.getFlags()))
+				flags|= RefactoringDescriptor.MULTI_CHANGE;
+			if (declaring.isAnonymous() || declaring.isLocal())
+				flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+		} catch (JavaModelException exception) {
+			JavaPlugin.log(exception);
 		}
-		return change;
+		final String description= Messages.format(RefactoringCoreMessages.RenameEnumConstProcessor_descriptor_description_short, fField.getElementName());
+		final String header= Messages.format(RefactoringCoreMessages.RenameEnumConstProcessor_descriptor_description, new String[] { field.getElementName(), JavaElementLabels.getElementLabel(field.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()});
+		final String comment= new JDTRefactoringDescriptorComment(project, this, header).asString();
+		final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_ENUM_CONSTANT);
+		descriptor.setProject(project);
+		descriptor.setDescription(description);
+		descriptor.setComment(comment);
+		descriptor.setFlags(flags);
+		descriptor.setJavaElement(field);
+		descriptor.setNewName(getNewElementName());
+		descriptor.setUpdateReferences(fUpdateReferences);
+		descriptor.setUpdateTextualOccurrences(fUpdateTextualMatches);
+		return descriptor;
 	}
 
 	/*

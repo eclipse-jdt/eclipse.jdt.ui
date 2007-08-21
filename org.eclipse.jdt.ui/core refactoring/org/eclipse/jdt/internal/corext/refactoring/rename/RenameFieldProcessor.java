@@ -567,51 +567,58 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.RenameFieldRefactoring_checking, 1);
-			final TextChange[] changes= fChangeManager.getAllChanges();
-			final List list= new ArrayList(changes.length);
-			list.addAll(Arrays.asList(changes));
-			String project= null;
-			IJavaProject javaProject= fField.getJavaProject();
-			if (javaProject != null)
-				project= javaProject.getElementName();
-			int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE;
-			try {
-				if (!Flags.isPrivate(fField.getFlags()))
-					flags|= RefactoringDescriptor.MULTI_CHANGE;
-			} catch (JavaModelException exception) {
-				JavaPlugin.log(exception);
-			}
-			final IType declaring= fField.getDeclaringType();
-			try {
-				if (declaring.isAnonymous() || declaring.isLocal())
-					flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-			} catch (JavaModelException exception) {
-				JavaPlugin.log(exception);
-			}
-			final String description= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_descriptor_description_short, fField.getElementName());
-			final String header= Messages.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { fField.getElementName(), JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()});
-			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
-			if (fRenameGetter)
-				comment.addSetting(RefactoringCoreMessages.RenameFieldRefactoring_setting_rename_getter);
-			if (fRenameSetter)
-				comment.addSetting(RefactoringCoreMessages.RenameFieldRefactoring_setting_rename_settter);
-			final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_FIELD);
-			descriptor.setProject(project);
-			descriptor.setDescription(description);
-			descriptor.setComment(comment.asString());
-			descriptor.setFlags(flags);
-			descriptor.setJavaElement(fField);
-			descriptor.setNewName(getNewElementName());
-			descriptor.setUpdateReferences(fUpdateReferences);
-			descriptor.setUpdateTextualOccurrences(fUpdateTextualMatches);
-			descriptor.setRenameGetters(fRenameGetter);
-			descriptor.setRenameSetters(fRenameSetter);
-			descriptor.setKeepOriginal(fDelegateUpdating);
-			descriptor.setDeprecateDelegate(fDelegateDeprecation);
-			return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.RenameFieldRefactoring_change_name, (Change[]) list.toArray(new Change[list.size()]));
+			TextChange[] changes= fChangeManager.getAllChanges();
+			RenameJavaElementDescriptor descriptor= createRefactoringDescriptor();
+			return new DynamicValidationRefactoringChange(descriptor, getProcessorName(), changes);
 		} finally {
 			monitor.done();
 		}
+	}
+	
+	/**
+	 * Overridden by subclasses.
+	 * @return return the refactoring descriptor for this refactoring
+	 */
+	protected RenameJavaElementDescriptor createRefactoringDescriptor() {
+		String project= null;
+		IJavaProject javaProject= fField.getJavaProject();
+		if (javaProject != null)
+			project= javaProject.getElementName();
+		int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE;
+		try {
+			if (!Flags.isPrivate(fField.getFlags()))
+				flags|= RefactoringDescriptor.MULTI_CHANGE;
+		} catch (JavaModelException exception) {
+			JavaPlugin.log(exception);
+		}
+		final IType declaring= fField.getDeclaringType();
+		try {
+			if (declaring.isAnonymous() || declaring.isLocal())
+				flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+		} catch (JavaModelException exception) {
+			JavaPlugin.log(exception);
+		}
+		final String description= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_descriptor_description_short, fField.getElementName());
+		final String header= Messages.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { fField.getElementName(), JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()});
+		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
+		if (fRenameGetter)
+			comment.addSetting(RefactoringCoreMessages.RenameFieldRefactoring_setting_rename_getter);
+		if (fRenameSetter)
+			comment.addSetting(RefactoringCoreMessages.RenameFieldRefactoring_setting_rename_settter);
+		final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_FIELD);
+		descriptor.setProject(project);
+		descriptor.setDescription(description);
+		descriptor.setComment(comment.asString());
+		descriptor.setFlags(flags);
+		descriptor.setJavaElement(fField);
+		descriptor.setNewName(getNewElementName());
+		descriptor.setUpdateReferences(fUpdateReferences);
+		descriptor.setUpdateTextualOccurrences(fUpdateTextualMatches);
+		descriptor.setRenameGetters(fRenameGetter);
+		descriptor.setRenameSetters(fRenameSetter);
+		descriptor.setKeepOriginal(fDelegateUpdating);
+		descriptor.setDeprecateDelegate(fDelegateDeprecation);
+		return descriptor;
 	}
 
 	private RefactoringStatus createChanges(IProgressMonitor pm) throws CoreException {

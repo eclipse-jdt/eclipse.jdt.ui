@@ -26,9 +26,9 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
+import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
@@ -56,7 +56,6 @@ import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.RefactoringDescriptorChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
@@ -83,7 +82,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	private String fNewName;
 	private CompilationUnit fCompilationUnitNode;
 	private VariableDeclaration fTempDeclarationNode;
-	private TextChange fChange;
+	private CompilationUnitChange fChange;
 	
 	private boolean fIsComposite;
 	private GroupCategorySet fCategorySet;
@@ -347,31 +346,32 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.RenameTypeProcessor_creating_changes, 1);
-			Change change= fChange;
-			if (change != null) {
-				String project= null;
-				IJavaProject javaProject= fCu.getJavaProject();
-				if (javaProject != null)
-					project= javaProject.getElementName();
-				final String header= Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, JavaElementLabels.getElementLabel(fLocalVariable.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), fNewName});
-				final String description= Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description_short, fCurrentName);
-				final String comment= new JDTRefactoringDescriptorComment(project, this, header).asString();
-				final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_LOCAL_VARIABLE);
-				descriptor.setProject(project);
-				descriptor.setDescription(description);
-				descriptor.setComment(comment);
-				descriptor.setFlags(RefactoringDescriptor.NONE);
-				descriptor.setJavaElement(fLocalVariable);
-				descriptor.setNewName(getNewElementName());
-				descriptor.setUpdateReferences(fUpdateReferences);
-				final RefactoringDescriptorChange result= new RefactoringDescriptorChange(descriptor, RefactoringCoreMessages.RenameTempRefactoring_rename, new Change[] { change});
-				result.markAsSynthetic();
-				change= result;
-			}
-			return change;
+			
+			RenameJavaElementDescriptor descriptor= createRefactoringDescriptor();
+			fChange.setDescriptor(new RefactoringChangeDescriptor(descriptor));
+			return fChange;
 		} finally {
 			monitor.done();
 		}
+	}
+
+	private RenameJavaElementDescriptor createRefactoringDescriptor() {
+		String project= null;
+		IJavaProject javaProject= fCu.getJavaProject();
+		if (javaProject != null)
+			project= javaProject.getElementName();
+		final String header= Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, JavaElementLabels.getElementLabel(fLocalVariable.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), fNewName});
+		final String description= Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description_short, fCurrentName);
+		final String comment= new JDTRefactoringDescriptorComment(project, this, header).asString();
+		final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_LOCAL_VARIABLE);
+		descriptor.setProject(project);
+		descriptor.setDescription(description);
+		descriptor.setComment(comment);
+		descriptor.setFlags(RefactoringDescriptor.NONE);
+		descriptor.setJavaElement(fLocalVariable);
+		descriptor.setNewName(getNewElementName());
+		descriptor.setUpdateReferences(fUpdateReferences);
+		return descriptor;
 	}
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
