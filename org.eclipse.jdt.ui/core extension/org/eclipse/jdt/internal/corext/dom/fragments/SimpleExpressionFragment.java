@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.dom.fragments;
 
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 class SimpleExpressionFragment extends SimpleFragment implements IExpressionFragment {
@@ -22,7 +23,11 @@ class SimpleExpressionFragment extends SimpleFragment implements IExpressionFrag
 		return (Expression) getAssociatedNode();
 	}
 
-	public Expression createCopyTarget(ASTRewrite rewrite) {
-		return (Expression) rewrite.createCopyTarget(getAssociatedNode());
+	public Expression createCopyTarget(ASTRewrite rewrite, boolean removeSurroundingParenthesis) {
+		Expression node= getAssociatedExpression();
+		if (removeSurroundingParenthesis && node instanceof ParenthesizedExpression) {
+			node= ((ParenthesizedExpression) node).getExpression();
+		}
+		return (Expression) rewrite.createCopyTarget(node);
 	}
 }

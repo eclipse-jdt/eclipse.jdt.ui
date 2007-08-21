@@ -4,7 +4,7 @@ class A {
 	static final int foo= 1;
 	static final int bar= 2;
 	private static final int CONSTANT= 1 + 3 * bar;
-	static final int baz= foo * (CONSTANT);
+	static final int baz= foo * CONSTANT;
 	void f() {
 		int i= CONSTANT;
 	}

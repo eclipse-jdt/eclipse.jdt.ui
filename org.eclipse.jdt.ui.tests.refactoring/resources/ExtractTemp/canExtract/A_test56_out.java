@@ -6,6 +6,6 @@ class A {
 		int temp= 3 + 1;
 		int a= 2 * 3 + temp;
 
-		int b= (temp) + 1*1;
+		int b= temp + 1*1;
 	}
 }

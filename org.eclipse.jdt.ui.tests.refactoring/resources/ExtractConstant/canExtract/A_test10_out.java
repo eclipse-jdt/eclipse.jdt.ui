@@ -7,6 +7,6 @@ class A {
 	void foob() {
 		int c= 2 + 2 * 4 + (28 + CONSTANT) + 1;
 
-		int e= (CONSTANT) * 3 * 1;
+		int e= CONSTANT * 3 * 1;
 	}
 }

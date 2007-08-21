@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,8 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -155,7 +157,11 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 	}
 	
 	/**
-	 * Returns List of Lists of <code>ASTNode</code>s
+	 * Returns all matching subsequences of <code>toMatch</code> in <code>source</code>.
+	 * 
+	 * @param source the source to look for matching subsequences
+	 * @param toMatch the sequence to match
+	 * @return returns a List of Lists of <code>ASTNode</code>s
 	 */
 	private static List getMatchingContiguousNodeSubsequences(List source, List toMatch) {
 		//naive implementation:
@@ -310,6 +316,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 	 * Note that this fragment does not directly
 	 * represent this expression node, but rather
 	 * a part of it.
+	 * @return returns the associated expression.
 	 */
 	public Expression getAssociatedExpression() {
 		return fGroupRoot;
@@ -319,6 +326,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 	 * Note that this fragment does not directly
 	 * represent this node, but rather a particular sort of
 	 * part of its subtree.
+	 * @return returns the associated node.
 	 */
 	public ASTNode getAssociatedNode() {
 		return fGroupRoot;
@@ -350,7 +358,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 		return fGroupRoot.getOperator();
 	}
 	
-	public Expression createCopyTarget(ASTRewrite rewrite) throws JavaModelException {
+	public Expression createCopyTarget(ASTRewrite rewrite, boolean removeSurroundingParenthesis) throws JavaModelException {
 		List allOperands= findGroupMembersInOrderFor(fGroupRoot);
 		if (allOperands.size() == fOperands.size()) {
 			return (Expression) rewrite.createCopyTarget(fGroupRoot);
@@ -377,9 +385,16 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 	}
 	
 	public void replace(ASTRewrite rewrite, ASTNode replacement, TextEditGroup textEditGroup) {
-		List allOperands= findGroupMembersInOrderFor(fGroupRoot);
+		ASTNode groupNode= getGroupRoot();
+
+		List allOperands= findGroupMembersInOrderFor(getGroupRoot());
 		if (allOperands.size() == fOperands.size()) {
-			rewrite.replace(fGroupRoot, replacement, textEditGroup);
+			if (replacement instanceof Name && groupNode.getParent() instanceof ParenthesizedExpression) {
+				// replace including the parenthesized expression around it
+				rewrite.replace(groupNode.getParent(), replacement, textEditGroup);
+			} else {
+				rewrite.replace(groupNode, replacement, textEditGroup);
+			}
 			return;
 		}
 		
@@ -397,7 +412,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 			}
 		}
 		Expression newExpression= ASTNodeFactory.newInfixExpression(rewrite.getAST(), getOperator(), newOperands);
-		rewrite.replace(getGroupRoot(), newExpression, textEditGroup);
+		rewrite.replace(groupNode, newExpression, textEditGroup);
 	}
 
 	private static ArrayList/*<Expression>*/ findGroupMembersInOrderFor(InfixExpression groupRoot) {

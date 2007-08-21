@@ -15,6 +15,8 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.JdtASTMatcher;
@@ -57,7 +59,12 @@ class SimpleFragment extends ASTFragment {
 	}
 	
 	public void replace(ASTRewrite rewrite, ASTNode replacement, TextEditGroup textEditGroup) {
-		rewrite.replace(fNode, replacement, textEditGroup);
+		if (replacement instanceof Name && fNode.getParent() instanceof ParenthesizedExpression) {
+			// replace including the parenthesized expression around it
+			rewrite.replace(fNode.getParent(), replacement, textEditGroup);
+		} else {
+			rewrite.replace(fNode, replacement, textEditGroup);
+		}
 	}
 
 	public int hashCode() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,12 +47,16 @@ public interface IASTFragment {
 	 * That two node match does not imply that their source ranges
 	 * are the same, or that they map (via getAssociatedNode()) to the
 	 * same node.
+	 * @param other the element to test with
+	 * @return return <code> true if the passed element matches the current element.
 	 */
 	public boolean matches(IASTFragment other);
 	
 	/**
 	 * Returns (at least some approximation of) a maximal set of
 	 * sub-fragments of this fragment which match <code> toMatch </code>
+	 * @param toMatch the fragment to match
+	 * @return set of sub fragments that match
 	 */
 	public IASTFragment[] getSubFragmentsMatching(IASTFragment toMatch);
 
