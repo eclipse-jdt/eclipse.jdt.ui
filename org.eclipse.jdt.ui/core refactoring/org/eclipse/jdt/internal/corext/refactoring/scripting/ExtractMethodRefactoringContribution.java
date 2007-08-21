@@ -18,6 +18,7 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractMethodDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
@@ -36,7 +37,7 @@ public final class ExtractMethodRefactoringContribution extends JavaRefactoringC
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
-		ExtractMethodRefactoring refactoring= new ExtractMethodRefactoring(null, 0, 0);
+		ExtractMethodRefactoring refactoring= new ExtractMethodRefactoring((ICompilationUnit) null, 0, 0);
 		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
 		return refactoring;
 	}

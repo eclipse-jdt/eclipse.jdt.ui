@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,6 +87,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 	private int fReturnKind;
 	private Type fReturnType;
+	private ITypeBinding fReturnTypeBinding;
 	
 	private FlowInfo fInputFlowInfo;
 	private FlowContext fInputFlowContext;
@@ -123,6 +124,10 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 	
 	public Type getReturnType() {
 		return fReturnType;
+	}
+	
+	public ITypeBinding getReturnTypeBinding() {
+		return fReturnTypeBinding;
 	}
 
 	public boolean generateImport() {
@@ -213,10 +218,14 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 	private void initReturnType(ImportRewrite rewriter) {
 		AST ast= fEnclosingBodyDeclaration.getAST();
 		fReturnType= null;
+		fReturnTypeBinding= null;
 		switch (fReturnKind) {
 			case ACCESS_TO_LOCAL:
 				VariableDeclaration declaration= ASTNodes.findVariableDeclaration(fReturnValue, fEnclosingBodyDeclaration);
 				fReturnType= ASTNodeFactory.newType(ast, declaration);
+				if (declaration.resolveBinding() != null) {
+					fReturnTypeBinding= declaration.resolveBinding().getType();
+				}
 				break;
 			case EXPRESSION:
 				Expression expression= (Expression)getFirstSelectedNode();
@@ -232,22 +241,28 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 						ITypeBinding normalizedBinding= Bindings.normalizeForDeclarationUse(fExpressionBinding, ast);
 						if (normalizedBinding != null) {
 							fReturnType= rewriter.addImport(normalizedBinding, ast);
+							fReturnTypeBinding= normalizedBinding;
 						}
 					}
 				} else {
 					fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
+					fReturnTypeBinding= ast.resolveWellKnownType("void"); //$NON-NLS-1$
 					getStatus().addError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_determine_return_type, JavaStatusContext.create(fCUnit, expression)); 
 				}
 				break;	
 			case RETURN_STATEMENT_VALUE:
-				if (fEnclosingBodyDeclaration.getNodeType() == ASTNode.METHOD_DECLARATION)
-					fReturnType= ((MethodDeclaration)fEnclosingBodyDeclaration).getReturnType2();
+				if (fEnclosingBodyDeclaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
+					fReturnType= ((MethodDeclaration) fEnclosingBodyDeclaration).getReturnType2();
+					fReturnTypeBinding= fReturnType != null ? fReturnType.resolveBinding() : null;
+				}
 				break;
 			default:
 				fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
+				fReturnTypeBinding= ast.resolveWellKnownType("void"); //$NON-NLS-1$
 		}
 		if (fReturnType == null)
 			fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
+			fReturnTypeBinding= ast.resolveWellKnownType("void"); //$NON-NLS-1$
 	}
 	
 	//	 !!! -- +/- same as in ExtractTempRefactoring
@@ -270,7 +285,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 	//---- Input checking -----------------------------------------------------------------------------------
 		
-	public void checkInput(RefactoringStatus status, String methodName, AST ast) {
+	public void checkInput(RefactoringStatus status, String methodName) {
 		ITypeBinding[] arguments= getArgumentTypes();
 		ITypeBinding type= ASTNodes.getEnclosingType(fEnclosingBodyDeclaration);
 		status.merge(Checks.checkMethodInType(type, methodName, arguments));
@@ -496,7 +511,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 	//---- Exceptions -----------------------------------------------------------------------------------------
 	
-	public ITypeBinding[] getExceptions(boolean includeRuntimeExceptions, AST ast) {
+	public ITypeBinding[] getExceptions(boolean includeRuntimeExceptions) {
 		if (includeRuntimeExceptions)
 			return fAllExceptions;
 		List result= new ArrayList(fAllExceptions.length);

@@ -24,23 +24,12 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
-import org.eclipse.core.filebuffers.LocationKind;
-
 import org.eclipse.core.resources.IFile;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
@@ -94,7 +83,6 @@ import org.eclipse.jdt.core.refactoring.descriptors.ExtractMethodDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -102,6 +90,8 @@ import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.StatementRewrite;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -118,7 +108,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
@@ -139,7 +130,6 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 	private int fSelectionLength;
 	private AST fAST;
 	private ASTRewrite fRewriter;
-	private IDocument fDocument;
 	private ExtractMethodAnalyzer fAnalyzer;
 	private int fVisibility;
 	private String fMethodName;
@@ -154,8 +144,12 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 	private ASTNode fDestination;
 	// either of type TypeDeclaration or AnonymousClassDeclaration
 	private ASTNode[] fDestinations;
+	private LinkedProposalModel fLinkedProposalModel;
 
 	private static final String EMPTY= ""; //$NON-NLS-1$
+	
+	private static final String KEY_TYPE= "type"; //$NON-NLS-1$
+	private static final String KEY_NAME= "name"; //$NON-NLS-1$
 	
 	private static class UsedNamesCollector extends ASTVisitor {
 		private Set result= new HashSet();
@@ -223,16 +217,27 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 	 */
 	public ExtractMethodRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) throws CoreException {
 		fCUnit= unit;
+		fRoot= null;
 		fMethodName= "extracted"; //$NON-NLS-1$
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fVisibility= -1;
-		if (unit != null)
-			initialize(unit);
 	}
-
-	private void initialize(ICompilationUnit cu) throws CoreException {
-		fImportRewriter= StubUtility.createImportRewrite(cu, true);
+	
+	/**
+	 * Creates a new extract method refactoring
+	 * @param astRoot the AST root of an AST created from a compilation unit
+	 * @param selectionStart
+	 * @param selectionLength
+	 * @throws CoreException 
+	 */
+	public ExtractMethodRefactoring(CompilationUnit astRoot, int selectionStart, int selectionLength) throws CoreException {
+		this((ICompilationUnit) astRoot.getTypeRoot(), selectionStart, selectionLength);
+		fRoot= astRoot;
+	}
+	
+	public void setLinkedProposalModel(LinkedProposalModel linkedProposalModel) {
+		fLinkedProposalModel= linkedProposalModel;
 	}
 
 	 public String getName() {
@@ -260,7 +265,11 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 			return result;
 		result.merge(ResourceChangeChecker.checkFilesToBeChanged(changedFiles, new SubProgressMonitor(pm, 1)));
 		
-		fRoot= RefactoringASTParser.parseWithASTProvider(fCUnit, true, new SubProgressMonitor(pm, 99));
+		if (fRoot == null) {
+			fRoot= RefactoringASTParser.parseWithASTProvider(fCUnit, true, new SubProgressMonitor(pm, 99));
+		}
+		fImportRewriter= StubUtility.createImportRewrite(fRoot, true);
+
 		fAST= fRoot.getAST();
 		fRoot.accept(createVisitor());
 		
@@ -424,7 +433,7 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 
 		BodyDeclaration node= fAnalyzer.getEnclosingBodyDeclaration();
 		if (node != null) {
-			fAnalyzer.checkInput(result, fMethodName, fAST);
+			fAnalyzer.checkInput(result, fMethodName);
 			pm.worked(1);
 		}
 		pm.done();
@@ -438,9 +447,75 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 		if (fMethodName == null)
 			return null;
 		pm.beginTask("", 2); //$NON-NLS-1$
-		fAnalyzer.aboutToCreateChange();
-		BodyDeclaration declaration= fAnalyzer.getEnclosingBodyDeclaration();
-		fRewriter= ASTRewrite.create(declaration.getAST());
+		try {
+			fAnalyzer.aboutToCreateChange();
+			BodyDeclaration declaration= fAnalyzer.getEnclosingBodyDeclaration();
+			fRewriter= ASTRewrite.create(declaration.getAST());
+	
+			final CompilationUnitChange result= new CompilationUnitChange(RefactoringCoreMessages.ExtractMethodRefactoring_change_name, fCUnit);
+			result.setSaveMode(TextFileChange.KEEP_SAVE_STATE);
+			result.setDescriptor(new RefactoringChangeDescriptor(getRefactoringDescriptor()));
+	
+			MultiTextEdit root= new MultiTextEdit();
+			result.setEdit(root);
+			
+			ASTNode[] selectedNodes= fAnalyzer.getSelectedNodes();
+			fRewriter.setTargetSourceRangeComputer(new SelectionAwareSourceRangeComputer(selectedNodes, fCUnit.getBuffer(), fSelectionStart, fSelectionLength));
+			
+			TextEditGroup substituteDesc= new TextEditGroup(Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_substitute_with_call, fMethodName)); 
+			result.addTextEditGroup(substituteDesc);
+			
+			MethodDeclaration mm= createNewMethod(selectedNodes, fCUnit.findRecommendedLineSeparator(), substituteDesc);
+
+			if (fLinkedProposalModel != null) {
+				LinkedProposalPositionGroup typeGroup= fLinkedProposalModel.getPositionGroup(KEY_TYPE, true);
+				typeGroup.addPosition(fRewriter.track(mm.getReturnType2()), false);
+				
+				ITypeBinding typeBinding= fAnalyzer.getReturnTypeBinding();
+				if (typeBinding != null) {
+					ITypeBinding[] relaxingTypes= ASTResolving.getNarrowingTypes(fAST, typeBinding);
+					for (int i= 0; i < relaxingTypes.length; i++) {
+						typeGroup.addProposal(relaxingTypes[i], fCUnit, relaxingTypes.length - i);
+					}
+				}
+				
+				LinkedProposalPositionGroup nameGroup= fLinkedProposalModel.getPositionGroup(KEY_NAME, true);
+				nameGroup.addPosition(fRewriter.track(mm.getName()), false);
+				
+				ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(fLinkedProposalModel, fRewriter, mm.modifiers(), false);
+			}
+			
+			TextEditGroup insertDesc= new TextEditGroup(Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_add_method, fMethodName)); 
+			result.addTextEditGroup(insertDesc);
+			
+			if (fDestination == fDestinations[0]) {
+				ChildListPropertyDescriptor desc= (ChildListPropertyDescriptor)declaration.getLocationInParent();
+				ListRewrite container= fRewriter.getListRewrite(declaration.getParent(), desc);
+				container.insertAfter(mm, declaration, insertDesc);
+			} else {
+				BodyDeclarationRewrite container= BodyDeclarationRewrite.create(fRewriter, fDestination);
+				container.insert(mm, insertDesc);
+			}
+			
+			replaceDuplicates(result);
+		
+			if (fImportRewriter.hasRecordedChanges()) {
+				TextEdit edit= fImportRewriter.rewriteImports(null);
+				root.addChild(edit);
+				result.addTextEditGroup(new TextEditGroup(
+					RefactoringCoreMessages.ExtractMethodRefactoring_organize_imports, 
+					new TextEdit[] {edit}
+				));
+			}
+			root.addChild(fRewriter.rewriteAST());
+			return result;
+		} finally {
+			pm.done();
+		}
+
+	}
+
+	private ExtractMethodDescriptor getRefactoringDescriptor() {
 		final Map arguments= new HashMap();
 		String project= null;
 		IJavaProject javaProject= fCUnit.getJavaProject();
@@ -486,59 +561,7 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 		arguments.put(ATTRIBUTE_EXCEPTIONS, Boolean.valueOf(fThrowRuntimeExceptions).toString());
 		arguments.put(ATTRIBUTE_COMMENTS, Boolean.valueOf(fGenerateJavadoc).toString());
 		arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceDuplicates).toString());
-		final CompilationUnitChange result= new CompilationUnitChange(RefactoringCoreMessages.ExtractMethodRefactoring_change_name, fCUnit);
-		result.setSaveMode(TextFileChange.KEEP_SAVE_STATE);
-		result.setDescriptor(new RefactoringChangeDescriptor(descriptor));
-
-		MultiTextEdit root= new MultiTextEdit();
-		result.setEdit(root);
-		// This is cheap since the compilation unit is already open in a editor.
-		IPath path= ((IFile)fCUnit.getPrimary().getResource()).getFullPath();
-		ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
-		try {
-			bufferManager.connect(path, LocationKind.IFILE, new SubProgressMonitor(pm, 1));
-			fDocument= bufferManager.getTextFileBuffer(path, LocationKind.IFILE).getDocument();
-			
-			ASTNode[] selectedNodes= fAnalyzer.getSelectedNodes();
-			fRewriter.setTargetSourceRangeComputer(new SelectionAwareSourceRangeComputer(selectedNodes,
-				fDocument, fSelectionStart, fSelectionLength));
-			
-			TextEditGroup substituteDesc= new TextEditGroup(Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_substitute_with_call, fMethodName)); 
-			result.addTextEditGroup(substituteDesc);
-			
-			MethodDeclaration mm= createNewMethod(fMethodName, true, selectedNodes, fDocument.getLineDelimiter(0), substituteDesc);
-
-			TextEditGroup insertDesc= new TextEditGroup(Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_add_method, fMethodName)); 
-			result.addTextEditGroup(insertDesc);
-			
-			if (fDestination == fDestinations[0]) {
-				ChildListPropertyDescriptor desc= (ChildListPropertyDescriptor)declaration.getLocationInParent();
-				ListRewrite container= fRewriter.getListRewrite(declaration.getParent(), desc);
-				container.insertAfter(mm, declaration, insertDesc);
-			} else {
-				BodyDeclarationRewrite container= BodyDeclarationRewrite.create(fRewriter, fDestination);
-				container.insert(mm, insertDesc);
-			}
-			
-			replaceDuplicates(result);
-		
-			if (fImportRewriter.hasRecordedChanges()) {
-				TextEdit edit= fImportRewriter.rewriteImports(null);
-				root.addChild(edit);
-				result.addTextEditGroup(new TextEditGroup(
-					RefactoringCoreMessages.ExtractMethodRefactoring_organize_imports, 
-					new TextEdit[] {edit}
-				));
-			}
-			root.addChild(fRewriter.rewriteAST(fDocument, fCUnit.getJavaProject().getOptions(true)));
-		} catch (BadLocationException e) {
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
-				e.getMessage(), e));
-		} finally {
-			bufferManager.disconnect(path, LocationKind.IFILE, new SubProgressMonitor(pm, 1));
-			pm.done();
-		}
-		return result;
+		return descriptor;
 	}
 	
 	/**
@@ -557,24 +580,10 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 	 * @return the signature of the extracted method
 	 */
 	public String getSignature(String methodName) {
-		MethodDeclaration method= null;
-		try {
-			method= createNewMethod(methodName, false, null, StubUtility.getLineDelimiterUsed(fCUnit), null);
-		} catch (CoreException cannotHappen) {
-			// we don't generate a code block and java comments.
-			Assert.isTrue(false);
-		} catch (BadLocationException e) {
-			// we don't generate a code block and java comments.
-			Assert.isTrue(false);
-		}
-		method.setBody(fAST.newBlock());
-		ASTFlattener flattener= new ASTFlattener() {
-			public boolean visit(Block node) {
-				return false;
-			}
-		};
-		method.accept(flattener);
-		return flattener.getResult();		
+		MethodDeclaration methodDecl= createNewMethodDeclaration();
+		methodDecl.setBody(null);
+		String str= ASTNodes.asString(methodDecl);
+		return str.substring(0, str.indexOf(';'));
 	}
 	
 	/**
@@ -709,7 +718,11 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 		for (int i= 0; i < fParameterInfos.size(); i++) {
 			ParameterInfo parameter= ((ParameterInfo)fParameterInfos.get(i));
 			arguments.add(ASTNodeFactory.newName(fAST, getMappedName(duplicate, parameter)));
-		}		
+		}
+		if (fLinkedProposalModel != null) {
+			LinkedProposalPositionGroup nameGroup= fLinkedProposalModel.getPositionGroup(KEY_NAME, true);
+			nameGroup.addPosition(fRewriter.track(invocation.getName()), false);
+		}
 		
 		ASTNode call;		
 		int returnKind= fAnalyzer.getReturnKind();
@@ -784,12 +797,29 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 		}		
 	}
 	
-	private MethodDeclaration createNewMethod(String name, boolean code, ASTNode[] selectedNodes, String lineDelimiter, TextEditGroup substitute) throws CoreException, BadLocationException {
+	private MethodDeclaration createNewMethod(ASTNode[] selectedNodes, String lineDelimiter, TextEditGroup substitute) throws CoreException {
+		MethodDeclaration result= createNewMethodDeclaration();
+		result.setBody(createMethodBody(selectedNodes, substitute));
+		if (fGenerateJavadoc) {
+			AbstractTypeDeclaration enclosingType= 
+				(AbstractTypeDeclaration)ASTNodes.getParent(fAnalyzer.getEnclosingBodyDeclaration(), AbstractTypeDeclaration.class);
+			String string= CodeGeneration.getMethodComment(fCUnit, enclosingType.getName().getIdentifier(), result, null, lineDelimiter);
+			if (string != null) {
+				Javadoc javadoc= (Javadoc)fRewriter.createStringPlaceholder(string, ASTNode.JAVADOC);
+				result.setJavadoc(javadoc);
+			}
+		}
+		return result;
+	}
+
+	private MethodDeclaration createNewMethodDeclaration() {
 		MethodDeclaration result= fAST.newMethodDeclaration();
+		
 		int modifiers= fVisibility;
 		if (Modifier.isStatic(fAnalyzer.getEnclosingBodyDeclaration().getModifiers()) || fAnalyzer.getForceStatic()) {
 			modifiers|= Modifier.STATIC;
 		}
+
 		ITypeBinding[] typeVariables= computeLocalTypeVariables();
 		List typeParameters= result.typeParameters();
 		for (int i= 0; i < typeVariables.length; i++) {
@@ -800,7 +830,7 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 		
 		result.modifiers().addAll(ASTNodeFactory.newModifiers(fAST, modifiers));
 		result.setReturnType2((Type)ASTNode.copySubtree(fAST, fAnalyzer.getReturnType()));
-		result.setName(fAST.newSimpleName(name));
+		result.setName(fAST.newSimpleName(fMethodName));
 		
 		List parameters= result.parameters();
 		for (int i= 0; i < fParameterInfos.size(); i++) {
@@ -815,24 +845,11 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 		}
 		
 		List exceptions= result.thrownExceptions();
-		ITypeBinding[] exceptionTypes= fAnalyzer.getExceptions(fThrowRuntimeExceptions, fAST);
+		ITypeBinding[] exceptionTypes= fAnalyzer.getExceptions(fThrowRuntimeExceptions);
 		for (int i= 0; i < exceptionTypes.length; i++) {
 			ITypeBinding exceptionType= exceptionTypes[i];
 			exceptions.add(ASTNodeFactory.newName(fAST, fImportRewriter.addImport(exceptionType)));
 		}
-		if (code) {
-			result.setBody(createMethodBody(result, selectedNodes, substitute));
-			if (fGenerateJavadoc) {
-				AbstractTypeDeclaration enclosingType= 
-					(AbstractTypeDeclaration)ASTNodes.getParent(fAnalyzer.getEnclosingBodyDeclaration(), AbstractTypeDeclaration.class);
-				String string= CodeGeneration.getMethodComment(fCUnit, enclosingType.getName().getIdentifier(), result, null, lineDelimiter);
-				if (string != null) {
-					Javadoc javadoc= (Javadoc)fRewriter.createStringPlaceholder(string, ASTNode.JAVADOC);
-					result.setJavadoc(javadoc);
-				}
-			}
-		}
-		
 		return result;
 	}
 	
@@ -867,7 +884,7 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 		}
 	}
 	
-	private Block createMethodBody(MethodDeclaration method, ASTNode[] selectedNodes, TextEditGroup substitute) throws BadLocationException, CoreException {
+	private Block createMethodBody(ASTNode[] selectedNodes, TextEditGroup substitute) {
 		Block result= fAST.newBlock();
 		ListRewrite statements= fRewriter.getListRewrite(result, Block.STATEMENTS_PROPERTY);
 		
@@ -965,81 +982,80 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 	}
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String selection= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION);
-			if (selection != null) {
-				int offset= -1;
-				int length= -1;
-				final StringTokenizer tokenizer= new StringTokenizer(selection);
-				if (tokenizer.hasMoreTokens())
-					offset= Integer.valueOf(tokenizer.nextToken()).intValue();
-				if (tokenizer.hasMoreTokens())
-					length= Integer.valueOf(tokenizer.nextToken()).intValue();
-				if (offset >= 0 && length >= 0) {
-					fSelectionStart= offset;
-					fSelectionLength= length;
-				} else
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION}));
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION));
-			final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-					return createInputFatalStatus(element, IJavaRefactorings.EXTRACT_METHOD);
-				else {
-					fCUnit= (ICompilationUnit) element;
-		        	try {
-						initialize(fCUnit);
-					} catch (CoreException exception) {
-						JavaPlugin.log(exception);
-					}
-				}
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
-			final String visibility= extended.getAttribute(ATTRIBUTE_VISIBILITY);
-			if (visibility != null && !"".equals(visibility)) {//$NON-NLS-1$
-				int flag= 0;
-				try {
-					flag= Integer.parseInt(visibility);
-				} catch (NumberFormatException exception) {
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_VISIBILITY));
-				}
-				fVisibility= flag;
-			}
-			final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-			if (name != null && !"".equals(name)) //$NON-NLS-1$
-				fMethodName= name;
-			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
-			final String destination= extended.getAttribute(ATTRIBUTE_DESTINATION);
-			if (destination != null && !"".equals(destination)) {//$NON-NLS-1$
-				int index= 0;
-				try {
-					index= Integer.parseInt(destination);
-				} catch (NumberFormatException exception) {
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DESTINATION));
-				}
-				fDestinationIndex= index;
-			}
-			final String replace= extended.getAttribute(ATTRIBUTE_REPLACE);
-			if (replace != null) {
-				fReplaceDuplicates= Boolean.valueOf(replace).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
-			final String comments= extended.getAttribute(ATTRIBUTE_COMMENTS);
-			if (comments != null)
-				fGenerateJavadoc= Boolean.valueOf(comments).booleanValue();
-			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_COMMENTS));
-			final String exceptions= extended.getAttribute(ATTRIBUTE_EXCEPTIONS);
-			if (exceptions != null)
-				fThrowRuntimeExceptions= Boolean.valueOf(exceptions).booleanValue();
-			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_EXCEPTIONS));
-		} else
+		if (!(arguments instanceof JavaRefactoringArguments))
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+
+		final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+		final String selection= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION);
+		if (selection == null)
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION));
+		
+		int offset= -1;
+		int length= -1;
+		final StringTokenizer tokenizer= new StringTokenizer(selection);
+		if (tokenizer.hasMoreTokens())
+			offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+		if (tokenizer.hasMoreTokens())
+			length= Integer.valueOf(tokenizer.nextToken()).intValue();
+		if (offset < 0 || length < 0)
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION}));
+
+		fSelectionStart= offset;
+		fSelectionLength= length;
+
+		final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		if (handle == null)
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+			
+		IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+		if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
+			return createInputFatalStatus(element, IJavaRefactorings.EXTRACT_METHOD);
+
+		fCUnit= (ICompilationUnit) element;
+		final String visibility= extended.getAttribute(ATTRIBUTE_VISIBILITY);
+		if (visibility != null && visibility.length() != 0) {
+			int flag= 0;
+			try {
+				flag= Integer.parseInt(visibility);
+			} catch (NumberFormatException exception) {
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_VISIBILITY));
+			}
+			fVisibility= flag;
+		}
+		final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
+		if (name == null || name.length() == 0)
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
+
+		fMethodName= name;
+		
+		final String destination= extended.getAttribute(ATTRIBUTE_DESTINATION);
+		if (destination != null && destination.length() == 0) {
+			int index= 0;
+			try {
+				index= Integer.parseInt(destination);
+			} catch (NumberFormatException exception) {
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DESTINATION));
+			}
+			fDestinationIndex= index;
+		}
+		final String replace= extended.getAttribute(ATTRIBUTE_REPLACE);
+		if (replace == null)
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
+
+		fReplaceDuplicates= Boolean.valueOf(replace).booleanValue();
+
+		final String comments= extended.getAttribute(ATTRIBUTE_COMMENTS);
+		if (comments == null)
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_COMMENTS));
+
+		fGenerateJavadoc= Boolean.valueOf(comments).booleanValue();
+
+		final String exceptions= extended.getAttribute(ATTRIBUTE_EXCEPTIONS);
+		if (exceptions == null)
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_EXCEPTIONS));
+
+		fThrowRuntimeExceptions= Boolean.valueOf(exceptions).booleanValue();
+
 		return new RefactoringStatus();
 	}	
 }

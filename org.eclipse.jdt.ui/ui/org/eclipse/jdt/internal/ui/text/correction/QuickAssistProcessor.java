@@ -96,6 +96,7 @@ import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFix;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
@@ -258,6 +259,19 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					etr.setConstantName(etr.guessConstantName()); // expensive
 				}
 			};
+			proposal.setCommandId(EXTRACT_CONSTANT_ID);
+			proposal.setLinkedProposalModel(linkedProposalModel);
+			proposals.add(proposal);
+		}
+		final ExtractMethodRefactoring extractMethodRefactoring= new ExtractMethodRefactoring(context.getASTRoot(), expression.getStartPosition(), expression.getLength());
+		extractMethodRefactoring.setMethodName("extracted"); //$NON-NLS-1$
+		if (extractMethodRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
+			String label= CorrectionMessages.QuickAssistProcessor_extractmethod_description;
+			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			extractMethodRefactoring.setLinkedProposalModel(linkedProposalModel);
+			
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractMethodRefactoring, 4, image);
 			proposal.setCommandId(EXTRACT_CONSTANT_ID);
 			proposal.setLinkedProposalModel(linkedProposalModel);
 			proposals.add(proposal);
