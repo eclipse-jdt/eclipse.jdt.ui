@@ -85,7 +85,7 @@ public abstract class OwnerDrawSupport implements Listener {
 		GC gc= event.gc;
 
 		ColoredString coloredLabel= getColoredLabel(item);
-		boolean isSelected= (event.detail & SWT.SELECTED) != 0 && fControl.isFocusControl();
+		boolean isSelected= (event.detail & SWT.SELECTED) != 0;
 		if (item instanceof TreeItem) {
 			TreeItem treeItem= (TreeItem) item;
 			Image image = treeItem.getImage(event.index);
