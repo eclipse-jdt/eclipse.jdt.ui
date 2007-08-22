@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
 
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -51,7 +52,8 @@ public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 	 * @see PreferencePage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
-		fCodeTemplateConfigurationBlock= new CodeTemplateBlock(getProject());
+		IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer) getContainer();
+		fCodeTemplateConfigurationBlock= new CodeTemplateBlock(getNewStatusChangedListener(), getProject(), container);
 		
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.CODE_TEMPLATES_PREFERENCE_PAGE);
@@ -62,6 +64,16 @@ public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 	 */
 	protected Control createPreferenceContent(Composite composite) {
 		return fCodeTemplateConfigurationBlock.createContents(composite);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#enableProjectSpecificSettings(boolean)
+	 */
+	protected void enableProjectSpecificSettings(boolean useProjectSpecificSettings) {
+		super.enableProjectSpecificSettings(useProjectSpecificSettings);
+		if (fCodeTemplateConfigurationBlock != null) {
+			fCodeTemplateConfigurationBlock.useProjectSpecificSettings(useProjectSpecificSettings);
+		}
 	}
 	
 	/*
@@ -82,6 +94,16 @@ public class CodeTemplatePreferencePage extends PropertyAndPreferencePage {
 		if (fCodeTemplateConfigurationBlock != null) {
 			fCodeTemplateConfigurationBlock.performDefaults();
 		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
+	 */
+	public void dispose() {
+		if (fCodeTemplateConfigurationBlock != null) {
+			fCodeTemplateConfigurationBlock.dispose();
+		}
+		super.dispose();
 	}
 	
 	/* (non-Javadoc)

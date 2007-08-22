@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,7 +38,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -56,6 +55,8 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
 import org.eclipse.jface.text.templates.persistence.TemplateReaderWriter;
 
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -68,15 +69,17 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariableProcessor;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.viewsupport.ProjectTemplateStore;
+import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
 
 /**
   */
-public class CodeTemplateBlock {
+public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	
 	private class CodeTemplateAdapter extends ViewerComparator implements ITreeListAdapter, IDialogFieldListener {
 
@@ -124,6 +127,9 @@ public class CodeTemplateBlock {
 		}
 
 		public void dialogFieldChanged(DialogField field) {
+			if (field == fGenerateComments) {
+				setValue(PREF_GENERATE_COMMENTS, fGenerateComments.isSelected());
+			}
 		}
 
 		public void keyPressed(TreeListDialogField field, KeyEvent event) {
@@ -247,6 +253,14 @@ public class CodeTemplateBlock {
 		}
 	}		
 	
+	private static final Key PREF_GENERATE_COMMENTS= getJDTUIKey(PreferenceConstants.CODEGEN_ADD_COMMENTS);
+	
+	private static Key[] getAllKeys() {
+		return new Key[] {
+			PREF_GENERATE_COMMENTS
+		};	
+	}	
+	
 	private final static int IDX_EDIT= 0;
 	private final static int IDX_IMPORT= 2;
 	private final static int IDX_EXPORT= 3;
@@ -256,19 +270,17 @@ public class CodeTemplateBlock {
 	protected final static Object CODE_NODE= PreferencesMessages.CodeTemplateBlock_templates_code_node; 
 
 	private TreeListDialogField fCodeTemplateTree;
-
+	private SelectionButtonDialogField fGenerateComments;
+	
 	protected ProjectTemplateStore fTemplateStore;
 	
 	private PixelConverter fPixelConverter;
 	private SourceViewer fPatternViewer;
-	private Control fSWTWidget;
+
 	private TemplateVariableProcessor fTemplateProcessor;
 	
-	private final IProject fProject;
-
-	public CodeTemplateBlock(IProject project) {
-		
-		fProject= project;
+	public CodeTemplateBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
+		super(context, project, getAllKeys(), container);		
 		
 		fTemplateStore= new ProjectTemplateStore(project);
 		try {
@@ -301,6 +313,12 @@ public class CodeTemplateBlock {
 		fCodeTemplateTree.addElement(CODE_NODE);
 
 		fCodeTemplateTree.selectFirstElement();	
+		
+		fGenerateComments= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);
+		fGenerateComments.setDialogFieldListener(adapter);
+		fGenerateComments.setLabelText(PreferencesMessages.CodeTemplateBlock_createcomment_label); 
+		
+		updateControls();
 	}
 
 	public void postSetSelection(Object element) {
@@ -308,6 +326,9 @@ public class CodeTemplateBlock {
 	}
 
 	public boolean hasProjectSpecificOptions(IProject project) {
+		if (super.hasProjectSpecificOptions(project))
+			return true;
+		
 		if (project != null) {
 			return ProjectTemplateStore.hasProjectSpecificTempates(project);
 		}
@@ -316,7 +337,8 @@ public class CodeTemplateBlock {
 	
 	protected Control createContents(Composite parent) {
 		fPixelConverter=  new PixelConverter(parent);
-		fSWTWidget= parent;
+
+		setShell(parent.getShell());
 		
 		Composite composite=  new Composite(parent, SWT.NONE);
 		composite.setFont(parent.getFont());
@@ -333,16 +355,18 @@ public class CodeTemplateBlock {
 		
 		fPatternViewer= createViewer(composite, 2);
 		
+		fGenerateComments.doFillIntoGrid(composite, 2);
+		
 		return composite;
 	}
 	
-	private Shell getShell() {
-		if (fSWTWidget != null) {
-			return fSWTWidget.getShell();
-		}
-		return JavaPlugin.getActiveWorkbenchShell();			
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#updateControls()
+	 */
+	protected void updateControls() {
+		fGenerateComments.setSelection(getBooleanValue(PREF_GENERATE_COMMENTS));
 	}	
-	
+		
 	private SourceViewer createViewer(Composite parent, int nColumns) {
 		Label label= new Label(parent, SWT.NONE);
 		label.setText(PreferencesMessages.CodeTemplateBlock_preview); 
@@ -535,7 +559,7 @@ public class CodeTemplateBlock {
 						// ignore 
 					}
 				}
-				openWriteErrorDialog(e);
+				openWriteErrorDialog();
 			}
 		}
 		
@@ -548,6 +572,7 @@ public class CodeTemplateBlock {
 	}
 
 	public void performDefaults() {
+		super.performDefaults();
 		fTemplateStore.restoreDefaults();
 		
 		// refresh
@@ -556,6 +581,10 @@ public class CodeTemplateBlock {
 	}
 	
 	public boolean performOk(boolean enabled) {
+		boolean res= super.performOk();
+		if (!res)
+			return false;
+		
 		if (fProject != null) {
 			TemplatePersistenceData[] templateData= fTemplateStore.getTemplateData();
 			for (int i= 0; i < templateData.length; i++) {
@@ -566,7 +595,7 @@ public class CodeTemplateBlock {
 			fTemplateStore.save();
 		} catch (IOException e) {
 			JavaPlugin.log(e);
-			openWriteErrorDialog(e);
+			openWriteErrorDialog();
 		}
 		return true;
 	}
@@ -590,9 +619,20 @@ public class CodeTemplateBlock {
 		MessageDialog.openError(getShell(), title, message);
 	}
 	
-	private void openWriteErrorDialog(Exception e) {
+	private void openWriteErrorDialog() {
 		String title= PreferencesMessages.CodeTemplateBlock_error_write_title; 
 		String message= PreferencesMessages.CodeTemplateBlock_error_write_message; 
 		MessageDialog.openError(getShell(), title, message);
+	}
+
+	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(java.lang.String, java.lang.String)
+	 */
+	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
+		// no validation here
 	}
 }
