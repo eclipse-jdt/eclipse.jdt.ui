@@ -312,7 +312,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	public void apply(IDocument document, char trigger, int offset) {
 		
 		if (isSupportingRequiredProposals()) {
-			CompletionProposal coreProposal= ((MemberProposalInfo)fProposalInfo).fProposal;
+			CompletionProposal coreProposal= ((MemberProposalInfo)getProposalInfo()).fProposal;
 			CompletionProposal[] requiredProposals= coreProposal.getRequiredProposals();
 			for (int i= 0; requiredProposals != null &&  i < requiredProposals.length; i++) {
 				int oldLen= document.getLength();
@@ -817,7 +817,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	}
 	
 	private IJavaProject getProject() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -1033,10 +1032,14 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * @since 3.3
 	 */
 	protected boolean isSupportingRequiredProposals() {
-		if (fInvocationContext == null || !(fProposalInfo instanceof MemberProposalInfo))
+		if (fInvocationContext == null)
 			return false;
 		
-		CompletionProposal proposal= ((MemberProposalInfo)fProposalInfo).fProposal;
+		ProposalInfo proposalInfo= getProposalInfo();
+		if (!(proposalInfo instanceof MemberProposalInfo))
+			return false;
+		
+		CompletionProposal proposal= ((MemberProposalInfo)proposalInfo).fProposal;
 		return proposal != null && (proposal.getKind() == CompletionProposal.METHOD_REF || proposal.getKind() == CompletionProposal.FIELD_REF);
 	}
 	
