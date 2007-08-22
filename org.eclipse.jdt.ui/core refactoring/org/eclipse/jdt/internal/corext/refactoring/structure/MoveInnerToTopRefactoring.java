@@ -827,11 +827,12 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 				}
 			}
 			monitor.worked(1);
+			ICompilationUnit inputCU= fType.getCompilationUnit();
 			for (final Iterator iterator= getMergedSet(typeReferences.keySet(), constructorReferences.keySet()).iterator(); iterator.hasNext();) {
 				final ICompilationUnit unit= (ICompilationUnit) iterator.next();
 				final CompilationUnitRewrite targetRewrite= getCompilationUnitRewrite(unit);
-				createCompilationUnitRewrite(bindings, targetRewrite, typeReferences, constructorReferences, adjustor.getAdjustments().containsKey(fType), fType.getCompilationUnit(), unit, false, status, monitor);
-				if (unit.equals(fType.getCompilationUnit())) {
+				createCompilationUnitRewrite(bindings, targetRewrite, typeReferences, constructorReferences, adjustor.getAdjustments().containsKey(fType), inputCU, unit, false, status, monitor);
+				if (unit.equals(inputCU)) {
 					try {
 						adjustor.setStatus(new RefactoringStatus());
 						adjustor.rewriteVisibility(targetRewrite.getCu(), new SubProgressMonitor(monitor, 1));
@@ -840,10 +841,13 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 					}
 					fNewSourceOfInputType= createNewSource(targetRewrite, unit);
 					targetRewrite.clearASTAndImportRewrites();
-					createCompilationUnitRewrite(bindings, targetRewrite, typeReferences, constructorReferences, adjustor.getAdjustments().containsKey(fType), fType.getCompilationUnit(), unit, true, status, monitor);
+					createCompilationUnitRewrite(bindings, targetRewrite, typeReferences, constructorReferences, adjustor.getAdjustments().containsKey(fType), inputCU, unit, true, status, monitor);
 				}
 				adjustor.rewriteVisibility(targetRewrite.getCu(), new SubProgressMonitor(monitor, 1));
 				manager.manage(unit, targetRewrite.createChange());
+			}
+			if (fNewSourceOfInputType == null) {
+				fNewSourceOfInputType= createNewSource(fSourceRewrite, inputCU);
 			}
 		} finally {
 			monitor.done();
