@@ -366,9 +366,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	}
 
 	public boolean canFlipToNextPage() {
-		if (getMethodsForAction(PULL_UP_ACTION).length == 0)
-			return isPageComplete();
-		return super.canFlipToNextPage();
+		return isPageComplete();
 	}
 
 	private void checkAdditionalRequired() {
