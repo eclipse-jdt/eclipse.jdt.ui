@@ -700,6 +700,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		fCategoriesViewer.setExpandedElements(fCategories.toArray());
 
 		final GridData gd= createGridData(numColumns, GridData.FILL_BOTH, SWT.DEFAULT);
+		gd.heightHint= fPixelConverter.convertHeightInCharsToPixels(5);
 		fCategoriesViewer.getControl().setLayoutData(gd);
 
 		fOptionsGroup = createGroup(numColumns, composite, "");  //$NON-NLS-1$
