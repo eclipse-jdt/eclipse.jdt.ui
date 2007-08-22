@@ -71,7 +71,6 @@ import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CharOperation;
@@ -313,7 +312,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	public void apply(IDocument document, char trigger, int offset) {
 		
 		if (isSupportingRequiredProposals()) {
-			CompletionProposal coreProposal= ((MemberProposalInfo)fProposalInfo).fProposal;
+			CompletionProposal coreProposal= ((MemberProposalInfo)getProposalInfo()).fProposal;
 			CompletionProposal[] requiredProposals= coreProposal.getRequiredProposals();
 			for (int i= 0; requiredProposals != null &&  i < requiredProposals.length; i++) {
 				int oldLen= document.getLength();
@@ -811,37 +810,23 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * @since 3.2
 	 */
 	protected boolean isCamelCaseMatching() {
-		IJavaProject project= getProject();
-		String value;
-		if (project == null)
-			value= JavaCore.getOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH);
-		else
-			value= project.getOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, true);
-		
+		String value= JavaCore.getOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH);
 		return JavaCore.ENABLED.equals(value);
 	}
 	
-	private IJavaProject getProject() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
 	private static boolean insertCompletion() {
 		IPreferenceStore preference= JavaPlugin.getDefault().getPreferenceStore();
 		return preference.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
 	}
 
-	private static Color getForegroundColor(StyledText text) {
-
+	private static Color getForegroundColor() {
 		IPreferenceStore preference= JavaPlugin.getDefault().getPreferenceStore();
 		RGB rgb= PreferenceConverter.getColor(preference, PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND);
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		return textTools.getColorManager().getColor(rgb);
 	}
 
-	private static Color getBackgroundColor(StyledText text) {
-
+	private static Color getBackgroundColor() {
 		IPreferenceStore preference= JavaPlugin.getDefault().getPreferenceStore();
 		RGB rgb= PreferenceConverter.getColor(preference, PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND);
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
@@ -895,8 +880,8 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		int offset= widgetCaret;
 		int length= getReplacementOffset() + getReplacementLength() - modelCaret;
 
-		Color foreground= getForegroundColor(text);
-		Color background= getBackgroundColor(text);
+		Color foreground= getForegroundColor();
+		Color background= getBackgroundColor();
 
 		StyleRange range= text.getStyleRangeAtOffset(offset);
 		int fontStyle= range != null ? range.fontStyle : SWT.NORMAL;
@@ -1038,10 +1023,14 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * @since 3.3
 	 */
 	protected boolean isSupportingRequiredProposals() {
-		if (fInvocationContext == null || !(fProposalInfo instanceof MemberProposalInfo))
+		if (fInvocationContext == null)
 			return false;
 		
-		CompletionProposal proposal= ((MemberProposalInfo)fProposalInfo).fProposal;
+		ProposalInfo proposalInfo= getProposalInfo();
+		if (!(proposalInfo instanceof MemberProposalInfo))
+			return false;
+		
+		CompletionProposal proposal= ((MemberProposalInfo)proposalInfo).fProposal;
 		return proposal != null && (proposal.getKind() == CompletionProposal.METHOD_REF || proposal.getKind() == CompletionProposal.FIELD_REF);
 	}
 	
