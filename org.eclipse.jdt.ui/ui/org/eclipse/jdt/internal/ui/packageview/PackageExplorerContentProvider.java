@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -565,7 +566,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				return false;
 			}
 			// if the raw class path has changed we refresh the entire project
-			if ((flags & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0) {
+			if ((flags & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0 || isManifestChange(delta)) {
 				postRefresh(element, ORIGINAL, element, runnables);
 				return false;				
 			}
@@ -657,6 +658,20 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		return false;
 	}
 	
+	private boolean isManifestChange(IJavaElementDelta delta) {
+		// temporary 3.3.1 workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=189987
+		IResourceDelta[] resourceDeltas= delta.getResourceDeltas();
+		if (resourceDeltas != null) {
+			for (int i= 0; i < resourceDeltas.length; i++) {
+				IResourceDelta rDelta= resourceDeltas[i];
+				if (rDelta.getResource().getName().equals("META-INF") && rDelta.findMember(new Path("MANIFEST.MF")) != null) {  //$NON-NLS-1$//$NON-NLS-2$
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	private static boolean isStructuralCUChange(int flags) {
 		// No refresh on working copy creation (F_PRIMARY_WORKING_COPY)
 		return ((flags & IJavaElementDelta.F_CHILDREN) != 0) || ((flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_FINE_GRAINED)) == IJavaElementDelta.F_CONTENT);
