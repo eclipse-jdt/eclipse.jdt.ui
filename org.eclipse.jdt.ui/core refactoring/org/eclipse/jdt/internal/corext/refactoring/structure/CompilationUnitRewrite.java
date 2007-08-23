@@ -49,6 +49,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * {@link org.eclipse.ltk.core.refactoring.Refactoring#checkInitialConditions(org.eclipse.core.runtime.IProgressMonitor)}.
  * <p>
  * Bindings are resolved by default, but can be disabled with <code>setResolveBindings(false)</code>.
+ * Bindings recovery is disabled by default, but can be enabled with <code>setBindingRecovery(true)</code>.
+ * Statements recovery is enabled by default, but can be disabled with <code>setStatementsRecovery(false)</code>.
  * </p>
  */
 public class CompilationUnitRewrite {
@@ -61,7 +63,7 @@ public class CompilationUnitRewrite {
 	private ImportRewrite fImportRewrite; // lazily initialized
 	private ImportRemover fImportRemover; // lazily initialized
 	private boolean fResolveBindings= true;
-	private boolean fStatementsRecovery= false;
+	private boolean fStatementsRecovery= true;
 	private boolean fBindingsRecovery= false;
 	private final WorkingCopyOwner fOwner;
 	private IDocument fRememberContent= null;
@@ -91,7 +93,7 @@ public class CompilationUnitRewrite {
 	
 
 	/**
-	 * Requests that the compiler should provide binding information for the AST
+	 * Controls whether the compiler should provide binding information for the AST
 	 * nodes it creates. To be effective, this method must be called before any
 	 * of {@link #getRoot()},{@link #getASTRewrite()},
 	 * {@link #getImportRemover()}. This method has no effect if the target object
@@ -112,13 +114,13 @@ public class CompilationUnitRewrite {
 	}
 	
 	/**
-	 * Requests that the compiler should perform statements recovery.
+	 * Controls whether the compiler should perform statements recovery.
 	 * To be effective, this method must be called before any
 	 * of {@link #getRoot()},{@link #getASTRewrite()},
 	 * {@link #getImportRemover()}. This method has no effect if the target object
 	 * has been created with {@link #CompilationUnitRewrite(ICompilationUnit, CompilationUnit)}.
 	 * <p>
-	 * Defaults to <b><code>false</code></b> (do not perform statements recovery).
+	 * Defaults to <b><code>true</code></b> (do perform statements recovery).
 	 * </p>
 	 * 
 	 * @param statementsRecovery whether statements recovery should be performed
@@ -129,7 +131,7 @@ public class CompilationUnitRewrite {
 	}
 	
 	/**
-	 * Requests that the compiler should perform bindings recovery.
+	 * Controls whether the compiler should perform bindings recovery.
 	 * To be effective, this method must be called before any
 	 * of {@link #getRoot()},{@link #getASTRewrite()},
 	 * {@link #getImportRemover()}. This method has no effect if the target object
