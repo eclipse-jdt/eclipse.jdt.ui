@@ -65,6 +65,11 @@ public class RenamePackageWizard extends RenameRefactoringWizard {
 			fRenameSubpackages.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
 					getRenamePackageProcessor().setRenameSubpackages(fRenameSubpackages.getSelection());
+					
+					RefactoringStatus status= validateTextField(getText());
+					if (status == null)
+						status= new RefactoringStatus();
+					setPageComplete(status);
 				}
 			});
 			layouter.perform(fRenameSubpackages);

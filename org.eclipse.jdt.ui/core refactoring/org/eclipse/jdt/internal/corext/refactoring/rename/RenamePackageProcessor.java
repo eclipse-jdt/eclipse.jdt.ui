@@ -354,8 +354,12 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		RefactoringStatus result= Checks.checkPackageName(newName);
-		if (Checks.isAlreadyNamed(fPackage, newName))
-			result.addFatalError(RefactoringCoreMessages.RenamePackageRefactoring_another_name); 
+		if (result.hasFatalError())
+			return result;
+		if (Checks.isAlreadyNamed(fPackage, newName)) {
+			result.addFatalError(RefactoringCoreMessages.RenamePackageRefactoring_another_name);
+			return result;
+		}
 		result.merge(checkPackageInCurrentRoot(newName));
 		return result;
 	}
@@ -456,8 +460,6 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 		IPackageFragment pack= root.getPackageFragment(newName);
 		if (! pack.exists())
 			return true;
-		else if (! pack.hasSubpackages()) //leaves are no good
-			return false;			
 		else if (pack.containsJavaResources())
 			return false;
 		else if (pack.getNonJavaResources().length != 0)
@@ -467,10 +469,46 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 	}
 	
 	private RefactoringStatus checkPackageInCurrentRoot(String newName) throws CoreException {
-		if (isPackageNameOkInRoot(newName, getPackageFragmentRoot()))
+		if (fRenameSubpackages) {
+			String currentName= getCurrentElementName();
+			if (isAncestorPackage(currentName, newName)) {
+				// renaming to subpackage (a -> a.b) is always OK, since all subpackages are also renamed
+				return null;
+			}
+			if (! isAncestorPackage(newName, currentName)) {
+				// renaming to an unrelated package
+				if (! isPackageNameOkInRoot(newName, getPackageFragmentRoot())) {
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenamePackageRefactoring_package_exists);
+				}
+			}
+			// renaming to superpackage (a.b -> a) or another package is OK iff
+			// 'a.b' does not contain any subpackage that would collide with another subpackage of 'a'
+			// (e.g. a.b.c collides if a.c already exists, but a.b.b does not collide with a.b)
+			IPackageFragment[] packsToRename= JavaElementUtil.getPackageAndSubpackages(fPackage);
+			for (int i = 0; i < packsToRename.length; i++) {
+				IPackageFragment pack = packsToRename[i];
+				String newPack= newName + pack.getElementName().substring(currentName.length());
+				if (! isAncestorPackage(currentName, newPack) && ! isPackageNameOkInRoot(newPack, getPackageFragmentRoot())) {
+					String msg= Messages.format(RefactoringCoreMessages.RenamePackageProcessor_subpackage_collides, newPack);
+					return RefactoringStatus.createFatalErrorStatus(msg);
+				}
+			}
 			return null;
-		else
+			
+		} else if (! isPackageNameOkInRoot(newName, getPackageFragmentRoot())) {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenamePackageRefactoring_package_exists);
+		} else {
+			return null;
+		}
+	}
+
+	private boolean isAncestorPackage(String ancestor, String descendant) {
+		int a= ancestor.length();
+		int d= descendant.length();
+		if (a == d || (a < d && descendant.charAt(a) == '.'))
+			return descendant.startsWith(ancestor);
+		else
+			return false;
 	}
 
 	private IPackageFragmentRoot getPackageFragmentRoot() {
