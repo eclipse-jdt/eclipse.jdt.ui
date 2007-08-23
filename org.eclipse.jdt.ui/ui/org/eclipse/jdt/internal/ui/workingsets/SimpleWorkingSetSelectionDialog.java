@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
@@ -166,6 +167,8 @@ public class SimpleWorkingSetSelectionDialog extends SelectionDialog {
 		createRightButtonBar(inner);
 		
 		createBottomButtonBar(composite);
+		
+		Dialog.applyDialogFont(composite);
 		
 		return composite;
 	}
