@@ -168,6 +168,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			try {
 				beginCompoundChange(viewer);
 
+				int oldReplaceOffset= getReplaceOffset();
 				try {
 					// this may already modify the document (e.g. add imports)
 					templateBuffer= fContext.evaluate(fTemplate);
@@ -177,8 +178,9 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 				}
 
 				start= getReplaceOffset();
+				int shift= start - oldReplaceOffset;
 				int end= getReplaceEndOffset();
-				end= Math.max(end, offset);
+				end= Math.max(end, offset + shift);
 
 				// insert template string
 				document= viewer.getDocument();
