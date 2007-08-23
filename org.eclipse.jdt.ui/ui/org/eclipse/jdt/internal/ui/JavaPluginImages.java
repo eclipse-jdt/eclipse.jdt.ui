@@ -131,6 +131,7 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_HTMLTAG= NAME_PREFIX + "html_tag_obj.gif"; 		//$NON-NLS-1$
 	
 	public static final String IMG_OBJS_TEMPLATE= NAME_PREFIX + "template_obj.gif"; 		//$NON-NLS-1$
+	public static final String IMG_OBJS_SWT_TEMPLATE= NAME_PREFIX + "template_swt_obj.gif"; 		//$NON-NLS-1$
 	public static final String IMG_OBJS_TYPEVARIABLE= NAME_PREFIX + "typevariable_obj.gif"; 		//$NON-NLS-1$
 	
 	public static final String IMG_OBJS_EXCEPTION= NAME_PREFIX + "jexception_obj.gif"; 	//$NON-NLS-1$
@@ -255,6 +256,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_HTMLTAG= createManagedFromKey(T_OBJ, IMG_OBJS_HTMLTAG);
 
 	public static final ImageDescriptor DESC_OBJS_TEMPLATE= createManagedFromKey(T_OBJ, IMG_OBJS_TEMPLATE);
+	public static final ImageDescriptor DESC_OBJS_SWT_TEMPLATE= createManagedFromKey(T_OBJ, IMG_OBJS_SWT_TEMPLATE);
 	
 	public static final ImageDescriptor DESC_OBJS_TYPEVARIABLE= createManagedFromKey(T_OBJ, IMG_OBJS_TYPEVARIABLE);
 	

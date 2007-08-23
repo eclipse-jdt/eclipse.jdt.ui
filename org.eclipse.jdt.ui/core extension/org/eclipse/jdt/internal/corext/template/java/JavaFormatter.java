@@ -316,7 +316,14 @@ public class JavaFormatter {
 			DocumentTemplateContext dtc= (DocumentTemplateContext) context;
 			if (dtc.getStart() == dtc.getCompletionOffset())
 				try {
-					if (dtc.getDocument().get(dtc.getStart(), dtc.getEnd() - dtc.getStart()).trim().length() == 0)
+					IDocument document= dtc.getDocument();
+					int lineAtOffset= document.getLineOfOffset(dtc.getStart());
+					//only if we are at the beginning of the line
+					if (document.getLineOffset(lineAtOffset) != dtc.getStart())
+						return false;
+					
+					//Does the selection only contain whitespace characters?
+					if (document.get(dtc.getStart(), dtc.getEnd() - dtc.getStart()).trim().length() == 0)
 						return true;
 				} catch (BadLocationException x) {
 					// ignore - this may happen when the document was modified after the initial invocation, and the

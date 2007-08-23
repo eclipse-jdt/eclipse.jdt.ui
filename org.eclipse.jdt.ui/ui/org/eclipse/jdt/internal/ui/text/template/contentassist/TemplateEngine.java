@@ -117,7 +117,7 @@ public class TemplateEngine {
 		if (selection.y == 0) {
 			for (int i= 0; i != templates.length; i++)
 				if (context.canEvaluate(templates[i]))
-					fProposals.add(new TemplateProposal(templates[i], context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)));
+					fProposals.add(createTemplateProposal(templates[i], region, context));
 
 		} else {
 
@@ -132,10 +132,24 @@ public class TemplateEngine {
 					template.getContextTypeId().equals(context.getContextType().getId()) &&
 					(!multipleLinesSelected && template.getPattern().indexOf($_WORD_SELECTION) != -1 || (multipleLinesSelected && template.getPattern().indexOf($_LINE_SELECTION) != -1)))
 				{
-					fProposals.add(new TemplateProposal(templates[i], context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)));
+					fProposals.add(createTemplateProposal(templates[i], region, context));
 				}
 			}
 		}
+	}
+
+	/**
+	 * Create a new template proposal
+	 * 
+	 * @param template the template to create a proposal for
+	 * @param region the region where the proposal will be made
+	 * @param context the context used to make the proposal
+	 * @return the proposal, not <code>null</code>
+	 * 
+	 * @since 3.4
+	 */
+	protected TemplateProposal createTemplateProposal(Template template, IRegion region, CompilationUnitContext context) {
+		return new TemplateProposal(template, context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE));
 	}
 
 	/**

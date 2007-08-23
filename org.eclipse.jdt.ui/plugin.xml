@@ -212,6 +212,13 @@
 		<proposalCategory
 			icon="$nl$/icons/full/elcl16/wordassist_co.gif"/>
 	</extension>
+	<extension
+		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+		id="swtProposalCategory"
+		name="%SWTProposalCategory">
+		<proposalCategory
+			icon="$nl$/icons/full/elcl16/swtassist_co.gif"/>
+	</extension>
 	 
 	<!-- java completions -->   
 	<extension
@@ -267,13 +274,22 @@
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="TemplateProposalComputer">
 		<javaCompletionProposalComputer
-			class="org.eclipse.jdt.internal.ui.text.java.TemplateCompletionProposalComputer"
+			class="org.eclipse.jdt.internal.ui.text.java.JavaTemplateCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.templateProposalCategory">
 			<partition type="__dftl_partition_content_type"/>
 			<partition type="__java_singleline_comment"/> <!-- to get NLS templates -->
 			<partition type="__java_javadoc"/>
 		</javaCompletionProposalComputer>
 	</extension>
+	<extension
+         point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+         id="swtBuilderCompletionProposalComputer">
+      <javaCompletionProposalComputer
+            class="org.eclipse.jdt.internal.ui.text.java.SWTTemplateCompletionProposalComputer"
+			categoryId="org.eclipse.jdt.ui.swtProposalCategory">
+			<partition type="__dftl_partition_content_type"/>
+      </javaCompletionProposalComputer>
+    </extension>
 	<!-- hippie word completions -->   
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
@@ -4890,6 +4906,11 @@
             class="org.eclipse.jdt.internal.corext.template.java.JavaDocContextType"
             id="javadoc">
       </contextType>
+      <contextType
+            name="%templates.swt.contextType.name"
+            class="org.eclipse.jdt.internal.corext.template.java.SWTContextType"
+            id="swt">
+      </contextType>
       <include
       		file="templates/default-templates.xml"
       		translations="$nl$/templates/default-templates.properties">
@@ -4897,6 +4918,10 @@
       <include
       		file="templates/default-codetemplates.xml"
       		translations="$nl$/templates/default-templates.properties">
+      </include>
+      <include
+            file="templates/default-swttemplates.xml"
+            translations="$nl$/templates/default-templates.properties">
       </include>
       <resolver
             class="org.eclipse.jdt.internal.corext.template.java.FieldResolver"

@@ -72,6 +72,7 @@ import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
+import org.eclipse.jdt.internal.corext.template.java.SWTContextType;
 import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
 import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
@@ -777,6 +778,10 @@ public class JavaPlugin extends AbstractUIPlugin {
 			ContributionContextTypeRegistry registry= new ContributionContextTypeRegistry();
 			registry.addContextType(JavaContextType.NAME);
 			registry.addContextType(JavaDocContextType.NAME);
+			registry.addContextType(SWTContextType.NAME);
+
+			SWTContextType swtContext= (SWTContextType) registry.getContextType(SWTContextType.NAME);
+			swtContext.inheritResolvers(registry.getContextType(JavaContextType.NAME));
 
 			fContextTypeRegistry= registry;
 		}

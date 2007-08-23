@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,23 +19,13 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.TextUtilities;
-import org.eclipse.jface.text.templates.TemplateContextType;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
-import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
-
-import org.eclipse.jdt.ui.text.IJavaPartitions;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
 
@@ -43,50 +33,25 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
  * 
  * @since 3.2
  */
-public final class TemplateCompletionProposalComputer implements IJavaCompletionProposalComputer {
+public abstract class TemplateCompletionProposalComputer implements IJavaCompletionProposalComputer {
 	
-	private final TemplateEngine fJavaTemplateEngine;
-	private final TemplateEngine fJavadocTemplateEngine;
-
 	public TemplateCompletionProposalComputer() {
-		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(JavaContextType.NAME);
-		if (contextType == null) {
-			contextType= new JavaContextType();
-			JavaPlugin.getDefault().getTemplateContextRegistry().addContextType(contextType);
-		}
-		fJavaTemplateEngine= new TemplateEngine(contextType);
-		
-		contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType("javadoc"); //$NON-NLS-1$
-		if (contextType == null) {
-			contextType= new JavaDocContextType();
-			JavaPlugin.getDefault().getTemplateContextRegistry().addContextType(contextType);
-		}
-		fJavadocTemplateEngine= new TemplateEngine(contextType);
 	}
 	
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
-		TemplateEngine engine;
-		try {
-			String partition= TextUtilities.getContentType(context.getDocument(), IJavaPartitions.JAVA_PARTITIONING, context.getInvocationOffset(), true);
-			if (partition.equals(IJavaPartitions.JAVA_DOC))
-				engine= fJavadocTemplateEngine;
-			else
-				engine= fJavaTemplateEngine;
-		} catch (BadLocationException x) {
+		if (!(context instanceof JavaContentAssistInvocationContext))
 			return Collections.EMPTY_LIST;
-		}
 		
-		if (engine != null) {
-			if (!(context instanceof JavaContentAssistInvocationContext))
-				return Collections.EMPTY_LIST;
+		JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
+		ICompilationUnit unit= javaContext.getCompilationUnit();
+		if (unit == null)
+			return Collections.EMPTY_LIST;
 
-			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
-			ICompilationUnit unit= javaContext.getCompilationUnit();
-			if (unit == null)
-				return Collections.EMPTY_LIST;
+		TemplateEngine engine= computeCompletionEngine(javaContext);
+		if (engine != null) {
 			
 			engine.reset();
 			engine.complete(javaContext.getViewer(), javaContext.getInvocationOffset(), unit);
@@ -126,6 +91,16 @@ public final class TemplateCompletionProposalComputer implements IJavaCompletion
 		
 		return Collections.EMPTY_LIST;
 	}
+
+	/**
+	 * Compute the engine used to retrieve completion proposals in the given context
+	 * 
+	 * @param context the context where proposals will be made
+	 * @return the engine or <code>null</code> if no engine available in the context
+	 * 
+	 * @since 3.4
+	 */
+	protected abstract TemplateEngine computeCompletionEngine(JavaContentAssistInvocationContext context);
 
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeContextInformation(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
@@ -197,13 +172,5 @@ public final class TemplateCompletionProposalComputer implements IJavaCompletion
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionStarted()
 	 */
 	public void sessionStarted() {
-	}
-
-	/*
-	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionEnded()
-	 */
-	public void sessionEnded() {
-		fJavadocTemplateEngine.reset();
-		fJavaTemplateEngine.reset();
 	}
 }
