@@ -32,8 +32,8 @@ public class SWTContextType extends CompilationUnitContextType {
 			super(type, document, completionPosition, compilationUnit);
 		}
 
-		/**
-		 * {@inheritDoc}
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.template.java.JavaContext#canEvaluate(org.eclipse.jface.text.templates.Template)
 		 */
 		public boolean canEvaluate(Template template) {
 			if (fForceEvaluation)
@@ -49,16 +49,16 @@ public class SWTContextType extends CompilationUnitContextType {
 	public SWTContextType() {
 		super(NAME);
 	}
-
-	/**
-	 * {@inheritDoc}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, int, int, org.eclipse.jdt.core.ICompilationUnit)
 	 */
 	public CompilationUnitContext createContext(IDocument document, int offset, int length, ICompilationUnit compilationUnit) {
 		return new SWTContext(this, document, offset, length, compilationUnit);
 	}
 
-	/**
-	 * {@inheritDoc}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.Position, org.eclipse.jdt.core.ICompilationUnit)
 	 */
 	public CompilationUnitContext createContext(IDocument document, Position offset, ICompilationUnit compilationUnit) {
 		return new SWTContext(this, document, offset, compilationUnit);

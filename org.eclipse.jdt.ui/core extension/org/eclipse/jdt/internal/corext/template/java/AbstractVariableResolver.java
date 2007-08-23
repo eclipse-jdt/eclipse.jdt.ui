@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.V
 
 /**
  * Resolves template variables to variables which are assignment-compatible with the variable
- * instance' class parameters.
+ * instance class parameters.
  * 
  * @since 3.4
  */
@@ -49,13 +49,11 @@ public abstract class AbstractVariableResolver extends TemplateVariableResolver 
 	 * @param type the type name to search variables for
 	 * @param context context within to search for variables
 	 * @return the visible variables of <code>type</code> in <code>context</code>, empty array if no visible variables
-	 * 
-	 * @since 3.4
 	 */
 	protected abstract Variable[] getVisibleVariables(String type, JavaContext context);
-
-	/**
-	 * {@inheritDoc}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
 	 */
 	public void resolve(TemplateVariable variable, TemplateContext context) {
 		
@@ -98,8 +96,8 @@ public abstract class AbstractVariableResolver extends TemplateVariableResolver 
 			super.resolve(variable, context);
 	}
 
-	/**
-	 * {@inheritDoc}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolveAll(org.eclipse.jface.text.templates.TemplateContext)
 	 */
 	protected String[] resolveAll(TemplateContext context) {
 	    

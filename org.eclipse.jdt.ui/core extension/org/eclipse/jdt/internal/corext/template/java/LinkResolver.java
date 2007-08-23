@@ -28,8 +28,8 @@ public class LinkResolver extends TemplateVariableResolver {
 	public LinkResolver() {
 	}
 
-	/**
-	 * {@inheritDoc}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
 	 */
 	public void resolve(TemplateVariable variable, TemplateContext context) {
 
@@ -61,8 +61,8 @@ public class LinkResolver extends TemplateVariableResolver {
 			super.resolve(variable, context);
 	}
 
-	/**
-	 * {@inheritDoc}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolveAll(org.eclipse.jface.text.templates.TemplateContext)
 	 */
 	protected String[] resolveAll(TemplateContext context) {
 		return fProposals;

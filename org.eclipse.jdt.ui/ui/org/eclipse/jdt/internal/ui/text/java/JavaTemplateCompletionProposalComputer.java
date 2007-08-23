@@ -45,8 +45,8 @@ public class JavaTemplateCompletionProposalComputer extends TemplateCompletionPr
 		fJavadocTemplateEngine= new TemplateEngine(contextType);
 	}
 
-	/**
-	 * {@inheritDoc}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.java.TemplateCompletionProposalComputer#computeCompletionEngine(org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext)
 	 */
 	protected TemplateEngine computeCompletionEngine(JavaContentAssistInvocationContext context) {
 		try {
@@ -60,8 +60,8 @@ public class JavaTemplateCompletionProposalComputer extends TemplateCompletionPr
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionEnded()
 	 */
 	public void sessionEnded() {
 		fJavadocTemplateEngine.reset();

@@ -31,8 +31,8 @@ public class FieldResolver extends AbstractVariableResolver {
 		super(defaultType);
 	}
 
-	/**
-	 * {@inheritDoc}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.template.java.AbstractVariableResolver#getVisibleVariables(java.lang.String, org.eclipse.jdt.internal.corext.template.java.JavaContext)
 	 */
 	protected Variable[] getVisibleVariables(String type, JavaContext context) {
 		return context.getFields(type);

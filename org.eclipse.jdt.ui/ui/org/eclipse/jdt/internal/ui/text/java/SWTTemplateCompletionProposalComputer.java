@@ -55,8 +55,9 @@ public class SWTTemplateCompletionProposalComputer extends TemplateCompletionPro
 		}
 
 		fSWTTemplateEngine= new TemplateEngine(contextType) {
-			/**
-			 * {@inheritDoc}
+			
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine#createTemplateProposal(org.eclipse.jface.text.templates.Template, org.eclipse.jface.text.IRegion, org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext)
 			 */
 			protected TemplateProposal createTemplateProposal(Template template, IRegion region, CompilationUnitContext context) {
 				TemplateProposal result= new TemplateProposal(template, context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SWT_TEMPLATE));
@@ -65,8 +66,8 @@ public class SWTTemplateCompletionProposalComputer extends TemplateCompletionPro
 		};
 	}
 
-	/**
-	 * {@inheritDoc}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.java.TemplateCompletionProposalComputer#computeCompletionEngine(org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext)
 	 */
 	protected TemplateEngine computeCompletionEngine(JavaContentAssistInvocationContext context) {
 
@@ -85,8 +86,8 @@ public class SWTTemplateCompletionProposalComputer extends TemplateCompletionPro
 		return fSWTTemplateEngine;
 	}
 
-	/**
-	 * {@inheritDoc}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionEnded()
 	 */
 	public void sessionEnded() {
 		fSWTTemplateEngine.reset();
