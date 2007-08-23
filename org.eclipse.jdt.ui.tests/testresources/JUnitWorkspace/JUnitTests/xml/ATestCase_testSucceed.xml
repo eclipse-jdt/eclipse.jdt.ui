@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testrun name="ATestCase.testSucceed" project="JUnitTests" tests="1" started="1" failures="0" errors="0" ignored="0">
+<testcase name="testSucceed" classname="pack.ATestCase"/>
+</testrun>

@@ -37,6 +37,12 @@ public class TestRunSessionSerializationTests3 extends AbstractTestRunSessionSer
 		runCUTest(test);
 	}
 	
+	public void testATestCase_testSucceed() throws Exception {
+		String testType= "ATestCase";
+		String method= "testSucceed";
+		runMethodTest(testType, method);
+	}
+
 	public void testATestSuite() throws Exception {
 		String test= "ATestSuite";
 		runCUTest(test);

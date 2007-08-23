@@ -112,7 +112,7 @@ public class AbstractTestRunListenerTest extends TestCase {
 		return aTestCase;
 	}
 
-	protected void launchJUnit(IType aTestCase) throws CoreException {
+	protected void launchJUnit(IJavaElement aTest) throws CoreException {
 		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 		
 		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
@@ -157,7 +157,7 @@ public class AbstractTestRunListenerTest extends TestCase {
 		};
 		lm.addLaunchListener(launchesListener);
 		
-		ILaunchConfiguration configuration= TestJUnitLaunchShortcut.createConfiguration(aTestCase);
+		ILaunchConfiguration configuration= TestJUnitLaunchShortcut.createConfiguration(aTest);
 		try {
 			configuration.launch(ILaunchManager.RUN_MODE, null);
 			new DisplayHelper() {
@@ -174,8 +174,8 @@ public class AbstractTestRunListenerTest extends TestCase {
 			fail("Launch has not terminated");
 	}
 	
-	protected String[] launchJUnit(IType aTestCase, final TestRunLog log) throws CoreException {
-		launchJUnit(aTestCase);
+	protected String[] launchJUnit(IJavaElement aTest, final TestRunLog log) throws CoreException {
+		launchJUnit(aTest);
 		
 		new DisplayHelper(){
 			protected boolean condition() {
