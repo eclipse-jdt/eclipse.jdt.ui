@@ -634,31 +634,32 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		if (fExportedClassContainers.contains(classContainer))
 			return Collections.EMPTY_LIST.iterator();
 		
-		if (JavaCore.GENERATE.equals(javaProject.getOption(JavaCore.COMPILER_SOURCE_FILE_ATTR, true))) {
-			if (fClassFilesMapContainer == null || !fClassFilesMapContainer.equals(classContainer)) {
-				fJavaNameToClassFilesMap= buildJavaToClassMap(classContainer, progressMonitor);
-				if (fJavaNameToClassFilesMap == null) {
-					// Could not fully build map. fallback is to export whole directory
-					String containerName= classContainer.getFullPath().toString();
-					String msg= Messages.format(JarPackagerMessages.JarFileExportOperation_missingSourceFileAttributeExportedAll, containerName); 
-					addInfo(msg, null);
-					fExportedClassContainers.add(classContainer);
-					return getClassesIn(classContainer);
-				}
-				fClassFilesMapContainer= classContainer;
-			}
-			ArrayList classFileList= (ArrayList)fJavaNameToClassFilesMap.get(file.getName());
-			if (classFileList == null || classFileList.isEmpty()) {
-				String msg= Messages.format(JarPackagerMessages.JarFileExportOperation_classFileOnClasspathNotAccessible, file.getFullPath()); 
-				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, msg, null));
-			}
-			return classFileList.iterator();
-		} else {
+		if (JavaCore.DO_NOT_GENERATE.equals(javaProject.getOption(JavaCore.COMPILER_SOURCE_FILE_ATTR, true))) {
 			IRegion region= JavaCore.newRegion();
 			region.add(typeRootElement);
 			IResource[] generatedResources= JavaCore.getGeneratedResources(region, false);
-			return Arrays.asList(generatedResources).iterator();
+			if (generatedResources.length > 0)
+				return Arrays.asList(generatedResources).iterator();
+			// if no results, give the old code a last chance
 		}
+		if (fClassFilesMapContainer == null || !fClassFilesMapContainer.equals(classContainer)) {
+			fJavaNameToClassFilesMap= buildJavaToClassMap(classContainer, progressMonitor);
+			if (fJavaNameToClassFilesMap == null) {
+				// Could not fully build map. fallback is to export whole directory
+				String containerName= classContainer.getFullPath().toString();
+				String msg= Messages.format(JarPackagerMessages.JarFileExportOperation_missingSourceFileAttributeExportedAll, containerName); 
+				addInfo(msg, null);
+				fExportedClassContainers.add(classContainer);
+				return getClassesIn(classContainer);
+			}
+			fClassFilesMapContainer= classContainer;
+		}
+		ArrayList classFileList= (ArrayList)fJavaNameToClassFilesMap.get(file.getName());
+		if (classFileList == null || classFileList.isEmpty()) {
+			String msg= Messages.format(JarPackagerMessages.JarFileExportOperation_classFileOnClasspathNotAccessible, file.getFullPath()); 
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, msg, null));
+		}
+		return classFileList.iterator();
 	}
 
 	private Iterator getClassesIn(IContainer classContainer) throws CoreException {

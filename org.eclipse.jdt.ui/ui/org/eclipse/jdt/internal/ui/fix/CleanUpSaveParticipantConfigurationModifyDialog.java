@@ -179,7 +179,7 @@ public class CleanUpSaveParticipantConfigurationModifyDialog extends StatusDialo
 				lastWidth= initialSize.x;
 			int lastHeight= fDialogSettings.getInt(DS_KEY_PREFERRED_HEIGHT);
 			if (initialSize.y > lastHeight)
-				lastHeight= initialSize.x;
+				lastHeight= initialSize.y;
 			return new Point(lastWidth, lastHeight);
 		} catch (NumberFormatException ex) {
 		}

@@ -204,7 +204,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 				lastWidth= initialSize.x;
 			int lastHeight= fDialogSettings.getInt(fKeyPreferredHight);
 			if (initialSize.y > lastHeight)
-				lastHeight= initialSize.x;
+				lastHeight= initialSize.y;
 			return new Point(lastWidth, lastHeight);
 		} catch (NumberFormatException ex) {
 		}
