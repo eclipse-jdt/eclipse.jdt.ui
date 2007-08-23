@@ -460,8 +460,6 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 		IPackageFragment pack= root.getPackageFragment(newName);
 		if (! pack.exists())
 			return true;
-//		else if (! pack.hasSubpackages()) //leaves are no good
-//			return false;			
 		else if (pack.containsJavaResources())
 			return false;
 		else if (pack.getNonJavaResources().length != 0)
@@ -471,7 +469,6 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 	}
 	
 	private RefactoringStatus checkPackageInCurrentRoot(String newName) throws CoreException {
-		//TODO: startsWith is wrong; must also check next char for '.'!
 		if (fRenameSubpackages) {
 			String currentName= getCurrentElementName();
 			if (isAncestorPackage(currentName, newName)) {
