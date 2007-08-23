@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,12 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
-import java.util.List;
-
-import org.eclipse.jface.text.templates.TemplateContext;
-import org.eclipse.jface.text.templates.TemplateVariable;
-import org.eclipse.jface.text.templates.TemplateVariableResolver;
-
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.Variable;
 
 /**
@@ -24,11 +18,8 @@ import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.V
  * 
  * @since 3.3
  */
-public class FieldResolver extends TemplateVariableResolver {
+public class FieldResolver extends AbstractVariableResolver {
 	
-	private final String fDefaultType;
-	private String fType;
-
 	/**
 	 * Default constructor for instantiation by the extension point.
 	 */
@@ -37,50 +28,14 @@ public class FieldResolver extends TemplateVariableResolver {
 	}
 	
 	FieldResolver(String defaultType) {
-		fDefaultType= defaultType;
+		super(defaultType);
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
+	/**
+	 * {@inheritDoc}
 	 */
-	public void resolve(TemplateVariable variable, TemplateContext context) {
-		List params= variable.getVariableType().getParams();
-		if (params.size() == 0)
-			fType= fDefaultType;
-		else
-			fType= (String) params.get(0);
-		
-		if (variable instanceof JavaVariable) {
-			JavaContext jc= (JavaContext) context;
-			JavaVariable jv= (JavaVariable) variable;
-			jv.setParamType(fType);
-	        Variable[] fields= jc.getFields(fType);
-			if (fields.length > 0) {
-				jv.setChoices(fields);
-				jc.markAsUsed(jv.getDefaultValue());
-			} else {
-				super.resolve(variable, context);
-				return;
-			}
-			if (fields.length > 1)
-				variable.setUnambiguous(false);
-			else
-				variable.setUnambiguous(isUnambiguous(context));
-		} else
-			super.resolve(variable, context);
+	protected Variable[] getVisibleVariables(String type, JavaContext context) {
+		return context.getFields(type);
 	}
 	
-	/*
-	 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolveAll(org.eclipse.jface.text.templates.TemplateContext)
-	 */
-	protected String[] resolveAll(TemplateContext context) {
-        JavaContext jc= (JavaContext) context;
-        Variable[] iterables= jc.getFields(fType);
-        String[] names= new String[iterables.length];
-        for (int i= 0; i < iterables.length; i++)
-			names[i]= iterables[i].getName();
-        if (names.length > 0)
-        	jc.markAsUsed(names[0]);
-		return names;
-	}
 }
