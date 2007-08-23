@@ -31,6 +31,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -57,7 +59,7 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 		String fSerialized;
 	}
 	
-	private SerializationResult launchTest(IType typeToLaunch) throws Exception {
+	private SerializationResult launchTest(IJavaElement elementToLaunch) throws Exception {
 		final SerializationResult result= new SerializationResult();
 
 		TestRunListener testRunListener= new TestRunListener() {
@@ -69,7 +71,7 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 		
 		JUnitCore.addTestRunListener(testRunListener); 
 		try {
-			new AbstractTestRunListenerTest().launchJUnit(typeToLaunch);
+			new AbstractTestRunListenerTest().launchJUnit(elementToLaunch);
 			assertTrue(new DisplayHelper(){
 				protected boolean condition() {
 					return result.fTestRunSession != null;
@@ -86,7 +88,7 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 		return result;
 	}
 
-	private void runExportImport(IType test, String expectedXML) throws Exception {
+	private void runExportImport(IJavaElement test, String expectedXML) throws Exception {
 		SerializationResult serializationResult= launchTest(test);
 		assertEqualXML(expectedXML, serializationResult.fSerialized);
 		
@@ -220,6 +222,21 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 		Path testPath= new Path(JUnitWorkspaceTestSetup.getProjectPath() + "ant/result/TEST-pack." + test + ".xml");
 		File testFile= JavaTestPlugin.getDefault().getFileInPlugin(testPath);
 		JUnitModel.importTestRunSession(testFile); // no contents check for now...
+	}
+	
+	protected void runMethodTest(String testType, String method) throws Exception {
+		IPackageFragmentRoot root= JUnitWorkspaceTestSetup.getRoot();
+		IPackageFragment pack= root.getPackageFragment("pack");
+		ICompilationUnit cu= pack.getCompilationUnit(testType + ".java");
+		IType testCase= cu.findPrimaryType();
+		IMethod testMethod= testCase.getMethod(method, new String[0]);
+		
+		Path expectedPath= new Path(JUnitWorkspaceTestSetup.getProjectPath() + "xml/" + testType + "_" + method + ".xml");
+		File expectedFile= JavaTestPlugin.getDefault().getFileInPlugin(expectedPath);
+		String expected= getContents(new FileInputStream(expectedFile));
+		runExportImport(testMethod, expected);
+		
+		//ant cannot run single test methods
 	}
 	
 }

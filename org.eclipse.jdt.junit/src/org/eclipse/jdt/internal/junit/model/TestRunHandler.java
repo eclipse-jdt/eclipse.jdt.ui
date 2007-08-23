@@ -83,6 +83,7 @@ public class TestRunHandler extends DefaultHandler {
 			} else {
 				fTestRunSession.reset(); 
 			}
+			fTestSuite= fTestRunSession.getTestRoot();
 			
 		} else if (qName.equals(IXMLTags.NODE_TESTSUITES)) { 
 			// support Ant's 'junitreport' task; create suite from NODE_TESTSUITE
@@ -93,12 +94,12 @@ public class TestRunHandler extends DefaultHandler {
 			if (fTestRunSession == null) {
 				// support standalone suites and Ant's 'junitreport' task:
 				fTestRunSession= new TestRunSession(name, null);
+				fTestSuite= fTestRunSession.getTestRoot();
 			}
 			
 			String pack= attributes.getValue(IXMLTags.ATTR_PACKAGE);
 			String suiteName= pack == null ? name : pack + "." + name; //$NON-NLS-1$
-			TestSuiteElement parent= fTestSuite == null ? fTestRunSession.getTestRoot() : fTestSuite;
-			fTestSuite= (TestSuiteElement) fTestRunSession.createTestElement(parent, getNextId(), suiteName, true, 0);
+			fTestSuite= (TestSuiteElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), suiteName, true, 0);
 			fNotRun.push(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_INCOMPLETE)));
 			
 		} else if (qName.equals(IXMLTags.NODE_PROPERTIES) || qName.equals(IXMLTags.NODE_PROPERTY)) {
