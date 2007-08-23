@@ -4945,7 +4945,7 @@
             contextTypeId="java"
             description="%templates.java.resolvers.Imports.description"
             name="%templates.java.resolvers.Imports.name"
-            type="imports"/>
+            type="import"/>
    </extension>
 
 <!-- =========================================================================== -->
