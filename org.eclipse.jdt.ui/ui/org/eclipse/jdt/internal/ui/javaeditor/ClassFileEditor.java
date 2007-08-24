@@ -78,6 +78,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
@@ -666,7 +667,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		verifyInput(getEditorInput());
 		
-		final IJavaElement inputElement= getInputJavaElement();
+		final ITypeRoot inputElement= getInputJavaElement();
 
 		Job job= new Job(JavaEditorMessages.OverrideIndicatorManager_intallJob) {
 			/*

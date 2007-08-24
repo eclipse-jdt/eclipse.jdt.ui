@@ -39,7 +39,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionFactory;
@@ -50,8 +49,10 @@ import org.eclipse.ui.operations.UndoRedoActionGroup;
 import org.eclipse.ui.part.Page;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ITypeRoot;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -60,7 +61,6 @@ import org.eclipse.jdt.internal.ui.actions.ExtractSuperClassAction;
 import org.eclipse.jdt.internal.ui.actions.IntroduceParameterObjectAction;
 import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -645,13 +645,8 @@ public class RefactorActionGroup extends ActionGroup {
 		}
 	}
 	
-	private IJavaElement getEditorInput() {
-		final IEditorInput input= fEditor.getEditorInput();
-		if (input instanceof IClassFileEditorInput) {
-			IClassFileEditorInput extended= (IClassFileEditorInput) input;
-			return extended.getClassFile();
-		}
-		return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(input);
+	private ITypeRoot getEditorInput() {
+		return JavaUI.getEditorInputTypeRoot(fEditor.getEditorInput());
 	}
 	
 	private IDocument getDocument() {

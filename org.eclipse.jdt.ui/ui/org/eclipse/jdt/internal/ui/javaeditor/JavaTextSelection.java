@@ -15,6 +15,7 @@ import org.eclipse.jface.text.TextSelection;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -36,7 +37,7 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
  */
 public class JavaTextSelection extends TextSelection {
 
-	private IJavaElement fElement;
+	private ITypeRoot fElement;
 	private IJavaElement[] fResolvedElements;
 
 	private boolean fEnclosingElementRequested;
@@ -60,8 +61,12 @@ public class JavaTextSelection extends TextSelection {
 
 	/**
 	 * Creates a new text selection at the given offset and length.
+	 * @param element the root element
+	 * @param document the document
+	 * @param offset offset of the selection
+	 * @param length length of the selection
 	 */
-	public JavaTextSelection(IJavaElement element, IDocument document, int offset, int length) {
+	public JavaTextSelection(ITypeRoot element, IDocument document, int offset, int length) {
 		super(document, offset, length);
 		fElement= element;
 	}

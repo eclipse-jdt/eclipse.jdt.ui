@@ -50,6 +50,7 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -63,6 +64,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -204,6 +206,12 @@ public final class ClipboardOperationAction extends TextEditorAction {
 
 	/**
 	 * Creates the action.
+	 * @param bundle the resource bundle
+	 * @param prefix a prefix to be prepended to the various resource keys
+	 *   (described in <code>ResourceAction</code> constructor), or
+	 *   <code>null</code> if none
+	 * @param editor the text editor
+	 * @param operationCode the operation code
 	 */
 	public ClipboardOperationAction(ResourceBundle bundle, String prefix, ITextEditor editor, int operationCode) {
 		super(bundle, prefix, editor);
@@ -313,7 +321,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 
 	private void doCutCopyWithImportsOperation() {
 		ITextEditor editor= getTextEditor();
-		IJavaElement inputElement= (IJavaElement) editor.getEditorInput().getAdapter(IJavaElement.class);
+		ITypeRoot inputElement= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
 		ISelection selection= editor.getSelectionProvider().getSelection();
 
 		Object clipboardData= null;
@@ -393,7 +401,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 	}
 
 
-	private ClipboardData getClipboardData(IJavaElement inputElement, int offset, int length) {
+	private ClipboardData getClipboardData(ITypeRoot inputElement, int offset, int length) {
 		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(inputElement, ASTProvider.WAIT_ACTIVE_ONLY, null);
 		if (astRoot == null) {
 			return null;
@@ -463,18 +471,17 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		String[] typeImports= (String[]) namesToImport.toArray(new String[namesToImport.size()]);
 		String[] staticImports= (String[]) staticsToImport.toArray(new String[staticsToImport.size()]);
 		return new ClipboardData(inputElement, typeImports, staticImports);
-	}
-
+	}	
 
 	private void doPasteWithImportsOperation() {
 		ITextEditor editor= getTextEditor();
-		IJavaElement inputElement= (IJavaElement) editor.getEditorInput().getAdapter(IJavaElement.class);
+		IJavaElement inputElement= JavaUI.getEditorInputTypeRoot(editor.getEditorInput()); 
 
 		Clipboard clipboard= new Clipboard(getDisplay());
 		ClipboardData importsData= (ClipboardData) clipboard.getContents(fgTransferInstance);
 		if (importsData != null && inputElement instanceof ICompilationUnit && !importsData.isFromSame(inputElement)) {
 			// combine operation and adding of imports
-			IRewriteTarget target= editor != null ? (IRewriteTarget) editor.getAdapter(IRewriteTarget.class) : null;
+			IRewriteTarget target= (IRewriteTarget) editor.getAdapter(IRewriteTarget.class);
 			if (target != null) {
 				target.beginCompoundChange();
 			}

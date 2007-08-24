@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.filebuffers.FileBuffers;
@@ -38,9 +37,10 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -183,18 +183,10 @@ public class NLSHintHelper {
 
 	public static String getResourceBundleName(ITypeBinding accessorClassBinding) throws JavaModelException {
 		IJavaElement je= accessorClassBinding.getJavaElement();
-		if (je == null)
-			return null;
-		
-		IOpenable openable= je.getOpenable();
-		IJavaElement container= null;
-		if (openable instanceof ICompilationUnit)
-			container= (ICompilationUnit)openable;
-		else if (openable instanceof IClassFile)
-			container= (IClassFile)openable;
-		else
-			Assert.isLegal(false);
-		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(container, ASTProvider.WAIT_YES, null);
+		if (!(je instanceof IType))
+			return null;	
+		ITypeRoot typeRoot= ((IType) je).getTypeRoot();
+		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(typeRoot, ASTProvider.WAIT_YES, null);
 	
 		return getResourceBundleName(astRoot);
 	}

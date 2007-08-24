@@ -32,10 +32,12 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -729,6 +731,27 @@ public final class JavaUI {
 			return je;
 		
 		return (IJavaElement)editorInput.getAdapter(IJavaElement.class);
+	}
+	
+	/**
+	 * Returns the {@link ITypeRoot} wrapped by the given editor input.
+	 *
+	 * @param editorInput the editor input
+	 * @return the {@link ITypeRoot} wrapped by <code>editorInput</code> or <code>null</code> if the editor input
+	 * does not stand for a ITypeRoot
+	 * @since 3.
+	 */
+	public static ITypeRoot getEditorInputTypeRoot(IEditorInput editorInput) {
+		// Performance: check working copy manager first: this is faster
+		ICompilationUnit cu= JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editorInput);
+		if (cu != null)
+			return cu;
+		
+		IJavaElement je= (IJavaElement) editorInput.getAdapter(IJavaElement.class);
+		if (je instanceof ITypeRoot)
+			return (ITypeRoot) je;
+		
+		return null;
 	}
 
 	/**
