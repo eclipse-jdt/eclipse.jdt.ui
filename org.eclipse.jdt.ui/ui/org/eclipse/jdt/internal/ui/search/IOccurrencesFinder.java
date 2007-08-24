@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,15 +13,16 @@ package org.eclipse.jdt.internal.ui.search;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.jface.text.IDocument;
 
-
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 public interface IOccurrencesFinder {
 	
 	public String initialize(CompilationUnit root, int offset, int length);
+	
+	public String initialize(CompilationUnit root, ASTNode node);
 	
 	public List perform();
 	
@@ -55,5 +56,5 @@ public interface IOccurrencesFinder {
 	 */
 	public String getElementName();
 	
-	public void collectOccurrenceMatches(IJavaElement element, IDocument document, Collection resultingMatches);
+	public void collectOccurrenceMatches(ITypeRoot element, Collection resultingMatches);
 }

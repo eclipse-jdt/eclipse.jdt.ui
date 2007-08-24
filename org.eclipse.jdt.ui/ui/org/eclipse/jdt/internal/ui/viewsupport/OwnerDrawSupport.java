@@ -57,11 +57,11 @@ public abstract class OwnerDrawSupport implements Listener {
 	
 	/**
 	 * Return the color for the given style
-	 * @param foregroundColorName the name of the color
+	 * @param colorName the name of the color
 	 * @param display the current display
 	 * @return the color
 	 */
-	public abstract Color getColor(String foregroundColorName, Display display);
+	public abstract Color getColor(String colorName, Display display);
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.swt.widgets.Listener#handleEvent(org.eclipse.swt.widgets.Event)
@@ -101,7 +101,7 @@ public abstract class OwnerDrawSupport implements Listener {
 				gc.drawFocus(bounds.x, bounds.y, bounds.width, bounds.height);
 			}
 		} else if (item instanceof TableItem) {
-			TableItem tableItem= (TableItem) item;
+			TableItem tableItem= (TableItem) item;		
 			Image image = tableItem.getImage(event.index);
 			if (image != null) {
 				processImage(image, gc, tableItem.getImageBounds(event.index));
@@ -137,9 +137,15 @@ public abstract class OwnerDrawSupport implements Listener {
 				ColoredString.StyleRange curr= (ColoredString.StyleRange) ranges.next();
 				ColoredString.Style style= curr.style;
 				if (style != null) {
-					Color foreground= getColor(style.getForegroundColorName(), display);
-					TextStyle textStyle= new TextStyle(null, foreground, null);
-					fTextLayout.setStyle(textStyle, curr.offset, curr.offset + curr.length - 1);
+					String foregroundColorName= style.getForegroundColorName();
+					String backgroundColorName= style.getBackgroundColorName();
+					if (foregroundColorName != null || backgroundColorName != null) {
+						Color foreground= foregroundColorName != null ? getColor(foregroundColorName, display) : null;
+						Color background= backgroundColorName != null ? getColor(backgroundColorName, display) : null;
+
+						TextStyle textStyle= new TextStyle(null, foreground, background);
+						fTextLayout.setStyle(textStyle, curr.offset, curr.offset + curr.length - 1);
+					}
 				}
 			}
 		}

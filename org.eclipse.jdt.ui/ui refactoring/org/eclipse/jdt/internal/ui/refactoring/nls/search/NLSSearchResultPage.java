@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,8 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.search.JavaSearchResultPage;
 import org.eclipse.jdt.internal.ui.search.TextSearchTableContentProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
+
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerComparator;
@@ -81,6 +83,7 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements 
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#configureTableViewer(org.eclipse.jface.viewers.TableViewer)
 	 */
 	protected void configureTableViewer(TableViewer viewer) {
+		ColoredViewersManager.install(viewer);
 		viewer.setComparator(new ViewerComparator() {
 			public int category(Object element) {
 				if (element instanceof FileEntry) {

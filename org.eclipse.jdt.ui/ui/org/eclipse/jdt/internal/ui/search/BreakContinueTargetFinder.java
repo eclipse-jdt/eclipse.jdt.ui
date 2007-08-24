@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,8 +15,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -91,11 +90,10 @@ public class BreakContinueTargetFinder extends ASTVisitor {
 	/* Returns contents or <code>null</code> if there's trouble. */
 	private String getContents(CompilationUnit root) {
 		try {
-			IJavaElement rootElem= root.getJavaElement();
-			if ((rootElem instanceof ISourceReference))
-				return ((ISourceReference)rootElem).getSource();
-			else
-				return null;
+			ITypeRoot rootElem= root.getTypeRoot();
+			if (rootElem != null)
+				return rootElem.getSource();
+			return null;
 		} catch (JavaModelException e) {
 			//We must handle it here because JavaEditor does not expect an exception
 			

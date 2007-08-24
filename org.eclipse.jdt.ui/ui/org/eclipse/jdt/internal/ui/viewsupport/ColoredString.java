@@ -20,13 +20,19 @@ public class ColoredString {
 	
 	public static class Style {
 		private final String fForegroundColorName;
+		private final String fBackgroundColorName;
 
-		public Style(String foregroundColorName) {
+		public Style(String foregroundColorName, String backgroundColorName) {
 			fForegroundColorName= foregroundColorName;	
+			fBackgroundColorName= backgroundColorName;
 		}
 		
 		public String getForegroundColorName() {
 			return fForegroundColorName;
+		}
+		
+		public String getBackgroundColorName() {
+			return fBackgroundColorName;
 		}
 	}
 	

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,9 +29,9 @@ import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
 import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -159,7 +159,7 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 		IMember member= getMember(selection);
 		if (!ActionUtil.isProcessable(getShell(), member))
 			return;
-		FindOccurrencesEngine engine= FindOccurrencesEngine.create(member, new OccurrencesFinder());
+		FindOccurrencesEngine engine= FindOccurrencesEngine.create(member.getTypeRoot(), new OccurrencesFinder());
 		try {
 			ISourceRange range= member.getNameRange();
 			String result= engine.run(range.getOffset(), range.getLength());
@@ -191,7 +191,7 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 	 * Method declared in SelectionDispatchAction.
 	 */
 	public final void run(ITextSelection ts) {
-		IJavaElement input= getEditorInput(fEditor);
+		ITypeRoot input= getEditorInput(fEditor);
 		if (!ActionUtil.isProcessable(getShell(), input))
 			return;
 		FindOccurrencesEngine engine= FindOccurrencesEngine.create(input, new OccurrencesFinder());
@@ -204,7 +204,7 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 		}
 	}
 
-	private static IJavaElement getEditorInput(JavaEditor editor) {
+	private static ITypeRoot getEditorInput(JavaEditor editor) {
 		IEditorInput input= editor.getEditorInput();
 		if (input instanceof IClassFileEditorInput)
 			return ((IClassFileEditorInput)input).getClassFile();

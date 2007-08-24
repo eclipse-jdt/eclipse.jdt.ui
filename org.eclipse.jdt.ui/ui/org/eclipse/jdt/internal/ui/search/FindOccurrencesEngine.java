@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,90 +10,46 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-
 import org.eclipse.search.ui.NewSearchUI;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
-public abstract class FindOccurrencesEngine {
-	
-	private IOccurrencesFinder fFinder;
-	
-	private static class FindOccurencesClassFileEngine extends FindOccurrencesEngine {
-		private IClassFile fClassFile;
-		
-		public FindOccurencesClassFileEngine(IClassFile file, IOccurrencesFinder finder) {
-			super(finder);
-			fClassFile= file;
-		}
-		protected CompilationUnit createAST() {
-			return JavaPlugin.getDefault().getASTProvider().getAST(fClassFile, ASTProvider.WAIT_YES, null);
-		}
-		protected IJavaElement getInput() {
-			return fClassFile;
-		}
-		protected ISourceReference getSourceReference() {
-			return fClassFile;
-		}
-	}
+public final class FindOccurrencesEngine {
 
-	private static class FindOccurencesCUEngine extends FindOccurrencesEngine {
-		private ICompilationUnit fCUnit;
-		
-		public FindOccurencesCUEngine(ICompilationUnit unit, IOccurrencesFinder finder) {
-			super(finder);
-			fCUnit= unit;
-		}
-		protected CompilationUnit createAST() {
-			return JavaPlugin.getDefault().getASTProvider().getAST(fCUnit, ASTProvider.WAIT_YES, null);
-		}
-		protected IJavaElement getInput() {
-			return fCUnit;
-		}
-		protected ISourceReference getSourceReference() {
-			return fCUnit;
-		}
-	}
-	
-	protected FindOccurrencesEngine(IOccurrencesFinder finder) {
-		fFinder= finder;
-	}
-	
-	public static FindOccurrencesEngine create(IJavaElement root, IOccurrencesFinder finder) {
+	public static FindOccurrencesEngine create(ITypeRoot root, IOccurrencesFinder finder) {
 		if (root == null || finder == null)
 			return null;
+		return new FindOccurrencesEngine(root, finder);
+	}
+	
+	private IOccurrencesFinder fFinder;
+	private ITypeRoot fTypeRoot;
 		
-		ICompilationUnit unit= (ICompilationUnit)root.getAncestor(IJavaElement.COMPILATION_UNIT);
-		if (unit != null)
-			return new FindOccurencesCUEngine(unit, finder);
-		IClassFile cf= (IClassFile)root.getAncestor(IJavaElement.CLASS_FILE);
-		if (cf != null)
-			return new FindOccurencesClassFileEngine(cf, finder);
-		return null;
+	private FindOccurrencesEngine(ITypeRoot typeRoot, IOccurrencesFinder finder) {
+		fFinder= finder;
+		fTypeRoot= typeRoot;
 	}
 
-	protected abstract CompilationUnit createAST();
+	public CompilationUnit createAST() {
+		return JavaPlugin.getDefault().getASTProvider().getAST(fTypeRoot, ASTProvider.WAIT_YES, null);
+	}
 	
-	protected abstract IJavaElement getInput();
+	public ITypeRoot getInput() {
+		return fTypeRoot;
+	}
 	
-	protected abstract ISourceReference getSourceReference();
-	
-	protected IOccurrencesFinder getOccurrencesFinder() {
+	public IOccurrencesFinder getOccurrencesFinder() {
 		return fFinder;
 	}
 
 	public String run(int offset, int length) throws JavaModelException {
-		ISourceReference sr= getSourceReference();
+		ISourceReference sr= getInput();
 		if (sr.getSourceRange() == null) {
 			return SearchMessages.FindOccurrencesEngine_noSource_text; 
 		}
@@ -106,13 +62,11 @@ public abstract class FindOccurrencesEngine {
 		if (message != null)
 			return message;
 		
-		final IDocument document= new Document(getSourceReference().getSource());
-		
-		performNewSearch(fFinder, document, getInput());
+		performNewSearch(fFinder, getInput());
 		return null;
 	}
 	
-	private void performNewSearch(IOccurrencesFinder finder, IDocument document, IJavaElement element) {
-		NewSearchUI.runQueryInBackground(new OccurrencesSearchQuery(finder, document, element));
+	private void performNewSearch(IOccurrencesFinder finder, ITypeRoot element) {
+		NewSearchUI.runQueryInBackground(new OccurrencesSearchQuery(finder, element));
 	}
 }

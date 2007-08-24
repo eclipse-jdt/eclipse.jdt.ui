@@ -53,9 +53,11 @@ import org.eclipse.jdt.internal.ui.viewsupport.ColoredString.Style;
 
 public class ColoredJavaElementLabels {
 
-	public static final Style QUALIFIER_STYLE= new Style(ColoredViewersManager.QUALIFIER_COLOR_NAME); 
-	public static final Style COUNTER_STYLE= new Style(ColoredViewersManager.COUNTER_COLOR_NAME); 
-	public static final Style DECORATIONS_STYLE= new Style(ColoredViewersManager.DECORATIONS_COLOR_NAME); 
+	public static final Style QUALIFIER_STYLE= new Style(ColoredViewersManager.QUALIFIER_COLOR_NAME, null); 
+	public static final Style COUNTER_STYLE= new Style(ColoredViewersManager.COUNTER_COLOR_NAME, null); 
+	public static final Style DECORATIONS_STYLE= new Style(ColoredViewersManager.DECORATIONS_COLOR_NAME, null); 
+	
+	public static final Style HIGHLIGHT_STYLE= new Style(null, ColoredViewersManager.HIGHLIGHT_BG_COLOR_NAME);
 	
 	private static final Style APPENDED_TYPE_STYLE= DECORATIONS_STYLE; 
 	
@@ -377,6 +379,12 @@ public class ColoredJavaElementLabels {
 		}
 	}
 	
+	/**
+	 * Appends labels for type parameters from type binding array
+	 * @param typeParameters the type parameters
+	 * @param flags flags with render options
+	 * @param result the resulting string buffer
+	 */
 	private static void getTypeParametersLabel(ITypeParameter[] typeParameters, long flags, ColoredString result) {
 		if (typeParameters.length > 0) {
 			result.append('<');
@@ -564,6 +572,12 @@ public class ColoredJavaElementLabels {
 		}
 	}
 	
+	/**
+	 * Appends labels for type parameters from a signature
+	 * @param typeParamSigs the type parameter signature
+	 * @param flags flags with render options
+	 * @param result the resulting string buffer
+	 */
 	private static void getTypeParameterSignaturesLabel(String[] typeParamSigs, long flags, ColoredString result) {
 		if (typeParamSigs.length > 0) {
 			result.append('<');

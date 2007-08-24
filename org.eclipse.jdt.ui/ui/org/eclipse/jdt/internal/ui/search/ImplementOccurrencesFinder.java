@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,16 +12,16 @@ package org.eclipse.jdt.internal.ui.search;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
+import org.eclipse.core.runtime.CoreException;
+
 
 import org.eclipse.search.ui.text.Match;
 
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
  * 
  * @since 3.1
  */
-public class ImplementOccurrencesFinder implements org.eclipse.jdt.internal.ui.search.IOccurrencesFinder {
+public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 	
 	
 	private class MethodVisitor extends ASTVisitor {
@@ -79,7 +79,7 @@ public class ImplementOccurrencesFinder implements org.eclipse.jdt.internal.ui.s
 		}
 	}
 	
-	
+	private CompilationUnit fASTRoot;
 	private ASTNode fStart;
 	private List fResult;
 	private ASTNode fSelectedNode;
@@ -110,6 +110,7 @@ public class ImplementOccurrencesFinder implements org.eclipse.jdt.internal.ui.s
 			return SearchMessages.ImplementOccurrencesFinder_invalidTarget;  
 
 		fStart= typeDeclaration;
+		fASTRoot= root;
 		return null;
 	}
 	
@@ -124,21 +125,40 @@ public class ImplementOccurrencesFinder implements org.eclipse.jdt.internal.ui.s
 		return fResult;
 	}
 	
-	public void collectOccurrenceMatches(IJavaElement element, IDocument document, Collection resultingMatches) {
+	public void collectOccurrenceMatches(ITypeRoot element, Collection resultingMatches) {
+		HashMap lineToGroup= new HashMap();
+
 		for (Iterator iter= fResult.iterator(); iter.hasNext();) {
 			ASTNode node= (ASTNode) iter.next();
-			int startPosition= node.getStartPosition();
-			int length= node.getLength();
-			try {
-				int line= document.getLineOfOffset(startPosition);
-				IRegion region= document.getLineInformation(line);
-				String lineContents= document.get(region.getOffset(), region.getLength()).trim();
-				JavaElementLine groupKey= new JavaElementLine(element, line, lineContents);
-				resultingMatches.add(new Match(groupKey, startPosition, length));
-			} catch (BadLocationException e) {
-				//nothing
+			JavaElementLine lineKey= getLineElement(node, lineToGroup, element);
+			if (lineKey != null) {
+				Match match= new Match(lineKey, node.getStartPosition(), node.getLength());
+				resultingMatches.add(match);
 			}
 		}
+	}
+	
+	private JavaElementLine getLineElement(ASTNode node, HashMap lineToGroup, ITypeRoot element) {
+		int lineNumber= fASTRoot.getLineNumber(node.getStartPosition());
+		if (lineNumber <= 0) {
+			return null;
+		}
+		
+		JavaElementLine groupKey= null;
+		try {
+			Integer key= new Integer(lineNumber);
+			groupKey= (JavaElementLine) lineToGroup.get(key);
+			if (groupKey == null) {
+				int lineStartOffset= fASTRoot.getPosition(lineNumber, 0);
+				if (lineStartOffset >= 0) {
+					groupKey= new JavaElementLine(element, lineNumber - 1, lineStartOffset);
+					lineToGroup.put(key, groupKey);
+				}
+			}
+		} catch (CoreException e) {
+			//nothing
+		}
+		return groupKey;
 	}
 	
 	/*

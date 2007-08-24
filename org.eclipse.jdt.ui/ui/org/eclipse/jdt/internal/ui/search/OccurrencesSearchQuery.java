@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,13 +17,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.jface.text.IDocument;
-
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.Match;
 
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ITypeRoot;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -34,16 +32,14 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 
 	private final OccurrencesSearchResult fResult;
 	private IOccurrencesFinder fFinder;
-	private IDocument fDocument;
-	private final IJavaElement fElement;
+	private final ITypeRoot fElement;
 	private final String fJobLabel;
 	private final String fSingularLabel;
 	private final String fPluralLabel;
 	private final String fName;
 	
-	public OccurrencesSearchQuery(IOccurrencesFinder finder, IDocument document, IJavaElement element) {
+	public OccurrencesSearchQuery(IOccurrencesFinder finder, ITypeRoot element) {
 		fFinder= finder;
-		fDocument= document;
 		fElement= element;
 		fJobLabel= fFinder.getJobLabel();
 		fResult= new OccurrencesSearchResult(this);
@@ -62,13 +58,12 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 		try {
 			fFinder.perform();
 			ArrayList resultingMatches= new ArrayList();
-			fFinder.collectOccurrenceMatches(fElement, fDocument, resultingMatches);
+			fFinder.collectOccurrenceMatches(fElement, resultingMatches);
 			if (!resultingMatches.isEmpty()) {
 				fResult.addMatches((Match[]) resultingMatches.toArray(new Match[resultingMatches.size()]));
 			}
 			//Don't leak AST:
 			fFinder= null;
-			fDocument= null;
 		} finally {
 			monitor.done();
 		}

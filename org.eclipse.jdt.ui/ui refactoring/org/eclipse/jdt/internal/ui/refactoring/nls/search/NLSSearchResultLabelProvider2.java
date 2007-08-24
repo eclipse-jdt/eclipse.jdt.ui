@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,19 +11,22 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
-import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
-
-import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.search.TextSearchLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
+import org.eclipse.jdt.internal.ui.viewsupport.IRichLabelProvider;
 
 
-class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider {
+class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements IRichLabelProvider {
 	
 	private AppearanceAwareLabelProvider fLabelProvider;
 	
@@ -32,18 +35,42 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider {
 		fLabelProvider= new AppearanceAwareLabelProvider(JavaElementLabels.ALL_POST_QUALIFIED, 0);
 	}
 	
-	/*
-	 * @see org.eclipse.jdt.internal.ui.search.TextSearchLabelProvider#doGetText(java.lang.Object)
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
 	 */
-	protected String doGetText(Object element) {
+	public String getText(Object element) {
+		return getLabelWithCounts(element, internalGetText(element).toString()); 
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.IRichLabelProvider#getRichTextLabel(java.lang.Object)
+	 */
+	public ColoredString getRichTextLabel(Object element) {
+		return getColoredLabelWithCounts(element, internalGetText(element)); 
+	}
+	
+	private ColoredString internalGetText(Object element) {
+		String description;
+		ColoredString elementLabel;
+		
 		if (element instanceof FileEntry) {
 			FileEntry fileEntry= (FileEntry) element;
-			return fileEntry.getMessage();
+			description= fileEntry.getMessage();
+			elementLabel= getPropertiesName(fileEntry.getPropertiesFile());
 		} else if (element instanceof CompilationUnitEntry) {
-			return ((CompilationUnitEntry)element).getMessage();
+			CompilationUnitEntry cuEntry= (CompilationUnitEntry) element;
+			description= cuEntry.getMessage();
+			elementLabel= ColoredJavaElementLabels.getTextLabel(cuEntry.getCompilationUnit(), JavaElementLabels.ALL_POST_QUALIFIED | ColoredJavaElementLabels.COLORIZE);
 		} else {
-			return Messages.format(NLSSearchMessages.NLSSearchResultLabelProvider2_undefinedKeys, fLabelProvider.getText(element));
+			description= NLSSearchMessages.NLSSearchResultLabelProvider2_undefinedKeys;
+			elementLabel= ColoredJavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_POST_QUALIFIED | ColoredJavaElementLabels.COLORIZE);
 		}
+		return new ColoredString(description).append(' ').append(elementLabel);
+	}
+	
+	private ColoredString getPropertiesName(IFile propertiesFile) {
+		String path= propertiesFile.getFullPath().removeLastSegments(1).makeRelative().toString();
+		return new ColoredString(propertiesFile.getName()).append(" - " + path, ColoredJavaElementLabels.QUALIFIER_STYLE); //$NON-NLS-1$
 	}
 	
 	/*

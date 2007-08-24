@@ -979,6 +979,15 @@
             %coloredLabels.inherited.description
          </description>
       </colorDefinition>
+      <colorDefinition
+            label="%coloredLabels.match_highlight.label"
+            categoryId="org.eclipse.jdt.ui.presentation"
+            value="206,204,247"
+            id="org.eclipse.jdt.ui.ColoredLabels.match_highlight">
+         <description>
+            %coloredLabels.match_highlight.description
+         </description>
+      </colorDefinition>
    </extension>
    
    

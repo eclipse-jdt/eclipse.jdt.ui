@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,13 +16,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
+import org.eclipse.core.runtime.CoreException;
+
 
 import org.eclipse.search.ui.text.Match;
 
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -97,34 +96,46 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		return fUsages;
 	}
 	
-	public void collectOccurrenceMatches(IJavaElement element, IDocument document, Collection resultingMatches) {
-		boolean isVariable= fTarget instanceof IVariableBinding;
+	public void collectOccurrenceMatches(ITypeRoot element, Collection resultingMatches) {
 		HashMap lineToGroup= new HashMap();
 		
 		for (Iterator iter= fUsages.iterator(); iter.hasNext();) {
 			ASTNode node= (ASTNode) iter.next();
-			int startPosition= node.getStartPosition();
-			int length= node.getLength();
-			try {
-				boolean isWriteAccess= fWriteUsages.contains(node);
-				int line= document.getLineOfOffset(startPosition);
-				Integer lineInteger= new Integer(line);
-				OccurrencesGroupKey groupKey= (OccurrencesGroupKey) lineToGroup.get(lineInteger);
-				if (groupKey == null) {
-					IRegion region= document.getLineInformation(line);
-					String lineContents= document.get(region.getOffset(), region.getLength()).trim();
-					groupKey= new OccurrencesGroupKey(element, line, lineContents, isWriteAccess, isVariable);
-					lineToGroup.put(lineInteger, groupKey);
-				} else if (isWriteAccess) {
-					// a line with read an write access is considered as write access:
-					groupKey.setWriteAccess(true);
-				}
-				Match match= new Match(groupKey, startPosition, length);
+
+			JavaElementLine lineKey= getLineElement(node, lineToGroup, element);
+			if (lineKey != null) {
+				Match match= new Match(lineKey, node.getStartPosition(), node.getLength());
 				resultingMatches.add(match);
-			} catch (BadLocationException e) {
-				//nothing
 			}
 		}
+	}
+	
+	private JavaElementLine getLineElement(ASTNode node, HashMap lineToGroup, ITypeRoot element) {
+		int lineNumber= fRoot.getLineNumber(node.getStartPosition());
+		if (lineNumber <= 0) {
+			return null;
+		}
+		boolean isWriteAccess= fWriteUsages.contains(node);
+		
+		OccurrencesGroupKey groupKey= null;
+		try {
+			Integer key= new Integer(lineNumber);
+			groupKey= (OccurrencesGroupKey) lineToGroup.get(key);
+			if (groupKey == null) {
+				int lineStartOffset= fRoot.getPosition(lineNumber, 0);
+				if (lineStartOffset >= 0) {
+					boolean isVariable= fTarget instanceof IVariableBinding;
+					groupKey= new OccurrencesGroupKey(element, lineNumber - 1, lineStartOffset, isWriteAccess, isVariable);
+					lineToGroup.put(key, groupKey);
+				}
+			} else if (isWriteAccess) {
+				// a line with read an write access is considered as write access:
+				groupKey.setWriteAccess(true);
+			}
+		} catch (CoreException e) {
+			//nothing
+		}
+		return groupKey;
 	}
 	
 	/*

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,11 +41,8 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
-import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 
 
 public class NLSSearchQuery implements ISearchQuery {
@@ -72,7 +69,6 @@ public class NLSSearchQuery implements ISearchQuery {
 		try {
 			final AbstractTextSearchResult textResult= (AbstractTextSearchResult) getSearchResult();
 			textResult.removeAll();
-			AppearanceAwareLabelProvider labelProvider= new AppearanceAwareLabelProvider(JavaElementLabels.ALL_POST_QUALIFIED, 0);
 			
 			for (int i= 0; i < fWrapperClass.length; i++) {
 				IJavaElement wrapperClass= fWrapperClass[i];
@@ -92,7 +88,7 @@ public class NLSSearchQuery implements ISearchQuery {
 					requestor.reportUnusedPropertyNames(new SubProgressMonitor(monitor, 1));
 					
 					ICompilationUnit compilationUnit= ((IType)wrapperClass).getCompilationUnit();
-					CompilationUnitEntry groupElement= new CompilationUnitEntry(Messages.format(NLSSearchMessages.NLSSearchResultCollector_unusedKeys, labelProvider.getText(compilationUnit)), compilationUnit);
+					CompilationUnitEntry groupElement= new CompilationUnitEntry(NLSSearchMessages.NLSSearchResultCollector_unusedKeys, compilationUnit);
 					
 					boolean hasUnusedPropertie= false;
 					IField[] fields= ((IType)wrapperClass).getFields();

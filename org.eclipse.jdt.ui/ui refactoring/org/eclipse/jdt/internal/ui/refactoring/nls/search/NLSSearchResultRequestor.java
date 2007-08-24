@@ -46,7 +46,6 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.PropertyFileDocumentModel;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
@@ -136,8 +135,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		pm.beginTask("", fProperties.size()); //$NON-NLS-1$
 		boolean hasUnused= false;		
 		pm.setTaskName(NLSSearchMessages.NLSSearchResultRequestor_searching); 
-		String message= Messages.format(NLSSearchMessages.NLSSearchResultCollector_unusedKeys, getPropertiesName(fPropertiesFile)); 
-		FileEntry groupElement= new FileEntry(fPropertiesFile, message);
+		FileEntry groupElement= new FileEntry(fPropertiesFile, NLSSearchMessages.NLSSearchResultCollector_unusedKeys);
 		
 		for (Enumeration enumeration= fProperties.propertyNames(); enumeration.hasMoreElements();) {
 			String propertyName= (String) enumeration.nextElement();
@@ -152,10 +150,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		pm.done();
 	}
 
-	private String getPropertiesName(IFile propertiesFile) {
-		String path= propertiesFile.getFullPath().removeLastSegments(1).toOSString();
-		return propertiesFile.getName() + " - " + path; //$NON-NLS-1$
-	}
+
 
 	private void addMatch(FileEntry groupElement, String propertyName) {
 		/* 
@@ -371,8 +366,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		if (duplicateKeys.size() == 0)
 			return;
 		
-		String message= Messages.format(NLSSearchMessages.NLSSearchResultCollector_duplicateKeys, getPropertiesName(fPropertiesFile)); 
-		FileEntry groupElement= new FileEntry(fPropertiesFile, message);
+		FileEntry groupElement= new FileEntry(fPropertiesFile, NLSSearchMessages.NLSSearchResultCollector_duplicateKeys);
 		Iterator iter= duplicateKeys.iterator();
 		while (iter.hasNext()) {
 			String propertyName= (String) iter.next();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,8 +21,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -82,18 +81,16 @@ public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 	
 	/**
 	 * {@inheritDoc}
-	 * 
-	 * @since 3.2
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		setEnabled(getMember(selection) != null);
+		setEnabled(false);
 	}
 
 	/* (non-JavaDoc)
 	 * Method declared in SelectionDispatchAction.
 	 */
 	public final void run(ITextSelection ts) {
-		IJavaElement input= getEditorInput(fEditor);
+		ITypeRoot input= getEditorInput(fEditor);
 		if (!ActionUtil.isProcessable(getShell(), input))
 			return;
 		FindOccurrencesEngine engine= FindOccurrencesEngine.create(input, new ExceptionOccurrencesFinder());
@@ -106,7 +103,7 @@ public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 		}
 	}
 
-	private static IJavaElement getEditorInput(JavaEditor editor) {
+	private static ITypeRoot getEditorInput(JavaEditor editor) {
 		IEditorInput input= editor.getEditorInput();
 		if (input instanceof IClassFileEditorInput)
 			return ((IClassFileEditorInput)input).getClassFile();
@@ -118,9 +115,5 @@ public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 		if (statusLine != null) 
 			statusLine.setMessage(true, msg, null); 
 		shell.getDisplay().beep();
-	}
-	
-	private IMember getMember(IStructuredSelection selection) {
-		return null;
 	}
 }

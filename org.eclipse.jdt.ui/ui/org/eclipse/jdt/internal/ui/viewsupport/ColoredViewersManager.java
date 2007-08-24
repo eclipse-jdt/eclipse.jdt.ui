@@ -46,6 +46,8 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 	public static final String COUNTER_COLOR_NAME= "org.eclipse.jdt.ui.ColoredLabels.counter"; //$NON-NLS-1$
 	public static final String INHERITED_COLOR_NAME= "org.eclipse.jdt.ui.ColoredLabels.inherited"; //$NON-NLS-1$
 	
+	public static final String HIGHLIGHT_BG_COLOR_NAME= "org.eclipse.jdt.ui.ColoredLabels.match_highlight"; //$NON-NLS-1$
+	
 	private static ColoredViewersManager fgInstance= new ColoredViewersManager();
 	
 	private Map fManagedViewers;
@@ -89,7 +91,7 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 	public void propertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
 		if (property.equals(QUALIFIER_COLOR_NAME) || property.equals(COUNTER_COLOR_NAME) || property.equals(DECORATIONS_COLOR_NAME)
-				|| property.equals(PREF_COLORED_LABELS)) {
+				|| property.equals(HIGHLIGHT_BG_COLOR_NAME) || property.equals(PREF_COLORED_LABELS)) {
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
 					refreshAllViewers();
@@ -147,8 +149,8 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 						return getColoredLabelForView(item);
 					}
 	
-					public Color getColor(String foregroundColorName, Display display) {
-						return getColorForName(foregroundColorName);
+					public Color getColor(String colorName, Display display) {
+						return getColorForName(colorName);
 					}
 				};
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,25 +16,35 @@ import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
+
 public abstract class TextSearchLabelProvider extends LabelProvider {
 
 	private AbstractTextSearchViewPage fPage;
-	private String fMatchCountFormat;
 
 	public TextSearchLabelProvider(AbstractTextSearchViewPage page) {
 		fPage= page;
-		fMatchCountFormat= SearchMessages.TextSearchLabelProvider_matchCountFormat; 
 	}
 	
-	public final String getText(Object element) {
-		int matchCount= fPage.getInput().getMatchCount(element);
-		String text= doGetText(element);
-		if (matchCount < 2)
-			return text;
-		else {
-			return Messages.format(fMatchCountFormat, new Object[] { text, new Integer(matchCount) });
-		}
+	public AbstractTextSearchViewPage getPage() {
+		return fPage;
 	}
-
-	protected abstract String doGetText(Object element);
+			
+	protected final ColoredString getColoredLabelWithCounts(Object element, ColoredString coloredName) {
+		String name= coloredName.getString();
+		String decorated= getLabelWithCounts(element, name);
+		if (decorated.length() > name.length()) {
+			ColoredJavaElementLabels.decorateColoredString(coloredName, decorated, ColoredJavaElementLabels.COUNTER_STYLE);
+		}
+		return coloredName;
+	}
+	
+	protected final String getLabelWithCounts(Object element, String elementName) {
+		int matchCount= fPage.getInput().getMatchCount(element);
+		if (matchCount < 2)
+			return elementName;
+		
+		return Messages.format(SearchMessages.TextSearchLabelProvider_matchCountFormat, new String[] { elementName, String.valueOf(matchCount)});
+	}
 }

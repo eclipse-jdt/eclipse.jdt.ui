@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,14 +16,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.search.ui.text.Match;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -57,7 +54,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 
 	public static final String IS_EXCEPTION= "isException"; //$NON-NLS-1$
 	
-	private AST fAST;
+	private CompilationUnit fASTRoot;
 	private Name fSelectedName;
 	
 	private ITypeBinding fException;
@@ -73,7 +70,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	}
 	
 	public String initialize(CompilationUnit root, ASTNode node) {
-		fAST= root.getAST();
+		fASTRoot= root;
 		if (!(node instanceof Name)) {
 			return SearchMessages.ExceptionOccurrencesFinder_no_exception;  
 		}
@@ -131,34 +128,47 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return fResult;
 	}
 	
-	public void collectOccurrenceMatches(IJavaElement element, IDocument document, Collection resultingMatches) {
-		HashMap lineToLineElement= new HashMap();
+	public void collectOccurrenceMatches(ITypeRoot element, Collection resultingMatches) {
+		HashMap lineToGroup= new HashMap();
 		
 		for (Iterator iter= fResult.iterator(); iter.hasNext();) {
 			ASTNode node= (ASTNode) iter.next();
-			int startPosition= node.getStartPosition();
-			int length= node.getLength();
-			try {
-				boolean isException= node == fSelectedName;
-				int line= document.getLineOfOffset(startPosition);
-				Integer lineInteger= new Integer(line);
-				ExceptionOccurrencesGroupKey groupKey= (ExceptionOccurrencesGroupKey) lineToLineElement.get(lineInteger);
-				if (groupKey == null) {
-					IRegion region= document.getLineInformation(line);
-					String lineContents= document.get(region.getOffset(), region.getLength()).trim();
-					groupKey= new ExceptionOccurrencesGroupKey(element, line, lineContents, isException);
-					lineToLineElement.put(lineInteger, groupKey);
-				} else if (isException) {
-					// the line with the target exception always has the exception icon:
-					groupKey.setException(true);
-				}
-				Match match= new Match(groupKey, startPosition, length);
+
+			JavaElementLine lineKey= getLineElement(node, lineToGroup, element);
+			if (lineKey != null) {
+				Match match= new Match(lineKey, node.getStartPosition(), node.getLength());
 				resultingMatches.add(match);
-			} catch (BadLocationException e) {
-				//nothing
 			}
 		}
 	}
+		
+	private JavaElementLine getLineElement(ASTNode node, HashMap lineToGroup, ITypeRoot element) {
+		int lineNumber= fASTRoot.getLineNumber(node.getStartPosition());
+		if (lineNumber <= 0) {
+			return null;
+		}
+		boolean isException= node == fSelectedName;
+		
+		ExceptionOccurrencesGroupKey groupKey= null;
+		try {
+			Integer key= new Integer(lineNumber);
+			groupKey= (ExceptionOccurrencesGroupKey) lineToGroup.get(key);
+			if (groupKey == null) {
+				int lineStartOffset= fASTRoot.getPosition(lineNumber, 0);
+				if (lineStartOffset >= 0) {
+					groupKey= new ExceptionOccurrencesGroupKey(element, lineNumber - 1, lineStartOffset, isException);
+					lineToGroup.put(key, groupKey);
+				}
+			} else if (isException) {
+				// the line with the target exception always has the exception icon:
+				groupKey.setException(true);
+			}
+		} catch (CoreException e) {
+			//nothing
+		}
+		return groupKey;
+	}
+	
 		
 	public String getJobLabel() {
 		return SearchMessages.ExceptionOccurrencesFinder_searchfor ; 
@@ -199,7 +209,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	public boolean visit(ConstructorInvocation node) {
 		if (matches(node.resolveConstructorBinding())) {
 			// mark this
-			SimpleName name= fAST.newSimpleName("xxxx"); //$NON-NLS-1$
+			SimpleName name= fASTRoot.getAST().newSimpleName("xxxx"); //$NON-NLS-1$
 			name.setSourceRange(node.getStartPosition(), 4);
 			fResult.add(name);
 		}
@@ -214,7 +224,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	
 	public boolean visit(SuperConstructorInvocation node) {
 		if (matches(node.resolveConstructorBinding())) {
-			SimpleName name= fAST.newSimpleName("xxxxx"); //$NON-NLS-1$
+			SimpleName name= fASTRoot.getAST().newSimpleName("xxxxx"); //$NON-NLS-1$
 			name.setSourceRange(node.getStartPosition(), 5);
 			fResult.add(name);
 		}
@@ -230,7 +240,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	
 	public boolean visit(ThrowStatement node) {
 		if (matches(node.getExpression().resolveTypeBinding())) {
-			SimpleName name= fAST.newSimpleName("xxxxx"); //$NON-NLS-1$
+			SimpleName name= fASTRoot.getAST().newSimpleName("xxxxx"); //$NON-NLS-1$
 			name.setSourceRange(node.getStartPosition(), 5);
 			fResult.add(name);
 			

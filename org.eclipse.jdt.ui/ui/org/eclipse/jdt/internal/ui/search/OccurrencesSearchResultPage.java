@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 
 
 public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
@@ -79,11 +81,12 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 	protected void configureTreeViewer(TreeViewer viewer) {
 		throw new IllegalStateException("Doesn't support tree mode."); //$NON-NLS-1$
 	}
-
+	
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#configureTableViewer(org.eclipse.jface.viewers.TableViewer)
 	 */
 	protected void configureTableViewer(TableViewer viewer) {
+		ColoredViewersManager.install(viewer);
 		viewer.setComparator(new ViewerComparator() {
 			public int compare(Viewer v, Object e1, Object e2) {
 				JavaElementLine jel1= (JavaElementLine) e1;
