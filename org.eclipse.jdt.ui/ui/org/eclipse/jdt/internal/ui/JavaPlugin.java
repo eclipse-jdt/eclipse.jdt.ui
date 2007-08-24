@@ -773,7 +773,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @return the template context type registry for the java plug-in
 	 * @since 3.0
 	 */
-	public ContextTypeRegistry getTemplateContextRegistry() {
+	public synchronized ContextTypeRegistry getTemplateContextRegistry() {
 		if (fContextTypeRegistry == null) {
 			ContributionContextTypeRegistry registry= new ContributionContextTypeRegistry();
 			registry.addContextType(JavaContextType.NAME);

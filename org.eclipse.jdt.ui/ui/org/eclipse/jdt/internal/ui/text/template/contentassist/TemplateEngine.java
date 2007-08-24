@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.Assert;
 
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -34,6 +35,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
+import org.eclipse.jdt.internal.corext.template.java.SWTContextType;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -51,8 +53,12 @@ public class TemplateEngine {
 	private final Map fPositions= new HashMap();
 
 	/**
-	 * Creates the template engine for a particular context type.
-	 * See <code>TemplateContext</code> for supported context types.
+	 * Creates the template engine for the given <code>contextType</code>.
+	 * <p>
+	 * The <code>JavaPlugin.getDefault().getTemplateContextRegistry()</code>
+	 * defines the supported context types.</p>
+	 *
+	 * @param contextType the context type 
 	 */
 	public TemplateEngine(TemplateContextType contextType) {
 		Assert.isNotNull(contextType);
@@ -75,6 +81,8 @@ public class TemplateEngine {
 
 	/**
 	 * Returns the array of matching templates.
+	 * 
+	 * @return the template proposals
 	 */
 	public TemplateProposal[] getResults() {
 		return (TemplateProposal[]) fProposals.toArray(new TemplateProposal[fProposals.size()]);
@@ -117,7 +125,7 @@ public class TemplateEngine {
 		if (selection.y == 0) {
 			for (int i= 0; i != templates.length; i++)
 				if (context.canEvaluate(templates[i]))
-					fProposals.add(createTemplateProposal(templates[i], region, context));
+					fProposals.add(new TemplateProposal(templates[i], context, region, getImage()));
 
 		} else {
 
@@ -132,31 +140,25 @@ public class TemplateEngine {
 					template.getContextTypeId().equals(context.getContextType().getId()) &&
 					(!multipleLinesSelected && template.getPattern().indexOf($_WORD_SELECTION) != -1 || (multipleLinesSelected && template.getPattern().indexOf($_LINE_SELECTION) != -1)))
 				{
-					fProposals.add(createTemplateProposal(templates[i], region, context));
+					fProposals.add(new TemplateProposal(templates[i], context, region, getImage()));
 				}
 			}
 		}
 	}
 
-	/**
-	 * Create a new template proposal
-	 * 
-	 * @param template the template to create a proposal for
-	 * @param region the region where the proposal will be made
-	 * @param context the context used to make the proposal
-	 * @return the proposal, not <code>null</code>
-	 * 
-	 * @since 3.4
-	 */
-	protected TemplateProposal createTemplateProposal(Template template, IRegion region, CompilationUnitContext context) {
-		return new TemplateProposal(template, context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE));
+	private Image getImage() {
+		if (SWTContextType.NAME.equals(fContextType))
+			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SWT_TEMPLATE);
+		else
+			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE);
 	}
-
+	
 	/**
 	 * Returns <code>true</code> if one line is completely selected or if multiple lines are selected.
 	 * Being completely selected means that all characters except the new line characters are
 	 * selected.
 	 *
+	 * @param viewer the text viewer 
 	 * @return <code>true</code> if one or multiple lines are selected
 	 * @since 2.1
 	 */

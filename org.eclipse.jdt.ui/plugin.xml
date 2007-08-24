@@ -274,7 +274,7 @@
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="TemplateProposalComputer">
 		<javaCompletionProposalComputer
-			class="org.eclipse.jdt.internal.ui.text.java.JavaTemplateCompletionProposalComputer"
+			class="org.eclipse.jdt.internal.ui.text.java.TemplateCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.templateProposalCategory">
 			<partition type="__dftl_partition_content_type"/>
 			<partition type="__java_singleline_comment"/> <!-- to get NLS templates -->

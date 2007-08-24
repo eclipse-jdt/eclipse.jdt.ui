@@ -10,70 +10,55 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.jface.text.IRegion;
+import org.eclipse.core.runtime.Assert;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
-import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContextType;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
-import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.SWTContextType;
 
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
-import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
 
 /**
  * @since 3.4
  */
-public class SWTTemplateCompletionProposalComputer extends TemplateCompletionProposalComputer {
+public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompletionProposalComputer {
 
 	private final TemplateEngine fSWTTemplateEngine;
 
 	public SWTTemplateCompletionProposalComputer() {
 		ContextTypeRegistry templateContextRegistry= JavaPlugin.getDefault().getTemplateContextRegistry();
-
-		SWTContextType contextType= (SWTContextType) templateContextRegistry.getContextType(SWTContextType.NAME);
-		if (contextType == null) {
-			contextType= new SWTContextType();
-			templateContextRegistry.addContextType(contextType);
-
-			TemplateContextType otherContextType= templateContextRegistry.getContextType(JavaContextType.NAME);
-			if (otherContextType == null) {
-				otherContextType= new JavaContextType();
-				templateContextRegistry.addContextType(otherContextType);
-			}
-
-			contextType.inheritResolvers(otherContextType);
-		}
-
-		fSWTTemplateEngine= new TemplateEngine(contextType) {
-			
-			/* (non-Javadoc)
-			 * @see org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine#createTemplateProposal(org.eclipse.jface.text.templates.Template, org.eclipse.jface.text.IRegion, org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext)
-			 */
-			protected TemplateProposal createTemplateProposal(Template template, IRegion region, CompilationUnitContext context) {
-				TemplateProposal result= new TemplateProposal(template, context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SWT_TEMPLATE));
-				return result;
-			}		
-		};
+		TemplateContextType contextType= templateContextRegistry.getContextType(SWTContextType.NAME);
+		Assert.isNotNull(contextType);
+		fSWTTemplateEngine= new TemplateEngine(contextType);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.java.TemplateCompletionProposalComputer#computeCompletionEngine(org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext)
 	 */
 	protected TemplateEngine computeCompletionEngine(JavaContentAssistInvocationContext context) {
-
 		ICompilationUnit unit= context.getCompilationUnit();
 		if (unit == null)
 			return null;
+		
+		try {
+			String partition= TextUtilities.getContentType(context.getDocument(), IJavaPartitions.JAVA_PARTITIONING, context.getInvocationOffset(), true);
+			if (!partition.equals(IDocument.DEFAULT_CONTENT_TYPE))
+				return null;
+		} catch (BadLocationException e1) {
+			return null;
+		}
 
 		try {
 			IType type= unit.getJavaProject().findType("org.eclipse.swt.SWT"); //$NON-NLS-1$
@@ -84,13 +69,6 @@ public class SWTTemplateCompletionProposalComputer extends TemplateCompletionPro
 		}
 
 		return fSWTTemplateEngine;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionEnded()
-	 */
-	public void sessionEnded() {
-		fSWTTemplateEngine.reset();
 	}
 
 }
