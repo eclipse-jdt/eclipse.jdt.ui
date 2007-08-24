@@ -154,6 +154,7 @@ import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.ITypeParameter;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -3000,7 +3001,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected void installOverrideIndicator(boolean provideAST) {
 		uninstallOverrideIndicator();
 		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
-		final IJavaElement inputElement= getInputJavaElement();
+		final ITypeRoot inputElement= getInputJavaElement();
 
 		if (model == null || inputElement == null)
 			return;
@@ -3099,8 +3100,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @return the Java element wrapped by this editors input.
 	 * @since 3.0
 	 */
-	protected IJavaElement getInputJavaElement() {
-		return EditorUtility.getEditorInputJavaElement(this, false);
+	protected ITypeRoot getInputJavaElement() {
+		return (ITypeRoot) EditorUtility.getEditorInputJavaElement(this, false);
 	}
 
 	protected void updateStatusLine() {

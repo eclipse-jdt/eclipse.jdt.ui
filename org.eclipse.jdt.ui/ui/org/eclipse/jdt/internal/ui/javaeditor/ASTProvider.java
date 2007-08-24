@@ -29,7 +29,6 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ITypeRoot;
@@ -251,8 +250,8 @@ public final class ASTProvider {
 	private static final String DEBUG_PREFIX= "ASTProvider > "; //$NON-NLS-1$
 
 
-	private IJavaElement fReconcilingJavaElement;
-	private IJavaElement fActiveJavaElement;
+	private ITypeRoot fReconcilingJavaElement;
+	private ITypeRoot fActiveJavaElement;
 	private CompilationUnit fAST;
 	private ActivationListener fActivationListener;
 	private Object fReconcileLock= new Object();
@@ -294,7 +293,7 @@ public final class ASTProvider {
 
 	private void activeJavaEditorChanged(IWorkbenchPart editor) {
 
-		IJavaElement javaElement= null;
+		ITypeRoot javaElement= null;
 		if (editor instanceof JavaEditor)
 			javaElement= ((JavaEditor)editor).getInputJavaElement();
 
@@ -347,7 +346,7 @@ public final class ASTProvider {
 	 * @param javaElement the Java element
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#aboutToBeReconciled()
 	 */
-	void aboutToBeReconciled(IJavaElement javaElement) {
+	void aboutToBeReconciled(ITypeRoot javaElement) {
 
 		if (javaElement == null)
 			return;
@@ -384,7 +383,7 @@ public final class ASTProvider {
 	 * @param javaElement the compilation unit AST
 	 * @return a string used for debugging
 	 */
-	private String toString(IJavaElement javaElement) {
+	private String toString(ITypeRoot javaElement) {
 		if (javaElement == null)
 			return "null"; //$NON-NLS-1$
 		else
@@ -415,7 +414,7 @@ public final class ASTProvider {
 	 * @param ast
 	 * @param javaElement
 	 */
-	private synchronized void cache(CompilationUnit ast, IJavaElement javaElement) {
+	private synchronized void cache(CompilationUnit ast, ITypeRoot javaElement) {
 
 		if (fActiveJavaElement != null && !fActiveJavaElement.equals(javaElement)) {
 			if (DEBUG && javaElement != null) // don't report call from disposeAST()
@@ -438,6 +437,20 @@ public final class ASTProvider {
 	}
 
 	/**
+	 * @deprecated use {{@link #getAST(ITypeRoot, WAIT_FLAG, IProgressMonitor)} instead.
+	 * @param je the java element
+	 * @param waitFlag wait flag
+	 * @param progressMonitor progress monitor
+	 * @return the ast root
+	 */
+	public CompilationUnit getAST(IJavaElement je, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor) {
+		if (je == null)
+			return null;
+		Assert.isTrue(je.getElementType() == IJavaElement.CLASS_FILE || je.getElementType() == IJavaElement.COMPILATION_UNIT);
+		return getAST((ITypeRoot) je, waitFlag, progressMonitor);
+	}
+	
+	/**
 	 * Returns a shared compilation unit AST for the given
 	 * Java element.
 	 * <p>
@@ -445,47 +458,49 @@ public final class ASTProvider {
 	 * synchronize all access to its nodes.
 	 * </p>
 	 *
-	 * @param je				the Java element
-	 * @param waitFlag			{@link #WAIT_YES}, {@link #WAIT_NO} or {@link #WAIT_ACTIVE_ONLY}
-	 * @param progressMonitor	the progress monitor or <code>null</code>
-	 * @return					the AST or <code>null</code> if the AST is not available
+	 * @param input
+	 * 			the Java element, must not be <code>null</code>
+	 * @param waitFlag
+	 * 			{@link #WAIT_YES}, {@link #WAIT_NO} or {@link #WAIT_ACTIVE_ONLY}
+	 * @param progressMonitor
+	 * 			the progress monitor or <code>null</code>
+	 * @return
+	 * 			the AST or <code>null</code> if the AST is not available
 	 */
-	public CompilationUnit getAST(IJavaElement je, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor) {
-		if (je == null)
-			return null;
+	public CompilationUnit getAST(ITypeRoot input, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor) {
+		if (input == null || waitFlag == null)
+			throw new IllegalArgumentException("input or wait flag are null"); //$NON-NLS-1$
 		
-		Assert.isTrue(je.getElementType() == IJavaElement.CLASS_FILE || je.getElementType() == IJavaElement.COMPILATION_UNIT);
-
 		if (progressMonitor != null && progressMonitor.isCanceled())
 			return null;
 
 		boolean isActiveElement;
 		synchronized (this) {
-			isActiveElement= je.equals(fActiveJavaElement);
+			isActiveElement= input.equals(fActiveJavaElement);
 			if (isActiveElement) {
 				if (fAST != null) {
 					if (DEBUG)
-						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "returning cached AST:" + toString(fAST) + " for: " + je.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "returning cached AST:" + toString(fAST) + " for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 					return fAST;
 				}
 				if (waitFlag == WAIT_NO) {
 					if (DEBUG)
-						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "returning null (WAIT_NO) for: " + je.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "returning null (WAIT_NO) for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
 
 					return null;
 
 				}
 			}
 		}
-		if (isActiveElement && isReconciling(je)) {
+		if (isActiveElement && isReconciling(input)) {
 			try {
-				final IJavaElement activeElement= fReconcilingJavaElement;
+				final ITypeRoot activeElement= fReconcilingJavaElement;
 
 				// Wait for AST
 				synchronized (fWaitLock) {
 					if (DEBUG)
-						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "waiting for AST for: " + je.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "waiting for AST for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
 
 					fWaitLock.wait();
 				}
@@ -494,12 +509,12 @@ public final class ASTProvider {
 				synchronized (this) {
 					if (activeElement == fActiveJavaElement && fAST != null) {
 						if (DEBUG)
-							System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "...got AST for: " + je.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+							System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "...got AST for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
 
 						return fAST;
 					}
 				}
-				return getAST(je, waitFlag, progressMonitor);
+				return getAST(input, waitFlag, progressMonitor);
 			} catch (InterruptedException e) {
 				return null; // thread has been interrupted don't compute AST
 			}
@@ -507,24 +522,24 @@ public final class ASTProvider {
 			return null;
 
 		if (isActiveElement)
-			aboutToBeReconciled(je);
+			aboutToBeReconciled(input);
 
 		CompilationUnit ast= null;
 		try {
-			ast= createAST(je, progressMonitor);
+			ast= createAST(input, progressMonitor);
 			if (progressMonitor != null && progressMonitor.isCanceled()) {
 				ast= null;
 				if (DEBUG)
-					System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "Ignore created AST for: " + je.getElementName() + " - operation has been cancelled"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "Ignore created AST for: " + input.getElementName() + " - operation has been cancelled"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		} finally {
 			if (isActiveElement) {
 				if (fAST != null) {
 					if (DEBUG)
-						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "Ignore created AST for " + je.getElementName() + " - AST from reconciler is newer"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					reconciled(fAST, je, null);
+						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "Ignore created AST for " + input.getElementName() + " - AST from reconciler is newer"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					reconciled(fAST, input, null);
 				} else
-					reconciled(ast, je, null);
+					reconciled(ast, input, null);
 			}
 		}
 
@@ -545,7 +560,7 @@ public final class ASTProvider {
 	 * 								the client does not want to wait
 	 * @param progressMonitor	the progress monitor or <code>null</code>
 	 * @return					the AST or <code>null</code> if the AST is not available
-	 * @deprecated As of 3.1, use {@link #getAST(IJavaElement, WAIT_FLAG, IProgressMonitor)}
+	 * @deprecated Use {@link #getAST(ITypeRoot, WAIT_FLAG, IProgressMonitor)}
 	 */
 	public CompilationUnit getAST(IJavaElement je, boolean wait, IProgressMonitor progressMonitor) {
 		if (wait)
@@ -561,7 +576,7 @@ public final class ASTProvider {
 	 * @param javaElement the Java element
 	 * @return <code>true</code> if reported as currently being reconciled
 	 */
-	private boolean isReconciling(IJavaElement javaElement) {
+	private boolean isReconciling(ITypeRoot javaElement) {
 		synchronized (fReconcileLock) {
 			return javaElement != null && javaElement.equals(fReconcilingJavaElement) && fIsReconciling;
 		}
@@ -570,12 +585,12 @@ public final class ASTProvider {
 	/**
 	 * Creates a new compilation unit AST.
 	 *
-	 * @param je the Java element for which to create the AST
+	 * @param input the Java element for which to create the AST
 	 * @param progressMonitor the progress monitor
 	 * @return AST
 	 */
-	private CompilationUnit createAST(final IJavaElement je, final IProgressMonitor progressMonitor) {
-		if (!hasSource(je))
+	private static CompilationUnit createAST(final ITypeRoot input, final IProgressMonitor progressMonitor) {
+		if (!hasSource(input))
 			return null;
 		
 		if (progressMonitor != null && progressMonitor.isCanceled())
@@ -585,14 +600,7 @@ public final class ASTProvider {
 		parser.setResolveBindings(true);
 		parser.setStatementsRecovery(SHARED_AST_STATEMENT_RECOVERY);
 		parser.setBindingsRecovery(SHARED_BINDING_RECOVERY);
-
-		if (progressMonitor != null && progressMonitor.isCanceled())
-			return null;
-		
-		if (je.getElementType() == IJavaElement.COMPILATION_UNIT)
-			parser.setSource((ICompilationUnit)je);
-		else if (je.getElementType() == IJavaElement.CLASS_FILE)
-			parser.setSource((IClassFile)je);
+		parser.setSource(input);
 
 		if (progressMonitor != null && progressMonitor.isCanceled())
 			return null;
@@ -605,8 +613,11 @@ public final class ASTProvider {
 					if (progressMonitor != null && progressMonitor.isCanceled())
 						return;
 					if (DEBUG)
-						System.err.println(getThreadName() + " - " + DEBUG_PREFIX + "creating AST for: " + je.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+						System.err.println(getThreadName() + " - " + DEBUG_PREFIX + "creating AST for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
 					root[0]= (CompilationUnit)parser.createAST(progressMonitor);
+					
+					//mark as unmodifiable
+					ASTNodes.setFlagsToAST(root[0], ASTNode.PROTECT);
 				} catch (OperationCanceledException ex) {
 					return;
 				}
@@ -616,11 +627,6 @@ public final class ASTProvider {
 				JavaPlugin.getDefault().getLog().log(status);
 			}
 		});
-		
-		// mark as unmodifiable
-		if (root[0] != null)
-			ASTNodes.setFlagsToAST(root[0], ASTNode.PROTECT);
-		
 		return root[0];
 	}
 	
@@ -631,12 +637,12 @@ public final class ASTProvider {
 	 * @return <code>true</code> if the element has source
 	 * @since 3.2
 	 */
-	private boolean hasSource(IJavaElement je) {
+	private static boolean hasSource(ITypeRoot je) {
 		if (je == null || !je.exists())
 			return false;
 		
 		try {
-			return je instanceof ITypeRoot && ((ITypeRoot)je).getBuffer() != null;
+			return je.getBuffer() != null;
 		} catch (JavaModelException ex) {
 			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, "Error in JDT Core during AST creation", ex);  //$NON-NLS-1$
 			JavaPlugin.getDefault().getLog().log(status);
@@ -663,13 +669,11 @@ public final class ASTProvider {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(org.eclipse.jdt.core.dom.CompilationUnit)
 	 */
-	void reconciled(CompilationUnit ast, IJavaElement javaElement, IProgressMonitor progressMonitor) {
-
+	void reconciled(CompilationUnit ast, ITypeRoot javaElement, IProgressMonitor progressMonitor) {
 		if (DEBUG)
 			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "reconciled: " + toString(javaElement) + ", AST: " + toString(ast)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		synchronized (fReconcileLock) {
-
 			fIsReconciling= progressMonitor != null && progressMonitor.isCanceled();
 			if (javaElement == null || !javaElement.equals(fReconcilingJavaElement)) {
 
@@ -688,7 +692,7 @@ public final class ASTProvider {
 		}
 	}
 
-	private String getThreadName() {
+	private static String getThreadName() {
 		String name= Thread.currentThread().getName();
 		if (name != null)
 			return name;
