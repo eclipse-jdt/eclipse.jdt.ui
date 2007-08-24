@@ -30,11 +30,19 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
 
 /**
- * ...
+ * An template completion proposal computer can generate template completion proposals
+ * from a given TemplateEngine. 
+ * 
+ * Subclasses must implement {@link #computeCompletionEngine(JavaContentAssistInvocationContext)}
+ * 
  * @since 3.4
  */
 public abstract class AbstractTemplateCompletionProposalComputer implements IJavaCompletionProposalComputer {
-
+	
+	/**
+	 * The engine for the current session, if any
+	 */
+	private TemplateEngine fEngine;
 	
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
@@ -95,8 +103,6 @@ public abstract class AbstractTemplateCompletionProposalComputer implements IJav
 	 * 
 	 * @param context the context where proposals will be made
 	 * @return the engine or <code>null</code> if no engine available in the context
-	 * 
-	 * @since 3.4
 	 */
 	protected abstract TemplateEngine computeCompletionEngine(JavaContentAssistInvocationContext context);
 
@@ -155,8 +161,6 @@ public abstract class AbstractTemplateCompletionProposalComputer implements IJav
 		keywords.add("null"); //$NON-NLS-1$
 		KEYWORDS= Collections.unmodifiableSet(keywords);
 	}
-
-	private TemplateEngine fEngine;
 
 	private boolean isKeyword(String name) {
 		return KEYWORDS.contains(name);
