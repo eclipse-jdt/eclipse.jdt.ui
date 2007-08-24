@@ -21,6 +21,7 @@ import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.Variable;
 
+
 /**
  * Resolves template variables to variables which are assignment-compatible with the variable
  * instance class parameters.
@@ -76,7 +77,7 @@ public abstract class AbstractVariableResolver extends TemplateVariableResolver 
 				}
 				fVariables= (Variable[]) variables.toArray(new Variable[variables.size()]);
 				
-				//set to default type, a template which reverences to the type
+				//set to default type, a template which references to the type
 				//of _the_ parameter will not correctly work anyway
 				jv.setParamType(fDefaultType);
 			}

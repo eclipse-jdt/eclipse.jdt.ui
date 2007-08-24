@@ -27,6 +27,7 @@ import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
+import org.eclipse.jdt.internal.corext.template.java.SWTContextType;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -79,6 +80,27 @@ public class TemplateContributionTest extends TestCase {
 				TemplateVariable variable= variables[j];
 				if (!variable.getType().equals(variable.getName())) {
 					assertTrue("No resolver found for variable '" + variable.getType() + "' in template'" + template.getName() + "'\n\n" + template.getPattern(), canHandle(javaContext, variable));
+				}
+			}
+		}
+	}
+	
+	public void testSWTContribution() throws Exception {
+		ContextTypeRegistry registry= JavaPlugin.getDefault().getTemplateContextRegistry();
+		TemplateContextType swtContext= registry.getContextType(SWTContextType.NAME);
+	
+		TemplateStore templateStore= JavaPlugin.getDefault().getTemplateStore();
+		Template[] javaTemplates= templateStore.getTemplates(SWTContextType.NAME);
+		
+		for (int i= 0; i < javaTemplates.length; i++) {
+			Template template= javaTemplates[i];
+			TemplateTranslator translator= new TemplateTranslator();
+			TemplateBuffer buffer= translator.translate(template);
+			TemplateVariable[] variables= buffer.getVariables();
+			for (int j= 0; j < variables.length; j++) {
+				TemplateVariable variable= variables[j];
+				if (!variable.getType().equals(variable.getName())) {
+					assertTrue("No resolver found for variable '" + variable.getType() + "' in template'" + template.getName() + "'\n\n" + template.getPattern(), canHandle(swtContext, variable));
 				}
 			}
 		}
