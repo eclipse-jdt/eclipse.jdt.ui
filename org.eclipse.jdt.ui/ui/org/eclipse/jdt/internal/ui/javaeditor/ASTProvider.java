@@ -548,29 +548,6 @@ public final class ASTProvider {
 	}
 
 	/**
-	 * Returns a shared compilation unit AST for the given
-	 * Java element.
-	 * <p>
-	 * Clients are not allowed to modify the AST and must
-	 * synchronize all access to its nodes.
-	 * </p>
-	 *
-	 * @param je				the Java element
-	 * @param wait				<code>true</code> if the client wants to wait for the result,
-	 * 								<code>null</code> will be returned if the AST is not ready and
-	 * 								the client does not want to wait
-	 * @param progressMonitor	the progress monitor or <code>null</code>
-	 * @return					the AST or <code>null</code> if the AST is not available
-	 * @deprecated Use {@link #getAST(ITypeRoot, WAIT_FLAG, IProgressMonitor)}
-	 */
-	public CompilationUnit getAST(IJavaElement je, boolean wait, IProgressMonitor progressMonitor) {
-		if (wait)
-			return getAST(je, WAIT_YES, progressMonitor);
-		else
-			return getAST(je, WAIT_NO, progressMonitor);
-	}
-
-	/**
 	 * Tells whether the given Java element is the one
 	 * reported as currently being reconciled.
 	 *
