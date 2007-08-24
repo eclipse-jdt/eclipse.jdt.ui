@@ -776,12 +776,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 	public synchronized ContextTypeRegistry getTemplateContextRegistry() {
 		if (fContextTypeRegistry == null) {
 			ContributionContextTypeRegistry registry= new ContributionContextTypeRegistry();
-			registry.addContextType(JavaContextType.NAME);
-			registry.addContextType(JavaDocContextType.NAME);
-			registry.addContextType(SWTContextType.NAME);
+			registry.addContextType(JavaContextType.ID);
+			registry.addContextType(JavaDocContextType.ID);
+			registry.addContextType(SWTContextType.ID);
 
-			SWTContextType swtContext= (SWTContextType) registry.getContextType(SWTContextType.NAME);
-			swtContext.inheritResolvers(registry.getContextType(JavaContextType.NAME));
+			SWTContextType swtContext= (SWTContextType) registry.getContextType(SWTContextType.ID);
+			swtContext.inheritResolvers(registry.getContextType(JavaContextType.ID));
 
 			fContextTypeRegistry= registry;
 		}

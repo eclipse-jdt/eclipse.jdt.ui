@@ -25,12 +25,12 @@ import org.eclipse.jdt.core.ICompilationUnit;
 public class SWTContextType extends CompilationUnitContextType {
 
 	/**
-	 * The name under which this context type is registered
+	 * The id under which this context type is registered
 	 */
-	public static final String NAME= "swt"; //$NON-NLS-1$
+	public static final String ID= "swt"; //$NON-NLS-1$
 
 	public SWTContextType() {
-		super(NAME);
+		super(ID);
 	}
 	
 	/* (non-Javadoc)

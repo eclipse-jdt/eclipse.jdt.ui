@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.templates.*;
+import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
@@ -22,13 +22,16 @@ import org.eclipse.jdt.core.ICompilationUnit;
  */
 public class JavaDocContextType extends CompilationUnitContextType {
 
-	public static final String NAME= "javadoc"; //$NON-NLS-1$
+	/**
+	 * The id under which this context type is registered
+	 */
+	public static final String ID= "javadoc"; //$NON-NLS-1$
 
 	/**
 	 * Creates a java context type.
 	 */
 	public JavaDocContextType() {
-		super(NAME);
+		super(ID);
 		
 		// global
 		addResolver(new GlobalTemplateVariables.Cursor());

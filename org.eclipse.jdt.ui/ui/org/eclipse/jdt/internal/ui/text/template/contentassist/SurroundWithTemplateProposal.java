@@ -249,7 +249,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		String newSelection= document.get(offset, length);
 		
 		//Create the new context
-		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(JavaContextType.NAME);
+		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(JavaContextType.ID);
 		CompilationUnitContext context= contextType.createContext(document, offset, newSelection.length(), fCompilationUnit);
 		context.setVariable("selection", newSelection); //$NON-NLS-1$
 		context.setForceEvaluation(true);

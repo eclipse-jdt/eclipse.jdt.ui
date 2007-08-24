@@ -31,7 +31,10 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
  */
 public class JavaContextType extends CompilationUnitContextType {
 
-	public static final String NAME= "java"; //$NON-NLS-1$
+	/**
+	 * The id under which this context type is registered
+	 */
+	public static final String ID= "java"; //$NON-NLS-1$
 
 	protected static abstract class AbstractIterable extends TemplateVariableResolver {
 		public AbstractIterable(String type, String description) {
@@ -301,7 +304,7 @@ public class JavaContextType extends CompilationUnitContextType {
 	 * Creates a java context type.
 	 */
 	public JavaContextType() {
-		super(NAME);
+		super(ID);
 		
 		// global
 		addResolver(new GlobalTemplateVariables.Cursor());
