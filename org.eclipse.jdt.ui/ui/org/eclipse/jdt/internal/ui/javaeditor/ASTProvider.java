@@ -535,14 +535,15 @@ public final class ASTProvider {
 		} finally {
 			if (isActiveElement) {
 				if (fAST != null) {
+					// in the meantime, reconcile created a new AST. Return that one
 					if (DEBUG)
 						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "Ignore created AST for " + input.getElementName() + " - AST from reconciler is newer"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					reconciled(fAST, input, null);
+					return fAST;
 				} else
 					reconciled(ast, input, null);
 			}
 		}
-
 		return ast;
 	}
 
