@@ -147,7 +147,7 @@ public class TemplateEngine {
 	}
 
 	private Image getImage() {
-		if (SWTContextType.NAME.equals(fContextType))
+		if (SWTContextType.NAME.equals(fContextType.getName()))
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SWT_TEMPLATE);
 		else
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE);
