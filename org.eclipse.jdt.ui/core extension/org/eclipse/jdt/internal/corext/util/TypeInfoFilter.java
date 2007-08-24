@@ -27,7 +27,6 @@ public class TypeInfoFilter {
 		
 		private String fPattern;
 		private int fMatchKind;
-		private boolean fCamelCaseExact; //https://bugs.eclipse.org/bugs/show_bug.cgi?id=174349
 		private StringMatcher fStringMatcher;
 
 		private static final char END_SYMBOL= '<';
@@ -36,7 +35,7 @@ public class TypeInfoFilter {
 		
 		public PatternMatcher(String pattern) {
 			this(pattern, SearchPattern.R_EXACT_MATCH | SearchPattern.R_PREFIX_MATCH |
-				SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CAMELCASE_MATCH);
+				SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CAMEL_CASE_MATCH);
 		}
 		
 		public PatternMatcher(String pattern, int allowedModes) {
@@ -61,7 +60,9 @@ public class TypeInfoFilter {
 					return fStringMatcher.match(text);
 				case SearchPattern.R_EXACT_MATCH:
 					return fPattern.equalsIgnoreCase(text);
-				case SearchPattern.R_CAMELCASE_MATCH:
+				case SearchPattern.R_CAMEL_CASE_MATCH:
+					return (SearchPattern.camelCaseMatch(fPattern, text, false));
+				case SearchPattern.R_CAMEL_CASE_MATCH | SearchPattern.R_PREFIX_MATCH:
 					if (SearchPattern.camelCaseMatch(fPattern, text)) {
 						return true;
 					}
@@ -101,9 +102,7 @@ public class TypeInfoFilter {
 			if (last == END_SYMBOL || last == BLANK) {
 				fPattern= pattern.substring(0, length - 1);
 				if (SearchUtils.isCamelCasePattern(fPattern)) {
-					// https://bugs.eclipse.org/bugs/show_bug.cgi?id=174349
-					fCamelCaseExact= true;
-					fMatchKind= SearchPattern.R_CAMELCASE_MATCH;
+					fMatchKind= SearchPattern.R_CAMEL_CASE_MATCH;
 				} else {
 					fMatchKind= SearchPattern.R_EXACT_MATCH;
 				}
@@ -111,7 +110,7 @@ public class TypeInfoFilter {
 			}
 			
 			if (SearchUtils.isCamelCasePattern(pattern)) {
-				fMatchKind= SearchPattern.R_CAMELCASE_MATCH;
+				fMatchKind= SearchPattern.R_CAMEL_CASE_MATCH | SearchPattern.R_PREFIX_MATCH;
 				fPattern= pattern;
 				return;
 			}
@@ -203,13 +202,9 @@ public class TypeInfoFilter {
 	}
 
 	public boolean isCamelCasePattern() {
-		return fNameMatcher.getMatchKind() == SearchPattern.R_CAMELCASE_MATCH;
+		return (fNameMatcher.getMatchKind() & SearchPattern.R_CAMEL_CASE_MATCH) != 0;
 	}
 
-	public boolean isCamelCaseExactPattern() {
-		return fNameMatcher.fCamelCaseExact;
-	}
-	
 	public String getPackagePattern() {
 		if (fPackageMatcher == null)
 			return null;

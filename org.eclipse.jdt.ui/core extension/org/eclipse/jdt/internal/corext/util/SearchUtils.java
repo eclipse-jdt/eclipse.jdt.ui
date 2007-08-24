@@ -69,8 +69,7 @@ public class SearchUtils {
      * @return whether it is a camel case pattern or not
      */
 	public static boolean isCamelCasePattern(String pattern) {
-		return SearchPattern.validateMatchRule(
-			pattern, 
-			SearchPattern.R_CAMELCASE_MATCH) == SearchPattern.R_CAMELCASE_MATCH;
+		int camelOrPrefix= SearchPattern.R_CAMEL_CASE_MATCH | SearchPattern.R_PREFIX_MATCH;
+		return SearchPattern.validateMatchRule(pattern, camelOrPrefix) == camelOrPrefix;
 	}
 }

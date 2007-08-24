@@ -593,11 +593,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		 */ 
 		String typePattern= typeSearchFilter.getNamePattern();
 		int matchRule= typeSearchFilter.getMatchRule();
-		if (typeSearchFilter.isCamelCaseExactPattern()) {
-			matchRule= SearchPattern.R_CAMELCASE_MATCH;
-		} else {
-			typeSearchFilter.setMatchEverythingMode(true);
-		}
+		typeSearchFilter.setMatchEverythingMode(true);
 
 		try {
 			engine.searchAllTypeNames(packPattern == null ? null : packPattern.toCharArray(),
@@ -1237,14 +1233,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 				return true;
 			
 			TypeNameMatch type= (TypeNameMatch) item;
-			boolean matches= fTypeInfoFilter.matchesHistoryElement(type);
-			if (matches && fTypeInfoFilter.isCamelCaseExactPattern()) {
-				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=174349 :
-				org.eclipse.ui.dialogs.SearchPattern uiPattern= new org.eclipse.ui.dialogs.SearchPattern();
-				uiPattern.setPattern(fTypeInfoFilter.getNamePattern() + "<"); //$NON-NLS-1$
-				return uiPattern.matches(type.getSimpleTypeName());
-			}
-			return matches;
+			return fTypeInfoFilter.matchesHistoryElement(type);
 		}
 		
 		/*
@@ -1265,10 +1254,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			return fTypeInfoFilter.getSearchFlags();
 		}
 
-		public boolean isCamelCaseExactPattern() {
-			return fTypeInfoFilter.isCamelCaseExactPattern();
-		}
-		
 		public String getPattern() {
 			return fTypeInfoFilter.getText();
 		}
