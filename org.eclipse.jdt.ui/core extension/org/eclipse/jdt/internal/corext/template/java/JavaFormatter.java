@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -317,9 +317,9 @@ public class JavaFormatter {
 			if (dtc.getStart() == dtc.getCompletionOffset())
 				try {
 					IDocument document= dtc.getDocument();
-					int lineAtOffset= document.getLineOfOffset(dtc.getStart());
+					int lineOffset= document.getLineInformationOfOffset(dtc.getStart()).getOffset();
 					//only if we are at the beginning of the line
-					if (document.getLineOffset(lineAtOffset) != dtc.getStart())
+					if (lineOffset != dtc.getStart())
 						return false;
 					
 					//Does the selection only contain whitespace characters?
