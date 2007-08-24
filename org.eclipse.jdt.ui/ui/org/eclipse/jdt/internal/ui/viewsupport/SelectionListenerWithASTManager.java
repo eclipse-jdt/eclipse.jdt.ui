@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -116,20 +117,32 @@ public class SelectionListenerWithASTManager {
 			}
 		}
 		
+		/**
+		 * A selection event has occurred.
+		 * 
+		 * @param selection the selection
+		 */
 		public void fireSelectionChanged(final ITextSelection selection) {
 			if (fCurrentJob != null) {
 				fCurrentJob.cancel();
 			}
 		}
 		
+		/**
+		 * A post selection event has occurred.
+		 * 
+		 * @param selection the selection
+		 */
 		public void firePostSelectionChanged(final ITextSelection selection) {
 			if (fCurrentJob != null) {
 				fCurrentJob.cancel();
 			}
-			final IJavaElement input= EditorUtility.getEditorInputJavaElement(fPart, false);
-			if (input == null) {
+			IJavaElement input= EditorUtility.getEditorInputJavaElement(fPart, false);
+			if (!(input instanceof ITypeRoot)) {
 				return;
 			}
+			final ITypeRoot typeRoot= (ITypeRoot) input;
+			
 			
 			fCurrentJob= new Job(JavaUIMessages.SelectionListenerWithASTManager_job_title) { 
 				public IStatus run(IProgressMonitor monitor) {
@@ -137,7 +150,7 @@ public class SelectionListenerWithASTManager {
 						monitor= new NullProgressMonitor();
 					}
 					synchronized (fJobLock) {
-						return calculateASTandInform(input, selection, monitor);
+						return calculateASTandInform(typeRoot, selection, monitor);
 					}
 				}
 			};
@@ -146,7 +159,7 @@ public class SelectionListenerWithASTManager {
 			fCurrentJob.schedule();
 		}
 		
-		protected IStatus calculateASTandInform(IJavaElement input, ITextSelection selection, IProgressMonitor monitor) {
+		protected final IStatus calculateASTandInform(ITypeRoot input, ITextSelection selection, IProgressMonitor monitor) {
 			if (monitor.isCanceled()) {
 				return Status.CANCEL_STATUS;
 			}

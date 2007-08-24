@@ -20,9 +20,9 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 
-import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -34,11 +34,10 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
-import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
@@ -56,7 +55,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		if (!(getEditor() instanceof JavaEditor))
 			return null;
 
-		IJavaElement je= getEditorInputJavaElement();
+		ITypeRoot je= getEditorInputJavaElement();
 		if (je == null)
 			return null;
 
@@ -84,7 +83,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		if (!(getEditor() instanceof JavaEditor))
 			return null;
 
-		IJavaElement je= getEditorInputJavaElement();
+		ITypeRoot je= getEditorInputJavaElement();
 		if (je == null)
 			return null;
 
@@ -148,15 +147,10 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		return buffer.toString();
 	}
 
-	private IJavaElement getEditorInputJavaElement() {
-		if (getEditor() instanceof CompilationUnitEditor)
-			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(getEditor().getEditorInput());
-		else if (getEditor() instanceof ClassFileEditor) {
-			IEditorInput editorInput= getEditor().getEditorInput();
-			if (editorInput instanceof IClassFileEditorInput)
-				return ((IClassFileEditorInput)editorInput).getClassFile();
-
-		}
+	private ITypeRoot getEditorInputJavaElement() {
+		IEditorPart editor= getEditor();
+		if (editor != null)
+			return JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
 		return null;
 	}
 

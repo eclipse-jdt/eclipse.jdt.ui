@@ -30,7 +30,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IWorkbenchPartSite;
 
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
@@ -400,7 +400,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	 * Schedule a background job for retrieving the AST and reconciling the Semantic Highlighting model.
 	 */
 	private void scheduleJob() {
-		final IJavaElement element= fEditor.getInputJavaElement();
+		final ITypeRoot element= fEditor.getInputJavaElement();
 
 		synchronized (fJobLock) {
 			final Job oldJob= fJob;

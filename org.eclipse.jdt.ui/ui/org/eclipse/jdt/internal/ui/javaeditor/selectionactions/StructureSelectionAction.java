@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -66,13 +67,13 @@ public abstract class StructureSelectionAction extends Action {
 	 */
 	public final  void run() {
 		IJavaElement inputElement= EditorUtility.getEditorInputJavaElement(fEditor, false);
-		if (!(inputElement instanceof ISourceReference && inputElement.exists()))
+		if (!(inputElement instanceof ITypeRoot && inputElement.exists()))
 			return;
 
-		ISourceReference source= (ISourceReference)inputElement;
+		ITypeRoot typeRoot= (ITypeRoot) inputElement;
 		ISourceRange sourceRange;
 		try {
-			sourceRange= source.getSourceRange();
+			sourceRange= typeRoot.getSourceRange();
 			if (sourceRange == null || sourceRange.getLength() == 0) {
 				MessageDialog.openInformation(fEditor.getEditorSite().getShell(),
 					SelectionActionMessages.StructureSelect_error_title,
@@ -82,7 +83,7 @@ public abstract class StructureSelectionAction extends Action {
 		} catch (JavaModelException e) {
 		}
 		ITextSelection selection= getTextSelection();
-		ISourceRange newRange= getNewSelectionRange(createSourceRange(selection), source);
+		ISourceRange newRange= getNewSelectionRange(createSourceRange(selection), typeRoot);
 		// Check if new selection differs from current selection
 		if (selection.getOffset() == newRange.getOffset() && selection.getLength() == newRange.getLength())
 			return;
@@ -95,15 +96,15 @@ public abstract class StructureSelectionAction extends Action {
 		}
 	}
 
-	public final ISourceRange getNewSelectionRange(ISourceRange oldSourceRange, ISourceReference sr) {
+	public final ISourceRange getNewSelectionRange(ISourceRange oldSourceRange, ITypeRoot typeRoot) {
 		try{
-			CompilationUnit root= getAST(sr);
+			CompilationUnit root= getAST(typeRoot);
 			if (root == null)
 				return oldSourceRange;
 			Selection selection= Selection.createFromStartLength(oldSourceRange.getOffset(), oldSourceRange.getLength());
 			SelectionAnalyzer selAnalyzer= new SelectionAnalyzer(selection, true);
 			root.accept(selAnalyzer);
-			return internalGetNewSelectionRange(oldSourceRange, sr, selAnalyzer);
+			return internalGetNewSelectionRange(oldSourceRange, typeRoot, selAnalyzer);
 	 	}	catch (JavaModelException e){
 	 		JavaPlugin.log(e); //dialog would be too heavy here
 	 		return new SourceRange(oldSourceRange.getOffset(), oldSourceRange.getLength());
@@ -112,6 +113,11 @@ public abstract class StructureSelectionAction extends Action {
 
 	/**
 	 * Subclasses determine the actual new selection.
+	 * @param oldSourceRange the selected range
+	 * @param sr the current type root
+	 * @param selAnalyzer the selection analyzer
+	 * @return return the new selection range
+	 * @throws JavaModelException 
 	 */
 	abstract ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ISourceReference sr, SelectionAnalyzer selAnalyzer) throws JavaModelException;
 
@@ -140,8 +146,8 @@ public abstract class StructureSelectionAction extends Action {
 		return new SourceRange(ts.getOffset(), ts.getLength());
 	}
 
-	private static CompilationUnit getAST(ISourceReference sr) {
-		return ASTProvider.getASTProvider().getAST((IJavaElement) sr, ASTProvider.WAIT_YES, null);
+	private static CompilationUnit getAST(ITypeRoot sr) {
+		return ASTProvider.getASTProvider().getAST(sr, ASTProvider.WAIT_YES, null);
 	}
 
 	//-- helper methods for this class and subclasses

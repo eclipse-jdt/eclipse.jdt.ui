@@ -33,7 +33,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -191,14 +190,10 @@ public class NLSHintHelper {
 		return getResourceBundleName(astRoot);
 	}
 	
-	public static String getResourceBundleName(ICompilationUnit unit) throws JavaModelException {
-		return getResourceBundleName(JavaPlugin.getDefault().getASTProvider().getAST(unit, ASTProvider.WAIT_YES, null));
+	public static String getResourceBundleName(ITypeRoot input) throws JavaModelException {
+		return getResourceBundleName(JavaPlugin.getDefault().getASTProvider().getAST(input, ASTProvider.WAIT_YES, null));
 	}
-	
-	public static String getResourceBundleName(IClassFile classFile) throws JavaModelException {
-		return getResourceBundleName(JavaPlugin.getDefault().getASTProvider().getAST(classFile, ASTProvider.WAIT_YES, null));
-	}
-	
+		
 	public static String getResourceBundleName(CompilationUnit astRoot) throws JavaModelException {
 
 		if (astRoot == null)

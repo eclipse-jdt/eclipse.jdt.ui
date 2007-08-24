@@ -17,11 +17,10 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.AbstractHyperlinkDetector;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -31,6 +30,8 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -55,7 +56,7 @@ public class NLSKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 		if (site == null)
 			return null;
 
-		IJavaElement javaElement= getInputJavaElement(textEditor);
+		ITypeRoot javaElement= getInputJavaElement(textEditor);
 		if (javaElement == null)
 			return null;
 
@@ -86,15 +87,8 @@ public class NLSKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 		return null;
 	}
 
-	private IJavaElement getInputJavaElement(ITextEditor editor) {
-		IEditorInput editorInput= editor.getEditorInput();
-		if (editorInput instanceof IClassFileEditorInput)
-			return ((IClassFileEditorInput)editorInput).getClassFile();
-
-		if (editor instanceof CompilationUnitEditor)
-			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editorInput);
-
-		return null;
+	private ITypeRoot getInputJavaElement(ITextEditor editor) {
+		return JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
 	}
 
 }
