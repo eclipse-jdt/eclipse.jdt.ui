@@ -39,11 +39,11 @@ public class TemplateCompletionProposalComputer extends AbstractTemplateCompleti
 
 	public TemplateCompletionProposalComputer() {
 		ContextTypeRegistry templateContextRegistry= JavaPlugin.getDefault().getTemplateContextRegistry();
-		TemplateContextType contextType= templateContextRegistry.getContextType(JavaContextType.ID);
+		TemplateContextType contextType= templateContextRegistry.getContextType(JavaContextType.NAME);
 		Assert.isNotNull(contextType);
 		fJavaTemplateEngine= new TemplateEngine(contextType);
 
-		contextType= templateContextRegistry.getContextType(JavaDocContextType.ID);
+		contextType= templateContextRegistry.getContextType(JavaDocContextType.NAME);
 		Assert.isNotNull(contextType);
 		fJavadocTemplateEngine= new TemplateEngine(contextType);
 	}

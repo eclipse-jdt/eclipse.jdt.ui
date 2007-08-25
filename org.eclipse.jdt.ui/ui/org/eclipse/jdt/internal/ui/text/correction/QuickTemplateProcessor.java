@@ -159,7 +159,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 	}
 
 	private void collectSurroundTemplates(IDocument document, ICompilationUnit cu, int offset, int length, Collection result) throws BadLocationException, CoreException {
-		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(JavaContextType.ID);
+		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(JavaContextType.NAME);
 		CompilationUnitContext context= contextType.createContext(document, offset, length, cu);
 		context.setVariable("selection", document.get(offset, length)); //$NON-NLS-1$
 		context.setForceEvaluation(true);
@@ -174,7 +174,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 		Template[] templates= JavaPlugin.getDefault().getTemplateStore().getTemplates();
 		for (int i= 0; i != templates.length; i++) {
 			Template currentTemplate= templates[i];
-			if (context.canEvaluate(currentTemplate) && currentTemplate.getContextTypeId().equals(JavaContextType.ID) && currentTemplate.getPattern().indexOf($_LINE_SELECTION) != -1) {
+			if (context.canEvaluate(currentTemplate) && currentTemplate.getContextTypeId().equals(JavaContextType.NAME) && currentTemplate.getPattern().indexOf($_LINE_SELECTION) != -1) {
 				// TODO using jdt proposals for the moment, as jdt expects IJavaCompletionProposals
 				
 				if (selectedStatements != null) {

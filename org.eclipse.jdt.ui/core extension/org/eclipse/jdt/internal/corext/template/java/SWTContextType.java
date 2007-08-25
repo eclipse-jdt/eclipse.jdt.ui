@@ -27,10 +27,10 @@ public class SWTContextType extends CompilationUnitContextType {
 	/**
 	 * The id under which this context type is registered
 	 */
-	public static final String ID= "swt"; //$NON-NLS-1$
+	public static final String NAME= "swt"; //$NON-NLS-1$
 
 	public SWTContextType() {
-		super(ID);
+		super(NAME);
 	}
 	
 	/* (non-Javadoc)

@@ -25,13 +25,13 @@ public class JavaDocContextType extends CompilationUnitContextType {
 	/**
 	 * The id under which this context type is registered
 	 */
-	public static final String ID= "javadoc"; //$NON-NLS-1$
+	public static final String NAME= "javadoc"; //$NON-NLS-1$
 
 	/**
 	 * Creates a java context type.
 	 */
 	public JavaDocContextType() {
-		super(ID);
+		super(NAME);
 		
 		// global
 		addResolver(new GlobalTemplateVariables.Cursor());
