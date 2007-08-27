@@ -665,6 +665,13 @@ public class JavaElementLabels {
 		}
 	}
 	
+	/**
+	 * Appends labels for type parameters from type binding array
+	 * 
+	 * @param typeParameters the type parameters
+	 * @param flags flags with render options
+	 * @param buf the resulting string buffer
+	 */
 	private static void getTypeParametersLabel(ITypeParameter[] typeParameters, long flags, StringBuffer buf) {
 		if (typeParameters.length > 0) {
 			buf.append('<');
@@ -836,6 +843,13 @@ public class JavaElementLabels {
 		}
 	}
 	
+	/**
+	 * Appends labels for type parameters from a signature
+	 * 
+	 * @param typeParamSigs the type parameter signature
+	 * @param flags flags with render options
+	 * @param buf the resulting string buffer
+	 */
 	private static void getTypeParameterSignaturesLabel(String[] typeParamSigs, long flags, StringBuffer buf) {
 		if (typeParamSigs.length > 0) {
 			buf.append('<');
@@ -1180,6 +1194,9 @@ public class JavaElementLabels {
 	 * referenced. This means it is own by a different project but is referenced
 	 * by the root's parent. Returns <code>false</code> if the given root
 	 * doesn't have an underlying resource.
+	 * 
+	 * @param root the package fragment root
+	 * @return returns <code>true</code> if the given package fragment root is referenced
 	 *
 	 * @since 3.2
 	 */
