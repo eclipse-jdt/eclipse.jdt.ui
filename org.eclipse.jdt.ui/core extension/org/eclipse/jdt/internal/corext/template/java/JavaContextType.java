@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,15 +26,16 @@ import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.V
 
 import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
 
+
 /**
- * A context type for java code.
+ * The context type for templates inside Java code.
  */
 public class JavaContextType extends CompilationUnitContextType {
 
 	/**
-	 * The id under which this context type is registered
+	 * The id under which this context type is registered.
 	 */
-	public static final String NAME= "java"; //$NON-NLS-1$
+	public static final String ID= "java"; //$NON-NLS-1$
 
 	protected static abstract class AbstractIterable extends TemplateVariableResolver {
 		public AbstractIterable(String type, String description) {
@@ -304,7 +305,7 @@ public class JavaContextType extends CompilationUnitContextType {
 	 * Creates a java context type.
 	 */
 	public JavaContextType() {
-		super(NAME);
+		super(ID);
 		
 		// global
 		addResolver(new GlobalTemplateVariables.Cursor());

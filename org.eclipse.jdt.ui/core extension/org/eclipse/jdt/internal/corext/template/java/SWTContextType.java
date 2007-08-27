@@ -19,18 +19,21 @@ import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
+
 /**
+ * The context type for templates inside SWT code.
+ * 
  * @since 3.4
  */
 public class SWTContextType extends CompilationUnitContextType {
 
 	/**
-	 * The id under which this context type is registered
+	 * The id under which this context type is registered.
 	 */
-	public static final String NAME= "swt"; //$NON-NLS-1$
+	public static final String ID= "swt"; //$NON-NLS-1$
 
 	public SWTContextType() {
-		super(NAME);
+		super(ID);
 	}
 	
 	/* (non-Javadoc)

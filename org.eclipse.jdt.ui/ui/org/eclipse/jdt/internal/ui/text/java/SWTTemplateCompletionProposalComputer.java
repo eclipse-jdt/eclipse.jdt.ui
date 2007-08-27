@@ -38,7 +38,7 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 
 	public SWTTemplateCompletionProposalComputer() {
 		ContextTypeRegistry templateContextRegistry= JavaPlugin.getDefault().getTemplateContextRegistry();
-		TemplateContextType contextType= templateContextRegistry.getContextType(SWTContextType.NAME);
+		TemplateContextType contextType= templateContextRegistry.getContextType(SWTContextType.ID);
 		Assert.isNotNull(contextType);
 		fSWTTemplateEngine= new TemplateEngine(contextType);
 	}

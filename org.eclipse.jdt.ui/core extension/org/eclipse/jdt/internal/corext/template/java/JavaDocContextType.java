@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,20 +18,20 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 
 /**
- * A context type for javadoc.
+ * The context type for templates inside Javadoc.
  */
 public class JavaDocContextType extends CompilationUnitContextType {
 
 	/**
 	 * The id under which this context type is registered
 	 */
-	public static final String NAME= "javadoc"; //$NON-NLS-1$
+	public static final String ID= "javadoc"; //$NON-NLS-1$
 
 	/**
 	 * Creates a java context type.
 	 */
 	public JavaDocContextType() {
-		super(NAME);
+		super(ID);
 		
 		// global
 		addResolver(new GlobalTemplateVariables.Cursor());
