@@ -17,7 +17,10 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
+
 /**
+ * The context for templates inside SWT code.
+ * 
  * @since 3.4
  */
 public class SWTContext extends JavaContext {
