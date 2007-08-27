@@ -739,7 +739,8 @@ public final class JavaUI {
 	 * @param editorInput the editor input
 	 * @return the {@link ITypeRoot} wrapped by <code>editorInput</code> or <code>null</code> if the editor input
 	 * does not stand for a ITypeRoot
-	 * @since 3.
+	 * 
+	 * @since 3.4
 	 */
 	public static ITypeRoot getEditorInputTypeRoot(IEditorInput editorInput) {
 		// Performance: check working copy manager first: this is faster

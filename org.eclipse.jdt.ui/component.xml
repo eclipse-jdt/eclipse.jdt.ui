@@ -25,6 +25,7 @@
    <type name="JavaUI" subclass="false" instantiate="false"/>
    <type name="OverrideIndicatorLabelDecorator" subclass="false"/>
    <type name="PreferenceConstants" subclass="false" instantiate="false"/>
+   <type name="SharedASTProvider" subclass="false" instantiate="false"/>
 <!-- tool does not support nested classes
    <type name="ProblemsLabelDecorator.ProblemsLabelChangedEvent" subclass="false" instantiate="false"/>
 -->

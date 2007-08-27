@@ -39,6 +39,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.ui.SharedASTProvider.WAIT_FLAG;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -52,27 +54,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public final class ASTProvider {
 
 	/**
-	 * Wait flag.
-	 *
-	 * @since 3.1
-	 */
-	public static final class WAIT_FLAG {
-
-		String fName;
-
-		private WAIT_FLAG(String name) {
-			fName= name;
-		}
-
-		/*
-		 * @see java.lang.Object#toString()
-		 */
-		public String toString() {
-			return fName;
-		}
-	}
-
-	/**
 	 * Wait flag indicating that a client requesting an AST
 	 * wants to wait until an AST is ready.
 	 * <p>
@@ -82,7 +63,7 @@ public final class ASTProvider {
 	 *
 	 * @since 3.1
 	 */
-	public static final WAIT_FLAG WAIT_YES= new WAIT_FLAG("wait yes"); //$NON-NLS-1$
+	public static final WAIT_FLAG WAIT_YES= SharedASTProvider.WAIT_YES;
 
 	/**
 	 * Wait flag indicating that a client requesting an AST
@@ -93,8 +74,7 @@ public final class ASTProvider {
 	 *
 	 * @since 3.1
 	 */
-	public static final WAIT_FLAG WAIT_ACTIVE_ONLY= new WAIT_FLAG("wait active only"); //$NON-NLS-1$
-
+	public static final WAIT_FLAG WAIT_ACTIVE_ONLY= SharedASTProvider.WAIT_ACTIVE_ONLY;
 	/**
 	 * Wait flag indicating that a client requesting an AST
 	 * only wants the already available shared AST.
@@ -104,7 +84,7 @@ public final class ASTProvider {
 	 *
 	 * @since 3.1
 	 */
-	public static final WAIT_FLAG WAIT_NO= new WAIT_FLAG("don't wait"); //$NON-NLS-1$
+	public static final WAIT_FLAG WAIT_NO= SharedASTProvider.WAIT_NO;
 
 
 	/**

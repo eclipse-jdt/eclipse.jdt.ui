@@ -43,13 +43,38 @@ Non-breaking API changes from R3.3 to R3.4</b></font> <br>
     </tr>
     <tr>
       <td>
-      Added API <code>JdtActionConstants.INTRODUCE_PARAMETER_OBJECT</code> and
-      <code>IJavaEditorActionDefinitionIds.INTRODUCE_PARAMETER_OBJECT</code> (in <code>org.eclipse.jdt.ui.actions)</code>.
-      </td>
+      Added constants for new refactorings:
+      <br>
+      Added to <code>org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds</code>:
+      <dl>
+      <li>INTRODUCE_PARAMETER_OBJECT</li>
+      <li>EXTRACT_CLASS</li>
+      </dl>
+      Added to <code>org.eclipse.jdt.ui.actions.JdtActionConstants</code>:
+      <dl>
+      <li>INTRODUCE_PARAMETER_OBJECT</li>
+      <li>EXTRACT_CLASS</li>
+      </dl>
+    </tr>
+    <tr>
+      <td>
+      Constants to <code>org.eclipse.jdt.ui.PreferenceConstants</code>:
+      <dl>
+      <li>SPELLING_IGNORE_JAVA_STRINGS</li>
+      <li>SPELLING_PROBLEMS_THRESHOLD</li>
+      </dl>
     </tr>
     <tr>
       <td>
       Added API <code>org.eclipse.jdt.ui.JavaUI.getEditorInputTypeRoot(IEditorInput)</code></td>
+    </tr>
+     <tr>
+      <td>
+      <code>org.eclipse.jdt.ui.SharedASTProvider</code> gives access to the AST used by the active
+      Java editor
+      <dl><li>SharedASTProvider.getAST(ITypeRoot, SharedASTProvider.WAIT_FLAG, IProgressMonitor)</li>
+      
+      </td>
     </tr>
   </tbody>
 </table>
