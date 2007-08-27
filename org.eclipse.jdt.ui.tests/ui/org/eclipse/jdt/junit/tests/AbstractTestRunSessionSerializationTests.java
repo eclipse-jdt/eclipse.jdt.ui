@@ -109,7 +109,7 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 	
 	private void assertEqualXML(String expected, String actual) {
 		/*
-		 * Just strips all whitespace and avoids comparing stack traces (which are VM-dependent). 
+		 * Avoid comparing stack traces (which are VM-dependent)
 		 */
 		String regex= "(?m)^\\s*at\\s+[\\w\\.\\:\\;\\$\\(\\)\\[ \\t]+$\r?\n?";
 		/*
@@ -119,7 +119,13 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 		String replacement= "";
 		expected= expected.replaceAll(regex, replacement).replaceAll(regex2, replacement);
 		actual= actual.replaceAll(regex, replacement).replaceAll(regex2, replacement);
+		int ibmJava6BugOffset= actual.indexOf("><");
+		if (ibmJava6BugOffset > 0) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=197842
+			actual= new StringBuffer(actual).insert(ibmJava6BugOffset + 1, " ").toString();
 		
+		/*
+		 * Strip all whitespace
+		 */
 		StringTokenizer expTok= new StringTokenizer(expected);
 		StringTokenizer actTok= new StringTokenizer(actual);
 		if (expTok.countTokens() != actTok.countTokens())
