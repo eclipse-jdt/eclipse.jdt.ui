@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.junit.model;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -22,10 +23,12 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ListenerList;
 
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.ILaunchesListener2;
 
 import org.eclipse.jdt.core.IJavaProject;
 
@@ -165,6 +168,30 @@ public class TestRunSession implements ITestRunSession {
 		
 		fTestRunnerClient= new RemoteTestRunnerClient();
 		fTestRunnerClient.startListening(new ITestRunListener2[] { new TestSessionNotifier() }, port);
+		
+		final ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
+		launchManager.addLaunchListener(new ILaunchesListener2() {
+			public void launchesTerminated(ILaunch[] launches) {
+				if (Arrays.asList(launches).contains(fLaunch)) {
+					if (fTestRunnerClient != null) {
+						fTestRunnerClient.stopWaiting();
+					}
+					launchManager.removeLaunchListener(this);
+				}
+			}
+			public void launchesRemoved(ILaunch[] launches) {
+				if (Arrays.asList(launches).contains(fLaunch)) {
+					if (fTestRunnerClient != null) {
+						fTestRunnerClient.stopWaiting();
+					}
+					launchManager.removeLaunchListener(this);
+				}
+			}
+			public void launchesChanged(ILaunch[] launches) {
+			}
+			public void launchesAdded(ILaunch[] launches) {
+			}
+		});
 
 		fSessionListeners= new ListenerList();
 		addTestSessionListener(new TestRunListenerAdapter(this));
@@ -306,7 +333,7 @@ public class TestRunSession implements ITestRunSession {
 	public void swapOut() {
 		if (fTestRoot == null)
 			return;
-		if (isRunning() || getStartTime() == 0 || isKeptAlive())
+		if (isRunning() || isStarting() || isKeptAlive())
 			return;
 		
 		Object[] listeners= fSessionListeners.getListeners();
@@ -334,6 +361,11 @@ public class TestRunSession implements ITestRunSession {
 		}
 	}
 	
+	public boolean isStarting() {
+		return getStartTime() == 0 && fLaunch != null && ! fLaunch.isTerminated();
+	}
+
+
 	public void removeSwapFile() {
 		File swapFile= getSwapFile();
 		if (swapFile.exists())
