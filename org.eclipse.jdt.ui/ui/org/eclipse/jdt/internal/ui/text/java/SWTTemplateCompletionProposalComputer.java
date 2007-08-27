@@ -15,8 +15,13 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.TemplateContextType;
 
+import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.template.java.SWTContextType;
@@ -26,21 +31,69 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
 
+
 /**
+ * Computer that computes the template proposals for the SWT context type.
+ *  
  * @since 3.4
  */
 public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompletionProposalComputer {
 
 	/**
+	 * The name of <code>org.eclipse.swt.SWT</code> used to detect
+	 * if a project uses SWT.
+	 */
+	private static final String SWT_TYPE_NAME= "org.eclipse.swt.SWT"; //$NON-NLS-1$
+
+	
+	/**
+	 * Listener that resets the cached java project if its build path changes.
+	 */
+	private final class BuildPathChangeListener implements IElementChangedListener {
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
+		 */
+		public void elementChanged(ElementChangedEvent event) {
+			IJavaProject javaProject= getCachedJavaProject();
+			if (javaProject == null)
+				return;
+
+			IJavaElementDelta[] children= event.getDelta().getChangedChildren();
+			for (int i= 0; i < children.length; i++) {
+				IJavaElementDelta child= children[i];
+				if (javaProject.equals(child.getElement())) {
+					if ((child.getFlags() & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0) {
+						setCachedJavaProject(null);
+					}
+				}
+			}
+		}
+	}
+
+
+	/**
 	 * Engine used to compute the proposals for this computer
 	 */
 	private final TemplateEngine fSWTTemplateEngine;
-
+	/**
+	 * The Java project of the compilation unit for which a template
+	 * engine has been computed last time if any
+	 */
+	private IJavaProject fCachedJavaProject;
+	/**
+	 * Is org.eclipse.swt.SWT on class path of <code>fJavaProject</code>. Invalid
+	 * if <code>fJavaProject</code> is <code>false</code>.
+	 */
+	private boolean fIsSWTOnClasspath;
+	
 	public SWTTemplateCompletionProposalComputer() {
 		ContextTypeRegistry templateContextRegistry= JavaPlugin.getDefault().getTemplateContextRegistry();
 		TemplateContextType contextType= templateContextRegistry.getContextType(SWTContextType.ID);
 		Assert.isNotNull(contextType);
 		fSWTTemplateEngine= new TemplateEngine(contextType);
+		
+		JavaCore.addElementChangedListener(new BuildPathChangeListener());
 	}
 
 	/* (non-Javadoc)
@@ -51,15 +104,51 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 		if (unit == null)
 			return null;
 
-		try {
-			IType type= unit.getJavaProject().findType("org.eclipse.swt.SWT"); //$NON-NLS-1$
-			if (type == null)
-				return null;
-		} catch (JavaModelException e) {
+		IJavaProject javaProject= unit.getJavaProject();
+		if (javaProject == null)
 			return null;
-		}
 
-		return fSWTTemplateEngine;
+		if (isSWTOnClasspath(javaProject))
+			return fSWTTemplateEngine;
+		
+		return null;
+	}
+
+	/**
+	 * Tells whether SWT is on the given project's class path.
+	 * 
+	 * @param javaProject
+	 * @return <code>true</code> if the given project's class path
+	 */
+	private synchronized boolean isSWTOnClasspath(IJavaProject javaProject) {
+		if (!javaProject.equals(fCachedJavaProject)) {
+			fCachedJavaProject= javaProject;
+			try {
+				IType type= javaProject.findType(SWT_TYPE_NAME);
+				fIsSWTOnClasspath= type != null;
+			} catch (JavaModelException e) {
+				fIsSWTOnClasspath= false;
+			}
+		}
+		return fIsSWTOnClasspath;
+	}
+
+	/**
+	 * Returns the cached Java project.
+	 * 
+	 * @return the cached Java project or <code>null</code> if none
+	 */
+	private synchronized IJavaProject getCachedJavaProject() {
+		return fCachedJavaProject;
+	}
+	
+	/**
+	 * Set the cached Java project.
+	 * 
+	 * @param project or <code>null</code> to reset the cache
+	 */
+	private synchronized void setCachedJavaProject(IJavaProject project) {
+		fCachedJavaProject= project;
 	}
 
 }
