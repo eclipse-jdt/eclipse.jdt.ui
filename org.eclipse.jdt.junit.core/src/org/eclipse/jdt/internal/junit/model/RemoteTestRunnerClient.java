@@ -296,6 +296,12 @@ public class RemoteTestRunnerClient {
 			fWriter.flush();
 		}
 	}
+	
+	public synchronized void stopWaiting() {
+		if (fServerSocket != null  && ! fServerSocket.isClosed() && fSocket == null) {
+			shutDown(); // will throw a SocketException in Threads that wait in ServerSocket#accept()
+		}
+	}
 
 	private synchronized void shutDown() {
 		if (fDebug) 
