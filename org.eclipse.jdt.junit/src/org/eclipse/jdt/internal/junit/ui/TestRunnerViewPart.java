@@ -1290,6 +1290,10 @@ action enablement
 		if (fViewMenuListener != null) {
 			getViewSite().getActionBars().getMenuManager().removeMenuListener(fViewMenuListener);
 		}
+		if (fDirtyListener != null) {
+			JavaCore.removeElementChangedListener(fDirtyListener);
+			fDirtyListener= null;
+		}
 	}
 
 	private void disposeImages() {
