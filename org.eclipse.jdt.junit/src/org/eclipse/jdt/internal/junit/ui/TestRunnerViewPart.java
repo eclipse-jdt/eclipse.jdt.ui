@@ -994,7 +994,7 @@ public class TestRunnerViewPart extends ViewPart {
 			return;
 		
 		ILaunchConfiguration configuration= prepareLaunchConfigForRelaunch(launchConfiguration);
-		DebugUITools.launch(configuration, launch.getLaunchMode());
+		relaunch(configuration, launch.getLaunchMode());
 	}
 
 	private ILaunchConfiguration prepareLaunchConfigForRelaunch(ILaunchConfiguration configuration) {
@@ -1035,7 +1035,7 @@ public class TestRunnerViewPart extends ViewPart {
 						}
 						ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy(configName); 
 						tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_FAILURES_NAMES, createFailureNamesFile());
-						tmp.launch(launch.getLaunchMode(), null);	
+						relaunch(tmp, launch.getLaunchMode());	
 						return;	
 					} catch (CoreException e) {
 						ErrorDialog.openError(getSite().getShell(), 
@@ -1049,6 +1049,10 @@ public class TestRunnerViewPart extends ViewPart {
 				); 
 		}
 	}	
+
+	private void relaunch(ILaunchConfiguration configuration, String launchMode) {
+		DebugUITools.launch(configuration, launchMode);
+	}
 
 	private String createFailureNamesFile() throws CoreException {
 		try {
