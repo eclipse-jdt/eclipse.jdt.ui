@@ -82,8 +82,9 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariableGuess;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
+
 /**
- * A context for java source.
+ * A context for Java source.
  */
 public class JavaContext extends CompilationUnitContext {
 
@@ -601,7 +602,7 @@ public class JavaContext extends CompilationUnitContext {
 	 */
 	public static String evaluateTemplate(Template template, ICompilationUnit compilationUnit, int position) throws CoreException, BadLocationException, TemplateException {
 
-		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(JavaContextType.NAME);
+		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(JavaContextType.ID);
 		if (contextType == null)
 			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, JavaTemplateMessages.JavaContext_error_message, null)); 
 
