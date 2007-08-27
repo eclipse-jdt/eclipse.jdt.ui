@@ -8,12 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
@@ -30,7 +28,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -436,20 +433,6 @@ public final class ASTProvider {
 		}
 	}
 
-	/**
-	 * @deprecated use {{@link #getAST(ITypeRoot, WAIT_FLAG, IProgressMonitor)} instead.
-	 * @param je the java element
-	 * @param waitFlag wait flag
-	 * @param progressMonitor progress monitor
-	 * @return the ast root
-	 */
-	public CompilationUnit getAST(IJavaElement je, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor) {
-		if (je == null)
-			return null;
-		Assert.isTrue(je.getElementType() == IJavaElement.CLASS_FILE || je.getElementType() == IJavaElement.COMPILATION_UNIT);
-		return getAST((ITypeRoot) je, waitFlag, progressMonitor);
-	}
-	
 	/**
 	 * Returns a shared compilation unit AST for the given
 	 * Java element.
