@@ -27,8 +27,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
 
+
 /**
- * Computer computing template proposals for java and javadoc context type.
+ * Computer computing template proposals for Java and Javadoc context type.
  * 
  * @since 3.2
  */
