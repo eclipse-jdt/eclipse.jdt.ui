@@ -43,7 +43,6 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
@@ -86,7 +85,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.DocumentAdapter;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantRegistry;
@@ -272,13 +270,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 		 }
 		 return null;
 	}
-	
-	/**
-	 * @deprecated Use EditorUtility.getDirtyEditors() instead.
-	 */
-	public static IEditorPart[] getDirtyEditors() {
-		return EditorUtility.getDirtyEditors();
-	}
 		
 	public static String getPluginId() {
 		return JavaUI.ID_PLUGIN;
@@ -359,10 +350,13 @@ public class JavaPlugin extends AbstractUIPlugin {
 
 		ensurePreferenceStoreBackwardsCompatibility();
 
+		// make sure org.eclipse.jdt.core.manipulation is loaded too
+		// can be removed if JavaElementPropertyTester is moved down to jdt.core (bug 127085)
+		JavaManipulation.class.toString();
+		
 		if (PlatformUI.isWorkbenchRunning()) {
 			// Initialize AST provider
 			getASTProvider();
-			new InitializeAfterLoadJob().schedule();
 			
 			fThemeListener= new IPropertyChangeListener() {
 				public void propertyChange(PropertyChangeEvent event) {
@@ -371,18 +365,20 @@ public class JavaPlugin extends AbstractUIPlugin {
 				}
 			};
 			PlatformUI.getWorkbench().getThemeManager().addPropertyChangeListener(fThemeListener);
+			new InitializeAfterLoadJob().schedule(); // last call in start, see bug 191193
 		}
-		
-		// make sure is loaded too for org.eclipse.jdt.core.manipulation
-		// can be removed if JavaElementPropertyTester is moved down to jdt.core (bug 127085)
-		JavaManipulation.class.toString();
 	}
 
 	/* package */ static void initializeAfterLoad(IProgressMonitor monitor) {
 		OpenTypeHistory.getInstance().checkConsistency(monitor);
 	}
 	
-	/** @deprecated */
+	/**
+	 * Private deprecated method to avoid deprecation warnings
+	 * 
+	 * @return the deprecated preference store
+	 * @deprecated
+	 */
 	private static IPreferenceStore getDeprecatedWorkbenchPreferenceStore() {
 		return PlatformUI.getWorkbench().getPreferenceStore();
 	}
@@ -608,6 +604,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	/**
+	 * Private deprecated method to avoid deprecation warnings
+	 * 
+	 * @return the deprecated buffer factory
 	 * @deprecated
 	 */
 	public synchronized org.eclipse.jdt.core.IBufferFactory getBufferFactory() {
@@ -818,7 +817,10 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	/**
-	 * @deprecated Indirection added to avoid deprecated warning on file
+	 * Private deprecated method to avoid deprecation warnings
+	 * 
+	 * @return the deprecated template store 
+	 * @deprecated
 	 */
 	private org.eclipse.jdt.internal.corext.template.java.Templates getOldTemplateStoreInstance() {
 		return org.eclipse.jdt.internal.corext.template.java.Templates.getInstance();
@@ -877,7 +879,10 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	/**
-	 * @deprecated Indirection added to avoid deprecated warning on file
+	 * Private deprecated method to avoid deprecation warnings
+	 * 
+	 * @return the deprecated code template store 
+	 * @deprecated
 	 */
 	private org.eclipse.jdt.internal.corext.template.java.CodeTemplates getOldCodeTemplateStoreInstance() {
 		return org.eclipse.jdt.internal.corext.template.java.CodeTemplates.getInstance();
@@ -966,7 +971,10 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	/**
-	 * 	@since 3.3
+	 * Returns the descriptors for the class path attribute configuration extension point
+	 * 
+	 * 	@return access to the descriptors for the class path attribute configuration extension point
+	 * @since 3.3
 	 */
 	public ClasspathAttributeConfigurationDescriptors getClasspathAttributeConfigurationDescriptors() {
 		if (fClasspathAttributeConfigurationDescriptors == null) {
