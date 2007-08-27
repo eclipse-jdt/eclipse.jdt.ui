@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,8 +43,8 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.ui.SharedASTProvider;
+
 
 public class NLSRefactoring extends Refactoring {
 
@@ -80,7 +80,7 @@ public class NLSRefactoring extends Refactoring {
 		Assert.isNotNull(cu);
 		fCu= cu;
 
-		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(fCu, ASTProvider.WAIT_YES, null);
+		CompilationUnit astRoot= SharedASTProvider.getAST(fCu, SharedASTProvider.WAIT_YES, null);
 		NLSHint nlsHint= new NLSHint(fCu, astRoot);
 
 		fSubstitutions= nlsHint.getSubstitutions();
@@ -120,6 +120,7 @@ public class NLSRefactoring extends Refactoring {
 
 	/**
 	 * to show the pattern in the UI
+	 * @return the substitution pattern
 	 */
 	public String getSubstitutionPattern() {
 		if (fIsEclipseNLS)

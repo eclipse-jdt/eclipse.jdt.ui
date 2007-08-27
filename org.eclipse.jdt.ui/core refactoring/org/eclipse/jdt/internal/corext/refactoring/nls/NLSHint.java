@@ -44,8 +44,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.ui.SharedASTProvider;
+
 
 /**
  * calculates hints for the nls-refactoring out of a compilation unit.
@@ -162,7 +162,7 @@ public class NLSHint {
 							if (fCache_CU == null || !fCache_CU.equals(bundleCU) || fCache_AST == null) {
 								fCache_CU= bundleCU;
 								if (fCache_CU != null)
-									fCache_AST=	JavaPlugin.getDefault().getASTProvider().getAST(fCache_CU, ASTProvider.WAIT_YES, null);
+									fCache_AST=	SharedASTProvider.getAST(fCache_CU, SharedASTProvider.WAIT_YES, null);
 								else
 									fCache_AST= null;
 							}

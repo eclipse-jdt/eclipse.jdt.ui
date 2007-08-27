@@ -64,8 +64,9 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.SharedASTProvider;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class NLSHintHelper {
 
@@ -185,13 +186,13 @@ public class NLSHintHelper {
 		if (!(je instanceof IType))
 			return null;	
 		ITypeRoot typeRoot= ((IType) je).getTypeRoot();
-		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(typeRoot, ASTProvider.WAIT_YES, null);
+		CompilationUnit astRoot= SharedASTProvider.getAST(typeRoot, SharedASTProvider.WAIT_YES, null);
 	
 		return getResourceBundleName(astRoot);
 	}
 	
 	public static String getResourceBundleName(ITypeRoot input) throws JavaModelException {
-		return getResourceBundleName(JavaPlugin.getDefault().getASTProvider().getAST(input, ASTProvider.WAIT_YES, null));
+		return getResourceBundleName(SharedASTProvider.getAST(input, SharedASTProvider.WAIT_YES, null));
 	}
 		
 	public static String getResourceBundleName(CompilationUnit astRoot) throws JavaModelException {

@@ -54,10 +54,9 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class AccessorClassModifier {
 
@@ -72,7 +71,7 @@ public class AccessorClassModifier {
 
 		fCU= cu;
 		
-		fRoot= JavaPlugin.getDefault().getASTProvider().getAST(cu, ASTProvider.WAIT_YES, null);
+		fRoot= SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_YES, null);
 		fAst= fRoot.getAST();
 		fASTRewrite= ASTRewrite.create(fAst);
 		

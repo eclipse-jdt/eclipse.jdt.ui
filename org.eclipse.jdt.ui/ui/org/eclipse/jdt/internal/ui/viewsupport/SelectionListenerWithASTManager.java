@@ -36,9 +36,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.ui.SharedASTProvider;
+
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
@@ -165,7 +165,7 @@ public class SelectionListenerWithASTManager {
 			}
 			// create AST
 			try {
-				CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(input, ASTProvider.WAIT_ACTIVE_ONLY, monitor);
+				CompilationUnit astRoot= SharedASTProvider.getAST(input, SharedASTProvider.WAIT_ACTIVE_ONLY, monitor);
 			
 				if (astRoot != null && !monitor.isCanceled()) {
 					Object[] listeners;

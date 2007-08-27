@@ -73,9 +73,9 @@ import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.SimilarElementsRequestor;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
@@ -516,7 +516,7 @@ public class JavaContext extends CompilationUnitContext {
 	}
 	
 	private CompilationUnit getASTRoot(ICompilationUnit compilationUnit) {
-		return JavaPlugin.getDefault().getASTProvider().getAST(compilationUnit, ASTProvider.WAIT_NO, new NullProgressMonitor());
+		return SharedASTProvider.getAST(compilationUnit, SharedASTProvider.WAIT_NO, new NullProgressMonitor());
 	}
 	
 	/*

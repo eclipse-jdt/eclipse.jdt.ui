@@ -54,40 +54,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public final class ASTProvider {
 
 	/**
-	 * Wait flag indicating that a client requesting an AST
-	 * wants to wait until an AST is ready.
-	 * <p>
-	 * An AST will be created by this AST provider if the shared
-	 * AST is not for the given java element.
-	 * </p>
-	 *
-	 * @since 3.1
-	 */
-	public static final WAIT_FLAG WAIT_YES= SharedASTProvider.WAIT_YES;
-
-	/**
-	 * Wait flag indicating that a client requesting an AST
-	 * only wants to wait for the shared AST of the active editor.
-	 * <p>
-	 * No AST will be created by the AST provider.
-	 * </p>
-	 *
-	 * @since 3.1
-	 */
-	public static final WAIT_FLAG WAIT_ACTIVE_ONLY= SharedASTProvider.WAIT_ACTIVE_ONLY;
-	/**
-	 * Wait flag indicating that a client requesting an AST
-	 * only wants the already available shared AST.
-	 * <p>
-	 * No AST will be created by the AST provider.
-	 * </p>
-	 *
-	 * @since 3.1
-	 */
-	public static final WAIT_FLAG WAIT_NO= SharedASTProvider.WAIT_NO;
-
-
-	/**
 	 * Tells whether this class is in debug mode.
 	 * @since 3.0
 	 */
@@ -424,7 +390,7 @@ public final class ASTProvider {
 	 * @param input
 	 * 			the Java element, must not be <code>null</code>
 	 * @param waitFlag
-	 * 			{@link #WAIT_YES}, {@link #WAIT_NO} or {@link #WAIT_ACTIVE_ONLY}
+	 * 			{@link SharedASTProvider#WAIT_YES}, {@link SharedASTProvider#WAIT_NO} or {@link SharedASTProvider#WAIT_ACTIVE_ONLY}
 	 * @param progressMonitor
 	 * 			the progress monitor or <code>null</code>
 	 * @return
@@ -447,7 +413,7 @@ public final class ASTProvider {
 
 					return fAST;
 				}
-				if (waitFlag == WAIT_NO) {
+				if (waitFlag == SharedASTProvider.WAIT_NO) {
 					if (DEBUG)
 						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "returning null (WAIT_NO) for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -481,7 +447,7 @@ public final class ASTProvider {
 			} catch (InterruptedException e) {
 				return null; // thread has been interrupted don't compute AST
 			}
-		} else if (waitFlag == WAIT_NO || (waitFlag == WAIT_ACTIVE_ONLY && !(isActiveElement && fAST == null)))
+		} else if (waitFlag == SharedASTProvider.WAIT_NO || (waitFlag == SharedASTProvider.WAIT_ACTIVE_ONLY && !(isActiveElement && fAST == null)))
 			return null;
 
 		if (isActiveElement)

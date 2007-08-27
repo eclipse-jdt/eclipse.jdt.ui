@@ -65,9 +65,9 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.ui.SharedASTProvider;
+
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.SimilarElementsRequestor;
 
@@ -141,7 +141,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		try {
 			monitor.beginTask(CodeGenerationMessages.AddImportsOperation_description, 4); 
 			
-			CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(fCompilationUnit, ASTProvider.WAIT_YES, new SubProgressMonitor(monitor, 1));
+			CompilationUnit astRoot= SharedASTProvider.getAST(fCompilationUnit, SharedASTProvider.WAIT_YES, new SubProgressMonitor(monitor, 1));
 
 			ImportRewrite importRewrite= StubUtility.createImportRewrite(astRoot, true);
 			

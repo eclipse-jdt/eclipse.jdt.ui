@@ -64,7 +64,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
 
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.ui.SharedASTProvider;
+
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.SimilarElementsRequestor;
 
@@ -412,7 +413,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			
 			CompilationUnit astRoot= fASTRoot;
 			if (astRoot == null) {
-				astRoot= ASTProvider.getASTProvider().getAST(fCompilationUnit, ASTProvider.WAIT_YES, new SubProgressMonitor(monitor, 2));
+				astRoot= SharedASTProvider.getAST(fCompilationUnit, SharedASTProvider.WAIT_YES, new SubProgressMonitor(monitor, 2));
 				if (monitor.isCanceled())
 					throw new OperationCanceledException();
 			} else {
