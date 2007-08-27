@@ -166,7 +166,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 	};
 	
 	private final class PreferenceModel {
-		private static final int LIMIT= 0xffff;
+		private static final int LIMIT= 65535;
 		private static final String COLON= ":"; //$NON-NLS-1$
 		private static final String SEPARATOR= "\0"; //$NON-NLS-1$
 
