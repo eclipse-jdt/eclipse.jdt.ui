@@ -2618,6 +2618,38 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
+	
+	public void testSuppressWarningInImports() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[1];
+
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");
+		buf.append("@SuppressWarnings(\"unused\")\n");
+		buf.append("public class A {\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 
 	public void testMakeFinalBug129165() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

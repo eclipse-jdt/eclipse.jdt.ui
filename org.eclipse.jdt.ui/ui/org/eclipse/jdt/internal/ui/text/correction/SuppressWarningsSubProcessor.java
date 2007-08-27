@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -47,6 +48,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -105,6 +107,12 @@ public class SuppressWarningsSubProcessor {
 		ASTNode target= ASTResolving.findParentBodyDeclaration(node);
 		if (target instanceof Initializer) { 
 			target= ASTResolving.findParentBodyDeclaration(target.getParent());
+		}
+		if (target == null) {
+			ASTNode importStatement= ASTNodes.getParent(node, ImportDeclaration.class);
+			if (importStatement != null && !context.getASTRoot().types().isEmpty()) {
+				target= (ASTNode) context.getASTRoot().types().get(0);
+			}
 		}
 		if (target != null) {
 			addSuppressWarningsProposal(context.getCompilationUnit(), target, warningToken, -3, proposals);
@@ -284,6 +292,12 @@ public class SuppressWarningsSubProcessor {
 		proposals.add(proposal);
 	}
 
+	/**
+	 * Adds a proposal to correct the name of the SuppressWarning annotation
+	 * @param context the context
+	 * @param problem the problem
+	 * @param proposals the resulting proposals
+	 */
 	public static void addUnknownSuppressWarningProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 
 		ASTNode coveringNode= context.getCoveringNode();
