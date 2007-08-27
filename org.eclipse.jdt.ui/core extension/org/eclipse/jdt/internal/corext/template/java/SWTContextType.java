@@ -40,14 +40,14 @@ public class SWTContextType extends CompilationUnitContextType {
 	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, int, int, org.eclipse.jdt.core.ICompilationUnit)
 	 */
 	public CompilationUnitContext createContext(IDocument document, int offset, int length, ICompilationUnit compilationUnit) {
-		return new SWTContext(this, document, offset, length, compilationUnit);
+		return new JavaContext(this, document, offset, length, compilationUnit);
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.Position, org.eclipse.jdt.core.ICompilationUnit)
 	 */
 	public CompilationUnitContext createContext(IDocument document, Position offset, ICompilationUnit compilationUnit) {
-		return new SWTContext(this, document, offset, compilationUnit);
+		return new JavaContext(this, document, offset, compilationUnit);
 	}
 
 	/**
