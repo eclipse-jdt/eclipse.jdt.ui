@@ -3128,7 +3128,16 @@ public class PreferenceConstants {
 	/**
 	 * A named preference that controls which the order of the specific code assist commands.
 	 * <p>
-	 * Value is of type <code>String</code>, a "\0"-separated list of identifiers.
+	 * Value is of type <code>String</code>, a "\0"-separated list with categoryId:cycleState where
+	 * <ul>
+	 * 	<li>categoryId is the <code>String</code> holding the category ID</li>
+	 * 	<li>cycleState is an <code>int</code> which specifies the rank and the enablement:
+	 * 	<ul>
+	 * 		<li>enabled= cycleState < 65535</li>
+	 * 		<li>rank= cycleState > 65535 ? cycleState - 65535 : cycleState)</li>
+	 *  </ul></li>
+	 * </ul>
+	 * 
 	 * </p>
 	 * 
 	 * @since 3.2
@@ -3777,8 +3786,8 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);
 		store.setDefault(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, false);
 		store.setDefault(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, false);
-		store.setDefault(PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES, "org.eclipse.jdt.ui.spellingProposalCategory\0org.eclipse.jdt.ui.textProposalCategory\0"); //$NON-NLS-1$
-		store.setDefault(PreferenceConstants.CODEASSIST_CATEGORY_ORDER, "org.eclipse.jdt.ui.spellingProposalCategory:65545\0org.eclipse.jdt.ui.javaTypeProposalCategory:65540\0org.eclipse.jdt.ui.javaNoTypeProposalCategory:65539\0org.eclipse.jdt.ui.textProposalCategory:65541\0org.eclipse.jdt.ui.templateProposalCategory:2\0"); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES, "org.eclipse.jdt.ui.textProposalCategory\0"); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.CODEASSIST_CATEGORY_ORDER, "org.eclipse.jdt.ui.spellingProposalCategory:65545\0org.eclipse.jdt.ui.javaTypeProposalCategory:65540\0org.eclipse.jdt.ui.javaNoTypeProposalCategory:65539\0org.eclipse.jdt.ui.textProposalCategory:65541\0org.eclipse.jdt.ui.templateProposalCategory:2\0org.eclipse.jdt.ui.swtProposalCategory:3\0"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_LRU_HISTORY, ""); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_SORTER, "org.eclipse.jdt.ui.RelevanceSorter"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, ""); //$NON-NLS-1$
