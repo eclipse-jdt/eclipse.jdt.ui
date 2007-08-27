@@ -8,9 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.javaeditor;
-
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -70,6 +68,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.ITypeParameter;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -80,6 +79,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 
 /**
  * A number of routines for working with JavaElements in editors.
@@ -348,16 +348,16 @@ public class EditorUtility {
 	 *
 	 * @param editor the editor
 	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
-	 * @return the given editor's input as Java element or <code>null</code> if none
+	 * @return the given editor's input as <code>ITypeRoot</code> or <code>null</code> if none
 	 * @since 3.2
 	 */
-	public static IJavaElement getEditorInputJavaElement(IEditorPart editor, boolean primaryOnly) {
+	public static ITypeRoot getEditorInputJavaElement(IEditorPart editor, boolean primaryOnly) {
 		Assert.isNotNull(editor);
 		IEditorInput editorInput= editor.getEditorInput();
 		if (editorInput == null)
 			return null;
 		
-		IJavaElement je= JavaUI.getEditorInputJavaElement(editorInput);
+		ITypeRoot je= JavaUI.getEditorInputTypeRoot(editorInput);
 		if (je != null || primaryOnly)
 			return je;
 

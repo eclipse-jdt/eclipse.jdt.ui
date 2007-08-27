@@ -45,10 +45,10 @@ public class TemplateContributionTest extends TestCase {
 
 	public void testJavaContribution() throws Exception {
 		ContextTypeRegistry registry= JavaPlugin.getDefault().getTemplateContextRegistry();
-		TemplateContextType javaContext= registry.getContextType(JavaContextType.NAME);
+		TemplateContextType javaContext= registry.getContextType(JavaContextType.ID);
 	
 		TemplateStore templateStore= JavaPlugin.getDefault().getTemplateStore();
-		Template[] javaTemplates= templateStore.getTemplates(JavaContextType.NAME);
+		Template[] javaTemplates= templateStore.getTemplates(JavaContextType.ID);
 		
 		for (int i= 0; i < javaTemplates.length; i++) {
 			Template template= javaTemplates[i];
@@ -66,10 +66,10 @@ public class TemplateContributionTest extends TestCase {
 	
 	public void testJavaDocContribution() throws Exception {
 		ContextTypeRegistry registry= JavaPlugin.getDefault().getTemplateContextRegistry();
-		TemplateContextType javaContext= registry.getContextType(JavaDocContextType.NAME);
+		TemplateContextType javaContext= registry.getContextType(JavaDocContextType.ID);
 	
 		TemplateStore templateStore= JavaPlugin.getDefault().getTemplateStore();
-		Template[] javaTemplates= templateStore.getTemplates(JavaDocContextType.NAME);
+		Template[] javaTemplates= templateStore.getTemplates(JavaDocContextType.ID);
 		
 		for (int i= 0; i < javaTemplates.length; i++) {
 			Template template= javaTemplates[i];
@@ -87,10 +87,10 @@ public class TemplateContributionTest extends TestCase {
 	
 	public void testSWTContribution() throws Exception {
 		ContextTypeRegistry registry= JavaPlugin.getDefault().getTemplateContextRegistry();
-		TemplateContextType swtContext= registry.getContextType(SWTContextType.NAME);
+		TemplateContextType swtContext= registry.getContextType(SWTContextType.ID);
 	
 		TemplateStore templateStore= JavaPlugin.getDefault().getTemplateStore();
-		Template[] javaTemplates= templateStore.getTemplates(SWTContextType.NAME);
+		Template[] javaTemplates= templateStore.getTemplates(SWTContextType.ID);
 		
 		for (int i= 0; i < javaTemplates.length; i++) {
 			Template template= javaTemplates[i];
