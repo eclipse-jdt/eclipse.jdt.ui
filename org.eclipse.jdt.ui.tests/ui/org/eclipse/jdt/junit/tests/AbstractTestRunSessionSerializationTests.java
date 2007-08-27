@@ -119,6 +119,9 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 		String replacement= "";
 		expected= expected.replaceAll(regex, replacement).replaceAll(regex2, replacement);
 		actual= actual.replaceAll(regex, replacement).replaceAll(regex2, replacement);
+		int ibmJava6BugOffset= actual.indexOf("><");
+		if (ibmJava6BugOffset > 0) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=197842
+			actual= new StringBuffer(actual).insert(ibmJava6BugOffset + 1, " ").toString();
 		
 		StringTokenizer expTok= new StringTokenizer(expected);
 		StringTokenizer actTok= new StringTokenizer(actual);
