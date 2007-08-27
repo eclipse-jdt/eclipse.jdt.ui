@@ -648,7 +648,7 @@ public class TestRunnerViewPart extends ViewPart {
 			List testRunSessions= JUnitPlugin.getModel().getTestRunSessions();
 			for (Iterator iter= testRunSessions.iterator(); iter.hasNext();) {
 				TestRunSession testRunSession= (TestRunSession) iter.next();
-				if (! testRunSession.isRunning()) {
+				if (! testRunSession.isRunning() && ! testRunSession.isStarting()) {
 					enabled= true;
 					break;
 				}
@@ -666,7 +666,7 @@ public class TestRunnerViewPart extends ViewPart {
 			List testRunSessions= JUnitPlugin.getModel().getTestRunSessions();
 			for (Iterator iter= testRunSessions.iterator(); iter.hasNext();) {
 				TestRunSession testRunSession= (TestRunSession) iter.next();
-				if (! testRunSession.isRunning()) {
+				if (! testRunSession.isRunning() && ! testRunSession.isStarting()) {
 					iter.remove();
 				}
 			}
@@ -718,7 +718,7 @@ public class TestRunnerViewPart extends ViewPart {
 	private class ToggleOrientationAction extends Action {
 		private final int fActionOrientation;
 		
-		public ToggleOrientationAction(TestRunnerViewPart v, int orientation) {
+		public ToggleOrientationAction(int orientation) {
 			super("", AS_RADIO_BUTTON); //$NON-NLS-1$
 			if (orientation == TestRunnerViewPart.VIEW_ORIENTATION_HORIZONTAL) {
 				setText(JUnitMessages.TestRunnerViewPart_toggle_horizontal_label); 
@@ -1561,9 +1561,9 @@ action enablement
 		
 		fToggleOrientationActions =
 			new ToggleOrientationAction[] {
-				new ToggleOrientationAction(this, VIEW_ORIENTATION_VERTICAL),
-				new ToggleOrientationAction(this, VIEW_ORIENTATION_HORIZONTAL),
-				new ToggleOrientationAction(this, VIEW_ORIENTATION_AUTOMATIC)};
+				new ToggleOrientationAction(VIEW_ORIENTATION_VERTICAL),
+				new ToggleOrientationAction(VIEW_ORIENTATION_HORIZONTAL),
+				new ToggleOrientationAction(VIEW_ORIENTATION_AUTOMATIC)};
 		
 		fShowTestHierarchyAction= new ShowTestHierarchyAction();
 		
