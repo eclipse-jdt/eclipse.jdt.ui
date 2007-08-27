@@ -49,8 +49,8 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.ui.SharedASTProvider;
+
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -90,7 +90,7 @@ public class NLSHintHelperTest extends TestCase {
 		IPackageFragment pkg= fLibrary.getPackageFragment("pkg");
 		IClassFile classFile= pkg.getClassFile("Client.class");
 		IRegion region= new Region(648, 4);
-		CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(classFile, ASTProvider.WAIT_YES, null);
+		CompilationUnit ast= SharedASTProvider.getAST(classFile, SharedASTProvider.WAIT_YES, null);
 		AccessorClassReference accessor= NLSHintHelper.getAccessorClassReference(ast, region);
 		assertNotNull(accessor);
 		Properties properties= NLSHintHelper.getProperties(fJProject, accessor);
@@ -418,7 +418,7 @@ public class NLSHintHelperTest extends TestCase {
         ICompilationUnit  cu= pack.createCompilationUnit(className + ".java", source, false, null);
 
         // Get type binding
-        CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(cu, ASTProvider.WAIT_YES, null);
+        CompilationUnit ast= SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_YES, null);
         ASTNode node= NodeFinder.perform(ast, cu.getType(className).getSourceRange());
         ITypeBinding typeBinding= ((TypeDeclaration)node).resolveBinding();
         

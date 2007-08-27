@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,11 +48,11 @@ import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 
 public class JavaCorrectionAssistant extends QuickAssistAssistant {
@@ -67,6 +67,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 
 	/**
 	 * Constructor for JavaCorrectionAssistant.
+	 * @param editor the editor
 	 */
 	public JavaCorrectionAssistant(ITextEditor editor) {
 		super();
@@ -248,7 +249,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 	private static void ensureUpdatedAnnotations(ITextEditor editor) {
 		Object inputElement= editor.getEditorInput().getAdapter(IJavaElement.class);
 		if (inputElement instanceof ICompilationUnit) {
-			JavaPlugin.getDefault().getASTProvider().getAST((ICompilationUnit) inputElement, ASTProvider.WAIT_ACTIVE_ONLY, null);
+			SharedASTProvider.getAST((ICompilationUnit) inputElement, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
 		}
 	}
 
@@ -283,6 +284,9 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 	 * The closest offset to the left of the initial offset is the
 	 * best. If there is no offset on the left, the closest on the
 	 * right is the best.</p>
+	 * @param newOffset the offset to llok at
+	 * @param invocationLocation the invocation location
+	 * @param bestOffset the current best offset
 	 * @return -1 is returned if the given offset is not closer or the new best offset
 	 */
 	private static int computeBestOffset(int newOffset, int invocationLocation, int bestOffset) {
@@ -323,6 +327,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 
 	/**
 	 * Returns true if the last invoked completion was called with an updated offset.
+	 * @return <code> true</code> if the last invoked completion was called with an updated offset.
 	 */
 	public boolean isUpdatedOffset() {
 		return fPosition != null;
@@ -330,6 +335,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 
 	/**
 	 * Returns the annotations at the current offset
+	 * @return the annotations at the offset
 	 */
 	public Annotation[] getAnnotationsAtOffset() {
 		return fCurrentAnnotations;

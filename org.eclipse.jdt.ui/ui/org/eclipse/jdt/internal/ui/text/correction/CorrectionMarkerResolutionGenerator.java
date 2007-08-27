@@ -74,6 +74,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.MultiStateCompilationUnitChange;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -102,7 +103,11 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 
 		/**
 		 * Constructor for CorrectionMarkerResolution.
-		 * @param marker 
+		 * @param cu the compilation unit
+		 * @param offset the offset
+		 * @param length the length
+		 * @param proposal the proposal for the given marker
+		 * @param marker the marker to fix
 		 */
 		public CorrectionMarkerResolution(ICompilationUnit cu, int offset, int length, IJavaCompletionProposal proposal, IMarker marker) {
 			fCompilationUnit= cu;
@@ -394,6 +399,8 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 
 		/**
 		 * Returns the markers with the same type as fMarker.getType for each IFile.
+		 * @param markers the markers
+		 * @return mapping files to markers
 		 */
 		private Hashtable/*<IFile, List<IMarker>>*/ getMarkersForFiles(IMarker[] markers) {
 			final Hashtable result= new Hashtable();
@@ -434,6 +441,8 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		
 		/**
 		 * Returns the ICompilationUnits for each IJavaProject 
+		 * @param fileMarkerTable a map from file to markers
+		 * @return map of projects to compilation units
 		 */
 		private Hashtable/*<IJavaProject, List<ICompilationUnit>>*/ getCompilationUnitsForProjects(final Hashtable/*<IFile, List<IMarker>>*/ fileMarkerTable) {
 			Hashtable result= new Hashtable();
@@ -462,7 +471,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		}
 		
 		private static CompilationUnit getASTRoot(ICompilationUnit compilationUnit, IProgressMonitor monitor) {
-			CompilationUnit result= ASTProvider.getASTProvider().getAST(compilationUnit, ASTProvider.WAIT_YES, monitor);
+			CompilationUnit result= SharedASTProvider.getAST(compilationUnit, SharedASTProvider.WAIT_YES, monitor);
 			if (result == null) {
 				// see bug 63554
 				result= ASTResolving.createQuickFixAST(compilationUnit, monitor);

@@ -40,7 +40,6 @@ import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
 
@@ -148,7 +147,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 * @throws JavaModelException
 	 */
 	protected int getOverrideIndicators(IMethod method) throws JavaModelException {
-		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(method.getTypeRoot(), ASTProvider.WAIT_ACTIVE_ONLY, null);
+		CompilationUnit astRoot= SharedASTProvider.getAST(method.getTypeRoot(), SharedASTProvider.WAIT_ACTIVE_ONLY, null);
 		if (astRoot != null) {
 			int res= findInHierarchyWithAST(astRoot, method);
 			if (res != -1) {

@@ -41,6 +41,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 
+import org.eclipse.jdt.ui.SharedASTProvider;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.HighlightedPosition;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.Highlighting;
@@ -422,7 +424,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 						}
 						if (monitor.isCanceled())
 							return Status.CANCEL_STATUS;
-						CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(element, ASTProvider.WAIT_YES, monitor);
+						CompilationUnit ast= SharedASTProvider.getAST(element, SharedASTProvider.WAIT_YES, monitor);
 						reconciled(ast, false, monitor);
 						synchronized (fJobLock) {
 							// allow the job to be gc'ed

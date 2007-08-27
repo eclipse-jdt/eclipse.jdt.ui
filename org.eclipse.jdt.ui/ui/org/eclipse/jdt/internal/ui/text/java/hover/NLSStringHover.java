@@ -35,9 +35,8 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.SharedASTProvider;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
@@ -60,7 +59,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 			return null;
 
 		// Never wait for an AST in UI thread.
-		CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(je, ASTProvider.WAIT_NO, null);
+		CompilationUnit ast= SharedASTProvider.getAST(je, SharedASTProvider.WAIT_NO, null);
 		if (ast == null)
 			return null;
 
@@ -87,7 +86,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		if (je == null)
 			return null;
 
-		CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(je, ASTProvider.WAIT_ACTIVE_ONLY, null);
+		CompilationUnit ast= SharedASTProvider.getAST(je, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
 		if (ast == null)
 			return null;
 

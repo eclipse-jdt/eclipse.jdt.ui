@@ -57,9 +57,9 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InOutFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithAnalyzer;
 
+import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public abstract class SurroundWith {
 
@@ -167,7 +167,7 @@ public abstract class SurroundWith {
 
 	public static boolean isApplicable(IInvocationContext context) throws JavaModelException {
 		ICompilationUnit unit= context.getCompilationUnit();
-		CompilationUnit ast= ASTProvider.getASTProvider().getAST(unit, ASTProvider.WAIT_NO, null);
+		CompilationUnit ast= SharedASTProvider.getAST(unit, SharedASTProvider.WAIT_NO, null);
 		if (ast == null)
 			return true;
 		

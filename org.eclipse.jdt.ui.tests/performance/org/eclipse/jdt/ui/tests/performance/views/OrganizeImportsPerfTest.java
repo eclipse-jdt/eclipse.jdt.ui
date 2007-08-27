@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,8 +30,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.ui.SharedASTProvider;
+
 
 import org.eclipse.test.performance.Dimension;
 
@@ -91,7 +91,7 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 	private CompilationUnit[] createASTs(ICompilationUnit[] cus) {
 		CompilationUnit[] result= new CompilationUnit[cus.length];
 		for (int i= 0; i < cus.length; i++) {
-			result[i]= JavaPlugin.getDefault().getASTProvider().getAST(cus[i], ASTProvider.WAIT_YES, new NullProgressMonitor());
+			result[i]= SharedASTProvider.getAST(cus[i], SharedASTProvider.WAIT_YES, new NullProgressMonitor());
 		}
 		return result;
 	}

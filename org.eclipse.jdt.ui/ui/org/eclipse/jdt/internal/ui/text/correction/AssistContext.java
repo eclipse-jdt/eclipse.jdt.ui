@@ -19,9 +19,9 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 
+import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
   */
@@ -74,7 +74,7 @@ public class AssistContext extends TextInvocationContext implements IInvocationC
 
 	public CompilationUnit getASTRoot() {
 		if (fASTRoot == null) {
-			fASTRoot= ASTProvider.getASTProvider().getAST(fCompilationUnit, ASTProvider.WAIT_YES, null);
+			fASTRoot= SharedASTProvider.getAST(fCompilationUnit, SharedASTProvider.WAIT_YES, null);
 			if (fASTRoot == null) {
 				// see bug 63554
 				fASTRoot= ASTResolving.createQuickFixAST(fCompilationUnit, null);

@@ -34,10 +34,10 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 
 /**
@@ -165,7 +165,7 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
 	}
 
 	private CompilationUnit getASTRoot(ICompilationUnit compilationUnit) {
-		return JavaPlugin.getDefault().getASTProvider().getAST(compilationUnit, ASTProvider.WAIT_NO, new NullProgressMonitor());
+		return SharedASTProvider.getAST(compilationUnit, SharedASTProvider.WAIT_NO, new NullProgressMonitor());
 	}
 
 	/**

@@ -32,8 +32,9 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 
+import org.eclipse.jdt.ui.SharedASTProvider;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
@@ -147,7 +148,7 @@ public abstract class StructureSelectionAction extends Action {
 	}
 
 	private static CompilationUnit getAST(ITypeRoot sr) {
-		return ASTProvider.getASTProvider().getAST(sr, ASTProvider.WAIT_YES, null);
+		return SharedASTProvider.getAST(sr, SharedASTProvider.WAIT_YES, null);
 	}
 
 	//-- helper methods for this class and subclasses

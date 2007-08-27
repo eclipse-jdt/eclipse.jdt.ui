@@ -110,10 +110,9 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class ASTView extends ViewPart implements IShowInSource {
 	
@@ -614,7 +613,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		} else if (input instanceof ICompilationUnit && (getCurrentInputKind() == ASTInputKindAction.USE_CACHE)) {
 			ICompilationUnit cu= (ICompilationUnit) input;
 			startTime= System.currentTimeMillis();
-			root= JavaPlugin.getDefault().getASTProvider().getAST(cu, ASTProvider.WAIT_NO, null);
+			root= SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_NO, null);
 			endTime= System.currentTimeMillis();
 			
 		} else {

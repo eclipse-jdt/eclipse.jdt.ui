@@ -35,9 +35,9 @@ import org.eclipse.jdt.internal.corext.fix.ConvertForLoopOperation;
 import org.eclipse.jdt.internal.corext.fix.ConvertLoopOperation;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor;
@@ -1884,7 +1884,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	}
 	
 	private static ForStatement getForStatement(ICompilationUnit cu) {
-		CompilationUnit ast= ASTProvider.getASTProvider().getAST(cu, ASTProvider.WAIT_YES, new NullProgressMonitor());
+		CompilationUnit ast= SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_YES, new NullProgressMonitor());
 		
 		final ForStatement[] statement= new ForStatement[1];
 		ast.accept(new GenericVisitor() {

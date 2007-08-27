@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
@@ -94,7 +95,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 		 * Opens and reveals the defining method.
 		 */
 		public void open() {
-			CompilationUnit ast= ASTProvider.getASTProvider().getAST(fJavaElement, ASTProvider.WAIT_ACTIVE_ONLY, null);
+			CompilationUnit ast= SharedASTProvider.getAST(fJavaElement, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
 			if (ast != null) {
 				ASTNode node= ast.findDeclaringNode(fAstNodeKey);
 				if (node instanceof MethodDeclaration) {

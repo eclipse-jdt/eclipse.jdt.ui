@@ -106,7 +106,6 @@ public final class SharedASTProvider {
 	 * <p>
 	 * Clients are not allowed to modify the AST and must not keep any references.
 	 * </p>
-	 *
 	 * @param element
 	 * 			the {@link ITypeRoot}, must not be <code>null</code>
 	 * @param waitFlag

@@ -89,6 +89,7 @@ import org.eclipse.jdt.core.util.ClassFormatException;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
@@ -675,7 +676,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			 * @since 3.0
 			 */
 			protected IStatus run(IProgressMonitor monitor) {
-				CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(inputElement, ASTProvider.WAIT_YES, null);
+				CompilationUnit ast= SharedASTProvider.getAST(inputElement, SharedASTProvider.WAIT_YES, null);
 				if (fOverrideIndicatorManager != null)
 					fOverrideIndicatorManager.reconciled(ast, true, monitor);
 				if (fSemanticManager != null) {

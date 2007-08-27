@@ -35,8 +35,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.SharedASTProvider;
 
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -131,7 +131,7 @@ public class ASTProviderTest extends CoreTests {
 		
 		for (int i= 0; i < 100; i++) {
 			String expected= cu.getBuffer().getContents();
-			CompilationUnit ast= ASTProvider.getASTProvider().getAST(cu, ASTProvider.WAIT_NO, null);
+			CompilationUnit ast= SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_NO, null);
 			if (ast != null) {
 				String actual= ast.toString();
 				System.out.println("Cached AST:");

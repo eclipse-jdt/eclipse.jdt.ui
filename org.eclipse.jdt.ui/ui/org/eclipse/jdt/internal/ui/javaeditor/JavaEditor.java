@@ -171,6 +171,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
@@ -1195,7 +1196,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		public void windowActivated(IWorkbenchWindow window) {
 			if (window == getEditorSite().getWorkbenchWindow() && fMarkOccurrenceAnnotations && isActivePart()) {
 				fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();
-				updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, JavaPlugin.getDefault().getASTProvider().getAST(getInputJavaElement(), ASTProvider.WAIT_NO, getProgressMonitor()));
+				updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProvider.getAST(getInputJavaElement(), SharedASTProvider.WAIT_NO, getProgressMonitor()));
 			}
 		}
 
@@ -2026,7 +2027,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (!(textSelection instanceof ITextSelection))
 			return;
 		
-		CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(getInputJavaElement(), ASTProvider.WAIT_ACTIVE_ONLY, getProgressMonitor());
+		CompilationUnit ast= SharedASTProvider.getAST(getInputJavaElement(), SharedASTProvider.WAIT_ACTIVE_ONLY, getProgressMonitor());
 		if (ast != null) {
 			fForcedMarkOccurrencesSelection= textSelection;
 			updateOccurrenceAnnotations((ITextSelection)textSelection, ast);
@@ -2903,7 +2904,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		SelectionListenerWithASTManager.getDefault().addListener(this, fPostSelectionListenerWithAST);
 		if (forceUpdate && getSelectionProvider() != null) {
 			fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();
-			updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, JavaPlugin.getDefault().getASTProvider().getAST(getInputJavaElement(), ASTProvider.WAIT_NO, getProgressMonitor()));
+			updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProvider.getAST(getInputJavaElement(), SharedASTProvider.WAIT_NO, getProgressMonitor()));
 		}
 
 		if (fOccurrencesFinderJobCanceler == null) {
@@ -3009,7 +3010,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fOverrideIndicatorManager= new OverrideIndicatorManager(model, inputElement, null);
 		
 		if (provideAST) {
-			CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(inputElement, ASTProvider.WAIT_ACTIVE_ONLY, getProgressMonitor());
+			CompilationUnit ast= SharedASTProvider.getAST(inputElement, SharedASTProvider.WAIT_ACTIVE_ONLY, getProgressMonitor());
 			fOverrideIndicatorManager.reconciled(ast, true, getProgressMonitor());
 		}
 	}

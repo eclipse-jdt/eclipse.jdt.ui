@@ -37,10 +37,10 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * If passed compilation unit is not null, the replacement string will be seen as a qualified type name.
@@ -171,7 +171,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	}
 
 	private CompilationUnit getASTRoot(ICompilationUnit compilationUnit) {
-		return JavaPlugin.getDefault().getASTProvider().getAST(compilationUnit, ASTProvider.WAIT_NO, new NullProgressMonitor());
+		return SharedASTProvider.getAST(compilationUnit, SharedASTProvider.WAIT_NO, new NullProgressMonitor());
 	}
 
 	/*

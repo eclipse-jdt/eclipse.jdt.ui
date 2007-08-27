@@ -73,6 +73,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
@@ -328,7 +329,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	private CompilationUnit createAst(ICompilationUnit unit, Map cleanUpOptions, IProgressMonitor monitor) {
 		IJavaProject project= unit.getJavaProject();
 		if (compatibleOptions(project, cleanUpOptions)) {
-			CompilationUnit ast= ASTProvider.getASTProvider().getAST(unit, ASTProvider.WAIT_NO, monitor);
+			CompilationUnit ast= SharedASTProvider.getAST(unit, SharedASTProvider.WAIT_NO, monitor);
 			if (ast != null)
 				return ast;
 		}

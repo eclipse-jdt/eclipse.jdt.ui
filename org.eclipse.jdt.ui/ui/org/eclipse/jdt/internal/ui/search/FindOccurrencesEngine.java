@@ -17,8 +17,8 @@ import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.ui.SharedASTProvider;
+
 
 public final class FindOccurrencesEngine {
 
@@ -37,7 +37,7 @@ public final class FindOccurrencesEngine {
 	}
 
 	public CompilationUnit createAST() {
-		return JavaPlugin.getDefault().getASTProvider().getAST(fTypeRoot, ASTProvider.WAIT_YES, null);
+		return SharedASTProvider.getAST(fTypeRoot, SharedASTProvider.WAIT_YES, null);
 	}
 	
 	public ITypeRoot getInput() {

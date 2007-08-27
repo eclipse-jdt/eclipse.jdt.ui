@@ -66,11 +66,11 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public class CopyQualifiedNameAction extends SelectionDispatchAction {
@@ -244,7 +244,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		if (element == null)
 			return null;
 		
-		CompilationUnit ast= ASTProvider.getASTProvider().getAST(element, ASTProvider.WAIT_YES, null);
+		CompilationUnit ast= SharedASTProvider.getAST(element, SharedASTProvider.WAIT_YES, null);
 		if (ast == null)
 			return null;
 

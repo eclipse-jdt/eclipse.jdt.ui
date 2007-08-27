@@ -32,8 +32,8 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.SharedASTProvider;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
@@ -60,7 +60,7 @@ public class NLSKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 		if (javaElement == null)
 			return null;
 
-		CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(javaElement, ASTProvider.WAIT_NO, null);
+		CompilationUnit ast= SharedASTProvider.getAST(javaElement, SharedASTProvider.WAIT_NO, null);
 		if (ast == null)
 			return null;
 
