@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.ui;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -46,14 +45,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * </p>
  * 
  * @since 3.4 
- * 
  */
 public final class SharedASTProvider {
 	
 	/**
-	 * Wait flag.
-	 *
-	 * @since 3.1
+	 * Wait flag class.
 	 */
 	public static final class WAIT_FLAG {
 
@@ -106,6 +102,7 @@ public final class SharedASTProvider {
 	 * <p>
 	 * Clients are not allowed to modify the AST and must not keep any references.
 	 * </p>
+	 * 
 	 * @param element
 	 * 			the {@link ITypeRoot}, must not be <code>null</code>
 	 * @param waitFlag
@@ -124,8 +121,9 @@ public final class SharedASTProvider {
 	public static CompilationUnit getAST(ITypeRoot element, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor) {
 		return JavaPlugin.getDefault().getASTProvider().getAST(element, waitFlag, progressMonitor);
 	}
-	
+
 	private SharedASTProvider() {
+		// Prevent instantiation.
 	}
-	
+
 }
