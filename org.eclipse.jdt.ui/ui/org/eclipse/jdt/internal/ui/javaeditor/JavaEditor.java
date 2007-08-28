@@ -124,6 +124,7 @@ import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -1637,8 +1638,18 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		return getSourceViewer();
 	}
 
-	/*
+	/**
+	 * Creates the Java source viewer to be used by this editor.
+	 * Subclasses may re-implement this method.
+	 *
+	 * @param parent the parent control
+	 * @param verticalRuler the vertical ruler
+	 * @param overviewRuler the overview ruler
+	 * @param isOverviewRulerVisible <code>true</code> if the overview ruler is visible
+	 * @param styles style bits, <code>SWT.WRAP</code> is currently not supported
+	 * @param store the preference store
 	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
+	 * @return the source viewer
 	 */
 	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean isOverviewRulerVisible, int styles, IPreferenceStore store) {
 		return new JavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, store);
