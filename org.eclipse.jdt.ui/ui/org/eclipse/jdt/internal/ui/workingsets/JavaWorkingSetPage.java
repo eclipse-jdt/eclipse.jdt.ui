@@ -12,15 +12,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.workingsets;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -40,12 +37,14 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.CheckboxTreeViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.ITreeViewerListener;
-import org.eclipse.jface.viewers.TreeExpansionEvent;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.WizardPage;
 
 import org.eclipse.ui.IWorkbenchPage;
@@ -56,10 +55,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.IWorkingSetPage;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -82,21 +78,38 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  * The Java working set page allows the user to create
  * and edit a Java working set.
  * <p>
- * Working set elements are presented as a Java element tree.
+ * Workspace elements can be added/removed from a tree into
+ * a list.
  * </p>
  * 
  * @since 2.0
  */
 public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
+	
+	private final class AddedElementsFilter extends EmptyInnerPackageFilter {
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+		 */
+		public boolean select(Viewer viewer, Object parentElement, Object element) {
+			if (fSelectedElements.contains(element))
+				return false;
+			
+			return super.select(viewer, parentElement, element);
+		}
+		
+	}
 
 	final private static String PAGE_TITLE= WorkingSetMessages.JavaWorkingSetPage_title; 
 	final private static String PAGE_ID= "javaWorkingSetPage"; //$NON-NLS-1$
 	
 	private Text fWorkingSetName;
-	private CheckboxTreeViewer fTree;
+	private TreeViewer fTree;
+	private TableViewer fTable;
 	private ITreeContentProvider fTreeContentProvider;
 	
 	private boolean fFirstCheck;
+	private final HashSet fSelectedElements;
 	private IWorkingSet fWorkingSet;
 
 	/**
@@ -104,7 +117,8 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 	 */
 	public JavaWorkingSetPage() {
 		super(PAGE_ID, PAGE_TITLE, JavaPluginImages.DESC_WIZBAN_JAVA_WORKINGSET);
-		setDescription(WorkingSetMessages.JavaWorkingSetPage_workingSet_description); 
+		setDescription(WorkingSetMessages.JavaWorkingSetPage_workingSet_description);
+		fSelectedElements= new HashSet();
 		fFirstCheck= true;
 	}
 
@@ -133,94 +147,236 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 				}
 			}
 		);
-		fWorkingSetName.setFocus();
 		
-		label= new Label(composite, SWT.WRAP);
-		label.setText(WorkingSetMessages.JavaWorkingSetPage_workingSet_content); 
-		gd= new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_CENTER);
-		label.setLayoutData(gd);
+		Composite leftCenterRightComposite= new Composite(composite, SWT.NONE);
+		GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
+		gridData.heightHint= convertHeightInCharsToPixels(20);
+		leftCenterRightComposite.setLayoutData(gridData);
+		GridLayout gridLayout= new GridLayout(3, false);
+		gridLayout.marginHeight= 0;
+		gridLayout.marginWidth= 0;
+		leftCenterRightComposite.setLayout(gridLayout);
+		
+		Composite leftComposite= new Composite(leftCenterRightComposite, SWT.NONE);
+		gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
+		gridData.widthHint= convertWidthInCharsToPixels(40);
+		leftComposite.setLayoutData(gridData);
+		gridLayout= new GridLayout(1, false);
+		gridLayout.marginHeight= 0;
+		gridLayout.marginWidth= 0;
+		leftComposite.setLayout(gridLayout);
+		
+		Composite centerComposite = new Composite(leftCenterRightComposite, SWT.NONE);
+		gridLayout= new GridLayout(1, false);
+		gridLayout.marginHeight= 0;
+		gridLayout.marginWidth= 0;
+		centerComposite.setLayout(gridLayout);
+		centerComposite.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
+		
+		Composite rightComposite= new Composite(leftCenterRightComposite, SWT.NONE);
+		gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
+		gridData.widthHint= convertWidthInCharsToPixels(40);
+		rightComposite.setLayoutData(gridData);
+		gridLayout= new GridLayout(1, false);
+		gridLayout.marginHeight= 0;
+		gridLayout.marginWidth= 0;
+		rightComposite.setLayout(gridLayout);
+		
+		createTree(leftComposite);
+		createTable(rightComposite);
+	
+		if (fWorkingSet != null)
+			fWorkingSetName.setText(fWorkingSet.getName());
 
-		fTree= new CheckboxTreeViewer(composite, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+		initializeSelectedElements();
+		validateInput();
+		
+		fTable.setInput(fSelectedElements);
+		fTable.refresh(true);
+		fTree.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
+		
+		createButtonBar(centerComposite);
+		
+		fWorkingSetName.setFocus();
+		fWorkingSetName.setSelection(0, fWorkingSetName.getText().length());
+
+		Dialog.applyDialogFont(composite);
+		// Set help for the page 
+		JavaUIHelp.setHelp(fTable, IJavaHelpContextIds.JAVA_WORKING_SET_PAGE);
+	}
+
+	private void createTree(Composite parent) {
+		
+		Label label= new Label(parent, SWT.NONE);
+		label.setLayoutData(new GridData(SWT.LEAD, SWT.CENTER, false, false));
+		label.setText(WorkingSetMessages.JavaWorkingSetPage_workspace_content);
+		
+		fTree= new TreeViewer(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
 		ColoredViewersManager.install(fTree);
-		gd= new GridData(GridData.FILL_BOTH | GridData.GRAB_VERTICAL);
-		gd.heightHint= convertHeightInCharsToPixels(15);
-		fTree.getControl().setLayoutData(gd);
+		fTree.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		fTreeContentProvider= new JavaWorkingSetPageContentProvider();
 		fTree.setContentProvider(fTreeContentProvider);
 		
-		AppearanceAwareLabelProvider fJavaElementLabelProvider= 
+		AppearanceAwareLabelProvider javaElementLabelProvider= 
 			new AppearanceAwareLabelProvider(
 				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS
 			);
 		
-		fTree.setLabelProvider(new DecoratingJavaLabelProvider(fJavaElementLabelProvider));
+		fTree.setLabelProvider(new DecoratingJavaLabelProvider(javaElementLabelProvider));
 		fTree.setComparator(new JavaElementComparator());
-		fTree.addFilter(new EmptyInnerPackageFilter());
+		final AddedElementsFilter filter= new AddedElementsFilter();
+		fTree.addFilter(filter);
 		fTree.setUseHashlookup(true);
-		
-		fTree.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
+	}
 
-		fTree.addCheckStateListener(new ICheckStateListener() {
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				handleCheckStateChange(event);
+	private void createButtonBar(Composite parent) {
+		Label spacer= new Label(parent, SWT.NONE);
+		spacer.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		
+		final Button addButton= new Button(parent, SWT.PUSH);
+		addButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		addButton.setText(WorkingSetMessages.JavaWorkingSetPage_add_button);
+		addButton.setEnabled(false);
+		SWTUtil.setButtonDimensionHint(addButton);
+		
+		final Button addAllButton= new Button(parent, SWT.PUSH);
+		addAllButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		addAllButton.setText(WorkingSetMessages.JavaWorkingSetPage_addAll_button);
+		addAllButton.setEnabled(fTree.getTree().getItems().length > 0);
+		SWTUtil.setButtonDimensionHint(addAllButton);
+		
+		final Button removeButton= new Button(parent, SWT.PUSH);
+		removeButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		removeButton.setText(WorkingSetMessages.JavaWorkingSetPage_remove_button);
+		removeButton.setEnabled(false);
+		SWTUtil.setButtonDimensionHint(removeButton);
+		
+		final Button removeAllButton= new Button(parent, SWT.PUSH);
+		removeAllButton.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
+		removeAllButton.setText(WorkingSetMessages.JavaWorkingSetPage_removeAll_button);
+		removeAllButton.setEnabled(!fSelectedElements.isEmpty());
+		SWTUtil.setButtonDimensionHint(removeAllButton);
+		
+		fTree.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				addButton.setEnabled(!event.getSelection().isEmpty());
 			}
 		});
-
-		fTree.addTreeListener(new ITreeViewerListener() {
-			public void treeCollapsed(TreeExpansionEvent event) {
+		
+		addButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				IStructuredSelection selection= (IStructuredSelection) fTree.getSelection();
+				fSelectedElements.addAll(selection.toList());
+				Object[] selectedElements= selection.toArray();
+				fTable.add(selectedElements);
+				fTree.remove(selectedElements);
+				fTable.setSelection(selection);
+				fTable.getControl().setFocus();
+				validateInput();
+				
+				removeAllButton.setEnabled(true);
+				addAllButton.setEnabled(fTree.getTree().getItems().length > 0);
 			}
-			public void treeExpanded(TreeExpansionEvent event) {
-				final Object element= event.getElement();
-				if (fTree.getGrayed(element) == false)
-					BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
-					public void run() {
-						setSubtreeChecked(element, fTree.getChecked(element), false);
+		});
+		
+		fTable.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				removeButton.setEnabled(!event.getSelection().isEmpty());
+			}
+		});
+		
+		removeButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				IStructuredSelection selection= (IStructuredSelection) fTable.getSelection();
+				fSelectedElements.removeAll(selection.toList());
+				Object[] selectedElements= selection.toArray();
+				fTable.remove(selectedElements);
+				try {
+					fTree.getTree().setRedraw(false);
+					for (int i= 0; i < selectedElements.length; i++) {
+						fTree.refresh(fTreeContentProvider.getParent(selectedElements[i]), true);
 					}
-				});
-			}
-		});
-
-		// Add select / deselect all buttons for bug 46669
-		Composite buttonComposite = new Composite(composite, SWT.NONE);
-		GridLayout layout= new GridLayout(2, false);
-		layout.marginWidth= 0; layout.marginHeight= 0;
-		buttonComposite.setLayout(layout);
-		buttonComposite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-		
-		Button selectAllButton = new Button(buttonComposite, SWT.PUSH);
-		selectAllButton.setText(WorkingSetMessages.JavaWorkingSetPage_selectAll_label);
-		selectAllButton.setToolTipText(WorkingSetMessages.JavaWorkingSetPage_selectAll_toolTip);
-		selectAllButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent selectionEvent) {
-				fTree.setCheckedElements(fTreeContentProvider.getElements(fTree.getInput()));
+				} finally {
+					fTree.getTree().setRedraw(true);
+				}
+				fTree.setSelection(selection);
+				fTree.getControl().setFocus();
 				validateInput();
+				
+				addAllButton.setEnabled(true);
+				removeAllButton.setEnabled(!fSelectedElements.isEmpty());
 			}
 		});
-		selectAllButton.setLayoutData(new GridData());
-		SWTUtil.setButtonDimensionHint(selectAllButton);
-
-		Button deselectAllButton = new Button(buttonComposite, SWT.PUSH);
-		deselectAllButton.setText(WorkingSetMessages.JavaWorkingSetPage_deselectAll_label);
-		deselectAllButton.setToolTipText(WorkingSetMessages.JavaWorkingSetPage_deselectAll_toolTip);
-		deselectAllButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent selectionEvent) {
-				fTree.setCheckedElements(new Object[0]);
-				validateInput();
-			}
-		});
-		deselectAllButton.setLayoutData(new GridData());
-		SWTUtil.setButtonDimensionHint(deselectAllButton);
 		
-		if (fWorkingSet != null)
-			fWorkingSetName.setText(fWorkingSet.getName());
-		initializeCheckedState();
-		validateInput();
+		addAllButton.addSelectionListener(new SelectionAdapter() {
+			/* (non-Javadoc)
+			 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+			 */
+			public void widgetSelected(SelectionEvent e) {
+				TreeItem[] items= fTree.getTree().getItems();
+				for (int i= 0; i < items.length; i++) {
+					fSelectedElements.add(items[i].getData());
+				}
+				fTable.refresh();
+				fTree.refresh();
+				
+				addAllButton.setEnabled(false);
+				removeAllButton.setEnabled(true);
+			}
+		});
+		
+		removeAllButton.addSelectionListener(new SelectionAdapter() {
+			/* (non-Javadoc)
+			 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+			 */
+			public void widgetSelected(SelectionEvent e) {
+				fSelectedElements.clear();
+				
+				fTable.refresh();
+				fTree.refresh();
+				
+				removeAllButton.setEnabled(false);
+				addAllButton.setEnabled(true);
+			}
+		});
 
-		Dialog.applyDialogFont(composite);
-		// Set help for the page 
-		JavaUIHelp.setHelp(fTree, IJavaHelpContextIds.JAVA_WORKING_SET_PAGE);
+	}
+
+	private void createTable(Composite parent) {
+		Label label= new Label(parent, SWT.WRAP);
+		label.setText(WorkingSetMessages.JavaWorkingSetPage_workingSet_content); 
+		label.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		
+		fTable= new TableViewer(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
+		ColoredViewersManager.install(fTable);
+		
+		GridData gd= new GridData(SWT.FILL, SWT.FILL, true, true);
+		fTable.getControl().setLayoutData(gd);
+		
+		fTable.setContentProvider(new IStructuredContentProvider() {
+
+			public Object[] getElements(Object inputElement) {
+				return fSelectedElements.toArray();
+			}
+
+			public void dispose() {
+			}
+
+			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			}
+			
+		});
+		
+		AppearanceAwareLabelProvider javaElementLabelProvider= new AppearanceAwareLabelProvider(
+			AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
+			AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS
+		);
+		fTable.setLabelProvider(new DecoratingJavaLabelProvider(javaElementLabelProvider));
+		fTable.setComparator(new JavaElementComparator());
+		fTable.addFilter(new EmptyInnerPackageFilter());
+		fTable.setUseHashlookup(true);
 	}
 
 	/*
@@ -239,7 +395,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		if (getContainer() != null && getShell() != null && fWorkingSetName != null) {
 			fFirstCheck= false;
 			fWorkingSetName.setText(fWorkingSet.getName());
-			initializeCheckedState();
+			initializeSelectedElements();
 			validateInput();
 		}
 	}
@@ -249,8 +405,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 	 */
 	public void finish() {
 		String workingSetName= fWorkingSetName.getText();
-		ArrayList elements= new ArrayList(10);
-		findCheckedElements(elements, fTree.getInput());
+		HashSet elements= fSelectedElements;
 		if (fWorkingSet == null) {
 			IWorkingSetManager workingSetManager= PlatformUI.getWorkbench().getWorkingSetManager();
 			fWorkingSet= workingSetManager.createWorkingSet(workingSetName, (IAdaptable[])elements.toArray(new IAdaptable[elements.size()]));
@@ -307,7 +462,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 			}
 		}
 		
-		if (!hasCheckedElement())
+		if (!hasSelectedElement())
 			infoMessage= WorkingSetMessages.JavaWorkingSetPage_warning_resourceMustBeChecked;
 
 		setMessage(infoMessage, INFORMATION);
@@ -315,95 +470,11 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		setPageComplete(errorMessage == null);
 	}
 	
-	private boolean hasCheckedElement() {
-		TreeItem[] items= fTree.getTree().getItems();
-		for (int i= 0; i < items.length; i++) {
-			if (items[i].getChecked())
-				return true;
-		}
-		return false;
+	private boolean hasSelectedElement() {
+		return !fSelectedElements.isEmpty();
 	}
 	
-	private void findCheckedElements(List checkedResources, Object parent) {
-		Object[] children= fTreeContentProvider.getChildren(parent);
-		for (int i= 0; i < children.length; i++) {
-			if (fTree.getGrayed(children[i]))
-				findCheckedElements(checkedResources, children[i]);
-			else if (fTree.getChecked(children[i]))
-				checkedResources.add(children[i]);
-		}
-	}
-
-	void handleCheckStateChange(final CheckStateChangedEvent event) {
-		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
-			public void run() {
-				IAdaptable element= (IAdaptable)event.getElement();
-				boolean state= event.getChecked();		
-				fTree.setGrayed(element, false);
-				if (isExpandable(element))
-					setSubtreeChecked(element, state, state); // only check subtree if state is set to true
-					
-				updateParentState(element, state);
-				validateInput();
-			}
-		});
-	}
-
-	private void setSubtreeChecked(Object parent, boolean state, boolean checkExpandedState) {
-		if (!(parent instanceof IAdaptable))
-			return;
-		IContainer container= (IContainer)((IAdaptable)parent).getAdapter(IContainer.class);
-		if ((!fTree.getExpandedState(parent) && checkExpandedState) || (container != null && !container.isAccessible()))
-			return;
-		
-		Object[] children= fTreeContentProvider.getChildren(parent);
-		for (int i= children.length - 1; i >= 0; i--) {
-			Object element= children[i];
-			if (state) {
-				fTree.setChecked(element, true);
-				fTree.setGrayed(element, false);
-			}
-			else
-				fTree.setGrayChecked(element, false);
-			if (isExpandable(element))
-				setSubtreeChecked(element, state, true);
-		}
-	}
-
-	private void updateParentState(Object child, boolean baseChildState) {
-		if (child == null)
-			return;
-		if (child instanceof IAdaptable) {
-			IResource resource= (IResource)((IAdaptable)child).getAdapter(IResource.class);
-			if (resource != null && !resource.isAccessible())
-				return;
-		}
-		Object parent= fTreeContentProvider.getParent(child);
-		if (parent == null)
-			return;
-		
-		updateObjectState(parent, baseChildState);
-	}
-
-	private void updateObjectState(Object element, boolean baseChildState) {		
-
-		boolean allSameState= true;
-		Object[] children= fTreeContentProvider.getChildren(element);
-
-		for (int i= children.length -1; i >= 0; i--) {
-			if (fTree.getChecked(children[i]) != baseChildState || fTree.getGrayed(children[i])) {
-				allSameState= false;
-				break;
-			}
-		}
-	
-		fTree.setGrayed(element, !allSameState);
-		fTree.setChecked(element, !allSameState || baseChildState);
-		
-		updateParentState(element, baseChildState);
-	}
-
-	private void initializeCheckedState() {
+	private void initializeSelectedElements() {
 
 		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
 			public void run() {
@@ -449,39 +520,8 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 					}
 				}
 
-				fTree.setCheckedElements(elements);
-				HashSet parents = new HashSet();
-				for (int i= 0; i < elements.length; i++) {
-					Object element= elements[i];
-					if (isExpandable(element))
-						setSubtreeChecked(element, true, true);
-						
-					if (element instanceof IAdaptable) {
-						IResource resource= (IResource) ((IAdaptable)element).getAdapter(IResource.class);
-						if (resource != null && !resource.isAccessible())
-							continue;
-					}
-					Object parent= fTreeContentProvider.getParent(element);
-					if (parent != null)
-						parents.add(parent);
-				}
-				
-				for (Iterator i = parents.iterator(); i.hasNext();)
-					updateObjectState(i.next(), true);
+				fSelectedElements.addAll(Arrays.asList(elements));
 			}
 		});
-	}
-	
-	private boolean isExpandable(Object element) {
-		return (
-			element instanceof IJavaProject
-			||
-			element instanceof IPackageFragmentRoot
-			||
-			element instanceof IPackageFragment
-			||
-			element instanceof IJavaModel
-			||
-			element instanceof IContainer);
 	}
 }

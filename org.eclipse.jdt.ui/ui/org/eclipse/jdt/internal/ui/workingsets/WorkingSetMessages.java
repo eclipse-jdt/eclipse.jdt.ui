@@ -31,20 +31,21 @@ public final class WorkingSetMessages extends NLS {
 	public static String ConfigureWorkingSetAssignementAction_WorkingSets_actionLabel;
 	public static String ConfigureWorkingSetAssignementAction_XofY_label;
 	
+	public static String JavaWorkingSetPage_add_button;
+	public static String JavaWorkingSetPage_addAll_button;
+	public static String JavaWorkingSetPage_remove_button;
+	public static String JavaWorkingSetPage_removeAll_button;
 	public static String JavaWorkingSetPage_title;
 	public static String JavaWorkingSetPage_workingSet_name;
 	public static String JavaWorkingSetPage_workingSet_description;
 	public static String JavaWorkingSetPage_workingSet_content;
+	public static String JavaWorkingSetPage_workspace_content;
 	public static String JavaWorkingSetPage_warning_nameMustNotBeEmpty;
 	public static String JavaWorkingSetPage_warning_workingSetExists;
 	public static String JavaWorkingSetPage_warning_resourceMustBeChecked;
 	public static String JavaWorkingSetPage_warning_nameWhitespace;
 	public static String JavaWorkingSetPage_projectClosedDialog_message;
 	public static String JavaWorkingSetPage_projectClosedDialog_title;
-	public static String JavaWorkingSetPage_selectAll_label;
-	public static String JavaWorkingSetPage_selectAll_toolTip;
-	public static String JavaWorkingSetPage_deselectAll_label;
-	public static String JavaWorkingSetPage_deselectAll_toolTip;
 	public static String OpenCloseWorkingSetAction_error_details;
 	
 	public static String SelectWorkingSetAction_text;
