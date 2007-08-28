@@ -99,10 +99,10 @@ public class JavaDocContext extends CompilationUnitContext {
 				if ((start != 0) && (document.getChar(start - 1) == HTML_TAG_END))
 					start--;
 		
-				while ((start != 0) && !Character.isWhitespace(document.getChar(start - 1)))
+				while ((start != 0) && Character.isUnicodeIdentifierPart(document.getChar(start - 1)))
 					start--;
 				
-				if ((start != 0) && !Character.isWhitespace(document.getChar(start - 1)))
+				if ((start != 0) && Character.isUnicodeIdentifierStart(document.getChar(start - 1)))
 					start--;
 		
 				// include html and javadoc tags
@@ -120,7 +120,7 @@ public class JavaDocContext extends CompilationUnitContext {
 			int start= getCompletionOffset();
 			int end= getCompletionOffset() + getCompletionLength();
 			
-			while (start != 0 && !Character.isWhitespace(document.getChar(start - 1)))
+			while (start != 0 && Character.isUnicodeIdentifierPart(document.getChar(start - 1)))
 				start--;
 			
 			while (start != end && Character.isWhitespace(document.getChar(start)))

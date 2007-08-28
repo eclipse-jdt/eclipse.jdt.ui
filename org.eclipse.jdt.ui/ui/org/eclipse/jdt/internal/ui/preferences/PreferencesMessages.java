@@ -686,7 +686,7 @@ public final class PreferencesMessages extends NLS {
 	public static String UserLibraryPreferencePage_LoadSaveDialog_load_badformat;
 	public static String UserLibraryPreferencePage_LoadSaveDialog_load_replace_title;
 	public static String EditTemplateDialog_error_noname;
-	public static String EditTemplateDialog_error_spaces;
+	public static String EditTemplateDialog_error_invalidName;
 	public static String EditTemplateDialog_title_new;
 	public static String EditTemplateDialog_title_edit;
 	public static String EditTemplateDialog_name;

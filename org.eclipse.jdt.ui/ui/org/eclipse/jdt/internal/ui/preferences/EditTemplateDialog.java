@@ -201,8 +201,7 @@ class EditTemplateDialog extends StatusDialog {
 	public void create() {
 		super.create();
 		updateStatusAndButtons();
-		boolean isEmpty= fNameText != null && fNameText.getText().length() == 0;
-		getButton(IDialogConstants.OK_ID).setEnabled(!isEmpty);
+		getButton(IDialogConstants.OK_ID).setEnabled(getStatus().isOK());
 	}
 	
 	/*
@@ -282,7 +281,7 @@ class EditTemplateDialog extends StatusDialog {
 		composite.setLayoutData(new GridData());
 		
 		fInsertVariableButton= new Button(composite, SWT.NONE);
-		fInsertVariableButton.setLayoutData(getButtonGridData(fInsertVariableButton));
+		fInsertVariableButton.setLayoutData(getButtonGridData());
 		fInsertVariableButton.setText(PreferencesMessages.EditTemplateDialog_insert_variable); 
 		fInsertVariableButton.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
@@ -352,7 +351,7 @@ class EditTemplateDialog extends StatusDialog {
 		updateStatusAndButtons();
 	}	
 
-	private static GridData getButtonGridData(Button button) {
+	private static GridData getButtonGridData() {
 		GridData data= new GridData(GridData.FILL_HORIZONTAL);	
 		return data;
 	}
@@ -562,13 +561,35 @@ class EditTemplateDialog extends StatusDialog {
 		if (!fSuppressError && isEmpty) {
 			status= new StatusInfo();
 			status.setError(PreferencesMessages.EditTemplateDialog_error_noname); 
-		} else if (fNameText != null && fNameText.getText().indexOf(' ') > -1) {
+		} else if (fNameText != null && !isValidTemplateName(fNameText.getText())) {
 			status= new StatusInfo();
-			status.setError(PreferencesMessages.EditTemplateDialog_error_spaces); 
+			status.setError(PreferencesMessages.EditTemplateDialog_error_invalidName); 
 		}
 		updateStatus(status);
 	}
-	
+
+	/**
+	 * Checks whether the given string is a valid
+	 * template name.
+	 *  
+	 * @param name the string to test
+	 * @return <code>true</code> if the name is valid
+	 * @since 3.3.1
+	 */
+	private boolean isValidTemplateName(String name) {
+		if (name.length() == 0)
+			return true;
+		
+		if (!Character.isUnicodeIdentifierStart(name.charAt(0)))
+			return false;
+			
+		for (int i= 1; i < name.length(); i++) {
+			if (!Character.isUnicodeIdentifierPart(name.charAt(i)))
+				return false;
+		}
+		return true;
+	}
+
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
