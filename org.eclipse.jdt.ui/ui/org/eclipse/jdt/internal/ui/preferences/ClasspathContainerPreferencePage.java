@@ -127,6 +127,7 @@ public class ClasspathContainerPreferencePage extends PropertyPage {
 	private Composite fWizardPageContainer;
 
 	public ClasspathContainerPreferencePage() {
+		noDefaultAndApplyButton();
 	}
 
 	/**
