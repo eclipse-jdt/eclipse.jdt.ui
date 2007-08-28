@@ -185,7 +185,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 	
 	/**
 	 * Property change listener on this plugin's preference store.
-	 * 
 	 * @since 3.0
 	 */
 	private IPropertyChangeListener fPropertyChangeListener;
@@ -220,21 +219,18 @@ public class JavaPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Content assist history.
-	 * 
 	 * @since 3.2
 	 */
 	private ContentAssistHistory fContentAssistHistory;
 	
 	/**
 	 * The save participant registry.
-	 * 
 	 * @since 3.3
 	 */
 	private SaveParticipantRegistry fSaveParticipantRegistry;
 	
 	/**
 	 * The descriptors from the 'classpathAttributeConfiguration' extension point.
-	 * 
 	 * @since 3.3
 	 */
 	private ClasspathAttributeConfigurationDescriptors fClasspathAttributeConfigurationDescriptors;
@@ -973,7 +969,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	/**
 	 * Returns the descriptors for the class path attribute configuration extension point
 	 * 
-	 * 	@return access to the descriptors for the class path attribute configuration extension point
+	 * @return access to the descriptors for the class path attribute configuration extension point
 	 * @since 3.3
 	 */
 	public ClasspathAttributeConfigurationDescriptors getClasspathAttributeConfigurationDescriptors() {
