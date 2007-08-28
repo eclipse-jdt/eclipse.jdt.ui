@@ -49,6 +49,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.part.MultiEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
@@ -507,8 +508,22 @@ public class EditorUtility {
 	 * 
 	 * @return an array of all dirty editor parts.
 	 * @since 3.2
+	 * @deprecated TODO: remove for 3.4
 	 */
 	public static IEditorPart[] getDirtyEditors() {
+		return getDirtyEditors(false);
+	}
+	
+	/**
+	 * Returns an array of all editors that have an unsaved content. If the identical content is 
+	 * presented in more than one editor, only one of those editor parts is part of the result.
+	 * @param skipNonResourceEditors if <code>true</code>, editors whose inputs do not adapt to {@link IResource}
+	 * are not saved
+	 * 
+	 * @return an array of dirty editor parts
+	 * @since 3.4
+	 */
+	public static IEditorPart[] getDirtyEditors(boolean skipNonResourceEditors) {
 		Set inputs= new HashSet();
 		List result= new ArrayList(0);
 		IWorkbench workbench= PlatformUI.getWorkbench();
@@ -520,13 +535,31 @@ public class EditorUtility {
 				for (int z= 0; z < editors.length; z++) {
 					IEditorPart ep= editors[z];
 					IEditorInput input= ep.getEditorInput();
-					if (inputs.add(input))
-						result.add(ep);
+					if (inputs.add(input)) {
+						if (!skipNonResourceEditors || isResourceEditorInput(input)) {
+							result.add(ep);
+						}
+					}
 				}
 			}
 		}
 		return (IEditorPart[])result.toArray(new IEditorPart[result.size()]);
 	}
+	
+	private static boolean isResourceEditorInput(IEditorInput input) {
+		if (input instanceof MultiEditorInput) {
+			IEditorInput[] inputs= ((MultiEditorInput) input).getInput();
+			for (int i= 0; i < inputs.length; i++) {
+				if (inputs[i].getAdapter(IResource.class) != null) {
+					return true;
+				}
+			}
+		} else if (input.getAdapter(IResource.class) != null) {
+			return true;
+		}
+		return false;
+	}
+	
 	
 	/**
 	 * Returns the editors to save before performing global Java-related
@@ -566,9 +599,10 @@ public class EditorUtility {
 		/*
 		 * Goal: save all editors that could interfere with refactoring operations.
 		 * 
-		 * If <code>saveUnknownEditors</code> is <code>false</code>, save all editors
-		 * for compilation units that are not working copies.
-		 * 
+		 * Always save all editors for compilation units that are not working copies.
+		 * (Leaving them dirty would cause problems, since the file buffer could have been
+		 * modified but the Java model is not reconciled.)
+		 *  
 		 * If <code>saveUnknownEditors</code> is <code>true</code>, save all editors
 		 * whose implementation is probably not based on file buffers.
 		 */

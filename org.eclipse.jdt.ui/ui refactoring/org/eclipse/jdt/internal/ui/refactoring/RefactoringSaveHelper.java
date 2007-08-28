@@ -105,7 +105,7 @@ public class RefactoringSaveHelper {
 		switch (fSaveMode) {
 			case SAVE_ALL_ALWAYS_ASK:
 			case SAVE_ALL:
-				dirtyEditors= EditorUtility.getDirtyEditors();
+				dirtyEditors= EditorUtility.getDirtyEditors(true);
 				break;
 				
 			case SAVE_NON_JAVA_UPDATES:
