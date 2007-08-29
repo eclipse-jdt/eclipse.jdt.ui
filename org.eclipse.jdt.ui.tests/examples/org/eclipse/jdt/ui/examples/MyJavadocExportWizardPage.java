@@ -22,6 +22,18 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/* Adds a page to the Javadoc export wizard
+
+   <extension
+         point="org.eclipse.jdt.ui.javadocExportWizardPage">
+      <javadocExportWizardPage
+            description="My Javadoc Export Wizard Page"
+            class="org.eclipse.jdt.ui.examples.MyJavadocExportWizardPage"
+            id="org.eclipse.jdt.EXAMPLE_JD_EXPORT_WP">
+      </javadocExportWizardPage>
+   </extension>
+
+*/
 public class MyJavadocExportWizardPage extends JavadocExportWizardPage {
 
 	private Text fText;
