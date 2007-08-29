@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,6 +72,8 @@ import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IUpdate;
+
+import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -201,8 +203,7 @@ class EditTemplateDialog extends StatusDialog {
 	public void create() {
 		super.create();
 		updateStatusAndButtons();
-		boolean isEmpty= fNameText != null && fNameText.getText().length() == 0;
-		getButton(IDialogConstants.OK_ID).setEnabled(!isEmpty);
+		getButton(IDialogConstants.OK_ID).setEnabled(getStatus().isOK());
 	}
 	
 	/*
@@ -310,7 +311,7 @@ class EditTemplateDialog extends StatusDialog {
 	protected void doTextWidgetChanged(Widget w) {
 		if (w == fNameText) {
 			fSuppressError= false;
-			updateStatusAndButtons();			
+			updateStatusAndButtons();
 		} else if (w == fContextCombo) {
 			String contextId= getContextId();
 			fTemplateProcessor.setContextType(fContextTypeRegistry.getContextType(contextId));
@@ -318,6 +319,7 @@ class EditTemplateDialog extends StatusDialog {
 			String prefix= getPrefix();
 			document.set(prefix + getPattern());
 			fPatternEditor.setVisibleRegion(prefix.length(), document.getLength() - prefix.length());
+			updateStatusAndButtons();
 		} else if (w == fDescriptionText) {
 			// nothing
 		}	
@@ -562,13 +564,43 @@ class EditTemplateDialog extends StatusDialog {
 		if (!fSuppressError && isEmpty) {
 			status= new StatusInfo();
 			status.setError(PreferencesMessages.EditTemplateDialog_error_noname); 
-		} else if (fNameText != null && fNameText.getText().indexOf(' ') > -1) {
+		} else if (fNameText != null && !isValidTemplateName(fNameText.getText())) {
 			status= new StatusInfo();
 			status.setError(PreferencesMessages.EditTemplateDialog_error_spaces); 
 		}
 		updateStatus(status);
 	}
-	
+
+	/**
+	 * Checks whether the given string is a valid
+	 * template name.
+	 *  
+	 * @param name the string to test
+	 * @return <code>true</code> if the name is valid
+	 * @since 3.3.1
+	 */
+	private boolean isValidTemplateName(String name) {
+		int nameLength= name.length();
+		if (nameLength == 0)
+			return true;
+
+		char firstChar= name.charAt(0);
+		boolean isJavadocTemplate= JavaDocContextType.NAME.equals(getContextId());
+		if (!Character.isUnicodeIdentifierStart(firstChar) && !(isJavadocTemplate && (firstChar == '<' || firstChar == '@')))
+			return false;
+
+		if (nameLength == 1)
+			return true;
+		
+		for (int i= 1; i < nameLength - 1; i++) {
+			if (!Character.isUnicodeIdentifierPart(name.charAt(i)))
+				return false;
+		}
+
+		char lastChar= name.charAt(nameLength - 1);
+		return Character.isUnicodeIdentifierPart(lastChar) || isJavadocTemplate && lastChar == '>';
+	}
+
 	/*
 	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
