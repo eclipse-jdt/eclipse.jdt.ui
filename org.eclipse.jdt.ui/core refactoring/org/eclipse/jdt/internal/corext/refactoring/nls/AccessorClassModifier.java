@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
 
+import com.ibm.icu.text.Collator;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -257,7 +259,21 @@ public class AccessorClassModifier {
 				fListRewrite.insertBefore(fieldDeclaration, (ASTNode) fFields.get(0), editGroup);
 				fFields.add(0, fieldDeclaration);
 			} else {
-				fListRewrite.insertAfter(fieldDeclaration, (ASTNode) fFields.get(insertionPosition), editGroup);
+				if (identifiers.size() == insertionPosition + 1) {
+					fListRewrite.insertAfter(fieldDeclaration, (ASTNode) fFields.get(insertionPosition), editGroup);
+				} else {
+					String beforeKey= (String) identifiers.get(insertionPosition);
+					String afterKey= (String) identifiers.get(insertionPosition + 1);
+					int distBefore= NLSUtil.compareTo(key, beforeKey);
+					int distAfter= NLSUtil.compareTo(key, afterKey);
+					if (distBefore > distAfter) {
+						fListRewrite.insertAfter(fieldDeclaration, (ASTNode) fFields.get(insertionPosition), editGroup);
+					} else if (distBefore == distAfter && Collator.getInstance().compare(beforeKey, afterKey) < 0) {
+						fListRewrite.insertAfter(fieldDeclaration, (ASTNode) fFields.get(insertionPosition), editGroup);
+					} else {
+						fListRewrite.insertBefore(fieldDeclaration, (ASTNode) fFields.get(insertionPosition + 1), editGroup);
+					}
+				}
 				fFields.add(insertionPosition + 1, fieldDeclaration);
 			}
 		}

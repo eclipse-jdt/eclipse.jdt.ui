@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -99,6 +99,9 @@ public class NLSPropertyFileModifier {
 
 	/**
 	 * Maps the new keys to a substitutions. If a substitution is not in the map then it is a duplicate.
+	 * 
+	 * @param substitutions the substitutions to add to the map
+	 * @return the map containing the substitutions
 	 */
 	static HashMap getNewKeyToSubstitutionMap(NLSSubstitution[] substitutions) {
 		HashMap keyToSubstMap= new HashMap(substitutions.length);
@@ -117,6 +120,9 @@ public class NLSPropertyFileModifier {
 	
 	/**
 	 * Maps the old keys to a substitutions. If a substitution is not in the map then it is a duplicate.
+	 * 
+	 * @param substitutions the substitutions to add to the map
+	 * @return the map containing the substitutions
 	 */
 	static HashMap getOldKeyToSubstitutionMap(NLSSubstitution[] substitutions) {
 		HashMap keyToSubstMap= new HashMap(substitutions.length);
@@ -181,16 +187,19 @@ public class NLSPropertyFileModifier {
 	}
 
 	private static void addInsertEdits(TextChange textChange, NLSSubstitution[] substitutions, Map newKeyToSubstMap, Map oldKeyToSubstMap, PropertyFileDocumentModel model) {
+		ArrayList keyValuePairsToAdd= new ArrayList();
+		
 		for (int i= 0; i < substitutions.length; i++) {
 			NLSSubstitution substitution= substitutions[i];
+			
 			if (doInsert(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
 				String value= substitution.getValueNonEmpty();
-				KeyValuePair curr= new KeyValuePair(substitution.getKey(), value);
-				
-				InsertEdit insert= model.insert(curr);
-				String message= Messages.format(NLSMessages.NLSPropertyFileModifier_add_entry, curr.getKey()); 
-				TextChangeCompatibility.addTextEdit(textChange, message, insert);
-			}
+				keyValuePairsToAdd.add(new KeyValuePair(substitution.getKey(), value));
+			}	
+		}
+		
+		if (keyValuePairsToAdd.size() > 0) {
+			model.insert((KeyValuePair[]) keyValuePairsToAdd.toArray(new KeyValuePair[keyValuePairsToAdd.size()]), textChange);
 		}
 	}
 	

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1140,6 +1140,114 @@ public class NLSSourceModifierTest extends TestCase {
         buf.append("    public static String Test_B_2;\n");
         buf.append("\n");
         buf.append("    public static String Test_A_1;\n");
+        buf.append("\n");
+        buf.append("    static {\n");
+        buf.append("        // initialize resource bundle\n");
+        buf.append("        NLS.initializeMessages(BUNDLE_NAME, Accessor.class);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        String expected= buf.toString();
+        
+        assertEquals(expected, accessorDoc.get());
+    }
+    
+    public void  testInsertionOrder4() throws Exception {        
+        StringBuffer buf= new StringBuffer();
+        buf.append("package test;\n");
+        buf.append("public class Test {\n");
+        buf.append("    private String str1= Accessor.Test_A_a;\n");
+        buf.append("    private String str2= Accessor.Test_A_b;\n");
+        buf.append("    private String str3= \"str3\";\n");
+        buf.append("    private String str4= \"str4\";\n");
+        buf.append("    private String str5= Accessor.Test_B_b;\n");
+        buf.append("    private String str6= Accessor.Test_B_c;\n");        
+        buf.append("}\n");
+        String klazz= buf.toString();
+        
+        buf= new StringBuffer();
+        buf.append("package test;\n");
+        buf.append("import org.eclipse.osgi.util.NLS;\n");
+        buf.append("public class Accessor extends NLS {\n");
+        buf.append("    private static final String BUNDLE_NAME = \"test.test\"; //$NON-NLS-1$\n");
+        buf.append("    private Accessor() {\n");
+        buf.append("    }\n");
+        buf.append("\n");
+        buf.append("    public static String Test_A_a;\n");
+        buf.append("    public static String Test_A_b;\n");
+        buf.append("\n");
+        buf.append("    public static String Test_B_b;\n");
+        buf.append("    public static String Test_B_c;\n");
+        buf.append("\n");
+        buf.append("    static {\n");
+        buf.append("        // initialize resource bundle\n");
+        buf.append("        NLS.initializeMessages(BUNDLE_NAME, Accessor.class);\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        String accessorKlazz= buf.toString();
+        
+        IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+        ICompilationUnit accessorCu= pack.createCompilationUnit("Accessor.java", accessorKlazz, false, null);
+        ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
+        
+        IPackageFragment nlspack= fSourceFolder.createPackageFragment("org.eclipse.osgi.util", false, null);
+        nlspack.createCompilationUnit("NLS.java", "public class NLS {}", false, null);
+        
+        CompilationUnit astRoot= createAST(cu);
+        NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
+        nlsSubstitutions[0].setState(NLSSubstitution.EXTERNALIZED);
+        nlsSubstitutions[0].setPrefix("Test_");
+        nlsSubstitutions[0].setKey("A_z");
+        nlsSubstitutions[1].setState(NLSSubstitution.EXTERNALIZED);
+        nlsSubstitutions[1].setPrefix("Test_");
+        nlsSubstitutions[1].setKey("B_a");
+        nlsSubstitutions[2].setInitialValue("str1");
+        nlsSubstitutions[2].setKey("Test_A_a");
+        nlsSubstitutions[3].setInitialValue("str2");
+        nlsSubstitutions[3].setKey("Test_A_b");
+        nlsSubstitutions[4].setInitialValue("str5");
+        nlsSubstitutions[4].setKey("Test_B_b");
+        nlsSubstitutions[5].setInitialValue("str6");
+        nlsSubstitutions[5].setKey("Test_B_c");
+        
+        String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
+        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor", true);
+        
+        Document doc = new Document(klazz);
+        change.getEdit().apply(doc);
+        
+        buf= new StringBuffer();
+        buf.append("package test;\n");
+        buf.append("public class Test {\n");
+        buf.append("    private String str1= Accessor.Test_A_a;\n");
+        buf.append("    private String str2= Accessor.Test_A_b;\n");
+        buf.append("    private String str3= Accessor.Test_A_z;\n");
+        buf.append("    private String str4= Accessor.Test_B_a;\n");
+        buf.append("    private String str5= Accessor.Test_B_b;\n");
+        buf.append("    private String str6= Accessor.Test_B_c;\n");
+        buf.append("}\n");
+        String expectedKlazz= buf.toString();
+        
+        assertEquals(expectedKlazz, doc.get());
+        
+        TextChange accessorChange= (TextChange)AccessorClassModifier.create(accessorCu, nlsSubstitutions);
+        Document accessorDoc= new Document(accessorKlazz);
+        accessorChange.getEdit().apply(accessorDoc);
+        
+        buf= new StringBuffer();
+        buf.append("package test;\n");
+        buf.append("import org.eclipse.osgi.util.NLS;\n");
+        buf.append("public class Accessor extends NLS {\n");
+        buf.append("    private static final String BUNDLE_NAME = \"test.test\"; //$NON-NLS-1$\n");
+        buf.append("    private Accessor() {\n");
+        buf.append("    }\n");
+        buf.append("\n");
+        buf.append("    public static String Test_A_a;\n");
+        buf.append("    public static String Test_A_b;\n");
+        buf.append("    public static String Test_A_z;\n");
+        buf.append("\n");
+        buf.append("    public static String Test_B_a;\n");
+        buf.append("    public static String Test_B_b;\n");
+        buf.append("    public static String Test_B_c;\n");
         buf.append("\n");
         buf.append("    static {\n");
         buf.append("        // initialize resource bundle\n");

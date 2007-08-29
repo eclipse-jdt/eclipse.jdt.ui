@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
+import com.ibm.icu.text.Collator;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -21,6 +26,11 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextUtilities;
+
+import org.eclipse.ltk.core.refactoring.TextChange;
+
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class PropertyFileDocumentModel {
 
@@ -42,35 +52,61 @@ public class PropertyFileDocumentModel {
     	}
     	return -1;
     }
-    
 
-    public InsertEdit insert(String key, String value) {
-        return insert(new KeyValuePair(key, value));
-    }
-
-    public InsertEdit insert(KeyValuePair keyValuePair) {
+    private InsertEdit insert(KeyValuePair keyValuePair) {
         KeyValuePairModell keyValuePairModell = new KeyValuePairModell(keyValuePair); 
         int index = findInsertPosition(keyValuePairModell);
         KeyValuePairModell insertHere = (KeyValuePairModell) fKeyValuePairs.get(index);
-        fKeyValuePairs.add(index, keyValuePairModell);
-        int offset = insertHere.fOffset - insertHere.fLeadingWhiteSpaces;
+        int offset = insertHere.fOffset;
         
         String extra= ""; //$NON-NLS-1$
         if (insertHere instanceof LastKeyValuePair && ((LastKeyValuePair)insertHere).needsNewLine()) {
         	extra= fLineDelimiter;
         	((LastKeyValuePair)insertHere).resetNeedsNewLine();
+        	offset-= insertHere.fLeadingWhiteSpaces;
+        } else if (index > 0) {
+        	String beforeKey= ((KeyValuePair) fKeyValuePairs.get(index - 1)).fKey;
+			String afterKey= insertHere.fKey;
+			String key= keyValuePair.fKey;
+			int distBefore= NLSUtil.compareTo(key, beforeKey);
+			int distAfter= NLSUtil.compareTo(key, afterKey);
+			if (distBefore > distAfter) {
+				offset-= insertHere.fLeadingWhiteSpaces;
+			} else if (distBefore == distAfter && Collator.getInstance().compare(beforeKey, afterKey) < 0) {
+				offset-= insertHere.fLeadingWhiteSpaces;
+			}
         }
         
         keyValuePairModell.fOffset= offset;
+        fKeyValuePairs.add(index, keyValuePairModell);
         return new InsertEdit(offset, extra + keyValuePairModell.getEncodedText(fLineDelimiter));
     }
 
-    public InsertEdit[] insert(KeyValuePair[] keyValuePairs) {
-        InsertEdit[] inserts = new InsertEdit[keyValuePairs.length];
-        for (int i = 0; i < keyValuePairs.length; i++) {            
-            inserts[i] = insert(keyValuePairs[i]);
-        }
-        return inserts;        
+    /**
+     * Inserts the given key value pairs into this model at appropriate
+     * positions. Records all required text changes in the given change
+     * 
+     * @param keyValuePairs the key value pairs to insert
+     * @param change the change to use to record text changes 
+     */
+    public void insert(KeyValuePair[] keyValuePairs, TextChange change) {
+    	
+        ArrayList sorted= new ArrayList(Arrays.asList(keyValuePairs));
+        Collections.sort(sorted, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				KeyValuePair p1= (KeyValuePair) o1;
+				KeyValuePair p2= (KeyValuePair) o2;
+				return Collator.getInstance().compare(p1.fKey, p2.fKey);
+			}
+        });
+        
+        for (int i = 0; i < sorted.size(); i++) {            
+            KeyValuePair curr= (KeyValuePair) sorted.get(i);
+			InsertEdit insertEdit= insert(curr);
+            
+            String message= Messages.format(NLSMessages.NLSPropertyFileModifier_add_entry, curr.getKey()); 
+			TextChangeCompatibility.addTextEdit(change, message, insertEdit);
+        }        
     }
     
     public DeleteEdit remove(String key) {
