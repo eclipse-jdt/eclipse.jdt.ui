@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -61,6 +62,48 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	 */
 	private static Set fgLocalesWithInstalledDictionaries;
 
+	/**
+	 * Returns the locales for which this
+	 * spell check engine has dictionaries in certain location.
+	 *
+	 * @param location dictionaries location
+	 * @return The available locales for this engine
+	 */
+	private static Set getLocalesWithInstalledDictionaries(URL location) {
+		String[] fileNames;
+		try {
+			URL url= FileLocator.toFileURL(location);
+			File file= new File(url.getFile());
+			if (!file.isDirectory())
+				return Collections.EMPTY_SET;
+			fileNames= file.list();
+			if (fileNames == null)
+				return Collections.EMPTY_SET;
+		} catch (IOException ex) {
+			JavaPlugin.log(ex);
+			return Collections.EMPTY_SET;
+		}
+		
+		Set localesWithInstalledDictionaries= new HashSet();
+		int fileNameCount= fileNames.length;
+		for (int i= 0; i < fileNameCount; i++) {
+			String fileName= fileNames[i];
+			int localeEnd= fileName.indexOf(".dictionary"); //$NON-NLS-1$ 
+			if (localeEnd > 1) {
+				String localeName= fileName.substring(0, localeEnd);
+				int languageEnd=localeName.indexOf('_');
+				if (languageEnd == -1)
+					localesWithInstalledDictionaries.add(new Locale(localeName));
+				else if (languageEnd == 2 && localeName.length() == 5)
+					localesWithInstalledDictionaries.add(new Locale(localeName.substring(0, 2), localeName.substring(3)));
+				else if (localeName.length() > 6 && localeName.charAt(5) == '_')
+					localesWithInstalledDictionaries.add(new Locale(localeName.substring(0, 2), localeName.substring(3, 5), localeName.substring(6)));
+			}
+		}
+
+		return localesWithInstalledDictionaries;
+	}
+
 	
 	/**
 	 * Returns the locales for which this
@@ -72,24 +115,10 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 		if (fgLocalesWithInstalledDictionaries != null)
 			return fgLocalesWithInstalledDictionaries;
 		
-		URL location;
+		Enumeration locations;
 		try {
-			location= getDictionaryLocation();
-			if (location == null)
-				return fgLocalesWithInstalledDictionaries= Collections.EMPTY_SET;
-		} catch (MalformedURLException ex) {
-			JavaPlugin.log(ex);
-			return fgLocalesWithInstalledDictionaries= Collections.EMPTY_SET;
-		}
-		
-		String[] fileNames;
-		try {
-			URL url= FileLocator.toFileURL(location);
-			File file= new File(url.getFile());
-			if (!file.isDirectory())
-				return fgLocalesWithInstalledDictionaries= Collections.EMPTY_SET;
-			fileNames= file.list();
-			if (fileNames == null)
+			locations= getDictionaryLocations();
+			if (locations == null)
 				return fgLocalesWithInstalledDictionaries= Collections.EMPTY_SET;
 		} catch (IOException ex) {
 			JavaPlugin.log(ex);
@@ -97,22 +126,13 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 		}
 		
 		fgLocalesWithInstalledDictionaries= new HashSet();
-		int fileNameCount= fileNames.length;
-		for (int i= 0; i < fileNameCount; i++) {
-			String fileName= fileNames[i];
-			int localeEnd= fileName.indexOf(".dictionary"); //$NON-NLS-1$ 
-			if (localeEnd > 1) {
-				String localeName= fileName.substring(0, localeEnd);
-				int languageEnd=localeName.indexOf('_');
-				if (languageEnd == -1)
-					fgLocalesWithInstalledDictionaries.add(new Locale(localeName));
-				else if (languageEnd == 2 && localeName.length() == 5)
-					fgLocalesWithInstalledDictionaries.add(new Locale(localeName.substring(0, 2), localeName.substring(3)));
-				else if (localeName.length() > 6 && localeName.charAt(5) == '_')
-					fgLocalesWithInstalledDictionaries.add(new Locale(localeName.substring(0, 2), localeName.substring(3, 5), localeName.substring(6)));
-			}
+		
+		while (locations.hasMoreElements()) {
+			URL location= (URL) locations.nextElement();
+			Set locales= getLocalesWithInstalledDictionaries(location);
+			fgLocalesWithInstalledDictionaries.addAll(locales);
 		}
-
+		
 		return fgLocalesWithInstalledDictionaries;
 	}
 
@@ -179,22 +199,20 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 	}
 
 	/**
-	 * Returns the URL for the dictionary location where
+	 * Returns the enumeration of URLs for the dictionary locations where
 	 * the Platform dictionaries are located.
 	 * <p>
 	 * This is in <code>org.eclipse.jdt.ui/dictionaries/</code>
 	 * which can also be populated via fragments.
 	 * </p>
 	 *
-	 * @throws MalformedURLException if the URL could not be created
-	 * @return The dictionary location, or <code>null</code> iff the location is not known
+	 * @throws IOException if there is an I/O error
+	 * @return The dictionary locations, or <code>null</code> iff the locations are not known
 	 */
-	public static URL getDictionaryLocation() throws MalformedURLException {
-
+	public static Enumeration getDictionaryLocations() throws IOException {
 		final JavaPlugin plugin= JavaPlugin.getDefault();
 		if (plugin != null)
-			return plugin.getBundle().getEntry("/" + DICTIONARY_LOCATION); //$NON-NLS-1$
-
+			return plugin.getBundle().getResources("/" + DICTIONARY_LOCATION); //$NON-NLS-1$
 		return null;
 	}
 
@@ -245,15 +263,19 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 		try {
 
 			Locale locale= null;
-			final URL location= getDictionaryLocation();
+			final Enumeration locations= getDictionaryLocations();
 
-			for (final Iterator iterator= getLocalesWithInstalledDictionaries().iterator(); iterator.hasNext();) {
+			while (locations != null && locations.hasMoreElements()) {
+				URL location= (URL)locations.nextElement();
+				
+				for (final Iterator iterator= getLocalesWithInstalledDictionaries(location).iterator(); iterator.hasNext();) {
 
-				locale= (Locale)iterator.next();
-				fLocaleDictionaries.put(locale, new LocaleSensitiveSpellDictionary(locale, location));
+					locale= (Locale)iterator.next();
+					fLocaleDictionaries.put(locale, new LocaleSensitiveSpellDictionary(locale, location));
+				}
 			}
 
-		} catch (MalformedURLException exception) {
+		} catch (IOException exception) {
 			// Do nothing
 		}
 		
