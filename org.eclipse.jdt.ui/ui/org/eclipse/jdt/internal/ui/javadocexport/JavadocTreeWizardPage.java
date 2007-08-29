@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -553,7 +553,8 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		return rootLocation != null && packageLocation != null && rootLocation.isPrefixOf(packageLocation);
 	}
 
-	protected void updateStore(IJavaProject[] checkedProjects) {
+	protected void updateStore() {
+		IJavaProject[] checkedProjects= getCheckedProjects();
 
 		if (fCustomButton.getSelection()) {
 			fStore.setDocletName(fDocletTypeText.getText());
@@ -721,6 +722,8 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			doValidation(TREESTATUS);
 			doValidation(PREFERENCESTATUS);
 			doValidation(JAVADOCSTATUS);
+		} else {
+			updateStore();
 		}
 		super.setVisible(visible);
 	}

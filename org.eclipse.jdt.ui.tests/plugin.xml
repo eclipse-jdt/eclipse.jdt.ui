@@ -159,6 +159,15 @@
       </classpathContainerPage>
    </extension>
    
+   <extension
+         point="org.eclipse.jdt.ui.javadocExportWizardPage">
+      <javadocExportWizardPage
+            description="My Javadoc Export Wizard Page"
+            class="org.eclipse.jdt.ui.examples.MyJavadocExportWizardPage"
+            id="org.eclipse.jdt.EXAMPLE_JD_EXPORT_WP">
+      </javadocExportWizardPage>
+   </extension>
+   
    <!-- **************** TEST NEW PROJECT WIZARD ******************* -->
    <extension 
 	point="org.eclipse.ui.newWizards">

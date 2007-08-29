@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -277,6 +277,8 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	
 	/**
 	 * Returns IJavaProjects and IPaths that will be on the classpath  
+	 * @param checkedProjects the list of checked projects
+	 * @return all IJavaProjects and IPaths that will be on the classpath
 	 */
 	private JavadocLinkRef[] getReferencedElements(IJavaProject[] checkedProjects) {
 		HashSet result= new HashSet();
@@ -412,7 +414,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			doValidation(STYLESHEETSTATUS);
 			updateHRefList(fFirstPage.getCheckedProjects());
 		} else {
-			fStore.setHRefs(getHRefs());
+			updateStore();
 		}
 	}
 
@@ -420,6 +422,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	 * Method will refresh the list of referenced libraries and projects
 	 * depended on the projects or elements of projects selected in the
 	 * TreeViewer on the JavadocTreeWizardPage.
+	 * @param checkedProjects the list of checked projects
 	 */
 	private void updateHRefList(IJavaProject[] checkedProjects) {
 		JavadocLinkRef[] res= getReferencedElements(checkedProjects);

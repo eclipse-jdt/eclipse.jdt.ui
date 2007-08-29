@@ -289,6 +289,8 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 			doValidation(OVERVIEWSTATUS);
 			doValidation(ANTSTATUS);
 			fCheckbrowser.setVisible(!fFirstPage.getCustom());
+		} else {
+			updateStore();
 		}
 	}
 

@@ -13,6 +13,7 @@
    <extension-point id="javaCompletionProposalComputer" name="%javaCompletionProposalComputer" schema="schema/javaCompletionProposalComputer.exsd"/>
    <extension-point id="javaCompletionProposalSorters" name="%javaCompletionProposalSorters" schema="schema/javaCompletionProposalSorters.exsd"/>
    <extension-point id="classpathAttributeConfiguration" name="%classpathAttributeConfiguration" schema="schema/classpathAttributeConfiguration.exsd"/>
+   <extension-point id="javadocExportWizardPage" name="%javadocExportWizardPageExtensionPoint" schema="schema/javadocExportWizardPage.exsd"/>
 
 <extension
 	point="org.eclipse.ui.decorators">

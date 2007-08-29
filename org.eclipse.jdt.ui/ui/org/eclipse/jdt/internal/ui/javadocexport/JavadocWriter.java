@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.javadocexport;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -28,48 +27,40 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 public class JavadocWriter {
 	
 	private static final char PATH_SEPARATOR= '/'; // use forward slash for all platforms
 	
-	private final OutputStream fOutputStream;
 	private final IJavaProject[] fJavaProjects;
 	private final IPath fBasePath;
-	private final String fEncoding;
 
 	/**
-	 * Create a JavadocWriter on the given output stream.
-	 * It is the client's responsibility to close the output stream.
+	 * Create a JavadocWriter.
 	 * @param basePath The base path to which all path will be made relative (if
 	 * possible). If <code>null</code>, paths are not made relative.
+	 * @param projects 
 	 */
-	public JavadocWriter(OutputStream outputStream, String encoding, IPath basePath, IJavaProject[] projects) {
-		Assert.isNotNull(outputStream);
-		Assert.isNotNull(encoding);
-		fOutputStream= new BufferedOutputStream(outputStream);
-		fEncoding= encoding;
+	public JavadocWriter(IPath basePath, IJavaProject[] projects) {
 		fBasePath= basePath;
 		fJavaProjects= projects;
 	}
 
-	public void writeXML(JavadocOptionsManager store) throws ParserConfigurationException, TransformerException {
+	public Element createXML(JavadocOptionsManager store) throws ParserConfigurationException {
 
 		DocumentBuilder docBuilder= null;
 		DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
@@ -89,21 +80,33 @@ public class JavadocWriter {
 
 		Element xmlJavadocDesc= document.createElement("javadoc"); //$NON-NLS-1$
 		javadocTarget.appendChild(xmlJavadocDesc);
-
+		
 		if (!store.isFromStandard())
 			xmlWriteDoclet(store, document, xmlJavadocDesc);
 		else
 			xmlWriteJavadocStandardParams(store, document, xmlJavadocDesc);
 
+		return xmlJavadocDesc;
+	}
+	
+	/**
+	 * Writes the document to the given stream.
+	 * It is the client's responsibility to close the output stream.
+	 * @param javadocElement the XML element defining the Javadoc tags
+	 * @param encoding the encoding to use
+	 * @param outputStream the output stream
+	 * @throws TransformerException thrown if writing fails
+	 */
+	public static void writeDocument(Element javadocElement, String encoding, OutputStream outputStream) throws TransformerException {
 
 		// Write the document to the stream
 		Transformer transformer=TransformerFactory.newInstance().newTransformer();
 		transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
-		transformer.setOutputProperty(OutputKeys.ENCODING, fEncoding);
+		transformer.setOutputProperty(OutputKeys.ENCODING, encoding);
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
 		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount","4"); //$NON-NLS-1$ //$NON-NLS-2$
-		DOMSource source = new DOMSource(document);
-		StreamResult result = new StreamResult(fOutputStream);
+		DOMSource source = new DOMSource(javadocElement.getOwnerDocument());
+		StreamResult result = new StreamResult(new BufferedOutputStream(outputStream));
 		transformer.transform(source, result);
 
 	}
@@ -303,12 +306,6 @@ public class JavadocWriter {
 			return "true"; //$NON-NLS-1$
 		else
 			return "false"; //$NON-NLS-1$
-	}
-
-	public void close() throws IOException {
-		if (fOutputStream != null) {
-			fOutputStream.close();
-		}
 	}
 
 }

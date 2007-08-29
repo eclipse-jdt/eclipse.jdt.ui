@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -820,19 +820,9 @@ public class JavadocOptionsManager {
 		}
 	}
 	
-
-	public File createXML(IJavaProject[] projects) throws CoreException {
-		FileOutputStream objectStreamOutput= null;
-		//@change
-		//for now only writing ant files for single project selection
-		try {
-			if (fAntpath.length() > 0) {
-				File file= new File(fAntpath);
-
-				String encoding= "UTF-8"; //$NON-NLS-1$
-				IContentType type= Platform.getContentTypeManager().getContentType("org.eclipse.ant.core.antBuildFile"); //$NON-NLS-1$
-				if (type != null)
-					encoding= type.getDefaultCharset();
+	public Element createXML(IJavaProject[] projects) throws CoreException {
+		if (fAntpath.length() > 0) {
+			try {
 				IPath filePath= Path.fromOSString(fAntpath);
 				IPath directoryPath= filePath.removeLastSegments(1);
 				
@@ -841,18 +831,35 @@ public class JavadocOptionsManager {
 				if (root.findFilesForLocation(filePath).length > 0) {
 					basePath= directoryPath; // only do relative path if ant file is stored in the workspace
 				}
-				
-				directoryPath.toFile().mkdirs();
-			
-				objectStreamOutput= new FileOutputStream(file);
-				JavadocWriter writer= new JavadocWriter(objectStreamOutput, encoding, basePath, projects);
-				writer.writeXML(this);
-				return file;
+				JavadocWriter writer= new JavadocWriter(basePath, projects);
+				return writer.createXML(this);
+			} catch (ParserConfigurationException e) {
+				String message= JavadocExportMessages.JavadocOptionsManager_createXM_error; 
+				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, message, e));
 			}
+		}
+		return null;
+	}
+	
+
+	public File writeXML(Element javadocElement) throws CoreException {
+		FileOutputStream objectStreamOutput= null;
+		//@change
+		//for now only writing ant files for single project selection
+		try {
+			File file= new File(fAntpath);
+
+			String encoding= "UTF-8"; //$NON-NLS-1$
+			IContentType type= Platform.getContentTypeManager().getContentType("org.eclipse.ant.core.antBuildFile"); //$NON-NLS-1$
+			if (type != null)
+				encoding= type.getDefaultCharset();
+			
+			file.getParentFile().mkdirs();
+		
+			objectStreamOutput= new FileOutputStream(file);
+			JavadocWriter.writeDocument(javadocElement, encoding, objectStreamOutput);
+			return file;
 		} catch (IOException e) {
-			String message= JavadocExportMessages.JavadocOptionsManager_createXM_error; 
-			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, message, e));
-		} catch (ParserConfigurationException e) {
 			String message= JavadocExportMessages.JavadocOptionsManager_createXM_error; 
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, message, e));
 		} catch (TransformerException e) {
@@ -866,7 +873,6 @@ public class JavadocOptionsManager {
 				}
 			}
 		}
-		return null;
 	}
 
 	public void updateDialogSettings(IDialogSettings dialogSettings, IJavaProject[] checkedProjects) {

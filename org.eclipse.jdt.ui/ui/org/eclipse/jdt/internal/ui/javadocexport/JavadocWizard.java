@@ -79,11 +79,14 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
+import org.w3c.dom.Element;
+
 public class JavadocWizard extends Wizard implements IExportWizard {
 
-	private JavadocTreeWizardPage fJTWPage;
-	private JavadocSpecificsWizardPage fJSWPage;
-	private JavadocStandardWizardPage fJSpWPage;
+	private JavadocTreeWizardPage fTreeWizardPage;
+	private JavadocSpecificsWizardPage fLastWizardPage;
+	private JavadocStandardWizardPage fStandardDocletWizardPage;
+	private ContributedJavadocWizardPage[] fContributedJavadocWizardPages;
 
 	private IPath fDestination;
 
@@ -139,10 +142,9 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	 * @see IWizard#performFinish()
 	 */
 	public boolean performFinish() {
-
-		IJavaProject[] checkedProjects= fJTWPage.getCheckedProjects();
-		updateStore(checkedProjects);
+		updateStore();
 		
+		IJavaProject[] checkedProjects= fTreeWizardPage.getCheckedProjects();
 		fStore.updateDialogSettings(getDialogSettings(), checkedProjects);
 
 		// Wizard should not run with dirty editors
@@ -180,12 +182,19 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			}
 		}
 
-		if (fJSWPage.generateAnt()) {
+		if (fLastWizardPage.generateAnt()) {
 			//@Improve: make a better message
 			OptionalMessageDialog.open(JAVADOC_ANT_INFORMATION_DIALOG, getShell(), JavadocExportMessages.JavadocWizard_antInformationDialog_title, null, JavadocExportMessages.JavadocWizard_antInformationDialog_message, MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0); 
 			try {
-				File file= fStore.createXML(checkedProjects);
-				if (file != null) {
+				Element javadocXMLElement= fStore.createXML(checkedProjects);
+				if (javadocXMLElement != null) {
+					
+					if (!fTreeWizardPage.getCustom()) {
+						for (int i= 0; i < fContributedJavadocWizardPages.length; i++) {
+							fContributedJavadocWizardPages[i].updateAntScript(javadocXMLElement);
+						}
+					}
+					File file= fStore.writeXML(javadocXMLElement);
 					IFile[] files= fRoot.findFilesForLocation(Path.fromOSString(file.getPath()));
 					if (files != null) {
 						for (int i= 0; i < files.length; i++) {
@@ -205,24 +214,22 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		return true;
 	}
 	
-	private void updateStore(IJavaProject[] checkedProjects) {
-		//writes the new settings to store
-		fJTWPage.updateStore(checkedProjects);
-		if (!fJTWPage.getCustom())
-			fJSpWPage.updateStore();
-		fJSWPage.updateStore();
+	private void updateStore() {
+		fTreeWizardPage.updateStore();
+		if (!fTreeWizardPage.getCustom())
+			fStandardDocletWizardPage.updateStore();
+		fLastWizardPage.updateStore();
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.IWizard#performCancel()
 	 */
 	public boolean performCancel() {
-		
-		IJavaProject[] checkedProjects= fJTWPage.getCheckedProjects();
-		updateStore(checkedProjects);
+		updateStore();
 		
 		//If the wizard was not launched from an ant file store the settings 
 		if (fXmlJavadocFile == null) {
+			IJavaProject[] checkedProjects= fTreeWizardPage.getCheckedProjects();
 			fStore.updateDialogSettings(getDialogSettings(), checkedProjects);
 		}
 		return super.performCancel();
@@ -264,9 +271,15 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			ArrayList vmArgs= new ArrayList();
 			ArrayList progArgs= new ArrayList();
 			
-			IStatus status= fStore.getArgumentArray(vmArgs, progArgs);
+			IStatus status= fStore.getArgumentArray(vmArgs, vmArgs);
 			if (!status.isOK()) {
 				ErrorDialog.openError(getShell(), JavadocExportMessages.JavadocWizard_error_title, JavadocExportMessages.JavadocWizard_warning_starting_message, status);
+			}
+			
+			if (!fTreeWizardPage.getCustom()) {
+				for (int i= 0; i < fContributedJavadocWizardPages.length; i++) {
+					fContributedJavadocWizardPages[i].updateArguments(vmArgs, vmArgs);
+				}
 			}
 			
 			File file= File.createTempFile("javadoc-arguments", ".tmp");  //$NON-NLS-1$//$NON-NLS-2$
@@ -354,19 +367,23 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	 * @see IWizard#addPages()
 	 */
 	public void addPages() {
+		fContributedJavadocWizardPages= ContributedJavadocWizardPage.getContributedPages(fStore);
 		
-		fJTWPage= new JavadocTreeWizardPage(TREE_PAGE_DESC, fStore);
-		fJSWPage= new JavadocSpecificsWizardPage(SPECIFICS_PAGE_DESC, fJTWPage, fStore);
-		fJSpWPage= new JavadocStandardWizardPage(STANDARD_PAGE_DESC, fJTWPage, fStore);
+		fTreeWizardPage= new JavadocTreeWizardPage(TREE_PAGE_DESC, fStore);
+		fLastWizardPage= new JavadocSpecificsWizardPage(SPECIFICS_PAGE_DESC, fTreeWizardPage, fStore);
+		fStandardDocletWizardPage= new JavadocStandardWizardPage(STANDARD_PAGE_DESC, fTreeWizardPage, fStore);
 
-		super.addPage(fJTWPage);
-		super.addPage(fJSpWPage);
-		super.addPage(fJSWPage);
+		super.addPage(fTreeWizardPage);
+		super.addPage(fStandardDocletWizardPage);
+		
+		for (int i= 0; i < fContributedJavadocWizardPages.length; i++) {
+			super.addPage(fContributedJavadocWizardPages[i]);
+		}
+		super.addPage(fLastWizardPage);
 
-		fJTWPage.init();
-		fJSpWPage.init();
-		fJSWPage.init();
-
+		fTreeWizardPage.init();
+		fStandardDocletWizardPage.init();
+		fLastWizardPage.init();
 	}
 
 	public void init(IWorkbench workbench, IStructuredSelection structuredSelection) {
@@ -437,31 +454,17 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	}
 
 	public IWizardPage getNextPage(IWizardPage page) {
-		if (page instanceof JavadocTreeWizardPage) {
-			if (!fJTWPage.getCustom()) {
-				return fJSpWPage;
-			}
-			return fJSWPage;
-		} else if (page instanceof JavadocSpecificsWizardPage) {
-			return null;
-		} else if (page instanceof JavadocStandardWizardPage)
-			return fJSWPage;
-		else
-			return null;
+		if (page == fTreeWizardPage && fTreeWizardPage.getCustom()) {
+			return fLastWizardPage;
+		}
+		return super.getNextPage(page);
 	}
 
 	public IWizardPage getPreviousPage(IWizardPage page) {
-		if (page instanceof JavadocSpecificsWizardPage) {
-			if (!fJTWPage.getCustom()) {
-				return fJSpWPage;
-			}
-			return fJSWPage;
-		} else if (page instanceof JavadocTreeWizardPage) {
-			return null;
-		} else if (page instanceof JavadocStandardWizardPage)
-			return fJTWPage;
-		else
-			return null;
+		if (page == fLastWizardPage && fTreeWizardPage.getCustom()) {
+			return fTreeWizardPage;
+		}
+		return super.getPreviousPage(page);
 	}
 	
 }

@@ -19,7 +19,8 @@ public final class JavadocExportMessages extends NLS {
 	private JavadocExportMessages() {
 		// Do not instantiate
 	}
-
+	
+	public static String ContributedJavadocWizardPage_error_create_page;
 	public static String JavadocSpecificsWizardPage_description;
 	public static String JavadocSpecificsWizardPage_stylesheetbrowsedialog_title;
 	public static String JavadocSpecificsWizardPage_overviewbutton_label;
