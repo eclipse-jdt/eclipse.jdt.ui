@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
 import org.eclipse.jdt.internal.ui.text.spelling.JavaSpellingReconcileStrategy;
+
 
 /**
  * Reconciling strategy for Java code. This is a composite strategy containing the
@@ -72,16 +73,20 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 	 * @see org.eclipse.jface.text.reconciler.CompositeReconcilingStrategy#reconcile(org.eclipse.jface.text.reconciler.DirtyRegion, org.eclipse.jface.text.IRegion)
 	 */
 	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
-		IProblemRequestorExtension e= getProblemRequestorExtension();
-		if (e != null) {
-			try {
-				e.beginReportingSequence();
+		try {
+			IProblemRequestorExtension e= getProblemRequestorExtension();
+			if (e != null) {
+				try {
+					e.beginReportingSequence();
+					super.reconcile(dirtyRegion, subRegion);
+				} finally {
+					e.endReportingSequence();
+				}
+			} else {
 				super.reconcile(dirtyRegion, subRegion);
-			} finally {
-				e.endReportingSequence();
 			}
-		} else {
-			super.reconcile(dirtyRegion, subRegion);
+		} finally {
+			reconciled();
 		}
 	}
 
@@ -89,18 +94,23 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 	 * @see org.eclipse.jface.text.reconciler.CompositeReconcilingStrategy#reconcile(org.eclipse.jface.text.IRegion)
 	 */
 	public void reconcile(IRegion partition) {
-		IProblemRequestorExtension e= getProblemRequestorExtension();
-		if (e != null) {
-			try {
-				e.beginReportingSequence();
+		try {
+			IProblemRequestorExtension e= getProblemRequestorExtension();
+			if (e != null) {
+				try {
+					e.beginReportingSequence();
+					super.reconcile(partition);
+				} finally {
+					e.endReportingSequence();
+				}
+			} else {
 				super.reconcile(partition);
-			} finally {
-				e.endReportingSequence();
 			}
-		} else {
-			super.reconcile(partition);
+		} finally {
+			reconciled();
 		}
 	}
+
 
 	/**
 	 * Tells this strategy whether to inform its listeners.
@@ -115,16 +125,20 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 	 * @see org.eclipse.jface.text.reconciler.CompositeReconcilingStrategy#initialReconcile()
 	 */
 	public void initialReconcile() {
-		IProblemRequestorExtension e= getProblemRequestorExtension();
-		if (e != null) {
-			try {
-				e.beginReportingSequence();
+		try {
+			IProblemRequestorExtension e= getProblemRequestorExtension();
+			if (e != null) {
+				try {
+					e.beginReportingSequence();
+					super.initialReconcile();
+				} finally {
+					e.endReportingSequence();
+				}
+			} else {
 				super.initialReconcile();
-			} finally {
-				e.endReportingSequence();
 			}
-		} else {
-			super.initialReconcile();
+		} finally {
+			reconciled();
 		}
 	}
 
@@ -136,5 +150,14 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 	public void aboutToBeReconciled() {
 		fJavaStrategy.aboutToBeReconciled();
 
+	}
+
+	/**
+	 * Called when reconcile has finished.
+	 *
+	 * @since 3.4
+	 */
+	private void reconciled() {
+		fJavaStrategy.reconciled();
 	}
 }

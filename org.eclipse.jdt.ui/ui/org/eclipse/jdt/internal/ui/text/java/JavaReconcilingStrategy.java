@@ -8,9 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.text.java;
-
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -57,6 +55,14 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	private IJavaReconcilingListener fJavaReconcilingListener;
 	private boolean fIsJavaReconcilingListener;
 
+	/**
+	 * Short cache to transfer the reconcile AST to
+	 * the {@link #reconciled()} method.
+	 * 
+	 * @since 3.4
+	 */
+	private CompilationUnit fAST;
+
 
 	public JavaReconcilingStrategy(ITextEditor editor) {
 		fEditor= editor;
@@ -75,71 +81,65 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	}
 
 	private void reconcile(final boolean initialReconcile) {
-		final CompilationUnit[] ast= new CompilationUnit[1];
-		try {
-			final ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput(), false);
-			if (unit != null) {
-				SafeRunner.run(new ISafeRunnable() {
-					public void run() {
-						try {
-							
-							/* fix for missing cancel flag communication */
-							IProblemRequestorExtension extension= getProblemRequestorExtension();
-							if (extension != null) {
-								extension.setProgressMonitor(fProgressMonitor);
-								extension.setIsActive(true);
-							}
-							
-							try {
-								boolean isASTNeeded= initialReconcile || JavaPlugin.getDefault().getASTProvider().isActive(unit);
-								// reconcile
-								if (fIsJavaReconcilingListener && isASTNeeded) {
-									int reconcileFlags= ICompilationUnit.FORCE_PROBLEM_DETECTION 
-										| (ASTProvider.SHARED_AST_STATEMENT_RECOVERY ? ICompilationUnit.ENABLE_STATEMENTS_RECOVERY : 0)
-										| (ASTProvider.SHARED_BINDING_RECOVERY ? ICompilationUnit.ENABLE_BINDINGS_RECOVERY : 0);
-											
-									ast[0]= unit.reconcile(ASTProvider.SHARED_AST_LEVEL, reconcileFlags, null, fProgressMonitor);
-									if (ast[0] != null) {
-										// mark as unmodifiable
-										ASTNodes.setFlagsToAST(ast[0], ASTNode.PROTECT);
-									}
-								} else
-									unit.reconcile(ICompilationUnit.NO_AST, true, null, fProgressMonitor);
-							} catch (OperationCanceledException ex) {
-								Assert.isTrue(fProgressMonitor == null || fProgressMonitor.isCanceled());
-								ast[0]= null;
-							} finally {
-								/* fix for missing cancel flag communication */
-								if (extension != null) {
-									extension.setProgressMonitor(null);
-									extension.setIsActive(false);
-								}
-							}
-							
-						} catch (JavaModelException ex) {
-							handleException(ex);
-						}
-					}
-					public void handleException(Throwable ex) {
-						IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, "Error in JDT Core during reconcile", ex);  //$NON-NLS-1$
-						JavaPlugin.getDefault().getLog().log(status);
-					}
-				});
-				
-			}
-		} finally {
-			// Always notify listeners, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=55969 for the final solution
-			try {
-				if (fIsJavaReconcilingListener) {
-					IProgressMonitor pm= fProgressMonitor;
-					if (pm == null)
-						pm= new NullProgressMonitor();
-					fJavaReconcilingListener.reconciled(ast[0], !fNotify, pm);
+		fAST= null;
+		final ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput(), false);
+		if (unit != null) {
+			SafeRunner.run(new ISafeRunnable() {
+				public void run() throws JavaModelException {
+					fAST= reconcile(unit, initialReconcile);
 				}
-			} finally {
-				fNotify= true;
+				public void handleException(Throwable ex) {
+					IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, "Error in JDT Core during reconcile", ex);  //$NON-NLS-1$
+					JavaPlugin.getDefault().getLog().log(status);
+				}
+			});
+		}
+	}
+
+	/**
+	 * Performs the reconcile and returns the AST if it was computed.
+	 * 
+	 * @param unit the compilation unit
+	 * @param initialReconcile <code>true</code> if this is the initial reconcile
+	 * @return the AST or <code>null</code> if none
+	 * @throws JavaModelException if the original Java element does not exist
+	 * @since 3.4
+	 */
+	private CompilationUnit reconcile(ICompilationUnit unit, boolean initialReconcile) throws JavaModelException {
+		/* fix for missing cancel flag communication */
+		IProblemRequestorExtension extension= getProblemRequestorExtension();
+		if (extension != null) {
+			extension.setProgressMonitor(fProgressMonitor);
+			extension.setIsActive(true);
+		}
+
+		try {
+			boolean isASTNeeded= initialReconcile || JavaPlugin.getDefault().getASTProvider().isActive(unit);
+			// reconcile
+			if (fIsJavaReconcilingListener && isASTNeeded) {
+				int reconcileFlags= ICompilationUnit.FORCE_PROBLEM_DETECTION 
+					| (ASTProvider.SHARED_AST_STATEMENT_RECOVERY ? ICompilationUnit.ENABLE_STATEMENTS_RECOVERY : 0)
+					| (ASTProvider.SHARED_BINDING_RECOVERY ? ICompilationUnit.ENABLE_BINDINGS_RECOVERY : 0);
+						
+				CompilationUnit ast= unit.reconcile(ASTProvider.SHARED_AST_LEVEL, reconcileFlags, null, fProgressMonitor);
+				if (ast != null) {
+					// mark as unmodifiable
+					ASTNodes.setFlagsToAST(ast, ASTNode.PROTECT);
+					return ast;
+				}
+			} else
+				unit.reconcile(ICompilationUnit.NO_AST, true, null, fProgressMonitor);
+		} catch (OperationCanceledException ex) {
+			Assert.isTrue(fProgressMonitor == null || fProgressMonitor.isCanceled());
+		} finally {
+			/* fix for missing cancel flag communication */
+			if (extension != null) {
+				extension.setProgressMonitor(null);
+				extension.setIsActive(false);
 			}
 		}
+		
+		return null;
 	}
 
 	/*
@@ -191,7 +191,28 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	 * @since 3.0
 	 */
 	public void aboutToBeReconciled() {
+		Assert.isTrue(fAST == null); // we'll see how this behaves ;-)
 		if (fIsJavaReconcilingListener)
 			fJavaReconcilingListener.aboutToBeReconciled();
+	}
+
+	/**
+	 * Called when reconcile has finished.
+	 * 
+	 * @since 3.4
+	 */
+	public void reconciled() {
+		// Always notify listeners, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=55969 for the final solution
+		try {
+			if (fIsJavaReconcilingListener) {
+				IProgressMonitor pm= fProgressMonitor;
+				if (pm == null)
+					pm= new NullProgressMonitor();
+				fJavaReconcilingListener.reconciled(fAST, !fNotify, pm);
+			}
+		} finally {
+			fNotify= true;
+			fAST= null;
+		}
 	}
 }
