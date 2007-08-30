@@ -42,6 +42,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -195,6 +196,20 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		fTable.refresh(true);
 		fTree.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
 		
+		Object[] selection= getActivePartSelection();
+		if (selection.length > 0) {
+			try {
+				fTree.getTree().setRedraw(false);
+				
+				for (int i= 0; i < selection.length; i++) {				
+					fTree.expandToLevel(selection[i], 0);
+				}
+				fTree.setSelection(new StructuredSelection(selection));
+			} finally {
+				fTree.getTree().setRedraw(true);
+			}
+		}
+		
 		createButtonBar(centerComposite);
 		
 		fWorkingSetName.setFocus();
@@ -238,7 +253,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		final Button addButton= new Button(parent, SWT.PUSH);
 		addButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		addButton.setText(WorkingSetMessages.JavaWorkingSetPage_add_button);
-		addButton.setEnabled(false);
+		addButton.setEnabled(!fTree.getSelection().isEmpty());
 		SWTUtil.setButtonDimensionHint(addButton);
 		
 		final Button addAllButton= new Button(parent, SWT.PUSH);
@@ -250,7 +265,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		final Button removeButton= new Button(parent, SWT.PUSH);
 		removeButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		removeButton.setText(WorkingSetMessages.JavaWorkingSetPage_remove_button);
-		removeButton.setEnabled(false);
+		removeButton.setEnabled(!fTable.getSelection().isEmpty());
 		SWTUtil.setButtonDimensionHint(removeButton);
 		
 		final Button removeAllButton= new Button(parent, SWT.PUSH);
@@ -475,53 +490,60 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 	}
 	
 	private void initializeSelectedElements() {
+		if (fWorkingSet == null)
+			return;
+		
+		Object[] elements= fWorkingSet.getElements();
+		
+		// Use closed project for elements in closed project
+		for (int i= 0; i < elements.length; i++) {
+			Object element= elements[i];
+			if (element instanceof IResource) {
+				IProject project= ((IResource)element).getProject();
+				if (!project.isAccessible())
+					elements[i]= project;
+			}
+			if (element instanceof IJavaElement) {
+				IJavaProject jProject= ((IJavaElement)element).getJavaProject();
+				if (jProject != null && !jProject.getProject().isAccessible()) 
+					elements[i]= jProject.getProject();
+			}
+		}
 
+		fSelectedElements.addAll(Arrays.asList(elements));
+	}
+
+	private Object[] getActivePartSelection() {
+		final Object[][] result= new Object[1][];
 		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
 			public void run() {
-				Object[] elements;
-				if (fWorkingSet == null) {
-					// Use current part's selection for initialization
-					IWorkbenchPage page= JavaPlugin.getActivePage();
-					if (page == null)
-						return;
-					
-					IWorkbenchPart part= JavaPlugin.getActivePage().getActivePart();
-					if (part == null)
-						return;
-					
-					try {
-						elements= SelectionConverter.getStructuredSelection(part).toArray();
-						for (int i= 0; i < elements.length; i++) {
-							if (elements[i] instanceof IResource) {
-								IJavaElement je= (IJavaElement)((IResource)elements[i]).getAdapter(IJavaElement.class);
-								if (je != null && je.exists() &&  je.getJavaProject().isOnClasspath((IResource)elements[i]))
-									elements[i]= je;
-							}
+				IWorkbenchPage page= JavaPlugin.getActivePage();
+				if (page == null)
+					return;
+				
+				IWorkbenchPart part= JavaPlugin.getActivePage().getActivePart();
+				if (part == null)
+					return;
+				
+				try {
+					Object[] elements= SelectionConverter.getStructuredSelection(part).toArray();
+					for (int i= 0; i < elements.length; i++) {
+						if (elements[i] instanceof IResource) {
+							IJavaElement je= (IJavaElement)((IResource)elements[i]).getAdapter(IJavaElement.class);
+							if (je != null && je.exists() &&  je.getJavaProject().isOnClasspath((IResource)elements[i]))
+								elements[i]= je;
 						}
-					} catch (JavaModelException e) {
-						return;
 					}
+					result[0]= elements;
+				} catch (JavaModelException e) {
+					return;
 				}
-				else
-					elements= fWorkingSet.getElements();
-
-				// Use closed project for elements in closed project
-				for (int i= 0; i < elements.length; i++) {
-					Object element= elements[i];
-					if (element instanceof IResource) {
-						IProject project= ((IResource)element).getProject();
-						if (!project.isAccessible())
-							elements[i]= project;
-					}
-					if (element instanceof IJavaElement) {
-						IJavaProject jProject= ((IJavaElement)element).getJavaProject();
-						if (jProject != null && !jProject.getProject().isAccessible()) 
-							elements[i]= jProject.getProject();
-					}
-				}
-
-				fSelectedElements.addAll(Arrays.asList(elements));
 			}
 		});
+		
+		if (result[0] == null)
+			return new Object[0];
+		
+		return result[0];
 	}
 }
