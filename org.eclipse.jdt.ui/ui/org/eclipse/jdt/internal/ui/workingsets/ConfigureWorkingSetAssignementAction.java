@@ -10,12 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.workingsets;
 
+import com.ibm.icu.text.Collator;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IAdaptable;
 
@@ -24,17 +27,23 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -42,12 +51,16 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.IWorkingSetNewWizard;
+import org.eclipse.ui.dialogs.SelectionDialog;
 
 import org.eclipse.jdt.core.IJavaElement;
 
@@ -61,71 +74,60 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 
 public final class ConfigureWorkingSetAssignementAction extends SelectionDispatchAction {
 	
+	/**
+	 * A set of GrayedCheckedModelElements
+	 */
 	private static final class GrayedCheckedModel {
 
-		private GrayedCheckedModelElement[] fElements;
-		private final Hashtable fLookup;
+		private ArrayList fElements;
 		
 		public GrayedCheckedModel(GrayedCheckedModelElement[] elements) {
-			fElements= elements;
-			fLookup= new Hashtable();
-			for (int i= 0; i < elements.length; i++) {
-				fLookup.put(elements[i].getWorkingSet(), elements[i]);
-			}
+			fElements= new ArrayList(Arrays.asList(elements));
 		}
 		
 		public void addElement(GrayedCheckedModelElement element) {
-			ArrayList list= new ArrayList(Arrays.asList(fElements));
-			list.add(element);
-			fElements= (GrayedCheckedModelElement[])list.toArray(new GrayedCheckedModelElement[list.size()]);
-			
-			fLookup.put(element.getWorkingSet(), element);
-		}
-
-		public IWorkingSet[] getAll() {
-			IWorkingSet[] result= new IWorkingSet[fElements.length];
-			for (int i= 0; i < fElements.length; i++) {
-				result[i]= fElements[i].getWorkingSet();
-			}
-			return result;
+			fElements.add(element);
 		}
 		
-		public GrayedCheckedModelElement getModelElement(IWorkingSet element) {
-			return (GrayedCheckedModelElement)fLookup.get(element);
+		public GrayedCheckedModelElement[] getElements() {
+			return (GrayedCheckedModelElement[]) fElements.toArray(new GrayedCheckedModelElement[fElements.size()]);
 		}
 
-		public IWorkingSet[] getChecked() {
+		public GrayedCheckedModelElement[] getChecked() {
 			ArrayList result= new ArrayList();
-			for (int i= 0; i < fElements.length; i++) {
-				if (fElements[i].isChecked())
-					result.add(fElements[i].getWorkingSet());
+			for (int i= 0; i < fElements.size(); i++) {
+				if (((GrayedCheckedModelElement)fElements.get(i)).isChecked())
+					result.add(fElements.get(i));
 			}
-			return (IWorkingSet[])result.toArray(new IWorkingSet[result.size()]);
+			return (GrayedCheckedModelElement[])result.toArray(new GrayedCheckedModelElement[result.size()]);
 		}
 
-		public IWorkingSet[] getGrayed() {
+		public GrayedCheckedModelElement[] getGrayed() {
 			ArrayList result= new ArrayList();
-			for (int i= 0; i < fElements.length; i++) {
-				if (fElements[i].isGrayed())
-					result.add(fElements[i].getWorkingSet());
+			for (int i= 0; i < fElements.size(); i++) {
+				if (((GrayedCheckedModelElement)fElements.get(i)).isGrayed())
+					result.add(fElements.get(i));
 			}
-			return (IWorkingSet[])result.toArray(new IWorkingSet[result.size()]);
+			return (GrayedCheckedModelElement[])result.toArray(new GrayedCheckedModelElement[result.size()]);
 		}
 
 		public void selectAll() {
-			for (int i= 0; i < fElements.length; i++) {
-				fElements[i].select();
+			for (int i= 0; i < fElements.size(); i++) {
+				((GrayedCheckedModelElement) fElements.get(i)).select();
 			}
 		}
 
 		public void deselectAll() {
-			for (int i= 0; i < fElements.length; i++) {
-				fElements[i].deselect();
+			for (int i= 0; i < fElements.size(); i++) {
+				((GrayedCheckedModelElement) fElements.get(i)).deselect();
 			}
 		}
 		
 	}
 
+	/**
+	 * Connects a IWorkingSet with its grayed-checked state
+	 */
 	private final static class GrayedCheckedModelElement {
 		
 		private final IWorkingSet fWorkingSet;
@@ -162,70 +164,294 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			fCheckCount= fElementCount;
 		}
 		
+		public int getElementCount() {
+			return fElementCount;
+		}
+		
 	}
 	
-	private final class WorkingSetModelAwareSelectionDialog extends SimpleWorkingSetSelectionDialog {
+	/**
+	 * Content provider for a GrayedCheckedModel input
+	 */
+	private static final class GrayedCheckedModelContentProvider implements IStructuredContentProvider {
+		private GrayedCheckedModelElement[] fElements;
+
+		public Object[] getElements(Object element) {
+			return fElements;
+		}
+
+		public void dispose() {}
+
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			if (newInput instanceof GrayedCheckedModel) {
+				fElements= ((GrayedCheckedModel)newInput).getElements();
+			} else {
+				fElements= new GrayedCheckedModelElement[0];
+			}
+		}
+	}
+	
+	/**
+	 * Label provider for GrayedCheckedModelElements
+	 */
+	private class GrayedCheckedModelLabelProvider extends LabelProvider {
+		
+		private Map fIcons;
+		
+		public GrayedCheckedModelLabelProvider() {
+			fIcons= new Hashtable();
+		}
+		
+		public void dispose() {
+			Iterator iterator= fIcons.values().iterator();
+			while (iterator.hasNext()) {
+				Image icon= (Image)iterator.next();
+				icon.dispose();
+			}
+			super.dispose();
+		}
+		
+		public Image getImage(Object object) {
+			IWorkingSet workingSet= ((GrayedCheckedModelElement)object).getWorkingSet();
+			ImageDescriptor imageDescriptor= workingSet.getImageDescriptor();
+			if (imageDescriptor == null)
+				return null;
+			
+			Image icon= (Image)fIcons.get(imageDescriptor);
+			if (icon == null) {
+				icon= imageDescriptor.createImage();
+				fIcons.put(imageDescriptor, icon);
+			}
+			
+			return icon;
+		}
+		
+		public String getText(Object object) {
+			GrayedCheckedModelElement modelElement= (GrayedCheckedModelElement)object;
+			IWorkingSet workingSet= modelElement.getWorkingSet();
+			if (!modelElement.isGrayed()) {
+				return workingSet.getName();
+			} else {
+				return Messages.format(WorkingSetMessages.ConfigureWorkingSetAssignementAction_XofY_label, new Object[] {workingSet.getName(), new Integer(modelElement.getCheckCount()), new Integer(modelElement.getElementCount())});
+			}
+			
+		}
+		
+	}
+	
+	private final class WorkingSetModelAwareSelectionDialog extends SelectionDialog {
+		
+		private final class GrayedCheckModelElementSorter extends ViewerSorter {
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				GrayedCheckedModelElement w1= (GrayedCheckedModelElement)e1;
+				GrayedCheckedModelElement w2= (GrayedCheckedModelElement)e2;
+				if (fWorkingSetModel == null)
+					return Collator.getInstance().compare(w1.getWorkingSet().getLabel(), w2.getWorkingSet().getLabel());
+				
+				IWorkingSet[] activeWorkingSets= fWorkingSetModel.getActiveWorkingSets();
+				for (int i= 0; i < activeWorkingSets.length; i++) {
+					IWorkingSet active= activeWorkingSets[i];
+					if (active == w1.getWorkingSet()) {
+						return -1;
+					} else if (active == w2.getWorkingSet()) {
+						return 1;
+					}
+				}
+				
+				return Collator.getInstance().compare(w1.getWorkingSet().getLabel(), w2.getWorkingSet().getLabel());
+			}
+		}
+
+		private class Filter extends ViewerFilter {
+			
+			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				GrayedCheckedModelElement model= (GrayedCheckedModelElement) element;
+				IWorkingSet set= model.getWorkingSet();
+				return accept(set);
+			}
+
+			private boolean accept(IWorkingSet set) {
+				if (!isValidWorkingSet(set))
+					return false;
+				
+				if (fWorkingSetModel == null)
+					return true;
+				
+				if (fShowVisibleOnly && !fWorkingSetModel.isActiveWorkingSet(set))
+					return false;
+				
+				return true;
+			}
+		}
 		
 		private CheckboxTableViewer fTableViewer;
 		private boolean fShowVisibleOnly;
 		private GrayedCheckedModel fModel;
 		private final IAdaptable[] fElements;
+		private final ArrayList fCreatedWorkingSets;
 		
 		private WorkingSetModelAwareSelectionDialog(Shell shell, GrayedCheckedModel model, IAdaptable[] elements) {
-			super(shell, VALID_WORKING_SET_IDS, model.getChecked());
+			super(shell);
+			
 			setTitle(WorkingSetMessages.ConfigureWorkingSetAssignementAction_WorkingSetAssignments_title);
+			setHelpAvailable(false);
+			setShellStyle(getShellStyle() | SWT.RESIZE);
+			
 			fModel= model;
 			fShowVisibleOnly= true;
 			fElements= elements;
+			fCreatedWorkingSets= new ArrayList();
 		}
 		
 		public IWorkingSet[] getGrayed() {
-			return fModel.getGrayed();
+			GrayedCheckedModelElement[] grayed= fModel.getGrayed();
+			IWorkingSet[] result= new IWorkingSet[grayed.length];
+			for (int i= 0; i < grayed.length; i++) {
+				result[i]= grayed[i].getWorkingSet();
+			}
+			return result;
 		}
 		
 		public IWorkingSet[] getSelection() {
-			return fModel.getChecked();
+			GrayedCheckedModelElement[] checked= fModel.getChecked();
+			IWorkingSet[] result= new IWorkingSet[checked.length];
+			for (int i= 0; i < checked.length; i++) {
+				result[i]= checked[i].getWorkingSet();
+			}
+			return result;
 		}
+		
+		protected final Control createDialogArea(Composite parent) {
+			Composite composite= (Composite)super.createDialogArea(parent);
+			composite.setFont(parent.getFont());
 
-		protected CheckboxTableViewer createTableViewer(Composite parent) {
-			fTableViewer= super.createTableViewer(parent);
-			fTableViewer.setGrayedElements(fModel.getGrayed());
-			fTableViewer.addCheckStateListener(new ICheckStateListener() {
-				public void checkStateChanged(CheckStateChangedEvent event) {
-					IWorkingSet element= (IWorkingSet)event.getElement();
-					fTableViewer.setGrayed(element, false);
-					GrayedCheckedModelElement modelElement= fModel.getModelElement(element);
-					if (event.getChecked()) {
-						modelElement.select();
-					} else {
-						modelElement.deselect();
-					}
-					fTableViewer.update(element, null);
+			createMessageArea(composite);
+			Composite inner= new Composite(composite, SWT.NONE);
+			inner.setFont(composite.getFont());
+			inner.setLayoutData(new GridData(GridData.FILL_BOTH));
+			GridLayout layout= new GridLayout();
+			layout.numColumns= 2;
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			inner.setLayout(layout);
+			
+			Composite tableComposite= new Composite(inner, SWT.NONE);
+			tableComposite.setFont(composite.getFont());
+			tableComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			layout= new GridLayout();
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			tableComposite.setLayout(layout);
+			
+			fTableViewer= createTableViewer(tableComposite);
+			createShowVisibleOnly(tableComposite);
+			
+			createRightButtonBar(inner);
+			
+			Dialog.applyDialogFont(composite);			
+			return composite;
+		}
+		
+		protected void createRightButtonBar(Composite parent) {
+			Composite composite= new Composite(parent, SWT.NONE);
+			composite.setFont(parent.getFont());
+			composite.setLayoutData(new GridData(GridData.FILL_VERTICAL));
+			GridLayout layout= new GridLayout();
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			composite.setLayout(layout);
+
+			Button selectAll= new Button(composite, SWT.PUSH);
+			selectAll.setText(WorkingSetMessages.ConfigureWorkingSetAssignementAction_SelectAll_button); 
+			selectAll.setFont(composite.getFont());
+			setButtonLayoutData(selectAll);
+			selectAll.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					fTableViewer.setAllChecked(true);
+					
+					fModel.selectAll();
+					fTableViewer.setGrayedElements(new Object[0]);
+					fTableViewer.refresh();
 				}
 			});
 			
-			createShowVisibleOnly(parent);
+			Button deselectAll= new Button(composite, SWT.PUSH);
+			deselectAll.setText(WorkingSetMessages.ConfigureWorkingSetAssignementAction_DeselectAll_button); 
+			deselectAll.setFont(composite.getFont());
+			setButtonLayoutData(deselectAll);
+			deselectAll.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					fTableViewer.setAllChecked(false);
+					
+					fModel.deselectAll();
+					fTableViewer.setGrayedElements(new Object[0]);
+					fTableViewer.refresh();
+				}
+			});
 			
-			return fTableViewer;
-		}
-		
-		protected void selectAll() {
-			super.selectAll();
-			fModel.selectAll();
-			fTableViewer.setGrayedElements(new Object[0]);
-			fTableViewer.refresh();
+			new Label(composite, SWT.NONE);
+			
+			Button newWorkingSet= new Button(composite, SWT.PUSH);
+			newWorkingSet.setText(WorkingSetMessages.ConfigureWorkingSetAssignementAction_New_button); 
+			newWorkingSet.setFont(composite.getFont());
+			setButtonLayoutData(newWorkingSet);
+			newWorkingSet.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
+					
+					//can only allow to create java working sets at the moment, see bug 186762
+					IWorkingSetNewWizard wizard= manager.createWorkingSetNewWizard(VALID_WORKING_SET_IDS);
+					if (wizard == null)
+						return;
+					
+					WizardDialog dialog= new WizardDialog(getShell(), wizard);
+					dialog.create();
+					if (dialog.open() == Window.OK) {
+						IWorkingSet workingSet= wizard.getSelection();
+						if (isValidWorkingSet(workingSet)) {
+							addNewWorkingSet(workingSet);
+				
+							manager.addWorkingSet(workingSet);
+							fCreatedWorkingSets.add(workingSet);
+						}
+					}
+				}
+			});
 		}
 
-		protected void deselectAll() {
-			super.deselectAll();
-			fModel.deselectAll();
-			fTableViewer.setGrayedElements(new Object[0]);
-			fTableViewer.refresh();
+		protected CheckboxTableViewer createTableViewer(Composite parent) {
+			
+			final CheckboxTableViewer result= CheckboxTableViewer.newCheckList(parent, SWT.BORDER | SWT.MULTI);
+			result.addCheckStateListener(new ICheckStateListener() {
+				public void checkStateChanged(CheckStateChangedEvent event) {
+					GrayedCheckedModelElement element= (GrayedCheckedModelElement)event.getElement();
+					result.setGrayed(element, false);
+					if (event.getChecked()) {
+						element.select();
+					} else {
+						element.deselect();
+					}
+					result.update(element, null);
+				}
+			});
+			GridData data= new GridData(GridData.FILL_BOTH);
+			data.heightHint= convertHeightInCharsToPixels(20);
+			data.widthHint= convertWidthInCharsToPixels(50);
+			result.getTable().setLayoutData(data);
+			result.getTable().setFont(parent.getFont());
+
+			result.addFilter(new Filter());
+			result.setLabelProvider(new GrayedCheckedModelLabelProvider());
+			result.setSorter(new GrayedCheckModelElementSorter());
+			result.setContentProvider(new GrayedCheckedModelContentProvider());
+			
+			result.setInput(fModel);
+			result.setCheckedElements(fModel.getChecked());
+			result.setGrayedElements(fModel.getGrayed());
+			
+			return result;
 		}
 		
-		/**
-		 * {@inheritDoc}
-		 */
 		protected void addNewWorkingSet(IWorkingSet workingSet) {
 			if (fWorkingSetModel != null) {
 				IWorkingSet[] workingSets= fWorkingSetModel.getActiveWorkingSets();
@@ -243,82 +469,18 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 				}
 			}
 			
-			fModel.addElement(new GrayedCheckedModelElement(workingSet, checkCount, fElements.length));
+			GrayedCheckedModelElement element= new GrayedCheckedModelElement(workingSet, checkCount, fElements.length);
+			fModel.addElement(element);
 			
-			fTableViewer.setInput(fModel.getAll());
+			fTableViewer.setInput(fModel);
 			fTableViewer.refresh();
 			
 			fTableViewer.setCheckedElements(fModel.getChecked());
 			fTableViewer.setGrayedElements(fModel.getGrayed());
 			
-			fTableViewer.setSelection(new StructuredSelection(workingSet));
+			fTableViewer.setSelection(new StructuredSelection(element));
 		}
 
-		protected ViewerFilter createTableFilter() {
-			final ViewerFilter superFilter= super.createTableFilter();
-			return new ViewerFilter() {
-				public boolean select(Viewer viewer, Object parentElement, Object element) {
-					if (!superFilter.select(viewer, parentElement, element))
-						return false;
-					
-					IWorkingSet set= (IWorkingSet)element;
-					if (!isValidWorkingSet(set))
-						return false;
-					
-					if (fWorkingSetModel == null)
-						return true;
-					
-					if (fShowVisibleOnly) {
-						if (!fWorkingSetModel.isActiveWorkingSet(set))
-							return false;
-						
-						return true;						
-					} else {
-						return true;
-					}
-				}					
-			};
-		}
-		
-		protected ViewerSorter createTableSorter() {
-			final ViewerSorter superSorter= super.createTableSorter();
-			return new ViewerSorter() {
-				public int compare(Viewer viewer, Object e1, Object e2) {
-					if (fWorkingSetModel == null)
-						return superSorter.compare(viewer, e1, e2);
-					
-					IWorkingSet[] activeWorkingSets= fWorkingSetModel.getActiveWorkingSets();
-					for (int i= 0; i < activeWorkingSets.length; i++) {
-						IWorkingSet active= activeWorkingSets[i];
-						if (active == e1) {
-							return -1;
-						} else if (active == e2) {
-							return 1;
-						}
-					}
-					
-					return superSorter.compare(viewer, e1, e2);
-				}
-			};
-		}
-		
-		protected LabelProvider createTableLabelProvider() {
-			final LabelProvider superLabelProvider= super.createTableLabelProvider();
-			return new LabelProvider() {
-				public String getText(Object element) {
-					String superText= superLabelProvider.getText(element);
-					if (superText == null)
-						return null;
-					
-					GrayedCheckedModelElement modelElement= fModel.getModelElement((IWorkingSet)element);
-					if (!modelElement.isGrayed())
-						return superText;
-					
-					return superText + Messages.format(WorkingSetMessages.ConfigureWorkingSetAssignementAction_XofY_label, new Object[] {new Integer(modelElement.getCheckCount()), new Integer(fElements.length)});
-				}
-			};
-		}	
-	
 		private void createShowVisibleOnly(Composite parent) {
 			if (fWorkingSetModel == null)
 				return;
@@ -370,10 +532,22 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		private void recalculateCheckedState() {
 			fModel= createGrayedCheckedModel(fElements, getAllWorkingSets());
 			
-			fTableViewer.setInput(fModel.getAll());
+			fTableViewer.setInput(fModel);
 			fTableViewer.refresh();
 			fTableViewer.setCheckedElements(fModel.getChecked());
 			fTableViewer.setGrayedElements(fModel.getGrayed());
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		protected void cancelPressed() {
+			IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
+			for (int i= 0; i < fCreatedWorkingSets.size(); i++) {
+				manager.removeWorkingSet((IWorkingSet)fCreatedWorkingSets.get(i));
+			}
+			
+			super.cancelPressed();
 		}
 	}
 
