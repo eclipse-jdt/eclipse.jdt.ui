@@ -562,7 +562,7 @@ public class TypeContextChecker {
 						bufBefore.append(node.getType().toString());
 						bufBefore.append("(){\n"); //$NON-NLS-1$
 						fillWithTypeStubs(bufBefore, bufAfter, focalPosition, anonDecl.bodyDeclarations());
-						bufAfter.insert(0, "};\n"); //$NON-NLS-1$
+						bufAfter.append("};\n"); //$NON-NLS-1$
 						return false;
 					}
 				});

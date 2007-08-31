@@ -46,6 +46,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 	
 	private static final boolean BUG_83691_CORE_JAVADOC_REF= true;
 	
+	private static final boolean BUG_201929= true;
+	
 	private static final boolean RUN_CONSTRUCTOR_TEST= true;
 
 	public ChangeSignatureTests(String name) {
@@ -178,6 +180,10 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, typeName);
 		IMethod method = classA.getMethod(methodName, signature);
 		assertTrue("method " + methodName +" does not exist", method.exists());
+		helperDoAll(method, newParamInfos, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation, newVisibility, deleted, returnTypeName, createDelegate);
+	}
+
+	private void helperDoAll(IMethod method, ParameterInfo[] newParamInfos, int[] newIndices, String[] oldParamNames, String[] newParamNames, String[] newParameterTypeNames, int[] permutation, int newVisibility, int[] deleted, String returnTypeName, boolean createDelegate) throws Exception {
 		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 		if (returnTypeName != null)
 			ref.setNewReturnTypeName(returnTypeName);
@@ -192,7 +198,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		RefactoringStatus result= performRefactoring(descriptor);
 		assertEquals("precondition was supposed to pass", null, result);
 		
-		IPackageFragment pack= (IPackageFragment)cu.getParent();
+		IPackageFragment pack= (IPackageFragment)method.getCompilationUnit().getParent();
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
@@ -1533,6 +1539,28 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.PROTECTED;
 		String newReturnTypeName= "void";
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}	
+	
+	public void testAll64()throws Exception{ // https://bugs.eclipse.org/bugs/show_bug.cgi?id=158008 and https://bugs.eclipse.org/bugs/show_bug.cgi?id=201929
+		if (BUG_201929) {
+			printTestDisabledMessage("BUG_201929");
+			return;
+		}
+		ParameterInfo[] newParamInfo= { ParameterInfo.createInfoForAddedParameter("java.util.List<Local>", "list", "null") };
+		int[] newIndices= { 2 };
+		String[] newParamTypeNames= {};
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {};
+		int[] deletedIndices= {0};
+		int newVisibility= Modifier.PRIVATE;
+		String newReturnTypeName= "void";
+		
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
+		int lastNasty= cu.getSource().lastIndexOf("nasty");
+		IMethod method= (IMethod) cu.getElementAt(lastNasty);
+		assertTrue(method.exists());
+		helperDoAll(method, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName, false);
 	}	
 	
 	public void testAddSyntaxError01()throws Exception{ // https://bugs.eclipse.org/bugs/show_bug.cgi?id=191349
