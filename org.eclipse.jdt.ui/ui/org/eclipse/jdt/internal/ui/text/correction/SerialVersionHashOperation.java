@@ -80,15 +80,15 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * @since 3.1
  */
 public final class SerialVersionHashOperation extends AbstractSerialVersionOperation {
-	
+
 	private static final String STATIC_CLASS_INITIALIZER= "<clinit>"; //$NON-NLS-1$
-		
+
 	public static Long calculateSerialVersionId(ITypeBinding typeBinding, final IProgressMonitor monitor) throws CoreException, IOException {
 		try {
 			IFile classfileResource= getClassfile(typeBinding);
 			if (classfileResource == null)
 				return null;
-			
+
 			InputStream contents= classfileResource.getContents();
 			try {
 				IClassFileReader cfReader= ToolFactory.createDefaultClassFileReader(contents, IClassFileReader.ALL);
@@ -104,22 +104,22 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 				monitor.done();
 		}
 	}
-	
+
 	private static String getClassName(char[] name) {
 		return new String(name).replace('/', '.');
 	}
-	
+
 	private static Long calculateSerialVersionId(IClassFileReader cfReader) throws IOException {
 		// implementing algorithm specified on http://java.sun.com/j2se/1.5.0/docs/guide/serialization/spec/class.html#4100
-		
+
 		ByteArrayOutputStream os= new ByteArrayOutputStream();
 		DataOutputStream doos= new DataOutputStream(os);
 		doos.writeUTF(getClassName(cfReader.getClassName())); // class name
 		int mod= getClassModifiers(cfReader);
 //		System.out.println(Integer.toHexString(mod) + ' ' + Flags.toString(mod));
-		
+
 		int classModifiers= mod & (Flags.AccPublic | Flags.AccFinal | Flags.AccInterface | Flags.AccAbstract); 
-		
+
 		doos.writeInt(classModifiers); // class modifiers
 		char[][] interfaces= getSortedInterfacesNames(cfReader);
 		for (int i= 0; i < interfaces.length; i++) {
@@ -153,7 +153,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		doos.flush();
 		return computeHash(os.toByteArray());
 	}
-	
+
 	private static int getClassModifiers(IClassFileReader cfReader) {
 		IInnerClassesAttribute innerClassesAttribute= cfReader.getInnerClassesAttribute();
 		if (innerClassesAttribute != null) {
@@ -172,28 +172,28 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 	}
 
 //	private static void print(byte[] bytes) {
-//		StringBuffer buf= new StringBuffer();
-//		for (int i= 0; i < bytes.length; i++) {
-//			char c= (char) bytes[i];
-//			if (!Character.isISOControl(c)) {
-//				buf.append(c).append(' ');
-//			} else {
-//				buf.append(Integer.toHexString(c)).append(' ');
-//			}
-//		}
-//		System.out.println(buf.toString());
-//		System.out.println();
+//	StringBuffer buf= new StringBuffer();
+//	for (int i= 0; i < bytes.length; i++) {
+//	char c= (char) bytes[i];
+//	if (!Character.isISOControl(c)) {
+//	buf.append(c).append(' ');
+//	} else {
+//	buf.append(Integer.toHexString(c)).append(' ');
 //	}
-	
-	
+//	}
+//	System.out.println(buf.toString());
+//	System.out.println();
+//	}
+
+
 	private static Long computeHash(byte[] bytes) {
 		try {
-		    byte[] sha= MessageDigest.getInstance("SHA-1").digest(bytes); //$NON-NLS-1$
+			byte[] sha= MessageDigest.getInstance("SHA-1").digest(bytes); //$NON-NLS-1$
 			if (sha.length >= 8) {
-			    long hash= 0;
-			    for (int i= 7; i >= 0; i--) {
-			    	hash= (hash << 8) | (sha[i] & 0xFF);
-			    }
+				long hash= 0;
+				for (int i= 7; i >= 0; i--) {
+					hash= (hash << 8) | (sha[i] & 0xFF);
+				}
 				return new Long(hash);
 			}
 		} catch (NoSuchAlgorithmException e) {
@@ -201,7 +201,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		}
 		return null;
 	}
-	
+
 	private static char[][] getSortedInterfacesNames(IClassFileReader cfReader) {
 		char[][] interfaceNames= cfReader.getInterfaceNames();
 		Arrays.sort(interfaceNames, new Comparator() {
@@ -211,7 +211,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		});
 		return interfaceNames;
 	}
-	
+
 	private static IFieldInfo[] getSortedFields(IClassFileReader cfReader) {
 		IFieldInfo[] allFields= cfReader.getFieldInfos();
 		Arrays.sort(allFields, new Comparator() {
@@ -221,7 +221,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		});
 		return allFields;
 	}
-	
+
 	private static boolean hasStaticClassInitializer(IClassFileReader cfReader) {
 		IMethodInfo[] methodInfos= cfReader.getMethodInfos();
 		for (int i= 0; i < methodInfos.length; i++) {
@@ -231,7 +231,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		}
 		return false;
 	}
-	
+
 	private static IMethodInfo[] getSortedMethods(IClassFileReader cfReader) {
 		IMethodInfo[] allMethods= cfReader.getMethodInfos();
 		Arrays.sort(allMethods, new Comparator() {
@@ -252,7 +252,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		});
 		return allMethods;
 	}
-	
+
 	private static IFile getClassfile(ITypeBinding typeBinding) throws CoreException {
 		// bug 191943
 		IType type= (IType) typeBinding.getJavaElement();
@@ -262,17 +262,17 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 
 		IRegion region= JavaCore.newRegion();
 		region.add(type.getCompilationUnit());
-		
+
 		String name= typeBinding.getBinaryName();
 		if (name != null) {
-			int packStart= name.indexOf('.');
+			int packStart= name.lastIndexOf('.');
 			if (packStart != -1) {
 				name= name.substring(packStart + 1);
 			}
 		} else {
 			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, CorrectionMessages.SerialVersionHashOperation_error_classnotfound));
 		}
-		
+
 		name += ".class"; //$NON-NLS-1$
 
 		IResource[] classFiles= JavaCore.getGeneratedResources(region, false);
@@ -284,7 +284,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		}
 		throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, CorrectionMessages.SerialVersionHashOperation_error_classnotfound));
 	}
-		
+
 	/**
 	 * Displays an appropriate error message for a specific problem.
 	 * 
@@ -345,7 +345,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 	}
 
 	private final ICompilationUnit fCompilationUnit;
-	
+
 	public SerialVersionHashOperation(ICompilationUnit unit, ASTNode[] nodes) {
 		super(unit, nodes);
 		fCompilationUnit= unit;
@@ -393,13 +393,13 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 				bufferManager.connect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 10));
 				if (monitor.isCanceled())
 					throw new InterruptedException();
-				
+
 				final ITextFileBuffer buffer= bufferManager.getTextFileBuffer(path, LocationKind.IFILE);
 				if (buffer.isDirty() && buffer.isStateValidated() && buffer.isCommitable() && displayYesNoMessage(CorrectionMessages.SerialVersionHashOperation_save_caption, CorrectionMessages.SerialVersionHashOperation_save_message))
 					buffer.commit(new SubProgressMonitor(monitor, 20), true);
 				else
 					monitor.worked(20);
-				
+
 				if (monitor.isCanceled())
 					throw new InterruptedException();
 			} finally {
@@ -408,7 +408,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 			project.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor, 60));
 			if (monitor.isCanceled())
 				throw new InterruptedException();
-			
+
 			ITypeBinding typeBinding= getTypeBinding(declarationNode);
 			if (typeBinding != null) {
 				Long id= calculateSerialVersionId(typeBinding, new SubProgressMonitor(monitor, 100));

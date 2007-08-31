@@ -91,13 +91,13 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 	protected void setUp() throws Exception {
 		JavaRuntime.getDefaultVMInstall();
 		fProject= ProjectTestSetup.getProject();
-		
+
 		Hashtable options= TestOptions.getDefaultOptions();
 
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "1"); //$NON-NLS-1$
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4"); //$NON-NLS-1$
-		
+
 		options.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
 		options.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.IGNORE);
 		options.put(JavaCore.COMPILER_PB_UNUSED_IMPORT, JavaCore.IGNORE);
@@ -117,7 +117,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fProject, ProjectTestSetup.getDefaultClasspath());
 	}
-	
+
 	public void testLocalClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -348,7 +348,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
-	
+
 	public void testOuterClass2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -419,6 +419,51 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		buf.append("    public Test4(Object source) {\n");
 		buf.append("        super(source);\n");
 		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testOuterClass3() throws Exception {
+		// longer package
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("a.b.c", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package a.b.c;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("public class Test1 implements Serializable {\n");
+		buf.append("    protected int var1;\n");
+		buf.append("    class Test1Inner {}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Test1.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package a.b.c;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("public class Test1 implements Serializable {\n");
+		buf.append("    /* Test */\n");
+		buf.append("    private static final long serialVersionUID = 1L;\n");
+		buf.append("    protected int var1;\n");
+		buf.append("    class Test1Inner {}\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package a.b.c;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("public class Test1 implements Serializable {\n");
+		buf.append("    /* Test */\n");
+		buf.append("    private static final long serialVersionUID = -3715240305486851194L;\n");
+		buf.append("    protected int var1;\n");
+		buf.append("    class Test1Inner {}\n");
 		buf.append("}\n");
 		expected[1]= buf.toString();
 
