@@ -45,37 +45,47 @@ import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
 
 public class JavaProjectWizard extends NewElementWizard implements IExecutableExtension {
-    
-    private NewJavaProjectWizardPageOne fFirstPage;
-    private NewJavaProjectWizardPageTwo fSecondPage;
-    
-    private IConfigurationElement fConfigElement;
-    
-    public JavaProjectWizard() {
-        setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWJPRJ);
-        setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-        setWindowTitle(NewWizardMessages.JavaProjectWizard_title); 
-    }
 
-    /*
-     * @see Wizard#addPages
-     */	
-    public void addPages() {
-        super.addPages();
-        fFirstPage= new NewJavaProjectWizardPageOne();
-        fFirstPage.setWorkingSets(getWorkingSets(getSelection()));
-        addPage(fFirstPage);
-        fSecondPage= new NewJavaProjectWizardPageTwo(fFirstPage);
-        addPage(fSecondPage);
-    }		
-    
-    /* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
-     */
-    protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
-    	fSecondPage.performFinish(monitor); // use the full progress monitor
-    }
-       
+	private NewJavaProjectWizardPageOne fFirstPage;
+	private NewJavaProjectWizardPageTwo fSecondPage;
+
+	private IConfigurationElement fConfigElement;
+
+	public JavaProjectWizard() {
+		this(null, null);
+	}
+
+	public JavaProjectWizard(NewJavaProjectWizardPageOne pageOne, NewJavaProjectWizardPageTwo pageTwo) {
+		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWJPRJ);
+		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
+		setWindowTitle(NewWizardMessages.JavaProjectWizard_title); 
+
+		fFirstPage= pageOne;
+		fSecondPage= pageTwo;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.wizard.Wizard#addPages()
+	 */
+	public void addPages() {
+		if (fFirstPage == null)
+			fFirstPage= new NewJavaProjectWizardPageOne();
+		addPage(fFirstPage);
+
+		if (fSecondPage == null)
+			fSecondPage= new NewJavaProjectWizardPageTwo(fFirstPage);
+		addPage(fSecondPage);
+
+		fFirstPage.setWorkingSets(getWorkingSets(getSelection()));
+	}		
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
+		fSecondPage.performFinish(monitor); // use the full progress monitor
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
 	 */
@@ -83,13 +93,13 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 		boolean res= super.performFinish();
 		if (res) {
 			final IJavaElement newElement= getCreatedElement();
-			
+
 			IWorkingSet[] workingSets= fFirstPage.getWorkingSets();
 			PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(newElement, workingSets);
-			
+
 			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
 			selectAndReveal(fSecondPage.getJavaProject().getProject());				
-			
+
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
 					PackageExplorerPart activePackageExplorer= getActivePackageExplorer();
@@ -103,36 +113,36 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 	}
 
 	protected void handleFinishException(Shell shell, InvocationTargetException e) {
-        String title= NewWizardMessages.JavaProjectWizard_op_error_title; 
-        String message= NewWizardMessages.JavaProjectWizard_op_error_create_message;			 
-        ExceptionHandler.handle(e, getShell(), title, message);
-    }	
-    
-    /*
-     * Stores the configuration element for the wizard.  The config element will be used
-     * in <code>performFinish</code> to set the result perspective.
-     */
-    public void setInitializationData(IConfigurationElement cfig, String propertyName, Object data) {
-        fConfigElement= cfig;
-    }
-    
-    /* (non-Javadoc)
-     * @see IWizard#performCancel()
-     */
-    public boolean performCancel() {
-        fSecondPage.performCancel();
-        return super.performCancel();
-    }
-    
+		String title= NewWizardMessages.JavaProjectWizard_op_error_title; 
+		String message= NewWizardMessages.JavaProjectWizard_op_error_create_message;			 
+		ExceptionHandler.handle(e, getShell(), title, message);
+	}	
+
+	/*
+	 * Stores the configuration element for the wizard.  The config element will be used
+	 * in <code>performFinish</code> to set the result perspective.
+	 */
+	public void setInitializationData(IConfigurationElement cfig, String propertyName, Object data) {
+		fConfigElement= cfig;
+	}
+
+	/* (non-Javadoc)
+	 * @see IWizard#performCancel()
+	 */
+	public boolean performCancel() {
+		fSecondPage.performCancel();
+		return super.performCancel();
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getCreatedElement()
 	 */
 	public IJavaElement getCreatedElement() {
 		return fSecondPage.getJavaProject();
 	}
-	
+
 	private static final IWorkingSet[] EMPTY_WORKING_SET_ARRAY = new IWorkingSet[0];
-	
+
 	private IWorkingSet[] getWorkingSets(IStructuredSelection selection) {
 		IWorkingSet[] selected= getSelectedWorkingSet(selection);
 		if (selected != null && selected.length > 0) {
@@ -142,37 +152,37 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 			}
 			return selected;
 		}
-		
+
 		PackageExplorerPart explorerPart= getActivePackageExplorer();
 		if (explorerPart == null)
 			return EMPTY_WORKING_SET_ARRAY;
-		
+
 		if (explorerPart.getRootMode() == ViewActionGroup.SHOW_PROJECTS) {				
 			//Get active filter
 			IWorkingSet filterWorkingSet= explorerPart.getFilterWorkingSet();
 			if (filterWorkingSet == null)
 				return EMPTY_WORKING_SET_ARRAY;
-			
+
 			if (!isValidWorkingSet(filterWorkingSet))
 				return EMPTY_WORKING_SET_ARRAY;
-			
+
 			return new IWorkingSet[] {filterWorkingSet};
 		} else if (explorerPart.getRootMode() == ViewActionGroup.SHOW_WORKING_SETS) {
 			//If we have been gone into a working set return the working set
 			Object input= explorerPart.getViewPartInput();
 			if (!(input instanceof IWorkingSet))
 				return EMPTY_WORKING_SET_ARRAY;
-			
+
 			IWorkingSet workingSet= (IWorkingSet)input;
 			if (!isValidWorkingSet(workingSet))
 				return EMPTY_WORKING_SET_ARRAY;
-			
+
 			return new IWorkingSet[] {workingSet};
 		}
-		
+
 		return EMPTY_WORKING_SET_ARRAY;
 	}
-	
+
 	private IWorkingSet[] getSelectedWorkingSet(IStructuredSelection selection) {
 		if (!(selection instanceof ITreeSelection))
 			return EMPTY_WORKING_SET_ARRAY;
@@ -217,14 +227,14 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 		PackageExplorerPart explorerPart= PackageExplorerPart.getFromActivePerspective();
 		if (explorerPart == null)
 			return null;
-		
+
 		IWorkbenchPage activePage= explorerPart.getViewSite().getWorkbenchWindow().getActivePage();
 		if (activePage == null)
 			return null;
-		
+
 		if (activePage.getActivePart() != explorerPart)
 			return null;
-		
+
 		return explorerPart;
 	}
 
@@ -232,10 +242,10 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 		String id= workingSet.getId();	
 		if (!JavaWorkingSetUpdater.ID.equals(id) && !"org.eclipse.ui.resourceWorkingSetPage".equals(id)) //$NON-NLS-1$
 			return false;
-		
+
 		if (workingSet.isAggregateWorkingSet())
 			return false;
-		
+
 		return true;
 	}
 

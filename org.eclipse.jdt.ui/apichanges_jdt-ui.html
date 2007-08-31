@@ -87,13 +87,13 @@ Non-breaking API changes from R3.3 to R3.4</b></font> <br>
     </tr>
     <tr>
       <td>
-      Both new Java project wizard pages are now API (package <code>org.eclipse.jdt.ui.wizards</code>). Clients
+      Both new Java project wizard pages are now API. Clients
       can reuse or modify the pages for their own New Java project wizards.
       <ul>
-      <li>NewJavaProjectWizardPageOne</li>
-      <li>NewJavaProjectWizardPageTwo</li>
+      <li>NewJavaProjectWizardPageOne (<code>org.eclipse.jdt.ui.wizards</code>)</li>
+      <li>NewJavaProjectWizardPageTwo (<code>org.eclipse.jdt.ui.wizards</code>)</li>
+      <li>OpenNewJavaProjectWizardAction.setConfiguredWizardPages(NewJavaProjectWizardPageOne, NewJavaProjectWizardPageTwo) (<code>org.eclipse.jdt.ui.actions</code>)
       </ul>
-      
       </td>
     </tr>
   </tbody>

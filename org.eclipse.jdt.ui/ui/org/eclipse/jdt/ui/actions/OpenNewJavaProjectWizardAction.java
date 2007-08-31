@@ -20,6 +20,9 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageOne;
+import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageTwo;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -38,7 +41,10 @@ import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard;
  * @since 3.2 
  */
 public class OpenNewJavaProjectWizardAction extends AbstractOpenWizardAction {
-	
+
+	private NewJavaProjectWizardPageOne fPageOne;
+	private NewJavaProjectWizardPageTwo fPageTwo;
+
 	/**
 	 * Creates an instance of the <code>OpenNewJavaProjectWizardAction</code>.
 	 */
@@ -49,15 +55,32 @@ public class OpenNewJavaProjectWizardAction extends AbstractOpenWizardAction {
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWJPRJ);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_PROJECT_WIZARD_ACTION);
 		setShell(JavaPlugin.getActiveWorkbenchShell());
+
+		fPageOne= null;
+		fPageTwo= null;
 	}
-	
+
+	/**
+	 * Sets the configure wizard pages to be used by the wizard. 
+	 *  
+	 * @param pageOne the {@link NewJavaProjectWizardPageOne} page to use or <code>null</code> to use the default page.
+	 * @param pageTwo the {@link NewJavaProjectWizardPageTwo} page to use or <code>null</code> to use the default page.
+	 * 
+	 * @since 3.4
+	 */
+	public void setConfiguredWizardPages(NewJavaProjectWizardPageOne pageOne, NewJavaProjectWizardPageTwo pageTwo) {
+		fPageOne= pageOne;
+		fPageTwo= pageTwo;
+	}
+
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.AbstractOpenWizardAction#createWizard()
 	 */
 	protected final INewWizard createWizard() throws CoreException {
-		return new JavaProjectWizard();
+		return new JavaProjectWizard(fPageOne, fPageTwo);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.AbstractOpenWizardAction#doCreateProjectFirstOnEmptyWorkspace(Shell)
 	 */
