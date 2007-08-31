@@ -46,11 +46,15 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 
 /**
- * Standard wizard page for creating new Java projects. This page can be used in 
+ * Basic wizard page for creating new Java projects. This page can be used in 
  * project creation wizards. The page shows UI to configure the project with a Java 
  * build path and output location. On finish the page will also configure the Java nature.
  * <p>
- * This is a replacement for <code>NewJavaProjectWizardPage</code> with a cleaner API.
+ * This is a replacement for {@link NewJavaProjectWizardPage} with a cleaner API.
+ * </p>
+ * <p>
+ * The pages used by the New Java Project wizard are {@link NewJavaProjectWizardPageOne} and
+ * {@link NewJavaProjectWizardPageTwo}.
  * </p>
  * <p>
  * Clients may instantiate or subclass.

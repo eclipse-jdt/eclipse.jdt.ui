@@ -46,23 +46,23 @@ Non-breaking API changes from R3.3 to R3.4</b></font> <br>
       Added constants for new refactorings:
       <br>
       Added to <code>org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds</code>:
-      <dl>
+      <ul>
       <li>INTRODUCE_PARAMETER_OBJECT</li>
       <li>EXTRACT_CLASS</li>
-      </dl>
+      </ul>
       Added to <code>org.eclipse.jdt.ui.actions.JdtActionConstants</code>:
-      <dl>
+      <ul>
       <li>INTRODUCE_PARAMETER_OBJECT</li>
       <li>EXTRACT_CLASS</li>
-      </dl>
+      </ul>
     </tr>
     <tr>
       <td>
       Constants to <code>org.eclipse.jdt.ui.PreferenceConstants</code>:
-      <dl>
+      <ul>
       <li>SPELLING_IGNORE_JAVA_STRINGS</li>
       <li>SPELLING_PROBLEMS_THRESHOLD</li>
-      </dl>
+      </ul>
     </tr>
     <tr>
       <td>
@@ -72,8 +72,28 @@ Non-breaking API changes from R3.3 to R3.4</b></font> <br>
       <td>
       <code>org.eclipse.jdt.ui.SharedASTProvider</code> gives access to the AST used by the active
       Java editor
-      <dl><li>SharedASTProvider.getAST(ITypeRoot, SharedASTProvider.WAIT_FLAG, IProgressMonitor)</li>
-      </dl>
+      <ul>
+      <li>SharedASTProvider.getAST(ITypeRoot, SharedASTProvider.WAIT_FLAG, IProgressMonitor)</li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+      New extension point <code>javadocExportWizardPage</code> allows to add pages to the Javadoc export wizard
+      <ul>
+      <li>JavadocExportWizardPage is to be extended by contributors</li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>
+      Both new Java project wizard pages are now API (package <code>org.eclipse.jdt.ui.wizards</code>). Clients
+      can reuse or modify the pages for their own New Java project wizards.
+      <ul>
+      <li>NewJavaProjectWizardPageOne</li>
+      <li>NewJavaProjectWizardPageTwo</li>
+      </ul>
+      
       </td>
     </tr>
   </tbody>

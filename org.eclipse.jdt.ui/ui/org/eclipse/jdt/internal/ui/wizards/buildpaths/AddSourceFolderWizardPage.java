@@ -138,7 +138,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		 */
 		public void changeControlPressed(DialogField field) {
 			final DirectoryDialog dialog= new DirectoryDialog(getShell());
-			dialog.setMessage(NewWizardMessages.JavaProjectWizardFirstPage_directory_message); 
+			dialog.setMessage(NewWizardMessages.AddSourceFolderWizardPage_directory_message); 
 			String directoryName = fLinkLocation.getText().trim();
 			if (directoryName.length() == 0) {
 				String prevLocation= JavaPlugin.getDefault().getDialogSettings().get(DIALOGSTORE_LAST_EXTERNAL_LOC);
@@ -614,6 +614,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	
     /**
 	 * Validates this page's controls.
+     * @param folderName the folder name
 	 *
 	 * @return IStatus indicating the validation result. IStatus.OK if the 
 	 *  specified link target is valid given the linkHandle.

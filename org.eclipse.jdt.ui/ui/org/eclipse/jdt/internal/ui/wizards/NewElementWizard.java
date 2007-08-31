@@ -88,6 +88,7 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 	
 	/**
 	 * Returns the scheduling rule for creating the element.
+	 * @return returns the scheduling rule
 	 */
 	protected ISchedulingRule getSchedulingRule() {
 		return ResourcesPlugin.getWorkspace().getRoot(); // look all by default

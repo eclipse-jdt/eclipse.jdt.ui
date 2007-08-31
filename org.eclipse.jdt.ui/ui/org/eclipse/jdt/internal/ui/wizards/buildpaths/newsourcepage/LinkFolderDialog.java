@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -152,7 +152,7 @@ public class LinkFolderDialog extends StatusDialog {
          */
         public void changeControlPressed(DialogField field) {
             final DirectoryDialog dialog= new DirectoryDialog(getShell());
-            dialog.setMessage(NewWizardMessages.JavaProjectWizardFirstPage_directory_message); 
+            dialog.setMessage(NewWizardMessages.LinkFolderDialog_directory_message); 
             String directoryName = getLinkTarget().trim();
             if (directoryName.length() == 0) {
                 String prevLocation= JavaPlugin.getDefault().getDialogSettings().get(DIALOGSTORE_LAST_EXTERNAL_LOC);
@@ -227,6 +227,7 @@ public class LinkFolderDialog extends StatusDialog {
         
         /**
 		 * Validates this page's controls.
+         * @param name the folder name
 		 *
 		 * @return IStatus indicating the validation result. IStatus.OK if the 
 		 *  specified link target is valid given the linkHandle.
@@ -276,6 +277,7 @@ public class LinkFolderDialog extends StatusDialog {
          * Tries to resolve the value entered in the link target field as 
          * a variable, if the value is a relative path.
          * Displays the resolved value if the entered value is a variable.
+         * @return returns the resolved variable
          */
         private String resolveVariable() {
             IPathVariableManager pathVariableManager = ResourcesPlugin.getWorkspace().getPathVariableManager();
@@ -286,6 +288,7 @@ public class LinkFolderDialog extends StatusDialog {
                 
         /**
          * Checks if the folder name is valid.
+         * @param name the folder name
          *
          * @return <code>true</code> if validation was
          * correct, <code>false</code> otherwise
@@ -484,9 +487,8 @@ public class LinkFolderDialog extends StatusDialog {
         return folderHandle;
     }
 
-    /**
-     * Update the dialog's status line to reflect the given status. It is safe to call
-     * this method before the dialog has been opened.
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.dialogs.StatusDialog#updateStatus(org.eclipse.core.runtime.IStatus)
      */
     protected void updateStatus(IStatus status) {
         super.updateStatus(status);

@@ -173,6 +173,8 @@
  <package name="org.eclipse.jdt.ui.wizards">
    <type name="BuildPathDialogAccess" subclass="false" instantiate="false"/>
    <type name="ClasspathAttributeConfiguration" subclass="true" instantiate="false"/>
+   <type name="JavaCapabilityConfigurationPage"/>
+   <type name="JavadocExportWizardPage"/>
    <type name="NewAnnotationWizardPage" subclass="false"/>
    <type name="NewClassWizardPage" subclass="false"/>
    <type name="NewContainerWizardPage"/>
@@ -180,6 +182,8 @@
    <type name="NewEnumWizardPage" subclass="false"/>
    <type name="NewInterfaceWizardPage" subclass="false"/>
    <type name="NewJavaProjectWizardPage"/>
+   <type name="NewJavaProjectWizardPageOne"/>
+   <type name="NewJavaProjectWizardPageTwo"/>
    <type name="NewPackageWizardPage" subclass="false"/>
    <type name="NewTypeWizardPage"/>
  </package>

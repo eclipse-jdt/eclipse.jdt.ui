@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.wizards;
+package org.eclipse.jdt.ui.wizards;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,7 +29,6 @@ import java.util.Map;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
-import org.eclipse.core.filesystem.URIUtil;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -46,11 +45,11 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceStatus;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 
@@ -61,28 +60,39 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.launching.JavaRuntime;
-
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.wizards.ClassPathDetector;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 /**
- * As addition to the JavaCapabilityConfigurationPage, the wizard does an
+ * The second page of the New Java project wizard. It allows to configure the build path and output location.
+ * As addition to the {@link JavaCapabilityConfigurationPage}, the wizard page does an
  * early project creation (so that linked folders can be defined) and, if an
- * existing external location was specified, offers to do a classpath detection
+ * existing external location was specified, detects the class path.
+ * 
+ * <p>
+ * Clients may instantiate or subclass.
+ * </p>
+ * 
+ * <p>
+  * <strong>EXPERIMENTAL</strong> This class or interface has been added as part
+ * of a work in progress. This API may change at any given time. Please do not
+ * use this API without consulting with the JDT/UI team. See bug 160985 for discussions.
+ * <p>
+ * 
+ * @since 3.4
  */
-public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage {
+public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage {
 
 	private static final String FILENAME_PROJECT= ".project"; //$NON-NLS-1$
 	private static final String FILENAME_CLASSPATH= ".classpath"; //$NON-NLS-1$
 
-	private final JavaProjectWizardFirstPage fFirstPage;
+	private final NewJavaProjectWizardPageOne fFirstPage;
 
 	private URI fCurrProjectLocation; // null if location is platform location
 	private IProject fCurrProject;
@@ -95,10 +105,11 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 	private HashSet fOrginalFolders;
 
 	/**
-	 * Constructor for JavaProjectWizardSecondPage.
+	 * Constructor for the {@link NewJavaProjectWizardPageTwo}.
+	 * 
 	 * @param mainPage the first page of the wizard
 	 */
-	public JavaProjectWizardSecondPage(JavaProjectWizardFirstPage mainPage) {
+	public NewJavaProjectWizardPageTwo(NewJavaProjectWizardPageOne mainPage) {
 		fFirstPage= mainPage;
 		fCurrProjectLocation= null;
 		fCurrProject= null;
@@ -109,7 +120,10 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		fIsAutobuild= null;
 	}
 	
-	protected boolean useNewSourcePage() {
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage#useNewSourcePage()
+	 */
+	protected final boolean useNewSourcePage() {
 		return true;
 	}
 	
@@ -121,7 +135,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		if (visible) {
 			IStatus status= changeToNewProject();
 			if (status != null && !status.isOK()) {
-				ErrorDialog.openError(getShell(), NewWizardMessages.JavaProjectWizardSecondPage_error_title, null, status);
+				ErrorDialog.openError(getShell(), NewWizardMessages.NewJavaProjectWizardPageTwo_error_title, null, status);
 			}
 		} else {
 			removeProject();
@@ -132,10 +146,13 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			setFocus();
 		}
 	}
+	
+	private boolean hasExistingContent(URI realLocation) throws CoreException {
+		IFileStore file= EFS.getStore(realLocation);
+		return file.fetchInfo().exists();
+	}
 
 	private IStatus changeToNewProject() {
-		fKeepContent= fFirstPage.getDetect();
-
 		class UpdateRunnable implements IRunnableWithProgress {
 			public IStatus infoStatus= Status.OK_STATUS;
 			
@@ -159,8 +176,8 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			getContainer().run(true, false, new WorkspaceModifyDelegatingOperation(op));
 			return op.infoStatus;
 		} catch (InvocationTargetException e) {
-			final String title= NewWizardMessages.JavaProjectWizardSecondPage_error_title; 
-			final String message= NewWizardMessages.JavaProjectWizardSecondPage_error_message; 
+			final String title= NewWizardMessages.NewJavaProjectWizardPageTwo_error_title; 
+			final String message= NewWizardMessages.NewJavaProjectWizardPageTwo_error_message; 
 			ExceptionHandler.handle(e, getShell(), title, message);
 		} catch  (InterruptedException e) {
 			// cancel pressed
@@ -168,42 +185,58 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		return null;
 	}
 	
-	final IStatus updateProject(IProgressMonitor monitor) throws CoreException, InterruptedException {
-		
+	private static URI getRealLocation(String projectName, URI location) {
+		if (location == null) {  // inside workspace
+			try {
+				URI rootLocation= ResourcesPlugin.getWorkspace().getRoot().getLocationURI();
+				
+				location= new URI(rootLocation.getScheme(), null,
+					Path.fromPortableString(rootLocation.getPath()).append(projectName).toString(),
+					null);
+			} catch (URISyntaxException e) {
+				Assert.isTrue(false, "Can't happen"); //$NON-NLS-1$
+			}
+		}
+		return location;
+	}
+	
+	private final IStatus updateProject(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		IStatus result= StatusInfo.OK_STATUS;
-		
-		fCurrProject= fFirstPage.getProjectHandle();
-		fCurrProjectLocation= getProjectLocationURI(); 
-		
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
 		try {
-			monitor.beginTask(NewWizardMessages.JavaProjectWizardSecondPage_operation_initialize, 7); 
+			monitor.beginTask(NewWizardMessages.NewJavaProjectWizardPageTwo_operation_initialize, 7); 
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
 			
-			URI realLocation= fCurrProjectLocation;
-			if (fCurrProjectLocation == null) {  // inside workspace
-				try {
-					URI rootLocation= ResourcesPlugin.getWorkspace().getRoot().getLocationURI();
-					realLocation= new URI(rootLocation.getScheme(), null,
-						Path.fromPortableString(rootLocation.getPath()).append(fCurrProject.getName()).toString(),
-						null);
-				} catch (URISyntaxException e) {
-					Assert.isTrue(false, "Can't happen"); //$NON-NLS-1$
-				}
+			String projectName= fFirstPage.getProjectName();
+			
+			fCurrProject= ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+			fCurrProjectLocation= fFirstPage.getProjectLocationURI();
+			
+			URI realLocation= getRealLocation(projectName, fCurrProjectLocation);
+			fKeepContent= hasExistingContent(realLocation);
+			
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
 			}
 
-			rememberExistingFiles(realLocation);
-			rememberExisitingFolders(realLocation);
+			if (fKeepContent) {
+				rememberExistingFiles(realLocation);
+				rememberExisitingFolders(realLocation);
+			}
             
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
+			
 			try {
 				createProject(fCurrProject, fCurrProjectLocation, new SubProgressMonitor(monitor, 2));
 			} catch (CoreException e) {
 				if (e.getStatus().getCode() == IResourceStatus.FAILED_READ_METADATA) {					
-					result= new StatusInfo(IStatus.INFO, Messages.format(NewWizardMessages.JavaProjectWizardSecondPage_DeleteCorruptProjectFile_message, e.getLocalizedMessage()));
+					result= new StatusInfo(IStatus.INFO, Messages.format(NewWizardMessages.NewJavaProjectWizardPageTwo_DeleteCorruptProjectFile_message, e.getLocalizedMessage()));
 					
 					deleteProjectFile(realLocation);
 					if (fCurrProject.exists())
@@ -214,93 +247,83 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 					throw e;
 				}	
 			}
-				
-			IClasspathEntry[] entries= null;
-			IPath outputLocation= null;
-	
-			if (fFirstPage.getDetect()) {
-				if (!fCurrProject.getFile(FILENAME_CLASSPATH).exists()) { 
-					final ClassPathDetector detector= new ClassPathDetector(fCurrProject, new SubProgressMonitor(monitor, 2));
-					entries= detector.getClasspath();
-                    outputLocation= detector.getOutputLocation();
-                    if (entries.length == 0)
-                    	entries= null;
-				} else {
-					monitor.worked(2);
-				}
-			} else if (fFirstPage.isSrcBin()) {
-				IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-				IPath srcPath= new Path(store.getString(PreferenceConstants.SRCBIN_SRCNAME));
-				IPath binPath= new Path(store.getString(PreferenceConstants.SRCBIN_BINNAME));
-				
-				if (srcPath.segmentCount() > 0) {
-					IFolder folder= fCurrProject.getFolder(srcPath);
-					CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
-				} else {
-					monitor.worked(1);
-				}
-				
-				if (binPath.segmentCount() > 0 && !binPath.equals(srcPath)) {
-					IFolder folder= fCurrProject.getFolder(binPath);
-					CoreUtility.createDerivedFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
-				} else {
-					monitor.worked(1);
-				}
-				
-				final IPath projectPath= fCurrProject.getFullPath();
-
-				// configure the classpath entries, including the default jre library.
-				List cpEntries= new ArrayList();
-				cpEntries.add(JavaCore.newSourceEntry(projectPath.append(srcPath)));
-				cpEntries.addAll(Arrays.asList(getDefaultClasspathEntry()));
-				entries= (IClasspathEntry[]) cpEntries.toArray(new IClasspathEntry[cpEntries.size()]);
-				
-				// configure the output location
-				outputLocation= projectPath.append(binPath);
-			} else {
-				IPath projectPath= fCurrProject.getFullPath();
-				List cpEntries= new ArrayList();
-				cpEntries.add(JavaCore.newSourceEntry(projectPath));
-				cpEntries.addAll(Arrays.asList(getDefaultClasspathEntry()));
-				entries= (IClasspathEntry[]) cpEntries.toArray(new IClasspathEntry[cpEntries.size()]);
-
-				outputLocation= projectPath;
-				monitor.worked(2);
-			}
+			
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
-			
-            init(JavaCore.create(fCurrProject), outputLocation, entries, false);
+				
+			initializeBuildPath(JavaCore.create(fCurrProject), new SubProgressMonitor(monitor, 2));
 			configureJavaProject(new SubProgressMonitor(monitor, 3)); // create the Java project to allow the use of the new source folder page
 		} finally {
 			monitor.done();
 		}
 		return result;
 	}
-	
-	private URI getProjectLocationURI() throws CoreException {
-		if (fFirstPage.isInWorkspace()) {
-			return null;
+
+	/**
+	 * Evaluates the new build path and output folder according to the settings on the first page.
+	 * The resulting build path is set by calling {@link #init(IJavaProject, IPath, IClasspathEntry[], boolean)}.
+	 * Clients can override this method.
+	 * 
+	 * @param javaProject the new project which is already created when this method is called.
+	 * @param monitor the progress monitor
+	 * @throws CoreException thrown when initializing the build path failed
+	 */
+	protected void initializeBuildPath(IJavaProject javaProject, IProgressMonitor monitor) throws CoreException {
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
 		}
-		return URIUtil.toURI(fFirstPage.getLocationPath());
+		monitor.beginTask(NewWizardMessages.NewJavaProjectWizardPageTwo_monitor_init_build_path, 2);
+		
+		try {
+			IClasspathEntry[] entries= null;
+			IPath outputLocation= null;
+			IProject project= javaProject.getProject();
+	
+			if (fKeepContent) {
+				if (!project.getFile(FILENAME_CLASSPATH).exists()) { 
+					final ClassPathDetector detector= new ClassPathDetector(fCurrProject, new SubProgressMonitor(monitor, 2));
+					entries= detector.getClasspath();
+			        outputLocation= detector.getOutputLocation();
+			        if (entries.length == 0)
+			        	entries= null;
+				} else {
+					monitor.worked(2);
+				}
+			} else {
+				List cpEntries= new ArrayList();
+				IWorkspaceRoot root= project.getWorkspace().getRoot();
+				
+				IClasspathEntry[] sourceClasspathEntries= fFirstPage.getSourceClasspathEntries();
+				for (int i= 0; i < sourceClasspathEntries.length; i++) {
+					IPath path= sourceClasspathEntries[i].getPath();
+					if (path.segmentCount() > 1) {
+						IFolder folder= root.getFolder(path);
+						CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
+					}
+					cpEntries.add(sourceClasspathEntries[i]);
+				}
+				
+				cpEntries.addAll(Arrays.asList(fFirstPage.getDefaultClasspathEntries()));
+				
+				entries= (IClasspathEntry[]) cpEntries.toArray(new IClasspathEntry[cpEntries.size()]);
+				
+				outputLocation= fFirstPage.getOutputLocation();
+				if (outputLocation.segmentCount() > 1) {
+					IFolder folder= root.getFolder(outputLocation);
+					CoreUtility.createDerivedFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
+				}
+			}
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
+			
+			init(javaProject, outputLocation, entries, false);
+		} finally {
+			monitor.done();
+		}
 	}
-	
-	private IClasspathEntry[] getDefaultClasspathEntry() {
-		IClasspathEntry[] defaultJRELibrary= PreferenceConstants.getDefaultJRELibrary();
-		String compliance= fFirstPage.getCompilerCompliance();
-		IPath jreContainerPath= new Path(JavaRuntime.JRE_CONTAINER);
-		if (compliance == null || defaultJRELibrary.length > 1 || !jreContainerPath.isPrefixOf(defaultJRELibrary[0].getPath())) {
-			// use default
-			return defaultJRELibrary;
-		}
-		IPath newPath= fFirstPage.getJREContainerPath();
-		if (newPath != null) {
-			return new IClasspathEntry[] { JavaCore.newContainerEntry(newPath) };
-		}
-		return defaultJRELibrary;
-	}
-	
+		
 	private void deleteProjectFile(URI projectLocation) throws CoreException {
 		IFileStore file= EFS.getStore(projectLocation);
 		if (file.fetchInfo().exists()) {
@@ -376,7 +399,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				copyFile(fDotProjectBackup, projectFile, new SubProgressMonitor(monitor, 1));
 			}
 		} catch (IOException e) {
-			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, NewWizardMessages.JavaProjectWizardSecondPage_problem_restore_project, e); 
+			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, NewWizardMessages.NewJavaProjectWizardPageTwo_problem_restore_project, e); 
 			throw new CoreException(status);
 		}
 		try {
@@ -386,7 +409,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				copyFile(fDotClasspathBackup, classpathFile, new SubProgressMonitor(monitor, 1));
 			}
 		} catch (IOException e) {
-			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, NewWizardMessages.JavaProjectWizardSecondPage_problem_restore_classpath, e); 
+			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, NewWizardMessages.NewJavaProjectWizardPageTwo_problem_restore_classpath, e); 
 			throw new CoreException(status);
 		}
 	}
@@ -397,7 +420,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			copyFile(source, bak);
 			return bak;
 		} catch (IOException e) {
-			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, Messages.format(NewWizardMessages.JavaProjectWizardSecondPage_problem_backup, name), e); 
+			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, Messages.format(NewWizardMessages.NewJavaProjectWizardPageTwo_problem_backup, name), e); 
 			throw new CoreException(status);
 		} 
 	}
@@ -435,13 +458,14 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 	
 	/**
 	 * Called from the wizard on finish.
+	 * 
 	 * @param monitor the progress monitor
 	 * @throws CoreException thrown when the project creation or configuration failed
 	 * @throws InterruptedException thrown when the user cancelled the project creation
 	 */
 	public void performFinish(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		try {
-			monitor.beginTask(NewWizardMessages.JavaProjectWizardSecondPage_operation_create, 3); 
+			monitor.beginTask(NewWizardMessages.NewJavaProjectWizardPageTwo_operation_create, 3); 
 			if (fCurrProject == null) {
 				updateProject(new SubProgressMonitor(monitor, 1));
 			}
@@ -481,20 +505,20 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		try {
 			getContainer().run(true, true, new WorkspaceModifyDelegatingOperation(op));
 		} catch (InvocationTargetException e) {
-			final String title= NewWizardMessages.JavaProjectWizardSecondPage_error_remove_title; 
-			final String message= NewWizardMessages.JavaProjectWizardSecondPage_error_remove_message; 
+			final String title= NewWizardMessages.NewJavaProjectWizardPageTwo_error_remove_title; 
+			final String message= NewWizardMessages.NewJavaProjectWizardPageTwo_error_remove_message; 
 			ExceptionHandler.handle(e, getShell(), title, message);		
 		} catch  (InterruptedException e) {
 			// cancel pressed
 		}
 	}
 	
-	final void doRemoveProject(IProgressMonitor monitor) throws InvocationTargetException {
+	private final void doRemoveProject(IProgressMonitor monitor) throws InvocationTargetException {
 		final boolean noProgressMonitor= (fCurrProjectLocation == null); // inside workspace
 		if (monitor == null || noProgressMonitor) {
 			monitor= new NullProgressMonitor();
 		}
-		monitor.beginTask(NewWizardMessages.JavaProjectWizardSecondPage_operation_remove, 3); 
+		monitor.beginTask(NewWizardMessages.NewJavaProjectWizardPageTwo_operation_remove, 3); 
 		try {
 			try {
 				URI projLoc= fCurrProject.getLocationURI();
