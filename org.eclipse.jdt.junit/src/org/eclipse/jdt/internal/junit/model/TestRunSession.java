@@ -699,7 +699,7 @@ public class TestRunSession implements ITestRunSession {
 			}
 
 			Status status= Status.convert(statusCode);
-			registerTestFailed(testElement, status, trace, nullifyEmpty(expected), nullifyEmpty(actual));
+			registerTestFailureStatus(testElement, status, trace, nullifyEmpty(expected), nullifyEmpty(actual));
 			
 			Object[] listeners= fSessionListeners.getListeners();
 			for (int i= 0; i < listeners.length; ++i) {
@@ -735,7 +735,7 @@ public class TestRunSession implements ITestRunSession {
 			TestCaseElement testCaseElement= (TestCaseElement) testElement;
 			
 			Status status= Status.convert(statusCode);
-			registerTestFailed(testElement, status, trace, nullifyEmpty(expectedResult), nullifyEmpty(actualResult));
+			registerTestFailureStatus(testElement, status, trace, nullifyEmpty(expectedResult), nullifyEmpty(actualResult));
 			
 			Object[] listeners= fSessionListeners.getListeners();
 			for (int i= 0; i < listeners.length; ++i) {
@@ -759,11 +759,11 @@ public class TestRunSession implements ITestRunSession {
 		}
 	}
 	
-	public void registerTestFailed(TestElement testElement, Status status, String trace, String expected, String actual) {
+	public void registerTestFailureStatus(TestElement testElement, Status status, String trace, String expected, String actual) {
 		testElement.setStatus(status, trace, expected, actual);
 		if (status.isError()) {
 			fErrorCount++;
-		} else {
+		} else if (status.isFailure()) {
 			fFailureCount++;
 		}
 	}
