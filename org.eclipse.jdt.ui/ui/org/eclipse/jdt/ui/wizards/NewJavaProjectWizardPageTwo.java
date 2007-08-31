@@ -51,8 +51,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
-import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -483,12 +481,6 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 					project.setOptions(options);
 				}
 			}
-
-			IWorkingSet[] workingSets= fFirstPage.getWorkingSets();
-			if (workingSets.length > 0) {
-				PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(fCurrProject, workingSets);
-			}
-
 		} finally {
 			monitor.done();
 			fCurrProject= null;

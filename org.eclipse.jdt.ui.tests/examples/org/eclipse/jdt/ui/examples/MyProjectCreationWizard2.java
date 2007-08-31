@@ -30,6 +30,7 @@ import org.eclipse.jface.wizard.Wizard;
 
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
@@ -153,13 +154,21 @@ public class MyProjectCreationWizard2 extends Wizard implements IExecutableExten
 			protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException, InterruptedException {
 				fJavaPage.performFinish(monitor);
 
-				IJavaProject newElement= fJavaPage.getJavaProject();
-				BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
-				BasicNewResourceWizard.selectAndReveal(newElement.getResource(), PlatformUI.getWorkbench().getActiveWorkbenchWindow());
 			}
 		};
 		try {
 			getContainer().run(false, true, op);
+
+			IJavaProject newElement= fJavaPage.getJavaProject();
+
+			IWorkingSet[] workingSets= fMainPage.getWorkingSets();
+			if (workingSets.length > 0) {
+				PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(newElement, workingSets);
+			}
+			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
+			BasicNewResourceWizard.selectAndReveal(newElement.getResource(), PlatformUI.getWorkbench().getActiveWorkbenchWindow());
+
+
 		} catch (InvocationTargetException e) {
 			return false; // TODO: should open error dialog and log
 		} catch  (InterruptedException e) {

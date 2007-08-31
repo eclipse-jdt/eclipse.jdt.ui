@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.TreePath;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -92,6 +93,11 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 		boolean res= super.performFinish();
 		if (res) {
 			final IJavaElement newElement= getCreatedElement();
+
+			IWorkingSet[] workingSets= fFirstPage.getWorkingSets();
+			if (workingSets.length > 0) {
+				PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(newElement, workingSets);
+			}
 
 			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
 			selectAndReveal(fSecondPage.getJavaProject().getProject());				
