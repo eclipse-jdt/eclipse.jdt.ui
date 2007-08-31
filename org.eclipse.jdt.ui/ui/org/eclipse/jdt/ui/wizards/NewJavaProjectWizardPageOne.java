@@ -102,7 +102,7 @@ import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
  * Clients may instantiate or subclass.
  * </p>
  * <p>
-  * <strong>EXPERIMENTAL</strong> This class or interface has been added as part
+ * <strong>EXPERIMENTAL</strong> This class or interface has been added as part
  * of a work in progress. This API may change at any given time. Please do not
  * use this API without consulting with the JDT/UI team. See bug 160985 for discussions.
  * <p>
@@ -124,18 +124,18 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fNameField.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_NameGroup_label_text); 
 			fNameField.setDialogFieldListener(this);
 		}
-		
+
 		public Control createControl(Composite composite) {
 			Composite nameComposite= new Composite(composite, SWT.NONE);
 			nameComposite.setFont(composite.getFont());
 			nameComposite.setLayout(initGridLayout(new GridLayout(2, false), false));
-			
+
 			fNameField.doFillIntoGrid(nameComposite, 2);
 			LayoutUtil.setHorizontalGrabbing(fNameField.getTextControl(null));
-			
+
 			return nameComposite;
 		}
-		
+
 		protected void fireEvent() {
 			setChanged();
 			notifyObservers();
@@ -148,7 +148,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		public void postSetFocus() {
 			fNameField.postSetFocusOnDialogField(getShell().getDisplay());
 		}
-		
+
 		public void setName(String name) {
 			fNameField.setText(name);
 		}
@@ -171,32 +171,32 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		protected final SelectionButtonDialogField fWorkspaceRadio;
 		protected final SelectionButtonDialogField fExternalRadio;
 		protected final StringButtonDialogField fLocation;
-		
+
 		private String fPreviousExternalLocation;
-		
+
 		private static final String DIALOGSTORE_LAST_EXTERNAL_LOC= JavaUI.ID_PLUGIN + ".last.external.project"; //$NON-NLS-1$
 
 		public LocationGroup() {
 			fWorkspaceRadio= new SelectionButtonDialogField(SWT.RADIO);
 			fWorkspaceRadio.setDialogFieldListener(this);
 			fWorkspaceRadio.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_LocationGroup_workspace_desc); 
-			
+
 			fExternalRadio= new SelectionButtonDialogField(SWT.RADIO);
 			fExternalRadio.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_LocationGroup_external_desc); 
-			
+
 			fLocation= new StringButtonDialogField(this);
 			fLocation.setDialogFieldListener(this);
 			fLocation.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_LocationGroup_locationLabel_desc); 
 			fLocation.setButtonLabel(NewWizardMessages.NewJavaProjectWizardPageOne_LocationGroup_browseButton_desc); 
-			
+
 			fExternalRadio.attachDialogField(fLocation);
-			
+
 			fWorkspaceRadio.setSelection(true);
 			fExternalRadio.setSelection(false);
-			
+
 			fPreviousExternalLocation= ""; //$NON-NLS-1$
 		}
-		
+
 		public Control createControl(Composite composite) {
 			final int numColumns= 3;
 
@@ -208,10 +208,10 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fExternalRadio.doFillIntoGrid(group, numColumns);
 			fLocation.doFillIntoGrid(group, numColumns);
 			LayoutUtil.setHorizontalGrabbing(fLocation.getTextControl(null));
-			
+
 			return group;
 		}
-				
+
 		protected void fireEvent() {
 			setChanged();
 			notifyObservers();
@@ -242,7 +242,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		public boolean isWorkspaceRadioSelected() {
 			return fWorkspaceRadio.isSelected();
 		}
-		
+
 		/**
 		 * Returns <code>true</code> if the location is in the workspace
 		 * 
@@ -253,8 +253,8 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			IPath projectPath= Path.fromOSString(location);
 			return Platform.getLocation().isPrefixOf(projectPath);
 		}
-		
-		
+
+
 		public void setLocation(IPath path) {
 			fWorkspaceRadio.setSelection(path == null);
 			if (path != null) {
@@ -278,7 +278,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 					directoryName= prevLocation;
 				}
 			}
-		
+
 			if (directoryName.length() > 0) {
 				final File path = new File(directoryName);
 				if (path.exists())
@@ -316,11 +316,11 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		private final SelectionButtonDialogField fStdRadio, fSrcBinRadio;
 		private Group fGroup;
 		private Link fPreferenceLink;
-		
+
 		public LayoutGroup() {
 			fStdRadio= new SelectionButtonDialogField(SWT.RADIO);
 			fStdRadio.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_LayoutGroup_option_oneFolder); 
-			
+
 			fSrcBinRadio= new SelectionButtonDialogField(SWT.RADIO);
 			fSrcBinRadio.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_LayoutGroup_option_separateFolders); 
 
@@ -328,27 +328,27 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fSrcBinRadio.setSelection(useSrcBin);
 			fStdRadio.setSelection(!useSrcBin);
 		}
-		
+
 		public Control createContent(Composite composite) {
 			fGroup= new Group(composite, SWT.NONE);
 			fGroup.setFont(composite.getFont());
 			fGroup.setLayout(initGridLayout(new GridLayout(3, false), true));
 			fGroup.setText(NewWizardMessages.NewJavaProjectWizardPageOne_LayoutGroup_title);
-			
+
 			fStdRadio.doFillIntoGrid(fGroup, 3);
 			LayoutUtil.setHorizontalGrabbing(fStdRadio.getSelectionButton(null));
-			
+
 			fSrcBinRadio.doFillIntoGrid(fGroup, 2);
-			
+
 			fPreferenceLink= new Link(fGroup, SWT.NONE);
 			fPreferenceLink.setText(NewWizardMessages.NewJavaProjectWizardPageOne_LayoutGroup_link_description);
 			fPreferenceLink.setLayoutData(new GridData(GridData.END, GridData.END, false, false));
 			fPreferenceLink.addSelectionListener(this);
-			
+
 			updateEnableState();
 			return fGroup;
 		}
-		
+
 
 		/* (non-Javadoc)
 		 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
@@ -356,7 +356,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		public void update(Observable o, Object arg) {
 			updateEnableState();
 		}
-		
+
 		private void updateEnableState() {
 			final boolean detect= fDetectGroup.mustDetect();
 			fStdRadio.setEnabled(!detect);
@@ -368,7 +368,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				fGroup.setEnabled(!detect);
 			}
 		}
-		
+
 		/**
 		 * Return <code>true</code> if the user specified to create 'source' and 'bin' folders.
 		 * 
@@ -395,17 +395,17 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fJREGroup.handlePossibleJVMChange();
 		}
 	}
-	
+
 	private final class JREGroup implements Observer, SelectionListener, IDialogFieldListener {
 
 		private static final String LAST_SELECTED_EE_SETTINGS_KEY= JavaUI.ID_PLUGIN + ".last.selected.execution.enviroment"; //$NON-NLS-1$
 		private static final String LAST_SELECTED_JRE_SETTINGS_KEY= JavaUI.ID_PLUGIN + ".last.selected.project.jre"; //$NON-NLS-1$
 		private static final String LAST_SELECTED_JRE_KIND= JavaUI.ID_PLUGIN + ".last.selected.jre.kind"; //$NON-NLS-1$
-		
+
 		private static final int DEFAULT_JRE= 0;
 		private static final int PROJECT_JRE= 1;
 		private static final int EE_JRE= 2;
-		
+
 		private final SelectionButtonDialogField fUseDefaultJRE, fUseProjectJRE, fUseEEJRE;
 		private final ComboDialogField fJRECombo;
 		private final ComboDialogField fEECombo;
@@ -415,79 +415,79 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		private String[] fJRECompliance;
 		private IExecutionEnvironment[] fInstalledEEs;
 		private String[] fEECompliance;
-		
+
 		public JREGroup() {
 			fUseDefaultJRE= new SelectionButtonDialogField(SWT.RADIO);
 			fUseDefaultJRE.setLabelText(getDefaultJVMLabel());
 
 			fUseProjectJRE= new SelectionButtonDialogField(SWT.RADIO);
 			fUseProjectJRE.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_JREGroup_specific_compliance);
-						
+
 			fJRECombo= new ComboDialogField(SWT.READ_ONLY);
 			fillInstalledJREs(fJRECombo);
 			fJRECombo.setDialogFieldListener(this);
 
 			fUseEEJRE= new SelectionButtonDialogField(SWT.RADIO);
 			fUseEEJRE.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_JREGroup_specific_EE);
-						
+
 			fEECombo= new ComboDialogField(SWT.READ_ONLY);
 			fillExecutionEnvironments(fEECombo);
 			fEECombo.setDialogFieldListener(this);
 
 			switch (getLastSelectedJREKind()) {
-			case DEFAULT_JRE:				
-				fUseDefaultJRE.setSelection(true);
-				break;
-			case PROJECT_JRE:
-				fUseProjectJRE.setSelection(true);
-				break;
-			case EE_JRE:
-				fUseEEJRE.setSelection(true);
-				break;
+				case DEFAULT_JRE:				
+					fUseDefaultJRE.setSelection(true);
+					break;
+				case PROJECT_JRE:
+					fUseProjectJRE.setSelection(true);
+					break;
+				case EE_JRE:
+					fUseEEJRE.setSelection(true);
+					break;
 			}
-			
+
 			fJRECombo.setEnabled(fUseProjectJRE.isSelected());
 			fEECombo.setEnabled(fUseEEJRE.isSelected());
-			
+
 			fUseDefaultJRE.setDialogFieldListener(this);
 			fUseProjectJRE.setDialogFieldListener(this);
 			fUseEEJRE.setDialogFieldListener(this);
 		}
-		
+
 		public Control createControl(Composite composite) {
 			fGroup= new Group(composite, SWT.NONE);
 			fGroup.setFont(composite.getFont());
 			fGroup.setLayout(initGridLayout(new GridLayout(3, false), true));
 			fGroup.setText(NewWizardMessages.NewJavaProjectWizardPageOne_JREGroup_title);
-			
+
 			fUseDefaultJRE.doFillIntoGrid(fGroup, 2);
-			
+
 			fPreferenceLink= new Link(fGroup, SWT.NONE);
 			fPreferenceLink.setFont(fGroup.getFont());
 			fPreferenceLink.setText(NewWizardMessages.NewJavaProjectWizardPageOne_JREGroup_link_description);
 			fPreferenceLink.setLayoutData(new GridData(GridData.END, GridData.CENTER, false, false));
 			fPreferenceLink.addSelectionListener(this);
-			
+
 			fUseProjectJRE.doFillIntoGrid(fGroup, 1);
-			
+
 			Combo comboControl= fJRECombo.getComboControl(fGroup);
 			comboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false)); // make sure column 2 is grabbing (but no fill)
 			comboControl.setVisibleItemCount(30);
-			
+
 			DialogField.createEmptySpace(fGroup);
-			
+
 			fUseEEJRE.doFillIntoGrid(fGroup, 1);
-			
+
 			Combo eeComboControl= fEECombo.getComboControl(fGroup);
 			eeComboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false)); // make sure column 2 is grabbing (but no fill)
 			eeComboControl.setVisibleItemCount(30);
-			
+
 			DialogField.createEmptySpace(fGroup);
-			
+
 			updateEnableState();
 			return fGroup;
 		}
-		
+
 
 		private void fillInstalledJREs(ComboDialogField comboField) {
 			String selectedItem= getLastSelectedJRE();
@@ -498,7 +498,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 					selectedItem= comboField.getItems()[selectionIndex];
 				}
 			}
-			
+
 			fInstalledJVMs= getWorkspaceJREs();
 			Arrays.sort(fInstalledJVMs, new Comparator() {
 
@@ -514,7 +514,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 					}
 					return Policy.getComparator().compare(i0.getName(), i1.getName());
 				}
-				
+
 			});
 			selectionIndex= -1;//find new index
 			String[] jreLabels= new String[fInstalledJVMs.length];
@@ -537,7 +537,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				comboField.selectItem(selectedItem);
 			}
 		}
-		
+
 		private void fillExecutionEnvironments(ComboDialogField comboField) {
 			String selectedItem= getLastSelectedEE();
 			int selectionIndex= -1;
@@ -547,7 +547,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 					selectedItem= comboField.getItems()[selectionIndex];
 				}
 			}
-			
+
 			fInstalledEEs= JavaRuntime.getExecutionEnvironmentsManager().getExecutionEnvironments();
 			Arrays.sort(fInstalledEEs, new Comparator() {
 				public int compare(Object arg0, Object arg1) {
@@ -571,7 +571,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				comboField.selectItem(selectedItem);
 			}
 		}
-		
+
 		private IVMInstall[] getWorkspaceJREs() {
 			List standins = new ArrayList();
 			IVMInstallType[] types = JavaRuntime.getVMInstallTypes();
@@ -594,10 +594,10 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				return NewWizardMessages.NewJavaProjectWizardPageOne_UnknownDefaultJRE_name;
 			}
 		}
-		
+
 		private String getDefaultEEName() {
 			IVMInstall defaultVM= JavaRuntime.getDefaultVMInstall();
-			
+
 			IExecutionEnvironment[] environments= JavaRuntime.getExecutionEnvironmentsManager().getExecutionEnvironments();
 			if (defaultVM != null) {
 				for (int i= 0; i < environments.length; i++) {
@@ -606,20 +606,20 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 						return environments[i].getId();			
 				}
 			}
-			
+
 			String defaultCC;
 			if (defaultVM instanceof IVMInstall2) {
 				defaultCC= JavaModelUtil.getCompilerCompliance((IVMInstall2)defaultVM, JavaCore.VERSION_1_4);
 			} else {
 				defaultCC= JavaCore.VERSION_1_4;
 			}
-			
+
 			for (int i= 0; i < environments.length; i++) {
 				String eeCompliance= JavaModelUtil.getExecutionEnvironmentCompliance(environments[i]);
 				if (defaultCC.endsWith(eeCompliance))
 					return environments[i].getId();
 			}
-			
+
 			return "J2SE-1.5"; //$NON-NLS-1$
 		}
 
@@ -645,7 +645,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				fGroup.setEnabled(!detect);
 			}
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
 		 */
@@ -662,11 +662,11 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			Map data= new HashMap();
 			data.put(PropertyAndPreferencePage.DATA_NO_LINK, Boolean.TRUE);
 			PreferencesUtil.createPreferenceDialogOn(getShell(), jreID, new String[] { jreID, complianceId  }, data).open();
-			
+
 			handlePossibleJVMChange();
 			fDetectGroup.handlePossibleJVMChange();
 		}
-		
+
 		public void handlePossibleJVMChange() {
 			fUseDefaultJRE.setLabelText(getDefaultJVMLabel());
 			fillInstalledJREs(fJRECombo);
@@ -706,29 +706,29 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			int index= combo.getSelectionIndex();
 			if (index == -1)
 				return;
-			
+
 			String item= combo.getItems()[index];
 			JavaPlugin.getDefault().getDialogSettings().put(preferenceKey, item);
 		}
-		
+
 		private int getLastSelectedJREKind() {
 			IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
 			if (settings.get(LAST_SELECTED_JRE_KIND) == null)
 				return DEFAULT_JRE;
-			
+
 			return settings.getInt(LAST_SELECTED_JRE_KIND);
 		}
-		
+
 		private String getLastSelectedEE() {
 			IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
 			return settings.get(LAST_SELECTED_EE_SETTINGS_KEY);
 		}
-		
+
 		private String getLastSelectedJRE() {
 			IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
 			return settings.get(LAST_SELECTED_JRE_SETTINGS_KEY);
 		}
-			
+
 		public IVMInstall getSelectedJVM() {
 			if (fUseProjectJRE.isSelected()) {
 				int index= fJRECombo.getSelectionIndex();
@@ -736,11 +736,11 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 					return fInstalledJVMs[index];
 				}
 			} else if (fUseEEJRE.isSelected()) {
-				
+
 			}
 			return null;
 		}
-		
+
 		public IPath getJREContainerPath() {
 			if (fUseProjectJRE.isSelected()) {
 				int index= fJRECombo.getSelectionIndex();
@@ -755,7 +755,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			}
 			return null;
 		}
-		
+
 		public String getSelectedCompilerCompliance() {
 			if (fUseProjectJRE.isSelected()) {
 				int index= fJRECombo.getSelectionIndex();
@@ -771,9 +771,9 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			return null;
 		}
 	}
-	
+
 	private final class WorkingSetGroup {
-		
+
 		private WorkingSetConfigurationBlock fWorkingSetBlock;
 
 		public WorkingSetGroup() {
@@ -781,19 +781,19 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fWorkingSetBlock= new WorkingSetConfigurationBlock(workingSetIds, JavaPlugin.getDefault().getDialogSettings());
 			//fWorkingSetBlock.setDialogMessage(NewWizardMessages.NewJavaProjectWizardPageOne_WorkingSetSelection_message);
 		}
-		
+
 		public Control createControl(Composite composite) {
 			Group workingSetGroup= new Group(composite, SWT.NONE);
 			workingSetGroup.setFont(composite.getFont());
 			workingSetGroup.setText(NewWizardMessages.NewJavaProjectWizardPageOne_WorkingSets_group);
 			workingSetGroup.setLayout(new GridLayout(1, false));
-			
+
 			fWorkingSetBlock.createContent(workingSetGroup);
-			
+
 			return workingSetGroup;
 		}
-		
-		
+
+
 		public void setWokingSets(IWorkingSet[] workingSets) {
 			TreePath[] paths= new TreePath[workingSets.length];
 			for (int i= 0; i < paths.length; i++) {
@@ -815,24 +815,24 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		private Link fHintText;
 		private Label fIcon;
 		private boolean fDetect;
-		
+
 		public DetectGroup() {
 			fDetect= false;
 		}
-		
+
 		public Control createControl(Composite parent) {
-			
+
 			Composite composite= new Composite(parent, SWT.NONE);
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 			GridLayout layout= new GridLayout(2, false);
 			layout.horizontalSpacing= 10;
 			composite.setLayout(layout);
-			
+
 			fIcon= new Label(composite, SWT.LEFT);
 			fIcon.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
 			GridData gridData= new GridData(SWT.LEFT, SWT.CENTER, false, false);
 			fIcon.setLayoutData(gridData);
-			
+
 			fHintText= new Link(composite, SWT.WRAP);
 			fHintText.setFont(composite.getFont());
 			fHintText.addSelectionListener(this);
@@ -840,13 +840,13 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			gridData.widthHint= convertWidthInCharsToPixels(50);
 			gridData.heightHint= convertHeightInCharsToPixels(3);
 			fHintText.setLayoutData(gridData);
-			
+
 			handlePossibleJVMChange();
 			return composite;
 		}
-		
+
 		public void handlePossibleJVMChange() {
-			
+
 			if (JavaRuntime.getDefaultVMInstall() == null) {
 				fHintText.setText(NewWizardMessages.NewJavaProjectWizardPageOne_NoJREFound_link);
 				fHintText.setVisible(true);
@@ -854,7 +854,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				fIcon.setVisible(true);
 				return;
 			}
-			
+
 			String selectedCompliance= fJREGroup.getSelectedCompilerCompliance();
 			if (selectedCompliance != null) {
 				String defaultCompliance= JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE);
@@ -884,7 +884,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 					selectedCompliance= "5.0"; //$NON-NLS-1$
 				else if (selectedCompliance.equals(JavaCore.VERSION_1_6))
 					selectedCompliance= "6.0"; //$NON-NLS-1$
-				
+
 				fHintText.setText(Messages.format(NewWizardMessages.NewJavaProjectWizardPageOne_DetectGroup_jre_message, new String[] {selectedCompliance, jvmCompliance}));
 				fHintText.setVisible(true);
 				fIcon.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
@@ -894,7 +894,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				fIcon.setVisible(false);
 			}
 		}
-		
+
 		private boolean computeDetectState() {
 			if (fLocationGroup.isWorkspaceRadioSelected()) {
 				String name= fNameGroup.getName();
@@ -909,16 +909,16 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				return directory.isDirectory();
 			}
 		}
-		
+
 		public void update(Observable o, Object arg) {
 			if (o instanceof LocationGroup) {
 				boolean oldDetectState= fDetect;
 				fDetect= computeDetectState();
-				
+
 				if (oldDetectState != fDetect) {
 					setChanged();
 					notifyObservers();
-					
+
 					if (fDetect) {
 						fHintText.setVisible(true);
 						fHintText.setText(NewWizardMessages.NewJavaProjectWizardPageOne_DetectGroup_message);
@@ -952,7 +952,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			data.put(PropertyAndPreferencePage.DATA_NO_LINK, Boolean.TRUE);
 			String id= "JRE".equals(e.text) ? jreID : complianceId; //$NON-NLS-1$
 			PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { jreID, complianceId  }, data).open();
-			
+
 			fJREGroup.handlePossibleJVMChange();
 			handlePossibleJVMChange();
 		}
@@ -992,7 +992,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				setPageComplete(false);
 				return;
 			}
-			
+
 			IPath projectLocation= ResourcesPlugin.getWorkspace().getRoot().getLocation().append(name);
 			if (projectLocation.toFile().exists()) {
 				try {
@@ -1002,14 +1002,14 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				} catch (IOException e) {
 					JavaPlugin.log(e);
 				}
-				
+
 				String existingName= projectLocation.lastSegment();
 				if (!existingName.equals(fNameGroup.getName())) {
 					setErrorMessage(Messages.format(NewWizardMessages.NewJavaProjectWizardPageOne_Message_invalidProjectNameForWorkspaceRoot, existingName));
 					setPageComplete(false);
 					return;
 				}
-				
+
 			}
 
 			final String location= fLocationGroup.getLocation().toOSString();
@@ -1030,10 +1030,10 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			}
 
 			IPath projectPath= Path.fromOSString(location);
-			
+
 			if (fLocationGroup.isWorkspaceRadioSelected())		
 				projectPath= projectPath.append(fNameGroup.getName());
-			
+
 			if (projectPath.toFile().exists()) {//create from existing source			
 				if (Platform.getLocation().isPrefixOf(projectPath)) { //create from existing source in workspace
 					if (!Platform.getLocation().equals(projectPath.removeLastSegments(1))) {
@@ -1041,7 +1041,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 						setPageComplete(false);
 						return;
 					}
-	
+
 					if (!projectPath.toFile().exists()) {
 						setErrorMessage(NewWizardMessages.NewJavaProjectWizardPageOne_Message_notExisingProjectOnWorkspaceRoot);
 						setPageComplete(false);
@@ -1054,7 +1054,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 					setPageComplete(false);
 					return;
 				}
-				
+
 				// If we do not place the contents in the workspace validate the
 				// location.
 				final IStatus locationStatus= workspace.validateProjectLocation(handle, projectPath);
@@ -1064,7 +1064,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 					return;
 				}
 			}
-			
+
 			setPageComplete(true);
 
 			setErrorMessage(null);
@@ -1077,11 +1077,11 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				if (file == null)
 					return false;
 			}
-			
+
 			return file.canWrite();
 		}
 	}
-	
+
 	private static final String PAGE_NAME= "NewJavaProjectWizardPageOne"; //$NON-NLS-1$
 
 	private final NameGroup fNameGroup;
@@ -1091,7 +1091,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	private final DetectGroup fDetectGroup;
 	private final Validator fValidator;
 	private final WorkingSetGroup fWorkingSetGroup;
-	
+
 	/**
 	 * Creates a new {@link NewJavaProjectWizardPageOne}.
 	 */
@@ -1100,14 +1100,14 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		setPageComplete(false);
 		setTitle(NewWizardMessages.NewJavaProjectWizardPageOne_page_title); 
 		setDescription(NewWizardMessages.NewJavaProjectWizardPageOne_page_description); 
-		
+
 		fNameGroup= new NameGroup();
 		fLocationGroup= new LocationGroup();
 		fJREGroup= new JREGroup();
 		fLayoutGroup= new LayoutGroup();
 		fWorkingSetGroup= new WorkingSetGroup();
 		fDetectGroup= new DetectGroup();
-		
+
 		// establish connections
 		fNameGroup.addObserver(fLocationGroup);
 		fDetectGroup.addObserver(fLayoutGroup);
@@ -1116,24 +1116,24 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 		// initialize all elements
 		fNameGroup.notifyObservers();
-		
+
 		// create and connect validator
 		fValidator= new Validator();
 		fNameGroup.addObserver(fValidator);
 		fLocationGroup.addObserver(fValidator);
-		
+
 		// initialize defaults
 		setProjectName(""); //$NON-NLS-1$
 		setProjectLocationURI(null);
 		setWorkingSets(new IWorkingSet[0]);
-		
+
 		initializeDefaultVM();
 	}
-	
+
 	private void initializeDefaultVM() {
 		JavaRuntime.getDefaultVMInstall();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
@@ -1148,28 +1148,34 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		// create UI elements
 		Control nameControl= createNameControl(composite);
 		nameControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		Control locationControl= createLocationControl(composite);
 		locationControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		Control jreControl= createJRESelectionControl(composite);
 		jreControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		Control layoutControl= createProjectLayoutControl(composite);
 		layoutControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		Control workingSetControl= createWorkingSetControl(composite);
 		workingSetControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		Control infoControl= createInfoControl(composite);
 		infoControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		setControl(composite);
-		Dialog.applyDialogFont(composite);
+	}
 
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
-	}	
-	
+	protected void setControl(Control newControl) {
+		Dialog.applyDialogFont(newControl);
+
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(newControl, IJavaHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
+
+		super.setControl(newControl);
+	}
+
+
 	/**
 	 * Creates the controls for the name field. 
 	 *  
@@ -1179,7 +1185,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	protected Control createNameControl(Composite composite) {
 		return fNameGroup.createControl(composite);
 	}
-	
+
 	/**
 	 * Creates the controls for the location field. 
 	 *  
@@ -1189,7 +1195,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	protected Control createLocationControl(Composite composite) {
 		return fLocationGroup.createControl(composite);
 	}
-	
+
 	/**
 	 * Creates the controls for the JRE selection
 	 *  
@@ -1199,7 +1205,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	protected Control createJRESelectionControl(Composite composite) {
 		return fJREGroup.createControl(composite);
 	}
-	
+
 	/**
 	 * Creates the controls for the project layout selection.
 	 *  
@@ -1209,7 +1215,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	protected Control createProjectLayoutControl(Composite composite) {
 		return fLayoutGroup.createContent(composite);
 	}
-	
+
 	/**
 	 * Creates the controls for the working set selection. 
 	 *  
@@ -1219,7 +1225,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	protected Control createWorkingSetControl(Composite composite) {
 		return fWorkingSetGroup.createControl(composite);
 	}
-	
+
 	/**
 	 * Creates the controls for the info section. 
 	 *  
@@ -1229,7 +1235,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	protected Control createInfoControl(Composite composite) {
 		return fDetectGroup.createControl(composite);
 	}
-	
+
 	/**
 	 * Gets a project name for the new project.
 	 * 
@@ -1238,7 +1244,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	public String getProjectName() {
 		return fNameGroup.getName();
 	}
-	
+
 	/**
 	 * Sets the name of the new project
 	 * 
@@ -1247,10 +1253,10 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	public void setProjectName(String name) {
 		if (name == null)
 			throw new IllegalArgumentException();
-		
+
 		fNameGroup.setName(name);
 	}
-	
+
 	/**
 	 * Returns the current project location path as entered by the user, or <code>null</code>
 	 * if the project should be created in the workspace. 
@@ -1263,7 +1269,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		}
 		return URIUtil.toURI(fLocationGroup.getLocation());
 	}
-	
+
 	/**
 	 * Sets the project location of the new project or <code>null</code> if the project
 	 * should be created in the workspace
@@ -1274,7 +1280,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		IPath path= uri != null ? URIUtil.toPath(uri) : null;
 		fLocationGroup.setLocation(path);
 	}
-		
+
 	/**
 	 * Returns the compiler compliance to be used for the project, or <code>null</code> to use the default
 	 * compiler compliance.
@@ -1284,7 +1290,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	public String getCompilerCompliance() {
 		return fJREGroup.getSelectedCompilerCompliance();
 	}
-	
+
 	/**
 	 * Returns the default class path entries to be added on new projects. By default this is the JRE container as
 	 * selected by the user.
@@ -1305,7 +1311,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		}
 		return defaultJRELibrary;
 	}
-	
+
 	/**
 	 * Returns the source class path entries to be added on new projects.
 	 * The underlying resources may not exist. All entries that are returned must be of kind
@@ -1315,7 +1321,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	 */
 	public IClasspathEntry[] getSourceClasspathEntries() {
 		IPath sourceFolderPath= new Path(getProjectName()).makeAbsolute();
-		
+
 		if (fLayoutGroup.isSrcBin()) {
 			IPath srcPath= new Path(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_SRCNAME));
 			if (srcPath.segmentCount() > 0) {
@@ -1324,7 +1330,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		}
 		return new IClasspathEntry[] {  JavaCore.newSourceEntry(sourceFolderPath) };
 	}
-	
+
 	/**
 	 * Returns the source class path entries to be added on new projects.
 	 * The underlying resource may not exist.
@@ -1341,7 +1347,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		}
 		return outputLocationPath;
 	}
-	
+
 	/**
 	 * Returns the working sets to which the new project should be added.
 	 * 
@@ -1350,7 +1356,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	public IWorkingSet[] getWorkingSets() {
 		return fWorkingSetGroup.getSelectedWorkingSets();
 	}
-	
+
 	/**
 	 * Sets the working sets to which the new project should be added.
 	 * 
@@ -1362,7 +1368,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		}
 		fWorkingSetGroup.setWokingSets(workingSets);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.DialogPage#setVisible(boolean)
 	 */
@@ -1372,7 +1378,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fNameGroup.postSetFocus();
 		}
 	}
-		
+
 	private GridLayout initGridLayout(GridLayout layout, boolean margins) {
 		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
 		layout.verticalSpacing= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
