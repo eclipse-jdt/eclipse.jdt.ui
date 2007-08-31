@@ -27,8 +27,8 @@
 	
 >Label ${label:newName(org.eclipse.swt.widgets.Label)}= new Label(${parent:var(org.eclipse.swt.widgets.Composite)}, ${style:link(SWT.NONE, SWT.WRAP, 'SWT.SEPARATOR | SWT.HORIZONTAL', 'SWT.SEPARATOR | SWT.VERTICAL')});
 ${label}.setLayoutData(new GridData(SWT.${horizontal:link(LEAD, CENTER, TRAIL, FILL)}, SWT.${vertical:link(TOP, CENTER, BOTTOM, FILL)}, ${hex:link(false, true)}, ${vex:link(false, true)}));
-${label}.setText(${word_selection});
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
+${label}.setText(${word_selection}${});
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
 
 <template 
 	name="Image" 
@@ -38,8 +38,8 @@ ${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</templ
 	
 >Label ${image:newName(org.eclipse.swt.widgets.Label)}= new Label(${parent:var(org.eclipse.swt.widgets.Composite)}, ${style:link(SWT.NONE, SWT.BORDER)});
 ${image}.setLayoutData(new GridData(SWT.${horizontal:link(LEAD, CENTER, TRAIL, FILL)}, SWT.${vertical:link(TOP, CENTER, BOTTOM, FILL)}, ${hex:link(false, true)}, ${vex:link(false, true)}));
-${image}.setImage(${word_selection});
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
+${image}.setImage(${word_selection}${});
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
 
 <template 
 	name="Button" 
@@ -49,8 +49,8 @@ ${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</templ
 	
 >Button ${button:newName(org.eclipse.swt.widgets.Button)}= new Button(${parent:var(org.eclipse.swt.widgets.Composite)}, ${style:link(SWT.PUSH, SWT.TOGGLE, SWT.RADIO, SWT.CHECK, SWT.FLAT)});
 ${button}.setLayoutData(new GridData(SWT.${horizontal:link(LEAD, CENTER, TRAIL, FILL)}, SWT.${vertical:link(TOP, CENTER, BOTTOM, FILL)}, ${hex:link(false, true)}, ${vex:link(false, true)}));
-${button}.setText(${word_selection});
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
+${button}.setText(${word_selection}${});
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
 
 <template 
 	name="Link" 
@@ -60,8 +60,8 @@ ${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</templ
 	
 >Link ${link:newName(org.eclipse.swt.widgets.Link)}= new Link(${parent:var(org.eclipse.swt.widgets.Composite)}, SWT.NONE);
 ${link}.setLayoutData(new GridData(SWT.${horizontal:link(LEAD, CENTER, TRAIL, FILL)}, SWT.${vertical:link(TOP, CENTER, BOTTOM, FILL)}, ${hex:link(false, true)}, ${vex:link(false, true)}));
-${link}.setText(${word_selection});
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
+${link}.setText(${word_selection}${});
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
 
 <template 
 	name="Combo" 
@@ -71,8 +71,8 @@ ${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</templ
 	
 >Combo ${combo:newName(org.eclipse.swt.widgets.Combo)}= new Combo(${parent:var(org.eclipse.swt.widgets.Composite)}, ${style:link(SWT.DROP_DOWN, 'SWT.DROP_DOWN | SWT.READ_ONLY')});
 ${combo}.setLayoutData(new GridData(SWT.${horizontal:link(FILL, LEAD, CENTER, TRAIL)}, SWT.${vertical:link(CENTER, FILL, TOP, BOTTOM)}, ${hex:link(true, false)}, ${vex:link(false, true)}));
-${combo}.setItems(${word_selection});
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
+${combo}.setItems(${word_selection}${});
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
 
 <template 
 	name="Scale" 
@@ -84,7 +84,7 @@ ${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</templ
 ${scale}.setLayoutData(new GridData(SWT.${horizontal:link(LEAD, FILL, CENTER, TRAIL)}, SWT.${vertical:link(TOP, FILL, CENTER, BOTTOM)}, ${hex:link(false, true)}, ${vex:link(false, true)}));
 ${scale}.setMaximum(${max:link(100)});
 ${scale}.setIncrement(${inc:link(5)});
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
 
 <template 
 	name="Spinner" 
@@ -96,7 +96,7 @@ ${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</templ
 ${spinner}.setLayoutData(new GridData(SWT.${horizontal:link(LEAD, CENTER, TRAIL, FILL)}, SWT.${vertical:link(TOP, CENTER, BOTTOM, FILL)}, ${hex:link(false, true)}, ${vex:link(false, true)}));
 ${spinner}.setMaximum(${max:link(10)});
 ${spinner}.setIncrement(${inc:link(1)});
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
 
 
 <!-- ************************************************** Advanced Widgets ************************************************** -->
@@ -110,8 +110,8 @@ ${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</templ
 	
 >Browser ${browser:newName(org.eclipse.swt.browser.Browser)}= new Browser(${parent:var(org.eclipse.swt.widgets.Composite)}, ${style:link(SWT.NONE, SWT.MOZILLA)});
 ${browser}.setLayoutData(new GridData(SWT.${horizontal:link(FILL, LEAD, CENTER, TRAIL)}, SWT.${vertical:link(FILL, TOP, CENTER, BOTTOM)}, ${hex:link(true, false)}, ${vex:link(true, false)}));
-${browser}.setUrl(${word_selection});
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
+${browser}.setUrl(${word_selection}${});
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
 
 <template 
 	name="DateTime" 
@@ -121,7 +121,7 @@ ${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</templ
 	
 >DateTime ${dateTime:newName(org.eclipse.swt.widgets.DateTime)}= new DateTime(${parent:var(org.eclipse.swt.widgets.Composite)}, ${style:link('SWT.CALENDAR | SWT.SHORT', 'SWT.CALENDAR | SWT.MEDIUM', 'SWT.CALENDAR | SWT.LONG', 'SWT.TIME | SWT.SHORT', 'SWT.TIME | SWT.MEDIUM', 'SWT.TIME | SWT.LONG', 'SWT.DATE | SWT.SHORT', 'SWT.DATE | SWT.MEDIUM', 'SWT.DATE | SWT.LONG')});
 ${dateTime}.setLayoutData(new GridData(SWT.${horizontal:link(FILL, LEAD, CENTER, TRAIL)}, SWT.${vertical:link(FILL, TOP, CENTER, BOTTOM)}, ${hex:link(true, false)}, ${vex:link(true, false)}));
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
 
 
 <!-- ************************************************** Containers ************************************************** -->
@@ -136,7 +136,7 @@ ${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</templ
 >Composite ${composite:newName(org.eclipse.swt.widgets.Composite)}= new Composite(${parent:var(org.eclipse.swt.widgets.Composite)}, ${style:link(SWT.NONE, SWT.BORDER)});
 ${composite}.setLayoutData(new GridData(SWT.${horizontal:link(FILL, LEAD, CENTER, TRAIL)}, SWT.${vertical:link(FILL, TOP, CENTER, BOTTOM)}, ${hex:link(true, false)}, ${vex:link(true, false)}));
 ${composite}.setLayout(new GridLayout(${numberColumns:link(1, 2, 3, 4, 5)}, ${equalColumns:link(false, true)}));
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData, org.eclipse.swt.layout.GridLayout)}${cursor}</template>
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData, org.eclipse.swt.layout.GridLayout)}${cursor}</template>
 
 <template 
 	name="ScrolledComposite" 
@@ -148,7 +148,7 @@ ${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData, org.eclipse.swt.
 ${scrolled}.setLayoutData(new GridData(SWT.${horizontal:link(FILL, LEAD, CENTER, TRAIL)}, SWT.${vertical:link(FILL, TOP, CENTER, BOTTOM)}, ${hex:link(true, false)}, ${vex:link(true, false)}));
 ${scrolled}.setExpandVertical(${exV:link(false, true)});
 ${scrolled}.setExpandHorizontal(${exH:link(false, true)});
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}
 
 ${scrolled}.setContent(${content});
 Point ${contentSize:newName(org.eclipse.swt.graphics.Point)} = ${content}.computeSize(SWT.DEFAULT, SWT.DEFAULT);
@@ -164,8 +164,8 @@ ${scrolled}.setMinSize(${contentSize});</template>
 >Group ${group:newName(org.eclipse.swt.widgets.Group)}= new Group(${parent:var(org.eclipse.swt.widgets.Composite)}, ${style:link(SWT.NONE, SWT.SHADOW_ETCHED_IN, SWT.SHADOW_ETCHED_OUT, SWT.SHADOW_IN, SWT.SHADOW_OUT, SWT.SHADOW_NONE)});
 ${group}.setLayoutData(new GridData(SWT.${horizontal:link(FILL, LEAD, CENTER, TRAIL)}, SWT.${vertical:link(TOP, FILL, CENTER, BOTTOM)}, ${hex:link(true, false)}, ${vex:link(false, true)}));
 ${group}.setLayout(new GridLayout(${numberColumns:link(1, 2, 3, 4, 5)}, ${equalColumns:link(false, true)}));
-${group}.setText(${word_selection});
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData, org.eclipse.swt.layout.GridLayout)}${cursor}</template>
+${group}.setText(${word_selection}${});
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData, org.eclipse.swt.layout.GridLayout)}${cursor}</template>
 
 <template 
 	name="SashForm" 
@@ -175,7 +175,7 @@ ${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData, org.eclipse.swt.
 	
 >SashForm ${sash:newName(org.eclipse.swt.custom.SashForm)}= new SashForm(${parent:var(org.eclipse.swt.widgets.Composite)}, ${style:link(SWT.HORIZONTAL, SWT.VERTICAL)});
 ${sash}.setLayoutData(new GridData(SWT.${horizontal:link(FILL, LEAD, CENTER, TRAIL)}, SWT.${vertical:link(FILL, TOP, CENTER, BOTTOM)}, ${hex:link(true, false)}, ${vex:link(true, false)}));
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}
 
 ${sash}.setWeights(new int[] {1, 1});</template>
 
@@ -191,7 +191,7 @@ ${sash}.setWeights(new int[] {1, 1});</template>
 	
 >ExpandBar ${bar:newName(org.eclipse.swt.widgets.ExpandBar)}= new ExpandBar(${parent:var(org.eclipse.swt.widgets.Composite)}, ${style:link(SWT.V_SCROLL, SWT.NONE)});
 ${bar}.setLayoutData(new GridData(SWT.${horizontal:link(FILL, LEAD, CENTER, TRAIL)}, SWT.${vertical:link(FILL, TOP, CENTER, BOTTOM)}, ${hex:link(true, false)}, ${vex:link(true, false)}));
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
 
 <template 
 	name="ExpandItem" 
@@ -200,8 +200,8 @@ ${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</templ
 	context="swt" enabled="true"
 	
 >ExpandItem ${item:newName(org.eclipse.swt.widgets.ExpandItem)}= new ExpandItem(${parent:var(org.eclipse.swt.widgets.ExpandBar)}, SWT.NONE);
-${item}.setText(${word_selection});
-${:import(org.eclipse.swt.SWT)}${cursor}
+${item}.setText(${word_selection}${});
+${imp:import(org.eclipse.swt.SWT)}${cursor}
 
 ${item}.setControl(${control});
 ${item}.setHeight(${control}.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);</template>
@@ -214,7 +214,7 @@ ${item}.setHeight(${control}.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);</template
 	
 >TabFolder ${folder:newName(org.eclipse.swt.widgets.TabFolder)}= new TabFolder(${parent:var(org.eclipse.swt.widgets.Composite)}, ${style:link(SWT.TOP, SWT.BOTTOM)});
 ${folder}.setLayoutData(new GridData(SWT.${horizontal:link(FILL, LEAD, CENTER, TRAIL)}, SWT.${vertical:link(FILL, TOP, CENTER, BOTTOM)}, ${hex:link(true, false)}, ${vex:link(true, false)}));
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
 
 <template 
 	name="TabItem" 
@@ -223,8 +223,8 @@ ${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</templ
 	context="swt" enabled="true"
 	
 >TabItem ${item:newName(org.eclipse.swt.widgets.TabItem)}= new TabItem(${parent:var(org.eclipse.swt.widgets.TabFolder)}, SWT.NONE);
-${item}.setText(${word_selection});
-${:import(org.eclipse.swt.SWT)}${cursor}
+${item}.setText(${word_selection}${});
+${imp:import(org.eclipse.swt.SWT)}${cursor}
 
 ${item}.setControl(${control});</template>
 
@@ -240,8 +240,8 @@ ${item}.setControl(${control});</template>
 	
 >Text ${text:newName(org.eclipse.swt.widgets.Text)}= new Text(${parent:var(org.eclipse.swt.widgets.Composite)}, ${style:link('SWT.SINGLE | SWT.LEAD | SWT.BORDER', 'SWT.SINGLE | SWT.LEAD | SWT.READONLY | SWT.BORDER', 'SWT.SINGLE | SWT.LEAD | SWT.PASSWORD | SWT.BORDER', 'SWT.MULTI | SWT.WRAP | SWT.V_SCROLL | SWT.BORDER', 'SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER')});
 ${text}.setLayoutData(new GridData(SWT.${horizontal:link(FILL, LEAD, CENTER, TRAIL)}, SWT.${vertical:link(TOP, CENTER, BOTTOM, FILL)}, ${hex:link(true, false)}, ${vex:link(false, true)}));
-${text}.setText(${word_selection});
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
+${text}.setText(${word_selection}${});
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
 
 <template 
 	name="StyledText" 
@@ -251,8 +251,8 @@ ${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</templ
 	
 >StyledText ${text:newName(org.eclipse.swt.custom.StyledText)}= new StyledText(${parent:var(org.eclipse.swt.widgets.Composite)}, ${style:link('SWT.V_SCROLL | SWT.H_SCROLL', 'SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY', 'SWT.WRAP | SWT.V_SCROLL', SWT.NONE, SWT.BORDER, SWT.FULL_SELECTION)});
 ${text}.setLayoutData(new GridData(SWT.${horizontal:link(FILL, LEAD, CENTER, TRAIL)}, SWT.${vertical:link(FILL, TOP, CENTER, BOTTOM)}, ${hex:link(true, false)}, ${vex:link(true, false)}));
-${text}.setText(${word_selection});
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
+${text}.setText(${word_selection}${});
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
 
 <template 
 	name="StyleRange" 
@@ -267,7 +267,7 @@ ${range}.foreground= ${fColor:link(null, 'Display.getDefault().getSystemColor(SW
 ${range}.background= ${bColor:link(null, 'Display.getDefault().getSystemColor(SWT.COLOR_BLACK)', 'Display.getDefault().getSystemColor(SWT.COLOR_WHITE)', 'Display.getDefault().getSystemColor(SWT.COLOR_RED)', 'Display.getDefault().getSystemColor(SWT.COLOR_BLUE)', 'Display.getDefault().getSystemColor(SWT.COLOR_GREEN)')};
 ${range}.fontStyle= ${fStyle:link(SWT.NORMAL, SWT.ITALIC, SWT.BOLD)};
 ${text:var(org.eclipse.swt.custom.StyledText)}.setStyleRange(${range});
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.widgets.Display)}${cursor}</template>
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.widgets.Display)}${cursor}</template>
 
 
 <!-- ************************************************** Structured Viewers ************************************************** -->
@@ -281,8 +281,8 @@ ${:import(org.eclipse.swt.SWT, org.eclipse.swt.widgets.Display)}${cursor}</templ
 	
 >List ${list:newName(org.eclipse.swt.widgets.List)}= new List(${parent:var(org.eclipse.swt.widgets.Composite)}, ${style:link('SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL', 'SWT.MULTI | SWT.V_SCROLL', SWT.MULTI, 'SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL', 'SWT.SINGLE | SWT.V_SCROLL', SWT.SINGLE)});
 ${list}.setLayoutData(new GridData(SWT.${horizontal:link(FILL, LEAD, CENTER, TRAIL)}, SWT.${vertical:link(FILL, TOP, CENTER, BOTTOM)}, ${hex:link(true, false)}, ${vex:link(true, false)}));
-${list}.setItems(${word_selection});
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
+${list}.setItems(${word_selection}${});
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</template>
 
 <template 
 	name="Table" 
@@ -294,7 +294,7 @@ ${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}</templ
 ${table}.setLayoutData(new GridData(SWT.${horizontal:link(FILL, LEAD, CENTER, TRAIL)}, SWT.${vertical:link(FILL, TOP, CENTER, BOTTOM)}, ${hex:link(true, false)}, ${vex:link(true, false)}));
 ${table}.setLinesVisible(${line:link(true, false)});
 ${table}.setHeaderVisible(${header:link(true, false)});
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}
 
 for (int ${index} = 0; ${index} &lt; ${table}.getColumnCount(); ${index}++) {
 	${table}.getColumn(${index}).pack();
@@ -307,8 +307,8 @@ for (int ${index} = 0; ${index} &lt; ${table}.getColumnCount(); ${index}++) {
 	context="swt" enabled="true"
 	
 >TableColumn ${column:newName(org.eclipse.swt.widgets.TableColumn)}= new TableColumn(${parent:var(org.eclipse.swt.widgets.Table)}, ${style:link(SWT.LEAD, SWT.CENTER, SWT.TRAIL)});
-${column}.setText(${word_selection});
-${:import(org.eclipse.swt.SWT)}${cursor}</template>
+${column}.setText(${word_selection}${});
+${imp:import(org.eclipse.swt.SWT)}${cursor}</template>
 
 <template 
 	name="TableItem" 
@@ -317,8 +317,8 @@ ${:import(org.eclipse.swt.SWT)}${cursor}</template>
 	context="swt" enabled="true"
 	
 >TableItem ${item:newName(org.eclipse.swt.widgets.TableItem)}= new TableItem(${parent:var(org.eclipse.swt.widgets.Table)}, SWT.NONE);
-${item}.setText(${count:link(0, 1, 2, 3, 4, 5)}, ${word_selection});
-${:import(org.eclipse.swt.SWT)}${cursor}</template>
+${item}.setText(${count:link(0, 1, 2, 3, 4, 5)}, ${word_selection}${});
+${imp:import(org.eclipse.swt.SWT)}${cursor}</template>
 
 <template 
 	name="Tree" 
@@ -330,7 +330,7 @@ ${:import(org.eclipse.swt.SWT)}${cursor}</template>
 ${tree}.setLayoutData(new GridData(SWT.${horizontal:link(FILL, LEAD, CENTER, TRAIL)}, SWT.${vertical:link(FILL, TOP, CENTER, BOTTOM)}, ${hex:link(true, false)}, ${vex:link(true, false)}));
 ${tree}.setLinesVisible(${line:link(true, false)});
 ${tree}.setHeaderVisible(${header:link(true, false)});
-${:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}
+${imp:import(org.eclipse.swt.SWT, org.eclipse.swt.layout.GridData)}${cursor}
 
 for (int ${index} = 0; ${index} &lt; ${tree}.getColumnCount(); ${index}++) {
 	${tree}.getColumn(${index}).pack();
@@ -343,8 +343,8 @@ for (int ${index} = 0; ${index} &lt; ${tree}.getColumnCount(); ${index}++) {
 	context="swt" enabled="true"
 	
 >TreeColumn ${column:newName(org.eclipse.swt.widgets.TreeColumn)}= new TreeColumn(${parent:var(org.eclipse.swt.widgets.Tree)}, ${style:link(SWT.LEAD, SWT.CENTER, SWT.TRAIL)});
-${column}.setText(${word_selection});
-${:import(org.eclipse.swt.SWT)}${cursor}</template>
+${column}.setText(${word_selection}${});
+${imp:import(org.eclipse.swt.SWT)}${cursor}</template>
 
 <template 
 	name="TreeItem" 
@@ -353,7 +353,7 @@ ${:import(org.eclipse.swt.SWT)}${cursor}</template>
 	context="swt" enabled="true"
 	
 >TreeItem ${item:newName(org.eclipse.swt.widgets.TreeItem)}= new TreeItem(${parent:var(org.eclipse.swt.widgets.Tree, org.eclipse.swt.widgets.TreeItem)}, SWT.NONE);
-${item}.setText(${count:link(0, 1, 2, 3, 4, 5)}, ${word_selection});
-${:import(org.eclipse.swt.SWT)}${cursor}</template>
+${item}.setText(${count:link(0, 1, 2, 3, 4, 5)}, ${word_selection}${});
+${imp:import(org.eclipse.swt.SWT)}${cursor}</template>
 
 </templates>
