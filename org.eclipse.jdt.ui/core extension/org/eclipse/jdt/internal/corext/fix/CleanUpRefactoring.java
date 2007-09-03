@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -57,6 +56,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.dom.ASTBatchParser;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -271,71 +271,16 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		}
 	}
 	
-	private static abstract class CleanUpParser {
-		
-		private static final int MAX_AT_ONCE;
-		static {
-			long maxMemory= Runtime.getRuntime().maxMemory();
-			int ratio= (int)Math.round((double)maxMemory / (64 * 0x100000));
-			switch (ratio) {
-			case 0:
-				MAX_AT_ONCE= 25;
-				break;
-			case 1:
-				MAX_AT_ONCE= 100;
-				break;
-			case 2:
-				MAX_AT_ONCE= 200;
-				break;
-			case 3:
-				MAX_AT_ONCE= 300;
-				break;
-			case 4:
-				MAX_AT_ONCE= 400;
-				break;
-			default:
-				MAX_AT_ONCE= 500;
-				break;
-			}
-		}
-		
-		public void createASTs(ICompilationUnit[] units, String[] bindingKeys, CleanUpASTRequestor requestor, IProgressMonitor monitor) {
-			if (monitor == null)
-				monitor= new NullProgressMonitor();
-			
-			try {
-				monitor.beginTask("", units.length); //$NON-NLS-1$
-				
-				List list= Arrays.asList(units);
-				int end= 0;
-				int cursor= 0;
-				while (cursor < units.length) {
-					end= Math.min(end + MAX_AT_ONCE, units.length);
-					List toParse= list.subList(cursor, end);
-					
-					createParser().createASTs((ICompilationUnit[])toParse.toArray(new ICompilationUnit[toParse.size()]), bindingKeys, requestor, new SubProgressMonitor(monitor, toParse.size()));
-					cursor= end;
-				}
-			} finally {
-				monitor.done();
-			}
-		}
-		
-		protected abstract ASTParser createParser();
-	}
-	
 	private class CleanUpFixpointIterator {
 		
 		private List/*<ParseListElement>*/fParseList;
 		private final Hashtable/*<ICompilationUnit, List<CleanUpChange>>*/fSolutions;
 		private final Hashtable/*<ICompilationUnit (primary), ICompilationUnit (working copy)>*/fWorkingCopies;
-		private final IJavaProject fProject;
 		private final Map fCleanUpOptions;
 		private final int fSize;
 		private int fIndex;
 		
-		public CleanUpFixpointIterator(IJavaProject project, ICompilationUnit[] units, ICleanUp[] cleanUps) {
-			fProject= project;
+		public CleanUpFixpointIterator(ICompilationUnit[] units, ICleanUp[] cleanUps) {
 			fSolutions= new Hashtable(units.length);
 			fWorkingCopies= new Hashtable();
 			
@@ -388,23 +333,25 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				
 				CleanUpRefactoringProgressMonitor cuMonitor= new CleanUpRefactoringProgressMonitor(monitor, parseList.size() + sourceList.size(), fSize, fIndex);
 				CleanUpASTRequestor requestor= new CleanUpASTRequestor(fParseList, fSolutions, cuMonitor);
-				CleanUpParser parser= new CleanUpParser() {
-					protected ASTParser createParser() {
-						ASTParser result= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
-						result.setResolveBindings(true);
-						result.setProject(fProject);
-						
-						Map options= RefactoringASTParser.getCompilerOptions(fProject);
-						options.putAll(fCleanUpOptions);
-						result.setCompilerOptions(options);
-						return result;
+				if (parseList.size() > 0) {
+					ASTBatchParser parser= new ASTBatchParser() {
+						protected ASTParser createParser(IJavaProject project) {
+							ASTParser result= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+							result.setResolveBindings(true);
+							result.setProject(project);
+
+							Map options= RefactoringASTParser.getCompilerOptions(project);
+							options.putAll(fCleanUpOptions);
+							result.setCompilerOptions(options);
+							return result;
+						}
+					};
+					try {
+						ICompilationUnit[] units= (ICompilationUnit[])parseList.toArray(new ICompilationUnit[parseList.size()]);
+						parser.createASTs(units, new String[0], requestor, cuMonitor);
+					} catch (FixCalculationException e) {
+						throw e.getException();
 					}
-				};
-				try {
-					ICompilationUnit[] units= (ICompilationUnit[])parseList.toArray(new ICompilationUnit[parseList.size()]);
-					parser.createASTs(units, new String[0], requestor, cuMonitor);
-				} catch (FixCalculationException e) {
-					throw e.getException();
 				}
 				
 				for (Iterator iterator= sourceList.iterator(); iterator.hasNext();) {
@@ -697,7 +644,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 	}
 	
 	private Change[] cleanUpProject(IJavaProject project, ICompilationUnit[] compilationUnits, ICleanUp[] cleanUps, IProgressMonitor monitor) throws CoreException {
-		CleanUpFixpointIterator iter= new CleanUpFixpointIterator(project, compilationUnits, cleanUps);
+		CleanUpFixpointIterator iter= new CleanUpFixpointIterator(compilationUnits, cleanUps);
 		
 		SubProgressMonitor subMonitor= new SubProgressMonitor(monitor, 2 * compilationUnits.length * cleanUps.length);
 		subMonitor.beginTask("", compilationUnits.length); //$NON-NLS-1$
