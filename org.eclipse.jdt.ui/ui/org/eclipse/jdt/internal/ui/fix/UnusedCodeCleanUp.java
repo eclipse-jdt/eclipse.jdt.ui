@@ -18,7 +18,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -47,7 +46,11 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean requireAST(ICompilationUnit unit) throws CoreException {
+	public CleanUpRequirements getRequirements() {
+		return new CleanUpRequirements(requireAST(), false, getRequiredOptions());
+	}
+	
+	private boolean requireAST() {
 		boolean removeUnuseMembers= isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 		
 		return removeUnuseMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS) ||
@@ -57,11 +60,23 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES) ||
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS);
 	}
-
-	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public IFix createFix(CleanUpContext context) throws CoreException {
+		CompilationUnit compilationUnit= context.getAST();
 		if (compilationUnit == null)
 			return null;
 		
+		if (context.getProblemLocations() == null) {
+			return createFix(compilationUnit);
+		} else {
+			return createFix(compilationUnit, context.getProblemLocations());
+		}
+	}
+
+	private IFix createFix(CompilationUnit compilationUnit) throws CoreException {		
 		boolean removeUnuseMembers= isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 		
 		return UnusedCodeFix.createCleanUp(compilationUnit,
@@ -74,15 +89,9 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 				false);
 	}
 	
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
-		if (compilationUnit == null)
-			return null;
-		
+	private IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		boolean removeMembers= isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
+		
 		return UnusedCodeFix.createCleanUp(compilationUnit, problems,
 				removeMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS), 
 				removeMembers && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS), 
@@ -94,10 +103,10 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 	}
 
 	public Map getRequiredOptions() {
-		Map options= new Hashtable();
+		Map result= new Hashtable();
 		
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS))
-			options.put(JavaCore.COMPILER_PB_UNUSED_IMPORT, JavaCore.WARNING);
+			result.put(JavaCore.COMPILER_PB_UNUSED_IMPORT, JavaCore.WARNING);
 
 		boolean removeMembers= isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 		if (removeMembers && (
@@ -105,12 +114,12 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS) || 
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS) ||
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES)))
-			options.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.WARNING);
+			result.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.WARNING);
 		
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES))
-			options.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.WARNING);
+			result.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.WARNING);
 
-		return options;
+		return result;
 	}
 	
 	/**
@@ -197,7 +206,7 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
+	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		int result= 0;
 		IProblem[] problems= compilationUnit.getProblems();
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS)) {

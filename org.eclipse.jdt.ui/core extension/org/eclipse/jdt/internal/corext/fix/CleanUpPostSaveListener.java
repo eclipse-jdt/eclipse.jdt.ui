@@ -229,14 +229,14 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     				
     				Map options= new HashMap();
     				for (int i= 0; i < cleanUps.length; i++) {
-    					Map map= cleanUps[i].getRequiredOptions();
+    					Map map= cleanUps[i].getRequirements().getCompilerOptions();
     					if (map != null) {
     						options.putAll(map);
     					}
     				}
     					
     				CompilationUnit ast= null;
-    				if (requiresAST(cleanUps, unit)) {
+    				if (requiresAST(cleanUps)) {
     					ast= createAst(unit, options, new SubProgressMonitor(monitor, 10));
     				}
     				
@@ -317,9 +317,9 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	    }
     }
 
-	private boolean requiresAST(ICleanUp[] cleanUps, ICompilationUnit unit) throws CoreException {
+	private boolean requiresAST(ICleanUp[] cleanUps) throws CoreException {
 		for (int i= 0; i < cleanUps.length; i++) {
-	        if (cleanUps[i].requireAST(unit))
+	        if (cleanUps[i].getRequirements().requiresAST())
 	        	return true;
         }
 		

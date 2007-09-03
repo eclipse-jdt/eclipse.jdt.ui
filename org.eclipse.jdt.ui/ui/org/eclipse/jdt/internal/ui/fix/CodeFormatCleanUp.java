@@ -16,12 +16,9 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
-
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class CodeFormatCleanUp extends AbstractCleanUp {
 	
@@ -36,11 +33,8 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean requireAST(ICompilationUnit unit) throws CoreException {
-		return false;
-	}
-	
-	public IFix createFix(ICompilationUnit compilationUnit) throws CoreException {
+	public IFix createFix(CleanUpContext context) throws CoreException {
+		ICompilationUnit compilationUnit= context.getCompilationUnit();
 		if (compilationUnit == null)
 			return null;
 		
@@ -50,27 +44,6 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 				removeWhitespaces && isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL), 
 				removeWhitespaces && isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY), 
 				isEnabled(CleanUpConstants.FORMAT_CORRECT_INDENTATION));
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
-		return null;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
-		if (compilationUnit == null)
-			return null;
-		
-		return null;
-	}
-	
-	public Map getRequiredOptions() {
-		return null;
 	}
 	
 	/**
@@ -95,6 +68,9 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 		return (String[])result.toArray(new String[result.size()]);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 		buf.append("public class Engine {\n"); //$NON-NLS-1$
@@ -114,16 +90,5 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 		buf.append("}\n"); //$NON-NLS-1$
 		
 		return buf.toString();
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
-		return -1;
-	}
-	
-	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-		return false;
 	}
 }

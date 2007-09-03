@@ -16,7 +16,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -39,7 +38,11 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean requireAST(ICompilationUnit unit) throws CoreException {
+	public CleanUpRequirements getRequirements() {
+		return new CleanUpRequirements(requireAST(), false, null);
+	}
+	
+	private boolean requireAST() {
 		boolean usePrentheses= isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		if (!usePrentheses)
 			return false;
@@ -48,7 +51,11 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 		       isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 	}
 	
-	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
+	/**
+	 * {@inheritDoc}
+	 */
+	public IFix createFix(CleanUpContext context) throws CoreException {
+		CompilationUnit compilationUnit= context.getAST();
 		if (compilationUnit == null)
 			return null;
 		
@@ -60,18 +67,7 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS),
 				isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER));
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
-		return createFix(compilationUnit);
-	}
-
-	public Map getRequiredOptions() {
-		return null;
-	}
-	
+		
 	/**
 	 * {@inheritDoc}
 	 */
@@ -86,6 +82,9 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 		return (String[])result.toArray(new String[result.size()]);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 		
@@ -117,10 +116,4 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 		return false;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
-		return -1;
-	}
 }

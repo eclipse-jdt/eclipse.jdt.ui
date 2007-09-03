@@ -16,13 +16,10 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
-
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class CommentFormatCleanUp extends AbstractCleanUp {
 	
@@ -34,10 +31,14 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 		super();
 	}
 	
-	public IFix createFix(ICompilationUnit compilationUnit) throws CoreException {
+	/**
+	 * {@inheritDoc}
+	 */
+	public IFix createFix(CleanUpContext context) throws CoreException {
+		ICompilationUnit compilationUnit= context.getCompilationUnit();
 		if (compilationUnit == null)
 			return null;
-		
+			
 		if (!isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE))
 			return null;
 		
@@ -48,34 +49,6 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 		boolean javaDoc= DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT));
 
 		return CommentFormatFix.createCleanUp(compilationUnit, singleLineComment, blockComment, javaDoc, preferences);
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
-		return null;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean requireAST(ICompilationUnit unit) throws CoreException {
-		return false;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
-		if (compilationUnit == null)
-			return null;
-		
-		return null;
-	}
-	
-	public Map getRequiredOptions() {
-		return null;
 	}
 	
 	/**
@@ -94,16 +67,4 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 		
 		return buf.toString();
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
-		return -1;
-	}
-	
-	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-		return false;
-	}
-	
 }

@@ -23,24 +23,99 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
+
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public abstract class AbstractCleanUp implements ICleanUp {
 	
-	private Map fOptions;
-	private final boolean fCanReinitialize;
+	private CleanUpOptions fOptions;
 	
-	public AbstractCleanUp() {
-		this(null);
+	protected AbstractCleanUp() {
+	}
+
+	protected AbstractCleanUp(Map settings) {
+		if (settings != null)
+			setOptions(new CleanUpOptions(settings));
 	}
 	
-	public AbstractCleanUp(Map options) {
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setOptions(CleanUpOptions options) {
 		fOptions= options;
-		fCanReinitialize= options == null;
 	}
 	
-	protected int getNumberOfProblems(IProblem[] problems, int problemId) {
+	/**
+	 * {@inheritDoc}
+	 */
+	public CleanUpOptions getOptions() {
+		return fOptions;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String[] getDescriptions() {
+		return new String[0];
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getPreview() {
+		return ""; //$NON-NLS-1$
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public CleanUpRequirements getRequirements() {
+		return new CleanUpRequirements(false, false, null);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
+		return new RefactoringStatus();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public IFix createFix(CleanUpContext context) throws CoreException {
+		return null;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
+		return new RefactoringStatus();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
+		return -1;
+	}
+	
+	/**
+	 * Utility method to: count number of problems in <code>problems</code> with <code>problemId</code>
+	 * @param problems the set of problems
+	 * @param problemId the problem id to look for
+	 * @return number of problems with problem id
+	 */
+	protected static int getNumberOfProblems(IProblem[] problems, int problemId) {
 		int result= 0;
 		for (int i= 0; i < problems.length; i++) {
 			if (problems[i].getID() == problemId)
@@ -49,51 +124,10 @@ public abstract class AbstractCleanUp implements ICleanUp {
 		return result;
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
-		if (monitor != null)
-			monitor.done();
-		return new RefactoringStatus();
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
-		if (monitor != null)
-			monitor.done();
-		//Default do nothing
-		return new RefactoringStatus();
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public void initialize(Map settings) throws CoreException {
-		if (fCanReinitialize)
-			fOptions= settings;
-	}
-	
 	protected boolean isEnabled(String key) {
-		Assert.isNotNull(key);
+		Assert.isNotNull(fOptions);
 		
-		Object value= fOptions.get(key);
-		return CleanUpConstants.TRUE == value || CleanUpConstants.TRUE.equals(value);
+		return fOptions.isEnabled(key);
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean needsFreshAST(CompilationUnit compilationUnit) {
-		return false;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public IFix createFix(ICompilationUnit unit) throws CoreException {
-		return null;
-	}
 }

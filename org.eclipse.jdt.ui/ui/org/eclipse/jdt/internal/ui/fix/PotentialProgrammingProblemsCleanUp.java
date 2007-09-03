@@ -42,10 +42,14 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 		super();
 	}
 	
-	/**
+	/**A
 	 * {@inheritDoc}
 	 */
-	public boolean requireAST(ICompilationUnit unit) throws CoreException {
+	public CleanUpRequirements getRequirements() {
+		return new CleanUpRequirements(requireAST(), false, getRequiredOptions());
+	}
+	
+	private boolean requireAST() {
 		boolean addSUID= isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 		if (!addSUID)
 			return false;
@@ -57,9 +61,19 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
+	public IFix createFix(CleanUpContext context) throws CoreException {
+		CompilationUnit compilationUnit= context.getAST();
 		if (compilationUnit == null)
 			return null;
+		
+		if (context.getProblemLocations() == null) {
+			return createFix(compilationUnit);
+		} else {
+			return createFix(compilationUnit, context.getProblemLocations());
+		}
+	}
+	
+	private IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		
 		boolean addSUID= isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 		if (!addSUID)
@@ -70,10 +84,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT));
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+	private IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 		
@@ -82,15 +93,12 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 				(isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT)));
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public Map getRequiredOptions() {
-		Map options= new Hashtable();
+	private Map getRequiredOptions() {
+		Map result= new Hashtable();
 		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)) || 
 				(isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT)))
-			options.put(JavaCore.COMPILER_PB_MISSING_SERIAL_VERSION, JavaCore.WARNING);
-		return options;
+			result.put(JavaCore.COMPILER_PB_MISSING_SERIAL_VERSION, JavaCore.WARNING);
+		return result;
 	}
 
 	/**
@@ -141,7 +149,10 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 	 * {@inheritDoc}
 	 */
 	public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
-		super.checkPreConditions(project, compilationUnits, null);
+		RefactoringStatus superStatus= super.checkPreConditions(project, compilationUnits, monitor);
+		if (superStatus.hasFatalError())
+			return superStatus;
+		
 		return PotentialProgrammingProblemsFix.checkPreConditions(project, compilationUnits, monitor,
 				isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED),
 				isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT),
@@ -158,7 +169,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
+	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)) || 
 				(isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT)))
 			return getNumberOfProblems(compilationUnit.getProblems(), IProblem.MissingSerialVersion);

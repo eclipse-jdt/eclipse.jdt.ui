@@ -17,7 +17,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -41,14 +40,26 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean requireAST(ICompilationUnit unit) throws CoreException {
-	    return isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
+	public CleanUpRequirements getRequirements() {
+		return new CleanUpRequirements(isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS), false, getRequiredOptions());
 	}
 	
-	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
+	/**
+	 * {@inheritDoc}
+	 */
+	public IFix createFix(CleanUpContext context) throws CoreException {
+		CompilationUnit compilationUnit= context.getAST();
 		if (compilationUnit == null)
 			return null;
 		
+		if (context.getProblemLocations() == null) {
+			return createFix(compilationUnit);
+		} else {
+			return createFix(compilationUnit, context.getProblemLocations());
+		}
+	}
+	
+	private IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		return UnusedCodeFix.createCleanUp(compilationUnit, 
 				false, 
 				false, 
@@ -60,13 +71,7 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 	}
 	
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
-		if (compilationUnit == null)
-			return null;
-		
+	private IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		return UnusedCodeFix.createCleanUp(compilationUnit, problems,
 				false, 
 				false, 
@@ -77,13 +82,13 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS));
 	}
 
-	public Map getRequiredOptions() {
-		Map options= new Hashtable();
+	private Map getRequiredOptions() {
+		Map result= new Hashtable();
 
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS))
-			options.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, JavaCore.WARNING);
+			result.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, JavaCore.WARNING);
 
-		return options;
+		return result;
 	}
 	
 	/**
@@ -126,7 +131,7 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
+	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		int result= 0;
 		IProblem[] problems= compilationUnit.getProblems();
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS))

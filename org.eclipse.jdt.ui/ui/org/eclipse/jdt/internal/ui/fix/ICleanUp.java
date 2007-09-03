@@ -19,6 +19,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
@@ -26,103 +27,180 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
- * A clean up can solve several different problems in a given
- * <code>CompilationUnit</code>. The <code>CompilationUnit</code> is
- * compiled by using the compiler options returned by
- * <code>getRequiredOptions</code>.
+ * A clean up can solve problems in a compilation unit.
+ * <p>
+ * The clean up is asked for its requirements through a call to
+ * {@link #getRequirements()}. The clean up can i.e. request
+ * an AST and define how to build this AST. It can base its
+ * requirements on the options passed through {@link #setOptions(CleanUpOptions)}.
+ * </p>
+ * <p>
+ * A context containing the information requested by the 
+ * requirements are passed to {@link #createFix(CleanUpContext)}.
+ * A fix capable of fixing the problems is returned by this function
+ * if {@link #checkPreConditions(IJavaProject, ICompilationUnit[], IProgressMonitor)}
+ * has returned a non fatal error status.
+ * </p>
+ * <p>
+ * At the end {@link #checkPostConditions(IProgressMonitor)} is called.
+ * </p>
+ * <p>
+ * Clients can implement this interface but should extend {@link AbstractCleanUp}
+ * if possible.
  * 
  * @since 3.2
  */
 public interface ICleanUp {
 	
 	/**
-	 * Does this clean up require an AST for the given <code>unit</code>. If
-	 * true is returned an AST for unit is created by the clean up
-	 * infrastructure and {@link #createFix(CompilationUnit)} is executed,
-	 * otherwise {@link #createFix(ICompilationUnit)} is executed. The source
-	 * from which the AST is created may be differ from the source of
-	 * <code>unit</code>.
-	 * <p>
-	 * Implementors should return false whenever possible because creating an
-	 * AST is expensive.
+	 * A collection of clean up requirements.
+	 * Instances of this class are returned by {@link ICleanUp#getRequirements()}
 	 * 
-	 * @param unit
-	 *            the unit to create an ast for
-	 * @return true if {@link #createFix(CompilationUnit)} must be executed,
-	 *         false if {@link #createFix(ICompilationUnit)} must be executed
+	 * @since 3.4
 	 */
-	public abstract boolean requireAST(ICompilationUnit unit) throws CoreException;
+	public class CleanUpRequirements {
+		
+		private final boolean fRequiresAST;
+		private final Map fCompilerOptions;
+		private final boolean fRequiresFreshAST;
+
+		/**
+		 * Create a new requirement collection
+		 * 
+		 * @param requiresAST true if an AST is required
+		 * @param requiresFreshAST true if a fresh AST is required
+		 * @param compilerOptions map of compiler options or <b>null</b> if no requirements
+		 */
+		protected CleanUpRequirements(boolean requiresAST, boolean requiresFreshAST, Map compilerOptions) {
+			fRequiresAST= requiresAST;
+			fRequiresFreshAST= requiresFreshAST;
+			fCompilerOptions= compilerOptions;
+		}
+		
+		/**
+		 * Does this clean up require an AST? If <code>true</code> 
+		 * then the clean up context passed to create fix 
+		 * will have an AST attached. 
+		 * <p>
+		 * <strong>This should return <code>false</code> whenever possible 
+		 * because creating an AST is expensive.</strong>
+		 * </p>
+		 * 
+		 * @return true if createFix will need an AST
+		 */
+		public boolean requiresAST() {
+			return fRequiresAST;
+		}
+		
+		/**
+		 * If true a fresh AST, containing all the changes from previous clean ups,
+		 * will be created and passed in the context.
+		 * <p>
+		 * Has no effect if {@link #requiresAST()} returns <code>false</code>.
+		 * </p>
+		 * 
+		 * @return true if the caller needs an up to date AST
+		 */
+		public boolean requiresFreshAST() {
+			return fRequiresFreshAST;
+		}
+		
+		/**
+		 * Required compiler options.
+		 * <p>
+		 * Has no effect if {@link #requiresAST()} returns <code>false</code>.
+		 * </p>
+		 * 
+		 * @return The options as map or <b>null</b>
+		 * @see JavaCore 
+		 */
+		public Map getCompilerOptions() {
+			return fCompilerOptions;
+		}
+		
+	}
 	
 	/**
-	 * Create an <code>IFix</code> which fixes all problems in
-	 * <code>unit</code> or <code>null</code> if nothing to fix.
-	 * <p>
-	 * This is called iff {@link #requireAST(ICompilationUnit)} returns
-	 * <code>false</code>.
+	 * A context containing all information required by a clean up
+	 * to create a fix
 	 * 
-	 * @param unit
-	 *            the ICompilationUnit to fix, not null
-	 * @return the fix for the problems or <code>null</code> if nothing to fix
+	 * @since 3.4
 	 */
-	public abstract IFix createFix(ICompilationUnit unit) throws CoreException;
+	public class CleanUpContext {
+		
+		private final ICompilationUnit fUnit;
+		private final CompilationUnit fAst;
+		private final IProblemLocation[] fLocations;
+
+		public CleanUpContext(ICompilationUnit unit, CompilationUnit ast, IProblemLocation[] locations) {
+			fUnit= unit;
+			fAst= ast;
+			fLocations= locations;
+			
+		}
+		
+		/**
+		 * @return the compilation unit to fix
+		 */
+		public ICompilationUnit getCompilationUnit() {
+			return fUnit;
+		}
+		
+		/**
+		 * An AST build from the compilation unit to fix.
+		 * Is <b>null</b> if CleanUpRequirements#requiresAST()
+		 * returned <code>false</code>.
+		 * The AST is guaranteed to contain changes made by previous
+		 * clean ups only if CleanUpRequirements#requiresFreshAST()
+		 * returned <code>true</code>.
+		 * 
+		 * @return an AST or <b>null</b> if none requested.
+		 */
+		public CompilationUnit getAST() {
+			return fAst;
+		}
+		
+		/**
+		 * @return locations of problems to fix or <b>null</b> if need to fix all problems.
+		 */
+		public IProblemLocation[] getProblemLocations() {
+			return fLocations;
+		}
+		
+	}
 	
 	/**
-	 * Create an <code>IFix</code> which fixes all problems in
-	 * <code>compilationUnit</code> or <code>null</code> if nothing to fix.
-	 * <p>
-	 * This is called iff {@link #requireAST(ICompilationUnit)} returns
-	 * <code>true</code>.
-	 * 
-	 * @param compilationUnit
-	 *            The compilation unit to fix, may be null
-	 * @return The fix or null if no fixes possible
-	 * @throws CoreException
+	 * @param options the options to use
 	 */
-	public abstract IFix createFix(CompilationUnit compilationUnit) throws CoreException;
+	public void setOptions(CleanUpOptions options);
 	
 	/**
-	 * Create a <code>IFix</code> which fixes all <code>problems</code> in
-	 * <code>CompilationUnit</code>
-	 * 
-	 * @param compilationUnit
-	 *            The compilation unit to fix, may be null
-	 * @param problems
-	 *            The locations of the problems to fix
-	 * @return The fix or null if no fixes possible
-	 * @throws CoreException
+	 * @return the options passed to {@link #setOptions(CleanUpOptions)}
 	 */
-	public abstract IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException;
+	public CleanUpOptions getOptions();
 	
 	/**
-	 * Required compiler options to allow <code>createFix</code> to work
-	 * correct.
+	 * Human readable description for each operation this clean up will execute.
 	 * 
-	 * @return The options as map or null
-	 */
-	public abstract Map getRequiredOptions();
-	
-	/**
-	 * If true a fresh AST, containing all the changes from previous clean ups,
-	 * will be created and passed to createFix.
-	 * 
-	 * @param compilationUnit
-	 *            The current available AST
-	 * @return true if the caller needs an up to date AST
-	 */
-	public abstract boolean needsFreshAST(CompilationUnit compilationUnit);
-	
-	/**
-	 * Description for each operation this clean up will execute
-	 * 
-	 * @return descriptions or null
+	 * @return descriptions or <b>null</b>
 	 */
 	public String[] getDescriptions();
 	
-	public void initialize(Map settings) throws CoreException;
+	/**
+	 * A code snippet which complies to the current settings.
+	 * 
+	 * @return A code snippet
+	 */
+	public abstract String getPreview();
+	
+	/**
+	 * @return the requirements for used for {@link #createFix(CleanUpContext)} to work
+	 */
+	public CleanUpRequirements getRequirements();
 	
 	/**
 	 * After call to checkPreConditions clients will start creating fixes for
-	 * <code>compilationUnits</code> int <code>project</code> unless the
+	 * <code>compilationUnits</code> in <code>project</code> unless the
 	 * result of checkPreConditions contains a fatal error
 	 * 
 	 * @param project
@@ -132,8 +210,20 @@ public interface ICleanUp {
 	 * @param monitor
 	 *            the monitor to show progress
 	 * @return the result of the precondition check, not null
+	 * @throws CoreException if an unexpected error occurred
 	 */
 	public abstract RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException;
+	
+	/**
+	 * Create an <code>IFix</code> which fixes all problems in
+	 * <code>context</code> or <b>null</b> if nothing to fix.
+	 * 
+	 * @param context 
+	 * 		a context containing all information requested by {@link #getRequirements()}
+	 * @return the fix for the problems or <b>null</b> if nothing to fix
+	 * @throws CoreException if an unexpected error occurred
+	 */
+	public abstract IFix createFix(CleanUpContext context) throws CoreException;
 	
 	/**
 	 * Called when done cleaning up.
@@ -141,6 +231,7 @@ public interface ICleanUp {
 	 * @param monitor
 	 *            the monitor to show progress
 	 * @return the result of the postcondition check, not null
+	 * @throws CoreException if an unexpected error occurred
 	 */
 	public abstract RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException;
 	
@@ -155,7 +246,7 @@ public interface ICleanUp {
 	 * @param problem
 	 *            The location of the problem to fix
 	 * @return True if problem can be fixed
-	 * @throws CoreException
+	 * @throws CoreException if an unexpected error occurred
 	 */
 	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException;
 	
@@ -167,13 +258,6 @@ public interface ICleanUp {
 	 *            The compilation unit to fix, not null
 	 * @return The maximal number of fixes or -1 if unknown.
 	 */
-	public abstract int maximalNumberOfFixes(CompilationUnit compilationUnit);
-	
-	/**
-	 * A code snippet which complies to the current settings.
-	 * 
-	 * @return A code snippet, not null.
-	 */
-	public abstract String getPreview();
+	public abstract int computeNumberOfFixes(CompilationUnit compilationUnit);
 	
 }

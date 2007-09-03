@@ -68,6 +68,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CommentFormatCleanUp;
@@ -83,6 +84,7 @@ import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ICleanUp.CleanUpContext;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.refactoring.IScheduledRefactoring;
 
@@ -345,7 +347,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			fCleanUpOptions= new Hashtable();
 			for (int i= 0; i < cleanUps.length; i++) {
 				ICleanUp cleanUp= cleanUps[i];
-				Map currentCleanUpOption= cleanUp.getRequiredOptions();
+				Map currentCleanUpOption= cleanUp.getRequirements().getCompilerOptions();
 				if (currentCleanUpOption != null)
 					fCleanUpOptions.putAll(currentCleanUpOption);
 			}
@@ -377,7 +379,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 						applyChange(compilationUnit, (List)fSolutions.get(compilationUnit.getPrimary()));
 					}
 					
-					if (requiresAST(compilationUnit, element.getCleanUps())) {
+					if (requiresAST(element.getCleanUps())) {
 						parseList.add(compilationUnit);
 					} else {
 						sourceList.add(compilationUnit);
@@ -433,9 +435,9 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			}
 		}
 		
-		private boolean requiresAST(ICompilationUnit compilationUnit, ICleanUp[] cleanUps) throws CoreException {
+		private boolean requiresAST(ICleanUp[] cleanUps) throws CoreException {
 			for (int i= 0; i < cleanUps.length; i++) {
-				if (cleanUps[i].requireAST(compilationUnit))
+				if (cleanUps[i].getRequirements().requiresAST())
 					return true;
 			}
 			return false;
@@ -625,9 +627,13 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			cuCount+= ((List)fProjects.get(project)).size();
 		}
 		
+		ICleanUp first= (ICleanUp) fCleanUps.get(0);
+		boolean usesProjectSettings= first.getOptions() == null;
+		
 		RefactoringStatus result= new RefactoringStatus();
 		
-		pm.beginTask("", cuCount * 2 * fCleanUps.size() + 4 * fCleanUps.size()); //$NON-NLS-1$
+		ICleanUp[] cleanUps= getCleanUps();
+		pm.beginTask("", cuCount * 2 * fCleanUps.size() + 4 * cleanUps.length); //$NON-NLS-1$
 		try {
 			DynamicValidationStateChange change= new DynamicValidationStateChange(getName());
 			change.setSchedulingRule(getSchedulingRule());
@@ -637,10 +643,11 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				List compilationUnits= (List)fProjects.get(project);
 				ICompilationUnit[] cus= (ICompilationUnit[])compilationUnits.toArray(new ICompilationUnit[compilationUnits.size()]);
 				
-				ICleanUp[] cleanUps= (ICleanUp[])fCleanUps.toArray(new ICleanUp[fCleanUps.size()]);
-				result.merge(initialize(project));
-				if (result.hasFatalError())
-					return result;
+				if (usesProjectSettings) {
+					result.merge(setProjectOptions(project, cleanUps));
+					if (result.hasFatalError())
+						return result;
+				}
 				
 				result.merge(checkPreConditions(project, cus, new SubProgressMonitor(pm, 3 * cleanUps.length)));
 				if (result.hasFatalError())
@@ -665,6 +672,11 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				return result;
 		} finally {
 			pm.done();
+			if (usesProjectSettings) {
+				for (int i= 0; i < cleanUps.length; i++) {
+					cleanUps[i].setOptions(null);
+				}
+			}
 		}
 		
 		return result;
@@ -702,15 +714,15 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		}
 	}
 	
-	private RefactoringStatus initialize(IJavaProject javaProject) throws CoreException {
+	private RefactoringStatus setProjectOptions(IJavaProject javaProject, ICleanUp[] cleanUps) throws CoreException {
 		Map options= CleanUpPreferenceUtil.loadOptions(new ProjectScope(javaProject.getProject()));
 		if (options == null) {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(FixMessages.CleanUpRefactoring_could_not_retrive_profile, javaProject.getElementName()));
 		}
 		
-		ICleanUp[] cleanUps= getCleanUps();
+		CleanUpOptions cleanUpOptions= new CleanUpOptions(options);
 		for (int j= 0; j < cleanUps.length; j++) {
-			cleanUps[j].initialize(options);
+			cleanUps[j].setOptions(cleanUpOptions);
 		}
 		
 		return new RefactoringStatus();
@@ -773,12 +785,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		int i= 0;
 		do {
 			ICleanUp cleanUp= cleanUps[i];
-			IFix fix;
-			if (ast == null || !cleanUp.requireAST(source)) {
-				fix= cleanUp.createFix(source);
-			} else {
-				fix= cleanUp.createFix(ast);
-			}
+			IFix fix= cleanUp.createFix(new CleanUpContext(source, ast, null));
 			if (fix != null) {
 				TextChange current= fix.createChange();
 				TextEdit currentEdit= pack(current.getEdit());
@@ -803,7 +810,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				}
 			}
 			i++;
-		} while (i < cleanUps.length && (ast == null || !cleanUps[i].needsFreshAST(ast)));
+		} while (i < cleanUps.length && (ast == null || !cleanUps[i].getRequirements().requiresFreshAST()));
 		
 		for (; i < cleanUps.length; i++) {
 			undoneCleanUps.add(cleanUps[i]);

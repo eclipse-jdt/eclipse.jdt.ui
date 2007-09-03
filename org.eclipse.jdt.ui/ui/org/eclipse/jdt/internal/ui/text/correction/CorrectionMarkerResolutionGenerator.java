@@ -82,6 +82,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
+import org.eclipse.jdt.internal.ui.fix.ICleanUp.CleanUpContext;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
@@ -296,7 +297,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 				List locationList= (List)problemLocations.get(cu);
 				IProblemLocation[] locations= (IProblemLocation[])locationList.toArray(new IProblemLocation[locationList.size()]);
 
-				IFix fix= cleanUp.createFix(root, locations);
+				IFix fix= cleanUp.createFix(new CleanUpContext(cu, root, locations));
 				
 				if (monitor.isCanceled())
 					return;

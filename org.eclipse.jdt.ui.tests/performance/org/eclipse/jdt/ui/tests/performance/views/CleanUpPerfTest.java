@@ -23,7 +23,6 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
@@ -33,7 +32,6 @@ import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
 import org.eclipse.ltk.core.refactoring.PerformRefactoringOperation;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -41,16 +39,14 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
-import org.eclipse.jdt.internal.corext.fix.IFix;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
@@ -148,57 +144,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 	public void testNullCleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
-		cleanUpRefactoring.addCleanUp(new ICleanUp() {
-			public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
-				return null;
-			}
-			
-			public Map getRequiredOptions() {
-				return null;
-			}
-			
-			public String[] getDescriptions() {
-				return null;
-			}
-			
-			public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-				return true;
-			}
-			
-			public IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
-				return null;
-			}
-			
-			public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
-				return new RefactoringStatus();
-			}
-			
-			public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
-				return new RefactoringStatus();
-			}
-			
-			public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
-				return 0;
-			}
-			
-			public String getPreview() {
-				return null;
-			}
-			
-			public boolean needsFreshAST(CompilationUnit compilationUnit) {
-				return false;
-			}
-			
-			public void initialize(Map settings) throws CoreException {}
-			
-			public IFix createFix(ICompilationUnit unit) throws CoreException {
-				return null;
-			}
-			
-			public boolean requireAST(ICompilationUnit unit) throws CoreException {
-				return true;
-			}
-		});
+		cleanUpRefactoring.addCleanUp(new AbstractCleanUp() {});
 		
 		doCleanUp(cleanUpRefactoring);
 	}

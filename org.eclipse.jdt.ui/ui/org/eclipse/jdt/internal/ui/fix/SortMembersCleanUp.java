@@ -36,8 +36,6 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.SortMembersFix;
 
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
-
 public class SortMembersCleanUp extends AbstractCleanUp {
 	
 	private HashSet fTouchedFiles;
@@ -50,7 +48,11 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 		super(options);
 	}
 
-	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
+	/**
+	 * {@inheritDoc}
+	 */
+	public IFix createFix(CleanUpContext context) throws CoreException {
+		CompilationUnit compilationUnit= context.getAST();
 		if (compilationUnit == null)
 			return null;
 		
@@ -65,6 +67,9 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 		return fix;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
 		if (fTouchedFiles == null) {
 			return super.checkPostConditions(monitor);
@@ -95,17 +100,6 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 			
 		}
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
-		return null;
-	}
-
-	public Map getRequiredOptions() {
-		return null;
-	}
 	
 	/**
 	 * {@inheritDoc}
@@ -121,6 +115,9 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 		return null;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
 		
@@ -146,21 +143,13 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 		
 		return buf.toString();
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
-		return -1;
-	}
-
-    public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-	    return false;
+  
+    /**
+     * {@inheritDoc}
+     */
+    public CleanUpRequirements getRequirements() {
+    	return new CleanUpRequirements(isEnabled(CleanUpConstants.SORT_MEMBERS), false, null);
     }
-    
-	public boolean requireAST(ICompilationUnit unit) throws CoreException {
-		return isEnabled(CleanUpConstants.SORT_MEMBERS);
-	}
 	
 	private static boolean containsRelevantMarkers(IFile file) throws CoreException {
 		IMarker[] bookmarks= file.findMarkers(IMarker.BOOKMARK, true, IResource.DEPTH_INFINITE);

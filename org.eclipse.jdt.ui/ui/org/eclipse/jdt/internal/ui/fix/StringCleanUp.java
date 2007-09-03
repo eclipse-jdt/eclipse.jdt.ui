@@ -17,7 +17,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -46,12 +45,31 @@ public class StringCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean requireAST(ICompilationUnit unit) throws CoreException {
+	public CleanUpRequirements getRequirements() {
+		return new CleanUpRequirements(requireAST(), false, getRequiredOptions());
+	}
+	
+	private boolean requireAST() {
 	    return isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS) || 
 		       isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public IFix createFix(CleanUpContext context) throws CoreException {
+		CompilationUnit compilationUnit= context.getAST();
+		if (compilationUnit == null)
+			return null;
+		
+		if (context.getProblemLocations() == null) {
+			return createFix(compilationUnit);
+		} else {
+			return createFix(compilationUnit, context.getProblemLocations());
+		}
+	}
 
-	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
+	private IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 
@@ -60,10 +78,7 @@ public class StringCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS));
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	public IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+	private IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 		
@@ -72,7 +87,7 @@ public class StringCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS));
 	}
 
-	public Map getRequiredOptions() {
+	private Map getRequiredOptions() {
 		Map result= new Hashtable();
 		
 		if (isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS) || isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS))
@@ -119,7 +134,7 @@ public class StringCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
+	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		int result= 0;
 		IProblem[] problems= compilationUnit.getProblems();
 		if (isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS))

@@ -26,8 +26,6 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.ImportsFix;
 
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
-
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class ImportsCleanUp extends AbstractCleanUp {
@@ -46,37 +44,34 @@ public class ImportsCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean requireAST(ICompilationUnit unit) throws CoreException {
-	    return isEnabled(CleanUpConstants.ORGANIZE_IMPORTS);
+	public CleanUpRequirements getRequirements() {
+		boolean isOrganizeImports= isEnabled(CleanUpConstants.ORGANIZE_IMPORTS);
+		return new CleanUpRequirements(isOrganizeImports, isOrganizeImports, null);
 	}
 
 	/**
      * {@inheritDoc}
      */
-    public IFix createFix(final CompilationUnit compilationUnit) throws CoreException {
+    public IFix createFix(CleanUpContext context) throws CoreException {
+    	CompilationUnit compilationUnit= context.getAST();
+    	if (compilationUnit == null)
+    		return null;
+    	
 		return ImportsFix.createCleanUp(compilationUnit, fCodeGeneratorSettings,
 				isEnabled(CleanUpConstants.ORGANIZE_IMPORTS), fStatus);
 	}
-
-	/**
-     * {@inheritDoc}
-     */
-    public IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
-	    return null;
-    }
 
     /**
      * {@inheritDoc}
      */
     public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
-		RefactoringStatus result= super.checkPreConditions(project, compilationUnits, monitor);
     	
 		if (isEnabled(CleanUpConstants.ORGANIZE_IMPORTS)) {
     		fCodeGeneratorSettings= JavaPreferencesSettings.getCodeGenerationSettings(project);
     		fStatus= new RefactoringStatus();
 		}
 		
-    	return result;
+		return super.checkPreConditions(project, compilationUnits, monitor);
     }
     
     /**
@@ -114,37 +109,6 @@ public class ImportsCleanUp extends AbstractCleanUp {
 		}
 		
 		return buf.toString();
-    }
-
-	/**
-     * {@inheritDoc}
-     */
-    public Map getRequiredOptions() {
-	    return null;
-    }
-
-	/**
-     * {@inheritDoc}
-     */
-    public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
-	    return -1;
-    }
-
-	/**
-     * {@inheritDoc}
-     */
-    public boolean needsFreshAST(CompilationUnit compilationUnit) {
-    	if (isEnabled(CleanUpConstants.ORGANIZE_IMPORTS))
-	    	return true;
-    	
-    	return super.needsFreshAST(compilationUnit);
-    }
-    
-	/**
-     * {@inheritDoc}
-     */
-    public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-	    return false;
     }
 
 }

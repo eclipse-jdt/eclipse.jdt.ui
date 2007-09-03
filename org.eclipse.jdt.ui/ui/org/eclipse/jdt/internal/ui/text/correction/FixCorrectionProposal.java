@@ -196,7 +196,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 		if (fCleanUp == null)
 			return null;
 		
-		int count= fCleanUp.maximalNumberOfFixes(fCompilationUnit);
+		int count= fCleanUp.computeNumberOfFixes(fCompilationUnit);
 		if (count == -1) {
 			return CorrectionMessages.FixCorrectionProposal_HitCtrlEnter_description;
 		} else if (count < 2) {
