@@ -81,9 +81,9 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
  * 
  * <p>
  * <strong>EXPERIMENTAL</strong> This class or interface has been added as part
- * of a work in progress. This API may change at any given time. Please do not
- * use this API without consulting with the JDT/UI team. See bug 160985 for discussions.
- * <p>
+ * of a work in progress. This API is under review and may still change when finalized. Please send your 
+ * comments to bug 160985.
+ * </p>
  * 
  * @since 3.4
  */

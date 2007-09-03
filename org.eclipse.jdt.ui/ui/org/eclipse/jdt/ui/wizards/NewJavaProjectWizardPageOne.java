@@ -103,9 +103,9 @@ import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
  * </p>
  * <p>
  * <strong>EXPERIMENTAL</strong> This class or interface has been added as part
- * of a work in progress. This API may change at any given time. Please do not
- * use this API without consulting with the JDT/UI team. See bug 160985 for discussions.
- * <p>
+ * of a work in progress. This API is under review and may still change when finalized. Please send your 
+ * comments to bug 160985.
+ * </p>
  * @since 3.4
  */
 public class NewJavaProjectWizardPageOne extends WizardPage {
@@ -794,7 +794,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		}
 
 
-		public void setWokingSets(IWorkingSet[] workingSets) {
+		public void setWorkingSets(IWorkingSet[] workingSets) {
 			TreePath[] paths= new TreePath[workingSets.length];
 			for (int i= 0; i < paths.length; i++) {
 				paths[i]= new TreePath(new Object[] { workingSets[i] });
@@ -1282,7 +1282,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	}
 
 	/**
-	 * Returns the compiler compliance to be used for the project, or <code>null</code> to use the default
+	 * Returns the compiler compliance to be used for the project, or <code>null</code> to use the workspace
 	 * compiler compliance.
 	 * 
 	 * @return compiler compliance to be used for the project or <code>null</code>
@@ -1366,7 +1366,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		if (workingSets == null) {
 			throw new IllegalArgumentException();
 		}
-		fWorkingSetGroup.setWokingSets(workingSets);
+		fWorkingSetGroup.setWorkingSets(workingSets);
 	}
 
 	/* (non-Javadoc)
