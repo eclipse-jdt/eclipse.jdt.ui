@@ -95,7 +95,7 @@ import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
 
 /**
  * The first page of the New Java Project wizard. This page is typically used in combination with
- * {@link NewJavaProjectWizardPageTwo}. Clients can extnd this page to modify the UI: Add, remove
+ * {@link NewJavaProjectWizardPageTwo}. Clients can extend this page to modify the UI: Add, remove
  * or reorder sections.
  * 
  * <p>
