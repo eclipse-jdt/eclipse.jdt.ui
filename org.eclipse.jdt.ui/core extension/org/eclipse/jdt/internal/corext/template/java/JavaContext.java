@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -96,7 +95,7 @@ public class JavaContext extends CompilationUnitContext {
 	 */
 	private Set fUsedNames= new HashSet();
 	private Map fVariables= new HashMap();
-	private Set fAddedImports= new HashSet();
+	private ImportRewrite fImportRewrite;
 	
 	/**
 	 * Creates a java template context.
@@ -181,7 +180,7 @@ public class JavaContext extends CompilationUnitContext {
 
 	private void clear() {
 		fUsedNames.clear();
-		fAddedImports.clear();
+		fImportRewrite= null;
 	}
 	
 	/*
@@ -427,13 +426,23 @@ public class JavaContext extends CompilationUnitContext {
 		return new String[] {Signature.getSimpleName(type).toLowerCase()};
 	}
 	
-	public void addImport(String type) {
+	/**
+	 * Adds an import for type with type name <code>type</cod> if possible.
+	 * Returns a string which can be used to reference the type.
+	 * 
+	 * @param type the fully qualified name of the type to import
+	 * @return returns a type to which the type binding can be assigned to. 
+	 * 	The returned type contains is unqualified when an import could be added or was already known. 
+	 * 	It is fully qualified, if an import conflict prevented the import.
+	 * @since 3.4
+	 */
+	public String addImport(String type) {
 		if (isReadOnly())
-			return;
+			return type;
 		
 		ICompilationUnit cu= getCompilationUnit();
 		if (cu == null)
-			return;
+			return type;
 
 		try {
 			boolean qualified= type.indexOf('.') != -1;
@@ -442,18 +451,34 @@ public class JavaContext extends CompilationUnitContext {
 				SimpleName nameNode= null;
 				TypeNameMatch[] matches= findAllTypes(type, searchScope, nameNode, null, cu);
 				if (matches.length != 1) // only add import if we have a single match
-					return;
+					return type;
 				type= matches[0].getFullyQualifiedName();
 			}
 			
-			fAddedImports.add(type);
+			CompilationUnit root= getASTRoot(cu);
+			if (fImportRewrite == null) {
+				if (root == null) {
+					fImportRewrite= StubUtility.createImportRewrite(cu, true);
+				} else {
+					fImportRewrite= StubUtility.createImportRewrite(root, true);
+				}
+			}
+
+			ImportRewriteContext context;
+			if (root == null)
+				context= null;
+			else
+				context= new ContextSensitiveImportRewriteContext(root, getCompletionOffset(), fImportRewrite);
+
+			return fImportRewrite.addImport(type, context);
 		} catch (JavaModelException e) {
 			handleException(null, e);
+			return type;
 		}
 	}
-
+	
 	private void rewriteImports() {
-		if (fAddedImports.isEmpty())
+		if (fImportRewrite == null)
 			return;
 		
 		if (isReadOnly())
@@ -473,23 +498,9 @@ public class JavaContext extends CompilationUnitContext {
 			document.addPosition(position);
 
 			try {
-				ImportRewrite rewrite= StubUtility.createImportRewrite(cu, true);
-				CompilationUnit root= getASTRoot(cu);
-				ImportRewriteContext context;
-				if (root == null)
-					context= null;
-				else
-					context= new ContextSensitiveImportRewriteContext(root, getCompletionOffset(), rewrite);
-
-				for (Iterator iterator= fAddedImports.iterator(); iterator.hasNext();) {
-					String type= (String) iterator.next();
-					rewrite.addImport(type, context);
-				}
+				JavaModelUtil.applyEdit(cu, fImportRewrite.rewriteImports(null), false, null);
 				
-				JavaModelUtil.applyEdit(cu, rewrite.rewriteImports(null), false, null);
-
 				setCompletionOffset(position.getOffset());
-
 			} catch (CoreException e) {
 				handleException(null, e);
 			} finally {

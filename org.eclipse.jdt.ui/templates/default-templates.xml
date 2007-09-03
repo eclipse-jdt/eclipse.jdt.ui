@@ -24,7 +24,7 @@
 	${cursor}
 }</template>
 
-<template name="for" description="%Templates.for_collection" id="org.eclipse.jdt.ui.templates.for_collection" context="java" enabled="true" autoinsert="false">for (Iterator ${iterator} = ${collection}.iterator(); ${iterator}.hasNext(); ) {
+<template name="for" description="%Templates.for_collection" id="org.eclipse.jdt.ui.templates.for_collection" context="java" enabled="true" autoinsert="false">for (${iteratorType:newType(java.util.Iterator)} ${iterator} = ${collection}.iterator(); ${iterator}.hasNext(); ) {
 	${type:elemType(collection)} ${name:newName(type)} = (${type}) ${iterator}.next();
 	${cursor}
 }</template>
@@ -152,7 +152,7 @@ return ${name};</template>
 	${cursor} 
 }</template>
 
-<template name="Test" description="%Templates.test_junit4" id="org.eclipse.jdt.ui.templates.test_junit4" context="java" enabled="true" autoinsert="false">@Test
+<template name="Test" description="%Templates.test_junit4" id="org.eclipse.jdt.ui.templates.test_junit4" context="java" enabled="true" autoinsert="false">@${testType:newType(org.junit.Test)}
 public void ${testname}() throws Exception {
 	${cursor} 
 }</template>
