@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
@@ -27,10 +28,12 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+
 public abstract class AbstractCleanUp implements ICleanUp {
-	
+
 	private CleanUpOptions fOptions;
-	
+
 	protected AbstractCleanUp() {
 	}
 
@@ -38,28 +41,28 @@ public abstract class AbstractCleanUp implements ICleanUp {
 		if (settings != null)
 			setOptions(new CleanUpOptions(settings));
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public void setOptions(CleanUpOptions options) {
 		fOptions= options;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public CleanUpOptions getOptions() {
 		return fOptions;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public String[] getDescriptions() {
 		return new String[0];
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -73,21 +76,21 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	public CleanUpRequirements getRequirements() {
 		return new CleanUpRequirements(false, false, null);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
 		return new RefactoringStatus();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public IFix createFix(CleanUpContext context) throws CoreException {
 		return null;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -108,7 +111,18 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		return -1;
 	}
-	
+
+	/**
+	 * @param key the name of the option
+	 * @return true if option with <code>key</code> is enabled
+	 */
+	protected boolean isEnabled(String key) {
+		Assert.isNotNull(fOptions);
+		Assert.isNotNull(key);
+
+		return fOptions.isEnabled(key);
+	}
+
 	/**
 	 * Utility method to: count number of problems in <code>problems</code> with <code>problemId</code>
 	 * @param problems the set of problems
@@ -123,11 +137,60 @@ public abstract class AbstractCleanUp implements ICleanUp {
 		}
 		return result;
 	}
-	
-	protected boolean isEnabled(String key) {
-		Assert.isNotNull(fOptions);
-		
-		return fOptions.isEnabled(key);
+
+	/**
+	 * Convert set of IProblems to IProblemLocations
+	 * @param problems the problems to convert
+	 * @return the converted set
+	 */
+	protected static IProblemLocation[] convertProblems(IProblem[] problems) {
+		IProblemLocation[] result= new IProblemLocation[problems.length];
+
+		for (int i= 0; i < problems.length; i++) {
+			result[i]= new ProblemLocation(problems[i]);
+		}
+
+		return result;
 	}
-	
+
+	/**
+	 * Returns unique problem locations. All locations in result 
+	 * have an id element <code>problemIds</code>.
+	 * 
+	 * @param problems the problems to filter
+	 * @param problemIds the ids of the resulting problem locations
+	 * @return problem locations
+	 */
+	protected static IProblemLocation[] filter(IProblemLocation[] problems, int[] problemIds) {
+		ArrayList result= new ArrayList();
+
+		for (int i= 0; i < problems.length; i++) {
+			IProblemLocation problem= problems[i];
+			if (contains(problemIds, problem.getProblemId()) && !contains(result, problem)) {
+				result.add(problem);
+			}
+		}
+
+		return (IProblemLocation[]) result.toArray(new IProblemLocation[result.size()]);
+	}
+
+	private static boolean contains(ArrayList problems, IProblemLocation problem) {
+		for (int i= 0; i < problems.size(); i++) {
+			IProblemLocation existing= (IProblemLocation) problems.get(i);
+			if (existing.getProblemId() == problem.getProblemId() && existing.getOffset() == problem.getOffset() && existing.getLength() == problem.getLength()) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private static boolean contains(int[] ids, int id) {
+		for (int i= 0; i < ids.length; i++) {
+			if (ids[i] == id)
+				return true;
+		}
+		return false;
+	}
+
 }

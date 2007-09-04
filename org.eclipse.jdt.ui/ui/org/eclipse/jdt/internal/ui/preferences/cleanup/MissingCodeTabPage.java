@@ -20,21 +20,19 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 
 public final class MissingCodeTabPage extends CleanUpTabPage {
 
-    public MissingCodeTabPage(IModificationListener listener, Map values, boolean isSaveParticipantConfiguration, String title) {
-    	super(listener, values, isSaveParticipantConfiguration, title);
-    }
-    
-    protected ICleanUp[] createPreviewCleanUps(Map values) {
-    	return new ICleanUp[] {
-    			new Java50CleanUp(values),
-    			new PotentialProgrammingProblemsCleanUp(values)
-    	};
-    }
+	public MissingCodeTabPage(IModificationListener listener, Map values, boolean isSaveParticipantConfiguration, String title) {
+		super(listener, values, isSaveParticipantConfiguration, title);
+	}
 
-    protected void doCreatePreferences(Composite composite, int numColumns) {
+	protected ICleanUp[] createPreviewCleanUps(Map values) {
+		return new ICleanUp[] { new Java50CleanUp(values), new PotentialProgrammingProblemsCleanUp(values), new UnimplementedCodeCleanUp(values) };
+	}
+
+	protected void doCreatePreferences(Composite composite, int numColumns) {
     	
     	Group annotationsGroup= createGroup(numColumns, composite, CleanUpMessages.MissingCodeTabPage_GroupName_Annotations);
     	
@@ -54,5 +52,11 @@ public final class MissingCodeTabPage extends CleanUpTabPage {
 			final RadioPreference defaultPref= createRadioPref(pppGroup, 1, CleanUpMessages.MissingCodeTabPage_RadioName_AddDefaultSUID, CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, CleanUpModifyDialog.FALSE_TRUE);
 			registerSlavePreference(addSUIDPref, new RadioPreference[] {generatedPref, defaultPref});			
 		}
+		
+		Group udGroup= createGroup(numColumns, composite, CleanUpMessages.MissingCodeTabPage_GroupName_UnimplementedCode);
+		CheckboxPreference addMethodPref= createCheckboxPref(udGroup, numColumns, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddMethods, CleanUpConstants.ADD_MISSING_METHODES, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(addMethodPref);
+
+		createLabel(numColumns, udGroup, CleanUpMessages.MissingCodeTabPage_Label_CodeTemplatePreferencePage);
     }
 }

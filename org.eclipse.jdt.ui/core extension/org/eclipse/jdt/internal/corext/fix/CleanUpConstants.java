@@ -998,6 +998,20 @@ public class CleanUpConstants {
 	 * @since 3.3
 	 */
 	public static final String SORT_MEMBERS_ALL = "cleanup.sort_members_all"; //$NON-NLS-1$
+	
+	/**
+	 * If enabled method stubs are added to all non abstract classes which
+	 * require to implement some methods.
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * Default value: Value returned by {@link #getEclipseDefaultSettings()}<br>
+	 * <br>
+	 * 
+	 * @see #TRUE
+	 * @see #FALSE
+	 * @since 3.4 
+	 */
+	public static final String ADD_MISSING_METHODES= "cleanup.add_missing_methods"; //$NON-NLS-1$
 
 	/**
 	 * Should the Clean Up Wizard be shown when executing the Clean Up Action?
@@ -1155,7 +1169,9 @@ public class CleanUpConstants {
 		result.put(ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, TRUE);
 		
 		result.put(ADD_MISSING_NLS_TAGS, FALSE);
-		
+
+		result.put(ADD_MISSING_METHODES, FALSE);
+
 		//Code Organizing
 		result.put(FORMAT_SOURCE_CODE, FALSE);
 		
@@ -1233,6 +1249,8 @@ public class CleanUpConstants {
 		result.put(ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, TRUE);
 		
 		result.put(ADD_MISSING_NLS_TAGS, FALSE);
+
+		result.put(ADD_MISSING_METHODES, FALSE);
 		
 		//Code Organizing
 		result.put(FORMAT_SOURCE_CODE, FALSE);

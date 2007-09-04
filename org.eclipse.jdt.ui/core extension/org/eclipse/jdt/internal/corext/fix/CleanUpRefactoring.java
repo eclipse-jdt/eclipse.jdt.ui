@@ -81,6 +81,7 @@ import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
@@ -1015,6 +1016,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				new PotentialProgrammingProblemsCleanUp(), 
 				new UnnecessaryCodeCleanUp(), 
 				new StringCleanUp(), 
+				new UnimplementedCodeCleanUp(),
 				new SortMembersCleanUp(), 
 				new ImportsCleanUp(),
 				new CommentFormatCleanUp(),
@@ -1033,6 +1035,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				new PotentialProgrammingProblemsCleanUp(settings), 
 				new UnnecessaryCodeCleanUp(settings), 
 				new StringCleanUp(settings),
+				new UnimplementedCodeCleanUp(settings),
 				new SortMembersCleanUp(settings), 
 				new ImportsCleanUp(settings), 
 				new CommentFormatCleanUp(settings),

@@ -84,12 +84,16 @@ public class CleanUpMessages extends NLS {
 	public static String MemberAccessesTabPage_RadioName_NeverThisForFields;
 	public static String MemberAccessesTabPage_RadioName_NeverThisForMethods;
 
+
 	public static String MissingCodeTabPage_CheckboxName_AddMissingAnnotations;
 	public static String MissingCodeTabPage_CheckboxName_AddMissingDeprecatedAnnotations;
 	public static String MissingCodeTabPage_CheckboxName_AddMissingOverrideAnnotations;
+	public static String MissingCodeTabPage_CheckboxName_AddMethods;
 	public static String MissingCodeTabPage_CheckboxName_AddSUID;
 	public static String MissingCodeTabPage_GroupName_Annotations;
+	public static String MissingCodeTabPage_GroupName_UnimplementedCode;
 	public static String MissingCodeTabPage_GroupName_PotentialProgrammingProblems;
+	public static String MissingCodeTabPage_Label_CodeTemplatePreferencePage;
 	public static String MissingCodeTabPage_RadioName_AddDefaultSUID;
 	public static String MissingCodeTabPage_RadioName_AddGeneratedSUID;
 

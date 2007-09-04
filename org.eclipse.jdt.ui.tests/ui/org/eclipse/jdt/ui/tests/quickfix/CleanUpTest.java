@@ -32,6 +32,8 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
+import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -6146,6 +6148,131 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected1= buf.toString();
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+
+	public void testUnimplementedCode01() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public interface IFace {\n");
+		buf.append("    void foo();\n");
+		buf.append("    void bar();\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("IFace.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E01 implements IFace {\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E01.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E02 implements IFace {\n");
+		buf.append("    public class Inner implements IFace {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu2= pack1.createCompilationUnit("E02.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.ADD_MISSING_METHODES);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E01 implements IFace {\n");
+		buf.append("\n");
+		buf.append("    /* comment */\n");
+		buf.append("    public void bar() {\n");
+		buf.append("        //TODO\n");
+		buf.append("        \n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    /* comment */\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        //TODO\n");
+		buf.append("        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E02 implements IFace {\n");
+		buf.append("    public class Inner implements IFace {\n");
+		buf.append("\n");
+		buf.append("        /* comment */\n");
+		buf.append("        public void bar() {\n");
+		buf.append("            //TODO\n");
+		buf.append("            \n");
+		buf.append("        }\n");
+		buf.append("\n");
+		buf.append("        /* comment */\n");
+		buf.append("        public void foo() {\n");
+		buf.append("            //TODO\n");
+		buf.append("            \n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    /* comment */\n");
+		buf.append("    public void bar() {\n");
+		buf.append("        //TODO\n");
+		buf.append("        \n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    /* comment */\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        //TODO\n");
+		buf.append("        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 });
+	}
+
+	public void testUnimplementedCode02() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public interface IFace {\n");
+		buf.append("    void foo();\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("IFace.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E01 implements IFace {\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E01.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E02 implements IFace {\n");
+		buf.append("    \n");
+		buf.append("    public class Inner implements IFace {\n");
+		buf.append("        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu2= pack1.createCompilationUnit("E02.java", buf.toString(), false, null);
+
+		enable(UnimplementedCodeCleanUp.MAKE_TYPE_ABSTRACT);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public abstract class E01 implements IFace {\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public abstract class E02 implements IFace {\n");
+		buf.append("    \n");
+		buf.append("    public abstract class Inner implements IFace {\n");
+		buf.append("        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 });
 	}
 	
 }

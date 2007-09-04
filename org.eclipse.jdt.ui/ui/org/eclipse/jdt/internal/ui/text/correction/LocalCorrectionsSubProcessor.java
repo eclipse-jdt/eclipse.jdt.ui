@@ -45,17 +45,12 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CatchClause;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
-import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -97,6 +92,7 @@ import org.eclipse.jdt.internal.corext.fix.CodeStyleFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
 import org.eclipse.jdt.internal.corext.fix.StringFix;
+import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
@@ -112,8 +108,10 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
@@ -130,7 +128,6 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistPr
 import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingAnnotationAttributesProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.UnimplementedMethodsCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.ChangeDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.InsertDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.RemoveDescription;
@@ -389,44 +386,26 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void addUnimplementedMethodsProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
-		ICompilationUnit cu= context.getCompilationUnit();
-		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-		if (selectedNode == null) {
-			return;
+		IFix addMethodFix= UnimplementedCodeFix.createAddUnimplementedMethodsFix(context.getASTRoot(), problem);
+		if (addMethodFix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+
+			Map settings= new Hashtable();
+			settings.put(CleanUpConstants.ADD_MISSING_METHODES, CleanUpConstants.TRUE);
+			ICleanUp cleanUp= new UnimplementedCodeCleanUp(settings);
+
+			proposals.add(new FixCorrectionProposal(addMethodFix, cleanUp, 10, image, context));
 		}
-		if (selectedNode.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION) { // bug 200016
-			selectedNode= selectedNode.getParent();
-		}
-		
-		ASTNode typeNode= null;
-		ITypeBinding binding= null;
-		if (selectedNode.getNodeType() == ASTNode.SIMPLE_NAME && selectedNode.getParent() instanceof AbstractTypeDeclaration) {
-			AbstractTypeDeclaration typeDecl= (AbstractTypeDeclaration) selectedNode.getParent();
-			binding= typeDecl.resolveBinding();
-			typeNode= typeDecl;
-		} else if (selectedNode.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
-			AnonymousClassDeclaration anonymDecl= ((ClassInstanceCreation) selectedNode).getAnonymousClassDeclaration();
-			binding= anonymDecl.resolveBinding();
-			typeNode= anonymDecl;
-		} else if (selectedNode.getNodeType() == ASTNode.ENUM_CONSTANT_DECLARATION) {
-			AnonymousClassDeclaration anonymDecl= ((EnumConstantDeclaration) selectedNode).getAnonymousClassDeclaration();
-			binding= anonymDecl.resolveBinding();
-			typeNode= anonymDecl;
-		} else if (selectedNode.getNodeType() == ASTNode.METHOD_DECLARATION && problem.getProblemId() == IProblem.EnumAbstractMethodMustBeImplemented) {
-			EnumDeclaration enumDecl= (EnumDeclaration) selectedNode.getParent(); // bug 200026
-			if (!enumDecl.enumConstants().isEmpty()) {
-				binding= enumDecl.resolveBinding();
-				typeNode= enumDecl;
-			}
-		}
-		if (typeNode != null && binding != null) {
-			UnimplementedMethodsCorrectionProposal proposal= new UnimplementedMethodsCorrectionProposal(cu, typeNode, problem.getProblemId(), 10);
-			proposals.add(proposal);
-		}
-		if (typeNode instanceof TypeDeclaration) {
-			TypeDeclaration typeDeclaration= (TypeDeclaration) typeNode;
-			ASTRewriteCorrectionProposal proposal= ModifierCorrectionSubProcessor.getMakeTypeAbstractProposal(cu, typeDeclaration, 5);
-			proposals.add(proposal);
+
+		IFix makeAbstractFix= UnimplementedCodeFix.createMakeTypeAbstractFix(context.getASTRoot(), problem);
+		if (makeAbstractFix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+
+			Map settings= new Hashtable();
+			settings.put(UnimplementedCodeCleanUp.MAKE_TYPE_ABSTRACT, CleanUpConstants.TRUE);
+			ICleanUp cleanUp= new UnimplementedCodeCleanUp(settings);
+
+			proposals.add(new FixCorrectionProposal(makeAbstractFix, cleanUp, 5, image, context));
 		}
 	}
 

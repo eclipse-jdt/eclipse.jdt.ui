@@ -5249,6 +5249,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
 		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT);
 		
+		enable(CleanUpConstants.ADD_MISSING_METHODES);
+
 		enable(CleanUpConstants.ADD_MISSING_NLS_TAGS);
 		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
 

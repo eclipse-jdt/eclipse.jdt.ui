@@ -148,6 +148,10 @@ public final class CorrectionMessages extends NLS {
 	public static String UnimplementedMethodsCorrectionProposal_description;
 	public static String UnimplementedMethodsCorrectionProposal_enum_info;
 	public static String UnimplementedMethodsCorrectionProposal_info;
+
+	public static String UnimplementedCodeFix_MakeAbstractFix_label;
+	public static String UnimplementedCodeFix_TextEditGroup_label;
+
 	public static String UnresolvedElementsSubProcessor_swaparguments_description;
 	public static String UnresolvedElementsSubProcessor_addargumentcast_description;
 	public static String UnresolvedElementsSubProcessor_changemethod_description;
@@ -266,6 +270,7 @@ public final class CorrectionMessages extends NLS {
 	public static String TypeChangeCompletionProposal_param_name;
 	public static String TypeChangeCompletionProposal_method_name;
 	public static String ImplementInterfaceProposal_name;
+	public static String AddUnimplementedMethodsOperation_AddMissingMethod_group;
 	public static String AdvancedQuickAssistProcessor_convertToIfElse_description;
 	public static String AdvancedQuickAssistProcessor_inverseIf_description;
 	public static String AdvancedQuickAssistProcessor_inverseBooleanVariable;
