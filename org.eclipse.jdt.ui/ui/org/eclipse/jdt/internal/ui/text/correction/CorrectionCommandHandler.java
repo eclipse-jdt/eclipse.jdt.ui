@@ -44,6 +44,7 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 
 /**
  * Handler to be used to run a quick fix or assist by keyboard shortcut

@@ -102,6 +102,11 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.sef.SelfEncapsulateFieldWizard;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ModifierChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -209,7 +214,7 @@ public class ModifierCorrectionSubProcessor {
 			ICompilationUnit targetCU= isLocalVar ? cu : ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), typeBinding.getTypeDeclaration());
 			if (targetCU != null) {
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				proposals.add(new ModifierChangeCompletionProposal(label, targetCU, bindingDecl, selectedNode, includedModifiers, excludedModifiers, relevance, image));
+				proposals.add(new ModifierChangeCorrectionProposal(label, targetCU, bindingDecl, selectedNode, includedModifiers, excludedModifiers, relevance, image));
 			}
 		}
 		if (kind == TO_VISIBLE && bindingDecl.getKind() == IBinding.VARIABLE) {
@@ -236,7 +241,7 @@ public class ModifierCorrectionSubProcessor {
 				int includedModifiers= JdtFlags.getVisibilityCode(defining);
 				String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemethodvisibility_description, new String[] { getVisibilityString(includedModifiers) });
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				proposals.add(new ModifierChangeCompletionProposal(label, cu, method, selectedNode, includedModifiers, excludedModifiers, 8, image));
+				proposals.add(new ModifierChangeCorrectionProposal(label, cu, method, selectedNode, includedModifiers, excludedModifiers, 8, image));
 			}
 		}
 
@@ -274,7 +279,7 @@ public class ModifierCorrectionSubProcessor {
 						return;
 				}
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				proposals.add(new ModifierChangeCompletionProposal(label, targetCU, overriddenDecl, selectedNode, includedModifiers, excludedModifiers, 7, image));
+				proposals.add(new ModifierChangeCorrectionProposal(label, targetCU, overriddenDecl, selectedNode, includedModifiers, excludedModifiers, 7, image));
 			}
 		}
 	}
@@ -292,7 +297,7 @@ public class ModifierCorrectionSubProcessor {
 			binding= ((IVariableBinding) binding).getVariableDeclaration();
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertofinal_description, binding.getName());
-			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 5, image));
+			proposals.add(new ModifierChangeCorrectionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 5, image));
 		}
 	}
 
@@ -380,19 +385,19 @@ public class ModifierCorrectionSubProcessor {
 				label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_removeinvalidmodifiers_description, methodName);
 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, includedModifiers, excludedModifiers, relevance, image));
+			proposals.add(new ModifierChangeCorrectionProposal(label, cu, binding, selectedNode, includedModifiers, excludedModifiers, relevance, image));
 			
 			if (problemId == IProblem.IllegalModifierCombinationFinalVolatileForField) {
-				proposals.add(new ModifierChangeCompletionProposal(CorrectionMessages.ModifierCorrectionSubProcessor_removefinal_description, cu, binding, selectedNode, 0, Modifier.FINAL, relevance + 1, image));
+				proposals.add(new ModifierChangeCorrectionProposal(CorrectionMessages.ModifierCorrectionSubProcessor_removefinal_description, cu, binding, selectedNode, 0, Modifier.FINAL, relevance + 1, image));
 			}
 			
 			if (problemId == IProblem.UnexpectedStaticModifierForField && binding instanceof IVariableBinding) {
 				ITypeBinding declClass= ((IVariableBinding) binding).getDeclaringClass();
 				if (declClass.isMember()) {
-					proposals.add(new ModifierChangeCompletionProposal(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertostaticfinal_description, cu, binding, selectedNode, Modifier.FINAL, Modifier.VOLATILE, relevance + 1, image));
+					proposals.add(new ModifierChangeCorrectionProposal(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertostaticfinal_description, cu, binding, selectedNode, Modifier.FINAL, Modifier.VOLATILE, relevance + 1, image));
 					ASTNode parentType= context.getASTRoot().findDeclaringNode(declClass);
 					if (parentType != null) {
-						proposals.add(new ModifierChangeCompletionProposal(CorrectionMessages.ModifierCorrectionSubProcessor_addstatictoparenttype_description, cu, declClass, parentType, Modifier.STATIC, 0, relevance - 1, image));
+						proposals.add(new ModifierChangeCorrectionProposal(CorrectionMessages.ModifierCorrectionSubProcessor_addstatictoparenttype_description, cu, declClass, parentType, Modifier.STATIC, 0, relevance - 1, image));
 					}
 				}
 			}
@@ -401,7 +406,7 @@ public class ModifierCorrectionSubProcessor {
 				if (declClass.isMember()) {
 					ASTNode parentType= context.getASTRoot().findDeclaringNode(declClass);
 					if (parentType != null) {
-						proposals.add(new ModifierChangeCompletionProposal(CorrectionMessages.ModifierCorrectionSubProcessor_addstatictoparenttype_description, cu, declClass, parentType, Modifier.STATIC, 0, relevance - 1, image));
+						proposals.add(new ModifierChangeCorrectionProposal(CorrectionMessages.ModifierCorrectionSubProcessor_addstatictoparenttype_description, cu, declClass, parentType, Modifier.STATIC, 0, relevance - 1, image));
 					}
 				}
 			}
@@ -644,7 +649,7 @@ public class ModifierCorrectionSubProcessor {
 			binding= ((IVariableBinding) binding).getVariableDeclaration();
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertofinal_description, binding.getName());
-			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 5, image));
+			proposals.add(new ModifierChangeCorrectionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 5, image));
 		}
 	}
 	

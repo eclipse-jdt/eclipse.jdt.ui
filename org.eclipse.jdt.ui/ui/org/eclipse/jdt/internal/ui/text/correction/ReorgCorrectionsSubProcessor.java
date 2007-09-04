@@ -105,6 +105,10 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectMainTypeNameProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectPackageDeclarationProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
@@ -117,47 +121,47 @@ public class ReorgCorrectionsSubProcessor {
 		IJavaProject javaProject= cu.getJavaProject();
 		String sourceLevel= javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
 		String compliance= javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-		
+
 		CompilationUnit root= context.getASTRoot();
-		
+
 		ASTNode coveredNode= problem.getCoveredNode(root);
 		if (!(coveredNode instanceof SimpleName))
-			return;		
-		
+			return;
+
 		ASTNode parentType= coveredNode.getParent();
 		if (!(parentType instanceof AbstractTypeDeclaration))
 			return;
-		
+
 		String currTypeName= ((SimpleName) coveredNode).getIdentifier();
 		String newTypeName= JavaCore.removeJavaLikeExtension(cu.getElementName());
-				
+
 		boolean hasOtherPublicTypeBefore= false;
-		
+
 		boolean found= false;
 		List types= root.types();
 		for (int i= 0; i < types.size(); i++) {
-			 AbstractTypeDeclaration curr= (AbstractTypeDeclaration) types.get(i);
-			 if (parentType != curr) {
-				 if (newTypeName.equals(curr.getName().getIdentifier())) {
-					 return;
-				 }
-				 if (!found && Modifier.isPublic(curr.getModifiers())) {
-					 hasOtherPublicTypeBefore= true;
-				 }
-			 } else {
-				 found= true;
-			 }
-		 }
+			AbstractTypeDeclaration curr= (AbstractTypeDeclaration) types.get(i);
+			if (parentType != curr) {
+				if (newTypeName.equals(curr.getName().getIdentifier())) {
+					return;
+				}
+				if (!found && Modifier.isPublic(curr.getModifiers())) {
+					hasOtherPublicTypeBefore= true;
+				}
+			} else {
+				found= true;
+			}
+		}
 		if (!JavaConventions.validateJavaTypeName(newTypeName, sourceLevel, compliance).matches(IStatus.ERROR)) {
 			proposals.add(new CorrectMainTypeNameProposal(cu, context, currTypeName, newTypeName, 5));
 		}
-		
+
 		if (!hasOtherPublicTypeBefore) {
 			String newCUName= JavaModelUtil.getRenamedCUName(cu, currTypeName);
 			ICompilationUnit newCU= ((IPackageFragment) (cu.getParent())).getCompilationUnit(newCUName);
 			if (!newCU.exists() && !isLinked && !JavaConventions.validateCompilationUnitName(newCUName, sourceLevel, compliance).matches(IStatus.ERROR)) {
 				RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);
-	
+
 				// rename CU
 				String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renamecu_description, newCUName);
 				proposals.add(new ChangeCorrectionProposal(label, change, 6, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME)));
@@ -205,7 +209,7 @@ public class ReorgCorrectionsSubProcessor {
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new UnusedCodeCleanUp(options), 6, image, context);
 			proposals.add(proposal);
 		}
-		
+
 		final ICompilationUnit cu= context.getCompilationUnit();
 		String name= CorrectionMessages.ReorgCorrectionsSubProcessor_organizeimports_description;
 		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 5, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
@@ -239,8 +243,8 @@ public class ReorgCorrectionsSubProcessor {
 				int kind= JavaModelUtil.is50OrHigher(cu.getJavaProject()) ? SimilarElementsRequestor.REF_TYPES : SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES;
 				UnresolvedElementsSubProcessor.addNewTypeProposals(cu, importDeclaration.getName(), kind, 5, proposals);
 			}
-			
-			
+
+
 			String name= ASTNodes.asString(importDeclaration.getName());
 			char[] packageName;
 			char[] typeName= null;
@@ -309,9 +313,9 @@ public class ReorgCorrectionsSubProcessor {
 					return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_classfolder_description, args);
 				}
 			case IClasspathEntry.CPE_VARIABLE: {
-					String[] args= { JavaElementLabels.getElementLabel(root, 0), project.getElementName() };
-					return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_variable_description, args);
-				}
+				String[] args= { JavaElementLabels.getElementLabel(root, 0), project.getElementName() };
+				return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_variable_description, args);
+			}
 			case IClasspathEntry.CPE_CONTAINER:
 				try {
 					String[] args= { JavaElementLabels.getContainerEntryLabel(entry.getPath(), root.getJavaProject()), project.getElementName() };
@@ -320,7 +324,7 @@ public class ReorgCorrectionsSubProcessor {
 					// ignore
 				}
 				break;
-			}
+		}
 		return null;
 	}
 
@@ -363,13 +367,13 @@ public class ReorgCorrectionsSubProcessor {
 	}
 
 	private static final class ChangeTo50Compliance extends ChangeCorrectionProposal implements IWorkspaceRunnable {
-		
+
 		private final IJavaProject fProject;
 		private final boolean fChangeOnWorkspace;
-		
+
 		private Job fUpdateJob;
 		private boolean f50JREFound;
-		
+
 		public ChangeTo50Compliance(String name, IJavaProject project, boolean changeOnWorkspace, int relevance) {
 			super(name, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 			fProject= project;
@@ -377,7 +381,7 @@ public class ReorgCorrectionsSubProcessor {
 			fUpdateJob= null;
 			f50JREFound= false;
 		}
-		
+
 		private boolean is50orGreaterVMInstall(IVMInstall install) {
 			if (install instanceof IVMInstall2) {
 				String compliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) install, JavaCore.VERSION_1_3);
@@ -385,7 +389,7 @@ public class ReorgCorrectionsSubProcessor {
 			}
 			return false;
 		}
-		
+
 		private IVMInstall find50OrGreaterVMInstall() {
 			IVMInstallType[] installTypes= JavaRuntime.getVMInstallTypes();
 			for (int i= 0; i < installTypes.length; i++) {
@@ -398,14 +402,14 @@ public class ReorgCorrectionsSubProcessor {
 			}
 			return null;
 		}
-		
+
 		public void run(IProgressMonitor monitor) throws CoreException {
 			boolean needsBuild= updateJRE(monitor);
 			if (needsBuild) {
 				fUpdateJob= CoreUtility.getBuildJob(fChangeOnWorkspace ? null : fProject.getProject());
 			}
 		}
-		
+
 		private boolean updateJRE( IProgressMonitor monitor) throws CoreException, JavaModelException {
 			try {
 				IVMInstall vm50Install= find50OrGreaterVMInstall();
@@ -451,7 +455,7 @@ public class ReorgCorrectionsSubProcessor {
 			}
 			fProject.setRawClasspath(classpath, monitor);
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 		 */
@@ -462,7 +466,7 @@ public class ReorgCorrectionsSubProcessor {
 			} else {
 				message.append(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeproject_description);
 			}
-			
+
 			IVMInstall vm50Install= find50OrGreaterVMInstall();
 			if (vm50Install != null) {
 				try {
@@ -486,7 +490,7 @@ public class ReorgCorrectionsSubProcessor {
 			}
 			return message.toString();
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(IDocument)
 		 */
@@ -513,20 +517,26 @@ public class ReorgCorrectionsSubProcessor {
 			} catch (InterruptedException e) {
 				return;
 			}
-			
+
 			if (fUpdateJob != null) {
 				fUpdateJob.schedule();
 			}
-			
+
 			if (!f50JREFound) {
 				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), CorrectionMessages.ReorgCorrectionsSubProcessor_no_50jre_title, CorrectionMessages.ReorgCorrectionsSubProcessor_no_50jre_message);
 			}
 		}
 	}
 
+	/**
+	 * Adds a proposal to change to 5.0 compliance
+	 * @param context the context
+	 * @param problem the current problem
+	 * @param proposals the resulting proposals
+	 */
 	public static void getNeed50ComplianceProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		IJavaProject project= context.getCompilationUnit().getJavaProject();
-		
+
 		String label1= CorrectionMessages.ReorgCorrectionsSubProcessor_50_project_compliance_description;
 		proposals.add(new ChangeTo50Compliance(label1, project, false, 5));
 
@@ -536,6 +546,12 @@ public class ReorgCorrectionsSubProcessor {
 		}
 	}
 
+	/**
+	 * Adds a proposal that opens the build path dialog
+	 * @param context the context
+	 * @param problem the current problem
+	 * @param proposals the resulting proposals
+	 */
 	public static void getIncorrectBuildPathProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		IProject project= context.getCompilationUnit().getJavaProject().getProject();
 		String label= CorrectionMessages.ReorgCorrectionsSubProcessor_configure_buildpath_label;
@@ -558,16 +574,16 @@ public class ReorgCorrectionsSubProcessor {
 			proposals.add(proposal);
 		}
 	}
-	
+
 	private static boolean canModifyAccessRules(IBinding binding) {
 		IJavaElement element= binding.getJavaElement();
 		if (element == null)
 			return false;
-		
+
 		IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
 		if (root == null)
 			return false;
-		
+
 		try {
 			IClasspathEntry classpathEntry= root.getRawClasspathEntry();
 			if (classpathEntry == null)
@@ -584,6 +600,6 @@ public class ReorgCorrectionsSubProcessor {
 		}
 		return false;
 	}
-	
-	
+
+
 }

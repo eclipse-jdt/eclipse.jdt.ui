@@ -16,7 +16,6 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -27,33 +26,34 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 
 
 public class TypeParameterMismatchSubProcessor {
 
-	public static void getTypeParameterMismatchProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
-		CompilationUnit astRoot= context.getASTRoot();
-		ASTNode selectedNode= problem.getCoveredNode(astRoot);
-		if (!(selectedNode instanceof SimpleName)) {
-			return;
-		}
+//	public static void getTypeParameterMismatchProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+//	CompilationUnit astRoot= context.getASTRoot();
+//	ASTNode selectedNode= problem.getCoveredNode(astRoot);
+//	if (!(selectedNode instanceof SimpleName)) {
+//	return;
+//	}
 
-		ASTNode normalizedNode= ASTNodes.getNormalizedNode(selectedNode);
-		if (!(normalizedNode instanceof ParameterizedType)) {
-			return;
-		}
-		// waiting for result of https://bugs.eclipse.org/bugs/show_bug.cgi?id=81544
+//	ASTNode normalizedNode= ASTNodes.getNormalizedNode(selectedNode);
+//	if (!(normalizedNode instanceof ParameterizedType)) {
+//	return;
+//	}
+//	// waiting for result of https://bugs.eclipse.org/bugs/show_bug.cgi?id=81544
 
 
-	}
-	
+//	}
+
 	public static void removeMismatchedParameters(IInvocationContext context, IProblemLocation problem, Collection proposals){
 		ICompilationUnit cu= context.getCompilationUnit();
 		ASTNode selectedNode= problem.getCoveredNode(context.getASTRoot());
 		if (!(selectedNode instanceof SimpleName)) {
 			return;
 		}
-		
+
 		ASTNode normalizedNode=ASTNodes.getNormalizedNode(selectedNode);
 		if (normalizedNode instanceof ParameterizedType) {
 			ASTRewrite rewrite = ASTRewrite.create(normalizedNode.getAST());
@@ -66,5 +66,5 @@ public class TypeParameterMismatchSubProcessor {
 			proposals.add(proposal);
 		}
 	}
-	
+
 }

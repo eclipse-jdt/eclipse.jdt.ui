@@ -32,8 +32,8 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.NewCUCompletionUsingWizardProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -115,7 +115,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
+		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(1);
 		String preview2= getWizardPreviewContent(newCUWizard);
 
 		buf= new StringBuffer();
@@ -126,7 +126,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
+		newCUWizard= (NewCUUsingWizardProposal) proposals.get(2);
 		String preview3= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -137,7 +137,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 		
-		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(3);
+		newCUWizard= (NewCUUsingWizardProposal) proposals.get(3);
 		String preview4= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -191,7 +191,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
+		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(1);
 		String preview2= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -202,7 +202,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
+		newCUWizard= (NewCUUsingWizardProposal) proposals.get(2);
 		String preview3= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -213,7 +213,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 		
-		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(3);
+		newCUWizard= (NewCUUsingWizardProposal) proposals.get(3);
 		String preview4= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -269,7 +269,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
+		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(1);
 		String preview2= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -280,7 +280,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
+		newCUWizard= (NewCUUsingWizardProposal) proposals.get(2);
 		String preview3= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -291,7 +291,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 	
-		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(3);
+		newCUWizard= (NewCUUsingWizardProposal) proposals.get(3);
 		String preview4= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -346,7 +346,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
+		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(1);
 		String preview2= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -465,7 +465,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
+		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(1);
 		String preview2= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -526,7 +526,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 		
-		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
+		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(2);
 		String preview3= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -539,7 +539,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(3);
+		newCUWizard= (NewCUUsingWizardProposal) proposals.get(3);
 		String preview4= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -552,7 +552,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected4= buf.toString();
 		
-		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(4);
+		newCUWizard= (NewCUUsingWizardProposal) proposals.get(4);
 		String preview5= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -610,7 +610,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
-		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(0);
+		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(0);
 		String preview1= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -621,7 +621,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 
-		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
+		newCUWizard= (NewCUUsingWizardProposal) proposals.get(1);
 		String preview2= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -632,7 +632,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 		
-		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
+		newCUWizard= (NewCUUsingWizardProposal) proposals.get(2);
 		String preview3= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -682,7 +682,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
+		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(1);
 		String preview2= getWizardPreviewContent(newCUWizard);
 				
 		buf= new StringBuffer();
@@ -695,7 +695,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
+		newCUWizard= (NewCUUsingWizardProposal) proposals.get(2);
 		String preview3= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -729,7 +729,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
-		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(0);
+		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(0);
 		String preview1= getWizardPreviewContent(newCUWizard);
 				
 		buf= new StringBuffer();
@@ -756,7 +756,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
-		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(0);
+		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(0);
 		String preview1= getWizardPreviewContent(newCUWizard);
 				
 		buf= new StringBuffer();
@@ -783,7 +783,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
-		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(0);
+		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(0);
 		String preview1= getWizardPreviewContent(newCUWizard);
 				
 		buf= new StringBuffer();
@@ -811,7 +811,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
-		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(0);
+		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(0);
 		String preview1= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -897,7 +897,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 		
-		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(3);
+		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(3);
 		String preview4= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -908,7 +908,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected4= buf.toString();
 
-		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(4);
+		newCUWizard= (NewCUUsingWizardProposal) proposals.get(4);
 		String preview5= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
@@ -919,7 +919,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected5= buf.toString();
 		
-		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(5);
+		newCUWizard= (NewCUUsingWizardProposal) proposals.get(5);
 		String preview6= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();

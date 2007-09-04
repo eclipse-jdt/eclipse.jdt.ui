@@ -39,8 +39,8 @@ import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
-import org.eclipse.jdt.internal.ui.text.correction.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;

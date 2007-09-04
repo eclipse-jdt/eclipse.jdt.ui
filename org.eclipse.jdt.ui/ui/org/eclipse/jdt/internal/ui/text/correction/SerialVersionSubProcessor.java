@@ -27,6 +27,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 
 /**
  * Subprocessor for serial version quickfix proposals.

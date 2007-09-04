@@ -55,6 +55,8 @@ import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.MarkerResolutionProposal;
 
 
 public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassist.IQuickAssistProcessor {

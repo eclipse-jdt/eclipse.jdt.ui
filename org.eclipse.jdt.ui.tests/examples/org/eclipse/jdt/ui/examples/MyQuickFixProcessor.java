@@ -20,7 +20,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
 
-import org.eclipse.jdt.internal.ui.text.correction.ReplaceCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
 
 /**
  *

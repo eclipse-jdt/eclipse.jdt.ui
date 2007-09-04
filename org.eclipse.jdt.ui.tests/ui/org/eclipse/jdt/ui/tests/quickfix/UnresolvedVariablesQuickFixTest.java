@@ -32,10 +32,10 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.NewCUCompletionUsingWizardProposal;
-import org.eclipse.jdt.internal.ui.text.correction.NewVariableCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.RenameNodeCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameNodeCorrectionProposal;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -1630,8 +1630,8 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		String[] previews= new String[proposals.size()];
 		for (i= 0; i < previews.length; i++) {
 			Object curr= proposals.get(i);
-			if (curr instanceof NewCUCompletionUsingWizardProposal) {
-				previews[i]= getWizardPreviewContent((NewCUCompletionUsingWizardProposal) curr);
+			if (curr instanceof NewCUUsingWizardProposal) {
+				previews[i]= getWizardPreviewContent((NewCUUsingWizardProposal) curr);
 			} else {
 				previews[i]= getPreviewContent((CUCorrectionProposal) curr);
 			}
@@ -1720,7 +1720,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		for (int i= proposals.size() - 1; i >= 0; i--) {
 			Object curr= proposals.get(i);
-			if (!(curr instanceof RenameNodeCompletionProposal)) {
+			if (!(curr instanceof RenameNodeCorrectionProposal)) {
 				proposals.remove(i);
 			}
 		}
@@ -1786,7 +1786,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		for (int i= proposals.size() - 1; i >= 0; i--) {
 			Object curr= proposals.get(i);
-			if (!(curr instanceof RenameNodeCompletionProposal)) {
+			if (!(curr instanceof RenameNodeCorrectionProposal)) {
 				proposals.remove(i);
 			}
 		}
@@ -1855,7 +1855,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot, 3);
 		for (int i= proposals.size() - 1; i >= 0; i--) {
 			Object curr= proposals.get(i);
-			if (!(curr instanceof RenameNodeCompletionProposal)) {
+			if (!(curr instanceof RenameNodeCorrectionProposal)) {
 				proposals.remove(i);
 			}
 		}
@@ -1903,7 +1903,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal localProposal= null;
 		for (int i = 0; i < proposals.size(); i++) {
 			Object curr= proposals.get(i);
-			if (curr instanceof NewVariableCompletionProposal && ((NewVariableCompletionProposal) curr).getVariableKind() == NewVariableCompletionProposal.LOCAL) {
+			if (curr instanceof NewVariableCorrectionProposal && ((NewVariableCorrectionProposal) curr).getVariableKind() == NewVariableCorrectionProposal.LOCAL) {
 				localProposal= (CUCorrectionProposal) curr;
 			}
 		}
@@ -1944,7 +1944,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal localProposal= null;
 		for (int i = 0; i < proposals.size(); i++) {
 			Object curr= proposals.get(i);
-			if (curr instanceof NewVariableCompletionProposal && ((NewVariableCompletionProposal) curr).getVariableKind() == NewVariableCompletionProposal.LOCAL) {
+			if (curr instanceof NewVariableCorrectionProposal && ((NewVariableCorrectionProposal) curr).getVariableKind() == NewVariableCorrectionProposal.LOCAL) {
 				localProposal= (CUCorrectionProposal) curr;
 			}
 		}
@@ -1986,7 +1986,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal localProposal= null;
 		for (int i = 0; i < proposals.size(); i++) {
 			Object curr= proposals.get(i);
-			if (curr instanceof NewVariableCompletionProposal && ((NewVariableCompletionProposal) curr).getVariableKind() == NewVariableCompletionProposal.LOCAL) {
+			if (curr instanceof NewVariableCorrectionProposal && ((NewVariableCorrectionProposal) curr).getVariableKind() == NewVariableCorrectionProposal.LOCAL) {
 				localProposal= (CUCorrectionProposal) curr;
 			}
 		}

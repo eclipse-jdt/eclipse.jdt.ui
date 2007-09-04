@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,9 @@ public class NameMatcher {
 	/**
 	 * Returns a similarity value of the two names.
 	 * The range of is from 0 to 256. no similarity is negative
+	 * @param name1 the first name
+	 * @param name2 the second name
+	 * @return <code>true</code> is returned if the names are similar
 	 */
 	public static boolean isSimilarName(String name1, String name2) {
 		return getSimilarity(name1, name2) >= 0;
@@ -25,6 +28,9 @@ public class NameMatcher {
 	/**
 	 * Returns a similarity value of the two names.
 	 * The range of is from 0 to 256. no similarity is negative
+	 * @param name1 the first name
+	 * @param name2 the second name
+	 * @return the similarity valuer
 	 */
 	public static int getSimilarity(String name1, String name2) {
 		if (name1.length() > name2.length()) {

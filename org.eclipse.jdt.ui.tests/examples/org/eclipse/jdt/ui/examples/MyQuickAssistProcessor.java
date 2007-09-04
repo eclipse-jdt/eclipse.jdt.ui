@@ -46,8 +46,8 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
 
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
 

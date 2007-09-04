@@ -80,7 +80,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.refactoring.DelegateUIHelper;
-import org.eclipse.jdt.internal.ui.text.correction.LinkedNamesAssistProposal.DeleteBlockingExitPolicy;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal.DeleteBlockingExitPolicy;
 
 public class RenameLinkedMode {
 

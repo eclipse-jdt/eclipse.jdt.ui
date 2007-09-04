@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,9 +53,15 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.ChangeDescription;
-import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.InsertDescription;
-import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.RemoveDescription;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.CastCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ImplementInterfaceProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.ChangeDescription;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.InsertDescription;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.RemoveDescription;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 
@@ -74,7 +80,7 @@ public class TypeMismatchSubProcessor {
 
 		CompilationUnit astRoot= context.getASTRoot();
 		AST ast= astRoot.getAST();
-		
+
 		ASTNode selectedNode= problem.getCoveredNode(astRoot);
 		if (!(selectedNode instanceof Expression)) {
 			return;
@@ -239,7 +245,7 @@ public class TypeMismatchSubProcessor {
 			targetCu= ASTResolving.findCompilationUnitForBinding(cu, astRoot, declaringType);
 		}
 		if (targetCu != null && ASTResolving.isUseableTypeInContext(castTypeBinding, callerBindingDecl, false)) {
-			proposals.add(new TypeChangeCompletionProposal(targetCu, callerBindingDecl, astRoot, castTypeBinding, isAssignedNode, relevance));
+			proposals.add(new TypeChangeCorrectionProposal(targetCu, callerBindingDecl, astRoot, castTypeBinding, isAssignedNode, relevance));
 		}
 
 		// add interface to resulting type
@@ -265,7 +271,7 @@ public class TypeMismatchSubProcessor {
 		} else {
 			label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_addcast_description, castType);
 		}
-		return new CastCompletionProposal(label, cu, nodeToCast, castTypeBinding, relevance);
+		return new CastCorrectionProposal(label, cu, nodeToCast, castTypeBinding, relevance);
 	}
 
 	public static void addIncompatibleReturnTypeProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws JavaModelException {
@@ -291,7 +297,7 @@ public class TypeMismatchSubProcessor {
 
 		ICompilationUnit cu= context.getCompilationUnit();
 		IMethodBinding methodDecl= methodDeclBinding.getMethodDeclaration();
-		proposals.add(new TypeChangeCompletionProposal(cu, methodDecl, astRoot, overridden.getReturnType(), false, 8));
+		proposals.add(new TypeChangeCorrectionProposal(cu, methodDecl, astRoot, overridden.getReturnType(), false, 8));
 
 		ICompilationUnit targetCu= cu;
 
@@ -303,7 +309,7 @@ public class TypeMismatchSubProcessor {
 			targetCu= ASTResolving.findCompilationUnitForBinding(cu, astRoot, overridenDeclType);
 		}
 		if (targetCu != null && ASTResolving.isUseableTypeInContext(returnType, overriddenDecl, false)) {
-			TypeChangeCompletionProposal proposal= new TypeChangeCompletionProposal(targetCu, overriddenDecl, astRoot, returnType, false, 7);
+			TypeChangeCorrectionProposal proposal= new TypeChangeCorrectionProposal(targetCu, overriddenDecl, astRoot, returnType, false, 7);
 			if (overridenDeclType.isInterface()) {
 				proposal.setDisplayName(Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturnofimplemented_description, overriddenDecl.getName()));
 			} else {
@@ -350,7 +356,7 @@ public class TypeMismatchSubProcessor {
 			proposals.add(new ChangeMethodSignatureProposal(label, cu, astRoot, methodDeclBinding, null, changes, 8, image));
 		}
 
-		ITypeBinding declaringType= overridden.getDeclaringClass();	
+		ITypeBinding declaringType= overridden.getDeclaringClass();
 		ICompilationUnit targetCu= cu;
 		if (declaringType.isFromSource()) {
 			targetCu= ASTResolving.findCompilationUnitForBinding(cu, astRoot, declaringType);

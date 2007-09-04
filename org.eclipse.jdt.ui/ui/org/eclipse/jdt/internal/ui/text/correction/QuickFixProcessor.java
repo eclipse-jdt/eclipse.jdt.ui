@@ -28,6 +28,9 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
 
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.TaskMarkerProposal;
+
 /**
   */
 public class QuickFixProcessor implements IQuickFixProcessor {
