@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,10 +35,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class CompilationUnitChange extends TextFileChange {
 
 	private final ICompilationUnit fCUnit;
-	
+
 	/** The (optional) refactoring descriptor */
 	private ChangeDescriptor fDescriptor;
-	
+
 	/**
 	 * Creates a new <code>CompilationUnitChange</code>.
 	 * 
@@ -51,18 +51,18 @@ public class CompilationUnitChange extends TextFileChange {
 		fCUnit= cunit;
 		setTextType("java"); //$NON-NLS-1$
 	}
-	
+
 	private static IFile getFile(ICompilationUnit cunit) {
 		return (IFile) cunit.getResource();
 	}
-	
+
 	/* non java-doc
 	 * Method declared in IChange.
 	 */
 	public Object getModifiedElement(){
 		return fCUnit;
 	}
-	
+
 	/**
 	 * Returns the compilation unit this change works on.
 	 * 
@@ -71,16 +71,16 @@ public class CompilationUnitChange extends TextFileChange {
 	public ICompilationUnit getCompilationUnit() {
 		return fCUnit;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	protected IDocument acquireDocument(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
-		fCUnit.becomeWorkingCopy(null, new SubProgressMonitor(pm, 1));
+		fCUnit.becomeWorkingCopy(new SubProgressMonitor(pm, 1));
 		return super.acquireDocument(new SubProgressMonitor(pm, 1));
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -98,7 +98,7 @@ public class CompilationUnitChange extends TextFileChange {
 			}
 		}
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -110,7 +110,7 @@ public class CompilationUnitChange extends TextFileChange {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -119,7 +119,7 @@ public class CompilationUnitChange extends TextFileChange {
 			return fCUnit;
 		return super.getAdapter(adapter);
 	}
-	
+
 	/**
 	 * Sets the refactoring descriptor for this change
 	 * 
@@ -128,7 +128,7 @@ public class CompilationUnitChange extends TextFileChange {
 	public void setDescriptor(ChangeDescriptor descriptor) {
 		fDescriptor= descriptor;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

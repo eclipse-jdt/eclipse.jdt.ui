@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,7 @@ import org.eclipse.ltk.core.refactoring.ContentStamp;
 import org.eclipse.ltk.core.refactoring.UndoTextFileChange;
 
 /* package */ class UndoCompilationUnitChange extends UndoTextFileChange {
-	
+
 	private ICompilationUnit fCUnit;
 
 	public UndoCompilationUnitChange(String name, ICompilationUnit unit, UndoEdit undo, ContentStamp stampToRestore, int saveMode) throws CoreException {
@@ -43,38 +43,30 @@ import org.eclipse.ltk.core.refactoring.UndoTextFileChange;
 	private static IFile getFile(ICompilationUnit cunit) throws CoreException {
 		IFile file= (IFile)cunit.getResource();
 		if (file == null)
-			throw new CoreException(new Status(
-				IStatus.ERROR, 
-				JavaPlugin.getPluginId(), 
-				IStatus.ERROR, 
-				Messages.format(
-					RefactoringCoreMessages.UndoCompilationUnitChange_no_resource, 
-					cunit.getElementName()), 
-				null)
-			);
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), Messages.format(	RefactoringCoreMessages.UndoCompilationUnitChange_no_resource, cunit.getElementName())));
 		return file;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public Object getModifiedElement() {
 		return fCUnit;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	protected Change createUndoChange(UndoEdit edit, ContentStamp stampToRestore) throws CoreException {
 		return new UndoCompilationUnitChange(getName(), fCUnit, edit, stampToRestore, getSaveMode());
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
-		fCUnit.becomeWorkingCopy(null, new SubProgressMonitor(pm,1));
+		fCUnit.becomeWorkingCopy(new SubProgressMonitor(pm,1));
 		try {
 			return super.perform(new SubProgressMonitor(pm,1));
 		} finally {
