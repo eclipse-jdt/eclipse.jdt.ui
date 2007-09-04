@@ -13,16 +13,14 @@
 
 package org.eclipse.jdt.ui.actions;
 
-import com.ibm.icu.text.Collator;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -57,9 +55,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -68,17 +64,17 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation.DelegateEntry;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -126,67 +122,58 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 		public IStatus validate(Object[] selection) {
 			StatusInfo info= new StatusInfo();
+			int count= 0;
 			if (selection != null && selection.length > 0) {
-				int count= 0;
-				List bindings= new ArrayList(selection.length);
-				IMethodBinding binding= null;
+
+				HashSet signatures= new HashSet(selection.length);
 				for (int index= 0; index < selection.length; index++) {
-					if (selection[index] instanceof IBinding[]) {
-						count++;
-						binding= (IMethodBinding) ((IBinding[]) selection[index])[1];
-						IMethodBinding existing= null;
-						for (int offset= 0; offset < bindings.size(); offset++) {
-							existing= (IMethodBinding) bindings.get(offset);
-							if (Bindings.isEqualMethod(binding, existing.getName(), existing.getParameterTypes())) {
-								return new StatusInfo(IStatus.ERROR, ActionMessages.AddDelegateMethodsAction_duplicate_methods); 
-							}
+					if (selection[index] instanceof DelegateEntry) {
+						DelegateEntry delegateEntry= (DelegateEntry) selection[index];
+						if (!signatures.add(getSignature(delegateEntry.delegateMethod))) {
+							return new StatusInfo(IStatus.ERROR, ActionMessages.AddDelegateMethodsAction_duplicate_methods); 
 						}
-						bindings.add(binding);
-						info= new StatusInfo(IStatus.INFO, Messages.format(ActionMessages.AddDelegateMethodsAction_selectioninfo_more, new Object[] { String.valueOf(count), String.valueOf(fEntries)})); 
+						count++;
 					}
 				}
 			}
+			info= new StatusInfo(IStatus.INFO, Messages.format(ActionMessages.AddDelegateMethodsAction_selectioninfo_more, new Object[] { String.valueOf(count), String.valueOf(fEntries)})); 
 			return info;
 		}
+
+		private String getSignature(IMethodBinding binding) {
+			StringBuffer buf= new StringBuffer(binding.getName()).append('(');
+			ITypeBinding[] parameterTypes= binding.getParameterTypes();
+			for (int i= 0; i < parameterTypes.length; i++) {
+				buf.append(parameterTypes[i].getTypeDeclaration().getName());
+			}
+			buf.append(')');
+			return buf.toString();
+		}
+
 	}
 
 	private static class AddDelegateMethodsContentProvider implements ITreeContentProvider {
 
-		private IBinding[][] fBindings= new IBinding[0][0];
-
-		private int fCount= 0;
-
+		private DelegateEntry[] fDelegateEntries;
 		private IVariableBinding[] fExpanded= new IVariableBinding[0];
 
-		private final CompilationUnit fUnit;
+		AddDelegateMethodsContentProvider(CompilationUnit astRoot, IType type, IField[] fields) throws JavaModelException {
 
-		AddDelegateMethodsContentProvider(IType type, IField[] fields) throws JavaModelException {
-			RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
-			fUnit= parser.parse(type.getCompilationUnit(), true);
-			final ITypeBinding binding= ASTNodes.getTypeBinding(fUnit, type);
+			final ITypeBinding binding= ASTNodes.getTypeBinding(astRoot, type);
 			if (binding != null) {
-				IBinding[][] bindings= StubUtility2.getDelegatableMethods(fUnit.getAST(), binding);
-				if (bindings != null) {
-					fBindings= bindings;
-					fCount= bindings.length;
-				}
+				fDelegateEntries= StubUtility2.getDelegatableMethods(binding);
+
 				List expanded= new ArrayList();
 				for (int index= 0; index < fields.length; index++) {
-					VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(fields[index], fUnit);
+					VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(fields[index], astRoot);
 					if (fragment != null) {
 						IVariableBinding variableBinding= fragment.resolveBinding();
 						if (variableBinding != null)
 							expanded.add(variableBinding);
 					}
 				}
-				IVariableBinding[] result= new IVariableBinding[expanded.size()];
-				expanded.toArray(result);
-				fExpanded= result;
+				fExpanded= (IVariableBinding[]) expanded.toArray(new IVariableBinding[expanded.size()]);
 			}
-		}
-
-		public CompilationUnit getCompilationUnit() {
-			return fUnit;
 		}
 
 		public void dispose() {
@@ -194,31 +181,26 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 		public Object[] getChildren(Object element) {
 			if (element instanceof IVariableBinding) {
-				IVariableBinding binding= (IVariableBinding) element;
 				List result= new ArrayList();
-				final String key= binding.getKey();
-				for (int index= 0; index < fBindings.length; index++)
-					if (fBindings[index][0].getKey().equals(key))
-						result.add(fBindings[index]);
+				for (int i= 0; i < fDelegateEntries.length; i++) {
+					if (element == fDelegateEntries[i].field) {
+						result.add(fDelegateEntries[i]);
+					}
+				}
 				return result.toArray();
-			}
+			}			
 			return null;
 		}
 
 		public int getCount() {
-			return fCount;
+			return fDelegateEntries.length;
 		}
 
 		public Object[] getElements(Object inputElement) {
-			Set keys= new HashSet();
-			List result= new ArrayList();
-			for (int index= 0; index < fBindings.length; index++) {
-				IBinding[] bindings= fBindings[index];
-				final String key= bindings[0].getKey();
-				if (!keys.contains(key)) {
-					keys.add(key);
-					result.add(bindings[0]);
-				}
+			HashSet result= new HashSet();
+			for (int i= 0; i < fDelegateEntries.length; i++) {
+				DelegateEntry curr= fDelegateEntries[i];
+				result.add(curr.field);
 			}
 			return result.toArray();
 		}
@@ -227,18 +209,13 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			return fExpanded;
 		}
 
-		public IBinding[][] getInitiallySelectedElements() {
-			List result= new ArrayList();
-			for (int index= 0; index < fBindings.length; index++)
-				for (int offset= 0; offset < fExpanded.length; offset++)
-					if (fExpanded[offset].getKey().equals(fBindings[index][0].getKey()))
-						result.add(fBindings[index]);
-			return (IBinding[][]) result.toArray(new IBinding[result.size()][2]);
+		public IVariableBinding[] getInitiallySelectedElements() {
+			return fExpanded;
 		}
 
 		public Object getParent(Object element) {
-			if (element instanceof IBinding[])
-				return ((IBinding[]) element)[0];
+			if (element instanceof DelegateEntry)
+				return ((DelegateEntry) element).field;
 			return null;
 		}
 
@@ -260,7 +237,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			super.configureShell(shell);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.ADD_DELEGATE_METHODS_SELECTION_DIALOG);
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
 		 */
@@ -273,7 +250,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				}
 			});
 			link.setToolTipText(ActionMessages.AddDelegateMethodsAction_template_link_tooltip); 
-			
+
 			GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 			gridData.widthHint= convertWidthInCharsToPixels(40); // only expand further if anyone else requires it
 			link.setLayoutData(gridData);
@@ -284,8 +261,9 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	private static class AddDelegateMethodsLabelProvider extends BindingLabelProvider {
 
 		public Image getImage(Object element) {
-			if (element instanceof IBinding[]) {
-				return super.getImage((((IBinding[]) element)[1]));
+			if (element instanceof DelegateEntry) {
+				DelegateEntry delegateEntry= (DelegateEntry) element;
+				return super.getImage(delegateEntry.delegateMethod);
 			} else if (element instanceof IVariableBinding) {
 				return super.getImage(element);
 			}
@@ -293,8 +271,9 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		}
 
 		public String getText(Object element) {
-			if (element instanceof IBinding[]) {
-				return super.getText((((IBinding[]) element)[1]));
+			if (element instanceof DelegateEntry) {
+				DelegateEntry delegateEntry= (DelegateEntry) element;
+				return super.getText(delegateEntry.delegateMethod);
 			} else if (element instanceof IVariableBinding) {
 				return super.getText(element);
 			}
@@ -304,27 +283,21 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 	private static class AddDelegateMethodsViewerComparator extends ViewerComparator {
 
-		private final BindingLabelProvider fProvider= new BindingLabelProvider();
-		private final Collator fCollator= Collator.getInstance();
-
 		public int category(Object element) {
-			if (element instanceof IBinding[])
+			if (element instanceof DelegateEntry)
 				return 0;
 			return 1;
 		}
 
-		public int compare(Viewer viewer, Object object1, Object object2) {
-			String first= ""; //$NON-NLS-1$
-			String second= ""; //$NON-NLS-1$
-			if (object1 instanceof IBinding[])
-				first= fProvider.getText(((IBinding[]) object1)[1]);
-			else if (object1 instanceof IVariableBinding)
-				first= ((IBinding) object1).getName();
-			if (object2 instanceof IBinding[])
-				second= fProvider.getText(((IBinding[]) object2)[1]);
-			else if (object2 instanceof IVariableBinding)
-				second= ((IBinding) object2).getName();
-			return fCollator.compare(first, second);
+		public int compare(Viewer viewer, Object o1, Object o2) {
+			if (o1 instanceof DelegateEntry && o2 instanceof DelegateEntry) {
+				String bindingLabel1= BindingLabelProvider.getBindingLabel(((DelegateEntry) o1).delegateMethod, BindingLabelProvider.DEFAULT_TEXTFLAGS);
+				String bindingLabel2= BindingLabelProvider.getBindingLabel(((DelegateEntry) o2).delegateMethod, BindingLabelProvider.DEFAULT_TEXTFLAGS);
+				return getComparator().compare(bindingLabel1, bindingLabel2);
+			} else if (o1 instanceof IVariableBinding && o2 instanceof IVariableBinding) {
+				return getComparator().compare(((IVariableBinding) o1).getName(), ((IVariableBinding) o2).getName());
+			}
+			return 0;
 		}
 	}
 
@@ -376,7 +349,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
 			IType type= (IType) selection.getFirstElement();
-			return type.getCompilationUnit() != null && !type.isInterface();
+			return type.getCompilationUnit() != null && !type.isInterface() && !type.isAnonymous();
 		}
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
@@ -433,7 +406,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					}
 					try {
 						final IType type= field.getDeclaringType();
-						if (type.isInterface()) {
+						if (type.isInterface() || type.isAnonymous()) {
 							return null;
 						}
 					} catch (JavaModelException exception) {
@@ -544,7 +517,9 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 	private void showUI(IType type, IField[] fields) {
 		try {
-			AddDelegateMethodsContentProvider provider= new AddDelegateMethodsContentProvider(type, fields);
+			CompilationUnit astRoot= SharedASTProvider.getAST(type.getCompilationUnit(), SharedASTProvider.WAIT_YES, new NullProgressMonitor());
+
+			AddDelegateMethodsContentProvider provider= new AddDelegateMethodsContentProvider(astRoot, type, fields);
 			SourceActionDialog dialog= new AddDelegateMethodsDialog(getShell(), new AddDelegateMethodsLabelProvider(), provider, fEditor, type, false);
 			dialog.setValidator(new AddDelegateMethodsActionStatusValidator(provider.getCount()));
 			AddDelegateMethodsViewerComparator comparator= new AddDelegateMethodsViewerComparator();
@@ -575,7 +550,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				}
 				List tuples= new ArrayList(object.length);
 				for (int index= 0; index < object.length; index++) {
-					if (object[index] instanceof IBinding[])
+					if (object[index] instanceof DelegateEntry)
 						tuples.add(object[index]);
 				}
 				IEditorPart part= JavaUI.openInEditor(type);
@@ -585,15 +560,10 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 						target.beginCompoundChange();
 					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
 					settings.createComments= dialog.getGenerateComment();
-					final int size= tuples.size();
-					String[] methodKeys= new String[size];
-					String[] variableKeys= new String[size];
-					for (int index= 0; index < size; index++) {
-						final IBinding[] tuple= (IBinding[]) tuples.get(index);
-						variableKeys[index]= tuple[0].getKey();
-						methodKeys[index]= tuple[1].getKey();
-					}
-					AddDelegateMethodsOperation operation= new AddDelegateMethodsOperation(type, dialog.getElementPosition(), provider.getCompilationUnit(), variableKeys, methodKeys, settings, true, false);
+
+					DelegateEntry[] methodToDelegate= (DelegateEntry[]) tuples.toArray(new DelegateEntry[tuples.size()]);
+
+					AddDelegateMethodsOperation operation= new AddDelegateMethodsOperation(astRoot, methodToDelegate, dialog.getElementPosition(), settings, true, false);
 					IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 					if (context == null)
 						context= new BusyIndicatorRunnableContext();
