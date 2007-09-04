@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -99,7 +99,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class ExternalizeStringsAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
-	
+
 	private NonNLSElement[] fElements;
 
 	/**
@@ -124,13 +124,13 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		fEditor= editor;
 		setEnabled(fEditor != null && SelectionConverter.canOperateOn(fEditor));
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void selectionChanged(ITextSelection selection) {
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -153,7 +153,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			return;
 		run((ICompilationUnit)element);
 	}
-	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
@@ -167,8 +167,8 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 				PlatformUI.getWorkbench().getProgressService().run(true, true, createRunnable(selection));
 			} catch(InvocationTargetException e) {
 				ExceptionHandler.handle(e, getShell(), 
-					ActionMessages.ExternalizeStringsAction_dialog_title, 
-					ActionMessages.FindStringsToExternalizeAction_error_message); 
+						ActionMessages.ExternalizeStringsAction_dialog_title, 
+						ActionMessages.FindStringsToExternalizeAction_error_message); 
 				return;
 			} catch(InterruptedException e) {
 				// OK
@@ -177,14 +177,15 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			showResults();	
 		}
 	}
-	
+
 	/**
 	 * Note: this method is for internal use only. Clients should not call this method.
+	 * @param unit the compilation unit
 	 */
 	public void run(final ICompilationUnit unit) {
 		if (!ActionUtil.isEditable(fEditor, getShell(), unit))
 			return;
-		
+
 		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
 			public void run() {
 				try {
@@ -210,7 +211,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			return ((IType) first).getCompilationUnit();
 		return null;
 	}
-	
+
 	private IRunnableWithProgress createRunnable(final IStructuredSelection selection) {
 		return new IRunnableWithProgress() {
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
@@ -229,7 +230,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			return new NonNLSElement[0];
 
 		pm.beginTask(ActionMessages.FindStringsToExternalizeAction_find_strings, elements.size()); 
-					
+
 		try{
 			List result= new ArrayList();	
 			for (Iterator iter= elements.iterator(); iter.hasNext();) {
@@ -237,7 +238,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 				if (obj instanceof IJavaElement) {
 					IJavaElement element= (IJavaElement) obj;
 					int elementType= element.getElementType();
-					
+
 					if (elementType == IJavaElement.PACKAGE_FRAGMENT) {
 						result.addAll(analyze((IPackageFragment) element, new SubProgressMonitor(pm, 1)));
 					} else if (elementType == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
@@ -305,12 +306,12 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		try{
 			if (pack == null)
 				return new ArrayList(0);
-				
+
 			ICompilationUnit[] cus= pack.getCompilationUnits();
-	
+
 			pm.beginTask("", cus.length); //$NON-NLS-1$
 			pm.setTaskName(pack.getElementName());
-			
+
 			List l= new ArrayList(cus.length);
 			for (int i= 0; i < cus.length; i++){
 				pm.subTask(cus[i].getElementName());
@@ -352,7 +353,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			pm.done();
 		}	
 	}
-	
+
 	/*
 	 * returns List of Strings
 	 */
@@ -389,7 +390,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		else	
 			return new NonNLSElement(cu, count);
 	}
-	
+
 	private int countNonExternalizedStrings(ICompilationUnit cu) throws CoreException {
 		try{
 			NLSLine[] lines= NLSScanner.scan(cu);
@@ -400,8 +401,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			return result;
 		} catch (InvalidInputException e) {
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
-				Messages.format(ActionMessages.FindStringsToExternalizeAction_error_cannotBeParsed, cu.getElementName()), 
-				e));
+					Messages.format(ActionMessages.FindStringsToExternalizeAction_error_cannotBeParsed, cu.getElementName()), e));
 		}	
 	}
 
@@ -418,22 +418,24 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	/**
 	 * returns <code>List</code> of <code>IPackageFragments</code>,  <code>IPackageFragmentRoots</code> or 
 	 * <code>IJavaProjects</code> (all entries are of the same kind)
+	 * @param selection the selection
+	 * @return the selected elements
 	 */
 	private static List getSelectedElementList(IStructuredSelection selection) {
 		if (selection == null)
 			return null;
-			
+
 		return selection.toList();
 	}
-			
+
 	//-------private classes --------------
-		
+
 	private static class NonNLSListDialog extends ListDialog {
-		
+
 		private static final int OPEN_BUTTON_ID= IDialogConstants.CLIENT_ID + 1;
-		
+
 		private Button fOpenButton;
-		
+
 		NonNLSListDialog(Shell parent, NonNLSElement[] input, int count) {
 			super(parent);
 			setInput(Arrays.asList(input));
@@ -471,11 +473,11 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			applyDialogFont(result);		
 			return result;
 		}
-		
+
 		protected void createButtonsForButtonBar(Composite parent) {
 			fOpenButton= createButton(parent, OPEN_BUTTON_ID, ActionMessages.FindStringsToExternalizeAction_button_label, true); 
 			fOpenButton.setEnabled(false);
-			
+
 			//looks like a 'close' but it a 'cancel'
 			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
 		}
@@ -502,26 +504,26 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 				}
 			} catch (JavaModelException e) {
 				ExceptionHandler.handle(e, 
-					ActionMessages.ExternalizeStringsAction_dialog_title, 
-					ActionMessages.FindStringsToExternalizeAction_error_message); 
+						ActionMessages.ExternalizeStringsAction_dialog_title, 
+						ActionMessages.FindStringsToExternalizeAction_error_message); 
 			}
 		}
-		
+
 		private static LabelProvider createLabelProvider() {
 			return new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT){ 
 				public String getText(Object element) {
 					NonNLSElement nlsel= (NonNLSElement)element;
 					String elementName= nlsel.cu.getResource().getFullPath().toString();
 					return Messages.format(
-						ActionMessages.FindStringsToExternalizeAction_foundStrings, 
-						new Object[] {new Integer(nlsel.count), elementName} );
+							ActionMessages.FindStringsToExternalizeAction_foundStrings, 
+							new Object[] {new Integer(nlsel.count), elementName} );
 				}		
 				public Image getImage(Object element) {
 					return super.getImage(((NonNLSElement)element).cu);
 				}
 			};
 		}
-		
+
 		/*
 		 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 		 */
@@ -532,7 +534,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 
 
 	}
-		
+
 	private static class NonNLSElement{
 		ICompilationUnit cu;
 		int count;

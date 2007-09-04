@@ -203,8 +203,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				// type can be null if file has a bad encoding
 				if (type == null) {
 					MessageDialog.openError(getShell(), 
-						ActionMessages.AddGetterSetterAction_no_primary_type_title, 
-						ActionMessages.AddGetterSetterAction_no_primary_type_message);
+							ActionMessages.AddGetterSetterAction_no_primary_type_title, 
+							ActionMessages.AddGetterSetterAction_no_primary_type_message);
 					notifyResult(false);
 					return;
 				}
@@ -231,7 +231,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
 			IType type= (IType) selection.getFirstElement();
-			return type.getCompilationUnit() != null && !type.isInterface() && !type.isLocal();
+			return type.getCompilationUnit() != null && !type.isInterface() && !type.isAnonymous();
 		}
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
@@ -381,6 +381,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	/**
 	 * Creates a key used in hash maps for a method signature
 	 * (gettersettername+arguments(fqn)).
+	 * @param methodName the method name
+	 * @param field the filed
+	 * @return the signature
+	 * @throws JavaModelException 
 	 */
 	private static String createSignatureKey(String methodName, IField field) throws JavaModelException {
 		StringBuffer buffer= new StringBuffer();
@@ -507,15 +511,15 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		return (IField[]) list.toArray(new IField[list.size()]);
 	}
 
-    private static List reorderFields(List collection, Set set) {
-    	final List list= new ArrayList(collection.size());
-    	for (final Iterator iterator= set.iterator(); iterator.hasNext();) {
-	        final IField field= (IField) iterator.next();
-	        if (collection.contains(field))
-	        	list.add(field);
-        }
-    	return list;
-    }
+	private static List reorderFields(List collection, Set set) {
+		final List list= new ArrayList(collection.size());
+		for (final Iterator iterator= set.iterator(); iterator.hasNext();) {
+			final IField field= (IField) iterator.next();
+			if (collection.contains(field))
+				list.add(field);
+		}
+		return list;
+	}
 
 	private void generate(IType type, IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, CompilationUnit unit, IJavaElement elementPosition) throws CoreException {
 		if (getterFields.length == 0 && setterFields.length == 0 && getterSetterFields.length == 0)
@@ -685,7 +689,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 					}
 					try {
 						final IType declaringType= fld.getDeclaringType();
-						if (declaringType.isInterface())
+						if (declaringType.isInterface() || declaringType.isAnonymous())
 							return null;
 					} catch (JavaModelException e) {
 						JavaPlugin.log(e);
@@ -747,7 +751,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	}
 
 	/**
+	 * @param type the type
 	 * @return map IField -> GetterSetterEntry[]
+	 * @throws JavaModelException 
 	 */
 	private Map createGetterSetterMapping(IType type) throws JavaModelException {
 		IField[] fields= type.getFields();
@@ -796,7 +802,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		public Viewer getViewer() {
 			return fViewer;
 		}
-			
+
 		/*
 		 * @see ITreeContentProvider#getChildren(Object)
 		 */
@@ -839,9 +845,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			fGetterSetterEntries= null;
 		}
 	}
-	
+
 	private static class SettersForFinalFieldsFilter extends ViewerFilter {
-		
+
 		private final AddGetterSetterContentProvider fContentProvider;
 
 		public SettersForFinalFieldsFilter(AddGetterSetterContentProvider contentProvider) {
@@ -865,7 +871,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			return true;
 		}
 	}
-	
+
 
 	private static class GetterSetterTreeSelectionDialog extends SourceActionDialog {
 
@@ -876,13 +882,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		private final String SETTINGS_SECTION= "AddGetterSetterDialog"; //$NON-NLS-1$
 		private final String SORT_ORDER= "SortOrdering"; //$NON-NLS-1$
 		private final String ALLOW_SETTERS_FOR_FINALS= "RemoveFinal"; //$NON-NLS-1$
-		
+
 		private IDialogSettings fSettings;
 		private SettersForFinalFieldsFilter fSettersForFinalFieldsFilter;
 
 		private boolean fSortOrder;
 		private boolean fAllowSettersForFinals;
-		
+
 		private ArrayList fPreviousSelectedFinals;
 
 
@@ -902,7 +908,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 			fSortOrder= fSettings.getBoolean(SORT_ORDER);
 			fAllowSettersForFinals= fSettings.getBoolean(ALLOW_SETTERS_FOR_FINALS);
-			
+
 			fSettersForFinalFieldsFilter= new SettersForFinalFieldsFilter(contentProvider);
 		}
 
@@ -919,11 +925,11 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				}
 			}
 		}
-		
+
 		private boolean allowSettersForFinals() {
 			return fAllowSettersForFinals;
 		}
-		
+
 		public void allowSettersForFinals(boolean allowSettersForFinals) {
 			if (fAllowSettersForFinals != allowSettersForFinals) {
 				fAllowSettersForFinals= allowSettersForFinals;
@@ -956,15 +962,15 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				updateOKStatus();
 			}
 		}
-		
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.ui.dialogs.CheckedTreeSelectionDialog#createTreeViewer(org.eclipse.swt.widgets.Composite)
 		 */
 		protected CheckboxTreeViewer createTreeViewer(Composite parent) {
-			 CheckboxTreeViewer treeViewer= super.createTreeViewer(parent);
-			 if (!fAllowSettersForFinals) {
-				 treeViewer.addFilter(fSettersForFinalFieldsFilter);
-			 }
+			CheckboxTreeViewer treeViewer= super.createTreeViewer(parent);
+			if (!fAllowSettersForFinals) {
+				treeViewer.addFilter(fSettersForFinalFieldsFilter);
+			}
 			return treeViewer;
 		}
 
@@ -972,7 +978,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			super.configureShell(shell);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.ADD_GETTER_SETTER_SELECTION_DIALOG);
 		}
-		
+
 		private void createGetterSetterButtons(Composite buttonComposite) {
 			createButton(buttonComposite, SELECT_GETTERS_ID, ActionMessages.GetterSetterTreeSelectionDialog_select_getters, false); 
 			createButton(buttonComposite, SELECT_SETTERS_ID, ActionMessages.GetterSetterTreeSelectionDialog_select_setters, false); 
@@ -997,7 +1003,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		protected Composite createInsertPositionCombo(Composite composite) {
 			Button addRemoveFinalCheckbox= addAllowSettersForFinalslCheckbox(composite);
 			addRemoveFinalCheckbox.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			
+
 			Composite entryComposite= super.createInsertPositionCombo(composite);
 			addSortOrder(entryComposite);
 			addVisibilityAndModifiersChoices(entryComposite);
@@ -1032,7 +1038,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			combo.setItems(new String[] { ActionMessages.GetterSetterTreeSelectionDialog_alpha_pair_sort, 
 					ActionMessages.GetterSetterTreeSelectionDialog_alpha_method_sort}); 
 			final int methodIndex= 1; // Hard-coded. Change this if the
-														// list gets more complicated.
+			// list gets more complicated.
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400
 			int sort= getSortOrder() ? 1 : 0;
 			combo.setText(combo.getItem(sort));
@@ -1094,7 +1100,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				}
 			});
 			link.setToolTipText(ActionMessages.AddGetterSetterAction_template_link_tooltip); 
-			
+
 			GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 			gridData.widthHint= convertWidthInCharsToPixels(40); // only expand further if anyone else requires it
 			link.setLayoutData(gridData);

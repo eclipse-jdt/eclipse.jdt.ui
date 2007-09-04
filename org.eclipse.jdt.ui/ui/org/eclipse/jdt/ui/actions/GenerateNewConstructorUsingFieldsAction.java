@@ -126,7 +126,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
 			IType type= (IType) selection.getFirstElement();
-			return type.getCompilationUnit() != null && !type.isInterface() && !type.isAnnotation();
+			return type.getCompilationUnit() != null && !type.isInterface() && !type.isAnnotation() && !type.isAnonymous();
 		}
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
@@ -176,7 +176,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 					}
 					try {
 						final IType declaringType= field.getDeclaringType();
-						if (declaringType.isInterface() || declaringType.isAnnotation())
+						if (declaringType.isInterface() || declaringType.isAnnotation() || declaringType.isAnonymous())
 							return null;
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);

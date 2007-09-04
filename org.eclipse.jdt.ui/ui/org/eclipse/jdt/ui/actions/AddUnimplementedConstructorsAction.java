@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -116,7 +116,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		private IMethodBinding[] fMethodsList= new IMethodBinding[0];
 
 		private final CompilationUnit fUnit;
-	
+
 		public AddUnimplementedConstructorsContentProvider(IType type) throws JavaModelException {
 			RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 			fUnit= parser.parse(type.getCompilationUnit(), true);
@@ -205,7 +205,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			super.configureShell(shell);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.ADD_UNIMPLEMENTED_CONSTRUCTORS_DIALOG);
 		}
-		
+
 		protected Control createDialogArea(Composite parent) {
 			initializeDialogUnits(parent);
 
@@ -287,7 +287,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 				}
 			});
 			link.setToolTipText(ActionMessages.AddUnimplementedConstructorsAction_template_link_tooltip); 
-			
+
 			GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 			gridData.widthHint= convertWidthInCharsToPixels(40); // only expand further if anyone else requires it
 			link.setLayoutData(gridData);
@@ -405,7 +405,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	private boolean canEnable(IStructuredSelection selection) throws JavaModelException {
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
 			IType type= (IType) selection.getFirstElement();
-			return type.getCompilationUnit() != null && !type.isInterface() && !type.isEnum();
+			return type.getCompilationUnit() != null && !type.isInterface() && !type.isEnum() && !type.isAnonymous();
 		}
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
@@ -523,7 +523,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 				notifyResult(false);
 				return;
 			}
-			
+
 			ArrayList result= new ArrayList();
 			for (int i= 0; i < elements.length; i++) {
 				Object elem= elements[i];
@@ -543,7 +543,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 				CompilationUnit astRoot= provider.getCompilationUnit();
 				final ITypeBinding typeBinding= ASTNodes.getTypeBinding(astRoot, type);
 				int insertPos= dialog.getInsertOffset();
-				
+
 				AddUnimplementedConstructorsOperation operation= (AddUnimplementedConstructorsOperation) createRunnable(astRoot, typeBinding, selected, insertPos, dialog.getGenerateComment(), dialog.getVisibilityModifier(), dialog.isOmitSuper());
 				IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 				if (context == null)
@@ -564,7 +564,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		}
 		notifyResult(dialogResult == Window.OK);
 	}
-	
+
 	/**
 	 * Returns a runnable that creates the constructor stubs.
 	 * 

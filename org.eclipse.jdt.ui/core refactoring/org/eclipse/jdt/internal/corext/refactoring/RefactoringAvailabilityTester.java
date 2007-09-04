@@ -144,7 +144,7 @@ public final class RefactoringAvailabilityTester {
 		if (first instanceof ICompilationUnit) {
 			final ICompilationUnit unit= (ICompilationUnit) first;
 			if (unit.exists())
-			return  JavaElementUtil.getMainType(unit);
+				return  JavaElementUtil.getMainType(unit);
 		}
 		return null;
 	}
@@ -222,9 +222,9 @@ public final class RefactoringAvailabilityTester {
 
 	public static boolean isDelegateCreationAvailable(final IField field) throws JavaModelException {
 		return field.exists() && (Flags.isStatic(field.getFlags()) && Flags.isFinal(field.getFlags()) /*
-																					 * &&
-																					 * hasInitializer(field)
-																					 */);
+		 * &&
+		 * hasInitializer(field)
+		 */);
 	}
 
 	public static boolean isDeleteAvailable(final IJavaElement element) throws JavaModelException {
@@ -240,7 +240,7 @@ public final class RefactoringAvailabilityTester {
 				// rename
 				// isClasspathDelete
 				return false;
-			
+
 			if (root.getResource().equals(root.getJavaProject().getProject()))
 				return false;
 		}
@@ -304,9 +304,8 @@ public final class RefactoringAvailabilityTester {
 						if (cu.exists()) 
 							return true;
 					} else if (elementType == IJavaElement.TYPE) {
-						IType type= (IType)element;
-						ICompilationUnit cu= type.getCompilationUnit();
-						if (cu != null && cu.exists())
+						IJavaElement parent= ((IType) element).getParent();
+						if (parent instanceof ICompilationUnit && parent.exists())
 							return true;
 					}
 				}
@@ -1076,7 +1075,7 @@ public final class RefactoringAvailabilityTester {
 		if (method.getElementName().equals("toString") //$NON-NLS-1$
 				&& (method.getNumberOfParameters() == 0) && (method.getReturnType().equals("Ljava.lang.String;") //$NON-NLS-1$
 						|| method.getReturnType().equals("QString;") //$NON-NLS-1$
-				|| method.getReturnType().equals("Qjava.lang.String;"))) //$NON-NLS-1$
+						|| method.getReturnType().equals("Qjava.lang.String;"))) //$NON-NLS-1$
 			return true;
 		else
 			return false;
