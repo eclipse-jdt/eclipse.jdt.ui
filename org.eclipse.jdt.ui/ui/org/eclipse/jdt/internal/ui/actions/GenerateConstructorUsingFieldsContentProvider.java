@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
@@ -19,60 +18,18 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 public class GenerateConstructorUsingFieldsContentProvider implements ITreeContentProvider {
 
 	private static final Object[] EMPTY= new Object[0];
 
-	private List fFields= new ArrayList();
+	private List fFields;
+	private List fSelected;
 
-	private List fSelected= new ArrayList();
-
-	private ITypeBinding fType= null;
-
-	private final CompilationUnit fUnit;
-
-	public GenerateConstructorUsingFieldsContentProvider(IType type, List fields, List selected) throws JavaModelException {
-		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
-		fUnit= parser.parse(type.getCompilationUnit(), true);
-		fType= ASTNodes.getTypeBinding(fUnit, type);
-		if (fType != null) {
-			IField field= null;
-			for (Iterator iterator= fields.iterator(); iterator.hasNext();) {
-				field= (IField) iterator.next();
-				VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, fUnit);
-				if (fragment != null) {
-					IVariableBinding binding= fragment.resolveBinding();
-					if (binding != null)
-						fFields.add(binding);
-				}
-			}
-			for (Iterator iterator= selected.iterator(); iterator.hasNext();) {
-				field= (IField) iterator.next();
-				VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, fUnit);
-				if (fragment != null) {
-					IVariableBinding binding= fragment.resolveBinding();
-					if (binding != null)
-						fSelected.add(binding);
-				}
-			}
-		}
-	}
-
-	public CompilationUnit getCompilationUnit() {
-		return fUnit;
+	public GenerateConstructorUsingFieldsContentProvider(List/*IVariableBinding*/ fields, List/*IVariableBinding*/ selected) throws JavaModelException {
+		fFields= fields;
+		fSelected= selected;
 	}
 
 	public boolean canMoveDown(List selectedElements) {
@@ -140,10 +97,6 @@ public class GenerateConstructorUsingFieldsContentProvider implements ITreeConte
 	 */
 	public Object getParent(Object element) {
 		return null;
-	}
-
-	public ITypeBinding getType() {
-		return fType;
 	}
 
 	/*

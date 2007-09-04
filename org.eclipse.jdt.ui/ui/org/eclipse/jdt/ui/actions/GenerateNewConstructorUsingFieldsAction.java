@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -29,29 +30,30 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddCustomConstructorOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -111,9 +113,9 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 	 */
 	public GenerateNewConstructorUsingFieldsAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.GenerateConstructorUsingFieldsAction_label); 
-		setDescription(ActionMessages.GenerateConstructorUsingFieldsAction_description); 
-		setToolTipText(ActionMessages.GenerateConstructorUsingFieldsAction_tooltip); 
+		setText(ActionMessages.GenerateConstructorUsingFieldsAction_label);
+		setDescription(ActionMessages.GenerateConstructorUsingFieldsAction_description);
+		setToolTipText(ActionMessages.GenerateConstructorUsingFieldsAction_tooltip);
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CREATE_NEW_CONSTRUCTOR_ACTION);
 	}
@@ -137,7 +139,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		if (fields != null && fields.length > 0) {
 			for (int index= 0; index < fields.length; index++) {
 				if (JdtFlags.isEnum(fields[index])) {
-					MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_enum_not_applicable); 
+					MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_enum_not_applicable);
 					return false;
 				}
 			}
@@ -244,7 +246,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 					run(((ICompilationUnit) firstElement).findPrimaryType(), new IField[0], false);
 			}
 		} catch (CoreException exception) {
-			ExceptionHandler.handle(exception, getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_actionfailed); 
+			ExceptionHandler.handle(exception, getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_actionfailed);
 		}
 	}
 
@@ -275,11 +277,11 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 					return;
 				}
 			}
-			MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_not_applicable); 
+			MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_not_applicable);
 		} catch (CoreException exception) {
-			ExceptionHandler.handle(exception, getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_actionfailed); 
+			ExceptionHandler.handle(exception, getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_actionfailed);
 		} catch (InvocationTargetException exception) {
-			ExceptionHandler.handle(exception, getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_actionfailed); 
+			ExceptionHandler.handle(exception, getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_actionfailed);
 		} catch (InterruptedException e) {
 			// cancelled
 		}
@@ -287,7 +289,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 
 	// ---- Helpers -------------------------------------------------------------------
 
-	void run(IType type, IField[] selected, boolean activated) throws CoreException {
+	void run(IType type, IField[] selectedFields, boolean activated) throws CoreException {
 		if (!ElementValidator.check(type, getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, activated)) {
 			notifyResult(false);
 			return;
@@ -296,32 +298,46 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			notifyResult(false);
 			return;
 		}
-		if (type.getCompilationUnit() == null) {
+
+		ICompilationUnit cu= type.getCompilationUnit();
+
+		if (cu == null) {
 			MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateNewConstructorUsingFieldsAction_error_not_a_source_file);
 			notifyResult(false);
 			return;
-			
 		}
-		
-		IField[] candidates= type.getFields();
+
+		List allSelected= Arrays.asList(selectedFields);
+
+		CompilationUnit astRoot= SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_YES, new NullProgressMonitor());
+		ITypeBinding typeBinding= ASTNodes.getTypeBinding(astRoot, type);
+		if (typeBinding == null) {
+			MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateNewConstructorUsingFieldsAction_error_not_a_source_file);
+			notifyResult(false);
+			return;
+		}
+
 		ArrayList fields= new ArrayList();
-		for (int index= 0; index < candidates.length; index++) {
-			boolean isStatic= Flags.isStatic(candidates[index].getFlags());
-			boolean isFinal= Flags.isFinal(candidates[index].getFlags());
-			if (!isStatic) {
-				if (isFinal) {
-					try {
-						// Do not add final fields which have been set in the <clinit>
-						IScanner scanner= ToolFactory.createScanner(true, false, false, false);
-						scanner.setSource(candidates[index].getSource().toCharArray());
-						TokenScanner tokenScanner= new TokenScanner(scanner);
-						tokenScanner.getTokenStartOffset(ITerminalSymbols.TokenNameEQUAL, 0);
-					} catch (JavaModelException e) {
-					} catch (CoreException e) {
-						fields.add(candidates[index]);
-					}
-				} else
-					fields.add(candidates[index]);
+		ArrayList selected= new ArrayList();
+
+		IVariableBinding[] candidates= typeBinding.getDeclaredFields();
+		for (int i= 0; i < candidates.length; i++) {
+			IVariableBinding curr= candidates[i];
+			if (curr.isSynthetic()) {
+				continue;
+			}
+			if (Modifier.isStatic(curr.getModifiers())) {
+				continue;
+			}
+			if (Modifier.isFinal(curr.getModifiers())) {
+				ASTNode declaringNode= astRoot.findDeclaringNode(curr);
+				if (declaringNode instanceof VariableDeclarationFragment && ((VariableDeclarationFragment) declaringNode).getInitializer() == null) {
+					continue; // Do not add final fields which have been set in the <clinit>
+				}
+			}
+			fields.add(curr);
+			if (allSelected.contains(curr.getJavaElement())) {
+				selected.add(curr);
 			}
 		}
 		if (fields.isEmpty()) {
@@ -329,18 +345,19 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			notifyResult(false);
 			return;
 		}
-		final GenerateConstructorUsingFieldsContentProvider provider= new GenerateConstructorUsingFieldsContentProvider(type, fields, Arrays.asList(selected));
+
+		final GenerateConstructorUsingFieldsContentProvider provider= new GenerateConstructorUsingFieldsContentProvider(fields, selected);
 		IMethodBinding[] bindings= null;
-		final ITypeBinding provided= provider.getType();
-		if (provided.isAnonymous()) {
+
+		if (typeBinding.isAnonymous()) {
 			MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_anonymous_class);
 			notifyResult(false);
 			return;
 		}
-		if (provided.isEnum()) {
-			bindings= new IMethodBinding[] {getObjectConstructor(provider.getCompilationUnit())};
+		if (typeBinding.isEnum()) {
+			bindings= new IMethodBinding[] {getObjectConstructor(astRoot.getAST())};
 		} else {
-			bindings= StubUtility2.getVisibleConstructors(provided, false, true);
+			bindings= StubUtility2.getVisibleConstructors(typeBinding, false, true);
 			if (bindings.length == 0) {
 				MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_nothing_found);
 				notifyResult(false);
@@ -349,14 +366,14 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		}
 
 		GenerateConstructorUsingFieldsSelectionDialog dialog= new GenerateConstructorUsingFieldsSelectionDialog(getShell(), new BindingLabelProvider(), provider, fEditor, type, bindings);
-		dialog.setCommentString(ActionMessages.SourceActionDialog_createConstructorComment); 
-		dialog.setTitle(ActionMessages.GenerateConstructorUsingFieldsAction_dialog_title); 
+		dialog.setCommentString(ActionMessages.SourceActionDialog_createConstructorComment);
+		dialog.setTitle(ActionMessages.GenerateConstructorUsingFieldsAction_dialog_title);
 		dialog.setInitialSelections(provider.getInitiallySelectedElements());
 		dialog.setContainerMode(true);
 		dialog.setSize(60, 18);
 		dialog.setInput(new Object());
-		dialog.setMessage(ActionMessages.GenerateConstructorUsingFieldsAction_dialog_label); 
-		dialog.setValidator(new GenerateConstructorUsingFieldsValidator(dialog, provided, fields.size()));
+		dialog.setMessage(ActionMessages.GenerateConstructorUsingFieldsAction_dialog_label);
+		dialog.setValidator(new GenerateConstructorUsingFieldsValidator(dialog, typeBinding, fields.size()));
 
 		final int dialogResult= dialog.open();
 		if (dialogResult == Window.OK) {
@@ -370,9 +387,9 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 				if (elements[index] instanceof IVariableBinding)
 					result.add(elements[index]);
 			}
-			IVariableBinding[] variables= new IVariableBinding[result.size()];
-			result.toArray(variables);
-			IEditorPart editor= JavaUI.openInEditor(type.getCompilationUnit());
+			IVariableBinding[] variables= (IVariableBinding[]) result.toArray(new IVariableBinding[result.size()]);
+
+			IEditorPart editor= JavaUI.openInEditor(cu);
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
 			settings.createComments= dialog.getGenerateComment();
 			IMethodBinding constructor= dialog.getSuperConstructorChoice();
@@ -380,7 +397,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			if (target != null)
 				target.beginCompoundChange();
 			try {
-				AddCustomConstructorOperation operation= new AddCustomConstructorOperation(type, dialog.getElementPosition(), provider.getCompilationUnit(), variables, constructor, settings, true, false);
+				AddCustomConstructorOperation operation= new AddCustomConstructorOperation(astRoot, typeBinding, variables, constructor, dialog.getElementPosition(), settings, true, false);
 				operation.setVisibility(dialog.getVisibilityModifier());
 				if (constructor.getParameterTypes().length == 0)
 					operation.setOmitSuper(dialog.isOmitSuper());
@@ -389,7 +406,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 					context= new BusyIndicatorRunnableContext();
 				PlatformUI.getWorkbench().getProgressService().runInUI(context, new WorkbenchRunnableAdapter(operation, operation.getSchedulingRule()), operation.getSchedulingRule());
 			} catch (InvocationTargetException exception) {
-				ExceptionHandler.handle(exception, getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_actionfailed); 
+				ExceptionHandler.handle(exception, getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_actionfailed);
 			} catch (InterruptedException exception) {
 				// Do nothing. Operation has been canceled by user.
 			} finally {
@@ -401,8 +418,8 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		notifyResult(dialogResult == Window.OK);
 	}
 
-	private IMethodBinding getObjectConstructor(CompilationUnit compilationUnit) {
-		final ITypeBinding binding= compilationUnit.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+	private IMethodBinding getObjectConstructor(AST ast) {
+		final ITypeBinding binding= ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 		return Bindings.findMethodInType(binding, "Object", new ITypeBinding[0]); //$NON-NLS-1$
 	}
 
