@@ -6091,6 +6091,46 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertTrue(message, message.indexOf("parse") != -1);
 	}
 	
+	public void testOrganizeImportsBug202266() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test2", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class E2 {\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test3", false, null);
+		buf= new StringBuffer();
+		buf.append("package test3;\n");
+		buf.append("public class E2 {\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("E2.java", buf.toString(), false, null);
+
+		IPackageFragment pack3= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    ArrayList foo;\n");
+		buf.append("    E2 foo2;\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack3.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		enable(CleanUpConstants.ORGANIZE_IMPORTS);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("\n");
+		buf.append("public class E1 {\n");
+		buf.append("    ArrayList foo;\n");
+		buf.append("    E2 foo2;\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+	
 	public void testCorrectIndetation01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

@@ -37,26 +37,22 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 public class ImportsFix extends AbstractFix {
 	
-	private static final class AmbiguousImportException extends RuntimeException {
-		private static final long serialVersionUID= 1L;
-	}
-
 	public static IFix createCleanUp(final CompilationUnit cu, CodeGenerationSettings settings, boolean organizeImports, RefactoringStatus status) throws CoreException {
 		if (!organizeImports)
 			return null;
-		
+
+		final boolean hasAmbiguity[]= new boolean[] { false };
 		IChooseImportQuery query= new IChooseImportQuery() {
 			public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
-				throw new AmbiguousImportException();
+				hasAmbiguity[0]= true;
+				return new TypeNameMatch[0];
 			}
 		};
+		
 		OrganizeImportsOperation op= new OrganizeImportsOperation((ICompilationUnit)cu.getJavaElement(), cu, settings.importIgnoreLowercase, false, false, query);
-		final TextEdit edit;
-		try {
-			edit= op.createTextEdit(null);
-		} catch (AmbiguousImportException e) {
+		final TextEdit edit= op.createTextEdit(null);
+		if (hasAmbiguity[0]) {
 			status.addInfo(Messages.format(ActionMessages.OrganizeImportsAction_multi_error_unresolvable, getLocationString(cu)));
-			return null;
 		}
 		
 		if (op.getParseError() != null) {
