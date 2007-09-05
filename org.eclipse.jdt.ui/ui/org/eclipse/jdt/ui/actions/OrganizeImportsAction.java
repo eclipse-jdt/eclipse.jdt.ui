@@ -244,12 +244,14 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		IEditingSupport helper= createViewerHelper();
 		try {
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
-			
-			if (fEditor == null && EditorUtility.isOpenInEditor(cu) == null) {
-				IEditorPart editor= JavaUI.openInEditor(cu);
-				if (editor instanceof JavaEditor) {
-					fEditor= (JavaEditor) editor;
-				}			
+
+			IEditorPart editor;
+			if (fEditor == null) {
+				editor= EditorUtility.isOpenInEditor(cu);
+				if (editor == null)
+					editor= JavaUI.openInEditor(cu);
+			} else {
+				editor= fEditor;
 			}
 			
 			CompilationUnit astRoot= SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
@@ -257,8 +259,8 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, astRoot, settings.importIgnoreLowercase, !cu.isWorkingCopy(), true, createChooseImportQuery());
 		
 			IRewriteTarget target= null;
-			if (fEditor != null) {
-				target= (IRewriteTarget) fEditor.getAdapter(IRewriteTarget.class);
+			if (editor != null) {
+				target= (IRewriteTarget) editor.getAdapter(IRewriteTarget.class);
 				if (target != null) {
 					target.beginCompoundChange();
 				}
@@ -276,11 +278,11 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				if (parseError != null) {
 					String message= Messages.format(ActionMessages.OrganizeImportsAction_single_error_parse, parseError.getMessage()); 
 					MessageDialog.openInformation(getShell(), ActionMessages.OrganizeImportsAction_error_title, message); 
-					if (fEditor != null && parseError.getSourceStart() != -1) {
-						fEditor.selectAndReveal(parseError.getSourceStart(), parseError.getSourceEnd() - parseError.getSourceStart() + 1);
+					if (editor instanceof JavaEditor && parseError.getSourceStart() != -1) {
+						((JavaEditor) editor).selectAndReveal(parseError.getSourceStart(), parseError.getSourceEnd() - parseError.getSourceStart() + 1);
 					}
 				} else {
-					if (fEditor != null) {
+					if (editor != null) {
 						setStatusBarMessage(getOrganizeInfo(op));
 					}
 				}

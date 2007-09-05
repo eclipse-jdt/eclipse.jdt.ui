@@ -60,10 +60,7 @@ public class ImportsFix extends AbstractFix {
 			return null;
 		}
 		
-		if (edit == null)
-			return null;
-		
-		if (op.getNumberOfImportsAdded() == 0 && op.getNumberOfImportsRemoved() == 0)
+		if (edit == null || edit.getChildrenSize() == 0)
 			return null;
 
 		return new IFix() {
