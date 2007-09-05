@@ -34,6 +34,8 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -270,14 +272,16 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		
 		addButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				IStructuredSelection selection= (IStructuredSelection) fTree.getSelection();
-				fSelectedElements.addAll(selection.toList());
-				Object[] selectedElements= selection.toArray();
-				fTable.add(selectedElements);
-				fTree.remove(selectedElements);
-				fTable.setSelection(selection);
-				fTable.getControl().setFocus();
-				validateInput();
+				addTreeSelection();
+
+				removeAllButton.setEnabled(true);
+				addAllButton.setEnabled(fTree.getTree().getItems().length > 0);
+			}
+		});
+
+		fTree.addDoubleClickListener(new IDoubleClickListener() {
+			public void doubleClick(DoubleClickEvent event) {
+				addTreeSelection();
 				
 				removeAllButton.setEnabled(true);
 				addAllButton.setEnabled(fTree.getTree().getItems().length > 0);
@@ -292,27 +296,22 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		
 		removeButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				IStructuredSelection selection= (IStructuredSelection) fTable.getSelection();
-				fSelectedElements.removeAll(selection.toList());
-				Object[] selectedElements= selection.toArray();
-				fTable.remove(selectedElements);
-				try {
-					fTree.getTree().setRedraw(false);
-					for (int i= 0; i < selectedElements.length; i++) {
-						fTree.refresh(fTreeContentProvider.getParent(selectedElements[i]), true);
-					}
-				} finally {
-					fTree.getTree().setRedraw(true);
-				}
-				fTree.setSelection(selection);
-				fTree.getControl().setFocus();
-				validateInput();
+				removeTableSelection();
 				
 				addAllButton.setEnabled(true);
 				removeAllButton.setEnabled(!fSelectedElements.isEmpty());
 			}
 		});
-		
+
+		fTable.addDoubleClickListener(new IDoubleClickListener() {
+			public void doubleClick(DoubleClickEvent event) {
+				removeTableSelection();
+
+				addAllButton.setEnabled(true);
+				removeAllButton.setEnabled(!fSelectedElements.isEmpty());
+			}
+		});
+
 		addAllButton.addSelectionListener(new SelectionAdapter() {
 			/* (non-Javadoc)
 			 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
@@ -347,20 +346,55 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 
 	}
 
+	/**
+	 * Moves selected elements in the tree into the table
+	 */
+	private void addTreeSelection() {
+		IStructuredSelection selection= (IStructuredSelection) fTree.getSelection();
+		fSelectedElements.addAll(selection.toList());
+		Object[] selectedElements= selection.toArray();
+		fTable.add(selectedElements);
+		fTree.remove(selectedElements);
+		fTable.setSelection(selection);
+		fTable.getControl().setFocus();
+		validateInput();
+	}
+
+	/**
+	 * Moves the selected elements in the table into the tree
+	 */
+	private void removeTableSelection() {
+		IStructuredSelection selection= (IStructuredSelection) fTable.getSelection();
+		fSelectedElements.removeAll(selection.toList());
+		Object[] selectedElements= selection.toArray();
+		fTable.remove(selectedElements);
+		try {
+			fTree.getTree().setRedraw(false);
+			for (int i= 0; i < selectedElements.length; i++) {
+				fTree.refresh(fTreeContentProvider.getParent(selectedElements[i]), true);
+			}
+		} finally {
+			fTree.getTree().setRedraw(true);
+		}
+		fTree.setSelection(selection);
+		fTree.getControl().setFocus();
+		validateInput();
+	}
+
 	private void createTable(Composite parent) {
 		Label label= new Label(parent, SWT.WRAP);
-		label.setText(WorkingSetMessages.JavaWorkingSetPage_workingSet_content); 
+		label.setText(WorkingSetMessages.JavaWorkingSetPage_workingSet_content);
 		label.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		
+
 		fTable= new TableViewer(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
-		
+
 		GridData gd= new GridData(SWT.FILL, SWT.FILL, true, true);
 		fTable.getControl().setLayoutData(gd);
-		
+
 		fTable.setUseHashlookup(true);
-		
+
 		configureTable(fTable);
-		
+
 		fTable.setContentProvider(new IStructuredContentProvider() {
 
 			public Object[] getElements(Object inputElement) {
@@ -372,7 +406,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			}
-			
+
 		});
 	}
 
@@ -413,9 +447,9 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 			for (int i= 0; i < oldItems.length; i++) {
 				IResource oldResource= null;
 				if (oldItems[i] instanceof IResource) {
-					oldResource= (IResource)oldItems[i];
+					oldResource= (IResource) oldItems[i];
 				} else {
-					oldResource= (IResource)oldItems[i].getAdapter(IResource.class);
+					oldResource= (IResource) oldItems[i].getAdapter(IResource.class);
 				}
 				if (oldResource != null && oldResource.isAccessible() == false) {
 					IProject project= oldResource.getProject();
@@ -432,20 +466,19 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 	}
 
 	private void validateInput() {
-		String errorMessage= null; 
+		String errorMessage= null;
 		String infoMessage= null;
 		String newText= fWorkingSetName.getText();
 
 		if (newText.equals(newText.trim()) == false)
-			errorMessage = WorkingSetMessages.JavaWorkingSetPage_warning_nameWhitespace; 
+			errorMessage = WorkingSetMessages.JavaWorkingSetPage_warning_nameWhitespace;
 		if (newText.equals("")) { //$NON-NLS-1$
 			if (fFirstCheck) {
 				setPageComplete(false);
 				fFirstCheck= false;
 				return;
-			}
-			else				
-				errorMessage= WorkingSetMessages.JavaWorkingSetPage_warning_nameMustNotBeEmpty; 
+			} else
+				errorMessage= WorkingSetMessages.JavaWorkingSetPage_warning_nameMustNotBeEmpty;
 		}
 
 		fFirstCheck= false;
@@ -454,11 +487,11 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 			IWorkingSet[] workingSets= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets();
 			for (int i= 0; i < workingSets.length; i++) {
 				if (newText.equals(workingSets[i].getName())) {
-					errorMessage= WorkingSetMessages.JavaWorkingSetPage_warning_workingSetExists; 
+					errorMessage= WorkingSetMessages.JavaWorkingSetPage_warning_workingSetExists;
 				}
 			}
 		}
-		
+
 		if (!hasSelectedElement())
 			infoMessage= WorkingSetMessages.JavaWorkingSetPage_warning_resourceMustBeChecked;
 
@@ -466,11 +499,11 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		setErrorMessage(errorMessage);
 		setPageComplete(errorMessage == null);
 	}
-	
+
 	private boolean hasSelectedElement() {
 		return !fSelectedElements.isEmpty();
 	}
-	
+
 	private void initializeSelectedElements() {
 		fSelectedElements.addAll(Arrays.asList(getInitialWorkingSetElements(fWorkingSet)));
 	}
