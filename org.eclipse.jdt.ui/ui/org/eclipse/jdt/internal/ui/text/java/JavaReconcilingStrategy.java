@@ -81,7 +81,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	}
 
 	private void reconcile(final boolean initialReconcile) {
-		fAST= null;
+		Assert.isTrue(fAST == null); // we'll see how this behaves ;-)
 		final ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput(), false);
 		if (unit != null) {
 			SafeRunner.run(new ISafeRunnable() {
@@ -191,7 +191,6 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	 * @since 3.0
 	 */
 	public void aboutToBeReconciled() {
-		Assert.isTrue(fAST == null); // we'll see how this behaves ;-)
 		if (fIsJavaReconcilingListener)
 			fJavaReconcilingListener.aboutToBeReconciled();
 	}
