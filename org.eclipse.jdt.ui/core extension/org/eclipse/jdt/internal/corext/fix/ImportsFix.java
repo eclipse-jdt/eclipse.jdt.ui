@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
+import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -60,7 +61,7 @@ public class ImportsFix extends AbstractFix {
 			return null;
 		}
 		
-		if (edit == null || edit.getChildrenSize() == 0)
+		if (edit == null || (edit instanceof MultiTextEdit && edit.getChildrenSize() == 0))
 			return null;
 
 		return new IFix() {
