@@ -1237,6 +1237,11 @@ public class PackageExplorerPart extends ViewPart
 		setTitleToolTip(getTitleToolTip());
 	}
 	
+	void updateToolbar() {
+		IActionBars actionBars= getViewSite().getActionBars();
+		fActionSet.fillToolBar(actionBars.getToolBarManager());
+	}
+	
 	/**
 	 * Updates the title text and title tool tip.
 	 * Called whenever the input of the viewer changes.

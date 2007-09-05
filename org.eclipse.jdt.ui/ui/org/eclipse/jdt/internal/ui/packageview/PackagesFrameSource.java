@@ -36,6 +36,7 @@ class PackagesFrameSource extends TreeViewerFrameSource {
 	protected void frameChanged(TreeFrame frame) {
 		super.frameChanged(frame);
 		fPackagesExplorer.updateTitle();
+		fPackagesExplorer.updateToolbar();
 	}
 
 }

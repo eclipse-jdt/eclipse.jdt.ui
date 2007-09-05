@@ -138,12 +138,12 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		
 		PackagesFrameSource frameSource= new PackagesFrameSource(fPart);
 		fFrameList= new FrameList(frameSource);
-		frameSource.connectTo(fFrameList);
-			
+		
 		fZoomInAction= new GoIntoAction(fFrameList);
 		fBackAction= new BackAction(fFrameList);
 		fForwardAction= new ForwardAction(fFrameList);
 		fUpAction= new UpAction(fFrameList);
+		frameSource.connectTo(fFrameList); // connect after the actions (order of property listener)
 		
 		fGotoTypeAction= new GotoTypeAction(fPart);
 		fGotoPackageAction= new GotoPackageAction(fPart);
@@ -203,14 +203,18 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 	}
 
 	/* package */ void fillToolBar(IToolBarManager toolBar) {
-		toolBar.add(fBackAction);
-		toolBar.add(fForwardAction);
-		toolBar.add(fUpAction); 
+		toolBar.removeAll();
 		
-		toolBar.add(new Separator());
+		if (fBackAction.isEnabled() || fUpAction.isEnabled() || fForwardAction.isEnabled()) {
+			toolBar.add(fBackAction);
+			toolBar.add(fForwardAction);
+			toolBar.add(fUpAction);
+			toolBar.add(new Separator());
+		}
+		
 		toolBar.add(fCollapseAllAction);
 		toolBar.add(fToggleLinkingAction);
-
+		toolBar.update(true);
 	}
 	
 	/* package */ void fillViewMenu(IMenuManager menu) {
@@ -310,6 +314,10 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		}
 	}
 	
+	/**
+	 * Called by the open action
+	 * @param event the open event
+	 */
 	/* package */ void handleOpen(OpenEvent event) {
 		IAction openAction= fNavigateActionGroup.getOpenAction();
 		if (openAction != null && openAction.isEnabled()) {
