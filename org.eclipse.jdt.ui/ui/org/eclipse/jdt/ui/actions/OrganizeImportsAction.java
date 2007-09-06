@@ -246,20 +246,25 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		try {
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
 			
-			if (fEditor == null && EditorUtility.isOpenInEditor(cu) == null) {
-				IEditorPart editor= JavaUI.openInEditor(cu);
-				if (editor instanceof JavaEditor) {
-					fEditor= (JavaEditor) editor;
-				}			
+			JavaEditor editor= null;
+			if (fEditor == null) {
+				IEditorPart openEditor= EditorUtility.isOpenInEditor(cu);
+				if (openEditor == null)
+					openEditor= JavaUI.openInEditor(cu);
+
+				if (openEditor instanceof JavaEditor)
+					editor= (JavaEditor) openEditor;
+			} else {
+				editor= fEditor;
 			}
 			
 			CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(cu, ASTProvider.WAIT_ACTIVE_ONLY, null);
 			
-			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, astRoot, settings.importIgnoreLowercase, !cu.isWorkingCopy(), true, createChooseImportQuery());
+			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, astRoot, settings.importIgnoreLowercase, !cu.isWorkingCopy(), true, createChooseImportQuery(editor));
 		
 			IRewriteTarget target= null;
-			if (fEditor != null) {
-				target= (IRewriteTarget) fEditor.getAdapter(IRewriteTarget.class);
+			if (editor != null) {
+				target= (IRewriteTarget) editor.getAdapter(IRewriteTarget.class);
 				if (target != null) {
 					target.beginCompoundChange();
 				}
@@ -271,25 +276,25 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				context= progressService;
 			}
 			try {
-				registerHelper(helper);
+				registerHelper(helper, editor);
 				progressService.runInUI(context, new WorkbenchRunnableAdapter(op, op.getScheduleRule()), op.getScheduleRule());
 				IProblem parseError= op.getParseError();
 				if (parseError != null) {
 					String message= Messages.format(ActionMessages.OrganizeImportsAction_single_error_parse, parseError.getMessage()); 
 					MessageDialog.openInformation(getShell(), ActionMessages.OrganizeImportsAction_error_title, message); 
-					if (fEditor != null && parseError.getSourceStart() != -1) {
-						fEditor.selectAndReveal(parseError.getSourceStart(), parseError.getSourceEnd() - parseError.getSourceStart() + 1);
+					if (editor != null && parseError.getSourceStart() != -1) {
+						editor.selectAndReveal(parseError.getSourceStart(), parseError.getSourceEnd() - parseError.getSourceStart() + 1);
 					}
 				} else {
-					if (fEditor != null) {
-						setStatusBarMessage(getOrganizeInfo(op));
+					if (editor != null) {
+						setStatusBarMessage(getOrganizeInfo(op), editor);
 					}
 				}
 			} catch (InvocationTargetException e) {
 				ExceptionHandler.handle(e, getShell(), ActionMessages.OrganizeImportsAction_error_title, ActionMessages.OrganizeImportsAction_error_message); 
 			} catch (InterruptedException e) {
 			} finally {
-				deregisterHelper(helper);
+				deregisterHelper(helper, editor);
 				if (target != null) {
 					target.endCompoundChange();
 				}
@@ -308,17 +313,17 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		}
 	}
 		
-	private IChooseImportQuery createChooseImportQuery() {
+	private IChooseImportQuery createChooseImportQuery(final JavaEditor editor) {
 		return new IChooseImportQuery() {
 			public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
-				return doChooseImports(openChoices, ranges);
+				return doChooseImports(openChoices, ranges, editor);
 			}
 		};
 	}
 	
-	private TypeNameMatch[] doChooseImports(TypeNameMatch[][] openChoices, final ISourceRange[] ranges) {
+	private TypeNameMatch[] doChooseImports(TypeNameMatch[][] openChoices, final ISourceRange[] ranges, final JavaEditor editor) {
 		// remember selection
-		ISelection sel= fEditor != null ? fEditor.getSelectionProvider().getSelection() : null;
+		ISelection sel= editor != null ? editor.getSelectionProvider().getSelection() : null;
 		TypeNameMatch[] result= null;
 		ILabelProvider labelProvider= new TypeNameMatchLabelProvider(TypeNameMatchLabelProvider.SHOW_FULLYQUALIFIED);
 		
@@ -326,7 +331,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			protected void handleSelectionChanged() {
 				super.handleSelectionChanged();
 				// show choices in editor
-				doListSelectionChanged(getCurrentPage(), ranges);
+				doListSelectionChanged(getCurrentPage(), ranges, editor);
 			}
 		};
 		fIsQueryShowing= true;
@@ -348,21 +353,21 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		// restore selection
 		if (sel instanceof ITextSelection) {
 			ITextSelection textSelection= (ITextSelection) sel;
-			fEditor.selectAndReveal(textSelection.getOffset(), textSelection.getLength());
+			editor.selectAndReveal(textSelection.getOffset(), textSelection.getLength());
 		}
 		fIsQueryShowing= false;
 		return result;
 	}
 	
-	private void doListSelectionChanged(int page, ISourceRange[] ranges) {
-		if (fEditor != null && ranges != null && page >= 0 && page < ranges.length) {
+	private void doListSelectionChanged(int page, ISourceRange[] ranges, JavaEditor editor) {
+		if (editor != null && ranges != null && page >= 0 && page < ranges.length) {
 			ISourceRange range= ranges[page];
-			fEditor.selectAndReveal(range.getOffset(), range.getLength());
+			editor.selectAndReveal(range.getOffset(), range.getLength());
 		}
 	}
 	
-	private void setStatusBarMessage(String message) {
-		IStatusLineManager manager= fEditor.getEditorSite().getActionBars().getStatusLineManager();
+	private void setStatusBarMessage(String message, JavaEditor editor) {
+		IStatusLineManager manager= editor.getEditorSite().getActionBars().getStatusLineManager();
 		manager.setMessage(message);
 	}
 	
@@ -378,20 +383,20 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		};
 	}
 	
-	private void registerHelper(IEditingSupport helper) {
-		if (fEditor == null)
+	private void registerHelper(IEditingSupport helper, JavaEditor editor) {
+		if (editor == null)
 			return;
-		ISourceViewer viewer= fEditor.getViewer();
+		ISourceViewer viewer= editor.getViewer();
 		if (viewer instanceof IEditingSupportRegistry) {
 			IEditingSupportRegistry registry= (IEditingSupportRegistry) viewer;
 			registry.register(helper);
 		}
 	}
 
-	private void deregisterHelper(IEditingSupport helper) {
-		if (fEditor == null)
+	private void deregisterHelper(IEditingSupport helper, JavaEditor editor) {
+		if (editor == null)
 			return;
-		ISourceViewer viewer= fEditor.getViewer();
+		ISourceViewer viewer= editor.getViewer();
 		if (viewer instanceof IEditingSupportRegistry) {
 			IEditingSupportRegistry registry= (IEditingSupportRegistry) viewer;
 			registry.unregister(helper);

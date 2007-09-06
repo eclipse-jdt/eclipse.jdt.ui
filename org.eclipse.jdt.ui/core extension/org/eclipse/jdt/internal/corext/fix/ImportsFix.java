@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
+import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -63,11 +64,8 @@ public class ImportsFix extends AbstractFix {
 			status.addInfo(Messages.format(ActionMessages.OrganizeImportsAction_multi_error_parse, getLocationString(cu)));
 			return null;
 		}
-		
-		if (edit == null)
-			return null;
-		
-		if (op.getNumberOfImportsAdded() == 0 && op.getNumberOfImportsRemoved() == 0)
+
+		if (edit == null || (edit instanceof MultiTextEdit && edit.getChildrenSize() == 0))
 			return null;
 
 		return new IFix() {
