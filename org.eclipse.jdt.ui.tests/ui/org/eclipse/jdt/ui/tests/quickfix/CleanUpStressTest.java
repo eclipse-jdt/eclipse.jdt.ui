@@ -1057,8 +1057,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf= new StringBuffer();
         buf.append("package junit.framework;\n");
         buf.append("\n");
-        buf.append("import java.util.Vector;\n");
         buf.append("import java.util.Enumeration;\n");
+        buf.append("import java.util.Vector;\n");
         buf.append("\n");
         buf.append("/**\n");
         buf.append(" * A <code>TestResult</code> collects the results of executing a test case. It\n");
