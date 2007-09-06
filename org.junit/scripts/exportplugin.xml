@@ -1,0 +1,29 @@
+<!-- build script to create JUnit Plugin -->
+<project name="org.junit" default="export" basedir="..">
+	<target name="init">
+		<tstamp/>
+		<property name="destdir" value="../../plugin-export" />
+		<property name="plugin"  value="org.junit" />
+		<property name="dest"  value="${destdir}/${plugin}" />
+	</target>
+
+	<target name="build" depends="init">
+    	<eclipse.incrementalBuild project="${plugin}" kind="incr"/>
+	</target>
+
+	<target name="export" depends="build">
+		<mkdir dir="${destdir}" />
+		<delete dir="${dest}" />
+		<mkdir dir="${dest}" />
+
+		<copy file="junit.jar" todir="${dest}"/>
+		<copy file="junitsrc.zip" todir="${dest}"/>
+		<copy file="plugin.xml" todir="${dest}"/>
+		<copy file="about.html" todir="${dest}"/>
+		<copy file="plugin.properties" todir="${dest}"/>
+		<copy todir= "${dest}/META-INF">
+			<fileset dir="META-INF"/>
+		</copy>		
+
+	</target>
+</project>
