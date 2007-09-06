@@ -23,9 +23,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.Flags;
@@ -80,7 +77,6 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
@@ -208,6 +204,12 @@ public class TypeContextChecker {
 			}
 		}
 
+		/**
+		 * Decides if a problem matters.
+		 * @param problem the problem
+		 * @param type the current type
+		 * @return return if a problem matters.
+		 */
 		private boolean isError(IProblem problem, Type type) {
 			return true;
 		}
@@ -495,34 +497,24 @@ public class TypeContextChecker {
 	}
 	
 	public static StubTypeContext createStubTypeContext(ICompilationUnit cu, CompilationUnit root, int focalPosition) throws CoreException {
-		IDocument document= RefactoringFileBuffers.acquire(cu).getDocument();
-		try {
-			StringBuffer bufBefore= new StringBuffer();
-			StringBuffer bufAfter= new StringBuffer();
-			
-			int introEnd= 0;
-			PackageDeclaration pack= root.getPackage();
-			if (pack != null)
-				introEnd= pack.getStartPosition() + pack.getLength();
-			List imports= root.imports();
-			if (imports.size() > 0) {
-				ImportDeclaration lastImport= (ImportDeclaration) imports.get(imports.size() - 1);
-				introEnd= lastImport.getStartPosition() + lastImport.getLength();
-			}
-			try {
-				bufBefore.append(document.get(0, introEnd));
-			} catch (BadLocationException e) {
-				throw new RuntimeException(e); // doesn't happen
-			}
-			
-			fillWithTypeStubs(bufBefore, bufAfter, focalPosition, root.types());
-			bufBefore.append(' ');
-			bufAfter.insert(0, ' ');
-			return new StubTypeContext(cu, bufBefore.toString(), bufAfter.toString());
-			
-		} finally {
-			RefactoringFileBuffers.release(cu);
+		StringBuffer bufBefore= new StringBuffer();
+		StringBuffer bufAfter= new StringBuffer();
+		
+		int introEnd= 0;
+		PackageDeclaration pack= root.getPackage();
+		if (pack != null)
+			introEnd= pack.getStartPosition() + pack.getLength();
+		List imports= root.imports();
+		if (imports.size() > 0) {
+			ImportDeclaration lastImport= (ImportDeclaration) imports.get(imports.size() - 1);
+			introEnd= lastImport.getStartPosition() + lastImport.getLength();
 		}
+		bufBefore.append(cu.getBuffer().getText(0, introEnd));
+		
+		fillWithTypeStubs(bufBefore, bufAfter, focalPosition, root.types());
+		bufBefore.append(' ');
+		bufAfter.insert(0, ' ');
+		return new StubTypeContext(cu, bufBefore.toString(), bufAfter.toString());
 	}
 
 	private static void fillWithTypeStubs(final StringBuffer bufBefore, final StringBuffer bufAfter, final int focalPosition, List/*<? extends BodyDeclaration>*/ types) {
