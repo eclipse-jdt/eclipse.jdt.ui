@@ -81,7 +81,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
-import org.eclipse.jdt.internal.corext.refactoring.changes.AddToClasspathChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.ClasspathChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreatePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
@@ -281,8 +281,8 @@ public class ReorgCorrectionsSubProcessor {
 						String[] args= { other.getElementName(), project.getElementName() };
 						String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_project_description, args);
 						IClasspathEntry newEntry= JavaCore.newProjectEntry(other.getPath());
-						AddToClasspathChange change= new AddToClasspathChange(project, newEntry);
-						if (change.validateClasspath()) {
+						ClasspathChange change= ClasspathChange.addEntryChange(project, newEntry);
+						if (change != null) {
 							ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(label, change, 8, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 							proposals.add(proposal);
 						}
@@ -290,8 +290,8 @@ public class ReorgCorrectionsSubProcessor {
 					if ((entryKind == IClasspathEntry.CPE_LIBRARY || entryKind == IClasspathEntry.CPE_VARIABLE || entryKind == IClasspathEntry.CPE_CONTAINER) && addedClaspaths.add(entry)) {
 						String label= getAddClasspathLabel(entry, root, project);
 						if (label != null) {
-							AddToClasspathChange change= new AddToClasspathChange(project, entry);
-							if (change.validateClasspath()) {
+							ClasspathChange change= ClasspathChange.addEntryChange(project, entry);
+							if (change != null) {
 								ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(label, change, 7, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 								proposals.add(proposal);
 							}

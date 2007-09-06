@@ -244,6 +244,10 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String Checks_validateEdit;
 
+	public static String ClasspathChange_change_name;
+
+	public static String ClasspathChange_progress_message;
+
 	public static String CodeAnalyzer_array_initializer;
 
 	public static String CodeRefactoringUtil_error_message;
