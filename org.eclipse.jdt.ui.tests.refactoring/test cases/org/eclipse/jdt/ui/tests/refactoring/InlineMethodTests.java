@@ -924,112 +924,118 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	public void testOperatorPredence() throws Exception {
 		AST ast= AST.newAST(AST.JLS3);
 		
-		int assignment= OperatorPrecedence.getValue(ast.newAssignment());
-		int conditional= OperatorPrecedence.getValue(ast.newConditionalExpression());
+		int assignment= OperatorPrecedence.getExpressionPrecedence(ast.newAssignment());
+		int conditional= OperatorPrecedence.getExpressionPrecedence(ast.newConditionalExpression());
 		assertTrue(assignment < conditional);
 		
 		InfixExpression exp= ast.newInfixExpression();
 		exp.setOperator(Operator.CONDITIONAL_OR);
-		int conditional_or= OperatorPrecedence.getValue(exp);
+		int conditional_or= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(conditional < conditional_or);
 		
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.CONDITIONAL_AND);
-		int conditional_and= OperatorPrecedence.getValue(exp);
+		int conditional_and= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(conditional_or < conditional_and);
 		
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.OR);
-		int bitwiseInclusiveOR= OperatorPrecedence.getValue(exp);
+		int bitwiseInclusiveOR= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(conditional_and < bitwiseInclusiveOR);
 		
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.XOR);
-		int bitwiseEnclusiveOR= OperatorPrecedence.getValue(exp);
+		int bitwiseEnclusiveOR= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(bitwiseInclusiveOR < bitwiseEnclusiveOR);
 		
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.AND);
-		int bitwiseAnd= OperatorPrecedence.getValue(exp);
+		int bitwiseAnd= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(bitwiseEnclusiveOR < bitwiseAnd);
 		
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.EQUALS);
-		int equals= OperatorPrecedence.getValue(exp);
+		int equals= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(bitwiseAnd < equals);
 		
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.NOT_EQUALS);
-		int notEquals= OperatorPrecedence.getValue(exp);
+		int notEquals= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(equals == notEquals);
 		
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.LESS);
-		int less= OperatorPrecedence.getValue(exp);
+		int less= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(notEquals < less);
 		
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.LESS_EQUALS);
-		int lessEquals= OperatorPrecedence.getValue(exp);
+		int lessEquals= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(less == lessEquals);
 		
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.GREATER);
-		int greater= OperatorPrecedence.getValue(exp);
+		int greater= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(lessEquals == greater);
 		
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.GREATER_EQUALS);
-		int greaterEquals= OperatorPrecedence.getValue(exp);
+		int greaterEquals= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(greater == greaterEquals);
 		
-		int instance= OperatorPrecedence.getValue(ast.newInstanceofExpression());
+		int instance= OperatorPrecedence.getExpressionPrecedence(ast.newInstanceofExpression());
 		assertTrue(greaterEquals == instance);
 		
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.LEFT_SHIFT);
-		int leftShift= OperatorPrecedence.getValue(exp);
+		int leftShift= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(instance < leftShift);
 		
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.RIGHT_SHIFT_SIGNED);
-		int rightShiftSigned= OperatorPrecedence.getValue(exp);
+		int rightShiftSigned= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(leftShift == rightShiftSigned);
 		
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.RIGHT_SHIFT_UNSIGNED);
-		int rightShiftUnSigned= OperatorPrecedence.getValue(exp);
+		int rightShiftUnSigned= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(rightShiftSigned == rightShiftUnSigned);
 		
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.PLUS);
-		int plus= OperatorPrecedence.getValue(exp);
+		int plus= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(rightShiftUnSigned < plus);
 		
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.MINUS);
-		int minus= OperatorPrecedence.getValue(exp);
+		int minus= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(plus == minus);
 		
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.TIMES);
-		int times= OperatorPrecedence.getValue(exp);
+		int times= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(minus < times);
 		
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.DIVIDE);
-		int divide= OperatorPrecedence.getValue(exp);
+		int divide= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(times == divide);
 		
 		exp= ast.newInfixExpression();
 		exp.setOperator(Operator.REMAINDER);
-		int remainder= OperatorPrecedence.getValue(exp);
+		int remainder= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(divide == remainder);
 		
-		int prefix= OperatorPrecedence.getValue(ast.newPrefixExpression());
-		assertTrue(remainder < prefix);
+		int newClass= OperatorPrecedence.getExpressionPrecedence(ast.newClassInstanceCreation());
+		assertTrue(remainder < newClass);
+
+		int cast= OperatorPrecedence.getExpressionPrecedence(ast.newCastExpression());
+		assertTrue(cast == newClass);
+
+		int prefix= OperatorPrecedence.getExpressionPrecedence(ast.newPrefixExpression());
+		assertTrue(cast < prefix);
 		
-		int postfix= OperatorPrecedence.getValue(ast.newPostfixExpression());
+		int postfix= OperatorPrecedence.getExpressionPrecedence(ast.newPostfixExpression());
 		assertTrue(prefix < postfix);
 	}
 }

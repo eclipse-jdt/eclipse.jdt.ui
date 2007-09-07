@@ -268,8 +268,8 @@ class SourceAnalyzer  {
 					if (data != null) {
 						ASTNode parent= node.getParent();
 						if (parent instanceof Expression) {
-							int precedence= OperatorPrecedence.getValue((Expression)parent);
-							if (precedence != -1) {
+							int precedence= OperatorPrecedence.getExpressionPrecedence((Expression)parent);
+							if (precedence != Integer.MAX_VALUE) {
 								data.setOperatorPrecedence(node, precedence);
 							}
 						}

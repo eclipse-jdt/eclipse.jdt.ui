@@ -51,7 +51,6 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -81,6 +80,7 @@ import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ExpressionsFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
+import org.eclipse.jdt.internal.corext.refactoring.code.OperatorPrecedence;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -569,7 +569,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static Expression parenthesizeIfRequired(Expression operand, int newOperatorPrecedence) {
-		if (newOperatorPrecedence < getExpressionPrecedence(operand)) {
+		if (newOperatorPrecedence > OperatorPrecedence.getExpressionPrecedence(operand)) {
 			return getParenthesizedExpression(operand.getAST(), operand);
 		}
 		return operand;
@@ -579,7 +579,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		InfixExpression newExpression = rewrite.getAST().newInfixExpression();
 		newExpression.setOperator(newOperator);
 
-		int newOperatorPrecedence = getInfixOperatorPrecedence(newOperator);
+		int newOperatorPrecedence = OperatorPrecedence.getOperatorPrecedence(newOperator);
 		//
 		Expression leftOperand = getInversedBooleanExpression(rewrite, infixExpression.getLeftOperand(), provider);
 		newExpression.setLeftOperand(parenthesizeIfRequired(leftOperand, newOperatorPrecedence));
@@ -621,73 +621,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new ExpressionsCleanUp(options), 1, image, context);
 		resultingCollections.add(proposal);
 		return true;
-	}
-	private static int getExpressionPrecedence(Expression expression) {
-		if (expression instanceof PostfixExpression) {
-			return 0;
-		}
-		if (expression instanceof PrefixExpression) {
-			return 1;
-		}
-		if ((expression instanceof ClassInstanceCreation) || (expression instanceof CastExpression)) {
-			return 2;
-		}
-		if (expression instanceof InfixExpression) {
-			InfixExpression infixExpression = (InfixExpression) expression;
-			InfixExpression.Operator operator = infixExpression.getOperator();
-			return getInfixOperatorPrecedence(operator);
-		}
-		if (expression instanceof InstanceofExpression) {
-			return 6;
-		}
-		if (expression instanceof ConditionalExpression) {
-			return 13;
-		}
-		if (expression instanceof Assignment) {
-			return 14;
-		}
-		if (expression instanceof MethodInvocation) {
-			return 2;
-		}
-		return -1;
-	}
-	private static int getInfixOperatorPrecedence(InfixExpression.Operator operator) {
-		if ((operator == InfixExpression.Operator.TIMES) || (operator == InfixExpression.Operator.DIVIDE)
-				|| (operator == InfixExpression.Operator.REMAINDER)) {
-			return 3;
-		}
-		if ((operator == InfixExpression.Operator.PLUS) || (operator == InfixExpression.Operator.MINUS)) {
-			return 4;
-		}
-		if ((operator == InfixExpression.Operator.LEFT_SHIFT)
-				|| (operator == InfixExpression.Operator.RIGHT_SHIFT_SIGNED)
-				|| (operator == InfixExpression.Operator.RIGHT_SHIFT_UNSIGNED)) {
-			return 5;
-		}
-		if ((operator == InfixExpression.Operator.LESS) || (operator == InfixExpression.Operator.GREATER)
-				|| (operator == InfixExpression.Operator.LESS_EQUALS)
-				|| (operator == InfixExpression.Operator.GREATER_EQUALS)) {
-			return 6;
-		}
-		if ((operator == InfixExpression.Operator.EQUALS) || (operator == InfixExpression.Operator.NOT_EQUALS)) {
-			return 7;
-		}
-		if (operator == InfixExpression.Operator.AND) {
-			return 8;
-		}
-		if (operator == InfixExpression.Operator.XOR) {
-			return 9;
-		}
-		if (operator == InfixExpression.Operator.OR) {
-			return 10;
-		}
-		if (operator == InfixExpression.Operator.CONDITIONAL_AND) {
-			return 11;
-		}
-		if (operator == InfixExpression.Operator.CONDITIONAL_OR) {
-			return 12;
-		}
-		return -1;
 	}
 
 	private static boolean getAddParanoidalParenthesisProposals(IInvocationContext context, ArrayList coveredNodes, Collection resultingCollections) throws CoreException {
@@ -1946,9 +1879,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		// check, may be we should keep parentheses
 		boolean keepParentheses= false;
 		if (negationExpression.getParent() instanceof Expression) {
-			int parentPrecedence= getExpressionPrecedence((Expression) negationExpression.getParent());
-			int inversedExpressionPrecedence= getExpressionPrecedence(inversedExpression);
-			keepParentheses= parentPrecedence < inversedExpressionPrecedence;
+			int parentPrecedence= OperatorPrecedence.getExpressionPrecedence(((Expression) negationExpression.getParent()));
+			int inversedExpressionPrecedence= OperatorPrecedence.getExpressionPrecedence(inversedExpression);
+			keepParentheses= parentPrecedence > inversedExpressionPrecedence;
 		}
 		// replace negated expression with inverted one
 		if (keepParentheses) {

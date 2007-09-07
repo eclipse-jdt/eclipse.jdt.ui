@@ -555,9 +555,9 @@ public class CallInliner {
 	private boolean argumentNeedsParenthesis(Expression expression, ParameterData param) {
 		if (expression instanceof CastExpression || expression instanceof ArrayCreation)
 			return true;
-		int argPrecedence= OperatorPrecedence.getValue(expression);
+		int argPrecedence= OperatorPrecedence.getExpressionPrecedence(expression);
 		int paramPrecedence= param.getOperatorPrecedence();
-		if (argPrecedence != -1 && paramPrecedence != -1)
+		if (argPrecedence != Integer.MAX_VALUE && paramPrecedence != Integer.MAX_VALUE)
 			return argPrecedence < paramPrecedence;
 		
 		return false;

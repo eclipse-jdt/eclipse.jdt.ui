@@ -22,22 +22,17 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.CastExpression;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.PostfixExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.internal.corext.refactoring.code.OperatorPrecedence;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 public class ExpressionsFix extends AbstractFix {
@@ -51,12 +46,20 @@ public class ExpressionsFix extends AbstractFix {
 		}
 
 		public void postVisit(ASTNode node) {
+			if (needsParentesis(node)) {
+				fNodes.add(node);
+			}
+		}
+
+		private boolean needsParentesis(ASTNode node) {
 			// check that parent is && or ||
 			if (!(node.getParent() instanceof InfixExpression))
-				return;
-			
+				return false;
+
 			// we want to add parenthesis around arithmetic operators and instanceof
-			boolean needParenthesis = false;
+			if (node instanceof InstanceofExpression)
+				return true;
+
 			if (node instanceof InfixExpression) {
 				InfixExpression expression = (InfixExpression) node;
 				InfixExpression.Operator operator = expression.getOperator();
@@ -65,9 +68,10 @@ public class ExpressionsFix extends AbstractFix {
 				InfixExpression.Operator parentOperator = parentExpression.getOperator();
 				
 				if (parentOperator == operator)
-					return;
+					return false;
 				
-				needParenthesis= (operator == InfixExpression.Operator.LESS)
+				
+				return (operator == InfixExpression.Operator.LESS)
 						|| (operator == InfixExpression.Operator.GREATER)
 						|| (operator == InfixExpression.Operator.LESS_EQUALS)
 						|| (operator == InfixExpression.Operator.GREATER_EQUALS)
@@ -77,171 +81,150 @@ public class ExpressionsFix extends AbstractFix {
 						|| (operator == InfixExpression.Operator.CONDITIONAL_AND)
 						|| (operator == InfixExpression.Operator.CONDITIONAL_OR);
 			}
-			if (node instanceof InstanceofExpression) {
-				needParenthesis = true;
-			}
-			if (!needParenthesis) {
-				return;
-			}
-			fNodes.add(node);
+
+			return false;
 		}
 	}
 	
 	private static final class UnnecessaryParenthesisVisitor extends ASTVisitor {
+
 		private final ArrayList fNodes;
 
 		private UnnecessaryParenthesisVisitor(ArrayList nodes) {
 			fNodes= nodes;
 		}
 
-		public void postVisit(ASTNode node) {
-			if (!(node instanceof ParenthesizedExpression)) {
-				return;
+		public boolean visit(ParenthesizedExpression node) {
+			if (canRemoveParenthesis(node)) {
+				fNodes.add(node);
 			}
-			ParenthesizedExpression parenthesizedExpression= (ParenthesizedExpression) node;
-			Expression expression= parenthesizedExpression.getExpression();
+
+			return true;
+		}
+
+		/*
+		 * Can the parenthesis around node be removed?
+		 */
+		private boolean canRemoveParenthesis(ParenthesizedExpression node) {
+			ASTNode parent= node.getParent();
+			if (!(parent instanceof Expression))
+				return true;
+
+			Expression parentExpression= (Expression) parent;
+			if (parentExpression instanceof ParenthesizedExpression)
+				return true;
+
+			Expression expression= getExpression(node);
+
+			int expressionPrecedence= OperatorPrecedence.getExpressionPrecedence(expression);
+			int parentPrecedence= OperatorPrecedence.getExpressionPrecedence(parentExpression);
+
+			if (expressionPrecedence > parentPrecedence)
+				//(opEx) opParent and opEx binds more -> can safely remove
+				return true;
+
+			if (expressionPrecedence < parentPrecedence)
+				//(opEx) opParent and opEx binds less -> do not remove 
+				return false;
+
+			//(opEx) opParent binds equal
+
+			if (parentExpression instanceof InfixExpression) {
+				InfixExpression parentInfix= (InfixExpression) parentExpression;
+				if (parentInfix.getLeftOperand() == node) {
+					//we have (expr op expr) op expr
+					//infix expressions are evaluated from left to right -> can safely remove
+					return true;
+				} else if (isAssociative(parentInfix)) {
+					//we have parent op (expr op expr) and op is associative
+					//left op (right) == (right) op left == right op left
+					return true;
+				} else {
+					return false;
+				}
+			} else if (parentExpression instanceof ConditionalExpression) {
+				ConditionalExpression conditionalExpression= (ConditionalExpression) parentExpression;
+				if (conditionalExpression.getElseExpression() != node)
+					return false;
+			}
+
+			return true;
+		}
+
+		/*
+		 * Get the expression wrapped by the parentheses
+		 * i.e. ((((expression)))) -> expression
+		 */
+		private Expression getExpression(ParenthesizedExpression node) {
+			Expression expression= node.getExpression();
 			while (expression instanceof ParenthesizedExpression) {
 				expression= ((ParenthesizedExpression) expression).getExpression();
 			}
-			// check case when this expression is cast expression and parent is method invocation with this expression as expression
-			if ((parenthesizedExpression.getExpression() instanceof CastExpression)
-				&& (parenthesizedExpression.getParent() instanceof MethodInvocation)) {
-				MethodInvocation parentMethodInvocation = (MethodInvocation) parenthesizedExpression.getParent();
-				if (parentMethodInvocation.getExpression() == parenthesizedExpression)
-					return;
-			}
-			// if this is part of another expression, check for this and parent precedences
-			if (parenthesizedExpression.getParent() instanceof Expression) {
-				Expression parentExpression= (Expression) parenthesizedExpression.getParent();
-				int expressionPrecedence= getExpressionPrecedence(expression);
-				int parentPrecedence= getExpressionPrecedence(parentExpression);
-				if ((expressionPrecedence > parentPrecedence)
-					&& !(parenthesizedExpression.getParent() instanceof ParenthesizedExpression)) {
-					return;
-				}
-				// check for case when precedences for expression and parent are same
-				if ((expressionPrecedence == parentPrecedence) && (parentExpression instanceof InfixExpression)) {
-					//we have expr infix (expr infix expr) removing the parenthesis is equal to (expr infix expr) infix expr
-					InfixExpression parentInfix= (InfixExpression) parentExpression;
- 					Operator parentOperator= parentInfix.getOperator();
-					if (parentInfix.getLeftOperand() == parenthesizedExpression) {
-						fNodes.add(node);
-					} else if (isAssoziative(parentOperator)) {
-						if (parentOperator == InfixExpression.Operator.PLUS) {
-							if (isStringExpression(parentInfix.getLeftOperand())
-								|| isStringExpression(parentInfix.getRightOperand())) {
-								return;
-							}
-							for (Iterator J= parentInfix.extendedOperands().iterator(); J.hasNext();) {
-								Expression operand= (Expression) J.next();
-								if (isStringExpression(operand)) {
-									return;
-								}
-							}
-						}
-						fNodes.add(node);
-					}
-					return;
-				} else if (expressionPrecedence == parentPrecedence && parentExpression instanceof ConditionalExpression) {
-					if (((ConditionalExpression)parentExpression).getElseExpression() != parenthesizedExpression)
-						return;
-				}
-			}
-			fNodes.add(node);
+			return expression;
 		}
 
-		//is e1 op (e2 op e3) == (e1 op e2) op e3 == e1 op e2 op e3 for 'operator'? 
-		private boolean isAssoziative(Operator operator) {
-			if (operator == InfixExpression.Operator.PLUS)
-				return true;
-			
+		/**
+		 * Is the given expression associative?
+		 * <p>
+		 * This is true if and only if:<br>
+		 * <code>left operator (right) == (right) operator left == right operator left</code>
+		 * </p>
+		 * 
+		 * @param expression the expression to inspect
+		 * @return true if expression is associative
+		 */
+		public static boolean isAssociative(InfixExpression expression) {
+			Operator operator= expression.getOperator();
+			if (operator == InfixExpression.Operator.PLUS) {
+				return isAllOperandsHaveSameType(expression);
+			}
+
+			if (operator == Operator.LESS || operator == Operator.LESS_EQUALS || operator == Operator.GREATER || operator == Operator.GREATER_EQUALS) {
+				return isAllOperandsHaveSameType(expression);
+			}
+
 			if (operator == InfixExpression.Operator.CONDITIONAL_AND)
 				return true;
-			
+
 			if (operator == InfixExpression.Operator.CONDITIONAL_OR)
 				return true;
-			
+
 			if (operator == InfixExpression.Operator.AND)
 				return true;
-			
+
 			if (operator == InfixExpression.Operator.OR)
 				return true;
-			
+
 			if (operator == InfixExpression.Operator.XOR)
 				return true;
-			
+
 			if (operator == InfixExpression.Operator.TIMES)
 				return true;
-			
+
 			return false;
 		}
 
-		private static int getExpressionPrecedence(Expression expression) {
-			if (expression instanceof PostfixExpression || expression instanceof MethodInvocation) {
-				return 0;
+		/*
+		 * Do all operands in expression have same type
+		 */
+		private static boolean isAllOperandsHaveSameType(InfixExpression expression) {
+			ITypeBinding binding= expression.getLeftOperand().resolveTypeBinding();
+			if (binding == null)
+				return false;
+
+			ITypeBinding current= expression.getRightOperand().resolveTypeBinding();
+			if (binding != current)
+				return false;
+
+			for (Iterator iterator= expression.extendedOperands().iterator(); iterator.hasNext();) {
+				Expression operand= (Expression) iterator.next();
+				current= operand.resolveTypeBinding();
+				if (binding != current)
+					return false;
 			}
-			if (expression instanceof PrefixExpression) {
-				return 1;
-			}
-			if ((expression instanceof ClassInstanceCreation) || (expression instanceof CastExpression)) {
-				return 2;
-			}
-			if (expression instanceof InfixExpression) {
-				InfixExpression infixExpression = (InfixExpression) expression;
-				InfixExpression.Operator operator = infixExpression.getOperator();
-				return getInfixOperatorPrecedence(operator);
-			}
-			if (expression instanceof InstanceofExpression) {
-				return 6;
-			}
-			if (expression instanceof ConditionalExpression) {
-				return 13;
-			}
-			if (expression instanceof Assignment) {
-				return 14;
-			}
-			return -1;
+
+			return true;
 		}
-		
-		private static int getInfixOperatorPrecedence(InfixExpression.Operator operator) {
-			if ((operator == InfixExpression.Operator.TIMES) || (operator == InfixExpression.Operator.DIVIDE)
-					|| (operator == InfixExpression.Operator.REMAINDER)) {
-				return 3;
-			}
-			if ((operator == InfixExpression.Operator.PLUS) || (operator == InfixExpression.Operator.MINUS)) {
-				return 4;
-			}
-			if ((operator == InfixExpression.Operator.LEFT_SHIFT)
-					|| (operator == InfixExpression.Operator.RIGHT_SHIFT_SIGNED)
-					|| (operator == InfixExpression.Operator.RIGHT_SHIFT_UNSIGNED)) {
-				return 5;
-			}
-			if ((operator == InfixExpression.Operator.LESS) || (operator == InfixExpression.Operator.GREATER)
-					|| (operator == InfixExpression.Operator.LESS_EQUALS)
-					|| (operator == InfixExpression.Operator.GREATER_EQUALS)) {
-				return 6;
-			}
-			if ((operator == InfixExpression.Operator.EQUALS) || (operator == InfixExpression.Operator.NOT_EQUALS)) {
-				return 7;
-			}
-			if (operator == InfixExpression.Operator.AND) {
-				return 8;
-			}
-			if (operator == InfixExpression.Operator.XOR) {
-				return 9;
-			}
-			if (operator == InfixExpression.Operator.OR) {
-				return 10;
-			}
-			if (operator == InfixExpression.Operator.CONDITIONAL_AND) {
-				return 11;
-			}
-			if (operator == InfixExpression.Operator.CONDITIONAL_OR) {
-				return 12;
-			}
-			return -1;
-		}
-		
 	}
 
 	private static class AddParenthesisOperation extends AbstractFixRewriteOperation {
@@ -374,11 +357,6 @@ public class ExpressionsFix extends AbstractFix {
 			return new ExpressionsFix(FixMessages.ExpressionsFix_remove_parenthesis_change_name, compilationUnit, new IFixRewriteOperation[] {op});
 		}
 		return null;
-	}
-	
-	private static boolean isStringExpression(Expression expression) {
-		ITypeBinding binding = expression.resolveTypeBinding();
-		return binding.getQualifiedName().equals("java.lang.String"); //$NON-NLS-1$
 	}
 
 	protected ExpressionsFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations) {
