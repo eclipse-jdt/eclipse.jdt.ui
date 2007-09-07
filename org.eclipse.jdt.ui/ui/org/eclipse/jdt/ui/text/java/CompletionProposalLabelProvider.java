@@ -76,6 +76,8 @@ public class CompletionProposalLabelProvider {
 				return appendUnboundedParameterList(new StringBuffer(), proposal).toString();
 			case CompletionProposal.TYPE_REF:
 				return appendTypeParameterList(new StringBuffer(), proposal).toString();
+			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
+				return appendUnboundedParameterList(new StringBuffer(), proposal).toString();
 			default:
 				Assert.isLegal(false);
 				return null; // dummy
@@ -559,9 +561,9 @@ public class CompletionProposalLabelProvider {
 			case CompletionProposal.METHOD_REF:
 			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
 			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
+			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
 				descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, flags);
 				break;
-			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
 			case CompletionProposal.TYPE_REF:
 				switch (Signature.getTypeSignatureKind(proposal.getSignature())) {
 					case Signature.CLASS_TYPE_SIGNATURE:
