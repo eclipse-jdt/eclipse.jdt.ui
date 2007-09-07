@@ -35,7 +35,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.internal.corext.refactoring.changes.AddToClasspathChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.ClasspathChange;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -939,7 +939,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 			int nCreateCU= 0;
 			for (int i= 0; i < proposals.size(); i++) {
 				ChangeCorrectionProposal curr=  (ChangeCorrectionProposal) proposals.get(i);
-				if (curr.getChange() instanceof AddToClasspathChange) {
+				if (curr.getChange() instanceof ClasspathChange) {
 					curr.apply(null);
 
 					IClasspathEntry[] newClasspath= cu.getJavaProject().getRawClasspath();
@@ -979,7 +979,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 			int nCreateCU= 0;
 			for (int i= 0; i < proposals.size(); i++) {
 				ChangeCorrectionProposal curr=  (ChangeCorrectionProposal) proposals.get(i);
-				if (curr.getChange() instanceof AddToClasspathChange) {
+				if (curr.getChange() instanceof ClasspathChange) {
 					curr.apply(null);
 					IClasspathEntry[] newClasspath= cu.getJavaProject().getRawClasspath();
 					assertEquals(prevClasspath.length + 1, newClasspath.length);
@@ -1073,7 +1073,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 			int nCreateCU= 0;
 			for (int i= 0; i < proposals.size(); i++) {
 				ChangeCorrectionProposal curr=  (ChangeCorrectionProposal) proposals.get(i);
-				if (curr.getChange() instanceof AddToClasspathChange) {
+				if (curr.getChange() instanceof ClasspathChange) {
 					curr.apply(null);
 					IClasspathEntry[] newClasspath= cu.getJavaProject().getRawClasspath();
 					assertEquals(prevClasspath.length + 1, newClasspath.length);
