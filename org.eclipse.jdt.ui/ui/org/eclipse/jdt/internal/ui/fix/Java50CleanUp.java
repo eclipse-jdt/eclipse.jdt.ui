@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -32,7 +33,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * @see org.eclipse.jdt.internal.corext.fix.Java50Fix
  *
  */
-public class Java50CleanUp extends AbstractCleanUp {
+public class Java50CleanUp extends AbstractMultiFix {
 		
 	public Java50CleanUp(Map options) {
 		super(options);
@@ -56,31 +57,22 @@ public class Java50CleanUp extends AbstractCleanUp {
 		       addAnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED) || 
 		       isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
-	public IFix createFix(CleanUpContext context) throws CoreException {
-		CompilationUnit compilationUnit= context.getAST();
-		if (compilationUnit == null)
-			return null;
-		
-		if (context.getProblemLocations() == null) {
-			return createFix(compilationUnit);
-		} else {
-			return createFix(compilationUnit, context.getProblemLocations());
-		}
-	}
-
-	private IFix createFix(CompilationUnit compilationUnit) throws CoreException {
+	protected IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		boolean addAnotations= isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		return Java50Fix.createCleanUp(compilationUnit, 
 				addAnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE), 
 				addAnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED), 
 				isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES));
 	}
-	
-	private IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 		
@@ -146,22 +138,16 @@ public class Java50CleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE)) {
-			Java50Fix fix= Java50Fix.createAddOverrideAnnotationFix(compilationUnit, problem);
-			if (fix != null)
-				return true;
-		}
-		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED)) {
-			Java50Fix fix= Java50Fix.createAddDeprectatedAnnotation(compilationUnit, problem);
-			if (fix != null)
-				return true;
-		}
-		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES)) {
-			Java50Fix fix= Java50Fix.createRawTypeReferenceFix(compilationUnit, problem);
-			if (fix != null)
-				return true;
-		}
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
+		if (problem.getProblemId() != IProblem.MissingOverrideAnnotation)
+			return isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
+
+		if (Java50Fix.isMissingDeprecationProblem(problem))
+			return isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED);
+
+		if (Java50Fix.isRawTypeReference(problem))
+			return isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES);
+
 		return false;
 	}
 

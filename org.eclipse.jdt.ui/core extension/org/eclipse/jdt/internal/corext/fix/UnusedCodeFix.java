@@ -451,10 +451,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 	}
 	
 	public static UnusedCodeFix createRemoveUnusedImportFix(CompilationUnit compilationUnit, IProblemLocation problem) {
-		int id= problem.getProblemId();
-		if (id == IProblem.UnusedImport || id == IProblem.DuplicateImport || id == IProblem.ConflictingImport ||
-		    id == IProblem.CannotImportPackage || id == IProblem.ImportNotFound) {
-			
+		if (isUnusedImport(problem)) {
 			ImportDeclaration node= getImportDeclaration(problem, compilationUnit);
 			if (node != null) {
 				String label= FixMessages.UnusedCodeFix_RemoveImport_description;
@@ -466,12 +463,14 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 		}
 		return null;
 	}
+
+	public static boolean isUnusedImport(IProblemLocation problem) {
+		int id= problem.getProblemId();
+		return id == IProblem.UnusedImport || id == IProblem.DuplicateImport || id == IProblem.ConflictingImport || id == IProblem.CannotImportPackage || id == IProblem.ImportNotFound;
+	}
 	
 	public static UnusedCodeFix createUnusedMemberFix(CompilationUnit compilationUnit, IProblemLocation problem, boolean forceInitializerRemoval) {
-		int id= problem.getProblemId();
-		if (id == IProblem.UnusedPrivateMethod || id == IProblem.UnusedPrivateConstructor || id == IProblem.UnusedPrivateField ||
-		    id == IProblem.UnusedPrivateType || id == IProblem.LocalVariableIsNeverUsed || id == IProblem.ArgumentIsNeverUsed) {
-			
+		if (isUnusedMember(problem)) {
 			SimpleName name= getUnusedName(compilationUnit, problem);
 			if (name != null) {
 				IBinding binding= name.resolveBinding();
@@ -487,7 +486,13 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 		}
 		return null;
 	}
-	
+
+	public static boolean isUnusedMember(IProblemLocation problem) {
+		int id= problem.getProblemId();
+		return id == IProblem.UnusedPrivateMethod || id == IProblem.UnusedPrivateConstructor || id == IProblem.UnusedPrivateField || id == IProblem.UnusedPrivateType
+				|| id == IProblem.LocalVariableIsNeverUsed || id == IProblem.ArgumentIsNeverUsed;
+	}
+
 	public static UnusedCodeFix createRemoveUnusedCastFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		if (problem.getProblemId() != IProblem.UnnecessaryCast)
 			return null;

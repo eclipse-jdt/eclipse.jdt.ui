@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -27,7 +28,7 @@ import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
+public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 		
 	public UnnecessaryCodeCleanUp(Map options) {
 		super(options);
@@ -47,19 +48,7 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public IFix createFix(CleanUpContext context) throws CoreException {
-		CompilationUnit compilationUnit= context.getAST();
-		if (compilationUnit == null)
-			return null;
-		
-		if (context.getProblemLocations() == null) {
-			return createFix(compilationUnit);
-		} else {
-			return createFix(compilationUnit, context.getProblemLocations());
-		}
-	}
-	
-	private IFix createFix(CompilationUnit compilationUnit) throws CoreException {
+	protected IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		return UnusedCodeFix.createCleanUp(compilationUnit, 
 				false, 
 				false, 
@@ -69,9 +58,11 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 				false,
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS));
 	}
-	
 
-	private IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+	/**
+	 * {@inheritDoc}
+	 */
+	protected IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		return UnusedCodeFix.createCleanUp(compilationUnit, problems,
 				false, 
 				false, 
@@ -119,12 +110,10 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS)) {
-			IFix fix= UnusedCodeFix.createRemoveUnusedCastFix(compilationUnit, problem);
-			if (fix != null)
-				return true;
-		}
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
+		if (problem.getProblemId() == IProblem.UnnecessaryCast)
+			return isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
+
 		return false;
 	}
 

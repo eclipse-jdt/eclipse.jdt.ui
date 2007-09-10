@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.corext.fix.PotentialProgrammingProblemsFix;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
+public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 	
 	public PotentialProgrammingProblemsCleanUp(Map options) {
 		super(options);
@@ -61,19 +61,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public IFix createFix(CleanUpContext context) throws CoreException {
-		CompilationUnit compilationUnit= context.getAST();
-		if (compilationUnit == null)
-			return null;
-		
-		if (context.getProblemLocations() == null) {
-			return createFix(compilationUnit);
-		} else {
-			return createFix(compilationUnit, context.getProblemLocations());
-		}
-	}
-	
-	private IFix createFix(CompilationUnit compilationUnit) throws CoreException {
+	protected IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		
 		boolean addSUID= isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 		if (!addSUID)
@@ -84,7 +72,10 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT));
 	}
 
-	private IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+	/**
+	 * {@inheritDoc}
+	 */
+	protected IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 		
@@ -135,13 +126,11 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED))
-				|| (isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT))) {
-			IFix[] fix= PotentialProgrammingProblemsFix.createMissingSerialVersionFixes(compilationUnit, problem);
-			if (fix != null)
-				return true;
-		}
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
+		if (problem.getProblemId() == IProblem.MissingSerialVersion)
+			return (isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED))
+				|| (isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT));
+
 		return false;
 	}
 	

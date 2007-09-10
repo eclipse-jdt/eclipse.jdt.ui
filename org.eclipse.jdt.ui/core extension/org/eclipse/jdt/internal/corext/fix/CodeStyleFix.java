@@ -543,12 +543,12 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 
-	private static boolean isIndirectStaticAccess(IProblemLocation problem) {
+	public static boolean isIndirectStaticAccess(IProblemLocation problem) {
 		return (problem.getProblemId() == IProblem.IndirectAccessToStaticField
 				|| problem.getProblemId() == IProblem.IndirectAccessToStaticMethod);
 	}
-	
-	private static boolean isNonStaticAccess(IProblemLocation problem) {
+
+	public static boolean isNonStaticAccess(IProblemLocation problem) {
 		return (problem.getProblemId() == IProblem.NonStaticAccessToStaticField
 				|| problem.getProblemId() == IProblem.NonStaticAccessToStaticMethod);
 	}

@@ -24,8 +24,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
 
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
-
 /**
  * A clean up can solve problems in a compilation unit.
  * <p>
@@ -130,13 +128,10 @@ public interface ICleanUp {
 		
 		private final ICompilationUnit fUnit;
 		private final CompilationUnit fAst;
-		private final IProblemLocation[] fLocations;
 
-		public CleanUpContext(ICompilationUnit unit, CompilationUnit ast, IProblemLocation[] locations) {
+		public CleanUpContext(ICompilationUnit unit, CompilationUnit ast) {
 			fUnit= unit;
 			fAst= ast;
-			fLocations= locations;
-			
 		}
 		
 		/**
@@ -159,14 +154,6 @@ public interface ICleanUp {
 		public CompilationUnit getAST() {
 			return fAst;
 		}
-		
-		/**
-		 * @return locations of problems to fix or <b>null</b> if need to fix all problems.
-		 */
-		public IProblemLocation[] getProblemLocations() {
-			return fLocations;
-		}
-		
 	}
 	
 	/**
@@ -234,30 +221,5 @@ public interface ICleanUp {
 	 * @throws CoreException if an unexpected error occurred
 	 */
 	public abstract RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException;
-	
-	/**
-	 * True if <code>problem</code> in <code>CompilationUnit</code> can be
-	 * fixed by this CleanUp. If true
-	 * <code>createFix(compilationUnit, new IProblemLocation[] {problem})</code>
-	 * does not return null.
-	 * 
-	 * @param compilationUnit
-	 *            The compilation unit to fix not null
-	 * @param problem
-	 *            The location of the problem to fix
-	 * @return True if problem can be fixed
-	 * @throws CoreException if an unexpected error occurred
-	 */
-	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException;
-	
-	/**
-	 * Maximal number of problems this clean up will fix in compilation unit.
-	 * There may be less then the returned number but never more.
-	 * 
-	 * @param compilationUnit
-	 *            The compilation unit to fix, not null
-	 * @return The maximal number of fixes or -1 if unknown.
-	 */
-	public abstract int computeNumberOfFixes(CompilationUnit compilationUnit);
 	
 }

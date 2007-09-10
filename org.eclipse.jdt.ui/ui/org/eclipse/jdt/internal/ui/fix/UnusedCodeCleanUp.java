@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -33,7 +34,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * @see org.eclipse.jdt.internal.corext.fix.UnusedCodeFix
  *
  */
-public class UnusedCodeCleanUp extends AbstractCleanUp {
+public class UnusedCodeCleanUp extends AbstractMultiFix {
 		
 	public UnusedCodeCleanUp(Map options) {
 		super(options);
@@ -60,23 +61,11 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES) ||
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
-	public IFix createFix(CleanUpContext context) throws CoreException {
-		CompilationUnit compilationUnit= context.getAST();
-		if (compilationUnit == null)
-			return null;
-		
-		if (context.getProblemLocations() == null) {
-			return createFix(compilationUnit);
-		} else {
-			return createFix(compilationUnit, context.getProblemLocations());
-		}
-	}
-
-	private IFix createFix(CompilationUnit compilationUnit) throws CoreException {		
+	protected IFix createFix(CompilationUnit compilationUnit) throws CoreException {		
 		boolean removeUnuseMembers= isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 		
 		return UnusedCodeFix.createCleanUp(compilationUnit,
@@ -88,8 +77,11 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS),
 				false);
 	}
-	
-	private IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		boolean removeMembers= isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 		
 		return UnusedCodeFix.createCleanUp(compilationUnit, problems,
@@ -184,22 +176,17 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS)) {
-			UnusedCodeFix fix= UnusedCodeFix.createRemoveUnusedImportFix(compilationUnit, problem);
-			if (fix != null)
-				return true;
-		}
-		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS) ||
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
+		if (UnusedCodeFix.isUnusedImport(problem))
+			return isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS);
+
+		if (UnusedCodeFix.isUnusedMember(problem))
+			return isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS) ||
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS) ||
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES) ||
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS) ||
-				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES)) 
-		{
-			UnusedCodeFix fix= UnusedCodeFix.createUnusedMemberFix(compilationUnit, problem, false);
-			if (fix != null)
-				return true;
-		}
+				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES);
+
 		return false;
 	}
 

@@ -733,7 +733,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		int i= 0;
 		do {
 			ICleanUp cleanUp= cleanUps[i];
-			IFix fix= cleanUp.createFix(new CleanUpContext(source, ast, null));
+			IFix fix= cleanUp.createFix(new CleanUpContext(source, ast));
 			if (fix != null) {
 				CompilationUnitChange current= fix.createChange();
 				TextEdit currentEdit= pack(current.getEdit());

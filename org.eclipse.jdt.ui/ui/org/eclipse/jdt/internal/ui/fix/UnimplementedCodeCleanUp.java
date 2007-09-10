@@ -19,6 +19,7 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateException;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -33,7 +34,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class UnimplementedCodeCleanUp extends AbstractCleanUp {
+public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 
 	public static final String MAKE_TYPE_ABSTRACT= "cleanup.make_type_abstract_if_missing_method"; //$NON-NLS-1$
 
@@ -97,33 +98,28 @@ public class UnimplementedCodeCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public IFix createFix(CleanUpContext context) throws CoreException {
-		CompilationUnit compilationUnit= context.getAST();
-		if (compilationUnit == null)
-			return null;
-
-		IProblemLocation[] problemLocations= context.getProblemLocations();
-		if (problemLocations == null) {
-			problemLocations= convertProblems(compilationUnit.getProblems());
-		}
+	protected IFix createFix(CompilationUnit unit) throws CoreException {
+		IProblemLocation[] problemLocations= convertProblems(unit.getProblems());
 		problemLocations= filter(problemLocations, new int[] { IProblem.AbstractMethodMustBeImplemented, IProblem.EnumAbstractMethodMustBeImplemented });
 
-		return UnimplementedCodeFix.createCleanUp(compilationUnit, isEnabled(CleanUpConstants.ADD_MISSING_METHODES), isEnabled(MAKE_TYPE_ABSTRACT), problemLocations);
+		return UnimplementedCodeFix.createCleanUp(unit, isEnabled(CleanUpConstants.ADD_MISSING_METHODES), isEnabled(MAKE_TYPE_ABSTRACT), problemLocations);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-		if (isEnabled(CleanUpConstants.ADD_MISSING_METHODES)) {
-			if (UnimplementedCodeFix.createAddUnimplementedMethodsFix(compilationUnit, problem) != null)
-				return true;
-		}
+	protected IFix createFix(CompilationUnit unit, IProblemLocation[] problems) throws CoreException {
+		IProblemLocation[] problemLocations= filter(problems, new int[] { IProblem.AbstractMethodMustBeImplemented, IProblem.EnumAbstractMethodMustBeImplemented });
+		return UnimplementedCodeFix.createCleanUp(unit, isEnabled(CleanUpConstants.ADD_MISSING_METHODES), isEnabled(MAKE_TYPE_ABSTRACT), problemLocations);
+	}
 
-		if (isEnabled(MAKE_TYPE_ABSTRACT)) {
-			if (UnimplementedCodeFix.createMakeTypeAbstractFix(compilationUnit, problem) != null)
-				return true;
-		}
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
+		int id= problem.getProblemId();
+		if (id == IProblem.AbstractMethodMustBeImplemented || id == IProblem.EnumAbstractMethodMustBeImplemented)
+			return isEnabled(CleanUpConstants.ADD_MISSING_METHODES) || isEnabled(MAKE_TYPE_ABSTRACT);
 
 		return false;
 	}

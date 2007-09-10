@@ -156,14 +156,24 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 	}
 	
 	public static Java50Fix createAddDeprectatedAnnotation(CompilationUnit compilationUnit, IProblemLocation problem) {
-		int id= problem.getProblemId();
-		if (id != IProblem.FieldMissingDeprecatedAnnotation && 
-			id != IProblem.MethodMissingDeprecatedAnnotation && 
-			id != IProblem.TypeMissingDeprecatedAnnotation)
-			
+		if (!isMissingDeprecationProblem(problem))
 			return null;
-			
+
 		return createFix(compilationUnit, problem, DEPRECATED, FixMessages.Java50Fix_AddDeprecated_description);
+	}
+
+	public static boolean isMissingDeprecationProblem(IProblemLocation problem) {
+		int id= problem.getProblemId();
+		if (id == IProblem.FieldMissingDeprecatedAnnotation)
+			return true;
+
+		if (id == IProblem.MethodMissingDeprecatedAnnotation)
+			return true;
+
+		if (id == IProblem.TypeMissingDeprecatedAnnotation)
+			return true;
+
+		return false;
 	}
 	
 	private static Java50Fix createFix(CompilationUnit compilationUnit, IProblemLocation problem, String annotation, String label) {
@@ -311,9 +321,8 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		List/*<SimpleType>*/ result= new ArrayList();
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation problem= locations[i];
-			int id= problem.getProblemId();
-			if (id == IProblem.UnsafeTypeConversion || id == IProblem.RawTypeReference || id == IProblem.UnsafeRawMethodInvocation) {
-		
+
+			if (isRawTypeReference(problem)) {
 				ASTNode node= problem.getCoveredNode(compilationUnit);
 				if (node instanceof ClassInstanceCreation) {
 					ASTNode rawReference= (ASTNode)node.getStructuralProperty(ClassInstanceCreation.TYPE_PROPERTY);
@@ -342,6 +351,11 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		SimpleType[] types= (SimpleType[])result.toArray(new SimpleType[result.size()]);
 		operations.add(new AddTypeParametersOperation(types));
 		return types[0];
+	}
+
+	public static boolean isRawTypeReference(IProblemLocation problem) {
+		int id= problem.getProblemId();
+		return id == IProblem.UnsafeTypeConversion || id == IProblem.RawTypeReference || id == IProblem.UnsafeRawMethodInvocation;
 	}
 
 	private static ASTNode getRawReference(MethodInvocation invocation, CompilationUnit compilationUnit) {

@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -32,7 +33,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * @see org.eclipse.jdt.internal.corext.fix.StringFix
  *
  */
-public class StringCleanUp extends AbstractCleanUp {
+public class StringCleanUp extends AbstractMultiFix {
 	
 	public StringCleanUp(Map options) {
 		super(options);
@@ -53,23 +54,11 @@ public class StringCleanUp extends AbstractCleanUp {
 	    return isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS) || 
 		       isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
-	public IFix createFix(CleanUpContext context) throws CoreException {
-		CompilationUnit compilationUnit= context.getAST();
-		if (compilationUnit == null)
-			return null;
-		
-		if (context.getProblemLocations() == null) {
-			return createFix(compilationUnit);
-		} else {
-			return createFix(compilationUnit, context.getProblemLocations());
-		}
-	}
-
-	private IFix createFix(CompilationUnit compilationUnit) throws CoreException {
+	protected IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 
@@ -77,8 +66,11 @@ public class StringCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS), 
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS));
 	}
-	
-	private IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 		
@@ -124,11 +116,16 @@ public class StringCleanUp extends AbstractCleanUp {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * @throws CoreException 
+	 * {@inheritDoc} 
 	 */
-	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-		return StringFix.createFix(compilationUnit, problem, isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS), isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS)) != null;
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
+		if (problem.getProblemId() == IProblem.UnnecessaryNLSTag)
+			return isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
+
+		if (problem.getProblemId() == IProblem.NonExternalizedStringLiteral)
+			return isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS);
+
+		return false;
 	}
 
 	/**

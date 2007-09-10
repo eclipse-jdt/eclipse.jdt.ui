@@ -46,6 +46,7 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
+import org.eclipse.jdt.internal.ui.fix.IMultiFix;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
@@ -191,7 +192,13 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 		if (fCleanUp == null)
 			return null;
 
-		int count= fCleanUp.computeNumberOfFixes(fCompilationUnit);
+		int count;
+		if (fCleanUp instanceof IMultiFix) {
+			count= ((IMultiFix)fCleanUp).computeNumberOfFixes(fCompilationUnit);
+		} else {
+			count= -1;
+		}
+
 		if (count == -1) {
 			return CorrectionMessages.FixCorrectionProposal_HitCtrlEnter_description;
 		} else if (count < 2) {

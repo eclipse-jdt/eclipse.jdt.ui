@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -31,7 +32,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * Creates fixes which can resolve code style issues 
  * @see org.eclipse.jdt.internal.corext.fix.CodeStyleFix
  */
-public class CodeStyleCleanUp extends AbstractCleanUp {
+public class CodeStyleCleanUp extends AbstractMultiFix {
 
 	public CodeStyleCleanUp() {
 		this(null);
@@ -62,23 +63,11 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 		       nonStaticFields && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY) ||
 		       nonStaticMethods && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_METHOD_USE_THIS_IF_NECESSARY);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
-	public IFix createFix(CleanUpContext context) throws CoreException {
-		CompilationUnit compilationUnit= context.getAST();
-		if (compilationUnit == null)
-			return null;
-		
-		if (context.getProblemLocations() != null) {
-			return createFix(compilationUnit, context.getProblemLocations());
-		} else {
-			return createFix(compilationUnit);
-		}
-	}
-	
-	private IFix createFix(CompilationUnit compilationUnit) throws CoreException {
+	protected IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 		
@@ -98,7 +87,11 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 				);
 	}
 	
-	private IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	protected IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		return CodeStyleFix.createCleanUp(compilationUnit, problems,
 				isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS), 
 				isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS), 
@@ -205,22 +198,16 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS)) {
-			IFix fix= CodeStyleFix.createAddFieldQualifierFix(compilationUnit, problem);
-			if (fix != null)
-				return true;
-		}
-		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS)) {
-			IFix fix= CodeStyleFix.createIndirectAccessToStaticFix(compilationUnit, problem);
-			if (fix != null)
-				return true;
-		}
-		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS)) {
-			IFix[] fixes= CodeStyleFix.createNonStaticAccessFixes(compilationUnit, problem);
-			if (fixes != null && fixes.length > 0)
-				return true;
-		}
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
+		if (IProblem.UnqualifiedFieldAccess == problem.getProblemId())
+			return isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
+
+		if (CodeStyleFix.isIndirectStaticAccess(problem))
+			return isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS);
+
+		if (CodeStyleFix.isNonStaticAccess(problem))
+			return isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
+
 		return false;
 	}
 
