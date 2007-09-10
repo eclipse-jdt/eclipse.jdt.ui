@@ -4141,6 +4141,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	public void testUnnecessaryThrownException3() throws Exception {
 		Hashtable hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION, JavaCore.ERROR);
+		hashtable.put(JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION_INCLUDE_DOC_COMMENT_REFERENCE, JavaCore.DISABLED);
 		JavaCore.setOptions(hashtable);
 				
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
