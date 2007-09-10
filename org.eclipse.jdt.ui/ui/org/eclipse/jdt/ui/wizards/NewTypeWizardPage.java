@@ -883,7 +883,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * Sets the focus on the type name input field.
 	 */		
 	protected void setFocus() {
-		fTypeNameDialogField.setFocus();
+		if (fTypeNameDialogField.isEnabled()) {
+			fTypeNameDialogField.setFocus();
+		} else {
+			setFocusOnContainer();
+		}
 	}
 				
 	// -------- TypeFieldsAdapter --------
