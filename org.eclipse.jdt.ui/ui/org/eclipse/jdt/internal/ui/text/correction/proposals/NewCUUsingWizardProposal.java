@@ -50,6 +50,10 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.ui.wizards.NewAnnotationWizardPage;
+import org.eclipse.jdt.ui.wizards.NewClassWizardPage;
+import org.eclipse.jdt.ui.wizards.NewEnumWizardPage;
+import org.eclipse.jdt.ui.wizards.NewInterfaceWizardPage;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -203,27 +207,28 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 
 
 	public void apply(IDocument document) {
-		NewElementWizard wizard= createWizard();
-		wizard.init(JavaPlugin.getDefault().getWorkbench(), new StructuredSelection(fCompilationUnit));
+		StructuredSelection selection= new StructuredSelection(fCompilationUnit);
+		NewElementWizard wizard= createWizard(selection);
+		wizard.init(JavaPlugin.getDefault().getWorkbench(), selection);
 
 		IType createdType= null;
 
 		if (fShowDialog) {
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
 			WizardDialog dialog= new WizardDialog(shell, wizard);
+
 			PixelConverter converter= new PixelConverter(JFaceResources.getDialogFont());
 			dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
 			dialog.create();
 			dialog.getShell().setText(CorrectionMessages.NewCUCompletionUsingWizardProposal_dialogtitle);
 
-			configureWizardPage(wizard);
 			if (dialog.open() == Window.OK) {
 				createdType= (IType) wizard.getCreatedElement();
 			}
 		} else {
 			wizard.addPages();
 			try {
-				NewTypeWizardPage page= configureWizardPage(wizard);
+				NewTypeWizardPage page= getPage(wizard);
 				page.createType(null);
 				createdType= page.getCreatedType();
 			} catch (CoreException e) {
@@ -250,29 +255,46 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 		}
 
 	}
+	
+	private NewTypeWizardPage getPage(NewElementWizard wizard) {
+		IWizardPage[] pages= wizard.getPages();
+		Assert.isTrue(pages.length > 0 && pages[0] instanceof NewTypeWizardPage);
+		return (NewTypeWizardPage) pages[0];
+	}
 
-	private NewElementWizard createWizard() {
+	private NewElementWizard createWizard(StructuredSelection selection) {
 		switch (fTypeKind) {
-			case K_CLASS:
-				return new NewClassCreationWizard();
-			case K_INTERFACE:
-				return new NewInterfaceCreationWizard();
-			case K_ENUM:
-				return new NewEnumCreationWizard();
-			case K_ANNOTATION:
-				return new NewAnnotationCreationWizard();
+			case K_CLASS: {
+				NewClassWizardPage page=  new NewClassWizardPage();
+				page.init(selection);
+				configureWizardPage(page);
+				return new NewClassCreationWizard(page, true);
+			}
+			case K_INTERFACE: {
+				NewInterfaceWizardPage page=  new NewInterfaceWizardPage();
+				page.init(selection);
+				configureWizardPage(page);
+				return new NewInterfaceCreationWizard(page, true);
+			}
+			case K_ENUM: {
+				NewEnumWizardPage page=  new NewEnumWizardPage();
+				page.init(selection);
+				configureWizardPage(page);
+				return new NewEnumCreationWizard(page, true);
+			}
+			case K_ANNOTATION: {
+				NewAnnotationWizardPage page=  new NewAnnotationWizardPage();
+				page.init(selection);
+				configureWizardPage(page);
+				return new NewAnnotationCreationWizard(page, true);
+			}
 		}
 		throw new IllegalArgumentException();
 	}
 
-	private NewTypeWizardPage configureWizardPage(NewElementWizard wizard) {
-		IWizardPage[] pages= wizard.getPages();
-		Assert.isTrue(pages.length > 0 && pages[0] instanceof NewTypeWizardPage);
-
-		NewTypeWizardPage page= (NewTypeWizardPage) pages[0];
+	private void configureWizardPage(NewTypeWizardPage page) {
 		fillInWizardPageName(page);
 		fillInWizardPageSuperTypes(page);
-		return page;
 	}
 
 	/**
