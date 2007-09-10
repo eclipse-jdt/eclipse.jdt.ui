@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.fix;
+package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +20,6 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -31,25 +30,17 @@ import org.eclipse.jface.text.TypedPosition;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 
-import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
-import org.eclipse.ltk.core.refactoring.GroupCategory;
-import org.eclipse.ltk.core.refactoring.GroupCategorySet;
-import org.eclipse.ltk.core.refactoring.TextChange;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.internal.corext.fix.IFix;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
 
-public class CommentFormatFix implements IFix {
+public class CommentFormatFix extends TextEditFix {
 	
 	public static IFix createCleanUp(ICompilationUnit unit, boolean singleLine, boolean multiLine, boolean javaDoc, HashMap preferences) throws CoreException {
 		if (!singleLine && !multiLine && !javaDoc)
@@ -65,16 +56,7 @@ public class CommentFormatFix implements IFix {
 		
 		MultiTextEdit resultEdit= new MultiTextEdit();
 		resultEdit.addChildren((TextEdit[])edits.toArray(new TextEdit[edits.size()]));
-		
-		TextChange change= new CompilationUnitChange(MultiFixMessages.CommentFormatFix_description, unit);
-		change.setEdit(resultEdit);
-		
-		String label= MultiFixMessages.CommentFormatFix_description;
-		CategorizedTextEditGroup group= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
-		group.addTextEdit(resultEdit);
-		change.addTextEditGroup(group);
-		
-		return new CommentFormatFix(change, unit);
+		return new CommentFormatFix(resultEdit, unit, MultiFixMessages.CommentFormatFix_description);
 	}
 	
 	static String format(String input, boolean singleLine, boolean multiLine, boolean javaDoc) {
@@ -172,40 +154,9 @@ public class CommentFormatFix implements IFix {
 		
 		return edit;
 	}
-	
-	private final ICompilationUnit fCompilationUnit;
-	private final TextChange fChange;
-	
-	public CommentFormatFix(TextChange change, ICompilationUnit compilationUnit) {
-		fChange= change;
-		fCompilationUnit= compilationUnit;
+
+	public CommentFormatFix(TextEdit edit, ICompilationUnit unit, String changeDescription) {
+		super(edit, unit, changeDescription);
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public TextChange createChange() throws CoreException {
-		return fChange;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public ICompilationUnit getCompilationUnit() {
-		return fCompilationUnit;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getDescription() {
-		return MultiFixMessages.CommentFormatFix_description;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public IStatus getStatus() {
-		return StatusInfo.OK_STATUS;
-	}
+
 }

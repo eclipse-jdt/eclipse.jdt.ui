@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -38,9 +37,9 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
-public class UnimplementedCodeFix extends LinkedFix {
+public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 
-	public static final class MakeTypeAbstractOperation extends AbstractLinkedFixRewriteOperation {
+	public static final class MakeTypeAbstractOperation extends CompilationUnitRewriteOperation {
 
 		private final TypeDeclaration fTypeDeclaration;
 
@@ -51,11 +50,11 @@ public class UnimplementedCodeFix extends LinkedFix {
 		/**
 		 * {@inheritDoc}
 		 */
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, LinkedProposalModel linkedProposalPositions) throws CoreException {
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedProposalPositions) throws CoreException {
 			AST ast= cuRewrite.getAST();
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			Modifier newModifier= ast.newModifier(Modifier.ModifierKeyword.ABSTRACT_KEYWORD);
-			TextEditGroup textEditGroup= createTextEditGroup(CorrectionMessages.UnimplementedCodeFix_TextEditGroup_label);
+			TextEditGroup textEditGroup= createTextEditGroup(CorrectionMessages.UnimplementedCodeFix_TextEditGroup_label, cuRewrite);
 			rewrite.getListRewrite(fTypeDeclaration, TypeDeclaration.MODIFIERS2_PROPERTY).insertLast(newModifier, textEditGroup);
 
 			LinkedProposalPositionGroup group= new LinkedProposalPositionGroup("modifier"); //$NON-NLS-1$
@@ -98,10 +97,10 @@ public class UnimplementedCodeFix extends LinkedFix {
 		} else {
 			label= CorrectionMessages.UnimplementedCodeFix_MakeAbstractFix_label;
 		}
-		return new UnimplementedCodeFix(label, root, (IFixRewriteOperation[]) operations.toArray(new IFixRewriteOperation[operations.size()]));
+		return new UnimplementedCodeFix(label, root, (CompilationUnitRewriteOperation[]) operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
 	}
 
-	public static IFix createAddUnimplementedMethodsFix(CompilationUnit root, IProblemLocation problem) {
+	public static UnimplementedCodeFix createAddUnimplementedMethodsFix(CompilationUnit root, IProblemLocation problem) {
 		ASTNode typeNode= getSelectedTypeNode(root, problem);
 		if (typeNode == null)
 			return null;
@@ -110,10 +109,10 @@ public class UnimplementedCodeFix extends LinkedFix {
 			return null;
 
 		AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(typeNode, problem.getProblemId());
-		return new UnimplementedCodeFix(CorrectionMessages.UnimplementedMethodsCorrectionProposal_description, root, new IFixRewriteOperation[] { operation });
+		return new UnimplementedCodeFix(CorrectionMessages.UnimplementedMethodsCorrectionProposal_description, root, new CompilationUnitRewriteOperation[] { operation });
 	}
 
-	public static IFix createMakeTypeAbstractFix(CompilationUnit root, IProblemLocation problem) {
+	public static UnimplementedCodeFix createMakeTypeAbstractFix(CompilationUnit root, IProblemLocation problem) {
 		ASTNode typeNode= getSelectedTypeNode(root, problem);
 		if (!(typeNode instanceof TypeDeclaration))
 			return null;
@@ -122,7 +121,7 @@ public class UnimplementedCodeFix extends LinkedFix {
 		MakeTypeAbstractOperation operation= new MakeTypeAbstractOperation(typeDeclaration);
 
 		String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_addabstract_description, typeDeclaration.getName().getIdentifier());
-		return new UnimplementedCodeFix(label, root, new IFixRewriteOperation[] { operation });
+		return new UnimplementedCodeFix(label, root, new CompilationUnitRewriteOperation[] { operation });
 	}
 
 	private static ASTNode getSelectedTypeNode(CompilationUnit root, IProblemLocation problem) {
@@ -176,7 +175,7 @@ public class UnimplementedCodeFix extends LinkedFix {
 		}
 	}
 
-	public UnimplementedCodeFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations) {
+	public UnimplementedCodeFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewriteOperations) {
 		super(name, compilationUnit, fixRewriteOperations);
 	}
 }

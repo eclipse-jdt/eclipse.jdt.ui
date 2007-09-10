@@ -68,12 +68,12 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
  * 		Add missing @Deprecated annotation
  * 		Convert for loop to enhanced for loop
  */
-public class Java50Fix extends LinkedFix {
+public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 	
 	private static final String OVERRIDE= "Override"; //$NON-NLS-1$
 	private static final String DEPRECATED= "Deprecated"; //$NON-NLS-1$
 	
-	private static class AnnotationRewriteOperation extends AbstractFixRewriteOperation {
+	private static class AnnotationRewriteOperation extends CompilationUnitRewriteOperation {
 		private final BodyDeclaration fBodyDeclaration;
 		private final String fAnnotation;
 
@@ -82,21 +82,20 @@ public class Java50Fix extends LinkedFix {
 			fAnnotation= annotation;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List)
+		/**
+		 * {@inheritDoc}
 		 */
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			AST ast= cuRewrite.getRoot().getAST();
 			ListRewrite listRewrite= cuRewrite.getASTRewrite().getListRewrite(fBodyDeclaration, fBodyDeclaration.getModifiersProperty());
 			Annotation newAnnotation= ast.newMarkerAnnotation();
 			newAnnotation.setTypeName(ast.newSimpleName(fAnnotation));
-			TextEditGroup group= createTextEditGroup(Messages.format(FixMessages.Java50Fix_AddMissingAnnotation_description, fAnnotation));
-			textEditGroups.add(group);
+			TextEditGroup group= createTextEditGroup(Messages.format(FixMessages.Java50Fix_AddMissingAnnotation_description, fAnnotation), cuRewrite);
 			listRewrite.insertFirst(newAnnotation, group);
 		}
 	}
 	
-	private static class AddTypeParametersOperation extends AbstractLinkedFixRewriteOperation {
+	private static class AddTypeParametersOperation extends CompilationUnitRewriteOperation {
 		
 		private final SimpleType[] fTypes;
 
@@ -107,7 +106,7 @@ public class Java50Fix extends LinkedFix {
 		/**
 		 * {@inheritDoc}
 		 */
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, LinkedProposalModel positionGroups) throws CoreException {
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel positionGroups) throws CoreException {
 			InferTypeArgumentsTCModel model= new InferTypeArgumentsTCModel();
 			InferTypeArgumentsConstraintCreator creator= new InferTypeArgumentsConstraintCreator(model, true);
 			
@@ -184,7 +183,7 @@ public class Java50Fix extends LinkedFix {
 		
 		AnnotationRewriteOperation operation= new AnnotationRewriteOperation(declaration, annotation);
 		
-		return new Java50Fix(label, compilationUnit, new IFixRewriteOperation[] {operation});
+		return new Java50Fix(label, compilationUnit, new CompilationUnitRewriteOperation[] {operation});
 	}
 	
 	public static Java50Fix createRawTypeReferenceFix(CompilationUnit compilationUnit, IProblemLocation problem) {
@@ -193,7 +192,7 @@ public class Java50Fix extends LinkedFix {
 		if (operations.size() == 0)
 			return null;
 		
-		return new Java50Fix(Messages.format(FixMessages.Java50Fix_AddTypeParameters_description, node.getName()), compilationUnit, (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]));
+		return new Java50Fix(Messages.format(FixMessages.Java50Fix_AddTypeParameters_description, node.getName()), compilationUnit, (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
 	}
 		
 	public static IFix createCleanUp(CompilationUnit compilationUnit, 
@@ -208,7 +207,7 @@ public class Java50Fix extends LinkedFix {
 		if (!addOverrideAnnotation && !addDeprecatedAnnotation && !rawTypeReference)
 			return null;
 
-		List/*<IFixRewriteOperation>*/ operations= new ArrayList();
+		List/*<CompilationUnitRewriteOperation>*/ operations= new ArrayList();
 
 		IProblem[] problems= compilationUnit.getProblems();
 		IProblemLocation[] locations= new IProblemLocation[problems.length];
@@ -228,7 +227,7 @@ public class Java50Fix extends LinkedFix {
 		if (operations.size() == 0)
 			return null;
 		
-		IFixRewriteOperation[] operationsArray= (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]);
+		CompilationUnitRewriteOperation[] operationsArray= (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
 		return new Java50Fix(FixMessages.Java50Fix_add_annotations_change_name, compilationUnit, operationsArray);
 	}
 
@@ -244,7 +243,7 @@ public class Java50Fix extends LinkedFix {
 		if (!addOverrideAnnotation && !addDeprecatedAnnotation && !rawTypeReferences)
 			return null;
 
-		List/*<IFixRewriteOperation>*/ operations= new ArrayList();
+		List/*<CompilationUnitRewriteOperation>*/ operations= new ArrayList();
 		
 		if (addOverrideAnnotation)
 			createAddOverrideAnnotationOperations(compilationUnit, problems, operations);
@@ -259,7 +258,7 @@ public class Java50Fix extends LinkedFix {
 		if (operations.size() == 0)
 			return null;
 		
-		IFixRewriteOperation[] operationsArray= (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]);
+		CompilationUnitRewriteOperation[] operationsArray= (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
 		return new Java50Fix(FixMessages.Java50Fix_add_annotations_change_name, compilationUnit, operationsArray);
 	}
 	
@@ -443,7 +442,7 @@ public class Java50Fix extends LinkedFix {
 		return declaringNode;
 	}
 		
-	private Java50Fix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewrites) {
+	private Java50Fix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewrites) {
 		super(name, compilationUnit, fixRewrites);
 	}
 	

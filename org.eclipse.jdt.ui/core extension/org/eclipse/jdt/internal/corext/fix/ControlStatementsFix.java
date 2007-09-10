@@ -36,11 +36,11 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
-public class ControlStatementsFix extends AbstractFix {
+public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		
 	private final static class ControlStatementFinder extends GenericVisitor {
 		
-		private final List/*<IFixRewriteOperation>*/ fResult;
+		private final List/*<CompilationUnitRewriteOperation>*/ fResult;
 		private final boolean fFindControlStatementsWithoutBlock;
 		private final boolean fRemoveUnnecessaryBlocks;
 		private final boolean fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow;
@@ -186,7 +186,7 @@ public class ControlStatementsFix extends AbstractFix {
         }
 	}
 	
-	private static final class AddBlockOperation extends AbstractFixRewriteOperation {
+	private static final class AddBlockOperation extends CompilationUnitRewriteOperation {
 
 		private final ChildPropertyDescriptor fBodyProperty;
 		private final Statement fBody;
@@ -198,10 +198,10 @@ public class ControlStatementsFix extends AbstractFix {
 			fControlStatement= controlStatement;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List)
+		/**
+		 * {@inheritDoc}
 		 */
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			String label;
 			if (fBodyProperty == IfStatement.THEN_STATEMENT_PROPERTY) {
@@ -212,9 +212,7 @@ public class ControlStatementsFix extends AbstractFix {
 				label = FixMessages.CodeStyleFix_ChangeControlToBlock_description;
 			}
 			
-			TextEditGroup group= createTextEditGroup(label);
-			textEditGroups.add(group);
-			
+			TextEditGroup group= createTextEditGroup(label, cuRewrite);
 			ASTNode moveTarget= rewrite.createMoveTarget(fBody);
 			Block replacingBody= cuRewrite.getRoot().getAST().newBlock();
 			replacingBody.statements().add(moveTarget);
@@ -223,7 +221,7 @@ public class ControlStatementsFix extends AbstractFix {
 
 	}
 	
-	static class RemoveBlockOperation extends AbstractFixRewriteOperation {
+	static class RemoveBlockOperation extends CompilationUnitRewriteOperation {
 
 		private final Statement fStatement;
 		private final ChildPropertyDescriptor fChild;
@@ -236,15 +234,14 @@ public class ControlStatementsFix extends AbstractFix {
 		/**
 		 * {@inheritDoc}
 		 */
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 
 			Block block= (Block)fStatement.getStructuralProperty(fChild);
 			Statement statement= (Statement)block.statements().get(0);
 			Statement moveTarget= (Statement)rewrite.createMoveTarget(statement);
 			
-			TextEditGroup group= createTextEditGroup(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription);
-			textEditGroups.add(group);
+			TextEditGroup group= createTextEditGroup(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, cuRewrite);
 			rewrite.set(fStatement, fChild, moveTarget, group);
 		}
 		
@@ -366,7 +363,7 @@ public class ControlStatementsFix extends AbstractFix {
 
 	}
 
-	public static IFix[] createRemoveBlockFix(CompilationUnit compilationUnit, ASTNode node) {
+	public static ControlStatementsFix[] createRemoveBlockFix(CompilationUnit compilationUnit, ASTNode node) {
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (statement == null) {
 			return null;
@@ -397,7 +394,7 @@ public class ControlStatementsFix extends AbstractFix {
             		RemoveBlockOperation op= new RemoveBlockOperation(item, IfStatement.THEN_STATEMENT_PROPERTY);
 					removeAllList.add(op);
 					if (item == statement)
-						result.add(new ControlStatementsFix(FixMessages.ControlStatementsFix_removeIfBlock_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op}));
+						result.add(new ControlStatementsFix(FixMessages.ControlStatementsFix_removeIfBlock_proposalDescription, compilationUnit, new CompilationUnitRewriteOperation[] {op}));
             	}
 			}
 			
@@ -405,34 +402,34 @@ public class ControlStatementsFix extends AbstractFix {
             	RemoveBlockOperation op= new RemoveBlockOperation(item, IfStatement.ELSE_STATEMENT_PROPERTY);
 				removeAllList.add(op);
 				if (item == statement)
-					result.add(new ControlStatementsFix(FixMessages.ControlStatementsFix_removeElseBlock_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op}));
+					result.add(new ControlStatementsFix(FixMessages.ControlStatementsFix_removeElseBlock_proposalDescription, compilationUnit, new CompilationUnitRewriteOperation[] {op}));
             }
             
 			if (removeAllList.size() > 1) {
-				IFixRewriteOperation[] allConvert= (IFixRewriteOperation[])removeAllList.toArray(new IFixRewriteOperation[removeAllList.size()]);
+				CompilationUnitRewriteOperation[] allConvert= (CompilationUnitRewriteOperation[])removeAllList.toArray(new CompilationUnitRewriteOperation[removeAllList.size()]);
 				result.add(new ControlStatementsFix(FixMessages.ControlStatementsFix_removeIfElseBlock_proposalDescription, compilationUnit, allConvert));
             }
             
-            return (IFix[])result.toArray(new IFix[result.size()]);
+            return (ControlStatementsFix[])result.toArray(new ControlStatementsFix[result.size()]);
 		} else if (statement instanceof WhileStatement) {
 			if (RemoveBlockOperation.satisfiesQuickAssistPrecondition(statement, WhileStatement.BODY_PROPERTY)) {
 				RemoveBlockOperation op= new RemoveBlockOperation(statement, WhileStatement.BODY_PROPERTY);
-				return new IFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op})};
+				return new ControlStatementsFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new CompilationUnitRewriteOperation[] {op})};
 			}
 		} else if (statement instanceof ForStatement) {
 			if (RemoveBlockOperation.satisfiesQuickAssistPrecondition(statement, ForStatement.BODY_PROPERTY)) {
 				RemoveBlockOperation op= new RemoveBlockOperation(statement, ForStatement.BODY_PROPERTY);
-				return new IFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op})};
+				return new ControlStatementsFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new CompilationUnitRewriteOperation[] {op})};
 			}
 		} else if (statement instanceof EnhancedForStatement) {
 			if (RemoveBlockOperation.satisfiesQuickAssistPrecondition(statement, EnhancedForStatement.BODY_PROPERTY)) {
 				RemoveBlockOperation op= new RemoveBlockOperation(statement, EnhancedForStatement.BODY_PROPERTY);
-				return new IFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op})};
+				return new ControlStatementsFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new CompilationUnitRewriteOperation[] {op})};
 			}
 		} else if (statement instanceof DoStatement) {
 			if (RemoveBlockOperation.satisfiesQuickAssistPrecondition(statement, DoStatement.BODY_PROPERTY)) {
 				RemoveBlockOperation op= new RemoveBlockOperation(statement, DoStatement.BODY_PROPERTY);
-				return new IFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op})};
+				return new ControlStatementsFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new CompilationUnitRewriteOperation[] {op})};
 			}
 		}
 		
@@ -454,11 +451,11 @@ public class ControlStatementsFix extends AbstractFix {
 		if (operations.isEmpty())
 			return null;
 		
-		IFixRewriteOperation[] ops= (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]);
+		CompilationUnitRewriteOperation[] ops= (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
 		return new ControlStatementsFix(FixMessages.ControlStatementsFix_change_name, compilationUnit, ops);
 	}
 
-	protected ControlStatementsFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations) {
+	protected ControlStatementsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewriteOperations) {
 		super(name, compilationUnit, fixRewriteOperations);
 	}
 

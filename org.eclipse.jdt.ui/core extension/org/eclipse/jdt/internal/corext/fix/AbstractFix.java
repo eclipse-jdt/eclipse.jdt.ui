@@ -10,136 +10,42 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.eclipse.text.edits.TextEditGroup;
-
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
-import org.eclipse.ltk.core.refactoring.GroupCategory;
-import org.eclipse.ltk.core.refactoring.GroupCategorySet;
-import org.eclipse.ltk.core.refactoring.TextChange;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
-
-import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-
-
-public abstract class AbstractFix implements IFix {
+public abstract class AbstractFix implements IFix, IProposableFix, ILinkedFix {
 	
-	public static abstract class AbstractFixRewriteOperation implements IFixRewriteOperation {
-		
-		protected Type importType(final ITypeBinding toImport, final ASTNode accessor, ImportRewrite imports, final CompilationUnit compilationUnit) {
-			ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(compilationUnit, accessor.getStartPosition(), imports);
-			return imports.addImport(toImport, compilationUnit.getAST(), importContext);
-		}
-		
-		protected TextEditGroup createTextEditGroup(String label) {
-			if (label.length() > 0){
-				return new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
-			} else {
-				return new TextEditGroup(label);
-			}
-		}
-
-		public String getAdditionalInfo() {
-			return null;
-		}
-	}
+	private final String fDisplayString;
 	
-	private final String fName;
-	private final ICompilationUnit fCompilationUnit;
-	private final IFixRewriteOperation[] fFixRewrites;
-	private final CompilationUnit fUnit;
-	private IStatus fStatus;
-	
-	protected AbstractFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations) {
-		fName= name;
-		fCompilationUnit= (ICompilationUnit)compilationUnit.getJavaElement();
-		fFixRewrites= fixRewriteOperations;
-		fUnit= compilationUnit;
-		fStatus= StatusInfo.OK_STATUS;
+	protected AbstractFix(String displayString) {
+		fDisplayString= displayString;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.IFix#getName()
+	/**
+	 * {@inheritDoc}
 	 */
-	public String getDescription() {
-		return fName;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.IFix#getCompilationUnit()
-	 */
-	public ICompilationUnit getCompilationUnit() {
-		return fCompilationUnit;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.IFix#createChange()
-	 */
-	public TextChange createChange() throws CoreException {
-		if (fFixRewrites == null || fFixRewrites.length == 0)
-			return null;
-
-		CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite(getCompilationUnit(), fUnit);
-
-		List/*<TextEditGroup>*/ groups= new ArrayList();
-		
-		for (int i= 0; i < fFixRewrites.length; i++) {
-			fFixRewrites[i].rewriteAST(cuRewrite, groups);
-		}
-		
-		CompilationUnitChange result= cuRewrite.createChange(getDescription(), true, null);
-		if (result == null)
-			return null;
-		
-		for (Iterator iter= groups.iterator(); iter.hasNext();) {
-			TextEditGroup group= (TextEditGroup)iter.next();
-			result.addTextEditGroup(group);
-		}
-		return result;
-	}
-	
-	public String getAdditionalInfo(){
-		StringBuffer sb= new StringBuffer();
-		for (int i = 0; i < fFixRewrites.length; i++) {
-			IFixRewriteOperation frw = fFixRewrites[i];
-			if (frw instanceof AbstractFixRewriteOperation) {
-				AbstractFixRewriteOperation fro= (AbstractFixRewriteOperation) frw;
-				String info= fro.getAdditionalInfo();
-				if (info != null)
-					sb.append(info);
-			}
-		}
-		if (sb.length() > 0) {
-			return sb.toString();
-		}
+	public String getAdditionalProposalInfo() {
 		return null;
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.IFix#getStatus()
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDisplayString() {
+		return fDisplayString;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public LinkedProposalModel getLinkedPositions() {
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
 	 */
 	public IStatus getStatus() {
-	    return fStatus;
+		return null;
 	}
-	
-    public void setStatus(IStatus status) {
-    	fStatus= status;
-    }
 }

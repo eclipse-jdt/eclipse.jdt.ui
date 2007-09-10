@@ -79,7 +79,7 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ExpressionsFix;
-import org.eclipse.jdt.internal.corext.fix.IFix;
+import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.refactoring.code.OperatorPrecedence;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -607,7 +607,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (nodes.isEmpty())
 			return false;
 
-		IFix fix= ExpressionsFix.createRemoveUnnecessaryParenthesisFix(context.getASTRoot(), (ASTNode[])nodes.toArray(new ASTNode[nodes.size()]));
+		IProposableFix fix= ExpressionsFix.createRemoveUnnecessaryParenthesisFix(context.getASTRoot(), (ASTNode[])nodes.toArray(new ASTNode[nodes.size()]));
 		if (fix == null)
 			return false;
 
@@ -625,7 +625,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 	private static boolean getAddParanoidalParenthesisProposals(IInvocationContext context, ArrayList coveredNodes, Collection resultingCollections) throws CoreException {
 
-		IFix fix= ExpressionsFix.createAddParanoidalParenthesisFix(context.getASTRoot(), (ASTNode[])coveredNodes.toArray(new ASTNode[coveredNodes.size()]));
+		IProposableFix fix= ExpressionsFix.createAddParanoidalParenthesisFix(context.getASTRoot(), (ASTNode[])coveredNodes.toArray(new ASTNode[coveredNodes.size()]));
 		if (fix == null)
 			return false;
 

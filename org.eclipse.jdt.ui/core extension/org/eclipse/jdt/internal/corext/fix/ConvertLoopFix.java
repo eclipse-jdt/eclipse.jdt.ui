@@ -26,11 +26,11 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-public class ConvertLoopFix extends LinkedFix {
-	
+public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
+
 	private final static class ControlStatementFinder extends GenericVisitor {
 		
-		private final List/*<IFixRewriteOperation>*/fResult;
+		private final List/*<CompilationUnitRewriteOperation>*/fResult;
 		private final Hashtable fUsedNames;
 		private final boolean fFindForLoopsToConvert;
 		private final boolean fConvertIterableForLoops;
@@ -121,31 +121,39 @@ public class ConvertLoopFix extends LinkedFix {
 		if (operations.isEmpty())
 			return null;
 		
-		IFixRewriteOperation[] ops= (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]);
-		return new ConvertLoopFix(FixMessages.ControlStatementsFix_change_name, compilationUnit, ops);
+		CompilationUnitRewriteOperation[] ops= (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
+		return new ConvertLoopFix(FixMessages.ControlStatementsFix_change_name, compilationUnit, ops, null);
 	}
 	
-	public static IFix createConvertForLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
+	public static ConvertLoopFix createConvertForLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
 		ConvertLoopOperation convertForLoopOperation= new ConvertForLoopOperation(loop);
 		if (!convertForLoopOperation.satisfiesPreconditions().isOK())
 			return null;
 		
-		return new ConvertLoopFix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new ILinkedFixRewriteOperation[] {convertForLoopOperation});
+		return new ConvertLoopFix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new CompilationUnitRewriteOperation[] {convertForLoopOperation}, null);
 	}
 	
-	public static IFix createConvertIterableLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
+	public static ConvertLoopFix createConvertIterableLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
 		ConvertIterableLoopOperation loopConverter= new ConvertIterableLoopOperation(loop);
 		IStatus status= loopConverter.satisfiesPreconditions();
 		if (status.getSeverity() == IStatus.ERROR)
 			return null;
-		
-		ConvertLoopFix result= new ConvertLoopFix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new ILinkedFixRewriteOperation[] {loopConverter});
-		result.setStatus(status);
-		return result;
+
+		return new ConvertLoopFix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new CompilationUnitRewriteOperation[] {loopConverter}, status);
 	}
+
+	private final IStatus fStatus;
 	
-	protected ConvertLoopFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations) {
+	protected ConvertLoopFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewriteOperations, IStatus status) {
 		super(name, compilationUnit, fixRewriteOperations);
+		fStatus= status;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public IStatus getStatus() {
+		return fStatus;
 	}
 	
 }

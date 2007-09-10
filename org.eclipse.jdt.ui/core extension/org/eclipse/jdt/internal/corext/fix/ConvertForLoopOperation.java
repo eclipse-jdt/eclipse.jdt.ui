@@ -112,7 +112,8 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		return Status.OK_STATUS;
 	}
 	
-	/**
+	
+	/*
 	 * Must be one of:
 	 * <ul>
 	 * <li>int [result]= 0;</li>
@@ -168,7 +169,8 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		return false;
 	}
 	
-	/**
+	
+	/*
 	 * [lengthBinding]= [arrayBinding].length
 	 */
 	private boolean validateLengthFragment(VariableDeclarationFragment fragment) {
@@ -187,7 +189,8 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		return true;
 	}
 	
-	/**
+	
+	/*
 	 * Must be one of:
 	 * <ul>
 	 * <li>[result]= 0</li>
@@ -205,7 +208,8 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		return (IVariableBinding)fragment.getName().resolveBinding();
 	}
 	
-	/**
+	
+	/*
 	 * Must be one of:
 	 * <ul>
 	 * <li>[indexBinding] < [result].length;</li>
@@ -259,7 +263,8 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		return false;
 	}
 	
-	/**
+	
+	/*
 	 * Must be one of:
 	 * <ul>
 	 * <li>[result].length</li>
@@ -313,7 +318,8 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		return false;
 	}
 	
-	/**
+	
+	/*
 	 * Must be one of:
 	 * <ul>
 	 * <li>[indexBinding]++</li>
@@ -377,7 +383,8 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		return LITERAL_1.equals(literal.getToken());
 	}
 	
-	/**
+	
+	/*
 	 * returns false iff
 	 * <ul>
 	 * <li><code>indexBinding</code> is used for anything else then accessing
@@ -482,13 +489,12 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 			return proposals[0];
 		}
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List, java.util.List)
+
+	/**
+	 * {@inheritDoc}
 	 */
-	public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, LinkedProposalModel positionGroups) throws CoreException {
-		TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
-		textEditGroups.add(group);
+	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel positionGroups) throws CoreException {
+		TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, cuRewrite);
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		
 		TightSourceRangeComputer rangeComputer;

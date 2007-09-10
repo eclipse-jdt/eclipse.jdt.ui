@@ -66,7 +66,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.SerialVersionHashOperation;
 
 
-public class PotentialProgrammingProblemsFix extends LinkedFix {
+public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOperationsFix {
 	
 	/** Name of the serializable class */
 	private static final String SERIALIZABLE_NAME= "java.io.Serializable"; //$NON-NLS-1$
@@ -260,7 +260,7 @@ public class PotentialProgrammingProblemsFix extends LinkedFix {
 
 	private static ISerialVersionFixContext fCurrentContext;
 
-	public static IFix[] createMissingSerialVersionFixes(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
+	public static IProposableFix[] createMissingSerialVersionFixes(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
 		if (problem.getProblemId() != IProblem.MissingSerialVersion)
 			return null;
 		
@@ -277,12 +277,12 @@ public class PotentialProgrammingProblemsFix extends LinkedFix {
 			return null;
 		
 		SerialVersionDefaultOperation defop= new SerialVersionDefaultOperation(unit, new ASTNode[] {declaringNode});
-		IFix fix1= new PotentialProgrammingProblemsFix(FixMessages.Java50Fix_SerialVersion_default_description, compilationUnit, new IFixRewriteOperation[] {defop});
+		IProposableFix fix1= new PotentialProgrammingProblemsFix(FixMessages.Java50Fix_SerialVersion_default_description, compilationUnit, new CompilationUnitRewriteOperation[] {defop});
 		
 		SerialVersionHashOperation hashop= new SerialVersionHashOperation(unit, new ASTNode[] {declaringNode});
-		IFix fix2= new PotentialProgrammingProblemsFix(FixMessages.Java50Fix_SerialVersion_hash_description, compilationUnit, new IFixRewriteOperation[] {hashop});
+		IProposableFix fix2= new PotentialProgrammingProblemsFix(FixMessages.Java50Fix_SerialVersion_hash_description, compilationUnit, new CompilationUnitRewriteOperation[] {hashop});
 	
-		return new IFix[] {fix1, fix2};
+		return new IProposableFix[] {fix1, fix2};
 	}
 
 	public static RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor, 
@@ -365,7 +365,7 @@ public class PotentialProgrammingProblemsFix extends LinkedFix {
 	            ITypeBinding binding= getTypeBinding(declarationNode);
 	            if (fCurrentContext.getSerialVersionId(binding) != null) {
 	            	SerialVersionHashBatchOperation op= new SerialVersionHashBatchOperation(unit, (ASTNode[])declarationNodes.toArray(new ASTNode[declarationNodes.size()]), fCurrentContext);
-	    			return new PotentialProgrammingProblemsFix(FixMessages.PotentialProgrammingProblemsFix_add_id_change_name, compilationUnit, new IFixRewriteOperation[] {op});	            	
+	    			return new PotentialProgrammingProblemsFix(FixMessages.PotentialProgrammingProblemsFix_add_id_change_name, compilationUnit, new CompilationUnitRewriteOperation[] {op});	            	
 	            }
             }
 		}
@@ -443,7 +443,7 @@ public class PotentialProgrammingProblemsFix extends LinkedFix {
 		return null;
 	}
 
-	protected PotentialProgrammingProblemsFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations) {
+	protected PotentialProgrammingProblemsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewriteOperations) {
 		super(name, compilationUnit, fixRewriteOperations);
 	}
 }

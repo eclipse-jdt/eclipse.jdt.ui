@@ -30,6 +30,7 @@ public final class FixMessages extends NLS {
 	public static String CleanUpRefactoring_Refactoring_name;
 	public static String CleanUpRefactoring_ProcessingCompilationUnit_message;
 	public static String CleanUpRefactoring_Initialize_message;
+	public static String CompilationUnitRewriteOperationsFix_0;
 	public static String CodeStyleFix_change_name;
 	public static String ControlStatementsFix_change_name;
 	
@@ -89,8 +90,6 @@ public final class FixMessages extends NLS {
 	public static String CodeStyleFix_ChangeControlToBlock_description;
 	public static String CodeStyleFix_removeThis_groupDescription;
 	public static String CodeStyleFix_ChangeAccessUsingDeclaring_description;
-	public static String CodeStyleFix_QualifyMethodWithThis_description;
-	public static String CodeStyleFix_QualifyFieldWithThis_description;
 	public static String CodeStyleFix_QualifyMethodWithDeclClass_description;
 	public static String CodeStyleFix_QualifyFieldWithDeclClass_description;
 	

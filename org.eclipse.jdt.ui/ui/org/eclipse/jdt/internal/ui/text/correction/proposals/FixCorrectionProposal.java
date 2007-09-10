@@ -34,10 +34,10 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.corext.fix.AbstractFix;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.fix.IFix;
-import org.eclipse.jdt.internal.corext.fix.LinkedFix;
+import org.eclipse.jdt.internal.corext.fix.ILinkedFix;
+import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -59,12 +59,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
  */
 public class FixCorrectionProposal extends LinkedCorrectionProposal implements ICompletionProposalExtension2, IStatusLineProposal {
 
-	private final IFix fFix;
+	private final IProposableFix fFix;
 	private final ICleanUp fCleanUp;
 	private CompilationUnit fCompilationUnit;
 
-	public FixCorrectionProposal(IFix fix, ICleanUp cleanUp, int relevance, Image image, IInvocationContext context) {
-		super(fix.getDescription(), fix.getCompilationUnit(), null, relevance, image);
+	public FixCorrectionProposal(IProposableFix fix, ICleanUp cleanUp, int relevance, Image image, IInvocationContext context) {
+		super(fix.getDisplayString(), context.getCompilationUnit(), null, relevance, image);
 		fFix= fix;
 		fCleanUp= cleanUp;
 		fCompilationUnit= context.getASTRoot();
@@ -79,7 +79,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 	 */
 	public Image getImage() {
 		IStatus status= fFix.getStatus();
-		if (!status.isOK()) {
+		if (status != null && !status.isOK()) {
 			ImageImageDescriptor image= new ImageImageDescriptor(super.getImage());
 
 			int flag= JavaElementImageDescriptor.WARNING;
@@ -98,31 +98,29 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
-		String result= super.getAdditionalProposalInfo();
+		StringBuffer result= new StringBuffer();
+
 		IStatus status= fFix.getStatus();
-		if (!status.isOK()) {
-			StringBuffer buf= new StringBuffer();
-			buf.append("<b>"); //$NON-NLS-1$
-			buf.append(CorrectionMessages.FixCorrectionProposal_WarningAdditionalProposalInfo);
-			buf.append("</b>"); //$NON-NLS-1$
-			buf.append(status.getMessage());
-			buf.append("<br><br>"); //$NON-NLS-1$
-			buf.append(result);
-			return buf.toString();
-		} else {
-			if (fFix instanceof AbstractFix) {
-				AbstractFix af = (AbstractFix) fFix;
-				String info = af.getAdditionalInfo();
-				if (info != null) {
-					StringBuffer sb=new StringBuffer();
-					sb.append(info);
-					sb.append("<br>"); //$NON-NLS-1$
-					sb.append(result);
-					return sb.toString();
-				}
+		if (status != null && !status.isOK()) {
+			result.append("<b>"); //$NON-NLS-1$
+			if (status.getSeverity() == IStatus.WARNING) {
+				result.append(CorrectionMessages.FixCorrectionProposal_WarningAdditionalProposalInfo);
+			} else if (status.getSeverity() == IStatus.ERROR) {
+				result.append(CorrectionMessages.FixCorrectionProposal_0);
 			}
-			return result;
+			result.append("</b>"); //$NON-NLS-1$
+			result.append(status.getMessage());
+			result.append("<br><br>"); //$NON-NLS-1$
 		}
+
+		String info= fFix.getAdditionalProposalInfo();
+		if (info != null) {
+			result.append(info);
+		} else {
+			result.append(super.getAdditionalProposalInfo());
+		}
+
+		return result.toString();
 	}
 
 	/* (non-Javadoc)
@@ -130,7 +128,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 	 */
 	public int getRelevance() {
 		IStatus status= fFix.getStatus();
-		if (status.getSeverity() == IStatus.WARNING) {
+		if (status != null && !status.isOK()) {
 			return super.getRelevance() - 100;
 		} else {
 			return super.getRelevance();
@@ -141,17 +139,12 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#createTextChange()
 	 */
 	protected TextChange createTextChange() throws CoreException {
-		IFix fix= fFix;
-		TextChange createChange= fix.createChange();
-		if (createChange instanceof TextFileChange)
-			((TextFileChange)createChange).setSaveMode(TextFileChange.LEAVE_DIRTY);
+		CompilationUnitChange createChange= fFix.createChange();
+		createChange.setSaveMode(TextFileChange.LEAVE_DIRTY);
 
-		if (fix instanceof LinkedFix) {
-			setLinkedProposalModel(((LinkedFix) fix).getLinkedPositions());
+		if (fFix instanceof ILinkedFix) {
+			setLinkedProposalModel(((ILinkedFix) fFix).getLinkedPositions());
 		}
-
-		if (createChange == null)
-			return new CompilationUnitChange("", getCompilationUnit()); //$NON-NLS-1$
 
 		return createChange;
 	}

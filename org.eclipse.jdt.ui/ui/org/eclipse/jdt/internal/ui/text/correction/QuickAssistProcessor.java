@@ -91,7 +91,7 @@ import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.ConvertLoopFix;
-import org.eclipse.jdt.internal.corext.fix.IFix;
+import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFix;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
@@ -917,7 +917,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getRemoveBlockProposals(IInvocationContext context, ASTNode coveringNode, Collection resultingCollections) {
-		IFix[] fixes= ControlStatementsFix.createRemoveBlockFix(context.getASTRoot(), coveringNode);
+		IProposableFix[] fixes= ControlStatementsFix.createRemoveBlockFix(context.getASTRoot(), coveringNode);
 		if (fixes != null) {
 			if (resultingCollections == null) {
 				return true;
@@ -927,7 +927,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			options.put(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER, CleanUpConstants.TRUE);
 			ICleanUp cleanUp= new ControlStatementsCleanUp(options);
 			for (int i= 0; i < fixes.length; i++) {
-				IFix fix= fixes[i];
+				IProposableFix fix= fixes[i];
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 0, image, context);
 				resultingCollections.add(proposal);
@@ -1254,8 +1254,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		if (resultingCollections == null)
 			return true;
-		
-		IFix fix= ConvertLoopFix.createConvertForLoopToEnhancedFix(context.getASTRoot(), forStatement);
+
+		IProposableFix fix= ConvertLoopFix.createConvertForLoopToEnhancedFix(context.getASTRoot(), forStatement);
 		if (fix == null)
 			return false;
 		
@@ -1277,8 +1277,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		if (resultingCollections == null)
 			return true;
-		
-		IFix fix= ConvertLoopFix.createConvertIterableLoopToEnhancedFix(context.getASTRoot(), forStatement);
+
+		IProposableFix fix= ConvertLoopFix.createConvertIterableLoopToEnhancedFix(context.getASTRoot(), forStatement);
 		if (fix == null)
 			return false;
 		
@@ -1319,8 +1319,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ASTNode[] selectedNodes= analyzer.getSelectedNodes();
 		if (selectedNodes.length == 0)
 			return false;
-		
-		IFix fix= VariableDeclarationFix.createChangeModifierToFinalFix(context.getASTRoot(), selectedNodes);
+
+		IProposableFix fix= VariableDeclarationFix.createChangeModifierToFinalFix(context.getASTRoot(), selectedNodes);
 		if (fix == null)
 			return false;
 		

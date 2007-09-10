@@ -203,13 +203,12 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		}
 		return getRoot().getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List, java.util.List)
+
+	/**
+	 * {@inheritDoc}
 	 */
-	public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, final LinkedProposalModel positionGroups) throws CoreException {
-		final TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
-		textEditGroups.add(group);
+	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel positionGroups) throws CoreException {
+		final TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, cuRewrite);
 		
 		final ASTRewrite astRewrite= cuRewrite.getASTRewrite();
 		

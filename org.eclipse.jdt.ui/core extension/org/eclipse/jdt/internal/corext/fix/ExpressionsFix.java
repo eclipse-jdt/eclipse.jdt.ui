@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.corext.fix;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -35,7 +34,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.code.OperatorPrecedence;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
-public class ExpressionsFix extends AbstractFix {
+public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 
 	private static final class MissingParenthesisVisitor extends ASTVisitor {
 		
@@ -227,7 +226,7 @@ public class ExpressionsFix extends AbstractFix {
 		}
 	}
 
-	private static class AddParenthesisOperation extends AbstractFixRewriteOperation {
+	private static class AddParenthesisOperation extends CompilationUnitRewriteOperation {
 
 		private final Expression[] fExpressions;
 
@@ -238,9 +237,8 @@ public class ExpressionsFix extends AbstractFix {
 		/**
 		 * {@inheritDoc}
 		 */
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
-			TextEditGroup group= createTextEditGroup(FixMessages.ExpressionsFix_addParanoiacParenthesis_description);
-			textEditGroups.add(group);
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
+			TextEditGroup group= createTextEditGroup(FixMessages.ExpressionsFix_addParanoiacParenthesis_description, cuRewrite);
 			
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
@@ -256,7 +254,7 @@ public class ExpressionsFix extends AbstractFix {
 		}
 	}
 	
-	private static class RemoveParenthesisOperation extends AbstractFixRewriteOperation {
+	private static class RemoveParenthesisOperation extends CompilationUnitRewriteOperation {
 
 		private final HashSet/*<ParenthesizedExpression>*/ fExpressions;
 
@@ -267,9 +265,8 @@ public class ExpressionsFix extends AbstractFix {
 		/**
 		 * {@inheritDoc}
 		 */
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
-			TextEditGroup group= createTextEditGroup(FixMessages.ExpressionsFix_removeUnnecessaryParenthesis_description);
-			textEditGroups.add(group);
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
+			TextEditGroup group= createTextEditGroup(FixMessages.ExpressionsFix_removeUnnecessaryParenthesis_description, cuRewrite);
 			
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 						
@@ -295,7 +292,7 @@ public class ExpressionsFix extends AbstractFix {
 		}
 	}
 	
-	public static IFix createAddParanoidalParenthesisFix(CompilationUnit compilationUnit, ASTNode[] coveredNodes) throws CoreException {
+	public static ExpressionsFix createAddParanoidalParenthesisFix(CompilationUnit compilationUnit, ASTNode[] coveredNodes) throws CoreException {
 		if (coveredNodes == null)
 			return null;
 		
@@ -312,11 +309,11 @@ public class ExpressionsFix extends AbstractFix {
 			return null;
 		
 
-		IFixRewriteOperation op= new AddParenthesisOperation((Expression[])changedNodes.toArray(new Expression[changedNodes.size()]));
-		return new ExpressionsFix(FixMessages.ExpressionsFix_addParanoiacParenthesis_description, compilationUnit, new IFixRewriteOperation[] {op});
+		CompilationUnitRewriteOperation op= new AddParenthesisOperation((Expression[])changedNodes.toArray(new Expression[changedNodes.size()]));
+		return new ExpressionsFix(FixMessages.ExpressionsFix_addParanoiacParenthesis_description, compilationUnit, new CompilationUnitRewriteOperation[] {op});
 	}
 	
-	public static IFix createRemoveUnnecessaryParenthesisFix(CompilationUnit compilationUnit, ASTNode[] nodes) {
+	public static ExpressionsFix createRemoveUnnecessaryParenthesisFix(CompilationUnit compilationUnit, ASTNode[] nodes) {
 		// check sub-expressions in fully covered nodes
 		final ArrayList changedNodes= new ArrayList();
 		for (int i= 0; i < nodes.length; i++) {
@@ -329,7 +326,7 @@ public class ExpressionsFix extends AbstractFix {
 		
 		HashSet expressions= new HashSet(changedNodes);
 		RemoveParenthesisOperation op= new RemoveParenthesisOperation(expressions);
-		return new ExpressionsFix(FixMessages.ExpressionsFix_removeUnnecessaryParenthesis_description, compilationUnit, new IFixRewriteOperation[] {op});
+		return new ExpressionsFix(FixMessages.ExpressionsFix_removeUnnecessaryParenthesis_description, compilationUnit, new CompilationUnitRewriteOperation[] {op});
 	}
 	
 	public static IFix createCleanUp(CompilationUnit compilationUnit, 
@@ -343,8 +340,8 @@ public class ExpressionsFix extends AbstractFix {
 			if (changedNodes.isEmpty())
 				return null;
 			
-			IFixRewriteOperation op= new AddParenthesisOperation((Expression[])changedNodes.toArray(new Expression[changedNodes.size()]));
-			return new ExpressionsFix(FixMessages.ExpressionsFix_add_parenthesis_change_name, compilationUnit, new IFixRewriteOperation[] {op});
+			CompilationUnitRewriteOperation op= new AddParenthesisOperation((Expression[])changedNodes.toArray(new Expression[changedNodes.size()]));
+			return new ExpressionsFix(FixMessages.ExpressionsFix_add_parenthesis_change_name, compilationUnit, new CompilationUnitRewriteOperation[] {op});
 		} else if (removeUnnecessaryParenthesis) {
 			final ArrayList changedNodes = new ArrayList();
 			compilationUnit.accept(new UnnecessaryParenthesisVisitor(changedNodes));
@@ -353,13 +350,13 @@ public class ExpressionsFix extends AbstractFix {
 				return null;
 			
 			HashSet expressions= new HashSet(changedNodes);
-			IFixRewriteOperation op= new RemoveParenthesisOperation(expressions);
-			return new ExpressionsFix(FixMessages.ExpressionsFix_remove_parenthesis_change_name, compilationUnit, new IFixRewriteOperation[] {op});
+			CompilationUnitRewriteOperation op= new RemoveParenthesisOperation(expressions);
+			return new ExpressionsFix(FixMessages.ExpressionsFix_remove_parenthesis_change_name, compilationUnit, new CompilationUnitRewriteOperation[] {op});
 		}
 		return null;
 	}
 
-	protected ExpressionsFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations) {
+	protected ExpressionsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewriteOperations) {
 		super(name, compilationUnit, fixRewriteOperations);
 	}
 

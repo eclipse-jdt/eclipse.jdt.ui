@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
-import java.util.List;
-
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.Assert;
@@ -33,7 +31,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
-import org.eclipse.jdt.internal.corext.fix.LinkedFix.AbstractLinkedFixRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 import org.eclipse.jdt.ui.CodeGeneration;
@@ -43,7 +41,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
  *
  * @since 3.1
  */
-public abstract class AbstractSerialVersionOperation extends AbstractLinkedFixRewriteOperation {
+public abstract class AbstractSerialVersionOperation extends CompilationUnitRewriteOperation {
 
 	/** The long literal suffix */
 	protected static final String LONG_SUFFIX= "L"; //$NON-NLS-1$
@@ -70,6 +68,7 @@ public abstract class AbstractSerialVersionOperation extends AbstractLinkedFixRe
 	 * Adds an initializer to the specified variable declaration fragment.
 	 *
 	 * @param fragment the variable declaration fragment to add an initializer
+	 * @param declarationNode
 	 * @return false if no id could be calculated
 	 * @throws CoreException 
 	 */
@@ -87,7 +86,7 @@ public abstract class AbstractSerialVersionOperation extends AbstractLinkedFixRe
 	/**
 	 * {@inheritDoc}
 	 */
-	public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, LinkedProposalModel positionGroups) throws CoreException {
+	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel positionGroups) throws CoreException {
 		final ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		VariableDeclarationFragment fragment= null;
 		for (int i= 0; i < fNodes.length; i++) {
@@ -107,9 +106,7 @@ public abstract class AbstractSerialVersionOperation extends AbstractLinkedFixRe
 
 			if (fragment.getInitializer() != null) {
 				
-				final TextEditGroup editGroup= createTextEditGroup(FixMessages.SerialVersion_group_description);
-				textEditGroups.add(editGroup);
-
+				final TextEditGroup editGroup= createTextEditGroup(FixMessages.SerialVersion_group_description, cuRewrite);
 				if (node instanceof AbstractTypeDeclaration)
 					rewrite.getListRewrite(node, ((AbstractTypeDeclaration) node).getBodyDeclarationsProperty()).insertAt(declaration, 0, editGroup);
 				else if (node instanceof AnonymousClassDeclaration)

@@ -89,7 +89,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CodeStyleFix;
-import org.eclipse.jdt.internal.corext.fix.IFix;
+import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
 import org.eclipse.jdt.internal.corext.fix.StringFix;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFix;
@@ -320,8 +320,8 @@ public class LocalCorrectionsSubProcessor {
 			
 		};
 		proposals.add(proposal);
-		
-		IFix fix= StringFix.createFix(context.getASTRoot(), problem, false, true);
+
+		IProposableFix fix= StringFix.createFix(context.getASTRoot(), problem, false, true);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_NEVER_TRANSLATE);
 			Map options= new Hashtable();
@@ -333,7 +333,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 	
 	public static void getUnnecessaryNLSTagProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
-		IFix fix= StringFix.createFix(context.getASTRoot(), problem, true, false);
+		IProposableFix fix= StringFix.createFix(context.getASTRoot(), problem, true, false);
 		if (fix != null) {
 			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 			Map options= new Hashtable();
@@ -349,7 +349,7 @@ public class LocalCorrectionsSubProcessor {
 	 * Fix instance accesses and indirect (static) accesses to static fields/methods
 	 */
 	public static void addCorrectAccessToStaticProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
-		IFix fix= CodeStyleFix.createIndirectAccessToStaticFix(context.getASTRoot(), problem);
+		IProposableFix fix= CodeStyleFix.createIndirectAccessToStaticFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map options= new HashMap();
@@ -360,10 +360,10 @@ public class LocalCorrectionsSubProcessor {
 			proposals.add(proposal);
 			return;
 		}
-		
-		IFix[] fixes= CodeStyleFix.createNonStaticAccessFixes(context.getASTRoot(), problem);
+
+		IProposableFix[] fixes= CodeStyleFix.createNonStaticAccessFixes(context.getASTRoot(), problem);
 		if (fixes != null) {
-			IFix fix1= fixes[0];
+			IProposableFix fix1= fixes[0];
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map options= new HashMap();
 			options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpConstants.TRUE);
@@ -377,7 +377,7 @@ public class LocalCorrectionsSubProcessor {
 				options1.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpConstants.TRUE);
 				options1.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS, CleanUpConstants.TRUE);
 				options1.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpConstants.TRUE);
-				IFix fix2= fixes[1];
+				IProposableFix fix2= fixes[1];
 				proposal= new FixCorrectionProposal(fix2, new CodeStyleCleanUp(options), 5, image, context);
 				proposals.add(proposal);
 			}
@@ -386,7 +386,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void addUnimplementedMethodsProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
-		IFix addMethodFix= UnimplementedCodeFix.createAddUnimplementedMethodsFix(context.getASTRoot(), problem);
+		IProposableFix addMethodFix= UnimplementedCodeFix.createAddUnimplementedMethodsFix(context.getASTRoot(), problem);
 		if (addMethodFix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 
@@ -397,7 +397,7 @@ public class LocalCorrectionsSubProcessor {
 			proposals.add(new FixCorrectionProposal(addMethodFix, cleanUp, 10, image, context));
 		}
 
-		IFix makeAbstractFix= UnimplementedCodeFix.createMakeTypeAbstractFix(context.getASTRoot(), problem);
+		IProposableFix makeAbstractFix= UnimplementedCodeFix.createMakeTypeAbstractFix(context.getASTRoot(), problem);
 		if (makeAbstractFix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 
@@ -510,8 +510,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void addUnnecessaryCastProposal(IInvocationContext context, IProblemLocation problem,  Collection proposals) {
-		
-		IFix fix= UnusedCodeFix.createRemoveUnusedCastFix(context.getASTRoot(), problem);
+		IProposableFix fix= UnusedCodeFix.createRemoveUnusedCastFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map options= new Hashtable();
@@ -583,7 +582,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void addUnqualifiedFieldAccessProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
-		IFix fix= CodeStyleFix.createAddFieldQualifierFix(context.getASTRoot(), problem);
+		IProposableFix fix= CodeStyleFix.createAddFieldQualifierFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map options= new HashMap();
@@ -939,7 +938,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void addTypePrametersToRawTypeReference(IInvocationContext context, IProblemLocation problem, Collection proposals) {
-		IFix fix= Java50Fix.createRawTypeReferenceFix(context.getASTRoot(), problem);
+		IProposableFix fix= Java50Fix.createRawTypeReferenceFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			for (Iterator iter= proposals.iterator(); iter.hasNext();) {
 				Object element= iter.next();

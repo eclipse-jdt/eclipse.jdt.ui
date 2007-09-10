@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.CommentFormatFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 
 public class CommentFormatCleanUp extends AbstractCleanUp {

@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
-import org.eclipse.jdt.internal.corext.fix.AbstractFix.AbstractFixRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
-public class AddUnimplementedMethodsOperation extends AbstractFixRewriteOperation {
+public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOperation {
 
 	private ASTNode fTypeNode;
 	private final int fProblemId;
@@ -59,7 +59,7 @@ public class AddUnimplementedMethodsOperation extends AbstractFixRewriteOperatio
 	/**
 	 * {@inheritDoc}
 	 */
-	public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(((CompilationUnit) fTypeNode.getRoot()), fTypeNode.getStartPosition(), cuRewrite.getImportRewrite());
 
 		if (fTypeNode instanceof EnumDeclaration && fProblemId == IProblem.EnumAbstractMethodMustBeImplemented) {
@@ -104,7 +104,7 @@ public class AddUnimplementedMethodsOperation extends AbstractFixRewriteOperatio
 
 			for (int i= 0; i < methods.length; i++) {
 				MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(unit, rewrite, imports, context, methods[i], binding.getName(), settings, binding.isInterface());
-				listRewrite.insertLast(newMethodDecl, createTextEditGroup(CorrectionMessages.AddUnimplementedMethodsOperation_AddMissingMethod_group));
+				listRewrite.insertLast(newMethodDecl, createTextEditGroup(CorrectionMessages.AddUnimplementedMethodsOperation_AddMissingMethod_group, cuRewrite));
 			}
 		}
 	}
@@ -113,7 +113,7 @@ public class AddUnimplementedMethodsOperation extends AbstractFixRewriteOperatio
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 
 		AnonymousClassDeclaration anonymDecl= constDecl.getAST().newAnonymousClassDeclaration();
-		rewrite.set(constDecl, EnumConstantDeclaration.ANONYMOUS_CLASS_DECLARATION_PROPERTY, anonymDecl, createTextEditGroup(CorrectionMessages.AddUnimplementedMethodsOperation_AddMissingMethod_group));
+		rewrite.set(constDecl, EnumConstantDeclaration.ANONYMOUS_CLASS_DECLARATION_PROPERTY, anonymDecl, createTextEditGroup(CorrectionMessages.AddUnimplementedMethodsOperation_AddMissingMethod_group, cuRewrite));
 		IVariableBinding varBinding= constDecl.resolveVariable();
 		if (varBinding != null) {
 			ICompilationUnit unit= cuRewrite.getCu();

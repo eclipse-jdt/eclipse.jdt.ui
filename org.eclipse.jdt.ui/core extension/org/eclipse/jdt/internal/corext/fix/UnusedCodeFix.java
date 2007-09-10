@@ -74,7 +74,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 /**
  * Fix which removes unused code.
  */
-public class UnusedCodeFix extends AbstractFix {
+public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 	
 	private static class SideEffectFinder extends ASTVisitor {
 
@@ -118,7 +118,7 @@ public class UnusedCodeFix extends AbstractFix {
 		}
 	}
 	
-	private static class RemoveImportOperation extends AbstractFixRewriteOperation {
+	private static class RemoveImportOperation extends CompilationUnitRewriteOperation {
 
 		private final ImportDeclaration fImportDeclaration;
 		
@@ -126,19 +126,18 @@ public class UnusedCodeFix extends AbstractFix {
 			fImportDeclaration= importDeclaration;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List)
+		/**
+		 * {@inheritDoc}
 		 */
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			ImportDeclaration node= fImportDeclaration;
-			TextEditGroup group= createTextEditGroup(FixMessages.UnusedCodeFix_RemoveImport_description);
+			TextEditGroup group= createTextEditGroup(FixMessages.UnusedCodeFix_RemoveImport_description, cuRewrite);
 			cuRewrite.getASTRewrite().remove(node, group);
-			textEditGroups.add(group);
 		}
 		
 	}
 	
-	private static class RemoveUnusedMemberOperation extends AbstractFixRewriteOperation {
+	private static class RemoveUnusedMemberOperation extends CompilationUnitRewriteOperation {
 
 		private final SimpleName[] fUnusedNames;
 		private boolean fForceRemove;
@@ -150,21 +149,23 @@ public class UnusedCodeFix extends AbstractFix {
 			fForceRemove=forceRemoveInitializer;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List)
+		/**
+		 * {@inheritDoc}
 		 */
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			for (int i= 0; i < fUnusedNames.length; i++) {
-				removeUnusedName(cuRewrite.getASTRewrite(), fUnusedNames[i], cuRewrite.getRoot(), textEditGroups);	
+				removeUnusedName(cuRewrite, fUnusedNames[i]);	
 			}
 		}
 		
-		private void removeUnusedName(ASTRewrite rewrite, SimpleName simpleName, CompilationUnit completeRoot, List groups) {
+		private void removeUnusedName(CompilationUnitRewrite cuRewrite, SimpleName simpleName) {
+			ASTRewrite rewrite= cuRewrite.getASTRewrite();
+			CompilationUnit completeRoot= cuRewrite.getRoot();
+
 			IBinding binding= simpleName.resolveBinding();
 			CompilationUnit root= (CompilationUnit) simpleName.getRoot();
 			String displayString= getDisplayString(binding);
-			TextEditGroup group= createTextEditGroup(displayString);
-			groups.add(group);
+			TextEditGroup group= createTextEditGroup(displayString, cuRewrite);
 			if (binding.getKind() == IBinding.METHOD) {
 				IMethodBinding decl= ((IMethodBinding) binding).getMethodDeclaration();
 				ASTNode declaration= root.findDeclaringNode(decl);
@@ -380,7 +381,7 @@ public class UnusedCodeFix extends AbstractFix {
 		}
 	}
 	
-	private static class RemoveCastOperation extends AbstractFixRewriteOperation {
+	private static class RemoveCastOperation extends CompilationUnitRewriteOperation {
 
 		private final CastExpression fCast;
 		private final ASTNode fSelectedNode;
@@ -393,10 +394,9 @@ public class UnusedCodeFix extends AbstractFix {
 		/**
 		 * {@inheritDoc}
 		 */
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			
-			TextEditGroup group= createTextEditGroup(FixMessages.UnusedCodeFix_RemoveCast_description);
-			textEditGroups.add(group);
+			TextEditGroup group= createTextEditGroup(FixMessages.UnusedCodeFix_RemoveCast_description, cuRewrite);
 			
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 
@@ -412,7 +412,7 @@ public class UnusedCodeFix extends AbstractFix {
 		}
 	}
 	
-	private static class RemoveAllCastOperation extends AbstractFixRewriteOperation {
+	private static class RemoveAllCastOperation extends CompilationUnitRewriteOperation {
 
 		private final HashSet fUnnecessaryCasts;
 
@@ -423,11 +423,10 @@ public class UnusedCodeFix extends AbstractFix {
 		/**
 		 * {@inheritDoc}
 		 */
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			
-			TextEditGroup group= createTextEditGroup(FixMessages.UnusedCodeFix_RemoveCast_description);
-			textEditGroups.add(group);
+			TextEditGroup group= createTextEditGroup(FixMessages.UnusedCodeFix_RemoveCast_description, cuRewrite);
 			
 			while (fUnnecessaryCasts.size() > 0) {
 				CastExpression castExpression= (CastExpression)fUnnecessaryCasts.iterator().next();
@@ -462,7 +461,7 @@ public class UnusedCodeFix extends AbstractFix {
 				RemoveImportOperation operation= new RemoveImportOperation(node);
 				Map options= new Hashtable();
 				options.put(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpConstants.TRUE);
-				return new UnusedCodeFix(label, compilationUnit, new IFixRewriteOperation[] {operation}, options);
+				return new UnusedCodeFix(label, compilationUnit, new CompilationUnitRewriteOperation[] {operation}, options);
 			}
 		}
 		return null;
@@ -482,14 +481,14 @@ public class UnusedCodeFix extends AbstractFix {
 						
 					String label= getDisplayString(name, binding, forceInitializerRemoval);
 					RemoveUnusedMemberOperation operation= new RemoveUnusedMemberOperation(new SimpleName[] {name}, forceInitializerRemoval);
-					return new UnusedCodeFix(label, compilationUnit, new IFixRewriteOperation[] {operation}, getCleanUpOptions(binding));
+					return new UnusedCodeFix(label, compilationUnit, new CompilationUnitRewriteOperation[] {operation}, getCleanUpOptions(binding));
 				}
 			}
 		}
 		return null;
 	}
 	
-	public static IFix createRemoveUnusedCastFix(CompilationUnit compilationUnit, IProblemLocation problem) {
+	public static UnusedCodeFix createRemoveUnusedCastFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		if (problem.getProblemId() != IProblem.UnnecessaryCast)
 			return null;
 		
@@ -503,7 +502,7 @@ public class UnusedCodeFix extends AbstractFix {
 		if (!(curr instanceof CastExpression))
 			return null;
 		
-		return new UnusedCodeFix(FixMessages.UnusedCodeFix_RemoveCast_description, compilationUnit, new IFixRewriteOperation[] {new RemoveCastOperation((CastExpression)curr, selectedNode)});
+		return new UnusedCodeFix(FixMessages.UnusedCodeFix_RemoveCast_description, compilationUnit, new CompilationUnitRewriteOperation[] {new RemoveCastOperation((CastExpression)curr, selectedNode)});
 	}
 	
 	public static IFix createCleanUp(CompilationUnit compilationUnit, 
@@ -540,7 +539,7 @@ public class UnusedCodeFix extends AbstractFix {
 			boolean removeUnusedImports,
 			boolean removeUnusedCast) {
 
-		List/*<IFixRewriteOperation>*/ result= new ArrayList();
+		List/*<CompilationUnitRewriteOperation>*/ result= new ArrayList();
 		Hashtable/*<ASTNode, List>*/ variableDeclarations= new Hashtable();
 		HashSet/*/CastExpression>*/ unnecessaryCasts= new HashSet();
 		for (int i= 0; i < problems.length; i++) {
@@ -611,7 +610,7 @@ public class UnusedCodeFix extends AbstractFix {
 		if (result.size() == 0)
 			return null;
 		
-		return new UnusedCodeFix(FixMessages.UnusedCodeFix_change_name, compilationUnit, (IFixRewriteOperation[])result.toArray(new IFixRewriteOperation[result.size()]));
+		return new UnusedCodeFix(FixMessages.UnusedCodeFix_change_name, compilationUnit, (CompilationUnitRewriteOperation[])result.toArray(new CompilationUnitRewriteOperation[result.size()]));
 	}
 	
 	private static boolean isFormalParameterInEnhancedForStatement(SimpleName name) {
@@ -729,11 +728,11 @@ public class UnusedCodeFix extends AbstractFix {
 	
 	private final Map fCleanUpOptions;
 	
-	private UnusedCodeFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations) {
+	private UnusedCodeFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewriteOperations) {
 		this(name, compilationUnit, fixRewriteOperations, null);
 	}
 	
-	private UnusedCodeFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations, Map options) {
+	private UnusedCodeFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewriteOperations, Map options) {
 		super(name, compilationUnit, fixRewriteOperations);
 		if (options == null) {
 			fCleanUpOptions= new Hashtable();			

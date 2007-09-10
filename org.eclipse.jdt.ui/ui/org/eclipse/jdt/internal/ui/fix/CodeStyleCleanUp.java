@@ -207,17 +207,17 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 	 */
 	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
 		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS)) {
-			CodeStyleFix fix= CodeStyleFix.createAddFieldQualifierFix(compilationUnit, problem);
+			IFix fix= CodeStyleFix.createAddFieldQualifierFix(compilationUnit, problem);
 			if (fix != null)
 				return true;
 		}
 		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS)) {
-			CodeStyleFix fix= CodeStyleFix.createIndirectAccessToStaticFix(compilationUnit, problem);
+			IFix fix= CodeStyleFix.createIndirectAccessToStaticFix(compilationUnit, problem);
 			if (fix != null)
 				return true;
 		}
 		if (isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS)) {
-			CodeStyleFix[] fixes= CodeStyleFix.createNonStaticAccessFixes(compilationUnit, problem);
+			IFix[] fixes= CodeStyleFix.createNonStaticAccessFixes(compilationUnit, problem);
 			if (fixes != null && fixes.length > 0)
 				return true;
 		}

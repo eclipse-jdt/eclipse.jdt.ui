@@ -735,7 +735,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			ICleanUp cleanUp= cleanUps[i];
 			IFix fix= cleanUp.createFix(new CleanUpContext(source, ast, null));
 			if (fix != null) {
-				TextChange current= fix.createChange();
+				CompilationUnitChange current= fix.createChange();
 				TextEdit currentEdit= pack(current.getEdit());
 				
 				if (solution != null) {
@@ -766,7 +766,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		return solution;
 	}
 	
-	private static void copyChangeGroups(CompilationUnitChange target, TextChange source) {
+	private static void copyChangeGroups(CompilationUnitChange target, CompilationUnitChange source) {
 		TextEditBasedChangeGroup[] changeGroups= source.getChangeGroups();
 		for (int i= 0; i < changeGroups.length; i++) {
 			TextEditGroup textEditGroup= changeGroups[i].getTextEditGroup();

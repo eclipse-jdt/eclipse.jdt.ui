@@ -79,7 +79,7 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.IFix;
+import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ClasspathChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreatePackageChange;
@@ -201,7 +201,7 @@ public class ReorgCorrectionsSubProcessor {
 	}
 
 	public static void removeImportStatementProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
-		IFix fix= UnusedCodeFix.createRemoveUnusedImportFix(context.getASTRoot(), problem);
+		IProposableFix fix= UnusedCodeFix.createRemoveUnusedImportFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_DELETE_IMPORT);
 			Map options= new Hashtable();

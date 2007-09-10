@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,50 +11,25 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.ltk.core.refactoring.TextChange;
-
-import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 
 /**
- * An <code>IFix</code> can calculate a <code>TextChange</code>
- * which applied to a <code>ICompilationUnit</code> will fix
- * one or several problems.
+ * An <code>IFix</code> can calculate a <code>CompilationUnitChange</code>
+ * which applied will fix one or several problems in a compilation unit.
  * 
  * @since 3.2
  */
 public interface IFix {
-	
+
 	/**
-	 * A String describing what the <code>TextChange</code> returned by
-	 * <code>createChange</code> will do.
+	 * A change which applied will fix problems in a compilation
+	 * unit. This must not return <b>null</b> and must not return
+	 * a null change.
 	 * 
-	 * @return The description, not null
+	 * @return the change to apply
+	 * @throws CoreException if something went wrong while calculating the change
 	 */
-	public abstract String getDescription();
-	
-	/**
-	 * A <code>TextChange</code> which applied to <code>getCompilationUnit</code>
-	 * will fix a problem.
-	 * 
-	 * @return The change or null if no fix possible
-	 * @throws CoreException
-	 */
-	public abstract TextChange createChange() throws CoreException;
-	
-	/**
-	 * The <code>ICompilationUnit</code> on which <code>createChange</code> should
-	 * be applied to fix a problem.
-	 * 
-	 * @return The ICompilationUnit, not null
-	 */
-	public abstract ICompilationUnit getCompilationUnit();
-	
-	/**
-	 * A status to inform about issues with this fix
-	 * 
-	 * @return The status, not null
-	 */
-	public abstract IStatus getStatus();
+	public CompilationUnitChange createChange() throws CoreException;
+
 }

@@ -14,23 +14,18 @@ package org.eclipse.jdt.internal.corext.fix;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
-import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.util.CompilationUnitSorter;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.SortMembersOperation.DefaultJavaElementComparator;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-
-public class SortMembersFix implements IFix {
+public class SortMembersFix extends TextEditFix {
 	
 	public static IFix createCleanUp(CompilationUnit compilationUnit, boolean sortMembers, boolean sortFields) throws CoreException {
 		if (!sortMembers && !sortFields)
@@ -45,46 +40,10 @@ public class SortMembersFix implements IFix {
 		if (edit == null)
 			return null;
 		
-		TextChange change= new CompilationUnitChange(label, cu);
-		change.setEdit(edit);
-		change.addTextEditGroup(group);
-		
-		return new SortMembersFix(change, cu);
+		return new SortMembersFix(edit, cu, FixMessages.SortMembersFix_Fix_description);
 	}
 	
-	private final ICompilationUnit fCompilationUnit;
-	private final TextChange fChange;
-	
-	public SortMembersFix(TextChange change, ICompilationUnit compilationUnit) {
-		fChange= change;
-		fCompilationUnit= compilationUnit;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public TextChange createChange() throws CoreException {
-		return fChange;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public ICompilationUnit getCompilationUnit() {
-		return fCompilationUnit;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getDescription() {
-		return FixMessages.SortMembersFix_Fix_description;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public IStatus getStatus() {
-		return StatusInfo.OK_STATUS;
+	public SortMembersFix(TextEdit edit, ICompilationUnit compilationUnit, String description) {
+		super(edit, compilationUnit, description);
 	}
 }

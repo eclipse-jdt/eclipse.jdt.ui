@@ -81,12 +81,12 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.IFix;
-import org.eclipse.jdt.internal.corext.fix.IFixRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFix;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFix.MakeTypeAbstractOperation;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
@@ -512,7 +512,7 @@ public class ModifierCorrectionSubProcessor {
 			MakeTypeAbstractOperation operation= new UnimplementedCodeFix.MakeTypeAbstractOperation(parentTypeDecl);
 
 			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_addabstract_description, parentTypeDecl.getName().getIdentifier());
-			UnimplementedCodeFix fix= new UnimplementedCodeFix(label, astRoot, new IFixRewriteOperation[] { operation });
+			UnimplementedCodeFix fix= new UnimplementedCodeFix(label, astRoot, new CompilationUnitRewriteOperation[] { operation });
 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, 5, image, context);
@@ -648,7 +648,7 @@ public class ModifierCorrectionSubProcessor {
 	}
 	
 	public static void addOverrideAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
-		IFix fix= Java50Fix.createAddOverrideAnnotationFix(context.getASTRoot(), problem);
+		IProposableFix fix= Java50Fix.createAddOverrideAnnotationFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map options= new Hashtable();
@@ -660,7 +660,7 @@ public class ModifierCorrectionSubProcessor {
 	}
 	
 	public static void addDeprecatedAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
-		IFix fix= Java50Fix.createAddDeprectatedAnnotation(context.getASTRoot(), problem);
+		IProposableFix fix= Java50Fix.createAddDeprectatedAnnotation(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map options= new Hashtable();

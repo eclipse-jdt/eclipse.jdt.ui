@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
-import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -39,7 +38,6 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
@@ -49,7 +47,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
  * 		Remove unnecessary $NON-NLS$ tag
  *
  */
-public class StringFix implements IFix {
+public class StringFix implements IFix, IProposableFix {
 	
 	private final TextEditGroup[] fEditGroups;
 	private final String fName;
@@ -194,14 +192,14 @@ public class StringFix implements IFix {
 		fEditGroups= groups;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix#createChange()
+	/**
+	 * {@inheritDoc}
 	 */
-	public TextChange createChange() throws CoreException {
+	public CompilationUnitChange createChange() throws CoreException {
 		if (fEditGroups == null || fEditGroups.length == 0)
 			return null;
 		
-		CompilationUnitChange result= new CompilationUnitChange(getDescription(), getCompilationUnit());
+		CompilationUnitChange result= new CompilationUnitChange(getDisplayString(), fCompilationUnit);
 		for (int i= 0; i < fEditGroups.length; i++) {
 			TextEdit[] edits= fEditGroups[i].getTextEdits();
 			String groupName= fEditGroups[i].getName();
@@ -212,24 +210,24 @@ public class StringFix implements IFix {
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.IFix#getDescription()
+	/**
+	 * {@inheritDoc}
 	 */
-	public String getDescription() {
+	public String getAdditionalProposalInfo() {
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDisplayString() {
 		return fName;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.IFix#getCompilationUnit()
-	 */
-	public ICompilationUnit getCompilationUnit() {
-		return fCompilationUnit;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.IFix#getStatus()
+	/**
+	 * {@inheritDoc}
 	 */
 	public IStatus getStatus() {
-	    return StatusInfo.OK_STATUS;
+		return null;
 	}
 }

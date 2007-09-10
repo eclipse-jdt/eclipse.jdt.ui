@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
-public class VariableDeclarationFix extends AbstractFix {
+public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix {
 	
 	private static class WrittenNamesFinder extends GenericVisitor {
 		
@@ -90,7 +90,6 @@ public class VariableDeclarationFix extends AbstractFix {
 
 	private static class VariableDeclarationFinder extends GenericVisitor {
 		
-		private final CompilationUnit fCompilationUnit;
 		private final List fResult;
 		private final HashMap fWrittenVariables;
 		private final boolean fAddFinalFields;
@@ -100,13 +99,12 @@ public class VariableDeclarationFix extends AbstractFix {
 		public VariableDeclarationFinder(boolean addFinalFields, 
 				boolean addFinalParameters, 
 				boolean addFinalLocals, 
-				final CompilationUnit compilationUnit, final List result, final HashMap writtenNames) {
+				final List result, final HashMap writtenNames) {
 			
 			super();
 			fAddFinalFields= addFinalFields;
 			fAddFinalParameters= addFinalParameters;
 			fAddFinalLocals= addFinalLocals;
-			fCompilationUnit= compilationUnit;
 			fResult= result;
 			fWrittenVariables= writtenNames;
 		}
@@ -145,7 +143,7 @@ public class VariableDeclarationFix extends AbstractFix {
 				if (fWrittenVariables.containsKey(binding))
 					return false;
 				
-				ModifierChangeOperation op= createAddFinalOperation(name, fCompilationUnit, node);
+				ModifierChangeOperation op= createAddFinalOperation(name, node);
 				if (op == null)
 					return false;
 				
@@ -162,7 +160,7 @@ public class VariableDeclarationFix extends AbstractFix {
 				VariableDeclarationFragment fragment= (VariableDeclarationFragment)iter.next();
 				SimpleName name= fragment.getName();
 				IBinding resolveBinding= name.resolveBinding();
-				if (canAddFinal(resolveBinding, name, declaration)) {
+				if (canAddFinal(resolveBinding, declaration)) {
 					IVariableBinding varbinding= (IVariableBinding)resolveBinding;
 					if (varbinding.isField()) {
 						if (fieldCanBeFinal(fragment, varbinding))
@@ -203,7 +201,7 @@ public class VariableDeclarationFix extends AbstractFix {
 				return false;
 			
 			ArrayList writes= (ArrayList)fWrittenVariables.get(binding);
-			if (!isWrittenInTypeConstructors(binding, writes, declaringClass))
+			if (!isWrittenInTypeConstructors(writes, declaringClass))
 				return false;
 				
 			HashSet writingConstructorBindings= new HashSet();
@@ -279,7 +277,7 @@ public class VariableDeclarationFix extends AbstractFix {
 			}
         }
 
-		private boolean isWrittenInTypeConstructors(IVariableBinding binding, ArrayList writes, ITypeBinding declaringClass) {
+		private boolean isWrittenInTypeConstructors(ArrayList writes, ITypeBinding declaringClass) {
 			
 			for (int i= 0; i < writes.size(); i++) {
 	            SimpleName name= (SimpleName)writes.get(i);
@@ -336,7 +334,7 @@ public class VariableDeclarationFix extends AbstractFix {
 			if (fWrittenVariables.containsKey(binding))
 				return false;
 			
-			ModifierChangeOperation op= createAddFinalOperation(name, fCompilationUnit, node);
+			ModifierChangeOperation op= createAddFinalOperation(name, node);
 			if (op == null)
 				return false;
 			
@@ -360,7 +358,7 @@ public class VariableDeclarationFix extends AbstractFix {
 			
 			if (fAddFinalParameters && fAddFinalLocals) {
 				
-				ModifierChangeOperation op= createAddFinalOperation(name, fCompilationUnit, node);
+				ModifierChangeOperation op= createAddFinalOperation(name, node);
 				if (op == null)
 					return false;
 				
@@ -370,7 +368,7 @@ public class VariableDeclarationFix extends AbstractFix {
 				if (!varBinding.isParameter())
 					return false;
 					
-				ModifierChangeOperation op= createAddFinalOperation(name, fCompilationUnit, node);
+				ModifierChangeOperation op= createAddFinalOperation(name, node);
 				if (op == null)
 					return false;
 				
@@ -380,7 +378,7 @@ public class VariableDeclarationFix extends AbstractFix {
 				if (varBinding.isParameter())
 					return false;
 				
-				ModifierChangeOperation op= createAddFinalOperation(name, fCompilationUnit, node);
+				ModifierChangeOperation op= createAddFinalOperation(name, node);
 				if (op == null)
 					return false;
 				
@@ -391,7 +389,7 @@ public class VariableDeclarationFix extends AbstractFix {
 		}
 	}
 	
-	private static class ModifierChangeOperation extends AbstractFixRewriteOperation {
+	private static class ModifierChangeOperation extends CompilationUnitRewriteOperation {
 		
 		private final ASTNode fDeclaration;
 		private final List fToChange;
@@ -408,11 +406,10 @@ public class VariableDeclarationFix extends AbstractFix {
 		/**
 		 * {@inheritDoc}
 		 */
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			
-			TextEditGroup group= createTextEditGroup(FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description);
-			textEditGroups.add(group);
+			TextEditGroup group= createTextEditGroup(FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description, cuRewrite);
 			
 			if (fDeclaration instanceof VariableDeclarationStatement) {
 				VariableDeclarationFragment[] toChange= (VariableDeclarationFragment[])fToChange.toArray(new VariableDeclarationFragment[fToChange.size()]);
@@ -428,12 +425,12 @@ public class VariableDeclarationFix extends AbstractFix {
 		}
 	}
 	
-	public static IFix createChangeModifierToFinalFix(final CompilationUnit compilationUnit, ASTNode[] selectedNodes) {
+	public static VariableDeclarationFix createChangeModifierToFinalFix(final CompilationUnit compilationUnit, ASTNode[] selectedNodes) {
 		HashMap writtenNames= new HashMap(); 
 		WrittenNamesFinder finder= new WrittenNamesFinder(writtenNames);
 		compilationUnit.accept(finder);
 		List ops= new ArrayList();
-		VariableDeclarationFinder visitor= new VariableDeclarationFinder(true, true, true, compilationUnit, ops, writtenNames);
+		VariableDeclarationFinder visitor= new VariableDeclarationFinder(true, true, true, ops, writtenNames);
 		if (selectedNodes.length == 1) {
 			if (selectedNodes[0] instanceof SimpleName) {
 				selectedNodes[0]= selectedNodes[0].getParent();
@@ -448,7 +445,7 @@ public class VariableDeclarationFix extends AbstractFix {
 		if (ops.size() == 0)
 			return null;
 		
-		IFixRewriteOperation[] result= (IFixRewriteOperation[])ops.toArray(new IFixRewriteOperation[ops.size()]);
+		CompilationUnitRewriteOperation[] result= (CompilationUnitRewriteOperation[])ops.toArray(new CompilationUnitRewriteOperation[ops.size()]);
 		String label;
 		if (result.length == 1) {
 			label= FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description;
@@ -469,21 +466,21 @@ public class VariableDeclarationFix extends AbstractFix {
 		compilationUnit.accept(finder);
 		
 		List operations= new ArrayList();
-		VariableDeclarationFinder visitor= new VariableDeclarationFinder(addFinalFields, addFinalParameters, addFinalLocals, compilationUnit, operations, writtenNames);
+		VariableDeclarationFinder visitor= new VariableDeclarationFinder(addFinalFields, addFinalParameters, addFinalLocals, operations, writtenNames);
 		compilationUnit.accept(visitor);
 		
 		if (operations.isEmpty())
 			return null;
 			
-		return new VariableDeclarationFix(FixMessages.VariableDeclarationFix_add_final_change_name, compilationUnit, (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]));
+		return new VariableDeclarationFix(FixMessages.VariableDeclarationFix_add_final_change_name, compilationUnit, (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
 	}
 	
-	private static ModifierChangeOperation createAddFinalOperation(SimpleName name, CompilationUnit compilationUnit, ASTNode decl) {
+	private static ModifierChangeOperation createAddFinalOperation(SimpleName name, ASTNode decl) {
 		if (decl == null)
 			return null;
 		
 		IBinding binding= name.resolveBinding();
-		if (!canAddFinal(binding, name, decl))
+		if (!canAddFinal(binding, decl))
 			return null;
 		
 		if (decl instanceof SingleVariableDeclaration) {
@@ -505,7 +502,7 @@ public class VariableDeclarationFix extends AbstractFix {
 		return null;
 	}
 
-	private static boolean canAddFinal(IBinding binding, SimpleName name, ASTNode declNode) {
+	private static boolean canAddFinal(IBinding binding, ASTNode declNode) {
 		if (!(binding instanceof IVariableBinding))
 			return false;
 
@@ -532,7 +529,7 @@ public class VariableDeclarationFix extends AbstractFix {
 		return true;
 	}
 
-	protected VariableDeclarationFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations) {
+	protected VariableDeclarationFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewriteOperations) {
 		super(name, compilationUnit, fixRewriteOperations);
 	}
 

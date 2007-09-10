@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.IFix;
+import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.PotentialProgrammingProblemsFix;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -39,7 +39,7 @@ public final class SerialVersionSubProcessor {
 	public static final class SerialVersionProposal extends FixCorrectionProposal {
 		private boolean fIsDefaultProposal;
 
-		public SerialVersionProposal(IFix fix, int relevance, IInvocationContext context, boolean isDefault) {
+		public SerialVersionProposal(IProposableFix fix, int relevance, IInvocationContext context, boolean isDefault) {
 			super(fix, createCleanUp(isDefault), relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD), context);
 			fIsDefaultProposal= isDefault;
 		}
@@ -88,8 +88,8 @@ public final class SerialVersionSubProcessor {
 		Assert.isNotNull(context);
 		Assert.isNotNull(location);
 		Assert.isNotNull(proposals);
-		
-		IFix[] fixes= PotentialProgrammingProblemsFix.createMissingSerialVersionFixes(context.getASTRoot(), location);
+
+		IProposableFix[] fixes= PotentialProgrammingProblemsFix.createMissingSerialVersionFixes(context.getASTRoot(), location);
 		if (fixes != null) {
 			proposals.add(new SerialVersionProposal(fixes[0], 9, context, true));
 			proposals.add(new SerialVersionProposal(fixes[1], 9, context, false));

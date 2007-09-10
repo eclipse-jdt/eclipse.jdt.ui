@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.CodeFormatFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 
 public class CodeFormatCleanUp extends AbstractCleanUp {

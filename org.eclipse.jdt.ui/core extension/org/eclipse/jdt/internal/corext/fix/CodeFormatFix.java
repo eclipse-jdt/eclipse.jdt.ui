@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.fix;
+package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,18 +29,16 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
-import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
-import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.IndentAction;
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
 public class CodeFormatFix implements IFix {
 	
@@ -57,16 +55,8 @@ public class CodeFormatFix implements IFix {
 			TextEdit edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT, content, 0, TextUtilities.getDefaultLineDelimiter(document), fomatterSettings);
 			if (edit == null || !edit.hasChildren())
 				return null;
-			
-			String label= MultiFixMessages.CodeFormatFix_description;
-			TextChange change= new CompilationUnitChange(label, cu);
-			change.setEdit(edit);
-			
-			CategorizedTextEditGroup group= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
-			group.addTextEdit(edit);
-			change.addTextEditGroup(group);
-			
-			return new CodeFormatFix(change, cu);
+
+			return new TextEditFix(edit, cu, MultiFixMessages.CodeFormatFix_description);
 		} else if (removeTrailingWhitespacesAll || removeTrailingWhitespacesIgnorEmpty || correctIndentation) {
 			try {
 				CompilationUnitChange change= new CompilationUnitChange("", cu); //$NON-NLS-1$
@@ -147,7 +137,7 @@ public class CodeFormatFix implements IFix {
 				if (!multiEdit.hasChildren())
 					return null;
 				
-				return new CodeFormatFix(change, cu);
+				return new CodeFormatFix(change);
 			} catch (BadLocationException x) {
 				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "", x)); //$NON-NLS-1$
 			}
@@ -176,40 +166,16 @@ public class CodeFormatFix implements IFix {
 		return position;
 	}
 
-	private final ICompilationUnit fCompilationUnit;
-	private final TextChange fChange;
+	private final CompilationUnitChange fChange;
 	
-	public CodeFormatFix(TextChange change, ICompilationUnit compilationUnit) {
+	public CodeFormatFix(CompilationUnitChange change) {
 		fChange= change;
-		fCompilationUnit= compilationUnit;
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.IFix#createChange()
+
+	/**
+	 * {@inheritDoc}
 	 */
-	public TextChange createChange() throws CoreException {
+	public CompilationUnitChange createChange() throws CoreException {
 		return fChange;
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.IFix#getCompilationUnit()
-	 */
-	public ICompilationUnit getCompilationUnit() {
-		return fCompilationUnit;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.IFix#getDescription()
-	 */
-	public String getDescription() {
-		return MultiFixMessages.CodeFormatFix_description;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.IFix#getStatus()
-	 */
-	public IStatus getStatus() {
-		return StatusInfo.OK_STATUS;
-	}
-	
 }

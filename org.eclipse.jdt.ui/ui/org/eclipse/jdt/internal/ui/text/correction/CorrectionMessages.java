@@ -331,6 +331,8 @@ public final class CorrectionMessages extends NLS {
 	public static String UnresolvedElementsSubProcessor_UnresolvedElementsSubProcessor_changetoattribute_description;
 	public static String UnresolvedElementsSubProcessor_UnresolvedElementsSubProcessor_createattribute_description;
 	public static String MissingAnnotationAttributesProposal_add_missing_attributes_label;
+	public static String FixCorrectionProposal_0;
+	public static String FixCorrectionProposal_1;
 	public static String FixCorrectionProposal_HitCtrlEnter_description;
 	public static String FixCorrectionProposal_hitCtrlEnter_variable_description;
 	public static String CorrectionMarkerResolutionGenerator__multiFixErrorDialog_Titel;
