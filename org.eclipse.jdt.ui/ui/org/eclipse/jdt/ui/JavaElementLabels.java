@@ -1121,7 +1121,8 @@ public class JavaElementLabels {
 				return true;
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e); // problems with class path
+			// problems with class path, ignore (bug 202792)
+			return false;
 		}
 		return false;
 	}
