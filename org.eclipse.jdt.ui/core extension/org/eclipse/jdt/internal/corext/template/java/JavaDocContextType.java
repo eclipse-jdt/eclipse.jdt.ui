@@ -31,7 +31,6 @@ public class JavaDocContextType extends CompilationUnitContextType {
 	 * Creates a java context type.
 	 */
 	public JavaDocContextType() {
-		super(ID);
 		
 		// global
 		addResolver(new GlobalTemplateVariables.Cursor());

@@ -33,7 +33,6 @@ public class SWTContextType extends CompilationUnitContextType {
 	public static final String ID= "swt"; //$NON-NLS-1$
 
 	public SWTContextType() {
-		super(ID);
 	}
 	
 	/* (non-Javadoc)

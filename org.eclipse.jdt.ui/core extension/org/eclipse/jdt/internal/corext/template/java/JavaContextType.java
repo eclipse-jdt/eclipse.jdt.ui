@@ -305,7 +305,6 @@ public class JavaContextType extends CompilationUnitContextType {
 	 * Creates a java context type.
 	 */
 	public JavaContextType() {
-		super(ID);
 		
 		// global
 		addResolver(new GlobalTemplateVariables.Cursor());
