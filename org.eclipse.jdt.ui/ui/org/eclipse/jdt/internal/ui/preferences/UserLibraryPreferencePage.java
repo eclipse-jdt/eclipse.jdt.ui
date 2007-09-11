@@ -682,6 +682,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 					
 					String pathString= archiveElement.getAttribute(TAG_ARCHIVE_PATH);
 					IPath path= version.equals(VERSION1) ? Path.fromOSString(pathString) : Path.fromPortableString(pathString);
+					path= path.makeAbsolute(); // only necessary for manually edited files: bug 202373 
 					CPListElement newArchive= new CPListElement(newLibrary, null, IClasspathEntry.CPE_LIBRARY, path, null);
 					newLibrary.add(newArchive);
 					
