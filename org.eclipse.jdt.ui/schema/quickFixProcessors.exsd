@@ -122,7 +122,7 @@ If no handled marker type are specified, the processor will get problems of type
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  the marker type id of the marker that can be handled by this processor
+                  the marker type id of the marker type that can be handled by this processor. The processor will not handle marker subtypes.
                </documentation>
             </annotation>
          </attribute>
