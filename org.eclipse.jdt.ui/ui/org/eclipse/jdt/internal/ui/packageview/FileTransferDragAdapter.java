@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.dnd.DND;
@@ -58,12 +59,10 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragSourceListener {
 	
 	private ISelectionProvider fProvider;
-	private boolean fWasDataRequested;
 	
 	public FileTransferDragAdapter(ISelectionProvider provider) {
 		fProvider= provider;
 		Assert.isNotNull(fProvider);
-		fWasDataRequested= false;
 	}
 
 	public Transfer getTransfer() {
@@ -72,7 +71,6 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 	
 	public void dragStart(DragSourceEvent event) {
 		event.doit= isDragable(fProvider.getSelection());
-		fWasDataRequested= false;
 	}
 	
 	private boolean isDragable(ISelection s) {
@@ -92,6 +90,8 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 				IPackageFragmentRoot root= (IPackageFragmentRoot)jElement.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 				if (root != null && root.isArchive())
 					return false;
+			} else if (element instanceof IProject) {
+				return false;
 			}
 		}
 		List resources= convertIntoResources(selection);
@@ -106,7 +106,6 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		}
 		
 		event.data= getResourceLocations(elements);
-		fWasDataRequested= true;
 	}
 
 	private static String[] getResourceLocations(List resources) {
@@ -117,18 +116,15 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		if (!event.doit)
 			return;
 		
-		if (!fWasDataRequested)
-			return;
-		
 		if (event.detail == DND.DROP_MOVE) {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=30543
 			// handleDropMove(event);
-		} else if (event.detail == DND.DROP_NONE || event.detail == DND.DROP_TARGET_MOVE) {
-			handleRefresh(event);
+		} else if (event.detail == DND.DROP_TARGET_MOVE) {
+			handleRefresh();
 		}
 	}
 	
-	/* package */ void handleDropMove(DragSourceEvent event) {
+	/* package */ void handleDropMove() {
 		final List elements= getResources();
 		if (elements == null || elements.size() == 0)
 			return;
@@ -162,7 +158,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		runOperation(op, true, false);
 	}
 	
-	private  void handleRefresh(DragSourceEvent event) {
+	private void handleRefresh() {
 		final Set roots= collectRoots(getResources());
 		
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
