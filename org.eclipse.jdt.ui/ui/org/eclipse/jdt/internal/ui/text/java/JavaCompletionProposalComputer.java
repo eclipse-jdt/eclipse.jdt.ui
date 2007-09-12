@@ -109,9 +109,10 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		return context.getInvocationOffset();
 	}
 
-	private List addContextInformations(JavaContentAssistInvocationContext context, int offset, IProgressMonitor monitor) {
-		List proposals= internalComputeCompletionProposals(offset, context, monitor);
+	private List addContextInformations(JavaContentAssistInvocationContext context, int offset) {
+		List proposals= internalComputeCompletionProposals(offset, context);
 		List result= new ArrayList(proposals.size());
+		List anonymousResult= new ArrayList(proposals.size());
 
 		for (Iterator it= proposals.iterator(); it.hasNext();) {
 			ICompletionProposal proposal= (ICompletionProposal) it.next();
@@ -119,10 +120,17 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 			if (contextInformation != null) {
 				ContextInformationWrapper wrapper= new ContextInformationWrapper(contextInformation);
 				wrapper.setContextInformationPosition(offset);
-				result.add(wrapper);
+				if (proposal instanceof AnonymousTypeCompletionProposal)
+					anonymousResult.add(wrapper);
+				else
+					result.add(wrapper);
 			}
 		}
+		
+		if (result.size() == 0)
+			return anonymousResult;
 		return result;
+		
 	}
 
 	/*
@@ -133,7 +141,7 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
 			
 			int contextInformationPosition= guessContextInformationPosition(javaContext);
-			List result= addContextInformations(javaContext, contextInformationPosition, monitor);
+			List result= addContextInformations(javaContext, contextInformationPosition);
 			return result;
 		}
 		return Collections.EMPTY_LIST;
@@ -145,12 +153,12 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (context instanceof JavaContentAssistInvocationContext) {
 			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
-			return internalComputeCompletionProposals(context.getInvocationOffset(), javaContext, monitor);
+			return internalComputeCompletionProposals(context.getInvocationOffset(), javaContext);
 		}
 		return Collections.EMPTY_LIST;
 	}
 
-	private List internalComputeCompletionProposals(int offset, JavaContentAssistInvocationContext context, IProgressMonitor monitor) {
+	private List internalComputeCompletionProposals(int offset, JavaContentAssistInvocationContext context) {
 		ICompilationUnit unit= context.getCompilationUnit();
 		if (unit == null)
 			return Collections.EMPTY_LIST;
@@ -222,6 +230,9 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 
 	/**
 	 * Creates the collector used to get proposals from core.
+	 * 
+	 * @param context the context
+	 * @return the collector 
 	 */
 	protected CompletionProposalCollector createCollector(JavaContentAssistInvocationContext context) {
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES))

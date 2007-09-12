@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,9 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
+import org.eclipse.jface.text.contentassist.IContextInformation;
 
+import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
@@ -66,10 +68,15 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.OverrideMethodDialog;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal implements ICompletionProposalExtension4 {
 
+public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal implements ICompletionProposalExtension4 {
+	
 	private String fDeclarationSignature;
 	private IType fSuperType;
+
+	private boolean fIsContextInformationComputed;
+	private int fContextInformationPosition;
+
 
 	public AnonymousTypeCompletionProposal(IJavaProject jproject, ICompilationUnit cu, int start, int length, String constructorCompletion, String displayName, String declarationSignature, int relevance) {
 		super(constructorCompletion, cu, start, length, null, displayName, relevance);
@@ -287,4 +294,66 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		}
 		return true;
 	}
+	
+	/*
+	 * @see ICompletionProposalExtension#getContextInformationPosition()
+	 * @since 3.4
+	 */
+	public int getContextInformationPosition() {
+		if (!fIsContextInformationComputed)
+			setContextInformation(computeContextInformation());
+		return fContextInformationPosition;
+	}
+	
+
+	/*
+	 * @see ICompletionProposal#getContextInformation()
+	 * @since 3.4
+	 */
+	public final IContextInformation getContextInformation() {
+		if (!fIsContextInformationComputed)
+			setContextInformation(computeContextInformation());
+		return super.getContextInformation();
+	}
+
+	protected IContextInformation computeContextInformation() {
+		try {
+			ProposalInfo proposalInfo= getProposalInfo();
+			fContextInformationPosition= getReplacementOffset() - 1;
+			if (!(proposalInfo instanceof MemberProposalInfo))
+				return null;
+			
+			CompletionProposal proposal= ((MemberProposalInfo)proposalInfo).fProposal;
+			// no context information for METHOD_NAME_REF proposals (e.g. for static imports)
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=94654
+			if (hasParameters() && (getReplacementString().endsWith(")") || getReplacementString().length() == 0)) { //$NON-NLS-1$
+				ProposalContextInformation contextInformation= new ProposalContextInformation(proposal);
+				fContextInformationPosition= getReplacementOffset() + getCursorPosition();
+				if (fContextInformationPosition != 0 && proposal.getCompletion().length == 0)
+					contextInformation.setContextInformationPosition(fContextInformationPosition);
+				return contextInformation;
+			}
+			return null;
+		} finally {
+			fIsContextInformationComputed= true;
+		}
+	}
+
+	/**
+	 * Returns <code>true</code> if the method being inserted has at least one parameter. Note
+	 * that this does not say anything about whether the argument list should be inserted.
+	 * 
+	 * @return <code>true</code> if the method has any parameters, <code>false</code> if it has no parameters
+	 * @since 3.4
+	 */
+	private boolean hasParameters() {
+		ProposalInfo proposalInfo= getProposalInfo();
+		if (!(proposalInfo instanceof MemberProposalInfo))
+			return false;
+		
+		CompletionProposal proposal= ((MemberProposalInfo)proposalInfo).fProposal;
+		return Signature.getParameterCount(proposal.getSignature()) > 0;
+	}
+
+
 }
