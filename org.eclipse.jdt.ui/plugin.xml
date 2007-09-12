@@ -3088,6 +3088,7 @@
          point="org.eclipse.ui.workingSets">
       <workingSet
             name="%JavaWorkingSetPage.name"
+            description="%JavaWorkingSetPage.description"
             pageClass="org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetPage"
             updaterClass="org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater"
             elementAdapterClass="org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetElementAdapter"
@@ -3101,6 +3102,7 @@
    <extension point="org.eclipse.ui.workingSets">
       <workingSet
             name="%OthersWorkingSetWizardPage.name"
+            description="%OthersWorkingSetWizardPage.description"
             icon="$nl$/icons/full/obj16/jworkingSet_obj.gif"
             updaterClass="org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater"
             id="org.eclipse.jdt.internal.ui.OthersWorkingSet">
