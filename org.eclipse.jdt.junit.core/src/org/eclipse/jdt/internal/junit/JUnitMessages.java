@@ -87,6 +87,8 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitContainerWizardPage_option_junit4;
 
+	public static String JUnitClasspathFixProcessor_progress_desc;
+
 	public static String JUnitContainerWizardPage_resolved_label;
 
 	public static String JUnitContainerWizardPage_warning_java5_required;

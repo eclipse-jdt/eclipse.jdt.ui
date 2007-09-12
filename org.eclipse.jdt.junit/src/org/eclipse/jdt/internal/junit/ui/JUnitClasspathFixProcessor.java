@@ -56,7 +56,7 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 			if (monitor == null) {
 				monitor= new NullProgressMonitor();
 			}
-			monitor.beginTask("Adding JUnit library", 1);
+			monitor.beginTask(JUnitMessages.JUnitClasspathFixProcessor_progress_desc, 1);
 			try {
 				IClasspathEntry entry= null;
 				if (fIsJunit4) {

@@ -19,6 +19,8 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
@@ -26,8 +28,11 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
+
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -43,10 +48,14 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.ui.CodeStyleConfiguration;
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
+import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
+
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
 
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
@@ -76,8 +85,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 	 * @see org.eclipse.jdt.ui.text.java.IQuickFixProcessor#hasCorrections(org.eclipse.jdt.core.ICompilationUnit, int)
 	 */
 	public boolean hasCorrections(ICompilationUnit unit, int problemId) {
-		return problemId == IProblem.UndefinedType || problemId ==  IProblem.ImportNotFound
-		|| problemId ==  IProblem.UndefinedMethod;
+		return problemId == IProblem.UndefinedType || problemId ==  IProblem.UndefinedMethod;
 	}
 	
 	/* (non-Javadoc)
@@ -88,7 +96,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation problem= locations[i];
 			int id= problem.getProblemId();
-			if (IProblem.UndefinedType == id || IProblem.ImportNotFound == id) {
+			if (IProblem.UndefinedType == id) {
 				res= getAddJUnitToBuildPathProposals(context, problem, res);
 			} else if (id == IProblem.UndefinedMethod) {
 				res= getAddAssertImportProposals(context, problem, res);
@@ -118,41 +126,40 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 	private ArrayList getAddJUnitToBuildPathProposals(IInvocationContext context, IProblemLocation location, ArrayList proposals) {
 		try {
 			ICompilationUnit unit= context.getCompilationUnit();
-			int res= 0;
 			String s= unit.getBuffer().getText(location.getOffset(), location.getLength());
-			if (s.equals("org.junit")) { //$NON-NLS-1$
-				res= JUNIT4;
-			} else if (s.equals("TestCase") || s.equals("TestSuite") || s.equals("junit")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				res= JUNIT3;
-			} else if (s.equals("Test")) { //$NON-NLS-1$
+			if (s.equals("TestCase") || s.equals("TestSuite") || s.equals("RunWith") || s.equals("Test")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				ASTNode node= location.getCoveredNode(context.getASTRoot());
 				if (node != null && node.getLocationInParent() == MarkerAnnotation.TYPE_NAME_PROPERTY) {
-					res= JUNIT4;
-				} else {
-					res= JUNIT3 | JUNIT4;
+					s= "org.junit.Test"; //$NON-NLS-1$
 				}
-			} else if (s.equals("RunWith")) { //$NON-NLS-1$
-				res= JUNIT4;
-			}
-			if (res != 0) {
-				IJavaProject javaProject= unit.getJavaProject();
-				if (JUnitStubUtility.is50OrHigher(javaProject) && ((res & JUNIT4) != 0)) {
-					if (proposals == null) {
+				ClasspathFixProposal[] fixProposals= ClasspathFixProcessor.getContributedFixImportProposals(unit.getJavaProject(), s, null);
+				for (int i= 0; i < fixProposals.length; i++) {
+					if (proposals == null)
 						proposals= new ArrayList();
-					}
-					proposals.add(new JUnitAddLibraryProposal(true, context, 10));
-				}
-				if ((res & JUNIT3) != 0) {
-					if (proposals == null) {
-						proposals= new ArrayList();
-					}
-					proposals.add(new JUnitAddLibraryProposal(false, context, 8));
+					proposals.add(new JUnitClasspathFixCorrectionProposal(fixProposals[i], getImportRewrite(context.getASTRoot(), s)));
 				}
 			}
 		} catch (JavaModelException e) {
 		    JUnitPlugin.log(e.getStatus());
 		}
 		return proposals;
+	}
+
+	private ImportRewrite getImportRewrite(CompilationUnit astRoot, String name) {
+		String typeToImport= null;
+		if (name.equals("TestCase") || name.equals("TestSuite")) { //$NON-NLS-1$ //$NON-NLS-2$
+			typeToImport= "junit.framework." + name; //$NON-NLS-1$
+		} else if (name.equals("org.junit.Test")) { //$NON-NLS-1$
+			typeToImport= "org.junit.Test"; //$NON-NLS-1$
+		} else if (name.equals("RunWith")) { //$NON-NLS-1$
+			typeToImport= "org.junit.runner.RunWith"; //$NON-NLS-1$
+		}
+		if (typeToImport != null) {
+			ImportRewrite importRewrite= CodeStyleConfiguration.createImportRewrite(astRoot, true);
+			importRewrite.addImport(typeToImport);
+			return importRewrite;
+		}		
+		return null;
 	}
 
 	private boolean isInsideJUnit4Test(IInvocationContext context) {
@@ -176,6 +183,37 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 			}
 		}
 		return false;
+	}
+	
+	private static class JUnitClasspathFixCorrectionProposal extends ChangeCorrectionProposal {
+
+		private final ClasspathFixProposal fClasspathFixProposal;
+		private final ImportRewrite fImportRewrite;
+
+		public JUnitClasspathFixCorrectionProposal(ClasspathFixProposal cpfix, ImportRewrite rewrite) {
+			super(cpfix.getDisplayString(), null, cpfix.getRelevance(), cpfix.getImage());
+			fClasspathFixProposal= cpfix;
+			fImportRewrite= rewrite;
+		}
+		
+		protected Change createChange() throws CoreException {
+			Change change= fClasspathFixProposal.createChange(null);
+			if (fImportRewrite != null) {
+				TextFileChange cuChange= new TextFileChange("Add import", (IFile) fImportRewrite.getCompilationUnit().getResource()); //$NON-NLS-1$
+				cuChange.setEdit(fImportRewrite.rewriteImports(null));
+				
+				CompositeChange composite= new CompositeChange(getDisplayString());
+				composite.add(change);
+				composite.add(cuChange);
+				return composite;
+			}
+			return change;
+			
+		}
+		
+		public String getAdditionalProposalInfo() {
+			return fClasspathFixProposal.getAdditionalProposalInfo();
+		}
 	}
 	
 	private static class AddAssertProposal implements IJavaCompletionProposal {
