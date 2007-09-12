@@ -66,7 +66,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
  * fix a problem. A fix correction proposal may have an {@link ICleanUp}
  * attached which can be executed instead of the provided IFix.
  */
-public class FixCorrectionProposal extends LinkedCorrectionProposal implements ICompletionProposalExtension2, IStatusLineProposal {
+public class FixCorrectionProposal extends CUCorrectionProposal implements ICompletionProposalExtension2, IStatusLineProposal {
 
 	private final IProposableFix fFix;
 	private final ICleanUp fCleanUp;
