@@ -135,7 +135,7 @@ public class SuppressWarningsSubProcessor {
 		private final ChildListPropertyDescriptor fProperty;
 
 		public SuppressWarningsProposal(String warningToken, String label, ICompilationUnit cu, ASTNode node, ChildListPropertyDescriptor property, int relevance) {
-			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ANNOTATION));
+			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG));
 			fWarningToken= warningToken;
 			fNode= node;
 			fProperty= property;

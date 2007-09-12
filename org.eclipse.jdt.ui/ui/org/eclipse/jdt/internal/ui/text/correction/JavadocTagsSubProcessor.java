@@ -36,6 +36,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -357,10 +358,13 @@ public class JavadocTagsSubProcessor {
 	 	proposals.add(addAllMissing);
 	}
 	
-	public static void getUnusedAndUndocumentedParameterProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void getUnusedAndUndocumentedParameterOrExceptionProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		
-		if (!JavaCore.ENABLED.equals(cu.getJavaProject().getOption(JavaCore.COMPILER_PB_UNUSED_PARAMETER_INCLUDE_DOC_COMMENT_REFERENCE, true))) {
+		boolean isUnusedParam= problem.getProblemId() == IProblem.ArgumentIsNeverUsed;
+		String key= isUnusedParam ? JavaCore.COMPILER_PB_UNUSED_PARAMETER_INCLUDE_DOC_COMMENT_REFERENCE : JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION_INCLUDE_DOC_COMMENT_REFERENCE;
+		
+		if (!JavaCore.ENABLED.equals(cu.getJavaProject().getOption(key, true))) {
 			return;
 		}
 		
@@ -379,16 +383,26 @@ public class JavadocTagsSubProcessor {
 			String declaringTypeName= methodDecl.resolveBinding().getDeclaringClass().getName();
 			String string= CodeGeneration.getMethodComment(cu, declaringTypeName, methodDecl, null, String.valueOf('\n'));
 			if (string != null) {
-				String label= CorrectionMessages.JavadocTagsSubProcessor_document_parameter_description;
+				String label;
+				if (isUnusedParam) {
+					label= CorrectionMessages.JavadocTagsSubProcessor_document_parameter_description;
+				} else {
+					label= CorrectionMessages.JavadocTagsSubProcessor_document_exception_description;
+				}
 				proposals.add(new AddJavadocCommentProposal(label, cu, 1, methodDecl.getStartPosition(), string));
 			}
 		} else {
-			String label= CorrectionMessages.JavadocTagsSubProcessor_document_parameter_description;
+			String label;
+			if (isUnusedParam) {
+				label= CorrectionMessages.JavadocTagsSubProcessor_document_parameter_description;
+			} else {
+				label= CorrectionMessages.JavadocTagsSubProcessor_document_exception_description;
+			}
 		 	ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), methodDecl, node, 1); 
 		 	proposals.add(proposal);
 		}
 	}
-
+	
 	public static void getMissingJavadocCommentProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ASTNode node= problem.getCoveringNode(context.getASTRoot());
 		if (node == null) {

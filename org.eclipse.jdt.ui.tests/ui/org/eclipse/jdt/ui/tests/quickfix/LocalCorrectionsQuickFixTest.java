@@ -4078,12 +4078,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
+		String[] expected= new String[2];
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.io.IOException;\n");
@@ -4094,7 +4093,25 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		expected[0]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("public class E {\n");
+		buf.append("    /**\n");
+		buf.append("     * @param b\n");
+		buf.append("     * @throws IOException\n");
+		buf.append("     */\n");
+		buf.append("    public void foo(String b) throws IOException {\n");
+		buf.append("        if  (b != null) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
 	}
 	
 	public void testUnnecessaryThrownException2() throws Exception {
@@ -4108,6 +4125,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("import java.io.IOException;\n");
 		buf.append("import java.text.ParseException;\n");
 		buf.append("public class E {\n");
+		buf.append("    /**\n");
+		buf.append("     * @throws IOException\n");
+		buf.append("     */\n");
 		buf.append("    public E(int i) throws IOException, ParseException {\n");
 		buf.append("        if  (i == 0) {\n");
 		buf.append("            throw new IOException();\n");	
@@ -4118,24 +4138,45 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
+		String[] expected= new String[2];
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.io.IOException;\n");
 		buf.append("import java.text.ParseException;\n");
 		buf.append("public class E {\n");
+		buf.append("    /**\n");
+		buf.append("     * @throws IOException\n");
+		buf.append("     */\n");
 		buf.append("    public E(int i) throws IOException {\n");
 		buf.append("        if  (i == 0) {\n");
 		buf.append("            throw new IOException();\n");	
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		expected[0]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.text.ParseException;\n");
+		buf.append("public class E {\n");
+		buf.append("    /**\n");
+		buf.append("     * @throws IOException\n");
+		buf.append("     * @throws ParseException \n");
+		buf.append("     */\n");
+		buf.append("    public E(int i) throws IOException, ParseException {\n");
+		buf.append("        if  (i == 0) {\n");
+		buf.append("            throw new IOException();\n");	
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
 	}
 	
 	public void testUnnecessaryThrownException3() throws Exception {

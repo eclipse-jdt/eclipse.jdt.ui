@@ -491,7 +491,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 		
 		if (problemId == IProblem.ArgumentIsNeverUsed) {
-			JavadocTagsSubProcessor.getUnusedAndUndocumentedParameterProposals(context, problem, proposals);
+			JavadocTagsSubProcessor.getUnusedAndUndocumentedParameterOrExceptionProposals(context, problem, proposals);
 		}
 	}
 
@@ -557,7 +557,7 @@ public class LocalCorrectionsSubProcessor {
 
 	}
 
-	public static void addUnnecessaryThrownExceptionProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+	public static void addUnnecessaryThrownExceptionProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		if (selectedNode == null || !(selectedNode.getParent() instanceof MethodDeclaration)) {
 			return;
@@ -579,6 +579,8 @@ public class LocalCorrectionsSubProcessor {
 
 			proposals.add(new ChangeMethodSignatureProposal(label, cu, selectedNode, binding, null, desc, 5, image));
 		}
+		
+		JavadocTagsSubProcessor.getUnusedAndUndocumentedParameterOrExceptionProposals(context, problem, proposals);
 	}
 
 	public static void addUnqualifiedFieldAccessProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
