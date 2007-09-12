@@ -112,7 +112,6 @@ import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
@@ -804,10 +803,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			fireLabelProviderChanged(new LabelProviderChangedEvent(this));
 		}
 
-		private boolean isInnerType(TypeNameMatch match) {
-			return match.getTypeQualifiedName().indexOf('.') != -1;
-		}
-
 		/*
 		 * (non-Javadoc)
 		 * 
@@ -817,12 +812,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			if (!(element instanceof TypeNameMatch)) {
 				return super.getImage(element);
 			}
-
-			TypeNameMatch type= (TypeNameMatch) element;
-
-			ImageDescriptor iD= JavaElementImageProvider.getTypeImageDescriptor(isInnerType(type), false, type.getModifiers(), false);
-			
-			return JavaPlugin.getImageDescriptorRegistry().get(iD);
+			return TypeNameMatchLabelProvider.getImage((TypeNameMatch) element, TypeNameMatchLabelProvider.SHOW_TYPE_ONLY);
 		}
 
 		/*
@@ -881,8 +871,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	 */
 	private static class TypeItemDetailsLabelProvider extends LabelProvider {
 
-		private final TypeNameMatchLabelProvider fLabelProvider= new TypeNameMatchLabelProvider(TypeNameMatchLabelProvider.SHOW_TYPE_CONTAINER_ONLY + TypeNameMatchLabelProvider.SHOW_ROOT_POSTFIX);
-
 		private final TypeInfoUtil fTypeInfoUtil;
 
 		public TypeItemDetailsLabelProvider(TypeInfoUtil typeInfoUtil) {
@@ -896,7 +884,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		 */
 		public Image getImage(Object element) {
 			if (element instanceof TypeNameMatch) {
-				return fLabelProvider.getImage((element));
+				return TypeNameMatchLabelProvider.getImage((TypeNameMatch) element, TypeNameMatchLabelProvider.SHOW_TYPE_CONTAINER_ONLY);
 			}
 
 			return super.getImage(element);
@@ -1069,10 +1057,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			return result.toString();
 		}
 
-		private boolean isInnerType(TypeNameMatch match) {
-			return match.getTypeQualifiedName().indexOf('.') != -1;
-		}
-
 		public ImageDescriptor getImageDescriptor(Object element) {
 			TypeNameMatch type= (TypeNameMatch) element;
 			if (fProviderExtension != null) {
@@ -1081,7 +1065,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 				if (descriptor != null)
 					return descriptor;
 			}
-			return JavaElementImageProvider.getTypeImageDescriptor(isInnerType(type), false, type.getModifiers(), false);
+			return TypeNameMatchLabelProvider.getImageDescriptor(type, TypeNameMatchLabelProvider.SHOW_TYPE_ONLY); 
 		}
 
 		private String getTypeContainerName(TypeNameMatch info) {

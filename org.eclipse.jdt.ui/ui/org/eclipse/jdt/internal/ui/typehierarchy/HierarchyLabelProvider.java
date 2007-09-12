@@ -166,6 +166,9 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		if (Flags.isStatic(flags)) {
 			adornmentFlags |= JavaElementImageDescriptor.STATIC;
 		}
+		if (Flags.isDeprecated(flags)) {
+			adornmentFlags |= JavaElementImageDescriptor.DEPRECATED;
+		}
 		
 		return new JavaElementImageDescriptor(desc, adornmentFlags, JavaElementImageProvider.BIG_SIZE);
 	}
