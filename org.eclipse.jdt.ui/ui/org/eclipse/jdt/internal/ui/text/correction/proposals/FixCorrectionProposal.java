@@ -13,20 +13,26 @@ package org.eclipse.jdt.internal.ui.text.correction.proposals;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
+
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -38,10 +44,12 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.ILinkedFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
+import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring.MultiFixTarget;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -162,7 +170,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 
 			int stopSeverity= RefactoringCore.getConditionCheckingFailedSeverity();
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
-			ProgressMonitorDialog context= new ProgressMonitorDialog(shell);
+			IRunnableContext context= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 			RefactoringExecutionHelper executer= new RefactoringExecutionHelper(refactoring, stopSeverity, RefactoringSaveHelper.SAVE_NOTHING, shell, context);
 			try {
 				executer.perform(true, true);
@@ -173,6 +181,49 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 			return;
 		}
 		apply(viewer.getDocument());
+	}
+
+	public void resolve(MultiFixTarget[] targets, final IProgressMonitor monitor) throws CoreException {
+		if (targets.length == 0)
+			return;
+
+		if (fCleanUp == null)
+			return;
+
+		String changeName;
+		String[] descriptions= fCleanUp.getDescriptions();
+		if (descriptions.length == 1) {
+			changeName= descriptions[0];
+		} else {
+			changeName= CorrectionMessages.FixCorrectionProposal_MultiFixChange_label;
+		}
+		
+		final CleanUpRefactoring refactoring= new CleanUpRefactoring(changeName);
+		for (int i= 0; i < targets.length; i++) {
+			refactoring.addCleanUpTarget(targets[i]);
+		}
+
+		refactoring.addCleanUp(fCleanUp);
+
+		IRunnableContext context= new IRunnableContext() {
+			public void run(boolean fork, boolean cancelable, IRunnableWithProgress runnable) throws InvocationTargetException, InterruptedException {
+				runnable.run(monitor == null ? new NullProgressMonitor() : monitor);
+			}
+		};
+
+		Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.INFO, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES, shell, context);
+		try {
+			helper.perform(true, true);
+		} catch (InterruptedException e) {
+		} catch (InvocationTargetException e) {
+			Throwable cause= e.getCause();
+			if (cause instanceof CoreException) {
+				throw (CoreException)cause;
+			} else {
+				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, cause.getLocalizedMessage(), cause));
+			}
+		}
 	}
 
 	public void selected(ITextViewer viewer, boolean smartToggle) {

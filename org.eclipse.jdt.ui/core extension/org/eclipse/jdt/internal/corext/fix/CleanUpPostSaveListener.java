@@ -77,6 +77,7 @@ import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
+import org.eclipse.jdt.internal.ui.fix.ICleanUp.CleanUpContext;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
 
@@ -241,7 +242,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     				}
     				
     				List undoneCleanUps= new ArrayList();
-    				CleanUpChange change= CleanUpRefactoring.calculateChange(ast, unit, cleanUps, undoneCleanUps);
+    				CleanUpChange change= CleanUpRefactoring.calculateChange(new CleanUpContext(unit, ast), cleanUps, undoneCleanUps);
     				
     				RefactoringStatus postCondition= new RefactoringStatus();
     				for (int i= 0; i < cleanUps.length; i++) {

@@ -57,7 +57,6 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -253,14 +252,14 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		public CleanUpConfigurationPage(CleanUpRefactoring refactoring) {
 			super(MultiFixMessages.CleanUpRefactoringWizard_CleanUpConfigurationPage_title);
 			fCleanUpRefactoring= refactoring;
-			ICompilationUnit[] cus= fCleanUpRefactoring.getCompilationUnits();
+			int cleanUpTargetsSize= fCleanUpRefactoring.getCleanUpTargetsSize();
 			IJavaProject[] projects= fCleanUpRefactoring.getProjects();
-			if (cus.length == 1) {
+			if (cleanUpTargetsSize == 1) {
 				setMessage(MultiFixMessages.CleanUpRefactoringWizard_CleaningUp11_Title);
 			} else if (projects.length == 1) {
-				setMessage(Messages.format(MultiFixMessages.CleanUpRefactoringWizard_CleaningUpN1_Title, new Integer(cus.length)));
+				setMessage(Messages.format(MultiFixMessages.CleanUpRefactoringWizard_CleaningUpN1_Title, new Integer(cleanUpTargetsSize)));
 			} else {
-				setMessage(Messages.format(MultiFixMessages.CleanUpRefactoringWizard_CleaningUpNN_Title, new Object[] {new Integer(cus.length), new Integer(projects.length)}));
+				setMessage(Messages.format(MultiFixMessages.CleanUpRefactoringWizard_CleaningUpNN_Title, new Object[] {new Integer(cleanUpTargetsSize), new Integer(projects.length)}));
 			}
         }
 

@@ -246,7 +246,7 @@ public final class RefactoringExecutionStarter {
 			}
 			
 			IRunnableContext context;
-			if (refactoring.getCompilationUnits().length > 1) {
+			if (refactoring.getCleanUpTargetsSize() > 1) {
 				context= new ProgressMonitorDialog(shell);
 			} else {
 				context= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
@@ -466,7 +466,7 @@ public final class RefactoringExecutionStarter {
 		// Not for instantiation
 	}
 	
-	public static void startIntroduceParameterObject(ICompilationUnit unit, int offset, int length, Shell shell) throws CoreException {
+	public static void startIntroduceParameterObject(ICompilationUnit unit, int offset, Shell shell) throws CoreException {
 		IJavaElement javaElement= unit.getElementAt(offset);
 		if (javaElement instanceof IMethod) {
 			IMethod method= (IMethod) javaElement;

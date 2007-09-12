@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,23 +17,16 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.graphics.Image;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
@@ -49,31 +42,17 @@ import org.eclipse.ui.texteditor.MarkerUtilities;
 
 import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
-import org.eclipse.ltk.core.refactoring.TextChange;
-
 import org.eclipse.jdt.core.CorrectionEngine;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.corext.fix.IFix;
-import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.MultiStateCompilationUnitChange;
+import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring.MultiFixTarget;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -82,7 +61,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.IMultiFix;
-import org.eclipse.jdt.internal.ui.fix.IMultiFix.MultiFixContext;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
@@ -155,170 +133,67 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 				run(markers[0]);
 				return;
 			}
-			IProgressMonitor pm= monitor;
-			if (pm == null)
-				pm= new NullProgressMonitor();
+			
+			if (!(fProposal instanceof FixCorrectionProposal))
+				return;
+			
+			if (monitor == null)
+				monitor= new NullProgressMonitor();
 			
 			try {
-				if (fProposal instanceof FixCorrectionProposal) {
-					ICleanUp cleanUp= ((FixCorrectionProposal)fProposal).getCleanUp();
-					if (cleanUp != null) {
-						Hashtable/*<ICompilationUnit, List<IProblemLocation>*/ problemLocations= new Hashtable();
-						for (int i= 0; i < markers.length; i++) {
-							IMarker marker= markers[i];
-							ICompilationUnit cu= getCompilationUnit(marker);
-							
-							if (cu != null) {
-								try {
-									IEditorInput input= EditorUtility.getEditorInput(cu);
-									IProblemLocation location= findProblemLocation(input, marker);
-									if (location != null) {
-										if (!problemLocations.containsKey(cu.getPrimary())) {
-											problemLocations.put(cu.getPrimary(), new ArrayList());
-										}
-										List l= (List)problemLocations.get(cu.getPrimary());
-										l.add(location);
-									}
-								} catch (JavaModelException e) {
-									JavaPlugin.log(e);
-								}
-							}
-						}
-						if (problemLocations.size() > 0) {
-									
-							Set cus= problemLocations.keySet();
-							Hashtable projects= new Hashtable();
-							for (Iterator iter= cus.iterator(); iter.hasNext();) {
-								ICompilationUnit cu= (ICompilationUnit)iter.next();
-								IJavaProject project= cu.getJavaProject();
-								if (!projects.containsKey(project)) {
-									projects.put(project, new ArrayList());
-								}
-								((List)projects.get(project)).add(cu);
-							}
-							
-							pm.beginTask("", problemLocations.size() * 2 + 2 + projects.keySet().size()); //$NON-NLS-1$
-							
-							String name= ""; //$NON-NLS-1$
-							String[] descriptions= cleanUp.getDescriptions();
-							if (descriptions != null && descriptions.length == 1) {
-								name= descriptions[0];
-							}
-							CompositeChange allChanges= new CompositeChange(name);
-							
-							for (Iterator projectIter= projects.keySet().iterator(); projectIter.hasNext();) {
-								IJavaProject project= (IJavaProject)projectIter.next();
-								List compilationUnitsList= (List)projects.get(project);
-								ICompilationUnit[] compilationUnits= (ICompilationUnit[])compilationUnitsList.toArray(new ICompilationUnit[compilationUnitsList.size()]);
-								
-								try {
-									cleanUpProject(project, compilationUnits, cleanUp, problemLocations, allChanges, pm);
-								} catch (CoreException e) {
-									JavaPlugin.log(e);
-								} finally {
-									pm.worked(1);
-								}
-							}
-
-							if (pm.isCanceled())
-								return;
-							
-							allChanges.initializeValidationData(new SubProgressMonitor(pm, 1));
-							
-							if (!validChanges(allChanges))
-								return;
-							
-							PerformChangeOperation op= new PerformChangeOperation(allChanges);
-							op.setUndoManager(RefactoringCore.getUndoManager(), allChanges.getName());
-							try {
-								op.run(new SubProgressMonitor(pm, 1));
-							} catch (CoreException e1) {
-								JavaPlugin.log(e1);
-							} finally {
-								pm.worked(1);
-							}
-							IEditorPart part= EditorUtility.isOpenInEditor(fCompilationUnit);
-							if (part instanceof ITextEditor) {
-								((ITextEditor) part).selectAndReveal(fOffset, fLength);
-								part.setFocus();
-							}
-						}
-					}
+				MultiFixTarget[] problems= getCleanUpTargets(markers);
+			
+				((FixCorrectionProposal)fProposal).resolve(problems, monitor);
+				
+				IEditorPart part= EditorUtility.isOpenInEditor(fCompilationUnit);
+				if (part instanceof ITextEditor) {
+					((ITextEditor) part).selectAndReveal(fOffset, fLength);
+					part.setFocus();
 				} 
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
 			} finally {
-				pm.done();
+				monitor.done();
 			}
 		}
 
-		private boolean validChanges(CompositeChange change) {
-			RefactoringStatus result= new RefactoringStatus();
-			List files= new ArrayList();
-			try {
-				findFilesToBeModified(change, files);
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-				return false;
-			}
-			result.merge(Checks.validateModifiesFiles((IFile[])files.toArray(new IFile[files.size()]), JavaPlugin.getActiveWorkbenchShell().getShell()));
-			if (result.hasFatalError()) {
-				RefactoringStatusEntry[] entries= result.getEntries();
-				IStatus status;
-				if (entries.length > 1) {
-					status= new MultiStatus(JavaUI.ID_PLUGIN, 0, result.getMessageMatchingSeverity(RefactoringStatus.ERROR), null);
-					for (int i= 0; i < entries.length; i++) {
-						((MultiStatus)status).add(new Status(entries[i].getSeverity(), JavaUI.ID_PLUGIN, 0, entries[i].getMessage(), null));
+		private MultiFixTarget[] getCleanUpTargets(IMarker[] markers) {
+			Hashtable/*<ICompilationUnit, List<IProblemLocation>*/ problemLocations= new Hashtable();
+			for (int i= 0; i < markers.length; i++) {
+				IMarker marker= markers[i];
+				ICompilationUnit cu= getCompilationUnit(marker);
+				
+				if (cu != null) {
+					try {
+						IEditorInput input= EditorUtility.getEditorInput(cu);
+						IProblemLocation location= findProblemLocation(input, marker);
+						if (location != null) {
+							List l= (List)problemLocations.get(cu.getPrimary());
+							if (l == null) {
+								l= new ArrayList();
+								problemLocations.put(cu.getPrimary(), l);
+							}
+							l.add(location);
+						}
+					} catch (JavaModelException e) {
+						JavaPlugin.log(e);
 					}
-				} else {
-					RefactoringStatusEntry entry= entries[0];
-					status= new Status(entry.getSeverity(), JavaUI.ID_PLUGIN, 0, entry.getMessage(), null);
 				}
-				ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell().getShell(), CorrectionMessages.CorrectionMarkerResolutionGenerator__multiFixErrorDialog_Titel, CorrectionMessages.CorrectionMarkerResolutionGenerator_multiFixErrorDialog_description, status);
-				return false;
 			}
-			return true;
+			
+			MultiFixTarget[] result= new MultiFixTarget[problemLocations.size()];
+			int i= 0;
+			for (Iterator iterator= problemLocations.entrySet().iterator(); iterator.hasNext();) {
+				Map.Entry entry= (Map.Entry) iterator.next();
+				ICompilationUnit cu= (ICompilationUnit) entry.getKey();
+				List locations= (List) entry.getValue();
+				result[i]= new MultiFixTarget(cu, (IProblemLocation[]) locations.toArray(new IProblemLocation[locations.size()]));
+				i++;
+			}
+			
+			return result;
 		}
 		
-		private void findFilesToBeModified(CompositeChange change, List result) throws JavaModelException {
-			Change[] children= change.getChildren();
-			for (int i=0;i < children.length;i++) {
-				Change child= children[i];
-				if (child instanceof CompositeChange) {
-					findFilesToBeModified((CompositeChange)child, result);
-				} else if (child instanceof MultiStateCompilationUnitChange) {
-					result.add(((MultiStateCompilationUnitChange)child).getCompilationUnit().getCorrespondingResource());
-				} else if (child instanceof CompilationUnitChange) {
-					result.add(((CompilationUnitChange)child).getCompilationUnit().getCorrespondingResource());
-				}
-			}
-		}
-
-		private void cleanUpProject(IJavaProject project, ICompilationUnit[] compilationUnits, ICleanUp cleanUp, Hashtable problemLocations, CompositeChange result, IProgressMonitor monitor) throws CoreException {
-			cleanUp.checkPreConditions(project, compilationUnits, new SubProgressMonitor(monitor, 1));
-			for (int i= 0; i < compilationUnits.length; i++) {
-				ICompilationUnit cu= compilationUnits[i];
-				CompilationUnit root= getASTRoot(cu, new SubProgressMonitor(monitor, 1));
-				List locationList= (List)problemLocations.get(cu);
-				IProblemLocation[] locations= (IProblemLocation[])locationList.toArray(new IProblemLocation[locationList.size()]);
-
-				IFix fix= cleanUp.createFix(new MultiFixContext(cu, root, locations));
-				
-				if (monitor.isCanceled())
-					return;
-				
-				if (fix != null) {
-					TextChange change= fix.createChange();
-					
-					if (monitor.isCanceled())
-						return;
-					
-					result.add(change);
-					monitor.worked(1);
-				}
-
-			}
-			cleanUp.checkPostConditions(null);	
-		}
-
 		/* (non-Javadoc)
 		 * @see org.eclipse.ui.IMarkerResolution2#getDescription()
 		 */
@@ -416,15 +291,6 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 						}
 					}
 				}
-			}
-			return result;
-		}
-		
-		private static CompilationUnit getASTRoot(ICompilationUnit compilationUnit, IProgressMonitor monitor) {
-			CompilationUnit result= SharedASTProvider.getAST(compilationUnit, SharedASTProvider.WAIT_YES, monitor);
-			if (result == null) {
-				// see bug 63554
-				result= ASTResolving.createQuickFixAST(compilationUnit, monitor);
 			}
 			return result;
 		}
