@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,7 @@ public class JavadocReader extends Object {
 	/**
 	 * Reads a Javadoc Ant Script from the underlying stream.
 	 * It is the client's responsibility to close the stream.
+	 * @param inputStream the input stream to read from
 	 */
 	public JavadocReader(InputStream inputStream) {
 		Assert.isNotNull(inputStream);

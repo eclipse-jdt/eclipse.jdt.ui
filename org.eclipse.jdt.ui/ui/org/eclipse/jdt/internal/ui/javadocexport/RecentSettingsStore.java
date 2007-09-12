@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,10 +18,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
@@ -45,7 +46,7 @@ public class RecentSettingsStore {
 	private Map fPerProjectSettings;
 	
 	/**
-	 * 
+	 * @param settings the settings to load from
 	 */
 	public RecentSettingsStore(IDialogSettings settings) {
 		fPerProjectSettings= new HashMap();
@@ -58,6 +59,7 @@ public class RecentSettingsStore {
 	* Method creates a list of data structes that contain
 	* The destination, antfile location and the list of library/project references for every
 	* project in the workspace.Defaults are created for new project.
+	 * @param settings the settings to load from
 	*/
 	private void load(IDialogSettings settings) {
 
