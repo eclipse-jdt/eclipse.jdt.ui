@@ -8,8 +8,7 @@
 <booleanAttribute key="clearws" value="true"/>
 <booleanAttribute key="clearwslog" value="false"/>
 <stringAttribute key="configLocation" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/LeakTestSuite"/>
-<booleanAttribute key="default" value="false"/>
-<stringAttribute key="deselected_workspace_plugins" value="org.eclipse.osgi"/>
+<booleanAttribute key="default" value="true"/>
 <booleanAttribute key="includeFragments" value="false"/>
 <booleanAttribute key="includeOptional" value="true"/>
 <stringAttribute key="location" value="${workspace_loc}/../junit-workspace"/>
@@ -38,10 +37,9 @@
 <stringAttribute key="pde.version" value="3.3"/>
 <stringAttribute key="product" value="org.eclipse.sdk.ide"/>
 <stringAttribute key="selectedPlugin" value="org.eclipse.ui"/>
-<stringAttribute key="selected_target_plugins" value="org.eclipse.osgi"/>
 <booleanAttribute key="tracing" value="true"/>
 <booleanAttribute key="useDefaultConfig" value="true"/>
 <booleanAttribute key="useDefaultConfigArea" value="true"/>
 <booleanAttribute key="useProduct" value="false"/>
-<stringAttribute key="vminstall" value="jdk1.4.2_10"/>
+<stringAttribute key="vminstall" value="jdk1.4.2_14"/>
 </launchConfiguration>
