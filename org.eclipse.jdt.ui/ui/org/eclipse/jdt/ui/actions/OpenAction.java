@@ -11,7 +11,9 @@
 package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -51,6 +53,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
+
 
 /**
  * This action opens a Java editor on a Java element or file.
@@ -132,6 +135,7 @@ public class OpenAction extends SelectionDispatchAction {
 			return;
 		try {
 			IJavaElement[] elements= SelectionConverter.codeResolveForked(fEditor, false);
+			elements= selectOpenableElements(elements);
 			if (elements == null || elements.length == 0) {
 				IEditorStatusLine statusLine= (IEditorStatusLine) fEditor.getAdapter(IEditorStatusLine.class);
 				if (statusLine != null)
@@ -139,6 +143,7 @@ public class OpenAction extends SelectionDispatchAction {
 				getShell().getDisplay().beep();
 				return;
 			}
+			
 			IJavaElement element= elements[0];
 			if (elements.length > 1) {
 				element= SelectionConverter.selectJavaElement(elements, getShell(), getDialogTitle(), ActionMessages.OpenAction_select_element);
@@ -146,15 +151,38 @@ public class OpenAction extends SelectionDispatchAction {
 					return;
 			}
 
-			int type= element.getElementType();
-			if (type == IJavaElement.JAVA_PROJECT || type == IJavaElement.PACKAGE_FRAGMENT_ROOT || type == IJavaElement.PACKAGE_FRAGMENT)
-				element= EditorUtility.getEditorInputJavaElement(fEditor, false);
 			run(new Object[] {element} );
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.OpenAction_error_message); 
 		} catch (InterruptedException e) {
 			// ignore
 		}
+	}
+
+	/**
+	 * Selects the openable elements out of the given ones.
+	 * 
+	 * @param elements the elements to filter
+	 * @return the openable elements
+	 * @since 3.4
+	 */
+	private IJavaElement[] selectOpenableElements(IJavaElement[] elements) {
+		List result= new ArrayList(elements.length);
+		for (int i= 0; i < elements.length; i++) {
+			IJavaElement element= elements[i];
+			switch (element.getElementType()) {
+				case IJavaElement.PACKAGE_DECLARATION:
+				case IJavaElement.PACKAGE_FRAGMENT:
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+				case IJavaElement.JAVA_PROJECT:
+				case IJavaElement.JAVA_MODEL:
+					break;
+				default:
+					result.add(element);
+					break;
+			}
+		}
+		return (IJavaElement[])result.toArray(new IJavaElement[result.size()]);
 	}
 
 	private boolean isProcessable() {
