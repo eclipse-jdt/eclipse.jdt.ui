@@ -13,12 +13,15 @@ package org.eclipse.jdt.ui.actions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -47,6 +50,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -235,51 +239,73 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			List result= new ArrayList();	
 			for (Iterator iter= elements.iterator(); iter.hasNext();) {
 				Object obj= iter.next();
-				if (obj instanceof IJavaElement) {
-					IJavaElement element= (IJavaElement) obj;
-					int elementType= element.getElementType();
-
-					if (elementType == IJavaElement.PACKAGE_FRAGMENT) {
-						result.addAll(analyze((IPackageFragment) element, new SubProgressMonitor(pm, 1)));
-					} else if (elementType == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
-						IPackageFragmentRoot root= (IPackageFragmentRoot)element;
-						if (!root.isExternal() && !ReorgUtils.isClassFolder(root)) {
-							result.addAll(analyze((IPackageFragmentRoot) element, new SubProgressMonitor(pm, 1)));
-						} else {
-							pm.worked(1);
-						}
-					} else if (elementType == IJavaElement.JAVA_PROJECT) {
-						result.addAll(analyze((IJavaProject) element, new SubProgressMonitor(pm, 1)));
-					} else if (elementType == IJavaElement.COMPILATION_UNIT) {
-						ICompilationUnit cu= (ICompilationUnit)element;
-						if (cu.exists()) {
-							NonNLSElement nlsElement= analyze(cu);
-							if (nlsElement != null) {
-								result.add(nlsElement);
-							}							
-						}
-						pm.worked(1);
-					} else if (elementType == IJavaElement.TYPE) {
-						IType type= (IType)element;
-						ICompilationUnit cu= type.getCompilationUnit();
-						if (cu != null && cu.exists()) {
-							NonNLSElement nlsElement= analyze(cu);
-							if (nlsElement != null) {
-								result.add(nlsElement);
-							}							
-						}
-						pm.worked(1);
-					} else {
-						pm.worked(1);
-					}
-				} else {
-					pm.worked(1);
-				}
+				result.addAll(analyze(obj, pm));
 			}
 			return (NonNLSElement[]) result.toArray(new NonNLSElement[result.size()]);
 		} finally{
 			pm.done();
 		}
+	}
+
+	private List analyze(Object obj, IProgressMonitor pm) throws CoreException, JavaModelException {
+		if (obj instanceof IJavaElement) {
+			IJavaElement element= (IJavaElement) obj;
+			int elementType= element.getElementType();
+
+			if (elementType == IJavaElement.PACKAGE_FRAGMENT) {
+				return analyze((IPackageFragment) element, new SubProgressMonitor(pm, 1));
+			} else if (elementType == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
+				IPackageFragmentRoot root= (IPackageFragmentRoot)element;
+				if (!root.isExternal() && !ReorgUtils.isClassFolder(root)) {
+					return analyze((IPackageFragmentRoot) element, new SubProgressMonitor(pm, 1));
+				} else {
+					pm.worked(1);
+				}
+			} else if (elementType == IJavaElement.JAVA_PROJECT) {
+				return analyze((IJavaProject) element, new SubProgressMonitor(pm, 1));
+			} else if (elementType == IJavaElement.COMPILATION_UNIT) {
+				ICompilationUnit cu= (ICompilationUnit)element;
+				if (cu.exists()) {
+					NonNLSElement nlsElement= analyze(cu);
+					if (nlsElement != null) {
+						pm.worked(1);
+						ArrayList result= new ArrayList();
+						result.add(nlsElement);
+						return result;
+					}							
+				}
+				pm.worked(1);
+			} else if (elementType == IJavaElement.TYPE) {
+				IType type= (IType)element;
+				ICompilationUnit cu= type.getCompilationUnit();
+				if (cu != null && cu.exists()) {
+					NonNLSElement nlsElement= analyze(cu);
+					if (nlsElement != null) {
+						pm.worked(1);
+						ArrayList result= new ArrayList();
+						result.add(nlsElement);
+						return result;
+					}							
+				}
+				pm.worked(1);
+			} else {
+				pm.worked(1);
+			}
+		} else if (obj instanceof IWorkingSet) {
+			List result= new ArrayList();
+			
+			IWorkingSet workingSet= (IWorkingSet) obj;
+			IAdaptable[] elements= workingSet.getElements();
+			for (int i= 0; i < elements.length; i++) {
+				result.addAll(analyze(elements[i], new NullProgressMonitor()));
+			}
+			pm.worked(1);
+			return result;
+		} else {
+			pm.worked(1);
+		}
+		
+		return Collections.EMPTY_LIST;
 	}
 
 	private void showResults() {

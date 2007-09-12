@@ -24,6 +24,8 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.IWorkingSet;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -58,6 +60,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringActions;
+import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
 
 /**
  * Helper class to detect whether a certain refactoring can be enabled on a
@@ -309,6 +312,9 @@ public final class RefactoringAvailabilityTester {
 							return true;
 					}
 				}
+			} else if (element instanceof IWorkingSet) {
+				IWorkingSet workingSet= (IWorkingSet) element;
+				return JavaWorkingSetUpdater.ID.equals(workingSet.getId());
 			}
 		}
 		return false;

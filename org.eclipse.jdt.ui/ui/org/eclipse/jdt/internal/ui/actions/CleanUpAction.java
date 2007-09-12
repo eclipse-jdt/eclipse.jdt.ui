@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
@@ -28,6 +29,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.IWorkingSet;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -48,6 +50,7 @@ import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
+import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
 
 public abstract class CleanUpAction extends SelectionDispatchAction {
 
@@ -147,6 +150,9 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 					}
 				} else if (selected[i] instanceof LogicalPackage) {
 					return true;
+				} else if (selected[i] instanceof IWorkingSet) {
+					IWorkingSet workingSet= (IWorkingSet) selected[i];
+					return JavaWorkingSetUpdater.ID.equals(workingSet.getId());
 				}
 			} catch (JavaModelException e) {
 				if (!e.isDoesNotExist()) {
@@ -224,51 +230,62 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 		HashSet result= new HashSet();
 		Object[] selected= selection.toArray();
 		for (int i= 0; i < selected.length; i++) {
-			try {
-				if (selected[i] instanceof IJavaElement) {
-					IJavaElement elem= (IJavaElement)selected[i];
-					if (elem.exists()) {
-						switch (elem.getElementType()) {
-							case IJavaElement.TYPE:
-								if (elem.getParent().getElementType() == IJavaElement.COMPILATION_UNIT) {
-									result.add(elem.getParent());
-								}
-								break;
-							case IJavaElement.COMPILATION_UNIT:
-								result.add(elem);
-								break;
-							case IJavaElement.IMPORT_CONTAINER:
-								result.add(elem.getParent());
-								break;
-							case IJavaElement.PACKAGE_FRAGMENT:
-								collectCompilationUnits((IPackageFragment)elem, result);
-								break;
-							case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-								collectCompilationUnits((IPackageFragmentRoot)elem, result);
-								break;
-							case IJavaElement.JAVA_PROJECT:
-								IPackageFragmentRoot[] roots= ((IJavaProject)elem).getPackageFragmentRoots();
-								for (int k= 0; k < roots.length; k++) {
-									collectCompilationUnits(roots[k], result);
-								}
-								break;
-						}
-					}
-				} else if (selected[i] instanceof LogicalPackage) {
-					IPackageFragment[] packageFragments= ((LogicalPackage)selected[i]).getFragments();
-					for (int k= 0; k < packageFragments.length; k++) {
-						IPackageFragment pack= packageFragments[k];
-						if (pack.exists()) {
-							collectCompilationUnits(pack, result);
-						}
-					}
-				}
-			} catch (JavaModelException e) {
-				if (JavaModelUtil.isExceptionToBeLogged(e))
-					JavaPlugin.log(e);
-			}
+			Object element= selected[i];
+			collectCompilationUnits(element, result);
 		}
 		return (ICompilationUnit[])result.toArray(new ICompilationUnit[result.size()]);
+	}
+
+	private void collectCompilationUnits(Object element, Collection result) {
+		try {
+			if (element instanceof IJavaElement) {
+				IJavaElement elem= (IJavaElement)element;
+				if (elem.exists()) {
+					switch (elem.getElementType()) {
+						case IJavaElement.TYPE:
+							if (elem.getParent().getElementType() == IJavaElement.COMPILATION_UNIT) {
+								result.add(elem.getParent());
+							}
+							break;
+						case IJavaElement.COMPILATION_UNIT:
+							result.add(elem);
+							break;
+						case IJavaElement.IMPORT_CONTAINER:
+							result.add(elem.getParent());
+							break;
+						case IJavaElement.PACKAGE_FRAGMENT:
+							collectCompilationUnits((IPackageFragment)elem, result);
+							break;
+						case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+							collectCompilationUnits((IPackageFragmentRoot)elem, result);
+							break;
+						case IJavaElement.JAVA_PROJECT:
+							IPackageFragmentRoot[] roots= ((IJavaProject)elem).getPackageFragmentRoots();
+							for (int k= 0; k < roots.length; k++) {
+								collectCompilationUnits(roots[k], result);
+							}
+							break;
+					}
+				}
+			} else if (element instanceof LogicalPackage) {
+				IPackageFragment[] packageFragments= ((LogicalPackage)element).getFragments();
+				for (int k= 0; k < packageFragments.length; k++) {
+					IPackageFragment pack= packageFragments[k];
+					if (pack.exists()) {
+						collectCompilationUnits(pack, result);
+					}
+				}
+			} else if (element instanceof IWorkingSet) {
+				IWorkingSet workingSet= (IWorkingSet) element;
+				IAdaptable[] elements= workingSet.getElements();
+				for (int j= 0; j < elements.length; j++) {
+					collectCompilationUnits(elements[j], result);
+				}
+			}
+		} catch (JavaModelException e) {
+			if (JavaModelUtil.isExceptionToBeLogged(e))
+				JavaPlugin.log(e);
+		}		
 	}
 
 	private void collectCompilationUnits(IPackageFragment pack, Collection result) throws JavaModelException {

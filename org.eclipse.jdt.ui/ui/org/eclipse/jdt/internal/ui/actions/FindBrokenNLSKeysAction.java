@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.IWorkingSet;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -57,6 +58,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.refactoring.nls.search.SearchBrokenNLSKeysUtil;
+import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
 
 public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 	
@@ -228,6 +230,9 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 					IFile file= (IFile)selected[i];
 					if ("properties".equalsIgnoreCase(file.getFileExtension())) //$NON-NLS-1$
 						return true;
+				} else if (selected[i] instanceof IWorkingSet) {
+					IWorkingSet workingSet= (IWorkingSet) selected[i];
+					return JavaWorkingSetUpdater.ID.equals(workingSet.getId());
 				}
 			} catch (JavaModelException e) {
 				if (!e.isDoesNotExist()) {
@@ -244,7 +249,10 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 				Object object= objects[i];
 				
 				IResource resource= null;
-				if (object instanceof IJavaElement) {
+				if (object instanceof IWorkingSet) {
+					IWorkingSet workingSet= (IWorkingSet) object;
+					collectNLSFilesFromResources(workingSet.getElements(), result);
+				} else if (object instanceof IJavaElement) {
 					resource= ((IJavaElement) object).getCorrespondingResource();
 				} else if (object instanceof IResource) {
 					resource= (IResource) object;
@@ -327,6 +335,9 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 				} else if (objects[i] instanceof LogicalPackage) {
 					LogicalPackage logicalPackage= (LogicalPackage)objects[i];
 					collectNLSFilesFromJavaElements(new Object[] {logicalPackage.getJavaProject()}, result);
+				} else if (objects[i] instanceof IWorkingSet) {
+					IWorkingSet workingSet= (IWorkingSet) objects[i];
+					collectNLSFilesFromJavaElements(workingSet.getElements(), result);
 				}
 			}
 		} catch (JavaModelException e) {
