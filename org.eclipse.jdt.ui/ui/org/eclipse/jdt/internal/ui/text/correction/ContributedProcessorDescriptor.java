@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.expressions.EvaluationContext;
 import org.eclipse.core.expressions.EvaluationResult;
@@ -31,6 +32,8 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
@@ -39,7 +42,6 @@ public final class ContributedProcessorDescriptor {
 	private final IConfigurationElement fConfigurationElement;
 	private Object fProcessorInstance;
 	private Boolean fStatus;
-	private boolean fLastResult;
 	private String fRequiredSourceLevel;
 	private final Set fHandledMarkerTypes;
 
@@ -114,20 +116,35 @@ public final class ContributedProcessorDescriptor {
 				String[] natures= javaProject.getProject().getDescription().getNatureIds();
 				evalContext.addVariable("projectNatures", Arrays.asList(natures)); //$NON-NLS-1$
 				evalContext.addVariable("sourceLevel", javaProject.getOption(JavaCore.COMPILER_SOURCE, true)); //$NON-NLS-1$
-				fLastResult= !(expression.evaluate(evalContext) != EvaluationResult.TRUE);
-				return fLastResult;
+				return expression.evaluate(evalContext) == EvaluationResult.TRUE;
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
+			return false;
 		}
 		fStatus= Boolean.FALSE;
 		return false;
 	}
 	
-	public Object getProcessor(ICompilationUnit cunit) throws CoreException {
+	public Object getProcessor(ICompilationUnit cunit, Class expectedType) {
 		if (matches(cunit)) {
 			if (fProcessorInstance == null) {
-				fProcessorInstance= fConfigurationElement.createExecutableExtension(CLASS);
+				try {
+					Object extension= fConfigurationElement.createExecutableExtension(CLASS);
+					if (expectedType.isInstance(extension)) {
+						fProcessorInstance= extension;
+					} else {
+						String message= "Invalid extension to " + fConfigurationElement.getName() //$NON-NLS-1$
+						+ ". Must extends '" + expectedType.getName() + "'." + fConfigurationElement.getContributor().getName(); //$NON-NLS-1$ //$NON-NLS-2$
+						JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, message));
+						fStatus= Boolean.FALSE;
+						return null;
+					}
+				} catch (CoreException e) {
+					JavaPlugin.log(e);
+					fStatus= Boolean.FALSE;
+					return null;
+				}
 			}
 			return fProcessorInstance;
 		}

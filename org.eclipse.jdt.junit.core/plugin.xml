@@ -223,17 +223,6 @@
       </actionSetPartAssociation>
    </extension>
    <extension
-         id="junit_task"
-         name="%Task.name"
-         point="org.eclipse.core.resources.markers">
-      <super
-            type="org.eclipse.core.resources.taskmarker">
-      </super>
-      <persistent
-            value="true">
-      </persistent>
-   </extension>
-   <extension
          point="org.eclipse.debug.ui.launchShortcuts">
       <shortcut
             label="%JUnitShortcut.label"
@@ -256,18 +245,6 @@
                </with>
             </enablement>
          </contextualLaunch>
-         <perspective
-               id="org.eclipse.jdt.ui.JavaPerspective">
-         </perspective>
-         <perspective
-               id="org.eclipse.jdt.ui.JavaHierarchyPerspective">
-         </perspective>
-         <perspective
-               id="org.eclipse.jdt.ui.JavaBrowsingPerspective">
-         </perspective>
-         <perspective
-               id="org.eclipse.debug.ui.DebugPerspective">
-         </perspective>
          <configurationType
                id="org.eclipse.jdt.junit.launchconfig">
          </configurationType>
@@ -305,6 +282,18 @@
             class="org.eclipse.jdt.internal.junit.ui.JUnitQuickFixProcessor"
             id="org.eclipse.jdt.junit.JUnitQuickFixProcessor">
       </quickFixProcessor>
+   </extension>
+   
+   <extension
+         point="org.eclipse.jdt.ui.classpathFixProcessors">
+      <classpathFixProcessor
+            name="%junitClasspathFixProcessor"
+            class="org.eclipse.jdt.internal.junit.ui.JUnitClasspathFixProcessor"
+            id="org.eclipse.jdt.junit.JUnitClasspathFixProcessor">
+            <extends
+                  id="org.eclipse.jdt.ui.text.correction.DefaultClasspathFixProcessor">
+            </extends>
+      </classpathFixProcessor>
    </extension>
    
    <extension

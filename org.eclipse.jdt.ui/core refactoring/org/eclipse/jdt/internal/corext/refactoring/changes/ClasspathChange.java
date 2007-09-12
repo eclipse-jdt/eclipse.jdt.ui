@@ -40,10 +40,7 @@ public class ClasspathChange extends JDTChange {
 		
 		IPath outputLocation= project.getOutputLocation();
 		
-		if (!JavaConventions.validateClasspath(project, newClasspath, outputLocation).matches(IStatus.ERROR)) {
-			return new ClasspathChange(project, newClasspath, outputLocation);
-		}
-		return null;
+		return newChange(project, newClasspath, outputLocation);
 	}
 	
 	public static ClasspathChange removeEntryChange(IJavaProject project, IClasspathEntry entryToRemove) throws JavaModelException {
@@ -57,12 +54,16 @@ public class ClasspathChange extends JDTChange {
 		}
 		IClasspathEntry[] entries= (IClasspathEntry[]) newClasspath.toArray(new IClasspathEntry[newClasspath.size()]);
 		IPath outputLocation= project.getOutputLocation();
-		if (!JavaConventions.validateClasspath(project, entries, outputLocation).matches(IStatus.ERROR)) {
-			return new ClasspathChange(project, entries, outputLocation);
+		
+		return newChange(project, entries, outputLocation);
+	}
+	
+	public static ClasspathChange newChange(IJavaProject project, IClasspathEntry[] newClasspath, IPath outputLocation) {
+		if (!JavaConventions.validateClasspath(project, newClasspath, outputLocation).matches(IStatus.ERROR)) {
+			return new ClasspathChange(project, newClasspath, outputLocation);
 		}
 		return null;
 	}
-	
 
 	private IJavaProject fProject;
 	private IClasspathEntry[] fNewClasspath;

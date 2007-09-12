@@ -7,6 +7,7 @@
    <extension-point id="javadocCompletionProcessor" name="%javadocCompletionProcessor" schema="schema/javadocCompletionProcessor.exsd"/>
    <extension-point id="quickFixProcessors" name="%quickFixProcessorExtensionPoint" schema="schema/quickFixProcessors.exsd"/>
    <extension-point id="quickAssistProcessors" name="%quickAssistProcessorExtensionPoint" schema="schema/quickAssistProcessors.exsd"/>
+   <extension-point id="classpathFixProcessors" name="%classpathFixProcessorExtensionPoint" schema="schema/classpathFixProcessors.exsd"/>
    <extension-point id="classpathContainerPage" name="%classpathContainerPageExtensionPoint" schema="schema/classpathContainerPage.exsd"/>
    <extension-point id="foldingStructureProviders" name="%foldingStructureProvidersExtensionPoint" schema="schema/foldingStructureProviders.exsd"/>
    <extension-point id="queryParticipants" name="%queryParticipantsExtensionPoint" schema="schema/queryParticipants.exsd"/>
@@ -175,6 +176,15 @@
             class="org.eclipse.jdt.internal.ui.text.correction.AdvancedQuickAssistProcessor"
             id="org.eclipse.jdt.ui.text.correction.AdvancedQuickAssistProcessor">
       </quickAssistProcessor>
+   </extension>
+   
+   <extension
+         point="org.eclipse.jdt.ui.classpathFixProcessors">
+      <classpathFixProcessor
+            name="%defaultQuickAssistProcessor"
+            class="org.eclipse.jdt.internal.ui.text.correction.DefaultClasspathFixProcessor"
+            id="org.eclipse.jdt.ui.text.correction.DefaultClasspathFixProcessor">
+      </classpathFixProcessor>
    </extension>
 
 	<!-- content assist processors - do not change their order -->  

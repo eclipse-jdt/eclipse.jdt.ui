@@ -1,0 +1,208 @@
+/*******************************************************************************
+ * Copyright (c) 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.jdt.internal.ui.text.correction;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.expressions.EvaluationContext;
+import org.eclipse.core.expressions.EvaluationResult;
+import org.eclipse.core.expressions.Expression;
+import org.eclipse.core.expressions.ExpressionConverter;
+import org.eclipse.core.expressions.ExpressionTagNames;
+
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor;
+import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+
+public final class ClasspathFixProcessorDescriptor {
+
+	private static final String ATT_EXTENSION = "classpathFixProcessors"; //$NON-NLS-1$
+
+	private static final String ID= "id"; //$NON-NLS-1$
+	private static final String CLASS= "class"; //$NON-NLS-1$
+	
+	private static final String EXTENDS= "extends"; //$NON-NLS-1$
+
+	private static ClasspathFixProcessorDescriptor[] fgContributedClasspathFixProcessors;
+	
+	private final IConfigurationElement fConfigurationElement;
+	private ClasspathFixProcessor fProcessorInstance;
+	private List fExtendedIds;
+	private Boolean fStatus;
+		
+	public ClasspathFixProcessorDescriptor(IConfigurationElement element) {
+		fConfigurationElement= element;
+		fProcessorInstance= null;
+		fStatus= null; // undefined
+		if (fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT).length == 0) {
+			fStatus= Boolean.TRUE;
+		}
+		IConfigurationElement[] children= fConfigurationElement.getChildren(EXTENDS);
+		if (children.length > 0) {
+			fExtendedIds= new ArrayList(children.length);
+			for (int i= 0; i < children.length; i++) {
+				fExtendedIds.add(children[i].getAttribute(ID));
+			}
+		} else {
+			fExtendedIds= Collections.EMPTY_LIST;
+		}
+	}
+	
+	public String getID() {
+		return fConfigurationElement.getAttribute(ID);
+	}
+	
+	public Collection/*String*/ getExtendedIds() {
+		return fExtendedIds;
+	}
+
+	public IStatus checkSyntax() {
+		IConfigurationElement[] children= fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT);
+		if (children.length > 1) {
+			return new StatusInfo(IStatus.ERROR, "Only one < enablement > element allowed. Disabling " + getID()); //$NON-NLS-1$
+		}
+		return new StatusInfo(IStatus.OK, "Syntactically correct classpath fix processor"); //$NON-NLS-1$
+	}
+
+	public boolean matches(IJavaProject javaProject) {
+		if (fStatus != null) {
+			return fStatus.booleanValue();
+		}
+
+		IConfigurationElement[] children= fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT);
+		if (children.length == 1) {
+			try {
+				ExpressionConverter parser= ExpressionConverter.getDefault();
+				Expression expression= parser.perform(children[0]);
+				EvaluationContext evalContext= new EvaluationContext(null, javaProject);
+				String[] natures= javaProject.getProject().getDescription().getNatureIds();
+				evalContext.addVariable("projectNatures", Arrays.asList(natures)); //$NON-NLS-1$
+				evalContext.addVariable("sourceLevel", javaProject.getOption(JavaCore.COMPILER_SOURCE, true)); //$NON-NLS-1$
+				return expression.evaluate(evalContext) == EvaluationResult.TRUE;
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
+			return false;
+		}
+		fStatus= Boolean.FALSE;
+		return false;
+	}
+	
+	public ClasspathFixProcessor getProcessor(IJavaProject project) {
+		if (matches(project)) {
+			if (fProcessorInstance == null) {
+				try {
+					Object extension= fConfigurationElement.createExecutableExtension(CLASS);
+					if (extension instanceof ClasspathFixProcessor) {
+						fProcessorInstance= (ClasspathFixProcessor) extension;
+					} else {
+						String message= "Invalid extension to " + ATT_EXTENSION //$NON-NLS-1$
+							+ ". Must extends ClasspathFixProcessor: " + getID(); //$NON-NLS-1$
+						JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, message));
+						fStatus= Boolean.FALSE;
+						return null;
+					}
+				} catch (CoreException e) {
+					JavaPlugin.log(e);
+					fStatus= Boolean.FALSE;
+					return null;
+				}
+			}
+			return fProcessorInstance;
+		}
+		return null;
+	}
+	
+	private static ClasspathFixProcessorDescriptor[] getCorrectionProcessors() {
+		if (fgContributedClasspathFixProcessors == null) {
+			IConfigurationElement[] elements= Platform.getExtensionRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, ATT_EXTENSION);
+			ArrayList res= new ArrayList(elements.length);
+
+			for (int i= 0; i < elements.length; i++) {
+				ClasspathFixProcessorDescriptor desc= new ClasspathFixProcessorDescriptor(elements[i]);
+				IStatus status= desc.checkSyntax();
+				if (status.isOK()) {
+					res.add(desc);
+				} else {
+					JavaPlugin.log(status);
+				}
+			}
+			fgContributedClasspathFixProcessors= (ClasspathFixProcessorDescriptor[]) res.toArray(new ClasspathFixProcessorDescriptor[res.size()]);
+			Arrays.sort(fgContributedClasspathFixProcessors, new Comparator() {
+				public int compare(Object o1, Object o2) {
+					ClasspathFixProcessorDescriptor d1= (ClasspathFixProcessorDescriptor) o1;
+					ClasspathFixProcessorDescriptor d2= (ClasspathFixProcessorDescriptor) o2;
+					if (d1.getExtendedIds().contains(d2.getID())) {
+						return -1;
+					}
+					if (d2.getExtendedIds().contains(d1.getID())) {
+						return 1;
+					}
+					return 0;
+				}
+			});
+		}
+		return fgContributedClasspathFixProcessors;
+	}
+		
+	public static ClasspathFixProposal[] getProposals(final IJavaProject project, final String missingType, final MultiStatus status) {
+		final ArrayList proposals= new ArrayList();
+
+		final HashSet extendedIds= new HashSet();
+		ClasspathFixProcessorDescriptor[] correctionProcessors= getCorrectionProcessors();
+		for (int i= 0; i < correctionProcessors.length; i++) {
+			final ClasspathFixProcessorDescriptor curr= correctionProcessors[i];
+			if (!extendedIds.contains(curr.getID())) {
+				SafeRunner.run(new ISafeRunnable() {
+					public void run() throws Exception {
+						ClasspathFixProcessor processor= curr.getProcessor(project);
+						if (processor != null) {
+							ClasspathFixProposal[] fixProposals= processor.getFixImportProposals(project, missingType);
+							if (fixProposals != null) {
+								for (int k= 0; k < fixProposals.length; k++) {
+									proposals.add(fixProposals[k]);
+								}
+								extendedIds.addAll(curr.getExtendedIds());
+							}
+						}
+					}	
+					public void handleException(Throwable exception) {
+						if (status != null) {
+							status.merge(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, CorrectionMessages.ClasspathFixProcessorDescriptor_error_processing_processors, exception));
+						}
+					}
+				});
+			}
+		}
+		return (ClasspathFixProposal[]) proposals.toArray(new ClasspathFixProposal[proposals.size()]);
+	}
+}

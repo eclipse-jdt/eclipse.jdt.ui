@@ -342,7 +342,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 		}
 
 		public void safeRun(ContributedProcessorDescriptor desc) throws Exception {
-			IQuickFixProcessor curr= (IQuickFixProcessor) desc.getProcessor(fContext.getCompilationUnit());
+			IQuickFixProcessor curr= (IQuickFixProcessor) desc.getProcessor(fContext.getCompilationUnit(), IQuickFixProcessor.class);
 			if (curr != null) {
 				IJavaCompletionProposal[] res= curr.getCorrections(fContext, fLocations);
 				if (res != null) {
@@ -366,7 +366,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 		}
 
 		public void safeRun(ContributedProcessorDescriptor desc) throws Exception {
-			IQuickAssistProcessor curr= (IQuickAssistProcessor) desc.getProcessor(fContext.getCompilationUnit());
+			IQuickAssistProcessor curr= (IQuickAssistProcessor) desc.getProcessor(fContext.getCompilationUnit(), IQuickAssistProcessor.class);
 			if (curr != null) {
 				IJavaCompletionProposal[] res= curr.getAssists(fContext, fLocations);
 				if (res != null) {
@@ -392,7 +392,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 		}
 
 		public void safeRun(ContributedProcessorDescriptor desc) throws Exception {
-			IQuickAssistProcessor processor= (IQuickAssistProcessor) desc.getProcessor(fContext.getCompilationUnit());
+			IQuickAssistProcessor processor= (IQuickAssistProcessor) desc.getProcessor(fContext.getCompilationUnit(), IQuickAssistProcessor.class);
 			if (processor != null && processor.hasAssists(fContext)) {
 				fHasAssists= true;
 			}
@@ -415,7 +415,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 		}
 
 		public void safeRun(ContributedProcessorDescriptor desc) throws Exception {
-			IQuickFixProcessor processor= (IQuickFixProcessor) desc.getProcessor(fCu);
+			IQuickFixProcessor processor= (IQuickFixProcessor) desc.getProcessor(fCu, IQuickFixProcessor.class);
 			if (processor != null && processor.hasCorrections(fCu, fProblemId)) {
 				fHasCorrections= true;
 			}

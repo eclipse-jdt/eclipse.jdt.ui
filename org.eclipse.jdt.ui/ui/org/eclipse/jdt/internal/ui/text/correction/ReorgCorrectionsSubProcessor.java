@@ -13,10 +13,8 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +45,7 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.IProgressService;
 
+import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
@@ -57,11 +56,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -71,33 +68,26 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.core.search.SearchPattern;
-import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
-import org.eclipse.jdt.internal.corext.refactoring.changes.ClasspathChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreatePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
 
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.actions.OrganizeImportsAction;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -228,106 +218,52 @@ public class ReorgCorrectionsSubProcessor {
 		};
 		proposals.add(proposal);
 	}
+	
+	private static class ClasspathFixCorrectionProposal extends ChangeCorrectionProposal {
 
+		private final ClasspathFixProposal fClasspathFixProposal;
+
+		public ClasspathFixCorrectionProposal(ClasspathFixProposal cpfix) {
+			super(cpfix.getDisplayString(), null, cpfix.getRelevance(), cpfix.getImage());
+			fClasspathFixProposal= cpfix;
+		}
+		
+		protected Change createChange() throws CoreException {
+			return fClasspathFixProposal.createChange(null);
+		}
+		
+		public String getAdditionalProposalInfo() {
+			return fClasspathFixProposal.getAdditionalProposalInfo();
+		}
+	}
+	
 	public static void importNotFoundProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
-		IJavaProject project= cu.getJavaProject();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-		if (selectedNode != null) {
-			ImportDeclaration importDeclaration= (ImportDeclaration) ASTNodes.getParent(selectedNode, ASTNode.IMPORT_DECLARATION);
-			if (importDeclaration == null) {
-				return;
-			}
-			if (!importDeclaration.isOnDemand()) {
-				int kind= JavaModelUtil.is50OrHigher(cu.getJavaProject()) ? SimilarElementsRequestor.REF_TYPES : SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES;
-				UnresolvedElementsSubProcessor.addNewTypeProposals(cu, importDeclaration.getName(), kind, 5, proposals);
-			}
-
-
-			String name= ASTNodes.asString(importDeclaration.getName());
-			char[] packageName;
-			char[] typeName= null;
-			if (importDeclaration.isOnDemand()) {
-				packageName= name.toCharArray();
-			} else {
-				packageName= Signature.getQualifier(name).toCharArray();
-				typeName= Signature.getSimpleName(name).toCharArray();
-			}
-			IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
-			ArrayList res= new ArrayList();
-			TypeNameMatchCollector requestor= new TypeNameMatchCollector(res);
-			int matchMode= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
-			new SearchEngine().searchAllTypeNames(packageName, matchMode, typeName,
-					matchMode, IJavaSearchConstants.TYPE, scope, requestor,
-					IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
-
-			if (res.isEmpty()) {
-				return;
-			}
-			HashSet addedClaspaths= new HashSet();
-			for (int i= 0; i < res.size(); i++) {
-				TypeNameMatch curr= (TypeNameMatch) res.get(i);
-				IType type= curr.getType();
-				if (type != null) {
-					IPackageFragmentRoot root= (IPackageFragmentRoot) type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-					IClasspathEntry entry= root.getRawClasspathEntry();
-					if (entry == null) {
-						continue;
-					}
-					IJavaProject other= root.getJavaProject();
-					int entryKind= entry.getEntryKind();
-					if ((entry.isExported() || entryKind == IClasspathEntry.CPE_SOURCE) && addedClaspaths.add(other)) {
-						String[] args= { other.getElementName(), project.getElementName() };
-						String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_project_description, args);
-						IClasspathEntry newEntry= JavaCore.newProjectEntry(other.getPath());
-						ClasspathChange change= ClasspathChange.addEntryChange(project, newEntry);
-						if (change != null) {
-							ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(label, change, 8, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
-							proposals.add(proposal);
-						}
-					}
-					if ((entryKind == IClasspathEntry.CPE_LIBRARY || entryKind == IClasspathEntry.CPE_VARIABLE || entryKind == IClasspathEntry.CPE_CONTAINER) && addedClaspaths.add(entry)) {
-						String label= getAddClasspathLabel(entry, root, project);
-						if (label != null) {
-							ClasspathChange change= ClasspathChange.addEntryChange(project, entry);
-							if (change != null) {
-								ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(label, change, 7, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
-								proposals.add(proposal);
-							}
-						}
-					}
-				}
-			}
+		if (selectedNode == null) {
+			return;
+		}
+		ImportDeclaration importDeclaration= (ImportDeclaration) ASTNodes.getParent(selectedNode, ASTNode.IMPORT_DECLARATION);
+		if (importDeclaration == null) {
+			return;
+		}
+		if (!importDeclaration.isOnDemand()) {
+			int kind= JavaModelUtil.is50OrHigher(cu.getJavaProject()) ? SimilarElementsRequestor.REF_TYPES : SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES;
+			UnresolvedElementsSubProcessor.addNewTypeProposals(cu, importDeclaration.getName(), kind, 5, proposals);
+		}
+		
+		String name= ASTNodes.asString(importDeclaration.getName());
+		if (importDeclaration.isOnDemand()) {
+			name= JavaModelUtil.concatenateName(name, ".*"); //$NON-NLS-1$
+		}
+		
+		ClasspathFixProposal[] classPathFixProposals= ClasspathFixProcessorDescriptor.getProposals(cu.getJavaProject(), name, null);
+		for (int i= 0; i < classPathFixProposals.length; i++) {
+			proposals.add(new ClasspathFixCorrectionProposal(classPathFixProposals[i]));
 		}
 	}
-
-	private static String getAddClasspathLabel(IClasspathEntry entry, IPackageFragmentRoot root, IJavaProject project) {
-		switch (entry.getEntryKind()) {
-			case IClasspathEntry.CPE_LIBRARY:
-				if (root.isArchive()) {
-					String[] args= { JavaElementLabels.getElementLabel(root, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED), project.getElementName() };
-					return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_archive_description, args);
-				} else {
-					String[] args= { JavaElementLabels.getElementLabel(root, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED), project.getElementName() };
-					return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_classfolder_description, args);
-				}
-			case IClasspathEntry.CPE_VARIABLE: {
-				String[] args= { JavaElementLabels.getElementLabel(root, 0), project.getElementName() };
-				return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_variable_description, args);
-			}
-			case IClasspathEntry.CPE_CONTAINER:
-				try {
-					String[] args= { JavaElementLabels.getContainerEntryLabel(entry.getPath(), root.getJavaProject()), project.getElementName() };
-					return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_library_description, args);
-				} catch (JavaModelException e) {
-					// ignore
-				}
-				break;
-		}
-		return null;
-	}
-
+			
 	private static final class OpenBuildPathCorrectionProposal extends ChangeCorrectionProposal {
 		private final IProject fProject;
 		private final IBinding fReferencedType;
