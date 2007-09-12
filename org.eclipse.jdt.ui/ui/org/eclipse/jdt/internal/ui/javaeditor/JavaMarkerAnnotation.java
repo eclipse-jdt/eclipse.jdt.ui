@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,12 +29,33 @@ import org.eclipse.jdt.core.JavaCore;
 
 public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnotation {
 
-	public static final String JAVA_MARKER_TYPE_PREFIX= "org.eclipse.jdt"; //$NON-NLS-1$
 	public static final String ERROR_ANNOTATION_TYPE= "org.eclipse.jdt.ui.error"; //$NON-NLS-1$
 	public static final String WARNING_ANNOTATION_TYPE= "org.eclipse.jdt.ui.warning"; //$NON-NLS-1$
 	public static final String INFO_ANNOTATION_TYPE= "org.eclipse.jdt.ui.info"; //$NON-NLS-1$
 	public static final String TASK_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.task"; //$NON-NLS-1$
 
+
+	/**
+	 * Tells whether the given marker can be treated as a Java annotation
+	 * which will later be update by JDT Core problems.
+	 * 
+	 * @param marker the marker
+	 * @return <code>true</code> if the marker can be treated as a Java annotation
+	 * @since 3.3.1
+	 */
+	static final boolean isJavaAnnotation(IMarker marker) {
+		// Performance
+		String markerType= MarkerUtilities.getMarkerType(marker);
+		if (IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER.equals(markerType) ||
+				IJavaModelMarker.TASK_MARKER.equals(markerType) ||
+				IJavaModelMarker.TRANSIENT_PROBLEM.equals(markerType) ||
+			IJavaModelMarker.BUILDPATH_PROBLEM_MARKER.equals(markerType))
+			return true;
+
+
+		return MarkerUtilities.isMarkerType(marker, IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
+	}
+	
 	private IJavaAnnotation fOverlay;
 
 
