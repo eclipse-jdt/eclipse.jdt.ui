@@ -55,7 +55,7 @@ This extension point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Prope
       <complexType>
          <sequence>
             <element ref="enablement" minOccurs="0" maxOccurs="1"/>
-            <element ref="extends" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="overrides" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="id" type="string" use="required">
             <annotation>
@@ -90,12 +90,12 @@ with a public 0-argument constructor.
       </complexType>
    </element>
 
-   <element name="extends">
+   <element name="overrides">
       <complexType>
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  The id of the classspath fix processor that is extended by the current processor. The current processor can choose to replace proposals of extended processor.
+                  The id of the classspath fix processor that is overridden by the current processor. The current processor can choose to replace proposals of extended processor.
                </documentation>
             </annotation>
          </attribute>

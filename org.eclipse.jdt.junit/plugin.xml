@@ -290,9 +290,9 @@
             name="%junitClasspathFixProcessor"
             class="org.eclipse.jdt.internal.junit.ui.JUnitClasspathFixProcessor"
             id="org.eclipse.jdt.junit.JUnitClasspathFixProcessor">
-            <extends
+            <overrides
                   id="org.eclipse.jdt.ui.text.correction.DefaultClasspathFixProcessor">
-            </extends>
+            </overrides>
       </classpathFixProcessor>
    </extension>
    

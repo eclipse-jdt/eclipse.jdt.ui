@@ -50,13 +50,13 @@ public final class ClasspathFixProcessorDescriptor {
 	private static final String ID= "id"; //$NON-NLS-1$
 	private static final String CLASS= "class"; //$NON-NLS-1$
 	
-	private static final String EXTENDS= "extends"; //$NON-NLS-1$
+	private static final String OVERRIDES= "overrides"; //$NON-NLS-1$
 
 	private static ClasspathFixProcessorDescriptor[] fgContributedClasspathFixProcessors;
 	
 	private final IConfigurationElement fConfigurationElement;
 	private ClasspathFixProcessor fProcessorInstance;
-	private List fExtendedIds;
+	private List fOverriddenIds;
 	private Boolean fStatus;
 		
 	public ClasspathFixProcessorDescriptor(IConfigurationElement element) {
@@ -66,14 +66,14 @@ public final class ClasspathFixProcessorDescriptor {
 		if (fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT).length == 0) {
 			fStatus= Boolean.TRUE;
 		}
-		IConfigurationElement[] children= fConfigurationElement.getChildren(EXTENDS);
+		IConfigurationElement[] children= fConfigurationElement.getChildren(OVERRIDES);
 		if (children.length > 0) {
-			fExtendedIds= new ArrayList(children.length);
+			fOverriddenIds= new ArrayList(children.length);
 			for (int i= 0; i < children.length; i++) {
-				fExtendedIds.add(children[i].getAttribute(ID));
+				fOverriddenIds.add(children[i].getAttribute(ID));
 			}
 		} else {
-			fExtendedIds= Collections.EMPTY_LIST;
+			fOverriddenIds= Collections.EMPTY_LIST;
 		}
 	}
 	
@@ -81,8 +81,8 @@ public final class ClasspathFixProcessorDescriptor {
 		return fConfigurationElement.getAttribute(ID);
 	}
 	
-	public Collection/*String*/ getExtendedIds() {
-		return fExtendedIds;
+	public Collection/*String*/ getOverridenIds() {
+		return fOverriddenIds;
 	}
 
 	public IStatus checkSyntax() {
@@ -161,10 +161,10 @@ public final class ClasspathFixProcessorDescriptor {
 				public int compare(Object o1, Object o2) {
 					ClasspathFixProcessorDescriptor d1= (ClasspathFixProcessorDescriptor) o1;
 					ClasspathFixProcessorDescriptor d2= (ClasspathFixProcessorDescriptor) o2;
-					if (d1.getExtendedIds().contains(d2.getID())) {
+					if (d1.getOverridenIds().contains(d2.getID())) {
 						return -1;
 					}
-					if (d2.getExtendedIds().contains(d1.getID())) {
+					if (d2.getOverridenIds().contains(d1.getID())) {
 						return 1;
 					}
 					return 0;
@@ -177,11 +177,11 @@ public final class ClasspathFixProcessorDescriptor {
 	public static ClasspathFixProposal[] getProposals(final IJavaProject project, final String missingType, final MultiStatus status) {
 		final ArrayList proposals= new ArrayList();
 
-		final HashSet extendedIds= new HashSet();
+		final HashSet overriddenIds= new HashSet();
 		ClasspathFixProcessorDescriptor[] correctionProcessors= getCorrectionProcessors();
 		for (int i= 0; i < correctionProcessors.length; i++) {
 			final ClasspathFixProcessorDescriptor curr= correctionProcessors[i];
-			if (!extendedIds.contains(curr.getID())) {
+			if (!overriddenIds.contains(curr.getID())) {
 				SafeRunner.run(new ISafeRunnable() {
 					public void run() throws Exception {
 						ClasspathFixProcessor processor= curr.getProcessor(project);
@@ -191,7 +191,7 @@ public final class ClasspathFixProcessorDescriptor {
 								for (int k= 0; k < fixProposals.length; k++) {
 									proposals.add(fixProposals[k]);
 								}
-								extendedIds.addAll(curr.getExtendedIds());
+								overriddenIds.addAll(curr.getOverridenIds());
 							}
 						}
 					}	

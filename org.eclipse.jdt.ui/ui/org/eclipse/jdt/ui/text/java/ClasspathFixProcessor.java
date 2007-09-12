@@ -115,7 +115,7 @@ public abstract class ClasspathFixProcessor {
 	}
 	
 	/**
-	 * Returns proposal that can fix unresolvable imports.
+	 * Returns proposal that can fix non-resolvable imports.
 	 * 
 	 * @param project the current project
 	 * @param name the missing type to be added to the class path. The entries can be either a
@@ -124,7 +124,7 @@ public abstract class ClasspathFixProcessor {
 	 *  <li>on demand import name, like 'org.junit.*'</li></ul>
 	 * @return returns proposals to fix the class path so that the missing types are found. If no proposals can be offered,
 	 * either <code>null</code> or the empty array can be returned. If <code>null</code> is returned, also the processors
-	 * replaced by this processor are asked. If a non null result is returned, all replaced processors are skipped.
+	 * overridden by this processor are asked. If a non null result is returned, all overridden processors are skipped.
 	 * 
 	 * @throws CoreException thrown when the creation of the proposals fails
 	 */
@@ -132,14 +132,14 @@ public abstract class ClasspathFixProcessor {
 
 	
 	/**
-	 * Evaluates all contributed proposals that can fix unresolvable imports.
+	 * Evaluates all contributed proposals that can fix non-resolvable imports.
 	 * 
 	 * @param project the current project
 	 * @param name the missing type to be added to the class path. The entries can be either a
 	 *  <ul><li>qualified type name, like 'junit.framework.Test'</li>
 	 *  <li>simple type name, like 'TestCase'</li>
 	 *  <li>on demand import name, like 'org.junit.*'</li></ul>
-	 * @param status a {@link MultiStatus} to collect the resulting stati or <code>null</code> to not collect stati.
+	 * @param status a {@link MultiStatus} to collect the resulting status or <code>null</code> to not collect status.
 	 * @return returns proposals to fix the class path so that the missing types are found. 
 	 */
 	public static ClasspathFixProposal[] getContributedFixImportProposals(IJavaProject project, String name, MultiStatus status) {
