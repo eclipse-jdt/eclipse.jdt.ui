@@ -61,10 +61,7 @@ import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 
 public class JUnitQuickFixProcessor implements IQuickFixProcessor {
-	
-	private static final int JUNIT3= 1;
-	private static final int JUNIT4= 2;
-	
+		
 	private static final HashSet ASSERT_METHOD_NAMES= new HashSet();
 	
 	public JUnitQuickFixProcessor() {
