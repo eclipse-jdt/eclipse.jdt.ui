@@ -604,7 +604,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 					}
 					if (name.resolveBinding() instanceof IVariableBinding) {
 						StructuralPropertyDescriptor locationInParent= name.getLocationInParent();
-						if (locationInParent == QualifiedName.NAME_PROPERTY || (locationInParent == FieldAccess.NAME_PROPERTY || ((FieldAccess) name.getParent()).getExpression() instanceof ThisExpression))  {
+						if (locationInParent == QualifiedName.NAME_PROPERTY || (locationInParent == FieldAccess.NAME_PROPERTY && !(((FieldAccess) name.getParent()).getExpression() instanceof ThisExpression)))  {
 							status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_part_of_qualified_name); 
 							break superCall;
 						}
