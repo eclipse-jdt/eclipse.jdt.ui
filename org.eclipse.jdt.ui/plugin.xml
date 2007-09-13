@@ -3443,6 +3443,12 @@
             description="%ActionDefinition.corrections.convertAnonymousToLocal.description"
             categoryId="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.correction.convertAnonymousToLocal.assist">
+      </command>
+      <command
+            name="%ActionDefinition.corrections.encapsulateField.name"
+            description="%ActionDefinition.corrections.encapsulateField.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.encapsulateField.assist">
       </command>  
       <command
             name="%ActionDefinition.surroundWith.quickMenu.name"

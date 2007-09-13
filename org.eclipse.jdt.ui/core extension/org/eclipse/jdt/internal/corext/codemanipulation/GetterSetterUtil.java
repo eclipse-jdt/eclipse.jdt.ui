@@ -236,7 +236,7 @@ public class GetterSetterUtil {
 	 * 
 	 * @param node the assignment/prefix/postfix node
 	 * @param astRewrite the astRewrite to use
-	 * @param getterExpression the expression to insert for read accesses
+	 * @param getterExpression the expression to insert for read accesses or <code>null</code> if such an expression does not exist
 	 * @param variableType the type of the variable that the result will be assigned to
 	 * @param is50OrHigher <code>true</code> if a 5.0 or higher environment can be used
 	 * @return an expression that can be assigned to the type variableType with node being replaced by a equivalent expression using the getter
@@ -276,7 +276,7 @@ public class GetterSetterUtil {
 			if (pe.getOperator() == PrefixExpression.Operator.DECREMENT)
 				op= InfixExpression.Operator.MINUS;
 		}
-		if (op != null) {
+		if (op != null && getterExpression != null) {
 			return createInfixInvocationFromPostPrefixExpression(op, getterExpression, ast, variableType, is50OrHigher);
 		}
 		return null;

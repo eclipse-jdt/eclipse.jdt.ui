@@ -8,6 +8,7 @@
  * Contributors:
  *   Konstantin Scheglov (scheglov_ke@nlmk.ru) - initial API and implementation
  *          (reports 71244 & 74746: New Quick Assist's [quick assist])
+ *   IBM Corporation - implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -131,7 +132,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			|| getPushNegationDownProposals(context, coveringNode, null)
 			|| getPullNegationUpProposals(context, coveredNodes, null)
 			|| getJoinIfListInIfElseIfProposals(context, coveringNode, coveredNodes, null)
-			|| getConvertSwitchToIfProposals(context, coveringNode, null);
+			|| getConvertSwitchToIfProposals(context, coveringNode, null)
+			|| GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, null);	
 		}
 		return false;
 	}
@@ -168,7 +170,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				getPullNegationUpProposals(context, coveredNodes, resultingCollections);
 				getJoinIfListInIfElseIfProposals(context, coveringNode, coveredNodes, resultingCollections);
 				getConvertSwitchToIfProposals(context, coveringNode, resultingCollections);
+				GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, resultingCollections);
 			}
+			
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
 		return null;

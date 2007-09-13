@@ -966,19 +966,19 @@ public final class RefactoringMessages extends NLS {
 
 	public static String ReplaceInvocationsWizard_title;
 
-	public static String SelfEncapsulateField_field_access;
-
-	public static String SelfEncapsulateField_keep_references;
-
 	public static String SelfEncapsulateField_sef;
 
-	public static String SelfEncapsulateField_use_setter_getter;
-
 	public static String SelfEncapsulateFieldInputPage_access_Modifiers;
+
+	public static String SelfEncapsulateFieldInputPage_configure_link;
+
+	public static String SelfEncapsulateFieldInputPage_keep_references;
 
 	public static String SelfEncapsulateFieldInputPage_default;
 
 	public static String SelfEncapsulateFieldInputPage_description;
+
+	public static String SelfEncapsulateFieldInputPage_field_access;
 
 	public static String SelfEncapsulateFieldInputPage_first_method;
 
@@ -995,6 +995,8 @@ public final class RefactoringMessages extends NLS {
 	public static String SelfEncapsulateFieldInputPage_public;
 
 	public static String SelfEncapsulateFieldInputPage_setter_name;
+
+	public static String SelfEncapsulateFieldInputPage_use_setter_getter;
 
 	public static String SelfEncapsulateFieldInputPage_usenewgetter_label;
 

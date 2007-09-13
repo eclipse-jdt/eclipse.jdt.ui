@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -48,6 +49,7 @@ import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.GetterSetterCorrectionSubProcessor.SelfEncapsulateFieldProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
@@ -74,6 +76,7 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(TypeMismatchQuickFixTests.allTests());
 		suite.addTest(ReorgQuickFixTest.allTests());
 		suite.addTest(ModifierCorrectionsQuickFixTest.allTests());
+		suite.addTest(GetterSetterQuickFixTest.allTests());
 		suite.addTest(AssistQuickFixTest.allTests());
 		suite.addTest(ChangeNonStaticToStaticTest.suite());
 		suite.addTest(MarkerResolutionTest.allTests());
@@ -331,11 +334,27 @@ public class QuickFixTest extends TestCase {
 			} else if (curr instanceof NewCUUsingWizardProposal) {
 				res[i]= getWizardPreviewContent((NewCUUsingWizardProposal) curr);
 			} else if (curr instanceof SurroundWithTemplateProposal) {
-				res[i]= getTemplatePreviewContent((SurroundWithTemplateProposal)curr);
+				res[i]= getTemplatePreviewContent((SurroundWithTemplateProposal) curr);
+			} else if (curr instanceof SelfEncapsulateFieldProposal) {
+				res[i]= getSEFPreviewContent((SelfEncapsulateFieldProposal) curr);
 			}
 		}
 		return res;
 	}
+
+	private static String getSEFPreviewContent(SelfEncapsulateFieldProposal sefp) throws JavaModelException {
+		ICompilationUnit compilationUnit= sefp.getField().getCompilationUnit();
+		String oldSource= compilationUnit.getSource();
+		
+		sefp.setNoDialog(true);
+		sefp.apply(null);
+
+		String newSource= compilationUnit.getSource();
+		compilationUnit.getBuffer().setContents(oldSource);
+		compilationUnit.getBuffer().save(null, true);
+		return newSource;
+	}
+
 
 	private static String getTemplatePreviewContent(SurroundWithTemplateProposal proposal) {
 		return proposal.getPreviewContent();

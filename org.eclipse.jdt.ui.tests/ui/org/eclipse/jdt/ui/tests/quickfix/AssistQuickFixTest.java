@@ -582,16 +582,15 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 				
-		int offset= buf.toString().indexOf("fField[0];");
-		AssistContext context= getCorrectionContext(cu, offset, 0);
+		String string= "fField[0];";
+		int offset= buf.toString().indexOf(string);
+		AssistContext context= getCorrectionContext(cu, offset, string.length());
 		List proposals= collectAssists(context, false);
 		
-		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= getPreviewContent(proposal);
-
+		String[] expected= new String[2];
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -600,10 +599,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        int i = fField[0];\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected1= buf.toString();
-		
-		proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview2= getPreviewContent(proposal);
+		expected[0]= buf.toString();
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -614,10 +610,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        i = fField[0];\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected2= buf.toString();
-		
+		expected[1]= buf.toString();
 
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
+		assertExpectedExistInProposals(proposals, expected);
 	}
 	
 	public void testAssignToLocal10() throws Exception {

@@ -168,6 +168,14 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 		checkArgName();
 	}
 	
+	public void reinitialize() {
+		try {
+			initialize(fField);
+		} catch (JavaModelException e) {
+			// ignore
+		}
+	}
+	
 	public IField getField() {
 		return fField;
 	}
@@ -470,7 +478,7 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 		for (int i= 0; i < messages.length; i++) {
 			IProblem problem= messages[i];
 			if (!isIgnorableProblem(problem)) {
-				result.addError(Messages.format(
+				result.addWarning(Messages.format(
 						RefactoringCoreMessages.SelfEncapsulateField_compiler_errors_update, 
 						element.getElementName()), JavaStatusContext.create(element));
 				return;
@@ -791,16 +799,14 @@ public class SelfEncapsulateFieldRefactoring extends ScriptableRefactoring {
 	}
 
 	public boolean isUsingLocalGetter() {
-		IType declaringType= fField.getDeclaringType();
-		return checkName(fGetterName, fUsedReadNames, declaringType);
+		return checkName(fGetterName, fUsedReadNames);
 	}
 
 	public boolean isUsingLocalSetter() {
-		IType declaringType= fField.getDeclaringType();
-		return checkName(fSetterName, fUsedModifyNames, declaringType);
+		return checkName(fSetterName, fUsedModifyNames);
 	}
 	
-	private static boolean checkName(String name, List usedNames, IType type) {
+	private static boolean checkName(String name, List usedNames) {
 		for (Iterator iter= usedNames.iterator(); iter.hasNext(); ) {
 			IMethodBinding method= (IMethodBinding)iter.next();
 			String selector= method.getName();

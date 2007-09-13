@@ -12,7 +12,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.Iterator;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -33,9 +32,7 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -3025,144 +3022,5 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		expected[1]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
-	}
-	
-	public void testInvisibleFieldToGetterSetter() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("b112441", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package b112441;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    private byte test;\n");
-		buf.append("\n");
-		buf.append("    public byte getTest() {\n");
-		buf.append("        return this.test;\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public void setTest(byte test) {\n");
-		buf.append("        this.test = test;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class D {\n");
-		buf.append("    public void foo(){\n");
-		buf.append("        C c=new C();\n");
-		buf.append("        ++c.test;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
-
-		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
-
-		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
-
-		String[] expected= new String[1];
-		buf= new StringBuffer();
-		buf.append("package b112441;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    private byte test;\n");
-		buf.append("\n");
-		buf.append("    public byte getTest() {\n");
-		buf.append("        return this.test;\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public void setTest(byte test) {\n");
-		buf.append("        this.test = test;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class D {\n");
-		buf.append("    public void foo(){\n");
-		buf.append("        C c=new C();\n");
-		buf.append("        c.setTest((byte) (c.getTest() + 1));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
-
-		assertExpectedExistInProposals(proposals, expected);
-	}
-	
-	public void testCreateFieldUsingSef() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    private int t;\n");
-		buf.append("    {\n");
-		buf.append("        System.out.println(t);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class B {\n");
-		buf.append("    {\n");
-		buf.append("        new A().t=5;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
-		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
-
-		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
-
-		String[] expected= new String[2];
-		buf= new StringBuffer();
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    int t;\n");
-		buf.append("    {\n");
-		buf.append("        System.out.println(t);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class B {\n");
-		buf.append("    {\n");
-		buf.append("        new A().t=5;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
-
-		assertExpectedExistInProposals(proposals, expected);
-		buf= new StringBuffer();
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    private int t;\n");
-		buf.append("    {\n");
-		buf.append("        System.out.println(getT());\n");
-		buf.append("    }\n");
-		buf.append("    public void setT(int t) {\n");
-		buf.append("        this.t = t;\n");
-		buf.append("    }\n");
-		buf.append("    public int getT() {\n");
-		buf.append("        return t;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class B {\n");
-		buf.append("    {\n");
-		buf.append("        new A().setT(5);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		checkForSEFProposal(proposals, cu, buf.toString());
-	}
-
-	private void checkForSEFProposal(ArrayList proposals, ICompilationUnit cu, String expected) throws Exception {
-		for (Iterator iter= proposals.iterator(); iter.hasNext();) {
-			ChangeCorrectionProposal proposal= (ChangeCorrectionProposal) iter.next();
-			if (proposal instanceof ModifierCorrectionSubProcessor.SelfEncapsulateFieldProposal) {
-				ModifierCorrectionSubProcessor.SelfEncapsulateFieldProposal sefp= (ModifierCorrectionSubProcessor.SelfEncapsulateFieldProposal) proposal;
-				sefp.setNoDialog(true);
-				sefp.apply(null);
-				assertEquals(expected, cu.getSource());
-				return;
-			}
-		}
-		fail("No SEF Quickfix found");
-	}
-
-	
+	}	
 }

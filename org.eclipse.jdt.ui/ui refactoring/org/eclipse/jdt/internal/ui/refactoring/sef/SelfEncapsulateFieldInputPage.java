@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.ui.refactoring.sef;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -27,29 +28,36 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
+import org.eclipse.jdt.internal.ui.preferences.CodeStylePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
@@ -59,8 +67,13 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	private IDialogSettings fSettings;
 	private List fEnablements;
 	
-	private static final String GENERATE_JAVADOC= "GenerateJavadoc";  //$NON-NLS-1$
+	private Text fGetterName;
+	private Text fSetterName;
 	
+	private Label fGetterInfo;
+	private Label fSetterInfo;
+	
+	private static final String GENERATE_JAVADOC= "GenerateJavadoc";  //$NON-NLS-1$
 
 	public SelfEncapsulateFieldInputPage() {
 		super("InputPage"); //$NON-NLS-1$
@@ -70,6 +83,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	
 	public void createControl(Composite parent) {
 		fRefactoring= (SelfEncapsulateFieldRefactoring)getRefactoring();
+		
 		fEnablements= new ArrayList();
 		loadSettings();
 		
@@ -77,66 +91,77 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		setControl(result);
 		initializeDialogUnits(result);
 		
-		GridLayout layout= new GridLayout();
-		layout.numColumns= 3;
-		layout.verticalSpacing= 8;
-		result.setLayout(layout);
-		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.widthHint= convertWidthInCharsToPixels(25);
+		result.setLayout(new GridLayout(3, false));
 		
-		Label label= new Label(result, SWT.LEAD);
+		Composite nameComposite= new Composite(result, SWT.NONE);
+		nameComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+		
+		GridLayout gridLayout= new GridLayout(3, false);
+		gridLayout.marginHeight= 0;
+		gridLayout.marginWidth= 0;
+		
+		nameComposite.setLayout(gridLayout);
+		
+		Label label= new Label(nameComposite, SWT.LEAD);
 		label.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_getter_name); 
 		
-		Text getter= new Text(result, SWT.BORDER);
-		getter.setText(fRefactoring.getGetterName());
-		getter.setLayoutData(gd);
-		TextFieldNavigationHandler.install(getter);
-		
-		final Label reUseGetter= new Label(result,SWT.LEAD);
-		GridData getterGD= new GridData();
-		getterGD.widthHint=convertWidthInCharsToPixels(23);
-		reUseGetter.setLayoutData(getterGD);
-		updateUseGetter(reUseGetter);
-		getter.addModifyListener(new ModifyListener() {
+		fGetterName= new Text(nameComposite, SWT.BORDER);
+		fGetterName.setText(fRefactoring.getGetterName());
+		TextFieldNavigationHandler.install(fGetterName);
+		fGetterName.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				String getterName= ((Text)e.widget).getText();
-				fRefactoring.setGetterName(getterName);
-				updateUseGetter(reUseGetter);
-				processValidation();
+				doGetterModified();
 			}
 		});
 		
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.widthHint= convertWidthInCharsToPixels(25);
+		fGetterName.setLayoutData(gd);
+		
+		fGetterInfo= new Label(nameComposite,SWT.LEAD);
+		fGetterInfo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		updateUseGetter();
+		
 		if (needsSetter()) {
-			label= new Label(result, SWT.LEAD);
+			label= new Label(nameComposite, SWT.LEAD);
 			label.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_setter_name); 
 			
-			Text setter= new Text(result, SWT.BORDER);
-			setter.setText(fRefactoring.getSetterName());
-			setter.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-			final Label reUseSetter= new Label(result, SWT.LEAD);
-			GridData setterGD= new GridData();
-			setterGD.widthHint=convertWidthInCharsToPixels(23);
-			reUseSetter.setLayoutData(setterGD);
-			updateUseSetter(reUseSetter);
-			setter.addModifyListener(new ModifyListener() {
+			fSetterName= new Text(nameComposite, SWT.BORDER);
+			fSetterName.setText(fRefactoring.getSetterName());
+			fSetterName.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			fSetterName.addModifyListener(new ModifyListener() {
 				public void modifyText(ModifyEvent e) {
-					String setterName= ((Text)e.widget).getText();
-					fRefactoring.setSetterName(setterName);
-					updateUseSetter(reUseSetter);
-					processValidation();
+					doSetterModified();
 				}
-
 			});
-			TextFieldNavigationHandler.install(setter);
-		}			
+			TextFieldNavigationHandler.install(fSetterName);
+			
+			fSetterInfo= new Label(nameComposite, SWT.LEAD);
+			fSetterInfo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			updateUseSetter();
+		}
+		
+		Link link= new Link(nameComposite, SWT.NONE);
+		link.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_configure_link);
+		link.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				doOpenPreference();
+			}
+		});
+		link.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1));
+		
+		Label separator= new Label(result, SWT.NONE);
+		separator.setText(""); //$NON-NLS-1$
+		separator.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1));
 		
 		// createSeparator(result, layouter);
 		createFieldAccessBlock(result);
 		
 		label= new Label(result, SWT.LEFT);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		label.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_insert_after);
 		fEnablements.add(label);
+		
 		final Combo combo= new Combo(result, SWT.READ_ONLY);
 		fillWithPossibleInsertPositions(combo, fRefactoring.getField());
 		combo.addSelectionListener(new SelectionAdapter() {
@@ -144,11 +169,8 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 				fRefactoring.setInsertionIndex(combo.getSelectionIndex() - 1);
 			}
 		});
-		GridData gridData= new GridData(GridData.FILL_HORIZONTAL);
-		gridData.horizontalSpan=2;
-		combo.setLayoutData(gridData);
+		combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
 		fEnablements.add(combo);
-		
 		
 		createAccessModifier(result);
 			
@@ -160,26 +182,25 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 				setGenerateJavadoc(((Button)e.widget).getSelection());
 			}
 		});
-		GridData checkGD= new GridData(GridData.FILL_HORIZONTAL);
-		checkGD.horizontalSpan=3;
-		checkBox.setLayoutData(checkGD);
+		checkBox.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1));
+
 		fEnablements.add(checkBox);
 		
 		updateEnablements();
 		
 		processValidation();
 		
-		getter.setFocus();
+		fGetterName.setFocus();
 		
 		Dialog.applyDialogFont(result);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.SEF_WIZARD_PAGE);		
 	}
 
-	private void updateUseSetter(Label reUseSetter) {
+	private void updateUseSetter() {
 		if (fRefactoring.isUsingLocalSetter())
-			reUseSetter.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_useexistingsetter_label);
+			fSetterInfo.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_useexistingsetter_label);
 		else
-			reUseSetter.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_usenewgetter_label); 
+			fSetterInfo.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_usenewgetter_label); 
 		updateEnablements();
 	}
 
@@ -191,11 +212,11 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		}
 	}
 
-	private void updateUseGetter(Label reUseGetter) {
+	private void updateUseGetter() {
 		if (fRefactoring.isUsingLocalGetter())
-			reUseGetter.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_useexistinggetter_label);
+			fGetterInfo.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_useexistinggetter_label);
 		else
-			reUseGetter.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_usenewsetter_label);
+			fGetterInfo.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_usenewsetter_label);
 		updateEnablements();
 	}
 
@@ -212,19 +233,20 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		int visibility= fRefactoring.getVisibility();
 		if (Flags.isPublic(visibility))
 			return;
-		GridLayout layout;
-		Label label;
-		label= new Label(result, SWT.NONE);
+
+		Label label= new Label(result, SWT.NONE);
 		label.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_access_Modifiers); 
 		fEnablements.add(label);
+		
 		Composite group= new Composite(result, SWT.NONE);
-		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		layout= new GridLayout();
-		layout.numColumns= 4; layout.marginWidth= 0; layout.marginHeight= 0;
+		group.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
+
+		GridLayout layout= new GridLayout(4, false);
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
 		group.setLayout(layout);
-		GridData gridData= new GridData(GridData.FILL_HORIZONTAL);
-		gridData.horizontalSpan=2;
-		group.setLayoutData(gridData);
+
+		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		Object[] info= createData(visibility);
 		String[] labels= (String[])info[0];
@@ -247,17 +269,19 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	
 	private void createFieldAccessBlock(Composite result) {
 		Label label= new Label(result, SWT.LEFT);
-		label.setText(RefactoringMessages.SelfEncapsulateField_field_access); 
+		label.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_field_access);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		
 		Composite group= new Composite(result, SWT.NONE);
-		GridLayout layout= new GridLayout();
-		layout.marginWidth= 0; layout.marginHeight= 0; layout.numColumns= 2;
+		GridLayout layout= new GridLayout(2, false);
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
 		group.setLayout(layout);
-		GridData gridData= new GridData(GridData.FILL_HORIZONTAL);
-		gridData.horizontalSpan=2;
-		group.setLayoutData(gridData);
+
+		group.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
+
 		Button radio= new Button(group, SWT.RADIO);
-		radio.setText(RefactoringMessages.SelfEncapsulateField_use_setter_getter); 
+		radio.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_use_setter_getter); 
 		radio.setSelection(true);
 		radio.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -267,7 +291,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		radio.setLayoutData(new GridData());
 		
 		radio= new Button(group, SWT.RADIO);
-		radio.setText(RefactoringMessages.SelfEncapsulateField_keep_references); 
+		radio.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_keep_references); 
 		radio.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				fRefactoring.setEncapsulateDeclaringClass(false);
@@ -337,5 +361,39 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		} catch(JavaModelException e) {
 			return true;
 		}
+	}
+	
+	private void doOpenPreference() {
+		String id= CodeStylePreferencePage.PROP_ID;
+		IJavaProject project= fRefactoring.getField().getJavaProject();
+		
+		String[] relevantOptions= getRelevantOptions(project);
+		
+		int open= PreferencesUtil.createPropertyDialogOn(getShell(), project, id, new String[] { id }, null).open();
+		if (open == Window.OK && !Arrays.equals(relevantOptions, getRelevantOptions(project))) { // relevant options changes
+			fRefactoring.reinitialize();
+			fGetterName.setText(fRefactoring.getGetterName());
+			fSetterName.setText(fRefactoring.getSetterName());
+		}
+	}
+	
+	private String[] getRelevantOptions(IJavaProject project) {
+		return new String[] {
+			project.getOption(JavaCore.CODEASSIST_FIELD_PREFIXES, true),
+			project.getOption(JavaCore.CODEASSIST_FIELD_SUFFIXES, true),
+			PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_IS_FOR_GETTERS, project)
+		};
+	}
+
+	private void doSetterModified() {
+		fRefactoring.setSetterName(fSetterName.getText());
+		updateUseSetter();
+		processValidation();
+	}
+	
+	private void doGetterModified() {
+		fRefactoring.setGetterName(fGetterName.getText());
+		updateUseGetter();
+		processValidation();
 	}
 }

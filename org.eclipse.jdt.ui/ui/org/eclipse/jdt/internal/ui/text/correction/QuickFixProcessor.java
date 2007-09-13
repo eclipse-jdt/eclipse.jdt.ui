@@ -374,7 +374,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				ModifierCorrectionSubProcessor.addRemoveInvalidModfiersProposal(context, problem, proposals, 5);
 				break;
 			case IProblem.NotVisibleField:
-				ModifierCorrectionSubProcessor.addGetterSetterProposal(context,problem,proposals, 15);
+				GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, problem, proposals);
 				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE, 10);
 				break;
 			case IProblem.NotVisibleMethod:
@@ -439,7 +439,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				LocalCorrectionsSubProcessor.addUnnecessaryThrownExceptionProposal(context, problem, proposals);
 				break;
 			case IProblem.UnqualifiedFieldAccess:
-				ModifierCorrectionSubProcessor.addGetterSetterProposal(context, problem, proposals, 15);
+				GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, problem, proposals);
 				LocalCorrectionsSubProcessor.addUnqualifiedFieldAccessProposal(context, problem, proposals);
 				break;
 			case IProblem.Task:
