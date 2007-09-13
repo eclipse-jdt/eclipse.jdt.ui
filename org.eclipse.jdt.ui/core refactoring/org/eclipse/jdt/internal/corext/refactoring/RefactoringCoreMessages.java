@@ -570,6 +570,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractMethodAnalyzer_cannot_extract_method_name_reference;
 
+	public static String ExtractMethodAnalyzer_cannot_extract_part_of_qualified_name;
+
 	public static String ExtractMethodAnalyzer_cannot_extract_name_in_declaration;
 
 	public static String ExtractMethodAnalyzer_cannot_extract_null_type;

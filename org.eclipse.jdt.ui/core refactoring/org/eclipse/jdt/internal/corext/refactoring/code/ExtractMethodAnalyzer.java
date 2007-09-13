@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -44,9 +45,12 @@ import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -596,6 +600,14 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 					}
 					if (name.resolveBinding() instanceof IMethodBinding) {
 						status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_method_name_reference); 
+						break superCall;
+					}
+					if (name.resolveBinding() instanceof IVariableBinding) {
+						StructuralPropertyDescriptor locationInParent= name.getLocationInParent();
+						if (locationInParent == QualifiedName.NAME_PROPERTY || (locationInParent == FieldAccess.NAME_PROPERTY || ((FieldAccess) name.getParent()).getExpression() instanceof ThisExpression))  {
+							status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_part_of_qualified_name); 
+							break superCall;
+						}
 					}
 					if (name.isSimpleName() && ((SimpleName)name).isDeclaration()) {
 						status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_name_in_declaration); 
