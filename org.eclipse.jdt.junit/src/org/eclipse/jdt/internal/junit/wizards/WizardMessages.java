@@ -52,6 +52,13 @@ public final class WizardMessages extends NLS {
 	public static String NewTestCaseWizardPageOne_error_class_to_test_not_valid;
 	public static String NewTestCaseWizardPageOne_error_class_to_test_not_exist;
 	public static String NewTestCaseWizardPageOne_warning_class_to_test_is_interface;
+	public static String NewTestCaseCreationWizard_fix_selection_junit3_description;
+	public static String NewTestCaseCreationWizard_fix_selection_junit4_description;
+	public static String NewTestCaseCreationWizard_fix_selection_open_build_path_dialog;
+	public static String NewTestCaseCreationWizard_fix_selection_problem_updating_classpath;
+	public static String NewTestCaseCreationWizard_fix_selection_invoke_fix;
+	public static String NewTestCaseCreationWizard_create_progress;
+	public static String NewTestCaseCreationWizard_fix_selection_not_now;
 	public static String NewTestCaseWizardPageOne_warning_class_to_test_not_visible;
 	public static String NewTestCaseWizardPageOne_comment_class_to_test;
 	public static String NewTestCaseWizardPageOne_error_junitNotOnbuildpath;

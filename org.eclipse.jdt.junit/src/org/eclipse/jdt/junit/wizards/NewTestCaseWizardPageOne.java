@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -551,22 +551,13 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		String message= null;
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		if (root != null) {
-			try {
-				IJavaProject project= root.getJavaProject();
-				if (project.exists()) {
-					if (isJUnit4()) {
-						if (!JUnitStubUtility.is50OrHigher(project)) {
-							message= WizardMessages.NewTestCaseWizardPageOne_linkedtext_java5required;
-						} else if (project.findType(JUnitPlugin.JUNIT4_ANNOTATION_NAME) == null) {
-							message= Messages.format(WizardMessages.NewTestCaseWizardPageOne_linkedtext_junit4_notonbuildpath, project.getElementName());
-						}
-					} else {			
-						if (project.findType(JUnitPlugin.TEST_SUPERCLASS_NAME) == null) {
-							message= Messages.format(WizardMessages.NewTestCaseWizardPageOne_linkedtext_junit3_notonbuildpath, project.getElementName());
-						}
+			IJavaProject project= root.getJavaProject();
+			if (project.exists()) {
+				if (isJUnit4()) {
+					if (!JUnitStubUtility.is50OrHigher(project)) {
+						message= WizardMessages.NewTestCaseWizardPageOne_linkedtext_java5required;
 					}
 				}
-			} catch (JavaModelException e) {
 			}
 		}
 		fLink.setVisible(message != null);
@@ -926,7 +917,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			buffer.append("void ");//$NON-NLS-1$ 
 			buffer.append(testName);
 			buffer.append("()");//$NON-NLS-1$ 
-			appendTestMethodBody(buffer, testName, method, type.getCompilationUnit(), imports);
+			appendTestMethodBody(buffer, type.getCompilationUnit());
 			type.createMethod(buffer.toString(), null, false, null);	
 		}
 	}
@@ -955,7 +946,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		return getPackageFragment().findRecommendedLineSeparator();
 	}
 
-	private void appendTestMethodBody(StringBuffer buffer, String name, IMethod method, ICompilationUnit targetCu, ImportsManager imports) throws CoreException {
+	private void appendTestMethodBody(StringBuffer buffer, ICompilationUnit targetCu) throws CoreException {
 		final String delimiter= getLineDelimiter();
 		buffer.append('{').append(delimiter);
 		String todoTask= ""; //$NON-NLS-1$
