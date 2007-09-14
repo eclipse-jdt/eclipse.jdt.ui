@@ -33,6 +33,7 @@ import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -139,7 +140,11 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 				}
 			}
 			if (qualifiedName != null) {	
-				ClasspathFixProposal[] fixProposals= ClasspathFixProcessor.getContributedFixImportProposals(unit.getJavaProject(), qualifiedName, null);
+				IJavaProject javaProject= unit.getJavaProject();
+				if (javaProject.findType(qualifiedName) != null) {
+					return proposals;
+				}
+				ClasspathFixProposal[] fixProposals= ClasspathFixProcessor.getContributedFixImportProposals(javaProject, qualifiedName, null);
 				for (int i= 0; i < fixProposals.length; i++) {
 					if (proposals == null)
 						proposals= new ArrayList();
