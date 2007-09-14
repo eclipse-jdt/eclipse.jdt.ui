@@ -123,17 +123,27 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 	private ArrayList getAddJUnitToBuildPathProposals(IInvocationContext context, IProblemLocation location, ArrayList proposals) {
 		try {
 			ICompilationUnit unit= context.getCompilationUnit();
+			String qualifiedName= null;
+			
 			String s= unit.getBuffer().getText(location.getOffset(), location.getLength());
-			if (s.equals("TestCase") || s.equals("TestSuite") || s.equals("RunWith") || s.equals("Test")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			if (s.equals("TestCase") || s.equals("TestSuite")) { //$NON-NLS-1$ //$NON-NLS-2$
+				qualifiedName= "junit.framework." + s; //$NON-NLS-1$
+			} else if (s.equals("RunWith")) { //$NON-NLS-1$
+				qualifiedName= "org.junit.runner.RunWith"; //$NON-NLS-1$
+			} else if (s.equals("Test")) { //$NON-NLS-1$
 				ASTNode node= location.getCoveredNode(context.getASTRoot());
 				if (node != null && node.getLocationInParent() == MarkerAnnotation.TYPE_NAME_PROPERTY) {
-					s= "org.junit.Test"; //$NON-NLS-1$
+					qualifiedName= "org.junit.Test"; //$NON-NLS-1$
+				} else {
+					qualifiedName= "junit.framework.Test"; //$NON-NLS-1$
 				}
-				ClasspathFixProposal[] fixProposals= ClasspathFixProcessor.getContributedFixImportProposals(unit.getJavaProject(), s, null);
+			}
+			if (qualifiedName != null) {	
+				ClasspathFixProposal[] fixProposals= ClasspathFixProcessor.getContributedFixImportProposals(unit.getJavaProject(), qualifiedName, null);
 				for (int i= 0; i < fixProposals.length; i++) {
 					if (proposals == null)
 						proposals= new ArrayList();
-					proposals.add(new JUnitClasspathFixCorrectionProposal(fixProposals[i], getImportRewrite(context.getASTRoot(), s)));
+					proposals.add(new JUnitClasspathFixCorrectionProposal(fixProposals[i], getImportRewrite(context.getASTRoot(), qualifiedName)));
 				}
 			}
 		} catch (JavaModelException e) {
@@ -142,15 +152,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 		return proposals;
 	}
 
-	private ImportRewrite getImportRewrite(CompilationUnit astRoot, String name) {
-		String typeToImport= null;
-		if (name.equals("TestCase") || name.equals("TestSuite")) { //$NON-NLS-1$ //$NON-NLS-2$
-			typeToImport= "junit.framework." + name; //$NON-NLS-1$
-		} else if (name.equals("org.junit.Test")) { //$NON-NLS-1$
-			typeToImport= "org.junit.Test"; //$NON-NLS-1$
-		} else if (name.equals("RunWith")) { //$NON-NLS-1$
-			typeToImport= "org.junit.runner.RunWith"; //$NON-NLS-1$
-		}
+	private ImportRewrite getImportRewrite(CompilationUnit astRoot, String typeToImport) {
 		if (typeToImport != null) {
 			ImportRewrite importRewrite= CodeStyleConfiguration.createImportRewrite(astRoot, true);
 			importRewrite.addImport(typeToImport);
