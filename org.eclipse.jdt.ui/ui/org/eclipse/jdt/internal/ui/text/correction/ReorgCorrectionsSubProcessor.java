@@ -255,7 +255,7 @@ public class ReorgCorrectionsSubProcessor {
 		
 		String name= ASTNodes.asString(importDeclaration.getName());
 		if (importDeclaration.isOnDemand()) {
-			name= JavaModelUtil.concatenateName(name, ".*"); //$NON-NLS-1$
+			name= JavaModelUtil.concatenateName(name, "*"); //$NON-NLS-1$
 		}
 		
 		ClasspathFixProposal[] classPathFixProposals= ClasspathFixProcessorDescriptor.getProposals(cu.getJavaProject(), name, null);
