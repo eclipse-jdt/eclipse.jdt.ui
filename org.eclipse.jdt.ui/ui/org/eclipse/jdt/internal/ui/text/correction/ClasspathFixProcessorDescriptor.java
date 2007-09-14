@@ -104,8 +104,7 @@ public final class ClasspathFixProcessorDescriptor {
 				ExpressionConverter parser= ExpressionConverter.getDefault();
 				Expression expression= parser.perform(children[0]);
 				EvaluationContext evalContext= new EvaluationContext(null, javaProject);
-				String[] natures= javaProject.getProject().getDescription().getNatureIds();
-				evalContext.addVariable("projectNatures", Arrays.asList(natures)); //$NON-NLS-1$
+				evalContext.addVariable("project", javaProject); //$NON-NLS-1$
 				evalContext.addVariable("sourceLevel", javaProject.getOption(JavaCore.COMPILER_SOURCE, true)); //$NON-NLS-1$
 				return expression.evaluate(evalContext) == EvaluationResult.TRUE;
 			} catch (CoreException e) {

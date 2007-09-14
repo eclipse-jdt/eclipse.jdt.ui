@@ -33,6 +33,9 @@ import org.eclipse.jdt.internal.ui.text.correction.ClasspathFixProcessorDescript
  * Class to be implemented by contributors to the extension point
  * <code>org.eclipse.jdt.ui.classpathFixProcessors</code>.
  * 
+  * <strong>EXPERIMENTAL</strong> This class or interface has been added as part
+ * of a work in progress. We are interested in feedback (bug 196141) . This API may still change. 
+ * 
  * @since 3.4
  */
 public abstract class ClasspathFixProcessor {

@@ -10,7 +10,7 @@
 &lt;p&gt;
 This extension point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Properties to test on are:
 &lt;dl&gt;
-&lt;li&gt;projectNatures: type Collection; all project natures of the current project&lt;/li&gt;
+&lt;li&gt;project: type IJavaProject; the current project&lt;/li&gt;
 &lt;li&gt;sourceLevel: type String; the source compliance of the current project&lt;/li&gt;
 &lt;/dl&gt;
 A processor can specify to override an other processor. An overridden processor is only asked to provide proposals when the overriding processor returns &lt;code&gt;null&lt;/code&gt; as proposals.
@@ -128,10 +128,9 @@ with a public 0-argument constructor.
    name=&quot;My Classpath Fix Processor&quot;
    class=&quot;com.example.MyClasspathFixProcessor&quot;&gt;
    &lt;enablement&gt;
-      &lt;with variable=&quot;projectNatures&quot;&gt;
-         &lt;iterate operator=&quot;or&quot;&gt;
-            &lt;equals value=&quot;com.example.mynature&quot;/&gt;
-         &lt;/iterate&gt;
+      &lt;with variable=&quot;project&quot;&gt;
+		 &lt;test property=&quot;org.eclipse.jdt.core.isInJavaProjectWithNature&quot;
+		       value=&quot;org.eclipse.pde.PluginNature&quot;/&gt;
       &lt;/with&gt;
    &lt;/enablement&gt;
    &lt;overrides
