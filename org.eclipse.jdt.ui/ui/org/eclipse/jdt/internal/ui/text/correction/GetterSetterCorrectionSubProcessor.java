@@ -13,6 +13,11 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
@@ -21,7 +26,10 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -107,6 +115,26 @@ public class GetterSetterCorrectionSubProcessor {
 			fNoDialog= noDialog;
 		}
 
+		public TextFileChange getChange(IFile file) throws CoreException {
+			final SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(fField);
+			refactoring.setVisibility(Flags.AccPublic);
+			refactoring.setConsiderVisibility(false);//private field references are just searched in local file
+			refactoring.checkInitialConditions(new NullProgressMonitor());
+			refactoring.checkFinalConditions(new NullProgressMonitor());
+			Change createdChange= refactoring.createChange(new NullProgressMonitor());
+			if (createdChange instanceof CompositeChange) {
+				Change[] children= ((CompositeChange) createdChange).getChildren();
+				for (int i= 0; i < children.length; i++) {
+					Change curr= children[i];
+					if (curr instanceof TextFileChange && ((TextFileChange) curr).getFile().equals(file)) {
+						return (TextFileChange) curr;
+					}
+				}
+			}
+			return null;
+		}
+		
+		
 		private static String getDescription(IField field) {
 			return Messages.format(CorrectionMessages.GetterSetterCorrectionSubProcessor_creategetterunsingencapsulatefield_description, field.getElementName());
 		}

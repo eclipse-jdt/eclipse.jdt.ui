@@ -22,17 +22,20 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
+import org.eclipse.ltk.core.refactoring.TextFileChange;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -342,17 +345,13 @@ public class QuickFixTest extends TestCase {
 		return res;
 	}
 
-	private static String getSEFPreviewContent(SelfEncapsulateFieldProposal sefp) throws JavaModelException {
+	private static String getSEFPreviewContent(SelfEncapsulateFieldProposal sefp) throws CoreException {
 		ICompilationUnit compilationUnit= sefp.getField().getCompilationUnit();
-		String oldSource= compilationUnit.getSource();
-		
-		sefp.setNoDialog(true);
-		sefp.apply(null);
-
-		String newSource= compilationUnit.getSource();
-		compilationUnit.getBuffer().setContents(oldSource);
-		compilationUnit.getBuffer().save(null, true);
-		return newSource;
+		TextFileChange change= sefp.getChange((IFile) compilationUnit.getResource());
+		if (change != null) {
+			return change.getPreviewContent(null);
+		}
+		return "";
 	}
 
 
