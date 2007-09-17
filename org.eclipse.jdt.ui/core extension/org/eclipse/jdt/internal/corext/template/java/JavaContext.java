@@ -49,8 +49,11 @@ import org.eclipse.jface.text.templates.TemplateVariableType;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -476,7 +479,92 @@ public class JavaContext extends CompilationUnitContext {
 			return type;
 		}
 	}
-	
+
+	/**
+	 * Adds a static import for the member with name <code>qualifiedMemberName</code>. The member is
+	 * either a static field or a static method or a '*' to import all static members of a type.
+	 * 
+	 * @param qualifiedMemberName the fully qualified name of the member to import or a qualified type
+	 * 			name plus a '.*' suffix.
+	 * @return returns either the simple member name if the import was successful or else the qualified name.
+	 * @since 3.4
+	 */
+	public String addStaticImport(String qualifiedMemberName) {
+		if (isReadOnly())
+			return qualifiedMemberName;
+
+		ICompilationUnit cu= getCompilationUnit();
+		if (cu == null)
+			return qualifiedMemberName;
+
+		int memberOffset= qualifiedMemberName.lastIndexOf('.');
+		if (memberOffset == -1)
+			return qualifiedMemberName;
+
+		String typeName= qualifiedMemberName.substring(0, memberOffset);
+		String memberName= qualifiedMemberName.substring(memberOffset + 1, qualifiedMemberName.length());
+		try {
+			boolean isField;
+			if ("*".equals(memberName)) { //$NON-NLS-1$
+				isField= true;
+			} else {
+				IJavaProject javaProject= cu.getJavaProject();
+
+				IType type= javaProject.findType(typeName);
+				if (type == null)
+					return qualifiedMemberName;
+
+				IField field= type.getField(memberName);
+				if (field.exists()) {
+					isField= true;
+				} else if (hasMethod(type, memberName)) {
+					isField= false;
+				} else {
+					return qualifiedMemberName;
+				}
+			}
+
+			CompilationUnit root= getASTRoot(cu);
+			if (fImportRewrite == null) {
+				if (root == null) {
+					fImportRewrite= StubUtility.createImportRewrite(cu, true);
+				} else {
+					fImportRewrite= StubUtility.createImportRewrite(root, true);
+				}
+			}
+
+			ImportRewriteContext context;
+			if (root == null)
+				context= null;
+			else
+				context= new ContextSensitiveImportRewriteContext(root, getCompletionOffset(), fImportRewrite);
+			
+			return fImportRewrite.addStaticImport(typeName, memberName, isField, context);
+		} catch (JavaModelException e) {
+			handleException(null, e);
+			return typeName;
+		}
+	}
+
+	/**
+	 * Does <code>type</code> contain a method with <code>name</code>?
+	 * 
+	 * @param type the type to inspect
+	 * @param name the name of the method to search for
+	 * @return true if has such a method
+	 * @throws JavaModelException
+	 * @since 3.4
+	 */
+	private boolean hasMethod(IType type, String name) throws JavaModelException {
+		IMethod[] methods= type.getMethods();
+		for (int i= 0; i < methods.length; i++) {
+			if (name.equals(methods[i].getElementName()))
+				return true;
+		}
+
+		return false;
+	}
+
 	private void rewriteImports() {
 		if (fImportRewrite == null)
 			return;

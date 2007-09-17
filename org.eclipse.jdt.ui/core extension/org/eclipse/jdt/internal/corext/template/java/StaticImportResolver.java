@@ -18,13 +18,13 @@ import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
 
-public class ImportsResolver extends TemplateVariableResolver {
+public class StaticImportResolver extends TemplateVariableResolver {
 
-	public ImportsResolver(String type, String description) {
+	public StaticImportResolver(String type, String description) {
 		super(type, description);
 	}
 
-	public ImportsResolver() {
+	public StaticImportResolver() {
 	}
 
 	/* (non-Javadoc)
@@ -39,8 +39,8 @@ public class ImportsResolver extends TemplateVariableResolver {
 			List params= variable.getVariableType().getParams();
 			if (params.size() > 0) {
 				for (Iterator iterator= params.iterator(); iterator.hasNext();) {
-					String typeName= (String) iterator.next();
-					jc.addImport(typeName);
+					String qualifiedMemberName= (String) iterator.next();
+					jc.addStaticImport(qualifiedMemberName);
 				}
 			}
 		} else {
@@ -54,4 +54,5 @@ public class ImportsResolver extends TemplateVariableResolver {
 	protected String[] resolveAll(TemplateContext context) {
 		return new String[0];
 	}
+
 }

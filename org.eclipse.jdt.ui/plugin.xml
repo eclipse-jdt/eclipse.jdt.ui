@@ -5005,6 +5005,12 @@
             description="%templates.java.resolvers.Imports.description"
             name="%templates.java.resolvers.Imports.name"
             type="import"/>
+      <resolver
+            class="org.eclipse.jdt.internal.corext.template.java.StaticImportResolver"
+            contextTypeId="java"
+            description="%templates.java.resolvers.ImportStatic.description"
+            name="%templates.java.resolvers.ImportStatic.name"
+            type="importStatic"/>
    </extension>
 
 <!-- =========================================================================== -->
