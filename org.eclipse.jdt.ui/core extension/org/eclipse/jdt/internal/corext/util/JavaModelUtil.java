@@ -804,33 +804,7 @@ public final class JavaModelUtil {
 	}
 	
 	public static void setCompilanceOptions(Map map, String compliance) {
-		if (JavaCore.VERSION_1_6.equals(compliance)) {
-			map.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_6);
-			map.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_6);
-			map.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_6);
-			map.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
-			map.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.ERROR);
-		} else if (JavaCore.VERSION_1_5.equals(compliance)) {
-			map.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
-			map.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
-			map.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
-			map.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
-			map.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.ERROR);
-		} else if (JavaCore.VERSION_1_4.equals(compliance)) {
-			map.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
-			map.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_3);
-			map.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_2);
-			map.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.WARNING);
-			map.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.WARNING);
-		} else if (JavaCore.VERSION_1_3.equals(compliance)) {
-			map.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_3);
-			map.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_3);
-			map.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_1);
-			map.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.IGNORE);
-			map.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.IGNORE);
-		} else {
-			throw new IllegalArgumentException("Unsupported compliance: " + compliance); //$NON-NLS-1$
-		}
+		JavaCore.setComplianceOptions(compliance, map);
 	}
 	
 	public static void setDefaultClassfileOptions(Map map, String compliance) {
