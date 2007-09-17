@@ -26,6 +26,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
@@ -6188,6 +6189,66 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected1= buf.toString();
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+
+	public void testCorrectIndetationBug202145_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("//  \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.FORMAT_CORRECT_INDENTATION);
+		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
+		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        //\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testCorrectIndetationBug202145_2() throws Exception {
+		IJavaProject project= ProjectTestSetup.getProject();
+		project.setOption(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.TRUE);
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E1 {\n");
+			buf.append("    public void foo() {\n");
+			buf.append("//  \n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+			enable(CleanUpConstants.FORMAT_CORRECT_INDENTATION);
+			enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
+			enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E1 {\n");
+			buf.append("    public void foo() {\n");
+			buf.append("//\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+
+			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		} finally {
+			project.setOption(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.FALSE);
+		}
 	}
 
 	public void testUnimplementedCode01() throws Exception {
