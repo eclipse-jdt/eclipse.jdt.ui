@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,6 +78,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PRESERVE= JavaCore.PRESERVE;
 	private static final String OPTIMIZE_OUT= JavaCore.OPTIMIZE_OUT;
 	
+	private static final String VERSION_CLDC_1_1= JavaCore.VERSION_CLDC_1_1;
 	private static final String VERSION_1_1= JavaCore.VERSION_1_1;
 	private static final String VERSION_1_2= JavaCore.VERSION_1_2;
 	private static final String VERSION_1_3= JavaCore.VERSION_1_3;
@@ -227,8 +228,9 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
 		Control[] otherChildren= group.getChildren();	
 				
-		String[] versions= new String[] { VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4, VERSION_1_5, VERSION_1_6 };
+		String[] versions= new String[] { VERSION_CLDC_1_1, VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4, VERSION_1_5, VERSION_1_6 };
 		String[] versionsLabels= new String[] {
+			PreferencesMessages.ComplianceConfigurationBlock_versionCLDC11,
 			PreferencesMessages.ComplianceConfigurationBlock_version11,  
 			PreferencesMessages.ComplianceConfigurationBlock_version12, 
 			PreferencesMessages.ComplianceConfigurationBlock_version13, 
@@ -348,8 +350,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				fComplianceStatus= validateCompliance();
 			} else if (PREF_COMPLIANCE.equals(changedKey)) {
 			    // set compliance settings to default
-			    Object oldDefault= setValue(INTR_DEFAULT_COMPLIANCE, DEFAULT_CONF);
-			    updateComplianceEnableState();
+			    Object oldDefault= getValue(INTR_DEFAULT_COMPLIANCE);
 				updateComplianceDefaultSettings(USER_CONF.equals(oldDefault), oldValue);
 				fComplianceStatus= validateCompliance();
 				validateComplianceStatus();
@@ -358,6 +359,19 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				fComplianceStatus= validateCompliance();
 			} else if (PREF_CODEGEN_TARGET_PLATFORM.equals(changedKey)) {
 				updateInlineJSREnableState();
+				if (VERSION_CLDC_1_1.equals(newValue) && !oldValue.equals(newValue)) {
+					String compliance= getValue(PREF_COMPLIANCE);
+					String source= getValue(PREF_SOURCE_COMPATIBILITY);
+					if (!JavaModelUtil.isVersionLessThan(compliance, VERSION_1_5)) {
+						setValue(PREF_COMPLIANCE, VERSION_1_4);
+					}
+					if (!VERSION_1_3.equals(source)) {
+						setValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_3);
+					}
+				}
+				updateControls();
+				updateInlineJSREnableState();
+				updateAssertEnumAsIdentifierEnableState();
 				fComplianceStatus= validateCompliance();
 			} else if (PREF_PB_ENUM_AS_IDENTIFIER.equals(changedKey) ||
 					PREF_PB_ASSERT_AS_IDENTIFIER.equals(changedKey)) {
@@ -431,7 +445,14 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			status.setError(PreferencesMessages.ComplianceConfigurationBlock_classfile_greater_compliance); 
 			return status;
 		}
-		
+
+		if (VERSION_CLDC_1_1.equals(target)) {
+			if (!VERSION_1_3.equals(source) || !JavaModelUtil.isVersionLessThan(compliance, VERSION_1_5)) {
+				status.setError(PreferencesMessages.ComplianceConfigurationBlock_cldc11_requires_source13_compliance_se14);
+				return status;
+			}
+		}
+
 		// target must not be smaller than source
 		if (!VERSION_1_3.equals(source) && JavaModelUtil.isVersionLessThan(target, source)) {
 			status.setError(PreferencesMessages.ComplianceConfigurationBlock_classfile_greater_source); 

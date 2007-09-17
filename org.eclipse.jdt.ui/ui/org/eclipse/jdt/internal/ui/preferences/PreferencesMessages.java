@@ -480,6 +480,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_line_number_attr_label;
 	public static String ComplianceConfigurationBlock_source_file_attr_label;
 	public static String ComplianceConfigurationBlock_codegen_unused_local_label;
+	public static String ComplianceConfigurationBlock_cldc11_requires_source13_compliance_se14;
 	public static String ComplianceConfigurationBlock_codegen_inline_jsr_bytecode_label;
 	public static String ComplianceConfigurationBlock_compiler_compliance_label;
 	public static String ComplianceConfigurationBlock_default_settings_label;
@@ -767,6 +768,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaBasePreferencePage_do_not_hide_dialog_message;
 	public static String CodeAssistConfigurationBlock_matchCamelCase_label;
 	public static String ComplianceConfigurationBlock_version16;
+	public static String ComplianceConfigurationBlock_versionCLDC11;
 	public static String ComplianceConfigurationBlock_src_greater_compliance;
 	public static String ComplianceConfigurationBlock_classfile_greater_compliance;
 	public static String ComplianceConfigurationBlock_classfile_greater_source;

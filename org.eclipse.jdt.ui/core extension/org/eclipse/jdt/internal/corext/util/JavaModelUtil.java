@@ -847,6 +847,12 @@ public final class JavaModelUtil {
 	 * @return returns if version 1 is less than version 2.
 	 */
 	public static boolean isVersionLessThan(String version1, String version2) {
+		if (JavaCore.VERSION_CLDC_1_1.equals(version1)) {
+			version1= JavaCore.VERSION_1_1 + 'a';
+		}
+		if (JavaCore.VERSION_CLDC_1_1.equals(version2)) {
+			version2= JavaCore.VERSION_1_1 + 'a';
+		}
 		return version1.compareTo(version2) < 0;
 	}
 	
