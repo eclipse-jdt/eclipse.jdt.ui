@@ -17,13 +17,21 @@ import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
-
+/**
+ * Resolver for the <code>import</code> variable. Resolves to a
+ * set of import statements.
+ * 
+ * @since 3.4
+ */
 public class ImportsResolver extends TemplateVariableResolver {
 
 	public ImportsResolver(String type, String description) {
 		super(type, description);
 	}
-
+	
+	/**
+	 * Default ctor for instantiation by the extension point.
+	 */
 	public ImportsResolver() {
 	}
 

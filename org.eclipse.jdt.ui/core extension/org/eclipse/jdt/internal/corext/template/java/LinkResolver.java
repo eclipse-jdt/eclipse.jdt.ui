@@ -17,6 +17,13 @@ import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
+/**
+ * Resolver for the <code>link</code> variable. Resolves to a
+ * first parameter puts the value into linked mode. Shows proposals
+ * for each parameter.
+ * 
+ * @since 3.4
+ */
 public class LinkResolver extends TemplateVariableResolver {
 
 	private String[] fProposals;
@@ -25,6 +32,9 @@ public class LinkResolver extends TemplateVariableResolver {
 		super(type, description);
 	}
 
+	/**
+	 * Default ctor for instantiation by the extension point.
+	 */
 	public LinkResolver() {
 	}
 

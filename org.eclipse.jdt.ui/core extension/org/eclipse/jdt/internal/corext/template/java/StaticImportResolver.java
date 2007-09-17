@@ -17,13 +17,21 @@ import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
-
+/**
+ *  Variable resolver for variable <code>importStatic</code>. Resolves to
+ *  static import statements.
+ * 
+ *  @since 3.4
+ */
 public class StaticImportResolver extends TemplateVariableResolver {
 
 	public StaticImportResolver(String type, String description) {
 		super(type, description);
 	}
 
+	/**
+	 * Default ctor for instantiation by the extension point.
+	 */
 	public StaticImportResolver() {
 	}
 
