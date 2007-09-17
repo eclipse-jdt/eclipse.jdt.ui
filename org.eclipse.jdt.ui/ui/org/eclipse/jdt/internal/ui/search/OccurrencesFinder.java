@@ -18,7 +18,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
-
 import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.core.ITypeRoot;
@@ -110,12 +109,16 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 	}
 	
+	public boolean isWriteAccess(ASTNode node) {
+		return fWriteUsages.contains(node);
+	}
+	
 	private JavaElementLine getLineElement(ASTNode node, HashMap lineToGroup, ITypeRoot element) {
 		int lineNumber= fRoot.getLineNumber(node.getStartPosition());
 		if (lineNumber <= 0) {
 			return null;
 		}
-		boolean isWriteAccess= fWriteUsages.contains(node);
+		boolean isWriteAccess= isWriteAccess(node);
 		
 		OccurrencesGroupKey groupKey= null;
 		try {

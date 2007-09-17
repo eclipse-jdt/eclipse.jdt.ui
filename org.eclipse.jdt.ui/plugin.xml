@@ -999,6 +999,15 @@
             %coloredLabels.match_highlight.description
          </description>
       </colorDefinition>
+      <colorDefinition
+            label="%coloredLabels.writeaccess_highlight.label"
+            categoryId="org.eclipse.jdt.ui.presentation"
+            value="244,113,146"
+            id="org.eclipse.jdt.ui.ColoredLabels.writeaccess_highlight">
+         <description>
+            %coloredLabels.writeaccess_highlight.description
+         </description>
+      </colorDefinition>
    </extension>
    
    

@@ -58,6 +58,7 @@ public class ColoredJavaElementLabels {
 	public static final Style DECORATIONS_STYLE= new Style(ColoredViewersManager.DECORATIONS_COLOR_NAME, null); 
 	
 	public static final Style HIGHLIGHT_STYLE= new Style(null, ColoredViewersManager.HIGHLIGHT_BG_COLOR_NAME);
+	public static final Style HIGHLIGHT_WRITE_STYLE= new Style(null, ColoredViewersManager.HIGHLIGHT_WRITE_BG_COLOR_NAME);
 	
 	private static final Style APPENDED_TYPE_STYLE= DECORATIONS_STYLE; 
 	

@@ -11,15 +11,16 @@
 
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
-import org.eclipse.jdt.internal.ui.viewsupport.IRichLabelProvider;
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
 
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
+import org.eclipse.jdt.internal.ui.viewsupport.IRichLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredString.Style;
 
 class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements IRichLabelProvider {
 	
@@ -48,6 +49,12 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 	
 	private ColoredString internalGetRichText(Object element) {
 		JavaElementLine jel= (JavaElementLine) element;
+		
+		Style highlightStyle= ColoredJavaElementLabels.HIGHLIGHT_STYLE;
+		if (jel instanceof OccurrencesGroupKey && ((OccurrencesGroupKey) jel).isWriteAccess()) {
+			highlightStyle= ColoredJavaElementLabels.HIGHLIGHT_WRITE_STYLE;
+		}
+		
 		ColoredString res= new ColoredString(jel.getLineContents());
 		Match[] matches= getPage().getInput().getMatches(jel);
 		for (int i= 0; i < matches.length; i++) {
@@ -56,7 +63,7 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 			int length= curr.getLength();
 			
 			if (offset >= 0 && (offset + length < res.length())) {
-				res.colorize(offset, length, ColoredJavaElementLabels.HIGHLIGHT_STYLE);
+				res.colorize(offset, length, highlightStyle);
 			}
 		}
 		return res;
