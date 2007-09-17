@@ -125,7 +125,7 @@ public class CommentFormatFix extends TextEditFix {
 	}
 	
 	private static TextEdit format(ITypedRegion region, IFormattingContext context, CommentFormattingStrategy formattingStrategy, String content) {
-		TypedPosition typedPosition= new TypedPosition(region.getOffset(), region.getLength(), region.getType());
+		TypedPosition typedPosition= new TypedPosition(region);
 		context.setProperty(FormattingContextProperties.CONTEXT_PARTITION, typedPosition);
 		formattingStrategy.formatterStarts(context);
 		TextEdit edit= formattingStrategy.calculateTextEdit();
