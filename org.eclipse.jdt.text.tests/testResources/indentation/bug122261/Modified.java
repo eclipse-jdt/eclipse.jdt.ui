@@ -1,4 +1,4 @@
-//this comment at the starting of the file is evil //
+// this comment at the starting of the file is evil //
 package indentbug;
 
 public class Bug {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.SourceViewer;
 
@@ -56,6 +58,9 @@ public class IndentActionTest extends TestCase {
 			
 			fJavaProject= EditorTestHelper.createJavaProject(PROJECT, "testResources/indentation");
 			fJavaProject.setOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
+			fJavaProject.setOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES, DefaultCodeFormatterConstants.FALSE);
+			fJavaProject.setOption(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_BLOCK_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.TRUE);
+			fJavaProject.setOption(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.TRUE);
 		}
 
 		protected void tearDown () throws Exception {
@@ -63,6 +68,11 @@ public class IndentActionTest extends TestCase {
 				JavaProjectHelper.delete(fJavaProject);
 			
 			super.tearDown();
+		}
+
+		public static IJavaProject getProject() {
+			IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT);
+			return JavaCore.create(project);
 		}
 	}
 	
@@ -121,4 +131,34 @@ public class IndentActionTest extends TestCase {
 		assertIndentResult();
 	}
 
+	public void testEmptySingleLineComment01() throws Exception {
+		selectAll();
+		assertIndentResult();
+	}
+
+	public void testEmptySingleLineComment02() throws Exception {
+		IJavaProject project= IndentTestSetup.getProject();
+		project.setOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES, DefaultCodeFormatterConstants.TRUE);
+		try {
+			selectAll();
+			assertIndentResult();
+		} finally {
+			project.setOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES, DefaultCodeFormatterConstants.FALSE);
+		}
+	}
+
+	public void testEmptySingleLineComment03() throws Exception {
+		IJavaProject project= IndentTestSetup.getProject();
+		project.setOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES, DefaultCodeFormatterConstants.TRUE);
+		project.setOption(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_BLOCK_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.FALSE);
+		project.setOption(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.FALSE);
+		try {
+			selectAll();
+			assertIndentResult();
+		} finally {
+			project.setOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES, DefaultCodeFormatterConstants.FALSE);
+			project.setOption(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_BLOCK_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.TRUE);
+			project.setOption(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.TRUE);
+		}
+	}
 }

@@ -316,42 +316,34 @@ public class IndentAction extends TextEditorAction {
 		String indent= null;
 		if (offset < document.getLength()) {
 			ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
-			ITypedRegion startingPartition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, false);
 			String type= partition.getType();
-			if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT)) {
+			ITypedRegion startingPartition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, false);
+			String startingType= startingPartition.getType();
+			boolean isCommentStart= startingPartition.getOffset() == offset;
+			if (isDontIndentMultiLineCommentOnFirstColumn(project) && isCommentStart && IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(startingType)) {
+				indent= ""; //$NON-NLS-1$
+			} else if (IJavaPartitions.JAVA_DOC.equals(type) || IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type)) {
 				indent= computeJavadocIndent(document, line, scanner, startingPartition);
-			} else if (!isTabAction && startingPartition.getOffset() == offset && startingPartition.getType().equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)) {
-				
-				// line comment starting at position 0 -> indent inside
-				int max= document.getLength() - offset;
-				int slashes= 2;
-				while (slashes < max - 1 && document.get(offset + slashes, 2).equals("//")) //$NON-NLS-1$
-					slashes+= 2;
-				
-				wsStart= offset + slashes;
-				
-				StringBuffer computed= indenter.computeIndentation(offset);
-				if (computed == null)
-					computed= new StringBuffer(0);
-				int tabSize= getTabSize(project);
-				while (slashes > 0 && computed.length() > 0) {
-					char c= computed.charAt(0);
-					if (c == '\t')
-						if (slashes > tabSize)
-							slashes-= tabSize;
-						else
-							break;
-					else if (c == ' ')
-						slashes--;
-					else break;
-					
-					computed.deleteCharAt(0);
+			} else if (!isTabAction && isCommentStart && IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(startingType)) {
+				// line comment starting at position 0 
+				if (multiLine) {
+					//Do what the formatter does
+					if (isDontIndentSingleLineCommentOnFirstColumn(project))
+						indent= ""; //$NON-NLS-1$
+				} else {
+					//indent inside -> add/remove indent such that user can start typing at correct position
+					int slashes= countLeadingSlashPairs(document, offset) * 2;
+					wsStart= offset + slashes;
+
+					StringBuffer computed= indenter.computeIndentation(offset);
+					if (computed == null)
+						computed= new StringBuffer(0);
+
+					removeIndentations(slashes, getTabSize(project), computed);
+					indent= document.get(offset, wsStart - offset) + computed;
 				}
-				
-				indent= document.get(offset, wsStart - offset) + computed;
-				
 			}
-		} 
+		}
 		
 		// standard java indentation
 		if (indent == null) {
@@ -374,6 +366,55 @@ public class IndentAction extends TextEditorAction {
 		}
 		
 		return new ReplaceData(offset, end, indent);
+	}
+
+	/**
+	 * Removes <code>count</code> indentations from start
+	 * of <code>buffer</code>. The size of a space character
+	 * is 1 and the size of a tab character is <code>tabSize</code>.
+	 * 
+	 * @param count the number of indentations to remove
+	 * @param tabSize the size of a tab character
+	 * @param buffer the buffer to modify
+	 * @since 3.4
+	 */
+	private static void removeIndentations(int count, int tabSize, StringBuffer buffer) {
+		while (count > 0 && buffer.length() > 0) {
+			char c= buffer.charAt(0);
+			if (c == '\t')
+				if (count > tabSize)
+					count-= tabSize;
+				else
+					break;
+			else if (c == ' ')
+				count--;
+			else break;
+
+			buffer.deleteCharAt(0);
+		}
+	}
+
+	/**
+	 * Returns number of continuous slashes pairs ('//') starting at <code>offset</code>
+	 * in <code>document</code>
+	 * 
+	 * @param document the document to inspect
+	 * @param offset the offset where to start looking for slash pairs
+	 * @return the number of slash pairs.
+	 * @throws BadLocationException
+	 * @since 3.4
+	 */
+	private static int countLeadingSlashPairs(IDocument document, int offset) throws BadLocationException {
+		IRegion lineInfo= document.getLineInformationOfOffset(offset);
+		int max= lineInfo.getOffset() + lineInfo.getLength() - 1;
+
+		int pairCount= 0;
+		while (offset < max && document.get(offset, 2).equals("//")) { //$NON-NLS-1$
+			pairCount++;
+			offset= offset + 2;
+		}
+
+		return pairCount;
 	}
 
 	/**
@@ -535,14 +576,38 @@ public class IndentAction extends TextEditorAction {
 	}
 
 	/**
-	 * Returns <code>true</code> if empty lines should be indented, false otherwise.
+	 * Returns <code>true</code> if empty lines should be indented, <code>false</code> otherwise.
 	 * 
 	 * @param project the project to retrieve the indentation settings from, <b>null</b> for workspace settings
-	 * @return <code>true</code> if empty lines should be indented, false otherwise
+	 * @return <code>true</code> if empty lines should be indented, <code>false</code> otherwise
 	 * @since 3.2
 	 */
 	private static boolean indentEmptyLines(IJavaProject project) {
 		return DefaultCodeFormatterConstants.TRUE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES, project));
+	}
+
+	/**
+	 * Returns <code>true</code> if multi line comments which start at first column
+	 * should not be indented, <code>false</code> otherwise.
+	 * 
+	 * @param project the project to retrieve the indentation settings from, <b>null</b> for workspace settings
+	 * @return <code>true</code> if such multi line comments should be indented, <code>false</code> otherwise
+	 * @since 3.4
+	 */
+	private static boolean isDontIndentMultiLineCommentOnFirstColumn(IJavaProject project) {
+		return DefaultCodeFormatterConstants.TRUE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_BLOCK_COMMENTS_ON_FIRST_COLUMN, project));
+	}
+
+	/**
+	 * Returns <code>true</code> if single line comments which start at first column
+	 * should not be indented, <code>false</code> otherwise.
+	 * 
+	 * @param project the project to retrieve the indentation settings from, <b>null</b> for workspace settings
+	 * @return <code>true</code> if such single line comments should be indented, <code>false</code> otherwise
+	 * @since 3.4
+	 */
+	private static boolean isDontIndentSingleLineCommentOnFirstColumn(IJavaProject project) {
+		return DefaultCodeFormatterConstants.TRUE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, project));
 	}
 	
 	/**
