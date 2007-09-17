@@ -1002,7 +1002,7 @@
       <colorDefinition
             label="%coloredLabels.writeaccess_highlight.label"
             categoryId="org.eclipse.jdt.ui.presentation"
-            value="244,113,146"
+            value="255,255,128"
             id="org.eclipse.jdt.ui.ColoredLabels.writeaccess_highlight">
          <description>
             %coloredLabels.writeaccess_highlight.description
