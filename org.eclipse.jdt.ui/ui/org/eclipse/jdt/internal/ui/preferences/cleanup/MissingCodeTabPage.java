@@ -51,12 +51,12 @@ public final class MissingCodeTabPage extends CleanUpTabPage {
 			final RadioPreference generatedPref= createRadioPref(pppGroup, 1, CleanUpMessages.MissingCodeTabPage_RadioName_AddGeneratedSUID, CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED, CleanUpModifyDialog.FALSE_TRUE);
 			final RadioPreference defaultPref= createRadioPref(pppGroup, 1, CleanUpMessages.MissingCodeTabPage_RadioName_AddDefaultSUID, CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, CleanUpModifyDialog.FALSE_TRUE);
 			registerSlavePreference(addSUIDPref, new RadioPreference[] {generatedPref, defaultPref});			
-		}
 		
-		Group udGroup= createGroup(numColumns, composite, CleanUpMessages.MissingCodeTabPage_GroupName_UnimplementedCode);
-		CheckboxPreference addMethodPref= createCheckboxPref(udGroup, numColumns, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddMethods, CleanUpConstants.ADD_MISSING_METHODES, CleanUpModifyDialog.FALSE_TRUE);
-		registerPreference(addMethodPref);
+			Group udGroup= createGroup(numColumns, composite, CleanUpMessages.MissingCodeTabPage_GroupName_UnimplementedCode);
+			CheckboxPreference addMethodPref= createCheckboxPref(udGroup, numColumns, CleanUpMessages.MissingCodeTabPage_CheckboxName_AddMethods, CleanUpConstants.ADD_MISSING_METHODES, CleanUpModifyDialog.FALSE_TRUE);
+			registerPreference(addMethodPref);
 
-		createLabel(numColumns, udGroup, CleanUpMessages.MissingCodeTabPage_Label_CodeTemplatePreferencePage);
+			createLabel(numColumns, udGroup, CleanUpMessages.MissingCodeTabPage_Label_CodeTemplatePreferencePage);
+		}
     }
 }
