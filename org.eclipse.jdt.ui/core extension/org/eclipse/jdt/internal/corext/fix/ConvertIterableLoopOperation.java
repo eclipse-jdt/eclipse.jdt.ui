@@ -487,8 +487,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 							} else {
 								return visit(invocation);
 							}
-						} else if (right instanceof NullLiteral)
-							return visit(left);
+						}
 						return true;
 					}
 					
@@ -533,6 +532,21 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 					
 				if (nextInvocationCount[0] > 1)
 					return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
+				
+				if (fElement != null) {
+					statement.accept(new ASTVisitor() {
+						public final boolean visit(final VariableDeclarationFragment node) {
+							if (node.getInitializer() instanceof NullLiteral) {
+								SimpleName name= node.getName();
+								if (iterable.equals(name.resolveTypeBinding()) && fElement.equals(name.resolveBinding())) {
+									fOccurrences.add(name);
+								}
+							}
+
+							return true;
+						}
+					});
+				}
 			}
 			final ASTNode root= getForStatement().getRoot();
 			if (root != null) {
