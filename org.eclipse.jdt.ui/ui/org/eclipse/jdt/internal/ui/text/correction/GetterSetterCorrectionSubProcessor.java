@@ -190,8 +190,7 @@ public class GetterSetterCorrectionSubProcessor {
 			return false;
 		}
 		SimpleName sn= (SimpleName) coveringNode;
-		if (sn.isDeclaration())
-			return false;
+
 		IBinding binding= sn.resolveBinding();
 		if (!(binding instanceof IVariableBinding))
 			return false;
