@@ -138,12 +138,17 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		
 		PackagesFrameSource frameSource= new PackagesFrameSource(fPart);
 		fFrameList= new FrameList(frameSource);
-		
+		frameSource.connectTo(fFrameList); 
 		fZoomInAction= new GoIntoAction(fFrameList);
 		fBackAction= new BackAction(fFrameList);
 		fForwardAction= new ForwardAction(fFrameList);
 		fUpAction= new UpAction(fFrameList);
-		frameSource.connectTo(fFrameList); // connect after the actions (order of property listener)
+		fFrameList.addPropertyChangeListener(new IPropertyChangeListener() { // connect after the actions (order of property listener)
+			public void propertyChange(PropertyChangeEvent event) {
+				fPart.updateTitle();
+				fPart.updateToolbar();
+			}
+		});
 		
 		fGotoTypeAction= new GotoTypeAction(fPart);
 		fGotoPackageAction= new GotoPackageAction(fPart);

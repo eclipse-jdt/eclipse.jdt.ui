@@ -28,15 +28,4 @@ class PackagesFrameSource extends TreeViewerFrameSource {
 		frame.setToolTipText(fPackagesExplorer.getToolTipText(input));
 		return frame;
 	}
-
-	/**
-	 * Also updates the title of the packages explorer
-	 * @param frame the frame that changed
-	 */
-	protected void frameChanged(TreeFrame frame) {
-		super.frameChanged(frame);
-		fPackagesExplorer.updateTitle();
-		fPackagesExplorer.updateToolbar();
-	}
-
 }
