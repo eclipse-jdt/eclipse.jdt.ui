@@ -6,7 +6,7 @@
          <meta.schema plugin="org.eclipse.jdt.ui" id="classpathFixProcessors" name="Classpath Fix Processor"/>
       </appInfo>
       <documentation>
-         This extension point allows add a processor to offer fixes for incomplete class paths when types can not be resolved.
+         This extension point allows add a processor to offer fixes for incomplete class paths when types cannot be resolved.
 &lt;p&gt;
 This extension point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Properties to test on are:
 &lt;dl&gt;
@@ -129,8 +129,8 @@ with a public 0-argument constructor.
    class=&quot;com.example.MyClasspathFixProcessor&quot;&gt;
    &lt;enablement&gt;
       &lt;with variable=&quot;project&quot;&gt;
-		 &lt;test property=&quot;org.eclipse.jdt.core.isInJavaProjectWithNature&quot;
-		       value=&quot;org.eclipse.pde.PluginNature&quot;/&gt;
+   &lt;test property=&quot;org.eclipse.jdt.core.isInJavaProjectWithNature&quot;
+         value=&quot;org.eclipse.pde.PluginNature&quot;/&gt;
       &lt;/with&gt;
    &lt;/enablement&gt;
    &lt;overrides
