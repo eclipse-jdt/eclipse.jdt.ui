@@ -63,11 +63,53 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 			for (int i= 0; i < children.length; i++) {
 				IJavaElementDelta child= children[i];
 				if (javaProject.equals(child.getElement())) {
-					if ((child.getFlags() & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0) {
+					if (isClasspathChange(child)) {
 						setCachedJavaProject(null);
 					}
 				}
 			}
+		}
+		
+		/**
+		 * Does the delta indicate a classpath change?
+		 * @param delta the delta to inspect
+		 * @return true if classpath has changed
+		 */
+		private boolean isClasspathChange(IJavaElementDelta delta) {
+			int flags= delta.getFlags();
+			if (isClasspathChangeFlag(flags))
+				return true;
+			
+			if ((flags & IJavaElementDelta.F_CHILDREN) != 0) {
+				IJavaElementDelta[] children= delta.getAffectedChildren();
+				for (int i= 0; i < children.length; i++) {
+					if (isClasspathChangeFlag(children[i].getFlags()))
+						return true;
+				}
+			}
+			
+			return false;
+		}
+
+		/**
+		 * Do the flags indicate a classpath change?
+		 * @param flags the flags to inspect
+		 * @return true if the flag flags a classpath change
+		 */
+		private boolean isClasspathChangeFlag(int flags) {
+			if ((flags & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0)
+				return true;
+			
+			if ((flags & IJavaElementDelta.F_ADDED_TO_CLASSPATH) != 0)
+				return true;
+			
+			if ((flags & IJavaElementDelta.F_REMOVED_FROM_CLASSPATH) != 0)
+				return true;
+			
+			if ((flags & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0)
+				return true;
+			
+			return false;
 		}
 	}
 
