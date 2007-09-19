@@ -74,6 +74,10 @@ public class PropertyFileDocumentModel {
 				offset-= insertHere.fLeadingWhiteSpaces;
 			} else if (distBefore == distAfter && Collator.getInstance().compare(beforeKey, afterKey) < 0) {
 				offset-= insertHere.fLeadingWhiteSpaces;
+			} else {
+				//insert it before afterKey -> move the leading white spaces to the inserted pair
+				keyValuePairModell.fLeadingWhiteSpaces= insertHere.fLeadingWhiteSpaces;
+				insertHere.fLeadingWhiteSpaces= 0;
 			}
         }
         

@@ -151,6 +151,22 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"key_y=value\n" + 
 				"key_z=value\n", props.get());
 	}
+	
+	public void testManyInsertsIntoDoc3() throws Exception {
+		Document props= new Document(
+				"key_a=value\n" +
+				"\n" +
+				"key_b_2=value\n");
+		
+		insert(props, new KeyValuePair[] {new KeyValuePair("key_b_1", "value"), new KeyValuePair("key_b_0", "value")});
+
+		assertEquals(
+				"key_a=value\n" +
+				"\n" +
+				"key_b_0=value\n" +
+				"key_b_1=value\n" +
+				"key_b_2=value\n", props.get());
+	}
 
 	public void testBlockInsertsIntoDoc() throws Exception {
 		Document props= new Document(
