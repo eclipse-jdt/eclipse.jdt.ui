@@ -248,14 +248,6 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		}
 
 		/*
-		 * @see IJavaAnnotation#getImage(Display)
-		 */
-		public Image getImage(Display display) {
-			initializeImages();
-			return fImage;
-		}
-
-		/*
 		 * @see IJavaAnnotation#getMessage()
 		 */
 		public String getText() {
