@@ -106,7 +106,7 @@ public abstract class JavadocExportWizardPage {
 	 * @return the page status
 	 * @see #setStatus(IStatus) to set the page status
 	 */
-	public IStatus getStatus() {
+	public final IStatus getStatus() {
 		return fPageStatus;
 	}
 	
@@ -116,7 +116,7 @@ public abstract class JavadocExportWizardPage {
 	 * 
 	 * @param status the new status
 	 */
-	protected void setStatus(IStatus status) {
+	protected final void setStatus(IStatus status) {
 		fPageStatus= status;
 		getContainer().statusUpdated();
 	}
@@ -127,7 +127,7 @@ public abstract class JavadocExportWizardPage {
 	 * 
 	 * @param container the parent container
 	 */
-	public void setContainer(IJavadocExportWizardPageContainer container) {
+	public final void setContainer(IJavadocExportWizardPageContainer container) {
 		fContainer= container;
 	}
 	
@@ -136,7 +136,7 @@ public abstract class JavadocExportWizardPage {
 	 * 
 	 * @return the parent wizard container 
 	 */
-	protected IJavadocExportWizardPageContainer getContainer() {
+	protected final IJavadocExportWizardPageContainer getContainer() {
 		return fContainer;
 	}
 	
@@ -160,7 +160,7 @@ public abstract class JavadocExportWizardPage {
 	}
 	
     /**
-     * Disposes the SWT resources allocated by this
+     * Disposes any resources allocated by this
      * dialog page.
      */
     public void dispose() {
