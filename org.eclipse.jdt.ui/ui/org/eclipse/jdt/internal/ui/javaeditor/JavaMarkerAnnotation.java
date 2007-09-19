@@ -8,9 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.javaeditor;
-
 
 import java.util.Iterator;
 
@@ -24,7 +22,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.JavaCore;
-
 
 
 public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnotation {
@@ -41,7 +38,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	 * 
 	 * @param marker the marker
 	 * @return <code>true</code> if the marker can be treated as a Java annotation
-	 * @since 3.3.1
+	 * @since 3.3.2
 	 */
 	static final boolean isJavaAnnotation(IMarker marker) {
 		// Performance
