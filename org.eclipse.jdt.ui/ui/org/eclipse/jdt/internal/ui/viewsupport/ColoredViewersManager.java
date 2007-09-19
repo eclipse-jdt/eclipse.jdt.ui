@@ -92,7 +92,7 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 	public void propertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
 		if (property.equals(QUALIFIER_COLOR_NAME) || property.equals(COUNTER_COLOR_NAME) || property.equals(DECORATIONS_COLOR_NAME)
-				|| property.equals(HIGHLIGHT_BG_COLOR_NAME) || property.equals(PREF_COLORED_LABELS)) {
+				|| property.equals(HIGHLIGHT_BG_COLOR_NAME) || property.equals(PREF_COLORED_LABELS) || property.equals(HIGHLIGHT_WRITE_BG_COLOR_NAME)) {
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
 					refreshAllViewers();
