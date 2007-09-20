@@ -1722,6 +1722,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		action= getAction(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY);
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, action);
 		
+		// Copy qualified name
+		action= getAction(IJavaEditorActionConstants.COPY_QUALIFIED_NAME);
+		if (menu.find(ITextEditorActionConstants.COPY) != null)
+			menu.insertAfter(ITextEditorActionConstants.COPY, action);
+		else
+			addAction(menu, ITextEditorActionConstants.GROUP_COPY, IJavaEditorActionConstants.COPY_QUALIFIED_NAME);
+
 	}
 
 	/**
@@ -2357,6 +2364,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		setAction(ITextEditorActionConstants.PASTE, action);
 		
 		action= new CopyQualifiedNameAction(this);
+		action.setImageDescriptor(null);
 		setAction(IJavaEditorActionConstants.COPY_QUALIFIED_NAME, action);
 	}
 	
