@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
@@ -33,6 +34,10 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.Change;
@@ -413,6 +418,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 					JavaPlugin.log(e);
 				}
 			}
+			fWorkingCopies.clear();
 		}
 		
 		private boolean requiresAST(ICleanUp[] cleanUps) throws CoreException {
@@ -472,16 +478,20 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
         }
 		
 		private void applyChange(ICompilationUnit compilationUnit, List changes) throws JavaModelException, CoreException {
-			if (changes.size() == 1) {
-				CleanUpChange change= (CleanUpChange)changes.get(changes.size() - 1);
-				compilationUnit.getBuffer().setContents(change.getPreviewContent(null));
-			} else {
-				MultiStateCompilationUnitChange mscuc= new MultiStateCompilationUnitChange("", compilationUnit.getPrimary()); //$NON-NLS-1$
-				for (int i= 0; i < changes.size(); i++) {
-					mscuc.addChange((CleanUpChange)changes.get(i));
+			IDocument document= new Document(((CompilationUnitChange)changes.get(0)).getCurrentContent(new NullProgressMonitor()));
+			for (int i= 0; i < changes.size(); i++) {
+				CleanUpChange change= (CleanUpChange)changes.get(i);
+				TextEdit edit= change.getEdit().copy();
+					
+				try {
+					edit.apply(document, TextEdit.UPDATE_REGIONS);
+				} catch (MalformedTreeException e) {
+					JavaPlugin.log(e);
+				} catch (BadLocationException e) {
+					JavaPlugin.log(e);
 				}
-				compilationUnit.getBuffer().setContents(mscuc.getPreviewContent(null));
 			}
+			compilationUnit.getBuffer().setContents(document.get());
 		}
 	}
 	
