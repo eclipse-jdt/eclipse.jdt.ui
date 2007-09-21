@@ -134,6 +134,11 @@ public class JavadocTagsSubProcessor {
 		private void insertMissingJavadocTag(ASTRewrite rewrite, ASTNode missingNode, BodyDeclaration bodyDecl) {
 			AST ast= bodyDecl.getAST();
 			Javadoc javadoc= bodyDecl.getJavadoc();
+			if (javadoc == null) {
+				javadoc= ast.newJavadoc();
+				rewrite.set(bodyDecl, bodyDecl.getJavadocProperty(), javadoc, null);
+			}
+			
 		 	ListRewrite tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 
 		 	StructuralPropertyDescriptor location= missingNode.getLocationInParent();
@@ -196,7 +201,13 @@ public class JavadocTagsSubProcessor {
 			TextElement textElement= ast.newTextElement();
 			textElement.setText(""); //$NON-NLS-1$
 			newTag.fragments().add(textElement);
+		 	
 			addLinkedPosition(rewrite.track(textElement), false, "comment_start"); //$NON-NLS-1$
+			
+			if (bodyDecl.getJavadoc() == null) {
+				// otherwise the linked position spans over a line delimiter
+				newTag.fragments().add(ast.newTextElement());
+			}
 		}
 	}
 
@@ -378,29 +389,14 @@ public class JavadocTagsSubProcessor {
 			return;
 		}
 			
-		if (methodDecl.getJavadoc() == null) {
-
-			String declaringTypeName= methodDecl.resolveBinding().getDeclaringClass().getName();
-			String string= CodeGeneration.getMethodComment(cu, declaringTypeName, methodDecl, null, String.valueOf('\n'));
-			if (string != null) {
-				String label;
-				if (isUnusedParam) {
-					label= CorrectionMessages.JavadocTagsSubProcessor_document_parameter_description;
-				} else {
-					label= CorrectionMessages.JavadocTagsSubProcessor_document_exception_description;
-				}
-				proposals.add(new AddJavadocCommentProposal(label, cu, 1, methodDecl.getStartPosition(), string));
-			}
+		String label;
+		if (isUnusedParam) {
+			label= CorrectionMessages.JavadocTagsSubProcessor_document_parameter_description;
 		} else {
-			String label;
-			if (isUnusedParam) {
-				label= CorrectionMessages.JavadocTagsSubProcessor_document_parameter_description;
-			} else {
-				label= CorrectionMessages.JavadocTagsSubProcessor_document_exception_description;
-			}
-		 	ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), methodDecl, node, 1); 
-		 	proposals.add(proposal);
+			label= CorrectionMessages.JavadocTagsSubProcessor_document_exception_description;
 		}
+	 	ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), methodDecl, node, 1); 
+	 	proposals.add(proposal);
 	}
 	
 	public static void getMissingJavadocCommentProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {

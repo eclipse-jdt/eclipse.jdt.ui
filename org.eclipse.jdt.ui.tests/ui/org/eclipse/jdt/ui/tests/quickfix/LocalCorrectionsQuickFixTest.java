@@ -3466,7 +3466,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    /**\n");
-		buf.append("     * @param str\n");
+		buf.append("     * @param str  \n");
 		buf.append("     */\n");
 		buf.append("    private void foo(Object str) {\n");
 		buf.append("        {\n");
@@ -4100,8 +4100,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("import java.io.IOException;\n");
 		buf.append("public class E {\n");
 		buf.append("    /**\n");
-		buf.append("     * @param b\n");
-		buf.append("     * @throws IOException\n");
+		buf.append("     * @throws IOException  \n");
 		buf.append("     */\n");
 		buf.append("    public void foo(String b) throws IOException {\n");
 		buf.append("        if  (b != null) {\n");
