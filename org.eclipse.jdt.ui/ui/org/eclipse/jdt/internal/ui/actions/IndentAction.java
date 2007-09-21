@@ -240,7 +240,7 @@ public class IndentAction extends TextEditorAction {
 	 * This method is for internal use only, it should not be called.
 	 * </p>
 	 * 
-	 * @param document the document to indent
+	 * @param document the document to indent must have a java partitioning installed
 	 * @param project the project to retrieve the indentation settings from, <b>null</b> for workspace settings
 	 * @return a text edit describing the changes or <b>null</b> if no changes required
 	 * @throws BadLocationException if the document got modified concurrently
@@ -248,8 +248,6 @@ public class IndentAction extends TextEditorAction {
 	 * @since 3.4
 	 */
 	public static TextEdit indent(IDocument document, IJavaProject project) throws BadLocationException {
-		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
-		
 		int offset= 0;
 		int length= document.getLength();
 		

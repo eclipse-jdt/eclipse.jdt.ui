@@ -36,6 +36,8 @@ import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.IndentAction;
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
@@ -112,6 +114,7 @@ public class CodeFormatFix implements IFix {
 				} 
 					
 				if (correctIndentation) {
+					JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 					TextEdit edit= IndentAction.indent(document, cu.getJavaProject());
 					if (edit != null) {
 						
