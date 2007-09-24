@@ -143,6 +143,7 @@ public class ClasspathContainerPreferencePage extends PropertyPage {
 
 	protected Control createContents(final Composite parent) {
 		fWizardPageContainer= new Composite(parent, SWT.NONE);
+		fWizardPageContainer.setFont(parent.getFont());
 		fWizardPageContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		GridLayout layout= new GridLayout(1, false);
 		layout.marginHeight= 0;
@@ -160,12 +161,14 @@ public class ClasspathContainerPreferencePage extends PropertyPage {
 			return;
 
 		Composite messageComposite= new Composite(parent, SWT.NONE);
+		messageComposite.setFont(parent.getFont());
 		messageComposite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		GridLayout layout= new GridLayout(1, false);
 		layout.marginHeight= 0;
 		messageComposite.setLayout(layout);
 
 		Label messageLabel= new Label(messageComposite, SWT.WRAP);
+		messageLabel.setFont(messageComposite.getFont());
 		messageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		IWizardPage page= fWizard.getPages()[0];
