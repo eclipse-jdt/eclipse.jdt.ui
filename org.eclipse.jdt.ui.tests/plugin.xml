@@ -208,4 +208,65 @@
 		        description="Hide A.java (jdt.ui.test)"
 		        id="org.eclipse.jdt.java.ui.filters.AFileFilter"/>
 	</extension>
+	
+<!-- JavaLeakTest: -->
+	<extension
+	      point="org.eclipse.ui.actionSets">
+	   <actionSet
+	         id="org.eclipse.jdt.ui.tests.actionSet1"
+	         label="JavaLeakTest"
+	         visible="true">
+	         <action
+	               definitionId="org.eclipse.jdt.ui.tests.JavaLeakTestActionDelegate"
+	               label="JavaLeakTestActionDelegate"
+	               class="org.eclipse.jdt.ui.tests.leaks.JavaLeakTestActionDelegate"
+	               menubarPath="navigate/open.ext2"
+	               enablesFor="*"
+	               id="org.eclipse.jdt.ui.tests.actions.JavaLeakTestActionDelegate">
+	            <enablement>
+	              <objectClass
+	                    name="org.eclipse.jface.text.ITextSelection">
+	              </objectClass>
+	            </enablement>
+	         </action>
+	   </actionSet>
+	</extension>
+
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <viewerContribution
+            targetID="#TextEditorContext"
+            id="org.eclipse.jdt.ui.tests.PopupActions">
+         <visibility>
+               <objectClass
+                     name="org.eclipse.jface.text.ITextSelection">
+               </objectClass>
+         </visibility>
+         <action
+               class="org.eclipse.jdt.ui.tests.leaks.JavaLeakTestActionDelegate"
+               definitionId="org.eclipse.jdt.ui.tests.JavaLeakTestActionDelegate"
+               enablesFor="*"
+               id="org.eclipse.jdt.ui.tests.actions.JavaLeakTestActionDelegate"
+               label="JavaLeakTestActionDelegate"
+               menubarPath="additions">
+         </action>
+      </viewerContribution>
+   </extension>
+         
+   <extension point="org.eclipse.ui.commands">
+      <command
+            name="JavaLeakTestActionDelegate"
+            description="JavaLeakTestActionDelegate"
+            id="org.eclipse.jdt.ui.tests.JavaLeakTestActionDelegate">
+      </command>
+   </extension>
+
+   <extension point="org.eclipse.ui.bindings">
+      <key
+            sequence="M1+M2+M3+Q"
+            commandId="org.eclipse.jdt.ui.tests.JavaLeakTestActionDelegate"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+   </extension>
+<!-- End of JavaLeakTest -->
+   
 </plugin>

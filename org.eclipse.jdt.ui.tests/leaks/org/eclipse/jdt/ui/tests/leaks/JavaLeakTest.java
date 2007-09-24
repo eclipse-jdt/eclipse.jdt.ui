@@ -10,13 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.leaks;
 
-import java.io.StringBufferInputStream;
+import java.io.ByteArrayInputStream;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -24,6 +29,9 @@ import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.INewWizard;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.handlers.IHandlerService;
 
 import org.eclipse.ui.editors.text.TextEditor;
 
@@ -31,6 +39,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -59,7 +68,7 @@ public class JavaLeakTest extends LeakTestCase {
 			return new LeakTestSetup(new TestSuite(THIS));
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new JavaLeakTest("testLeak"));
+			suite.addTest(new JavaLeakTest("testJavaEditorActionDelegate"));
 			return new LeakTestSetup(suite);
 		}	
 	}
@@ -106,14 +115,30 @@ public class JavaLeakTest extends LeakTestCase {
 	}
 	
 	private IFile createTestFile(String fileName) throws Exception {
-		IFile file= fJProject.getProject().getFile(fileName);
-		file.create(new StringBufferInputStream("test\n"), false, null);
+		IProject project= fJProject.getProject();
+		IFile file= project.getFile(fileName);
+		file.create(new ByteArrayInputStream("test\n".getBytes(project.getDefaultCharset())), false, null);
 		assertTrue(file.exists());
 		return file;
 	}
 	
 	private void internalTestEditorClose(Object objectToOpen, final Class clazz, boolean closeAll) throws Exception {
+		IEditorPart part= internalTestEditorOpen(objectToOpen, clazz);
 		
+		// can't close and assert abandonment in a separate method, since that would leave 'part' as a stack-local reference
+		boolean res;
+		if (closeAll)
+			res= JavaPlugin.getActivePage().closeAllEditors(false);
+		else
+			res= JavaPlugin.getActivePage().closeEditor(part, false);
+		part= null;
+		assertTrue("Could not close editor", res);
+		
+		// verify that the editor instance is gone
+		assertInstanceCount(clazz, 0);
+	}
+
+	private IEditorPart internalTestEditorOpen(Object objectToOpen, final Class clazz) throws JavaModelException, PartInitException {
 		// verify that no instance is there when we start
 		assertInstanceCount(clazz, 0);
 		
@@ -125,18 +150,7 @@ public class JavaLeakTest extends LeakTestCase {
 
 		// verify that the editor instance is there
 		assertInstanceCount(clazz, 1);
-		
-		// close the editor
-		boolean res;
-		if (closeAll)
-			res= JavaPlugin.getActivePage().closeAllEditors(false);
-		else
-			res= JavaPlugin.getActivePage().closeEditor(part, false);
-		part= null;
-		assertTrue("Could not close editor", res);
-		
-		// verify that the editor instance is gone
-		assertInstanceCount(clazz, 0);
+		return part;
 	}
 	
 	public void testNewClassWizard() throws Exception {
@@ -169,5 +183,74 @@ public class JavaLeakTest extends LeakTestCase {
 		dialog.close();
 		wizard= null;
 		dialog= null;
-	}	
+	}
+	
+	public void testJavaEditorContextMenu() throws Exception {
+		//regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=166761
+		
+		ICompilationUnit cu= createTestCU("Test");
+		IEditorPart part= internalTestEditorOpen(cu, CompilationUnitEditor.class);
+				
+		final Menu menu= ((CompilationUnitEditor) part).getViewer().getTextWidget().getMenu();
+		openContextMenu(menu);
+		
+		boolean res= JavaPlugin.getActivePage().closeEditor(part, false);
+		part= null;
+		assertTrue("Could not close editor", res);
+		
+		// verify that the editor instance is gone
+		assertInstanceCount(CompilationUnitEditor.class, 0);
+	}
+
+	private void openContextMenu(final Menu menu) {
+		Display display= menu.getDisplay();
+		
+        while (!menu.isDisposed() && display.readAndDispatch()) {
+        	//loop, don't sleep
+        }
+        
+        // 2 work arounds for https://bugs.eclipse.org/bugs/show_bug.cgi?id=204289 :
+        
+        // activate shell:
+        menu.getShell().forceActive();
+        
+        // dislocate menu from cursor:
+        Point cLoc= display.getCursorLocation();
+        Rectangle dBounds= display.getBounds();
+        menu.setLocation(
+        		cLoc.x < dBounds.width /2 ? cLoc.x + 5 : 5,
+        		cLoc.y < dBounds.height/2 ? cLoc.y + 5 : 5
+        );
+		
+        menu.setVisible(true);
+		
+		display.asyncExec(new Runnable() {
+            public void run() {
+                menu.setVisible(false);
+            }
+        });
+		
+        while (!menu.isDisposed() && display.readAndDispatch()) {
+        	//loop, don't sleep
+        }
+	}
+
+	public void testJavaEditorActionDelegate() throws Exception {
+		//regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=166761
+		
+		ICompilationUnit cu= createTestCU("Test");
+		IEditorPart part= internalTestEditorOpen(cu, CompilationUnitEditor.class);
+				
+		IWorkbench workbench= part.getSite().getWorkbenchWindow().getWorkbench();
+		IHandlerService handlerService = (IHandlerService) workbench.getService(IHandlerService.class);
+		handlerService.executeCommand("org.eclipse.jdt.ui.tests.JavaLeakTestActionDelegate", null);
+		
+		boolean res= JavaPlugin.getActivePage().closeEditor(part, false);
+		part= null;
+		assertTrue("Could not close editor", res);
+		
+		// verify that the editor instance is gone
+		assertInstanceCount(CompilationUnitEditor.class, 0);
+	}
+	
 }
