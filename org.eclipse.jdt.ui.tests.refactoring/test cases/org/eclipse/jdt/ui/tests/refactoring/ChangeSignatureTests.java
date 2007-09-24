@@ -46,8 +46,6 @@ public class ChangeSignatureTests extends RefactoringTest {
 	
 	private static final boolean BUG_83691_CORE_JAVADOC_REF= true;
 	
-	private static final boolean BUG_201929= true;
-	
 	private static final boolean RUN_CONSTRUCTOR_TEST= true;
 
 	public ChangeSignatureTests(String name) {
@@ -1541,11 +1539,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}	
 	
-	public void testAll64()throws Exception{ // https://bugs.eclipse.org/bugs/show_bug.cgi?id=158008 and https://bugs.eclipse.org/bugs/show_bug.cgi?id=201929
-		if (BUG_201929) {
-			printTestDisabledMessage("BUG_201929");
-			return;
-		}
+	public void testAll64() throws Exception{ // https://bugs.eclipse.org/bugs/show_bug.cgi?id=158008 and https://bugs.eclipse.org/bugs/show_bug.cgi?id=201929
 		ParameterInfo[] newParamInfo= { ParameterInfo.createInfoForAddedParameter("java.util.List<Local>", "list", "null") };
 		int[] newIndices= { 2 };
 		String[] newParamTypeNames= {};
