@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
-
 
 import java.util.HashMap;
 import java.util.Map;
@@ -86,7 +85,9 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 * @param paramTypes The type signatures of the parameters e.g.
 	 *        <code>{"QString;","I"}</code>
 	 * @param isConstructor If the method is a constructor
+	 * @param type the type
 	 * @return The first found method or <code>null</code>, if nothing found
+	 * @throws JavaModelException 
 	 */
 	private IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IType type) throws JavaModelException {
 		Map typeVariables= computeTypeVariables(type);
@@ -145,6 +146,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 * @param methods The methods to search in
 	 * @param typeVariables a map from type variables to concretely used types
 	 * @return The found method or <code>null</code>, if nothing found
+	 * @throws JavaModelException if the method does not exist or if an exception occurs while accessing its corresponding resource
 	 */
 	private IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IMethod[] methods, Map typeVariables) throws JavaModelException {
 		for (int i= methods.length - 1; i >= 0; i--) {
@@ -168,6 +170,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 * @param typeVariables a map from type variables to types
 	 * @return Returns <code>true</code> if the method has the given name and
 	 *         parameter types and constructor state.
+	 * @throws JavaModelException if the method does not exist or if an exception occurs while accessing its corresponding resource
 	 */
 	private boolean isSameMethodSignature(String name, String[] paramTypes, boolean isConstructor, IMethod method, Map typeVariables) throws JavaModelException {
 		if (isConstructor || name.equals(method.getElementName())) {

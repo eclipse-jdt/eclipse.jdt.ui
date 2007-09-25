@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
-
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -22,6 +21,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.text.ISourceVersionDependent;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
+
 
 /**
  * Double click strategy aware of Java identifier syntax rules.
@@ -136,7 +136,17 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, ISourc
 						fState= WS;
 						return true;
 					}
-					// fall through ID
+					if (isIdentifierStart(c)) {
+						fStart= offset;
+						fState= IDS;
+						return true;
+					}
+					if (isIdentifierPart(c)) {
+						fStart= offset;
+						fState= ID;
+						return true;
+					}
+					return false;
 				case ID:
 					if (isIdentifierStart(c)) {
 						fStart= offset;
@@ -308,6 +318,7 @@ public class JavaDoubleClickSelector implements ITextDoubleClickStrategy, ISourc
 	}
 
 	/**
+	 * @param textViewer the text viewer
 	 * @see ITextDoubleClickStrategy#doubleClicked
 	 */
 	public void doubleClicked(ITextViewer textViewer) {
