@@ -333,6 +333,7 @@ public class ParameterGuesser {
 		}
 
 		private boolean filter(char[] returnTypeName, char[] completionName) {
+			completionName= Signature.getSimpleName(completionName);
 			return Arrays.equals(VOID, returnTypeName) || Arrays.equals(HASHCODE, completionName) || Arrays.equals(TOSTRING, completionName) || Arrays.equals(CLONE, completionName);
 		}
 
