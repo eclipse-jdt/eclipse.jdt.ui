@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -1235,31 +1234,9 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 
-		monitor.beginTask("", 120); //$NON-NLS-1$
-
-		try {
-			final IProgressMonitor subMonitor1= getSubProgressMonitor(monitor, 50);
+		monitor.beginTask("", 100); //$NON-NLS-1$
 
 			try {
-				SafeRunner.run(new ISafeRunnable() {
-					public void run() {
-						try {
-							info.fCopy.reconcile(ICompilationUnit.NO_AST, false, null, subMonitor1);
-						} catch (JavaModelException ex) {
-							handleException(ex);
-						} catch (OperationCanceledException ex) {
-							// do not log this
-						}
-					}
-					public void handleException(Throwable ex) {
-						IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, "Error in JDT Core during reconcile while saving", ex);  //$NON-NLS-1$
-						JavaPlugin.getDefault().getLog().log(status);
-					}
-				});
-			} finally {
-				subMonitor1.done();
-			}
-
 			IDocument document= info.fTextFileBuffer.getDocument();
 			IResource resource= info.fCopy.getResource();
 
@@ -1274,23 +1251,18 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 
 			if (!resource.exists()) {
 				// underlying resource has been deleted, just recreate file, ignore the rest
-				IProgressMonitor subMonitor2= getSubProgressMonitor(monitor, 70);
-				try {
-					createFileFromDocument(subMonitor2, (IFile) resource, document);
-				} finally {
-					subMonitor2.done();
-				}
+				createFileFromDocument(monitor, (IFile) resource, document);
 				return;
 			}
 
 			if (fSavePolicy != null)
 				fSavePolicy.preSave(info.fCopy);
 
-			IProgressMonitor subMonitor3= getSubProgressMonitor(monitor, 50);
+			IProgressMonitor subMonitor= getSubProgressMonitor(monitor, 50);
 			try {
 				fIsAboutToSave= true;
-				info.fCopy.commitWorkingCopy(isSynchronized || overwrite, subMonitor3);
-				notifyPostSaveListeners(info.fCopy, info, getSubProgressMonitor(monitor, 20));
+				info.fCopy.commitWorkingCopy(isSynchronized || overwrite, subMonitor);
+				notifyPostSaveListeners(info, getSubProgressMonitor(monitor, 50));
 			} catch (CoreException x) {
 				// inform about the failure
 				fireElementStateChangeFailed(element);
@@ -1301,7 +1273,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				throw x;
 			} finally {
 				fIsAboutToSave= false;
-				subMonitor3.done();
+				subMonitor.done();
 			}
 
 			// If here, the dirty state of the editor will change to "not dirty".
@@ -1469,14 +1441,14 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
      * must ensure it ends up in the UI thread.
      * </p>
      * 
-     * @param unit the compilation unit
      * @param info compilation unit info
      * @param monitor the progress monitor
      * @throws CoreException 
      * @see IPostSaveListener
      * @since 3.3
      */
-	protected void notifyPostSaveListeners(final ICompilationUnit unit, final CompilationUnitInfo info, final IProgressMonitor monitor) throws CoreException {
+	protected void notifyPostSaveListeners(final CompilationUnitInfo info, final IProgressMonitor monitor) throws CoreException {
+		final ICompilationUnit unit= info.fCopy;
 		final IBuffer buffer= unit.getBuffer();
 		IPostSaveListener[] listeners= JavaPlugin.getDefault().getSaveParticipantRegistry().getEnabledPostSaveListeners(unit.getJavaProject().getProject());
 		
@@ -1518,7 +1490,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 						errorStatus.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, msg, null));
 						
 						// Revert the changes
-						if (info != null && buffer.hasUnsavedChanges()) {
+						if (buffer.hasUnsavedChanges()) {
 							try {
 								info.fTextFileBuffer.revert(getSubProgressMonitor(monitor, 1));
 							} catch (CoreException e) {
