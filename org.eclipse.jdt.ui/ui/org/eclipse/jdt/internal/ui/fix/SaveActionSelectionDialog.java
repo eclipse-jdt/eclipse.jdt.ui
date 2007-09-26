@@ -28,13 +28,9 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.CodeFormatingTabPage;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.CodeStyleTabPage;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.MemberAccessesTabPage;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.MissingCodeTabPage;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.UnnecessaryCodeTabPage;
 
 public class SaveActionSelectionDialog extends CleanUpSelectionDialog {
 	
@@ -50,15 +46,15 @@ public class SaveActionSelectionDialog extends CleanUpSelectionDialog {
 		fOrginalValues= new HashMap(settings);
 	}
 	
-	protected CleanUpTabPage[] createTabPages(Map workingValues) {
-		CleanUpTabPage[] result= new CleanUpTabPage[5];
+	protected CleanUpTabPage[] createTabPages(Map workingValues) {	
+		CleanUpTabPage[] result= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPages();
 		
-		result[0]= new CodeStyleTabPage(this, workingValues, true, SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_CodeStyle_TabPage);
-		result[1]= new MemberAccessesTabPage(this, workingValues, true, SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_MemberAccesses_TabPage);
-		result[2]= new UnnecessaryCodeTabPage(this, workingValues, true, SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_UnnecessaryCode_TabPage);
-		result[3]= new MissingCodeTabPage(this, workingValues, true, SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_MissingCode_TabPage);
-		result[4]= new CodeFormatingTabPage(this, workingValues, true, SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_CodeOrganizing_TabPage);
-		
+		for (int i= 0; i < result.length; i++) {
+			result[i].setIsSaveAction(true);
+			result[i].setWorkingValues(workingValues);
+			result[i].setModifyListener(this);
+		}
+			
 		return result;
 	}
 	

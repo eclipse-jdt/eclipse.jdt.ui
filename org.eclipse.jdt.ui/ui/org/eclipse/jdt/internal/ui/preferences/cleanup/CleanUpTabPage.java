@@ -25,20 +25,31 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage;
 
 public abstract class CleanUpTabPage extends ModifyDialogTabPage {
 
-	private final Map fValues;
+	private Map fValues;
 	private JavaPreview fCleanUpPreview;
-	private final boolean fIsSaveAction;
+	private boolean fIsSaveAction;
 	private int fCount;
 	private int fSelectedCount;
 	private final String fTitle;
 	
-	public CleanUpTabPage(IModificationListener listener, Map values, boolean isSaveAction, String title) {
-		super(listener, values);
-		fValues= values;
-		fIsSaveAction= isSaveAction;
+	public CleanUpTabPage(String title) {
+		super();
 		fCount= 0;
 		fSelectedCount= 0;
 		fTitle= title;
+		fIsSaveAction= false;
+	}
+	
+	public void setIsSaveAction(boolean isSaveAction) {
+		fIsSaveAction= isSaveAction;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setWorkingValues(Map workingValues) {
+		super.setWorkingValues(workingValues);
+		fValues= workingValues;
 	}
 	
 	public String getTitle() {

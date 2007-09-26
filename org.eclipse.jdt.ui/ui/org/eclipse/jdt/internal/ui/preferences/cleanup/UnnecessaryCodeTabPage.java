@@ -24,8 +24,8 @@ import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 
 public final class UnnecessaryCodeTabPage extends CleanUpTabPage {
 	
-    public UnnecessaryCodeTabPage(IModificationListener listener, Map values, boolean isSaveParticipantConfiguration, String title) {
-    	super(listener, values, isSaveParticipantConfiguration, title);
+    public UnnecessaryCodeTabPage(String title) {
+    	super(title);
     }
     
     protected ICleanUp[] createPreviewCleanUps(Map values) {

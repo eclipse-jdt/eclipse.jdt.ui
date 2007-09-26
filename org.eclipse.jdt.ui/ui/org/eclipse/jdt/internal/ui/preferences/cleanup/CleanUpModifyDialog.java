@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
@@ -53,12 +54,13 @@ public class CleanUpModifyDialog extends ModifyDialog {
 	 * {@inheritDoc}
 	 */
 	protected void addPages(final Map values) {
-		fPages= new CleanUpTabPage[5];
-		fPages[0]= new CodeStyleTabPage(this, values, false, CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeStyle);
-		fPages[1]= new MemberAccessesTabPage(this, values, false, CleanUpMessages.CleanUpModifyDialog_TabPageName_MemberAccesses);
-		fPages[2]= new UnnecessaryCodeTabPage(this, values, false, CleanUpMessages.CleanUpModifyDialog_TabPageName_UnnecessaryCode);
-		fPages[3]= new MissingCodeTabPage(this, values, false, CleanUpMessages.CleanUpModifyDialog_TabPageName_MissingCode);
-		fPages[4]= new CodeFormatingTabPage(this, values, false, CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeFormating);
+		fPages= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPages();
+		
+		for (int i= 0; i < fPages.length; i++) {
+			fPages[i].setIsSaveAction(false);
+			fPages[i].setWorkingValues(values);
+			fPages[i].setModifyListener(this);
+		}
 		
 		for (int i= 0; i < fPages.length; i++) {
 			addTabPage(fPages[i].getTitle(), fPages[i]);

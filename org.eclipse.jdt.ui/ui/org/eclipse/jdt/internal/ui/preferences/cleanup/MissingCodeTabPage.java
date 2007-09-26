@@ -24,8 +24,8 @@ import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 
 public final class MissingCodeTabPage extends CleanUpTabPage {
 
-	public MissingCodeTabPage(IModificationListener listener, Map values, boolean isSaveParticipantConfiguration, String title) {
-		super(listener, values, isSaveParticipantConfiguration, title);
+	public MissingCodeTabPage(String title) {
+		super(title);
 	}
 
 	protected ICleanUp[] createPreviewCleanUps(Map values) {

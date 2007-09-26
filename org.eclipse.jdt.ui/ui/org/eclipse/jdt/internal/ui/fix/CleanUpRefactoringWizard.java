@@ -72,11 +72,6 @@ import org.eclipse.jdt.internal.ui.preferences.BulletListBlock;
 import org.eclipse.jdt.internal.ui.preferences.CleanUpPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.CodeFormatingTabPage;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.CodeStyleTabPage;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.MemberAccessesTabPage;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.MissingCodeTabPage;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.UnnecessaryCodeTabPage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage.IModificationListener;
@@ -182,13 +177,13 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			}
 
 			protected CleanUpTabPage[] createTabPages(Map workingValues) {
-				CleanUpTabPage[] result= new CleanUpTabPage[5];
+				CleanUpTabPage[] result= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPages();
 				
-				result[0]= new CodeStyleTabPage(this, workingValues, false, MultiFixMessages.CleanUpRefactoringWizard_code_style_tab);
-				result[1]= new MemberAccessesTabPage(this, workingValues, false, MultiFixMessages.CleanUpRefactoringWizard_member_accesses_tab);
-				result[2]= new UnnecessaryCodeTabPage(this, workingValues, false, MultiFixMessages.CleanUpRefactoringWizard_unnecessary_code_tab);
-				result[3]= new MissingCodeTabPage(this, workingValues, false, MultiFixMessages.CleanUpRefactoringWizard_missing_code_tab);
-				result[4]= new CodeFormatingTabPage(this, workingValues, false, MultiFixMessages.CleanUpRefactoringWizard_code_organizing_tab);
+				for (int i= 0; i < result.length; i++) {
+					result[i].setIsSaveAction(false);
+					result[i].setModifyListener(this);
+					result[i].setWorkingValues(workingValues);
+				}
 				
 				return result;
 			}

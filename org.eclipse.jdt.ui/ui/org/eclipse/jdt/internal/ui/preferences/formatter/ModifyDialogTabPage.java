@@ -608,12 +608,12 @@ public abstract class ModifyDialogTabPage {
 	/**
 	 * The map where the current settings are stored.
 	 */
-	protected final Map fWorkingValues;
+	protected Map fWorkingValues;
 	
 	/**
 	 * The modify dialog where we can display status messages.
 	 */
-	private final IModificationListener fModifyListener;
+	private IModificationListener fModifyListener;
 
 
 	/*
@@ -623,6 +623,18 @@ public abstract class ModifyDialogTabPage {
 		fWorkingValues= workingValues;
 		fModifyListener= modifyListener;
 		fDefaultFocusManager= new DefaultFocusManager();
+	}
+	
+	public ModifyDialogTabPage() {
+		fDefaultFocusManager= new DefaultFocusManager();
+	}
+	
+	public void setWorkingValues(Map workingValues) {
+		fWorkingValues= workingValues;
+	}
+	
+	public void setModifyListener(IModificationListener modifyListener) {
+		fModifyListener= modifyListener;
 	}
 	
 	/**

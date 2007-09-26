@@ -24,8 +24,8 @@ import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 
 public final class MemberAccessesTabPage extends CleanUpTabPage {
 
-    public MemberAccessesTabPage(IModificationListener listener, Map values, boolean isSaveParticipantConfiguration, String title) {
-    	super(listener, values, isSaveParticipantConfiguration, title);
+    public MemberAccessesTabPage(String title) {
+    	super(title);
     }
     
     protected ICleanUp[] createPreviewCleanUps(Map values) {

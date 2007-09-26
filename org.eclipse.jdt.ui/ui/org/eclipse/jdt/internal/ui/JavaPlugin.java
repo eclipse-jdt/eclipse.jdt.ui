@@ -67,6 +67,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpRegistry;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
@@ -228,6 +229,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @since 3.3
 	 */
 	private SaveParticipantRegistry fSaveParticipantRegistry;
+	
+	/**
+	 * The clean up registry
+	 * @since 3.4
+	 */
+	private CleanUpRegistry fCleanUpRegistry;
 	
 	/**
 	 * The descriptors from the 'classpathAttributeConfiguration' extension point.
@@ -928,6 +935,13 @@ public class JavaPlugin extends AbstractUIPlugin {
 		if (fSaveParticipantRegistry == null)
 			fSaveParticipantRegistry= new SaveParticipantRegistry();
 		return fSaveParticipantRegistry;
+	}
+	
+	public synchronized CleanUpRegistry getCleanUpRegistry() {
+		if (fCleanUpRegistry == null)
+			fCleanUpRegistry= new CleanUpRegistry();
+		
+		return fCleanUpRegistry;
 	}
 
 	/**

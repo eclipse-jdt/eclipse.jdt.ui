@@ -25,8 +25,8 @@ import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 
 public final class CodeStyleTabPage extends CleanUpTabPage {
 
-    public CodeStyleTabPage(IModificationListener listener, Map values, boolean isSaveParticipantConfiguration, String title) {
-    	super(listener, values, isSaveParticipantConfiguration, title);
+    public CodeStyleTabPage(String title) {
+    	super(title);
     }
     
     protected ICleanUp[] createPreviewCleanUps(Map values) {

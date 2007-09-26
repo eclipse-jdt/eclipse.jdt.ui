@@ -35,12 +35,19 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
 
 public final class CodeFormatingTabPage extends CleanUpTabPage {
 
-	private final Map fValues;
+	private Map fValues;
 	private CleanUpPreview fPreview;
 
-	public CodeFormatingTabPage(IModificationListener listener, Map values, boolean isSaveParticipantConfiguration, String title) {
-		super(listener, values, isSaveParticipantConfiguration, title);
-		fValues= values;
+	public CodeFormatingTabPage(String title) {
+		super(title);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setWorkingValues(Map workingValues) {
+		super.setWorkingValues(workingValues);
+		fValues= workingValues;
 	}
 
 	protected ICleanUp[] createPreviewCleanUps(Map values) {
