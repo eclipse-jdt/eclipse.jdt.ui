@@ -813,4 +813,43 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview, expected);
 	}
+	
+	public void testBug194639() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.util.Collections;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("public class E01 {\n");
+		buf.append("    public void foo(Integer i) {\n");
+		buf.append("        for (Iterator iterator = Collections.singleton(i).iterator(); iterator.hasNext();) {\n");
+		buf.append("            Integer inter = (Integer) iterator.next();\n");
+		buf.append("            System.out.println(inter);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit unit= pack.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		List proposals= fetchConvertingProposal(buf, unit);
+		
+		assertNotNull(fConvertLoopProposal);
+		
+		assertCorrectLabels(proposals);
+		
+		String preview= getPreviewContent(fConvertLoopProposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.util.Collections;\n");
+		buf.append("public class E01 {\n");
+		buf.append("    public void foo(Integer i) {\n");
+		buf.append("        for (Object element : Collections.singleton(i)) {\n");
+		buf.append("            Integer inter = (Integer) element;\n");
+		buf.append("            System.out.println(inter);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview, expected);
+	}
 }

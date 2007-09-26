@@ -318,11 +318,16 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		fEnhancedForLoop.setParameter(declaration);
 		fEnhancedForLoop.setExpression(getExpression(astRewrite));
 		
-		remover.registerRemovedNode(getForStatement().getExpression());
 		for (Iterator iterator= getForStatement().initializers().iterator(); iterator.hasNext();) {
 			ASTNode node= (ASTNode)iterator.next();
-			remover.registerRemovedNode(node);			
+			if (node instanceof VariableDeclarationExpression) {
+				VariableDeclarationExpression variableDeclarationExpression= (VariableDeclarationExpression) node;
+				remover.registerRemovedNode(variableDeclarationExpression.getType());
+			} else {
+				remover.registerRemovedNode(node);
+			}
 		}
+		
 		for (Iterator iterator= getForStatement().updaters().iterator(); iterator.hasNext();) {
 			ASTNode node= (ASTNode)iterator.next();
 			remover.registerRemovedNode(node);						
