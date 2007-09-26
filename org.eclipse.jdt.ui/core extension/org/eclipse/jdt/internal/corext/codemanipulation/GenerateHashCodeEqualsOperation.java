@@ -28,6 +28,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -228,6 +229,8 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		Assert.isNotNull(fields);
 		Assert.isNotNull(unit);
 		Assert.isNotNull(settings);
+		Assert.isTrue(unit.getTypeRoot() instanceof ICompilationUnit);
+		
 		fType= type;
 		fInsert= insert;
 		fUnit= unit;
@@ -237,7 +240,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		fSave= save;
 		fApply= apply;
 		fDoubleCount= 0;
-		fRewrite= new CompilationUnitRewrite((ICompilationUnit) fUnit.getJavaElement(), fUnit);
+		fRewrite= new CompilationUnitRewrite((ICompilationUnit) fUnit.getTypeRoot(), fUnit);
 		fForce= force;
 		fAst= fRewrite.getAST();
 		fUseBlocksForThen= false;
@@ -1016,8 +1019,9 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 				newDeclaration.setJavadoc(javadoc);
 			}
 		}
-		if (fSettings.overrideAnnotation && JavaModelUtil.is50OrHigher(fUnit.getJavaElement().getJavaProject()))
-			StubUtility2.addOverrideAnnotation(fRewrite.getASTRewrite(), newDeclaration, copyFrom);
+		IJavaProject project= fUnit.getJavaElement().getJavaProject();
+		if (fSettings.overrideAnnotation && JavaModelUtil.is50OrHigher(project))
+			StubUtility2.addOverrideAnnotation(project, fRewrite.getASTRewrite(), newDeclaration, copyFrom);
 	}
 
 	private boolean needsNoSuperCall(ITypeBinding typeBinding, String name, ITypeBinding[] parameters) {

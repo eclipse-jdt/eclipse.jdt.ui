@@ -67,8 +67,8 @@ import org.eclipse.jdt.ui.CodeGeneration;
  */
 public final class StubUtility2 {
 
-	public static void addOverrideAnnotation(ASTRewrite rewrite, MethodDeclaration decl, IMethodBinding binding) {
-		String version= binding.getJavaElement().getJavaProject().getOption(JavaCore.COMPILER_COMPLIANCE, true);
+	public static void addOverrideAnnotation(IJavaProject project, ASTRewrite rewrite, MethodDeclaration decl, IMethodBinding binding) {
+		String version= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
 		if (!binding.getDeclaringClass().isInterface() || !JavaModelUtil.isVersionLessThan(version, JavaCore.VERSION_1_6)) {
 			final Annotation marker= rewrite.getAST().newMarkerAnnotation();
 			marker.setTypeName(rewrite.getAST().newSimpleName("Override")); //$NON-NLS-1$
@@ -450,7 +450,7 @@ public final class StubUtility2 {
 			}
 		}
 		if (settings != null && settings.overrideAnnotation && JavaModelUtil.is50OrHigher(unit.getJavaProject())) {
-			addOverrideAnnotation(rewrite, decl, binding);
+			addOverrideAnnotation(unit.getJavaProject(), rewrite, decl, binding);
 		}
 
 		return decl;
