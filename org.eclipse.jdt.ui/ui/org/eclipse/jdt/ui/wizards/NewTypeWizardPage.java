@@ -543,7 +543,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				if (elem.getElementType() == IJavaElement.TYPE) {
 					type= (IType)elem;
 					if (type.exists()) {
-						String superName= JavaModelUtil.getFullyQualifiedName(type);
+						String superName= SuperInterfaceSelectionDialog.getNameWithTypeParameters(type);
 						if (type.isInterface()) {
 							initSuperinterfaces.add(superName);
 						} else {
@@ -577,6 +577,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		setAddComments(StubUtility.doAddComments(project), true); // from project or workspace
 	}
+	
+
+	
 	
 	private static IStatus validateJavaTypeName(String text, IJavaProject project) {
 		if (project == null || !project.exists()) {
@@ -916,15 +919,15 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 
 		public void widgetSelected(SelectionEvent e) {
-			typePageLinkActivated(e);
+			typePageLinkActivated();
 		}
 
 		public void widgetDefaultSelected(SelectionEvent e) {
-			typePageLinkActivated(e);
+			typePageLinkActivated();
 		}
 	}
 	
-	private void typePageLinkActivated(SelectionEvent e) {
+	private void typePageLinkActivated() {
 		IJavaProject project= getJavaProject();
 		if (project != null) {
 			PreferenceDialog dialog= PreferencesUtil.createPropertyDialogOn(getShell(), project.getProject(), CodeTemplatePreferencePage.PROP_ID, null, null);
@@ -950,13 +953,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		} else if (field == fSuperClassDialogField) {
 			IType type= chooseSuperClass();
 			if (type != null) {
-				fSuperClassDialogField.setText(JavaModelUtil.getFullyQualifiedName(type));
+				fSuperClassDialogField.setText(SuperInterfaceSelectionDialog.getNameWithTypeParameters(type));
 			}
 		}
 	}
 	
 	private void typePageCustomButtonPressed(DialogField field, int index) {		
-		if (field == fSuperInterfacesDialogField) {
+		if (field == fSuperInterfacesDialogField && index == 0) {
 			chooseSuperInterfaces();
 			List interfaces= fSuperInterfacesDialogField.getElements();
 			if (!interfaces.isEmpty()) {
