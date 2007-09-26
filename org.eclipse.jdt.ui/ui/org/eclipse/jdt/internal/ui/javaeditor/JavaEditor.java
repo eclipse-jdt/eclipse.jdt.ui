@@ -217,6 +217,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 
 import org.osgi.service.prefs.BackingStoreException;
 
+
 /**
  * Java specific text editor.
  */
@@ -2045,7 +2046,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (!(textSelection instanceof ITextSelection))
 			return;
 		
-		CompilationUnit ast= SharedASTProvider.getAST(getInputJavaElement(), SharedASTProvider.WAIT_ACTIVE_ONLY, getProgressMonitor());
+		CompilationUnit ast= SharedASTProvider.getAST(getInputJavaElement(), SharedASTProvider.WAIT_NO /* DO NOT USE WAIT_ACTIVE_ONLY */ , getProgressMonitor());
 		if (ast != null) {
 			fForcedMarkOccurrencesSelection= textSelection;
 			updateOccurrenceAnnotations((ITextSelection)textSelection, ast);
