@@ -97,7 +97,7 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 		 * @return true if the flag flags a classpath change
 		 */
 		private boolean isClasspathChangeFlag(int flags) {
-			if ((flags & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0)
+			if ((flags & IJavaElementDelta.F_RESOLVED_CLASSPATH_CHANGED) != 0)
 				return true;
 			
 			if ((flags & IJavaElementDelta.F_ADDED_TO_CLASSPATH) != 0)

@@ -564,8 +564,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				postRefresh(element, ORIGINAL, element, runnables);
 				return false;
 			}
-			// if the raw class path has changed we refresh the entire project
-			if ((flags & IJavaElementDelta.F_CLASSPATH_CHANGED) != 0) {
+			// if the class path has changed we refresh the entire project
+			if ((flags & IJavaElementDelta.F_RESOLVED_CLASSPATH_CHANGED) != 0) {
 				postRefresh(element, ORIGINAL, element, runnables);
 				return false;				
 			}
