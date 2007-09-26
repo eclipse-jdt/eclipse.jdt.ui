@@ -41,8 +41,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.util.Messages;
-
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension2;
@@ -107,7 +105,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		if (containerEntry == null || containerEntry.getPath().segmentCount() != 2) {
 			setDescription(NewWizardMessages.UserLibraryWizardPage_description_new); 
 		} else {
-			setDescription(Messages.format(NewWizardMessages.UserLibraryWizardPage_description_edit, containerEntry.getPath().segment(1))); 
+			setDescription(NewWizardMessages.UserLibraryWizardPage_description_edit); 
 		}
 	}
 	
@@ -213,12 +211,14 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	}
 	
 	private void doDoubleClicked(ListDialogField field) {
-		List list= fLibrarySelector.getSelectedElements();
-		if (list.size() == 1) {
-			Object elem= list.get(0);
-			boolean state= fLibrarySelector.isChecked(elem);
-			if (!state || !fIsEditMode) {
-				fLibrarySelector.setChecked(elem, !state);
+		if (field == fLibrarySelector) {
+			List list= fLibrarySelector.getSelectedElements();
+			if (list.size() == 1) {
+				Object elem= list.get(0);
+				boolean state= fLibrarySelector.isChecked(elem);
+				if (!state || !fIsEditMode) {
+					fLibrarySelector.setChecked(elem, !state);
+				}
 			}
 		}
 	}
