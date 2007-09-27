@@ -22,19 +22,20 @@ import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 /**
  * Tracks all instances reachable though reflection from a given root object. To visit all elements in a VM
- * pass a class loader as class loaders know all loaded classes. This normally covers
- * all references held by fields.
- * <p>Instances only referenced through local variables or native roots can not be found.</p>
+ * pass a class loader as class loaders know all loaded classes and classes know all static fields. This normally covers
+ * all references except instances that are only referenced by local variables or by native roots
  */
 public final class ReferenceTracker {
 	
+	private static final String CURRENT_PKG_NAME= ReferenceTracker.class.getPackage().getName();
+	
 	private IdentityHashSet fVisitedElements;
-	private final ReferenceVisitor fRequestor;
+	private final ReferenceVisitor fReferenceVisitor;
 	private FIFOQueue fQueue;
 	private MultiStatus fStatus;
-		
-	public ReferenceTracker(ReferenceVisitor requestor) {
-		fRequestor= requestor;
+
+	public ReferenceTracker(ReferenceVisitor visitor) {
+		fReferenceVisitor= visitor;
 		fStatus= null;
 		fVisitedElements= null;
 		fQueue= null;
@@ -42,7 +43,7 @@ public final class ReferenceTracker {
 	
 	private static boolean isInteresting(Class clazz) {
 		String name= clazz.getName();
-		if (name.startsWith("org.eclipse.reftracker.") || name.startsWith("sun.reflect.")) {  //$NON-NLS-1$//$NON-NLS-2$
+		if (name.startsWith(CURRENT_PKG_NAME) || name.startsWith("sun.reflect.")) {  //$NON-NLS-1$//$NON-NLS-2$
 			return false;
 		}
 		return true;
@@ -102,9 +103,9 @@ public final class ReferenceTracker {
 		}
 
 		boolean firstVisit= fVisitedElements.add(curr);
-		fRequestor.visit(ref, curr.getClass(), firstVisit);
+		boolean continueVisiting= fReferenceVisitor.visit(ref, curr.getClass(), firstVisit);
 		
-		if (!firstVisit) {
+		if (!firstVisit || !continueVisiting) {
 			return;
 		}
 
@@ -166,6 +167,4 @@ public final class ReferenceTracker {
 		return fStatus;
 	}
 
-
-	
 }
