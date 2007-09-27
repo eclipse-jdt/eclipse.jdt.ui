@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.template.java;
 
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.Variable;
 
+
 public class VarResolver extends AbstractVariableResolver {
 	
 	/**
@@ -30,13 +31,13 @@ public class VarResolver extends AbstractVariableResolver {
 	 * @see org.eclipse.jdt.internal.corext.template.java.AbstractVariableResolver#getVisibleVariables(java.lang.String, org.eclipse.jdt.internal.corext.template.java.JavaContext)
 	 */
 	protected Variable[] getVisibleVariables(String type, JavaContext context) {
-		Variable[] localLariables= context.getLocalVariables(type);
+		Variable[] localVariables= context.getLocalVariables(type);
 		Variable[] fields= context.getFields(type);
 		
-		Variable[] result= new Variable[localLariables.length + fields.length];
+		Variable[] result= new Variable[localVariables.length + fields.length];
 		
-		System.arraycopy(fields, 0, result, 0, fields.length);
-		System.arraycopy(localLariables, 0, result, fields.length, localLariables.length);
+		System.arraycopy(localVariables, 0, result, 0, localVariables.length);
+		System.arraycopy(fields, 0, result, localVariables.length, fields.length);
 
 		return result;
 	}
