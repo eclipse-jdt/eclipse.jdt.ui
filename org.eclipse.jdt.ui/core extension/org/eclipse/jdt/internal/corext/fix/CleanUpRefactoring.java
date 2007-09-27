@@ -611,8 +611,6 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		
 		int cuCount= getCleanUpTargetsSize();
 		
-		ICleanUp first= (ICleanUp) fCleanUps.get(0);
-		
 		RefactoringStatus result= new RefactoringStatus();
 		
 		ICleanUp[] cleanUps= getCleanUps();
