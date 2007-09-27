@@ -2365,6 +2365,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		setAction(ITextEditorActionConstants.PASTE, action);
 		
 		action= new CopyQualifiedNameAction(this);
+		action.setActionDefinitionId(CopyQualifiedNameAction.ACTION_DEFINITION_ID);
 		action.setImageDescriptor(null);
 		setAction(IJavaEditorActionConstants.COPY_QUALIFIED_NAME, action);
 	}
