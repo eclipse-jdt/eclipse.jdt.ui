@@ -45,6 +45,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -158,13 +160,15 @@ public class ParameterGuesser {
 		boolean isHierarchyAssignable(Variable rhs) throws JavaModelException {
 			if (rhs.type == null || type == null)
 				return false;
-		
+
+			if ("java.lang.Object".equals(getFullyQualifiedName())) //$NON-NLS-1$
+				return true;
+
+			if (rhs.type.equals(type))
+				return true;
+
 			// XXX: No simpler way, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=112635
-			IType[] types= fVariablesHierarchy.getSupertypes(rhs.type);
-			for (int i= 0; i < types.length; i++)
-				if (type.equals(types[i]))
-					return true;
-			return false;
+			return  JavaModelUtil.isSuperType(fVariablesHierarchy, type, rhs.type);
 		}
 
 		boolean isAutoBoxingAssignable(Variable rhs) {
