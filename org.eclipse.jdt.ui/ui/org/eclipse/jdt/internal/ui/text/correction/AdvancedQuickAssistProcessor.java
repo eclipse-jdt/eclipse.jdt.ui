@@ -92,6 +92,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
@@ -620,8 +621,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
 		Map options= new Hashtable();
-		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES, CleanUpConstants.TRUE);
-		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER, CleanUpConstants.TRUE);
+		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES, CleanUpOptions.TRUE);
+		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER, CleanUpOptions.TRUE);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new ExpressionsCleanUp(options), 1, image, context);
 		resultingCollections.add(proposal);
 		return true;
@@ -639,8 +640,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		// add correction proposal
 		Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		Map options= new Hashtable();
-		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES, CleanUpConstants.TRUE);
-		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpConstants.TRUE);
+		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES, CleanUpOptions.TRUE);
+		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpOptions.TRUE);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new ExpressionsCleanUp(options), 1, image, context);
 		resultingCollections.add(proposal);
 		return true;

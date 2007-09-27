@@ -92,6 +92,7 @@ import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage;
@@ -195,7 +196,7 @@ public class ReorgCorrectionsSubProcessor {
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_DELETE_IMPORT);
 			Map options= new Hashtable();
-			options.put(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpConstants.TRUE);
+			options.put(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new UnusedCodeCleanUp(options), 6, image, context);
 			proposals.add(proposal);
 		}

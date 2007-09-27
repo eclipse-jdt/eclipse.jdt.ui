@@ -155,6 +155,30 @@ public interface ICleanUp {
 			return fAst;
 		}
 	}
+
+	/**
+	 * Constant for default options kind for clean up.
+	 * This kind is mapped to the 'Eclipse [built-in]' profile.
+	 */
+	public static final int DEFAULT_CLEAN_UP_OPTIONS= 1;
+	
+	/**
+	 * Constant for default options kind for save actions.
+	 * This kind is mapped to the save actions default settings.
+	 */
+	public static final int DEFAULT_SAVE_ACTION_OPTIONS= 2;
+	
+	/**
+	 * Returns the default options for the specified kind of clean up.
+	 * Implementors can reuse the same keys for each kind.
+	 * 
+	 * @param kind the kind for which to get the default options
+	 * @return the default options
+	 * 
+	 * @see ICleanUp#DEFAULT_CLEAN_UP_OPTIONS
+	 * @see ICleanUp#DEFAULT_SAVE_ACTION_OPTIONS
+	 */
+	public CleanUpOptions getDefaultOptions(int kind);
 	
 	/**
 	 * @param options the options to use

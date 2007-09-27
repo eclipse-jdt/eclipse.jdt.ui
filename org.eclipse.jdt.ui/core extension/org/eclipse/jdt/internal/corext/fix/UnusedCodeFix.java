@@ -67,6 +67,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
@@ -457,7 +458,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 				String label= FixMessages.UnusedCodeFix_RemoveImport_description;
 				RemoveImportOperation operation= new RemoveImportOperation(node);
 				Map options= new Hashtable();
-				options.put(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpConstants.TRUE);
+				options.put(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.TRUE);
 				return new UnusedCodeFix(label, compilationUnit, new CompilationUnitRewriteOperation[] {operation}, options);
 			}
 		}
@@ -699,21 +700,21 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 	private static Map getCleanUpOptions(IBinding binding) {
 		Map result= new Hashtable();
 		
-		result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS, CleanUpConstants.TRUE);		
+		result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS, CleanUpOptions.TRUE);		
 		switch (binding.getKind()) {
 			case IBinding.TYPE:
-				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES, CleanUpConstants.TRUE);
+				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES, CleanUpOptions.TRUE);
 				break;
 			case IBinding.METHOD:
 				if (((IMethodBinding) binding).isConstructor()) {
-					result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS, CleanUpConstants.TRUE);
+					result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS, CleanUpOptions.TRUE);
 				} else {
-					result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS, CleanUpConstants.TRUE);
+					result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS, CleanUpOptions.TRUE);
 				}
 				break;
 			case IBinding.VARIABLE:
-				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS, CleanUpConstants.TRUE);
-				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES, CleanUpConstants.TRUE);
+				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS, CleanUpOptions.TRUE);
+				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES, CleanUpOptions.TRUE);
 				break;
 		}
 

@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.SortMembersMessageDialog;
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -71,8 +72,8 @@ public class MultiSortMembersAction extends CleanUpAction {
 			return null;
 
 		Hashtable settings= new Hashtable();
-		settings.put(CleanUpConstants.SORT_MEMBERS, CleanUpConstants.TRUE);
-		settings.put(CleanUpConstants.SORT_MEMBERS_ALL, !dialog.isNotSortingFieldsEnabled() ? CleanUpConstants.TRUE : CleanUpConstants.FALSE);
+		settings.put(CleanUpConstants.SORT_MEMBERS, CleanUpOptions.TRUE);
+		settings.put(CleanUpConstants.SORT_MEMBERS_ALL, !dialog.isNotSortingFieldsEnabled() ? CleanUpOptions.TRUE : CleanUpOptions.FALSE);
 
 		return new ICleanUp[] {
 			new SortMembersCleanUp(settings)

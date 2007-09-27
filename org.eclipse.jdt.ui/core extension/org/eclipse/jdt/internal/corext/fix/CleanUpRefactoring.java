@@ -77,6 +77,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
+import org.eclipse.jdt.internal.ui.fix.MapCleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp.CleanUpContext;
 import org.eclipse.jdt.internal.ui.fix.IMultiFix.MultiFixContext;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
@@ -697,7 +698,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(FixMessages.CleanUpRefactoring_could_not_retrive_profile, javaProject.getElementName()));
 		}
 		
-		CleanUpOptions cleanUpOptions= new CleanUpOptions(options);
+		CleanUpOptions cleanUpOptions= new MapCleanUpOptions(options);
 		for (int j= 0; j < cleanUps.length; j++) {
 			cleanUps[j].setOptions(cleanUpOptions);
 		}
@@ -1046,7 +1047,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		ICleanUp[] result= createCleanUps();
 		
 		for (int i= 0; i < result.length; i++) {
-			result[i].setOptions(new CleanUpOptions(settings));
+			result[i].setOptions(new MapCleanUpOptions(settings));
 		}
 		
 		return result;

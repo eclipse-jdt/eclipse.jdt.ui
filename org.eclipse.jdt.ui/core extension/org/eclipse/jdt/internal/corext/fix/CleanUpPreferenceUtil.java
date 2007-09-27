@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.DefaultScope;
@@ -27,6 +28,8 @@ import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
+import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpMessages;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
@@ -71,7 +74,7 @@ public class CleanUpPreferenceUtil {
         }
     	
     	if (id.equals(CleanUpConstants.SAVE_PARTICIPANT_PROFILE))
-    		return CleanUpConstants.getSaveParticipantSettings();
+    		return JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_SAVE_ACTION_OPTIONS).getMap();
 		
     	CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
         ProfileStore profileStore= new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, versioner);
@@ -100,7 +103,7 @@ public class CleanUpPreferenceUtil {
 		
     	CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
     	
-    	Map defaultSettings= CleanUpConstants.getEclipseDefaultSettings();
+    	CleanUpOptions defaultOptions= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS);
     	KeySet[] keySets= CleanUpProfileManager.KEY_SETS;
     	
     	boolean hasValues= false;
@@ -113,7 +116,7 @@ public class CleanUpPreferenceUtil {
 				if (val != null) {
 					hasValues= true;
 				} else {
-					val= defaultSettings.get(key);
+					val= defaultOptions.getValue(key);
 				}
 				profileOptions.put(key, val);
 			}
@@ -140,15 +143,15 @@ public class CleanUpPreferenceUtil {
 			if (hasSettingsInScope(instanceScope)) {
 				node= instanceScope.getNode(JavaUI.ID_PLUGIN);
 			} else {
-				return CleanUpConstants.getSaveParticipantSettings();
+				return JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_SAVE_ACTION_OPTIONS).getMap();
 			}
 		}
 		
 		Map result= new HashMap();
-		Map defaultSettings= CleanUpConstants.getSaveParticipantSettings();
-		for (Iterator iterator= defaultSettings.keySet().iterator(); iterator.hasNext();) {
+		Set keys= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_SAVE_ACTION_OPTIONS).getKeys();
+		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
 	        String key= (String)iterator.next();
-	        result.put(key, node.get(SAVE_PARTICIPANT_KEY_PREFIX + key, CleanUpConstants.FALSE));
+	        result.put(key, node.get(SAVE_PARTICIPANT_KEY_PREFIX + key, CleanUpOptions.FALSE));
         }
 		
 		return result;
@@ -165,8 +168,8 @@ public class CleanUpPreferenceUtil {
     private static boolean hasSettingsInScope(IScopeContext context) {
     	IEclipsePreferences node= context.getNode(JavaUI.ID_PLUGIN);
     	
-		Map defaultSettings= CleanUpConstants.getSaveParticipantSettings();
-		for (Iterator iterator= defaultSettings.keySet().iterator(); iterator.hasNext();) {
+    	Set keys= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_SAVE_ACTION_OPTIONS).getKeys();
+		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
 			String key= (String)iterator.next();
 			if (node.get(SAVE_PARTICIPANT_KEY_PREFIX + key, null) != null)
 				return true;
@@ -210,7 +213,8 @@ public class CleanUpPreferenceUtil {
 	public static List getBuiltInProfiles() {
     	ArrayList result= new ArrayList();
     	
-    	final Profile eclipseProfile= new BuiltInProfile(CleanUpConstants.ECLIPSE_PROFILE, CleanUpMessages.CleanUpProfileManager_ProfileName_EclipseBuildIn, CleanUpConstants.getEclipseDefaultSettings(), 2, CleanUpProfileVersioner.CURRENT_VERSION, CleanUpProfileVersioner.PROFILE_KIND);
+    	Map settings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS).getMap();
+    	final Profile eclipseProfile= new BuiltInProfile(CleanUpConstants.ECLIPSE_PROFILE, CleanUpMessages.CleanUpProfileManager_ProfileName_EclipseBuildIn, settings, 2, CleanUpProfileVersioner.CURRENT_VERSION, CleanUpProfileVersioner.PROFILE_KIND);
     	result.add(eclipseProfile);
     	
     	return result;

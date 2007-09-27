@@ -73,6 +73,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.GenerateHashCodeEqualsDialog;
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
@@ -376,8 +377,8 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 	}
 	
 	private boolean useBlocks(IJavaProject project) {
-		if (CleanUpConstants.TRUE.equals(PreferenceConstants.getPreference(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, project))) {
-			return CleanUpConstants.TRUE.equals(PreferenceConstants.getPreference(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS, project));
+		if (CleanUpOptions.TRUE.equals(PreferenceConstants.getPreference(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, project))) {
+			return CleanUpOptions.TRUE.equals(PreferenceConstants.getPreference(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS, project));
 		}
 		return false;
 	}

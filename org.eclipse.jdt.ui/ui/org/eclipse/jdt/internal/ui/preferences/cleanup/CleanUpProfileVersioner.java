@@ -8,13 +8,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.preferences.cleanup;
-
-import java.util.Map;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
+import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.preferences.formatter.IProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 
@@ -60,8 +60,8 @@ public class CleanUpProfileVersioner implements IProfileVersioner {
     }
     
 	private static void updateFrom1To2(CustomProfile profile) {
-		Map defaultSettings= CleanUpConstants.getEclipseDefaultSettings();
-		profile.getSettings().put(CleanUpConstants.ORGANIZE_IMPORTS, defaultSettings.get(CleanUpConstants.ORGANIZE_IMPORTS));
+		CleanUpOptions defaultSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS);
+		profile.getSettings().put(CleanUpConstants.ORGANIZE_IMPORTS, defaultSettings.getValue(CleanUpConstants.ORGANIZE_IMPORTS));
     }
 	
  }

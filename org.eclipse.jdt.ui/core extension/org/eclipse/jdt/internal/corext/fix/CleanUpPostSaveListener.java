@@ -76,6 +76,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp.CleanUpContext;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
@@ -199,7 +200,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			}
 			
 			ICleanUp[] cleanUps;
-			if (CleanUpConstants.TRUE.equals(settings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS))) {
+			if (CleanUpOptions.TRUE.equals(settings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS))) {
 				cleanUps= CleanUpRefactoring.createCleanUps(settings);
 			} else {
 				HashMap filteredSettins= new HashMap();

@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -49,7 +50,7 @@ public class MultiOrganizeImportAction extends CleanUpAction {
 
 	protected ICleanUp[] createCleanUps(ICompilationUnit[] units) {
 		Map settings= new Hashtable();
-		settings.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpConstants.TRUE);
+		settings.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpOptions.TRUE);
 		ImportsCleanUp importsCleanUp= new ImportsCleanUp(settings);
 
 		return new ICleanUp[] {

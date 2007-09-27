@@ -25,6 +25,7 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
@@ -46,11 +47,11 @@ public final class SerialVersionSubProcessor {
 
 		private static ICleanUp createCleanUp(boolean isDefault) {
 			Map options= new Hashtable();
-			options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID, CleanUpConstants.TRUE);
+			options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID, CleanUpOptions.TRUE);
 			if (isDefault) {
-				options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, CleanUpConstants.TRUE);
+				options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, CleanUpOptions.TRUE);
 			} else {
-				options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED, CleanUpConstants.TRUE);
+				options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED, CleanUpOptions.TRUE);
 			}
 			return new PotentialProgrammingProblemsCleanUp(options);
 		}

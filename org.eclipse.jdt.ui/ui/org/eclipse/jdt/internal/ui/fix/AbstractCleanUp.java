@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
+import java.util.Hashtable;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
@@ -33,6 +34,13 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	protected AbstractCleanUp(Map settings) {
 		if (settings != null)
 			setOptions(new CleanUpOptions(settings));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public CleanUpOptions getDefaultOptions(int kind) {
+		return new CleanUpOptions(new Hashtable());
 	}
 
 	/**

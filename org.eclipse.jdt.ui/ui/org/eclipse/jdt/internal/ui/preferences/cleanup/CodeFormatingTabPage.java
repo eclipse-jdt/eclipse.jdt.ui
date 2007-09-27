@@ -26,6 +26,7 @@ import org.eclipse.jface.dialogs.Dialog;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CommentFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
@@ -62,8 +63,8 @@ public final class CodeFormatingTabPage extends CleanUpTabPage {
 	protected JavaPreview doCreateJavaPreview(Composite parent) {
 		fPreview= (CleanUpPreview)super.doCreateJavaPreview(parent);
 		fPreview.showInvisibleCharacters(true);
-        fPreview.setFormat(CleanUpConstants.TRUE.equals(fValues.get(CleanUpConstants.FORMAT_SOURCE_CODE)));
-        fPreview.setCorrectIndentation(CleanUpConstants.TRUE.equals(fValues.get(CleanUpConstants.FORMAT_CORRECT_INDENTATION)));
+        fPreview.setFormat(CleanUpOptions.TRUE.equals(fValues.get(CleanUpConstants.FORMAT_SOURCE_CODE)));
+        fPreview.setCorrectIndentation(CleanUpOptions.TRUE.equals(fValues.get(CleanUpConstants.FORMAT_CORRECT_INDENTATION)));
 		return fPreview;
 	}
 
@@ -140,7 +141,7 @@ public final class CodeFormatingTabPage extends CleanUpTabPage {
 			}
 		});
 		nullRadio.setEnabled(sortMembersPref.getChecked());
-		nullRadio.setSelection(CleanUpConstants.FALSE.equals(fValues.get(CleanUpConstants.SORT_MEMBERS_ALL)));
+		nullRadio.setSelection(CleanUpOptions.FALSE.equals(fValues.get(CleanUpConstants.SORT_MEMBERS_ALL)));
 		boolean warningEnabled= sortMembersPref.getChecked() && sortAllPref.getChecked();
 		warningImage.setEnabled(warningEnabled);
 		warningLabel.setEnabled(warningEnabled);		

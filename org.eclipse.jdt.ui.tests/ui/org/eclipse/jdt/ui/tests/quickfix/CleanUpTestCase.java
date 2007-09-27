@@ -11,11 +11,11 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import junit.framework.Test;
@@ -56,6 +56,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
@@ -140,16 +141,17 @@ public class CleanUpTestCase extends QuickFixTest {
 
 	private void disableAll() throws CoreException {
 		Map settings= fProfile.getSettings();
-		Collection keys= CleanUpConstants.getEclipseDefaultSettings().keySet();
+		CleanUpOptions options= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS);
+		Set keys= options.getKeys();
 		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
 			String key= (String)iterator.next();
-			settings.put(key, CleanUpConstants.FALSE);
+			settings.put(key, CleanUpOptions.FALSE);
 		}
 		commitProfile();
 	}
 
 	protected void enable(String key) throws CoreException {
-		fProfile.getSettings().put(key, CleanUpConstants.TRUE);
+		fProfile.getSettings().put(key, CleanUpOptions.TRUE);
 		commitProfile();
 	}
 

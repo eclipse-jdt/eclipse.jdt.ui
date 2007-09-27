@@ -22,12 +22,12 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
@@ -39,8 +39,8 @@ public class CleanUpModifyDialog extends ModifyDialog {
 	 * Constant array for boolean selection 
 	 */
 	static String[] FALSE_TRUE = {
-		CleanUpConstants.FALSE,
-		CleanUpConstants.TRUE
+		CleanUpOptions.FALSE,
+		CleanUpOptions.TRUE
 	};
 	
 	private Label fCountLabel;

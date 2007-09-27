@@ -326,13 +326,13 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			String settings= getDialogSettings().get(CUSTOM_PROFILE_KEY);
 			if (settings == null) {
-				fCustomSettings= CleanUpConstants.getEclipseDefaultSettings();
+				fCustomSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS).getMap();
 			} else {
 				try {
 	                fCustomSettings= decodeSettings(settings);
                 } catch (CoreException e) {
 	                JavaPlugin.log(e);
-	                fCustomSettings= CleanUpConstants.getEclipseDefaultSettings();
+	                fCustomSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS).getMap();
                 }
 			}
 			
@@ -485,7 +485,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			try {
 				List res= ProfileStore.readProfilesFromStream(new InputSource(is));
 				if (res == null || res.size() == 0)
-					return CleanUpConstants.getEclipseDefaultSettings();
+					return JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS).getMap();
 				
 				CustomProfile profile= (CustomProfile)res.get(0);
 				new CleanUpProfileVersioner().update(profile);

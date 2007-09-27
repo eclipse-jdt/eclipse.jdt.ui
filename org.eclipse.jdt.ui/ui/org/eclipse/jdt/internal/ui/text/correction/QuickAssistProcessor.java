@@ -109,6 +109,7 @@ import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
@@ -923,8 +924,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				return true;
 			}
 			Map options= new Hashtable();
-			options.put(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, CleanUpConstants.TRUE);
-			options.put(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER, CleanUpConstants.TRUE);
+			options.put(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, CleanUpOptions.TRUE);
+			options.put(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER, CleanUpOptions.TRUE);
 			ICleanUp cleanUp= new ControlStatementsCleanUp(options);
 			for (int i= 0; i < fixes.length; i++) {
 				IProposableFix fix= fixes[i];
@@ -1261,7 +1262,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		Map options= new HashMap();
-		options.put(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpConstants.TRUE);
+		options.put(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
 		ICleanUp cleanUp= new ConvertLoopCleanUp(options);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 1, image, context);
 		proposal.setCommandId(CONVERT_FOR_LOOP_ID);
@@ -1284,7 +1285,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		Map options= new HashMap();
-		options.put(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpConstants.TRUE);
+		options.put(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
 		ICleanUp cleanUp= new ConvertLoopCleanUp(options);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 1, image, context);
 		proposal.setCommandId(CONVERT_FOR_LOOP_ID);
@@ -1329,10 +1330,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		Map options= new Hashtable();
-		options.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL, CleanUpConstants.TRUE);
-		options.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES, CleanUpConstants.TRUE);
-		options.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS, CleanUpConstants.TRUE);
-		options.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, CleanUpConstants.TRUE);
+		options.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL, CleanUpOptions.TRUE);
+		options.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES, CleanUpOptions.TRUE);
+		options.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS, CleanUpOptions.TRUE);
+		options.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, CleanUpOptions.TRUE);
 		VariableDeclarationCleanUp cleanUp= new VariableDeclarationCleanUp(options);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 5, image, context);
 		resultingCollections.add(proposal);

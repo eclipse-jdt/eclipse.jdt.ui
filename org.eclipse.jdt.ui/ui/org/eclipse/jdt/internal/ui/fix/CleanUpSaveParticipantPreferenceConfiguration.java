@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.fix;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -48,6 +49,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.AbstractSaveParticipantPreferenceConfiguration;
 import org.eclipse.jdt.internal.ui.preferences.BulletListBlock;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
@@ -249,8 +251,8 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		
 		IEclipsePreferences node= fContext.getNode(JavaUI.ID_PLUGIN);
 		
-		Map settings= CleanUpConstants.getSaveParticipantSettings();
-		for (Iterator iterator= settings.keySet().iterator(); iterator.hasNext();) {
+		Set keys= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_SAVE_ACTION_OPTIONS).getKeys();
+		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
 			String key= (String)iterator.next();
 			node.remove(CleanUpPreferenceUtil.SAVE_PARTICIPANT_KEY_PREFIX + key);
 		}
@@ -282,15 +284,15 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	}
 	
 	private void settingsChanged() {
-		fFormatCodeButton.setSelection(CleanUpConstants.TRUE.equals(fSettings.get(CleanUpConstants.FORMAT_SOURCE_CODE)));
-		fOrganizeImportsButton.setSelection(CleanUpConstants.TRUE.equals(fSettings.get(CleanUpConstants.ORGANIZE_IMPORTS)));
-		fAdditionalActionButton.setSelection(CleanUpConstants.TRUE.equals(fSettings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS)));
+		fFormatCodeButton.setSelection(CleanUpOptions.TRUE.equals(fSettings.get(CleanUpConstants.FORMAT_SOURCE_CODE)));
+		fOrganizeImportsButton.setSelection(CleanUpOptions.TRUE.equals(fSettings.get(CleanUpConstants.ORGANIZE_IMPORTS)));
+		fAdditionalActionButton.setSelection(CleanUpOptions.TRUE.equals(fSettings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS)));
 		
 		updateAdvancedEnableState();
 		
 		Map settings= new HashMap(fSettings);
-		settings.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpConstants.FALSE);
-		settings.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpConstants.FALSE);
+		settings.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpOptions.FALSE);
+		settings.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpOptions.FALSE);
 		
 		final ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps(settings);
 		
@@ -318,7 +320,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	}
 	
 	private void updateAdvancedEnableState() {
-		boolean additionalOptionEnabled= isEnabled(fContext) && CleanUpConstants.TRUE.equals(fSettings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS));
+		boolean additionalOptionEnabled= isEnabled(fContext) && CleanUpOptions.TRUE.equals(fSettings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS));
 		boolean additionalEnabled= additionalOptionEnabled && (!ProjectScope.SCOPE.equals(fContext.getName()) || hasSettingsInScope(fContext));
 		fSelectedActionsText.setEnabled(additionalEnabled);
 		fConfigureButton.setEnabled(additionalEnabled);
@@ -344,9 +346,9 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	private void changeSettingsValue(String key, boolean enabled) {
 		String value;
 		if (enabled) {
-			value= CleanUpConstants.TRUE;
+			value= CleanUpOptions.TRUE;
 		} else {
-			value= CleanUpConstants.FALSE;
+			value= CleanUpOptions.FALSE;
 		}
 		fSettings.put(key, value);
 		settingsChanged();

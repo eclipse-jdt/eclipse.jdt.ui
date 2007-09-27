@@ -45,6 +45,15 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 	/**
 	 * {@inheritDoc}
 	 */
+	public CleanUpOptions getDefaultOptions(int kind) {
+		//Hint: We cheat a little here. 
+		//This allows us to have all jdt/ui clean up settings in one place, the CleanUpConstants
+		return CleanUpConstants.getDefaultOptions(kind);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	public CleanUpRequirements getRequirements() {
 		return new CleanUpRequirements(requireAST(), false, getRequiredOptions());
 	}

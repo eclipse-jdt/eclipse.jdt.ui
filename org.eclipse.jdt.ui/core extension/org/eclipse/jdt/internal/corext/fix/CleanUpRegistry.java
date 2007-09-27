@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
+import java.util.ArrayList;
+
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CommentFormatCleanUp;
@@ -19,6 +22,7 @@ import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.fix.MapCleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
@@ -46,35 +50,60 @@ public class CleanUpRegistry {
 	 * @return a set of registered clean ups.
 	 */
 	public ICleanUp[] getCleanUps() {
-		return new ICleanUp[] {
-				new CodeStyleCleanUp(), 
-				new ControlStatementsCleanUp(), 
-				new ConvertLoopCleanUp(), 
-				new VariableDeclarationCleanUp(), 
-				new ExpressionsCleanUp(), 
-				new UnusedCodeCleanUp(), 
-				new Java50CleanUp(), 
-				new PotentialProgrammingProblemsCleanUp(), 
-				new UnnecessaryCodeCleanUp(), 
-				new StringCleanUp(), 
-				new UnimplementedCodeCleanUp(),
-				new SortMembersCleanUp(), 
-				new ImportsCleanUp(),
-				new CommentFormatCleanUp(),
-				new CodeFormatCleanUp()};
+		ArrayList result= new ArrayList();
+		
+		result.add(new CodeStyleCleanUp());
+		result.add(new ControlStatementsCleanUp()); 
+		result.add(new ConvertLoopCleanUp());
+		result.add(new VariableDeclarationCleanUp());
+		result.add(new ExpressionsCleanUp());
+		result.add(new UnusedCodeCleanUp());
+		result.add(new Java50CleanUp());
+		result.add(new PotentialProgrammingProblemsCleanUp()); 
+		result.add(new UnnecessaryCodeCleanUp()); 
+		result.add(new StringCleanUp());
+		result.add(new UnimplementedCodeCleanUp());
+		result.add(new SortMembersCleanUp());
+		result.add(new ImportsCleanUp());
+		result.add(new CommentFormatCleanUp());
+		result.add(new CodeFormatCleanUp());
+		
+		return (ICleanUp[]) result.toArray(new ICleanUp[result.size()]);
 	}
 
 	/**
 	 * @return a set of tab pages which can be used to configure a clean up profile
 	 */
 	public CleanUpTabPage[] getCleanUpTabPages() {
-		CleanUpTabPage[] result= new CleanUpTabPage[5];
+		ArrayList result= new ArrayList();
 		
-		result[0]= new CodeStyleTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeStyle);
-		result[1]= new MemberAccessesTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_MemberAccesses);
-		result[2]= new UnnecessaryCodeTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_UnnecessaryCode);
-		result[3]= new MissingCodeTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_MissingCode);
-		result[4]= new CodeFormatingTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeFormating);
+		result.add(new CodeStyleTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeStyle));
+		result.add(new MemberAccessesTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_MemberAccesses));
+		result.add(new UnnecessaryCodeTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_UnnecessaryCode));
+		result.add(new MissingCodeTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_MissingCode));
+		result.add(new CodeFormatingTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeFormating));
+		
+		return (CleanUpTabPage[]) result.toArray(new CleanUpTabPage[result.size()]);
+	}
+	
+	/**
+	 * Returns the default options for the specified clean up kind.
+	 * 
+	 * @param kind the kind of clean up for which to retrieve the options
+	 * @return the default options
+	 * 
+	 * @see ICleanUp#DEFAULT_CLEAN_UP_OPTIONS
+	 * @see ICleanUp#DEFAULT_SAVE_ACTION_OPTIONS
+	 */
+	public MapCleanUpOptions getDefaultOptions(int kind) {
+		MapCleanUpOptions result= new MapCleanUpOptions();
+		
+		ICleanUp[] cleanUps= getCleanUps();
+		
+		for (int i= 0; i < cleanUps.length; i++) {
+			CleanUpOptions options= cleanUps[i].getDefaultOptions(kind);
+			result.addAll(options);
+		}
 		
 		return result;
 	}

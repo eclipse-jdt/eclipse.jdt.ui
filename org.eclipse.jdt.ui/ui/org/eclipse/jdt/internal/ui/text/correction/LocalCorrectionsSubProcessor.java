@@ -107,6 +107,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
@@ -325,7 +326,7 @@ public class LocalCorrectionsSubProcessor {
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_NEVER_TRANSLATE);
 			Map options= new Hashtable();
-			options.put(CleanUpConstants.ADD_MISSING_NLS_TAGS, CleanUpConstants.TRUE);
+			options.put(CleanUpConstants.ADD_MISSING_NLS_TAGS, CleanUpOptions.TRUE);
 			FixCorrectionProposal addNLS= new FixCorrectionProposal(fix, new StringCleanUp(options), 3, image, context);
 			addNLS.setCommandId(ADD_NON_NLS_ID);
 			proposals.add(addNLS);
@@ -337,7 +338,7 @@ public class LocalCorrectionsSubProcessor {
 		if (fix != null) {
 			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 			Map options= new Hashtable();
-			options.put(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS, CleanUpConstants.TRUE);
+			options.put(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new StringCleanUp(options), 6, image, context);
 			proposal.setCommandId(REMOVE_UNNECESSARY_NLS_TAG_ID);
 			proposals.add(proposal);
@@ -353,8 +354,8 @@ public class LocalCorrectionsSubProcessor {
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map options= new HashMap();
-			options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpConstants.TRUE);
-			options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS, CleanUpConstants.TRUE);
+			options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpOptions.TRUE);
+			options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleCleanUp(options), 6, image, context);
 			proposal.setCommandId(ADD_STATIC_ACCESS_ID);
 			proposals.add(proposal);
@@ -366,17 +367,17 @@ public class LocalCorrectionsSubProcessor {
 			IProposableFix fix1= fixes[0];
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map options= new HashMap();
-			options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpConstants.TRUE);
-			options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpConstants.TRUE);
+			options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpOptions.TRUE);
+			options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix1, new CodeStyleCleanUp(options), 6, image, context);
 			proposal.setCommandId(ADD_STATIC_ACCESS_ID);
 			proposals.add(proposal);
 			
 			if (fixes.length > 1) {
 				Map options1= new HashMap();
-				options1.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpConstants.TRUE);
-				options1.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS, CleanUpConstants.TRUE);
-				options1.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpConstants.TRUE);
+				options1.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpOptions.TRUE);
+				options1.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS, CleanUpOptions.TRUE);
+				options1.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpOptions.TRUE);
 				IProposableFix fix2= fixes[1];
 				proposal= new FixCorrectionProposal(fix2, new CodeStyleCleanUp(options), 5, image, context);
 				proposals.add(proposal);
@@ -391,7 +392,7 @@ public class LocalCorrectionsSubProcessor {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 
 			Map settings= new Hashtable();
-			settings.put(CleanUpConstants.ADD_MISSING_METHODES, CleanUpConstants.TRUE);
+			settings.put(CleanUpConstants.ADD_MISSING_METHODES, CleanUpOptions.TRUE);
 			ICleanUp cleanUp= new UnimplementedCodeCleanUp(settings);
 
 			proposals.add(new FixCorrectionProposal(addMethodFix, cleanUp, 10, image, context));
@@ -402,7 +403,7 @@ public class LocalCorrectionsSubProcessor {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 
 			Map settings= new Hashtable();
-			settings.put(UnimplementedCodeCleanUp.MAKE_TYPE_ABSTRACT, CleanUpConstants.TRUE);
+			settings.put(UnimplementedCodeCleanUp.MAKE_TYPE_ABSTRACT, CleanUpOptions.TRUE);
 			ICleanUp cleanUp= new UnimplementedCodeCleanUp(settings);
 
 			proposals.add(new FixCorrectionProposal(makeAbstractFix, cleanUp, 5, image, context));
@@ -514,7 +515,7 @@ public class LocalCorrectionsSubProcessor {
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map options= new Hashtable();
-			options.put(CleanUpConstants.REMOVE_UNNECESSARY_CASTS, CleanUpConstants.TRUE);
+			options.put(CleanUpConstants.REMOVE_UNNECESSARY_CASTS, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new UnnecessaryCodeCleanUp(options), 5, image, context);
 			proposals.add(proposal);
 		}
@@ -588,8 +589,8 @@ public class LocalCorrectionsSubProcessor {
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map options= new HashMap();
-			options.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS, CleanUpConstants.TRUE);
-			options.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS, CleanUpConstants.TRUE);
+			options.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS, CleanUpOptions.TRUE);
+			options.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleCleanUp(options), 5, image, context);
 			proposal.setCommandId(ADD_FIELD_QUALIFICATION_ID);
 			proposals.add(proposal);
@@ -953,7 +954,7 @@ public class LocalCorrectionsSubProcessor {
 			}
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map options= new Hashtable();
-			options.put(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES, CleanUpConstants.TRUE);
+			options.put(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50CleanUp(options), 6, image, context);
 			proposal.setCommandId(RAW_TYPE_REFERENCE_ID);
 			proposals.add(proposal);
