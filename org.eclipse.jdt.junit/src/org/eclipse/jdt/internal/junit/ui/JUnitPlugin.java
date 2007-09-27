@@ -330,6 +330,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	 * Returns the bundles for a given bundle name,
 	 * 
 	 * @param bundleName the bundle name
+	 * @param version the version of the bundle
 	 * @return the bundles of the given name
 	 */
 	public Bundle[] getBundles(String bundleName, String version) {
