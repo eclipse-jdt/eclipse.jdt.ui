@@ -49,10 +49,12 @@ import org.eclipse.ui.texteditor.spelling.SpellingService;
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 
 /**
@@ -152,9 +154,27 @@ public class JavaReconciler extends MonoReconciler {
 			if (event.getDelta().getFlags() == IJavaElementDelta.F_AST_AFFECTED)
 				return;
 			setJavaModelChanged(true);
-			if (!fIsReconciling && isEditorActive() )
+			if (!fIsReconciling && isEditorActive() && !isSaveDelta(event.getDelta().getAffectedChildren()))
 				JavaReconciler.this.forceReconciling();
 		}
+	}
+
+	/**
+	 * Check whether the given delta has been
+	 * sent when saving this reconciler's editor.
+	 * 
+	 * @param delta the deltas
+	 * @return <code>true</code> if the given delta
+	 * @since 3.4
+	 */
+	private boolean isSaveDelta(IJavaElementDelta[] delta) {
+		if (delta.length != 1)
+			return false;
+
+		if (delta[0].getFlags() == IJavaElementDelta.F_PRIMARY_RESOURCE && delta[0].getElement().equals(fReconciledElement))
+			return true;
+
+		return isSaveDelta(delta[0].getAffectedChildren());
 	}
 
 	/**
@@ -242,6 +262,12 @@ public class JavaReconciler extends MonoReconciler {
 	private volatile boolean fIsReconciling= false;
 	
 	private boolean fIninitalProcessDone= false;
+	
+	/**
+	 * The element that this reconciler reconciles.
+	 * @since 3.4
+	 */
+	private ITypeRoot fReconciledElement;
 
 	/**
 	 * Creates a new reconciler.
@@ -299,6 +325,8 @@ public class JavaReconciler extends MonoReconciler {
 			}
 		};
 		JavaPlugin.getDefault().getCombinedPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
+		
+		fReconciledElement= EditorUtility.getEditorInputJavaElement(fTextEditor, false);
 	}
 
 	/*
