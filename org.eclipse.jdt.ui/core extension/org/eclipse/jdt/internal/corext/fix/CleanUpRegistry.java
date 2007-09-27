@@ -32,10 +32,10 @@ import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpMessages;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CodeFormatingTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CodeStyleTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CopyrightTabPage;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.MemberAccessesTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.MissingCodeTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.UnnecessaryCodeTabPage;
@@ -48,52 +48,57 @@ import org.eclipse.jdt.internal.ui.preferences.cleanup.UnnecessaryCodeTabPage;
  */
 public class CleanUpRegistry {
 	
+	public abstract class CleanUpTabPageDescriptor {
+		
+		private String fName;
+		private String fId;
+		
+		/**
+		 * @param id a unique id of the page described by this
+		 * @param name a human readable name of the page
+		 */
+		public CleanUpTabPageDescriptor(String id, String name) {
+			fId= id;
+			fName= name;
+		}
+
+		/**
+		 * @return unique id of this page
+		 */
+		public String getId() {
+			return fId;
+		}
+		
+		/**
+		 * @return the name of the tab
+		 */
+		public String getName() {
+			return fName;
+		}
+		
+		/**
+		 * @return new instance of a tab page
+		 */
+		public abstract ICleanUpTabPage createTabPage();
+	}
+	
+	private ICleanUp[] fCleanUps;
+	private CleanUpTabPageDescriptor[] fPageDescriptors;
+	
 	/**
 	 * @return a set of registered clean ups.
 	 */
-	public ICleanUp[] getCleanUps() {
-		ArrayList result= new ArrayList();
-		
-		result.add(new CodeStyleCleanUp());
-		result.add(new ControlStatementsCleanUp()); 
-		result.add(new ConvertLoopCleanUp());
-		result.add(new VariableDeclarationCleanUp());
-		result.add(new ExpressionsCleanUp());
-		result.add(new UnusedCodeCleanUp());
-		result.add(new Java50CleanUp());
-		result.add(new PotentialProgrammingProblemsCleanUp()); 
-		result.add(new UnnecessaryCodeCleanUp()); 
-		result.add(new StringCleanUp());
-		result.add(new UnimplementedCodeCleanUp());
-		result.add(new SortMembersCleanUp());
-		result.add(new ImportsCleanUp());
-		result.add(new CommentFormatCleanUp());
-		result.add(new CodeFormatCleanUp());
-		
-		if (isUpdateCopyrightEnabled()) {
-			result.add(new CopyrightUpdaterCleanUp());
-		}
-		
-		return (ICleanUp[]) result.toArray(new ICleanUp[result.size()]);
+	public synchronized ICleanUp[] getCleanUps() {
+		ensureCleanUpRegistered();
+		return fCleanUps;
 	}
 
 	/**
-	 * @return a set of tab pages which can be used to configure a clean up profile
+	 * @return set of clean up tab page descriptors
 	 */
-	public CleanUpTabPage[] getCleanUpTabPages() {
-		ArrayList result= new ArrayList();
-		
-		result.add(new CodeStyleTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeStyle));
-		result.add(new MemberAccessesTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_MemberAccesses));
-		result.add(new UnnecessaryCodeTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_UnnecessaryCode));
-		result.add(new MissingCodeTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_MissingCode));
-		result.add(new CodeFormatingTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeFormating));
-		
-		if (isUpdateCopyrightEnabled()) {
-			result.add(new CopyrightTabPage("Copyright")); //$NON-NLS-1$
-		}
-		
-		return (CleanUpTabPage[]) result.toArray(new CleanUpTabPage[result.size()]);
+	public synchronized CleanUpTabPageDescriptor[] getCleanUpTabPageDescriptors() {
+		ensurePagesRegistered();
+		return fPageDescriptors;
 	}
 	
 	/**
@@ -116,6 +121,83 @@ public class CleanUpRegistry {
 		}
 		
 		return result;
+	}
+	
+	private synchronized void ensureCleanUpRegistered() {
+		if (fCleanUps != null)
+			return;
+		
+		ArrayList result= new ArrayList();
+		
+		result.add(new CodeStyleCleanUp());
+		result.add(new ControlStatementsCleanUp()); 
+		result.add(new ConvertLoopCleanUp());
+		result.add(new VariableDeclarationCleanUp());
+		result.add(new ExpressionsCleanUp());
+		result.add(new UnusedCodeCleanUp());
+		result.add(new Java50CleanUp());
+		result.add(new PotentialProgrammingProblemsCleanUp()); 
+		result.add(new UnnecessaryCodeCleanUp()); 
+		result.add(new StringCleanUp());
+		result.add(new UnimplementedCodeCleanUp());
+		result.add(new SortMembersCleanUp());
+		result.add(new ImportsCleanUp());
+		result.add(new CommentFormatCleanUp());
+		result.add(new CodeFormatCleanUp());
+		
+		if (isUpdateCopyrightEnabled()) {
+			result.add(new CopyrightUpdaterCleanUp());
+		}
+		
+		fCleanUps= (ICleanUp[]) result.toArray(new ICleanUp[result.size()]);	
+	}
+	
+	private synchronized void ensurePagesRegistered() {
+		if (fPageDescriptors != null)
+			return;
+		
+		ArrayList result= new ArrayList();
+		
+		result.add(new CleanUpTabPageDescriptor(CodeStyleTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeStyle) {
+			public ICleanUpTabPage createTabPage() {
+				return new CodeStyleTabPage(); 
+			}
+		});
+		
+		result.add(new CleanUpTabPageDescriptor(MemberAccessesTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_MemberAccesses) {
+			public ICleanUpTabPage createTabPage() {
+				return new MemberAccessesTabPage(); 
+			}
+		});
+		
+		result.add(new CleanUpTabPageDescriptor(UnnecessaryCodeTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_UnnecessaryCode) {
+			public ICleanUpTabPage createTabPage() {
+				return new UnnecessaryCodeTabPage(); 
+			}
+		});
+		
+		result.add(new CleanUpTabPageDescriptor(MissingCodeTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_MissingCode) {
+			public ICleanUpTabPage createTabPage() {
+				return new MissingCodeTabPage(); 
+			}
+		});
+		
+		result.add(new CleanUpTabPageDescriptor(CodeFormatingTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeFormating) {
+			public ICleanUpTabPage createTabPage() {
+				return new CodeFormatingTabPage(); 
+			}
+		});
+		
+	
+		if (isUpdateCopyrightEnabled()) {
+			result.add(new CleanUpTabPageDescriptor(CopyrightTabPage.ID, "Copyright") { //$NON-NLS-1$
+				public ICleanUpTabPage createTabPage() {
+					return new CopyrightTabPage(); 
+				}
+			});
+		}
+		
+		fPageDescriptors= (CleanUpTabPageDescriptor[]) result.toArray(new CleanUpTabPageDescriptor[result.size()]);		
 	}
 	
 	private boolean isUpdateCopyrightEnabled() {

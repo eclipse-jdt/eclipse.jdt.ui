@@ -158,13 +158,11 @@ public interface ICleanUp {
 
 	/**
 	 * Constant for default options kind for clean up.
-	 * This kind is mapped to the 'Eclipse [built-in]' profile.
 	 */
 	public static final int DEFAULT_CLEAN_UP_OPTIONS= 1;
 	
 	/**
 	 * Constant for default options kind for save actions.
-	 * This kind is mapped to the save actions default settings.
 	 */
 	public static final int DEFAULT_SAVE_ACTION_OPTIONS= 2;
 	

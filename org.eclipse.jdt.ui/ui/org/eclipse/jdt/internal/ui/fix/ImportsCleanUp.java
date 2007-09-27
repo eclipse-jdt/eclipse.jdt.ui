@@ -79,10 +79,14 @@ public class ImportsCleanUp extends AbstractCleanUp {
      */
     public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
     	fCodeGeneratorSettings= null;
-    	if (fStatus == null || fStatus.isOK()) {
-    		return super.checkPostConditions(monitor);
-    	} else {
-    		return fStatus;
+    	try {
+	    	if (fStatus == null || fStatus.isOK()) {
+	    		return super.checkPostConditions(monitor);
+	    	} else {
+	    		return fStatus;
+	    	}
+    	} finally {
+    		fStatus= null;
     	}
     }
 

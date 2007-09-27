@@ -23,25 +23,26 @@ import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage;
 
-public abstract class CleanUpTabPage extends ModifyDialogTabPage {
+public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICleanUpTabPage {
 
 	private Map fValues;
 	private JavaPreview fCleanUpPreview;
 	private boolean fIsSaveAction;
-	private int fCount;
-	private int fSelectedCount;
-	private final String fTitle;
+	int fCount;
+	int fSelectedCount;
 	
-	public CleanUpTabPage(String title) {
+	public CleanUpTabPage() {
 		super();
 		fCount= 0;
 		fSelectedCount= 0;
-		fTitle= title;
 		fIsSaveAction= false;
 	}
 	
-	public void setIsSaveAction(boolean isSaveAction) {
-		fIsSaveAction= isSaveAction;
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setOptionsKind(int kind) {
+		fIsSaveAction= kind == ICleanUp.DEFAULT_SAVE_ACTION_OPTIONS;
 	}
 	
 	/**
@@ -50,10 +51,6 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage {
 	public void setWorkingValues(Map workingValues) {
 		super.setWorkingValues(workingValues);
 		fValues= workingValues;
-	}
-	
-	public String getTitle() {
-		return fTitle;
 	}
 	
 	/**

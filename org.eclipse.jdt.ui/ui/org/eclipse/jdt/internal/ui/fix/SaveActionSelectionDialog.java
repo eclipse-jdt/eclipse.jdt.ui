@@ -26,11 +26,12 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 
+import org.eclipse.jdt.internal.corext.fix.CleanUpRegistry.CleanUpTabPageDescriptor;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage;
 
 public class SaveActionSelectionDialog extends CleanUpSelectionDialog {
 	
@@ -46,15 +47,22 @@ public class SaveActionSelectionDialog extends CleanUpSelectionDialog {
 		fOrginalValues= new HashMap(settings);
 	}
 	
-	protected CleanUpTabPage[] createTabPages(Map workingValues) {	
-		CleanUpTabPage[] result= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPages();
+	protected NamedCleanUpTabPage[] createTabPages(Map workingValues) {	
+		CleanUpTabPageDescriptor[] descriptors= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPageDescriptors();
 		
-		for (int i= 0; i < result.length; i++) {
-			result[i].setIsSaveAction(true);
-			result[i].setWorkingValues(workingValues);
-			result[i].setModifyListener(this);
-		}
+		NamedCleanUpTabPage[] result= new NamedCleanUpTabPage[descriptors.length];
+		
+		for (int i= 0; i < descriptors.length; i++) {
+			String name= descriptors[i].getName();
+			ICleanUpTabPage page= descriptors[i].createTabPage();
 			
+			page.setOptionsKind(ICleanUp.DEFAULT_SAVE_ACTION_OPTIONS);
+			page.setModifyListener(this);
+			page.setWorkingValues(workingValues);
+			
+			result[i]= new NamedCleanUpTabPage(name, page);
+		}
+		
 		return result;
 	}
 	

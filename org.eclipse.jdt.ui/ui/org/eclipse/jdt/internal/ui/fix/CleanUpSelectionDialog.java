@@ -37,11 +37,30 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage.IModificationListener;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage;
+import org.eclipse.jdt.internal.ui.preferences.formatter.IModifyDialogTabPage;
 
-public abstract class CleanUpSelectionDialog extends StatusDialog implements IModificationListener {
+public abstract class CleanUpSelectionDialog extends StatusDialog implements IModifyDialogTabPage.IModificationListener {
+	
+	protected final class NamedCleanUpTabPage {
+		
+		private final String fName;
+		private final ICleanUpTabPage fPage;
+		
+		public NamedCleanUpTabPage(String name, ICleanUpTabPage page) {
+			fName= name;
+			fPage= page;
+		}
+		
+		public ICleanUpTabPage getPage() {
+			return fPage;
+		}
+		
+		public String getName() {
+			return fName;
+		}
+		
+	}
 
 	private static final String DS_KEY_PREFERRED_WIDTH= ".preferred_width"; //$NON-NLS-1$
 	private static final String DS_KEY_PREFERRED_HEIGHT= ".preferred_height"; //$NON-NLS-1$
@@ -53,7 +72,7 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 	private final List fTabPages;
 	private final IDialogSettings fDialogSettings;
 	private TabFolder fTabFolder;
-	private CleanUpTabPage[] fPages;
+	private ICleanUpTabPage[] fPages;
 	private Label fCountLabel;
 
 	public CleanUpSelectionDialog(Shell parent, Map settings, String title) {
@@ -68,7 +87,7 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 	}
 
-	protected abstract CleanUpTabPage[] createTabPages(Map workingValues);
+	protected abstract NamedCleanUpTabPage[] createTabPages(Map workingValues);
 
 	protected abstract String getPreferenceKeyPrefix();
 
@@ -105,7 +124,7 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 		}
 
 		fTabFolder.setSelection(lastFocusNr);
-		((ModifyDialogTabPage) fTabFolder.getSelection()[0].getData()).setInitialFocus();
+		((IModifyDialogTabPage) fTabFolder.getSelection()[0].getData()).setInitialFocus();
 	}
 
 	protected Control createDialogArea(Composite parent) {
@@ -115,10 +134,13 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 		fTabFolder.setFont(composite.getFont());
 		fTabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		fPages= createTabPages(fWorkingValues);
+		NamedCleanUpTabPage[] pages= createTabPages(fWorkingValues);
 		
-		for (int i= 0; i < fPages.length; i++) {
-			addTabPage(fPages[i].getTitle(), fPages[i]);
+		fPages= new ICleanUpTabPage[pages.length];
+		
+		for (int i= 0; i < pages.length; i++) {
+			fPages[i]= pages[i].getPage();
+			addTabPage(pages[i].getName(), fPages[i]);
 		}
 
 		fCountLabel= new Label(composite, SWT.NONE);
@@ -133,7 +155,7 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 
 			public void widgetSelected(SelectionEvent e) {
 				final TabItem tabItem= (TabItem) e.item;
-				final ModifyDialogTabPage page= (ModifyDialogTabPage) tabItem.getData();
+				final IModifyDialogTabPage page= (IModifyDialogTabPage) tabItem.getData();
 				fDialogSettings.put(getPreferenceKeyFocus(), fTabPages.indexOf(page));
 				page.makeVisible();
 			}
@@ -183,7 +205,7 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 		}
 	}
 
-	private final void addTabPage(String title, ModifyDialogTabPage tabPage) {
+	private final void addTabPage(String title, IModifyDialogTabPage tabPage) {
 		final TabItem tabItem= new TabItem(fTabFolder, SWT.NONE);
 		applyDialogFont(tabItem.getControl());
 		tabItem.setText(title);

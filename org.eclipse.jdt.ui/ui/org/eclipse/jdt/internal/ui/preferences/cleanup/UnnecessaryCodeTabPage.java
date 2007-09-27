@@ -24,8 +24,10 @@ import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 
 public final class UnnecessaryCodeTabPage extends CleanUpTabPage {
 	
-    public UnnecessaryCodeTabPage(String title) {
-    	super(title);
+	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.unnecessary_code"; //$NON-NLS-1$
+	
+    public UnnecessaryCodeTabPage() {
+    	super();
     }
     
     protected ICleanUp[] createPreviewCleanUps(Map values) {

@@ -23,9 +23,11 @@ import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 
 public final class MissingCodeTabPage extends CleanUpTabPage {
+	
+	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.missing_code"; //$NON-NLS-1$
 
-	public MissingCodeTabPage(String title) {
-		super(title);
+	public MissingCodeTabPage() {
+		super();
 	}
 
 	protected ICleanUp[] createPreviewCleanUps(Map values) {

@@ -56,16 +56,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 
-public abstract class ModifyDialogTabPage {
+public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	
-	public interface IModificationListener {
-
-		void updateStatus(IStatus status);
-
-		void valuesModified();
-
-    }
-
 	/**
 	 * This is the default listener for any of the Preference
 	 * classes. It is added by the respective factory methods and
@@ -613,13 +605,13 @@ public abstract class ModifyDialogTabPage {
 	/**
 	 * The modify dialog where we can display status messages.
 	 */
-	private IModificationListener fModifyListener;
+	private IModifyDialogTabPage.IModificationListener fModifyListener;
 
 
 	/*
 	 * Create a new <code>ModifyDialogTabPage</code>
 	 */
-	public ModifyDialogTabPage(IModificationListener modifyListener, Map workingValues) {
+	public ModifyDialogTabPage(IModifyDialogTabPage.IModificationListener modifyListener, Map workingValues) {
 		fWorkingValues= workingValues;
 		fModifyListener= modifyListener;
 		fDefaultFocusManager= new DefaultFocusManager();
@@ -629,11 +621,17 @@ public abstract class ModifyDialogTabPage {
 		fDefaultFocusManager= new DefaultFocusManager();
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setWorkingValues(Map workingValues) {
 		fWorkingValues= workingValues;
 	}
 	
-	public void setModifyListener(IModificationListener modifyListener) {
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setModifyListener(IModifyDialogTabPage.IModificationListener modifyListener) {
 		fModifyListener= modifyListener;
 	}
 	
@@ -718,7 +716,7 @@ public abstract class ModifyDialogTabPage {
 	}
 	
 	/**
-	 * This method is called after all controls have been alloated, including the preview. 
+	 * This method is called after all controls have been allocated, including the preview. 
 	 * It can be used to set the preview text and to create listeners.
 	 *
 	 */
@@ -769,11 +767,7 @@ public abstract class ModifyDialogTabPage {
 
 	
 	/**
-	 * This is called when the page becomes visible. 
-	 * Common tasks to do include:
-	 * <ul><li>Updating the preview.</li>
-	 * <li>Setting the focus</li>
-	 * </ul>
+	 * {@inheritDoc}
 	 */
 	final public void makeVisible() {
 		fDefaultFocusManager.resetFocus();
@@ -789,11 +783,8 @@ public abstract class ModifyDialogTabPage {
 		fModifyListener.valuesModified();
 	}
     /**
-     * Each tab page should remember where its last focus was, and reset it
-     * correctly within this method. This method is only called after
-     * initialization on the first tab page to be displayed in order to restore
-     * the focus of the last session.
-     */
+	 * {@inheritDoc}
+	 */
     public void setInitialFocus() {
 		if (fDefaultFocusManager.isUsed()) {
 			fDefaultFocusManager.restoreFocus();

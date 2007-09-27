@@ -23,9 +23,11 @@ import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 
 public final class MemberAccessesTabPage extends CleanUpTabPage {
+	
+	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.member_accesses"; //$NON-NLS-1$
 
-    public MemberAccessesTabPage(String title) {
-    	super(title);
+    public MemberAccessesTabPage() {
+    	super();
     }
     
     protected ICleanUp[] createPreviewCleanUps(Map values) {

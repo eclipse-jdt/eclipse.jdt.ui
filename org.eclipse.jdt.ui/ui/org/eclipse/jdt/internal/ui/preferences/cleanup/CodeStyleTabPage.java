@@ -24,9 +24,11 @@ import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 
 public final class CodeStyleTabPage extends CleanUpTabPage {
+	
+	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.code_style"; //$NON-NLS-1$
 
-    public CodeStyleTabPage(String title) {
-    	super(title);
+    public CodeStyleTabPage() {
+    	super();
     }
     
     protected ICleanUp[] createPreviewCleanUps(Map values) {

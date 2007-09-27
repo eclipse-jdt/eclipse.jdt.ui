@@ -739,8 +739,6 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		try {
 			for (int j= 0; j < cleanUps.length; j++) {
 				result.merge(cleanUps[j].checkPostConditions(new SubProgressMonitor(monitor, 1)));
-				if (result.hasFatalError())
-					return result;
 			}
 		} finally {
 			monitor.done();

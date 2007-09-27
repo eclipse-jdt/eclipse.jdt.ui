@@ -37,7 +37,6 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.ui.SharedASTProvider;
 
-
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class CleanUpAnnotationTest extends CleanUpTestCase {
@@ -234,6 +233,6 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 			expected1
 		});
 		
-		assertTrue(status.isOK());
+		assertTrue(status.toString(), status.isOK());
 	}
 }

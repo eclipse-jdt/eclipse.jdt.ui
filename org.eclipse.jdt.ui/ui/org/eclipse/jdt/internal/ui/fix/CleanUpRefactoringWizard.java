@@ -62,6 +62,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
+import org.eclipse.jdt.internal.corext.fix.CleanUpRegistry.CleanUpTabPageDescriptor;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -71,10 +72,10 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.BulletListBlock;
 import org.eclipse.jdt.internal.ui.preferences.CleanUpPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage;
+import org.eclipse.jdt.internal.ui.preferences.formatter.IModifyDialogTabPage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage.IModificationListener;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -166,7 +167,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
         }
 	}
 	
-	private static class CleanUpConfigurationPage extends UserInputWizardPage implements IModificationListener {
+	private static class CleanUpConfigurationPage extends UserInputWizardPage implements IModifyDialogTabPage.IModificationListener {
 
 		private static final class WizardCleanUpSelectionDialog extends CleanUpSelectionDialog {
 			
@@ -176,13 +177,20 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				super(parent, settings, MultiFixMessages.CleanUpRefactoringWizard_CustomCleanUpsDialog_title);
 			}
 
-			protected CleanUpTabPage[] createTabPages(Map workingValues) {
-				CleanUpTabPage[] result= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPages();
+			protected NamedCleanUpTabPage[] createTabPages(Map workingValues) {
+				CleanUpTabPageDescriptor[] descriptors= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPageDescriptors();
 				
-				for (int i= 0; i < result.length; i++) {
-					result[i].setIsSaveAction(false);
-					result[i].setModifyListener(this);
-					result[i].setWorkingValues(workingValues);
+				NamedCleanUpTabPage[] result= new NamedCleanUpTabPage[descriptors.length];
+				
+				for (int i= 0; i < descriptors.length; i++) {
+					String name= descriptors[i].getName();
+					ICleanUpTabPage page= descriptors[i].createTabPage();
+					
+					page.setOptionsKind(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS);
+					page.setModifyListener(this);
+					page.setWorkingValues(workingValues);
+					
+					result[i]= new NamedCleanUpTabPage(name, page);
 				}
 				
 				return result;

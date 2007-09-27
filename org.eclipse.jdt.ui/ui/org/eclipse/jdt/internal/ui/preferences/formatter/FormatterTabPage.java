@@ -33,7 +33,7 @@ public abstract class FormatterTabPage extends ModifyDialogTabPage {
 	private final IDialogSettings fDialogSettings;
 	private Button fShowInvisibleButton;
 
-	public FormatterTabPage(IModificationListener modifyListener, Map workingValues) {
+	public FormatterTabPage(IModifyDialogTabPage.IModificationListener modifyListener, Map workingValues) {
 		super(modifyListener, workingValues);
 		
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();

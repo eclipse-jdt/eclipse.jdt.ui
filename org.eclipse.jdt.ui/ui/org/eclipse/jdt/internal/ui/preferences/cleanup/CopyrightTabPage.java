@@ -19,9 +19,11 @@ import org.eclipse.jdt.internal.ui.fix.CopyrightUpdaterCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 
 public class CopyrightTabPage extends CleanUpTabPage {
+	
+	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.copyright"; //$NON-NLS-1$
 
-	public CopyrightTabPage(String title) {
-		super(title);
+	public CopyrightTabPage() {
+		super();
 	}
 
 	/**

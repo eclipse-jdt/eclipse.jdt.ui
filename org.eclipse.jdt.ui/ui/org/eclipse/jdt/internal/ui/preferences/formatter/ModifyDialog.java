@@ -51,7 +51,6 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage.IModificationListener;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -59,7 +58,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
-public abstract class ModifyDialog extends StatusDialog implements IModificationListener {
+public abstract class ModifyDialog extends StatusDialog implements IModifyDialogTabPage.IModificationListener {
     
     /**
      * The keys to retrieve the preferred area from the dialog settings.
@@ -136,7 +135,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		
 		if (!fNewProfile) {
 			fTabFolder.setSelection(lastFocusNr);
-			((ModifyDialogTabPage)fTabFolder.getSelection()[0].getData()).setInitialFocus();
+			((IModifyDialogTabPage)fTabFolder.getSelection()[0].getData()).setInitialFocus();
 		}
 	}
 
@@ -173,7 +172,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 			public void widgetDefaultSelected(SelectionEvent e) {}
 			public void widgetSelected(SelectionEvent e) {
 				final TabItem tabItem= (TabItem)e.item;
-				final ModifyDialogTabPage page= (ModifyDialogTabPage)tabItem.getData();
+				final IModifyDialogTabPage page= (IModifyDialogTabPage)tabItem.getData();
 				//				page.fSashForm.setWeights();
 				fDialogSettings.put(fKeyLastFocus, fTabPages.indexOf(page));
 				page.makeVisible();
@@ -311,7 +310,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		super.createButtonsForButtonBar(parent);
 	}
 
-	protected final void addTabPage(String title, ModifyDialogTabPage tabPage) {
+	protected final void addTabPage(String title, IModifyDialogTabPage tabPage) {
 		final TabItem tabItem= new TabItem(fTabFolder, SWT.NONE);
 		applyDialogFont(tabItem.getControl());
 		tabItem.setText(title);

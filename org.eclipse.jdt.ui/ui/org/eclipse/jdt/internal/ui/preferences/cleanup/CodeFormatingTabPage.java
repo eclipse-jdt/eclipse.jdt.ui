@@ -35,12 +35,14 @@ import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
 import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
 
 public final class CodeFormatingTabPage extends CleanUpTabPage {
+	
+	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.code_formatting"; //$NON-NLS-1$
 
 	private Map fValues;
 	private CleanUpPreview fPreview;
 
-	public CodeFormatingTabPage(String title) {
-		super(title);
+	public CodeFormatingTabPage() {
+		super();
 	}
 	
 	/**
