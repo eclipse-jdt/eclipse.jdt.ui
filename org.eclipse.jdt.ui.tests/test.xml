@@ -4,7 +4,6 @@
   <!-- The property ${eclipse-home} should be passed into this script -->
   <!-- Set a meaningful default value for when it is not. -->
   <property name="eclipse-home" value="${basedir}\..\.."/>
-  <property name="org.eclipse.jdt.ui.tests" value="org.eclipse.jdt.ui.tests_3.1.0"/>
 
   <!-- sets the properties eclipse-home, and library-file -->
   <property name="plugin-name" value="org.eclipse.jdt.ui.tests"/>
@@ -35,31 +34,22 @@
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="data-dir" value="${jdt-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
-      <property name="classname" 
-                value="org.eclipse.jdt.ui.tests.AutomatedSuite"/>
+      <property name="classname" value="org.eclipse.jdt.ui.tests.AutomatedSuite"/>
     </ant>
     
   </target>
   
     <!-- leak test target -->
-  <target name="leaksuite" depends="checkOS" if="os.isWindows">
+  <target name="leaksuite">
     <property name="jdt-folder" value="${eclipse-home}/jdt_folder"/>
 
     <delete dir="${jdt-folder}" quiet="true"/>
-    <copy file="${eclipse-home}/plugins/${org.eclipse.jdt.ui.tests}/leaks/ProfileNatives.dll" todir="${java.home}/bin" />	
     
 	<ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="data-dir" value="${jdt-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
-      <property name="vmargs" value="-Xmx256M -Xint -XrunProfileNatives"/>
       <property name="classname" value="org.eclipse.jdt.ui.tests.LeakTestSuite"/>
     </ant>
-  </target>
-
-  <target name="checkOS">
-   	<condition property="os.isWindows">
-    	<os family="windows"/>
-  	</condition>
   </target>
   
   <!-- This target holds code to cleanup the testing environment after -->

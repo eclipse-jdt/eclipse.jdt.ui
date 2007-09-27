@@ -16,6 +16,7 @@ Export-Package:
  org.eclipse.jdt.ui.examples.filters;x-internal:=true,
  org.eclipse.jdt.ui.leaktest;x-internal:=true,
  org.eclipse.jdt.ui.leaktest.example;x-internal:=true,
+ org.eclipse.jdt.ui.leaktest.reftracker;x-internal:=true,
  org.eclipse.jdt.ui.tests;x-internal:=true,
  org.eclipse.jdt.ui.tests.browsing;x-internal:=true,
  org.eclipse.jdt.ui.tests.buildpath;x-internal:=true,

@@ -34,12 +34,15 @@ public class LeakTestExample extends LeakTestCase {
 	
 	private Object fGlobalReference;
 	
+	private ArrayList fGlobalList= new ArrayList();
 
 	public LeakTestExample(String name) {
 		super(name);
 	}
 			
 	public void testLeakGlobalReference() throws Exception {
+		fGlobalList.clear();
+		
 		Class cl= MyClass.class;
 
 		// get the count before creating the instance
@@ -61,6 +64,7 @@ public class LeakTestExample extends LeakTestCase {
 	}
 	
 	public void testNoLeakGlobalReference() throws Exception {
+		fGlobalList.clear();
 		Class cl= MyClass.class;
 
 		// get the count before creating my instance
@@ -74,8 +78,7 @@ public class LeakTestExample extends LeakTestCase {
 		assertDifferentCount("after creation: ", count1, count2);
 		
 		// add the instance to a list
-		ArrayList list= new ArrayList();
-		list.add(fGlobalReference);
+		fGlobalList.add(fGlobalReference);
 		
 		// clear the global references of the instance
 		fGlobalReference= null;
@@ -86,41 +89,4 @@ public class LeakTestExample extends LeakTestCase {
 		assertEqualCount("after clear: ", count2, count3);
 	}
 	
-	public void testLeakLocalReference() throws Exception {
-		Class cl= MyClass.class;
-
-		int count1= getInstanceCount(cl);
-		
-		MyClass reference= new MyClass();
-		
-		int count2= getInstanceCount(cl);
-		assertDifferentCount("after creation: ", count1, count2);
-		
-		reference.toString();
-		reference= null;
-		
-		int count3= getInstanceCount(cl);
-		assertEqualCount("after clear: ", count1, count3);
-	}
-	
-	public void testNoLeakLocalReference() throws Exception {
-		Class cl= MyClass.class;
-
-		int count1= getInstanceCount(cl);
-		
-		MyClass reference= new MyClass();
-
-		int count2= getInstanceCount(cl);
-		assertDifferentCount("after creation: ", count1, count2);
-		
-		ArrayList list= new ArrayList();
-		list.add(reference);
-		
-		reference= null;
-		
-		int count3= getInstanceCount(cl);
-		assertEqualCount("after clear: ", count2, count3);
-	}
-	
-
 }

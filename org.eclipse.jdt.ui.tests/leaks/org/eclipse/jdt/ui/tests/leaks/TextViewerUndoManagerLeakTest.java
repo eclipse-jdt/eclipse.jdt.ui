@@ -24,8 +24,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.IUndoManager;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.TextViewerUndoManager;
 import org.eclipse.jface.text.TextViewer;
+import org.eclipse.jface.text.TextViewerUndoManager;
 
 import org.eclipse.jdt.ui.leaktest.LeakTestCase;
 import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
@@ -171,7 +171,7 @@ public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 		try {
 			for (int i= 0; i < count; i++) {
 				final Position position= createRandomPositionPoisson(document.getLength());
-				final String string= createRandomStringPoisson(4);
+				final String string= createRandomStringPoisson();
 				document.replace(position.getOffset(), position.getLength(), string);
 			}
 		} catch (BadLocationException e) {
@@ -222,7 +222,7 @@ public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 		return (char) (32 + 95 * Math.random());
 	}
 	
-	private static String createRandomStringPoisson(int mean) {
+	private static String createRandomStringPoisson() {
 		final int length= getRandomPoissonValue(2);
 		return createRandomString(length);
 	}
@@ -260,6 +260,8 @@ public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 	
 	/**
 	 * Returns the faculty of k.
+	 * @param k value
+	 * @return the faculty of the value
 	 */
 	private static final int faculty(int k) {
 		return k == 0

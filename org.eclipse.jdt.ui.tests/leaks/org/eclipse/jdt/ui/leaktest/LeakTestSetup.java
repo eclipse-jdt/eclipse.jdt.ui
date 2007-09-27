@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,26 +13,13 @@ package org.eclipse.jdt.ui.leaktest;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
-
 /**
  *
  */
 public class LeakTestSetup extends TestSetup {
 	
 	private static LeakTestSetup fgCurrentSetup= null;
-	private ProfilerConnector fConnection;
 	
-	/**
-	 * @return the profiler Connection or <code>null</code> if no profiler connection could be established (e.g. because not supported on the platform)
-	 */
-	public static ProfilerConnector getProfilerConnector() {
-		if (fgCurrentSetup == null)
-			return null;
-		
-		return fgCurrentSetup.getConnection();
-	}
-		
-		
 	public LeakTestSetup(Test test) {
 		super(test);
 		if (fgCurrentSetup == null) {
@@ -44,25 +31,13 @@ public class LeakTestSetup extends TestSetup {
 		if (fgCurrentSetup != this) {
 			return;
 		}
-		try {
-			fConnection= new ProfilerConnector();
-		} catch (ProfileException e) {
-			fConnection= null;
-		}
+		// nothing done at the moment
 	}
 
 	protected void tearDown() throws Exception {
 		if (fgCurrentSetup != this) {
 			return;
 		}
-		fConnection.close();
+		// nothing done at the moment
 	}
-
-	/**
-	 * @return Returns the connection.
-	 */
-	public ProfilerConnector getConnection() {
-		return fConnection;
-	}
-
 }
