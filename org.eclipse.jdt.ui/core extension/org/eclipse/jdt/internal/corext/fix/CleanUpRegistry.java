@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
@@ -18,7 +19,6 @@ import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CommentFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
-import org.eclipse.jdt.internal.ui.fix.CopyrightUpdaterCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
@@ -34,7 +34,6 @@ import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpMessages;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CodeFormatingTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CodeStyleTabPage;
-import org.eclipse.jdt.internal.ui.preferences.cleanup.CopyrightTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.MemberAccessesTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.MissingCodeTabPage;
@@ -48,7 +47,7 @@ import org.eclipse.jdt.internal.ui.preferences.cleanup.UnnecessaryCodeTabPage;
  */
 public class CleanUpRegistry {
 	
-	public abstract class CleanUpTabPageDescriptor {
+	public static abstract class CleanUpTabPageDescriptor {
 		
 		private String fName;
 		private String fId;
@@ -145,10 +144,6 @@ public class CleanUpRegistry {
 		result.add(new CommentFormatCleanUp());
 		result.add(new CodeFormatCleanUp());
 		
-		if (isUpdateCopyrightEnabled()) {
-			result.add(new CopyrightUpdaterCleanUp());
-		}
-		
 		fCleanUps= (ICleanUp[]) result.toArray(new ICleanUp[result.size()]);	
 	}
 	
@@ -188,20 +183,29 @@ public class CleanUpRegistry {
 			}
 		});
 		
-	
-		if (isUpdateCopyrightEnabled()) {
-			result.add(new CleanUpTabPageDescriptor(CopyrightTabPage.ID, "Copyright") { //$NON-NLS-1$
-				public ICleanUpTabPage createTabPage() {
-					return new CopyrightTabPage(); 
-				}
-			});
-		}
-		
 		fPageDescriptors= (CleanUpTabPageDescriptor[]) result.toArray(new CleanUpTabPageDescriptor[result.size()]);		
 	}
-	
-	private boolean isUpdateCopyrightEnabled() {
-		return "true".equals(System.getProperty("org.eclipse.jdt.ui/UpdateCopyrightOnSave")); //$NON-NLS-1$ //$NON-NLS-2$
+
+	/**
+	 * @param cleanUp the clean up to register
+	 */
+	public synchronized void registerCleanUp(ICleanUp cleanUp) {
+		ensureCleanUpRegistered();
+		ArrayList result= new ArrayList();
+		result.addAll(Arrays.asList(fCleanUps));
+		result.add(cleanUp);
+		fCleanUps= (ICleanUp[]) result.toArray(new ICleanUp[result.size()]);
+	}
+
+	/**
+	 * @param descriptor the descriptor of the page to register
+	 */
+	public synchronized void registerTabPage(CleanUpTabPageDescriptor descriptor) {
+		ensurePagesRegistered();
+		ArrayList result= new ArrayList();
+		result.addAll(Arrays.asList(fPageDescriptors));
+		result.add(descriptor);
+		fPageDescriptors= (CleanUpTabPageDescriptor[]) result.toArray(new CleanUpTabPageDescriptor[result.size()]);
 	}
 
 }
