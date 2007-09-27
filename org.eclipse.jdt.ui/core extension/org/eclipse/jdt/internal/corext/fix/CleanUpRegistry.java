@@ -18,6 +18,7 @@ import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CommentFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
+import org.eclipse.jdt.internal.ui.fix.CopyrightUpdaterCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
@@ -34,6 +35,7 @@ import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpMessages;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CodeFormatingTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CodeStyleTabPage;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.CopyrightTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.MemberAccessesTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.MissingCodeTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.UnnecessaryCodeTabPage;
@@ -68,6 +70,10 @@ public class CleanUpRegistry {
 		result.add(new CommentFormatCleanUp());
 		result.add(new CodeFormatCleanUp());
 		
+		if (isUpdateCopyrightEnabled()) {
+			result.add(new CopyrightUpdaterCleanUp());
+		}
+		
 		return (ICleanUp[]) result.toArray(new ICleanUp[result.size()]);
 	}
 
@@ -82,6 +88,10 @@ public class CleanUpRegistry {
 		result.add(new UnnecessaryCodeTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_UnnecessaryCode));
 		result.add(new MissingCodeTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_MissingCode));
 		result.add(new CodeFormatingTabPage(CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeFormating));
+		
+		if (isUpdateCopyrightEnabled()) {
+			result.add(new CopyrightTabPage("Copyright")); //$NON-NLS-1$
+		}
 		
 		return (CleanUpTabPage[]) result.toArray(new CleanUpTabPage[result.size()]);
 	}
@@ -106,6 +116,10 @@ public class CleanUpRegistry {
 		}
 		
 		return result;
+	}
+	
+	private boolean isUpdateCopyrightEnabled() {
+		return "true".equals(System.getProperty("org.eclipse.jdt.ui/UpdateCopyrightOnSave")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 }
