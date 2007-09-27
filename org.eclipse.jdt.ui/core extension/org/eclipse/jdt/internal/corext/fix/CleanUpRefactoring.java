@@ -488,6 +488,8 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 	private Change fChange;
 	private boolean fLeaveFilesDirty;
 	private final String fName;
+
+	private CleanUpOptions fOptions;
 	
 	public CleanUpRefactoring() {
 		this(FixMessages.CleanUpRefactoring_Refactoring_name);
@@ -497,6 +499,10 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		fName= name;
 		fCleanUps= new ArrayList();
 		fProjects= new Hashtable();
+	}
+	
+	public void setOptions(CleanUpOptions options) {
+		fOptions= options;
 	}
 	
 	public void addCompilationUnit(ICompilationUnit unit) {
@@ -606,7 +612,6 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		int cuCount= getCleanUpTargetsSize();
 		
 		ICleanUp first= (ICleanUp) fCleanUps.get(0);
-		boolean usesProjectSettings= first.getOptions() == null;
 		
 		RefactoringStatus result= new RefactoringStatus();
 		
@@ -621,10 +626,14 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				List targetsList= (List) entry.getValue();
 				CleanUpTarget[] targets= (CleanUpTarget[])targetsList.toArray(new CleanUpTarget[targetsList.size()]);
 				
-				if (usesProjectSettings) {
+				if (fOptions == null) {
 					result.merge(setProjectOptions(project, cleanUps));
 					if (result.hasFatalError())
 						return result;
+				} else {
+					for (int i= 0; i < cleanUps.length; i++) {
+						cleanUps[i].setOptions(fOptions);
+					}
 				}
 				
 				result.merge(checkPreConditions(project, targets, new SubProgressMonitor(pm, 3 * cleanUps.length)));
@@ -646,15 +655,8 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			List files= new ArrayList();
 			findFilesToBeModified(change, files);
 			result.merge(Checks.validateModifiesFiles((IFile[])files.toArray(new IFile[files.size()]), getValidationContext()));
-			if (result.hasFatalError())
-				return result;
 		} finally {
 			pm.done();
-			if (usesProjectSettings) {
-				for (int i= 0; i < cleanUps.length; i++) {
-					cleanUps[i].setOptions(null);
-				}
-			}
 		}
 		
 		return result;

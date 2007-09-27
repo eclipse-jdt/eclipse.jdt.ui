@@ -294,7 +294,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		settings.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpOptions.FALSE);
 		settings.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpOptions.FALSE);
 		
-		final ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps(settings);
+		final ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps();
 		
 		if (cleanUps.length == 0) {			
 			fSelectedActionsText.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_NoActionEnabled_Info);
@@ -302,7 +302,9 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 			StringBuffer buf= new StringBuffer();
 			
 			boolean first= true;
+			CleanUpOptions options= new MapCleanUpOptions(settings);
 	    	for (int i= 0; i < cleanUps.length; i++) {
+				cleanUps[i].setOptions(options);
 		        String[] descriptions= cleanUps[i].getDescriptions();
 		        if (descriptions != null) {
 	    	        for (int j= 0; j < descriptions.length; j++) {

@@ -184,11 +184,6 @@ public interface ICleanUp {
 	public void setOptions(CleanUpOptions options);
 	
 	/**
-	 * @return the options passed to {@link #setOptions(CleanUpOptions)}
-	 */
-	public CleanUpOptions getOptions();
-	
-	/**
 	 * Human readable description for each operation this clean up will execute.
 	 * 
 	 * @return descriptions or <b>null</b>

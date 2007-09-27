@@ -53,13 +53,6 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
-	public CleanUpOptions getOptions() {
-		return fOptions;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	public String[] getDescriptions() {
 		return new String[0];
 	}

@@ -413,8 +413,10 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
         private void showCustomSettings(BulletListBlock bulletListBlock) {
 			StringBuffer buf= new StringBuffer();
 			
-			final ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps(fCustomSettings);
+			final ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps();
+			CleanUpOptions options= new MapCleanUpOptions(fCustomSettings);
 	    	for (int i= 0; i < cleanUps.length; i++) {
+	    		cleanUps[i].setOptions(options);
 		        String[] descriptions= cleanUps[i].getDescriptions();
 		        if (descriptions != null) {
 	    	        for (int j= 0; j < descriptions.length; j++) {
@@ -450,15 +452,16 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
         }
 
 		private void initializeRefactoring() {
-			ICleanUp[] cleanups;
+			CleanUpRefactoring refactoring= (CleanUpRefactoring)getRefactoring();
+			
 			if (fUseCustomField.isSelected()) {
-				cleanups= CleanUpRefactoring.createCleanUps(fCustomSettings);
+				refactoring.setOptions(new MapCleanUpOptions(fCustomSettings));
 			} else {
-				cleanups= CleanUpRefactoring.createCleanUps();
+				refactoring.setOptions(null);
 			}
 
-			CleanUpRefactoring refactoring= (CleanUpRefactoring)getRefactoring();
 			refactoring.clearCleanUps();
+			ICleanUp[] cleanups= CleanUpRefactoring.createCleanUps();
 			for (int i= 0; i < cleanups.length; i++) {
 	            refactoring.addCleanUp(cleanups[i]);
             }

@@ -39,7 +39,9 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
+import org.eclipse.jdt.internal.ui.fix.MapCleanUpOptions;
 import org.eclipse.jdt.internal.ui.preferences.BulletListBlock;
 import org.eclipse.jdt.internal.ui.preferences.PreferencesAccess;
 import org.eclipse.jdt.internal.ui.preferences.formatter.IProfileVersioner;
@@ -101,7 +103,11 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		final Map sharedSettings= new Hashtable();
 		fill(settings, sharedSettings);
 		
-		final ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps(sharedSettings);
+		final ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps();
+		CleanUpOptions options= new MapCleanUpOptions(sharedSettings);
+		for (int i= 0; i < cleanUps.length; i++) {
+			cleanUps[i].setOptions(options);
+		}
 		
 		createLabel(composite, CleanUpMessages.CleanUpConfigurationBlock_SelectedCleanUps_label, numColumns);
 		
