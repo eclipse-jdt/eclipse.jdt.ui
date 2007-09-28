@@ -20,8 +20,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 
-import org.eclipse.ui.IEditorPart;
-
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -34,10 +32,10 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
 
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
 
 /**
  * Provides externalized string as hover info for NLS key.
@@ -145,12 +143,4 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		HTMLPrinter.addPageEpilog(buffer);
 		return buffer.toString();
 	}
-
-	private ITypeRoot getEditorInputJavaElement() {
-		IEditorPart editor= getEditor();
-		if (editor != null)
-			return JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
-		return null;
-	}
-
 }

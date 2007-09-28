@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
 import java.io.IOException;
@@ -20,7 +19,9 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHoverExtension;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
 
 import org.eclipse.ui.IEditorPart;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
 
+
 /**
  * Provides source as hover info for Java elements.
  */
@@ -49,10 +51,9 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 	/*
 	 * @see JavaElementHover
 	 */
-	protected String getHoverInfo(IJavaElement[] result) {
-		int nResults= result.length;
-
-		if (nResults > 1)
+	public String getHoverInfo(ITextViewer textViewer, IRegion region) {
+		IJavaElement[] result= getJavaElementsAt(textViewer, region);
+		if (result == null || result.length == 0 || result.length > 1)
 			return null;
 
 		IJavaElement curr= result[0];
@@ -86,7 +87,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 	}
 
 	private String removeLeadingComments(String source) {
-		JavaCodeReader reader= new JavaCodeReader();
+		final JavaCodeReader reader= new JavaCodeReader();
 		IDocument document= new Document(source);
 		int i;
 		try {
@@ -101,8 +102,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 			i= 0;
 		} finally {
 			try {
-				if (reader != null)
-					reader.close();
+				reader.close();
 			} catch (IOException ex) {
 				JavaPlugin.log(ex);
 			}
@@ -120,7 +120,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 	public IInformationControlCreator getHoverControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				IEditorPart editor= getEditor(); 
+				IEditorPart editor= getEditor();
 				int shellStyle= SWT.TOOL | SWT.NO_TRIM;
 				if (editor instanceof IWorkbenchPartOrientation)
 					shellStyle |= ((IWorkbenchPartOrientation)editor).getOrientation();
@@ -138,7 +138,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 			public IInformationControl createInformationControl(Shell parent) {
 				int style= SWT.V_SCROLL | SWT.H_SCROLL;
 				int shellStyle= SWT.RESIZE | SWT.TOOL;
-				IEditorPart editor= getEditor(); 
+				IEditorPart editor= getEditor();
 				if (editor instanceof IWorkbenchPartOrientation)
 					shellStyle |= ((IWorkbenchPartOrientation)editor).getOrientation();
 				return new SourceViewerInformationControl(parent, shellStyle, style);

@@ -40,8 +40,10 @@ import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
@@ -51,6 +53,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
 import org.osgi.framework.Bundle;
+
 
 /**
  * Abstract class for providing hover information for Java elements.
@@ -97,12 +100,16 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
 		return JavaWordFinder.findWord(textViewer.getDocument(), offset);
 	}
-
-	/*
-	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
+	
+	/**
+	 * Returns the Java elements at the given hover region.
+	 * 
+	 * @param textViewer the text viewer
+	 * @param hoverRegion the hover region
+	 * @return the array with the Java elements or <code>null</code>
+	 * @since 3.4
 	 */
-	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
-		
+	protected IJavaElement[] getJavaElementsAt(ITextViewer textViewer, IRegion hoverRegion) {
 		/*
 		 * The region should be a word region an not of length 0.
 		 * This check is needed because codeSelect(...) also finds
@@ -114,16 +121,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 		ICodeAssist resolve= getCodeAssist();
 		if (resolve != null) {
 			try {
-				IJavaElement[] result= resolve.codeSelect(hoverRegion.getOffset(), hoverRegion.getLength());
-				if (result == null)
-					return null;
-
-				int nResults= result.length;
-				if (nResults == 0)
-					return null;
-
-				return getHoverInfo(result);
-
+				return resolve.codeSelect(hoverRegion.getOffset(), hoverRegion.getLength());
 			} catch (JavaModelException x) {
 				return null;
 			}
@@ -186,6 +184,13 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 				return ""; //$NON-NLS-1$
 			}
 		}
+		return null;
+	}
+	
+	protected ITypeRoot getEditorInputJavaElement() {
+		IEditorPart editor= getEditor();
+		if (editor != null)
+			return JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
 		return null;
 	}
 }
