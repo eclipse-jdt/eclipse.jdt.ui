@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Genady Beryozkin <eclipse@genady.org> [hovering] tooltip for constant string does not show constant value - https://bugs.eclipse.org/bugs/show_bug.cgi?id=85382
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
@@ -25,23 +26,36 @@ import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IInformationControlExtension4;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHoverExtension;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.SimpleName;
 
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavadocContentAccess;
+import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 
 /**
  * Provides Javadoc as hover info for Java elements.
@@ -50,7 +64,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class JavadocHover extends AbstractJavaEditorTextHover implements IInformationProviderExtension2, ITextHoverExtension {
 
-	
 	/**
 	 * Presenter control creator.
 	 * 
@@ -141,17 +154,14 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 			fHoverControlCreator= new HoverControlCreator();
 		return fHoverControlCreator;
 	}
-
-	/*
-	 * @see JavaElementHover
-	 */
-	protected String getHoverInfo(IJavaElement[] result) {
-
-		StringBuffer buffer= new StringBuffer();
-		int nResults= result.length;
-		if (nResults == 0)
+	
+	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
+		IJavaElement[] result= getJavaElementsAt(textViewer, hoverRegion);
+		if (result == null || result.length == 0)
 			return null;
 
+		int nResults= result.length;
+		StringBuffer buffer= new StringBuffer();
 		boolean hasContents= false;
 		if (nResults > 1) {
 
@@ -159,7 +169,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 				HTMLPrinter.startBulletList(buffer);
 				IJavaElement curr= result[i];
 				if (curr instanceof IMember || curr.getElementType() == IJavaElement.LOCAL_VARIABLE) {
-					HTMLPrinter.addBullet(buffer, getInfoText(curr));
+					HTMLPrinter.addBullet(buffer, getInfoText(curr, hoverRegion));
 					hasContents= true;
 				}
 				HTMLPrinter.endBulletList(buffer);
@@ -170,7 +180,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 			IJavaElement curr= result[0];
 			if (curr instanceof IMember) {
 				IMember member= (IMember) curr;
-				HTMLPrinter.addSmallHeader(buffer, getInfoText(member));
+				HTMLPrinter.addSmallHeader(buffer, getInfoText(member, hoverRegion));
 				Reader reader;
 				try {
 					reader= JavadocContentAccess.getHTMLContentReader(member, true, true);
@@ -203,7 +213,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 				}
 				hasContents= true;
 			} else if (curr.getElementType() == IJavaElement.LOCAL_VARIABLE || curr.getElementType() == IJavaElement.TYPE_PARAMETER) {
-				HTMLPrinter.addSmallHeader(buffer, getInfoText(curr));
+				HTMLPrinter.addSmallHeader(buffer, getInfoText(curr, hoverRegion));
 				hasContents= true;
 			}
 		}
@@ -220,9 +230,15 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		return null;
 	}
 
-	private String getInfoText(IJavaElement member) {
+	private String getInfoText(IJavaElement member, IRegion hoverRegion) {
 		long flags= member.getElementType() == IJavaElement.LOCAL_VARIABLE ? LOCAL_VARIABLE_FLAGS : LABEL_FLAGS;
-		String label= JavaElementLabels.getElementLabel(member, flags);
+		StringBuffer label= new StringBuffer(JavaElementLabels.getElementLabel(member, flags));
+		if (isStaticFinal(member)) {
+			String initializer = getFieldInitializer((IField)member, hoverRegion);
+			label.append("= "); //$NON-NLS-1$
+			label.append(initializer);
+		}
+		
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < label.length(); i++) {
 			char ch= label.charAt(i);
@@ -237,4 +253,66 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		return buf.toString();
 	}
 
+	/*
+	 * @since 3.4
+	 */
+	private boolean isStaticFinal(IJavaElement member) {
+		if (member.getElementType() != IJavaElement.FIELD)
+			return false;
+		IField field= (IField)member;
+		try {
+			int fieldFlags= field.getFlags();
+			return Flags.isFinal(fieldFlags) && Flags.isStatic(fieldFlags);
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			return false;
+		}
+	}
+
+	/**
+	 * Returns the initializer for the given field.
+	 * 
+	 * @param field the field
+	 * @param hoverRegion the hover region
+	 * @return the initializer for the given field or <code>null</code> if none
+	 * @since 3.4
+	 */
+	private String getFieldInitializer(IField field, IRegion hoverRegion) {
+		ITypeRoot typeRoot= getEditorInputJavaElement();
+		Object constantValue= null;
+		
+		CompilationUnit unit= SharedASTProvider.getAST(typeRoot, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
+		
+		ASTNode node= NodeFinder.perform(unit, hoverRegion.getOffset(),	hoverRegion.getLength());
+		if (node != null && node.getNodeType() == ASTNode.SIMPLE_NAME) {
+			IBinding binding= ((SimpleName)node).resolveBinding();
+			if (binding != null && binding.getKind() == IBinding.VARIABLE) {
+				IVariableBinding variableBinding = (IVariableBinding)binding;
+				if (variableBinding.getJavaElement().equals(field)) {
+					constantValue= variableBinding.getConstantValue();
+				}
+			}
+		}
+		if (constantValue == null)
+			return null;
+		
+		StringBuffer result= new StringBuffer();
+		if (constantValue instanceof String) {
+			result.append('"');
+			String stringConstant= (String)constantValue;
+			if (stringConstant.length() > 80) {
+				result.append(stringConstant.substring(0, 80));
+				result.append(JavaElementLabels.ELLIPSIS_STRING);
+			} else
+				result.append(stringConstant);
+			result.append('"');
+		} else if (constantValue instanceof Character) {
+			result.append('\'');
+			result.append(constantValue);
+			result.append('\'');
+		} else
+			result.append(constantValue);
+		
+		return result.toString();
+	}
 }
