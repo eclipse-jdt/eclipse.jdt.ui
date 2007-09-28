@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.jface.action.Action;
+
+import org.eclipse.ui.PlatformUI;
 
 /**
  * Requests to rerun a test.
@@ -26,6 +26,12 @@ public class RerunAction extends Action {
 	
 	/**
 	 * Constructor for RerunAction.
+	 * @param actionName the name of the action
+	 * @param runner the JUnit view
+	 * @param testId the test id
+	 * @param className the class name containing the test
+	 * @param testName the method to run or <code>null</code>
+	 * @param launchMode the launch mode
 	 */
 	public RerunAction(String actionName, TestRunnerViewPart runner, String testId, String className, String testName,
 			String launchMode) {

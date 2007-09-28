@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,32 +47,33 @@ import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
  * A dialog with checked table viewer.
  */
 public class CheckedTableSelectionDialog extends SelectionStatusDialog {
-	
+
 	private CheckboxTableViewer fViewer;
-	
+
 	private ILabelProvider fLabelProvider;
 	private IStructuredContentProvider fContentProvider;
-	
-	private ISelectionStatusValidator fValidator= null; 
-	private String fEmptyListMessage= WizardMessages.CheckedTableSelectionDialog_emptyListMessage; 
-	
+
+	private ISelectionStatusValidator fValidator= null;
+	private String fEmptyListMessage= WizardMessages.CheckedTableSelectionDialog_emptyListMessage;
+
 	private IStatus fCurrStatus= new JUnitStatus();
 	private List fFilters;
-	private Object fInput;		
+	private Object fInput;
 	private boolean fIsEmpty;
-	
+
 	private int fWidth= 40;
 	private int fHeight= 18;
-	
+
 	/**
 	 * Constructs an instance of <code>ElementTreeSelectionDialog</code>.
+	 * @param parent the parent shell
 	 * @param labelProvider   the label provider to render the entries
 	 * @param contentProvider the content provider to evaluate the tree structure
-	 */	
+	 */
 	public CheckedTableSelectionDialog(Shell parent, ILabelProvider labelProvider,
-		IStructuredContentProvider contentProvider) {
+	                                   IStructuredContentProvider contentProvider) {
 		super(parent);
-		
+
 		fLabelProvider= labelProvider;
 		fContentProvider= contentProvider;
 
@@ -92,11 +93,11 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	/**
 	 * Sets the message to be displayed if the list is empty.
 	 * @param message the message to be displayed.
-	 */	
+	 */
 	public void setEmptyListMessage(String message) {
 		fEmptyListMessage= message;
-	}	
-		
+	}
+
 	/**
 	 * Adds a filter to the tree viewer.
 	 * @param filter a filter.
@@ -104,10 +105,10 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	public void addFilter(ViewerFilter filter) {
 		if (fFilters == null)
 			fFilters= new ArrayList(4);
-			
+
 		fFilters.add(filter);
 	}
-	
+
 	/**
 	 * Sets an optional validator to check if the selection is valid.
 	 * The validator is invoked whenever the selection changes.
@@ -115,8 +116,8 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	 */
 	public void setValidator(ISelectionStatusValidator validator) {
 		fValidator= validator;
-	}			
-	
+	}
+
 	/**
 	 * Sets the tree input.
 	 * @param input the tree input.
@@ -148,10 +149,10 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 		}
 		updateStatus(fCurrStatus);
 	}
-	
+
 	/*
 	 * @see Window#open()
-	 */	 
+	 */
 	public int open() {
 		fIsEmpty= evaluateIfTableEmpty(fInput);
 		BusyIndicator.showWhile(null, new Runnable() {
@@ -164,43 +165,43 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 
 	private void access$superOpen() {
 		super.open();
-	}	
-	 		
+	}
+
 	/**
 	 * Handles cancel button pressed event.
-	 */	 
+	 */
 	protected void cancelPressed() {
 		setResult(null);
 		super.cancelPressed();
-	} 
+	}
 
 	/*
 	 * @see SelectionStatusDialog#computeResult()
-	 */	 
+	 */
 	protected void computeResult() {
 		setResult(Arrays.asList(fViewer.getCheckedElements()));
-	} 
-	 
+	}
+
 	/*
 	 * @see Window#create()
-	 */	 
+	 */
 	public void create() {
 		super.create();
 
 		List initialSelections= getInitialElementSelections();
 		if (initialSelections.size() > 0) {
-			fViewer.setCheckedElements(initialSelections.toArray());			
+			fViewer.setCheckedElements(initialSelections.toArray());
 		}
-			
+
 		updateOKStatus();
-	}		
-	
+	}
+
 	/*
 	 * @see Dialog#createDialogArea(Composite)
-	 */	 
+	 */
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
-		
+
 		Label messageLabel= createMessageArea(composite);
 		Control treeWidget= createTableViewer(composite);
 		Control buttonComposite= createSelectionButtons(composite);
@@ -209,7 +210,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 		data.widthHint= convertWidthInCharsToPixels(fWidth);
 		data.heightHint= convertHeightInCharsToPixels(fHeight);
 		treeWidget.setLayoutData(data);
-		
+
 		if (fIsEmpty) {
 			messageLabel.setEnabled(false);
 			treeWidget.setEnabled(false);
@@ -218,30 +219,31 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 		applyDialogFont(composite);
 		return composite;
 	}
-	
+
 	private Table createTableViewer(Composite parent) {
 		fViewer= CheckboxTableViewer.newCheckList(parent, SWT.BORDER);
-			
+
 		fViewer.setContentProvider(fContentProvider);
 		fViewer.setLabelProvider(fLabelProvider);
 		fViewer.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				updateOKStatus();
-			}	
+			}
 		});
-		
+
 		if (fFilters != null) {
 			for (int i= 0; i != fFilters.size(); i++)
 				fViewer.addFilter((ViewerFilter) fFilters.get(i));
 		}
-				
+
 		fViewer.setInput(fInput);
-		return fViewer.getTable();	
+		return fViewer.getTable();
 	}
-		
+
 	/**
 	 * Add the selection and deselection buttons to the dialog.
 	 * @param composite org.eclipse.swt.widgets.Composite
+	 * @return the created composite
 	 */
 	private Composite createSelectionButtons(Composite composite) {
 		Composite buttonComposite= new Composite(composite, SWT.RIGHT);
@@ -252,7 +254,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 		data.grabExcessHorizontalSpace= true;
 		composite.setData(data);
 
-		Button selectButton= createButton(buttonComposite, IDialogConstants.SELECT_ALL_ID, WizardMessages.CheckedTableSelectionDialog_selectAll, false); 
+		Button selectButton= createButton(buttonComposite, IDialogConstants.SELECT_ALL_ID, WizardMessages.CheckedTableSelectionDialog_selectAll, false);
 
 		SelectionListener listener= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -262,7 +264,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 		};
 		selectButton.addSelectionListener(listener);
 
-		Button deselectButton= createButton(buttonComposite, IDialogConstants.DESELECT_ALL_ID, WizardMessages.CheckedTableSelectionDialog_deselectAll, false); 
+		Button deselectButton= createButton(buttonComposite, IDialogConstants.DESELECT_ALL_ID, WizardMessages.CheckedTableSelectionDialog_deselectAll, false);
 
 		listener= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -273,7 +275,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 		deselectButton.addSelectionListener(listener);
 		return buttonComposite;
 	}
-	
+
 	private boolean evaluateIfTableEmpty(Object input) {
 		Object[] elements= fContentProvider.getElements(input);
 		if (elements.length > 0) {

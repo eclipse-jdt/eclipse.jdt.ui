@@ -243,8 +243,10 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	 * The element type can only be of type {@link IJavaProject}, {@link IPackageFragmentRoot}, {@link IPackageFragment}, {@link IType} or {@link IMethod}.
 	 *  
 	 * Clients can extend this method (should call super) to configure additional attributes on the launch configuration working copy.
+	 * @param element 
 	 * 
 	 * @return a launch configuration working copy for the given element 
+	 * @throws CoreException 
 	 */
 	protected ILaunchConfigurationWorkingCopy createLaunchConfiguration(IJavaElement element) throws CoreException {
 		final String testName;

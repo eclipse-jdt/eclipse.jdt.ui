@@ -287,6 +287,7 @@ public abstract class TestElement implements ITestElement {
 	}
 	
 	/**
+	 * @return return the class name
 	 * @see org.eclipse.jdt.internal.junit.runner.ITestIdentifier#getName()
 	 * @see org.eclipse.jdt.internal.junit.runner.MessageIds#TEST_IDENTIFIER_MESSAGE_FORMAT
 	 */

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -95,12 +95,14 @@ public class JUnitStubUtility {
 	/**
 	 * Generates a stub. Given a template method, a stub with the same signature
 	 * will be constructed so it can be added to a type.
+	 * @param compilationUnit the compilation unit
 	 * @param destTypeName The name of the type to which the method will be added to (Used for the constructor)
 	 * @param method A method template (method belongs to different type than the parent)
 	 * @param settings Options as defined above (GENSTUB_*)
+	 * @param extraAnnotations the annotations to add
 	 * @param imports Imports required by the sub are added to the imports structure
-	 * @return The ynformatted stub
-	 * @throws JavaModelException
+	 * @return The unformatted stub
+	 * @throws CoreException 
 	 */
 	public static String genStub(ICompilationUnit compilationUnit, String destTypeName, IMethod method, GenStubSettings settings, String extraAnnotations, ImportsManager imports) throws CoreException {
 		IType declaringtype= method.getDeclaringType();

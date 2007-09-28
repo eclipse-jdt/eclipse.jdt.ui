@@ -12,7 +12,24 @@ package org.eclipse.jdt.internal.junit.ui;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.dialogs.SelectionStatusDialog;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -20,25 +37,13 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 import org.eclipse.jdt.internal.junit.Messages;
-
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.IWorkbenchWindowActionDelegate;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.dialogs.SelectionStatusDialog;
 
 /**
  * Shows a dialog with test methods that refer to the selection.
@@ -60,7 +65,7 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 		}
 	}
 			
-	private void run(ITextSelection ITextSelection) {
+	private void runWithEditorSelection() {
 		try {
 			JavaEditor editor= getActiveEditor();
 			if (editor == null)
@@ -136,8 +141,10 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 	public void run(IAction action) {
 		if (fSelection instanceof IStructuredSelection)
 			run((IStructuredSelection)fSelection);
-		else if (fSelection instanceof ITextSelection) 
-			run((ITextSelection)fSelection);
+		else {
+			runWithEditorSelection();
+		}
+			
 	}
 	
 	public void selectionChanged(IAction action, ISelection selection) {

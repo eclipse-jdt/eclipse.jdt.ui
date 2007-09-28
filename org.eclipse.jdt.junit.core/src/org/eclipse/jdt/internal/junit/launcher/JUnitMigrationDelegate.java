@@ -90,7 +90,7 @@ public class JUnitMigrationDelegate implements ILaunchConfigurationMigrationDele
 	 * if none.
 	 * 
 	 * @param config working copy
-	 * @returns resource or <code>null</code>
+	 * @return resource or <code>null</code>
 	 * @throws CoreException if an exception occurs mapping resource
 	 */
 	private static IResource getResource(ILaunchConfiguration config) throws CoreException {

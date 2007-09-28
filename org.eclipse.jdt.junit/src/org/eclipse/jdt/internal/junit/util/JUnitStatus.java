@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.junit.util;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 /**
@@ -22,7 +23,7 @@ import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 public class JUnitStatus implements IStatus {
 	private String fStatusMessage;
 	private int fSeverity;
-	
+
 	/**
 	 * Creates a status set to OK (no message)
 	 */
@@ -44,7 +45,7 @@ public class JUnitStatus implements IStatus {
 	public static IStatus createError(String message) {
 		return new JUnitStatus(IStatus.ERROR, message);
 	}
-	
+
 	public static IStatus createWarning(String message) {
 		return new JUnitStatus(IStatus.WARNING, message);
 	}
@@ -52,23 +53,26 @@ public class JUnitStatus implements IStatus {
 	public static IStatus createInfo(String message) {
 		return new JUnitStatus(IStatus.INFO, message);
 	}
-	
+
 	/**
-	 *  Returns if the status' severity is OK.
+	 * Returns if the status' severity is OK.
+	 * @return returns if the status' severity is OK.
 	 */
 	public boolean isOK() {
 		return fSeverity == IStatus.OK;
 	}
 
 	/**
-	 *  Returns if the status' severity is WARNING.
+	 * Returns if the status' severity is WARNING.
+	 * @return returns if the status' severity is WARNING.
 	 */	
 	public boolean isWarning() {
 		return fSeverity == IStatus.WARNING;
 	}
 
 	/**
-	 *  Returns if the status' severity is INFO.
+	 * Returns if the status' severity is INFO.
+	 * @return returns if the status' severity is INFO.
 	 */	
 	public boolean isInfo() {
 		return fSeverity == IStatus.INFO;
@@ -76,18 +80,19 @@ public class JUnitStatus implements IStatus {
 
 	/**
 	 *  Returns if the status' severity is ERROR.
+	 * @return returns if the status' severity is ERROR.
 	 */	
 	public boolean isError() {
 		return fSeverity == IStatus.ERROR;
 	}
-	
+
 	/**
 	 * @see IStatus#getMessage()
 	 */
 	public String getMessage() {
 		return fStatusMessage;
 	}
-	
+
 	/**
 	 * Sets the status to ERROR.
 	 * @param errorMessage the error message (can be empty, but not null)
@@ -125,7 +130,7 @@ public class JUnitStatus implements IStatus {
 		fStatusMessage= null;
 		fSeverity= IStatus.OK;
 	}
-	
+
 	/*
 	 * @see IStatus#matches(int)
 	 */

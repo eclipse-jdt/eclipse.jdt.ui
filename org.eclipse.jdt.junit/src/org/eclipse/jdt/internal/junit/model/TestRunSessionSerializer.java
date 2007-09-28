@@ -56,11 +56,11 @@ public class TestRunSessionSerializer implements XMLReader {
 			throw new SAXException("ContentHandler missing"); //$NON-NLS-1$
 
 		fHandler.startDocument();
-		handleTestRun(fTestRunSession);
+		handleTestRun();
 		fHandler.endDocument();
 	}
 
-	private void handleTestRun(TestRunSession testRunSession) throws SAXException {
+	private void handleTestRun() throws SAXException {
 		AttributesImpl atts= new AttributesImpl();
 		addCDATA(atts, IXMLTags.ATTR_NAME, fTestRunSession.getTestRunName());
 		IJavaProject project= fTestRunSession.getLaunchedProject();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,11 +15,14 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
+
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
 
 /**
  * The default exception handler shows an error dialog when one of its handle methods
@@ -33,7 +36,7 @@ import org.eclipse.swt.widgets.Shell;
 public class ExceptionHandler {
 
 	private static ExceptionHandler fgInstance= new ExceptionHandler();
-	
+
 	/**
 	 * Handles the given <code>CoreException</code>. 
 	 * 
@@ -45,7 +48,7 @@ public class ExceptionHandler {
 	public static void handle(CoreException e, Shell parent, String title, String message) {
 		fgInstance.perform(e, parent, title, message);
 	}
-	
+
 	/**
 	 * Handles the given <code>InvocationTargetException</code>. 
 	 * 
@@ -59,14 +62,14 @@ public class ExceptionHandler {
 	}
 
 	//---- Hooks for subclasses to control exception handling ------------------------------------
-	
+
 	protected void perform(CoreException e, Shell shell, String title, String message) {
 		JUnitPlugin.log(e);
 		IStatus status= e.getStatus();
 		if (status != null) {
 			ErrorDialog.openError(shell, title, message, status);
 		} else {
-			displayMessageDialog(e, e.getMessage(), shell, title, message);
+			displayMessageDialog(e.getMessage(), shell, title, message);
 		}
 	}
 
@@ -77,14 +80,14 @@ public class ExceptionHandler {
 		} else {
 			JUnitPlugin.log(e);
 			if (e.getMessage() != null && e.getMessage().length() > 0) {
-				displayMessageDialog(e, e.getMessage(), shell, title, message);
+				displayMessageDialog(e.getMessage(), shell, title, message);
 			} else {
-				displayMessageDialog(e, target.getMessage(), shell, title, message);
+				displayMessageDialog(target.getMessage(), shell, title, message);
 			}
 		}
 	}
-	
-	private void displayMessageDialog(Throwable t, String exceptionMessage, Shell shell, String title, String message) {
+
+	private void displayMessageDialog(String exceptionMessage, Shell shell, String title, String message) {
 		StringWriter msg= new StringWriter();
 		if (message != null) {
 			msg.write(message);

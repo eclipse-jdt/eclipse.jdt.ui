@@ -124,9 +124,7 @@ public class FailureTrace implements IMenuListener {
 			String lineNumber= traceLine;
 			lineNumber= lineNumber.substring(lineNumber.indexOf(':') + 1, lineNumber.lastIndexOf(')'));
 			int line= Integer.valueOf(lineNumber).intValue();
-			//fix for bug 37333	
-			String cuName= traceLine.substring(traceLine.lastIndexOf('(') + 1, traceLine.lastIndexOf(':'));
-			return new OpenEditorAtLineAction(fTestRunner, cuName, testName, line);
+			return new OpenEditorAtLineAction(fTestRunner, testName, line);
 		} catch(NumberFormatException e) {
 		}
 		catch(IndexOutOfBoundsException e) {	

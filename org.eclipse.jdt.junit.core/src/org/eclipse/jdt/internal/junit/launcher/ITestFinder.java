@@ -39,7 +39,8 @@ public interface ITestFinder {
 	/**
 	 * @param element element to search for tests
 	 * @param result a Set to add ITypes
-	 * @param pm
+	 * @param pm the progress monitor
+	 * @throws CoreException thrown when tests can not be found
 	 */
 	public abstract void findTestsInContainer(IJavaElement element, Set/*<IType>*/ result, IProgressMonitor pm) throws CoreException;
 	

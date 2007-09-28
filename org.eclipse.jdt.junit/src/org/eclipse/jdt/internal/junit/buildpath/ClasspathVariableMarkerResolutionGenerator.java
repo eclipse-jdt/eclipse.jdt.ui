@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -40,9 +39,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 public class ClasspathVariableMarkerResolutionGenerator implements IMarkerResolutionGenerator2 {
 
@@ -100,8 +98,7 @@ public class ClasspathVariableMarkerResolutionGenerator implements IMarkerResolu
 							}
 							entries[idx]= BuildPathSupport.getJUnit3ClasspathEntry();
 							
-							Shell shell= JUnitPlugin.getActiveWorkbenchShell();
-							setClasspath(shell, project, entries, new BusyIndicatorRunnableContext());
+							setClasspath(project, entries, new BusyIndicatorRunnableContext());
 							
 						} catch (JavaModelException e) {
 							JUnitPlugin.log(e);
@@ -125,7 +122,7 @@ public class ClasspathVariableMarkerResolutionGenerator implements IMarkerResolu
 		return -1;
 	}
 	
-	private static void setClasspath(Shell shell, final IJavaProject project, final IClasspathEntry[] entries, IRunnableContext context) throws JavaModelException {
+	private static void setClasspath(final IJavaProject project, final IClasspathEntry[] entries, IRunnableContext context) throws JavaModelException {
 		/*
 		 * @see org.eclipse.jdt.internal.junit.ui.JUnitAddLibraryProposal#addToClasspath()
 		 */
