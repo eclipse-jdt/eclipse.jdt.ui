@@ -119,6 +119,39 @@ public interface ICleanUp {
 	}
 	
 	/**
+	 * Clean up requirement for save actions. They can request changed
+	 * regions.
+	 */
+	public class SaveActionRequirements extends CleanUpRequirements {
+
+		private final boolean fRequiresChangedRegions;
+
+		protected SaveActionRequirements(boolean requiresAST, boolean requiresFreshAST, Map compilerOptions, boolean requiresChangedRegions) {
+			super(requiresAST, requiresFreshAST, compilerOptions);
+			fRequiresChangedRegions= requiresChangedRegions;
+		}
+		
+		/**
+		 * Does this clean up required to be informed about changed regions?
+		 * The changed regions are the regions which have been changed between
+		 * the last save state of the compilation unit and its current state.
+		 * <p>
+		 * Has only an effect if the clean up is used as save action.
+		 * </p>
+		 * <p>
+		 * <strong>This should return <code>false</code> whenever possible
+		 * because calculating the changed regions is expensive.</code>
+		 * </p>
+		 * 
+		 * @return true if context must contain changed regions
+		 */
+		public boolean requiresChangedRegions() {
+			return fRequiresChangedRegions;
+		}
+		
+	}
+	
+	/**
 	 * A context containing all information required by a clean up
 	 * to create a fix
 	 * 

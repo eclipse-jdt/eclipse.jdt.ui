@@ -69,6 +69,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	private Map fSettings;
 	private BulletListBlock fSelectedActionsText;
 	private Button fFormatCodeButton;
+	private Button fFormatChangedOnlyButton;
 	private Button fOrganizeImportsButton;
 	private Shell fShell;
 	private Link fFormatConfigLink;
@@ -102,6 +103,20 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 			 */
 			public void widgetSelected(SelectionEvent e) {
 				changeSettingsValue(CleanUpConstants.FORMAT_SOURCE_CODE, fFormatCodeButton.getSelection());
+			}
+		});
+	
+		fFormatChangedOnlyButton= new Button(composite, SWT.CHECK);
+		fFormatChangedOnlyButton.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_FormatOnlyChangedRegions_Checkbox);
+		gridData= new GridData(SWT.FILL, SWT.TOP, true, false);
+		gridData.horizontalIndent= 20;
+		fFormatChangedOnlyButton.setLayoutData(gridData);
+		fFormatChangedOnlyButton.addSelectionListener(new SelectionAdapter() {
+			/**
+			 * {@inheritDoc}
+			 */
+			public void widgetSelected(SelectionEvent e) {
+				changeSettingsValue(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY, fFormatChangedOnlyButton.getSelection());
 			}
 		});
 		

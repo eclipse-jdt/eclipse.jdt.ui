@@ -12,15 +12,27 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.filesystem.IFileStore;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -34,7 +46,10 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
 
 import org.eclipse.ui.IEditorDescriptor;
@@ -60,6 +75,10 @@ import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.ide.IGotoMarker;
 
+import org.eclipse.compare.rangedifferencer.IRangeComparator;
+import org.eclipse.compare.rangedifferencer.RangeDifference;
+import org.eclipse.compare.rangedifferencer.RangeDifferencer;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -79,7 +98,9 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
 
 
 /**
@@ -146,7 +167,7 @@ public class EditorUtility {
 		 * XXX: once we have FileStoreEditorInput as API,
 		 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=111887
 		 * we can fix this code by creating the correct editor input
-		 * in getEditorInput(Object)  
+		 * in getEditorInput(Object)
 		 */
 		if (inputElement instanceof IJavaElement) {
 			ICompilationUnit cu= (ICompilationUnit)((IJavaElement)inputElement).getAncestor(IJavaElement.COMPILATION_UNIT);
@@ -309,7 +330,7 @@ public class EditorUtility {
 	private static void initializeHighlightRange(IEditorPart editorPart) {
 		if (editorPart instanceof ITextEditor) {
 			IAction toggleAction= editorPart.getEditorSite().getActionBars().getGlobalActionHandler(ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY);
-			boolean enable= toggleAction != null; 
+			boolean enable= toggleAction != null;
 			if (enable && editorPart instanceof JavaEditor)
 				enable= JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SHOW_SEGMENTS);
 			else
@@ -503,7 +524,7 @@ public class EditorUtility {
 	}
 	
 	/**
-	 * Returns an array of all editors that have an unsaved content. If the identical content is 
+	 * Returns an array of all editors that have an unsaved content. If the identical content is
 	 * presented in more than one editor, only one of those editor parts is part of the result.
 	 * 
 	 * @return an array of all dirty editor parts.
@@ -515,7 +536,7 @@ public class EditorUtility {
 	}
 	
 	/**
-	 * Returns an array of all editors that have an unsaved content. If the identical content is 
+	 * Returns an array of all editors that have an unsaved content. If the identical content is
 	 * presented in more than one editor, only one of those editor parts is part of the result.
 	 * @param skipNonResourceEditors if <code>true</code>, editors whose inputs do not adapt to {@link IResource}
 	 * are not saved
@@ -602,7 +623,7 @@ public class EditorUtility {
 		 * Always save all editors for compilation units that are not working copies.
 		 * (Leaving them dirty would cause problems, since the file buffer could have been
 		 * modified but the Java model is not reconciled.)
-		 *  
+		 * 
 		 * If <code>saveUnknownEditors</code> is <code>true</code>, save all editors
 		 * whose implementation is probably not based on file buffers.
 		 */
@@ -627,6 +648,164 @@ public class EditorUtility {
 			return saveUnknownEditors;
 		
 		return false;
+	}
+
+	/**
+	 * Return all the regions which have changed in the given buffer since the
+	 * last save occurred.
+	 * 
+	 * @param buffer the buffer to compare contents from
+	 * @param monitor to report progress to
+	 * @return the changed regions
+	 * @throws CoreException
+	 * @since 3.4
+	 */
+	public static IRegion[] calculateChangedRegions(final ITextFileBuffer buffer, final IProgressMonitor monitor) throws CoreException {
+		final IRegion[][] result= new IRegion[1][];
+		final IStatus[] errorStatus= new IStatus[] { Status.OK_STATUS };
+	
+		try {
+			SafeRunner.run(new ISafeRunnable() {
+	
+				/* (non-Javadoc)
+				 * @see org.eclipse.core.runtime.ISafeRunnable#handleException(java.lang.Throwable)
+				 */
+				public void handleException(Throwable exception) {
+					JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.INTERNAL_ERROR, exception.getLocalizedMessage(), exception));
+					String msg= JavaEditorMessages.CompilationUnitDocumentProvider_error_calculatingChangedRegions;
+					errorStatus[0]= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.INTERNAL_ERROR, msg, exception);
+					result[0]= null;
+				}
+	
+				/* (non-Javadoc)
+				 * @see org.eclipse.core.runtime.ISafeRunnable#run()
+				 */
+				public void run() throws Exception {
+					monitor.beginTask(JavaEditorMessages.CompilationUnitDocumentProvider_calculatingChangedRegions_message, 20);
+					IFileStore fileStore= buffer.getFileStore();
+	
+					ITextFileBufferManager fileBufferManager= FileBuffers.createTextFileBufferManager();
+					fileBufferManager.connectFileStore(fileStore, getSubProgressMonitor(monitor, 15));
+					try {
+						IDocument currentDocument= buffer.getDocument();
+						IDocument oldDocument= ((ITextFileBuffer) fileBufferManager.getFileStoreFileBuffer(fileStore)).getDocument();
+	
+						Collection lineNumbers= getChangedLineNumbers(oldDocument, currentDocument);
+	
+						int changeLinesSize= lineNumbers.size();
+						if (changeLinesSize == 0) {
+							result[0]= new IRegion[0];
+							return;
+						}
+	
+						result[0]= getRegions((Integer[]) lineNumbers.toArray(new Integer[changeLinesSize]), currentDocument);
+					} finally {
+						fileBufferManager.disconnectFileStore(fileStore, getSubProgressMonitor(monitor, 5));
+						monitor.done();
+					}
+				}
+	
+				/**
+				 * Returns a set of line numbers (<code>Integer</code>) of lines which differ
+				 * comparing <code>oldDocument</code>s content with <code>currentDocument</code>s
+				 * content.
+				 * 
+				 * @param oldDocument a document containing the old content
+				 * @param currentDocument a document containing the current content
+				 */
+				private Collection getChangedLineNumbers(IDocument oldDocument, IDocument currentDocument) throws BadLocationException {
+					/*
+					 * Do not change the type of those local variables. We use Object
+					 * here in order to prevent loading of the Compare plug-in at load
+					 * time of this class.
+					 */
+					Object leftSide= new JavaTokenComparator(oldDocument.get());
+					Object rightSide= new JavaTokenComparator(currentDocument.get());
+	
+					RangeDifference[] differences= RangeDifferencer.findDifferences((IRangeComparator) leftSide, (IRangeComparator) rightSide);
+	
+					int numberOfLines= currentDocument.getNumberOfLines();
+					HashSet lineNumbers= new HashSet(numberOfLines);
+					for (int i= 0; i < differences.length; i++) {
+						RangeDifference curr= differences[i];
+						if (curr.kind() == RangeDifference.CHANGE) {
+							int start= ((JavaTokenComparator) rightSide).getTokenStart(curr.rightStart());
+							int end= ((JavaTokenComparator) rightSide).getTokenStart(curr.rightEnd());
+	
+							int startLine= currentDocument.getLineOfOffset(start);
+							int endLine= currentDocument.getLineOfOffset(end);
+							for (int j= startLine; j <= endLine; j++) {
+								Integer line= new Integer(j);
+								if (!lineNumbers.contains(line))
+									lineNumbers.add(line);
+							}
+						}
+					}
+					return lineNumbers;
+				}
+	
+				/**
+				 * Returns regions of the <code>lineNumbers</code>. Successive line numbers are merged
+				 * into one region.
+				 * 
+				 * @param lineNumbers the line numbers for which to calculate regions
+				 * @param document the document to which the line numbers belong
+				 */
+				private IRegion[] getRegions(Integer[] lineNumbers, IDocument document) throws BadLocationException {
+					Arrays.sort(lineNumbers);
+	
+					ArrayList regions= new ArrayList();
+					int startLine= lineNumbers[0].intValue();
+					for (int i= 0; i < lineNumbers.length; i++) {
+						int currentLine= lineNumbers[i].intValue();
+	
+						int nextLine;
+						if (lineNumbers.length == i + 1) {
+							nextLine= Integer.MAX_VALUE;
+						} else {
+							nextLine= lineNumbers[i + 1].intValue();
+						}
+	
+						if (nextLine > currentLine + 1) {
+							IRegion startLineRegion= document.getLineInformation(startLine);
+							if (startLine == currentLine) {
+								regions.add(startLineRegion);
+							} else {
+								IRegion endLineRegion= document.getLineInformation(currentLine);
+								int startOffset= startLineRegion.getOffset();
+								int endOffset= endLineRegion.getOffset() + endLineRegion.getLength();
+								regions.add(new Region(startOffset, endOffset - startOffset));
+							}
+	
+							startLine= nextLine;
+						}
+					}
+					return (IRegion[]) regions.toArray(new IRegion[regions.size()]);
+				}
+	
+			});
+		} finally {
+			if (!errorStatus[0].isOK())
+				throw new CoreException(errorStatus[0]);
+		}
+	
+		return result[0];
+	}
+
+	/**
+	 * Creates and returns a new sub-progress monitor for the
+	 * given parent monitor.
+	 *
+	 * @param monitor the parent progress monitor
+	 * @param ticks the number of work ticks allocated from the parent monitor
+	 * @return the new sub-progress monitor
+	 * @since 3.4
+	 */
+	private static IProgressMonitor getSubProgressMonitor(IProgressMonitor monitor, int ticks) {
+		if (monitor != null)
+			return new SubProgressMonitor(monitor, ticks, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
+
+		return new NullProgressMonitor();
 	}
 
 }

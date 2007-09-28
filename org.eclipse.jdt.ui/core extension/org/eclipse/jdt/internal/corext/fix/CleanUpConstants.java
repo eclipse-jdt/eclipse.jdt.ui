@@ -43,6 +43,20 @@ public class CleanUpConstants {
 	public static final String FORMAT_SOURCE_CODE= "cleanup.format_source_code"; //$NON-NLS-1$
 	
 	/**
+	 * If true then only changed regions are formatted on save. Only has an effect if {@link #FORMAT_SOURCE_CODE}
+	 * is TRUE <br><br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * Default value: Value returned by {@link #getEclipseDefaultSettings()}<br>
+	 * <br>
+	 * 
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 3.4
+	 */
+	public static final String FORMAT_SOURCE_CODE_CHANGES_ONLY= "cleanup.format_source_code_changes_only"; //$NON-NLS-1$
+	
+	/**
 	 * Format comments. Specify which comment with:<br>
 	 * {@link #FORMAT_JAVADOC}<br>
 	 * {@link #FORMAT_MULTI_LINE_COMMENT}<br>
@@ -1166,6 +1180,7 @@ public class CleanUpConstants {
 
 		//Code Organizing
 		result.put(FORMAT_SOURCE_CODE, CleanUpOptions.FALSE);
+		result.put(FORMAT_SOURCE_CODE_CHANGES_ONLY, CleanUpOptions.FALSE);
 		
 		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES, CleanUpOptions.FALSE);
 		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES_ALL, CleanUpOptions.TRUE);
@@ -1246,6 +1261,7 @@ public class CleanUpConstants {
 		
 		//Code Organizing
 		result.put(FORMAT_SOURCE_CODE, CleanUpOptions.FALSE);
+		result.put(FORMAT_SOURCE_CODE_CHANGES_ONLY, CleanUpOptions.FALSE);
 		
 		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES, CleanUpOptions.FALSE);
 		result.put(FORMAT_REMOVE_TRAILING_WHITESPACES_ALL, CleanUpOptions.TRUE);

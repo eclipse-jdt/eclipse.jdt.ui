@@ -15,11 +15,15 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.IRegion;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CodeFormatFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
+
+import org.eclipse.jdt.internal.ui.fix.IMultiLineCleanUp.MultiLineCleanUpContext;
 
 public class CodeFormatCleanUp extends AbstractCleanUp {
 	
@@ -34,13 +38,29 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
+	public CleanUpRequirements getRequirements() {
+		boolean requiresChangedRegions= isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE) && isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
+		return new SaveActionRequirements(false, false, null, requiresChangedRegions);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	public IFix createFix(CleanUpContext context) throws CoreException {
 		ICompilationUnit compilationUnit= context.getCompilationUnit();
 		if (compilationUnit == null)
 			return null;
 		
+		IRegion[] regions;
+		if (context instanceof MultiLineCleanUpContext) {
+			regions= ((MultiLineCleanUpContext)context).getRegions();
+		} else {
+			regions= null;
+		}
+		
 		boolean removeWhitespaces= isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
 		return CodeFormatFix.createCleanUp(compilationUnit, 
+				regions, 
 				isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE), 
 				removeWhitespaces && isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL), 
 				removeWhitespaces && isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY), 

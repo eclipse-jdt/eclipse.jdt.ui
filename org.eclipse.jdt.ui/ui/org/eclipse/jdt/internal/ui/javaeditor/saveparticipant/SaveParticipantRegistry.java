@@ -15,13 +15,27 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 
-import org.eclipse.jdt.internal.corext.fix.CleanUpPostSaveListener;
+import org.eclipse.jface.text.IRegion;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+
+import org.eclipse.jdt.internal.corext.fix.CleanUpPostSaveListener;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.CleanUpSaveParticipantPreferenceConfiguration;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
@@ -34,7 +48,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
  * Save participants can be enabled and disabled on the Java &gt; Editor &gt;
  * Save Participants preference page. Enabled save participants are notified
  * through a call to
- * {@link IPostSaveListener#saved(org.eclipse.jdt.core.ICompilationUnit, org.eclipse.core.runtime.IProgressMonitor)}
+ * {@link IPostSaveListener#saved(org.eclipse.jdt.core.ICompilationUnit, IRegion[], org.eclipse.core.runtime.IProgressMonitor)}
  * whenever the {@link CompilationUnitDocumentProvider} saves a compilation unit
  * that is in the workspace.</p>
  * <p>
@@ -103,7 +117,7 @@ public final class SaveParticipantRegistry {
 			public ISaveParticipantPreferenceConfiguration createPreferenceConfiguration() {
 				return new CleanUpSaveParticipantPreferenceConfiguration();
 			}
-		};	
+		};
 		map.put(desc.getId(), desc);
 				
 		fDescriptors= map;
@@ -118,7 +132,7 @@ public final class SaveParticipantRegistry {
 	 * @param context to context to check, not null
 	 * @return true if there are settings in context
 	 */
-	public synchronized boolean hasSettingsInScope(IScopeContext context) {		
+	public synchronized boolean hasSettingsInScope(IScopeContext context) {
 		ensureRegistered();
 	
     	for (Iterator iterator= fDescriptors.values().iterator(); iterator.hasNext();) {
@@ -135,10 +149,10 @@ public final class SaveParticipantRegistry {
     }
 
 	/**
-	 * Returns an array of <code>IPostSaveListener</code> which are 
+	 * Returns an array of <code>IPostSaveListener</code> which are
 	 * enabled in the given context.
 	 *
-	 * @param context the context from which to retrive the settings from, not null
+	 * @param context the context from which to retrieve the settings from, not null
 	 * @return the current enabled post save listeners according to the preferences
 	 */
 	public synchronized IPostSaveListener[] getEnabledPostSaveListeners(IScopeContext context) {
@@ -160,6 +174,52 @@ public final class SaveParticipantRegistry {
 		} else {
 			return (IPostSaveListener[])result.toArray(new IPostSaveListener[result.size()]);
 		}
+	}
+
+	/**
+	 * Tells whether one of the active post save listeners needs to
+	 * be informed about the changed region in this save cycle.
+	 * 
+	 * @param unit the unit which is about to be saved
+	 * @return true if the change regions need do be determined
+	 * @throws CoreException
+	 * @since 3.4
+	 */
+	public static boolean isChangedRegionsRequired(final ICompilationUnit unit) throws CoreException {
+		String message= SaveParticipantMessages.SaveParticipantRegistry_needsChangedRegionFailed;
+		final MultiStatus errorStatus= new MultiStatus(JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, message, null);
+	
+		IPostSaveListener[] listeners= JavaPlugin.getDefault().getSaveParticipantRegistry().getEnabledPostSaveListeners(unit.getJavaProject().getProject());
+		try {
+			final boolean result[]= new boolean[] {false};
+			for (int i= 0; i < listeners.length; i++) {
+				final IPostSaveListener listener= listeners[i];
+				SafeRunner.run(new ISafeRunnable() {
+		
+					public void run() throws Exception {
+						if (listener.needsChangedRegions(unit))
+							result[0]= true;
+					}
+					
+					public void handleException(Throwable ex) {
+						final String participantName= listener.getName();
+						String msg= Messages.format("The save participant ''{0}'' caused an exception: {1}", new String[] { listener.getId(), ex.toString() }); //$NON-NLS-1$
+						JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, msg, null));
+						
+						msg= Messages.format(SaveParticipantMessages.SaveParticipantRegistry_needsChangedRegionFailed, new String[] { participantName, ex.toString() });
+						errorStatus.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, msg, null));
+					}
+					
+				});
+				if (result[0])
+					return true;
+			}
+		} finally {
+			if (!errorStatus.isOK())
+				throw new CoreException(errorStatus);
+		}
+		
+		return false;
 	}
 	
 }

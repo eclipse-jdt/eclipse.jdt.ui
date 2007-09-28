@@ -49,6 +49,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
+import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.ui.PlatformUI;
 
@@ -79,6 +80,9 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp.CleanUpContext;
+import org.eclipse.jdt.internal.ui.fix.ICleanUp.CleanUpRequirements;
+import org.eclipse.jdt.internal.ui.fix.ICleanUp.SaveActionRequirements;
+import org.eclipse.jdt.internal.ui.fix.IMultiLineCleanUp.MultiLineCleanUpContext;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
 
@@ -174,11 +178,26 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	public static final String POSTSAVELISTENER_ID= "org.eclipse.jdt.ui.postsavelistener.cleanup"; //$NON-NLS-1$
 	private static final String WARNING_VALUE= "warning"; //$NON-NLS-1$
 	private static final String ERROR_VALUE= "error"; //$NON-NLS-1$
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean needsChangedRegions(ICompilationUnit unit) throws CoreException {
+		ICleanUp[] cleanUps= getCleanUps(unit.getJavaProject().getProject());
+		
+		for (int i= 0; i < cleanUps.length; i++) {
+			CleanUpRequirements requirements= cleanUps[i].getRequirements();
+			if (requirements instanceof SaveActionRequirements && ((SaveActionRequirements)requirements).requiresChangedRegions())
+				return true;
+		}
+		
+		return false;
+	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void saved(ICompilationUnit unit, IProgressMonitor monitor) throws CoreException {
+	public void saved(ICompilationUnit unit, IRegion[] changedRegions, IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		
@@ -242,8 +261,15 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     					ast= createAst(unit, options, new SubProgressMonitor(monitor, 10));
     				}
     				
+    				CleanUpContext context;
+    				if (changedRegions == null) {
+    					context= new CleanUpContext(unit, ast);
+    				} else {
+    					context= new MultiLineCleanUpContext(unit, ast, changedRegions);
+    				}
+    				
     				List undoneCleanUps= new ArrayList();
-    				CleanUpChange change= CleanUpRefactoring.calculateChange(new CleanUpContext(unit, ast), cleanUps, undoneCleanUps);
+					CleanUpChange change= CleanUpRefactoring.calculateChange(context, cleanUps, undoneCleanUps);
     				
     				RefactoringStatus postCondition= new RefactoringStatus();
     				for (int i= 0; i < cleanUps.length; i++) {
@@ -283,6 +309,31 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		} finally {
 			monitor.done();
 		}
+	}
+
+	private ICleanUp[] getCleanUps(IProject project) throws CoreException {
+		ICleanUp[] cleanUps;
+		Map settings= CleanUpPreferenceUtil.loadSaveParticipantOptions(new ProjectScope(project));
+		if (settings == null) {
+			IEclipsePreferences contextNode= new InstanceScope().getNode(JavaUI.ID_PLUGIN);
+			String id= contextNode.get(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, null);
+			if (id == null) {
+				id= new DefaultScope().getNode(JavaUI.ID_PLUGIN).get(CleanUpConstants.CLEANUP_ON_SAVE_PROFILE, CleanUpConstants.DEFAULT_SAVE_PARTICIPANT_PROFILE);
+			}
+			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, Messages.format(FixMessages.CleanUpPostSaveListener_unknown_profile_error_message, id)));
+		}
+		
+		if (CleanUpOptions.TRUE.equals(settings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS))) {
+			cleanUps= CleanUpRefactoring.createCleanUps(settings);
+		} else {
+			HashMap filteredSettins= new HashMap();
+			filteredSettins.put(CleanUpConstants.FORMAT_SOURCE_CODE, settings.get(CleanUpConstants.FORMAT_SOURCE_CODE));
+			filteredSettins.put(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY, settings.get(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY));
+			filteredSettins.put(CleanUpConstants.ORGANIZE_IMPORTS, settings.get(CleanUpConstants.ORGANIZE_IMPORTS));
+			cleanUps= CleanUpRefactoring.createCleanUps(filteredSettins);
+		}
+		
+		return cleanUps;
 	}
 
 	private int showStatus(RefactoringStatus status) {

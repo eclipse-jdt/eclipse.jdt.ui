@@ -83,6 +83,7 @@ public class CleanUpTestCase extends QuickFixTest {
 		suite.addTest(CleanUpStressTest.suite());
 		suite.addTest(CleanUpTest.suite());
 		suite.addTest(CleanUpAnnotationTest.suite());
+		suite.addTest(SaveParticipantTest.suite());
 
 		return suite;
 	}
@@ -130,6 +131,7 @@ public class CleanUpTestCase extends QuickFixTest {
 		Map settings= new Hashtable();
 		fProfile= new ProfileManager.CustomProfile("testProfile", settings, CleanUpProfileVersioner.CURRENT_VERSION, CleanUpProfileVersioner.PROFILE_KIND);
 		new InstanceScope().getNode(JavaUI.ID_PLUGIN).put(CleanUpConstants.CLEANUP_PROFILE, fProfile.getID());
+		new InstanceScope().getNode(JavaUI.ID_PLUGIN).put(CleanUpConstants.SAVE_PARTICIPANT_PROFILE, fProfile.getID());
 
 		disableAll();
 	}
@@ -162,6 +164,8 @@ public class CleanUpTestCase extends QuickFixTest {
 		CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
 		ProfileStore profileStore= new ProfileStore(CleanUpConstants.CLEANUP_PROFILES, versioner);
 		profileStore.writeProfiles(profiles, new InstanceScope());
+
+		CleanUpPreferenceUtil.saveSaveParticipantOptions(new InstanceScope(), fProfile.getSettings());
 	}
 
 	protected RefactoringStatus assertRefactoringResultAsExpected(ICompilationUnit[] cus, String[] expected) throws CoreException {

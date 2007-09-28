@@ -24,7 +24,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.TypedPosition;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
@@ -42,15 +44,17 @@ import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
 
 public class CommentFormatFix extends TextEditFix {
 	
-	public static IFix createCleanUp(ICompilationUnit unit, boolean singleLine, boolean multiLine, boolean javaDoc, HashMap preferences) throws CoreException {
+	public static IFix createCleanUp(ICompilationUnit unit, IRegion[] regions, boolean singleLine, boolean multiLine, boolean javaDoc, HashMap preferences) throws CoreException {
 		if (!singleLine && !multiLine && !javaDoc)
 			return null;
 		
 		String content= unit.getBuffer().getContents();
 		Document document= new Document(content);
 		
-		final List edits= format(document, singleLine, multiLine, javaDoc, preferences);
+		if (regions == null)
+			regions= new IRegion[] {new Region(0, document.getLength())};
 		
+		final List edits= format(document, singleLine, multiLine, javaDoc, preferences, regions);
 		if (edits.size() == 0)
 			return null;
 		
@@ -65,7 +69,7 @@ public class CommentFormatFix extends TextEditFix {
 		
 		HashMap preferences= new HashMap(JavaCore.getOptions());
 		Document document= new Document(input);
-		List edits= format(document, singleLine, multiLine, javaDoc, preferences);
+		List edits= format(document, singleLine, multiLine, javaDoc, preferences, new IRegion[] {new Region(0, document.getLength())});
 		
 		if (edits.size() == 0)
 			return input;
@@ -83,7 +87,7 @@ public class CommentFormatFix extends TextEditFix {
 		return document.get();
 	}
 	
-	private static List format(IDocument document, boolean singleLine, boolean multiLine, boolean javaDoc, HashMap preferences) {
+	private static List format(IDocument document, boolean singleLine, boolean multiLine, boolean javaDoc, HashMap preferences, IRegion[] changedRegions) {
 		final List edits= new ArrayList();
 		
 		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
@@ -101,18 +105,21 @@ public class CommentFormatFix extends TextEditFix {
 			ITypedRegion[] regions= TextUtilities.computePartitioning(document, IJavaPartitions.JAVA_PARTITIONING, 0, document.getLength(), false);
 			for (int i= 0; i < regions.length; i++) {
 				ITypedRegion region= regions[i];
-				if (singleLine && region.getType().equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)) {
-					TextEdit edit= format(region, context, formattingStrategy, content);
-					if (edit != null)
-						edits.add(edit);
-				} else if (multiLine && region.getType().equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT)) {
-					TextEdit edit= format(region, context, formattingStrategy, content);
-					if (edit != null)
-						edits.add(edit);
-				} else if (javaDoc && region.getType().equals(IJavaPartitions.JAVA_DOC)) {
-					TextEdit edit= format(region, context, formattingStrategy, content);
-					if (edit != null)
-						edits.add(edit);
+				
+				if (isChanged(region, changedRegions)) {
+					if (singleLine && region.getType().equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)) {
+						TextEdit edit= format(region, context, formattingStrategy, content);
+						if (edit != null)
+							edits.add(edit);
+					} else if (multiLine && region.getType().equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT)) {
+						TextEdit edit= format(region, context, formattingStrategy, content);
+						if (edit != null)
+							edits.add(edit);
+					} else if (javaDoc && region.getType().equals(IJavaPartitions.JAVA_DOC)) {
+						TextEdit edit= format(region, context, formattingStrategy, content);
+						if (edit != null)
+							edits.add(edit);
+					}
 				}
 			}
 		} catch (BadLocationException e) {
@@ -122,6 +129,35 @@ public class CommentFormatFix extends TextEditFix {
 		}
 		
 		return edits;
+	}
+	
+	private static boolean isChanged(IRegion region, IRegion[] changedRegions) {
+		int regionOffset= region.getOffset();
+		int regionEnd= getRegionEnd(region);
+
+		for (int i= 0; i < changedRegions.length; i++) {
+			IRegion changed= changedRegions[i];
+
+			int changeOffset= changed.getOffset();
+			int changeEnd= getRegionEnd(changed);
+
+			if (changeOffset <= regionOffset && changeEnd >= regionEnd)//covers
+				return true;
+
+			if (changeOffset > regionOffset && changeEnd < regionEnd)//inside
+				return true;
+
+			if (changeOffset < regionOffset && changeEnd < regionEnd)//touches start
+				return true;
+
+			if (changeOffset < regionEnd && changeEnd > regionEnd)//touches end
+				return true;
+		}
+		return false;
+	}
+
+	private static int getRegionEnd(IRegion region) {
+		return region.getOffset() + region.getLength() - 1;
 	}
 	
 	private static TextEdit format(ITypedRegion region, IFormattingContext context, CommentFormattingStrategy formattingStrategy, String content) {

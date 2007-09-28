@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
+
 import org.eclipse.core.resources.IEncodedStorage;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFileState;
@@ -62,6 +63,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ILineTracker;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.quickassist.IQuickFixableAnnotation;
 import org.eclipse.jface.text.source.Annotation;
@@ -88,6 +90,7 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.ForwardingDocumentProvider;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 
+
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -113,6 +116,7 @@ import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
+import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantRegistry;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 import org.eclipse.jdt.internal.ui.text.spelling.JavaSpellingReconcileStrategy;
@@ -1259,12 +1263,37 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 
 			if (fSavePolicy != null)
 				fSavePolicy.preSave(info.fCopy);
+			
+			IProgressMonitor subMonitor= null;
+ 			try {
+ 				fIsAboutToSave= true;
+				Throwable changedRegionException= null;
+				boolean needsChangedRegions= false;
+				try {
+					needsChangedRegions= SaveParticipantRegistry.isChangedRegionsRequired(info.fCopy);
+				} catch (CoreException ex) {
+					changedRegionException= ex;
+				}
 
-			IProgressMonitor subMonitor= getSubProgressMonitor(monitor, 50);
-			try {
-				fIsAboutToSave= true;
-				info.fCopy.commitWorkingCopy(isSynchronized || overwrite, subMonitor);
-				notifyPostSaveListeners(info, getSubProgressMonitor(monitor, 50));
+				IRegion[] changedRegions= null;
+				if (needsChangedRegions) {
+					try {
+						changedRegions= EditorUtility.calculateChangedRegions(info.fTextFileBuffer, getSubProgressMonitor(monitor, 20));
+					} catch (CoreException ex) {
+						changedRegionException= ex;
+					} finally {
+						subMonitor= getSubProgressMonitor(monitor, 50);
+					}
+				} else
+					subMonitor= getSubProgressMonitor(monitor, 70);
+				
+ 				info.fCopy.commitWorkingCopy(isSynchronized || overwrite, subMonitor);
+				notifyPostSaveListeners(info, changedRegions, getSubProgressMonitor(monitor, 30));
+				
+				if (changedRegionException != null) {
+					// FIXME: could not limit to changed region
+				}
+					
 			} catch (CoreException x) {
 				// inform about the failure
 				fireElementStateChangeFailed(element);
@@ -1275,7 +1304,8 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				throw x;
 			} finally {
 				fIsAboutToSave= false;
-				subMonitor.done();
+				if (subMonitor != null)
+					subMonitor.done();
 			}
 
 			// If here, the dirty state of the editor will change to "not dirty".
@@ -1442,14 +1472,14 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
      * called in the UI thread i.e. if they open a dialog they
      * must ensure it ends up in the UI thread.
      * </p>
-     * 
      * @param info compilation unit info
+     * @param changedRegions
      * @param monitor the progress monitor
      * @throws CoreException
      * @see IPostSaveListener
      * @since 3.3
      */
-	protected void notifyPostSaveListeners(final CompilationUnitInfo info, final IProgressMonitor monitor) throws CoreException {
+	protected void notifyPostSaveListeners(final CompilationUnitInfo info, final IRegion[] changedRegions, final IProgressMonitor monitor) throws CoreException {
 		final ICompilationUnit unit= info.fCopy;
 		final IBuffer buffer= unit.getBuffer();
 		IPostSaveListener[] listeners= JavaPlugin.getDefault().getSaveParticipantRegistry().getEnabledPostSaveListeners(unit.getJavaProject().getProject());
@@ -1467,7 +1497,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 						try {
 							long stamp= unit.getResource().getModificationStamp();
 							
-							listener.saved(unit, getSubProgressMonitor(monitor, 4));
+							listener.saved(unit, changedRegions, getSubProgressMonitor(monitor, 4));
 							
 							if (stamp != unit.getResource().getModificationStamp()) {
 								String msg= Messages.format(JavaEditorMessages.CompilationUnitDocumentProvider_error_saveParticipantSavedFile, participantName);
@@ -1526,5 +1556,4 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				throw new CoreException(errorStatus);
 		}
 	}
-
 }

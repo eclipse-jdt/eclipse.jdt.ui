@@ -15,12 +15,16 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.IRegion;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CommentFormatFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
+
+import org.eclipse.jdt.internal.ui.fix.IMultiLineCleanUp.MultiLineCleanUpContext;
 
 public class CommentFormatCleanUp extends AbstractCleanUp {
 	
@@ -30,6 +34,14 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 	
 	public CommentFormatCleanUp() {
 		super();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public CleanUpRequirements getRequirements() {
+		boolean requiresChangedRegions= isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE) && isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
+		return new SaveActionRequirements(false, false, null, requiresChangedRegions);
 	}
 	
 	/**
@@ -48,8 +60,15 @@ public class CommentFormatCleanUp extends AbstractCleanUp {
 		boolean singleLineComment= DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT));
 		boolean blockComment= DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT));
 		boolean javaDoc= DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT));
+		
+		IRegion[] regions;
+		if (context instanceof MultiLineCleanUpContext) {
+			regions= ((MultiLineCleanUpContext)context).getRegions();
+		} else {
+			regions= null;
+		}
 
-		return CommentFormatFix.createCleanUp(compilationUnit, singleLineComment, blockComment, javaDoc, preferences);
+		return CommentFormatFix.createCleanUp(compilationUnit, regions, singleLineComment, blockComment, javaDoc, preferences);
 	}
 	
 	/**

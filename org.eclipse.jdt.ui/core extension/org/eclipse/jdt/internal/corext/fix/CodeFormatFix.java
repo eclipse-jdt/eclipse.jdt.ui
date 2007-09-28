@@ -44,18 +44,35 @@ import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
 public class CodeFormatFix implements IFix {
 	
-	public static IFix createCleanUp(ICompilationUnit cu, boolean format, boolean removeTrailingWhitespacesAll, boolean removeTrailingWhitespacesIgnorEmpty, boolean correctIndentation) throws CoreException {
+	public static IFix createCleanUp(ICompilationUnit cu, IRegion[] regions, boolean format, boolean removeTrailingWhitespacesAll, boolean removeTrailingWhitespacesIgnorEmpty, boolean correctIndentation) throws CoreException {
 		if (!format && !removeTrailingWhitespacesAll && !removeTrailingWhitespacesIgnorEmpty && !correctIndentation)
 			return null;
 		
 		if (format) {
-			Map fomatterSettings= new HashMap(cu.getJavaProject().getOptions(true));
+			Map formatterSettings= new HashMap(cu.getJavaProject().getOptions(true));
 			
 			String content= cu.getBuffer().getContents();
 			Document document= new Document(content);
-			
-			TextEdit edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT, content, 0, TextUtilities.getDefaultLineDelimiter(document), fomatterSettings);
-			if (edit == null || !edit.hasChildren())
+			String lineDelemiter= TextUtilities.getDefaultLineDelimiter(document);
+						
+			TextEdit edit;
+			if (regions == null) {
+				edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT, content, 0, lineDelemiter, formatterSettings);
+			} else {
+				if (regions.length == 0)
+					return null;
+
+				//Bug 203304: https://bugs.eclipse.org/bugs/show_bug.cgi?id=201063
+//				edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT, content, regions, 0, lineDelemiter, formatterSettings);
+				edit= new MultiTextEdit();
+				for (int i= 0; i < regions.length; i++) {
+					TextEdit formatEdit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT, content, regions[i].getOffset(), regions[i].getLength(), 0, lineDelemiter, formatterSettings);
+					if (formatEdit != null && (!(formatEdit instanceof MultiTextEdit) || formatEdit.hasChildren())) {
+						edit.addChild(formatEdit);
+					}
+				}
+			}
+			if (edit == null || (edit instanceof MultiTextEdit && !edit.hasChildren()))
 				return null;
 
 			return new TextEditFix(edit, cu, MultiFixMessages.CodeFormatFix_description);
