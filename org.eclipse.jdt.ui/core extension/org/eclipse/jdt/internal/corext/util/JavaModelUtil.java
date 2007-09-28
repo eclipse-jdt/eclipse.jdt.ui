@@ -76,29 +76,29 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
  * Utility methods for the Java Model.
  */
 public final class JavaModelUtil {
-	
+
 	/**
 	 * Only use this suffix for creating new .java files.
 	 * In general, use one of the three *JavaLike*(..) methods in JavaCore or create
 	 * a name from an existing compilation unit with {@link #getRenamedCUName(ICompilationUnit, String)}
-	 * <p> 
+	 * <p>
 	 * Note: Unlike {@link JavaCore#getJavaLikeExtensions()}, this suffix includes a leading ".".
 	 * </p>
-	 * 
-	 * @see JavaCore#getJavaLikeExtensions() 
+	 *
+	 * @see JavaCore#getJavaLikeExtensions()
 	 * @see JavaCore#isJavaLikeFileName(String)
 	 * @see JavaCore#removeJavaLikeExtension(String)
 	 * @see #getRenamedCUName(ICompilationUnit, String)
 	 */
 	public static final String DEFAULT_CU_SUFFIX= ".java"; //$NON-NLS-1$
-	
-	/** 
+
+	/**
 	 * Finds a type by its qualified type name (dot separated).
 	 * @param jproject The java project to search in
 	 * @param fullyQualifiedName The fully qualified name (type name with enclosing type names and package (all separated by dots))
 	 * @return The type found, or null if not existing
 	 * 	@throws JavaModelException thrown when the project can not be accessed
-	 */	
+	 */
 	public static IType findType(IJavaProject jproject, String fullyQualifiedName) throws JavaModelException {
 		//workaround for bug 22883
 		IType type= jproject.findType(fullyQualifiedName);
@@ -110,18 +110,18 @@ public final class JavaModelUtil {
 			type= findType(root, fullyQualifiedName);
 			if (type != null && type.exists())
 				return type;
-		}	
+		}
 		return null;
 	}
-	
-	/** 
+
+	/**
 	 * Finds a type by its qualified type name (dot separated).
 	 * @param jproject The java project to search in
 	 * @param fullyQualifiedName The fully qualified name (type name with enclosing type names and package (all separated by dots))
 	 * @param owner the working copy owner
 	 * @return The type found, or null if not existing
 	 * @throws JavaModelException thrown when the project can not be accessed
-	 */	
+	 */
 	public static IType findType(IJavaProject jproject, String fullyQualifiedName, WorkingCopyOwner owner) throws JavaModelException {
 		//workaround for bug 22883
 		IType type= jproject.findType(fullyQualifiedName, owner);
@@ -133,12 +133,12 @@ public final class JavaModelUtil {
 			type= findType(root, fullyQualifiedName);
 			if (type != null && type.exists())
 				return type;
-		}	
+		}
 		return null;
 	}
-	
 
-	
+
+
 	private static IType findType(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException{
 		IJavaElement[] children= root.getChildren();
 		for (int i= 0; i < children.length; i++) {
@@ -151,10 +151,10 @@ public final class JavaModelUtil {
 				if (type != null && type.exists())
 					return type;
 			}
-		}		
+		}
 		return null;
 	}
-	
+
 	private static IType findType(IPackageFragment pack, String fullyQualifiedName) throws JavaModelException{
 		ICompilationUnit[] cus= pack.getCompilationUnits();
 		for (int i= 0; i < cus.length; i++) {
@@ -165,7 +165,7 @@ public final class JavaModelUtil {
 		}
 		return null;
 	}
-	
+
 	private static IType findType(ICompilationUnit cu, String fullyQualifiedName) throws JavaModelException{
 		IType[] types= cu.getAllTypes();
 		for (int i= 0; i < types.length; i++) {
@@ -175,7 +175,7 @@ public final class JavaModelUtil {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Finds a type container by container name.
 	 * The returned element will be of type <code>IType</code> or a <code>IPackageFragment</code>.
@@ -196,19 +196,19 @@ public final class JavaModelUtil {
 			if (!(result instanceof IPackageFragment)) {
 				result= null;
 			}
-			
+
 		}
 		return result;
-	}	
-	
-	/** 
+	}
+
+	/**
 	 * Finds a type in a compilation unit. Typical usage is to find the corresponding
 	 * type in a working copy.
 	 * @param cu the compilation unit to search in
 	 * @param typeQualifiedName the type qualified name (type name with enclosing type names (separated by dots))
 	 * @return the type found, or null if not existing
 	 * @throws JavaModelException thrown when the cu can not be accessed
-	 */		
+	 */
 	public static IType findTypeInCompilationUnit(ICompilationUnit cu, String typeQualifiedName) throws JavaModelException {
 		IType[] types= cu.getAllTypes();
 		for (int i= 0; i < types.length; i++) {
@@ -219,16 +219,16 @@ public final class JavaModelUtil {
 		}
 		return null;
 	}
-	
-	/** 
+
+	/**
 	 * Returns the element of the given compilation unit which is "equal" to the
 	 * given element. Note that the given element usually has a parent different
 	 * from the given compilation unit.
-	 * 
+	 *
 	 * @param cu the cu to search in
 	 * @param element the element to look for
 	 * @return an element of the given cu "equal" to the given element
-	 */		
+	 */
 	public static IJavaElement findInCompilationUnit(ICompilationUnit cu, IJavaElement element) {
 		IJavaElement[] elements= cu.findElements(element);
 		if (elements != null && elements.length > 0) {
@@ -236,7 +236,7 @@ public final class JavaModelUtil {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns the qualified type name of the given type using '.' as separators.
 	 * This is a replace for IType.getTypeQualifiedName()
@@ -255,10 +255,10 @@ public final class JavaModelUtil {
 			}
 		} catch (JavaModelException e) {
 			// ignore
-		}	
+		}
 		return type.getTypeQualifiedName('.');
 	}
-	
+
 	/**
 	 * Returns the fully qualified name of the given type using '.' as separators.
 	 * This is a replace for IType.getFullyQualifiedTypeName
@@ -277,10 +277,10 @@ public final class JavaModelUtil {
 			}
 		} catch (JavaModelException e) {
 			// ignore
-		}		
+		}
 		return type.getFullyQualifiedName('.');
 	}
-	
+
 	/**
 	 * Returns the fully qualified name of a type's container. (package name or enclosing type name)
 	 * @param type the type
@@ -294,8 +294,8 @@ public final class JavaModelUtil {
 			return type.getPackageFragment().getElementName();
 		}
 	}
-	
-	
+
+
 	/**
 	 * Concatenates two names. Uses a dot for separation.
 	 * Both strings can be empty or <code>null</code>.
@@ -313,10 +313,10 @@ public final class JavaModelUtil {
 				buf.append('.');
 			}
 			buf.append(name2);
-		}		
+		}
 		return buf.toString();
 	}
-	
+
 	/**
 	 * Concatenates two names. Uses a dot for separation.
 	 * Both strings can be empty or <code>null</code>.
@@ -334,10 +334,10 @@ public final class JavaModelUtil {
 				buf.append('.');
 			}
 			buf.append(name2);
-		}		
+		}
 		return buf.toString();
-	}	
-	
+	}
+
 	/**
 	 * Evaluates if a member (possible from another package) is visible from
 	 * elements in a package.
@@ -347,24 +347,24 @@ public final class JavaModelUtil {
 	 * @throws JavaModelException thrown when the member can not be accessed
 	 */
 	public static boolean isVisible(IMember member, IPackageFragment pack) throws JavaModelException {
-		
+
 		int type= member.getElementType();
 		if  (type == IJavaElement.INITIALIZER ||  (type == IJavaElement.METHOD && member.getElementName().startsWith("<"))) { //$NON-NLS-1$
 			return false;
 		}
-		
+
 		int otherflags= member.getFlags();
 		IType declaringType= member.getDeclaringType();
 		if (Flags.isPublic(otherflags) || (declaringType != null && isInterfaceOrAnnotation(declaringType))) {
 			return true;
 		} else if (Flags.isPrivate(otherflags)) {
 			return false;
-		}		
-		
+		}
+
 		IPackageFragment otherpack= (IPackageFragment) member.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 		return (pack != null && otherpack != null && isSamePackage(pack, otherpack));
 	}
-	
+
 	/**
 	 * Evaluates if a member in the focus' element hierarchy is visible from
 	 * elements in a package.
@@ -378,31 +378,31 @@ public final class JavaModelUtil {
 		if  (type == IJavaElement.INITIALIZER ||  (type == IJavaElement.METHOD && member.getElementName().startsWith("<"))) { //$NON-NLS-1$
 			return false;
 		}
-		
+
 		int otherflags= member.getFlags();
-		
+
 		IType declaringType= member.getDeclaringType();
 		if (Flags.isPublic(otherflags) || Flags.isProtected(otherflags) || (declaringType != null && isInterfaceOrAnnotation(declaringType))) {
 			return true;
 		} else if (Flags.isPrivate(otherflags)) {
 			return false;
-		}		
-		
+		}
+
 		IPackageFragment otherpack= (IPackageFragment) member.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 		return (pack != null && pack.equals(otherpack));
 	}
-			
-		
+
+
 	/**
 	 * Returns the package fragment root of <code>IJavaElement</code>. If the given
 	 * element is already a package fragment root, the element itself is returned.
-	 * @param element the element 
+	 * @param element the element
 	 * @return the package fragment root of the element or <code>null</code>
 	 */
 	public static IPackageFragmentRoot getPackageFragmentRoot(IJavaElement element) {
 		return (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 	}
-	
+
 	/**
 	 * Finds a method in a type.
 	 * This searches for a method with the same name and signature. Parameter types are only
@@ -424,7 +424,7 @@ public final class JavaModelUtil {
 		}
 		return null;
 	}
-				
+
 	/**
 	 * Finds a method in a type and all its super types. The super class hierarchy is searched first, then the super interfaces.
 	 * This searches for a method with the same name and signature. Parameter types are only
@@ -460,10 +460,10 @@ public final class JavaModelUtil {
 				}
 			}
 		}
-		return method;		
+		return method;
 	}
-		
-	
+
+
 	/**
 	 * Tests if a method equals to the given signature.
 	 * Parameter types are only compared by the simple name, no resolving for
@@ -504,7 +504,7 @@ public final class JavaModelUtil {
 	public static boolean isSamePackage(IPackageFragment pack1, IPackageFragment pack2) {
 		return pack1.getElementName().equals(pack2.getElementName());
 	}
-	
+
 	/**
 	 * Checks whether the given type has a valid main method or not.
 	 * @param type the type to test
@@ -520,7 +520,7 @@ public final class JavaModelUtil {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Checks if the field is boolean.
 	 * @param field the field
@@ -530,7 +530,7 @@ public final class JavaModelUtil {
 	public static boolean isBoolean(IField field) throws JavaModelException{
 		return field.getTypeSignature().equals(Signature.SIG_BOOLEAN);
 	}
-	
+
 	/**
 	 * @param type the type to test
 	 * @return <code>true</code> iff the type is an interface or an annotation
@@ -539,10 +539,10 @@ public final class JavaModelUtil {
 	public static boolean isInterfaceOrAnnotation(IType type) throws JavaModelException {
 		return type.isInterface();
 	}
-		
+
 	/**
 	 * Resolves a type name in the context of the declaring type.
-	 * 
+	 *
 	 * @param refTypeSig the type name in signature notation (for example 'QVector') this can also be an array type, but dimensions will be ignored.
 	 * @param declaringType the context for resolving (type where the reference was made in)
 	 * @return returns the fully qualified type name or build-in-type name. if a unresolved type couldn't be resolved null is returned
@@ -572,10 +572,10 @@ public final class JavaModelUtil {
 			return Signature.toString(refTypeSig.substring(arrayCount));
 		}
 	}
-	
+
 	/**
 	 * Returns if a CU can be edited.
-	 * @param cu the compilation unit 
+	 * @param cu the compilation unit
 	 * @return <code>true</code> if the CU can be edited
 	 */
 	public static boolean isEditable(ICompilationUnit cu)  {
@@ -595,7 +595,7 @@ public final class JavaModelUtil {
 
 	/*
 	 * http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-	 * 
+	 *
 	 * Reconciling happens in a separate thread. This can cause a situation where the
 	 * Java element gets disposed after an exists test has been done. So we should not
 	 * log not present exceptions when they happen in working copies.
@@ -610,7 +610,7 @@ public final class JavaModelUtil {
 		for (int i= 0; i < elements.length; i++) {
 			IJavaElement element= elements[i];
 			// if the element is already a compilation unit don't log
-			// does not exist exceptions. See bug 
+			// does not exist exceptions. See bug
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=75894
 			// for more details
 			if (element.getElementType() == IJavaElement.COMPILATION_UNIT)
@@ -621,7 +621,7 @@ public final class JavaModelUtil {
 			if (!unit.isWorkingCopy())
 				return true;
 		}
-		return false;		
+		return false;
 	}
 
 	public static IType[] getAllSuperTypes(IType type, IProgressMonitor pm) throws JavaModelException {
@@ -643,7 +643,7 @@ public final class JavaModelUtil {
 				pm.done();
 		}
 	}
-	
+
 	public static boolean isSuperType(ITypeHierarchy hierarchy, IType possibleSuperType, IType type) {
 		// filed bug 112635 to add this method to ITypeHierarchy
 		IType superClass= hierarchy.getSuperclass(type);
@@ -661,7 +661,7 @@ public final class JavaModelUtil {
 		}
 		return false;
 	}
-	
+
 	public static boolean isExcludedPath(IPath resourcePath, IPath[] exclusionPatterns) {
 		char[] path = resourcePath.toString().toCharArray();
 		for (int i = 0, length = exclusionPatterns.length; i < length; i++) {
@@ -670,7 +670,7 @@ public final class JavaModelUtil {
 				return true;
 			}
 		}
-		return false;	
+		return false;
 	}
 
 
@@ -680,7 +680,7 @@ public final class JavaModelUtil {
 	 * @param resourcePath the resource path
 	 * @param exclusionPatterns the exclusion patterns
 	 * @return returns <code> true</code> if the given resource path matches one of the exclusion
-	 * 
+	 *
 	 * @see IClasspathEntry#getExclusionPatterns
 	 */
 	public final static boolean isExcluded(IPath resourcePath, char[][] exclusionPatterns) {
@@ -690,8 +690,8 @@ public final class JavaModelUtil {
 			if (CharOperation.pathMatch(exclusionPatterns[i], path, true, '/'))
 				return true;
 		return false;
-	}	
-		
+	}
+
 
 	/**
 	 * Force a reconcile of a compilation unit.
@@ -700,12 +700,12 @@ public final class JavaModelUtil {
 	 */
 	public static void reconcile(ICompilationUnit unit) throws JavaModelException {
 		unit.reconcile(
-				ICompilationUnit.NO_AST, 
-				false /* don't force problem detection */, 
-				null /* use primary owner */, 
+				ICompilationUnit.NO_AST,
+				false /* don't force problem detection */,
+				null /* use primary owner */,
 				null /* no progress monitor */);
 	}
-	
+
 	/**
 	 * Helper method that tests if an classpath entry can be found in a
 	 * container. <code>null</code> is returned if the entry can not be found
@@ -726,7 +726,7 @@ public final class JavaModelUtil {
 		}
 		return null; // attachment not possible
 	}
-	
+
 	/**
 	 * Finds an entry in a container. <code>null</code> is returned if the entry can not be found
 	 * @param container The container
@@ -745,7 +745,7 @@ public final class JavaModelUtil {
 		}
 		return null; // attachment not possible
 	}
-	
+
 	/**
 	 * Get all compilation units of a selection.
 	 * @param javaElements the selected java elements
@@ -768,7 +768,7 @@ public final class JavaModelUtil {
 				for (int i= 0; i < packageFragmentRoots.length; i++)
 					addAllCus(collector, packageFragmentRoots[i]);
 				return;
-		
+
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 				IPackageFragmentRoot packageFragmentRoot= (IPackageFragmentRoot) javaElement;
 				if (packageFragmentRoot.getKind() != IPackageFragmentRoot.K_SOURCE)
@@ -777,16 +777,16 @@ public final class JavaModelUtil {
 				for (int j= 0; j < packageFragments.length; j++)
 					addAllCus(collector, packageFragments[j]);
 				return;
-		
+
 			case IJavaElement.PACKAGE_FRAGMENT:
 				IPackageFragment packageFragment= (IPackageFragment) javaElement;
 				collector.addAll(Arrays.asList(packageFragment.getCompilationUnits()));
 				return;
-			
+
 			case IJavaElement.COMPILATION_UNIT:
 				collector.add(javaElement);
 				return;
-				
+
 			default:
 				IJavaElement cu= javaElement.getAncestor(IJavaElement.COMPILATION_UNIT);
 				if (cu != null)
@@ -794,7 +794,7 @@ public final class JavaModelUtil {
 		}
 	}
 
-	
+
 	/**
 	 * Sets all compliance settings in the given map to 5.0
 	 * @param map the map to update
@@ -802,11 +802,11 @@ public final class JavaModelUtil {
 	public static void set50CompilanceOptions(Map map) {
 		setCompilanceOptions(map, JavaCore.VERSION_1_5);
 	}
-	
+
 	public static void setCompilanceOptions(Map map, String compliance) {
 		JavaCore.setComplianceOptions(compliance, map);
 	}
-	
+
 	public static void setDefaultClassfileOptions(Map map, String compliance) {
 		map.put(JavaCore.COMPILER_CODEGEN_INLINE_JSR_BYTECODE, is50OrHigher(compliance) ? JavaCore.ENABLED : JavaCore.DISABLED);
 		map.put(JavaCore.COMPILER_LOCAL_VARIABLE_ATTR, JavaCore.GENERATE);
@@ -814,7 +814,7 @@ public final class JavaModelUtil {
 		map.put(JavaCore.COMPILER_SOURCE_FILE_ATTR, JavaCore.GENERATE);
 		map.put(JavaCore.COMPILER_CODEGEN_UNUSED_LOCAL, JavaCore.PRESERVE);
 	}
-	
+
 	/**
 	 * @param version1 the first version
 	 * @param version2 the second version
@@ -829,26 +829,26 @@ public final class JavaModelUtil {
 		}
 		return version1.compareTo(version2) < 0;
 	}
-	
+
 	public static boolean is50OrHigher(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_1_5);
 	}
-	
+
 	public static boolean is50OrHigher(IJavaProject project) {
-		return is50OrHigher(project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
+		return is50OrHigher(project.getOption(JavaCore.COMPILER_SOURCE, true));
 	}
-	
+
 	public static boolean is50OrHigherJRE(IJavaProject project) throws CoreException {
 		IVMInstall vmInstall= JavaRuntime.getVMInstall(project);
 		if (!(vmInstall instanceof IVMInstall2))
 			return true; // assume 5.0.
-		
+
 		String compliance= getCompilerCompliance((IVMInstall2) vmInstall, null);
 		if (compliance == null)
 			return true; // assume 5.0
 		return compliance.startsWith(JavaCore.VERSION_1_5) || compliance.startsWith(JavaCore.VERSION_1_6);
 	}
-	
+
 	public static String getCompilerCompliance(IVMInstall2 vMInstall, String defaultCompliance) {
 		String version= vMInstall.getJavaVersion();
 		if (version == null) {
@@ -868,7 +868,7 @@ public final class JavaModelUtil {
 		}
 		return defaultCompliance;
 	}
-	
+
 	public static String getExecutionEnvironmentCompliance(IExecutionEnvironment executionEnvironment) {
 		String desc= executionEnvironment.getId();
 		if (desc.indexOf("1.6") != -1) { //$NON-NLS-1$
@@ -884,10 +884,10 @@ public final class JavaModelUtil {
 	/**
 	 * Compute a new name for a compilation unit, given the name of the new main type.
 	 * This query tries to maintain the existing extension (e.g. ".java").
-	 * 
+	 *
 	 * @param cu a compilation unit
 	 * @param newMainName the new name of the cu's main type (without extension)
-	 * @return the new name for the compilation unit  
+	 * @return the new name for the compilation unit
 	 */
 	public static String getRenamedCUName(ICompilationUnit cu, String newMainName) {
 		String oldName = cu.getElementName();
@@ -897,22 +897,22 @@ public final class JavaModelUtil {
 		} else {
 			return newMainName;
 		}
-	}	
-	
+	}
+
 	/**
-	 * Applies an text edit to a compilation unit. Filed bug 117694 against jdt.core. 
+	 * Applies an text edit to a compilation unit. Filed bug 117694 against jdt.core.
 	 * 	@param cu the compilation unit to apply the edit to
 	 * 	@param edit the edit to apply
 	 * @param save is set, save the CU after the edit has been applied
 	 * @param monitor the progress monitor to use
 	 * @throws CoreException Thrown when the access to the CU failed
 	 * @throws ValidateEditException if validate edit fails
-	 */	
+	 */
 	public static void applyEdit(ICompilationUnit cu, TextEdit edit, boolean save, IProgressMonitor monitor) throws CoreException, ValidateEditException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
-		monitor.beginTask(CorextMessages.JavaModelUtil_applyedit_operation, 3); 
+		monitor.beginTask(CorextMessages.JavaModelUtil_applyedit_operation, 3);
 
 		try {
 			IDocument document= null;
@@ -931,7 +931,7 @@ public final class JavaModelUtil {
 			}
 		} finally {
 			monitor.done();
-		}		
+		}
 	}
 
 	private static IDocument aquireDocument(ICompilationUnit cu, boolean[] needsSave, IProgressMonitor monitor) throws CoreException {
@@ -950,7 +950,7 @@ public final class JavaModelUtil {
 		monitor.done();
 		return new Document(cu.getSource());
 	}
-	
+
 	private static void commitDocument(ICompilationUnit cu, IDocument document, TextEdit edit, IProgressMonitor monitor) throws CoreException, MalformedTreeException, BadLocationException {
 		if (JavaModelUtil.isPrimary(cu)) {
 			IFile file= (IFile) cu.getResource();
@@ -960,7 +960,7 @@ public final class JavaModelUtil {
 					throw new ValidateEditException(status);
 				}
 				new RewriteSessionEditProcessor(document, edit, TextEdit.UPDATE_REGIONS).performEdits(); // apply after file is commitable
-				
+
 				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
 				bufferManager.getTextFileBuffer(file.getFullPath(), LocationKind.IFILE).commit(monitor, true);
 				return;
@@ -970,7 +970,7 @@ public final class JavaModelUtil {
 		new RewriteSessionEditProcessor(document, edit, TextEdit.UPDATE_REGIONS).performEdits();
 	}
 
-	
+
 	private static void releaseDocument(ICompilationUnit cu, IDocument document, IProgressMonitor monitor) throws CoreException {
 		if (JavaModelUtil.isPrimary(cu)) {
 			IFile file= (IFile) cu.getResource();
@@ -983,7 +983,7 @@ public final class JavaModelUtil {
 		cu.getBuffer().setContents(document.get());
 		monitor.done();
 	}
-	
+
 	public static boolean isImplicitImport(String qualifier, ICompilationUnit cu) {
 		if ("java.lang".equals(qualifier)) {  //$NON-NLS-1$
 			return true;
@@ -1004,17 +1004,17 @@ public final class JavaModelUtil {
 			return storage instanceof IStorage;
 		}
 	}
-	
+
 	/**
 	 * Returns true iff the given local variable is a parameter of its
 	 * declaring method.
-	 * 
-	 * TODO replace this method with new API when available: 
+	 *
+	 * TODO replace this method with new API when available:
 	 * 		https://bugs.eclipse.org/bugs/show_bug.cgi?id=48420
 	 * @param currentLocal the local variable to test
-	 * 
+	 *
 	 * @return returns true if the variable is a parameter
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 */
 	public static boolean isParameter(ILocalVariable currentLocal) throws JavaModelException {
 
@@ -1028,5 +1028,5 @@ public final class JavaModelUtil {
 		}
 		return false;
 	}
-	
+
 }
