@@ -233,10 +233,12 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 	private String getInfoText(IJavaElement member, IRegion hoverRegion) {
 		long flags= member.getElementType() == IJavaElement.LOCAL_VARIABLE ? LOCAL_VARIABLE_FLAGS : LABEL_FLAGS;
 		StringBuffer label= new StringBuffer(JavaElementLabels.getElementLabel(member, flags));
-		if (isStaticFinal(member)) {
-			String initializer= getFieldInitializer((IField)member, hoverRegion);
-			label.append("= "); //$NON-NLS-1$
-			label.append(initializer);
+		if (member.getElementType() == IJavaElement.FIELD) {
+			String initializer= getConstantValue((IField)member, hoverRegion);
+			if (initializer != null) {
+				label.append("= "); //$NON-NLS-1$
+				label.append(initializer);
+			}
 		}
 		
 		StringBuffer buf= new StringBuffer();
@@ -270,14 +272,17 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 	}
 
 	/**
-	 * Returns the initializer for the given field.
+	 * Returns the constant value for the given field.
 	 * 
 	 * @param field the field
 	 * @param hoverRegion the hover region
 	 * @return the initializer for the given field or <code>null</code> if none
 	 * @since 3.4
 	 */
-	private String getFieldInitializer(IField field, IRegion hoverRegion) {
+	private String getConstantValue(IField field, IRegion hoverRegion) {
+		if (!isStaticFinal(field))
+			return null;
+		
 		ITypeRoot typeRoot= getEditorInputJavaElement();
 		Object constantValue= null;
 		
