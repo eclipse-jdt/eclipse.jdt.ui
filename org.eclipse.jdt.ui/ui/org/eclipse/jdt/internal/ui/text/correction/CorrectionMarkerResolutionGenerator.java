@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
@@ -65,8 +64,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 
-/**
-  */
+
 public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGenerator, IMarkerResolutionGenerator2 {
 
 	public static class CorrectionMarkerResolution extends WorkbenchMarkerResolution {
@@ -365,7 +363,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 	private static boolean hasProblem(IProblem[] problems, IProblemLocation location) {
 		for (int i= 0; i < problems.length; i++) {
 			IProblem problem= problems[i];
-			if (problem.getID() == location.getProblemId() && problem.getSourceStart() == location.getOffset())
+			if (problem.getID() == location.getProblemId() && (problem.getSourceStart() == location.getOffset() || problem.getSourceStart() == -1 && location.getOffset() == 0))
 				return true;
 		}
 		return false;
