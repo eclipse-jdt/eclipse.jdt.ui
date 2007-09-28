@@ -493,10 +493,12 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 
 		protected Position createPositionFromProblem(IProblem problem) {
 			int start= problem.getSourceStart();
-			if (start < 0)
-				return null;
+			int end= problem.getSourceEnd();
 
-			int length= problem.getSourceEnd() - problem.getSourceStart() + 1;
+			if (start == -1 && end == -1)
+				return new Position(0, 0);
+
+			int length= end - start + 1;
 			if (length < 0)
 				return null;
 
@@ -583,7 +585,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		/**
 		 * Signals the end of problem reporting.
 		 * 
-		 * @param reportedProblems the problems to report 
+		 * @param reportedProblems the problems to report
 		 */
 		private void reportProblems(List reportedProblems) {
 			if (fProgressMonitor != null && fProgressMonitor.isCanceled())
@@ -655,7 +657,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		/**
 		 * Overlays value with problem annotation.
 		 * 
-		 * @param value the value 
+		 * @param value the value
 		 * @param problemAnnotation
 		 */
 		private void setOverlay(Object value, ProblemAnnotation problemAnnotation) {
@@ -962,9 +964,9 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	 */
 	private ICompilationUnit createFakeCompiltationUnit(Object element, boolean setContents) {
 		if (element instanceof IStorageEditorInput)
-			return createFakeCompiltationUnit((IStorageEditorInput)element, setContents); 
+			return createFakeCompiltationUnit((IStorageEditorInput)element, setContents);
 		else if (element instanceof IURIEditorInput)
-			return createFakeCompiltationUnit((IURIEditorInput)element); 
+			return createFakeCompiltationUnit((IURIEditorInput)element);
 		return null;
 	}
 	
@@ -1347,7 +1349,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	/**
 	 * Returns the preference whether handling temporary problems is enabled.
 	 * 
-	 * @return <code>true</code> if temporary problems are handled 
+	 * @return <code>true</code> if temporary problems are handled
 	 */
 	protected boolean isHandlingTemporaryProblems() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -1443,7 +1445,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
      * 
      * @param info compilation unit info
      * @param monitor the progress monitor
-     * @throws CoreException 
+     * @throws CoreException
      * @see IPostSaveListener
      * @since 3.3
      */
@@ -1495,7 +1497,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 								info.fTextFileBuffer.revert(getSubProgressMonitor(monitor, 1));
 							} catch (CoreException e) {
 								msg= Messages.format("Error on revert after failure of save participant ''{0}''.", participantName);  //$NON-NLS-1$
-								IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, msg, ex); 
+								IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, msg, ex);
 								JavaPlugin.getDefault().getLog().log(status);
 							}
 
