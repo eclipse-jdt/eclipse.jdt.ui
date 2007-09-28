@@ -234,7 +234,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		long flags= member.getElementType() == IJavaElement.LOCAL_VARIABLE ? LOCAL_VARIABLE_FLAGS : LABEL_FLAGS;
 		StringBuffer label= new StringBuffer(JavaElementLabels.getElementLabel(member, flags));
 		if (isStaticFinal(member)) {
-			String initializer = getFieldInitializer((IField)member, hoverRegion);
+			String initializer= getFieldInitializer((IField)member, hoverRegion);
 			label.append("= "); //$NON-NLS-1$
 			label.append(initializer);
 		}
@@ -287,7 +287,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		if (node != null && node.getNodeType() == ASTNode.SIMPLE_NAME) {
 			IBinding binding= ((SimpleName)node).resolveBinding();
 			if (binding != null && binding.getKind() == IBinding.VARIABLE) {
-				IVariableBinding variableBinding = (IVariableBinding)binding;
+				IVariableBinding variableBinding= (IVariableBinding)binding;
 				if (variableBinding.getJavaElement().equals(field)) {
 					constantValue= variableBinding.getConstantValue();
 				}
