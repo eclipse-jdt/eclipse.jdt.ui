@@ -27,6 +27,7 @@ final class JavaHoverMessages extends NLS {
 	public static String JavadocHover_noAttachedJavadoc;
 	public static String JavadocHover_noAttachedSource;
 	public static String JavadocHover_noInformation;
+	public static String JavadocHover_constantValue_hexValue;
 	public static String JavadocHover_error_gettingJavadoc;
 	public static String JavaTextHover_createTextHover;
 	public static String NoBreakpointAnnotation_addBreakpoint;

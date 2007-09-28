@@ -36,19 +36,23 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavadocContentAccess;
@@ -236,7 +240,12 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		if (member.getElementType() == IJavaElement.FIELD) {
 			String constantValue= getConstantValue((IField)member, hoverRegion);
 			if (constantValue != null) {
-				label.append("= "); //$NON-NLS-1$
+				IJavaProject javaProject= member.getJavaProject();
+				if (JavaCore.INSERT.equals(javaProject.getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, true)))
+					label.append(' ');
+				label.append('=');
+				if (JavaCore.INSERT.equals(javaProject.getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR, true)))
+					label.append(' ');
 				label.append(constantValue);
 			}
 		}
@@ -303,8 +312,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		if (constantValue == null)
 			return null;
 		
-		StringBuffer result= new StringBuffer();
 		if (constantValue instanceof String) {
+			StringBuffer result= new StringBuffer();
 			result.append('"');
 			String stringConstant= (String)constantValue;
 			if (stringConstant.length() > 80) {
@@ -314,13 +323,47 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 				result.append(stringConstant);
 			}
 			result.append('"');
+			return result.toString();
+			
 		} else if (constantValue instanceof Character) {
-			result.append('\'');
-			result.append(constantValue);
-			result.append('\'');
-		} else
-			result.append(constantValue);
-		
-		return result.toString();
+			String constantResult= '\'' + constantValue.toString() + '\'';
+			
+			char charValue= ((Character) constantValue).charValue();
+			String hexString= Integer.toHexString(charValue);
+			StringBuffer hexResult= new StringBuffer("\\u"); //$NON-NLS-1$
+			for (int i= hexString.length(); i < 4; i++) {
+				hexResult.append('0');
+			}
+			hexResult.append(hexString);
+			return formatWithHexValue(constantResult, hexResult.toString());
+			
+		} else if (constantValue instanceof Byte) {
+			int byteValue= ((Byte) constantValue).intValue() & 0xFF;
+			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(byteValue)); //$NON-NLS-1$
+			
+		} else if (constantValue instanceof Short) {
+			int shortValue= ((Short) constantValue).shortValue() & 0xFFFF;
+			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(shortValue)); //$NON-NLS-1$
+			
+		} else if (constantValue instanceof Integer) {
+			int intValue= ((Integer) constantValue).intValue();
+			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(intValue)); //$NON-NLS-1$
+			
+		} else if (constantValue instanceof Long) {
+			long longValue= ((Long) constantValue).longValue();
+			return formatWithHexValue(constantValue, "0x" + Long.toHexString(longValue)); //$NON-NLS-1$
+			
+		} else {
+			return constantValue.toString();
+		}
+	}
+
+	/**
+	 * @param constantValue
+	 * @param hexValue
+	 * @return a formatted string with constant and hex values
+	 */
+	private static String formatWithHexValue(Object constantValue, String hexValue) {
+		return Messages.format(JavaHoverMessages.JavadocHover_constantValue_hexValue, new String[] { constantValue.toString(), hexValue });
 	}
 }
