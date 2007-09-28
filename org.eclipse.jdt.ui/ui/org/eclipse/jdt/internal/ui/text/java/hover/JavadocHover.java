@@ -234,10 +234,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		long flags= member.getElementType() == IJavaElement.LOCAL_VARIABLE ? LOCAL_VARIABLE_FLAGS : LABEL_FLAGS;
 		StringBuffer label= new StringBuffer(JavaElementLabels.getElementLabel(member, flags));
 		if (member.getElementType() == IJavaElement.FIELD) {
-			String initializer= getConstantValue((IField)member, hoverRegion);
-			if (initializer != null) {
+			String constantValue= getConstantValue((IField)member, hoverRegion);
+			if (constantValue != null) {
 				label.append("= "); //$NON-NLS-1$
-				label.append(initializer);
+				label.append(constantValue);
 			}
 		}
 		
@@ -276,7 +276,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 	 * 
 	 * @param field the field
 	 * @param hoverRegion the hover region
-	 * @return the initializer for the given field or <code>null</code> if none
+	 * @return the constant value for the given field or <code>null</code> if none
 	 * @since 3.4
 	 */
 	private String getConstantValue(IField field, IRegion hoverRegion) {
@@ -287,13 +287,15 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		Object constantValue= null;
 		
 		CompilationUnit unit= SharedASTProvider.getAST(typeRoot, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
+		if (unit == null)
+			return null;
 		
 		ASTNode node= NodeFinder.perform(unit, hoverRegion.getOffset(),	hoverRegion.getLength());
 		if (node != null && node.getNodeType() == ASTNode.SIMPLE_NAME) {
 			IBinding binding= ((SimpleName)node).resolveBinding();
 			if (binding != null && binding.getKind() == IBinding.VARIABLE) {
 				IVariableBinding variableBinding= (IVariableBinding)binding;
-				if (variableBinding.getJavaElement().equals(field)) {
+				if (field.equals(variableBinding.getJavaElement())) {
 					constantValue= variableBinding.getConstantValue();
 				}
 			}
@@ -308,8 +310,9 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 			if (stringConstant.length() > 80) {
 				result.append(stringConstant.substring(0, 80));
 				result.append(JavaElementLabels.ELLIPSIS_STRING);
-			} else
+			} else {
 				result.append(stringConstant);
+			}
 			result.append('"');
 		} else if (constantValue instanceof Character) {
 			result.append('\'');
