@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -18,19 +19,29 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
+import org.eclipse.jface.operation.IRunnableWithProgress;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
+import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -56,9 +67,8 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
 import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
 
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
-
 import org.eclipse.jdt.internal.junit.Messages;
+import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 
 public class JUnitQuickFixProcessor implements IQuickFixProcessor {
@@ -148,7 +158,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 				for (int i= 0; i < fixProposals.length; i++) {
 					if (proposals == null)
 						proposals= new ArrayList();
-					proposals.add(new JUnitClasspathFixCorrectionProposal(fixProposals[i], getImportRewrite(context.getASTRoot(), qualifiedName)));
+					proposals.add(new JUnitClasspathFixCorrectionProposal(javaProject, fixProposals[i], getImportRewrite(context.getASTRoot(), qualifiedName)));
 				}
 			}
 		} catch (JavaModelException e) {
@@ -189,13 +199,14 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 		return false;
 	}
 	
-	private static class JUnitClasspathFixCorrectionProposal extends ChangeCorrectionProposal {
+	private static class JUnitClasspathFixCorrectionProposal implements IJavaCompletionProposal {
 
 		private final ClasspathFixProposal fClasspathFixProposal;
 		private final ImportRewrite fImportRewrite;
+		private final IJavaProject fJavaProject;
 
-		public JUnitClasspathFixCorrectionProposal(ClasspathFixProposal cpfix, ImportRewrite rewrite) {
-			super(cpfix.getDisplayString(), null, cpfix.getRelevance(), cpfix.getImage());
+		public JUnitClasspathFixCorrectionProposal(IJavaProject javaProject, ClasspathFixProposal cpfix, ImportRewrite rewrite) {
+			fJavaProject= javaProject;
 			fClasspathFixProposal= cpfix;
 			fImportRewrite= rewrite;
 		}
@@ -212,11 +223,55 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 				return composite;
 			}
 			return change;
-			
+		}
+		
+		public void apply(IDocument document) {
+			try {
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, true, new IRunnableWithProgress() {
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						try {
+							Change change= createChange();
+							change.initializeValidationData(new NullProgressMonitor());
+							PerformChangeOperation op= RefactoringUI.createUIAwareChangeOperation(change);
+							op.setUndoManager(RefactoringCore.getUndoManager(), getDisplayString());
+							op.setSchedulingRule(fJavaProject.getProject());
+							op.run(monitor);
+						} catch (CoreException e) {
+							throw new InvocationTargetException(e);
+						} catch (OperationCanceledException e) {
+							throw new InterruptedException();
+						}
+					}
+				});
+			} catch (InvocationTargetException e) {
+				ExceptionHandler.handle(e, JUnitPlugin.getActiveWorkbenchShell(), JUnitMessages.JUnitQuickFixProcessor_apply_problem_title, JUnitMessages.JUnitQuickFixProcessor_apply_problem_description);
+			} catch (InterruptedException e) {
+				
+			}
 		}
 		
 		public String getAdditionalProposalInfo() {
 			return fClasspathFixProposal.getAdditionalProposalInfo();
+		}
+
+		public int getRelevance() {
+			return fClasspathFixProposal.getRelevance();
+		}
+
+		public IContextInformation getContextInformation() {
+			return null;
+		}
+
+		public String getDisplayString() {
+			return fClasspathFixProposal.getDisplayString();
+		}
+
+		public Image getImage() {
+			return fClasspathFixProposal.getImage();
+		}
+
+		public Point getSelection(IDocument document) {
+			return null;
 		}
 	}
 	
