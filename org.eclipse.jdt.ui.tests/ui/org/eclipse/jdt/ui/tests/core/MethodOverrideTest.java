@@ -16,6 +16,11 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -36,11 +41,14 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -48,6 +56,11 @@ import org.eclipse.jdt.testplugin.TestOptions;
 
 public class MethodOverrideTest extends CoreTests {
 
+	
+	/**
+	 * See bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=111093
+	 */
+	
 	private static final Class THIS= MethodOverrideTest.class;
 	private static final boolean DEBUG_SHOWRESULTS= false;
 	
@@ -304,9 +317,6 @@ public class MethodOverrideTest extends CoreTests {
 		IMethodBinding[] overridingBindings= overridingTypeBinding.getDeclaredMethods();
 		IMethodBinding[] overriddenBindings= overriddenTypeBinding.getDeclaredMethods();
 		
-		if (DEBUG_SHOWRESULTS) {
-			System.out.println("--- " + getName() + " ---");
-		}
 		for (int i= 0; i < overridingMethods.length; i++) {
 			
 			IMethod overriding= overridingMethods[i];
@@ -329,17 +339,26 @@ public class MethodOverrideTest extends CoreTests {
 				boolean bindingIsSubsignature= overridingBinding.isSubsignature(overriddenBinding);
 
 				if (testerOverrides != overrideAnnotationResult || testerOverrides != bindingOverrides 
-						|| testerOverrides != bindingIsSubsignature || testerOverrides != uiBindingsIsSubsignature) { 
-					System.out.println(getDebugString(overridingBinding, overriddenBinding));
-					System.out.println("    IMethodBinding.overrides(): " +  String.valueOf(bindingOverrides));
-					System.out.println("    IMethodBinding.isSubsignature(): " +  String.valueOf(bindingIsSubsignature));
-					System.out.println("    MethodOverrideTester.isSubsignature(): " +  String.valueOf(testerOverrides));
-					System.out.println("    Bindings.isSubsignature(): " +  String.valueOf(uiBindingsIsSubsignature));
-					System.out.println("    Override Annotation: " +  String.valueOf(overrideAnnotationResult));
-				} else {
-					System.out.println(getDebugString(overridingBinding, overriddenBinding));
-					System.out.println("    " +  String.valueOf(overrideAnnotationResult));
-				}
+						|| testerOverrides != bindingIsSubsignature || testerOverrides != uiBindingsIsSubsignature) {
+					
+					System.out.println();
+					System.out.println("====================================");
+					System.out.println(getName());
+					System.out.println("====================================");
+					
+					System.out.println("IMethodBinding.overrides(): " +  String.valueOf(bindingOverrides));
+					System.out.println("IMethodBinding.isSubsignature(): " +  String.valueOf(bindingIsSubsignature));
+					//System.out.println("MethodOverrideTester.isSubsignature(): " +  String.valueOf(testerOverrides));
+					System.out.println("Bindings.isSubsignature(): " +  String.valueOf(uiBindingsIsSubsignature));
+					System.out.println("Override Annotation: " +  String.valueOf(overrideAnnotationResult));
+					System.out.println();
+					System.out.println(getCodeString(overridingBinding, overriddenBinding, root));
+					System.out.println();
+				} 
+//				else {
+//					System.out.println(getDebugString(overridingBinding, overriddenBinding));
+//					System.out.println("    " +  String.valueOf(overrideAnnotationResult));
+//				}
 			}
 			if (overrideAnnotationResult != testerOverrides) {
 				assertEquals(getDebugString(overridingBinding, overriddenBinding), overrideAnnotationResult, testerOverrides);
@@ -361,6 +380,46 @@ public class MethodOverrideTest extends CoreTests {
 		buf.append(")");
 		return buf.toString();
 	}
+	
+	private static String getCodeString(IMethodBinding overriding,  IMethodBinding overriddenMethod, CompilationUnit root) {
+		StringBuffer buf= new StringBuffer();
+		
+		buf.append("// Overridden: ----------------------------------\n");
+		buf.append(getCode(overriddenMethod, root)).append('\n');
+		
+		buf.append("// Overriding: ----------------------------------\n");
+		buf.append(getCode(overriding, root)).append('\n');
+		return buf.toString();
+	}
+	
+	private static String getCode(IMethodBinding binding, CompilationUnit root) {
+		
+		final MethodDeclaration method=  (MethodDeclaration) root.findDeclaringNode(binding.getMethodDeclaration());
+		
+		ASTFlattener flattener= new ASTFlattener() {
+			public boolean visit(MethodDeclaration node) {
+				if (node == method) {
+					super.visit(node);
+				}
+				return false;
+			}
+		};
+		method.getParent().accept(flattener);
+		String unformatted= flattener.getResult();
+		
+		TextEdit edit= CodeFormatterUtil.format2(method.getParent(), unformatted, 0, "\n", null);
+		if (edit != null) {
+			Document document= new Document(unformatted);
+			try {
+				edit.apply(document, TextEdit.NONE);
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
+			}
+			return document.get();
+		}
+		return unformatted; // unknown node
+	}
+	
 
 	private void assertSameType(IType type, ITypeBinding binding) throws JavaModelException {
 		assertNotNull(binding);
