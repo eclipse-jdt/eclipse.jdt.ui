@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
@@ -129,14 +128,14 @@ public class CleanUpRegistry {
 		ArrayList result= new ArrayList();
 		
 		result.add(new CodeStyleCleanUp());
-		result.add(new ControlStatementsCleanUp()); 
+		result.add(new ControlStatementsCleanUp());
 		result.add(new ConvertLoopCleanUp());
 		result.add(new VariableDeclarationCleanUp());
 		result.add(new ExpressionsCleanUp());
 		result.add(new UnusedCodeCleanUp());
 		result.add(new Java50CleanUp());
-		result.add(new PotentialProgrammingProblemsCleanUp()); 
-		result.add(new UnnecessaryCodeCleanUp()); 
+		result.add(new PotentialProgrammingProblemsCleanUp());
+		result.add(new UnnecessaryCodeCleanUp());
 		result.add(new StringCleanUp());
 		result.add(new UnimplementedCodeCleanUp());
 		result.add(new SortMembersCleanUp());
@@ -144,7 +143,7 @@ public class CleanUpRegistry {
 		result.add(new CommentFormatCleanUp());
 		result.add(new CodeFormatCleanUp());
 		
-		fCleanUps= (ICleanUp[]) result.toArray(new ICleanUp[result.size()]);	
+		fCleanUps= (ICleanUp[]) result.toArray(new ICleanUp[result.size()]);
 	}
 	
 	private synchronized void ensurePagesRegistered() {
@@ -155,35 +154,35 @@ public class CleanUpRegistry {
 		
 		result.add(new CleanUpTabPageDescriptor(CodeStyleTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeStyle) {
 			public ICleanUpTabPage createTabPage() {
-				return new CodeStyleTabPage(); 
+				return new CodeStyleTabPage();
 			}
 		});
 		
 		result.add(new CleanUpTabPageDescriptor(MemberAccessesTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_MemberAccesses) {
 			public ICleanUpTabPage createTabPage() {
-				return new MemberAccessesTabPage(); 
+				return new MemberAccessesTabPage();
 			}
 		});
 		
 		result.add(new CleanUpTabPageDescriptor(UnnecessaryCodeTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_UnnecessaryCode) {
 			public ICleanUpTabPage createTabPage() {
-				return new UnnecessaryCodeTabPage(); 
+				return new UnnecessaryCodeTabPage();
 			}
 		});
 		
 		result.add(new CleanUpTabPageDescriptor(MissingCodeTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_MissingCode) {
 			public ICleanUpTabPage createTabPage() {
-				return new MissingCodeTabPage(); 
+				return new MissingCodeTabPage();
 			}
 		});
 		
 		result.add(new CleanUpTabPageDescriptor(CodeFormatingTabPage.ID, CleanUpMessages.CleanUpModifyDialog_TabPageName_CodeFormating) {
 			public ICleanUpTabPage createTabPage() {
-				return new CodeFormatingTabPage(); 
+				return new CodeFormatingTabPage();
 			}
 		});
 		
-		fPageDescriptors= (CleanUpTabPageDescriptor[]) result.toArray(new CleanUpTabPageDescriptor[result.size()]);		
+		fPageDescriptors= (CleanUpTabPageDescriptor[]) result.toArray(new CleanUpTabPageDescriptor[result.size()]);
 	}
 
 	/**
@@ -191,10 +190,11 @@ public class CleanUpRegistry {
 	 */
 	public synchronized void registerCleanUp(ICleanUp cleanUp) {
 		ensureCleanUpRegistered();
-		ArrayList result= new ArrayList();
-		result.addAll(Arrays.asList(fCleanUps));
-		result.add(cleanUp);
-		fCleanUps= (ICleanUp[]) result.toArray(new ICleanUp[result.size()]);
+		ICleanUp[] oldCleanUps= fCleanUps;
+		int oldLength= oldCleanUps.length;
+		fCleanUps= new ICleanUp[oldLength + 1];
+		System.arraycopy(oldCleanUps, 0, fCleanUps, 0, oldLength);
+		fCleanUps[oldLength]= cleanUp;
 	}
 
 	/**
@@ -202,10 +202,11 @@ public class CleanUpRegistry {
 	 */
 	public synchronized void registerTabPage(CleanUpTabPageDescriptor descriptor) {
 		ensurePagesRegistered();
-		ArrayList result= new ArrayList();
-		result.addAll(Arrays.asList(fPageDescriptors));
-		result.add(descriptor);
-		fPageDescriptors= (CleanUpTabPageDescriptor[]) result.toArray(new CleanUpTabPageDescriptor[result.size()]);
+		CleanUpTabPageDescriptor[] oldDescriptorps= fPageDescriptors;
+		int oldLength= oldDescriptorps.length;
+		fPageDescriptors= new CleanUpTabPageDescriptor[oldLength + 1];
+		System.arraycopy(oldDescriptorps, 0, fPageDescriptors, 0, oldLength);
+		fPageDescriptors[oldLength]= descriptor;
 	}
 
 }
