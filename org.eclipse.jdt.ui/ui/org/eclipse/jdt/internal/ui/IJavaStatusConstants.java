@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
 
 /**
@@ -57,5 +58,14 @@ public interface IJavaStatusConstants {
 	 * @since 3.3
 	 */
 	public static final int EDITOR_POST_SAVE_NOTIFICATION= 10006;
+
+	/**
+	 * Status constant indication that a problem occurred while calculating
+	 * the changed region during a save.
+	 * 
+	 * @see CompilationUnitDocumentProvider
+	 * @since 3.4
+	 */
+	public static final int EDITOR_CHANGED_REGION_CALCULATION= 10007;
 	
  }

@@ -671,9 +671,9 @@ public class EditorUtility {
 				 * @see org.eclipse.core.runtime.ISafeRunnable#handleException(java.lang.Throwable)
 				 */
 				public void handleException(Throwable exception) {
-					JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.INTERNAL_ERROR, exception.getLocalizedMessage(), exception));
+					JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_CHANGED_REGION_CALCULATION, exception.getLocalizedMessage(), exception));
 					String msg= JavaEditorMessages.CompilationUnitDocumentProvider_error_calculatingChangedRegions;
-					errorStatus[0]= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.INTERNAL_ERROR, msg, exception);
+					errorStatus[0]= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_CHANGED_REGION_CALCULATION, msg, exception);
 					result[0]= null;
 				}
 	

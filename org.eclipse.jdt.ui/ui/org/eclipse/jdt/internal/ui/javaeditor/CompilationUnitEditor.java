@@ -1280,25 +1280,32 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	protected void openSaveErrorDialog(String title, String message, CoreException exception) {
 		IStatus status= exception.getStatus();
 		if (JavaUI.ID_PLUGIN.equals(status.getPlugin()) && status.getCode() == IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION) {
-			int mask= IStatus.OK | IStatus.INFO | IStatus.WARNING | IStatus.ERROR;
-			ErrorDialog dialog = new ErrorDialog(getSite().getShell(), title, message, status, mask) {
-				protected Control createDialogArea(Composite parent) {
-					parent= (Composite)super.createDialogArea(parent);
-					Link link= new Link(parent, SWT.NONE);
-					link.setText(JavaEditorMessages.CompilationUnitEditor_error_saving_saveParticipant);
-					link.addSelectionListener(new SelectionAdapter() {
-						public void widgetSelected(SelectionEvent e) {
-							PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.SaveParticipantPreferencePage", null, null).open(); //$NON-NLS-1$
-						}
-					});
-					GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
-					link.setLayoutData(gridData);
-					return parent;
-				}
-			};
-			dialog.open();
+			openSaveListenerErrorDialog(title, message, JavaEditorMessages.CompilationUnitEditor_error_saving_saveParticipant, exception);
+		} else if (JavaUI.ID_PLUGIN.equals(status.getPlugin()) && status.getCode() == IJavaStatusConstants.EDITOR_CHANGED_REGION_CALCULATION) {
+			openSaveListenerErrorDialog(title, message, JavaEditorMessages.CompilationUnitEditor_error_saving_changedRegionCalculation, exception);
 		} else
 			super.openSaveErrorDialog(title, message, exception);
+	}
+
+	private void openSaveListenerErrorDialog(String title, String message, final String linkText, CoreException exception) {
+		IStatus status= exception.getStatus();
+		int mask= IStatus.OK | IStatus.INFO | IStatus.WARNING | IStatus.ERROR;
+		ErrorDialog dialog= new ErrorDialog(getSite().getShell(), title, message, status, mask) {
+			protected Control createDialogArea(Composite parent) {
+				parent= (Composite) super.createDialogArea(parent);
+				Link link= new Link(parent, SWT.NONE);
+				link.setText(linkText);
+				link.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent e) {
+						PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.SaveParticipantPreferencePage", null, null).open(); //$NON-NLS-1$
+					}
+				});
+				GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+				link.setLayoutData(gridData);
+				return parent;
+			}
+		};
+		dialog.open();
 	}
 
 	public boolean isSaveAsAllowed() {

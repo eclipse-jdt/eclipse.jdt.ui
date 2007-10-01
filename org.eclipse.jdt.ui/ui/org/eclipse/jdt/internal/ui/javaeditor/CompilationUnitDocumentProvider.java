@@ -1268,7 +1268,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 
 				IPostSaveListener[] listeners= JavaPlugin.getDefault().getSaveParticipantRegistry().getEnabledPostSaveListeners(info.fCopy.getJavaProject().getProject());
 
-				Throwable changedRegionException= null;
+				CoreException changedRegionException= null;
 				boolean needsChangedRegions= false;
 				try {
 					if (listeners.length > 0)
@@ -1294,7 +1294,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 					notifyPostSaveListeners(info, changedRegions, listeners, getSubProgressMonitor(monitor, 30));
 				
 				if (changedRegionException != null) {
-					// FIXME: could not limit to changed region
+					throw changedRegionException;
 				}
 			} catch (CoreException x) {
 				// inform about the failure
