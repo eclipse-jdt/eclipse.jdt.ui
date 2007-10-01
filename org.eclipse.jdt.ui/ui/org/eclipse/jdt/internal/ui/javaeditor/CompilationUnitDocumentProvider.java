@@ -40,7 +40,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
-
 import org.eclipse.core.resources.IEncodedStorage;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFileState;
@@ -89,7 +88,6 @@ import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.ForwardingDocumentProvider;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
-
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -1242,7 +1240,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 
 		monitor.beginTask("", 100); //$NON-NLS-1$
 
-			try {
+		try {
 			IDocument document= info.fTextFileBuffer.getDocument();
 			IResource resource= info.fCopy.getResource();
 
@@ -1267,10 +1265,14 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			IProgressMonitor subMonitor= null;
  			try {
  				fIsAboutToSave= true;
+
+				IPostSaveListener[] listeners= JavaPlugin.getDefault().getSaveParticipantRegistry().getEnabledPostSaveListeners(info.fCopy.getJavaProject().getProject());
+
 				Throwable changedRegionException= null;
 				boolean needsChangedRegions= false;
 				try {
-					needsChangedRegions= SaveParticipantRegistry.isChangedRegionsRequired(info.fCopy);
+					if (listeners.length > 0)
+						needsChangedRegions= SaveParticipantRegistry.isChangedRegionsRequired(info.fCopy);
 				} catch (CoreException ex) {
 					changedRegionException= ex;
 				}
@@ -1285,15 +1287,15 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 						subMonitor= getSubProgressMonitor(monitor, 50);
 					}
 				} else
-					subMonitor= getSubProgressMonitor(monitor, 70);
+					subMonitor= getSubProgressMonitor(monitor, listeners.length > 0 ? 70 : 100);
 				
  				info.fCopy.commitWorkingCopy(isSynchronized || overwrite, subMonitor);
-				notifyPostSaveListeners(info, changedRegions, getSubProgressMonitor(monitor, 30));
+				if (listeners.length > 0)
+					notifyPostSaveListeners(info, changedRegions, listeners, getSubProgressMonitor(monitor, 30));
 				
 				if (changedRegionException != null) {
 					// FIXME: could not limit to changed region
 				}
-					
 			} catch (CoreException x) {
 				// inform about the failure
 				fireElementStateChangeFailed(element);
@@ -1479,10 +1481,9 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
      * @see IPostSaveListener
      * @since 3.3
      */
-	protected void notifyPostSaveListeners(final CompilationUnitInfo info, final IRegion[] changedRegions, final IProgressMonitor monitor) throws CoreException {
+	protected void notifyPostSaveListeners(final CompilationUnitInfo info, final IRegion[] changedRegions, IPostSaveListener[] listeners, final IProgressMonitor monitor) throws CoreException {
 		final ICompilationUnit unit= info.fCopy;
 		final IBuffer buffer= unit.getBuffer();
-		IPostSaveListener[] listeners= JavaPlugin.getDefault().getSaveParticipantRegistry().getEnabledPostSaveListeners(unit.getJavaProject().getProject());
 		
 		String message= JavaEditorMessages.CompilationUnitDocumentProvider_error_saveParticipantProblem;
 		final MultiStatus errorStatus= new MultiStatus(JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, message, null);
