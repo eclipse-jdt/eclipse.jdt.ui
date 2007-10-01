@@ -1,16 +1,19 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2007 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials 
+ * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
 package org.eclipse.jdt.ui.leaktest.reftracker;
 
+import java.lang.ref.Reference;
+import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
@@ -26,21 +29,25 @@ import org.eclipse.jdt.testplugin.JavaTestPlugin;
  * all references except instances that are only referenced by local variables or by native roots
  */
 public final class ReferenceTracker {
-	
+
 	private static final String CURRENT_PKG_NAME= ReferenceTracker.class.getPackage().getName();
-	
+	private static final String REFERENCE_NAME= Reference.class.getName();
+
 	private IdentityHashSet fVisitedElements;
 	private final ReferenceVisitor fReferenceVisitor;
 	private FIFOQueue fQueue;
 	private MultiStatus fStatus;
+
+	private boolean fSkipWeakOrSoft;
 
 	public ReferenceTracker(ReferenceVisitor visitor) {
 		fReferenceVisitor= visitor;
 		fStatus= null;
 		fVisitedElements= null;
 		fQueue= null;
+		fSkipWeakOrSoft= true;
 	}
-	
+
 	private static boolean isInteresting(Class clazz) {
 		String name= clazz.getName();
 		if (name.startsWith(CURRENT_PKG_NAME) || name.startsWith("sun.reflect.")) {  //$NON-NLS-1$//$NON-NLS-2$
@@ -48,13 +55,16 @@ public final class ReferenceTracker {
 		}
 		return true;
 	}
-	
+
 	private void followArrayReference(ReferencedObject prev, int index, Object to) {
 		fQueue.add(new ReferencedArrayElement(prev, index, to));
 	}
-		
+
 	private void followFieldReference(ReferencedObject ref, Object curr, Field fld) {
 		try {
+			if (fSkipWeakOrSoft && isWeakOrSoftReference(curr, fld)) {
+				return;
+			}
 			boolean isAccessible= setAccessible(fld, true);
 			try {
 				Object fieldVal= fld.get(curr);
@@ -72,11 +82,20 @@ public final class ReferenceTracker {
 			handleError(e, fld);
 		}
 	}
-	
+
+	private static boolean isWeakOrSoftReference(Object curr, Field fld) {
+		if (REFERENCE_NAME.equals(fld.getDeclaringClass().getName())) {
+			return "referent".equals(fld.getName())
+			&& (curr instanceof WeakReference || curr instanceof SoftReference);
+		}
+		return false;
+	}
+
+
 	private void handleError(Throwable t, Field fld) {
 		fStatus.add(new Status(IStatus.ERROR, JavaTestPlugin.getPluginId(), IStatus.ERROR, "Problem on access of " + fld.toString(), t));
 	}
-	
+
 	private void followStaticReferences(Class classInstance) {
 		Field[] declaredFields= classInstance.getDeclaredFields();
 		for (int i= 0; i < declaredFields.length; i++) {
@@ -86,7 +105,7 @@ public final class ReferenceTracker {
 			}
 		}
 	}
-	
+
 	private static boolean setAccessible(Field fld, boolean enable) {
 		boolean isAccessible= fld.isAccessible();
 		if (isAccessible != enable) {
@@ -94,7 +113,7 @@ public final class ReferenceTracker {
 		}
 		return isAccessible;
 	}
-	
+
 	private void visit(ReferencedObject ref) {
 		Object curr= ref.getValue();
 		Class currClass= curr.getClass();
@@ -104,7 +123,7 @@ public final class ReferenceTracker {
 
 		boolean firstVisit= fVisitedElements.add(curr);
 		boolean continueVisiting= fReferenceVisitor.visit(ref, curr.getClass(), firstVisit);
-		
+
 		if (!firstVisit || !continueVisiting) {
 			return;
 		}
@@ -143,16 +162,16 @@ public final class ReferenceTracker {
 		return (modifiers & Modifier.STATIC) != 0;
 	}
 
-	public IStatus start(Object root) {		
+	public IStatus start(Object root) {
 		fVisitedElements= new IdentityHashSet(1 << 21); // 2 M -> 8 MB
 		fQueue= new FIFOQueue(100);
 		fStatus= new MultiStatus(JavaTestPlugin.getPluginId(), IStatus.OK, "Problem tracking resources", null);
-		
+
 		try {
 			visit(new RootReference(root));
-			
+
 			FIFOQueue queue= fQueue;
-			
+
 			ReferencedObject next= (ReferencedObject) queue.poll();
 			while (next != null) {
 				visit(next);
