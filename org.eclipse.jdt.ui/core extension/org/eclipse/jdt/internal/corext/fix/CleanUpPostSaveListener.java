@@ -47,9 +47,13 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.BadPositionCategoryException;
+import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Region;
 
 import org.eclipse.ui.PlatformUI;
 
@@ -150,10 +154,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 						((IDocumentExtension4)document).replace(0, 0, "", fDocumentStamp); //$NON-NLS-1$
 						stampSetted= true;
 					} catch (BadLocationException e) {
-						String message= e.getMessage();
-                        if (message == null)
-                        	message= "BadLocationException"; //$NON-NLS-1$
-						throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IRefactoringCoreStatusCodes.BAD_LOCATION, message, e));
+						throw wrapBadLocationException(e);
 					}
 				}
 				
@@ -164,10 +165,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 				
 				return new CleanUpSaveUndo(getName(), fFile, ((UndoEdit[]) list.toArray(new UndoEdit[list.size()])), oldDocValue, oldFileValue);
 			} catch (BadLocationException e) {
-				String message= e.getMessage();
-                if (message == null)
-                	message= "BadLocationException"; //$NON-NLS-1$
-				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IRefactoringCoreStatusCodes.BAD_LOCATION, message, e));
+				throw wrapBadLocationException(e);
 			} finally {
 				if (buffer != null)
 					manager.disconnect(fFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(pm, 1));
@@ -178,6 +176,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	public static final String POSTSAVELISTENER_ID= "org.eclipse.jdt.ui.postsavelistener.cleanup"; //$NON-NLS-1$
 	private static final String WARNING_VALUE= "warning"; //$NON-NLS-1$
 	private static final String ERROR_VALUE= "error"; //$NON-NLS-1$
+	private static final String CHANGED_REGION_POSITION_CATEGORY= "changed_region_position_category"; //$NON-NLS-1$
 	
 	/**
 	 * {@inheritDoc}
@@ -288,7 +287,11 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     					PerformChangeOperation performChangeOperation= RefactoringUI.createUIAwareChangeOperation(change);
     					performChangeOperation.setSchedulingRule(unit.getSchedulingRule());
     					
-    					performChangeOperation.run(new SubProgressMonitor(monitor, 5));
+    					if (undoneCleanUps.size() > 0 && changedRegions != null && changedRegions.length > 0) {
+							changedRegions= performWithChangedRegionUpdate(performChangeOperation, changedRegions, unit, new SubProgressMonitor(monitor, 5));
+						} else {
+							performChangeOperation.run(new SubProgressMonitor(monitor, 5));
+						}
     					
     					performChangeOperation.getUndoChange();
     					undoEdits.addFirst(change.getUndoEdit());
@@ -370,6 +373,62 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	    }
     }
 
+	private IRegion[] performWithChangedRegionUpdate(PerformChangeOperation performChangeOperation, IRegion[] changedRegions, ICompilationUnit unit, IProgressMonitor monitor) throws CoreException {
+		final ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		final IPath path= unit.getResource().getFullPath();
+
+		monitor.beginTask("", 7); //$NON-NLS-1$
+
+		ITextFileBuffer buffer= null;
+		try {
+			manager.connect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
+			buffer= manager.getTextFileBuffer(path, LocationKind.IFILE);
+			IDocument document= buffer.getDocument();
+
+			document.addPositionCategory(CHANGED_REGION_POSITION_CATEGORY);
+			DefaultPositionUpdater updater= new DefaultPositionUpdater(CHANGED_REGION_POSITION_CATEGORY);
+			try {
+				document.addPositionUpdater(updater);
+
+				Position[] positions= new Position[changedRegions.length];
+				for (int i= 0; i < changedRegions.length; i++) {
+					try {
+						Position position= new Position(changedRegions[i].getOffset(), changedRegions[i].getLength());
+						document.addPosition(CHANGED_REGION_POSITION_CATEGORY, position);
+
+						positions[i]= position;
+					} catch (BadLocationException e) {
+						throw wrapBadLocationException(e);
+					} catch (BadPositionCategoryException e) {
+						String message= e.getMessage();
+						if (message == null)
+							message= "BadPositionCategoryException"; //$NON-NLS-1$
+						throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, 0, message, e));
+					}
+				}
+
+				performChangeOperation.run(new SubProgressMonitor(monitor, 5));
+
+				ArrayList result= new ArrayList();
+				for (int i= 0; i < positions.length; i++) {
+					Position position= positions[i];
+					if (!position.isDeleted())
+						result.add(new Region(position.getOffset(), position.getLength()));
+
+					document.removePosition(position);
+				}
+
+				return (IRegion[]) result.toArray(new IRegion[result.size()]);
+			} finally {
+				document.removePositionUpdater(updater);
+			}
+		} finally {
+			if (buffer != null)
+				manager.disconnect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
+			monitor.done();
+		}
+	}
+
 	private boolean requiresAST(ICleanUp[] cleanUps) throws CoreException {
 		for (int i= 0; i < cleanUps.length; i++) {
 	        if (cleanUps[i].getRequirements().requiresAST())
@@ -441,5 +500,11 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	public String getId() {
 		return POSTSAVELISTENER_ID;
 	}
-	
+
+	private static CoreException wrapBadLocationException(BadLocationException e) {
+		String message= e.getMessage();
+		if (message == null)
+			message= "BadLocationException"; //$NON-NLS-1$
+		return new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IRefactoringCoreStatusCodes.BAD_LOCATION, message, e));
+	}
 }

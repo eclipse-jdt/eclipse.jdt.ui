@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.ui.PartInitException;
@@ -23,9 +24,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPostSaveListener;
+import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
@@ -45,7 +48,9 @@ public class SaveParticipantTest extends CleanUpTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		new InstanceScope().getNode(JavaUI.ID_PLUGIN).putBoolean("editor_save_participant_" + CleanUpPostSaveListener.POSTSAVELISTENER_ID, true);
+		IEclipsePreferences node= new InstanceScope().getNode(JavaUI.ID_PLUGIN);
+		node.putBoolean("editor_save_participant_" + CleanUpPostSaveListener.POSTSAVELISTENER_ID, true);
+		node.put(CleanUpPreferenceUtil.SAVE_PARTICIPANT_KEY_PREFIX + CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS, CleanUpOptions.TRUE);
 	}
 
 	private static void editCUInEditor(ICompilationUnit cu, String newContent) throws JavaModelException, PartInitException {
@@ -67,7 +72,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
@@ -122,7 +127,41 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		buf.append("    }\n");
 		buf.append("}");
 		String expected1= buf.toString();
-		
+
+		assertEquals(expected1, cu1.getBuffer().getContents());
+	}
+
+	public void testFormatChanges02() throws Exception {
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo( Object o ) {\n");
+		buf.append("        Object s= (String)o;\n");
+		buf.append("}}\n");
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
+		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo( Object o ) {\n");
+		buf.append("        Object s       = (String)o;\n");
+		buf.append("}}\n");
+
+		editCUInEditor(cu1, buf.toString());
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo( Object o ) {\n");
+		buf.append("        Object s = o;\n");
+		buf.append("}}\n");
+		String expected1= buf.toString();
+
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
 }
