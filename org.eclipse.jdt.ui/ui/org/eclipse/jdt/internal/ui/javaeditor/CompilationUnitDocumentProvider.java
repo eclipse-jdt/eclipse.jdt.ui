@@ -1476,7 +1476,8 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
      * </p>
      * @param info compilation unit info
      * @param changedRegions
-     * @param monitor the progress monitor
+     * @param listeners the listeners to notify
+	 * @param monitor the progress monitor
      * @throws CoreException
      * @see IPostSaveListener
      * @since 3.3
