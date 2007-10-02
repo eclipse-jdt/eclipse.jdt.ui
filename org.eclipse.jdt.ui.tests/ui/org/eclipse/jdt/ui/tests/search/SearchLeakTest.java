@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,13 +12,14 @@ package org.eclipse.jdt.ui.tests.search;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.eclipse.search2.internal.ui.InternalSearchUI;
 
-import org.eclipse.jdt.ui.leaktest.LeakTestCase;
-import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
+import org.eclipse.search2.internal.ui.InternalSearchUI;
 
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
+
+import org.eclipse.jdt.ui.leaktest.LeakTestCase;
+import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
 
 /**
  */
@@ -42,12 +43,12 @@ public class SearchLeakTest extends LeakTestCase {
 		InternalSearchUI.getInstance().removeQuery(query2);	
 		query1= null;
 		query2= null;
-		assertEquals(0, getInstanceCount(JavaSearchResult.class));
+		assertInstanceCount(JavaSearchResult.class, 0);
 	}
 	public void testRemoveAllQueries() throws Exception {
 		SearchTestHelper.runMethodRefQuery("junit.framework.Test", "countTestCases", new String[0]);
 		SearchTestHelper.runMethodRefQuery("junit.framework.TestCase", "countTestCases", new String[0]);
 		InternalSearchUI.getInstance().removeAllQueries();
-		assertEquals(0, getInstanceCount(JavaSearchResult.class));
+		assertInstanceCount(JavaSearchResult.class, 0);
 	}
 }
