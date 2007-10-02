@@ -87,7 +87,6 @@ public final class WorkingSetMessages extends NLS {
 	public static String OpenCloseWorkingSetAction_open_label;
 	public static String OpenCloseWorkingSetAction_open_error_title;
 	public static String OpenCloseWorkingSetAction_open_error_message;
-	public static String OpenPropertiesWorkingSetAction_label;
 	public static String RemoveWorkingSetElementAction_label;
 
 	static {

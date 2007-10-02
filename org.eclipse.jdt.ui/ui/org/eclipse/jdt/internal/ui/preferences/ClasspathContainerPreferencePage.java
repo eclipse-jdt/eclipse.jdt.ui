@@ -12,29 +12,16 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizard;
-import org.eclipse.jface.wizard.IWizardContainer;
-import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.PropertyPage;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -49,82 +36,10 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathContainerWizard;
  * Wraps a PropertyPage around a ClasspathContainerWizard.
  * It is required, that the wizard consists of exactly one page.
  */
-public class ClasspathContainerPreferencePage extends PropertyPage {
+public class ClasspathContainerPreferencePage extends WizardPropertyPage {
 
-	private static final class PropertyPageWizardContainer implements IWizardContainer {
-
-		private final IWizard fWizard;
-		private final PropertyPage fPage;
-		private String fMessage;
-
-		private PropertyPageWizardContainer(PropertyPage page, IWizard wizard) {
-			Assert.isLegal(wizard.getPageCount() == 1);
-
-			fPage= page;
-			fWizard= wizard;
-		}
-
-		public IWizardPage getCurrentPage() {
-			return fWizard.getPages()[0];
-		}
-
-		public Shell getShell() {
-			return fPage.getShell();
-		}
-
-		public void showPage(IWizardPage page) {
-		}
-
-		public void updateButtons() {
-			fPage.setValid(fWizard.canFinish());
-		}
-
-		public void updateMessage() {
-			IWizardPage page= getCurrentPage();
-
-			String message= fPage.getMessage();
-			if (message != null && fMessage == null)
-				fMessage= message;
-
-			if (page.getErrorMessage() != null) {
-				fPage.setMessage(page.getErrorMessage(), ERROR);
-			} else if (page instanceof IMessageProvider) {
-				IMessageProvider messageProvider= (IMessageProvider) page;
-				if (messageProvider.getMessageType() != IMessageProvider.NONE) {
-					fPage.setMessage(messageProvider.getMessage(), messageProvider.getMessageType());
-				} else {
-					if (messageProvider.getMessage() != null && fMessage == null)
-						fMessage= messageProvider.getMessage();
-
-					fPage.setMessage(fMessage, NONE);
-				}
-			} else {
-				fPage.setErrorMessage(null);
-			}
-		}
-
-		public void updateTitleBar() {
-			IWizardPage page= getCurrentPage();
-			String name= page.getTitle();
-			if (name == null)
-				name= page.getName();
-
-			fPage.setMessage(name);
-		}
-
-		public void updateWindowTitle() {
-		}
-
-		public void run(boolean fork, boolean cancelable, IRunnableWithProgress runnable) throws InvocationTargetException, InterruptedException {
-			ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
-			dialog.run(fork, cancelable, runnable);
-		}
-	}
-
-	private ClasspathContainerWizard fWizard;
 	private IJavaProject fJavaProject;
 	private IClasspathEntry fEntry;
-	private Composite fWizardPageContainer;
 
 	public ClasspathContainerPreferencePage() {
 		noDefaultAndApplyButton();
@@ -136,98 +51,21 @@ public class ClasspathContainerPreferencePage extends PropertyPage {
 	public void setElement(IAdaptable element) {
 		super.setElement(element);
 
-		ClassPathContainer container= (ClassPathContainer) element;
+		ClassPathContainer container;
+		if (element instanceof ClassPathContainer) {
+			container= (ClassPathContainer) element;
+		} else {
+			container= (ClassPathContainer) element.getAdapter(ClassPathContainer.class);
+		}
 		fJavaProject= container.getJavaProject();
 		fEntry= container.getClasspathEntry();
 	}
 
-	protected Control createContents(final Composite parent) {
-		fWizardPageContainer= new Composite(parent, SWT.NONE);
-		fWizardPageContainer.setFont(parent.getFont());
-		fWizardPageContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		GridLayout layout= new GridLayout(1, false);
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		fWizardPageContainer.setLayout(layout);
-
-		createWizardPageContent(fWizardPageContainer);
-
-		return fWizardPageContainer;
-	}
-
-	private void createWizardPageContent(Composite parent) {
-		fWizard= createWizard();
-		if (fWizard == null)
-			return;
-
-		Composite messageComposite= new Composite(parent, SWT.NONE);
-		messageComposite.setFont(parent.getFont());
-		messageComposite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		GridLayout layout= new GridLayout(1, false);
-		layout.marginHeight= 0;
-		messageComposite.setLayout(layout);
-
-		Label messageLabel= new Label(messageComposite, SWT.WRAP);
-		messageLabel.setFont(messageComposite.getFont());
-		messageLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		IWizardPage page= fWizard.getPages()[0];
-		fWizard.createPageControls(parent);
-
-		if (page.getControl() == null)
-			page.createControl(parent);
-
-		Control pageControl= page.getControl();
-		if (pageControl.getLayoutData() == null)
-			pageControl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		setPageName(page);
-		setDescription(page, messageLabel);
-
-		page.setVisible(true);
-		
-		setValid(fWizard.canFinish());
-	}
-
-	private void setPageName(IWizardPage page) {
-		String name= page.getTitle();
-		if (name == null)
-			name= page.getName();
-
-		setMessage(name);
-	}
-
-	private void setDescription(IWizardPage page, Label messageLabel) {
-		String description= null;
-		if (page.getDescription() != null) {
-			description= page.getDescription();
-		} else if (page instanceof IMessageProvider) {
-			IMessageProvider messageProvider= (IMessageProvider) page;
-			if (messageProvider.getMessageType() == IMessageProvider.NONE) {
-				description= messageProvider.getMessage();
-			}
-		}
-
-		if (description != null) {
-			messageLabel.setText(description);
-		} else {
-			messageLabel.setVisible(false);
-		}
-	}
-
-	private ClasspathContainerWizard createWizard() {
+	protected IWizard createWizard() {
 		try {
 			IJavaProject project= fJavaProject;
 			IClasspathEntry[] entries= project.getRawClasspath();
-			ClasspathContainerWizard result= new ClasspathContainerWizard(fEntry, project, entries);
-
-			result.addPages();
-			PropertyPageWizardContainer wizardContainer= new PropertyPageWizardContainer(this, result);
-			wizardContainer.updateButtons();
-			wizardContainer.updateMessage();
-			result.setContainer(wizardContainer);
-
-			return result;
+			return new ClasspathContainerWizard(fEntry, project, entries);
 		} catch (JavaModelException e) {
 			String title= ActionMessages.ConfigureContainerAction_error_title;
 			String message= ActionMessages.ConfigureContainerAction_error_creationfailed_message;
@@ -238,69 +76,10 @@ public class ClasspathContainerPreferencePage extends PropertyPage {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public boolean performOk() {
-		fWizard.performFinish();
-		applyContainerChange();
-		fWizard.dispose();
-
-		return super.performOk();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean performCancel() {
-		fWizard.performCancel();
-		fWizard.dispose();
-
-		return super.performCancel();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void performApply() {
-		fWizard.performFinish();
-		applyContainerChange();
-		fWizard.dispose();
-
-		rebuildWizardPage();
-
-		super.performApply();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void performDefaults() {
-		fWizard.performCancel();
-		fWizard.dispose();
-
-		rebuildWizardPage();
-
-		super.performDefaults();
-	}
-
-	/**
-	 * Rebuilds the wizard page based on the current classpath entry
-	 */
-	private void rebuildWizardPage() {
-		Control[] children= fWizardPageContainer.getChildren();
-		for (int i= 0; i < children.length; i++) {
-			children[i].dispose();
-		}
-
-		createWizardPageContent(fWizardPageContainer);
-		fWizardPageContainer.getParent().layout(true, true);
-	}
-
-	/**
 	 * Apply the changes to the classpath
 	 */
-	private void applyContainerChange() {
-		IClasspathEntry[] created= fWizard.getNewEntries();
+	protected void applyChanges() {
+		IClasspathEntry[] created= ((ClasspathContainerWizard) getWizard()).getNewEntries();
 		if (created == null || created.length != 1)
 			return;
 
@@ -346,7 +125,7 @@ public class ClasspathContainerPreferencePage extends PropertyPage {
 		}
 	}
 
-	protected static int indexInClasspath(IClasspathEntry[] entries, IClasspathEntry entry) {
+	private static int indexInClasspath(IClasspathEntry[] entries, IClasspathEntry entry) {
 		for (int i= 0; i < entries.length; i++) {
 			if (entries[i].equals(entry)) {
 				return i;

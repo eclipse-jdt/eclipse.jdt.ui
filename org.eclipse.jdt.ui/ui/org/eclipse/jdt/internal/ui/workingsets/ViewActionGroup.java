@@ -46,7 +46,6 @@ public class ViewActionGroup extends ActionGroup {
 	private final WorkingSetShowActionGroup fShowActionGroup;
 	private final WorkingSetFilterActionGroup fFilterActionGroup;
 	private final ConfigureWorkingSetAssignementAction fWorkingSetAssignementAction;
-	private final OpenPropertiesWorkingSetAction fEditWorkingSetGroupAction; // active on working sets: edit
 	private final IWorkbenchPartSite fSite;
 
 	public ViewActionGroup(int mode, IPropertyChangeListener changeListener, IWorkbenchPartSite site) {
@@ -60,11 +59,9 @@ public class ViewActionGroup extends ActionGroup {
 		fFilterActionGroup= new WorkingSetFilterActionGroup(site, fChangeListener);
 		fShowActionGroup= new WorkingSetShowActionGroup(site);
 		fWorkingSetAssignementAction= new ConfigureWorkingSetAssignementAction(site);
-		fEditWorkingSetGroupAction= new OpenPropertiesWorkingSetAction(site);
 
 		ISelectionProvider selectionProvider= site.getSelectionProvider();
 		selectionProvider.addSelectionChangedListener(fWorkingSetAssignementAction);
-		selectionProvider.addSelectionChangedListener(fEditWorkingSetGroupAction);
 		
 		fMode= mode;
 		if (showWorkingSets())
@@ -79,7 +76,6 @@ public class ViewActionGroup extends ActionGroup {
 		fChangeListener= null;
 		ISelectionProvider selectionProvider= fSite.getSelectionProvider();
 		selectionProvider.removeSelectionChangedListener(fWorkingSetAssignementAction);
-		selectionProvider.removeSelectionChangedListener(fEditWorkingSetGroupAction);
 		super.dispose();
 	}
 	
@@ -91,10 +87,6 @@ public class ViewActionGroup extends ActionGroup {
 	public void fillContextMenu(IMenuManager menu) {
 		if (fWorkingSetAssignementAction.isEnabled())
 			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fWorkingSetAssignementAction);
-		
-		if (fEditWorkingSetGroupAction.isEnabled()) {
-			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fEditWorkingSetGroupAction);
-		}
 	}
 
 	/**
