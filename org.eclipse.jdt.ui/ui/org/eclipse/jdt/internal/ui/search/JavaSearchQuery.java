@@ -180,7 +180,7 @@ public class JavaSearchQuery implements ISearchQuery {
 		if (pattern.indexOf('*') != -1 || pattern.indexOf('?') != -1) {
 			return SearchPattern.R_PATTERN_MATCH;
 		} else if (SearchUtils.isCamelCasePattern(pattern)) {
-			return SearchPattern.R_CAMEL_CASE_MATCH | SearchPattern.R_PREFIX_MATCH;
+			return SearchPattern.R_CAMELCASE_MATCH;
 		}
 		return SearchPattern.R_EXACT_MATCH;
 	}

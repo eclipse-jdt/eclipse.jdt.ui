@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,12 +64,13 @@ public class SearchUtils {
 
     /**
      * Returns whether the given pattern is a camel case pattern or not.
+     * <em>Note: this method does not consider the
+     * {@link SearchPattern#R_CAMELCASE_SAME_PART_COUNT_MATCH} variant.<em>
      * 
      * @param pattern the pattern to inspect
      * @return whether it is a camel case pattern or not
      */
 	public static boolean isCamelCasePattern(String pattern) {
-		int camelOrPrefix= SearchPattern.R_CAMEL_CASE_MATCH | SearchPattern.R_PREFIX_MATCH;
-		return SearchPattern.validateMatchRule(pattern, camelOrPrefix) == camelOrPrefix;
+		return SearchPattern.validateMatchRule(pattern, SearchPattern.R_CAMELCASE_MATCH) == SearchPattern.R_CAMELCASE_MATCH;
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,10 +35,10 @@ public class TypeInfoFilter {
 		
 		public PatternMatcher(String pattern) {
 			this(pattern, SearchPattern.R_EXACT_MATCH | SearchPattern.R_PREFIX_MATCH |
-				SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CAMEL_CASE_MATCH);
+				SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CAMELCASE_MATCH | SearchPattern.R_CAMELCASE_SAME_PART_COUNT_MATCH);
 		}
 		
-		public PatternMatcher(String pattern, int allowedModes) {
+		private PatternMatcher(String pattern, int allowedModes) {
 			initializePatternAndMatchKind(pattern);
 			fMatchKind= fMatchKind & allowedModes;
 			if (fMatchKind == SearchPattern.R_PATTERN_MATCH) {
@@ -60,9 +60,9 @@ public class TypeInfoFilter {
 					return fStringMatcher.match(text);
 				case SearchPattern.R_EXACT_MATCH:
 					return fPattern.equalsIgnoreCase(text);
-				case SearchPattern.R_CAMEL_CASE_MATCH:
-					return (SearchPattern.camelCaseMatch(fPattern, text, false));
-				case SearchPattern.R_CAMEL_CASE_MATCH | SearchPattern.R_PREFIX_MATCH:
+				case SearchPattern.R_CAMELCASE_SAME_PART_COUNT_MATCH:
+					return (SearchPattern.camelCaseMatch(fPattern, text, true));
+				case SearchPattern.R_CAMELCASE_MATCH:
 					if (SearchPattern.camelCaseMatch(fPattern, text)) {
 						return true;
 					}
@@ -85,10 +85,8 @@ public class TypeInfoFilter {
 				fMatchKind= SearchPattern.R_PATTERN_MATCH;
 				switch (last) {
 					case END_SYMBOL:
-						fPattern= pattern.substring(0, length - 1);
-						break;
 					case BLANK:
-						fPattern= pattern.trim();
+						fPattern= pattern.substring(0, length - 1);
 						break;
 					case ANY_STRING:
 						fPattern= pattern;
@@ -101,8 +99,9 @@ public class TypeInfoFilter {
 			
 			if (last == END_SYMBOL || last == BLANK) {
 				fPattern= pattern.substring(0, length - 1);
-				if (SearchUtils.isCamelCasePattern(fPattern)) {
-					fMatchKind= SearchPattern.R_CAMEL_CASE_MATCH;
+				if (SearchPattern.validateMatchRule(fPattern,SearchPattern.R_CAMELCASE_SAME_PART_COUNT_MATCH)
+						== SearchPattern.R_CAMELCASE_SAME_PART_COUNT_MATCH) {
+					fMatchKind= SearchPattern.R_CAMELCASE_SAME_PART_COUNT_MATCH;
 				} else {
 					fMatchKind= SearchPattern.R_EXACT_MATCH;
 				}
@@ -110,7 +109,7 @@ public class TypeInfoFilter {
 			}
 			
 			if (SearchUtils.isCamelCasePattern(pattern)) {
-				fMatchKind= SearchPattern.R_CAMEL_CASE_MATCH | SearchPattern.R_PREFIX_MATCH;
+				fMatchKind= SearchPattern.R_CAMELCASE_MATCH;
 				fPattern= pattern;
 				return;
 			}
@@ -202,7 +201,8 @@ public class TypeInfoFilter {
 	}
 
 	public boolean isCamelCasePattern() {
-		return (fNameMatcher.getMatchKind() & SearchPattern.R_CAMEL_CASE_MATCH) != 0;
+		int ccMask= SearchPattern.R_CAMELCASE_MATCH | SearchPattern.R_CAMELCASE_SAME_PART_COUNT_MATCH;
+		return (fNameMatcher.getMatchKind() & ccMask) != 0;
 	}
 
 	public String getPackagePattern() {
