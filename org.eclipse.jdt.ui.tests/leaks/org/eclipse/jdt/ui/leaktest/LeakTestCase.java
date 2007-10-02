@@ -35,12 +35,14 @@ public class LeakTestCase extends TestCase {
 	}
 	
 	private void calmDown() {
-		System.gc();
-		DisplayHelper.runEventLoop(Display.getCurrent(), 500);
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
+		for (int i= 0; i < 10; i++) {
+			System.gc();
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+			}
 		}
+		DisplayHelper.runEventLoop(Display.getCurrent(), 500);
 	}
 	
   	/**
@@ -50,11 +52,18 @@ public class LeakTestCase extends TestCase {
   	 * @param expected the expected instance count
 	 */
   	public void assertInstanceCount(final Class clazz, final int expected) {
-  		InstancesOfTypeCollector requestor= collect(clazz.getName());
-		int actual= requestor.getNumberOfResults();
-		if (expected != actual) {
-			assertEquals(requestor.getResultString(), expected, actual);
-		}
+  		int numTries= 2;
+  		while (true) {
+	  		InstancesOfTypeCollector requestor= collect(clazz.getName());
+			int actual= requestor.getNumberOfResults();
+			if (expected == actual) {
+				return;
+			}
+			numTries--;
+			if (numTries == 0) {
+  				assertTrue("Expected: " + expected + ", actual: " + actual + "\n" + requestor.getResultString(), false);
+			}
+  		}
 	}
 	
 	/**
