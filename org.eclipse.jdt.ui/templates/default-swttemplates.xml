@@ -16,6 +16,100 @@
 <templates>
 
 
+<!-- ************************************************** Basic SWT patterns ********************************************* -->
+
+<template 
+	name="eventloop" 
+	description="%SWTTemplates.eventloop" 
+	id="org.eclipse.jdt.ui.text.codetemplates.swt.eventloop" 
+	context="swt" enabled="true"
+	
+>while (!${shell:var(org.eclipse.swt.widgets.Shell)}.isDisposed()) {
+	if (!${display:var(org.eclipse.swt.widgets.Display)}.readAndDispatch ()) 
+		${display}.sleep ();
+}</template>
+
+<template 
+	name="execute" 
+	description="%SWTTemplates.execute" 
+	id="org.eclipse.jdt.ui.text.codetemplates.swt.execute" 
+	context="swt" enabled="true"
+	
+>${display:var(org.eclipse.swt.widgets.Display)}.${kind:link(syncExec, asyncExec)}(new ${runnable:newType(java.lang.Runnable)}(){
+	public void run(){
+		${cursor}
+	}
+});</template>
+
+<template 
+	name="addlistener" 
+	description="%SWTTemplates.addlistener" 
+	id="org.eclipse.jdt.ui.text.codetemplates.swt.addlistener" 
+	context="swt" enabled="true"
+	
+>${control:var(org.eclipse.swt.widgets.Widget)}.addListener(${type:link(
+	SWT.Activate,
+	SWT.Arm,
+	SWT.Close,
+	SWT.Collapse,
+	SWT.Deactivate,
+	SWT.DefaultSelection,
+	SWT.Deiconify,
+	SWT.Dispose,
+	SWT.DragDetect,
+	SWT.EraseItem,
+	SWT.Expand,
+	SWT.FocusIn,
+	SWT.FocusOut,
+	SWT.HardKeyDown,
+	SWT.HardKeyUp,
+	SWT.Help,
+	SWT.Hide,
+	SWT.Iconify,
+	SWT.ImeComposition,
+	SWT.KeyDown,
+	SWT.KeyUp,
+	SWT.MeasureItem,
+	SWT.MenuDetect,
+	SWT.Modify,
+	SWT.MouseDoubleClick,
+	SWT.MouseDown,
+	SWT.MouseEnter,
+	SWT.MouseExit,
+	SWT.MouseHover,
+	SWT.MouseMove,
+	SWT.MouseUp,
+	SWT.MouseWheel,
+	SWT.Move,
+	SWT.Paint,
+	SWT.PaintItem,
+	SWT.Resize,
+	SWT.Selection,
+	SWT.SetData,
+	SWT.Settings,
+	SWT.Show,
+	SWT.Traverse,
+	SWT.Verify)}, new ${listener:newType(org.eclipse.swt.widgets.Listener)}(){
+	public void handleEvent(${event:newType(org.eclipse.swt.widgets.Event)} e) {
+		${imp:import(org.eclipse.swt.SWT)}${cursor}				
+	}
+});</template>
+
+<template 
+	name="GridLayout" 
+	description="%SWTTemplates.gridlayout" 
+	id="org.eclipse.jdt.ui.text.codetemplates.swt.gridlayout" 
+	context="swt" enabled="true"
+	
+>${gridLayout:newType(org.eclipse.swt.layout.GridLayout)} ${layout:newName(org.eclipse.swt.layout.GridLayout)} = new ${gridLayout}(${columns:link(1, 2, 3, 4, 5)}, ${width:link(false, true)});
+${layout}.marginWidth = ${marginW:link(5, 0)};
+${layout}.marginHeight = ${marginH:link(5, 0)};
+${layout}.verticalSpacing = ${vSpacing:link(0, 5)};
+${layout}.horizontalSpacing = ${hSpacing:link(0, 5)};
+${parent:var(org.eclipse.swt.widgets.Composite)}.setLayout(${layout});</template>
+
+
+
 <!-- ************************************************** Basic Widgets ************************************************** -->
 
 
