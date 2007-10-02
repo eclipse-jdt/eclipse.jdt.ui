@@ -13,9 +13,16 @@ package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
 import java.util.Iterator;
 
+import org.eclipse.text.edits.CopyTargetEdit;
+import org.eclipse.text.edits.DeleteEdit;
+import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.MoveSourceEdit;
+import org.eclipse.text.edits.MoveTargetEdit;
 import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditVisitor;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -49,10 +56,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
-import org.eclipse.compare.rangedifferencer.IRangeComparator;
-import org.eclipse.compare.rangedifferencer.RangeDifference;
-import org.eclipse.compare.rangedifferencer.RangeDifferencer;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -62,8 +65,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -73,7 +76,6 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
-import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -98,7 +100,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 
 	/**
 	 * Constructs a correction proposal working on a compilation unit with a given text change
-	 * 
+	 *
 	 * @param name the name that is displayed in the proposal selection dialog.
 	 * @param cu the compilation unit on that the change works.
 	 * @param change the change that is executed when the proposal is applied or <code>null</code>
@@ -122,7 +124,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	 * <p>Users have to override {@link #addEdits(IDocument, TextEdit)} to provide
 	 * the text edits or {@link #createTextChange()} to provide a text change.
 	 * </p>
-	 * 
+	 *
 	 * @param name The name that is displayed in the proposal selection dialog.
 	 * @param cu The compilation unit on that the change works.
 	 * @param relevance The relevance of this proposal.
@@ -138,7 +140,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	 * add text edits to the root edit of the change. Implementors must not access the proposal,
 	 * e.g getting the change.
 	 * <p>The default implementation does not add any edits</p>
-	 * 
+	 *
 	 * @param document content of the underlying compilation unit. To be accessed read only.
 	 * @param editRoot The root edit to add all edits to
 	 * @throws CoreException can be thrown if adding the edits is failing.
@@ -164,38 +166,71 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
-		StringBuffer buf= new StringBuffer();
+		final StringBuffer buf= new StringBuffer();
 
 		try {
-			TextChange change= getTextChange();
+			final TextChange change= getTextChange();
 
-			IDocument previewContent= change.getPreviewDocument(new NullProgressMonitor());
-			String currentConentString= change.getCurrentContent(new NullProgressMonitor());
+			change.setKeepPreviewEdits(true);
+			final IDocument previewContent= change.getPreviewDocument(new NullProgressMonitor());
+			final TextEdit rootEdit= change.getPreviewEdit(change.getEdit());
 
-			/*
-			 * Do not change the type of those local variables. We use Object
-			 * here in order to prevent loading of the Compare plug-in at load
-			 * time of this class.
-			 */
-			Object leftSide= new JavaTokenComparator(previewContent.get());
-			Object rightSide= new JavaTokenComparator(currentConentString);
+			class EditAnnotator extends TextEditVisitor {
+				private int fWrittenToPos = 0;
 
-			RangeDifference[] differences= RangeDifferencer.findRanges((IRangeComparator)leftSide, (IRangeComparator)rightSide);
-			for (int i= 0; i < differences.length; i++) {
-				RangeDifference curr= differences[i];
-				int start= ((JavaTokenComparator)leftSide).getTokenStart(curr.leftStart());
-				int end= ((JavaTokenComparator)leftSide).getTokenStart(curr.leftEnd());
-				if (curr.kind() == RangeDifference.CHANGE && curr.leftLength() > 0) {
+				public void unchangedUntil(int pos) {
+					if (pos > fWrittenToPos) {
+						appendContent(previewContent, fWrittenToPos, pos, buf, true);
+						fWrittenToPos = pos;
+					}
+				}
+
+				public boolean visit(MoveTargetEdit edit) {
+					return true; //rangeAdded(edit);
+				}
+
+				public boolean visit(CopyTargetEdit edit) {
+					return true; //return rangeAdded(edit);
+				}
+
+				public boolean visit(InsertEdit edit) {
+					return rangeAdded(edit);
+				}
+
+				public boolean visit(ReplaceEdit edit) {
+					if (edit.getLength() > 0)
+						return rangeAdded(edit);
+					return rangeRemoved(edit);
+				}
+
+				public boolean visit(MoveSourceEdit edit) {
+					return rangeRemoved(edit);
+				}
+
+				public boolean visit(DeleteEdit edit) {
+					return rangeRemoved(edit);
+				}
+
+				private boolean rangeRemoved(TextEdit edit) {
+					unchangedUntil(edit.getOffset());
+					return false;
+				}
+
+				private boolean rangeAdded(TextEdit edit) {
+					unchangedUntil(edit.getOffset());
 					buf.append("<b>"); //$NON-NLS-1$
-					appendContent(previewContent, start, end, buf, false);
+					appendContent(previewContent, edit.getOffset(), edit.getExclusiveEnd(), buf, false);
 					buf.append("</b>"); //$NON-NLS-1$
-				} else if (curr.kind() == RangeDifference.NOCHANGE) {
-					appendContent(previewContent, start, end, buf, true);
+					fWrittenToPos = edit.getExclusiveEnd();
+					return false;
 				}
 			}
+			EditAnnotator ea = new EditAnnotator();
+			rootEdit.accept(ea);
+
+			// Final pre-existing region
+			ea.unchangedUntil(previewContent.getLength());
 		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
 		return buf.toString();
@@ -203,53 +238,57 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 
 	private final int surroundLines= 1;
 
-	private void appendContent(IDocument text, int startOffset, int endOffset, StringBuffer buf, boolean surroundLinesOnly) throws BadLocationException {
-		int startLine= text.getLineOfOffset(startOffset);
-		int endLine= text.getLineOfOffset(endOffset);
+	private void appendContent(IDocument text, int startOffset, int endOffset, StringBuffer buf, boolean surroundLinesOnly) {
+		try {
+			int startLine= text.getLineOfOffset(startOffset);
+			int endLine= text.getLineOfOffset(endOffset);
 
-		boolean dotsAdded= false;
-		if (surroundLinesOnly && startOffset == 0) { // no surround lines for the top no-change range
-			startLine= Math.max(endLine - surroundLines, 0);
-			buf.append("...<br>"); //$NON-NLS-1$
-			dotsAdded= true;
-		}
+			boolean dotsAdded= false;
+			if (surroundLinesOnly && startOffset == 0) { // no surround lines for the top no-change range
+				startLine= Math.max(endLine - surroundLines, 0);
+				buf.append("...<br>"); //$NON-NLS-1$
+				dotsAdded= true;
+			}
 
-		for (int i= startLine; i <= endLine; i++) {
-			if (surroundLinesOnly) {
-				if ((i - startLine > surroundLines) && (endLine - i > surroundLines)) {
-					if (!dotsAdded) {
-						buf.append("...<br>"); //$NON-NLS-1$
-						dotsAdded= true;
-					} else if (endOffset == text.getLength()) {
-						return; // no surround lines for the bottom no-change range
+			for (int i= startLine; i <= endLine; i++) {
+				if (surroundLinesOnly) {
+					if ((i - startLine > surroundLines) && (endLine - i > surroundLines)) {
+						if (!dotsAdded) {
+							buf.append("...<br>"); //$NON-NLS-1$
+							dotsAdded= true;
+						} else if (endOffset == text.getLength()) {
+							return; // no surround lines for the bottom no-change range
+						}
+						continue;
 					}
-					continue;
+				}
+
+				IRegion lineInfo= text.getLineInformation(i);
+				int start= lineInfo.getOffset();
+				int end= start + lineInfo.getLength();
+
+				int from= Math.max(start, startOffset);
+				int to= Math.min(end, endOffset);
+				String content= text.get(from, to - from);
+				if (surroundLinesOnly && (from == start) && Strings.containsOnlyWhitespaces(content)) {
+					continue; // ignore empty lines except when range started in the middle of a line
+				}
+				for (int k= 0; k < content.length(); k++) {
+					char ch= content.charAt(k);
+					if (ch == '<') {
+						buf.append("&lt;"); //$NON-NLS-1$
+					} else if (ch == '>') {
+						buf.append("&gt;"); //$NON-NLS-1$
+					} else {
+						buf.append(ch);
+					}
+				}
+				if (to == end && to != endOffset) { // new line when at the end of the line, and not end of range
+					buf.append("<br>"); //$NON-NLS-1$
 				}
 			}
-
-			IRegion lineInfo= text.getLineInformation(i);
-			int start= lineInfo.getOffset();
-			int end= start + lineInfo.getLength();
-
-			int from= Math.max(start, startOffset);
-			int to= Math.min(end, endOffset);
-			String content= text.get(from, to - from);
-			if (surroundLinesOnly && (from == start) && Strings.containsOnlyWhitespaces(content)) {
-				continue; // ignore empty lines except when range started in the middle of a line
-			}
-			for (int k= 0; k < content.length(); k++) {
-				char ch= content.charAt(k);
-				if (ch == '<') {
-					buf.append("&lt;"); //$NON-NLS-1$
-				} else if (ch == '>') {
-					buf.append("&gt;"); //$NON-NLS-1$
-				} else {
-					buf.append(ch);
-				}
-			}
-			if (to == end && to != endOffset) { // new line when at the end of the line, and not end of range
-				buf.append("<br>"); //$NON-NLS-1$
-			}
+		} catch (BadLocationException e) {
+			// ignore
 		}
 	}
 
@@ -398,7 +437,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	 * Creates the text change for this proposal.
 	 * This method is only called once and only when no text change has been passed in
 	 * {@link #CUCorrectionProposal(String, ICompilationUnit, TextChange, int, Image)}.
-	 * 
+	 *
 	 * @return returns the created text change.
 	 * @throws CoreException thrown if the creation of the text change failed.
 	 */
@@ -441,7 +480,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 
 	/**
 	 * Gets the text change that is invoked when the change is applied.
-	 * 
+	 *
 	 * @return returns the text change that is invoked when the change is applied.
 	 * @throws CoreException throws an exception if accessing the change failed
 	 */
@@ -451,7 +490,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 
 	/**
 	 * The compilation unit on that the change works.
-	 * 
+	 *
 	 * @return the compilation unit on that the change works.
 	 */
 	public final ICompilationUnit getCompilationUnit() {
@@ -460,7 +499,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 
 	/**
 	 * Creates a preview of the content of the compilation unit after applying the change.
-	 * 
+	 *
 	 * @return returns the preview of the changed compilation unit.
 	 * @throws CoreException thrown if the creation of the change failed.
 	 */
