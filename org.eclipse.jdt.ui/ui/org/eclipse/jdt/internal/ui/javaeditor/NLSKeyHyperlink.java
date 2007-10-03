@@ -105,9 +105,6 @@ public class NLSKeyHyperlink implements IHyperlink {
 		} catch (PartInitException e) {
 			handleOpenPropertiesFileFailed(propertiesFile);
 			return;
-		} catch (JavaModelException e) {
-			handleOpenPropertiesFileFailed(propertiesFile);
-			return;
 		}
 
 		// Reveal the key in the properties file

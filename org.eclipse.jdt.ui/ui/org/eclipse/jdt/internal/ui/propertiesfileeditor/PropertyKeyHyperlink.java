@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
-import java.lang.reflect.InvocationTargetException;
 import com.ibm.icu.text.Collator;
+
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,7 +38,6 @@ import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -65,7 +65,6 @@ import org.eclipse.search.core.text.TextSearchScope;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -78,7 +77,6 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -344,15 +342,6 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		try {
 			IEditorPart part= EditorUtility.openInEditor(keyReference.storage, true);
 			EditorUtility.revealInEditor(part, keyReference.offset, keyReference.length);
-		} catch (JavaModelException e) {
-			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
-				IJavaStatusConstants.INTERNAL_ERROR, PropertiesFileEditorMessages.OpenAction_error_message, e));
-
-			ErrorDialog.openError(fShell,
-				getErrorDialogTitle(),
-				PropertiesFileEditorMessages.OpenAction_error_messageProblems,
-				e.getStatus());
-
 		} catch (PartInitException x) {
 
 			String message= null;

@@ -46,7 +46,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring.MultiFixTarget;
@@ -160,21 +159,17 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			for (int i= 0; i < markers.length; i++) {
 				IMarker marker= markers[i];
 				ICompilationUnit cu= getCompilationUnit(marker);
-				
+
 				if (cu != null) {
-					try {
-						IEditorInput input= EditorUtility.getEditorInput(cu);
-						IProblemLocation location= findProblemLocation(input, marker);
-						if (location != null) {
-							List l= (List)problemLocations.get(cu.getPrimary());
-							if (l == null) {
-								l= new ArrayList();
-								problemLocations.put(cu.getPrimary(), l);
-							}
-							l.add(location);
+					IEditorInput input= EditorUtility.getEditorInput(cu);
+					IProblemLocation location= findProblemLocation(input, marker);
+					if (location != null) {
+						List l= (List)problemLocations.get(cu.getPrimary());
+						if (l == null) {
+							l= new ArrayList();
+							problemLocations.put(cu.getPrimary(), l);
 						}
-					} catch (JavaModelException e) {
-						JavaPlugin.log(e);
+						l.add(location);
 					}
 				}
 			}
@@ -329,33 +324,29 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			return NO_RESOLUTIONS;
 		}
 
-		try {
-			ICompilationUnit cu= getCompilationUnit(marker);
-			if (cu != null) {
-				IEditorInput input= EditorUtility.getEditorInput(cu);
-				if (input != null) {
-					IProblemLocation location= findProblemLocation(input, marker);
-					if (location != null) {
+		ICompilationUnit cu= getCompilationUnit(marker);
+		if (cu != null) {
+			IEditorInput input= EditorUtility.getEditorInput(cu);
+			if (input != null) {
+				IProblemLocation location= findProblemLocation(input, marker);
+				if (location != null) {
 
-						IInvocationContext context= new AssistContext(cu,  location.getOffset(), location.getLength());
-						if (!hasProblem (context.getASTRoot().getProblems(), location))
-							return NO_RESOLUTIONS;
-						
-						ArrayList proposals= new ArrayList();
-						JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
-						Collections.sort(proposals, new CompletionProposalComparator());
+					IInvocationContext context= new AssistContext(cu,  location.getOffset(), location.getLength());
+					if (!hasProblem (context.getASTRoot().getProblems(), location))
+						return NO_RESOLUTIONS;
 
-						int nProposals= proposals.size();
-						IMarkerResolution[] resolutions= new IMarkerResolution[nProposals];
-						for (int i= 0; i < nProposals; i++) {
-							resolutions[i]= new CorrectionMarkerResolution(context.getCompilationUnit(), location.getOffset(), location.getLength(), (IJavaCompletionProposal) proposals.get(i), marker);
-						}
-						return resolutions;
+					ArrayList proposals= new ArrayList();
+					JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
+					Collections.sort(proposals, new CompletionProposalComparator());
+
+					int nProposals= proposals.size();
+					IMarkerResolution[] resolutions= new IMarkerResolution[nProposals];
+					for (int i= 0; i < nProposals; i++) {
+						resolutions[i]= new CorrectionMarkerResolution(context.getCompilationUnit(), location.getOffset(), location.getLength(), (IJavaCompletionProposal) proposals.get(i), marker);
 					}
+					return resolutions;
 				}
 			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
 		}
 		return NO_RESOLUTIONS;
 	}
