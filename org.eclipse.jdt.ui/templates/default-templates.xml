@@ -169,4 +169,12 @@ public void ${testname}() throws Exception {
 	}
 }</template>
 
+<template name="arraymerge" description="%Templates.arraymerge" id="org.eclipse.jdt.ui.templates.arraymerge" context="java" enabled="true" autoinsert="false">${array_type}[] ${result:newName(array1)} = new ${array_type}[${array1:array}.length + ${array}.length];
+System.arraycopy(${array1}, 0, ${result}, 0, ${array1}.length);
+System.arraycopy(${array}, 0, ${result}, ${array1}.length, ${array}.length);</template>
+
+<template name="arrayadd" description="%Templates.arrayadd" id="org.eclipse.jdt.ui.templates.arrayadd" context="java" enabled="true" autoinsert="false">${array_type}[] ${result:newName(array)} = new ${array_type}[${array}.length + 1];
+System.arraycopy(${array}, 0, ${result}, 0, ${array}.length);
+${result}[${array}.length]= ${var};</template>
+
 </templates>
