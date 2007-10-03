@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.text.edits.TextEdit;
@@ -183,14 +182,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	 */
 	public boolean needsChangedRegions(ICompilationUnit unit) throws CoreException {
 		ICleanUp[] cleanUps= getCleanUps(unit.getJavaProject().getProject());
-		
-		for (int i= 0; i < cleanUps.length; i++) {
-			CleanUpRequirements requirements= cleanUps[i].getRequirements();
-			if (requirements instanceof SaveActionRequirements && ((SaveActionRequirements)requirements).requiresChangedRegions())
-				return true;
-		}
-		
-		return false;
+		return requiresChangedRegions(cleanUps);
 	}
 
 	/**
@@ -267,7 +259,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     					context= new MultiLineCleanUpContext(unit, ast, changedRegions);
     				}
     				
-    				List undoneCleanUps= new ArrayList();
+    				ArrayList undoneCleanUps= new ArrayList();
 					CleanUpChange change= CleanUpRefactoring.calculateChange(context, cleanUps, undoneCleanUps);
     				
     				RefactoringStatus postCondition= new RefactoringStatus();
@@ -278,6 +270,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     				if (showStatus(postCondition) != Window.OK)
     					return;
     				
+    				cleanUps= (ICleanUp[])undoneCleanUps.toArray(new ICleanUp[undoneCleanUps.size()]);
     				if (change != null) {
     					result.add(change);
     					
@@ -287,7 +280,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     					PerformChangeOperation performChangeOperation= RefactoringUI.createUIAwareChangeOperation(change);
     					performChangeOperation.setSchedulingRule(unit.getSchedulingRule());
     					
-    					if (undoneCleanUps.size() > 0 && changedRegions != null && changedRegions.length > 0) {
+    					if (changedRegions != null && changedRegions.length > 0 && requiresChangedRegions(cleanUps)) {
 							changedRegions= performWithChangedRegionUpdate(performChangeOperation, changedRegions, unit, new SubProgressMonitor(monitor, 5));
 						} else {
 							performChangeOperation.run(new SubProgressMonitor(monitor, 5));
@@ -296,8 +289,6 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     					performChangeOperation.getUndoChange();
     					undoEdits.addFirst(change.getUndoEdit());
     				}
-    				
-    				cleanUps= (ICleanUp[])undoneCleanUps.toArray(new ICleanUp[undoneCleanUps.size()]);
     			} while (cleanUps.length > 0);
 			} finally {
 				manager.changePerformed(result, true);
@@ -400,10 +391,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 					} catch (BadLocationException e) {
 						throw wrapBadLocationException(e);
 					} catch (BadPositionCategoryException e) {
-						String message= e.getMessage();
-						if (message == null)
-							message= "BadPositionCategoryException"; //$NON-NLS-1$
-						throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, 0, message, e));
+						throw wrapBadPositionCategoryException(e);
 					}
 				}
 
@@ -414,13 +402,16 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 					Position position= positions[i];
 					if (!position.isDeleted())
 						result.add(new Region(position.getOffset(), position.getLength()));
-
-					document.removePosition(position);
 				}
 
 				return (IRegion[]) result.toArray(new IRegion[result.size()]);
 			} finally {
 				document.removePositionUpdater(updater);
+				try {
+					document.removePositionCategory(CHANGED_REGION_POSITION_CATEGORY);
+				} catch (BadPositionCategoryException e) {
+					throw wrapBadPositionCategoryException(e);
+				}
 			}
 		} finally {
 			if (buffer != null)
@@ -437,6 +428,16 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		
 	    return false;
     }
+	
+	private boolean requiresChangedRegions(ICleanUp[] cleanUps) {
+		for (int i= 0; i < cleanUps.length; i++) {
+			CleanUpRequirements requirements= cleanUps[i].getRequirements();
+			if (requirements instanceof SaveActionRequirements && ((SaveActionRequirements)requirements).requiresChangedRegions())
+				return true;
+		}
+		
+		return false;
+	}
 
 	private CompilationUnit createAst(ICompilationUnit unit, Map cleanUpOptions, IProgressMonitor monitor) {
 		IJavaProject project= unit.getJavaProject();
@@ -506,5 +507,12 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		if (message == null)
 			message= "BadLocationException"; //$NON-NLS-1$
 		return new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IRefactoringCoreStatusCodes.BAD_LOCATION, message, e));
+	}
+
+	private CoreException wrapBadPositionCategoryException(BadPositionCategoryException e) {
+		String message= e.getMessage();
+		if (message == null)
+			message= "BadPositionCategoryException"; //$NON-NLS-1$
+		return new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, 0, message, e));
 	}
 }
