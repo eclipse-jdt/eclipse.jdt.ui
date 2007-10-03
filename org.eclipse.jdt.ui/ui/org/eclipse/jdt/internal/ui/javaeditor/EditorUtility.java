@@ -114,16 +114,11 @@ public class EditorUtility {
 	/**
 	 * Tests if a CU is currently shown in an editor
 	 * 
+	 * @param inputElement the input element
 	 * @return the IEditorPart if shown, null if element is not open in an editor
 	 */
 	public static IEditorPart isOpenInEditor(Object inputElement) {
-		IEditorInput input= null;
-
-		try {
-			input= getEditorInput(inputElement);
-		} catch (JavaModelException x) {
-			JavaPlugin.log(x.getStatus());
-		}
+		IEditorInput input= getEditorInput(inputElement);
 
 		if (input != null) {
 			IWorkbenchPage p= JavaPlugin.getActivePage();
@@ -139,20 +134,23 @@ public class EditorUtility {
 	 * Opens a Java editor for an element such as <code>IJavaElement</code>, <code>IFile</code>, or <code>IStorage</code>.
 	 * The editor is activated by default.
 	 * 
+	 * @param inputElement the input element
 	 * @return an open editor or <code>null</code> if an external editor was opened
 	 * @throws PartInitException if the editor could not be opened or the input element is not valid
 	 */
-	public static IEditorPart openInEditor(Object inputElement) throws JavaModelException, PartInitException {
+	public static IEditorPart openInEditor(Object inputElement) throws PartInitException {
 		return openInEditor(inputElement, true);
 	}
 
 	/**
 	 * Opens the editor currently associated with the given element (IJavaElement, IFile, IStorage...)
 	 * 
+	 * @param inputElement the input element
+	 * @param activate <code>true</code> if the editor should be activated
 	 * @return an open editor or <code>null</code> if an external editor was opened
 	 * @throws PartInitException if the editor could not be opened or the input element is not valid
 	 */
-	public static IEditorPart openInEditor(Object inputElement, boolean activate) throws JavaModelException, PartInitException {
+	public static IEditorPart openInEditor(Object inputElement, boolean activate) throws PartInitException {
 
 		if (inputElement instanceof IFile)
 			return openInEditor((IFile) inputElement, activate);
@@ -193,7 +191,10 @@ public class EditorUtility {
 	}
 
 	/**
-	 * Selects a Java Element in an editor
+	 * Selects a Java Element in an editor.
+	 * 
+	 * @param part the editor part
+	 * @param element the Java element to reveal
 	 */
 	public static void revealInEditor(IEditorPart part, IJavaElement element) {
 		if (element == null)
@@ -208,9 +209,9 @@ public class EditorUtility {
 		try {
 			ISourceRange range= null;
 			if (element instanceof ICompilationUnit)
-				range= null;
+				return;
 			else if (element instanceof IClassFile)
-				range= null;
+				return;
 			else if (element instanceof ILocalVariable)
 				range= ((ILocalVariable)element).getNameRange();
 			else if (element instanceof IMember)
@@ -229,6 +230,9 @@ public class EditorUtility {
 
 	/**
 	 * Selects and reveals the given region in the given editor part.
+	 * 
+	 * @param part the editor part
+	 * @param region the region
 	 */
 	public static void revealInEditor(IEditorPart part, IRegion region) {
 		if (part != null && region != null)
@@ -237,6 +241,9 @@ public class EditorUtility {
 
 	/**
 	 * Selects and reveals the given offset and length in the given editor part.
+	 * @param editor the editor part
+	 * @param offset the offset
+	 * @param length the length
 	 */
 	public static void revealInEditor(IEditorPart editor, final int offset, final int length) {
 		if (editor instanceof ITextEditor) {
@@ -384,7 +391,7 @@ public class EditorUtility {
 		return  JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editorInput, false);
 	}
 
-	private static IEditorInput getEditorInput(IJavaElement element) throws JavaModelException {
+	private static IEditorInput getEditorInput(IJavaElement element) {
 		while (element != null) {
 			if (element instanceof ICompilationUnit) {
 				ICompilationUnit unit= ((ICompilationUnit) element).getPrimary();
@@ -402,7 +409,7 @@ public class EditorUtility {
 		return null;
 	}
 
-	public static IEditorInput getEditorInput(Object input) throws JavaModelException {
+	public static IEditorInput getEditorInput(Object input) {
 		if (input instanceof IJavaElement)
 			return getEditorInput((IJavaElement) input);
 
@@ -416,8 +423,9 @@ public class EditorUtility {
 	}
 
 	/**
-	 * If the current active editor edits a java element return it, else
-	 * return null
+	 * Returns the Java element edited in the current active editor.
+	 * 
+	 * @return the Java element or <code>null</code> if the active editor doesn't edit a Java element
 	 */
 	public static IJavaElement getActiveEditorJavaInput() {
 		IWorkbenchPage page= JavaPlugin.getActivePage();
@@ -611,7 +619,7 @@ public class EditorUtility {
 		return (IEditorPart[])result.toArray(new IEditorPart[result.size()]);
 	}
 
-	/**
+	/*
 	 * @since 3.3
 	 */
 	private static boolean mustSaveDirtyEditor(IEditorPart ep, IEditorInput input, boolean saveUnknownEditors) {
@@ -650,7 +658,7 @@ public class EditorUtility {
 
 	/**
 	 * Return the regions of all lines which have changed in the given buffer since the
-	 * last save occurred. Each region in the result spans over the size of at least one line. 
+	 * last save occurred. Each region in the result spans over the size of at least one line.
 	 * If successive lines have changed a region spans over the size of all successive lines.
 	 * 
 	 * @param buffer the buffer to compare contents from
@@ -697,7 +705,7 @@ public class EditorUtility {
 				}
 
 				/**
-				 * Return regions of all lines which differ comparing <code>oldDocument</code>s content 
+				 * Return regions of all lines which differ comparing <code>oldDocument</code>s content
 				 * with <code>currentDocument</code>s content. Successive lines are merged into one region.
 				 * 
 				 * @param oldDocument a document containing the old content
