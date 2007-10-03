@@ -359,9 +359,13 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 	}
 
 	/**
+	 * Creates and returns the a formatted message for the given
+	 * constant with its hex value.
+	 * 
 	 * @param constantValue
 	 * @param hexValue
 	 * @return a formatted string with constant and hex values
+	 * @since 3.4
 	 */
 	private static String formatWithHexValue(Object constantValue, String hexValue) {
 		return Messages.format(JavaHoverMessages.JavadocHover_constantValue_hexValue, new String[] { constantValue.toString(), hexValue });
