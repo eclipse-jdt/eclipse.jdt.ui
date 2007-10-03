@@ -1280,7 +1280,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				IRegion[] changedRegions= null;
 				if (needsChangedRegions) {
 					try {
-						changedRegions= EditorUtility.calculateChangedRegions(info.fTextFileBuffer, getSubProgressMonitor(monitor, 20));
+						changedRegions= EditorUtility.calculateChangedLineRegions(info.fTextFileBuffer, getSubProgressMonitor(monitor, 20));
 					} catch (CoreException ex) {
 						changedRegionException= ex;
 					} finally {

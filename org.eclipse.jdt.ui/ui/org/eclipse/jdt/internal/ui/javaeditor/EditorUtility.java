@@ -12,8 +12,6 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -100,7 +98,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
+import org.eclipse.jdt.internal.ui.text.LineComparator;
 
 
 /**
@@ -651,16 +649,17 @@ public class EditorUtility {
 	}
 
 	/**
-	 * Return all the regions which have changed in the given buffer since the
-	 * last save occurred.
+	 * Return the regions of all lines which have changed in the given buffer since the
+	 * last save occurred. Each region in the result spans over the size of at least one line. 
+	 * If successive lines have changed a region spans over the size of all successive lines.
 	 * 
 	 * @param buffer the buffer to compare contents from
 	 * @param monitor to report progress to
-	 * @return the changed regions
+	 * @return the regions of the changed lines
 	 * @throws CoreException
 	 * @since 3.4
 	 */
-	public static IRegion[] calculateChangedRegions(final ITextFileBuffer buffer, final IProgressMonitor monitor) throws CoreException {
+	public static IRegion[] calculateChangedLineRegions(final ITextFileBuffer buffer, final IProgressMonitor monitor) throws CoreException {
 		final IRegion[][] result= new IRegion[1][];
 		final IStatus[] errorStatus= new IStatus[] { Status.OK_STATUS };
 	
@@ -690,99 +689,60 @@ public class EditorUtility {
 						IDocument currentDocument= buffer.getDocument();
 						IDocument oldDocument= ((ITextFileBuffer) fileBufferManager.getFileStoreFileBuffer(fileStore)).getDocument();
 	
-						Collection lineNumbers= getChangedLineNumbers(oldDocument, currentDocument);
-	
-						int changeLinesSize= lineNumbers.size();
-						if (changeLinesSize == 0) {
-							result[0]= new IRegion[0];
-							return;
-						}
-	
-						result[0]= getRegions((Integer[]) lineNumbers.toArray(new Integer[changeLinesSize]), currentDocument);
+						result[0]= getChangedLineRegions(oldDocument, currentDocument);
 					} finally {
 						fileBufferManager.disconnectFileStore(fileStore, getSubProgressMonitor(monitor, 5));
 						monitor.done();
 					}
 				}
-	
+
 				/**
-				 * Returns a set of line numbers (<code>Integer</code>) of lines which differ
-				 * comparing <code>oldDocument</code>s content with <code>currentDocument</code>s
-				 * content.
+				 * Return regions of all lines which differ comparing <code>oldDocument</code>s content 
+				 * with <code>currentDocument</code>s content. Successive lines are merged into one region.
 				 * 
 				 * @param oldDocument a document containing the old content
 				 * @param currentDocument a document containing the current content
+				 * @return the changed regions
+				 * @throws BadLocationException
 				 */
-				private Collection getChangedLineNumbers(IDocument oldDocument, IDocument currentDocument) throws BadLocationException {
+				private IRegion[] getChangedLineRegions(IDocument oldDocument, IDocument currentDocument) throws BadLocationException {
 					/*
 					 * Do not change the type of those local variables. We use Object
 					 * here in order to prevent loading of the Compare plug-in at load
 					 * time of this class.
 					 */
-					Object leftSide= new JavaTokenComparator(oldDocument.get());
-					Object rightSide= new JavaTokenComparator(currentDocument.get());
-	
+					Object leftSide= new LineComparator(oldDocument);
+					Object rightSide= new LineComparator(currentDocument);
+
 					RangeDifference[] differences= RangeDifferencer.findDifferences((IRangeComparator) leftSide, (IRangeComparator) rightSide);
-	
-					int numberOfLines= currentDocument.getNumberOfLines();
-					HashSet lineNumbers= new HashSet(numberOfLines);
+
+					//It holds that:
+					//1. Ranges are sorted:
+					//     forAll r1,r2 element differences: indexOf(r1)<indexOf(r2) -> r1.rightStart()<r2.rightStart();
+					//2. Successive changed lines are merged into on RangeDifference
+					//     forAll r1,r2 element differences: r1.rightStart()<r2.rightStart() -> r1.rightEnd()<r2.rightStart
+
+					ArrayList regions= new ArrayList();
 					for (int i= 0; i < differences.length; i++) {
 						RangeDifference curr= differences[i];
 						if (curr.kind() == RangeDifference.CHANGE) {
-							int start= ((JavaTokenComparator) rightSide).getTokenStart(curr.rightStart());
-							int end= ((JavaTokenComparator) rightSide).getTokenStart(curr.rightEnd());
-	
-							int startLine= currentDocument.getLineOfOffset(start);
-							int endLine= currentDocument.getLineOfOffset(end);
-							for (int j= startLine; j <= endLine; j++) {
-								Integer line= new Integer(j);
-								if (!lineNumbers.contains(line))
-									lineNumbers.add(line);
-							}
-						}
-					}
-					return lineNumbers;
-				}
-	
-				/**
-				 * Returns regions of the <code>lineNumbers</code>. Successive line numbers are merged
-				 * into one region.
-				 * 
-				 * @param lineNumbers the line numbers for which to calculate regions
-				 * @param document the document to which the line numbers belong
-				 */
-				private IRegion[] getRegions(Integer[] lineNumbers, IDocument document) throws BadLocationException {
-					Arrays.sort(lineNumbers);
-	
-					ArrayList regions= new ArrayList();
-					int startLine= lineNumbers[0].intValue();
-					for (int i= 0; i < lineNumbers.length; i++) {
-						int currentLine= lineNumbers[i].intValue();
-	
-						int nextLine;
-						if (lineNumbers.length == i + 1) {
-							nextLine= Integer.MAX_VALUE;
-						} else {
-							nextLine= lineNumbers[i + 1].intValue();
-						}
-	
-						if (nextLine > currentLine + 1) {
-							IRegion startLineRegion= document.getLineInformation(startLine);
-							if (startLine == currentLine) {
+							int startLine= curr.rightStart();
+							int endLine= curr.rightEnd() - 1;
+
+							IRegion startLineRegion= currentDocument.getLineInformation(startLine);
+							if (startLine == endLine) {
 								regions.add(startLineRegion);
 							} else {
-								IRegion endLineRegion= document.getLineInformation(currentLine);
+								IRegion endLineRegion= currentDocument.getLineInformation(endLine);
 								int startOffset= startLineRegion.getOffset();
 								int endOffset= endLineRegion.getOffset() + endLineRegion.getLength();
 								regions.add(new Region(startOffset, endOffset - startOffset));
 							}
-	
-							startLine= nextLine;
 						}
 					}
+
 					return (IRegion[]) regions.toArray(new IRegion[regions.size()]);
 				}
-	
 			});
 		} finally {
 			if (!errorStatus[0].isOK())
