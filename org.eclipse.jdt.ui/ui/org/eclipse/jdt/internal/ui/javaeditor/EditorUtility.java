@@ -733,7 +733,7 @@ public class EditorUtility {
 					ArrayList regions= new ArrayList();
 					for (int i= 0; i < differences.length; i++) {
 						RangeDifference curr= differences[i];
-						if (curr.kind() == RangeDifference.CHANGE) {
+						if (curr.kind() == RangeDifference.CHANGE && curr.rightLength() > 0) {
 							int startLine= curr.rightStart();
 							int endLine= curr.rightEnd() - 1;
 
