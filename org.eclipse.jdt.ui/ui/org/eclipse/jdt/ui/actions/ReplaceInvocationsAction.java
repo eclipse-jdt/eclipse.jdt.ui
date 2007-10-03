@@ -96,6 +96,7 @@ public class ReplaceInvocationsAction extends SelectionDispatchAction {
 
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
+	 * @param selection the Java text selection (internal type)
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -261,6 +261,7 @@ public class MemberFilterActionGroup extends ActionGroup {
 	 * @param filterProperty the filter to be tested. Valid values are <code>FILTER_FIELDS</code>, 
 	 * <code>FILTER_PUBLIC</code>, <code>FILTER_PRIVATE</code> and <code>FILTER_LOCALTYPES</code> as defined by this action 
 	 * group
+	 * @return returns <code>true</code> if the given filter is installed
 	 */	
 	public boolean hasMemberFilter(int filterProperty) {
 		return fFilter.hasFilter(filterProperty);

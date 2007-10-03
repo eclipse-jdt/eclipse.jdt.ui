@@ -417,6 +417,10 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		fUserDefinedPatternsEnabled= state;
 	}
 
+	/**
+	 * Fills the tool bar.
+	 * @param tooBar the tool bar
+	 */
 	private void fillToolBar(IToolBarManager tooBar) {
 	}
 

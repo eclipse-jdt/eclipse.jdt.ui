@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,9 @@ public class WorkingSetFindAction extends FindAction {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param site the site
+	 * @param action the action
+	 * @param workingSetName the working set name 
 	 */
 	public WorkingSetFindAction(IWorkbenchSite site, FindAction action, String workingSetName) {
 		super(site);
@@ -47,6 +50,9 @@ public class WorkingSetFindAction extends FindAction {
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor (internal type)
+	 * @param action the action
+	 * @param workingSetName the working set name 
 	 */
 	public WorkingSetFindAction(JavaEditor editor, FindAction action, String workingSetName) {
 		super(editor);
