@@ -385,8 +385,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		private boolean fCloseStrings= true;
 		private boolean fCloseAngularBrackets= true;
 		private final String CATEGORY= toString();
-		private IPositionUpdater fUpdater= new ExclusivePositionUpdater(CATEGORY);
-		private Stack fBracketLevelStack= new Stack();
+		private final IPositionUpdater fUpdater= new ExclusivePositionUpdater(CATEGORY);
+		private final Stack fBracketLevelStack= new Stack();
 
 		public void setCloseBracketsEnabled(boolean enabled) {
 			fCloseBrackets= enabled;
@@ -617,9 +617,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 */
 	private class RememberedSelection {
 		/** The remembered selection start. */
-		private RememberedOffset fStartOffset= new RememberedOffset();
+		private final RememberedOffset fStartOffset= new RememberedOffset();
 		/** The remembered selection end. */
-		private RememberedOffset fEndOffset= new RememberedOffset();
+		private final RememberedOffset fEndOffset= new RememberedOffset();
 
 		/**
 		 * Remember current selection.
@@ -890,7 +890,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		private boolean containsOffset(IJavaElement element, int offset) {
 			int elementOffset= getOffset(element);
 			int elementLength= getLength(element);
-			return (elementOffset > -1 && elementLength > -1) ? (offset >= elementOffset && offset < elementOffset + elementLength) : false;
+			return elementOffset > -1 && elementLength > -1 ? offset >= elementOffset && offset < elementOffset + elementLength : false;
 		}
 		/**
 		 * Returns the offset of the given Java element.
@@ -980,9 +980,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * The remembered selection.
 	 * @since 3.0
 	 */
-	private RememberedSelection fRememberedSelection= new RememberedSelection();
+	private final RememberedSelection fRememberedSelection= new RememberedSelection();
 	/** The bracket inserter. */
-	private BracketInserter fBracketInserter= new BracketInserter();
+	private final BracketInserter fBracketInserter= new BracketInserter();
 
 	/** The standard action groups added to the menu */
 	private GenerateActionGroup fGenerateActionGroup;
@@ -994,7 +994,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * Reconciling listeners.
 	 * @since 3.0
 	 */
-	private ListenerList fReconcilingListeners= new ListenerList(ListenerList.IDENTITY);
+	private final ListenerList fReconcilingListeners= new ListenerList(ListenerList.IDENTITY);
 
 	/**
 	 * Mutex for the reconciler. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=63898
@@ -1287,6 +1287,15 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			super.openSaveErrorDialog(title, message, exception);
 	}
 
+	/**
+	 * Open a error dialog informing about a failure during handling of save listeners.
+	 * 
+	 * @param title	the dialog title
+	 * @param message the message to display
+	 * @param linkText a text for a link to the save participant preference page
+	 * @param exception the exception to handle
+	 * @since 3.4
+	 */
 	private void openSaveListenerErrorDialog(String title, String message, final String linkText, CoreException exception) {
 		IStatus status= exception.getStatus();
 		int mask= IStatus.OK | IStatus.INFO | IStatus.WARNING | IStatus.ERROR;
