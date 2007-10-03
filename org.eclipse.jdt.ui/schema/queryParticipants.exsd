@@ -102,7 +102,7 @@
    &lt;extension
          point=&quot;org.eclipse.jdt.ui.queryParticipants&quot;&gt;
       &lt;queryParticipant
-            label=&quot;Example Query Participant&quot;
+            name=&quot;Example Query Participant&quot;
             nature=&quot;org.eclipse.jdt.core.javanature&quot;
             class=&quot;org.eclipse.jdt.ui.example.TestParticipant&quot;
             id=&quot;org.eclipse.jdt.ui.example.TestParticipant&quot;&gt;
