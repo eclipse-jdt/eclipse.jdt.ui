@@ -51,8 +51,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.util.Policy;
-import org.eclipse.jface.viewers.TreePath;
-import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.wizard.WizardPage;
 
 import org.eclipse.ui.IWorkingSet;
@@ -795,11 +793,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 
 		public void setWorkingSets(IWorkingSet[] workingSets) {
-			TreePath[] paths= new TreePath[workingSets.length];
-			for (int i= 0; i < paths.length; i++) {
-				paths[i]= new TreePath(new Object[] { workingSets[i] });
-			}
-			fWorkingSetBlock.setSelection(new TreeSelection(paths));
+			fWorkingSetBlock.setWorkingSets(workingSets);
 		}
 
 		public IWorkingSet[] getSelectedWorkingSets() {
