@@ -497,7 +497,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			int start= problem.getSourceStart();
 			int end= problem.getSourceEnd();
 
-			if (start == -1 && end == -1)
+			if (end == 0 && start == 0)
 				return new Position(0, 0);
 
 			int length= end - start + 1;
