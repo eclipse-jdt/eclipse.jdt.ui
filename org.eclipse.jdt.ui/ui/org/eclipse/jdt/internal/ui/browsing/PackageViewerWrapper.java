@@ -15,6 +15,9 @@ import java.util.List;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
 
+import org.eclipse.swt.dnd.DragSourceListener;
+import org.eclipse.swt.dnd.DropTargetListener;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.HelpListener;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Item;
@@ -23,6 +26,7 @@ import org.eclipse.swt.widgets.Widget;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -205,6 +209,10 @@ class PackageViewerWrapper extends StructuredViewer {
 		fViewer.setFilters(filters);
 	}
 
+	public ViewerFilter[] getFilters() {
+		return fViewer.getFilters();
+	}
+
 	public void refresh() {
 		fViewer.refresh();
 	}
@@ -319,7 +327,7 @@ class PackageViewerWrapper extends StructuredViewer {
 
 	// need to provide implementation for abstract methods
 	protected Widget doFindInputItem(Object element) {
-		return ((IPackagesViewViewer)fViewer).doFindInputItem(element);
+		return ((IPackagesViewViewer) fViewer).doFindInputItem(element);
 	}
 
 	protected Widget doFindItem(Object element) {
@@ -339,7 +347,35 @@ class PackageViewerWrapper extends StructuredViewer {
 	}
 
 	protected void setSelectionToWidget(List l, boolean reveal) {
-		((IPackagesViewViewer)fViewer).setSelectionToWidget(l, reveal);
+		((IPackagesViewViewer) fViewer).setSelectionToWidget(l, reveal);
+	}
+
+	public ViewerComparator getComparator() {
+		return fViewer.getComparator();
+	}
+
+	public IElementComparer getComparer() {
+		return fViewer.getComparer();
+	}
+
+	public ViewerSorter getSorter() {
+		return fViewer.getSorter();
+	}
+
+	public void setComparer(IElementComparer comparer) {
+		fViewer.setComparer(comparer);
+	}
+
+	public void addDragSupport(int operations, Transfer[] transferTypes, DragSourceListener listener) {
+		fViewer.addDragSupport(operations, transferTypes, listener);
+	}
+
+	public void addDropSupport(int operations, Transfer[] transferTypes, DropTargetListener listener) {
+		fViewer.addDropSupport(operations, transferTypes, listener);
+	}
+
+	public Widget[] testFindItems(Object element) {
+		return fViewer.testFindItems(element);
 	}
 
 
