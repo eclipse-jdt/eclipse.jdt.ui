@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,7 +49,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.widgets.Shell;
-
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
@@ -162,6 +161,8 @@ public class JarWriter3 {
 	 * 
 	 * @throws IOException
 	 *             if an I/O error has occurred
+	 * @throws CoreException 
+	 *             if accessing the resource failes
 	 */
 	protected void addDirectories(IResource resource, IPath destinationPath) throws IOException, CoreException {
 		IContainer parent= null;
@@ -428,7 +429,7 @@ public class JarWriter3 {
 	 * @throws IOException
 	 *             if an input/output error occurs
 	 */
-	private void writeMetaData(final JarPackageData data, final File file, final IPath path) throws FileNotFoundException, IOException, CoreException {
+	private void writeMetaData(final JarPackageData data, final File file, final IPath path) throws FileNotFoundException, IOException {
 		Assert.isNotNull(data);
 		Assert.isNotNull(file);
 		Assert.isNotNull(path);
