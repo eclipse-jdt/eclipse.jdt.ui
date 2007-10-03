@@ -114,7 +114,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 				}
 				if (part != null) {
 					IEditorInput input= part.getEditorInput();
-					IDocument doc= JavaPlugin.getDefault().getCompilationUnitDocumentProvider().getDocument(input);					
+					IDocument doc= JavaPlugin.getDefault().getCompilationUnitDocumentProvider().getDocument(input);
 					fProposal.apply(doc);
 				}
 			} catch (CoreException e) {
@@ -147,7 +147,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 				if (part instanceof ITextEditor) {
 					((ITextEditor) part).selectAndReveal(fOffset, fLength);
 					part.setFocus();
-				} 
+				}
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			} finally {
@@ -215,7 +215,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			
 			FixCorrectionProposal fix= (FixCorrectionProposal)fProposal;
 			final ICleanUp cleanUp= fix.getCleanUp();
-			if (!(cleanUp instanceof IMultiFix)) 
+			if (!(cleanUp instanceof IMultiFix))
 				return NO_MARKERS;
 
 			IMultiFix multiFix= (IMultiFix) cleanUp;
@@ -338,7 +338,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 					if (location != null) {
 
 						IInvocationContext context= new AssistContext(cu,  location.getOffset(), location.getLength());
-						if (!hasProblem (context.getASTRoot().getProblems(), location)) 
+						if (!hasProblem (context.getASTRoot().getProblems(), location))
 							return NO_RESOLUTIONS;
 						
 						ArrayList proposals= new ArrayList();
@@ -363,7 +363,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 	private static boolean hasProblem(IProblem[] problems, IProblemLocation location) {
 		for (int i= 0; i < problems.length; i++) {
 			IProblem problem= problems[i];
-			if (problem.getID() == location.getProblemId() && (problem.getSourceStart() == location.getOffset() || problem.getSourceStart() == -1 && location.getOffset() == 0))
+			if (problem.getID() == location.getProblemId() && problem.getSourceStart() == location.getOffset())
 				return true;
 		}
 		return false;
