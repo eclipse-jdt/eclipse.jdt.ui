@@ -104,18 +104,23 @@ public class CommentFormatFix extends TextEditFix {
 		try {
 			ITypedRegion[] regions= TextUtilities.computePartitioning(document, IJavaPartitions.JAVA_PARTITIONING, 0, document.getLength(), false);
 			for (int i= 0; i < regions.length; i++) {
-				ITypedRegion region= regions[i];
+				ITypedRegion region= regions[i];				
+				String type= region.getType();
 				
-				if (isChanged(region, changedRegions)) {
-					if (singleLine && region.getType().equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)) {
+				if (singleLine && IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(type)) {
+					if (isChanged(region, changedRegions)) {
 						TextEdit edit= format(region, context, formattingStrategy, content);
 						if (edit != null)
 							edits.add(edit);
-					} else if (multiLine && region.getType().equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT)) {
+					}
+				} else if (multiLine && IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type)) {
+					if (isChanged(region, changedRegions)) {
 						TextEdit edit= format(region, context, formattingStrategy, content);
 						if (edit != null)
 							edits.add(edit);
-					} else if (javaDoc && region.getType().equals(IJavaPartitions.JAVA_DOC)) {
+					}
+				} else if (javaDoc && IJavaPartitions.JAVA_DOC.equals(type)) {
+					if (isChanged(region, changedRegions)) {
 						TextEdit edit= format(region, context, formattingStrategy, content);
 						if (edit != null)
 							edits.add(edit);
@@ -185,7 +190,9 @@ public class CommentFormatFix extends TextEditFix {
 			if (content.equals(doc.get()))
 				return null;
 		} catch (MalformedTreeException e) {
+			//ignore, return the bad edit
 		} catch (BadLocationException e) {
+			//ignore, return the bad edit
 		}
 		
 		return edit;
