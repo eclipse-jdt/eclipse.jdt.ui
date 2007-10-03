@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,11 +20,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class SearchParticipantsExtensionPoint {
@@ -58,15 +60,14 @@ public class SearchParticipantsExtensionPoint {
 		Set seenParticipants= new HashSet();
 		while (activeParticipants.hasNext()) {
 			SearchParticipantDescriptor participant= (SearchParticipantDescriptor) activeParticipants.next();
-			if (participant.isEnabled()) {
-				String id= participant.getID();
+			String id= participant.getID();
+			if (participant.isEnabled() && !seenParticipants.contains(id)) {
 				for (int i= 0; i < projects.length; i++) {
-					if (seenParticipants.contains(id))
-						continue;
 					try {
 						if (projects[i].hasNature(participant.getNature())) {
 							participants.add(new SearchParticipantRecord(participant, participant.create()));
 							seenParticipants.add(id);
+							break;
 						}
 					} catch (CoreException e) {
 						JavaPlugin.log(e.getStatus());
