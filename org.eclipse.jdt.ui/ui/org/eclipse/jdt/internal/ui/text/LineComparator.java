@@ -21,8 +21,9 @@ import org.eclipse.compare.rangedifferencer.IRangeComparator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+
 /**
- * This implementation of IRangeComparator compares lines of a document.
+ * This implementation of <code>IRangeComparator</code> compares lines of a document.
  * The lines are compared using a DJB hash function.
  * 
  * @since 3.4
@@ -73,7 +74,7 @@ public class LineComparator implements IRangeComparator {
 	/**
 	 * @param line the number of the line in the document to get the hash for
 	 * @return the hash of the line
-	 * @throws BadLocationException if the line number is invalid 
+	 * @throws BadLocationException if the line number is invalid
 	 */
 	private Integer getHash(int line) throws BadLocationException {
 		Integer hash= (Integer) fHashes.get(line);
