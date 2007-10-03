@@ -890,7 +890,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		private boolean containsOffset(IJavaElement element, int offset) {
 			int elementOffset= getOffset(element);
 			int elementLength= getLength(element);
-			return elementOffset > -1 && elementLength > -1 ? offset >= elementOffset && offset < elementOffset + elementLength : false;
+			return (elementOffset > -1 && elementLength > -1) ? (offset >= elementOffset && offset < elementOffset + elementLength) : false;
 		}
 		/**
 		 * Returns the offset of the given Java element.
