@@ -147,7 +147,7 @@ public class CommentFormatFix extends TextEditFix {
 			if (changeOffset > regionOffset && changeEnd < regionEnd)//inside
 				return true;
 
-			if (changeOffset < regionOffset && changeEnd < regionEnd)//touches start
+			if (changeOffset < regionOffset && changeEnd > regionOffset)//touches start
 				return true;
 
 			if (changeOffset < regionEnd && changeEnd > regionEnd)//touches end
