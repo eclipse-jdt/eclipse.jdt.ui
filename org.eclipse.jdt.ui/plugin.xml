@@ -439,7 +439,7 @@
          <description>
             %java.perspective.description
          </description>
-      </perspective>
+      </perspective> 
       <perspective
             name="%typeHierarchyName"
             icon="$nl$/icons/full/eview16/hierch_persp.gif"
@@ -449,60 +449,57 @@
             %typeHierarchy.perspective.description
          </description>
       </perspective>
+      <perspective
+            name="%Browsing.perspectiveName"
+            icon="$nl$/icons/full/eview16/browse_persp.gif"
+            class="org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPerspectiveFactory"
+            id="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+         <description>
+            %browsing.perspective.description
+         </description>
+      </perspective>     
    </extension>
    
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
-      <perspectiveExtension
-            targetID="org.eclipse.ui.resourcePerspective">
-         <perspectiveShortcut
-               id="org.eclipse.jdt.ui.JavaPerspective">
-         </perspectiveShortcut>
+      <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+         <perspectiveShortcut id="org.eclipse.jdt.ui.JavaPerspective"/>
+         <perspectiveShortcut id="org.eclipse.jdt.ui.JavaBrowsingPerspective"/>
       </perspectiveExtension>
-      <perspectiveExtension
-            targetID="org.eclipse.jdt.ui.JavaPerspective">
-         <perspectiveShortcut
-               id="org.eclipse.jdt.ui.JavaPerspective">
-         </perspectiveShortcut>
+
+      <perspectiveExtension targetID="org.eclipse.debug.ui.DebugPerspective">
+         <perspectiveShortcut id="org.eclipse.jdt.ui.JavaPerspective"/>
+         <perspectiveShortcut id="org.eclipse.jdt.ui.JavaBrowsingPerspective"/>
+         <actionSet id="org.eclipse.jdt.ui.JavaActionSet"/>
+         <showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
       </perspectiveExtension>
-      <perspectiveExtension
-            targetID="org.eclipse.jdt.ui.JavaPerspective">
-         <perspectiveShortcut
-               id="org.eclipse.debug.ui.DebugPerspective">
-         </perspectiveShortcut>
-      </perspectiveExtension>
-      <perspectiveExtension
-            targetID="org.eclipse.debug.ui.DebugPerspective">
-         <perspectiveShortcut
-               id="org.eclipse.jdt.ui.JavaPerspective">
-         </perspectiveShortcut>
-      </perspectiveExtension>
-      <perspectiveExtension
-            targetID="org.eclipse.debug.ui.DebugPerspective">
-         <actionSet
-               id="org.eclipse.jdt.ui.JavaActionSet">
-         </actionSet>
+
+      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <perspectiveShortcut id="org.eclipse.debug.ui.DebugPerspective"/>
+         <perspectiveShortcut id="org.eclipse.jdt.ui.JavaBrowsingPerspective"/>
+         <showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
+         <showInPart id="org.eclipse.team.ui.GenericHistoryView"/>
+         <showInPart id="org.eclipse.ui.views.ResourceNavigator"/>
+         <viewShortcut id="org.eclipse.pde.runtime.LogView"/>
       </perspectiveExtension>
       
-      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
-         <showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
-         <showInPart id="org.eclipse.team.ui.GenericHistoryView"/>
-         <showInPart id="org.eclipse.ui.views.ResourceNavigator"/>
-      </perspectiveExtension>
       <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+         <perspectiveShortcut id="org.eclipse.jdt.ui.JavaPerspective"/>
+         <perspectiveShortcut id="org.eclipse.debug.ui.DebugPerspective"/>
          <showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
          <showInPart id="org.eclipse.team.ui.GenericHistoryView"/>
          <showInPart id="org.eclipse.ui.views.ResourceNavigator"/>
       </perspectiveExtension>
+      
       <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaHierarchyPerspective">
+         <perspectiveShortcut id="org.eclipse.jdt.ui.JavaPerspective"/>
+         <perspectiveShortcut id="org.eclipse.jdt.ui.JavaBrowsingPerspective"/>
+         <perspectiveShortcut id="org.eclipse.debug.ui.DebugPerspective"/>
          <showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
          <showInPart id="org.eclipse.team.ui.GenericHistoryView"/>        
          <showInPart id="org.eclipse.ui.views.ResourceNavigator"/>
       </perspectiveExtension>
-      <perspectiveExtension targetID="org.eclipse.debug.ui.DebugPerspective">
-         <showInPart id="org.eclipse.jdt.ui.PackageExplorer"/>
-      </perspectiveExtension>
-      
+            
    </extension>
    <extension
          point="org.eclipse.ui.ide.projectNatureImages">
@@ -1999,57 +1996,6 @@
 <!-- =========================================================================== -->
 <!-- Java Browsing 																 -->
 <!-- =========================================================================== -->
-   <extension
-         point="org.eclipse.ui.perspectives">
-      <perspective
-            name="%Browsing.perspectiveName"
-            icon="$nl$/icons/full/eview16/browse_persp.gif"
-            class="org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPerspectiveFactory"
-            id="org.eclipse.jdt.ui.JavaBrowsingPerspective">
-         <description>
-            %browsing.perspective.description
-         </description>
-      </perspective>
-   </extension>
-   <extension
-         point="org.eclipse.ui.perspectiveExtensions">
-      <perspectiveExtension
-            targetID="org.eclipse.ui.resourcePerspective">
-         <perspectiveShortcut
-               id="org.eclipse.jdt.ui.JavaBrowsingPerspective">
-         </perspectiveShortcut>
-      </perspectiveExtension>
-      <perspectiveExtension
-            targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
-         <perspectiveShortcut
-               id="org.eclipse.jdt.ui.JavaBrowsingPerspective">
-         </perspectiveShortcut>
-      </perspectiveExtension>
-      <perspectiveExtension
-            targetID="org.eclipse.jdt.ui.JavaPerspective">
-         <perspectiveShortcut
-               id="org.eclipse.jdt.ui.JavaBrowsingPerspective">
-         </perspectiveShortcut>
-      </perspectiveExtension>
-      <perspectiveExtension
-            targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
-         <perspectiveShortcut
-               id="org.eclipse.jdt.ui.JavaPerspective">
-         </perspectiveShortcut>
-      </perspectiveExtension>
-      <perspectiveExtension
-            targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
-         <perspectiveShortcut
-               id="org.eclipse.debug.ui.DebugPerspective">
-         </perspectiveShortcut>
-      </perspectiveExtension>
-      <perspectiveExtension
-            targetID="org.eclipse.debug.ui.DebugPerspective">
-         <perspectiveShortcut
-               id="org.eclipse.jdt.ui.JavaBrowsingPerspective">
-         </perspectiveShortcut>
-      </perspectiveExtension>
-   </extension>
    <extension
          point="org.eclipse.ui.views">
       <category
