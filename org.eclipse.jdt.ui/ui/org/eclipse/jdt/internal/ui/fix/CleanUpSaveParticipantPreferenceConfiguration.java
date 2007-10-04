@@ -300,8 +300,10 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	
 	private void settingsChanged() {
 		fFormatCodeButton.setSelection(CleanUpOptions.TRUE.equals(fSettings.get(CleanUpConstants.FORMAT_SOURCE_CODE)));
+		boolean isFormatting= fFormatCodeButton.getSelection();
 		fFormatChangedOnlyButton.setSelection(CleanUpOptions.TRUE.equals(fSettings.get(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY)));
-		fFormatChangedOnlyButton.setEnabled(fFormatCodeButton.getSelection());
+		fFormatChangedOnlyButton.setEnabled(isFormatting);
+		fFormatConfigLink.setEnabled(isFormatting);
 		fOrganizeImportsButton.setSelection(CleanUpOptions.TRUE.equals(fSettings.get(CleanUpConstants.ORGANIZE_IMPORTS)));
 		fAdditionalActionButton.setSelection(CleanUpOptions.TRUE.equals(fSettings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS)));
 		
