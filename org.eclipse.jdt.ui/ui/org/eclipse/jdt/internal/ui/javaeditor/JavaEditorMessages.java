@@ -65,7 +65,9 @@ final class JavaEditorMessages extends NLS {
 	public static String CompilationUnitEditor_error_saving_message2;
 	public static String CompilationUnitEditor_error_saving_title1;
 	public static String CompilationUnitEditor_error_saving_title2;
+	public static String CompilationUnitEditor_editedLine_calculation_failed;
 	public static String CompilationUnitEditor_error_saving_saveParticipant;
+	public static String CompilationUnitEditor_failing_saveParticipant_message;
 	public static String CompilationUnitEditor_error_saving_changedRegionCalculation;
 	public static String CompilationUnitEditor_warning_save_delete;
 	public static String EditorUtility_could_not_find_editorId;

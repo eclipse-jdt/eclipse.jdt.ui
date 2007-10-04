@@ -187,7 +187,7 @@ public final class SaveParticipantRegistry {
 	 */
 	public static boolean isChangedRegionsRequired(final ICompilationUnit unit) throws CoreException {
 		String message= SaveParticipantMessages.SaveParticipantRegistry_needsChangedRegionFailed;
-		final MultiStatus errorStatus= new MultiStatus(JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, message, null);
+		final MultiStatus errorStatus= new MultiStatus(JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_CHANGED_REGION_CALCULATION, message, null);
 	
 		IPostSaveListener[] listeners= JavaPlugin.getDefault().getSaveParticipantRegistry().getEnabledPostSaveListeners(unit.getJavaProject().getProject());
 		try {
@@ -202,12 +202,12 @@ public final class SaveParticipantRegistry {
 					}
 					
 					public void handleException(Throwable ex) {
-						final String participantName= listener.getName();
-						String msg= Messages.format("The save participant ''{0}'' caused an exception: {1}", new String[] { listener.getId(), ex.toString() }); //$NON-NLS-1$
-						JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, msg, null));
+						String msg= Messages.format("The save participant ''{0}'' caused an exception.", new String[] { listener.getId() }); //$NON-NLS-1$
+						JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, msg, ex));
 						
-						msg= Messages.format(SaveParticipantMessages.SaveParticipantRegistry_needsChangedRegionFailed, new String[] { participantName, ex.toString() });
-						errorStatus.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, msg, null));
+						final String participantName= listener.getName();
+						msg= Messages.format(SaveParticipantMessages.SaveParticipantRegistry_needsChangedRegionCausedException, new String[] { participantName, ex.toString() });
+						errorStatus.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_CHANGED_REGION_CALCULATION, msg, null));
 					}
 					
 				});

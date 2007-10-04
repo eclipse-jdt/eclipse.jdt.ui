@@ -26,6 +26,7 @@ final class SaveParticipantMessages extends NLS {
 	}
 
 	public static String SaveParticipantRegistry_participantNotFound;
+	public static String SaveParticipantRegistry_needsChangedRegionCausedException;
 	public static String SaveParticipantRegistry_needsChangedRegionFailed;
 
 	static {

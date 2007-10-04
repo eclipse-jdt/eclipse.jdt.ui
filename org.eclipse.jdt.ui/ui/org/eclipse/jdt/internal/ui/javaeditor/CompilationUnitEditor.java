@@ -1280,9 +1280,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	protected void openSaveErrorDialog(String title, String message, CoreException exception) {
 		IStatus status= exception.getStatus();
 		if (JavaUI.ID_PLUGIN.equals(status.getPlugin()) && status.getCode() == IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION) {
-			openSaveListenerErrorDialog(title, message, JavaEditorMessages.CompilationUnitEditor_error_saving_saveParticipant, exception);
+			openSaveListenerErrorDialog(title, JavaEditorMessages.CompilationUnitEditor_failing_saveParticipant_message, JavaEditorMessages.CompilationUnitEditor_error_saving_saveParticipant, exception);
 		} else if (JavaUI.ID_PLUGIN.equals(status.getPlugin()) && status.getCode() == IJavaStatusConstants.EDITOR_CHANGED_REGION_CALCULATION) {
-			openSaveListenerErrorDialog(title, message, JavaEditorMessages.CompilationUnitEditor_error_saving_changedRegionCalculation, exception);
+			openSaveListenerErrorDialog(title, JavaEditorMessages.CompilationUnitEditor_editedLine_calculation_failed, JavaEditorMessages.CompilationUnitEditor_error_saving_changedRegionCalculation, exception);
 		} else
 			super.openSaveErrorDialog(title, message, exception);
 	}
