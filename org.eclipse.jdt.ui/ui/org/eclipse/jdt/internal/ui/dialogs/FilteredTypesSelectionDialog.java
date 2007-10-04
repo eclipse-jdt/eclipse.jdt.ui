@@ -1624,7 +1624,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		public void load(IMemento memento) {
 			TypeNameMatch[] types= OpenTypeHistory.getInstance().getTypeInfos();
 
-			for (int i= 0; i < types.length; i++) {
+			for (int i= types.length - 1; i >= 0 ; i--) { // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=205314
 				TypeNameMatch type= types[i];
 				accessed(type);
 			}
