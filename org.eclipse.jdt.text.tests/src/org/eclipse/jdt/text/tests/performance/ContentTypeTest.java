@@ -8,17 +8,17 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.text.tests.performance;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
@@ -29,6 +29,7 @@ import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+
 
 /**
  * Measures the time to determine the content type of a file buffer.
@@ -132,6 +133,7 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 	public void testPluginXMLDirty() throws Exception {
 		measure(PLUGIN_XML_FILE, PLUGIN_XML_CONTENT_TYPE, true, getNullPerformanceMeter(), getWarmUpRuns(), PLUGIN_XML_ITERATIONS);
 		final PerformanceMeter performanceMeter= createPerformanceMeter();
+		explainDegradation("Test is slower because a new XML content type got added.", performanceMeter);
 		measure(PLUGIN_XML_FILE, PLUGIN_XML_CONTENT_TYPE, true, performanceMeter, getMeasuredRuns(), PLUGIN_XML_ITERATIONS);
 		commitAllMeasurements();
 		assertAllPerformance();
