@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,11 +27,11 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
-import org.eclipse.ltk.ui.refactoring.LanguageElementNode;
-import org.eclipse.ltk.ui.refactoring.TextEditChangeNode;
-
+import org.eclipse.ltk.core.refactoring.MultiStateTextFileChange;
 import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
 import org.eclipse.ltk.core.refactoring.TextEditBasedChangeGroup;
+import org.eclipse.ltk.ui.refactoring.LanguageElementNode;
+import org.eclipse.ltk.ui.refactoring.TextEditChangeNode;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -85,7 +85,11 @@ public class CompilationUnitChangeNode extends TextEditChangeNode {
 	}
 	
 	protected ChildNode[] createChildNodes() {
-		final TextEditBasedChange change= getTextEditBasedChange();
+		TextEditBasedChange change= getTextEditBasedChange();
+		if (change instanceof MultiStateTextFileChange) {
+			return new ChildNode[0]; // no edit preview & edit disabling possible in the MultiStateTextFileChange (edits must be applied in sequence)
+		}
+		
 		ICompilationUnit cunit= (ICompilationUnit) change.getAdapter(ICompilationUnit.class);
 		if (cunit != null) {
 			List children= new ArrayList(5);
