@@ -17,14 +17,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.jface.text.AbstractDocument;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextStore;
-
-import org.eclipse.test.performance.PerformanceMeter;
 
 
 /**
@@ -204,14 +204,15 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 		meter.stop();
 	}
 
-	public void measureGetAll(PerformanceMeter meter) throws BadLocationException {
-		fDocument.set(FAUST1);
-		int length = fDocument.getLength();
-		meter.start();
-		for (int times = 0; times < 80; times++)
-			fDocument.get(0, length);
-		meter.stop();
-	}
+//  Commented out: is too fast (0ms)
+//	public void measureGetAll(PerformanceMeter meter) throws BadLocationException {
+//		fDocument.set(FAUST1);
+//		int length = fDocument.getLength();
+//		meter.start();
+//		for (int times = 0; times < 80; times++)
+//			fDocument.get(0, length);
+//		meter.stop();
+//	}
 
 	/* combined: uses both line tracker and text store */
 
