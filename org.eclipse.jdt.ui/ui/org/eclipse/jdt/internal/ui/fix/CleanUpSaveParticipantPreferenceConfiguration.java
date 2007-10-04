@@ -305,6 +305,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		fFormatChangedOnlyButton.setEnabled(isFormatting);
 		fFormatConfigLink.setEnabled(isFormatting);
 		fOrganizeImportsButton.setSelection(CleanUpOptions.TRUE.equals(fSettings.get(CleanUpConstants.ORGANIZE_IMPORTS)));
+		fOrganizeImportsConfigLink.setEnabled(fOrganizeImportsButton.getSelection());
 		fAdditionalActionButton.setSelection(CleanUpOptions.TRUE.equals(fSettings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS)));
 		
 		updateAdvancedEnableState();
