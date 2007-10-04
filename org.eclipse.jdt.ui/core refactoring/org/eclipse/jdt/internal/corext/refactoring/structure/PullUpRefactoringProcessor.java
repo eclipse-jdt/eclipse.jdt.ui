@@ -1058,20 +1058,19 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			final Map deleteMap= createMembersToDeleteMap(new SubProgressMonitor(monitor, 1));
 			final Map effectedMap= createEffectedTypesMap(new SubProgressMonitor(monitor, 1));
 			final ICompilationUnit[] units= getAffectedCompilationUnits(new SubProgressMonitor(monitor, 1));
-			ICompilationUnit unit= null;
-			CompilationUnitRewrite rewrite= null;
+
 			final Map adjustments= new HashMap();
 			MemberVisibilityAdjustor adjustor= null;
 			final IProgressMonitor sub= new SubProgressMonitor(monitor, 1);
 			try {
 				sub.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, units.length * 11);
 				for (int index= 0; index < units.length; index++) {
-					unit= units[index];
+					ICompilationUnit unit= units[index];
 					if (!(source.equals(unit) || target.equals(unit) || deleteMap.containsKey(unit) || effectedMap.containsKey(unit))) {
 						sub.worked(10);
 						continue;
 					}
-					rewrite= getCompilationUnitRewrite(fCompilationUnitRewrites, unit);
+					CompilationUnitRewrite rewrite= getCompilationUnitRewrite(fCompilationUnitRewrites, unit);
 					if (deleteMap.containsKey(unit)) {
 						LinkedList list= new LinkedList((List) deleteMap.get(unit));
 						if (destination.isInterface()) {
@@ -1180,8 +1179,8 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			if (fReplace) {
 				final Set set= fCompilationUnitRewrites.keySet();
 				for (final Iterator iterator= set.iterator(); iterator.hasNext();) {
-					unit= (ICompilationUnit) iterator.next();
-					rewrite= (CompilationUnitRewrite) fCompilationUnitRewrites.get(unit);
+					ICompilationUnit unit= (ICompilationUnit) iterator.next();
+					CompilationUnitRewrite rewrite= (CompilationUnitRewrite) fCompilationUnitRewrites.get(unit);
 					if (rewrite != null) {
 						final CompilationUnitChange change= rewrite.createChange(false, null);
 						if (change != null)
@@ -1195,7 +1194,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				try {
 					subMonitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, set.size());
 					for (final Iterator iterator= set.iterator(); iterator.hasNext();) {
-						unit= (ICompilationUnit) iterator.next();
+						ICompilationUnit unit= (ICompilationUnit) iterator.next();
 						change= manager.get(unit);
 						if (change instanceof TextChange) {
 							edit= ((TextChange) change).getEdit();
@@ -1213,9 +1212,14 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 					subMonitor.done();
 					ICompilationUnit[] cus= manager.getAllCompilationUnits();
 					for (int index= 0; index < cus.length; index++) {
-						CompilationUnitChange current= (CompilationUnitChange) manager.get(cus[index]);
+						ICompilationUnit unit= cus[index];
+						CompilationUnitChange current= (CompilationUnitChange) manager.get(unit);
 						if (change != null && current.getEdit() == null)
-							manager.remove(cus[index]);
+							manager.remove(unit);
+						CompilationUnitRewrite rewrite= (CompilationUnitRewrite) fCompilationUnitRewrites.get(unit);
+						if (rewrite != null) {
+							rewrite.clearGroupDescriptions();
+						}
 					}
 				}
 			}

@@ -328,4 +328,11 @@ public class CompilationUnitRewrite {
 		}
 		return fImportRemover;
 	}
+
+	public void clearGroupDescriptions() {
+		for (Iterator iter= fTextEditGroups.iterator(); iter.hasNext();) {
+			TextEditGroup group= (TextEditGroup) iter.next();
+			group.clearTextEdits();
+		}
+	}
 }
