@@ -371,18 +371,24 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	private void checkAdditionalRequired() {
 		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, new IRunnableWithProgress() {
-
+			initializeRefactoring();
+			
+			class GetRequiredMembersRunnable implements IRunnableWithProgress {
+				public IMember[] result;
 				public void run(final IProgressMonitor pm) throws InvocationTargetException {
 					try {
-						checkPullUp(getPullUpRefactoring().getPullUpProcessor().getAdditionalRequiredMembersToPullUp(pm), true);
+						this.result= getPullUpRefactoring().getPullUpProcessor().getAdditionalRequiredMembersToPullUp(pm);
 					} catch (JavaModelException e) {
 						throw new InvocationTargetException(e);
 					} finally {
 						pm.done();
 					}
 				}
-			});
+			}
+			GetRequiredMembersRunnable runnable= new GetRequiredMembersRunnable();
+			getContainer().run(true, false, runnable);
+			checkPullUp(runnable.result, true);
+			
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), RefactoringMessages.PullUpInputPage_pull_Up, RefactoringMessages.PullUpInputPage_exception);
 		} catch (InterruptedException e) {
@@ -641,13 +647,12 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		fReplaceButton.setSelection(getPullUpRefactoring().getPullUpProcessor().isReplace());
 	}
 
-	private void createSuperTypeCombo(final IProgressMonitor pm, final Composite parent) throws JavaModelException {
+	private void createSuperTypeCombo(Composite parent) {
 		final Label label= new Label(parent, SWT.NONE);
 		label.setText(RefactoringMessages.PullUpInputPage1_Select_destination);
 		label.setLayoutData(new GridData());
 
 		fSuperTypesCombo= new Combo(parent, SWT.READ_ONLY);
-		fCandidateTypes= getPullUpRefactoring().getPullUpProcessor().getCandidateTypes(new RefactoringStatus(), pm);
 		if (fCandidateTypes.length > 0) {
 			for (int i= 0; i < fCandidateTypes.length; i++) {
 				final String comboLabel= JavaModelUtil.getFullyQualifiedName(fCandidateTypes[i]);
@@ -660,11 +665,10 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	protected void createSuperTypeControl(final Composite parent) {
 		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, new IRunnableWithProgress() {
-
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, false, new IRunnableWithProgress() {
 				public void run(final IProgressMonitor monitor) throws InvocationTargetException {
 					try {
-						createSuperTypeCombo(monitor, parent);
+						fCandidateTypes= getPullUpRefactoring().getPullUpProcessor().getCandidateTypes(new RefactoringStatus(), monitor);
 					} catch (JavaModelException exception) {
 						throw new InvocationTargetException(exception);
 					} finally {
@@ -672,6 +676,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 					}
 				}
 			});
+			createSuperTypeCombo(parent);
 		} catch (InvocationTargetException exception) {
 			ExceptionHandler.handle(exception, getShell(), RefactoringMessages.PullUpInputPage_pull_Up, RefactoringMessages.PullUpInputPage_exception);
 		} catch (InterruptedException exception) {

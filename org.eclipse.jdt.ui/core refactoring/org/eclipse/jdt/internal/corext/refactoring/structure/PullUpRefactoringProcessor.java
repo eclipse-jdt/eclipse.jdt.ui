@@ -418,7 +418,8 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		Assert.isNotNull(monitor);
 		SubProgressMonitor sub= null;
 		try {
-			monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_calculating_required, 3);
+			monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_calculating_required, 6);
+			
 			final IMethod[] requiredMethods= ReferenceFinderUtil.getMethodsReferencedIn(new IJavaElement[] { member}, fOwner, new SubProgressMonitor(monitor, 1));
 			sub= new SubProgressMonitor(monitor, 1);
 			boolean isStatic= false;
@@ -1376,21 +1377,26 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	public IMember[] getAdditionalRequiredMembersToPullUp(final IProgressMonitor monitor) throws JavaModelException {
 		final IMember[] members= getCreatedDestinationMembers();
-		monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_calculating_required, members.length);// not
-		final List queue= new ArrayList(members.length);
-		queue.addAll(Arrays.asList(members));
-		if (queue.isEmpty())
-			return new IMember[0];
-		int i= 0;
-		IMember current;
-		do {
-			current= (IMember) queue.get(i);
-			addAllRequiredPullableMembers(queue, current, new SubProgressMonitor(monitor, 1));
-			i++;
-			if (queue.size() == i)
-				current= null;
-		} while (current != null);
-		queue.removeAll(Arrays.asList(members));// report only additional
+		List queue;
+		try {
+			monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_calculating_required, getDeclaringType().getChildren().length);// maximum
+			queue= new ArrayList(members.length);
+			queue.addAll(Arrays.asList(members));
+			if (queue.isEmpty())
+				return new IMember[0];
+			int i= 0;
+			IMember current;
+			do {
+				current= (IMember) queue.get(i);
+				addAllRequiredPullableMembers(queue, current, new SubProgressMonitor(monitor, 1));
+				i++;
+				if (queue.size() == i)
+					current= null;
+			} while (current != null);
+			queue.removeAll(Arrays.asList(members));// report only additional
+		} finally {
+			monitor.done();
+		}
 		return (IMember[]) queue.toArray(new IMember[queue.size()]);
 	}
 
