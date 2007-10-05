@@ -1279,12 +1279,13 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 */
 	protected void openSaveErrorDialog(String title, String message, CoreException exception) {
 		IStatus status= exception.getStatus();
-		if (JavaUI.ID_PLUGIN.equals(status.getPlugin()) && status.getCode() == IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION) {
-			openSaveListenerErrorDialog(title, JavaEditorMessages.CompilationUnitEditor_failing_saveParticipant_message, JavaEditorMessages.CompilationUnitEditor_error_saving_saveParticipant, exception);
-		} else if (JavaUI.ID_PLUGIN.equals(status.getPlugin()) && status.getCode() == IJavaStatusConstants.EDITOR_CHANGED_REGION_CALCULATION) {
-			openSaveListenerErrorDialog(title, JavaEditorMessages.CompilationUnitEditor_editedLine_calculation_failed, JavaEditorMessages.CompilationUnitEditor_error_saving_changedRegionCalculation, exception);
-		} else
-			super.openSaveErrorDialog(title, message, exception);
+		if (JavaUI.ID_PLUGIN.equals(status.getPlugin())
+				&& (status.getCode() == IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION || status.getCode() == IJavaStatusConstants.EDITOR_CHANGED_REGION_CALCULATION)) {
+			openSaveListenerErrorDialog(title, message, exception);
+			return;
+		}
+
+		super.openSaveErrorDialog(title, message, exception);
 	}
 
 	/**
@@ -1292,11 +1293,19 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * 
 	 * @param title	the dialog title
 	 * @param message the message to display
-	 * @param linkText a text for a link to the save participant preference page
 	 * @param exception the exception to handle
 	 * @since 3.4
 	 */
-	private void openSaveListenerErrorDialog(String title, String message, final String linkText, CoreException exception) {
+	private void openSaveListenerErrorDialog(String title, String message, CoreException exception) {
+		final String linkText;
+		if (exception.getStatus().getCode() == IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION) {
+			message= JavaEditorMessages.CompilationUnitEditor_error_saving_participant_message;
+			linkText= JavaEditorMessages.CompilationUnitEditor_error_saving_participant_link;
+		} else {
+			message= JavaEditorMessages.CompilationUnitEditor_error_saving_editedLines_calculation_message;
+			linkText= JavaEditorMessages.CompilationUnitEditor_error_saving_editedLines_calculation_link;
+		}
+
 		IStatus status= exception.getStatus();
 		int mask= IStatus.OK | IStatus.INFO | IStatus.WARNING | IStatus.ERROR;
 		ErrorDialog dialog= new ErrorDialog(getSite().getShell(), title, message, status, mask) {
