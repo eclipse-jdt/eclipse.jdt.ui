@@ -46,6 +46,12 @@ public class PropertyFileDocumentModellTest extends TestCase {
 	private static void insert(IDocument document, KeyValuePair[] pairs) throws CoreException {
 		PropertyFileDocumentModel model= new PropertyFileDocumentModel(document);
 		
+		for (int i= 0; i < pairs.length; i++) {
+			KeyValuePair pair= pairs[i];
+			pair.setValue(PropertyFileDocumentModel.unwindValue(pair.getValue()) + model.getLineDelimiter());
+			pair.setKey(PropertyFileDocumentModel.unwindEscapeChars(pair.getKey()));
+		}
+		
 		DocumentChange change= new DocumentChange("", document);
 		model.insert(pairs, change);
 		change.perform(new NullProgressMonitor());
@@ -249,7 +255,7 @@ public class PropertyFileDocumentModellTest extends TestCase {
 		Document props= new Document("org.eclipse.1=value1\n" + "org.eclipse.2=value2\n" + "org.eclipse.3=value3\n");
 		PropertyFileDocumentModel modell= new PropertyFileDocumentModel(props);
 
-		ReplaceEdit replaceEdit= modell.replace(new KeyValuePair("org.eclipse.2", "value"), new KeyValuePair("org.1", "value"));
+		ReplaceEdit replaceEdit= modell.replace(new KeyValuePair("org.eclipse.2", "value\n"), new KeyValuePair("org.1", "value\n"));
 		replaceEdit.apply(props);
 
 		assertEquals("org.eclipse.1=value1\n" + "org.1=value\n" + "org.eclipse.3=value3\n", props.get());

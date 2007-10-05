@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -17,7 +19,11 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -461,5 +467,31 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		// create delegates for the field and a getter
 		fRenameGetter= true;
 		helper2("f", "g", true);
+	}
+	
+	public void testRenameNLSAccessor01() throws Exception {
+		IFile file= createPropertiesFromTestFile("messages");
+		
+		helper2("f", "g");
+		
+		assertEqualLines(getExpectedFileConent("messages"), getContents(file));
+	}
+
+	private String getExpectedFileConent(String propertyName) throws IOException {
+		String fileName= getOutputTestFileName(propertyName);
+		fileName= fileName.substring(0, fileName.length() - ".java".length()) + ".properties";
+		return getContents(getFileInputStream(fileName));
+	}
+
+	private IFile createPropertiesFromTestFile(String propertyName) throws IOException, CoreException {
+		IFolder pack= (IFolder) getPackageP().getResource();
+		IFile file= pack.getFile(propertyName + ".properties");
+
+		String fileName= getInputTestFileName(propertyName);
+		fileName= fileName.substring(0, fileName.length() - ".java".length()) + ".properties";
+		InputStream inputStream= getFileInputStream(fileName);
+		file.create(inputStream, true, null);
+		
+		return file;
 	}
 }

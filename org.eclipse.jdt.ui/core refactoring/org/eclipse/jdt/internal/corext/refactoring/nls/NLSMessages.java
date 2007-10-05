@@ -32,6 +32,9 @@ public final class NLSMessages extends NLS {
 	public static String NLSRefactoring_checking;
 	public static String NLSRefactoring_pattern_empty;
 	public static String NLSRefactoring_pattern_does_not_contain;
+	public static String NLSAccessorFieldRenameParticipant_changeDescription;
+	public static String NLSAccessorFieldRenameParticipant_error_description;
+	public static String NLSAccessorFieldRenameParticipant_participantName;
 	public static String NLSRefactoring_Only_the_first_occurrence_of;
 	public static String NLSRefactoring_null;
 	public static String NLSRefactoring_empty;

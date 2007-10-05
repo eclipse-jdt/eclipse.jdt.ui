@@ -5130,6 +5130,26 @@
             class="org.eclipse.jdt.internal.corext.refactoring.scripting.CopyRefactoringContribution"
             id="org.eclipse.jdt.ui.copy"/>
    </extension>
+   
+   <extension
+         point="org.eclipse.ltk.core.refactoring.renameParticipants">
+      <renameParticipant
+            class="org.eclipse.jdt.internal.corext.refactoring.nls.NLSAccessorFieldRenameParticipant"
+            id="org.eclipse.jdt.ui.NLSFieldRenameParticipant"
+            name="%Refactoring.NLSFieldRenameParticipant">
+            <enablement>
+              <with variable="affectedNatures">
+                <iterate operator="or">
+                  <equals value="org.eclipse.jdt.core.javanature"/>
+                </iterate>
+              </with>
+              <with variable="element">
+                <instanceof value="org.eclipse.jdt.core.IField"/>
+              </with>
+            </enablement>
+      </renameParticipant>
+   </extension>
+   
 
 <!-- End Refactoring -->
 

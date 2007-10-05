@@ -162,7 +162,10 @@ public class NLSPropertyFileModifier {
 			NLSSubstitution substitution= substitutions[i];
 			if (doReplace(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
 				KeyValuePair initialPair= new KeyValuePair(substitution.getInitialKey(), substitution.getInitialValue());
-				KeyValuePair newPair= new KeyValuePair(substitution.getKey(), substitution.getValueNonEmpty());
+				
+				String key= PropertyFileDocumentModel.unwindEscapeChars(substitution.getKey());
+				String value= PropertyFileDocumentModel.unwindValue(substitution.getValue()) + model.getLineDelimiter();
+				KeyValuePair newPair= new KeyValuePair(key, value);
 				TextEdit edit= model.replace(initialPair, newPair);
 				if (edit != null) {
 					TextChangeCompatibility.addTextEdit(textChange, Messages.format(NLSMessages.NLSPropertyFileModifier_replace_entry, substitution.getKey()), edit); 
@@ -193,8 +196,9 @@ public class NLSPropertyFileModifier {
 			NLSSubstitution substitution= substitutions[i];
 			
 			if (doInsert(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
-				String value= substitution.getValueNonEmpty();
-				keyValuePairsToAdd.add(new KeyValuePair(substitution.getKey(), value));
+				String value= PropertyFileDocumentModel.unwindValue(substitution.getValueNonEmpty()) + model.getLineDelimiter();
+				String key= PropertyFileDocumentModel.unwindEscapeChars(substitution.getKey());
+				keyValuePairsToAdd.add(new KeyValuePair(key, value));
 			}	
 		}
 		

@@ -43,14 +43,27 @@ public class PropertyFileDocumentModel {
         fLineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
     }
     
-    public int getIndex(String key) {
+    /**
+	 * @return the line delimiter used by the document described by this model
+	 */
+    public String getLineDelimiter() {
+		return fLineDelimiter;
+	}
+    
+    /**
+	 * Return the key value pair in this model with the key <code>key</code>
+	 * 
+	 * @param key the key of the pair
+	 * @return the pair with the key or <b>null</b> if no such pair.
+	 */
+    public KeyValuePair getKeyValuePair(String key) {
     	for (int i= 0; i < fKeyValuePairs.size(); i++) {
             KeyValuePairModell keyValuePair = (KeyValuePairModell) fKeyValuePairs.get(i);
             if (keyValuePair.getKey().equals(key)) {
-            	return i;
+            	return keyValuePair;
             }
     	}
-    	return -1;
+    	return null;
     }
 
     private InsertEdit insert(KeyValuePair keyValuePair) {
@@ -83,7 +96,7 @@ public class PropertyFileDocumentModel {
         
         keyValuePairModell.fOffset= offset;
         fKeyValuePairs.add(index, keyValuePairModell);
-        return new InsertEdit(offset, extra + keyValuePairModell.getEncodedText(fLineDelimiter));
+        return new InsertEdit(offset, extra + keyValuePairModell.getKeyValueText());
     }
 
     /**
@@ -128,7 +141,7 @@ public class PropertyFileDocumentModel {
         for (Iterator iter = fKeyValuePairs.iterator(); iter.hasNext();) {
             KeyValuePairModell keyValuePair = (KeyValuePairModell) iter.next();
             if (keyValuePair.fKey.equals(toReplace.getKey())) {
-                String newText = new KeyValuePairModell(replaceWith).getEncodedText(fLineDelimiter);
+                String newText= new KeyValuePairModell(replaceWith).getKeyValueText();
                 KeyValuePairModell next = (KeyValuePairModell) iter.next();
                 int range = next.fOffset - keyValuePair.fOffset;
             	return new ReplaceEdit(keyValuePair.fOffset, range, newText);
@@ -323,8 +336,8 @@ public class PropertyFileDocumentModel {
             super(keyValuePair.fKey, keyValuePair.fValue);
         }
 
-        public String getEncodedText(String lineDelimiter) {
-			return PropertyFileDocumentModel.unwindEscapeChars(fKey) + '=' + PropertyFileDocumentModel.unwindValue(fValue) + lineDelimiter;
+        private String getKeyValueText() {
+			return fKey + '=' + fValue;
         }
         
 		public int compareTo(Object o) {
