@@ -139,6 +139,9 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		
 		if (element instanceof IPackageFragment)
 			return true;
+
+		if (element instanceof IResource)
+			return true;
 		
 		return false;
 	}
@@ -149,7 +152,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
     public void run() {
     	
     	try {
-			IJavaElement[] elements= getSelectedElements();
+			Object[] elements= getSelectedElements();
 			if (elements == null) {
 				MessageDialog.openInformation(getShell(), ActionMessages.CopyQualifiedNameAction_InfoDialogTitel, ActionMessages.CopyQualifiedNameAction_NoElementToQualify);
 				return;
@@ -159,8 +162,13 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 			Transfer[] dataTypes= null;
 			
 			if (elements.length == 1) {
-				String qualifiedName= JavaElementLabels.getElementLabel(elements[0], LABEL_FLAGS);
-				IResource resource= elements[0].getCorrespondingResource();
+				Object element= elements[0];
+				String qualifiedName= getQualifiedName(element);
+				IResource resource;
+				if (element instanceof IJavaElement)
+					resource= ((IJavaElement) element).getCorrespondingResource();
+				else
+					resource= (IResource) element;
 				
 				if (resource != null) {
 					IPath location= resource.getLocation();
@@ -177,11 +185,9 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 				}
 			} else {
 				StringBuffer buf= new StringBuffer();
-				buf.append(JavaElementLabels.getElementLabel(elements[0], LABEL_FLAGS));
+				buf.append(getQualifiedName(elements[0]));
 				for (int i= 1; i < elements.length; i++) {
-					IJavaElement element= elements[i];
-					
-					String qualifiedName= JavaElementLabels.getElementLabel(element, LABEL_FLAGS);
+					String qualifiedName= getQualifiedName(elements[i]);
 					buf.append('\r').append('\n').append(qualifiedName);
 				}
 				data= new Object[] {buf.toString()};
@@ -206,7 +212,13 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		}
     }
 
-    private IJavaElement[] getSelectedElements() throws JavaModelException {
+	private String getQualifiedName(Object element) {
+		if (element instanceof IResource)
+			return ((IResource) element).getFullPath().toString();
+		return JavaElementLabels.getTextLabel(element, LABEL_FLAGS);
+	}
+
+    private Object[] getSelectedElements() throws JavaModelException {
     	if (fEditor != null) {
     		IJavaElement element= getSelectedElement(fEditor);
     		if (element == null)
@@ -228,7 +240,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
     	if (result.isEmpty())
     		return null;
     	
-		return (IJavaElement[])result.toArray(new IJavaElement[result.size()]);
+		return result.toArray(new Object[result.size()]);
 	}
 
 	private IJavaElement getSelectedElement(JavaEditor editor) {
