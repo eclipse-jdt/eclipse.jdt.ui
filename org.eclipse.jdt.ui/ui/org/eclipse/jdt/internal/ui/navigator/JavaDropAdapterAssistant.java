@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -169,7 +169,7 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 	private void handleDropMove(final Object target) throws JavaModelException, InvocationTargetException, InterruptedException {
 		IJavaElement[] javaElements = ReorgUtils.getJavaElements(fElements);
 		IResource[] resources = ReorgUtils.getResources(fElements);
-		ReorgMoveStarter starter = ReorgMoveStarter.create(javaElements, resources, ReorgDestinationFactory.createDestination(target));;
+		ReorgMoveStarter starter= ReorgMoveStarter.create(javaElements, resources, ReorgDestinationFactory.createDestination(target));
 		
 		if (starter != null)
 			starter.run(getShell());
