@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Widget;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -340,6 +341,30 @@ class PackageViewerWrapper extends StructuredViewer {
 
 	protected void setSelectionToWidget(List l, boolean reveal) {
 		((IPackagesViewViewer)fViewer).setSelectionToWidget(l, reveal);
+	}
+
+	public ViewerComparator getComparator() {
+		return fViewer.getComparator();
+	}
+
+	public IElementComparer getComparer() {
+		return fViewer.getComparer();
+	}
+
+	public ViewerFilter[] getFilters() {
+		return fViewer.getFilters();
+	}
+
+	public ViewerSorter getSorter() {
+		return fViewer.getSorter();
+	}
+
+	public void setComparer(IElementComparer comparer) {
+		fViewer.setComparer(comparer);
+	}
+
+	public Widget[] testFindItems(Object element) {
+		return fViewer.testFindItems(element);
 	}
 
 
