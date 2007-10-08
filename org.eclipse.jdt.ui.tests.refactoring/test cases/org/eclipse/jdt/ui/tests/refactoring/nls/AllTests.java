@@ -30,6 +30,7 @@ public class AllTests {
         suite.addTest(NlsRefactoringCreateChangeTest.allTests());
         suite.addTest(NLSSourceModifierTest.allTests());
         suite.addTest(NLSHintTest.allTests());
+        suite.addTest(NLSHintHelperTest.suite());
         suite.addTest(PropertyFileDocumentModellTest.suite());
         suite.addTest(SimpleLineReaderTest.suite());
         suite.addTest(NLSHolderTest.suite());
