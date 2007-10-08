@@ -49,6 +49,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
+import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
@@ -386,8 +387,24 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		
 		doCleanUp(cleanUpRefactoring);
 	}
+
+	public void testCodeFormatCleanUp() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map node= getNullSettings();
+
+		node.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpOptions.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new CodeFormatCleanUp());
+		
+		doCleanUp(cleanUpRefactoring);
+	}
 	
 	private void doCleanUp(CleanUpRefactoring refactoring) throws CoreException {
+		refactoring.setUseProjectOptions(true);
 		
 		performRefactoring(refactoring, false, IStatus.WARNING, true);
 		performRefactoring(refactoring, false, IStatus.WARNING, true);
