@@ -371,7 +371,8 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	private void checkAdditionalRequired() {
 		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, new IRunnableWithProgress() {
+			initializeRefactoring();
+			getContainer().run(false, false, new IRunnableWithProgress() {
 
 				public void run(final IProgressMonitor pm) throws InvocationTargetException {
 					try {
