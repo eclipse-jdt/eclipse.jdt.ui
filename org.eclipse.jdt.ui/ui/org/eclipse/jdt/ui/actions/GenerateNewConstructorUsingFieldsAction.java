@@ -331,7 +331,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			}
 			if (Modifier.isFinal(curr.getModifiers())) {
 				ASTNode declaringNode= astRoot.findDeclaringNode(curr);
-				if (declaringNode instanceof VariableDeclarationFragment && ((VariableDeclarationFragment) declaringNode).getInitializer() == null) {
+				if (declaringNode instanceof VariableDeclarationFragment && ((VariableDeclarationFragment) declaringNode).getInitializer() != null) {
 					continue; // Do not add final fields which have been set in the <clinit>
 				}
 			}
