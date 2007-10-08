@@ -128,16 +128,26 @@ public class PropertyFileDocumentModellTest extends TestCase {
 		Document props= new Document(
 				"org.eclipse.nls.1=value\n" + 
 				"\n" + 
-				"org.eclipse=value\n");
+				"org.eclipse.2=value\n");
 		
-		insert(props, new KeyValuePair[] {new KeyValuePair("org.eclipse.nls.2", "value"), new KeyValuePair("org.eclipse.2", "value")});
+		insert(props, new KeyValuePair[] {
+				new KeyValuePair("org.eclipse.nls.2", "value"),
+				new KeyValuePair("org.eclipse.nls", "value"),
+				new KeyValuePair("org.apache", "value"),
+				new KeyValuePair("org.xenon", "value"),
+				new KeyValuePair("org.eclipse", "value"),
+				new KeyValuePair("org.eclipse.xyzblabla.pipapo", "value")});
 		
 		assertEquals(
+				"org.apache=value\n" +
+				"org.eclipse.nls=value\n" +
 				"org.eclipse.nls.1=value\n" +
 				"org.eclipse.nls.2=value\n" +
 				"\n" +
 				"org.eclipse=value\n" +
-				"org.eclipse.2=value\n", 
+				"org.eclipse.2=value\n" +
+				"org.eclipse.xyzblabla.pipapo=value\n" +
+				"org.xenon=value\n", 
 				props.get());
 	}
 	
@@ -174,6 +184,38 @@ public class PropertyFileDocumentModellTest extends TestCase {
 				"key_b_2=value\n", props.get());
 	}
 
+	public void testManyInsertsIntoDoc4() throws Exception {
+		Document props= new Document(
+				"Clazz.Pong=Pong\n" + 
+				"Clazz.Ping=Ping\n");
+		
+		insert(props, new KeyValuePair[] {
+				new KeyValuePair("Clazz.Pizza", "value"),
+				new KeyValuePair("Clazz.Posers", "value")});
+		
+		assertEquals(
+				"Clazz.Pong=Pong\n" + 
+				"Clazz.Posers=value\n" +
+				"Clazz.Ping=Ping\n" +
+				"Clazz.Pizza=value\n", props.get());
+	}
+	
+	public void testManyInsertsIntoDoc5() throws Exception {
+		Document props= new Document(
+				"Clazz.Pong=Pong\n" + 
+				"Clazz.Ping=Ping\n");
+		
+		insert(props, new KeyValuePair[] {
+				new KeyValuePair("Clazz.P", "p"),
+				new KeyValuePair("Clazz.PosersWithAVeryLongName", "p")});
+		
+		assertEquals(
+				"Clazz.P=p\n" +
+				"Clazz.Pong=Pong\n" + 
+				"Clazz.PosersWithAVeryLongName=p\n" +
+				"Clazz.Ping=Ping\n", props.get());
+	}
+	
 	public void testBlockInsertsIntoDoc() throws Exception {
 		Document props= new Document(
 				"org.eclipse.1=value\n" + 

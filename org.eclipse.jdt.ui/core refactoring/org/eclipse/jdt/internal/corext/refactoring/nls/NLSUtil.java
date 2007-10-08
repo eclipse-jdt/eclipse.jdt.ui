@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,8 +43,10 @@ public class NLSUtil {
 	}
 
 	/**
-	 * Returns null if an error occurred.
-	 * closes the stream 
+	 * Reads a stream into a String and closes the stream.
+	 * @param is the input stream
+	 * @param encoding the encoding
+	 * @return the contents, or <code>null</code> if an error occurred
 	 */
 	public static String readString(InputStream is, String encoding) {
 		if (is == null)
@@ -75,7 +77,10 @@ public class NLSUtil {
 
 	/**
 	 * Creates and returns an NLS tag edit for a string that is at the specified position in 
-	 * a compilation unit. Returns <code>null</code> if the string is already NLSed 
+	 * a compilation unit.
+	 * @param cu the compilation unit
+	 * @param position position of the string 
+	 * @return the edit, or <code>null</code> if the string is already NLSed 
 	 * or the edit could not be created for some other reason.
 	 * @throws CoreException 
 	 */
@@ -95,7 +100,10 @@ public class NLSUtil {
 	
 	/**
 	 * Creates and returns NLS tag edits for strings that are at the specified positions in 
-	 * a compilation unit. Returns <code>null</code> if all the strings are already NLSed 
+	 * a compilation unit.
+	 * @param cu the compilation unit
+	 * @param positions positions of the strings
+	 * @return the edit, or <code>null</code> if all strings are already NLSed 
 	 * or the edits could not be created for some other reason.
 	 * @throws CoreException 
 	 */
@@ -230,7 +238,7 @@ public class NLSUtil {
 		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
 			String string= (String) iterator.next();
 	
-			int currentInvertDistance= compareTo(key, string);
+			int currentInvertDistance= invertDistance(key, string);
 			if (currentInvertDistance > invertDistance) {
 				invertDistance= currentInvertDistance;
 				if (Collator.getInstance().compare(key, string) >= 0) {
@@ -251,24 +259,42 @@ public class NLSUtil {
 	}
 
 	/**
-	 * @param key1
-	 * @param key2
-	 * @return the invert distance between <code>key1</code> and <code>key2</cod>, the higher to closer
+	 * @param insertKey the key to insert
+	 * @param existingKey the existing key
+	 * @return the invert distance between <code>insertkey</code> and <code>existingKey</code>,
+	 * the higher the closer
 	 * @since 3.4
 	 */
-	public static int compareTo(String key1, String key2) {
-	    int counter = 0;
-	    
-	    int minLen = Math.min(key1.length(), key2.length());
-	    int diffLen = Math.abs(key1.length() - key2.length());
-	    
-	    for (int i= 0; i < minLen; i++) {
-	        if (key1.charAt(i) == key2.charAt(i)) {
-	            counter++;                    
-	        } else {
-	            break;
-	        }
-	    }            
-	    return counter - diffLen;
+	public static int invertDistance(String insertKey, String existingKey) {
+
+		int existingKeyLength= existingKey.length();
+		int insertKeyLength= insertKey.length();
+
+		int minLen= Math.min(insertKeyLength, existingKeyLength);
+
+		int prefixMatchCount= 0;
+		for (int i= 0; i < minLen; i++) {
+			if (insertKey.charAt(i) == existingKey.charAt(i)) {
+				prefixMatchCount++;
+			} else {
+				return prefixMatchCount << 16;
+			}
+		}
+		
+		if (insertKeyLength > existingKeyLength && isSeparator(insertKey.charAt(existingKeyLength))) {
+			//existing: prefix
+			//new:      prefix_xyz
+			//insert it after existing key -> prefix match plus one
+			return (prefixMatchCount + 1) << 16;
+		}
+
+		int existingLonger= existingKeyLength - insertKeyLength;
+		// Sort by prefix match length first (<< 16). Existing keys that are longer
+		// than the insertion key are not preferred insertion positions.
+		return (prefixMatchCount << 16) - Math.max(0, existingLonger);
+	}
+
+	private static boolean isSeparator(char ch) {
+		return ch == '.' || ch == '-' || ch == '_';
 	}
 }

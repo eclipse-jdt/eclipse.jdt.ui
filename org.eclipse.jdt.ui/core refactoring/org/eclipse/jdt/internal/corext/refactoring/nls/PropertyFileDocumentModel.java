@@ -81,8 +81,8 @@ public class PropertyFileDocumentModel {
         	String beforeKey= ((KeyValuePair) fKeyValuePairs.get(index - 1)).fKey;
 			String afterKey= insertHere.fKey;
 			String key= keyValuePair.fKey;
-			int distBefore= NLSUtil.compareTo(key, beforeKey);
-			int distAfter= NLSUtil.compareTo(key, afterKey);
+			int distBefore= NLSUtil.invertDistance(key, beforeKey);
+			int distAfter= NLSUtil.invertDistance(key, afterKey);
 			if (distBefore > distAfter) {
 				offset-= insertHere.fLeadingWhiteSpaces;
 			} else if (distBefore == distAfter && Collator.getInstance().compare(beforeKey, afterKey) < 0) {
@@ -154,7 +154,8 @@ public class PropertyFileDocumentModel {
     	ArrayList keys= new ArrayList();
         for (int i= 0; i < fKeyValuePairs.size(); i++) {
             KeyValuePairModell element = (KeyValuePairModell) fKeyValuePairs.get(i);
-            keys.add(element.getKey());
+            if (! (element instanceof LastKeyValuePair))
+            	keys.add(element.getKey());
         }
         int insertIndex= NLSUtil.getInsertionPosition(keyValuePair.getKey(), keys);
         
@@ -321,7 +322,7 @@ public class PropertyFileDocumentModel {
 		return s.length();
 	}
 
-	private static class KeyValuePairModell extends KeyValuePair implements Comparable {        
+	private static class KeyValuePairModell extends KeyValuePair {        
 
         int fOffset;
         int fLeadingWhiteSpaces;
@@ -339,10 +340,6 @@ public class PropertyFileDocumentModel {
         private String getKeyValueText() {
 			return fKey + '=' + fValue;
         }
-        
-		public int compareTo(Object o) {
-            return NLSUtil.compareTo(((KeyValuePair) o).fKey, fKey);
-        }
     }
 
     /**
@@ -354,11 +351,8 @@ public class PropertyFileDocumentModel {
     	private boolean fNeedsNewLine;
     	
         public LastKeyValuePair(int offset, boolean needsNewLine) {
-            super("last", "key", offset, 0); //$NON-NLS-1$ //$NON-NLS-2$
+            super("zzzzzzz", "key", offset, 0); //$NON-NLS-1$ //$NON-NLS-2$
             fNeedsNewLine= needsNewLine;
-        }
-        public int compareTo(Object o) {
-            return 1;
         }
         public boolean needsNewLine() {
         	return fNeedsNewLine;

@@ -264,8 +264,8 @@ public class AccessorClassModifier {
 				} else {
 					String beforeKey= (String) identifiers.get(insertionPosition);
 					String afterKey= (String) identifiers.get(insertionPosition + 1);
-					int distBefore= NLSUtil.compareTo(key, beforeKey);
-					int distAfter= NLSUtil.compareTo(key, afterKey);
+					int distBefore= NLSUtil.invertDistance(key, beforeKey);
+					int distAfter= NLSUtil.invertDistance(key, afterKey);
 					if (distBefore > distAfter) {
 						fListRewrite.insertAfter(fieldDeclaration, (ASTNode) fFields.get(insertionPosition), editGroup);
 					} else if (distBefore == distAfter && Collator.getInstance().compare(beforeKey, afterKey) < 0) {
