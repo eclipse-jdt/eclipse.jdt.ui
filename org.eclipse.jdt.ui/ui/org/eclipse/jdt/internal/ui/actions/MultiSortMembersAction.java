@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import java.util.Hashtable;
+import java.util.Map;
 
 import org.eclipse.jface.window.Window;
 
@@ -67,6 +68,16 @@ public class MultiSortMembersAction extends CleanUpAction {
 	        return null;
         }
 
+		Map settings= getSettings();
+		if (settings == null)
+			return null;
+
+		return new ICleanUp[] {
+			new SortMembersCleanUp(settings)
+		};
+	}
+
+	protected Map getSettings() {
 		SortMembersMessageDialog dialog= new SortMembersMessageDialog(getShell());
 		if (dialog.open() != Window.OK)
 			return null;
@@ -74,10 +85,7 @@ public class MultiSortMembersAction extends CleanUpAction {
 		Hashtable settings= new Hashtable();
 		settings.put(CleanUpConstants.SORT_MEMBERS, CleanUpOptions.TRUE);
 		settings.put(CleanUpConstants.SORT_MEMBERS_ALL, !dialog.isNotSortingFieldsEnabled() ? CleanUpOptions.TRUE : CleanUpOptions.FALSE);
-
-		return new ICleanUp[] {
-			new SortMembersCleanUp(settings)
-		};
+		return settings;
 	}
 
 	/**

@@ -488,8 +488,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 	private Change fChange;
 	private boolean fLeaveFilesDirty;
 	private final String fName;
-
-	private CleanUpOptions fOptions;
+	private boolean fUseProjectOptions;
 	
 	public CleanUpRefactoring() {
 		this(FixMessages.CleanUpRefactoring_Refactoring_name);
@@ -499,10 +498,11 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		fName= name;
 		fCleanUps= new ArrayList();
 		fProjects= new Hashtable();
+		fUseProjectOptions= false;
 	}
 	
-	public void setOptions(CleanUpOptions options) {
-		fOptions= options;
+	public void setUseProjectOptions(boolean enabled) {
+		fUseProjectOptions= enabled;
 	}
 	
 	public void addCompilationUnit(ICompilationUnit unit) {
@@ -624,14 +624,10 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				List targetsList= (List) entry.getValue();
 				CleanUpTarget[] targets= (CleanUpTarget[])targetsList.toArray(new CleanUpTarget[targetsList.size()]);
 				
-				if (fOptions == null) {
+				if (fUseProjectOptions) {
 					result.merge(setProjectOptions(project, cleanUps));
 					if (result.hasFatalError())
 						return result;
-				} else {
-					for (int i= 0; i < cleanUps.length; i++) {
-						cleanUps[i].setOptions(fOptions);
-					}
 				}
 				
 				result.merge(checkPreConditions(project, targets, new SubProgressMonitor(pm, 3 * cleanUps.length)));

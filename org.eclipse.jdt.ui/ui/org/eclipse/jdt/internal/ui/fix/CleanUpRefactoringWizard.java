@@ -454,15 +454,18 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		private void initializeRefactoring() {
 			CleanUpRefactoring refactoring= (CleanUpRefactoring)getRefactoring();
 			
+			CleanUpOptions options= null;
 			if (fUseCustomField.isSelected()) {
-				refactoring.setOptions(new MapCleanUpOptions(fCustomSettings));
+				options= new MapCleanUpOptions(fCustomSettings);
 			} else {
-				refactoring.setOptions(null);
+				refactoring.setUseProjectOptions(true);
 			}
 
 			refactoring.clearCleanUps();
 			ICleanUp[] cleanups= CleanUpRefactoring.createCleanUps();
 			for (int i= 0; i < cleanups.length; i++) {
+				if (options != null)
+					cleanups[i].setOptions(options);
 	            refactoring.addCleanUp(cleanups[i]);
             }
         }

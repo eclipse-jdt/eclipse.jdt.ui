@@ -84,6 +84,7 @@ public class CleanUpTestCase extends QuickFixTest {
 		suite.addTest(CleanUpTest.suite());
 		suite.addTest(CleanUpAnnotationTest.suite());
 		suite.addTest(SaveParticipantTest.suite());
+		suite.addTest(CleanUpActionTest.suite());
 
 		return suite;
 	}
@@ -206,11 +207,17 @@ public class CleanUpTestCase extends QuickFixTest {
 	
 	protected final RefactoringStatus performRefactoring(ICompilationUnit[] cus) throws CoreException {
 		final CleanUpRefactoring ref= new CleanUpRefactoring();
+		ref.setUseProjectOptions(true);
+		ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps();
+		
+		return performRefactoring(ref, cus, cleanUps);
+	}
+
+	protected RefactoringStatus performRefactoring(final CleanUpRefactoring ref, ICompilationUnit[] cus, ICleanUp[] cleanUps) throws CoreException {
 		for (int i= 0; i < cus.length; i++) {
 			ref.addCompilationUnit(cus[i]);
 		}
 		
-		ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps();
 		for (int i= 0; i < cleanUps.length; i++) {
 			ref.addCleanUp(cleanUps[i]);
 		}
