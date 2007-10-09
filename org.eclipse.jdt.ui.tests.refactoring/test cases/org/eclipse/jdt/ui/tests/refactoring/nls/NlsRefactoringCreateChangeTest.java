@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,16 +14,18 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Properties;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.ltk.core.refactoring.Change;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -31,13 +33,13 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
-
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
 
-import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
 public class NlsRefactoringCreateChangeTest extends TestCase {
 
@@ -120,7 +122,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		NLSSubstitution[] substitutions= nls.getSubstitutions();
 		nls.setPrefix("test");
 		substitutions[0].setState(NLSSubstitution.EXTERNALIZED);
-		substitutions[0].generateKey(substitutions);
+		substitutions[0].generateKey(substitutions, new Properties());
 
 		performChange(nls);
 
@@ -686,7 +688,7 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		NLSSubstitution[] substitutions= nls.getSubstitutions();
 		nls.setPrefix("test");
 		substitutions[0].setState(NLSSubstitution.EXTERNALIZED);
-		substitutions[0].generateKey(substitutions);
+		substitutions[0].generateKey(substitutions, new Properties());
 		return nls;
 	}
 

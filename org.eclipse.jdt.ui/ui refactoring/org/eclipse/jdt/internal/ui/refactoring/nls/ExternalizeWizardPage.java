@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -201,7 +201,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 					if (PROPERTIES[STATE_PROP].equals(property)) {
 						substitution.setState(((Integer) value).intValue());
 						if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && substitution.hasStateChanged()) {
-							substitution.generateKey(fSubstitutions);
+							substitution.generateKey(fSubstitutions, getProperties(fNLSRefactoring.getPropertyFileHandle()));
 						}
 					}
 				}
@@ -527,7 +527,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fAccessorChoices= null;
 
 		setDescription(NLSUIMessages.ExternalizeWizardPage_description);
-		createDefaultExternalization(fSubstitutions, nlsRefactoring.getPrefix());
+		createDefaultExternalization(fSubstitutions);
 	}
 
 	/*
@@ -815,12 +815,12 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		});
 	}
 
-	private void createDefaultExternalization(NLSSubstitution[] substitutions, String defaultPrefix) {
+	private void createDefaultExternalization(NLSSubstitution[] substitutions) {
 		for (int i= 0; i < substitutions.length; i++) {
 			NLSSubstitution substitution= substitutions[i];
 			if (substitution.getState() == NLSSubstitution.INTERNALIZED) {
 				substitution.setState(NLSSubstitution.EXTERNALIZED);
-				substitution.generateKey(substitutions);
+				substitution.generateKey(substitutions, getProperties(fNLSRefactoring.getPropertyFileHandle()));
 			}
 		}
 	}
@@ -1000,6 +1000,20 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			if (conflictingKeys(substitution)) {
 				status.addFatalError(NLSUIMessages.ExternalizeWizardPage_warning_conflicting); 
 				return;
+			}
+		}
+	
+		Properties properties= getProperties(fNLSRefactoring.getPropertyFileHandle());
+		for (int i= 0; i < fSubstitutions.length; i++) {
+			NLSSubstitution substitution= fSubstitutions[i];
+			if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
+				if (properties.containsKey(substitution.getKey())) {
+					String value1= substitution.getValueNonEmpty();
+					String value2= properties.getProperty(substitution.getKey());
+					if (!value1.equals(value2)) {
+						status.addFatalError(NLSUIMessages.ExternalizeWizardPage_warning_conflicting);
+					}
+				}
 			}
 		}
 	}
@@ -1241,7 +1255,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			NLSSubstitution substitution= (NLSSubstitution) iter.next();
 			substitution.setState(state);
 			if ((substitution.getState() == NLSSubstitution.EXTERNALIZED) && substitution.hasStateChanged()) {
-				substitution.generateKey(fSubstitutions);
+				substitution.generateKey(fSubstitutions, getProperties(fNLSRefactoring.getPropertyFileHandle()));
 			}
 		}
 		fTableViewer.update(selected.toArray(), props);

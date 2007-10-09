@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.tests.refactoring.nls;
 
 import java.util.Hashtable;
+import java.util.Properties;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -112,7 +113,7 @@ public class NLSSourceModifierTest extends TestCase {
         NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
         nlsSubstitutions[0].setState(NLSSubstitution.EXTERNALIZED);
         nlsSubstitutions[0].setPrefix("key.");
-        nlsSubstitutions[0].generateKey(nlsSubstitutions);
+        nlsSubstitutions[0].generateKey(nlsSubstitutions, new Properties());
         
         String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
         TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor", false);
@@ -141,7 +142,7 @@ public class NLSSourceModifierTest extends TestCase {
         NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
         nlsSubstitutions[0].setState(NLSSubstitution.EXTERNALIZED);
         nlsSubstitutions[0].setPrefix("key_");
-        nlsSubstitutions[0].generateKey(nlsSubstitutions);
+        nlsSubstitutions[0].generateKey(nlsSubstitutions, new Properties());
         
         String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
         TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor", true);
@@ -269,7 +270,7 @@ public class NLSSourceModifierTest extends TestCase {
         NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
         nlsSubstitutions[0].setState(NLSSubstitution.EXTERNALIZED);
         nlsSubstitutions[0].setPrefix("key.");
-        nlsSubstitutions[0].generateKey(nlsSubstitutions);
+        nlsSubstitutions[0].generateKey(nlsSubstitutions, new Properties());
         
         
         String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
@@ -299,7 +300,7 @@ public class NLSSourceModifierTest extends TestCase {
         NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
         nlsSubstitutions[0].setState(NLSSubstitution.EXTERNALIZED);
         nlsSubstitutions[0].setPrefix("key_");
-        nlsSubstitutions[0].generateKey(nlsSubstitutions);
+        nlsSubstitutions[0].generateKey(nlsSubstitutions, new Properties());
         
         
         String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
@@ -1273,7 +1274,7 @@ public class NLSSourceModifierTest extends TestCase {
         NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
         nlsSubstitutions[0].setState(NLSSubstitution.EXTERNALIZED);
         nlsSubstitutions[0].setPrefix("key.");
-        nlsSubstitutions[0].generateKey(nlsSubstitutions);
+        nlsSubstitutions[0].generateKey(nlsSubstitutions, new Properties());
         
         String subpattern= "getFoo(${key})";
         TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, subpattern, pack, "Accessor", false);

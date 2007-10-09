@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,7 +54,11 @@ public class NLSSubstitution {
 	}
 
 	/**
-	 * value == null indicates a corrupt substitution. 
+	 * @param state initial state of the substitution
+	 * @param key initial key
+	 * @param value the externalized value, or <b>null</b> to indicate a corrupt substitution
+	 * @param element the element to externalize
+	 * @param accessorClassReference the accessor class descriptor
 	 */
 	public NLSSubstitution(int state, String key, String value, NLSElement element, AccessorClassReference accessorClassReference) {
 		this(state,value,element);
@@ -126,7 +130,7 @@ public class NLSSubstitution {
 	}
 
 	/**
-	 * Value can be null.
+	 * @return the value or <b>null</b> if none
 	 */
 	public String getValue() {
 		return fValue;
@@ -249,7 +253,7 @@ public class NLSSubstitution {
 	}
 
 	/**
-	 * Sets the prefix.
+	 * @param prefix the prefix to use for the key
 	 */
 	public void setPrefix(String prefix) {
 		fPrefix= prefix;
@@ -279,32 +283,32 @@ public class NLSSubstitution {
 		return fKey;
 	}
 
-	public void generateKey(NLSSubstitution[] substitutions) {
+	public void generateKey(NLSSubstitution[] substitutions, Properties properties) {
 		if (fState != EXTERNALIZED || ((fState == EXTERNALIZED) && hasStateChanged())) {
-			int min= Integer.MAX_VALUE;
-			int max= Integer.MIN_VALUE;
-			
-			for (int i= 0; i < substitutions.length; i++) {
-				NLSSubstitution substitution= substitutions[i];
-				if (substitution == this || substitution.fState != EXTERNALIZED)
-					continue;
-				try {
-					int value= Integer.parseInt(substitution.internalGetKeyWithoutPrefix());
-					min= Math.min(min, value);
-					max= Math.max(max, value);
-				} catch (NumberFormatException ex) {
-					
+			int number= 0;
+			while (true) {
+				String ithKey= createKey(number);
+				if (!properties.containsKey(fPrefix + ithKey) && !containsKey(substitutions, ithKey)) {
+					fCachedPrefixPlusKey= null;
+					fKey= ithKey;
+					return;
 				}
+				number++;
 			}
-			
-			fCachedPrefixPlusKey= null;
-			if (min == Integer.MAX_VALUE)
-				fKey= createKey(0);
-			else if (min > 0)
-				fKey= createKey(min-1);
-			else
-				fKey= createKey(max + 1);
 		}
+	}
+
+	private boolean containsKey(NLSSubstitution[] substitutions, String key) {
+		for (int i= 0; i < substitutions.length; i++) {
+			NLSSubstitution substitution= substitutions[i];
+			if (substitution == this || substitution.fState != EXTERNALIZED)
+				continue;
+
+			if (key.equals(substitution.internalGetKeyWithoutPrefix()))
+				return true;
+		}
+
+		return false;
 	}
 
 	public static void updateSubtitutions(NLSSubstitution[] substitutions, Properties props, String accessorClassName) {

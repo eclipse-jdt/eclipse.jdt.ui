@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.nls;
+
+import java.util.Properties;
 
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -35,8 +37,8 @@ public class NLSSubstitutionTest extends TestCase {
 		NLSSubstitution subs = new NLSSubstitution(NLSSubstitution.IGNORED, "v1", null);
 		subs.setState(NLSSubstitution.EXTERNALIZED);
 	    subs.setPrefix("key.");
-		subs.generateKey(substitutions);
-		assertEquals("key.3", subs.getKey());
+		subs.generateKey(substitutions, new Properties());
+		assertEquals("key.1", subs.getKey());
 	}
 	
 	public void testGeneratedKey2() {
@@ -46,13 +48,25 @@ public class NLSSubstitutionTest extends TestCase {
 				};
 		substitutions[1].setState(NLSSubstitution.EXTERNALIZED);
 		setPrefix("key.", substitutions);
-		substitutions[1].generateKey(substitutions);
+		substitutions[1].generateKey(substitutions, new Properties());
 			
 		NLSSubstitution subs = new NLSSubstitution(NLSSubstitution.IGNORED, "v1", null);
 		subs.setState(NLSSubstitution.EXTERNALIZED);
 	    subs.setPrefix("key.");
-		subs.generateKey(substitutions);
+		subs.generateKey(substitutions, new Properties());
 		assertEquals("key.2", subs.getKey());
+	}
+
+	public void testGeneratedKeyBug202815() {
+		NLSSubstitution substitution= new NLSSubstitution(NLSSubstitution.IGNORED, "v1", null);
+		substitution.setState(NLSSubstitution.EXTERNALIZED);
+		substitution.setPrefix("key.");
+
+		Properties properties= new Properties();
+		properties.put("key.0", "v0");
+
+		substitution.generateKey(new NLSSubstitution[] { substitution }, properties);
+		assertEquals("key.1", substitution.getKey());
 	}
 	
 	public void testGetKeyWithoutPrefix() {
