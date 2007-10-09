@@ -128,8 +128,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("                \"junit.textui.TestRunner\", //$NON-NLS-1$\n");
         buf.append("                \"java.lang.reflect.Method.invoke(\" //$NON-NLS-1$\n");
         buf.append("        };\n");
-        buf.append("        for (final String element : patterns) {\n");
-        buf.append("            if (line.indexOf(element) > 0) {\n");
+        buf.append("        for (final String pattern : patterns) {\n");
+		buf.append("            if (line.indexOf(pattern) > 0) {\n");
         buf.append("                return true;\n");
         buf.append("            }\n");
         buf.append("        }\n");
@@ -1753,8 +1753,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("    private void readExcludedPackages() {\n");
         buf.append("        this.fExcluded = new Vector(10);\n");
-        buf.append("        for (final String element : this.defaultExclusions) {\n");
-        buf.append("            this.fExcluded.addElement(element);\n");
+        buf.append("        for (final String defaultExclusion : this.defaultExclusions) {\n");
+		buf.append("            this.fExcluded.addElement(defaultExclusion);\n");
         buf.append("        }\n");
         buf.append("\n");
         buf.append("        final InputStream is = this.getClass().getResourceAsStream(\n");
@@ -2109,8 +2109,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("        final Vector names = new Vector();\n");
         buf.append("        while (Test.class.isAssignableFrom(superClass)) {\n");
         buf.append("            final Method[] methods = superClass.getDeclaredMethods();\n");
-        buf.append("            for (final Method element : methods) {\n");
-        buf.append("                this.addTestMethod(element, names, theClass);\n");
+        buf.append("            for (final Method method : methods) {\n");
+		buf.append("                this.addTestMethod(method, names, theClass);\n");
         buf.append("            }\n");
         buf.append("            superClass = superClass.getSuperclass();\n");
         buf.append("        }\n");
@@ -2714,9 +2714,9 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("        }\n");
         buf.append("        final String[] contents = thisRoot.list();\n");
         buf.append("        if (contents != null) {\n");
-        buf.append("            for (final String element : contents) {\n");
+        buf.append("            for (final String content : contents) {\n");
         buf.append("                this.gatherFiles(classRoot, classFileName + File.separatorChar\n");
-        buf.append("                        + element, result);\n");
+        buf.append("                        + content, result);\n");
         buf.append("            }\n");
         buf.append("        }\n");
         buf.append("    }\n");
@@ -3190,8 +3190,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    private String expected(final String[] lines) {\n");
         buf.append("        final OutputStream expected = new ByteArrayOutputStream();\n");
         buf.append("        final PrintStream expectedWriter = new PrintStream(expected);\n");
-        buf.append("        for (final String element : lines) {\n");
-        buf.append("            expectedWriter.println(element);\n");
+        buf.append("        for (final String line : lines) {\n");
+		buf.append("            expectedWriter.println(line);\n");
         buf.append("        }\n");
         buf.append("        return expected.toString();\n");
         buf.append("    }\n");
@@ -5277,6 +5277,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 		ICompilationUnit[] units= (ICompilationUnit[])cus.toArray(new ICompilationUnit[cus.size()]);
 		performRefactoring(units);
 		
+
 //		generateTable(units);
 		
 		for (int i= 0; i < units.length; i++) {
@@ -5403,39 +5404,39 @@ public class CleanUpStressTest extends CleanUpTestCase {
 //		CU_ORDER[69]= "junit.tests.runner.TestCaseClassLoaderTest.java";
 //		CU_ORDER[70]= "junit.samples.money.Money.java";
 //	}
-//	
+//
 //	private void generateTable(ICompilationUnit[] units) throws CoreException {
 //
 //		assertNoCompileErrors(units);
-//		
+//
 //		Hashtable expected= new Hashtable();
 //		for (int i= 0; i < units.length; i++) {
-//	        expected.put(getCompilationUnitName(units[i]), units[i].getBuffer().getContents());
-//        }
-//		
+//			expected.put(getCompilationUnitName(units[i]), units[i].getBuffer().getContents());
+//		}
+//
 //		StringBuffer buf= new StringBuffer();
-//		
+//
 //		buf.append("    private static Hashtable fExpectedChangesAllTests;").append("\n");
 //		buf.append("    static {").append("\n");
 //		buf.append("        fExpectedChangesAllTests= new Hashtable();").append("\n");
 //		buf.append("        StringBuffer buf= null;").append("\n");
-//		
+//
 //		for (int i= 0; i < CU_ORDER.length; i++) {
-//			String previewContent= (String)expected.get(CU_ORDER[i]);
+//			String previewContent= (String) expected.get(CU_ORDER[i]);
 //			String bufWrappedContext= getBufWrappedContext(new Document(previewContent));
-//			
+//
 //			buf.append("        buf= new StringBuffer();").append("\n");
 //			buf.append(bufWrappedContext).append("\n");
-//			buf.append("        fExpectedChangesAllTests.put(\""+CU_ORDER[i] +"\", buf.toString());").append("\n");
-//        }
-//		
+//			buf.append("        fExpectedChangesAllTests.put(\"" + CU_ORDER[i] + "\", buf.toString());").append("\n");
+//		}
+//
 //		buf.append("    }").append("\n");
-//	
+//
 //		Clipboard clipboard= new Clipboard(null);
-//		clipboard.setContents(new Object[] { buf.toString() }, new Transfer[] { TextTransfer.getInstance() } );
+//		clipboard.setContents(new Object[] { buf.toString() }, new Transfer[] { TextTransfer.getInstance() });
 //		clipboard.dispose();
 //	}
-//	
+//
 //	private static String getBufWrappedContext(IDocument document) {
 //		StringBuffer buf= new StringBuffer();
 //		try {
@@ -5443,22 +5444,22 @@ public class CleanUpStressTest extends CleanUpTestCase {
 //			int selectionLength= document.getLength();
 //			int startLine= document.getLineOfOffset(selectionOffset);
 //			int endLine= document.getLineOfOffset(selectionOffset + selectionLength);
-//			
+//
 //			for (int i= startLine; i <= endLine; i++) {
 //				IRegion lineInfo= document.getLineInformation(i);
 //				String lineContent= document.get(lineInfo.getOffset(), lineInfo.getLength());
 //				buf.append("        buf.append(\"");
 //				for (int k= 0; k < lineContent.length(); k++) {
-//                	char ch= lineContent.charAt(k);
-//                	if (ch == '\t') {
-//                		buf.append("    "); // 4 spaces
-//                	} else if (ch == '"' || ch == '\\') {
-//                		buf.append('\\').append(ch);
-//                	} else {
-//                		buf.append(ch);
-//                	}
-//                }
-//				
+//					char ch= lineContent.charAt(k);
+//					if (ch == '\t') {
+//						buf.append("    "); // 4 spaces
+//					} else if (ch == '"' || ch == '\\') {
+//						buf.append('\\').append(ch);
+//					} else {
+//						buf.append(ch);
+//					}
+//				}
+//
 //				if (i != endLine) {
 //					buf.append("\\n\");");
 //					buf.append('\n');
@@ -5471,32 +5472,32 @@ public class CleanUpStressTest extends CleanUpTestCase {
 //		}
 //		return buf.toString();
 //	}
-//	
-//	private void assertNoCompileErrors(ICompilationUnit[] units) throws JavaModelException, CoreException {
-//        ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
-//        parser.setResolveBindings(true);
-//        parser.setProject(fJProject1);
-//    
-//        parser.createASTs(units, new String[0], new ASTRequestor() {
-//        	public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
-//        	    IProblem[] problems= ast.getProblems();
 //
-//    	    	StringBuffer buf= new StringBuffer();
-//        	    for (int i= 0; i < problems.length; i++) {
-//                    if (problems[i].isError()) {
-//                        buf.append(problems[i].getMessage()).append('\n');	
-//                    }
-//                }
-//        	    if (buf.length() != 0) {
-//        	    	buf.insert(0, "Found errors in " + source.getElementName() + ":\n");
-//        	    	try {
-//                        buf.append(source.getBuffer().getContents());
-//                    } catch (JavaModelException e) {
-//                        JavaPlugin.log(e);
-//                    }
-//        	    	assertTrue(buf.toString(), false);
-//        	    }
-//        	}
-//        }, new NullProgressMonitor());
-//    }
+//	private void assertNoCompileErrors(ICompilationUnit[] units) throws JavaModelException, CoreException {
+//		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+//		parser.setResolveBindings(true);
+//		parser.setProject(fJProject1);
+//
+//		parser.createASTs(units, new String[0], new ASTRequestor() {
+//			public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
+//				IProblem[] problems= ast.getProblems();
+//
+//				StringBuffer buf= new StringBuffer();
+//				for (int i= 0; i < problems.length; i++) {
+//					if (problems[i].isError()) {
+//						buf.append(problems[i].getMessage()).append('\n');
+//					}
+//				}
+//				if (buf.length() != 0) {
+//					buf.insert(0, "Found errors in " + source.getElementName() + ":\n");
+//					try {
+//						buf.append(source.getBuffer().getContents());
+//					} catch (JavaModelException e) {
+//						JavaPlugin.log(e);
+//					}
+//					assertTrue(buf.toString(), false);
+//				}
+//			}
+//		}, new NullProgressMonitor());
+//	}
 }

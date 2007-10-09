@@ -3030,8 +3030,8 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("        int[] array={1,2,3,4};\n");
 		buf.append("        for (int element : array) {\n");
 		buf.append("            String[] strs={\"1\",\"2\"};\n");
-		buf.append("            for (String element2 : strs) {\n");
-		buf.append("                System.out.println(element+element2);\n");
+		buf.append("            for (String str : strs) {\n");
+		buf.append("                System.out.println(element+str);\n");
 		buf.append("            }\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
@@ -3435,8 +3435,8 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("public class E1 {\n");
 		buf.append("    public void foo(Object[] objs) {\n");
 		buf.append("        if (objs != null) {\n");
-		buf.append("            for (Object element : objs) {\n");
-		buf.append("                System.out.println(element);\n");
+		buf.append("            for (Object obj : objs) {\n");
+		buf.append("                System.out.println(obj);\n");
 		buf.append("            }\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
@@ -4638,8 +4638,8 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("public class E1 {\n");
 		buf.append("    public void foo(boolean b, int[] ints) {\n");
 		buf.append("        if (b)\n");
-		buf.append("            for (int element : ints)\n");
-		buf.append("                System.out.println(element);\n");
+		buf.append("            for (int j : ints)\n");
+		buf.append("                System.out.println(j);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -4671,9 +4671,9 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void foo(boolean b, int[] ints) {\n");
-		buf.append("        for (int element : ints)\n");
-		buf.append("            for (int element2 : ints)\n");
-		buf.append("                System.out.println(element2);\n");
+		buf.append("        for (int k : ints)\n");
+		buf.append("            for (int l : ints)\n");
+		buf.append("                System.out.println(l);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -5755,8 +5755,8 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("import java.util.List;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void foo(int[] ints, List<E1> es) {\n");
-		buf.append("        for (final int element : ints) {\n");
-		buf.append("            System.out.println(element);\n");
+		buf.append("        for (final int i : ints) {\n");
+		buf.append("            System.out.println(i);\n");
 		buf.append("        }\n");
 		buf.append("        \n");
 		buf.append("        for (final E1 e1 : es) {\n");

@@ -634,7 +634,12 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	
 	private String[] getVariableNameProposals(ITypeBinding arrayTypeBinding, IJavaProject project) {
 		String[] variableNames= getUsedVariableNames();
-		String[] elementSuggestions= StubUtility.getLocalNameSuggestions(project, FOR_LOOP_ELEMENT_IDENTIFIER, 0, variableNames);
+		String baseName= FOR_LOOP_ELEMENT_IDENTIFIER;
+		String name= fArrayBinding.getName();
+		if (name.length() > 2 && name.charAt(name.length() - 1) == 's') {
+			baseName= name.substring(0, name.length() - 1);
+		}
+		String[] elementSuggestions= StubUtility.getLocalNameSuggestions(project, baseName, 0, variableNames);
 		
 		String type= arrayTypeBinding.getElementType().getName();
 		String[] typeSuggestions= StubUtility.getLocalNameSuggestions(project, type, arrayTypeBinding.getDimensions() - 1, variableNames);

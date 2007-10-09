@@ -1830,8 +1830,8 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("public class E1 {\n");
 		buf.append("    public void a(int[] ints) {\n");
 		buf.append("        //Comment\n");
-		buf.append("        for (int element : ints) {\n");
-		buf.append("            System.out.println(element);\n");
+		buf.append("        for (int j : ints) {\n");
+		buf.append("            System.out.println(j);\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -1867,8 +1867,8 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("public class E1 {\n");
 		buf.append("    public void a(int[] ints) {\n");
 		buf.append("        //Comment\n");
-		buf.append("        for (int element : ints) {\n");
-		buf.append("            System.out.println(element);\n");
+		buf.append("        for (int j : ints) {\n");
+		buf.append("            System.out.println(j);\n");
 		buf.append("        }\n");
 		buf.append("        //Comment\n");
 		buf.append("    }\n");
