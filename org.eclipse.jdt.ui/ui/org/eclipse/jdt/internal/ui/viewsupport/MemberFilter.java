@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,29 +38,27 @@ public class MemberFilter extends ViewerFilter {
 
 	/**
 	 * Modifies filter and add a property to filter for
+	 * @param filter the filter to add
 	 */
 	public final void addFilter(int filter) {
 		fFilterProperties |= filter;
 	}
 	/**
 	 * Modifies filter and remove a property to filter for
+	 * @param filter the filter to remove
 	 */	
 	public final void removeFilter(int filter) {
 		fFilterProperties &= (-1 ^ filter);
 	}
 	/**
 	 * Tests if a property is filtered
+	 * @param filter the filter to test
+	 * @return returns the result of the test
 	 */		
 	public final boolean hasFilter(int filter) {
 		return (fFilterProperties & filter) != 0;
 	}
 	
-	/*
-	 * @see ViewerFilter#isFilterProperty(java.lang.Object, java.lang.String)
-	 */
-	public boolean isFilterProperty(Object element, Object property) {
-		return false;
-	}
 	/*
 	 * @see ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */		

@@ -40,7 +40,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 public class BindingLabelProvider extends LabelProvider {
 	
 
-	private static int getAdornmentFlags(IBinding binding, int flags) {
+	private static int getAdornmentFlags(IBinding binding) {
 		int adornments= 0;
 		if (binding instanceof IMethodBinding && ((IMethodBinding) binding).isConstructor())
 			adornments|= JavaElementImageDescriptor.CONSTRUCTOR;
@@ -205,7 +205,7 @@ public class BindingLabelProvider extends LabelProvider {
 			if (binding.isGenericMethod()) {
 				ITypeBinding[] typeParameters= binding.getTypeParameters();
 				if (typeParameters.length > 0) {
-					getTypeParametersLabel(typeParameters, (flags & JavaElementLabels.T_TYPE_PARAMETERS), buffer);
+					getTypeParametersLabel(typeParameters, buffer);
 					buffer.append(' ');
 				}
 			}
@@ -275,7 +275,7 @@ public class BindingLabelProvider extends LabelProvider {
 				ITypeBinding[] typeParameters= binding.getTypeParameters();
 				if (typeParameters.length > 0) {
 					buffer.append(' ');
-					getTypeParametersLabel(typeParameters, (flags & JavaElementLabels.T_TYPE_PARAMETERS), buffer);
+					getTypeParametersLabel(typeParameters, buffer);
 				}
 			}
 		}
@@ -381,7 +381,7 @@ public class BindingLabelProvider extends LabelProvider {
 			
 			if ((flags & JavaElementLabels.T_TYPE_PARAMETERS) != 0) {
 				if (binding.isGenericType()) {
-					getTypeParametersLabel(binding.getTypeParameters(), flags, buffer);
+					getTypeParametersLabel(binding.getTypeParameters(), buffer);
 				} else if (binding.isParameterizedType()) {
 					getTypeArgumentsLabel(binding.getTypeArguments(), flags, buffer);
 				}
@@ -422,7 +422,7 @@ public class BindingLabelProvider extends LabelProvider {
 	}
 	
 
-	private static void getTypeParametersLabel(ITypeBinding[] typeParameters, long flags, StringBuffer buffer) {
+	private static void getTypeParametersLabel(ITypeBinding[] typeParameters, StringBuffer buffer) {
 		if (typeParameters.length > 0) {
 			buffer.append('<');
 			for (int index= 0; index < typeParameters.length; index++) {
@@ -466,7 +466,7 @@ public class BindingLabelProvider extends LabelProvider {
 	public static ImageDescriptor getBindingImageDescriptor(IBinding binding, int imageFlags) {
 		ImageDescriptor baseImage= getBaseImageDescriptor(binding, imageFlags);
 		if (baseImage != null) {
-			int adornmentFlags= getAdornmentFlags(binding, imageFlags);
+			int adornmentFlags= getAdornmentFlags(binding);
 			Point size= ((imageFlags & JavaElementImageProvider.SMALL_ICONS) != 0) ? JavaElementImageProvider.SMALL_SIZE : JavaElementImageProvider.BIG_SIZE;
 			return new JavaElementImageDescriptor(baseImage, adornmentFlags, size);
 		}

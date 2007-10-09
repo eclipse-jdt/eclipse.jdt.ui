@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,8 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	
 	/**
 	 * Constructor for AppearanceAwareLabelProvider.
+	 * @param textFlags Flags defined in <code>JavaElementLabels</code>.
+	 * @param imageFlags Flags defined in <code>JavaElementImageProvider</code>.
 	 */
 	public AppearanceAwareLabelProvider(long textFlags, int imageFlags) {
 		super(textFlags, imageFlags);

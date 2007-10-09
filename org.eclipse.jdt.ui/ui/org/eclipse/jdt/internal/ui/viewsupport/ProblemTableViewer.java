@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -136,6 +136,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 	/**
 	 * Answers whether this viewer can ignore label provider changes resulting from
 	 * marker changes in annotation models
+	 * @return returns <code>true</code> if annotation model changes can be ignored
 	 */
 	private boolean canIgnoreChangesFromAnnotionModel() {
 		Object contentProvider= getContentProvider();

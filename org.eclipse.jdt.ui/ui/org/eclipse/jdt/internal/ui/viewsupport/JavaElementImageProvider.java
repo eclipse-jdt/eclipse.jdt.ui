@@ -89,7 +89,9 @@ public class JavaElementImageProvider {
 	 * Returns the icon for a given element. The icon depends on the element type
 	 * and element properties. If configured, overlay icons are constructed for
 	 * <code>ISourceReference</code>s.
+	 * @param element the element
 	 * @param flags Flags as defined by the JavaImageLabelProvider
+	 * @return return the image or <code>null</code>
 	 */
 	public Image getImageLabel(Object element, int flags) {
 		return getImageLabel(computeDescriptor(element, flags));
@@ -139,6 +141,9 @@ public class JavaElementImageProvider {
 	/**
 	 * Returns an image descriptor for a compilation unit not on the class path.
 	 * The descriptor includes overlays, if specified.
+	 * @param file the cu resource file
+	 * @param flags the image flags
+	 * @return returns the image descriptor
 	 */
 	public ImageDescriptor getCUResourceImageDescriptor(IFile file, int flags) {
 		Point size= useSmallSize(flags) ? SMALL_SIZE : BIG_SIZE;
@@ -147,6 +152,9 @@ public class JavaElementImageProvider {
 		
 	/**
 	 * Returns an image descriptor for a java element. The descriptor includes overlays, if specified.
+	 * @param element the Java element
+	 * @param flags the image flags
+	 * @return returns the image descriptor
 	 */
 	public ImageDescriptor getJavaImageDescriptor(IJavaElement element, int flags) {
 		Point size= useSmallSize(flags) ? SMALL_SIZE : BIG_SIZE;
@@ -162,6 +170,9 @@ public class JavaElementImageProvider {
 	/**
 	 * Returns an image descriptor for a IAdaptable. The descriptor includes overlays, if specified (only error ticks apply).
 	 * Returns <code>null</code> if no image could be found.
+	 * @param adaptable the adaptable
+	 * @param flags the image flags
+	 * @return returns the image descriptor
 	 */	
 	public ImageDescriptor getWorkbenchImageDescriptor(IAdaptable adaptable, int flags) {
 		IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter) adaptable.getAdapter(IWorkbenchAdapter.class);
@@ -181,6 +192,9 @@ public class JavaElementImageProvider {
 	
 	/**
 	 * Returns an image descriptor for a java element. This is the base image, no overlays.
+	 * @param element the element
+	 * @param renderFlags the image flags
+	 * @return returns the image descriptor
 	 */
 	public ImageDescriptor getBaseImageDescriptor(IJavaElement element, int renderFlags) {
 
@@ -245,7 +259,7 @@ public class JavaElementImageProvider {
 				}
 				
 				case IJavaElement.PACKAGE_FRAGMENT:
-					return getPackageFragmentIcon(element, renderFlags);
+					return getPackageFragmentIcon(element);
 
 					
 				case IJavaElement.COMPILATION_UNIT:
@@ -308,7 +322,7 @@ public class JavaElementImageProvider {
 		return !Flags.isPublic(flags) && !Flags.isProtected(flags) && !Flags.isPrivate(flags);
 	}
 	
-	protected ImageDescriptor getPackageFragmentIcon(IJavaElement element, int renderFlags) throws JavaModelException {
+	private ImageDescriptor getPackageFragmentIcon(IJavaElement element) throws JavaModelException {
 		IPackageFragment fragment= (IPackageFragment)element;
 		boolean containsJavaElements= false;
 		try {
@@ -429,14 +443,7 @@ public class JavaElementImageProvider {
 			
 		return JavaPluginImages.DESC_FIELD_DEFAULT;
 	}		
-	
-	/**
-	 * @deprecated
-	 */
-	public static ImageDescriptor getTypeImageDescriptor(boolean isInterface, boolean isInner, boolean isInInterface, int flags) {
-		return getTypeImageDescriptor(isInner, isInInterface, isInterface ? flags | Flags.AccInterface : flags, false);
-	}
-	
+		
 	public static ImageDescriptor getTypeImageDescriptor(boolean isInner, boolean isInInterfaceOrAnnotation, int flags, boolean useLightIcons) {
 		if (Flags.isEnum(flags)) {
 			if (useLightIcons) {
