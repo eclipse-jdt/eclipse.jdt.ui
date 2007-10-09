@@ -124,7 +124,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 		return new UnimplementedCodeFix(label, root, new CompilationUnitRewriteOperation[] { operation });
 	}
 
-	private static ASTNode getSelectedTypeNode(CompilationUnit root, IProblemLocation problem) {
+	public static ASTNode getSelectedTypeNode(CompilationUnit root, IProblemLocation problem) {
 		ASTNode selectedNode= problem.getCoveringNode(root);
 		if (selectedNode == null)
 			return null;

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
+import java.util.HashSet;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -21,6 +22,7 @@ import org.eclipse.jface.text.templates.TemplateException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -132,7 +134,16 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 			return 0;
 
 		IProblemLocation[] locations= filter(convertProblems(compilationUnit.getProblems()), new int[] { IProblem.AbstractMethodMustBeImplemented, IProblem.EnumAbstractMethodMustBeImplemented });
-		return locations.length;
+		
+		HashSet types= new HashSet();
+		for (int i= 0; i < locations.length; i++) {
+			ASTNode type= UnimplementedCodeFix.getSelectedTypeNode(compilationUnit, locations[i]);
+			if (type != null) {
+				types.add(type);
+			}
+		}
+
+		return types.size();
 	}
 
 	private String getOverridingMethodComment() {
