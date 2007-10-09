@@ -19,17 +19,6 @@
 <!-- ************************************************** Basic SWT patterns ********************************************* -->
 
 <template 
-	name="eventloop" 
-	description="%SWTTemplates.eventloop" 
-	id="org.eclipse.jdt.ui.text.codetemplates.swt.eventloop" 
-	context="swt" enabled="true"
-	
->while (!${shell:var(org.eclipse.swt.widgets.Shell)}.isDisposed()) {
-	if (!${display:var(org.eclipse.swt.widgets.Display)}.readAndDispatch ()) 
-		${display}.sleep ();
-}</template>
-
-<template 
 	name="execute" 
 	description="%SWTTemplates.execute" 
 	id="org.eclipse.jdt.ui.text.codetemplates.swt.execute" 
@@ -220,6 +209,25 @@ ${imp:import(org.eclipse.swt.SWT)}${cursor}</template>
 
 <!-- ************************************************** Containers ************************************************** -->
 
+<template 
+	name="Shell" 
+	description="%SWTTemplates.shell" 
+	id="org.eclipse.jdt.ui.text.codetemplates.swt.shell" 
+	context="swt" enabled="true"
+	
+>${displayType:newType(org.eclipse.swt.widgets.Display)} ${display:newName(org.eclipse.swt.widgets.Display)} = new ${displayType}();
+${shellType:newType(org.eclipse.swt.widgets.Shell)} ${shell:newName(org.eclipse.swt.widgets.Shell)} = new ${shellType}(${display});
+${shell}.setLayout(new ${layoutType:newType(org.eclipse.swt.layout.GridLayout)}(${numberColumns:link(1, 2, 3, 4, 5)}, ${equalColumns:link(false, true)}));
+
+${cursor}
+
+${shell}.pack();
+${shell}.open();
+while (!${shell}.isDisposed()) {
+	if (!${display}.readAndDispatch ()) 
+		${display}.sleep();
+}
+${display}.dispose();</template>
 
 <template 
 	name="Composite" 
