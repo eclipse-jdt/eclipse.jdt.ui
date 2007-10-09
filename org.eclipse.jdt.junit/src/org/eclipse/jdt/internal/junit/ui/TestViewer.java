@@ -230,7 +230,7 @@ public class TestViewer {
 			} else {
 				TestCaseElement testCaseElement= (TestCaseElement) testElement;
 				String testMethodName= testCaseElement.getTestMethodName();
-				manager.add(new OpenTestAction(fTestRunnerPart, className, testMethodName));
+				manager.add(new OpenTestAction(fTestRunnerPart, testCaseElement));
 				manager.add(new Separator());
 				if (fTestRunnerPart.lastLaunchIsKeptAlive()) {
 					manager.add(new RerunAction(JUnitMessages.RerunAction_label_rerun, fTestRunnerPart, testElement.getId(), className, testMethodName, ILaunchManager.RUN_MODE));
@@ -290,7 +290,7 @@ public class TestViewer {
 			action= new OpenTestAction(fTestRunnerPart, testElement.getTestName());
 		} else if (testElement instanceof TestCaseElement){
 			TestCaseElement testCase= (TestCaseElement) testElement;
-			action= new OpenTestAction(fTestRunnerPart, testCase.getClassName(), testCase.getTestMethodName());
+			action= new OpenTestAction(fTestRunnerPart, testCase);
 		} else {
 			throw new IllegalStateException(String.valueOf(testElement));
 		}
