@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testrun name="FailingSuite" project="JUnitTests" tests="1" started="0" failures="1" errors="0" ignored="0">
-  <testsuite name="pack.FailingSuite$MySetup" incomplete="true">
+  <testsuite name="pack.FailingSuite.MySetup" incomplete="true">
     <failure>junit.framework.AssertionFailedError: failure in setUp
 	at junit.framework.Assert.fail(Assert.java:47)
 	at pack.FailingSuite$MySetup.setUp(FailingSuite.java:15)
