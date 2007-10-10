@@ -77,6 +77,8 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	private IPreferencePageContainer fContainer;
 	private Button fAdditionalActionButton;
 	private Button fConfigureButton;
+
+	private Button fFormatAllButton;
 	
 	/**
 	 * {@inheritDoc}
@@ -105,11 +107,32 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 				changeSettingsValue(CleanUpConstants.FORMAT_SOURCE_CODE, fFormatCodeButton.getSelection());
 			}
 		});
-	
-		fFormatChangedOnlyButton= new Button(composite, SWT.CHECK);
-		fFormatChangedOnlyButton.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_FormatOnlyChangedRegions_Checkbox);
+
+		Composite regionFormatingCombo= new Composite(composite, SWT.NONE);
 		gridData= new GridData(SWT.FILL, SWT.TOP, true, false);
 		gridData.horizontalIndent= 20;
+		regionFormatingCombo.setLayoutData(gridData);
+		gridLayout= new GridLayout(1, false);
+		gridLayout.marginHeight= 0;
+		gridLayout.marginWidth= 0;
+		regionFormatingCombo.setLayout(gridLayout);
+
+		fFormatAllButton= new Button(regionFormatingCombo, SWT.RADIO);
+		fFormatAllButton.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePAge_FormatAllLines_Radio);
+		gridData= new GridData(SWT.FILL, SWT.TOP, true, false);
+		fFormatAllButton.setLayoutData(gridData);
+		fFormatAllButton.addSelectionListener(new SelectionAdapter() {
+			/**
+			 * {@inheritDoc}
+			 */
+			public void widgetSelected(SelectionEvent e) {
+				changeSettingsValue(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY, !fFormatAllButton.getSelection());
+			}
+		});
+		
+		fFormatChangedOnlyButton= new Button(regionFormatingCombo, SWT.RADIO);
+		fFormatChangedOnlyButton.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_FormatOnlyChangedRegions_Radio);
+		gridData= new GridData(SWT.FILL, SWT.TOP, true, false);
 		fFormatChangedOnlyButton.setLayoutData(gridData);
 		fFormatChangedOnlyButton.addSelectionListener(new SelectionAdapter() {
 			/**
@@ -303,6 +326,8 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		boolean isFormatting= fFormatCodeButton.getSelection();
 		fFormatChangedOnlyButton.setSelection(CleanUpOptions.TRUE.equals(fSettings.get(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY)));
 		fFormatChangedOnlyButton.setEnabled(isFormatting);
+		fFormatAllButton.setSelection(CleanUpOptions.FALSE.equals(fSettings.get(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY)));
+		fFormatAllButton.setEnabled(isFormatting);
 		fFormatConfigLink.setEnabled(isFormatting);
 		fOrganizeImportsButton.setSelection(CleanUpOptions.TRUE.equals(fSettings.get(CleanUpConstants.ORGANIZE_IMPORTS)));
 		fOrganizeImportsConfigLink.setEnabled(fOrganizeImportsButton.getSelection());
