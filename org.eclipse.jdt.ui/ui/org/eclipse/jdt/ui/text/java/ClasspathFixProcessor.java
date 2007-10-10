@@ -118,7 +118,9 @@ public abstract class ClasspathFixProcessor {
 	}
 	
 	/**
-	 * Returns proposal that can fix non-resolvable imports.
+	 * Returns proposal that can fix non-resolvable imports. The proposal is expected to change the class path or a classpath container
+	 * so that the missing type can be resolved. A proposal should also consider to fix related types. For example, when a reference to
+	 * <code>junit.framework.TestCase</code> is requested, it makes sense to import the full JUnit library, not just fixing the missing type.
 	 * 
 	 * @param project the current project
 	 * @param name the missing type to be added to the class path. The entries can be either a
