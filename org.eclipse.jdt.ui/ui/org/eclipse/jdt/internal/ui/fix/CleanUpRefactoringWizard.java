@@ -50,6 +50,7 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -363,9 +364,12 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				 * {@inheritDoc}
 				 */
 				public void widgetSelected(SelectionEvent e) {
-					CleanUpSelectionDialog dialog= new WizardCleanUpSelectionDialog(getShell(), fCustomSettings);
-					dialog.open();
-					showCustomSettings(bulletListBlock);
+					Hashtable workingValues= new Hashtable(fCustomSettings);
+					CleanUpSelectionDialog dialog= new WizardCleanUpSelectionDialog(getShell(), workingValues);
+					if (dialog.open() == Window.OK) {
+						fCustomSettings= workingValues;
+						showCustomSettings(bulletListBlock);
+					}
 				}
 			});
 			

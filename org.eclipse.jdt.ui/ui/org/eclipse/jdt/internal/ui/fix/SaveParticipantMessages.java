@@ -15,7 +15,6 @@ import org.eclipse.osgi.util.NLS;
 public class SaveParticipantMessages extends NLS {
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.fix.SaveParticipantMessages"; //$NON-NLS-1$
 	
-	public static String CleanUpSaveParticipantConfigurationModifyDialog_Apply_Button;
 	public static String CleanUpSaveParticipantConfigurationModifyDialog_CodeOrganizing_TabPage;
 	public static String CleanUpSaveParticipantConfigurationModifyDialog_CodeStyle_TabPage;
 	public static String CleanUpSaveParticipantConfigurationModifyDialog_MemberAccesses_TabPage;

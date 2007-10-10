@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.fix;
 
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -35,6 +36,7 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.preference.IPreferencePageContainer;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
@@ -210,8 +212,12 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 			 * {@inheritDoc}
 			 */
 			public void widgetSelected(SelectionEvent e) {
-				new SaveActionSelectionDialog(parent.getShell(), fSettings).open();
-				settingsChanged();
+				Hashtable workingValues= new Hashtable(fSettings);
+				SaveActionSelectionDialog dialog= new SaveActionSelectionDialog(parent.getShell(), workingValues);
+				if (dialog.open() == Window.OK) {
+					fSettings= workingValues;
+					settingsChanged();
+				}
 			}
 			
 		});
