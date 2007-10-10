@@ -256,8 +256,14 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	 * {@inheritDoc}
 	 */
 	public void performDefaults() {
-		fSettings= CleanUpPreferenceUtil.loadSaveParticipantOptions(new InstanceScope());
+		if (ProjectScope.SCOPE.equals(fContext.getName())) {
+			fSettings= CleanUpPreferenceUtil.loadSaveParticipantOptions(new InstanceScope());
+		} else {
+			fSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_SAVE_ACTION_OPTIONS).getMap();
+		}
 		settingsChanged();
+		
+		super.performDefaults();
 	}
 	
 	/**

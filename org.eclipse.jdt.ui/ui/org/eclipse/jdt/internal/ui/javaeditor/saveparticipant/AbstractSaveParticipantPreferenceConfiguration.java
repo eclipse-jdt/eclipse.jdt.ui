@@ -16,6 +16,8 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
+import org.eclipse.core.resources.ProjectScope;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -51,16 +53,21 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
 	private ControlEnableState fConfigControlEnabledState;
 
 	/**
-	 * The id of the post save listener managed by this configuration block, not null
+	 * @return id of the post save listener managed by this configuration block
 	 */
 	protected abstract String getPostSaveListenerId();
 	
 	/**
-	 * The name of the post save listener managed by this configuration block, not null
+	 * @return human readable name of the post save listener managed by this configuration block
 	 */
 	protected abstract String getPostSaveListenerName();
 	
-	protected Control createConfigControl(Composite composite, IPreferencePageContainer container) {
+	/**
+	 * @param parent the parent to use to add the control to 
+	 * @param container the container showing the preferences
+	 * @return the create control or <b>null</b> if non
+	 */
+	protected Control createConfigControl(Composite parent, IPreferencePageContainer container) {
 		//Default has no specific controls
 	    return null;
     }
@@ -116,7 +123,12 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
 	 */
 	public void performDefaults() {
 		String key= getPreferenceKey();
-		boolean defaultEnabled= new DefaultScope().getNode(JavaUI.ID_PLUGIN).getBoolean(key, false);
+		boolean defaultEnabled;
+		if (ProjectScope.SCOPE.equals(fContext.getName())) {
+			defaultEnabled= new InstanceScope().getNode(JavaUI.ID_PLUGIN).getBoolean(key, false);
+		} else {
+			defaultEnabled= new DefaultScope().getNode(JavaUI.ID_PLUGIN).getBoolean(key, false);
+		}
 		fContext.getNode(JavaUI.ID_PLUGIN).putBoolean(key, defaultEnabled);
 		fEnableField.setSelection(defaultEnabled);
 	}
