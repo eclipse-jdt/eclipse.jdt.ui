@@ -31,10 +31,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.preference.IPreferencePageContainer;
 import org.eclipse.jface.window.Window;
 
@@ -47,7 +47,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPostSaveListener;
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
-import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -79,26 +78,28 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	private IPreferencePageContainer fContainer;
 	private Button fAdditionalActionButton;
 	private Button fConfigureButton;
-
 	private Button fFormatAllButton;
 	
+	private Composite fCleanUpOptionsComposite;
+	private ControlEnableState fControlEnableState;
+
 	/**
 	 * {@inheritDoc}
 	 */
-	public Control createConfigControl(final Composite parent, IPreferencePageContainer container) {
+	public void createConfigControl(final Composite parent, IPreferencePageContainer container) {
 		fContainer= container;
 		fShell= parent.getShell();
 		
-		final Composite composite= new Composite(parent, SWT.NONE);
+		fCleanUpOptionsComposite= new Composite(parent, SWT.NONE);
 		GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.horizontalIndent= INDENT;
-		composite.setLayoutData(gridData);
+		fCleanUpOptionsComposite.setLayoutData(gridData);
 		GridLayout gridLayout= new GridLayout(1, false);
 		gridLayout.marginHeight= 0;
 		gridLayout.marginWidth= 0;
-		composite.setLayout(gridLayout);
+		fCleanUpOptionsComposite.setLayout(gridLayout);
 		
-		fFormatCodeButton= new Button(composite, SWT.CHECK);
+		fFormatCodeButton= new Button(fCleanUpOptionsComposite, SWT.CHECK);
 		fFormatCodeButton.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_FormatSource_Checkbox);
 		fFormatCodeButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		fFormatCodeButton.addSelectionListener(new SelectionAdapter() {
@@ -110,7 +111,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 			}
 		});
 
-		Composite regionFormatingCombo= new Composite(composite, SWT.NONE);
+		Composite regionFormatingCombo= new Composite(fCleanUpOptionsComposite, SWT.NONE);
 		gridData= new GridData(SWT.FILL, SWT.TOP, true, false);
 		gridData.horizontalIndent= 20;
 		regionFormatingCombo.setLayoutData(gridData);
@@ -148,14 +149,14 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		PixelConverter pixelConverter= new PixelConverter(parent);
 		int heightOneHalf= (int)Math.round(pixelConverter.convertHeightInCharsToPixels(1) * 1.5);
 		
-		fFormatConfigLink= new Link(composite, SWT.NONE);
+		fFormatConfigLink= new Link(fCleanUpOptionsComposite, SWT.NONE);
 		fFormatConfigLink.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_ConfigureFormatter_Link);
 		GridData gridData2= new GridData(SWT.LEFT, SWT.TOP, false, true);
 		gridData2.horizontalIndent= 20;
 		gridData2.minimumHeight= heightOneHalf;
 		fFormatConfigLink.setLayoutData(gridData2);
 		
-		fOrganizeImportsButton= new Button(composite, SWT.CHECK);
+		fOrganizeImportsButton= new Button(fCleanUpOptionsComposite, SWT.CHECK);
 		fOrganizeImportsButton.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_OrganizeImports_Checkbox);
 		fOrganizeImportsButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		fOrganizeImportsButton.addSelectionListener(new SelectionAdapter() {
@@ -167,17 +168,17 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 			}
 		});
 		
-		fOrganizeImportsConfigLink= new Link(composite, SWT.NONE);
+		fOrganizeImportsConfigLink= new Link(fCleanUpOptionsComposite, SWT.NONE);
 		fOrganizeImportsConfigLink.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_ConfigureImports_Link);
 		GridData gridData3= new GridData(SWT.LEFT, SWT.TOP, false, true);
 		gridData3.horizontalIndent= 20;
 		gridData3.minimumHeight= heightOneHalf;
 		fOrganizeImportsConfigLink.setLayoutData(gridData3);
 		
-		fAdditionalActionButton= new Button(composite, SWT.CHECK);
+		fAdditionalActionButton= new Button(fCleanUpOptionsComposite, SWT.CHECK);
 		fAdditionalActionButton.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_AdditionalActions_Checkbox);
 		
-		createAdvancedComposite(composite);
+		createAdvancedComposite(fCleanUpOptionsComposite);
 		fAdditionalActionButton.addSelectionListener(new SelectionAdapter() {
 			/**
 			 * {@inheritDoc}
@@ -186,8 +187,6 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 				changeSettingsValue(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS, fAdditionalActionButton.getSelection());
 			}
 		});
-		
-		return composite;
 	}
 	
 	private Composite createAdvancedComposite(final Composite parent) {
@@ -200,9 +199,10 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		layout.marginWidth= 0;
 		composite.setLayout(layout);
 		
-		fSelectedActionsText= new BulletListBlock();
-		final GridData data= (GridData)fSelectedActionsText.createControl(composite).getLayoutData();
-		data.heightHint= new PixelConverter(composite).convertHeightInCharsToPixels(8);
+		fSelectedActionsText= new BulletListBlock(composite, SWT.NONE);
+		gridData= new GridData(SWT.FILL, SWT.TOP, true, false);
+		gridData.heightHint= new PixelConverter(composite).convertHeightInCharsToPixels(8);
+		fSelectedActionsText.setLayoutData(gridData);
 		
 		fConfigureButton= new Button(composite, SWT.NONE);
 		fConfigureButton.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_Configure_Button);
@@ -254,14 +254,12 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	/**
 	 * {@inheritDoc}
 	 */
-	public void dispose() {
-		super.dispose();
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
 	public void performDefaults() {
+		if (ProjectScope.SCOPE.equals(fContext.getName()) && !hasSettingsInScope(fContext))
+			return;
+		
+		enabled(true);
+		
 		if (ProjectScope.SCOPE.equals(fContext.getName())) {
 			fSettings= CleanUpPreferenceUtil.loadSaveParticipantOptions(new InstanceScope());
 		} else {
@@ -289,8 +287,6 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		super.enableProjectSettings();
 		
 		CleanUpPreferenceUtil.saveSaveParticipantOptions(fContext, fSettings);
-		
-		updateAdvancedEnableState();
 	}
 	
 	/**
@@ -306,8 +302,6 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 			String key= (String)iterator.next();
 			node.remove(CleanUpPreferenceUtil.SAVE_PARTICIPANT_KEY_PREFIX + key);
 		}
-		
-		updateAdvancedEnableState();
 	}
 	
 	/**
@@ -327,62 +321,67 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void enableConfigControl(boolean isEnabled) {
-		super.enableConfigControl(isEnabled);
-		
-		updateAdvancedEnableState();
+	protected void enabled(boolean isEnabled) {
+		if (isEnabled) {
+			if (fControlEnableState == null)
+				return;
+
+			fControlEnableState.restore();
+			fControlEnableState= null;
+		} else {
+			if (fControlEnableState != null)
+				return;
+
+			fControlEnableState= ControlEnableState.disable(fCleanUpOptionsComposite);
+		}
 	}
 	
 	private void settingsChanged() {
 		fFormatCodeButton.setSelection(CleanUpOptions.TRUE.equals(fSettings.get(CleanUpConstants.FORMAT_SOURCE_CODE)));
 		boolean isFormatting= fFormatCodeButton.getSelection();
 		fFormatChangedOnlyButton.setSelection(CleanUpOptions.TRUE.equals(fSettings.get(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY)));
-		fFormatChangedOnlyButton.setEnabled(isFormatting);
 		fFormatAllButton.setSelection(CleanUpOptions.FALSE.equals(fSettings.get(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY)));
+		
+		fFormatChangedOnlyButton.setEnabled(isFormatting);
 		fFormatAllButton.setEnabled(isFormatting);
 		fFormatConfigLink.setEnabled(isFormatting);
+		
 		fOrganizeImportsButton.setSelection(CleanUpOptions.TRUE.equals(fSettings.get(CleanUpConstants.ORGANIZE_IMPORTS)));
 		fOrganizeImportsConfigLink.setEnabled(fOrganizeImportsButton.getSelection());
+		
 		fAdditionalActionButton.setSelection(CleanUpOptions.TRUE.equals(fSettings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS)));
 		
-		updateAdvancedEnableState();
+		boolean additionalEnabled= CleanUpOptions.TRUE.equals(fSettings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS));
+		
+		fSelectedActionsText.setEnabled(additionalEnabled);
+		fConfigureButton.setEnabled(additionalEnabled);
 		
 		Map settings= new HashMap(fSettings);
 		settings.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpOptions.FALSE);
 		settings.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpOptions.FALSE);
+		CleanUpOptions options= new MapCleanUpOptions(settings);
 		
-		final ICleanUp[] cleanUps= CleanUpRefactoring.createCleanUps();
-		
-		if (cleanUps.length == 0) {			
-			fSelectedActionsText.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_NoActionEnabled_Info);
-		} else {
-			StringBuffer buf= new StringBuffer();
-			
-			boolean first= true;
-			CleanUpOptions options= new MapCleanUpOptions(settings);
-	    	for (int i= 0; i < cleanUps.length; i++) {
-				cleanUps[i].setOptions(options);
-		        String[] descriptions= cleanUps[i].getDescriptions();
-		        if (descriptions != null) {
-	    	        for (int j= 0; j < descriptions.length; j++) {
-	    	        	if (first) {
-	    	        		first= false;
-	    	        	} else {
-	    	        		buf.append('\n');	    	        		
-	    	        	}
-	    	            buf.append(descriptions[j]);
-	                }
-		        }
-	        }
-	    	fSelectedActionsText.setText(buf.toString());
-		}
+		fSelectedActionsText.setText(getSelectedCleanUpsText(options));
 	}
-	
-	private void updateAdvancedEnableState() {
-		boolean additionalOptionEnabled= isEnabled(fContext) && CleanUpOptions.TRUE.equals(fSettings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS));
-		boolean additionalEnabled= additionalOptionEnabled && (!ProjectScope.SCOPE.equals(fContext.getName()) || hasSettingsInScope(fContext));
-		fSelectedActionsText.setEnabled(additionalEnabled);
-		fConfigureButton.setEnabled(additionalEnabled);
+
+	private String getSelectedCleanUpsText(CleanUpOptions options) {
+		StringBuffer buf= new StringBuffer();
+
+		final ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUps();
+		for (int i= 0; i < cleanUps.length; i++) {
+			cleanUps[i].setOptions(options);
+			String[] descriptions= cleanUps[i].getDescriptions();
+			if (descriptions != null) {
+				for (int j= 0; j < descriptions.length; j++) {
+					if (buf.length() > 0) {
+						buf.append('\n');
+					}
+					buf.append(descriptions[j]);
+				}
+	        }
+        }
+		String string= buf.toString();
+		return string;
 	}
 	
 	private void configurePreferenceLink(Link link, final IJavaProject javaProject, final String preferenceId, final String propertyId) {

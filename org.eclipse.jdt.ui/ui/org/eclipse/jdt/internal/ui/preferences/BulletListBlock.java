@@ -17,6 +17,7 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GlyphMetrics;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -24,18 +25,26 @@ import org.eclipse.swt.widgets.Display;
 /**
  * Each line of the given text is preceded by a bullet.
  */
-public class BulletListBlock {
+public class BulletListBlock extends Composite {
 
 	private StyledText fStyledText;
 	private boolean fEnabled;
 	private String fText;
 	
-	public BulletListBlock() {
+	public BulletListBlock(Composite parent, int style) {
+		super(parent, style);
 		fEnabled= true;
 		fText= ""; //$NON-NLS-1$
+		
+		GridLayout layout= new GridLayout(1, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		setLayout(layout);
+		
+		createControl(this);
 	}
 
-	public Control createControl(Composite parent) {
+	private Control createControl(Composite parent) {
 		fStyledText= new StyledText(parent, SWT.FLAT | SWT.BORDER | SWT.READ_ONLY);
 		
 		final GridData data= new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
@@ -48,6 +57,13 @@ public class BulletListBlock {
 	public void setText(String text) {
 		fText= text;
 		configureStyledText(fText, fEnabled);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean getEnabled() {
+		return fEnabled;
 	}
 	
 	public void setEnabled(boolean enabled) {

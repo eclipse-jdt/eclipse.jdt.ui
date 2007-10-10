@@ -37,7 +37,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
@@ -345,11 +344,11 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
                 }
 			}
 			
-			final BulletListBlock bulletListBlock= new BulletListBlock();
-			Control bulletList= bulletListBlock.createControl(composite);
-			GridData layoutData= (GridData)bulletList.getLayoutData();
-			(layoutData).horizontalIndent= 15;
+			final BulletListBlock bulletListBlock= new BulletListBlock(composite, SWT.NONE);
+			GridData layoutData= new GridData(SWT.FILL, SWT.FILL, true, true);
+			layoutData.horizontalIndent= 15;
 			layoutData.grabExcessVerticalSpace= true;
+			bulletListBlock.setLayoutData(layoutData);
 			
 			final Button configure= new Button(composite, SWT.NONE);
 			configure.setText(MultiFixMessages.CleanUpRefactoringWizard_ConfigureCustomProfile_button);

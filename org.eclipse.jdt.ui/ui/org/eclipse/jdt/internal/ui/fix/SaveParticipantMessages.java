@@ -31,7 +31,6 @@ public class SaveParticipantMessages extends NLS {
 	public static String CleanUpSaveParticipantPreferenceConfiguration_Configure_Button;
 	public static String CleanUpSaveParticipantPreferenceConfiguration_ConfigureFormatter_Link;
 	public static String CleanUpSaveParticipantPreferenceConfiguration_ConfigureImports_Link;
-	public static String CleanUpSaveParticipantPreferenceConfiguration_NoActionEnabled_Info;
 	
 	public static String CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePAge_FormatAllLines_Radio;
 

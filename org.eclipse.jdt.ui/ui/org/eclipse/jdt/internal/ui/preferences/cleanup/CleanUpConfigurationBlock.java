@@ -29,7 +29,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -68,7 +67,6 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 	private SelectionButtonDialogField fShowCleanUpWizardDialogField;
 	private CleanUpProfileManager fProfileManager;
 	private ProfileStore fProfileStore;
-	private BulletListBlock fBrowserBlock;
     
     public CleanUpConfigurationBlock(IProject project, PreferencesAccess access) {
 	    super(project, access, DIALOGSTORE_LASTSAVELOADPATH);
@@ -111,10 +109,11 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		
 		createLabel(composite, CleanUpMessages.CleanUpConfigurationBlock_SelectedCleanUps_label, numColumns);
 		
-		fBrowserBlock= new BulletListBlock();
-		Control control= fBrowserBlock.createControl(composite);
-		((GridData)control.getLayoutData()).horizontalSpan= numColumns;
-		fBrowserBlock.setText(getSelectedCleanUpsInfo(cleanUps));
+		final BulletListBlock cleanUpListBlock= new BulletListBlock(composite, SWT.NONE);
+		GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
+		gridData.horizontalSpan= numColumns;
+		cleanUpListBlock.setLayoutData(gridData);
+		cleanUpListBlock.setText(getSelectedCleanUpsInfo(cleanUps));
 		
 		profileManager.addObserver(new Observer() {
 
@@ -126,7 +125,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 				case ProfileManager.SELECTION_CHANGED_EVENT:
 				case ProfileManager.SETTINGS_CHANGED_EVENT:
 					fill(profileManager.getSelected().getSettings(), sharedSettings);
-					fBrowserBlock.setText(getSelectedCleanUpsInfo(cleanUps));
+					cleanUpListBlock.setText(getSelectedCleanUpsInfo(cleanUps));
 				}
             }
 			
@@ -273,8 +272,5 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 			}
 		}
 	}
-	
-	public void enableProjectSpecificSettings(boolean useProjectSpecificSettings) {
-		fBrowserBlock.setEnabled(useProjectSpecificSettings);
-	}
+
 }
