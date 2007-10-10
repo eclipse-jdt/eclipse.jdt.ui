@@ -843,15 +843,6 @@
          </enabledWhen>
          <keywordReference id="org.eclipse.jdt.ui.classpathcontainer" />
       </page>
-      <page
-            name="%workingSetPageName"
-            class="org.eclipse.jdt.internal.ui.preferences.WorkingSetPropertyPage"
-            id="org.eclipse.jdt.ui.propertyPages.WorkingSetPropertyPage">
-         <enabledWhen>
-         	<adapt type="org.eclipse.ui.IWorkingSet" />
-         </enabledWhen>
-         <keywordReference id="org.eclipse.jdt.ui.workingset" />
-      </page>
 
    </extension>
    <extension
@@ -1589,9 +1580,6 @@
      <keyword
             label="%preferenceKeywords.classpathcontainer"
             id="org.eclipse.jdt.ui.classpathcontainer"/>
-     <keyword
-            label="%preferenceKeywords.workingset"
-            id="org.eclipse.jdt.ui.workingset"/>
    </extension>  
 <!-- =========================================================================== -->
 <!-- Work in Progress                                                            -->
