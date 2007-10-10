@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -100,7 +100,6 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		return javadocComposite;
 	}
 	
-	
 	private Composite createJavadocTabContent(Composite folder) {
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
 		
@@ -165,14 +164,21 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_label; 
 		addCheckBox(composite, label, PREF_PB_INVALID_JAVADOC_TAGS, enabledDisabled, indent);
 		
+		Composite validateTagComposite= new Composite(composite, SWT.NONE);
+		GridData gridData= new GridData(SWT.FILL, SWT.TOP, true, false);
+		gridData.horizontalIndent= indent;
+		gridData.horizontalSpan= nColumns;
+		validateTagComposite.setLayoutData(gridData);
+		GridLayout gridLayout= new GridLayout(1, false);
+		gridLayout.marginHeight= 0;
+		gridLayout.marginWidth= 0;
+		validateTagComposite.setLayout(gridLayout);
+		
 		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_not_visible_ref_label; 
-		addCheckBox(composite, label, PREF_PB_INVALID_JAVADOC_TAGS_NOT_VISIBLE_REF, enabledDisabled, indent);
+		addCheckBox(validateTagComposite, label, PREF_PB_INVALID_JAVADOC_TAGS_NOT_VISIBLE_REF, enabledDisabled, indent);
 		
 		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_deprecated_label; 
-		addCheckBox(composite, label, PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF, enabledDisabled, indent);
-
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= nColumns;
+		addCheckBox(validateTagComposite, label, PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF, enabledDisabled, indent);
 		
 		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_javadoc_label; 
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
@@ -182,9 +188,6 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		
 		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_javadoc_tags_overriding_label; 
 		addCheckBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING, enabledDisabled, indent);
-
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan= nColumns;
 		
 		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_comments_label; 
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_COMMENTS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
@@ -211,7 +214,8 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 			if (PREF_PB_INVALID_JAVADOC.equals(changedKey) ||
 					PREF_PB_MISSING_JAVADOC_TAGS.equals(changedKey) ||
 					PREF_PB_MISSING_JAVADOC_COMMENTS.equals(changedKey) ||
-					PREF_JAVADOC_SUPPORT.equals(changedKey)) {				
+					PREF_JAVADOC_SUPPORT.equals(changedKey) ||
+					PREF_PB_INVALID_JAVADOC_TAGS.equals(changedKey)) {				
 				updateEnableStates();
 			} else {
 				return;
@@ -229,8 +233,11 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		if (enableJavadoc) {
 			boolean enableInvalidTagsErrors= !checkValue(PREF_PB_INVALID_JAVADOC, IGNORE);
 			getCheckBox(PREF_PB_INVALID_JAVADOC_TAGS).setEnabled(enableInvalidTagsErrors);
-			getCheckBox(PREF_PB_INVALID_JAVADOC_TAGS_NOT_VISIBLE_REF).setEnabled(enableInvalidTagsErrors);
-			getCheckBox(PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF).setEnabled(enableInvalidTagsErrors);
+			
+			boolean enableInvalidTagsDetailsErrors= enableInvalidTagsErrors && checkValue(PREF_PB_INVALID_JAVADOC_TAGS, ENABLED);
+			getCheckBox(PREF_PB_INVALID_JAVADOC_TAGS_NOT_VISIBLE_REF).setEnabled(enableInvalidTagsDetailsErrors);
+			getCheckBox(PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF).setEnabled(enableInvalidTagsDetailsErrors);
+			
 			setComboEnabled(PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, enableInvalidTagsErrors);
 			
 			boolean enableMissingTagsErrors= !checkValue(PREF_PB_MISSING_JAVADOC_TAGS, IGNORE);
