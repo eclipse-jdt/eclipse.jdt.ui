@@ -44,6 +44,8 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	private static final Key PREF_PB_MISSING_JAVADOC_TAGS= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS);
 	private static final Key PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS_VISIBILITY);
 	private static final Key PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS_OVERRIDING);
+	
+	private static final Key PREF_PB_MISSING_JAVADOC_TAG_DESCRIPTION= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_TAG_DESCRIPTION);
 
 	private static final Key PREF_PB_MISSING_JAVADOC_COMMENTS= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS);
 	private static final Key PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY);
@@ -62,6 +64,10 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	private static final String PROTECTED= JavaCore.PROTECTED;
 	private static final String DEFAULT= JavaCore.DEFAULT;
 	private static final String PRIVATE= JavaCore.PRIVATE;
+	
+	private static final String NO_TAG= JavaCore.COMPILER_PB_MISSING_JAVADOC_TAG_DESCRIPTION_NO_TAG;
+	private static final String ALL_TAGS= JavaCore.COMPILER_PB_MISSING_JAVADOC_TAG_DESCRIPTION_ALL_TAGS;
+	private static final String RETURN_TAGS= JavaCore.COMPILER_PB_MISSING_JAVADOC_TAG_DESCRIPTION_RETURN_TAG;
 	
 	private PixelConverter fPixelConverter;
 	private Composite fJavadocComposite;
@@ -82,6 +88,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 				PREF_PB_INVALID_JAVADOC_TAGS_NOT_VISIBLE_REF, PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF,
 				PREF_PB_MISSING_JAVADOC_TAGS, PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY, PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING,
 				PREF_PB_MISSING_JAVADOC_COMMENTS, PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY, PREF_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING,
+				PREF_PB_MISSING_JAVADOC_TAG_DESCRIPTION,
 			};
 		return keys;
 	}
@@ -119,6 +126,14 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 				PreferencesMessages.JavadocProblemsConfigurationBlock_default, 
 				PreferencesMessages.JavadocProblemsConfigurationBlock_private
 		};
+		
+		String[] missingTagValues= { NO_TAG, ALL_TAGS, RETURN_TAGS };
+		String[] missingTagLabels= new String[] {
+				PreferencesMessages.JavadocProblemsConfigurationBlock_ignore,
+				PreferencesMessages.JavadocProblemsConfigurationBlock_allTags,
+				PreferencesMessages.JavadocProblemsConfigurationBlock_returnTag
+		};
+		
 		int nColumns= 3;
 				
 
@@ -180,6 +195,9 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_deprecated_label; 
 		addCheckBox(validateTagComposite, label, PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF, enabledDisabled, indent);
 		
+		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_tag_description;
+		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_TAG_DESCRIPTION, missingTagValues, missingTagLabels, indent);
+		
 		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_javadoc_label; 
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
@@ -239,6 +257,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 			getCheckBox(PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF).setEnabled(enableInvalidTagsDetailsErrors);
 			
 			setComboEnabled(PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, enableInvalidTagsErrors);
+			setComboEnabled(PREF_PB_MISSING_JAVADOC_TAG_DESCRIPTION, enableInvalidTagsErrors);
 			
 			boolean enableMissingTagsErrors= !checkValue(PREF_PB_MISSING_JAVADOC_TAGS, IGNORE);
 			getCheckBox(PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING).setEnabled(enableMissingTagsErrors);
