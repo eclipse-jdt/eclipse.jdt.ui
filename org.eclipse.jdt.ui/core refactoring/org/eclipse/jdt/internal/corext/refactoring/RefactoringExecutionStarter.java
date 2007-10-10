@@ -40,6 +40,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.CopyRefactoring;
 import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+import org.eclipse.ltk.ui.refactoring.resource.RenameResourceWizard;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -70,8 +71,6 @@ import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceIndirectionRefa
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameResourceProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
@@ -137,7 +136,6 @@ import org.eclipse.jdt.internal.ui.refactoring.code.ReplaceInvocationsWizard;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CreateTargetQueries;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.DeleteUserInterfaceManager;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.NewNameQueries;
-import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceManager;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgCopyWizard;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMoveWizard;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgQueries;
@@ -431,9 +429,9 @@ public final class RefactoringExecutionStarter {
 			support.openDialog(shell);
 	}
 
-	public static void startRenameResourceRefactoring(final IResource resource, final Shell shell) throws CoreException {
-		final JavaRenameRefactoring refactoring= new JavaRenameRefactoring(new RenameResourceProcessor(resource));
-		RenameUserInterfaceManager.getDefault().getStarter(refactoring).activate(refactoring, shell, RefactoringSaveHelper.SAVE_ALL);
+	public static void startRenameResourceRefactoring(final IResource resource, final Shell shell) {
+		RenameResourceWizard wizard= new RenameResourceWizard(resource);
+		new RefactoringStarter().activate(wizard, shell, wizard.getWindowTitle(), RefactoringSaveHelper.SAVE_ALL);
 	}
 
 	public static void startReplaceInvocationsRefactoring(final ITypeRoot typeRoot, final int offset, final int length, final Shell shell) throws JavaModelException {

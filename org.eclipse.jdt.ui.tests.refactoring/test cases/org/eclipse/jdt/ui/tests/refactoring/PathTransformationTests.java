@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,8 +16,6 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-
-import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 
 public class PathTransformationTests extends TestCase {
 	
@@ -40,7 +38,7 @@ public class PathTransformationTests extends TestCase {
 		//if (oldName.lastIndexOf(".") != -1)
 		//	extension= oldName.substring(oldName.lastIndexOf("."));
 		IPath pNew= createIPath(path + "/" + newName + extension);
-		IPath newPath= RenameResourceChange.renamedResourcePath(pOld, newName);
+		IPath newPath= pOld.removeLastSegments(1).append(newName);
 		
 		assertEquals(pNew.toString(), newPath.toString());
 	}

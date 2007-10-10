@@ -40,6 +40,8 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  * </p>
  * 
  * @since 3.3
+ * 
+ * @deprecated since 3.4, use {@link org.eclipse.ltk.core.refactoring.resource.RenameResourceDescriptor} from <code>ltk.core.refactoring</code> instead
  */
 public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 
@@ -103,6 +105,18 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 		Assert.isLegal(!"".equals(name), "Name must not be empty"); //$NON-NLS-1$//$NON-NLS-2$
 		fName= name;
 	}
+	
+	/**
+	 * Returns the new name to rename the resource to.
+	 * 
+	 * @return 
+	 *            the new name to rename the resource to
+	 *            
+	 * @since 3.4
+	 */
+	public String getNewName() {
+		return fName;
+	}
 
 	/**
 	 * Sets the project name of this refactoring.
@@ -137,6 +151,19 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	public void setResource(final IResource resource) {
 		Assert.isNotNull(resource);
 		fResourcePath= resource.getFullPath();
+	}
+	
+	
+	/**
+	 * Returns the path of the resource to rename.
+	 *  
+	 * @return
+	 *          the path of the resource to rename
+	 *          
+	 * @since 3.4
+	 */
+	public IPath getResourcePath() {
+		return fResourcePath;
 	}
 
 	/**

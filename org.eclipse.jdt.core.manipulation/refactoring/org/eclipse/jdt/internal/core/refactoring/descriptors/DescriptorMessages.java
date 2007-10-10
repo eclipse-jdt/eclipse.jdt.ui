@@ -66,6 +66,8 @@ public class DescriptorMessages extends NLS {
 
 	public static String RenameResourceDescriptor_project_constraint;
 
+	public static String RenameResourceRefactoringContribution_error_cannot_access;
+
 	public static String UseSupertypeDescriptor_no_subtype;
 
 	public static String UseSupertypeDescriptor_no_supertype;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,8 +23,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
-
-import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
+import org.eclipse.ltk.core.refactoring.resource.RenameResourceChange;
 
 public class RenameResourceChangeTests extends RefactoringTest {
 	
@@ -53,7 +52,7 @@ public class RenameResourceChangeTests extends RefactoringTest {
 			file.create(getStream(content), true, new NullProgressMonitor());
 			assertTrue("should exist", file.exists());
 			
-			Change change= new RenameResourceChange(null, file, newName, null);
+			Change change= new RenameResourceChange(file.getFullPath(), newName);
 			change.initializeValidationData(new NullProgressMonitor());
 			performChange(change);
 			assertTrue("after: should exist", folder.getFile(newName).exists());
@@ -77,7 +76,7 @@ public class RenameResourceChangeTests extends RefactoringTest {
 			assertTrue("should exist", file.exists());
 			
 			
-			Change change= new RenameResourceChange(null, file, newName, null);
+			Change change= new RenameResourceChange(file.getFullPath(), newName);
 			change.initializeValidationData(new NullProgressMonitor());
 			performChange(change);
 			assertTrue("after: should exist", folder.getFile(newName).exists());
@@ -99,7 +98,7 @@ public class RenameResourceChangeTests extends RefactoringTest {
 			file.create(getStream(content), true, new NullProgressMonitor());
 			assertTrue("should exist", file.exists());
 			
-			Change change= new RenameResourceChange(null, file, newName, null);
+			Change change= new RenameResourceChange(file.getFullPath(), newName);
 			change.initializeValidationData(new NullProgressMonitor());
 			Change undo= performChange(change);
 			assertTrue("after: should exist", folder.getFile(newName).exists());
@@ -129,7 +128,7 @@ public class RenameResourceChangeTests extends RefactoringTest {
 			assertTrue("should exist", subFolder.exists());
 			
 			
-			Change change= new RenameResourceChange(null, subFolder, newName, null);
+			Change change= new RenameResourceChange(subFolder.getFullPath(), newName);
 			change.initializeValidationData(new NullProgressMonitor());
 			performChange(change);
 			assertTrue("after: should exist", folder.getFolder(newName).exists());
@@ -158,7 +157,7 @@ public class RenameResourceChangeTests extends RefactoringTest {
 			assertTrue("file1 should exist", file1.exists());
 			assertTrue("file2 should exist", file2.exists());
 			
-			Change change= new RenameResourceChange(null, subFolder, newName, null);
+			Change change= new RenameResourceChange(subFolder.getFullPath(), newName);
 			change.initializeValidationData(new NullProgressMonitor());
 			performChange(change);
 			assertTrue("after: should exist", folder.getFolder(newName).exists());
@@ -181,7 +180,7 @@ public class RenameResourceChangeTests extends RefactoringTest {
 			assertTrue("should exist", subFolder.exists());
 			
 			
-			Change change= new RenameResourceChange(null, subFolder, newName, null);
+			Change change= new RenameResourceChange(subFolder.getFullPath(), newName);
 			change.initializeValidationData(new NullProgressMonitor());
 			Change undo= performChange(change);
 			assertTrue("after: should exist", folder.getFolder(newName).exists());
@@ -216,7 +215,7 @@ public class RenameResourceChangeTests extends RefactoringTest {
 			link.createLink(getPackageP().getResource().getRawLocation(), IResource.NONE, null);
 			assertTrue(link.exists());
 			
-			RenameResourceChange change= new RenameResourceChange(null, project, newName, null);
+			RenameResourceChange change= new RenameResourceChange(project.getFullPath(), newName);
 			change.initializeValidationData(new NullProgressMonitor());
 			performChange(change);
 			

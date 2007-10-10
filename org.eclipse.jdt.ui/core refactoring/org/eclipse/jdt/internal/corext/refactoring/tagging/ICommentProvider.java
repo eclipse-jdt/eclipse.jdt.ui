@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.tagging;
 /**
  * Interface for refactorings which provide a comment for the history.
  * 
+ * @deprecated not used anymore
  * @since 3.2
  */
 public interface ICommentProvider {
@@ -22,6 +23,7 @@ public interface ICommentProvider {
 	 * accepting user comments to be stored in the refactoring history. The
 	 * return value of this method may change according to the state of the
 	 * refactoring.
+	 * @return returns <code>true</code> if comments are enabled
 	 */
 	public boolean canEnableComment();
 

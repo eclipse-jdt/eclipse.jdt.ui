@@ -52,6 +52,7 @@ import org.eclipse.ltk.core.refactoring.participants.IParticipantDescriptorFilte
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
+import org.eclipse.ltk.core.refactoring.resource.RenameResourceChange;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -98,7 +99,6 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
@@ -1033,7 +1033,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 						renamedResourceName= getNewElementName();
 					else
 						renamedResourceName= getNewElementName() + '.' + ext;
-					result.add(new RenameResourceChange(null, fType.getCompilationUnit().getResource(), renamedResourceName, comment));
+					result.add(new RenameResourceChange(fType.getCompilationUnit().getPath(), renamedResourceName));
 				} else {
 					String renamedCUName= JavaModelUtil.getRenamedCUName(fType.getCompilationUnit(), getNewElementName());
 					result.add(new RenameCompilationUnitChange(fType.getCompilationUnit(), renamedCUName));
@@ -1058,7 +1058,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		}
 	}
 	
-	private boolean willRenameCU() throws CoreException{
+	private boolean willRenameCU() {
 		String name = JavaCore.removeJavaLikeExtension(fType.getCompilationUnit().getElementName());
 		if (! (Checks.isTopLevel(fType) && name.equals(fType.getElementName())))
 			return false;
@@ -1150,7 +1150,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		}
 	}
 	
-	private void computeQualifiedNameMatches(IProgressMonitor pm) throws CoreException {
+	private void computeQualifiedNameMatches(IProgressMonitor pm) {
 		IPackageFragment fragment= fType.getPackageFragment();
 		if (fQualifiedNameSearchResult == null)
 			fQualifiedNameSearchResult= new QualifiedNameSearchResult();
@@ -1578,7 +1578,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 
 	// ----------------- Processor creation --------
 
-	private RenameMethodProcessor createVirtualMethodRenameProcessor(IMethod currentMethod, String newMethodName, IMethod[] ripples, ITypeHierarchy hierarchy) throws JavaModelException {
+	private RenameMethodProcessor createVirtualMethodRenameProcessor(IMethod currentMethod, String newMethodName, IMethod[] ripples, ITypeHierarchy hierarchy) {
 		RenameMethodProcessor processor= new RenameVirtualMethodProcessor(currentMethod, ripples, fChangeManager, hierarchy, CATEGORY_METHOD_RENAME);
 		initMethodProcessor(processor, newMethodName);
 		return processor;

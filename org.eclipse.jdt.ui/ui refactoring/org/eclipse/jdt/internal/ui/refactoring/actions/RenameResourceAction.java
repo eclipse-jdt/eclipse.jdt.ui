@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,8 +11,6 @@
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -23,9 +21,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class RenameResourceAction extends SelectionDispatchAction {
 
@@ -45,11 +40,7 @@ public class RenameResourceAction extends SelectionDispatchAction {
 		IResource resource = getResource(selection);
 		if (!RefactoringAvailabilityTester.isRenameAvailable(resource))
 			return;
-		try {
-			RefactoringExecutionStarter.startRenameResourceRefactoring(resource, getShell());
-		} catch (CoreException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.RenameJavaElementAction_name, RefactoringMessages.RenameJavaElementAction_exception);  
-		}
+		RefactoringExecutionStarter.startRenameResourceRefactoring(resource, getShell());
 	}
 
 	private static IResource getResource(IStructuredSelection selection) {

@@ -21,4 +21,10 @@
         type="org.eclipse.jdt.core.IJavaElement"/>
    </extension>
 
+   <extension point="org.eclipse.ltk.core.refactoring.refactoringContributions">
+      <contribution
+            class="org.eclipse.jdt.internal.core.refactoring.descriptors.RenameResourceRefactoringContribution"
+            id="org.eclipse.jdt.ui.rename.resource"/>
+   </extension>            
+
 </plugin>

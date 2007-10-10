@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,18 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
-
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
+
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 
 /**
  * A helper class to activate the UI of a refactoring
@@ -30,16 +30,7 @@ public class RefactoringStarter {
 	
 	private RefactoringStatus fStatus;
 
-	/**
-	 * @param refactoring
-	 * @param wizard
-	 * @param parent
-	 * @param dialogTitle
-	 * @param saveMode a save mode from {@link RefactoringSaveHelper}
-	 * @return <code>true</code> if the refactoring was executed, <code>false</code> otherwise
-	 * @throws JavaModelException
-	 */
-	public boolean activate(Refactoring refactoring, RefactoringWizard wizard, Shell parent, String dialogTitle, int saveMode) throws JavaModelException {
+	public boolean activate(RefactoringWizard wizard, Shell parent, String dialogTitle, int saveMode) {
 		RefactoringSaveHelper saveHelper= new RefactoringSaveHelper(saveMode);
 		if (! canActivate(saveHelper, parent))
 			return false;
@@ -57,6 +48,21 @@ public class RefactoringStarter {
 		} catch (InterruptedException e) {
 			return false; // User action got cancelled
 		}
+	}
+
+
+	/**
+	 * @param refactoring
+	 * @param wizard
+	 * @param parent
+	 * @param dialogTitle
+	 * @param saveMode a save mode from {@link RefactoringSaveHelper}
+	 * @return <code>true</code> if the refactoring was executed, <code>false</code> otherwise
+	 * @throws JavaModelException
+	 * @deprecated use {@link #activate(RefactoringWizard, Shell, String, int)} instead
+	 */
+	public boolean activate(Refactoring refactoring, RefactoringWizard wizard, Shell parent, String dialogTitle, int saveMode) throws JavaModelException {
+		return activate(wizard, parent, dialogTitle, saveMode);
 	}
 	
 	public RefactoringStatus getInitialConditionCheckingStatus() {

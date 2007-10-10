@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.refactoring.descriptors.MoveStaticMembersDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.PullUpDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.PushDownDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
-import org.eclipse.jdt.core.refactoring.descriptors.RenameResourceDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.UseSupertypeDescriptor;
 
 /**
@@ -419,8 +418,9 @@ public interface IJavaRefactorings {
 	 * <code>org.eclipse.jdt.ui.rename.resource</code>).
 	 * <p>
 	 * Clients may safely cast the obtained refactoring descriptor to
-	 * {@link RenameResourceDescriptor}.
+	 * {@link org.eclipse.jdt.core.refactoring.descriptors.RenameResourceDescriptor}.
 	 * </p>
+	 * @deprecated Since 3.4. Use {@link org.eclipse.ltk.core.refactoring.resource.RenameResourceDescriptor#ID} instead.
 	 */
 	public static final String RENAME_RESOURCE= "org.eclipse.jdt.ui.rename.resource"; //$NON-NLS-1$
 

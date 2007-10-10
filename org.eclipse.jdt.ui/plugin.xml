@@ -5000,9 +5000,6 @@
    <extension
          point="org.eclipse.ltk.core.refactoring.refactoringContributions">
       <contribution
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameResourceRefactoringContribution"
-            id="org.eclipse.jdt.ui.rename.resource"/>
-      <contribution
             class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameCompilationUnitRefactoringContribution"
             id="org.eclipse.jdt.ui.rename.compilationunit"/>
       <contribution
