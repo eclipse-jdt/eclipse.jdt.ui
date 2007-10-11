@@ -955,6 +955,8 @@ public class PasteAction extends SelectionDispatchAction{
 				clipboardJavaElements= new IJavaElement[0];
 
 			Object destination= getTarget(javaElements, resources);
+			Assert.isNotNull(destination);
+			Assert.isLegal(clipboardResources.length + clipboardJavaElements.length > 0);
 			ReorgCopyStarter.create(clipboardJavaElements, clipboardResources, ReorgDestinationFactory.createDestination(destination)).run(getShell());
 		}
 
