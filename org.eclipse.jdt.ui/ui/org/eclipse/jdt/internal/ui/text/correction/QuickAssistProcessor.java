@@ -823,7 +823,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (outer instanceof IfStatement) {
 			IfStatement ifStatement= (IfStatement) outer;
 			Statement elseBlock= ifStatement.getElseStatement();
-			if (elseBlock == null || ((elseBlock instanceof Block) && ((Block) elseBlock).statements().isEmpty())) {
+			if (elseBlock == null || elseBlock instanceof Block && ((Block) elseBlock).statements().isEmpty()) {
 				body= ifStatement.getThenStatement();
 			}
 			label= CorrectionMessages.QuickAssistProcessor_unwrap_ifstatement;
@@ -1138,10 +1138,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 			rewrite.replace(right, rewrite.createCopyTarget(leftExpression), null);
 
-			if ((right instanceof CastExpression)
-				|| (right instanceof Assignment)
-				|| (right instanceof ConditionalExpression)
-				|| (right instanceof InfixExpression)) {
+			if (right instanceof CastExpression
+				|| right instanceof Assignment
+				|| right instanceof ConditionalExpression
+				|| right instanceof InfixExpression) {
 				ParenthesizedExpression paren= ast.newParenthesizedExpression();
 				paren.setExpression((Expression) rewrite.createCopyTarget(right));
 				rewrite.replace(left, paren, null);
@@ -1158,7 +1158,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getArrayInitializerToArrayCreation(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
+	private static boolean getArrayInitializerToArrayCreation(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		if (!(node instanceof ArrayInitializer)) {
 			return false;
 		}
@@ -1248,7 +1248,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getConvertForLoopProposal(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
+	private static boolean getConvertForLoopProposal(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		ForStatement forStatement= getEnclosingForStatementHeader(node);
 		if (forStatement == null)
 			return false;
@@ -1271,7 +1271,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getConvertIterableLoopProposal(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
+	private static boolean getConvertIterableLoopProposal(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		ForStatement forStatement= getEnclosingForStatementHeader(node);
 		if (forStatement == null)
 			return false;

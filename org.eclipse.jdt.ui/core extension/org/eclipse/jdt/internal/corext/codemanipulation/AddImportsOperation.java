@@ -28,8 +28,6 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
-import org.eclipse.jface.text.BadLocationException;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -157,14 +155,12 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			res.addChild(importsEdit);
 			
 			JavaModelUtil.applyEdit(fCompilationUnit, res, fDoSave, new SubProgressMonitor(monitor, 1));
-		} catch (BadLocationException e) {
-			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		} finally {
 			monitor.done();
 		}
 	}
 	
-	private TextEdit evaluateEdits(CompilationUnit root, ImportRewrite importRewrite, int offset, int length, IProgressMonitor monitor) throws BadLocationException, JavaModelException {
+	private TextEdit evaluateEdits(CompilationUnit root, ImportRewrite importRewrite, int offset, int length, IProgressMonitor monitor) throws JavaModelException {
 		SimpleName nameNode= null;
 		if (root != null) { // got an AST
 			ASTNode node= NodeFinder.perform(root, offset, length);
@@ -306,7 +302,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	}
 
 	
-	private int getNameStart(IBuffer buffer, int pos) throws BadLocationException {
+	private int getNameStart(IBuffer buffer, int pos) {
 		while (pos > 0) {
 			char ch= buffer.getChar(pos - 1);
 			if (!Character.isJavaIdentifierPart(ch) && ch != '.') {
@@ -317,7 +313,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		return pos;
 	}
 	
-	private int getNameEnd(IBuffer doc, int pos) throws BadLocationException {
+	private int getNameEnd(IBuffer doc, int pos) {
 		if (pos > 0) {
 			if (Character.isWhitespace(doc.getChar(pos - 1))) {
 				return pos;
@@ -334,10 +330,10 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		return pos;
 	}
 	
-	private int getSimpleNameStart(IBuffer buffer, int nameStart, String containerName) throws BadLocationException {
+	private int getSimpleNameStart(IBuffer buffer, int nameStart, String containerName) {
 		int containerLen= containerName.length();
 		int docLen= buffer.getLength();
-		if ((containerLen > 0) && (nameStart + containerLen + 1 < docLen)) {
+		if (containerLen > 0 && nameStart + containerLen + 1 < docLen) {
 			for (int k= 0; k < containerLen; k++) {
 				if (buffer.getChar(nameStart + k) != containerName.charAt(k)) {
 					return nameStart;
@@ -399,10 +395,10 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	private boolean isOfKind(TypeNameMatch curr, int typeKinds, boolean is50OrHigher) {
 		int flags= curr.getModifiers();
 		if (Flags.isAnnotation(flags)) {
-			return is50OrHigher && ((typeKinds & SimilarElementsRequestor.ANNOTATIONS) != 0);
+			return is50OrHigher && (typeKinds & SimilarElementsRequestor.ANNOTATIONS) != 0;
 		}
 		if (Flags.isEnum(flags)) {
-			return is50OrHigher && ((typeKinds & SimilarElementsRequestor.ENUMS) != 0);
+			return is50OrHigher && (typeKinds & SimilarElementsRequestor.ENUMS) != 0;
 		}
 		if (Flags.isInterface(flags)) {
 			return (typeKinds & SimilarElementsRequestor.INTERFACES) != 0;
