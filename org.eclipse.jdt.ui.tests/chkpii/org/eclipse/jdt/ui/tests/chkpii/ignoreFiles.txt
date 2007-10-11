@@ -19,16 +19,8 @@ com.oti.zrh.contextids/*
 com.oti.zrh.eclipse.tools/*
 com.oti.zrh.eclipse.doc.tools-feature/*
 com.oti.zrh.eclipse.tools-updateSite/*
-Eclipse*JDT*Builds/*
 org.eclipse.jdt.launching.j9/*
 org.eclipse.jdt.ui.tests.refactoring/resources/*
-platform-releng-home/*
-platform-search-home/*
-platform-text-home/*
-www platform-text/*
-platform-ui-home/*
-jdt-ui-home/*
-www jdt-ui/*
 org.eclipse.jdt.ui/core*extension\org/eclipse/jdt/internal/corext/template/default-codetemplates.xml
 org.eclipse.pde.doc.isv/buildDoc.xml
 org.eclipse.pde.doc.user/buildDoc.xml
@@ -53,7 +45,6 @@ org.eclipse.perfmsr.core/*
 org.eclipse.pde.source/*
 org.eclipse.ui.examples.recipeeditor/doc/article.html
 org.eclipse.ui.examples.recipeeditor/templates/templates.xml
-Text Team Documents/*
 com.ibm.icu/*
 org.apache.ant/*
 org.apache.lucene/*
@@ -106,3 +97,16 @@ org.eclipse.update.configurator/*
 org.eclipse.update.core/*
 org.eclipse.update.core.linux/*
 org.eclipse.update.ui/*
+www*eclipse.org-development/*
+www*platform-search/*
+www*platform-UI/*
+platform-releng-home/*
+platform-search-home/*
+platform-text-home/*
+www*platform-text/*
+platform-ui-home/*
+jdt-ui-home/*
+www*jdt-ui/*
+Text*Team*Documents/*
+Eclipse*JDT*Builds/*
+T*JDT-UI*Team*Documents/*
