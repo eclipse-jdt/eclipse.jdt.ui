@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,27 +17,24 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.ltk.core.refactoring.Change;
+
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class MoveResourceChange extends ResourceReorgChange {
 	
 	public MoveResourceChange(IResource res, IContainer dest){
 		super(res, dest, null);
-	}
-	
-	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		
 		// We already present a dialog to the user if he
 		// moves read-only resources. Since moving a resource
 		// doesn't do a validate edit (it actually doesn't
 		// change the content we can't check for READ only
 		// here.
-		return super.isValid(pm, DIRTY);
+		setValidationMethod(VALIDATE_NOT_DIRTY);
 	}
-	
+		
 	/* non java-doc
 	 * @see ResourceReorgChange#doPerform(IPath, IProgressMonitor)
 	 */

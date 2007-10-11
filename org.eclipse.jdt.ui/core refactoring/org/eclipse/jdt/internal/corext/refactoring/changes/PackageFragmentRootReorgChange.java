@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,8 +23,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
+import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -32,13 +32,12 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
-abstract class PackageFragmentRootReorgChange extends JDTChange {
+abstract class PackageFragmentRootReorgChange extends ResourceChange {
 
 	private final String fRootHandle;
 	private final INewNameQuery fNewNameQuery;
@@ -52,15 +51,14 @@ abstract class PackageFragmentRootReorgChange extends JDTChange {
 		fNewNameQuery= newNameQuery;
 		fUpdateClasspathQuery= updateClasspathQuery;
 		fDestination= destination;
-	}
-
-	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		
 		// we already ask for confirmation of move read only
 		// resources. Furthermore we don't do a validate
 		// edit since move source folders doesn't change
 		// an content
-		return isValid(pm, NONE);
+		setValidationMethod(VALIDATE_DEFAULT);
 	}
+
 	
 	public final Change perform(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		pm.beginTask(getName(), 2);
@@ -80,6 +78,17 @@ abstract class PackageFragmentRootReorgChange extends JDTChange {
 
 	public Object getModifiedElement() {
 		return getRoot();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.base.JDTChange#getModifiedResource()
+	 */
+	protected IResource getModifiedResource() {
+		IPackageFragmentRoot root= getRoot();
+		if (root != null) {
+			return root.getResource();
+		}
+		return null;
 	}
 	
 	protected IPackageFragmentRoot getRoot(){

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,12 +25,12 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
+import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
-abstract class ResourceReorgChange extends JDTChange {
+abstract class ResourceReorgChange extends ResourceChange {
 	
 	private final INewNameQuery fNewNameQuery;
 	private final IResource fSource;
@@ -74,6 +74,10 @@ abstract class ResourceReorgChange extends JDTChange {
 	/**
 	 * returns false if source and destination are the same (in workspace or on disk)
 	 * in such case, no action should be performed
+	 * @param pm the progress monitor
+	 * @param newName the new name
+	 * @return returns <code>true</code> if the resource already exists
+	 * @throws CoreException thrown when teh resource cannpt be accessed
 	 */
 	private boolean deleteIfAlreadyExists(IProgressMonitor pm, String newName) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
@@ -109,10 +113,7 @@ abstract class ResourceReorgChange extends JDTChange {
 		return name;
 	}
 	
-	/* non java-doc
-	 * @see IChange#getModifiedLanguageElement()
-	 */
-	public Object getModifiedElement() {
+	protected IResource getModifiedResource() {
 		return getResource();
 	}
 	

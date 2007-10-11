@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,17 +20,18 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.util.IOCloser;
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-public class DeleteFileChange extends JDTChange {
+public class DeleteFileChange extends ResourceChange {
 
 	private IPath fPath;
 	private String fSource;
@@ -38,10 +39,8 @@ public class DeleteFileChange extends JDTChange {
 	public DeleteFileChange(IFile file){
 		Assert.isNotNull(file, "file"); //$NON-NLS-1$
 		fPath= file.getFullPath().removeFirstSegments(ResourcesPlugin.getWorkspace().getRoot().getFullPath().segmentCount());
-	}
-	
-	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		return isValid(pm, READ_ONLY | DIRTY);
+		
+		setValidationMethod(VALIDATE_NOT_DIRTY | VALIDATE_NOT_READ_ONLY);
 	}
 	
 	public Change perform(IProgressMonitor pm) throws CoreException {
@@ -106,7 +105,7 @@ public class DeleteFileChange extends JDTChange {
 		return NLSChangesMessages.deleteFile_Delete_File; 
 	}
 
-	public Object getModifiedElement() {
+	protected IResource getModifiedResource() {
 		return ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
 	}
 }

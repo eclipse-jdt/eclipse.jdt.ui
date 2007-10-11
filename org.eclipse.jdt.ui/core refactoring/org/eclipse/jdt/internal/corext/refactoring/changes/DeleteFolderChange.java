@@ -26,7 +26,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.ui.ide.undo.ResourceDescription;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -34,7 +33,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 public class DeleteFolderChange extends AbstractDeleteChange {
 	
 	private final IPath fPath;
-	private final boolean fIsExecuteChange;
 	
 	public DeleteFolderChange(IFolder folder, boolean isExecuteChange) {
 		this(getFolderPath(folder), isExecuteChange);
@@ -42,7 +40,16 @@ public class DeleteFolderChange extends AbstractDeleteChange {
 	
 	public DeleteFolderChange(IPath path, boolean isExecuteChange) {
 		fPath= path;
-		fIsExecuteChange= isExecuteChange;
+		
+		// no need to do additional checking since the dialog
+		// already prompts the user if there are dirty
+		// or read only files in the folder. The change is
+		// currently not used as a undo/redo change
+		if (isExecuteChange) {
+			setValidationMethod(VALIDATE_DEFAULT);
+		} else {
+			setValidationMethod(VALIDATE_NOT_READ_ONLY | VALIDATE_NOT_DIRTY);
+		}
 	}
 	
 	public static IPath getFolderPath(IFolder folder){
@@ -56,21 +63,12 @@ public class DeleteFolderChange extends AbstractDeleteChange {
 	public String getName() {
 		return Messages.format(RefactoringCoreMessages.DeleteFolderChange_0, fPath.lastSegment()); 
 	}
-	
-	public Object getModifiedElement() {
+		
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.base.JDTChange#getModifiedResource()
+	 */
+	protected IResource getModifiedResource() {
 		return getFolder(fPath);
-	}
-
-	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		if (fIsExecuteChange) {
-			// no need to do additional checking since the dialog
-			// already prompts the user if there are dirty
-			// or read only files in the folder. The change is
-			// currently not used as a undo/redo change
-			return super.isValid(pm, NONE);
-		} else {
-			return super.isValid(pm, READ_ONLY | DIRTY);
-		}
 	}
 
 	protected Change doDelete(IProgressMonitor pm) throws CoreException{

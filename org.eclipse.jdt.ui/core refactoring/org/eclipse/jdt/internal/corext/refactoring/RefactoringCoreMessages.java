@@ -1868,6 +1868,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenameSourceFolderChange_descriptor_description_short;
 
+	public static String RenameSourceFolderChange_error_underlying_resource_not_existing;
+
 	public static String RenameSourceFolderChange_rename;
 
 	public static String RenameSourceFolderChange_rename_archive;

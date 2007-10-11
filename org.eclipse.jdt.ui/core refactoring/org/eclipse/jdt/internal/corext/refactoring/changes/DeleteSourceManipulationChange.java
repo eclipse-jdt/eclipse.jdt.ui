@@ -22,7 +22,6 @@ import org.eclipse.ui.ide.undo.ResourceDescription;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.NullChange;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -41,12 +40,22 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 
 	private final String fHandle;
-	private final boolean fIsExecuteChange;
 	
 	public DeleteSourceManipulationChange(ISourceManipulation sm, boolean isExecuteChange) { 
 		Assert.isNotNull(sm);
 		fHandle= getJavaElement(sm).getHandleIdentifier();
-		fIsExecuteChange= isExecuteChange;
+		
+		if (isExecuteChange) {
+			if (sm instanceof ICompilationUnit) {
+				// don't check anything in this case. We have a warning dialog
+				// already presented to the user that the file is dirty.
+				setValidationMethod(VALIDATE_DEFAULT);
+			} else {
+				setValidationMethod(VALIDATE_NOT_DIRTY);
+			}
+		} else {
+			setValidationMethod(VALIDATE_NOT_DIRTY | VALIDATE_NOT_READ_ONLY);
+		}
 	}
 
 	/*
@@ -56,21 +65,6 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 		return Messages.format(RefactoringCoreMessages.DeleteSourceManipulationChange_0, getElementName()); 
 	}
 	
-	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		ISourceManipulation element= getSourceManipulation();
-		if (fIsExecuteChange) {
-			if (element instanceof ICompilationUnit) {
-				// don't check anything in this case. We have a warning dialog
-				// already presented to the user that the file is dirty.
-				return super.isValid(pm, NONE);
-			} else {
-				return super.isValid(pm, DIRTY);
-			}
-		} else {
-			return super.isValid(pm, READ_ONLY | DIRTY);
-		}
-	}
-
 	private String getElementName() {
 		IJavaElement javaElement= getJavaElement(getSourceManipulation());
 		if (JavaElementUtil.isDefaultPackage(javaElement))
@@ -83,6 +77,17 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	 */
 	public Object getModifiedElement() {
 		return JavaCore.create(fHandle);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.base.JDTChange#getModifiedResource()
+	 */
+	protected IResource getModifiedResource() {
+		IJavaElement elem= JavaCore.create(fHandle);
+		if (elem != null) {
+			return elem.getResource();
+		}
+		return null;
 	}
 	
 	/*

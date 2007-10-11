@@ -18,9 +18,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.NullChange;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -28,9 +30,8 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 
-public class ClasspathChange extends JDTChange {
+public class ClasspathChange extends ResourceChange {
 	
 	public static ClasspathChange addEntryChange(IJavaProject project, IClasspathEntry entryToAdd) throws JavaModelException {
 		IClasspathEntry[] rawClasspath= project.getRawClasspath();
@@ -73,11 +74,8 @@ public class ClasspathChange extends JDTChange {
 		fProject= project;
 		fNewClasspath= newClasspath;
 		fOutputLocation= outputLocation;
-	}
-	
-	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		// .classpath file will be handled by JDT/Core.
-		return super.isValid(pm, READ_ONLY | DIRTY);
+		
+		setValidationMethod(VALIDATE_NOT_DIRTY | VALIDATE_NOT_READ_ONLY);
 	}
 	
 	public Change perform(IProgressMonitor pm) throws CoreException {
@@ -102,9 +100,11 @@ public class ClasspathChange extends JDTChange {
 		return RefactoringCoreMessages.ClasspathChange_change_name;
 	}
 
+	protected IResource getModifiedResource() {
+		return fProject.getResource();
+	}
+	
 	public Object getModifiedElement() {
 		return fProject;
 	}
-		
-	
 }

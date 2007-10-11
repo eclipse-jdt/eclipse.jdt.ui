@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
@@ -29,9 +28,18 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 public final class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 
-	private static RefactoringStatus checkIfModifiable(IPackageFragmentRoot root, IProgressMonitor pm) throws CoreException {
+	private static RefactoringStatus checkIfModifiable(IPackageFragmentRoot root) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
-		checkExistence(result, root);
+		if (root == null) {
+			result.addFatalError(RefactoringCoreMessages.DynamicValidationStateChange_workspace_changed);
+			return result;
+		}
+		if (!root.exists()) {
+			result.addFatalError(Messages.format(RefactoringCoreMessages.Change_does_not_exist, root.getElementName()));
+			return result;
+		}
+		
+		
 		if (result.hasFatalError())
 			return result;
 
@@ -45,11 +53,13 @@ public final class RenameSourceFolderChange extends AbstractJavaElementRenameCha
 			return result;
 		}
 
-		checkExistence(result, root.getCorrespondingResource());
-		if (result.hasFatalError())
+		IResource correspondingResource= root.getCorrespondingResource();
+		if (correspondingResource == null || correspondingResource.exists()) {
+			result.addFatalError(Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_error_underlying_resource_not_existing, root.getElementName()));
 			return result;
+		}
 
-		if (root.getCorrespondingResource().isLinked()) {
+		if (correspondingResource.isLinked()) {
 			result.addFatalError(Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_rename_linked, root.getElementName()));
 			return result;
 		}
@@ -61,10 +71,11 @@ public final class RenameSourceFolderChange extends AbstractJavaElementRenameCha
 		this(sourceFolder.getPath(), sourceFolder.getElementName(), newName, IResource.NULL_STAMP);
 		Assert.isTrue(!sourceFolder.isReadOnly(), "should not be read only"); //$NON-NLS-1$
 		Assert.isTrue(!sourceFolder.isArchive(), "should not be an archive"); //$NON-NLS-1$
+		setValidationMethod(VALIDATE_NOT_DIRTY);
 	}
 
 	private RenameSourceFolderChange(IPath resourcePath, String oldName, String newName, long stampToRestore) {
-		super(resourcePath, oldName, newName);
+		super(resourcePath, oldName, newName, stampToRestore);
 	}
 
 	protected IPath createNewPath() {
@@ -105,13 +116,12 @@ public final class RenameSourceFolderChange extends AbstractJavaElementRenameCha
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		RefactoringStatus result= new RefactoringStatus();
-		pm.beginTask("", 2); //$NON-NLS-1$
-		result.merge(isValid(new SubProgressMonitor(pm, 1), DIRTY));
+		RefactoringStatus result= super.isValid(pm);
 		if (result.hasFatalError())
 			return result;
+		
 		IPackageFragmentRoot sourceFolder= getSourceFolder();
-		result.merge(checkIfModifiable(sourceFolder, new SubProgressMonitor(pm, 1)));
+		result.merge(checkIfModifiable(sourceFolder));
 
 		return result;
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,6 +59,8 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 		super(resourcePath, oldName, newName, stampToRestore);
 		fCompilationUnitStamps= compilationUnitStamps;
 		fRenameSubpackages= renameSubpackages;
+	
+		setValidationMethod(VALIDATE_NOT_DIRTY);
 	}
 
 	private void addStamps(Map stamps, ICompilationUnit[] units) {
@@ -156,7 +158,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 			IJavaElement element= (IJavaElement) getModifiedElement();
 			// don't check for read-only since we don't go through
 			// validate edit.
-			result.merge(isValid(new SubProgressMonitor(pm, 1), DIRTY));
+			result.merge(super.isValid(new SubProgressMonitor(pm, 1)));
 			if (result.hasFatalError())
 				return result;
 			if (element != null && element.exists() && element instanceof IPackageFragment) {
@@ -168,7 +170,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 					for (int i= 0; i < allPackages.length; i++) {
 						// don't check for read-only since we don't go through
 						// validate edit.
-						checkIfModifiable(result, allPackages[i], DIRTY);
+						checkIfModifiable(result, allPackages[i].getResource(), VALIDATE_NOT_DIRTY);
 						if (result.hasFatalError())
 							return result;
 						isValid(result, allPackages[i], new SubProgressMonitor(subPm, 1));
@@ -188,7 +190,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 		pm.beginTask("", units.length); //$NON-NLS-1$
 		for (int i= 0; i < units.length; i++) {
 			pm.subTask(Messages.format(RefactoringCoreMessages.RenamePackageChange_checking_change, pack.getElementName()));
-			checkIfModifiable(result, units[i], READ_ONLY | DIRTY);
+			checkIfModifiable(result, units[i].getResource(), VALIDATE_NOT_READ_ONLY | VALIDATE_NOT_DIRTY);
 			pm.worked(1);
 		}
 		pm.done();

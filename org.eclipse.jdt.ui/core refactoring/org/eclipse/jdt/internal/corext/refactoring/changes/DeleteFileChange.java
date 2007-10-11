@@ -15,24 +15,29 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ui.ide.undo.ResourceDescription;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class DeleteFileChange extends AbstractDeleteChange {
 
-	private final boolean fIsExecuteChange;
 	private final IFile fFile;
 	
 	public DeleteFileChange(IFile file, boolean executeChange) {
 		Assert.isNotNull(file, "file");  //$NON-NLS-1$
-		fIsExecuteChange= executeChange;
 		fFile= file;
+		// no need for checking since we already prompt the
+		// user if the file is dirty or read only
+		if (executeChange) {
+			setValidationMethod(VALIDATE_DEFAULT);
+		} else {
+			setValidationMethod(VALIDATE_NOT_READ_ONLY | VALIDATE_NOT_DIRTY);
+		}
 	}
 	
 	private IFile getFile(){
@@ -45,21 +50,11 @@ public class DeleteFileChange extends AbstractDeleteChange {
 	public String getName() {
 		return Messages.format(RefactoringCoreMessages.DeleteFileChange_1, fFile.getName()); 
 	}
-
-	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		if (fIsExecuteChange) {
-			// no need for checking since we already prompt the
-			// user if the file is dirty or read only
-			return super.isValid(pm, NONE);
-		} else {
-			return super.isValid(pm, READ_ONLY | DIRTY);
-		}
-	}
-
-	/* non java-doc
-	 * @see IChange#getModifiedLanguageElement()
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.base.JDTChange#getModifiedResource()
 	 */
-	public Object getModifiedElement() {
+	protected IResource getModifiedResource() {
 		return getFile();
 	}
 

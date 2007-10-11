@@ -14,18 +14,19 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.LocationKind;
 
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
-import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 
-abstract class AbstractDeleteChange extends JDTChange {
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
+
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
+abstract class AbstractDeleteChange extends ResourceChange {
 	
 	protected abstract Change doDelete(IProgressMonitor pm) throws CoreException;
 	

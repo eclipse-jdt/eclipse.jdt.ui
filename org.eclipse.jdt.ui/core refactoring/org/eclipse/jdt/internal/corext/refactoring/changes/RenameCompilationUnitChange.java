@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -36,6 +35,8 @@ public final class RenameCompilationUnitChange extends AbstractJavaElementRename
 
 	private RenameCompilationUnitChange(IPath resourcePath, String oldName, String newName, long stampToRestore) {
 		super(resourcePath, oldName, newName, stampToRestore);
+		
+		setValidationMethod(VALIDATE_NOT_DIRTY | VALIDATE_NOT_READ_ONLY);
 	}
 
 	protected IPath createNewPath() {
@@ -58,9 +59,5 @@ public final class RenameCompilationUnitChange extends AbstractJavaElementRename
 
 	public String getName() {
 		return Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_name, new String[] { getOldName(), getNewName()});
-	}
-
-	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		return super.isValid(pm, READ_ONLY | SAVE_IF_DIRTY);
 	}
 }

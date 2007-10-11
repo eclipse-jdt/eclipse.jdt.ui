@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,12 +18,12 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -33,7 +33,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
  * 
  * @since 3.3
  */
-public final class LoggedCreateTargetChange extends JDTChange {
+public final class LoggedCreateTargetChange extends ResourceChange {
 
 	/** The queries */
 	private final ICreateTargetQueries fQueries;
@@ -57,7 +57,7 @@ public final class LoggedCreateTargetChange extends JDTChange {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object getModifiedElement() {
+	protected IResource getModifiedResource() {
 		return null;
 	}
 

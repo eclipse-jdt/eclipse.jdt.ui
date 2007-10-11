@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,27 +10,26 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import org.eclipse.core.resources.mapping.ResourceMapping;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
+import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
-abstract class PackageReorgChange extends JDTChange {
+abstract class PackageReorgChange extends ResourceChange {
 
 	private String fPackageHandle;
 	private String fDestinationHandle;
@@ -40,18 +39,16 @@ abstract class PackageReorgChange extends JDTChange {
 		fPackageHandle= pack.getHandleIdentifier();
 		fDestinationHandle= dest.getHandleIdentifier();
 		fNameQuery= nameQuery;
-	}
-
-	abstract Change doPerformReorg(IProgressMonitor pm) throws JavaModelException, OperationCanceledException;
-
-	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		
 		// it is enough to check the package only since package reorg changes
 		// are not undoable. Don't check for read only here since
 		// we already ask for user confirmation and moving a read
 		// only package doesn't go thorugh validate edit (no
 		// file content is modified).
-		return isValid(pm, NONE);
+		setValidationMethod(VALIDATE_DEFAULT);
 	}
+
+	abstract Change doPerformReorg(IProgressMonitor pm) throws JavaModelException, OperationCanceledException;
 
 	public final Change perform(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		pm.beginTask(getName(), 1);
@@ -68,6 +65,17 @@ abstract class PackageReorgChange extends JDTChange {
 
 	public Object getModifiedElement() {
 		return getPackage();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.base.JDTChange#getModifiedResource()
+	 */
+	protected IResource getModifiedResource() {
+		IPackageFragment pack= getPackage();
+		if (pack != null) {
+			return pack.getResource();
+		}
+		return null;
 	}
 
 	IPackageFragmentRoot getDestination() {

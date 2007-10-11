@@ -41,7 +41,6 @@ import org.eclipse.ui.ide.undo.ResourceDescription;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.NullChange;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -60,7 +59,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 	
 	private final String fHandle;
-	private final boolean fIsExecuteChange;
 	private final IPackageFragmentRootManipulationQuery fUpdateClasspathQuery;
 
 	public DeletePackageFragmentRootChange(IPackageFragmentRoot root, boolean isExecuteChange, 
@@ -68,8 +66,17 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 		Assert.isNotNull(root);
 		Assert.isTrue(! root.isExternal());
 		fHandle= root.getHandleIdentifier();
-		fIsExecuteChange= isExecuteChange;
 		fUpdateClasspathQuery= updateClasspathQuery;
+		
+		if (isExecuteChange) {
+			// don't check for read-only resources since we already
+			// prompt the user via a dialog to confirm deletion of
+			// read only resource. The change is currently not used
+			// as 
+			setValidationMethod(VALIDATE_NOT_DIRTY);
+		} else {
+			setValidationMethod(VALIDATE_NOT_DIRTY | VALIDATE_NOT_READ_ONLY);
+		}
 	}
 
 	public String getName() {
@@ -81,22 +88,17 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 		return getRoot();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.base.JDTChange#getModifiedResource()
+	 */
+	protected IResource getModifiedResource() {
+		return getRoot().getResource();
+	}
+	
 	private IPackageFragmentRoot getRoot(){
 		return (IPackageFragmentRoot)JavaCore.create(fHandle);
 	}
 	
-	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		if (fIsExecuteChange) {
-			// don't check for read-only resources since we already
-			// prompt the user via a dialog to confirm deletion of
-			// read only resource. The change is currently not used
-			// as 
-			return super.isValid(pm, DIRTY);
-		} else {
-			return super.isValid(pm, READ_ONLY | DIRTY);
-		}
-	}
-
 	protected Change doDelete(IProgressMonitor pm) throws CoreException {
 		if (! confirmDeleteIfReferenced())
 			return new NullChange();

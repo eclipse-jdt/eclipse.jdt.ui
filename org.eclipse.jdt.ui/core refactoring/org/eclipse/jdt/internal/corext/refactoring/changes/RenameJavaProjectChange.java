@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,6 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -42,8 +41,10 @@ public final class RenameJavaProjectChange extends AbstractJavaElementRenameChan
 	}
 
 	private RenameJavaProjectChange(IPath resourcePath, String oldName, String newName, long stampToRestore, boolean updateReferences) {
-		super(resourcePath, oldName, newName);
+		super(resourcePath, oldName, newName, stampToRestore);
 		fUpdateReferences= updateReferences;
+		
+		setValidationMethod(VALIDATE_NOT_DIRTY);
 	}
 
 	private IClasspathEntry createModifiedEntry(IClasspathEntry oldEntry) {
@@ -95,10 +96,6 @@ public final class RenameJavaProjectChange extends AbstractJavaElementRenameChan
 		if (!cpe.getPath().equals(getResourcePath()))
 			return false;
 		return true;
-	}
-
-	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		return isValid(pm, DIRTY);
 	}
 
 	private void modifyClassPath(IJavaProject referencingProject, IProgressMonitor pm) throws JavaModelException {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,12 +20,11 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
-
-public abstract class AbstractJavaElementRenameChange extends JDTChange {
+public abstract class AbstractJavaElementRenameChange extends ResourceChange {
 
 	private final String fNewName;
 
@@ -56,6 +55,10 @@ public abstract class AbstractJavaElementRenameChange extends JDTChange {
 
 	public Object getModifiedElement() {
 		return JavaCore.create(getResource());
+	}
+	
+	protected IResource getModifiedResource() {
+		return getResource();
 	}
 
 	public String getNewName() {

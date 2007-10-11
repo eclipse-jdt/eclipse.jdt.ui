@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -39,21 +38,21 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 		super(cu, newPackage);
 		fStampToRestore= IResource.NULL_STAMP;
 		fDeletePackages= null;
+		
+		setValidationMethod(VALIDATE_NOT_DIRTY | VALIDATE_NOT_READ_ONLY);
 	}
 	
 	private MoveCompilationUnitChange(IPackageFragment oldPackage, String cuName, IPackageFragment newPackage, long stampToRestore, IPackageFragment[] deletePackages) {
 		super(oldPackage.getHandleIdentifier(), newPackage.getHandleIdentifier(), oldPackage.getCompilationUnit(cuName).getHandleIdentifier());
 		fStampToRestore= stampToRestore;
 		fDeletePackages= deletePackages;
+		
+		setValidationMethod(VALIDATE_NOT_DIRTY | VALIDATE_NOT_READ_ONLY);
 	}
 	
 	public String getName() {
 		return Messages.format(RefactoringCoreMessages.MoveCompilationUnitChange_name, 
 		new String[]{getCu().getElementName(), getPackageName(getDestinationPackage())}); 
-	}
-
-	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		return super.isValid(pm, READ_ONLY | SAVE_IF_DIRTY);
 	}
 	
 	Change doPerformReorg(IProgressMonitor pm) throws CoreException, OperationCanceledException {

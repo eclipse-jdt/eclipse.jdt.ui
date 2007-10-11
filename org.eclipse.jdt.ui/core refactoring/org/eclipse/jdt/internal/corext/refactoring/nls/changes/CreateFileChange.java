@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,14 +34,14 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-public class CreateFileChange extends JDTChange {
+public class CreateFileChange extends ResourceChange {
 
 	private String fChangeName;
 
@@ -111,7 +111,7 @@ public class CreateFileChange extends JDTChange {
 		return fPath;
 	}
 
-	public Object getModifiedElement() {
+	protected IResource getModifiedResource() {
 		return ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
 	}
 
