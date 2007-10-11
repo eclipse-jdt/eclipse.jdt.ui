@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.ui.text;
 
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
@@ -34,7 +33,6 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.reconciler.DirtyRegion;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
 
 import org.eclipse.ui.IEditorInput;
@@ -151,10 +149,11 @@ public class JavaReconciler extends MonoReconciler {
 		 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
 		 */
 		public void elementChanged(ElementChangedEvent event) {
-			if (event.getDelta().getFlags() == IJavaElementDelta.F_AST_AFFECTED)
+			if (isRunningInReconcilerThread())
 				return;
+
 			setJavaModelChanged(true);
-			if (!fIsReconciling && isEditorActive() && !isSaveDelta(event.getDelta().getAffectedChildren()))
+			if (isEditorActive() && !isSaveDelta(event.getDelta().getAffectedChildren()))
 				JavaReconciler.this.forceReconciling();
 		}
 	}
@@ -197,6 +196,9 @@ public class JavaReconciler extends MonoReconciler {
 		 * @see IResourceChangeListener#resourceChanged(org.eclipse.core.resources.IResourceChangeEvent)
 		 */
 		public void resourceChanged(IResourceChangeEvent e) {
+			if (isRunningInReconcilerThread())
+				return;
+
 			IResourceDelta delta= e.getDelta();
 			IResource resource= getResource();
 			if (delta != null && resource != null) {
@@ -205,13 +207,9 @@ public class JavaReconciler extends MonoReconciler {
 					IMarkerDelta[] deltas= child.getMarkerDeltas();
 					int i= deltas.length;
 					while (--i >= 0) {
-						try {
-							if (deltas[i].getMarker().isSubtypeOf(IMarker.PROBLEM)) {
-								forceReconciling();
-								return;
-							}
-						} catch (CoreException e1) {
-							// ignore and try next one
+						if (deltas[i].isSubtypeOf(IMarker.PROBLEM)) {
+							forceReconciling();
+							return;
 						}
 					}
 				}
@@ -219,7 +217,7 @@ public class JavaReconciler extends MonoReconciler {
 		}
 	}
 
-
+	
 	/** The reconciler's editor */
 	private ITextEditor fTextEditor;
 	/** The part listener */
@@ -255,12 +253,7 @@ public class JavaReconciler extends MonoReconciler {
 	 * @since 3.3
 	 */
 	private IPropertyChangeListener fPropertyChangeListener;
-	/**
-	 * Tells whether a reconcile is in progress.
-	 * @since 3.1
-	 */
-	private volatile boolean fIsReconciling= false;
-	
+
 	private boolean fIninitalProcessDone= false;
 	
 	/**
@@ -395,17 +388,6 @@ public class JavaReconciler extends MonoReconciler {
 			super.initialProcess();
 		}
 		fIninitalProcessDone= true;
-	}
-
-	/*
-	 * @see org.eclipse.jface.text.reconciler.MonoReconciler#process(org.eclipse.jface.text.reconciler.DirtyRegion)
-	 */
-	protected void process(DirtyRegion dirtyRegion) {
-		synchronized (fMutex) {
-			fIsReconciling= true;
-			super.process(dirtyRegion);
-			fIsReconciling= false;
-		}
 	}
 
 	/**
