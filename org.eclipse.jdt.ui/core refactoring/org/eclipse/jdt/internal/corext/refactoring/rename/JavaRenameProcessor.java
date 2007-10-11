@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,16 +26,14 @@ import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 
-public abstract class JavaRenameProcessor extends RenameProcessor implements IScriptableRefactoring, INameUpdating, ICommentProvider {
+public abstract class JavaRenameProcessor extends RenameProcessor implements IScriptableRefactoring, INameUpdating {
 	
 	private String fNewElementName;
-	private String fComment;
 	private RenameModifications fRenameModifications;
 	
 	public final RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants shared) throws CoreException {
@@ -88,15 +86,4 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements ISc
 	 */
 	public abstract int getSaveMode();
 
-	public final boolean canEnableComment() {
-		return true;
-	}
-
-	public final String getComment() {
-		return fComment;
-	}
-
-	public final void setComment(String comment) {
-		fComment= comment;
-	}
 }

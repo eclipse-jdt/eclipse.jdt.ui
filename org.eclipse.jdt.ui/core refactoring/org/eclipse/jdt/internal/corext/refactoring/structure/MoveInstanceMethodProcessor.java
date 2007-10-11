@@ -132,7 +132,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefa
 import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IVisibilityAdjustment;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
@@ -153,7 +152,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 /**
  * Refactoring processor to move instance methods.
  */
-public final class MoveInstanceMethodProcessor extends MoveProcessor implements IScriptableRefactoring, IDelegateUpdating, ICommentProvider {
+public final class MoveInstanceMethodProcessor extends MoveProcessor implements IScriptableRefactoring, IDelegateUpdating {
 
 	/**
 	 * AST visitor to find references to parameters occurring in anonymous
@@ -510,7 +509,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			if (expression instanceof FieldAccess) {
 				final FieldAccess access= (FieldAccess) expression;
 				final IBinding binding= access.getName().resolveBinding();
-				if ((access.getExpression() instanceof ThisExpression) && Bindings.equals(fTarget, binding)) {
+				if (access.getExpression() instanceof ThisExpression && Bindings.equals(fTarget, binding)) {
 					fRewrite.replace(node, ast.newSimpleName(node.getName().getIdentifier()), null);
 					return false;
 				}
@@ -679,7 +678,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		protected static boolean isQualifiedEntity(final Name name) {
 			Assert.isNotNull(name);
 			final ASTNode parent= name.getParent();
-			if ((parent instanceof QualifiedName && ((QualifiedName) parent).getName().equals(name)) || (parent instanceof FieldAccess && ((FieldAccess) parent).getName().equals(name)) || (parent instanceof SuperFieldAccess))
+			if (parent instanceof QualifiedName && ((QualifiedName) parent).getName().equals(name) || parent instanceof FieldAccess && ((FieldAccess) parent).getName().equals(name) || parent instanceof SuperFieldAccess)
 				return true;
 			else if (parent instanceof MethodInvocation) {
 				final MethodInvocation invocation= (MethodInvocation) parent;
@@ -824,7 +823,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			Assert.isNotNull(node);
 			final Expression expression= node.getExpression();
 			final IMethodBinding binding= node.resolveMethodBinding();
-			if (binding == null || (!Modifier.isStatic(binding.getModifiers()) && Bindings.equals(binding, fBinding) && (expression == null || expression instanceof ThisExpression))) {
+			if (binding == null || !Modifier.isStatic(binding.getModifiers()) && Bindings.equals(binding, fBinding) && (expression == null || expression instanceof ThisExpression)) {
 				fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_potentially_recursive, JavaStatusContext.create(fMethod.getCompilationUnit(), node)));
 				fResult.add(node);
 				return false;
@@ -949,7 +948,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 							same= true;
 						final Modifier.ModifierKeyword keyword= same ? null : Modifier.ModifierKeyword.PUBLIC_KEYWORD;
 						final String modifier= same ? RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_default : RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_public;
-						if (MemberVisibilityAdjustor.hasLowerVisibility(binding.getModifiers(), same ? Modifier.NONE : (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(type, keyword, fAdjustments))
+						if (MemberVisibilityAdjustor.hasLowerVisibility(binding.getModifiers(), same ? Modifier.NONE : keyword == null ? Modifier.NONE : keyword.toFlagValue()) && MemberVisibilityAdjustor.needsVisibilityAdjustments(type, keyword, fAdjustments))
 							fAdjustments.put(type, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(type, keyword, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_type_warning, new String[] { BindingLabelProvider.getBindingLabel(declaration.resolveBinding(), JavaElementLabels.ALL_FULLY_QUALIFIED), modifier }), JavaStatusContext.create(type.getCompilationUnit(), declaration))));
 					}
 				}
@@ -1068,9 +1067,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/** The text change manager */
 	private TextChangeManager fChangeManager= null;
 
-	/** The comment */
-	private String fComment;
-
 	/** Should the delegator be deprecated? */
 	private boolean fDelegateDeprecation= true;
 
@@ -1130,13 +1126,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		fMethod= method;
 		if (method != null)
 			initialize(method);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean canEnableComment() {
-		return true;
 	}
 
 	/**
@@ -1597,7 +1586,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 						final MethodDeclaration method= ASTNodeSearchUtil.getMethodDeclarationNode(getter, fSourceRewrite.getRoot());
 						if (method != null) {
 							final IMethodBinding binding= method.resolveBinding();
-							if (binding != null && MemberVisibilityAdjustor.hasLowerVisibility(getter.getFlags(), same ? Modifier.NONE : (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(getter, keyword, adjustments))
+							if (binding != null && MemberVisibilityAdjustor.hasLowerVisibility(getter.getFlags(), same ? Modifier.NONE : keyword == null ? Modifier.NONE : keyword.toFlagValue()) && MemberVisibilityAdjustor.needsVisibilityAdjustments(getter, keyword, adjustments))
 								adjustments.put(getter, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(getter, keyword, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), modifier }), JavaStatusContext.create(getter))));
 							final MethodInvocation invocation= rewrite.getAST().newMethodInvocation();
 							invocation.setExpression(expression);
@@ -1859,7 +1848,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 									final AbstractTypeDeclaration member= (AbstractTypeDeclaration) ASTNodes.getParent(invocation, AbstractTypeDeclaration.class);
 									if (member != null) {
 										final ITypeBinding resolved= member.resolveBinding();
-										if (ASTNodes.getParent(invocation, AnonymousClassDeclaration.class) != null || (resolved != null && resolved.isMember())) {
+										if (ASTNodes.getParent(invocation, AnonymousClassDeclaration.class) != null || resolved != null && resolved.isMember()) {
 											final IMethodBinding method= declaration.resolveBinding();
 											if (method != null) {
 												final ITypeBinding declaring= method.getDeclaringClass();
@@ -2179,7 +2168,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				if (declaring != null && Bindings.equals(declaring.getPackage(), fTarget.getType().getPackage()))
 					same= true;
 				final Modifier.ModifierKeyword keyword= same ? null : Modifier.ModifierKeyword.PUBLIC_KEYWORD;
-				if (MemberVisibilityAdjustor.hasLowerVisibility(binding.getModifiers(), same ? Modifier.NONE : (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(fMethod, keyword, adjustments)) {
+				if (MemberVisibilityAdjustor.hasLowerVisibility(binding.getModifiers(), same ? Modifier.NONE : keyword == null ? Modifier.NONE : keyword.toFlagValue()) && MemberVisibilityAdjustor.needsVisibilityAdjustments(fMethod, keyword, adjustments)) {
 					final MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment adjustment= new MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment(fMethod, keyword, RefactoringStatus.createStatus(RefactoringStatus.WARNING, Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning, new String[] { MemberVisibilityAdjustor.getLabel(fMethod), MemberVisibilityAdjustor.getLabel(keyword) }), JavaStatusContext.create(fMethod), null, RefactoringStatusEntry.NO_CODE, null));
 					ModifierRewrite.create(rewrite, declaration).setVisibility(keyword == null ? Modifier.NONE : keyword.toFlagValue(), null);
 					adjustment.setNeedsRewriting(false);
@@ -2609,13 +2598,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public String getComment() {
-		return fComment;
-	}
-
-	/**
 	 * Returns a compilation unit rewrite for the specified compilation unit.
 	 * 
 	 * @param rewrites
@@ -2898,13 +2880,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 */
 	public final boolean needsTargetNode() {
 		return fTargetNode;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setComment(final String comment) {
-		fComment= comment;
 	}
 
 	/**

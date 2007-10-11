@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,16 +43,13 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
-public final class JavaMoveProcessor extends MoveProcessor implements IScriptableRefactoring, ICommentProvider, IQualifiedNameUpdating, IReorgDestinationValidator {
-
-	private String fComment;
+public final class JavaMoveProcessor extends MoveProcessor implements IScriptableRefactoring, IQualifiedNameUpdating, IReorgDestinationValidator {
 
 	private ICreateTargetQueries fCreateTargetQueries;
 
@@ -72,10 +69,6 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 	
 	public boolean canElementBeDestination(IReorgDestination destination) {
 		return fMovePolicy.canElementBeDestination(destination);
-	}
-
-	public boolean canEnableComment() {
-		return true;
 	}
 
 	public boolean canEnableQualifiedNameUpdating() {
@@ -167,10 +160,6 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 		result.addAll(Arrays.asList(jNatures));
 		result.addAll(Arrays.asList(rNatures));
 		return (String[]) result.toArray(new String[result.size()]);
-	}
-
-	public String getComment() {
-		return fComment;
 	}
 
 	public Object getCommonParentForInputElements() {
@@ -266,10 +255,6 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 
 	public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
 		return fMovePolicy.postCreateChange(participantChanges, pm);
-	}
-
-	public void setComment(String comment) {
-		fComment= comment;
 	}
 
 	public void setCreateTargetQueries(ICreateTargetQueries queries) {

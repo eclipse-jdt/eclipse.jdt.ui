@@ -72,7 +72,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefa
 import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -84,7 +83,7 @@ import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public final class JavaDeleteProcessor extends DeleteProcessor implements IScriptableRefactoring, ICommentProvider {
+public final class JavaDeleteProcessor extends DeleteProcessor implements IScriptableRefactoring {
 
 	private static final String ATTRIBUTE_RESOURCES= "resources"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_ELEMENTS= "elements"; //$NON-NLS-1$
@@ -99,7 +98,6 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 	private IJavaElement[] fJavaElements;
 	private IReorgQueries fDeleteQueries;
 	private DeleteModifications fDeleteModifications;
-	private String fComment;
 
 	private Change fDeleteChange;
 	private boolean fDeleteSubPackages;
@@ -471,7 +469,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 	private boolean canRemoveCompletely(IPackageFragment pack, List packagesToDelete) throws JavaModelException {
 		final IPackageFragment[] subPackages= JavaElementUtil.getPackageAndSubpackages(pack);
 		for (int i= 0; i < subPackages.length; i++) {
-			if (!(subPackages[i].equals(pack)) && !(packagesToDelete.contains(subPackages[i])))
+			if (!subPackages[i].equals(pack) && !packagesToDelete.contains(subPackages[i]))
 				return false;
 		}
 		return true;
@@ -496,7 +494,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 					return;
 		}
 		
-		final IResource[] children= (((IContainer) frag.getResource())).members();
+		final IResource[] children= ((IContainer) frag.getResource()).members();
 		for (int i= 0; i < children.length; i++) {
 			// Child must be a package fragment already in the list,
 			// or a resource which is deleted as well.
@@ -772,7 +770,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 	private static IMethod[] getGetterSetter(IField field) throws JavaModelException {
 		IMethod getter= GetterSetterUtil.getGetter(field);
 		IMethod setter= GetterSetterUtil.getSetter(field);
-		if ((getter != null && getter.exists()) || 	(setter != null && setter.exists()))
+		if (getter != null && getter.exists() || 	setter != null && setter.exists())
 			return new IMethod[]{getter, setter};
 		else
 			return null;
@@ -809,18 +807,6 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IScrip
 				return false;
 		}
 		return true;
-	}
-
-	public boolean canEnableComment() {
-		return true;
-	}
-
-	public String getComment() {
-		return fComment;
-	}
-
-	public void setComment(String comment) {
-		fComment= comment;
 	}
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {

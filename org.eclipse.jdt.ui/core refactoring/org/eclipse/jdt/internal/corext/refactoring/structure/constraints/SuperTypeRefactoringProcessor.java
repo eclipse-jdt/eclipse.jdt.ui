@@ -96,7 +96,6 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRewriteUtil;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
@@ -118,7 +117,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 3.1
  */
-public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor implements IScriptableRefactoring, ICommentProvider {
+public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor implements IScriptableRefactoring {
 
 	// TODO: remove
 	protected static final String ATTRIBUTE_INSTANCEOF= "instanceof"; //$NON-NLS-1$
@@ -145,9 +144,6 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	protected static ASTNode createCorrespondingNode(final CompilationUnitRewrite rewrite, final TType type) {
 		return rewrite.getImportRewrite().addImportFromSignature(new BindingKey(type.getBindingKey()).toSignature(), rewrite.getAST());
 	}
-
-	/** The comment */
-	protected String fComment;
 
 	/** Should type occurrences on instanceof's also be rewritten? */
 	protected boolean fInstanceOf= false;
@@ -207,13 +203,6 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			if (fInstanceOf)
 				comment.addSetting(RefactoringCoreMessages.SuperTypeRefactoringProcessor_use_in_instanceof_setting);
 		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean canEnableComment() {
-		return true;
 	}
 
 	/**
@@ -507,13 +496,6 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 */
 	protected void finalize() throws Throwable {
 		resetWorkingCopies();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public final String getComment() {
-		return fComment;
 	}
 
 	/**
@@ -1090,13 +1072,6 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public final void setComment(final String comment) {
-		fComment= comment;
-	}
-
-	/**
 	 * Determines whether type occurrences in instanceof's should be rewritten.
 	 * 
 	 * @param rewrite
@@ -1212,7 +1187,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 							}
 							final List batches= new ArrayList(units);
 							final int size= batches.size();
-							final int iterations= ((size - 1) / SIZE_BATCH) + 1;
+							final int iterations= (size - 1) / SIZE_BATCH + 1;
 							final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 100);
 							try {
 								subsubMonitor.beginTask("", iterations * 100); //$NON-NLS-1$

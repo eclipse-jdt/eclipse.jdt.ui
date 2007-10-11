@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,15 +44,12 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
-public final class JavaCopyProcessor extends CopyProcessor implements IReorgDestinationValidator, IScriptableRefactoring, ICommentProvider {
-
-	private String fComment;
+public final class JavaCopyProcessor extends CopyProcessor implements IReorgDestinationValidator, IScriptableRefactoring {
 
 	private ICopyPolicy fCopyPolicy;
 
@@ -72,10 +69,6 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 
 	public boolean canElementBeDestination(IReorgDestination destination) {
 		return fCopyPolicy.canElementBeDestination(destination);
-	}
-
-	public boolean canEnableComment() {
-		return true;
 	}
 
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
@@ -148,10 +141,6 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 		return RefactoringCoreMessages.JavaCopyProcessor_changeName;
 	}
 
-	public String getComment() {
-		return fComment;
-	}
-
 	public Object getCommonParentForInputElements() {
 		return new ParentChecker(fCopyPolicy.getResources(), fCopyPolicy.getJavaElements()).getCommonParent();
 	}
@@ -208,10 +197,6 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 		RefactoringParticipant[] result= fCopyPolicy.loadParticipants(status, this, getAffectedProjectNatures(), sharedParticipants);
 		fExecutionLog= fCopyPolicy.getReorgExecutionLog();
 		return result;
-	}
-
-	public void setComment(String comment) {
-		fComment= comment;
 	}
 	
 	public RefactoringStatus setDestination(IReorgDestination destination) throws JavaModelException {

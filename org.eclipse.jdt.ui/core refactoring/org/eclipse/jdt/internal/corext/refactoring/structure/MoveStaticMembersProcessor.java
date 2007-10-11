@@ -108,7 +108,6 @@ import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateFieldCreato
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -124,7 +123,7 @@ import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-public final class MoveStaticMembersProcessor extends MoveProcessor implements IDelegateUpdating, IScriptableRefactoring, ICommentProvider {
+public final class MoveStaticMembersProcessor extends MoveProcessor implements IDelegateUpdating, IScriptableRefactoring {
 
 	private static final String ATTRIBUTE_DELEGATE="delegate"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DEPRECATE="deprecate"; //$NON-NLS-1$
@@ -143,7 +142,6 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	private BodyDeclaration[] fMemberDeclarations;
 	private boolean fDelegateUpdating;
 	private boolean fDelegateDeprecation;
-	private String fComment;
 
 	private static class TypeReferenceFinder extends ASTVisitor {
 		List fResult= new ArrayList();
@@ -437,7 +435,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 		// no checking required for moving interface fields to classes
 				
-		if (! ((JdtFlags.isStatic(fDestinationType)) || (fDestinationType.getDeclaringType() == null))){
+		if (! (JdtFlags.isStatic(fDestinationType) || fDestinationType.getDeclaringType() == null)){
 			String message= RefactoringCoreMessages.MoveMembersRefactoring_static_declaration; 
 			result.addError(message);
 		}	
@@ -491,7 +489,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				IType type= (IType) member;
 				if (type.isInterface() && !Checks.isTopLevel(type))
 					return true;
-				return (Flags.isPublic(flags) && Flags.isStatic(flags));
+				return Flags.isPublic(flags) && Flags.isStatic(flags);
 			}
 			default:
 				return false;
@@ -537,7 +535,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				if (type != null //reference can e.g. be an import declaration
 						&& ! blindAccessorTypes.contains(type)
 						&& ! isWithinMemberToMove(searchResult)
-						&& ! isVisibleFrom(member, getDestinationType(), type)) {
+						&& !isVisibleFrom(getDestinationType(), type)) {
 					blindAccessorTypes.add(type);
 				}
 			}
@@ -546,7 +544,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		if (fDelegateUpdating && isDelegateCreationAvailable(member)) {
 			// ensure moved member is visible from the delegate
 			IType type= member.getDeclaringType();
-			if (!blindAccessorTypes.contains(type) && !isVisibleFrom(member, getDestinationType(), type))
+			if (!blindAccessorTypes.contains(type) && !isVisibleFrom(getDestinationType(), type))
 				blindAccessorTypes.add(type);
 		}
 		
@@ -611,7 +609,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		return (SearchResultGroup[]) engine.getResults();
 	}
 
-	private static boolean isVisibleFrom(IMember member, IType newMemberDeclaringType, IType accessingType) throws JavaModelException{
+	private static boolean isVisibleFrom(IType newMemberDeclaringType, IType accessingType) throws JavaModelException {
 		int memberVisibility= JdtFlags.getVisibilityCode(newMemberDeclaringType);
 			
 		IType declaringType= newMemberDeclaringType.getDeclaringType();
@@ -748,7 +746,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 					// will be visible from within the delegate
 					ModifierKeyword threshold= adjustor.getVisibilityThreshold(member, fDestinationType, new NullProgressMonitor());
 					IncomingMemberVisibilityAdjustment adjustment= (IncomingMemberVisibilityAdjustment) adjustments.get(member);
-					ModifierKeyword kw= (adjustment != null) ? adjustment.getKeyword() : ModifierKeyword.fromFlagValue(JdtFlags.getVisibilityCode(member));
+					ModifierKeyword kw= adjustment != null ? adjustment.getKeyword() : ModifierKeyword.fromFlagValue(JdtFlags.getVisibilityCode(member));
 					if (MemberVisibilityAdjustor.hasLowerVisibility(kw, threshold)) {
 						adjustments.put(member, new MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment(member, threshold, RefactoringStatus.createWarningStatus(Messages.format(MemberVisibilityAdjustor.getMessage(member), new String[] { MemberVisibilityAdjustor.getLabel(member), MemberVisibilityAdjustor.getLabel(threshold)}), JavaStatusContext.create(member))));
 					}
@@ -1075,18 +1073,6 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
-	}
-
-	public boolean canEnableComment() {
-		return true;
-	}
-
-	public String getComment() {
-		return fComment;
-	}
-
-	public void setComment(String comment) {
-		fComment= comment;
 	}
 
 	public String getDelegateUpdatingTitle(boolean plural) {
