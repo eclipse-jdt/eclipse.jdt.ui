@@ -109,7 +109,7 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 		startMeasuring();
 		
 		for (int i= 0; i < roots.length; i++) {
-			OrganizeImportsOperation op= new OrganizeImportsOperation(cus[i], roots[i], true, false, true, null);
+			OrganizeImportsOperation op= new OrganizeImportsOperation(cus[i], roots[i], true, true, true, null);
 			op.run(new NullProgressMonitor());
 		}
 		
