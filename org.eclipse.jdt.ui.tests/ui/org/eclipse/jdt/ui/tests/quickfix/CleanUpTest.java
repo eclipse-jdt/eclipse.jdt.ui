@@ -587,7 +587,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        int i= bar();\n");
+		buf.append("        bar();\n");
 		buf.append("    }\n");
 		buf.append("    public int bar() {return 1;}\n");
 		buf.append("}\n");
@@ -642,8 +642,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        int i= 1;\n");
-		buf.append("        i= bar();\n");
+		buf.append("        bar();\n");
 		buf.append("    }\n");
 		buf.append("    public int bar() {return 1;}\n");
 		buf.append("}\n");
@@ -831,6 +830,33 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected1= buf.toString();
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+	
+	public void testUnusedCodeBug189394() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Random;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Random ran = new Random();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Random;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        new Random();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 	
 	public void testJava5001() throws Exception {

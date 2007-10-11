@@ -129,7 +129,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("                \"java.lang.reflect.Method.invoke(\" //$NON-NLS-1$\n");
         buf.append("        };\n");
         buf.append("        for (final String pattern : patterns) {\n");
-		buf.append("            if (line.indexOf(pattern) > 0) {\n");
+        buf.append("            if (line.indexOf(pattern) > 0) {\n");
         buf.append("                return true;\n");
         buf.append("            }\n");
         buf.append("        }\n");
@@ -1754,7 +1754,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    private void readExcludedPackages() {\n");
         buf.append("        this.fExcluded = new Vector(10);\n");
         buf.append("        for (final String defaultExclusion : this.defaultExclusions) {\n");
-		buf.append("            this.fExcluded.addElement(defaultExclusion);\n");
+        buf.append("            this.fExcluded.addElement(defaultExclusion);\n");
         buf.append("        }\n");
         buf.append("\n");
         buf.append("        final InputStream is = this.getClass().getResourceAsStream(\n");
@@ -2110,7 +2110,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("        while (Test.class.isAssignableFrom(superClass)) {\n");
         buf.append("            final Method[] methods = superClass.getDeclaredMethods();\n");
         buf.append("            for (final Method method : methods) {\n");
-		buf.append("                this.addTestMethod(method, names, theClass);\n");
+        buf.append("                this.addTestMethod(method, names, theClass);\n");
         buf.append("            }\n");
         buf.append("            superClass = superClass.getSuperclass();\n");
         buf.append("        }\n");
@@ -3191,7 +3191,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("        final OutputStream expected = new ByteArrayOutputStream();\n");
         buf.append("        final PrintStream expectedWriter = new PrintStream(expected);\n");
         buf.append("        for (final String line : lines) {\n");
-		buf.append("            expectedWriter.println(line);\n");
+        buf.append("            expectedWriter.println(line);\n");
         buf.append("        }\n");
         buf.append("        return expected.toString();\n");
         buf.append("    }\n");
@@ -4184,8 +4184,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("                \"-classpath\", cp, \"junit.textui.TestRunner\", testClass}; //$NON-NLS-1$ //$NON-NLS-2$\n");
         buf.append("        final Process p = Runtime.getRuntime().exec(cmd);\n");
         buf.append("        final InputStream i = p.getInputStream();\n");
-        buf.append("        int b;\n");
-        buf.append("        while ((b = i.read()) != -1) {\n");
+        buf.append("        while ((i.read()) != -1) {\n");
         buf.append("            ; // System.out.write(b);\n");
         buf.append("        }\n");
         buf.append("        Assert.assertTrue((p.waitFor() == 0) == success);\n");
