@@ -130,15 +130,10 @@ public class ReplaceInvocationsAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */
 	public void run(ITextSelection selection) {
-		try {
-			IJavaElement editorInput= SelectionConverter.getInput(fEditor);
-			if ((editorInput instanceof ITypeRoot)
-					&& ActionUtil.isProcessable(getShell(), editorInput)) {
-				ITypeRoot typeRoot= (ITypeRoot) editorInput;
-				RefactoringExecutionStarter.startReplaceInvocationsRefactoring(typeRoot, selection.getOffset(), selection.getLength(), getShell());
-			}
-		} catch (JavaModelException e) {
-			handleException(e);
+		IJavaElement editorInput= SelectionConverter.getInput(fEditor);
+		if (editorInput instanceof ITypeRoot && ActionUtil.isProcessable(getShell(), editorInput)) {
+			ITypeRoot typeRoot= (ITypeRoot) editorInput;
+			RefactoringExecutionStarter.startReplaceInvocationsRefactoring(typeRoot, selection.getOffset(), selection.getLength(), getShell());
 		}
 	}
 }

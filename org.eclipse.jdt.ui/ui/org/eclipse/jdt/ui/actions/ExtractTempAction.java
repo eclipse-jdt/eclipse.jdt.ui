@@ -14,8 +14,6 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 
@@ -28,7 +26,6 @@ import org.eclipse.jdt.internal.ui.refactoring.ExtractTempWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Extracts an expression into a new local variable and replaces all occurrences of
@@ -77,11 +74,7 @@ public class ExtractTempAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isEditable(fEditor))
 			return;
-		try{
-			final ExtractTempRefactoring refactoring= new ExtractTempRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
-			new RefactoringStarter().activate(refactoring, new ExtractTempWizard(refactoring), getShell(), RefactoringMessages.ExtractTempAction_extract_temp, RefactoringSaveHelper.SAVE_NOTHING);
-		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, RefactoringMessages.ExtractTempAction_extract_temp, RefactoringMessages.NewTextRefactoringAction_exception); 
-		}	
+		ExtractTempRefactoring refactoring= new ExtractTempRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
+		new RefactoringStarter().activate(new ExtractTempWizard(refactoring), getShell(), RefactoringMessages.ExtractTempAction_extract_temp, RefactoringSaveHelper.SAVE_NOTHING);	
 	}
 }

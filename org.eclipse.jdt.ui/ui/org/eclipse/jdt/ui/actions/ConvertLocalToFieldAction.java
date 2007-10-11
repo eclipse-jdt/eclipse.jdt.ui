@@ -29,7 +29,6 @@ import org.eclipse.jdt.internal.ui.refactoring.PromoteTempWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Action to convert a local variable to a field.
@@ -81,12 +80,8 @@ public class ConvertLocalToFieldAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isEditable(fEditor))
 			return;
-		try{
-			ICompilationUnit cunit= SelectionConverter.getInputAsCompilationUnit(fEditor);
-			final PromoteTempToFieldRefactoring refactoring= new PromoteTempToFieldRefactoring(cunit, selection.getOffset(), selection.getLength());
-			new RefactoringStarter().activate(refactoring, new PromoteTempWizard(refactoring), getShell(), RefactoringMessages.ConvertLocalToField_title, RefactoringSaveHelper.SAVE_NOTHING);
-		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, RefactoringMessages.ConvertLocalToField_title, RefactoringMessages.NewTextRefactoringAction_exception); 
-		}	
+		ICompilationUnit cunit= SelectionConverter.getInputAsCompilationUnit(fEditor);
+		PromoteTempToFieldRefactoring refactoring= new PromoteTempToFieldRefactoring(cunit, selection.getOffset(), selection.getLength());
+		new RefactoringStarter().activate(new PromoteTempWizard(refactoring), getShell(), RefactoringMessages.ConvertLocalToField_title, RefactoringSaveHelper.SAVE_NOTHING);
 	}
 }

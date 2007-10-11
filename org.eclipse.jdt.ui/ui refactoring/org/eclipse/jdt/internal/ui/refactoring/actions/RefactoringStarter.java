@@ -14,12 +14,9 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
-
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 
@@ -48,21 +45,6 @@ public class RefactoringStarter {
 		} catch (InterruptedException e) {
 			return false; // User action got cancelled
 		}
-	}
-
-
-	/**
-	 * @param refactoring
-	 * @param wizard
-	 * @param parent
-	 * @param dialogTitle
-	 * @param saveMode a save mode from {@link RefactoringSaveHelper}
-	 * @return <code>true</code> if the refactoring was executed, <code>false</code> otherwise
-	 * @throws JavaModelException
-	 * @deprecated use {@link #activate(RefactoringWizard, Shell, String, int)} instead
-	 */
-	public boolean activate(Refactoring refactoring, RefactoringWizard wizard, Shell parent, String dialogTitle, int saveMode) throws JavaModelException {
-		return activate(wizard, parent, dialogTitle, saveMode);
 	}
 	
 	public RefactoringStatus getInitialConditionCheckingStatus() {

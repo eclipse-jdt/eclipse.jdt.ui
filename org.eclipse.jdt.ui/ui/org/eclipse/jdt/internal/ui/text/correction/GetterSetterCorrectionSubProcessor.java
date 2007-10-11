@@ -173,7 +173,7 @@ public class GetterSetterCorrectionSubProcessor {
 						});
 					}
 				} else {
-					new RefactoringStarter().activate(refactoring, new SelfEncapsulateFieldWizard(refactoring), JavaPlugin.getActiveWorkbenchShell(), "", RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES); //$NON-NLS-1$
+					new RefactoringStarter().activate(new SelfEncapsulateFieldWizard(refactoring), JavaPlugin.getActiveWorkbenchShell(), "", RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES); //$NON-NLS-1$
 				}
 			} catch (JavaModelException e) {
 				ExceptionHandler.handle(e, CorrectionMessages.GetterSetterCorrectionSubProcessor_encapsulate_field_error_title, CorrectionMessages.GetterSetterCorrectionSubProcessor_encapsulate_field_error_message);

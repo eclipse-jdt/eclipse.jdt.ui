@@ -32,7 +32,6 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Inlines the value of a local variable at all places where a read reference
@@ -90,14 +89,10 @@ public class InlineTempAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */		
 	public void run(ITextSelection selection) {
-		try{
-			ICompilationUnit input= SelectionConverter.getInputAsCompilationUnit(fEditor);
-			if (!ActionUtil.isEditable(fEditor))
-				return;
-			RefactoringExecutionStarter.startInlineTempRefactoring(input, null, selection, getShell());
-		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, RefactoringMessages.InlineTempAction_inline_temp, RefactoringMessages.NewTextRefactoringAction_exception); 
-		}	
+		ICompilationUnit input= SelectionConverter.getInputAsCompilationUnit(fEditor);
+		if (!ActionUtil.isEditable(fEditor))
+			return;
+		RefactoringExecutionStarter.startInlineTempRefactoring(input, null, selection, getShell());	
 	}
 
 	/*
@@ -115,13 +110,6 @@ public class InlineTempAction extends SelectionDispatchAction {
 	}
 
 	/* package */ boolean tryInlineTemp(ICompilationUnit unit, CompilationUnit node, ITextSelection selection, Shell shell) {
-		try {
-			if (RefactoringExecutionStarter.startInlineTempRefactoring(unit, node, selection, shell)) {
-				return true;
-			}
-		} catch (JavaModelException exception) {
-			ExceptionHandler.handle(exception, RefactoringMessages.InlineTempAction_inline_temp, RefactoringMessages.NewTextRefactoringAction_exception); 
-		}
-		return false;
+		return RefactoringExecutionStarter.startInlineTempRefactoring(unit, node, selection, shell);
 	}
 }

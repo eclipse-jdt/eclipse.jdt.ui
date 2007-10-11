@@ -90,7 +90,7 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 		return new Object[] {fProject};
 	}
 
-	public Object getNewElement() throws CoreException {
+	public Object getNewElement() {
 		IPath newPath= fProject.getPath().removeLastSegments(1).append(getNewElementName());
 		return JavaCore.create(ResourcesPlugin.getWorkspace().getRoot().findMember(newPath));
 	}

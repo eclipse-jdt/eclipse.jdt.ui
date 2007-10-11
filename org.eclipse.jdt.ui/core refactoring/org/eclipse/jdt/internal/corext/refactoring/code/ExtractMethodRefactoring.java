@@ -213,9 +213,8 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
 	 * @param selectionStart
 	 * @param selectionLength
-	 * @throws CoreException 
 	 */
-	public ExtractMethodRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) throws CoreException {
+	public ExtractMethodRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) {
 		fCUnit= unit;
 		fRoot= null;
 		fMethodName= "extracted"; //$NON-NLS-1$
@@ -229,9 +228,8 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 	 * @param astRoot the AST root of an AST created from a compilation unit
 	 * @param selectionStart
 	 * @param selectionLength
-	 * @throws CoreException 
 	 */
-	public ExtractMethodRefactoring(CompilationUnit astRoot, int selectionStart, int selectionLength) throws CoreException {
+	public ExtractMethodRefactoring(CompilationUnit astRoot, int selectionStart, int selectionLength) {
 		this((ICompilationUnit) astRoot.getTypeRoot(), selectionStart, selectionLength);
 		fRoot= astRoot;
 	}
@@ -685,7 +683,7 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 	private ASTNode getNextParent(ASTNode node) {
 		do {
 			node= node.getParent();
-		} while (node != null && !((node instanceof AbstractTypeDeclaration) || (node instanceof AnonymousClassDeclaration)));
+		} while (node != null && !(node instanceof AbstractTypeDeclaration || node instanceof AnonymousClassDeclaration));
 		return node;
 	}
 		
@@ -716,7 +714,7 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 		invocation.setName(fAST.newSimpleName(fMethodName));
 		List arguments= invocation.arguments();
 		for (int i= 0; i < fParameterInfos.size(); i++) {
-			ParameterInfo parameter= ((ParameterInfo)fParameterInfos.get(i));
+			ParameterInfo parameter= (ParameterInfo)fParameterInfos.get(i);
 			arguments.add(ASTNodeFactory.newName(fAST, getMappedName(duplicate, parameter)));
 		}
 		if (fLinkedProposalModel != null) {

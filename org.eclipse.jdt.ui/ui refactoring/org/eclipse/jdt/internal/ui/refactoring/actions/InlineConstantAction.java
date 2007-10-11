@@ -139,25 +139,13 @@ public class InlineConstantAction extends SelectionDispatchAction {
 		Assert.isTrue(length >= 0);
 		if (!ActionUtil.isEditable(fEditor, getShell(), cu))
 			return;
-		try {
-			CompilationUnit node= RefactoringASTParser.parseWithASTProvider(cu, true, null);
-			if (! RefactoringExecutionStarter.startInlineConstantRefactoring(cu, node, offset, length, getShell())) {
-				MessageDialog.openInformation(getShell(), RefactoringMessages.InlineConstantAction_dialog_title, RefactoringMessages.InlineConstantAction_no_constant_reference_or_declaration);
-			}
-			
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), RefactoringMessages.InlineConstantAction_dialog_title, RefactoringMessages.InlineConstantAction_unexpected_exception); 
+		CompilationUnit node= RefactoringASTParser.parseWithASTProvider(cu, true, null);
+		if (!RefactoringExecutionStarter.startInlineConstantRefactoring(cu, node, offset, length, getShell())) {
+			MessageDialog.openInformation(getShell(), RefactoringMessages.InlineConstantAction_dialog_title, RefactoringMessages.InlineConstantAction_no_constant_reference_or_declaration);
 		}
 	}
 
 	public boolean tryInlineConstant(ICompilationUnit unit, CompilationUnit node, ITextSelection selection, Shell shell) {
-		try {
-			if (RefactoringExecutionStarter.startInlineConstantRefactoring(unit, node, selection.getOffset(), selection.getLength(), shell)) {
-				return true;
-			}
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), RefactoringMessages.InlineConstantAction_dialog_title, RefactoringMessages.InlineConstantAction_unexpected_exception); 
-		}
-		return false;
+		return RefactoringExecutionStarter.startInlineConstantRefactoring(unit, node, selection.getOffset(), selection.getLength(), shell);
 	}
 }

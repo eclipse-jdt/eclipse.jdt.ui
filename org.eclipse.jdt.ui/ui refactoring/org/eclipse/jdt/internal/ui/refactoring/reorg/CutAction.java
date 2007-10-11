@@ -23,7 +23,6 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 
@@ -89,7 +88,7 @@ public class CutAction extends SelectionDispatchAction{
 	private static boolean containsTopLevelTypes(IStructuredSelection selection) {
 		for (Iterator iter = selection.iterator(); iter.hasNext();) {
 			Object each= iter.next();
-			if ((each instanceof IType) && ((IType)each).getDeclaringType() == null)
+			if (each instanceof IType && ((IType)each).getDeclaringType() == null)
 				return true;
 		}
 		return false;
@@ -102,8 +101,6 @@ public class CutAction extends SelectionDispatchAction{
 				fCopyToClipboardAction.run(selection);
 				RefactoringExecutionStarter.startCutRefactoring(selection.toArray(), getShell());
 			}
-		} catch (CoreException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		} catch (InterruptedException e) {
 			//OK
 		} catch (InvocationTargetException e) {

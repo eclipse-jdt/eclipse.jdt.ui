@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,7 +37,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.JavaMoveRefactoring
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
 public class ReorgMoveStarter {
@@ -62,25 +61,21 @@ public class ReorgMoveStarter {
 	}
 	
 	public void run(Shell parent) throws InterruptedException, InvocationTargetException {
-		try {
-			JavaMoveRefactoring ref= new JavaMoveRefactoring(fMoveProcessor);
-			if (fMoveProcessor.hasAllInputSet()) {
-				IRunnableContext context= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-				fMoveProcessor.setCreateTargetQueries(new CreateTargetQueries(parent));
-				fMoveProcessor.setReorgQueries(new ReorgQueries(parent));
-				new RefactoringExecutionHelper(ref, RefactoringCore.getConditionCheckingFailedSeverity(), fMoveProcessor.getSaveMode(), parent, context).perform(false, false);
-			} else  {
-				RefactoringWizard wizard= new ReorgMoveWizard(ref);
-				/*
-				 * We want to get the shell from the refactoring dialog but it's not known at this point, 
-				 * so we pass the wizard and then, once the dialog is open, we will have access to its shell.
-				 */
-				fMoveProcessor.setCreateTargetQueries(new CreateTargetQueries(wizard));
-				fMoveProcessor.setReorgQueries(new ReorgQueries(wizard));
-				new RefactoringStarter().activate(ref, wizard, parent, RefactoringMessages.OpenRefactoringWizardAction_refactoring, fMoveProcessor.getSaveMode()); 
-			}
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
+		JavaMoveRefactoring ref= new JavaMoveRefactoring(fMoveProcessor);
+		if (fMoveProcessor.hasAllInputSet()) {
+			IRunnableContext context= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+			fMoveProcessor.setCreateTargetQueries(new CreateTargetQueries(parent));
+			fMoveProcessor.setReorgQueries(new ReorgQueries(parent));
+			new RefactoringExecutionHelper(ref, RefactoringCore.getConditionCheckingFailedSeverity(), fMoveProcessor.getSaveMode(), parent, context).perform(false, false);
+		} else {
+			RefactoringWizard wizard= new ReorgMoveWizard(ref);
+			/*
+			 * We want to get the shell from the refactoring dialog but it's not known at this point, 
+			 * so we pass the wizard and then, once the dialog is open, we will have access to its shell.
+			 */
+			fMoveProcessor.setCreateTargetQueries(new CreateTargetQueries(wizard));
+			fMoveProcessor.setReorgQueries(new ReorgQueries(wizard));
+			new RefactoringStarter().activate(wizard, parent, RefactoringMessages.OpenRefactoringWizardAction_refactoring, fMoveProcessor.getSaveMode()); 
 		}
 	}
 }

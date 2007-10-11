@@ -134,24 +134,13 @@ public class InlineMethodAction extends SelectionDispatchAction {
 	private void run(int offset, int length, ITypeRoot typeRoot) {
 		if (!ActionUtil.isEditable(fEditor, getShell(), typeRoot))
 			return;
-		try {
-			CompilationUnit compilationUnit= RefactoringASTParser.parseWithASTProvider(typeRoot, true, null);
-			if (! RefactoringExecutionStarter.startInlineMethodRefactoring(typeRoot, compilationUnit, offset, length, getShell())) {
-				MessageDialog.openInformation(getShell(), RefactoringMessages.InlineMethodAction_dialog_title, RefactoringMessages.InlineMethodAction_no_method_invocation_or_declaration_selected);
-			}
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), RefactoringMessages.InlineMethodAction_dialog_title, RefactoringMessages.InlineMethodAction_unexpected_exception); 
+		CompilationUnit compilationUnit= RefactoringASTParser.parseWithASTProvider(typeRoot, true, null);
+		if (!RefactoringExecutionStarter.startInlineMethodRefactoring(typeRoot, compilationUnit, offset, length, getShell())) {
+			MessageDialog.openInformation(getShell(), RefactoringMessages.InlineMethodAction_dialog_title, RefactoringMessages.InlineMethodAction_no_method_invocation_or_declaration_selected);
 		}
 	}
 
 	public boolean tryInlineMethod(ITypeRoot typeRoot, CompilationUnit node, ITextSelection selection, Shell shell) {
-		try {
-			if (RefactoringExecutionStarter.startInlineMethodRefactoring(typeRoot, node, selection.getOffset(), selection.getLength(), shell)) {
-				return true;
-			}
-		} catch (JavaModelException exception) {
-			JavaPlugin.log(exception);
-		}
-		return false;
+		return RefactoringExecutionStarter.startInlineMethodRefactoring(typeRoot, node, selection.getOffset(), selection.getLength(), shell);
 	}
 }

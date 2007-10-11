@@ -14,8 +14,6 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactoring;
 
@@ -28,7 +26,6 @@ import org.eclipse.jdt.internal.ui.refactoring.ExtractConstantWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Extracts an expression into a constant field and replaces all occurrences of
@@ -77,11 +74,7 @@ public class ExtractConstantAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isEditable(fEditor))
 			return;
-		try{
-			final ExtractConstantRefactoring refactoring= new ExtractConstantRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
-			new RefactoringStarter().activate(refactoring, new ExtractConstantWizard(refactoring), getShell(), RefactoringMessages.ExtractConstantAction_extract_constant, RefactoringSaveHelper.SAVE_NOTHING);
-		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, RefactoringMessages.ExtractConstantAction_extract_constant, RefactoringMessages.NewTextRefactoringAction_exception); 
-		}	
+		ExtractConstantRefactoring refactoring= new ExtractConstantRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
+		new RefactoringStarter().activate(new ExtractConstantWizard(refactoring), getShell(), RefactoringMessages.ExtractConstantAction_extract_constant, RefactoringSaveHelper.SAVE_NOTHING);	
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,16 +21,19 @@ public interface INameUpdating {
 	
 	/**
 	 * Sets new name for the entity that this refactoring is working on.
+	 * @param newName the new name
 	 */
 	public void setNewElementName(String newName);
 	
 	/**
 	 * Get the name for the entity that this refactoring is working on.
+	 * @return returns the new name
 	 */
 	public String getNewElementName();
 
 	/**
 	 * Gets the current name of the entity that this refactoring is working on.
+	 * @return returns the current name
 	 */
 	public String getCurrentElementName();
 	
@@ -44,11 +47,17 @@ public interface INameUpdating {
 	
 	/**
 	 * Gets the element after renaming, or <code>null</code> if not available.
+	 * @return returns the new element or <code>null</code>
+	 * 
+	 * @throws CoreException thrown when the new element could not be evaluated
 	 */	
 	public Object getNewElement() throws CoreException;
 
 	/**
 	 * Checks if the new name is valid for the entity that this refactoring renames.
+	 * @param newName the new name
+	 * @return returns the resulting status
+	 * @throws CoreException Core exception is thrown when the validation could not be performed
 	 */
 	public RefactoringStatus checkNewElementName(String newName) throws CoreException;
 }

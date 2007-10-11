@@ -40,7 +40,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -95,7 +94,6 @@ import org.eclipse.jdt.internal.corext.fix.StringFix;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -115,8 +113,6 @@ import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
@@ -304,16 +300,7 @@ public class LocalCorrectionsSubProcessor {
 
 		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 2, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
 			public void apply(IDocument document) {
-				try {
-					NLSRefactoring refactoring= NLSRefactoring.create(cu);
-					if (refactoring == null)
-						return;
-					ExternalizeWizard wizard= new ExternalizeWizard(refactoring);
-					String dialogTitle= CorrectionMessages.LocalCorrectionsSubProcessor_externalizestrings_dialog_title;
-					new RefactoringStarter().activate(refactoring, wizard, JavaPlugin.getActiveWorkbenchShell(), dialogTitle, RefactoringSaveHelper.SAVE_NON_JAVA_UPDATES);
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
-				}
+				ExternalizeWizard.open(cu, JavaPlugin.getActiveWorkbenchShell());
 			}
 			public String getAdditionalProposalInfo() {
 				return CorrectionMessages.LocalCorrectionsSubProcessor_externalizestrings_additional_info;

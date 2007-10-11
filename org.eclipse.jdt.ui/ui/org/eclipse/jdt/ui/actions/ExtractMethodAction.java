@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.PlatformUI;
@@ -28,7 +26,6 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.code.ExtractMethodWizard;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Extracts the code selected inside a compilation unit editor into a new method.
@@ -79,11 +76,7 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isEditable(fEditor))
 			return;
-		try{
-			final ExtractMethodRefactoring refactoring= new ExtractMethodRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
-			new RefactoringStarter().activate(refactoring, new ExtractMethodWizard(refactoring), getShell(), RefactoringMessages.ExtractMethodAction_dialog_title, RefactoringSaveHelper.SAVE_NOTHING);
-		} catch (CoreException e){
-			ExceptionHandler.handle(e, RefactoringMessages.ExtractMethodAction_dialog_title, RefactoringMessages.NewTextRefactoringAction_exception); 
-		}
+		ExtractMethodRefactoring refactoring= new ExtractMethodRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
+		new RefactoringStarter().activate(new ExtractMethodWizard(refactoring), getShell(), RefactoringMessages.ExtractMethodAction_dialog_title, RefactoringSaveHelper.SAVE_NOTHING);
 	}
 }

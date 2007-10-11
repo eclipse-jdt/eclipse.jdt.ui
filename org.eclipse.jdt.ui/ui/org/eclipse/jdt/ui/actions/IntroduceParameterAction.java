@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.PlatformUI;
@@ -27,7 +25,6 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Introduces a new method parameter from a selected expression.
@@ -75,11 +72,7 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isEditable(fEditor))
 			return;
-		try{
-			ICompilationUnit unit= SelectionConverter.getInputAsCompilationUnit(fEditor);
-			RefactoringExecutionStarter.startIntroduceParameter(unit, selection.getOffset(), selection.getLength(), getShell());
-		} catch (CoreException e){
-			ExceptionHandler.handle(e, RefactoringMessages.IntroduceParameterAction_dialog_title, RefactoringMessages.NewTextRefactoringAction_exception); 
-		}
+		ICompilationUnit unit= SelectionConverter.getInputAsCompilationUnit(fEditor);
+		RefactoringExecutionStarter.startIntroduceParameter(unit, selection.getOffset(), selection.getLength(), getShell());
 	}
 }
