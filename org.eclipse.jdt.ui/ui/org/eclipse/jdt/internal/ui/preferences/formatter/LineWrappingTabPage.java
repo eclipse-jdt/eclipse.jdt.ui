@@ -213,7 +213,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	        fElements.clear();
 	        evaluateElements(selection.iterator());
 	        evaluateMaps(wrappingStyleMap, indentStyleMap, forceWrappingMap);
-	        setPreviewText(getPreviewText(wrappingStyleMap, indentStyleMap, forceWrappingMap));
+	        setPreviewText(getPreviewText());
 	        refreshControls(wrappingStyleMap, indentStyleMap, forceWrappingMap);
 	    }
 	    
@@ -244,7 +244,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
             }
 	    }
   
-        private String getPreviewText(Map wrappingMap, Map indentMap, Map forceMap) {
+        private String getPreviewText() {
             Iterator iterator= fElements.iterator();
             String previewText= ""; //$NON-NLS-1$
             while (iterator.hasNext()) {
@@ -721,16 +721,22 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		fIndentStyleCombo.setItems(INDENT_NAMES);
 		fIndentStyleCombo.setLayoutData(createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL, 0));
 		
-		// button "Force split"
-		fForceSplit= new Button(fOptionsGroup, SWT.CHECK);
-		fForceSplit.setLayoutData(createGridData(numColumns - 1, GridData.HORIZONTAL_ALIGN_BEGINNING, SWT.DEFAULT));
-		fForceSplit.setText(FormatterMessages.LineWrappingTabPage_force_split_checkbox_text); 
-		
 		Preference expressionWrapPositionPreference= createCheckboxPref(fOptionsGroup, 1, FormatterMessages.LineWrappingTabPage_binary_expression_wrap_operator, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_BINARY_OPERATOR, FALSE_TRUE);
 		Control control= expressionWrapPositionPreference.getControl();
 		control.setVisible(false);
-		((GridData)control.getLayoutData()).exclude= true;
+		GridData layoutData= (GridData)control.getLayoutData();
+		layoutData.exclude= true;
+		layoutData.horizontalAlignment= SWT.BEGINNING;
+		layoutData.grabExcessHorizontalSpace= false;
 		fBinaryExpressionCategory.addPreference(expressionWrapPositionPreference);
+		
+		// button "Force split"
+		fForceSplit= new Button(fOptionsGroup, SWT.CHECK);
+		String label= FormatterMessages.LineWrappingTabPage_force_split_checkbox_text;
+		GridData gridData= new GridData(SWT.FILL, SWT.CENTER, true, false);
+		gridData.horizontalSpan= numColumns - 1;
+		fForceSplit.setLayoutData(gridData);
+		fForceSplit.setText(label);
 		
 		// selection state object
 		fSelectionState= new SelectionState();
