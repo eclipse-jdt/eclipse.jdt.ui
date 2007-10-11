@@ -8,9 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.javaeditor;
-
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -85,7 +83,6 @@ import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
-import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 
 import org.eclipse.ui.editors.text.EditorsUI;
@@ -491,10 +488,9 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			}
 
 			protected MarkerAnnotation createMarkerAnnotation(IMarker marker) {
-				String markerType= MarkerUtilities.getMarkerType(marker);
-				if (markerType != null && markerType.startsWith(JavaMarkerAnnotation.JAVA_MARKER_TYPE_PREFIX))
+				if (JavaMarkerAnnotation.isJavaAnnotation(marker))
 					return new JavaMarkerAnnotation(marker);
-				return super.createMarkerAnnotation(marker);
+				return new InternalMarkerAnnotation(marker);
 			}
 
 			/*
@@ -851,6 +847,56 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				fListenerList.remove(listener);
 			}
 		}
+
+
+	/**
+	 * Internal class to avoid API addition for 3.3.2,
+	 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=170692
+	 * 
+	 * @since 3.3.2
+	 * @deprecated will be removed during 3.4
+	 */
+	private static class InternalMarkerAnnotation extends MarkerAnnotation implements IQuickFixableAnnotation {
+
+		/**
+		 * Tells whether this annotation is quick fixable.
+		 */
+		private boolean fIsQuickFixable;
+		/**
+		 * Tells whether the quick fixable state (<code>fIsQuickFixable</code> has been computed.
+		 */
+		private boolean fIsQuickFixableStateSet;
+
+		
+		public InternalMarkerAnnotation(IMarker marker) {
+			super(marker);
+		}
+		
+		/*
+		 * @see org.eclipse.jface.text.quickassist.IQuickFixableAnnotation#setQuickFixable(boolean)
+		 */
+		public void setQuickFixable(boolean state) {
+			fIsQuickFixable= state;
+			fIsQuickFixableStateSet= true;
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.quickassist.IQuickFixableAnnotation#isQuickFixableStateSet()
+		 */
+		public boolean isQuickFixableStateSet() {
+			return fIsQuickFixableStateSet;
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.quickassist.IQuickFixableAnnotation#isQuickFixable()
+		 */
+		public boolean isQuickFixable() {
+			Assert.isTrue(isQuickFixableStateSet());
+			return fIsQuickFixable;
+		}
+		
+	}
+	
 
 	/** Preference key for temporary problems */
 	private final static String HANDLE_TEMPORARY_PROBLEMS= PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS;
