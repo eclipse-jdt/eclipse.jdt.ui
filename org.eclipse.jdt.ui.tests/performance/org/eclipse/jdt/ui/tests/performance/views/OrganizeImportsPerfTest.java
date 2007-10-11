@@ -32,7 +32,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation
 
 import org.eclipse.jdt.ui.SharedASTProvider;
 
-
 import org.eclipse.test.performance.Dimension;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -109,7 +108,7 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 		startMeasuring();
 		
 		for (int i= 0; i < roots.length; i++) {
-			OrganizeImportsOperation op= new OrganizeImportsOperation(cus[i], roots[i], true, false, true, null);
+			OrganizeImportsOperation op= new OrganizeImportsOperation(cus[i], roots[i], true, true, true, null);
 			op.run(new NullProgressMonitor());
 		}
 		
