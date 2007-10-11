@@ -528,7 +528,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			removeHandlerAndKeyBindingSupport();
 			saveDialogBounds(getShell());
 			getShell().setVisible(false);
-			removeHandlerAndKeyBindingSupport();
 		}
 	}
 	
