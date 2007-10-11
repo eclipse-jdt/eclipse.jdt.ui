@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,9 +49,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider.Pr
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.hover.AnnotationExpansionControl.AnnotationHoverInput;
 
+
 /**
- *
- *
  * @since 3.0
  */
 public class JavaExpandHover extends AnnotationExpandHover {
@@ -199,11 +198,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 	}
 
 	private boolean isBreakpointAnnotation(Annotation a) {
-		if (a instanceof JavaMarkerAnnotation) {
-			JavaMarkerAnnotation jma= (JavaMarkerAnnotation) a;
-			// HACK to get breakpoints to show up first
-			return jma.getType().equals("org.eclipse.debug.core.breakpoint"); //$NON-NLS-1$
-		}
-		return false;
+		// HACK to get breakpoints to show up first
+		return a.getType().equals("org.eclipse.debug.core.breakpoint"); //$NON-NLS-1$
 	}
 }
