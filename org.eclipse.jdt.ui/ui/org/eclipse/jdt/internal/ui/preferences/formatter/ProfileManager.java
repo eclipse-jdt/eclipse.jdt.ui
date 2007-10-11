@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -80,7 +81,7 @@ public abstract class ProfileManager extends Observable {
 		
 		public abstract int getVersion();
 		
-		public boolean hasEqualSettings(Map otherMap, List allKeys) {
+		public boolean hasEqualSettings(Map otherMap, Collection allKeys) {
 			Map settings= getSettings();
 			for (Iterator iter= allKeys.iterator(); iter.hasNext(); ){
 				String key= (String) iter.next();

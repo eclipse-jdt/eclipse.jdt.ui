@@ -334,13 +334,18 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 	}
 	
     private void doValidate() {
+    	String name= fProfileNameField.getText().trim();
+		if (name.equals(fProfile.getName()) && fProfile.hasEqualSettings(fWorkingValues, fWorkingValues.keySet())) {
+			updateStatus(StatusInfo.OK_STATUS);
+			return;
+		}
+    	
     	IStatus status= validateProfileName();
     	if (status.matches(IStatus.ERROR)) {
     		updateStatus(status);
     		return;
     	}
     	
-    	String name= fProfileNameField.getText().trim();
 		if (!name.equals(fProfile.getName()) && fProfileManager.containsName(name)) {
 			updateStatus(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, FormatterMessages.ModifyDialog_Duplicate_Status));
 			return;
