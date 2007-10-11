@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.ui.text;
 
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
@@ -185,13 +184,9 @@ public class JavaReconciler extends MonoReconciler {
 					IMarkerDelta[] deltas= child.getMarkerDeltas();
 					int i= deltas.length;
 					while (--i >= 0) {
-						try {
-							if (deltas[i].getMarker().isSubtypeOf(IMarker.PROBLEM)) {
-								forceReconciling();
-								return;
-							}
-						} catch (CoreException e1) {
-							// ignore and try next one
+						if (deltas[i].isSubtypeOf(IMarker.PROBLEM)) {
+							forceReconciling();
+							return;
 						}
 					}
 				}
