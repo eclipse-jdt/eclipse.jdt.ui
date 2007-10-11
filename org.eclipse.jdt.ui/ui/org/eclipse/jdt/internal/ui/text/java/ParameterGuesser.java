@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,13 +38,14 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IRegion;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
@@ -56,18 +56,17 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
+
 /**
- * This class triggers a code-completion that will track all local ane member variables for later
+ * This class triggers a code-completion that will track all local and member variables for later
  * use as a parameter guessing proposal.
- *
- * @author Andrew McCullough
  */
 public class ParameterGuesser {
 
 	final class Variable {
 
 		/**
-		 * Variable type. Used to choose the best guess based on scope (Local beats instance beats inherited)
+		 * Variable type. Used to choose the best guess based on scope (Local beats instance beats inherited).
 		 */
 		public static final int LOCAL= 0;
 		public static final int FIELD= 1;
@@ -85,25 +84,28 @@ public class ParameterGuesser {
 		public ImageDescriptor descriptor;
 		public boolean isAutoboxingMatch;
 		private String fFQN;
-		private boolean fFQNResolved= false;
-		private IType fType;
-		private boolean fTypeResolved= false;
+		private IType type;
+		private boolean fIsPrimitive;
 
-		/**
-		 * Creates a variable.
-		 */
-		public Variable(String typePackage, String typeName, String name, int variableType, int positionScore, char[] triggers, ImageDescriptor descriptor) {
+
+		public Variable(String typePackage, String typeName, String name, int variableType, int positionScore, char[] triggerChars, ImageDescriptor descriptor) {
 			if (typePackage == null)
 				typePackage= ""; //$NON-NLS-1$
 			if (typeName == null)
 				typeName= ""; //$NON-NLS-1$
+			
 			this.typePackage= typePackage;
 			this.typeName= typeName;
 			this.name= name;
 			this.variableType= variableType;
 			this.positionScore= positionScore;
-			triggerChars= triggers;
+			this.triggerChars= triggerChars;
 			this.descriptor= descriptor;
+			
+			fFQN= computeFQN();
+			fIsPrimitive= ParameterGuesser.PRIMITIVE_ASSIGNMENTS.containsKey(fFQN);
+			if (!fIsPrimitive)
+				type= computeType();
 		}
 
 		/*
@@ -128,61 +130,57 @@ public class ParameterGuesser {
 			return buffer.toString();
 		}
 
-		String getFQN() {
-			if (!fFQNResolved) {
-				fFQNResolved= true;
-				fFQN= computeFQN(typePackage, typeName);
-			}
+		String getFullyQualifiedName() {
 			return fFQN;
 		}
-		
-		private String computeFQN(String pkg, String type) {
-			if (pkg.length() != 0) {
-				return pkg + '.' + type; 
-			}
-			return type;
+
+		private String computeFQN() {
+			if (typePackage.length() != 0)
+				return typePackage + '.' + typeName; 
+			return typeName;
 		}
 
-
-		IType getType(IJavaProject project) throws JavaModelException {
-			if (!fTypeResolved) {
-				fTypeResolved= true;
-				if (typePackage.length() > 0)
-					fType= project.findType(getFQN());
+		private IType computeType() {
+			try {
+				return fCompilationUnit.getJavaProject().findType(fFQN);
+			} catch (JavaModelException e) {
+				return null;
 			}
-			return fType;
 		}
 
 		boolean isPrimitive() {
-			return ParameterGuesser.PRIMITIVE_ASSIGNMENTS.containsKey(getFQN());
+			return fIsPrimitive;
 		}
 
 		boolean isArrayType() {
 			// check for an exact match (fast)
-			return getFQN().endsWith("[]"); //$NON-NLS-1$
+			return getFullyQualifiedName().endsWith("[]"); //$NON-NLS-1$
 		}
 
 		boolean isHierarchyAssignable(Variable rhs) throws JavaModelException {
-			IJavaProject project= fCompilationUnit.getJavaProject();
-			IType paramType= getType(project);
-			IType varType= rhs.getType(project);
-			if (varType == null || paramType == null)
+			if (rhs.type == null || type == null)
 				return false;
-		
-			ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(varType);
-			return hierarchy.contains(paramType);
+
+			if ("java.lang.Object".equals(getFullyQualifiedName())) //$NON-NLS-1$
+				return true;
+
+			if (rhs.type.equals(type))
+				return true;
+
+			// XXX: No simpler way, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=112635
+			return  JavaModelUtil.isSuperType(fVariablesHierarchy, type, rhs.type);
 		}
 
 		boolean isAutoBoxingAssignable(Variable rhs) {
 			// auto-unbox variable to match primitive parameter
 			if (isPrimitive()) {
-				String unboxedVariable= ParameterGuesser.getAutoUnboxedType(rhs.getFQN());
+				String unboxedVariable= ParameterGuesser.getAutoUnboxedType(rhs.getFullyQualifiedName());
 				return ParameterGuesser.isPrimitiveAssignable(typeName, unboxedVariable);
 			}
 		
 			// variable is primitive, auto-box to match parameter type
 			if (rhs.isPrimitive()) {
-				String unboxedType= ParameterGuesser.getAutoUnboxedType(getFQN());
+				String unboxedType= ParameterGuesser.getAutoUnboxedType(getFullyQualifiedName());
 				return ParameterGuesser.isPrimitiveAssignable(unboxedType, rhs.typeName);
 			}
 		
@@ -190,13 +188,17 @@ public class ParameterGuesser {
 		}
 
 		/**
-		 * Return true if <code>rhs</code> is assignable to the receiver
+		 * Return true if <code>rhs</code> is assignable to the receiver.
+		 * 
+		 * @param rhs the variable on the right-hand-side 
+		 * @return <code>true</code> if assignable
+		 * @throws JavaModelException if it fails
 		 */
 		boolean isAssignable(Variable rhs) throws JavaModelException {
 		
 			// if there is no package specified, do the check on type name only.  This will work for primitives
 			// and for local variables that cannot be resolved.
-			if (typePackage.length() == 0 || rhs.typePackage.length() == 0) {
+			if (type == null || rhs.type == null) {
 		
 				if (rhs.typeName.equals(typeName))
 					return true;
@@ -217,7 +219,7 @@ public class ParameterGuesser {
 		
 			// if there is an exact textual match, there is no need to search type hierarchy.. this is
 			// a quick way to pick up an exact match.
-			if (rhs.getFQN().equals(getFQN()))
+			if (rhs.getFullyQualifiedName().equals(getFullyQualifiedName()))
 				return true;
 		
 			// otherwise, we get a match/no match by searching the type hierarchy
@@ -306,6 +308,9 @@ public class ParameterGuesser {
 
 		/**
 		 * Determine if the declaring type matches the type of the code completion invocation
+		 * 
+		 * @param declaringTypeName the name of the declaring type 
+		 * @return <code>true</code> if the given type matches 
 		 */
 		private final boolean isInherited(String declaringTypeName) {
 			return !declaringTypeName.equals(fEnclosingTypeName);
@@ -332,6 +337,7 @@ public class ParameterGuesser {
 		}
 
 		private boolean filter(char[] returnTypeName, char[] completionName) {
+			completionName= Signature.getSimpleName(completionName);
 			return Arrays.equals(VOID, returnTypeName) || Arrays.equals(HASHCODE, completionName) || Arrays.equals(TOSTRING, completionName) || Arrays.equals(CLONE, completionName);
 		}
 
@@ -460,6 +466,8 @@ public class ParameterGuesser {
 	private List fVariables;
 	private ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
 	private boolean fAllowAutoBoxing;
+	private ITypeHierarchy fVariablesHierarchy;
+
 
 	/**
 	 * Creates a parameter guesser for compilation unit and offset.
@@ -485,6 +493,8 @@ public class ParameterGuesser {
 
 	/**
 	 * Returns the offset at which code assist is performed.
+	 * 
+	 * @return the code assist offset 
 	 */
 	public int getCodeAssistOffset() {
 		return fCodeAssistOffset;
@@ -492,6 +502,8 @@ public class ParameterGuesser {
 
 	/**
 	 * Returns the compilation unit in which code assist is performed.
+	 * 
+	 * @return the compilation unit 
 	 */
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
@@ -506,16 +518,28 @@ public class ParameterGuesser {
 	 * @param pos
 	 * @param document
 	 * @return returns the name of the best match, or <code>null</code> if no match found
-	 * @throws JavaModelException
+	 * @throws JavaModelException if it fails
 	 */
 	public ICompletionProposal[] parameterProposals(String paramPackage, String paramType, String paramName, Position pos, IDocument document) throws JavaModelException {
 
+		Variable parameter= new Variable(paramPackage, paramType, paramName, Variable.LOCAL, 0, null, null);
+		
 		if (fVariables == null) {
 			VariableCollector variableCollector= new VariableCollector();
 			fVariables= variableCollector.collect(fCodeAssistOffset, fCompilationUnit);
 		}
 
-		Variable parameter= new Variable(paramPackage, paramType, paramName, Variable.LOCAL, 0, null, null);
+		if (fVariablesHierarchy == null && !parameter.isPrimitive()) {
+			// Compute supertype hierarchies
+			IRegion scope= JavaCore.newRegion();
+			for (ListIterator iterator= fVariables.listIterator(fVariables.size()); iterator.hasPrevious(); ) {
+				Variable variable= (Variable) iterator.previous();
+				IType varType= variable.type;
+				if (varType != null)
+					scope.add(varType);
+			}
+			fVariablesHierarchy= fCompilationUnit.getJavaProject().newTypeHierarchy(scope, null);
+		}
 
 		List typeMatches= findProposalsMatchingType(fVariables, parameter);
 		orderMatches(typeMatches, paramName);
@@ -599,6 +623,9 @@ public class ParameterGuesser {
 	 *
 	 * 	4) A better source position score will prevail (the declaration point of the variable, or
 	 * 		"how close to the point of completion?"
+	 * 
+	 * @param typeMatches the list of type matches 
+	 * @param paramName the parameter name
 	 */
 	private static void orderMatches(List typeMatches, String paramName) {
 		if (typeMatches != null) Collections.sort(typeMatches, new MatchComparator(paramName));
@@ -606,10 +633,15 @@ public class ParameterGuesser {
 
 	/**
 	 * Finds a local or member variable that matched the type of the parameter
+	 * 
+	 * @param proposals the list of completion proposals 
+	 * @param parameter the parameter
+	 * @return the list with matching proposals
+	 * @throws JavaModelException 
 	 */
 	private List findProposalsMatchingType(List proposals, Variable parameter) throws JavaModelException {
 
-		if (parameter.getFQN().length() == 0)
+		if (parameter.getFullyQualifiedName().length() == 0)
 			return null;
 
 		// traverse the lists in reverse order, since it is empirically true that the code
@@ -630,6 +662,10 @@ public class ParameterGuesser {
 
 	/**
 	 * Returns the longest common substring of two strings.
+	 * 
+	 * @param first the first string 
+	 * @param second the second string
+	 * @return the longest common substring
 	 */
 	private static String getLongestCommonSubstring(String first, String second) {
 
