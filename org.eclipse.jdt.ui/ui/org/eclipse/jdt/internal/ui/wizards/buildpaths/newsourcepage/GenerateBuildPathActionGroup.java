@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
@@ -188,7 +189,9 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		for (Iterator iter= fActions.iterator(); iter.hasNext();) {
 			Action action= (Action)iter.next();
 			if (action instanceof ISelectionChangedListener) {
-				provider.addSelectionChangedListener((ISelectionChangedListener)action);
+				ISelectionChangedListener listener= (ISelectionChangedListener)action;
+				provider.addSelectionChangedListener(listener);
+				listener.selectionChanged(new SelectionChangedEvent(provider, provider.getSelection()));
 			}
 		}
 		
@@ -244,7 +247,10 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
         }
     }
         
-    private void setGlobalActionHandlers(IActionBars actionBar) {
+	/**
+	 * @param actionBar the action bars to set the handler for
+	 */
+	private void setGlobalActionHandlers(IActionBars actionBar) {
         // TODO implement
     }
     
