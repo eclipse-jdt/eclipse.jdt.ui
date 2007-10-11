@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -65,7 +64,6 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -79,9 +77,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.refactoring.actions.ListDialog;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -186,24 +182,13 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	 * Note: this method is for internal use only. Clients should not call this method.
 	 * @param unit the compilation unit
 	 */
-	public void run(final ICompilationUnit unit) {
+	public void run(ICompilationUnit unit) {
 		if (!ActionUtil.isEditable(fEditor, getShell(), unit))
 			return;
 
-		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
-			public void run() {
-				try {
-					if (unit != null && unit.exists()) {
-						NLSRefactoring refactoring= NLSRefactoring.create(unit);
-						if (refactoring != null)
-							new RefactoringStarter().activate(refactoring, new ExternalizeWizard(refactoring), getShell(), ActionMessages.ExternalizeStringsAction_dialog_title, RefactoringSaveHelper.SAVE_NON_JAVA_UPDATES); 
-					}
-				} catch(JavaModelException e) {
-					ExceptionHandler.handle(e, getShell(), ActionMessages.ExternalizeStringsAction_dialog_title, ActionMessages.ExternalizeStringsAction_dialog_message); 
-				}
-			}
-		});
+		ExternalizeWizard.open(unit, getShell());
 	}
+
 
 	private static ICompilationUnit getCompilationUnit(IStructuredSelection selection) {
 		if (selection.isEmpty() || selection.size() != 1)
@@ -492,7 +477,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			getTableViewer().getTable().addSelectionListener(new SelectionAdapter(){
 				public void widgetDefaultSelected(SelectionEvent e) {
 					NonNLSElement element= (NonNLSElement)e.item.getData();
-					openWizard(element.cu);
+					ExternalizeWizard.open(element.cu, getShell());
 				}
 			});
 			getTableViewer().getTable().setFocus();
@@ -517,21 +502,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			if (s instanceof IStructuredSelection){
 				IStructuredSelection ss= (IStructuredSelection)s;
 				if (ss.getFirstElement() instanceof NonNLSElement)
-					openWizard(((NonNLSElement)ss.getFirstElement()).cu);
-			}
-		}
-
-		private void openWizard(ICompilationUnit unit) {
-			try {
-				if (unit != null && unit.exists()) {
-					NLSRefactoring refactoring= NLSRefactoring.create(unit);
-					if (refactoring != null)
-						new RefactoringStarter().activate(refactoring, new ExternalizeWizard(refactoring), getShell(), ActionMessages.ExternalizeStringsAction_dialog_title, RefactoringSaveHelper.SAVE_NON_JAVA_UPDATES); 
-				}
-			} catch (JavaModelException e) {
-				ExceptionHandler.handle(e, 
-						ActionMessages.ExternalizeStringsAction_dialog_title, 
-						ActionMessages.FindStringsToExternalizeAction_error_message); 
+					ExternalizeWizard.open(((NonNLSElement) ss.getFirstElement()).cu, getShell());
 			}
 		}
 

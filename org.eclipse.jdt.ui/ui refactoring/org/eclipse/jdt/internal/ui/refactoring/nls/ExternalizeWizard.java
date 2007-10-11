@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,14 +10,23 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.nls;
 
+import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.wizard.IWizardPage;
+
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+
+import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 
 /**
  * good citizen problems - wizard is only valid after constructor (when the pages toggle
@@ -50,5 +59,19 @@ public class ExternalizeWizard extends RefactoringWizard {
 	public boolean canFinish() {
 		IWizardPage page= getContainer().getCurrentPage();
 		return super.canFinish() && !(page instanceof ExternalizeWizardPage);
+	}
+
+	public static void open(final ICompilationUnit unit, final Shell shell) {
+		if (unit == null || !unit.exists()) {
+			return;
+		}
+		Display display= shell != null ? shell.getDisplay() : Display.getCurrent();
+		BusyIndicator.showWhile(display, new Runnable() {
+			public void run() {
+				NLSRefactoring refactoring= NLSRefactoring.create(unit);
+				if (refactoring != null)
+					new RefactoringStarter().activate(new ExternalizeWizard(refactoring), shell, ActionMessages.ExternalizeStringsAction_dialog_title, RefactoringSaveHelper.SAVE_NON_JAVA_UPDATES);
+			}
+		});
 	}
 }
