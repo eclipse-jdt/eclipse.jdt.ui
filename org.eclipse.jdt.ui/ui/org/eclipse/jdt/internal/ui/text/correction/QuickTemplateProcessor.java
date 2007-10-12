@@ -30,8 +30,10 @@ import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateContext;
 
 import org.eclipse.ui.part.FileEditorInput;
 
@@ -42,9 +44,12 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
+import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
+import org.eclipse.jdt.internal.corext.template.java.SWTContextType;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -63,6 +68,7 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
 public class QuickTemplateProcessor implements IQuickAssistProcessor {
 
 	private static final String $_LINE_SELECTION= "${" + GlobalTemplateVariables.LineSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+	private static final String $_WORD_SELECTION= "${" + GlobalTemplateVariables.WordSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	public QuickTemplateProcessor() {
 	}
@@ -107,31 +113,43 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 
 			ICompilationUnit cu= context.getCompilationUnit();
 			IDocument document= getDocument(cu);
+			
+			String contentType= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
+
+			String contextId;
+			if (contentType.equals(IJavaPartitions.JAVA_DOC)) {
+				contextId= JavaDocContextType.ID;
+			} else {
+				contextId= JavaContextType.ID;
+			}
 
 			// test if selection is either a full line or spans over multiple lines
 			int startLine= document.getLineOfOffset(offset);
 			int endLine= document.getLineOfOffset(offset + length);
-			IRegion endLineRegion= document.getLineInformation(endLine);
-			//if end position is at start of line, set it back to the previous line's end
-			if (endLine > startLine && endLineRegion.getOffset() == offset + length) {
-				endLine--;
-				endLineRegion= document.getLineInformation(endLine);
-				length= endLineRegion.getOffset() + endLineRegion.getLength() - offset;
-			}
-			if (startLine  == endLine) {
-				if (length == 0 || offset != endLineRegion.getOffset() || length != endLineRegion.getLength()) {
-					AssistContext invocationContext= new AssistContext(cu, offset, length);
-					if (!SurroundWith.isApplicable(invocationContext))
-						return null;
+			
+			if (contextId.equals(JavaContextType.ID)) {
+				IRegion endLineRegion= document.getLineInformation(endLine);
+				//if end position is at start of line, set it back to the previous line's end
+				if (endLine > startLine && endLineRegion.getOffset() == offset + length) {
+					endLine--;
+					endLineRegion= document.getLineInformation(endLine);
+					length= endLineRegion.getOffset() + endLineRegion.getLength() - offset;
 				}
-			} else {
-				// expand selection
-				offset= document.getLineOffset(startLine);
-				length= endLineRegion.getOffset() + endLineRegion.getLength() - offset;
+				if (startLine == endLine) {
+					if (length == 0 || offset != endLineRegion.getOffset() || length != endLineRegion.getLength()) {
+						AssistContext invocationContext= new AssistContext(cu, offset, length);
+						if (!SurroundWith.isApplicable(invocationContext))
+							return null;
+					}
+				} else {
+					// expand selection
+					offset= document.getLineOffset(startLine);
+					length= endLineRegion.getOffset() + endLineRegion.getLength() - offset;
+				}
 			}
 
 			ArrayList resultingCollections= new ArrayList();
-			collectSurroundTemplates(document, cu, offset, length, resultingCollections);
+			collectSurroundTemplates(document, cu, offset, length, resultingCollections, contextId);
 			sort(resultingCollections);
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		} catch (BadLocationException e) {
@@ -158,8 +176,8 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 		return document;
 	}
 
-	private void collectSurroundTemplates(IDocument document, ICompilationUnit cu, int offset, int length, Collection result) throws BadLocationException, CoreException {
-		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(JavaContextType.ID);
+	private void collectSurroundTemplates(IDocument document, ICompilationUnit cu, int offset, int length, Collection result, String contextId) throws BadLocationException, CoreException {
+		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(contextId);
 		CompilationUnitContext context= contextType.createContext(document, offset, length, cu);
 		context.setVariable("selection", document.get(offset, length)); //$NON-NLS-1$
 		context.setForceEvaluation(true);
@@ -174,9 +192,8 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 		Template[] templates= JavaPlugin.getDefault().getTemplateStore().getTemplates();
 		for (int i= 0; i != templates.length; i++) {
 			Template currentTemplate= templates[i];
-			if (context.canEvaluate(currentTemplate) && currentTemplate.getContextTypeId().equals(JavaContextType.ID) && currentTemplate.getPattern().indexOf($_LINE_SELECTION) != -1) {
-				// TODO using jdt proposals for the moment, as jdt expects IJavaCompletionProposals
-				
+			if (canEvaluate(context, currentTemplate)) {
+
 				if (selectedStatements != null) {
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 					TemplateProposal proposal= new SurroundWithTemplateProposal(cu, currentTemplate, context, region, image, selectedStatements);
@@ -197,6 +214,21 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 					result.add(proposal);
 				}
 			}
+		}
+	}
+
+	private boolean canEvaluate(TemplateContext context, Template template) {
+		String contextId= context.getContextType().getId();
+		if (JavaDocContextType.ID.equals(contextId)) {
+			if (template.getPattern().indexOf($_LINE_SELECTION) == -1 && template.getPattern().indexOf($_WORD_SELECTION) == -1)
+				return false;
+			
+			return JavaDocContextType.ID.equals(template.getContextTypeId());
+		} else {
+			if (template.getPattern().indexOf($_LINE_SELECTION) == -1)
+				return false;
+			
+			return JavaContextType.ID.equals(template.getContextTypeId()) || SWTContextType.ID.equals(template.getContextTypeId());
 		}
 	}
 
