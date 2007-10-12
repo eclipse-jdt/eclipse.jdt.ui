@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,16 +60,8 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.DoStatement)
 		 */
 		public boolean visit(DoStatement node) {
-			if (fFindControlStatementsWithoutBlock) {
-				Statement doBody= node.getBody();
-				if (!(doBody instanceof Block)) {
-					fResult.add(new AddBlockOperation(DoStatement.BODY_PROPERTY, doBody, node));
-				}
-			} else if (fRemoveUnnecessaryBlocks || fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
-				if (RemoveBlockOperation.satisfiesCleanUpPrecondition(node, DoStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
-					fResult.add(new RemoveBlockOperation(node, DoStatement.BODY_PROPERTY));
-				}
-			}
+			handle(node.getBody(), DoStatement.BODY_PROPERTY);
+			
 			return super.visit(node);
 		}
 
@@ -77,33 +69,17 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.ForStatement)
 		 */
 		public boolean visit(ForStatement node) {
-			if (fFindControlStatementsWithoutBlock) {
-				Statement forBody= node.getBody();
-				if (!(forBody instanceof Block)) {
-					fResult.add(new AddBlockOperation(ForStatement.BODY_PROPERTY, forBody, node));
-				}
-			} else if (fRemoveUnnecessaryBlocks || fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
-				if (RemoveBlockOperation.satisfiesCleanUpPrecondition(node, ForStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
-					fResult.add(new RemoveBlockOperation(node, ForStatement.BODY_PROPERTY));
-				}
-			}
+			handle(node.getBody(), ForStatement.BODY_PROPERTY);
+			
 			return super.visit(node);
 		}
-		
+	
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean visit(EnhancedForStatement node) {
-			if (fFindControlStatementsWithoutBlock) {
-				Statement forBody= node.getBody();
-				if (!(forBody instanceof Block)) {
-					fResult.add(new AddBlockOperation(EnhancedForStatement.BODY_PROPERTY, forBody, node));
-				}
-			} else if (fRemoveUnnecessaryBlocks || fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
-				if (RemoveBlockOperation.satisfiesCleanUpPrecondition(node, EnhancedForStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
-					fResult.add(new RemoveBlockOperation(node, EnhancedForStatement.BODY_PROPERTY));
-				}
-			}
+			handle(node.getBody(), EnhancedForStatement.BODY_PROPERTY);
+			
 			return super.visit(node);
 		}
 		
@@ -111,25 +87,13 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.IfStatement)
 		 */
 		public boolean visit(IfStatement statement) {
-			if (fFindControlStatementsWithoutBlock) {
-				Statement then= statement.getThenStatement();
-				if (!(then instanceof Block)) {
-					fResult.add(new AddBlockOperation(IfStatement.THEN_STATEMENT_PROPERTY, then, statement));
-				}
-				Statement elseStatement= statement.getElseStatement();
-				if (elseStatement != null && !(elseStatement instanceof Block) && !(elseStatement instanceof IfStatement)) {
-					fResult.add(new AddBlockOperation(IfStatement.ELSE_STATEMENT_PROPERTY, elseStatement, statement));
-				}
-			} else if (fRemoveUnnecessaryBlocks || fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
-				if (RemoveBlockOperation.satisfiesCleanUpPrecondition(statement, IfStatement.THEN_STATEMENT_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
-					fResult.add(new RemoveBlockOperation(statement, IfStatement.THEN_STATEMENT_PROPERTY));
-				}
-				if (!(statement.getElseStatement() instanceof IfStatement)) {
-					if (RemoveBlockOperation.satisfiesCleanUpPrecondition(statement, IfStatement.ELSE_STATEMENT_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow)) {
-						fResult.add(new RemoveBlockOperation(statement, IfStatement.ELSE_STATEMENT_PROPERTY));
-					}	
-				}
+			handle(statement.getThenStatement(), IfStatement.THEN_STATEMENT_PROPERTY);
+			
+			Statement elseStatement= statement.getElseStatement();
+			if (elseStatement != null && !(elseStatement instanceof IfStatement)) {
+				handle(elseStatement, IfStatement.ELSE_STATEMENT_PROPERTY);
 			}
+			
 			return super.visit(statement);
 		}
 
@@ -137,16 +101,32 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.WhileStatement)
 		 */
 		public boolean visit(WhileStatement node) {
-			if (fFindControlStatementsWithoutBlock) {
-				Statement whileBody= node.getBody();
-				if (!(whileBody instanceof Block)) {
-					fResult.add(new AddBlockOperation(WhileStatement.BODY_PROPERTY, whileBody, node));
-				}
-			} else if (fRemoveUnnecessaryBlocks || fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
-				if (RemoveBlockOperation.satisfiesCleanUpPrecondition(node, WhileStatement.BODY_PROPERTY, fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow))
-					fResult.add(new RemoveBlockOperation(node, WhileStatement.BODY_PROPERTY));
-			}
+			handle(node.getBody(), WhileStatement.BODY_PROPERTY);
+			
 			return super.visit(node);
+		}
+
+		private void handle(Statement body, ChildPropertyDescriptor bodyProperty) {
+			Statement parent= (Statement) body.getParent();
+			if (fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
+				if (!(body instanceof Block)) {
+					if (body.getNodeType() != ASTNode.IF_STATEMENT && body.getNodeType() != ASTNode.RETURN_STATEMENT) {
+						fResult.add(new AddBlockOperation(bodyProperty, body, parent));
+					}
+				} else {
+					if (RemoveBlockOperation.satisfiesCleanUpPrecondition(parent, bodyProperty, true)) {
+						fResult.add(new RemoveBlockOperation(parent, bodyProperty));
+					}
+				}
+			} else if (fFindControlStatementsWithoutBlock) {
+				if (!(body instanceof Block)) {
+					fResult.add(new AddBlockOperation(bodyProperty, body, parent));
+				}
+			} else if (fRemoveUnnecessaryBlocks) {
+				if (RemoveBlockOperation.satisfiesCleanUpPrecondition(parent, bodyProperty, false)) {
+					fResult.add(new RemoveBlockOperation(parent, bodyProperty));
+				}
+			}
 		}
 
 	}
@@ -439,7 +419,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 	public static IFix createCleanUp(CompilationUnit compilationUnit, 
 			boolean convertSingleStatementToBlock, 
 			boolean removeUnnecessaryBlock,
-			boolean removeUnnecessaryBlockContainingReturnOrThrow) throws CoreException {
+			boolean removeUnnecessaryBlockContainingReturnOrThrow) {
 		
 		if (!convertSingleStatementToBlock && !removeUnnecessaryBlock && !removeUnnecessaryBlockContainingReturnOrThrow)
 			return null;
