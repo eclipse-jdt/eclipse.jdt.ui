@@ -54,7 +54,7 @@ public final class RenameSourceFolderChange extends AbstractJavaElementRenameCha
 		}
 
 		IResource correspondingResource= root.getCorrespondingResource();
-		if (correspondingResource == null || correspondingResource.exists()) {
+		if (correspondingResource == null || !correspondingResource.exists()) {
 			result.addFatalError(Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_error_underlying_resource_not_existing, root.getElementName()));
 			return result;
 		}
