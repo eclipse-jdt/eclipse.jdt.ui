@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.osgi.util.NLS;
 
+
 public final class PreferencesMessages extends NLS {
 
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.preferences.PreferencesMessages";//$NON-NLS-1$
@@ -700,6 +701,7 @@ public final class PreferencesMessages extends NLS {
 	public static String EditTemplateDialog_pattern;
 	public static String EditTemplateDialog_insert_variable;
 	public static String EditTemplateDialog_undo;
+	public static String EditTemplateDialog_redo;
 	public static String EditTemplateDialog_cut;
 	public static String EditTemplateDialog_copy;
 	public static String EditTemplateDialog_paste;
