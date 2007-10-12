@@ -301,8 +301,8 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 					MultiFixMessages.CleanUpRefactoringWizard_Profile_TableHeader
 			};
 			ColumnLayoutData[] columns = new ColumnLayoutData[] {
-					new ColumnWeightData(1, 100, true),
-					new ColumnWeightData(2, 20, true)
+					new ColumnWeightData(2, true), 
+					new ColumnWeightData(1, true)
 			};
 			settingsField.setTableColumns(new ListDialogField.ColumnsDescription(columns , headerNames, true));
 			settingsField.setViewerComparator(new ViewerComparator());
@@ -313,7 +313,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			GridData data= (GridData)settingsField.getListControl(null).getLayoutData();
 			data.horizontalIndent= 15;
 			data.grabExcessVerticalSpace= false;
-			data.heightHint= SWTUtil.getTableHeightHint(table, Math.min(5, fCleanUpRefactoring.getProjects().length + 1));
+			data.heightHint= SWTUtil.getTableHeightHint(table, Math.min(5, fCleanUpRefactoring.getProjects().length + 2));
 			data.grabExcessHorizontalSpace= true;
 			data.verticalAlignment= GridData.BEGINNING;
 			
