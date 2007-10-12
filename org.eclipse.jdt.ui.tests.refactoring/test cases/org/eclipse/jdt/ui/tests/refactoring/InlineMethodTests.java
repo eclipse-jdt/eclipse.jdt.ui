@@ -1026,16 +1026,16 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		int remainder= OperatorPrecedence.getExpressionPrecedence(exp);
 		assertTrue(divide == remainder);
 		
-		int newClass= OperatorPrecedence.getExpressionPrecedence(ast.newClassInstanceCreation());
-		assertTrue(remainder < newClass);
-
 		int cast= OperatorPrecedence.getExpressionPrecedence(ast.newCastExpression());
-		assertTrue(cast == newClass);
+		assertTrue(times < cast);
 
 		int prefix= OperatorPrecedence.getExpressionPrecedence(ast.newPrefixExpression());
 		assertTrue(cast < prefix);
 		
 		int postfix= OperatorPrecedence.getExpressionPrecedence(ast.newPostfixExpression());
 		assertTrue(prefix < postfix);
+		
+		int newClass= OperatorPrecedence.getExpressionPrecedence(ast.newClassInstanceCreation());
+		assertTrue(postfix == newClass);
 	}
 }
