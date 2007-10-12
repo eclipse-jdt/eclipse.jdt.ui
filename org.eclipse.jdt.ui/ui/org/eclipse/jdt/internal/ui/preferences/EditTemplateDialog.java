@@ -16,16 +16,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.expressions.Expression;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.custom.VerifyKeyListener;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -46,6 +48,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.StatusDialog;
@@ -69,9 +72,13 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
 
+import org.eclipse.ui.ActiveShellExpression;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.IUpdate;
+import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 
@@ -115,7 +122,10 @@ class EditTemplateDialog extends StatusDialog {
 		 * @see Action#firePropertyChange(String, Object, Object)
 		 */
 		public void update() {
-	
+			// XXX: workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=206111
+			if (fOperationCode == ITextOperationTarget.REDO)
+				return;
+
 			boolean wasEnabled= isEnabled();
 			boolean isEnabled= (fOperationTarget != null && fOperationTarget.canDoOperation(fOperationCode));
 			setEnabled(isEnabled);
@@ -350,7 +360,7 @@ class EditTemplateDialog extends StatusDialog {
 			}
 		}
 
-		updateUndoAction();
+		updateAction(ITextEditorActionConstants.UNDO);
 		updateStatusAndButtons();
 	}	
 
@@ -424,12 +434,6 @@ class EditTemplateDialog extends StatusDialog {
 			}
 		});
 
-		viewer.prependVerifyKeyListener(new VerifyKeyListener() {
-			public void verifyKey(VerifyEvent event) {
-				handleVerifyKeyPressed(event);
-			}
-		});
-		
 		return viewer;
 	}
 	
@@ -442,31 +446,26 @@ class EditTemplateDialog extends StatusDialog {
 			return ""; //$NON-NLS-1$
 	}
 
-	private void handleVerifyKeyPressed(VerifyEvent event) {
-		if (!event.doit)
-			return;
-
-		if (event.stateMask != SWT.MOD1)
-			return;
-			
-		switch (event.character) {
-			case ' ':
-				fPatternEditor.doOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);
-				event.doit= false;
-				break;
-
-			// CTRL-Z
-			case 'z' - 'a' + 1:
-				fPatternEditor.doOperation(ITextOperationTarget.UNDO);
-				event.doit= false;
-				break;				
-		}
-	}
-
 	private void initializeActions() {
+		final ArrayList handlerActivations= new ArrayList(3);
+		final IHandlerService handlerService= (IHandlerService) PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
+		getShell().addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				handlerService.deactivateHandlers(handlerActivations);
+			}
+		});
+		
+		Expression expression= new ActiveShellExpression(fPatternEditor.getControl().getShell());
+
 		TextViewerAction action= new TextViewerAction(fPatternEditor, ITextOperationTarget.UNDO);
 		action.setText(PreferencesMessages.EditTemplateDialog_undo); 
 		fGlobalActions.put(ITextEditorActionConstants.UNDO, action);
+		handlerActivations.add(handlerService.activateHandler(IWorkbenchActionDefinitionIds.UNDO, new ActionHandler(action), expression));
+
+		action= new TextViewerAction(fPatternEditor, ITextOperationTarget.REDO);
+		action.setText(PreferencesMessages.EditTemplateDialog_redo);
+		fGlobalActions.put(ITextEditorActionConstants.REDO, action);
+		handlerActivations.add(handlerService.activateHandler(IWorkbenchActionDefinitionIds.REDO, new ActionHandler(action), expression));
 
 		action= new TextViewerAction(fPatternEditor, ITextOperationTarget.CUT);
 		action.setText(PreferencesMessages.EditTemplateDialog_cut); 
@@ -487,6 +486,7 @@ class EditTemplateDialog extends StatusDialog {
 		action= new TextViewerAction(fPatternEditor, ISourceViewer.CONTENTASSIST_PROPOSALS);
 		action.setText(PreferencesMessages.EditTemplateDialog_content_assist); 
 		fGlobalActions.put("ContentAssistProposal", action); //$NON-NLS-1$
+		handlerActivations.add(handlerService.activateHandler(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS, new ActionHandler(action), expression));
 
 		fSelectionActions.add(ITextEditorActionConstants.CUT);
 		fSelectionActions.add(ITextEditorActionConstants.COPY);
@@ -509,6 +509,7 @@ class EditTemplateDialog extends StatusDialog {
 	private void fillContextMenu(IMenuManager menu) {
 		menu.add(new GroupMarker(ITextEditorActionConstants.GROUP_UNDO));
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_UNDO, (IAction) fGlobalActions.get(ITextEditorActionConstants.UNDO));
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_UNDO, (IAction) fGlobalActions.get(ITextEditorActionConstants.REDO));
 		
 		menu.add(new Separator(ITextEditorActionConstants.GROUP_EDIT));		
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, (IAction) fGlobalActions.get(ITextEditorActionConstants.CUT));
@@ -519,17 +520,12 @@ class EditTemplateDialog extends StatusDialog {
 		menu.add(new Separator(IContextMenuConstants.GROUP_GENERATE));
 		menu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, (IAction) fGlobalActions.get("ContentAssistProposal")); //$NON-NLS-1$
 	}
+	
 
 	protected void updateSelectionDependentActions() {
 		Iterator iterator= fSelectionActions.iterator();
 		while (iterator.hasNext())
 			updateAction((String)iterator.next());		
-	}
-
-	protected void updateUndoAction() {
-		IAction action= (IAction) fGlobalActions.get(ITextEditorActionConstants.UNDO);
-		if (action instanceof IUpdate)
-			((IUpdate) action).update();
 	}
 
 	protected void updateAction(String actionId) {
