@@ -448,9 +448,10 @@ public class ModifierCorrectionSubProcessor {
 			parentTypeDecl= (TypeDeclaration) parentType;
 			parentIsAbstractClass= !parentTypeDecl.isInterface() && Modifier.isAbstract(parentTypeDecl.getModifiers());
 		}
-		boolean hasNoBody= (decl.getBody() == null);
+		boolean hasNoBody= decl.getBody() == null;
 
-		if (problem.getProblemId() == IProblem.AbstractMethodInAbstractClass || parentIsAbstractClass) {
+		int id= problem.getProblemId();
+		if (id == IProblem.AbstractMethodInAbstractClass || id == IProblem.EnumAbstractMethodMustBeImplemented || parentIsAbstractClass) {
 			AST ast= astRoot.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 
@@ -477,7 +478,7 @@ public class ModifierCorrectionSubProcessor {
 			proposals.add(proposal);
 		}
 
-		if (!hasNoBody && problem.getProblemId() == IProblem.BodyForAbstractMethod) {
+		if (!hasNoBody && id == IProblem.BodyForAbstractMethod) {
 			ASTRewrite rewrite= ASTRewrite.create(decl.getAST());
 			rewrite.remove(decl.getBody(), null);
 
@@ -487,7 +488,7 @@ public class ModifierCorrectionSubProcessor {
 			proposals.add(proposal2);
 		}
 
-		if (problem.getProblemId() == IProblem.AbstractMethodInAbstractClass && (parentTypeDecl != null)) {
+		if (id == IProblem.AbstractMethodInAbstractClass && parentTypeDecl != null) {
 			MakeTypeAbstractOperation operation= new UnimplementedCodeFix.MakeTypeAbstractOperation(parentTypeDecl);
 
 			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_addabstract_description, parentTypeDecl.getName().getIdentifier());
@@ -626,7 +627,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 	
-	public static void addOverrideAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void addOverrideAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		IProposableFix fix= Java50Fix.createAddOverrideAnnotationFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -638,7 +639,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 	
-	public static void addDeprecatedAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void addDeprecatedAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		IProposableFix fix= Java50Fix.createAddDeprectatedAnnotation(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -650,7 +651,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 	
-	public static void addOverridingDeprecatedMethodProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void addOverridingDeprecatedMethodProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		
 		ICompilationUnit cu= context.getCompilationUnit();
 

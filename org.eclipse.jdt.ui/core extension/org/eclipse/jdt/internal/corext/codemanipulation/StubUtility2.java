@@ -662,8 +662,12 @@ public final class StubUtility2 {
 		final String name= NamingConventions.removePrefixAndSuffixForFieldName(unit.getJavaProject(), binding.getName(), binding.getModifiers());
 		return StubUtility.suggestArgumentName(unit.getJavaProject(), name, excluded);
 	}
-
+	
 	public static IMethodBinding[] getUnimplementedMethods(ITypeBinding typeBinding) {
+		return getUnimplementedMethods(typeBinding, false);
+	}
+
+	public static IMethodBinding[] getUnimplementedMethods(ITypeBinding typeBinding, boolean implementAbstractsOfInput) {
 		ArrayList allMethods= new ArrayList();
 		ArrayList toImplement= new ArrayList();
 
@@ -694,7 +698,7 @@ public final class StubUtility2 {
 		for (int i= 0; i < allMethods.size(); i++) {
 			IMethodBinding curr= (IMethodBinding) allMethods.get(i);
 			int modifiers= curr.getModifiers();
-			if ((Modifier.isAbstract(modifiers) || curr.getDeclaringClass().isInterface()) && (typeBinding != curr.getDeclaringClass())) {
+			if ((Modifier.isAbstract(modifiers) || curr.getDeclaringClass().isInterface()) && (implementAbstractsOfInput || typeBinding != curr.getDeclaringClass())) {
 				// implement all abstract methods
 				toImplement.add(curr);
 			}
@@ -747,7 +751,7 @@ public final class StubUtility2 {
 				superType= superType.getSuperclass();
 			IMethodBinding method= Bindings.findMethodInType(superType, "Object", new ITypeBinding[0]); //$NON-NLS-1$
 			if (method != null) {
-				if ((proposeDefault || (!accountExisting || (existingConstructors == null || existingConstructors.isEmpty()))) && (!accountExisting || !Bindings.containsSignatureEquivalentConstructor(methods, method)))
+				if ((proposeDefault || !accountExisting || existingConstructors == null || existingConstructors.isEmpty()) && (!accountExisting || !Bindings.containsSignatureEquivalentConstructor(methods, method)))
 					constructorMethods.add(method);
 			}
 		}

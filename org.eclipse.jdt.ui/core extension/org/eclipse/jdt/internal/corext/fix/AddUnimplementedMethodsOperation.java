@@ -11,12 +11,10 @@
 
 package org.eclipse.jdt.internal.corext.fix;
 
-import java.util.List;
-
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -27,7 +25,6 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -49,10 +46,15 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOperation {
 
 	private ASTNode fTypeNode;
-	private final int fProblemId;
 
-	public AddUnimplementedMethodsOperation(ASTNode typeNode, int problemId) {
-		fProblemId= problemId;
+	/**
+	 * Create a {@link AddUnimplementedMethodsOperation}
+	 * @param typeNode must be one of the following types:
+	 * <ul><li>AnonymousClassDeclaration</li>
+	 * <li>AbstractTypeDeclaration</li>
+	 * <li>EnumConstantDeclaration</li></ul>
+	 */
+	public AddUnimplementedMethodsOperation(ASTNode typeNode) {
 		fTypeNode= typeNode;
 	}
 
@@ -60,76 +62,45 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 	 * {@inheritDoc}
 	 */
 	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
-		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(((CompilationUnit) fTypeNode.getRoot()), fTypeNode.getStartPosition(), cuRewrite.getImportRewrite());
-
-		if (fTypeNode instanceof EnumDeclaration && fProblemId == IProblem.EnumAbstractMethodMustBeImplemented) {
-			EnumDeclaration typeNode= (EnumDeclaration) fTypeNode;
-			List enumConstants= typeNode.enumConstants();
-			for (int i= 0; i < enumConstants.size(); i++) {
-				EnumConstantDeclaration enumConstant= (EnumConstantDeclaration) enumConstants.get(i);
-				AnonymousClassDeclaration anonymousClassDeclaration= enumConstant.getAnonymousClassDeclaration();
-				if (anonymousClassDeclaration == null) {
-					addEnumConstantDeclarationBody(enumConstant, cuRewrite, context);
-				} else {
-					addUnimplementedMethods(anonymousClassDeclaration, cuRewrite, context);
-				}
-			}
-		} else {
-			addUnimplementedMethods(fTypeNode, cuRewrite, context);
-		}
-	}
-
-	private void addUnimplementedMethods(ASTNode typeNode, CompilationUnitRewrite cuRewrite, ImportRewriteContext context) throws CoreException {
+		IMethodBinding[] unimplementedMethods= getUnimplementedMethods(fTypeNode);
+		if (unimplementedMethods.length == 0)
+			return;
+		
+		ImportRewriteContext context= new ContextSensitiveImportRewriteContext((CompilationUnit) fTypeNode.getRoot(), fTypeNode.getStartPosition(), cuRewrite.getImportRewrite());
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
+		ICompilationUnit unit= cuRewrite.getCu();
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(unit.getJavaProject());
+		
 		ListRewrite listRewrite;
-		ITypeBinding binding;
-		if (typeNode instanceof AnonymousClassDeclaration) {
-			AnonymousClassDeclaration decl= (AnonymousClassDeclaration) typeNode;
-			binding= decl.resolveBinding();
+
+		if (fTypeNode instanceof AnonymousClassDeclaration) {
+			AnonymousClassDeclaration decl= (AnonymousClassDeclaration) fTypeNode;
 			listRewrite= rewrite.getListRewrite(decl, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
-		} else {
-			AbstractTypeDeclaration decl= (AbstractTypeDeclaration) typeNode;
-			binding= decl.resolveBinding();
-			listRewrite= rewrite.getListRewrite(decl, decl.getBodyDeclarationsProperty());
-		}
-		if (binding != null) {
-			ICompilationUnit unit= cuRewrite.getCu();
-			ImportRewrite imports= cuRewrite.getImportRewrite();
-
-			IMethodBinding[] methods= StubUtility2.getUnimplementedMethods(binding);
-			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(unit.getJavaProject());
-			if (binding.isAnonymous()) {
-				settings.createComments= false;
-			}
-
-			for (int i= 0; i < methods.length; i++) {
-				MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(unit, rewrite, imports, context, methods[i], binding.getName(), settings, binding.isInterface());
-				listRewrite.insertLast(newMethodDecl, createTextEditGroup(CorrectionMessages.AddUnimplementedMethodsOperation_AddMissingMethod_group, cuRewrite));
-			}
-		}
-	}
-
-	private void addEnumConstantDeclarationBody(EnumConstantDeclaration constDecl, CompilationUnitRewrite cuRewrite, ImportRewriteContext context) throws CoreException {
-		ASTRewrite rewrite= cuRewrite.getASTRewrite();
-
-		AnonymousClassDeclaration anonymDecl= constDecl.getAST().newAnonymousClassDeclaration();
-		rewrite.set(constDecl, EnumConstantDeclaration.ANONYMOUS_CLASS_DECLARATION_PROPERTY, anonymDecl, createTextEditGroup(CorrectionMessages.AddUnimplementedMethodsOperation_AddMissingMethod_group, cuRewrite));
-		IVariableBinding varBinding= constDecl.resolveVariable();
-		if (varBinding != null) {
-			ICompilationUnit unit= cuRewrite.getCu();
-			ImportRewrite imports= cuRewrite.getImportRewrite();
-
-			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(unit.getJavaProject());
 			settings.createComments= false;
-
-			IMethodBinding[] declaredMethods= varBinding.getDeclaringClass().getDeclaredMethods();
-			for (int k= 0; k < declaredMethods.length; k++) {
-				IMethodBinding curr= declaredMethods[k];
-				if (Modifier.isAbstract(curr.getModifiers())) {
-					MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(unit, rewrite, imports, context, curr, curr.getDeclaringClass().getName(), settings, false);
-					anonymDecl.bodyDeclarations().add(newMethodDecl);
-				}
+		} else if (fTypeNode instanceof AbstractTypeDeclaration) {
+			AbstractTypeDeclaration decl= (AbstractTypeDeclaration) fTypeNode;
+			listRewrite= rewrite.getListRewrite(decl, decl.getBodyDeclarationsProperty());
+		} else if (fTypeNode instanceof EnumConstantDeclaration) {
+			EnumConstantDeclaration enumConstantDeclaration= (EnumConstantDeclaration) fTypeNode;
+			AnonymousClassDeclaration anonymousClassDeclaration= enumConstantDeclaration.getAnonymousClassDeclaration();
+			if (anonymousClassDeclaration == null) {
+				anonymousClassDeclaration= rewrite.getAST().newAnonymousClassDeclaration();
+				rewrite.set(enumConstantDeclaration, EnumConstantDeclaration.ANONYMOUS_CLASS_DECLARATION_PROPERTY, anonymousClassDeclaration, createTextEditGroup(
+						CorrectionMessages.AddUnimplementedMethodsOperation_AddMissingMethod_group, cuRewrite));
 			}
+			listRewrite= rewrite.getListRewrite(anonymousClassDeclaration, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
+			settings.createComments= false;
+		} else {
+			Assert.isTrue(false, "Unknown type node"); //$NON-NLS-1$
+			return;
+		}
+
+		ImportRewrite imports= cuRewrite.getImportRewrite();
+
+		for (int i= 0; i < unimplementedMethods.length; i++) {
+			IMethodBinding curr= unimplementedMethods[i];
+			MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(unit, rewrite, imports, context, curr, curr.getDeclaringClass().getName(), settings, false);
+			listRewrite.insertLast(newMethodDecl, createTextEditGroup(CorrectionMessages.AddUnimplementedMethodsOperation_AddMissingMethod_group, cuRewrite));
 		}
 	}
 
@@ -155,35 +126,33 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 	}
 
 	private IMethodBinding[] getMethodsToOverride() {
-		if (fTypeNode instanceof EnumDeclaration && fProblemId == IProblem.EnumAbstractMethodMustBeImplemented) {
-			EnumDeclaration typeNode= (EnumDeclaration) fTypeNode;
-			List enumConstants= typeNode.enumConstants();
-			for (int i= 0; i < enumConstants.size(); i++) {
-				EnumConstantDeclaration enumConstant= (EnumConstantDeclaration) enumConstants.get(i);
-				AnonymousClassDeclaration anonymousClassDeclaration= enumConstant.getAnonymousClassDeclaration();
-				if (anonymousClassDeclaration != null)
-					return getUnimplementedMethods(anonymousClassDeclaration);
-			}
-
-			return new IMethodBinding[0];
-		} else {
-			return getUnimplementedMethods(fTypeNode);
-		}
+		return getUnimplementedMethods(fTypeNode);
 	}
 
 	private IMethodBinding[] getUnimplementedMethods(ASTNode typeNode) {
-		ITypeBinding binding;
+		ITypeBinding binding= null;
+		boolean implementAbstractsOfInput= false;
 		if (typeNode instanceof AnonymousClassDeclaration) {
 			AnonymousClassDeclaration decl= (AnonymousClassDeclaration) typeNode;
 			binding= decl.resolveBinding();
-		} else {
+		} else if (typeNode instanceof AbstractTypeDeclaration) {
 			AbstractTypeDeclaration decl= (AbstractTypeDeclaration) typeNode;
 			binding= decl.resolveBinding();
+		} else if (typeNode instanceof EnumConstantDeclaration) {
+			EnumConstantDeclaration enumConstantDeclaration= (EnumConstantDeclaration) typeNode;
+			if (enumConstantDeclaration.getAnonymousClassDeclaration() != null) {
+				binding= enumConstantDeclaration.getAnonymousClassDeclaration().resolveBinding();
+			} else {
+				IVariableBinding varBinding= enumConstantDeclaration.resolveVariable();
+				if (varBinding != null) {
+					binding= varBinding.getDeclaringClass();
+					implementAbstractsOfInput= true;
+				}
+			}
 		}
 		if (binding == null)
 			return new IMethodBinding[0];
 
-
-		return StubUtility2.getUnimplementedMethods(binding);
+		return StubUtility2.getUnimplementedMethods(binding, implementAbstractsOfInput);
 	}
 }

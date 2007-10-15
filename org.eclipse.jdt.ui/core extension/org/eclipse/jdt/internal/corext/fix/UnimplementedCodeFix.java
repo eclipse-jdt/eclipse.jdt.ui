@@ -17,7 +17,6 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -25,7 +24,6 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
-import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -78,12 +76,12 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 			if (addMissingMethod) {
 				ASTNode typeNode= getSelectedTypeNode(root, problem);
 				if (typeNode != null && !isTypeBindingNull(typeNode)) {
-					operations.add(new AddUnimplementedMethodsOperation(typeNode, problem.getProblemId()));
+					operations.add(new AddUnimplementedMethodsOperation(typeNode));
 				}
 			} else {
 				ASTNode typeNode= getSelectedTypeNode(root, problem);
 				if (typeNode instanceof TypeDeclaration) {
-					operations.add(new MakeTypeAbstractOperation(((TypeDeclaration) typeNode)));
+					operations.add(new MakeTypeAbstractOperation((TypeDeclaration) typeNode));
 				}
 			}
 		}
@@ -108,7 +106,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 		if (isTypeBindingNull(typeNode))
 			return null;
 
-		AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(typeNode, problem.getProblemId());
+		AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(typeNode);
 		return new UnimplementedCodeFix(CorrectionMessages.UnimplementedMethodsCorrectionProposal_description, root, new CompilationUnitRewriteOperation[] { operation });
 	}
 
@@ -132,20 +130,19 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 		if (selectedNode.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION) { // bug 200016
 			selectedNode= selectedNode.getParent();
 		}
-
+		
+		if (selectedNode.getLocationInParent() == EnumConstantDeclaration.NAME_PROPERTY) {
+			selectedNode= selectedNode.getParent();
+		}
 		if (selectedNode.getNodeType() == ASTNode.SIMPLE_NAME && selectedNode.getParent() instanceof AbstractTypeDeclaration) {
 			return selectedNode.getParent();
 		} else if (selectedNode.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
 			return ((ClassInstanceCreation) selectedNode).getAnonymousClassDeclaration();
 		} else if (selectedNode.getNodeType() == ASTNode.ENUM_CONSTANT_DECLARATION) {
-			return ((EnumConstantDeclaration) selectedNode).getAnonymousClassDeclaration();
-		} else if (selectedNode.getNodeType() == ASTNode.METHOD_DECLARATION && problem.getProblemId() == IProblem.EnumAbstractMethodMustBeImplemented) {
-			EnumDeclaration enumDecl= (EnumDeclaration) selectedNode.getParent(); // bug 200026
-			if (!enumDecl.enumConstants().isEmpty()) {
-				return enumDecl;
-			} else {
-				return null;
-			}
+			EnumConstantDeclaration enumConst= (EnumConstantDeclaration) selectedNode;
+			if (enumConst.getAnonymousClassDeclaration() != null)
+				return enumConst.getAnonymousClassDeclaration();
+			return enumConst;
 		} else {
 			return null;
 		}
@@ -164,12 +161,8 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 				return true;
 
 			return false;
-		} else if (typeNode instanceof EnumDeclaration) {
-			EnumDeclaration enumDeclaration= (EnumDeclaration) typeNode;
-			if (enumDeclaration.resolveBinding() == null)
-				return true;
-
-			return false;
+		} else if (typeNode instanceof EnumConstantDeclaration) {
+			return false;                                                                                                                                      
 		} else {
 			return true;
 		}

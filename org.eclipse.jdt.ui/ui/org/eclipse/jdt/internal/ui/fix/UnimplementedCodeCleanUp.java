@@ -102,7 +102,7 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 	 */
 	protected IFix createFix(CompilationUnit unit) throws CoreException {
 		IProblemLocation[] problemLocations= convertProblems(unit.getProblems());
-		problemLocations= filter(problemLocations, new int[] { IProblem.AbstractMethodMustBeImplemented, IProblem.EnumAbstractMethodMustBeImplemented });
+		problemLocations= filter(problemLocations, new int[] { IProblem.AbstractMethodMustBeImplemented, IProblem.EnumConstantMustImplementAbstractMethod });
 
 		return UnimplementedCodeFix.createCleanUp(unit, isEnabled(CleanUpConstants.ADD_MISSING_METHODES), isEnabled(MAKE_TYPE_ABSTRACT), problemLocations);
 	}
@@ -111,7 +111,7 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 	 * {@inheritDoc}
 	 */
 	protected IFix createFix(CompilationUnit unit, IProblemLocation[] problems) throws CoreException {
-		IProblemLocation[] problemLocations= filter(problems, new int[] { IProblem.AbstractMethodMustBeImplemented, IProblem.EnumAbstractMethodMustBeImplemented });
+		IProblemLocation[] problemLocations= filter(problems, new int[] { IProblem.AbstractMethodMustBeImplemented, IProblem.EnumConstantMustImplementAbstractMethod });
 		return UnimplementedCodeFix.createCleanUp(unit, isEnabled(CleanUpConstants.ADD_MISSING_METHODES), isEnabled(MAKE_TYPE_ABSTRACT), problemLocations);
 	}
 
@@ -120,9 +120,9 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 	 */
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		int id= problem.getProblemId();
-		if (id == IProblem.AbstractMethodMustBeImplemented || id == IProblem.EnumAbstractMethodMustBeImplemented)
+		if (id == IProblem.AbstractMethodMustBeImplemented || id == IProblem.EnumConstantMustImplementAbstractMethod)
 			return isEnabled(CleanUpConstants.ADD_MISSING_METHODES) || isEnabled(MAKE_TYPE_ABSTRACT);
-
+		
 		return false;
 	}
 
@@ -133,7 +133,7 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 		if (!isEnabled(CleanUpConstants.ADD_MISSING_METHODES) && !isEnabled(MAKE_TYPE_ABSTRACT))
 			return 0;
 
-		IProblemLocation[] locations= filter(convertProblems(compilationUnit.getProblems()), new int[] { IProblem.AbstractMethodMustBeImplemented, IProblem.EnumAbstractMethodMustBeImplemented });
+		IProblemLocation[] locations= filter(convertProblems(compilationUnit.getProblems()), new int[] { IProblem.AbstractMethodMustBeImplemented, IProblem.EnumConstantMustImplementAbstractMethod });
 		
 		HashSet types= new HashSet();
 		for (int i= 0; i < locations.length; i++) {

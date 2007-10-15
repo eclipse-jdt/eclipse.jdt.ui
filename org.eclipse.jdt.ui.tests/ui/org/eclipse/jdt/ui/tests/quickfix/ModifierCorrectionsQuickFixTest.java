@@ -3023,4 +3023,37 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}	
+	
+	public void testAbstractMethodInEnumWithoutEnumConstants() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package r;\n");
+		buf.append("\n");
+		buf.append("enum E {\n");
+		buf.append("    ;\n");
+		buf.append("    public abstract boolean foo();\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package r;\n");
+		buf.append("\n");
+		buf.append("enum E {\n");
+		buf.append("    ;\n");
+		buf.append("    public boolean foo() {\n");
+		buf.append("        return false;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 }
