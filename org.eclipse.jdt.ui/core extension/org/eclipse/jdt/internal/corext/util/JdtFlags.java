@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -296,6 +295,18 @@ public class JdtFlags {
 		            	visibility == Modifier.PRIVATE);  
 	}
 	
+	/**
+	 * Compares two visibilities.
+	 * 
+	 * @param newVisibility the 'new' visibility
+	 * @param oldVisibility the 'old' visibility
+	 * @return <code>true</code> iff the 'new' visibility is strictly higher than the old visibility
+	 * 
+	 * @see Modifier#PUBLIC
+	 * @see Modifier#PROTECTED
+	 * @see Modifier#NONE
+	 * @see Modifier#PRIVATE
+	 */
 	public static boolean isHigherVisibility(int newVisibility, int oldVisibility){
 		assertVisibility(oldVisibility);
 		assertVisibility(newVisibility);
