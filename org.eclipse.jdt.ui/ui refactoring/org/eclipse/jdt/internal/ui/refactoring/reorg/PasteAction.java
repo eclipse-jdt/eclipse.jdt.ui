@@ -13,10 +13,10 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -323,43 +323,7 @@ public class PasteAction extends SelectionDispatchAction{
 			private final String fTypeName;
 			private final String fPackageName;
 
-			public static ParsedCu[] parse(IJavaProject javaProject, String text) {
-				IScanner scanner= ToolFactory.createScanner(false, false, false, false);
-				scanner.setSource(text.toCharArray());
-				
-				ArrayList cus= new ArrayList();
-				int start= 0;
-				boolean tokensScanned= false;
-				int tok;
-				while (true) {
-					try {
-						tok= scanner.getNextToken();
-					} catch (InvalidInputException e) {
-						// Handle gracefully to give the ASTParser a chance to recover,
-						// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=168691
-						tok= ITerminalSymbols.TokenNameEOF;
-					}
-					if (tok == ITerminalSymbols.TokenNamepackage && tokensScanned) {
-						int packageStart= scanner.getCurrentTokenStartPosition();
-						ParsedCu cu= parseCu(javaProject, text.substring(start, packageStart));
-						if (cu != null) {
-							cus.add(cu);
-							start= packageStart;
-						}
-					} else if (tok == ITerminalSymbols.TokenNameEOF) {
-						ParsedCu cu= parseCu(javaProject, text.substring(start, text.length()));
-						if (cu != null) {
-							cus.add(cu);
-						}
-						break;
-					}
-					tokensScanned= true;
-				}
-
-				return (ParsedCu[]) cus.toArray(new ParsedCu[cus.size()]);
-			}
-			
-			private static ParsedCu parseCu(IJavaProject javaProject, String text) {
+			public static List/*<ParsedCu>*/ parseCus(IJavaProject javaProject, String text) {
 				String packageName= IPackageFragment.DEFAULT_PACKAGE_NAME;
 				ASTParser parser= ASTParser.newParser(AST.JLS3);
 				parser.setProject(javaProject);
@@ -368,31 +332,52 @@ public class PasteAction extends SelectionDispatchAction{
 				CompilationUnit unit= (CompilationUnit) parser.createAST(null);
 				
 				if (unit == null)
-					return null;
-				
-				int typesCount= unit.types().size();
-				String typeName= null;
-				if (typesCount > 0) {
-					// get first most visible type:
-					int maxVisibility= Modifier.PRIVATE;
-					for (ListIterator iter= unit.types().listIterator(typesCount); iter.hasPrevious();) {
-						AbstractTypeDeclaration type= (AbstractTypeDeclaration) iter.previous();
-						int visibility= JdtFlags.getVisibilityCode(type);
-						if (! JdtFlags.isHigherVisibility(maxVisibility, visibility)) {
-							maxVisibility= visibility;
-							typeName= type.getName().getIdentifier();
-						}
-					}
-				}
-				if (typeName == null)
-					return null;
+					return Collections.EMPTY_LIST;
 				
 				PackageDeclaration pack= unit.getPackage();
 				if (pack != null) {
 					packageName= pack.getName().getFullyQualifiedName();
 				}
 				
-				return new ParsedCu(text, typeName, packageName);
+				ArrayList cus= new ArrayList();
+				List types= unit.types();
+				
+				int startOffset= 0;
+				String typeName= null;
+				int maxVisibility= JdtFlags.VISIBILITY_CODE_INVALID;
+				
+				// Each public type starts a new cu:
+				for (Iterator iter= types.iterator(); iter.hasNext(); ) {
+					AbstractTypeDeclaration type= (AbstractTypeDeclaration) iter.next();
+					if (typeName == null) {
+						// first in group:
+						maxVisibility= JdtFlags.getVisibilityCode(type);
+						typeName= type.getName().getIdentifier();
+					} else {
+						int visibility= JdtFlags.getVisibilityCode(type);
+						if (visibility == Modifier.PUBLIC) {
+							// public => create CU for previous:
+							int prevEnd= type.getStartPosition();
+							String source= text.substring(startOffset, prevEnd);
+							cus.add(new ParsedCu(source, typeName, packageName));
+							// ... and restart:
+							startOffset= prevEnd;
+							typeName= type.getName().getIdentifier();
+							maxVisibility= visibility;
+						} else {
+							if (JdtFlags.isHigherVisibility(visibility, maxVisibility)) {
+								maxVisibility= visibility;
+								typeName= type.getName().getIdentifier();
+							}
+						}
+					}
+				}
+				if (typeName != null) {
+					// create CU for the rest:
+					String source= text.substring(startOffset);
+					cus.add(new ParsedCu(source, typeName, packageName));
+				}
+				return cus;
 			}
 			
 			private ParsedCu(String text, String typeName, String packageName) {
@@ -419,6 +404,7 @@ public class PasteAction extends SelectionDispatchAction{
 		 * destination pack iff pasted 1 CU to package fragment or compilation unit, <code>null</code> otherwise
 		 */
 		private IPackageFragment fDestinationPack;
+		private int fPackageDeclCount;
 		private ParsedCu[] fParsedCus;
 		private TransferData[] fAvailableTypes;
 		
@@ -446,7 +432,7 @@ public class PasteAction extends SelectionDispatchAction{
 				destination= javaElements[0];
 				javaProject= destination.getJavaProject();
 			}
-			fParsedCus= ParsedCu.parse(javaProject, text);
+			parseCUs(javaProject, text);
 			
 			if (fParsedCus.length == 0)
 				return false;
@@ -455,8 +441,8 @@ public class PasteAction extends SelectionDispatchAction{
 				return true;
 			
 			/*
-			 * 1 CU: paste into package, adapt package declaration
-			 * 2+ CUs: always paste into source folder
+			 * 0 to 1 package declarations in source: paste into package, adapt package declarations
+			 * 2+ package declarations: always paste into source folder
 			 */
 			
 			IPackageFragmentRoot packageFragmentRoot;
@@ -486,7 +472,7 @@ public class PasteAction extends SelectionDispatchAction{
 					packageFragmentRoot= (IPackageFragmentRoot) destinationPack.getParent();
 					if (isWritable(packageFragmentRoot)) {
 						fDestination= packageFragmentRoot;
-						if (fParsedCus.length == 1) {
+						if (fPackageDeclCount <= 1) {
 							fDestinationPack= destinationPack;
 						}
 						return true;
@@ -498,7 +484,7 @@ public class PasteAction extends SelectionDispatchAction{
 					packageFragmentRoot= (IPackageFragmentRoot) destinationPack.getParent();
 					if (isWritable(packageFragmentRoot)) {
 						fDestination= packageFragmentRoot;
-						if (fParsedCus.length == 1) {
+						if (fPackageDeclCount <= 1) {
 							fDestinationPack= destinationPack;
 						}
 						return true;
@@ -595,19 +581,20 @@ public class PasteAction extends SelectionDispatchAction{
 						if (! alreadyExists) {
 							editorPart[0]= openCu(cu);
 						}
-						if (fDestinationPack != null && ! fDestinationPack.getElementName().equals(parsedCu.getPackageName())) {
+						if (fDestinationPack != null) {
 							if (fDestinationPack.getElementName().length() == 0) {
 								removePackageDeclaration(cu);
 							} else {
 								cu.createPackageDeclaration(fDestinationPack.getElementName(), new SubProgressMonitor(pm, 1));
 							}
-							if (! alreadyExists && editorPart[0] != null)
-								editorPart[0].doSave(new SubProgressMonitor(pm, 1)); //avoid showing error marker due to missing/wrong package declaration
-							else
-								pm.worked(1);
 						} else {
-							pm.worked(1);
+							String parsedPackageName= parsedCu.getPackageName();
+							if (parsedPackageName.length() > 0) {
+								cu.createPackageDeclaration(parsedPackageName, new SubProgressMonitor(pm, 1));
+							}
 						}
+						if (! alreadyExists && editorPart[0] != null)
+							editorPart[0].doSave(new SubProgressMonitor(pm, 1)); //avoid showing error marker due to missing/wrong package declaration
 						return cu;
 					} finally {
 						pm.done();
@@ -747,6 +734,45 @@ public class PasteAction extends SelectionDispatchAction{
 				JavaPlugin.log(e);
 				return null;
 			}
+		}
+
+		private void parseCUs(IJavaProject javaProject, String text) {
+			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+			scanner.setSource(text.toCharArray());
+			
+			ArrayList cus= new ArrayList();
+			int start= 0;
+			boolean tokensScanned= false;
+			fPackageDeclCount= 0;
+			int tok;
+			while (true) {
+				try {
+					tok= scanner.getNextToken();
+				} catch (InvalidInputException e) {
+					// Handle gracefully to give the ASTParser a chance to recover,
+					// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=168691
+					tok= ITerminalSymbols.TokenNameEOF;
+				}
+				if (tok == ITerminalSymbols.TokenNamepackage) {
+					fPackageDeclCount++;
+					if (tokensScanned) {
+						int packageStart= scanner.getCurrentTokenStartPosition();
+						List parsed= ParsedCu.parseCus(javaProject, text.substring(start, packageStart));
+						if (parsed.size() > 0) {
+							cus.addAll(parsed);
+							start= packageStart;
+						}
+					}
+				} else if (tok == ITerminalSymbols.TokenNameEOF) {
+					List parsed= ParsedCu.parseCus(javaProject, text.substring(start, text.length()));
+					if (parsed.size() > 0) {
+						cus.addAll(parsed);
+					}
+					break;
+				}
+				tokensScanned= true;
+			}
+			fParsedCus= (ParsedCu[]) cus.toArray(new ParsedCu[cus.size()]);
 		}
     }
     
@@ -1193,7 +1219,11 @@ public class PasteAction extends SelectionDispatchAction{
 			}
 
 			/**
+			 * @param destination the destination element
+			 * @param kind the type of the source to paste
+			 * @param unit the parsed CU
 			 * @return an AbstractTypeDeclaration, a CompilationUnit, or null
+			 * @throws JavaModelException if something fails
 			 */ 
 			private ASTNode getDestinationNodeForSourceElement(IJavaElement destination, int kind, CompilationUnit unit) throws JavaModelException {
 				final IType ancestor= getAncestorType(destination);
