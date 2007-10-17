@@ -45,7 +45,7 @@ public abstract class RepeatingRefactoringPerformanceTestCase extends Refactorin
 	}
 	
 	protected void assertMeasurements() {
-		assertPerformanceInRelativeBand(Dimension.ELAPSED_PROCESS, -100, +10);;
+		assertPerformanceInRelativeBand(Dimension.ELAPSED_PROCESS, -100, +10);
 	}
 	
 	protected abstract void doExecuteRefactoring(int numberOfCus, int numberOfRefs, boolean measure) throws Exception;

@@ -394,9 +394,7 @@ public class JavaProjectHelper {
 			importFilesFromZip(file, root.getPath(), null);
 			return root;
 		} finally {
-			if (file != null) {
-				file.close();
-			}
+			file.close();
 		}
 	}
 
@@ -510,9 +508,7 @@ public class JavaProjectHelper {
 			importFilesFromZip(file, root.getPath(), null);
 			return root;
 		} finally {
-			if (file != null) {
-				file.close();
-			}
+			file.close();
 		}
 	}	
 
