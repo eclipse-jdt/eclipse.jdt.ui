@@ -125,7 +125,8 @@ public class RenameLinkedMode {
 		}
 
 		public ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length) {
-			fShowPreview|= (event.stateMask & SWT.CTRL) != 0;
+			fShowPreview= (event.stateMask & SWT.CTRL) != 0
+							&& (event.character == SWT.CR || event.character == SWT.LF);
 			return super.doExit(model, event, offset, length);
 		}
 	}
