@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,8 @@
  * Contributors:
  *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
  * 			(report 36180: Callers/Callees view)
+ *   Stephan Herrmann (stephan@cs.tu-berlin.de):
+ *          - bug 75800: [call hierarchy] should allow searches for fields
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
@@ -19,7 +21,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IMember;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -36,12 +38,12 @@ class HistoryAction extends Action {
             JavaElementLabelProvider.SHOW_PARAMETERS |
             JavaElementLabelProvider.SHOW_RETURN_TYPE);
     private CallHierarchyViewPart fView;
-    private IMethod fMethod;
+    private IMember fMember;
 
-    public HistoryAction(CallHierarchyViewPart viewPart, IMethod element) {
+    public HistoryAction(CallHierarchyViewPart viewPart, IMember element) {
         super("", AS_RADIO_BUTTON); //$NON-NLS-1$
         fView = viewPart;
-        fMethod = element;
+        fMember = element;
 
         String elementName = getElementLabel(element);
         setText(elementName);
@@ -65,7 +67,7 @@ class HistoryAction extends Action {
      * @see Action#run()
      */
     public void run() {
-        fView.gotoHistoryEntry(fMethod);
+        fView.gotoHistoryEntry(fMember);
     }
 
     /**

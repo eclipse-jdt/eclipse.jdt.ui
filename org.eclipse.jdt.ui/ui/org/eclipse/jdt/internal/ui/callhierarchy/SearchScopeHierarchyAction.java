@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,12 +10,14 @@
  *          (report 36180: Callers/Callees view)
  *   Michael Fraenkel (fraenkel@us.ibm.com) - patch
  *          (report 60714: Call Hierarchy: display search scope in view title)
+ *   Stephan Herrmann (stephan@cs.tu-berlin.de):
+ *          - bug 75800: [call hierarchy] should allow searches for fields
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -37,10 +39,10 @@ class SearchScopeHierarchyAction extends SearchScopeAction {
 	
 	public IJavaSearchScope getSearchScope() {
 		try {
-			IMethod method = this.fGroup.getView().getMethod();
+			IMember member = this.fGroup.getView().getRootElement();
 			
-			if (method != null) {
-				return SearchEngine.createHierarchyScope(method.getDeclaringType());
+			if (member != null) {
+				return SearchEngine.createHierarchyScope(member.getDeclaringType());
 			} else {
 				return null;
 			}
@@ -62,8 +64,8 @@ class SearchScopeHierarchyAction extends SearchScopeAction {
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getFullDescription()
 	 */
 	public String getFullDescription() {
-		IMethod method = this.fGroup.getView().getMethod();
-		return JavaSearchScopeFactory.getInstance().getHierarchyScopeDescription(method.getDeclaringType());
+		IMember member= this.fGroup.getView().getRootElement();
+		return JavaSearchScopeFactory.getInstance().getHierarchyScopeDescription(member.getDeclaringType());
 	}
 
 }

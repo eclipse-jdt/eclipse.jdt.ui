@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,8 @@
  * Contributors:
  *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
  * 			(report 36180: Callers/Callees view)
+ *   Stephan Herrmann (stephan@cs.tu-berlin.de):
+ *          - bug 75800: [call hierarchy] should allow searches for fields
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
@@ -38,9 +40,13 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
+import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -49,10 +55,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
-import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
-import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class CallHierarchyUI {
     private static final int DEFAULT_MAX_CALL_DEPTH= 10;    
@@ -121,6 +123,10 @@ public class CallHierarchyUI {
     }
 
     /**
+     * Opens the element in the editor or shows an error dialog if that fails.
+     * @param element the element to open
+     * @param shell parent shell for error dialog
+     * @param title title for error dialog
      * @return <code>true</code> iff no error occurred while trying to
      *  open the editor, <code>false</code> iff an error dialog was raised.
      */
@@ -195,20 +201,6 @@ public class CallHierarchyUI {
         return null;
     }
 
-    /**
-     * Converts the input to a possible input candidates
-     */ 
-    public static IJavaElement[] getCandidates(Object input) {
-        if (!(input instanceof IJavaElement)) {
-            return null;
-        }
-        IJavaElement elem= (IJavaElement) input;
-        if (elem.getElementType() == IJavaElement.METHOD) {
-            return new IJavaElement[] { elem };
-        }
-        return null;    
-    }
-    
     public static CallHierarchyViewPart open(IJavaElement[] candidates, IWorkbenchWindow window) {
         Assert.isTrue(candidates != null && candidates.length != 0);
             
@@ -230,7 +222,7 @@ public class CallHierarchyUI {
         IWorkbenchPage page= window.getActivePage();
         try {
             CallHierarchyViewPart result= (CallHierarchyViewPart)page.showView(CallHierarchyViewPart.ID_CALL_HIERARCHY);
-            result.setMethod((IMethod)input);
+            result.setRootElement((IMember)input);
             return result;
         } catch (CoreException e) {
             ExceptionHandler.handle(e, window.getShell(), 

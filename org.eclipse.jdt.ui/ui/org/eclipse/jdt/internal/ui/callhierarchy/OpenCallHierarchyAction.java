@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,17 +13,16 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.text.ITextSelection;
-
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
@@ -32,6 +31,8 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
@@ -91,6 +92,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
     
     /**
      * Note: This constructor is for internal use only. Clients should not call this constructor.
+     * @param editor internal
      */
     public OpenCallHierarchyAction(JavaEditor editor) {
         this(editor.getEditorSite());
@@ -116,14 +118,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
         if (selection.size() != 1)
             return false;
         Object input= selection.getFirstElement();
-        if (!(input instanceof IJavaElement))
-            return false;
-        switch (((IJavaElement)input).getElementType()) {
-            case IJavaElement.METHOD:
-                return true;
-            default:
-                return false;
-        }
+        return CallHierarchy.isPossibleParent(input);
     }
     
     /* (non-Javadoc)
@@ -140,9 +135,10 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
 			    return;
 			List candidates= new ArrayList(elements.length);
 			for (int i= 0; i < elements.length; i++) {
-			    IJavaElement[] resolvedElements= CallHierarchyUI.getCandidates(elements[i]);
-			    if (resolvedElements != null)   
-			        candidates.addAll(Arrays.asList(resolvedElements));
+				IJavaElement element= elements[i];
+				if (CallHierarchy.isPossibleParent(element)) {
+					candidates.add(element);
+				}
 			}
 			if (candidates.isEmpty()) {
 			    IJavaElement enclosingMethod= getEnclosingMethod(input, selection);
@@ -175,7 +171,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
                     }
                     break;
             }
-            if (enclosingElement != null && enclosingElement.getElementType() == IJavaElement.METHOD) {
+        	if (CallHierarchy.isPossibleParent(enclosingElement)) {
                 return enclosingElement;
             }
         } catch (JavaModelException e) {
@@ -231,10 +227,9 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
     
     private static IStatus compileCandidates(List result, IJavaElement elem) {
         IStatus ok= new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$        
-        switch (elem.getElementType()) {
-            case IJavaElement.METHOD:
-                result.add(elem);
-                return ok;
+        if (CallHierarchy.isPossibleParent(elem)) {
+			result.add(elem);
+			return ok;
         }
         return createStatus(CallHierarchyMessages.OpenCallHierarchyAction_messages_no_valid_java_element); 
     }

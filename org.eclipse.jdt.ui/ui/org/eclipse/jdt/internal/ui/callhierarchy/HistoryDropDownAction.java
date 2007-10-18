@@ -8,6 +8,8 @@
  * Contributors:
  *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
  * 			(report 36180: Callers/Callees view)
+ *   Stephan Herrmann (stephan@cs.tu-berlin.de):
+ *          - bug 75800: [call hierarchy] should allow searches for fields
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
@@ -22,7 +24,7 @@ import org.eclipse.jface.action.IMenuCreator;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IMember;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -40,8 +42,8 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
 		}
 			
 		public void run() {
-			fView.setHistoryEntries(new IMethod[0]);
-			fView.setMethod(null);
+			fView.setHistoryEntries(new IMember[0]);
+			fView.setRootElement(null);
 		}
 	}
 	
@@ -69,7 +71,7 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
             fMenu.dispose();
         }
         fMenu= new Menu(parent);
-        IMethod[] elements= fView.getHistoryEntries();
+        IMember[] elements= fView.getHistoryEntries();
         addEntries(fMenu, elements);
 		new MenuItem(fMenu, SWT.SEPARATOR);
 		addActionToMenu(fMenu, new HistoryListAction(fView));
@@ -91,14 +93,14 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
         item.fill(parent, -1);
     }
 
-    private boolean addEntries(Menu menu, IMethod[] elements) {
+    private boolean addEntries(Menu menu, IMember[] elements) {
         boolean checked = false;
 
         int min = Math.min(elements.length, RESULTS_IN_DROP_DOWN);
 
         for (int i = 0; i < min; i++) {
             HistoryAction action = new HistoryAction(fView, elements[i]);
-            action.setChecked(elements[i].equals(fView.getMethod()));
+            action.setChecked(elements[i].equals(fView.getRootElement()));
             checked = checked || action.isChecked();
             addActionToMenu(menu, action);
         }

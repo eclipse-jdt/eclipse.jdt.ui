@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,18 +14,20 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.ui.progress.DeferredTreeContentManager;
 
+import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.ui.progress.DeferredTreeContentManager;
 
 public class CallHierarchyContentProvider implements ITreeContentProvider {
     private final static Object[] EMPTY_ARRAY = new Object[0];
@@ -140,7 +142,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 		// user into believing that there is more
 		if (element instanceof MethodWrapper) {
 			MethodWrapper methodWrapper= (MethodWrapper) element;
-			if (methodWrapper.getMember().getElementType() != IJavaElement.METHOD) {
+			if (! CallHierarchy.isPossibleParent(methodWrapper.getMember())) {
 				return false;
 			}
 			if (shouldStopTraversion(methodWrapper)) {
@@ -170,12 +172,13 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
     		}
     	}
         if (viewer instanceof AbstractTreeViewer) {
-            fManager = new DeferredTreeContentManager(this, (AbstractTreeViewer) viewer, fPart.getSite());
+            fManager = new DeferredTreeContentManager((AbstractTreeViewer) viewer, fPart.getSite());
         }
     }
 
     /**
      * Cancel all current jobs. 
+     * @param wrapper the parent to cancel jobs for
      */
     void cancelJobs(MethodWrapper wrapper) {
         if (fManager != null && wrapper != null) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,8 @@
  *             (report 36180: Callers/Callees view)
  *   Michael Fraenkel (fraenkel@us.ibm.com) - patch
  *             (report 60714: Call Hierarchy: display search scope in view title)
+ *   Stephan Herrmann (stephan@cs.tu-berlin.de):
+ *          - bug 75800: [call hierarchy] should allow searches for fields
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
@@ -76,7 +78,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
@@ -160,7 +162,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private MethodWrapper fCalleeRoot;
     private MethodWrapper fCallerRoot;
     private IMemento fMemento;
-    private IMethod fShownMethod;
+    private IMember fRootElement;
     private CallHierarchySelectionProvider fSelectionProviderMediator;
     private List fMethodHistory;
     private LocationViewer fLocationViewer;
@@ -197,8 +199,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     /**
      * Sets the history entries
+     * @param elems the new history elements
      */
-    public void setHistoryEntries(IMethod[] elems) {
+    public void setHistoryEntries(IMember[] elems) {
         fMethodHistory.clear();
 
         for (int i = 0; i < elems.length; i++) {
@@ -210,36 +213,37 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     /**
      * Gets all history entries.
+     * @return all history entries
      */
-    public IMethod[] getHistoryEntries() {
+    public IMember[] getHistoryEntries() {
         if (fMethodHistory.size() > 0) {
             updateHistoryEntries();
         }
 
-        return (IMethod[]) fMethodHistory.toArray(new IMethod[fMethodHistory.size()]);
+        return (IMember[]) fMethodHistory.toArray(new IMember[fMethodHistory.size()]);
     }
 
     /**
-     * Method setMethod.
-     * @param method
+     * Method setRootElement
+     * @param member
      */
-    public void setMethod(IMethod method) {
-        if (method == null) {
+    public void setRootElement(IMember member) {
+        if (member == null) {
             showPage(PAGE_EMPTY);
 
             return;
         }
-        if (! method.equals(fShownMethod)) {
-            addHistoryEntry(method);
+        if (! member.equals(fRootElement)) {
+            addHistoryEntry(member);
         }
 
-        this.fShownMethod = method;
+        this.fRootElement = member;
 
         refresh();
     }
 
-    public IMethod getMethod() {
-        return fShownMethod;
+    public IMember getRootElement() {
+        return fRootElement;
     }
 
     public MethodWrapper getCurrentMethodWrapper() {
@@ -482,6 +486,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     /**
      * Restores the type hierarchy settings from a memento.
+     * @param memento the memento
      */
     private void restoreState(IMemento memento) {
         fSearchScopeActions.restoreState(memento);
@@ -562,10 +567,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     /**
      * Goes to the selected entry, without updating the order of history entries.
+     * @param entry the history entry
      */
-    public void gotoHistoryEntry(IMethod entry) {
+    public void gotoHistoryEntry(IMember entry) {
         if (fMethodHistory.contains(entry)) {
-            setMethod(entry);
+            setRootElement(entry);
         }
     }
 
@@ -691,6 +697,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     /**
      * Returns the current selection.
+     * @return selection
      */
     protected ISelection getSelection() {
     	StructuredViewer viewerInFocus= fSelectionProviderMediator.getViewerInFocus();
@@ -730,7 +737,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     private MethodWrapper getCalleeRoot() {
         if (fCalleeRoot == null) {
-            fCalleeRoot = CallHierarchy.getDefault().getCalleeRoot(fShownMethod);
+            fCalleeRoot = CallHierarchy.getDefault().getCalleeRoot(fRootElement);
         }
 
         return fCalleeRoot;
@@ -742,7 +749,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     private MethodWrapper getCallerRoot() {
         if (fCallerRoot == null) {
-            fCallerRoot = CallHierarchy.getDefault().getCallerRoot(fShownMethod);
+            fCallerRoot = CallHierarchy.getDefault().getCallerRoot(fRootElement);
         }
 
         return fCallerRoot;
@@ -750,6 +757,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     /**
      * Adds the entry if new. Inserted at the beginning of the history entries list.
+     * @param entry the entry to add
      */
     private void addHistoryEntry(IJavaElement entry) {
         if (fMethodHistory.contains(entry)) {
@@ -895,9 +903,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     private void updateHistoryEntries() {
         for (int i = fMethodHistory.size() - 1; i >= 0; i--) {
-            IMethod method = (IMethod) fMethodHistory.get(i);
+            IMember member = (IMember) fMethodHistory.get(i);
 
-            if (!method.exists()) {
+            if (!member.exists()) {
                 fMethodHistory.remove(i);
             }
         }
@@ -909,12 +917,12 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	 * Method updateView.
 	 */
 	private void updateView() {
-		if ( (fShownMethod != null)) {
+		if ( (fRootElement != null)) {
 			showPage(PAGE_VIEWER);
 
 			CallHierarchy.getDefault().setSearchScope(getSearchScope());
 
-			String elementName= JavaElementLabels.getElementLabel(fShownMethod, JavaElementLabels.ALL_DEFAULT);
+			String elementName= JavaElementLabels.getElementLabel(fRootElement, JavaElementLabels.ALL_DEFAULT);
 			String scopeDescription= fSearchScopeActions.getFullDescription();
 			String[] args= new String[] { elementName, scopeDescription };
 			// set input to null so that setSorter does not cause a refresh on the old contents:

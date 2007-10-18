@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,8 @@
  * Contributors:
  *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
  *          (report 36180: Callers/Callees view)
+ *   Stephan Herrmann (stephan@cs.tu-berlin.de):
+ *          - bug 75800: [call hierarchy] should allow searches for fields
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
@@ -30,7 +32,7 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IMember;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
@@ -48,9 +50,9 @@ public class HistoryListAction extends Action {
 		
 		private ListDialogField fHistoryList;
 		private IStatus fHistoryStatus;
-		private IMethod fResult;
+		private IMember fResult;
 		
-		private HistoryListDialog(Shell shell, IMethod[] elements) {
+		private HistoryListDialog(Shell shell, IMember[] elements) {
 			super(shell);
 			setTitle(CallHierarchyMessages.HistoryListDialog_title); 
 			
@@ -129,20 +131,20 @@ public class HistoryListAction extends Action {
         		status.setError(""); //$NON-NLS-1$
         		fResult= null;
         	} else {
-        		fResult= (IMethod) selected.get(0);
+        		fResult= (IMember) selected.get(0);
         	}
         	fHistoryList.enableButton(0, fHistoryList.getSize() > selected.size() && selected.size() != 0);			
         	fHistoryStatus= status;
         	updateStatus(status);	
         }
 				
-		public IMethod getResult() {
+		public IMember getResult() {
 			return fResult;
 		}
 		
-		public IMethod[] getRemaining() {
+		public IMember[] getRemaining() {
 			List elems= fHistoryList.getElements();
-			return (IMethod[]) elems.toArray(new IMethod[elems.size()]);
+			return (IMember[]) elems.toArray(new IMember[elems.size()]);
 		}	
 		
 		/*
@@ -175,11 +177,11 @@ public class HistoryListAction extends Action {
 	 * @see IAction#run()
 	 */
 	public void run() {
-		IMethod[] historyEntries= fView.getHistoryEntries();
+		IMember[] historyEntries= fView.getHistoryEntries();
 		HistoryListDialog dialog= new HistoryListDialog(JavaPlugin.getActiveWorkbenchShell(), historyEntries);
 		if (dialog.open() == Window.OK) {
 			fView.setHistoryEntries(dialog.getRemaining());
-			fView.setMethod(dialog.getResult());
+			fView.setRootElement(dialog.getResult());
 		}
 	}
 

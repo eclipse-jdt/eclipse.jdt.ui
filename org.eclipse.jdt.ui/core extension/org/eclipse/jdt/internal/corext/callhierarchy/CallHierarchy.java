@@ -8,6 +8,8 @@
  * Contributors:
  *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation
  *          (report 36180: Callers/Callees view)
+ *   Stephan Herrmann (stephan@cs.tu-berlin.de):
+ *          - bug 75800: [call hierarchy] should allow searches for fields
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.callhierarchy;
 
@@ -21,6 +23,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -93,12 +96,12 @@ public class CallHierarchy {
         return new ArrayList(0);
     }
 
-    public MethodWrapper getCallerRoot(IMethod method) {
-        return new CallerMethodWrapper(null, new MethodCall(method));
+    public MethodWrapper getCallerRoot(IMember member) {
+        return new CallerMethodWrapper(null, new MethodCall(member));
     }
 
-    public MethodWrapper getCalleeRoot(IMethod method) {
-        return new CalleeMethodWrapper(null, new MethodCall(method));
+    public MethodWrapper getCalleeRoot(IMember member) {
+        return new CalleeMethodWrapper(null, new MethodCall(member));
     }
 
     public static CallLocation getCallLocation(Object element) {
@@ -236,5 +239,9 @@ public class CallHierarchy {
             JavaPlugin.log(e);
         }
         return null;
+    }
+    
+    public static boolean isPossibleParent(Object element) {
+    	return element instanceof IMethod || element instanceof IField;
     }
 }

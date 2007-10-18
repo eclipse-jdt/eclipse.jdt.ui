@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,12 +10,14 @@
  *          (report 36180: Callers/Callees view)
  *   Michael Fraenkel (fraenkel@us.ibm.com) - patch
  *          (report 60714: Call Hierarchy: display search scope in view title)
+ *   Stephan Herrmann (stephan@cs.tu-berlin.de):
+ *          - bug 75800: [call hierarchy] should allow searches for fields
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -33,13 +35,13 @@ class SearchScopeProjectAction extends SearchScopeAction {
 	}
 	
 	public IJavaSearchScope getSearchScope() {
-		IMethod method = this.fGroup.getView().getMethod();
-		if (method == null) {
+		IMember member = this.fGroup.getView().getRootElement();
+		if (member == null) {
 			return null;
 		}
 		
 		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
-		return factory.createJavaProjectSearchScope(method.getJavaProject(), true);
+		return factory.createJavaProjectSearchScope(member.getJavaProject(), true);
 	}
 	
 	/* (non-Javadoc)
@@ -53,10 +55,10 @@ class SearchScopeProjectAction extends SearchScopeAction {
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getFullDescription()
 	 */
 	public String getFullDescription() {
-		IMethod method = this.fGroup.getView().getMethod();
-		if (method != null) {
+		IMember member = this.fGroup.getView().getRootElement();
+		if (member != null) {
 			JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
-			return factory.getProjectScopeDescription(method.getJavaProject(), true);
+			return factory.getProjectScopeDescription(member.getJavaProject(), true);
 		}
 		return ""; //$NON-NLS-1$
 	}
