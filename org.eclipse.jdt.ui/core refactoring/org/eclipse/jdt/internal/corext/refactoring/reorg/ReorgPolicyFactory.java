@@ -56,6 +56,7 @@ import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
 import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
+import org.eclipse.ltk.core.refactoring.resource.MoveResourceChange;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -119,7 +120,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageFragmentRootChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.MoveResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
@@ -904,7 +904,7 @@ public final class ReorgPolicyFactory {
 		}
 
 		private IPackageFragment getJavaDestinationAsPackageFragment(IJavaElement javaDest) {
-			if (javaDest == null || (fCheckDestination && !javaDest.exists()))
+			if (javaDest == null || fCheckDestination && !javaDest.exists())
 				return null;
 			if (javaDest instanceof IPackageFragment)
 				return (IPackageFragment) javaDest;
@@ -1610,7 +1610,7 @@ public final class ReorgPolicyFactory {
 				return false;
 			IPackageFragmentRoot[] roots= getPackageFragmentRoots();
 			for (int i= 0; i < roots.length; i++) {
-				if (roots[i].isReadOnly() && !(roots[i].isArchive())) {
+				if (roots[i].isReadOnly() && !roots[i].isArchive()) {
 					final ResourceAttributes attributes= roots[i].getResource().getResourceAttributes();
 					if (attributes == null || attributes.isReadOnly())
 						return false;
@@ -2735,7 +2735,7 @@ public final class ReorgPolicyFactory {
 			if (!super.canEnable())
 				return false;
 			for (int i= 0; i < fPackageFragmentRoots.length; i++) {
-				if (!(ReorgUtils.isSourceFolder(fPackageFragmentRoots[i]) || (fPackageFragmentRoots[i].isArchive() && !fPackageFragmentRoots[i].isExternal())))
+				if (!(ReorgUtils.isSourceFolder(fPackageFragmentRoots[i]) || fPackageFragmentRoots[i].isArchive() && !fPackageFragmentRoots[i].isExternal()))
 					return false;
 			}
 			if (ReorgUtils.containsLinkedResources(fPackageFragmentRoots))
@@ -3286,6 +3286,13 @@ public final class ReorgPolicyFactory {
 			return fDestination.getLocation();
 		}
 
+		/**
+		 * Returns the modifications
+		 * 
+		 * @return the modifications
+		 * 
+		 * @throws CoreException
+		 */
 		protected RefactoringModifications getModifications() throws CoreException {
 			return null;
 		}
@@ -3339,7 +3346,7 @@ public final class ReorgPolicyFactory {
 						// Leave for compatibility
 						// https://bugs.eclipse.org/bugs/show_bug.cgi?id=157479
 						final IResource resource= JavaRefactoringDescriptorUtil.handleToResource(extended.getProject(), handle);
-						if (resource == null || (fCheckDestination && !resource.exists()))
+						if (resource == null || fCheckDestination && !resource.exists())
 							return ScriptableRefactoring.createInputFatalStatus(resource, getProcessorId(), getRefactoringId());
 						else {
 							try {
@@ -3357,7 +3364,7 @@ public final class ReorgPolicyFactory {
 					handle= extended.getAttribute(ATTRIBUTE_TARGET);
 					if (handle != null) {
 						final IResource resource= JavaRefactoringDescriptorUtil.handleToResource(extended.getProject(), handle);
-						if (resource == null || (fCheckDestination && !resource.exists()))
+						if (resource == null || fCheckDestination && !resource.exists())
 							return ScriptableRefactoring.createInputFatalStatus(resource, getProcessorId(), getRefactoringId());
 						else {
 							try {
@@ -3795,6 +3802,14 @@ public final class ReorgPolicyFactory {
 			return status;
 		}
 
+		/**
+		 * Verifies the destination.
+		 * 
+		 * @param destination the destination
+		 * @param location the location
+		 * @return returns the status
+		 * @throws JavaModelException
+		 */
 		protected RefactoringStatus verifyDestination(IJavaElement destination, int location) throws JavaModelException {
 			Assert.isNotNull(destination);
 			if (!fCheckDestination)
@@ -3849,7 +3864,7 @@ public final class ReorgPolicyFactory {
 						if (getJavaElements().length != 1)
 							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
 						
-						if (!(destination.equals(getJavaElements()[0])))
+						if (!destination.equals(getJavaElements()[0]))
 							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
 					} else {
 						int[] types= new int[] {IJavaElement.FIELD, IJavaElement.INITIALIZER, IJavaElement.METHOD, IJavaElement.TYPE};

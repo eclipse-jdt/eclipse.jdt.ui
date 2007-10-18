@@ -34,6 +34,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.resource.DeleteResourceChange;
 import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
@@ -164,7 +165,7 @@ public class CreateFileChange extends ResourceChange {
 				} else {
 					pm.worked(1);
 				}
-				return new DeleteFileChange(file);
+				return new DeleteResourceChange(file.getFullPath(), true);
 			} catch (UnsupportedEncodingException e) {
 				throw new JavaModelException(e, IJavaModelStatusConstants.IO_EXCEPTION);
 			}

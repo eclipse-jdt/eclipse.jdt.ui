@@ -15,14 +15,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ui.ide.undo.ResourceDescription;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.resource.DeleteResourceChange;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -69,13 +68,7 @@ public class UndoDeleteResourceChange extends Change {
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		IResource created= fResourceDescription.createResource(pm);
 		created.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(pm, 1));
-		if (created instanceof IFile) {
-			return new DeleteFileChange((IFile) created, false);
-		} else if (created instanceof IFolder) {
-			return new DeleteFolderChange((IFolder) created, false);
-		} else {
-			return null; // should not happen
-		}
+		return new DeleteResourceChange(created.getFullPath(), true);
 	}
 	
 	public String toString() {

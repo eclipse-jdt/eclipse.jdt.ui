@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -33,6 +32,7 @@ import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
+import org.eclipse.ltk.core.refactoring.resource.DeleteResourceChange;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -47,8 +47,6 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ClasspathChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFileChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFolderChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeletePackageFragmentRootChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteSourceManipulationChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -118,12 +116,7 @@ class DeleteChangeCreator {
 	private static Change createDeleteChange(IResource resource) {
 		Assert.isTrue(! (resource instanceof IWorkspaceRoot));//cannot be done
 		Assert.isTrue(! (resource instanceof IProject)); //project deletion is handled by the workbench
-		if (resource instanceof IFile)
-			return new DeleteFileChange((IFile)resource, true);
-		if (resource instanceof IFolder)
-			return new DeleteFolderChange((IFolder)resource, true);
-		Assert.isTrue(false);//there're no more kinds
-		return null;
+		return new DeleteResourceChange(resource.getFullPath(), true);
 	}
 
 	/*

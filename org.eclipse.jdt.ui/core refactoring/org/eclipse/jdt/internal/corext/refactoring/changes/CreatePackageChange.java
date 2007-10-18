@@ -14,12 +14,12 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.resource.DeleteResourceChange;
 import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 
 import org.eclipse.jdt.core.IPackageFragment;
@@ -53,7 +53,7 @@ public class CreatePackageChange extends ResourceChange {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) fPackageFragment.getParent();
 				root.createPackageFragment(fPackageFragment.getElementName(), false, pm);
 				
-				return new DeleteFolderChange((IFolder) fPackageFragment.getResource(), true); 
+				return new DeleteResourceChange(fPackageFragment.getPath(), true); 
 			}		
 		} finally {
 			pm.done();
