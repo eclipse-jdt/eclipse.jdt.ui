@@ -200,6 +200,11 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	
 	private void addSortingSection(Composite composite) {
 		String label;
+		
+		label= PreferencesMessages.CodeAssistConfigurationBlock_typeFilters_link;
+		createPreferencePageLink(composite, label, null);
+		new Label(composite, SWT.NONE);
+
 		label= PreferencesMessages.JavaEditorPreferencePage_presentProposalsInAlphabeticalOrder;
 		ProposalSorterHandle[] sorters= ProposalSorterRegistry.getDefault().getSorters();
 		String[] labels= new String[sorters.length];
@@ -256,16 +261,16 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		});		
 		
 		label= PreferencesMessages.JavaEditorPreferencePage_autoActivationDelay; 
-		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_DELAY, 4, 0, true);
+		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_DELAY, 4, 0);
 		
 		label= PreferencesMessages.JavaEditorPreferencePage_autoActivationTriggersForJava; 
-		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, 4, 0, false);
+		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, 4, 0);
 		
 		label= PreferencesMessages.JavaEditorPreferencePage_autoActivationTriggersForJavaDoc; 
-		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, 4, 0, false);
+		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, 4, 0);
 	}
 	
-	protected Text addLabelledTextField(Composite parent, String label, Key key, int textlimit, int indent, boolean dummy) {	
+	protected Text addLabelledTextField(Composite parent, String label, Key key, int textlimit, int indent) {	
 		PixelConverter pixelConverter= new PixelConverter(parent);
 		
 		Label labelControl= new Label(parent, SWT.WRAP);
