@@ -16,7 +16,6 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
@@ -42,8 +41,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.jdt.testplugin.TestOptions;
-
-import org.osgi.service.prefs.BackingStoreException;
 
 public class ImportOrganizeTest extends CoreTests {
 	
@@ -87,10 +84,8 @@ public class ImportOrganizeTest extends CoreTests {
 			public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
 				assertTrue(name + "-query-nchoices1", choices.length == openChoices.length);
 				assertTrue(name + "-query-nchoices2", nEntries.length == openChoices.length);
-				if (nEntries != null) {
-					for (int i= 0; i < nEntries.length; i++) {
-						assertTrue(name + "-query-cnt" + i, openChoices[i].length == nEntries[i]);
-					}
+				for (int i= 0; i < nEntries.length; i++) {
+					assertTrue(name + "-query-cnt" + i, openChoices[i].length == nEntries[i]);
 				}
 				TypeNameMatch[] res= new TypeNameMatch[openChoices.length];
 				for (int i= 0; i < openChoices.length; i++) {
@@ -2751,7 +2746,75 @@ public class ImportOrganizeTest extends CoreTests {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
-	
+	public void test_PackageInfoBug157541a() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("@Foo\n");
+		buf.append("package pack1;");
+		ICompilationUnit cu= pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack2= sourceFolder.createPackageFragment("pack2", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack2;\n");
+		buf.append("public @interface Foo {\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("Foo.java", buf.toString(), false, null);
+
+		String[] order= new String[] { "", "#" };
+		IChooseImportQuery query= createQuery("Foo", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("@Foo\n");
+		buf.append("package pack1;\n");
+		buf.append("import pack2.Foo;\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
+	public void test_PackageInfoBug157541b() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("@Foo @Bar\n");
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import pack2.Foo;\n");
+		buf.append("\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+		
+		IPackageFragment pack2= sourceFolder.createPackageFragment("pack2", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack2;\n");
+		buf.append("public @interface Foo {\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("Foo.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack2;\n");
+		buf.append("public @interface Bar {\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("Bar.java", buf.toString(), false, null);
+
+		String[] order= new String[] { "", "#" };
+		IChooseImportQuery query= createQuery("Foo", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("@Foo @Bar\n");
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import pack2.Bar;\n");
+		buf.append("import pack2.Foo;\n");
+		buf.append("\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
 	
 
 	
@@ -2921,12 +2984,12 @@ public class ImportOrganizeTest extends CoreTests {
 	}
 
 	
-	private OrganizeImportsOperation createOperation(ICompilationUnit cu, String[] order, int threshold, boolean ignoreLowerCaseNames, boolean save, boolean allowSyntaxErrors, IChooseImportQuery chooseImportQuery) throws CoreException, BackingStoreException {
+	private OrganizeImportsOperation createOperation(ICompilationUnit cu, String[] order, int threshold, boolean ignoreLowerCaseNames, boolean save, boolean allowSyntaxErrors, IChooseImportQuery chooseImportQuery) {
 		setOrganizeImportSettings(order, threshold, threshold, cu.getJavaProject());
 		return new OrganizeImportsOperation(cu, null, ignoreLowerCaseNames, save, allowSyntaxErrors, chooseImportQuery);
 	}
 	
-	private  void setOrganizeImportSettings(String[] order, int threshold, int staticThreshold, IJavaProject project) throws BackingStoreException {
+	private void setOrganizeImportSettings(String[] order, int threshold, int staticThreshold, IJavaProject project) {
 		IEclipsePreferences scope= new ProjectScope(project.getProject()).getNode(JavaUI.ID_PLUGIN);
 		if (order == null) {
 			scope.remove(PreferenceConstants.ORGIMPORTS_IMPORTORDER);
@@ -2939,6 +3002,7 @@ public class ImportOrganizeTest extends CoreTests {
 			}
 			scope.put(PreferenceConstants.ORGIMPORTS_IMPORTORDER, buf.toString());
 			scope.put(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, String.valueOf(threshold));
+			scope.put(PreferenceConstants.ORGIMPORTS_STATIC_ONDEMANDTHRESHOLD, String.valueOf(staticThreshold));
 		}
 	}
 	
