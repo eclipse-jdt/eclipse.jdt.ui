@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,8 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.ui.activities.WorkbenchActivityHelper;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 
@@ -113,11 +115,13 @@ public class ClasspathContainerDescriptor {
 			IConfigurationElement[] elements = extensionPoint.getConfigurationElements();
 			for (int i = 0; i < elements.length; i++) {
 				try {
-					ClasspathContainerDescriptor curr= new ClasspathContainerDescriptor(elements[i]);					
-					if (defaultPageName.equals(curr.getPageClass())) {
-						defaultPage= curr;
-					} else {
-						containers.add(curr);
+					ClasspathContainerDescriptor curr= new ClasspathContainerDescriptor(elements[i]);
+					if (!WorkbenchActivityHelper.filterItem(curr)) {
+						if (defaultPageName.equals(curr.getPageClass())) {
+							defaultPage= curr;
+						} else {
+							containers.add(curr);
+						}
 					}
 				} catch (CoreException e) {
 					JavaPlugin.log(e);
