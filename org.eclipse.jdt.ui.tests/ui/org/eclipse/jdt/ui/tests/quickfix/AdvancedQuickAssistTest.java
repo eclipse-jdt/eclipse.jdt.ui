@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -339,14 +339,8 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("||");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
+
 		List proposals= collectAssists(context, false);
-
-		for (Iterator I= proposals.iterator(); I.hasNext();) {
-			Object o= I.next();
-			if (!(o instanceof CUCorrectionProposal))
-				I.remove();
-		}
-
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -355,7 +349,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("    public void foo(boolean a, int b, boolean c) {\n");
 		buf.append("        if (a)\n");
 		buf.append("            return;\n");
-		buf.append("        if (b == 5)\n");
+		buf.append("        else if (b == 5)\n");
 		buf.append("            return;\n");
 		buf.append("        b= 9;\n");
 		buf.append("    }\n");
@@ -363,7 +357,47 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		String expected1= buf.toString();
 
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
 
+	public void testSplitOrCondition2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean a, int b, boolean c) {\n");
+		buf.append("        if (a || b == 5)\n");
+		buf.append("            return;\n");
+		buf.append("        else {\n");
+		buf.append("            b= 8;\n");
+		buf.append("        }\n");
+		buf.append("        b= 9;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("||");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+
+		List proposals= collectAssists(context, false);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean a, int b, boolean c) {\n");
+		buf.append("        if (a)\n");
+		buf.append("            return;\n");
+		buf.append("        else if (b == 5)\n");
+		buf.append("            return;\n");
+		buf.append("        else {\n");
+		buf.append("            b= 8;\n");
+		buf.append("        }\n");
+		buf.append("        b= 9;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
 	public void testIfReturnIntoIfElseAtEndOfVoidMethod1() throws Exception {
@@ -1985,7 +2019,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
 		assertNoErrors(context);
-		List proposals= Arrays.asList((new QuickTemplateProcessor()).getAssists(context, null));
+		List proposals= Arrays.asList(new QuickTemplateProcessor().getAssists(context, null));
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 7);
@@ -2093,7 +2127,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
 		assertNoErrors(context);
-		List proposals= Arrays.asList((new QuickTemplateProcessor()).getAssists(context, null));
+		List proposals= Arrays.asList(new QuickTemplateProcessor().getAssists(context, null));
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 7);
@@ -2209,7 +2243,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
 		assertNoErrors(context);
-		List proposals= Arrays.asList((new QuickTemplateProcessor()).getAssists(context, null));
+		List proposals= Arrays.asList(new QuickTemplateProcessor().getAssists(context, null));
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 7);
@@ -2339,7 +2373,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
 		assertNoErrors(context);
-		List proposals= Arrays.asList((new QuickTemplateProcessor()).getAssists(context, null));
+		List proposals= Arrays.asList(new QuickTemplateProcessor().getAssists(context, null));
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 7);
