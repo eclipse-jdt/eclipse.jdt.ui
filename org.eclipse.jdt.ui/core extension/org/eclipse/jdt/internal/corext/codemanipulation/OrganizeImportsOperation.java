@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -159,6 +160,9 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 			ITypeBinding currTypeBinding= Bindings.getBindingOfParentType(ref);
 			if (currTypeBinding == null) {
+				if (ASTNodes.getParent(ref, ASTNode.PACKAGE_DECLARATION) != null) {
+					return true; // reference in package-info.java
+				}
 				return false; // not in a type
 			}
 			if (!Modifier.isPublic(modifiers)) {
@@ -316,10 +320,10 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private boolean isOfKind(TypeNameMatch curr, int typeKinds, boolean is50OrHigher) {
 			int flags= curr.getModifiers();
 			if (Flags.isAnnotation(flags)) {
-				return is50OrHigher && ((typeKinds & SimilarElementsRequestor.ANNOTATIONS) != 0);
+				return is50OrHigher && (typeKinds & SimilarElementsRequestor.ANNOTATIONS) != 0;
 			}
 			if (Flags.isEnum(flags)) {
-				return is50OrHigher && ((typeKinds & SimilarElementsRequestor.ENUMS) != 0);
+				return is50OrHigher && (typeKinds & SimilarElementsRequestor.ENUMS) != 0;
 			}
 			if (Flags.isInterface(flags)) {
 				return (typeKinds & SimilarElementsRequestor.INTERFACES) != 0;
@@ -363,7 +367,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 	private final boolean fAllowSyntaxErrors;
 
-	public OrganizeImportsOperation(ICompilationUnit cu, CompilationUnit astRoot, boolean ignoreLowerCaseNames, boolean save, boolean allowSyntaxErrors, IChooseImportQuery chooseImportQuery) throws CoreException {
+	public OrganizeImportsOperation(ICompilationUnit cu, CompilationUnit astRoot, boolean ignoreLowerCaseNames, boolean save, boolean allowSyntaxErrors, IChooseImportQuery chooseImportQuery) {
 		fCompilationUnit= cu;
 		fASTRoot= astRoot;
 

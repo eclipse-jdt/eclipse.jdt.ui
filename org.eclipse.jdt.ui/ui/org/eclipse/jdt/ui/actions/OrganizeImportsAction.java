@@ -16,7 +16,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -262,47 +261,43 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		if (!ActionUtil.isEditable(editor, getShell(), cu))
 			return;
 
-		try {
-			CompilationUnit astRoot= SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
+		CompilationUnit astRoot= SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
 
-			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
-			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, astRoot, settings.importIgnoreLowercase, !cu.isWorkingCopy(), true, createChooseImportQuery(editor));
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, astRoot, settings.importIgnoreLowercase, !cu.isWorkingCopy(), true, createChooseImportQuery(editor));
+
+		IRewriteTarget target= (IRewriteTarget) editor.getAdapter(IRewriteTarget.class);
+		if (target != null) {
+			target.beginCompoundChange();
+		}
 		
-			IRewriteTarget target= (IRewriteTarget) editor.getAdapter(IRewriteTarget.class);
-			if (target != null) {
-				target.beginCompoundChange();
-			}
-			
-			IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
-			IRunnableContext context= getSite().getWorkbenchWindow();
-			if (context == null) {
-				context= progressService;
-			}
-			IEditingSupport helper= createViewerHelper();
-			try {
-				registerHelper(helper, editor);
-				progressService.runInUI(context, new WorkbenchRunnableAdapter(op, op.getScheduleRule()), op.getScheduleRule());
-				IProblem parseError= op.getParseError();
-				if (parseError != null) {
-					String message= Messages.format(ActionMessages.OrganizeImportsAction_single_error_parse, parseError.getMessage()); 
-					MessageDialog.openInformation(getShell(), ActionMessages.OrganizeImportsAction_error_title, message); 
-					if (parseError.getSourceStart() != -1) {
-						editor.selectAndReveal(parseError.getSourceStart(), parseError.getSourceEnd() - parseError.getSourceStart() + 1);
-					}
-				} else {
-					setStatusBarMessage(getOrganizeInfo(op), editor);
+		IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
+		IRunnableContext context= getSite().getWorkbenchWindow();
+		if (context == null) {
+			context= progressService;
+		}
+		IEditingSupport helper= createViewerHelper();
+		try {
+			registerHelper(helper, editor);
+			progressService.runInUI(context, new WorkbenchRunnableAdapter(op, op.getScheduleRule()), op.getScheduleRule());
+			IProblem parseError= op.getParseError();
+			if (parseError != null) {
+				String message= Messages.format(ActionMessages.OrganizeImportsAction_single_error_parse, parseError.getMessage());
+				MessageDialog.openInformation(getShell(), ActionMessages.OrganizeImportsAction_error_title, message);
+				if (parseError.getSourceStart() != -1) {
+					editor.selectAndReveal(parseError.getSourceStart(), parseError.getSourceEnd() - parseError.getSourceStart() + 1);
 				}
-			} catch (InvocationTargetException e) {
-				ExceptionHandler.handle(e, getShell(), ActionMessages.OrganizeImportsAction_error_title, ActionMessages.OrganizeImportsAction_error_message); 
-			} catch (InterruptedException e) {
-			} finally {
-				deregisterHelper(helper, editor);
-				if (target != null) {
-					target.endCompoundChange();
-				}
+			} else {
+				setStatusBarMessage(getOrganizeInfo(op), editor);
 			}
-		} catch (CoreException e) {	
+		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), ActionMessages.OrganizeImportsAction_error_title, ActionMessages.OrganizeImportsAction_error_message); 
+		} catch (InterruptedException e) {
+		} finally {
+			deregisterHelper(helper, editor);
+			if (target != null) {
+				target.endCompoundChange();
+			}
 		}
 	}
 	

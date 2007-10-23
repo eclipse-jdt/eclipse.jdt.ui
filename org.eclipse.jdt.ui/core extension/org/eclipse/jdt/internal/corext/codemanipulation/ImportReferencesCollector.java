@@ -94,7 +94,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		}
 		int nodeStart= node.getStartPosition();
 		int offset= fSubRange.getOffset();
-		return nodeStart + node.getLength() > offset && (offset + fSubRange.getLength()) >  nodeStart;
+		return nodeStart + node.getLength() > offset && offset + fSubRange.getLength() >  nodeStart;
 	}
 	
 	
@@ -231,6 +231,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 	 */
 	public boolean visit(PackageDeclaration node) {
 		if (node.getAST().apiLevel() >= AST.JLS3) {
+			doVisitNode(node.getJavadoc());
 			doVisitChildren(node.annotations());
 		}
 		return false;
