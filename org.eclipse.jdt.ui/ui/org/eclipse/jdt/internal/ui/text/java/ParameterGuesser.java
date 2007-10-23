@@ -157,7 +157,7 @@ public class ParameterGuesser {
 			return getFullyQualifiedName().endsWith("[]"); //$NON-NLS-1$
 		}
 
-		boolean isHierarchyAssignable(Variable rhs) throws JavaModelException {
+		boolean isHierarchyAssignable(Variable rhs) {
 			if (rhs.type == null || type == null)
 				return false;
 

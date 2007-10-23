@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,12 @@ public class ProposalInfo {
 		fElement= null;
 	}
 
+	/**
+	 * Returns the Java element.
+	 * 
+	 * @throws JavaModelException if accessing the java model fails
+	 * @return the Java element 
+	 */
 	public IJavaElement getJavaElement() throws JavaModelException {
 		return fElement;
 	}
@@ -77,8 +83,6 @@ public class ProposalInfo {
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
-		} catch (IOException e) {
-			JavaPlugin.log(e);
 		}
 		return null;
 	}
@@ -92,9 +96,8 @@ public class ProposalInfo {
 	 * @return the javadoc for <code>member</code> or <code>null</code> if
 	 *         it is not available
 	 * @throws JavaModelException if accessing the javadoc fails
-	 * @throws IOException if reading the javadoc fails
 	 */
-	private String extractJavadoc(IMember member, IProgressMonitor monitor) throws JavaModelException, IOException {
+	private String extractJavadoc(IMember member, IProgressMonitor monitor) throws JavaModelException {
 		if (member != null) {
 			Reader reader=  getHTMLContentReader(member, monitor);
 			if (reader != null)
