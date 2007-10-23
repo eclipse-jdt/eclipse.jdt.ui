@@ -61,12 +61,13 @@ public class TypeInfoFilter {
 				case SearchPattern.R_EXACT_MATCH:
 					return fPattern.equalsIgnoreCase(text);
 				case SearchPattern.R_CAMELCASE_SAME_PART_COUNT_MATCH:
-					return (SearchPattern.camelCaseMatch(fPattern, text, true));
+					return SearchPattern.camelCaseMatch(fPattern, text, true);
 				case SearchPattern.R_CAMELCASE_MATCH:
 					if (SearchPattern.camelCaseMatch(fPattern, text)) {
 						return true;
 					}
-					// fall through to prefix match if camel case failed (bug 137244)
+					// fall back to prefix match if camel case failed (bug 137244)
+					return Strings.startsWithIgnoreCase(text, fPattern);
 				default:
 					return Strings.startsWithIgnoreCase(text, fPattern);
 			}
@@ -157,7 +158,8 @@ public class TypeInfoFilter {
 	private String evaluatePackagePattern(String s) {
 		StringBuffer buf= new StringBuffer();
 		boolean hasWildCard= false;
-		for (int i= 0; i < s.length(); i++) {
+		int len= s.length();
+		for (int i= 0; i < len; i++) {
 			char ch= s.charAt(i);
 			if (ch == '.') {
 				if (!hasWildCard) {
@@ -170,6 +172,9 @@ public class TypeInfoFilter {
 			buf.append(ch);
 		}
 		if (!hasWildCard) {
+			if (len == 0) {
+				buf.append('?');
+			}
 			buf.append('*');
 		}
 		return buf.toString();
