@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -687,7 +687,7 @@ public class StubUtility {
 	 */
 	private static ASTNode getReturnType(MethodDeclaration decl) {
 		// used from API, can't eliminate
-		return (decl.getAST().apiLevel() == AST.JLS2) ? decl.getReturnType() : decl.getReturnType2();
+		return decl.getAST().apiLevel() == AST.JLS2 ? decl.getReturnType() : decl.getReturnType2();
 	}
 	
 	
@@ -837,7 +837,7 @@ public class StubUtility {
 		return 0;
 	}
 	
-	public static int getIndentUsed(IBuffer buffer, int offset, IJavaProject project) throws JavaModelException {
+	public static int getIndentUsed(IBuffer buffer, int offset, IJavaProject project) {
 		int i= offset;
 		// find beginning of line
 		while (i > 0 && !IndentManipulation.isLineDelimiterChar(buffer.getChar(i - 1)) ){
@@ -911,6 +911,11 @@ public class StubUtility {
 			if (nameFromExpression != null) {
 				add(getVariableNameSuggestions(variableKind, project, nameFromExpression, 0, excluded, false), res); // pass 0 as dimension, base name already contains plural.
 			}
+			
+			String nameFromParent= getBaseNameFromLocationInParent(assignedExpression);
+			if (nameFromParent != null) {
+				add(getVariableNameSuggestions(variableKind, project, nameFromParent, 0, excluded, false), res); // pass 0 as dimension, base name already contains plural.
+			}
 		}
 		if (expectedType != null) {
 			expectedType= Bindings.normalizeTypeBinding(expectedType);
@@ -932,13 +937,6 @@ public class StubUtility {
 				}
 			}
 		}
-		if (assignedExpression != null) {
-			// add at end, less important
-			String nameFromParent= getBaseNameFromLocationInParent(assignedExpression);
-			if (nameFromParent != null) {
-				add(getVariableNameSuggestions(variableKind, project, nameFromParent, 0, excluded, false), res); // pass 0 as dimension, base name already contains plural.
-			}
-		}
 		if (res.isEmpty()) {
 			return getDefaultVariableNameSuggestions(variableKind, excluded);
 		}
@@ -952,6 +950,11 @@ public class StubUtility {
 			String nameFromExpression= getBaseNameFromExpression(project, assignedExpression, variableKind);
 			if (nameFromExpression != null) {
 				add(getVariableNameSuggestions(variableKind, project, nameFromExpression, 0, excluded, false), res); // pass 0 as dimension, base name already contains plural.
+			}
+			
+			String nameFromParent= getBaseNameFromLocationInParent(assignedExpression);
+			if (nameFromParent != null) {
+				add(getVariableNameSuggestions(variableKind, project, nameFromParent, 0, excluded, false), res); // pass 0 as dimension, base name already contains plural.
 			}
 		}
 		if (expectedType != null) {			
@@ -971,13 +974,6 @@ public class StubUtility {
 				for (int i= 0; i < names.length; i++) {
 					res.add(names[i]);
 				}
-			}
-		}
-		if (assignedExpression != null) {
-			// add at end, less important
-			String nameFromParent= getBaseNameFromLocationInParent(assignedExpression);
-			if (nameFromParent != null) {
-				add(getVariableNameSuggestions(variableKind, project, nameFromParent, 0, excluded, false), res); // pass 0 as dimension, base name already contains plural.
 			}
 		}
 		if (res.isEmpty()) {
@@ -1166,7 +1162,7 @@ public class StubUtility {
 				IMethod method= (IMethod) javaElement;
 				if (method.getOpenable().getBuffer() != null) { // avoid dummy names and lookup from Javadoc
 					String[] parameterNames= method.getParameterNames();
-					if (index < parameterNames.length) {
+					if (index < parameterNames.length && !parameterNames[index].equals("arg" + index)) { //$NON-NLS-1$
 						return NamingConventions.removePrefixAndSuffixForArgumentName(method.getJavaProject(), parameterNames[index]);
 					}
 				}

@@ -17,16 +17,17 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class ExtractTempTests extends RefactoringTest {
 
@@ -63,7 +64,7 @@ public class ExtractTempTests extends RefactoringTest {
 	
 	private String getTestFileName(boolean canExtract, boolean input){
 		String fileName= TEST_PATH_PREFIX + getRefactoringPath();
-		fileName += (canExtract ? "canExtract/": "cannotExtract/");
+		fileName += canExtract ? "canExtract/": "cannotExtract/";
 		return fileName + getSimpleTestFileName(canExtract, input);
 	}
 	
@@ -211,15 +212,15 @@ public class ExtractTempTests extends RefactoringTest {
 	}	
 
 	public void test14() throws Exception{
-		helper1(6, 15, 6, 20, false, false, "temp", "i");
+		helper1(6, 15, 6, 20, false, false, "temp", "y2");
 	}	
 	
 	public void test15() throws Exception{
-		helper1(7, 23, 7, 28, false, false, "temp", "i");
+		helper1(7, 23, 7, 28, false, false, "temp", "y2");
 	}	
 
 	public void test16() throws Exception{
-		helper1(7, 23, 7, 28, false, false, "temp", "i");
+		helper1(7, 23, 7, 28, false, false, "temp", "y2");
 	}	
 	
 	public void test17() throws Exception{
@@ -377,12 +378,12 @@ public class ExtractTempTests extends RefactoringTest {
 
 	public void test49() throws Exception{
 //		printTestDisabledMessage("test for bug#23282 ");
-		helper1(5, 15, 5, 19, true, false, "temp", "b");
+		helper1(5, 15, 5, 19, true, false, "temp", "flag2");
 	}
 
 	public void test50() throws Exception{
 //		printTestDisabledMessage("test for bug#23283 ");
-		helper1(5, 15, 5, 19, true, false, "temp", "b");
+		helper1(5, 15, 5, 19, true, false, "temp", "flag2");
 	}
 
 	public void test51() throws Exception{
