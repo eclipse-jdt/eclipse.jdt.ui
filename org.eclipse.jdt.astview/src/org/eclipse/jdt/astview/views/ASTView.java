@@ -47,6 +47,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -398,8 +399,9 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private Action fStatementsRecoveryAction;
 	private Action fBindingsRecoveryAction;
 	private Action fFilterNonRelevantAction;
-	private Action fResolveBindingKeyAction;
-	private Action fCreateBindingFromElementAction;
+	private Action fFindDeclaringNodeAction;
+	private Action fParseBindingFromKeyAction;
+	private Action fParseBindingFromElementAction;
 	private Action fCollapseAction;
 	private Action fExpandAction;
 	private Action fClearAction;
@@ -573,7 +575,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			fTray.setInput(fTrayRoots);
 		setASTUptoDate(root != null);
 		fClearAction.setEnabled(root != null);
-		fResolveBindingKeyAction.setEnabled(root != null);
+		fFindDeclaringNodeAction.setEnabled(root != null);
 		fPreviousDouble= null; // avoid leaking AST
 	}
 	
@@ -829,8 +831,9 @@ public class ASTView extends ViewPart implements IShowInSource {
 			manager.add(fASTInputKindActions[i]);	
 		}
 		manager.add(new Separator());
-		manager.add(fResolveBindingKeyAction);
-		manager.add(fCreateBindingFromElementAction);
+		manager.add(fFindDeclaringNodeAction);
+		manager.add(fParseBindingFromKeyAction);
+		manager.add(fParseBindingFromElementAction);
 		manager.add(new Separator());
 		manager.add(fLinkWithEditor);
 	}
@@ -930,21 +933,29 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fFilterNonRelevantAction.setToolTipText("Hide non-relevant binding attributes"); //$NON-NLS-1$
 		fFilterNonRelevantAction.setEnabled(true);
 
-		fResolveBindingKeyAction= new Action("&Resolve Binding Key...", IAction.AS_PUSH_BUTTON) { //$NON-NLS-1$
+		fFindDeclaringNodeAction= new Action("Find &Declaring Node...", IAction.AS_PUSH_BUTTON) { //$NON-NLS-1$
 			public void run() {
-				performResolveBindingKey();
+				performFindDeclaringNode();
 			}
 		};
-		fResolveBindingKeyAction.setToolTipText("Resolve Binding Key..."); //$NON-NLS-1$
-		fResolveBindingKeyAction.setEnabled(false);
+		fFindDeclaringNodeAction.setToolTipText("Find Declaring Node..."); //$NON-NLS-1$
+		fFindDeclaringNodeAction.setEnabled(false);
 		
-		fCreateBindingFromElementAction= new Action("&Create Binding from Element Handle...", IAction.AS_PUSH_BUTTON) { //$NON-NLS-1$
+		fParseBindingFromElementAction= new Action("&Parse Binding from &Element Handle...", IAction.AS_PUSH_BUTTON) { //$NON-NLS-1$
 			public void run() {
-				performCreateBindingFromElement();
+				performParseBindingFromElement();
 			}
 		};
-		fCreateBindingFromElementAction.setToolTipText("Create Binding from Element Handle..."); //$NON-NLS-1$
-		fCreateBindingFromElementAction.setEnabled(true);
+		fParseBindingFromElementAction.setToolTipText("Parse Binding from Element Handle..."); //$NON-NLS-1$
+		fParseBindingFromElementAction.setEnabled(true);
+		
+		fParseBindingFromKeyAction= new Action("Parse Binding from &Key...", IAction.AS_PUSH_BUTTON) { //$NON-NLS-1$
+			public void run() {
+				performParseBindingFromKey();
+			}
+		};
+		fParseBindingFromKeyAction.setToolTipText("Parse Binding from Key..."); //$NON-NLS-1$
+		fParseBindingFromKeyAction.setEnabled(true);
 		
 		fFocusAction = new Action() {
 			public void run() {
@@ -1271,14 +1282,38 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fViewer.refresh();
 	}
 	
-	protected void performResolveBindingKey() {
-		InputDialog dialog= new InputDialog(getSite().getShell(), "Resolve Binding Key", "Key: (optionally surrounded by <KEY: '> and <'>)", "", null);
-		if (dialog.open() != Window.OK)
+	protected void performFindDeclaringNode() {
+		String msg= "Find Declaring Node from Key";
+		String key= askForKey(msg);
+		if (key == null)
 			return;
+		ASTNode node= fRoot.findDeclaringNode(key);
+		if (node != null) {
+			fViewer.setSelection(new StructuredSelection(node), true);
+		} else {
+			MessageDialog.openError(
+					getSite().getShell(),
+					"Find Declaring Node from Key",
+					"The declaring node for key '" + key + "' could not be found");
+		}
+	}
 
+	private String askForKey(String dialogTitle) {
+		InputDialog dialog= new InputDialog(getSite().getShell(), dialogTitle, "Key: (optionally surrounded by <KEY: '> and <'>)", "", null);
+		if (dialog.open() != Window.OK)
+			return null;
+		
 		String key= dialog.getValue();
 		if (key.startsWith("KEY: '") && key.endsWith("'"))
 			key= key.substring(6, key.length() - 1);
+		return key;
+	}
+	
+	protected void performParseBindingFromKey() {
+		String msg= "Parse Binding from Key";
+		String key= askForKey(msg);
+		if (key == null)
+			return;
 		ASTParser parser= ASTParser.newParser(fCurrentASTLevel);
 		parser.setResolveBindings(true);
 		parser.setProject(fTypeRoot.getJavaProject());
@@ -1307,8 +1342,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fViewer.setSelection(new StructuredSelection(item), true);
 	}
 	
-	protected void performCreateBindingFromElement() {
-		InputDialog dialog= new InputDialog(getSite().getShell(), "Create Binding from Java Element", "IJavaElement#getHandleIdentifier():", "", null);
+	protected void performParseBindingFromElement() {
+		InputDialog dialog= new InputDialog(getSite().getShell(), "Parse Binding from Java Element", "IJavaElement#getHandleIdentifier():", "", null);
 		if (dialog.open() != Window.OK)
 			return;
 		
