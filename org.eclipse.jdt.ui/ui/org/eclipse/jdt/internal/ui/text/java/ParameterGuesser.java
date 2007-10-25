@@ -242,19 +242,11 @@ public class ParameterGuesser {
 		
 		
 		VariableCollector() {
-			setIgnored(CompletionProposal.ANONYMOUS_CLASS_DECLARATION, true);
+			super(true);
 			setIgnored(CompletionProposal.FIELD_REF, false);
-			setIgnored(CompletionProposal.KEYWORD, true);
-			setIgnored(CompletionProposal.LABEL_REF, true);
-			setIgnored(CompletionProposal.METHOD_DECLARATION, true);
-			setIgnored(CompletionProposal.METHOD_NAME_REFERENCE, true);
 			setIgnored(CompletionProposal.METHOD_REF, false);
-			setIgnored(CompletionProposal.PACKAGE_REF, true);
-			setIgnored(CompletionProposal.POTENTIAL_METHOD_DECLARATION, true);
-			setIgnored(CompletionProposal.VARIABLE_DECLARATION, true);
-			setIgnored(CompletionProposal.TYPE_REF, true);
-			setIgnored(CompletionProposal.ANNOTATION_ATTRIBUTE_REF, false);
 			setIgnored(CompletionProposal.LOCAL_VARIABLE_REF, false);
+			setIgnored(CompletionProposal.ANNOTATION_ATTRIBUTE_REF, false);
 		}
 
 		public List collect(int codeAssistOffset, ICompilationUnit compilationUnit) throws JavaModelException {

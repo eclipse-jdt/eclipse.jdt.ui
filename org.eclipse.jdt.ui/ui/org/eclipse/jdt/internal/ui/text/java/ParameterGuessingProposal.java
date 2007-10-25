@@ -169,12 +169,10 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 	 */
 	private String computeGuessingCompletion() throws JavaModelException {
 		
-		StringBuffer buffer= new StringBuffer(String.valueOf(fProposal.getName()));
+		StringBuffer buffer= new StringBuffer();
+		appendMethodNameReplacement(buffer);
 		
 		FormatterPrefs prefs= getFormatterPrefs();
-		if (prefs.beforeOpeningParen)
-			buffer.append(SPACE);
-		buffer.append(LPAREN);
 		
 		setCursorPosition(buffer.length());
 		

@@ -508,6 +508,7 @@ public class CompletionProposalLabelProvider {
 		switch (proposal.getKind()) {
 			case CompletionProposal.METHOD_NAME_REFERENCE:
 			case CompletionProposal.METHOD_REF:
+			case CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER:
 			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
 				if (fContext != null && fContext.isInJavadoc())
 					return createJavadocMethodProposalLabel(proposal);
@@ -532,6 +533,7 @@ public class CompletionProposalLabelProvider {
 				return createPackageProposalLabel(proposal);
 			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
 			case CompletionProposal.FIELD_REF:
+			case CompletionProposal.FIELD_REF_WITH_CASTED_RECEIVER:
 				return createLabelWithTypeAndDeclaration(proposal);
 			case CompletionProposal.LOCAL_VARIABLE_REF:
 			case CompletionProposal.VARIABLE_DECLARATION:
@@ -559,6 +561,7 @@ public class CompletionProposalLabelProvider {
 			case CompletionProposal.METHOD_DECLARATION:
 			case CompletionProposal.METHOD_NAME_REFERENCE:
 			case CompletionProposal.METHOD_REF:
+			case CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER:
 			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
 			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
 			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
@@ -577,6 +580,7 @@ public class CompletionProposalLabelProvider {
 				}
 				break;
 			case CompletionProposal.FIELD_REF:
+			case CompletionProposal.FIELD_REF_WITH_CASTED_RECEIVER:
 				descriptor= JavaElementImageProvider.getFieldImageDescriptor(false, flags);
 				break;
 			case CompletionProposal.LOCAL_VARIABLE_REF:
