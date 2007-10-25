@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.examples;
 
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.IFileBuffer;
 import org.eclipse.core.filebuffers.IFileBufferListener;
@@ -17,7 +19,6 @@ import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
@@ -46,14 +47,16 @@ public class JavaElementLightweightDecorator extends LabelProvider implements IL
 		 * @see org.eclipse.core.filebuffers.IFileBufferListener#bufferCreated(org.eclipse.core.filebuffers.IFileBuffer)
 		 */
 		public void bufferCreated(IFileBuffer buffer) {
-			update(buffer.getLocation());
+			if (buffer.getLocation() != null)
+				update(buffer.getLocation());
 		}
 
 		/* (non-Javadoc)
 		 * @see org.eclipse.core.filebuffers.IFileBufferListener#bufferDisposed(org.eclipse.core.filebuffers.IFileBuffer)
 		 */
 		public void bufferDisposed(IFileBuffer buffer) {
-			update(buffer.getLocation());
+			if (buffer.getLocation() != null)
+				update(buffer.getLocation());
 		}
 
 		/* (non-Javadoc)
