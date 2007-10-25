@@ -23,6 +23,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -173,9 +175,9 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	private boolean inputDeleted(Collection runnables) {
 		if (fInput == null)
 			return false;
-		if ((fInput instanceof IJavaElement) && ((IJavaElement) fInput).exists())
+		if (fInput instanceof IJavaElement && ((IJavaElement) fInput).exists())
 			return false;
-		if ((fInput instanceof IResource) && ((IResource) fInput).exists())
+		if (fInput instanceof IResource && ((IResource) fInput).exists())
 			return false;
 		if (fInput instanceof WorkingSetModel)
 			return false;
@@ -548,7 +550,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				return false;
 			}
 			
-			if ((kind == IJavaElementDelta.CHANGED) && !isStructuralCUChange(flags)) {
+			if (kind == IJavaElementDelta.CHANGED && !isStructuralCUChange(flags)) {
 				return false; // test moved ahead
 			}
 			
@@ -659,7 +661,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	
 	private static boolean isStructuralCUChange(int flags) {
 		// No refresh on working copy creation (F_PRIMARY_WORKING_COPY)
-		return ((flags & IJavaElementDelta.F_CHILDREN) != 0) || ((flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_FINE_GRAINED)) == IJavaElementDelta.F_CONTENT);
+		return (flags & IJavaElementDelta.F_CHILDREN) != 0 || (flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_FINE_GRAINED)) == IJavaElementDelta.F_CONTENT;
 	}
 	
 	/* package */ void handleAffectedChildren(IJavaElementDelta delta, IJavaElement element, Collection runnables) throws JavaModelException {
@@ -880,9 +882,16 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	protected void postAdd(final Object parent, final Object element, Collection runnables) {
 		runnables.add(new Runnable() {
 			public void run() {
-				if (fViewer.testFindItem(element) == null) 
-					fViewer.add(parent, element);
+				Widget[] items= fViewer.testFindItems(element);
+				if (items != null) {
+					for (int i= 0; i < items.length; i++) {
+						if (parent.equals(((TreeItem) items[i]).getParent().getData())) {
+							return; // no add, element already added (most likely by a refresh)
+						}
+					}
 				}
+				fViewer.add(parent, element);
+			}
 		});
 	}
 
