@@ -390,6 +390,37 @@ public class Binding extends ASTAttribute {
 		return result;
 	}
 
+	public static String getBindingLabel(IBinding binding) {
+		String label;
+		if (binding == null) {
+			label= ">binding"; //$NON-NLS-1$
+		} else {
+			switch (binding.getKind()) {
+				case IBinding.VARIABLE:
+					label= "> variable binding"; //$NON-NLS-1$
+					break;
+				case IBinding.TYPE:
+					label= "> type binding"; //$NON-NLS-1$
+					break;
+				case IBinding.METHOD:
+					label= "> method binding"; //$NON-NLS-1$
+					break;
+				case IBinding.PACKAGE:
+					label= "> package binding"; //$NON-NLS-1$
+					break;
+				case IBinding.ANNOTATION:
+					label= "> annotation binding"; //$NON-NLS-1$
+					break;
+				case IBinding.MEMBER_VALUE_PAIR:
+					label= "> member value pair binding"; //$NON-NLS-1$
+					break;
+				default:
+					label= "> unknown binding"; //$NON-NLS-1$
+			}
+		}
+		return label;
+	}
+
 	/**
 	 * Creates an {@link ASTAttribute} for a value from
 	 * {@link IMemberValuePairBinding#getValue()} or from
@@ -398,7 +429,8 @@ public class Binding extends ASTAttribute {
 	public static ASTAttribute createValueAttribute(ASTAttribute parent, String name, Object value) {
 		ASTAttribute res;
 		if (value instanceof IBinding) {
-			res= new Binding(parent, name, (IBinding) value, true);
+			IBinding binding= (IBinding) value;
+			res= new Binding(parent, name + ": " + getBindingLabel(binding), binding, true);
 			
 		} else if (value instanceof String) {
 			res= new GeneralAttribute(parent, name, "\"" + (String) value + "\"");

@@ -1331,7 +1331,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 		try {
 			parser.createASTs(new ICompilationUnit[0], new String[] { key }, requestor, null);
 			if (requestor.fBindingKey != null) {
-				item= new Binding(viewerInput, requestor.fBindingKey, requestor.fBinding, true);
+				String name= requestor.fBindingKey + ": " + Binding.getBindingLabel(requestor.fBinding);
+				item= new Binding(viewerInput, name, requestor.fBinding, true);
 			} else {
 				item= new Error(viewerInput, "Key not resolved: " + key, null);
 			}
@@ -1363,7 +1364,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 			ASTParser parser= ASTParser.newParser(fCurrentASTLevel);
 			parser.setProject(project);
 			IBinding[] bindings= parser.createBindings(new IJavaElement[] { handle }, null);
-			item= new Binding(viewerInput, handleIdentifier, bindings[0], true);
+			String name= handleIdentifier + ": " + Binding.getBindingLabel(bindings[0]);
+			item= new Binding(viewerInput, name, bindings[0], true);
 		}
 		fViewer.add(viewerInput, item);
 		fViewer.setSelection(new StructuredSelection(item), true);

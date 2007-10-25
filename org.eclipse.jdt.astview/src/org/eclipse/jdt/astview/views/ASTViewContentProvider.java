@@ -213,36 +213,10 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 	}
 	
 	private Binding createBinding(ASTNode parent, IBinding binding) {
-		String label;
-		if (binding == null) {
-			label= ">binding"; //$NON-NLS-1$
-		} else {
-			switch (binding.getKind()) {
-				case IBinding.VARIABLE:
-					label= "> variable binding"; //$NON-NLS-1$
-					break;
-				case IBinding.TYPE:
-					label= "> type binding"; //$NON-NLS-1$
-					break;
-				case IBinding.METHOD:
-					label= "> method binding"; //$NON-NLS-1$
-					break;
-				case IBinding.PACKAGE:
-					label= "> package binding"; //$NON-NLS-1$
-					break;
-				case IBinding.ANNOTATION:
-					label= "> annotation binding"; //$NON-NLS-1$
-					break;
-				case IBinding.MEMBER_VALUE_PAIR:
-					label= "> member value pair binding"; //$NON-NLS-1$
-					break;
-				default:
-					label= "> unknown binding"; //$NON-NLS-1$
-			}
-		}
+		String label= Binding.getBindingLabel(binding);
 		return new Binding(parent, label, binding, true);
 	}
-	
+
 	private Object createExpressionTypeBinding(ASTNode parent, ITypeBinding binding) {
 		String label= "> (Expression) type binding"; //$NON-NLS-1$
 		return new Binding(parent, label, binding, true);
