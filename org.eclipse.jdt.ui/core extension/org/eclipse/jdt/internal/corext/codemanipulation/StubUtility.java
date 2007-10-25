@@ -1114,55 +1114,29 @@ public class StubUtility {
 		return name;
 	}
 	
-	private static String getBaseNameFromLocationInParent(Expression assignedExpression) {
-		StructuralPropertyDescriptor location= assignedExpression.getLocationInParent();
-		if (location == MethodInvocation.ARGUMENTS_PROPERTY) {
-			MethodInvocation parent= (MethodInvocation) assignedExpression.getParent();
-			IMethodBinding binding= parent.resolveMethodBinding();
-			int index= parent.arguments().indexOf(assignedExpression);
-			if (binding != null && index != -1) {
-				return getParameterName(binding, index);
-			}
-		} else if (location == ClassInstanceCreation.ARGUMENTS_PROPERTY) {
-			ClassInstanceCreation parent= (ClassInstanceCreation) assignedExpression.getParent();
-			IMethodBinding binding= parent.resolveConstructorBinding();
-			int index= parent.arguments().indexOf(assignedExpression);
-			if (binding != null && index != -1) {
-				return getParameterName(binding, index);
-			}
-		} else if (location == SuperMethodInvocation.ARGUMENTS_PROPERTY) {
-			SuperMethodInvocation parent= (SuperMethodInvocation) assignedExpression.getParent();
-			IMethodBinding binding= parent.resolveMethodBinding();
-			int index= parent.arguments().indexOf(assignedExpression);
-			if (binding != null && index != -1) {
-				return getParameterName(binding, index);
-			}
-		} else if (location == ConstructorInvocation.ARGUMENTS_PROPERTY) {
-			ConstructorInvocation parent= (ConstructorInvocation) assignedExpression.getParent();
-			IMethodBinding binding= parent.resolveConstructorBinding();
-			int index= parent.arguments().indexOf(assignedExpression);
-			if (binding != null && index != -1) {
-				return getParameterName(binding, index);
-			}
-		} else if (location == SuperConstructorInvocation.ARGUMENTS_PROPERTY) {
-			SuperConstructorInvocation parent= (SuperConstructorInvocation) assignedExpression.getParent();
-			IMethodBinding binding= parent.resolveConstructorBinding();
-			int index= parent.arguments().indexOf(assignedExpression);
-			if (binding != null && index != -1) {
-				return getParameterName(binding, index);
-			}
-		}
-		return null;
-	}
-	
-	private static String getParameterName(IMethodBinding binding, int index) {
+	private static String getBaseNameFromLocationInParent(Expression assignedExpression, List arguments, IMethodBinding binding) {
+		if (binding == null)
+			return null;
+		
+		ITypeBinding[] parameterTypes= binding.getParameterTypes();
+		if (parameterTypes.length != arguments.size()) // beware of guessed method bindings
+			return null;
+
+		int index= arguments.indexOf(assignedExpression);
+		if (index == -1)
+			return null;
+
+		ITypeBinding expressionBinding= assignedExpression.resolveTypeBinding();
+		if (expressionBinding != null && !expressionBinding.isAssignmentCompatible(parameterTypes[index]))
+			return null;
+
 		try {
 			IJavaElement javaElement= binding.getJavaElement();
 			if (javaElement instanceof IMethod) {
 				IMethod method= (IMethod) javaElement;
 				if (method.getOpenable().getBuffer() != null) { // avoid dummy names and lookup from Javadoc
 					String[] parameterNames= method.getParameterNames();
-					if (index < parameterNames.length && !parameterNames[index].equals("arg" + index)) { //$NON-NLS-1$
+					if (index < parameterNames.length) {
 						return NamingConventions.removePrefixAndSuffixForArgumentName(method.getJavaProject(), parameterNames[index]);
 					}
 				}
@@ -1173,6 +1147,28 @@ public class StubUtility {
 		return null;
 	}
 	
+	
+	private static String getBaseNameFromLocationInParent(Expression assignedExpression) {
+		StructuralPropertyDescriptor location= assignedExpression.getLocationInParent();
+		if (location == MethodInvocation.ARGUMENTS_PROPERTY) {
+			MethodInvocation parent= (MethodInvocation) assignedExpression.getParent();
+			return getBaseNameFromLocationInParent(assignedExpression, parent.arguments(), parent.resolveMethodBinding());
+		} else if (location == ClassInstanceCreation.ARGUMENTS_PROPERTY) {
+			ClassInstanceCreation parent= (ClassInstanceCreation) assignedExpression.getParent();
+			return getBaseNameFromLocationInParent(assignedExpression, parent.arguments(), parent.resolveConstructorBinding());
+		} else if (location == SuperMethodInvocation.ARGUMENTS_PROPERTY) {
+			SuperMethodInvocation parent= (SuperMethodInvocation) assignedExpression.getParent();
+			return getBaseNameFromLocationInParent(assignedExpression, parent.arguments(), parent.resolveMethodBinding());
+		} else if (location == ConstructorInvocation.ARGUMENTS_PROPERTY) {
+			ConstructorInvocation parent= (ConstructorInvocation) assignedExpression.getParent();
+			return getBaseNameFromLocationInParent(assignedExpression, parent.arguments(), parent.resolveConstructorBinding());
+		} else if (location == SuperConstructorInvocation.ARGUMENTS_PROPERTY) {
+			SuperConstructorInvocation parent= (SuperConstructorInvocation) assignedExpression.getParent();
+			return getBaseNameFromLocationInParent(assignedExpression, parent.arguments(), parent.resolveConstructorBinding());
+		}
+		return null;
+	}
+		
 	public static String[] getArgumentNameSuggestions(IType type, String[] excluded) {
 		return getVariableNameSuggestions(PARAMETER, type.getJavaProject(), JavaModelUtil.getFullyQualifiedName(type), 0, new ExcludedCollection(excluded), true);
 	}

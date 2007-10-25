@@ -1781,7 +1781,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("    public static void xoo(int i, Object o) {\n");
 		buf.append("    }\n");
 		buf.append("\n");
-		buf.append("    public static void xoo(float x, E e) {\n");
+		buf.append("    public static void xoo(float x, E o) {\n");
 		buf.append("    }\n");		
 		buf.append("}\n");		
 		String expected2= buf.toString();
