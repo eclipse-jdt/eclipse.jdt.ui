@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,11 +13,15 @@ package org.eclipse.jdt.internal.ui.text.java;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
+
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
@@ -144,19 +148,15 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		
 		// we're inserting a method plus the argument list - respect formatter preferences
 		StringBuffer buffer= new StringBuffer();
-		buffer.append(fProposal.getName());
-
+		appendMethodNameReplacement(buffer);
+		
 		FormatterPrefs prefs= getFormatterPrefs();
-		if (prefs.beforeOpeningParen)
-			buffer.append(SPACE);
-		buffer.append(LPAREN);
 		
 		if (hasParameters()) {
 			setCursorPosition(buffer.length());
 			
 			if (prefs.afterOpeningParen)
 				buffer.append(SPACE);
-			
 
 			// don't add the trailing space, but let the user type it in himself - typing the closing paren will exit
 //			if (prefs.beforeClosingParen)
@@ -170,6 +170,33 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 
 		return buffer.toString();
 
+	}
+
+	/**
+	 * Appends everything up to the method name including
+	 * the opening parenthesis.
+	 * <p>
+	 * In case of {@link CompletionProposal#METHOD_REF_WITH_CASTED_RECEIVER}
+	 * it add cast.
+	 * </p>
+	 * 
+	 * @param buffer the string buffer
+	 * @since 3.4
+	 */
+	protected void appendMethodNameReplacement(StringBuffer buffer) {
+		if (fProposal.getKind() == CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER) {
+			String coreCompletion= String.valueOf(fProposal.getCompletion());
+			String lineDelimiter= TextUtilities.getDefaultLineDelimiter(getTextViewer().getDocument());
+			String replacement= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, coreCompletion, 0, lineDelimiter, fInvocationContext.getProject());
+			buffer.append(replacement.substring(0, replacement.lastIndexOf('.') + 1));
+		}
+
+		buffer.append(fProposal.getName());
+
+		FormatterPrefs prefs= getFormatterPrefs();
+		if (prefs.beforeOpeningParen)
+			buffer.append(SPACE);
+		buffer.append(LPAREN);
 	}
 	
 	protected ProposalInfo computeProposalInfo() {
@@ -201,7 +228,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		buf.append(parameterList);
 		return buf.toString();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isValidPrefix(java.lang.String)
 	 */
@@ -222,5 +249,15 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 			}
 		}
 		return isPrefix(prefix, word);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isPrefix(java.lang.String, java.lang.String)
+	 * @since 3.4
+	 */
+	protected boolean isPrefix(String prefix, String string) {
+		if (fProposal.getKind() == CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER && prefix != null)
+			prefix= prefix.substring(fProposal.getReceiverEnd() - fProposal.getReceiverStart() + 1);
+		return super.isPrefix(prefix, string);
 	}
 }

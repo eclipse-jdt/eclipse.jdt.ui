@@ -47,27 +47,6 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 	 */
 	protected CompletionProposalCollector createCollector(JavaContentAssistInvocationContext context) {
 		CompletionProposalCollector collector= super.createCollector(context);
-		collector.setIgnored(CompletionProposal.ANNOTATION_ATTRIBUTE_REF, true);
-		collector.setIgnored(CompletionProposal.ANONYMOUS_CLASS_DECLARATION, true);
-		collector.setIgnored(CompletionProposal.FIELD_REF, true);
-		collector.setIgnored(CompletionProposal.KEYWORD, true);
-		collector.setIgnored(CompletionProposal.LABEL_REF, true);
-		collector.setIgnored(CompletionProposal.LOCAL_VARIABLE_REF, true);
-		collector.setIgnored(CompletionProposal.METHOD_DECLARATION, true);
-		collector.setIgnored(CompletionProposal.METHOD_NAME_REFERENCE, true);
-		collector.setIgnored(CompletionProposal.METHOD_REF, true);
-		collector.setIgnored(CompletionProposal.PACKAGE_REF, true);
-		collector.setIgnored(CompletionProposal.POTENTIAL_METHOD_DECLARATION, true);
-		collector.setIgnored(CompletionProposal.VARIABLE_DECLARATION, true);
-		
-		collector.setIgnored(CompletionProposal.JAVADOC_BLOCK_TAG, true);
-		collector.setIgnored(CompletionProposal.JAVADOC_FIELD_REF, true);
-		collector.setIgnored(CompletionProposal.JAVADOC_INLINE_TAG, true);
-		collector.setIgnored(CompletionProposal.JAVADOC_METHOD_REF, true);
-		collector.setIgnored(CompletionProposal.JAVADOC_PARAM_REF, true);
-		collector.setIgnored(CompletionProposal.JAVADOC_TYPE_REF, true);
-		collector.setIgnored(CompletionProposal.JAVADOC_VALUE_REF, true);
-		
 		collector.setIgnored(CompletionProposal.TYPE_REF, false);
 		return collector;
 	}

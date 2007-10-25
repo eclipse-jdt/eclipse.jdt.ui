@@ -38,7 +38,7 @@ public final class FillArgumentNamesCompletionProposalCollector extends Completi
 	private final boolean fIsGuessArguments;
 
 	public FillArgumentNamesCompletionProposalCollector(JavaContentAssistInvocationContext context) {
-		super(context.getCompilationUnit());
+		super(context.getCompilationUnit(), true);
 		setInvocationContext(context);
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		fIsGuessArguments= preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS);
@@ -50,6 +50,7 @@ public final class FillArgumentNamesCompletionProposalCollector extends Completi
 	protected IJavaCompletionProposal createJavaCompletionProposal(CompletionProposal proposal) {
 		switch (proposal.getKind()) {
 			case CompletionProposal.METHOD_REF:
+			case CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER:
 				return createMethodReferenceProposal(proposal);
 			case CompletionProposal.TYPE_REF:
 				return createTypeProposal(proposal);

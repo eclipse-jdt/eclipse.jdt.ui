@@ -37,9 +37,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
-
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.AnonymousTypeCompletionProposal;
@@ -47,6 +48,7 @@ import org.eclipse.jdt.internal.ui.text.java.AnonymousTypeProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.FieldProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.GetterSetterCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.JavaFieldWithCastedReceiverCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaMethodCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
@@ -134,7 +136,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 * @param cu the compilation unit that the result collector will operate on
 	 */
 	public CompletionProposalCollector(ICompilationUnit cu) {
-		this(cu.getJavaProject(), cu);
+		this(cu.getJavaProject(), cu, false);
 	}
 
 	/**
@@ -154,16 +156,32 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 *        <code>null</code>
 	 */
 	public CompletionProposalCollector(IJavaProject project) {
-		this(project, null);
+		this(project, null, false);
 	}
 
-	private CompletionProposalCollector(IJavaProject project, ICompilationUnit cu) {
+	private CompletionProposalCollector(IJavaProject project, ICompilationUnit cu, boolean ignoreAll) {
+		super(ignoreAll);
 		fJavaProject= project;
 		fCompilationUnit= cu;
 
 		fUserReplacementLength= -1;
 	}
-	
+
+	/**
+	 * Creates a new instance ready to collect proposals. If the passed
+	 * <code>ICompilationUnit</code> is not contained in an
+	 * {@link IJavaProject}, no javadoc will be available as
+	 * {@link org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo() additional info}
+	 * on the created proposals.
+	 *
+	 * @param cu the compilation unit that the result collector will operate on
+	 * @param ignoreAll <code>true</code> to ignore all kinds of completion proposals
+	 * @since 3.4
+	 */
+	public CompletionProposalCollector(ICompilationUnit cu, boolean ignoreAll) {
+		this(cu.getJavaProject(), cu, ignoreAll);
+	}
+
 	/**
 	 * Sets the invocation context.
 	 * <p>
@@ -397,7 +415,10 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			case CompletionProposal.JAVADOC_FIELD_REF:
 			case CompletionProposal.JAVADOC_VALUE_REF:
 				return createFieldProposal(proposal);
+			case CompletionProposal.FIELD_REF_WITH_CASTED_RECEIVER:
+				return createFieldWithCastedReceiverProposal(proposal);
 			case CompletionProposal.METHOD_REF:
+			case CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER:
 			case CompletionProposal.METHOD_NAME_REFERENCE:
 			case CompletionProposal.JAVADOC_METHOD_REF:
 				return createMethodReferenceProposal(proposal);
@@ -552,10 +573,12 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			case CompletionProposal.METHOD_NAME_REFERENCE:
 			case CompletionProposal.JAVADOC_METHOD_REF:
 			case CompletionProposal.METHOD_REF:
+			case CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER:
 			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
 			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
 			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
 			case CompletionProposal.FIELD_REF:
+			case CompletionProposal.FIELD_REF_WITH_CASTED_RECEIVER:
 			case CompletionProposal.JAVADOC_FIELD_REF:
 			case CompletionProposal.JAVADOC_VALUE_REF:
 				char[] declaration= proposal.getDeclarationSignature();
@@ -638,6 +661,32 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		int relevance= computeRelevance(proposal);
 
 		JavaCompletionProposal javaProposal= new JavaCompletionProposal(completion, start, length, image, label, relevance, getContext().isInJavadoc(), getInvocationContext());
+		if (fJavaProject != null)
+			javaProposal.setProposalInfo(new FieldProposalInfo(fJavaProject, proposal));
+
+		javaProposal.setTriggerCharacters(VAR_TRIGGER);
+
+		return javaProposal;
+	}
+
+	/**
+	 * Creates the Java completion proposal for the JDT Core
+	 * {@link CompletionProposal#FIELD_REF_WITH_CASTED_RECEIVER} proposal.
+	 * 
+	 * @param proposal the JDT Core proposal
+	 * @return the Java completion proposal
+	 * @since 3.4
+	 */
+	private IJavaCompletionProposal createFieldWithCastedReceiverProposal(CompletionProposal proposal) {
+		String completion= String.valueOf(proposal.getCompletion());
+		completion= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, completion, 0, "\n", fJavaProject); //$NON-NLS-1$
+		int start= proposal.getReplaceStart();
+		int length= getLength(proposal);
+		String label= fLabelProvider.createLabel(proposal);
+		Image image= getImage(fLabelProvider.createFieldImageDescriptor(proposal));
+		int relevance= computeRelevance(proposal);
+
+		JavaCompletionProposal javaProposal= new JavaFieldWithCastedReceiverCompletionProposal(completion, start, length, image, label, relevance, getContext().isInJavadoc(), getInvocationContext(), proposal);
 		if (fJavaProject != null)
 			javaProposal.setProposalInfo(new FieldProposalInfo(fJavaProject, proposal));
 
