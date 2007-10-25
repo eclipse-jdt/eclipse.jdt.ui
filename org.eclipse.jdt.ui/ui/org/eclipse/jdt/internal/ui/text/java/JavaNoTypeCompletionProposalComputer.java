@@ -31,10 +31,6 @@ public class JavaNoTypeCompletionProposalComputer extends JavaCompletionProposal
 	 */
 	protected CompletionProposalCollector createCollector(JavaContentAssistInvocationContext context) {
 		CompletionProposalCollector collector= super.createCollector(context);
-		collector.setIgnored(CompletionProposal.FIELD_REF, false);
-		collector.setIgnored(CompletionProposal.METHOD_REF, false);
-		collector.setIgnored(CompletionProposal.LOCAL_VARIABLE_REF, false);
-		collector.setIgnored(CompletionProposal.ANNOTATION_ATTRIBUTE_REF, false);
 		collector.setIgnored(CompletionProposal.ANNOTATION_ATTRIBUTE_REF, false);
 		collector.setIgnored(CompletionProposal.ANONYMOUS_CLASS_DECLARATION, false);
 		collector.setIgnored(CompletionProposal.FIELD_REF, false);
