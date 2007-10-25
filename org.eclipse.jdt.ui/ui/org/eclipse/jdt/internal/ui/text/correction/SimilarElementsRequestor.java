@@ -18,7 +18,6 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -76,7 +75,9 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 			requestor.setIgnored(CompletionProposal.PACKAGE_REF, true);
 			requestor.setIgnored(CompletionProposal.VARIABLE_DECLARATION, true);
 			requestor.setIgnored(CompletionProposal.METHOD_REF, true);
+			requestor.setIgnored(CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER, true);
 			requestor.setIgnored(CompletionProposal.FIELD_REF, true);
+			requestor.setIgnored(CompletionProposal.FIELD_REF_WITH_CASTED_RECEIVER, true);
 			requestor.setIgnored(CompletionProposal.LOCAL_VARIABLE_REF, true);
 			requestor.setIgnored(CompletionProposal.VARIABLE_DECLARATION, true);
 			requestor.setIgnored(CompletionProposal.VARIABLE_DECLARATION, true);

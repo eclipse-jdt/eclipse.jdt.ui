@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.CompletionRequestor;
@@ -388,6 +387,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		 *        the type parameter binding for
 		 * @param index the index into the list of type parameters of
 		 *        <code>superType</code>
+		 * @return the binding
 		 * @throws JavaModelException if any java model operation fails
 		 * @throws IndexOutOfBoundsException if the index is not valid
 		 */
@@ -413,6 +413,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		 *        for
 		 * @param index the index into the list of type parameters of
 		 *        <code>superType</code>
+		 * @return the binding
 		 * @throws JavaModelException if any java model operation fails
 		 * @throws IndexOutOfBoundsException if the index is not valid
 		 */
@@ -674,6 +675,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		 * 
 		 * @param signature the signature to check
 		 * @param context the context inside which to resolve the type
+		 * @return <code>true</code> if the given signature is a concrete type signature
 		 * @throws JavaModelException if finding the type fails
 		 */
 		private boolean isConcreteType(String signature, IType context) throws JavaModelException {
@@ -711,6 +713,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		setIgnored(CompletionProposal.METHOD_DECLARATION, true);
 		setIgnored(CompletionProposal.METHOD_NAME_REFERENCE, true);
 		setIgnored(CompletionProposal.METHOD_REF, true);
+		setIgnored(CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER, true);
 		setIgnored(CompletionProposal.PACKAGE_REF, true);
 		setIgnored(CompletionProposal.POTENTIAL_METHOD_DECLARATION, true);
 		setIgnored(CompletionProposal.VARIABLE_DECLARATION, true);
