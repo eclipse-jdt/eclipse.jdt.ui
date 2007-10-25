@@ -30,6 +30,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -335,6 +336,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		int offset= contents.indexOf(str);
 
 		CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext(offset, cu));
+		collector.setIgnored(CompletionProposal.TYPE_REF, false);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -577,6 +579,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		int offset= contents.indexOf(str);
 
 		CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext(offset, cu));
+		collector.setIgnored(CompletionProposal.METHOD_REF, false);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -626,6 +629,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		int offset= contents.indexOf(str);
 
 		CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext(offset, cu));
+		collector.setIgnored(CompletionProposal.METHOD_REF, false);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);

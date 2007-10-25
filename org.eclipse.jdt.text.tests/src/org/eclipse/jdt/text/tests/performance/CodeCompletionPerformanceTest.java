@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,8 +20,27 @@ import junit.framework.TestSuite;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 
+import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.PerformanceMeter;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.source.ISourceViewer;
+
+import org.eclipse.ui.PartInitException;
+
+import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
@@ -33,21 +52,6 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.java.FillArgumentNamesCompletionProposalCollector;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-import org.eclipse.jface.preference.IPreferenceStore;
-
-import org.eclipse.test.performance.Dimension;
-import org.eclipse.test.performance.PerformanceMeter;
-import org.eclipse.ui.PartInitException;
 
 public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 
@@ -230,6 +234,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 			
 			for (int accumulated= 0; accumulated < ACC_COMPLETION; accumulated++) {
 				CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext());
+				collector.setIgnored(CompletionProposal.METHOD_REF, false);
 				codeComplete(collector);
 			}
 			
@@ -247,6 +252,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 	private void measureApplicationWithParamterNames(PerformanceMeter meter, final int runs) throws Exception {
 		for (int run= 0; run < runs; run++) {
 			CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext());
+			collector.setIgnored(CompletionProposal.METHOD_REF, false);
 			IJavaCompletionProposal[] proposals= codeComplete(collector);
 			
 			meter.start();
@@ -278,6 +284,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 			
 			for (int accumulated= 0; accumulated < ACC_COMPLETION; accumulated++) {
 				CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext());
+				collector.setIgnored(CompletionProposal.METHOD_REF, false);
 				codeComplete(collector);
 			}
 			
@@ -300,6 +307,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		
 		for (int run= 0; run < runs; run++) {
 			CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext());
+			collector.setIgnored(CompletionProposal.METHOD_REF, false);
 			IJavaCompletionProposal[] proposals= codeComplete(collector);
 			
 			meter.start();
@@ -366,6 +374,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 			
 			for (int accumulated= 0; accumulated < ACC_COMPLETION; accumulated++) {
 				CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext());
+				collector.setIgnored(CompletionProposal.METHOD_REF, false);
 				codeComplete(collector);
 			}
 			
@@ -390,6 +399,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		
 		for (int run= 0; run < runs; run++) {
 			CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext());
+			collector.setIgnored(CompletionProposal.METHOD_REF, false);
 			IJavaCompletionProposal[] proposals= codeComplete(collector);
 			
 			meter.start();
