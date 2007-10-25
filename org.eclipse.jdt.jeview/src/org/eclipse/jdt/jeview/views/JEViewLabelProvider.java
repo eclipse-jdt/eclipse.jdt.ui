@@ -59,6 +59,9 @@ public class JEViewLabelProvider extends LabelProvider /*implements IColorProvid
 		} else if (element instanceof JavaElementProperty) {
 			return fInfoImg;
 			
+		} else if (element instanceof JEMemberValuePair) {
+			return fInfoImg;
+			
 		} else if (element instanceof JavaElementChildrenProperty) {
 			return fChildrenImg;
 			

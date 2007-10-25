@@ -19,6 +19,8 @@ import java.util.concurrent.Callable;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jdt.core.IAnnotatable;
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -27,6 +29,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -163,6 +166,11 @@ public class JavaElement extends JEAttribute {
 			addMethodChildren(result, (IMethod) fJavaElement);
 		if (fJavaElement instanceof IMember)
 			addMemberChildren(result, (IMember) fJavaElement);
+		
+		if (fJavaElement instanceof IAnnotation)
+			addAnnotationChildren(result, (IAnnotation) fJavaElement);
+		if (fJavaElement instanceof IAnnotatable)
+			addAnnotatableChildren(result, (IAnnotatable) fJavaElement);
 		
 		return result.toArray(new JEAttribute[result.size()]);
 		
@@ -360,6 +368,26 @@ public class JavaElement extends JEAttribute {
 		});
 	}
 	
+	private void addAnnotationChildren(ArrayList<JEAttribute> result, final IAnnotation annotation) {
+		result.add(new JavaElementChildrenProperty(this, "MEMBER VALUE PAIRS") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				IMemberValuePair[] memberValuePairs= annotation.getMemberValuePairs();
+				return createMemberValuePairs(this, memberValuePairs);
+			}
+		});
+	}
+	
+	private void addAnnotatableChildren(ArrayList<JEAttribute> result, final IAnnotatable annotatable) {
+		result.add(new JavaElementChildrenProperty(this, "ANNOTATIONS") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				IAnnotation[] annotations= annotatable.getAnnotations();
+				return createJavaElements(this, annotations);
+			}
+		});
+	}
+	
 	private void addTypeChildren(ArrayList<JEAttribute> result, final IType type) {
 		result.add(new JavaElementProperty(this, "IS RESOLVED", type.isResolved()));
 		result.add(new JavaElementProperty(this, "KEY", type.getKey()));
@@ -456,6 +484,14 @@ public class JavaElement extends JEAttribute {
 		});
 	}
 	
+	static JavaElement[] createJavaElements(JEAttribute parent, Object[] javaElements) {
+		JavaElement[] jeChildren= new JavaElement[javaElements.length];
+		for (int i= 0; i < javaElements.length; i++) {
+			jeChildren[i]= new JavaElement(parent, (IJavaElement) javaElements[i]);
+		}
+		return jeChildren;
+	}
+	
 	static JavaElement[] createJavaElements(JEAttribute parent, IJavaElement[] javaElements) {
 		JavaElement[] jeChildren= new JavaElement[javaElements.length];
 		for (int i= 0; i < javaElements.length; i++) {
@@ -476,6 +512,15 @@ public class JavaElement extends JEAttribute {
 				resourceChildren[i]= new JavaElementProperty(parent, null, resource);
 		}
 		return resourceChildren;
+	}
+	
+	static JEAttribute[] createMemberValuePairs(JEAttribute parent, IMemberValuePair[] mvPairs) {
+		JEAttribute[] mvPairChildren= new JEAttribute[mvPairs.length];
+		for (int i= 0; i < mvPairs.length; i++) {
+			IMemberValuePair mvPair= mvPairs[i];
+			mvPairChildren[i]= new JEMemberValuePair(parent, mvPair);
+		}
+		return mvPairChildren;
 	}
 	
 	static JEAttribute[] createCPEntries(JEAttribute parent, IClasspathEntry[] entries) {

@@ -25,6 +25,7 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 
 import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -100,6 +101,7 @@ public class JavaElementProperties implements IPropertySource {
 		addFieldProperties();
 		addMethodProperties();
 		addTypeProperties();
+		addAnnotationProperties();
 		addPackageFragmentProperties();
 		addPackageFragmentRootProperties();
 		addTypeParammeterProperties();
@@ -221,6 +223,19 @@ public class JavaElementProperties implements IPropertySource {
 		});
 	}
 
+	private static void addAnnotationProperties() {
+		addProperty(new Property(IAnnotation.class, "nameRange") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return getSourceRangeString(((IAnnotation) element).getNameRange());
+			}
+		});
+		addProperty(new Property(IAnnotation.class, "occurrenceCount") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IAnnotation) element).getOccurrenceCount();
+			}
+		});
+	}
+	
 	private static void addMemberProperties() {
 		addProperty(new Property(IMember.class, "nameRange") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
@@ -590,6 +605,9 @@ public class JavaElementProperties implements IPropertySource {
 				break;
 			case IJavaElement.TYPE_PARAMETER :
 				name= "ITypeParameter";
+				break;
+			case IJavaElement.ANNOTATION :
+				name= "IAnnotation";
 				break;
 			default :
 				name= "UNKNOWN";

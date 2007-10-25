@@ -77,6 +77,7 @@ import org.eclipse.compare.rangedifferencer.IRangeComparator;
 import org.eclipse.compare.rangedifferencer.RangeDifference;
 import org.eclipse.compare.rangedifferencer.RangeDifferencer;
 
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -218,6 +219,8 @@ public class EditorUtility {
 				range= ((IMember)element).getNameRange();
 			else if (element instanceof ITypeParameter)
 				range= ((ITypeParameter)element).getNameRange();
+			else if (element instanceof IAnnotation)
+				range= ((IAnnotation)element).getNameRange();
 			else if (element instanceof ISourceReference)
 				range= ((ISourceReference)element).getSourceRange();
 

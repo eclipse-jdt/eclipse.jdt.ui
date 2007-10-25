@@ -143,6 +143,7 @@ import org.eclipse.ui.editors.text.IEncodingSupport;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
@@ -1897,8 +1898,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 			try {
 				ISourceRange range= null;
-				if (reference instanceof ILocalVariable) {
-					IJavaElement je= ((ILocalVariable)reference).getParent();
+				if (reference instanceof ILocalVariable || reference instanceof ITypeParameter || reference instanceof IAnnotation) {
+					IJavaElement je= ((IJavaElement)reference).getParent();
 					if (je instanceof ISourceReference)
 						range= ((ISourceReference)je).getSourceRange();
 				} else
@@ -1935,6 +1936,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					}
 				} else if (reference instanceof ILocalVariable) {
 					range= ((ILocalVariable)reference).getNameRange();
+					if (range != null) {
+						offset= range.getOffset();
+						length= range.getLength();
+					}
+				} else if (reference instanceof IAnnotation) {
+					range= ((IAnnotation)reference).getNameRange();
 					if (range != null) {
 						offset= range.getOffset();
 						length= range.getLength();

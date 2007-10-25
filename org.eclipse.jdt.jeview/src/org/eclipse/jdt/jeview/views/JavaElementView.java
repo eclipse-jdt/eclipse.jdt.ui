@@ -95,6 +95,7 @@ import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
@@ -111,6 +112,7 @@ import org.eclipse.jdt.jeview.JEViewPlugin;
 import org.eclipse.jdt.jeview.properties.JarEntryResourceProperties;
 import org.eclipse.jdt.jeview.properties.JavaElementProperties;
 import org.eclipse.jdt.jeview.properties.MarkerProperties;
+import org.eclipse.jdt.jeview.properties.MemberValuePairProperties;
 import org.eclipse.jdt.jeview.properties.ResourceProperties;
 
 
@@ -177,7 +179,10 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 					if (! (resource instanceof IWorkspaceRoot)) // various selection listeners assume getProject() is non-null
 						externalSelection.add(resource);
 				} else if (element instanceof JEAttribute) {
-					externalSelection.add(((JEAttribute) element).getWrappedObject());
+					Object wrappedObject= ((JEAttribute) element).getWrappedObject();
+					if (wrappedObject != null) {
+						externalSelection.add(wrappedObject);
+					}
 				}
 			}
 			return new StructuredSelection(externalSelection);
@@ -780,6 +785,8 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 						return new MarkerProperties((IMarker) object);
 					else if (object instanceof IJarEntryResource)
 						return new JarEntryResourceProperties((IJarEntryResource) object);
+					else if (object instanceof IMemberValuePair)
+						return new MemberValuePairProperties((IMemberValuePair) object);
 					else
 						return null;
 				}

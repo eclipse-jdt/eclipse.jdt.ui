@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import org.eclipse.jdt.core.IAnnotatable;
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -80,6 +82,9 @@ public class GenericRefactoringHandleTransplanter {
 				
 			case IJavaElement.TYPE_PARAMETER:
 				return transplantHandle((IMember) parent, (ITypeParameter) element);
+				
+			case IJavaElement.ANNOTATION:
+				return transplantHandle((IAnnotatable) parent, (IAnnotation) element);
 				
 			default:
 				throw new IllegalArgumentException(element.toString());
@@ -156,6 +161,10 @@ public class GenericRefactoringHandleTransplanter {
 	
 	protected ILocalVariable transplantHandle(ILocalVariable element) {
 		return element; // can't get from parent!
+	}
+	
+	protected IAnnotation transplantHandle(IAnnotatable parent, IAnnotation element) {
+		return parent.getAnnotation(element.getElementName());
 	}
 	
 	protected ITypeParameter transplantHandle(IMember parent, ITypeParameter element) {
