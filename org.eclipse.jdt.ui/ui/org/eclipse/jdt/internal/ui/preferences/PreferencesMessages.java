@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
  *     Sebastian Davids, sdavids@gmx.de - 187316 [preferences] Mark Occurences Pref Page; Link to
+ *     André Søreng <andreis@fast.no> - [syntax highlighting] highlight numbers - https://bugs.eclipse.org/bugs/show_bug.cgi?id=63573
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -147,6 +148,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_others;
 	public static String JavaEditorPreferencePage_operators;
 	public static String JavaEditorPreferencePage_brackets;
+	public static String JavaEditorPreferencePage_numbers;
 	public static String JavaEditorPreferencePage_javaCommentTaskTags;
 	public static String JavaEditorPreferencePage_javaDocKeywords;
 	public static String JavaEditorPreferencePage_javaDocHtmlTags;

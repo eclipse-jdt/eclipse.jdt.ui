@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,10 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Philippe Ombredanne <pombredanne@nexb.com> - https://bugs.eclipse.org/bugs/show_bug.cgi?id=150989
+ *     André Søreng <andreis@fast.no> - [syntax highlighting] highlight numbers - https://bugs.eclipse.org/bugs/show_bug.cgi?id=63573
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.text.java;
-
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -30,6 +29,7 @@ import org.eclipse.jface.text.rules.IWordDetector;
 import org.eclipse.jface.text.rules.SingleLineRule;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WhitespaceRule;
+import org.eclipse.jface.text.rules.WordRule;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -40,9 +40,9 @@ import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
 import org.eclipse.jdt.internal.ui.text.CombinedWordRule;
+import org.eclipse.jdt.internal.ui.text.ISourceVersionDependent;
 import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
 import org.eclipse.jdt.internal.ui.text.JavaWordDetector;
-import org.eclipse.jdt.internal.ui.text.ISourceVersionDependent;
 
 
 /**
@@ -158,7 +158,73 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		}
 	}
 
+	/**
+	 * Detector for java numbers.
+	 * 
+	 * @since 3.4
+	 */
+	private static final class NumberDetector implements IWordDetector {
 
+		/** Keep track of the number */
+		private StringBuffer number;
+
+		/** Keep track of the number type */
+		private int numberType;
+
+		/** Define various number types */
+		private static final int NORMAL= 0;
+		private static final int HEX= 1;
+		private static final int SCIENTIFIC= 2;
+
+		/*
+		 * @see org.eclipse.jface.text.rules.IWordDetector#isWordStart(char)
+		 */
+		public boolean isWordStart(char c) {
+			if (Character.isDigit(c)) {
+				numberType= NORMAL;
+				number= new StringBuffer();
+				number.append(c);
+				return true;
+			}
+			return false;	
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.rules.IWordDetector#isWordPart(char)
+		 */
+		public boolean isWordPart(char c) {
+
+			c= Character.toLowerCase(c);
+			number.append(c);
+
+			// Detect number type
+			if (c == 'x' && number.length() == 2 && number.charAt(0) == '0') {
+				numberType= HEX;
+				return true;
+			} else if (c == 'e' && numberType != HEX) {
+				if (numberType == SCIENTIFIC) {
+					return false;
+				}
+				numberType= SCIENTIFIC;
+				return true;
+			}
+
+			// Check if the character is valid depending on the type
+			if (numberType == HEX) {
+				return Character.isDigit(c) || c == 'a' || c == 'b'
+					|| c == 'c' || c == 'd'
+						|| c == 'e' || c == 'f';
+			} else if (numberType == SCIENTIFIC) {
+				return Character.isDigit(c) ||
+				(number.charAt(number.length() - 2) == 'e' && 
+						(c == '+' || c == '-'));
+
+			} else {
+				return Character.isDigit(c) || c == '.';
+			}
+		}
+	}
+		
 	private static class VersionedWordMatcher extends CombinedWordRule.WordMatcher implements ISourceVersionDependent {
 
 		private final IToken fDefaultToken;
@@ -400,6 +466,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		IJavaColorConstants.JAVA_KEYWORD_RETURN,
 		IJavaColorConstants.JAVA_OPERATOR,
 		IJavaColorConstants.JAVA_BRACKET,
+		IJavaColorConstants.JAVA_NUMBER,
 		ANNOTATION_COLOR_KEY,
 	};
 
@@ -477,6 +544,10 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		// Add rule for brackets
 		token= getToken(IJavaColorConstants.JAVA_BRACKET);
 		rules.add(new BracketRule(token));
+		
+		// Add rule for numbers
+		token= getToken(IJavaColorConstants.JAVA_NUMBER);
+		rules.add(new WordRule(new NumberDetector(), token));
 
 		// Add word rule for keyword 'return'.
 		CombinedWordRule.WordMatcher returnWordRule= new CombinedWordRule.WordMatcher();

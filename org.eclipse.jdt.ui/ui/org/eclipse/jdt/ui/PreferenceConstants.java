@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     André Søreng <andreis@fast.no> - [syntax highlighting] highlight numbers - https://bugs.eclipse.org/bugs/show_bug.cgi?id=63573
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
@@ -1656,6 +1657,59 @@ public class PreferenceConstants {
 	 * @since 3.3
 	 */
 	public final static String EDITOR_JAVA_BRACKET_UNDERLINE= IJavaColorConstants.JAVA_BRACKET + EDITOR_UNDERLINE_SUFFIX;
+	
+	/**
+	 * A named preference that holds the color used to render numbers.
+	 * <p>
+	 * Value is of type <code>String</code>. A RGB color value encoded as a string
+	 * using class <code>PreferenceConverter</code>
+	 * </p>
+	 *
+	 * @see org.eclipse.jface.resource.StringConverter
+	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @since 3.4
+	 */
+	public final static String EDITOR_JAVA_NUMBER_COLOR= IJavaColorConstants.JAVA_NUMBER;
+
+	/**
+	 * A named preference that controls whether numbers are rendered in bold.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.4
+	 */
+	public final static String EDITOR_JAVA_NUMBER_BOLD= IJavaColorConstants.JAVA_NUMBER + EDITOR_BOLD_SUFFIX;
+
+	/**
+	 * A named preference that controls whether numbers are rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.4
+	 */
+	public final static String EDITOR_JAVA_NUMBER_ITALIC= IJavaColorConstants.JAVA_NUMBER + EDITOR_ITALIC_SUFFIX;
+
+	/**
+	 * A named preference that controls whether numbers are rendered in strikethrough.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.4
+	 */
+	public final static String EDITOR_JAVA_NUMBER_STRIKETHROUGH= IJavaColorConstants.JAVA_NUMBER + EDITOR_STRIKETHROUGH_SUFFIX;
+
+	/**
+	 * A named preference that controls whether numbers are rendered in underline.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.4
+	 */
+	public final static String EDITOR_JAVA_NUMBER_UNDERLINE= IJavaColorConstants.JAVA_NUMBER + EDITOR_UNDERLINE_SUFFIX;
 
 	/**
 	 * A named preference that holds the color used to render annotations.
@@ -3713,6 +3767,13 @@ public class PreferenceConstants {
 				findRGB(registry, IJavaThemeConstants.EDITOR_JAVA_BRACKET_COLOR, new RGB(0, 0, 0)));
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_BRACKET_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_BRACKET_ITALIC, false);
+		
+		setDefaultAndFireEvent(
+				store, 
+				PreferenceConstants.EDITOR_JAVA_NUMBER_COLOR, 
+				findRGB(registry, IJavaThemeConstants.EDITOR_JAVA_NUMBER_COLOR, new RGB(42, 0, 255)));
+		store.setDefault(PreferenceConstants.EDITOR_JAVA_NUMBER_BOLD, false);
+		store.setDefault(PreferenceConstants.EDITOR_JAVA_NUMBER_ITALIC, false);
 
 		setDefaultAndFireEvent(
 				store, 
