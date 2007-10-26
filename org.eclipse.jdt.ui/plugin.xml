@@ -1656,6 +1656,7 @@
 		<viewPage
 			id="org.eclipse.jdt.ui.JavaSearchResultPage"
 			searchResultClass="org.eclipse.jdt.internal.ui.search.JavaSearchResult"
+			helpContextId="org.eclipse.jdt.ui.java_search_result"
 			class="org.eclipse.jdt.internal.ui.search.JavaSearchResultPage">
 		</viewPage>
    </extension>
@@ -1665,6 +1666,7 @@
 		<viewPage
 			id="org.eclipse.jdt.internal.ui.search.OccurrencesSearchResultPage"
 			searchResultClass="org.eclipse.jdt.internal.ui.search.OccurrencesSearchResult"
+			helpContextId="org.eclipse.jdt.ui.occurrences_search_result"
 			class="org.eclipse.jdt.internal.ui.search.OccurrencesSearchResultPage">
 		</viewPage>
    </extension>
@@ -1674,6 +1676,7 @@
 		<viewPage
 			id="org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchResultPage"
 			searchResultClass="org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchResult"
+			helpContextId="org.eclipse.jdt.ui.nls_search_result"
 			class="org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchResultPage">
 		</viewPage>
    </extension>
