@@ -512,7 +512,7 @@ public final class MemberVisibilityAdjustor {
 		final ModifierKeyword threshold= getVisibilityThreshold(element, referencedMovedElement, monitor);
 		int flags= referencedMovedElement.getFlags();
 		IType declaring= referencedMovedElement.getDeclaringType();
-		if (declaring.isInterface())
+		if (declaring.isInterface() || referencedMovedElement instanceof IField && Flags.isEnum(referencedMovedElement.getFlags()))
 			return;
 		if (hasLowerVisibility(flags, threshold == null ? Modifier.NONE : threshold.toFlagValue()) && needsVisibilityAdjustment(referencedMovedElement, threshold))
 			fAdjustments.put(referencedMovedElement, new IncomingMemberVisibilityAdjustment(referencedMovedElement, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, Messages.format(getMessage(referencedMovedElement), new String[] { getLabel(referencedMovedElement), getLabel(threshold)}), JavaStatusContext.create(referencedMovedElement), null, RefactoringStatusEntry.NO_CODE, null)));
@@ -536,7 +536,7 @@ public final class MemberVisibilityAdjustor {
 			}
 		}
 
-		if ((member.equals(fReferenced)) || (Modifier.isPublic(member.getFlags())))
+		if (member.equals(fReferenced) || Modifier.isPublic(member.getFlags()))
 			return;
 
 		final SearchResultGroup[] references= findReferences(member, monitor);
