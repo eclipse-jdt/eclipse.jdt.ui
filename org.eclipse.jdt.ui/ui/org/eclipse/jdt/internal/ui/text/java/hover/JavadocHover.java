@@ -293,6 +293,9 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 			return null;
 		
 		ITypeRoot typeRoot= getEditorInputJavaElement();
+		if (typeRoot == null)
+			return null;
+		
 		Object constantValue= null;
 		
 		CompilationUnit unit= SharedASTProvider.getAST(typeRoot, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
