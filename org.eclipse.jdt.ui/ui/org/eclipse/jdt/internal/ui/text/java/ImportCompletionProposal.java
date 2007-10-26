@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nathan Beyer (Cerner) <nbeyer@cerner.com> - [content assist][5.0] when selected method from favorites is a member of a type with a type variable an invalid static import is added - https://bugs.eclipse.org/bugs/show_bug.cgi?id=202221  
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -84,8 +85,8 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
  			qualifiedType= fProposal.getSignature();
  	 		qualifiedTypeName= String.valueOf(Signature.toCharArray(qualifiedType));
  		} else if (proposalKind == CompletionProposal.METHOD_IMPORT || proposalKind == CompletionProposal.FIELD_IMPORT) {
- 	 		qualifiedType= fProposal.getDeclarationSignature();
- 	 		qualifiedTypeName= String.valueOf(Signature.toCharArray(qualifiedType));
+            qualifiedType= Signature.getTypeErasure(fProposal.getDeclarationSignature());
+            qualifiedTypeName= String.valueOf(Signature.toCharArray(qualifiedType));
 		} else {
 			/*
 			 * In 3.3 we only support the above import proposals, see
