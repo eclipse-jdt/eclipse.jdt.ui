@@ -3077,6 +3077,12 @@
             parentId="org.eclipse.ui.textEditorScope"
             id="org.eclipse.jdt.ui.javaEditorScope">
       </context>
+      <context
+            name="%context.editingPropertiesSource.name"
+            description="%context.editingPropertiesSource.description"
+            parentId="org.eclipse.ui.textEditorScope"
+            id="org.eclipse.jdt.ui.propertiesEditorScope">
+      </context>
    </extension>
 
    <extension
@@ -4012,6 +4018,21 @@
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+M2+C"
+            contextId="org.eclipse.jdt.ui.propertiesEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+7"
+            contextId="org.eclipse.jdt.ui.propertiesEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M1+/"
+            contextId="org.eclipse.jdt.ui.propertiesEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <!-- alternative for some gtk input modes -->
       <key
             platform="gtk"
@@ -4020,6 +4041,12 @@
             commandId="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
             
+      <key
+            platform="gtk"
+            sequence="ESC CTRL+C"
+            contextId="org.eclipse.jdt.ui.propertiesEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.toggle.comment"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             sequence="M1+M2+F"
             contextId="org.eclipse.jdt.ui.javaEditorScope"

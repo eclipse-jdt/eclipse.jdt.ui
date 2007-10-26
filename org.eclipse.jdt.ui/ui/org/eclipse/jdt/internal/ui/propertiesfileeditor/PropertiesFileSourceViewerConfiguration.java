@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Brock Janiczak <brockj@tpg.com.au> - [nls tooling] Properties file editor should have "toggle comment" action - https://bugs.eclipse.org/bugs/show_bug.cgi?id=192045
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
@@ -54,6 +55,7 @@ import org.eclipse.jdt.internal.ui.text.HTMLAnnotationHover;
 import org.eclipse.jdt.internal.ui.text.JavaPresentationReconciler;
 import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
+
 
 /**
  * Configuration for a source viewer which shows a properties file.
@@ -312,4 +314,11 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 		return reconciler;
 	}	
 
+	/*
+	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getDefaultPrefixes(org.eclipse.jface.text.source.ISourceViewer, java.lang.String)
+	 * @since 3.4
+	 */
+	public String[] getDefaultPrefixes(ISourceViewer sourceViewer, String contentType) {
+		return new String[] {"#", ""}; //$NON-NLS-1$ //$NON-NLS-2$
+	}
 }

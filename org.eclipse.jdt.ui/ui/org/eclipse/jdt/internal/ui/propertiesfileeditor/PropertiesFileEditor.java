@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,18 +7,24 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Brock Janiczak <brockj@tpg.com.au> - [nls tooling] Properties file editor should have "toggle comment" action - https://bugs.eclipse.org/bugs/show_bug.cgi?id=192045
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
 import org.eclipse.swt.SWT;
 
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
 import org.eclipse.ui.IPageLayout;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IShowInTargetList;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.ui.editors.text.TextEditor;
 
@@ -27,7 +33,10 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ToggleCommentAction;
+
 
 /**
  * Properties file editor.
@@ -52,6 +61,13 @@ public class PropertiesFileEditor extends TextEditor {
 		setSourceViewerConfiguration(new PropertiesFileSourceViewerConfiguration(textTools.getColorManager(), store, this, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING));
 	}
 
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#initializeKeyBindingScopes()
+	 * @since 3.4
+	 */
+	protected void initializeKeyBindingScopes() {
+		setKeyBindingScopes(new String[] { "org.eclipse.jdt.ui.propertiesEditorScope" });  //$NON-NLS-1$
+	}
 
 	/*
 	 * @see org.eclipse.ui.editors.text.TextEditor#createActions()
@@ -59,11 +75,32 @@ public class PropertiesFileEditor extends TextEditor {
 	protected void createActions() {
 		super.createActions();
 
+		IAction action= new ToggleCommentAction(PropertiesFileEditorMessages.getBundleForConstructedKeys(), "ToggleComment.", this); //$NON-NLS-1$
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.TOGGLE_COMMENT);
+		setAction(IJavaEditorActionDefinitionIds.TOGGLE_COMMENT, action);
+		markAsStateDependentAction(IJavaEditorActionDefinitionIds.TOGGLE_COMMENT, true);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.TOGGLE_COMMENT_ACTION);
+		configureToggleCommentAction();
+		
 		fOpenAction= new OpenAction(this);
 		fOpenAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EDITOR);
 		setAction(JdtActionConstants.OPEN, fOpenAction);
 	}
 
+	/**
+	 * Configures the toggle comment action.
+	 *
+	 * @since 3.4
+	 */
+	private void configureToggleCommentAction() {
+		IAction action= getAction(IJavaEditorActionDefinitionIds.TOGGLE_COMMENT);
+		if (action instanceof ToggleCommentAction) {
+			ISourceViewer sourceViewer= getSourceViewer();
+			SourceViewerConfiguration configuration= getSourceViewerConfiguration();
+			((ToggleCommentAction)action).configure(sourceViewer, configuration);
+		}
+	}
+	
 	/*
 	 * @see AbstractTextEditor#handlePreferenceStoreChanged(PropertyChangeEvent)
 	 */
@@ -141,5 +178,15 @@ public class PropertiesFileEditor extends TextEditor {
 		more[0]= "org.eclipse.jdt.ui.preferences.PropertiesFileEditorPreferencePage"; //$NON-NLS-1$
 		System.arraycopy(ids, 0, more, 1, ids.length);
 		return more;
+	}
+
+	/*
+	 * @see org.eclipse.ui.editors.text.TextEditor#editorContextMenuAboutToShow(org.eclipse.jface.action.IMenuManager)
+	 * @since 3.4
+	 */
+	protected void editorContextMenuAboutToShow(IMenuManager menu) {
+		super.editorContextMenuAboutToShow(menu);
+		
+		addAction(menu, ITextEditorActionConstants.GROUP_EDIT, IJavaEditorActionDefinitionIds.TOGGLE_COMMENT);
 	}
 }
