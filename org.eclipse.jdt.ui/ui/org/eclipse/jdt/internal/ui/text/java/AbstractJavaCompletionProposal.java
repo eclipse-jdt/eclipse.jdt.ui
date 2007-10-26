@@ -1031,7 +1031,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			return false;
 		
 		CompletionProposal proposal= ((MemberProposalInfo)proposalInfo).fProposal;
-		return proposal != null && (proposal.getKind() == CompletionProposal.METHOD_REF || proposal.getKind() == CompletionProposal.FIELD_REF);
+		return proposal != null && (proposal.getKind() == CompletionProposal.METHOD_REF || proposal.getKind() == CompletionProposal.FIELD_REF || proposal.getKind() == CompletionProposal.TYPE_REF);
 	}
 	
 }

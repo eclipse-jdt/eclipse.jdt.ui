@@ -177,6 +177,8 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		collector.setAllowsRequiredProposals(CompletionProposal.METHOD_REF, CompletionProposal.TYPE_IMPORT, true);
 		collector.setAllowsRequiredProposals(CompletionProposal.METHOD_REF, CompletionProposal.METHOD_IMPORT, true);
 
+		collector.setAllowsRequiredProposals(CompletionProposal.TYPE_REF, CompletionProposal.TYPE_REF, true);
+		
 		// Set the favorite list to propose static members - since 3.3 
 		collector.setFavoriteReferences(getFavoriteStaticMembers());
 
