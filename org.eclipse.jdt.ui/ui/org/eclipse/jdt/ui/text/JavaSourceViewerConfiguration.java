@@ -751,7 +751,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		};
 	}
 
-	private IInformationControlCreator getHierarchyPresenterControlCreator(ISourceViewer sourceViewer) {
+	private IInformationControlCreator getHierarchyPresenterControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
 				int shellStyle= SWT.RESIZE;
@@ -837,7 +837,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		if (getEditor() != null && getEditor().getEditorInput() != null && JavaUI.getEditorInputJavaElement(getEditor().getEditorInput()) == null)
 			return null;
 		
-		InformationPresenter presenter= new InformationPresenter(getHierarchyPresenterControlCreator(sourceViewer));
+		InformationPresenter presenter= new InformationPresenter(getHierarchyPresenterControlCreator());
 		presenter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 		presenter.setAnchor(AbstractInformationControlManager.ANCHOR_GLOBAL);
 		IInformationProvider provider= new JavaElementProvider(getEditor(), doCodeResolve);
