@@ -14,26 +14,19 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.formatter.align.Alignment;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.formatter.align.Alignment;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class TestOptions {
-	
-	/**
-	 * @deprecated use getDefaultOptions() instead
-	 */
-	public static Hashtable getFormatterOptions() {
-		return getDefaultOptions();
-	}
 	
 	public static Hashtable getDefaultOptions() {
 		Hashtable result= JavaCore.getDefaultOptions();
@@ -42,6 +35,7 @@ public class TestOptions {
 		result.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.IGNORE);
 		result.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
 		result.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.IGNORE);
+		result.put(JavaCore.COMPILER_PB_UNUSED_WARNING_TOKEN, JavaCore.IGNORE);
 		// should cover all compiler settings
 		result.putAll(TestFormatterOptions.getSettings());
 		return result;
