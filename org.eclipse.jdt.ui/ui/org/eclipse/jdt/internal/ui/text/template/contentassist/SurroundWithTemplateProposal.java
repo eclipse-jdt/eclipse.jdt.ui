@@ -146,7 +146,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		fSelectedStatements= selectedStatements;
 	}
 	
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal#getAdditionalProposalInfo()
 	 */
 	public String getPreviewContent() {
@@ -189,7 +189,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
 	 */
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {

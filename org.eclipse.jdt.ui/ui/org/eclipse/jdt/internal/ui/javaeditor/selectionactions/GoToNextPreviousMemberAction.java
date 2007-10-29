@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.action.Action;
+
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IEditorInput;
@@ -94,8 +95,8 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 		setEnabled(enabled);
 	}
 
-	/* (non-JavaDoc)
-	 * Method declared in IAction.
+	/*
+	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	public final  void run() {
 		ITextSelection selection= getTextSelection();

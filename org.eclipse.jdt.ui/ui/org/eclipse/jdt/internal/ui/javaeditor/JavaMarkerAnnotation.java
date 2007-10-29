@@ -155,7 +155,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getCompilationUnit()
 	 */
 	public ICompilationUnit getCompilationUnit() {
@@ -166,7 +166,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getMarkerType()
 	 */
 	public String getMarkerType() {

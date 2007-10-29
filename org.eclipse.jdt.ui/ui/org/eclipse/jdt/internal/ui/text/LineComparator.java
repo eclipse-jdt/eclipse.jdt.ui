@@ -45,14 +45,14 @@ public class LineComparator implements IRangeComparator {
 		fHashes= new ArrayList(Arrays.asList(nulls));
     }
 
-	/* (non-Javadoc)
+	/*
      * @see org.eclipse.compare.rangedifferencer.IRangeComparator#getRangeCount()
      */
     public int getRangeCount() {
         return fDocument.getNumberOfLines();
     }
 
-    /* (non-Javadoc)
+    /*
      * @see org.eclipse.compare.rangedifferencer.IRangeComparator#rangesEqual(int, org.eclipse.compare.rangedifferencer.IRangeComparator, int)
      */
     public boolean rangesEqual(int thisIndex, IRangeComparator other, int otherIndex) {
@@ -64,7 +64,7 @@ public class LineComparator implements IRangeComparator {
 		}
     }
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.compare.rangedifferencer.IRangeComparator#skipRangeComparison(int, int, org.eclipse.compare.rangedifferencer.IRangeComparator)
 	 */
 	public boolean skipRangeComparison(int length, int maxLength, IRangeComparator other) {

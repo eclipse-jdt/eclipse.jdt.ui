@@ -94,8 +94,8 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		public NamePatternFilter() {
 		}
 
-		/* (non-Javadoc)
-		 * Method declared on ViewerFilter.
+		/*
+		 * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 		 */
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			StringMatcher matcher= getMatcher();

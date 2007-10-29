@@ -677,7 +677,7 @@ public class EditorUtility {
 		try {
 			SafeRunner.run(new ISafeRunnable() {
 	
-				/* (non-Javadoc)
+				/*
 				 * @see org.eclipse.core.runtime.ISafeRunnable#handleException(java.lang.Throwable)
 				 */
 				public void handleException(Throwable exception) {
@@ -687,7 +687,7 @@ public class EditorUtility {
 					result[0]= null;
 				}
 	
-				/* (non-Javadoc)
+				/*
 				 * @see org.eclipse.core.runtime.ISafeRunnable#run()
 				 */
 				public void run() throws Exception {
