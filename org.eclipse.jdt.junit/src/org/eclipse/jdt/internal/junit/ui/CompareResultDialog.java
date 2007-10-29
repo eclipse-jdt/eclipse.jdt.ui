@@ -167,10 +167,17 @@ public class CompareResultDialog extends TrayDialog {
 	
 	public CompareResultDialog(Shell parentShell, TestElement element) {
 		super(parentShell);
-		setShellStyle(SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MAX);
 		setFailedTest(element);
 	}
-	
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+	 * @since 3.4
+	 */
+	protected boolean isResizable() {
+		return true;
+	}
+
 	private void setFailedTest(TestElement failedTest) {
 		fTestName= failedTest.getTestName();
 		fExpected= failedTest.getExpected();
