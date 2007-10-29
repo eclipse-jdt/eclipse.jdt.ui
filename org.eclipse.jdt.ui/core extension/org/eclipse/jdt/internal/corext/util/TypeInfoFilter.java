@@ -272,7 +272,7 @@ public class TypeInfoFilter {
 	private boolean matchesPackage(TypeNameMatch type) {
 		if (fPackageMatcher == null)
 			return true;
-		return fPackageMatcher.matches(type.getTypeContainerName());
+		return fPackageMatcher.matches(JavaModelUtil.getTypeContainerName(type));
 	}
 
 	private boolean matchesScope(TypeNameMatch type) {

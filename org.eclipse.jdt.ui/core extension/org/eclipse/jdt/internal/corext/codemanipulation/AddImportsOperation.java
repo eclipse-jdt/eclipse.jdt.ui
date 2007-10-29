@@ -297,7 +297,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		} else {
 			chosen= types[0];
 		}
-		importRewrite.addImport(chosen.getFullyQualifiedName());
+		importRewrite.addImport(JavaModelUtil.getFullyQualifiedName(chosen));
 		return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
 	}
 

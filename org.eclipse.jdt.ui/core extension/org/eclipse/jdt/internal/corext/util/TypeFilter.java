@@ -53,7 +53,7 @@ public class TypeFilter implements IPropertyChangeListener {
 	}
 	
 	public static boolean isFiltered(TypeNameMatch match) {
-		return getDefault().filter(match.getFullyQualifiedName());
+		return getDefault().filter(JavaModelUtil.getFullyQualifiedName(match));
 	}
 
 	private StringMatcher[] fStringMatchers;

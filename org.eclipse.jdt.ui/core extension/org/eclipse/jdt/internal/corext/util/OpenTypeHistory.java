@@ -98,7 +98,10 @@ public class OpenTypeHistory extends History {
 					if (isChanged && (delta.getFlags() & IJavaElementDelta.F_MODIFIERS) != 0) {
 						return true;
 					}
-					// type children can be inner classes: fall through
+					if (isRemoved) {
+						return true;
+					}
+					return processChildrenDelta(delta);
 				case IJavaElement.JAVA_MODEL:
 				case IJavaElement.PACKAGE_FRAGMENT:
 				case IJavaElement.CLASS_FILE:
@@ -277,7 +280,7 @@ public class OpenTypeHistory extends History {
 		List result= new ArrayList();
 		for (Iterator iter= values.iterator(); iter.hasNext();) {
 			TypeNameMatch type= (TypeNameMatch)iter.next();
-			if ((filter == null || filter.matchesHistoryElement(type)) && !TypeFilter.isFiltered(type.getFullyQualifiedName()))
+			if ((filter == null || filter.matchesHistoryElement(type)) && !TypeFilter.isFiltered(JavaModelUtil.getFullyQualifiedName(type)))
 				result.add(type);
 		}
 		Collections.reverse(result);

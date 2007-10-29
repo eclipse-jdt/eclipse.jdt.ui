@@ -53,6 +53,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.History;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
 
@@ -343,7 +344,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				Object[] array= (Object[]) res[i];
 				if (array.length > 0) {
 					result[i]= (TypeNameMatch) array[0];
-					QualifiedTypeNameHistory.remember(result[i].getFullyQualifiedName());
+					QualifiedTypeNameHistory.remember(JavaModelUtil.getFullyQualifiedName(result[i]));
 				}
 			}
 		}

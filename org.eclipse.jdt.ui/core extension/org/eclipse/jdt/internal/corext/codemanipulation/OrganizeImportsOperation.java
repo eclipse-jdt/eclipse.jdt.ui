@@ -99,7 +99,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			public void addInfo(TypeNameMatch info) {
 				for (int i= this.foundInfos.size() - 1; i >= 0; i--) {
 					TypeNameMatch curr= (TypeNameMatch) this.foundInfos.get(i);
-					if (curr.getTypeContainerName().equals(info.getTypeContainerName())) {
+					if (JavaModelUtil.getTypeContainerName(curr).equals(JavaModelUtil.getTypeContainerName(info))) {
 						return; // not added. already contains type with same name
 					}
 				}
@@ -284,7 +284,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				return null;
 			} else if (nFound == 1) {
 				TypeNameMatch typeRef= (TypeNameMatch) typeRefsFound.get(0);
-				fImpStructure.addImport(typeRef.getFullyQualifiedName());
+				fImpStructure.addImport(JavaModelUtil.getFullyQualifiedName(typeRef));
 				return null;
 			} else {
 				String typeToImport= null;
@@ -293,8 +293,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				// multiple found, use old imports to find an entry
 				for (int i= 0; i < nFound; i++) {
 					TypeNameMatch typeRef= (TypeNameMatch) typeRefsFound.get(i);
-					String fullName= typeRef.getFullyQualifiedName();
-					String containerName= typeRef.getTypeContainerName();
+					String fullName= JavaModelUtil.getFullyQualifiedName(typeRef);
+					String containerName= JavaModelUtil.getTypeContainerName(typeRef);
 					if (fOldSingleImports.contains(fullName)) {
 						// was single-imported
 						fImpStructure.addImport(fullName);
@@ -457,7 +457,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}
 				for (int i= 0; i < chosen.length; i++) {
 					TypeNameMatch typeInfo= chosen[i];
-					importsRewrite.addImport(typeInfo.getFullyQualifiedName());
+					importsRewrite.addImport(JavaModelUtil.getFullyQualifiedName(typeInfo));
 				}
 			}
 

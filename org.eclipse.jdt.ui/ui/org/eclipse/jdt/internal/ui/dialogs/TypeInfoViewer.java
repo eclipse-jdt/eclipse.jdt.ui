@@ -70,6 +70,7 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.core.search.TypeNameMatchRequestor;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -157,7 +158,7 @@ public class TypeInfoViewer {
 	     	int result= compareName(leftInfo.getSimpleTypeName(), rightInfo.getSimpleTypeName());
 	     	if (result != 0)
 	     		return result;
-	     	result= compareTypeContainerName(leftInfo.getTypeContainerName(), rightInfo.getTypeContainerName());
+	     	result= compareTypeContainerName(JavaModelUtil.getTypeContainerName(leftInfo), JavaModelUtil.getTypeContainerName(rightInfo));
 	     	if (result != 0)
 	     		return result;
 	     	
@@ -279,7 +280,7 @@ public class TypeInfoViewer {
 		public String getQualifiedText(TypeNameMatch type) {
 			StringBuffer result= new StringBuffer();
 			result.append(type.getSimpleTypeName());
-			String containerName= type.getTypeContainerName();
+			String containerName= JavaModelUtil.getTypeContainerName(type);
 			result.append(JavaElementLabels.CONCAT_STRING);
 			if (containerName.length() > 0) {
 				result.append(containerName);
@@ -291,7 +292,7 @@ public class TypeInfoViewer {
 		public String getFullyQualifiedText(TypeNameMatch type) {
 			StringBuffer result= new StringBuffer();
 			result.append(type.getSimpleTypeName());
-			String containerName= type.getTypeContainerName();
+			String containerName= JavaModelUtil.getTypeContainerName(type);
 			if (containerName.length() > 0) {
 				result.append(JavaElementLabels.CONCAT_STRING);
 				result.append(containerName);
@@ -348,7 +349,7 @@ public class TypeInfoViewer {
 		}
 		public String getQualificationText(TypeNameMatch type) {
 			StringBuffer result= new StringBuffer();
-			String containerName= type.getTypeContainerName();
+			String containerName= JavaModelUtil.getTypeContainerName(type);
 			if (containerName.length() > 0) {
 				result.append(containerName);
 				result.append(JavaElementLabels.CONCAT_STRING);
@@ -374,7 +375,7 @@ public class TypeInfoViewer {
 		}
 		
 		private String getTypeContainerName(TypeNameMatch info) {
-			String result= info.getTypeContainerName();
+			String result= JavaModelUtil.getTypeContainerName(info);
 			if (result.length() > 0)
 				return result;
 			return JavaUIMessages.TypeInfoViewer_default_package;

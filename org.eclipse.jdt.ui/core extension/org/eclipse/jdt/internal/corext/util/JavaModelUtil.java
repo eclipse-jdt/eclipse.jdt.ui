@@ -61,6 +61,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.corext.CorextMessages;
 import org.eclipse.jdt.internal.corext.ValidateEditException;
@@ -280,6 +281,17 @@ public final class JavaModelUtil {
 		}
 		return type.getFullyQualifiedName('.');
 	}
+	
+	/**
+	 * Returns the fully qualified name of the given {@link TypeNameMatch}  using '.' as separators.
+	 * This is a replace for {@link TypeNameMatch#getFullyQualifiedName()}.
+	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=182179.
+	 * @param typeNameMatch the type
+	 * @return the fully qualified name
+	 */
+	public static String getFullyQualifiedName(TypeNameMatch typeNameMatch) {
+		return getFullyQualifiedName(typeNameMatch.getType());
+	}
 
 	/**
 	 * Returns the fully qualified name of a type's container. (package name or enclosing type name)
@@ -295,6 +307,14 @@ public final class JavaModelUtil {
 		}
 	}
 
+	/**
+	 * Returns the fully qualified name of a type's container. (package name or enclosing type name)
+	 * @param typeNameMatch the type
+	 * @return the type container name
+	 */
+	public static String getTypeContainerName(TypeNameMatch typeNameMatch) {
+		return getTypeContainerName(typeNameMatch.getType());
+	}
 
 	/**
 	 * Concatenates two names. Uses a dot for separation.
@@ -1028,5 +1048,9 @@ public final class JavaModelUtil {
 		}
 		return false;
 	}
+
+
+
+
 
 }

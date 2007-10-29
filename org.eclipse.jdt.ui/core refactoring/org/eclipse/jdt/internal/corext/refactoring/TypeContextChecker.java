@@ -302,7 +302,7 @@ public class TypeContextChecker {
 				return elementTypeName;
 			} else if (typeRefsFound.size() == 1){
 				TypeNameMatch typeInfo= (TypeNameMatch) typeRefsFound.get(0);
-				return typeInfo.getFullyQualifiedName();
+				return JavaModelUtil.getFullyQualifiedName(typeInfo);
 			} else {
 				Assert.isTrue(typeRefsFound.size() > 1);
 				String[] keys= {elementTypeName, String.valueOf(typeRefsFound.size())};

@@ -49,6 +49,7 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.History;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
@@ -209,7 +210,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			if (containerName.length() != 0) {
 				for (int i= 0; i < nResults; i++) {
 					TypeNameMatch curr= results[i];
-					if (containerName.equals(curr.getTypeContainerName())) {
+					if (containerName.equals(JavaModelUtil.getTypeContainerName(curr))) {
 						return curr;
 					}
 				}
@@ -228,7 +229,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			if (dialog.open() == Window.OK) {
 				fIsShowing= false;
 				TypeNameMatch result= (TypeNameMatch) dialog.getFirstResult();
-				QualifiedTypeNameHistory.remember(result.getFullyQualifiedName());
+				QualifiedTypeNameHistory.remember(JavaModelUtil.getFullyQualifiedName(result));
 				return result;
 			}
 			fIsShowing= false;

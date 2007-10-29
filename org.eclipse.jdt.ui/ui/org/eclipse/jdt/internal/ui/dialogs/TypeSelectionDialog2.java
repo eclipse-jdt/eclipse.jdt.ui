@@ -53,6 +53,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
 
@@ -187,7 +188,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 						jElements.add(type);
 					} else {
 			    		status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
-			    			Messages.format(JavaUIMessages.TypeSelectionDialog_error_type_doesnot_exist, selection[i].getFullyQualifiedName()),
+			    			Messages.format(JavaUIMessages.TypeSelectionDialog_error_type_doesnot_exist, JavaModelUtil.getFullyQualifiedName(selection[i])),
 			    			null);
 			    		break;
 					}
@@ -269,7 +270,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 				String title= JavaUIMessages.TypeSelectionDialog_errorTitle; 
 				IPackageFragmentRoot root= typeInfo.getPackageFragmentRoot();
 				String containerName= JavaElementLabels.getElementLabel(root, JavaElementLabels.ROOT_QUALIFIED);
-				String message= Messages.format(JavaUIMessages.TypeSelectionDialog_dialogMessage, new String[] { typeInfo.getFullyQualifiedName(), containerName }); 
+				String message= Messages.format(JavaUIMessages.TypeSelectionDialog_dialogMessage, new String[] { JavaModelUtil.getFullyQualifiedName(typeInfo), containerName }); 
 				MessageDialog.openError(getShell(), title, message);
 				history.remove(typeInfo);
 				setResult(null);
