@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,8 +18,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 class CalleeMethodWrapper extends MethodWrapper {
@@ -48,9 +47,6 @@ class CalleeMethodWrapper extends MethodWrapper {
         }
     }
 
-    /**
-     * Constructor for CalleeMethodWrapper.
-     */
     public CalleeMethodWrapper(MethodWrapper parent, MethodCall methodCall) {
         super(parent, methodCall);
     }
@@ -84,20 +80,20 @@ class CalleeMethodWrapper extends MethodWrapper {
 	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#findChildren(org.eclipse.core.runtime.IProgressMonitor)
      */
     protected Map findChildren(IProgressMonitor progressMonitor) {
-    	if (getMember().exists() && getMember().getElementType() == IJavaElement.METHOD) {
-        	CompilationUnit cu= CallHierarchy.getCompilationUnitNode(getMember(), true);
-            if (progressMonitor != null) {
-                progressMonitor.worked(5);
-            }
+    	IMember member= getMember();
+		if (member.exists()) {
+			CompilationUnit cu= CallHierarchy.getCompilationUnitNode(member, true);
+		    if (progressMonitor != null) {
+		        progressMonitor.worked(5);
+		    }
 
-        	if (cu != null) {
-        		CalleeAnalyzerVisitor visitor = new CalleeAnalyzerVisitor((IMethod) getMember(),
-        				cu, progressMonitor);
-        
-        		cu.accept(visitor);
-        		return visitor.getCallees();
-        	}
-        }
+			if (cu != null) {
+				CalleeAnalyzerVisitor visitor = new CalleeAnalyzerVisitor(member, cu, progressMonitor);
+		
+				cu.accept(visitor);
+				return visitor.getCallees();
+			}
+		}
         return new HashMap(0);
     }
 }

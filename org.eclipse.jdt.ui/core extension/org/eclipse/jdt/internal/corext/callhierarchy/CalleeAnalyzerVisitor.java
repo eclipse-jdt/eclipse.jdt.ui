@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,8 @@
 package org.eclipse.jdt.internal.corext.callhierarchy;
 
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -23,8 +25,9 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -37,26 +40,27 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-class CalleeAnalyzerVisitor extends ASTVisitor {
+class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
     private CallSearchResultCollector fSearchResults;
-    private IMethod fMethod;
+    private IMember fMember;
     private CompilationUnit fCompilationUnit;
     private IProgressMonitor fProgressMonitor;
     private int fMethodEndPosition;
     private int fMethodStartPosition;
 
-    CalleeAnalyzerVisitor(IMethod method, CompilationUnit compilationUnit, IProgressMonitor progressMonitor) {
+    CalleeAnalyzerVisitor(IMember member, CompilationUnit compilationUnit, IProgressMonitor progressMonitor) {
         fSearchResults = new CallSearchResultCollector();
-        this.fMethod = method;
+        this.fMember = member;
         this.fCompilationUnit= compilationUnit;
         this.fProgressMonitor = progressMonitor;
 
         try {
-            ISourceRange sourceRange = method.getSourceRange();
+            ISourceRange sourceRange = member.getSourceRange();
             this.fMethodStartPosition = sourceRange.getOffset();
             this.fMethodEndPosition = fMethodStartPosition + sourceRange.getLength();
         } catch (JavaModelException jme) {
@@ -109,6 +113,32 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
         return true;
     }
 
+    /**
+     * @see HierarchicalASTVisitor#visit(org.eclipse.jdt.core.dom.AbstractTypeDeclaration)
+     */
+    public boolean visit(AbstractTypeDeclaration node) {
+    	progressMonitorWorked(1);
+    	if (!isFurtherTraversalNecessary(node)) {
+    		return false;
+    	}
+    	
+    	if (isNodeWithinMethod(node)) {
+    		List bodyDeclarations= node.bodyDeclarations();
+    		for (Iterator iter= bodyDeclarations.iterator(); iter.hasNext(); ) {
+				BodyDeclaration bodyDeclaration= (BodyDeclaration) iter.next();
+				if (bodyDeclaration instanceof MethodDeclaration) {
+					MethodDeclaration child= (MethodDeclaration) bodyDeclaration;
+					if (child.isConstructor()) {
+						addMethodCall(child.resolveBinding(), child.getName());
+					}
+				}
+			}
+    		return false;
+    	}
+    	
+    	return true;
+    }
+    
     /**
      * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodDeclaration)
      */
@@ -232,7 +262,7 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
                 }
                 final int position= node.getStartPosition();
 				final int number= fCompilationUnit.getLineNumber(position);
-				fSearchResults.addMember(fMethod, referencedMember, position, position + node.getLength(), number < 1 ? 1 : number);
+				fSearchResults.addMember(fMember, referencedMember, position, position + node.getLength(), number < 1 ? 1 : number);
             }
         } catch (JavaModelException jme) {
             JavaPlugin.log(jme);

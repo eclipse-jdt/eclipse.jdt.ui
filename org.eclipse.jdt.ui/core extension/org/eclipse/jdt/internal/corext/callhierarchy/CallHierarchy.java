@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -242,6 +241,6 @@ public class CallHierarchy {
     }
     
     public static boolean isPossibleParent(Object element) {
-    	return element instanceof IMethod || element instanceof IField;
+    	return element instanceof IMember;
     }
 }
