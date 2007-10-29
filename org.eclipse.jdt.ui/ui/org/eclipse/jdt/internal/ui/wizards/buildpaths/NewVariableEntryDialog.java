@@ -108,8 +108,6 @@ public class NewVariableEntryDialog extends StatusDialog {
 		super(parent);
 		setTitle(NewWizardMessages.NewVariableEntryDialog_title); 
 		
-		int shellStyle= getShellStyle();
-		setShellStyle(shellStyle | SWT.MAX | SWT.RESIZE);
 		updateStatus(new StatusInfo(IStatus.ERROR, "")); //$NON-NLS-1$
 
 		String[] buttonLabels= new String[] { 
@@ -147,6 +145,14 @@ public class NewVariableEntryDialog extends StatusDialog {
 		fResultPaths= null;
 		
 		fVariablesList.selectFirstElement();
+	}
+
+	/*
+	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+	 * @since 3.4
+	 */
+	protected boolean isResizable() {
+		return true;
 	}
 	
 	private void initializeElements() {

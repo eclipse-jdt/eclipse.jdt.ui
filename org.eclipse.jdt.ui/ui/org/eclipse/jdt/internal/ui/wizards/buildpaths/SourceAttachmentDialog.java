@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -46,7 +45,6 @@ public class SourceAttachmentDialog extends StatusDialog {
 	 */
 	public SourceAttachmentDialog(Shell parent, IClasspathEntry entry) {
 		super(parent);
-		setShellStyle(getShellStyle() | SWT.RESIZE);
 
 		IStatusChangeListener listener= new IStatusChangeListener() {
 			public void statusChanged(IStatus status) {
@@ -58,6 +56,14 @@ public class SourceAttachmentDialog extends StatusDialog {
 		setTitle(NewWizardMessages.SourceAttachmentDialog_title); 
 	}
 	
+	/*
+	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+	 * @since 3.4
+	 */
+	protected boolean isResizable() {
+		return true;
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets.Shell)
 	 */
@@ -80,13 +86,18 @@ public class SourceAttachmentDialog extends StatusDialog {
 
 	/**
 	 * Creates the controls for the source attachment configuration.
+	 * 
+	 * @param composite the parent composite
+	 * @return the control 
 	 */	
 	protected Control createSourceAttachmentControls(Composite composite) {
 		return fSourceAttachmentBlock.createControl(composite);
 	}
 	
 	/**
-	 * Returns the configured class path entry
+	 * Returns the configured class path entry.
+	 * 
+	 * @return the configured class path entry 
 	 */
 	public IClasspathEntry getResult() {
 		return fSourceAttachmentBlock.getNewEntry();

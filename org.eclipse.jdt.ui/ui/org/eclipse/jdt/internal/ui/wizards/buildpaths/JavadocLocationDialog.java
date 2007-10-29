@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,6 @@ import java.net.URL;
 
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -48,7 +47,6 @@ public class JavadocLocationDialog extends StatusDialog {
 	 */
 	public JavadocLocationDialog(Shell parent, String libraryName, URL initialURL) {
 		super(parent);
-		setShellStyle(getShellStyle() | SWT.RESIZE);
 		
 		IStatusChangeListener listener= new IStatusChangeListener() {
 			public void statusChanged(IStatus status) {
@@ -58,6 +56,14 @@ public class JavadocLocationDialog extends StatusDialog {
 		
 		setTitle(Messages.format(NewWizardMessages.LibrariesWorkbookPage_JavadocPropertyDialog_title, libraryName)); 
 		fJavadocConfigurationBlock= new JavadocConfigurationBlock(parent, listener, initialURL, false);
+	}
+
+	/*
+	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+	 * @since 3.4
+	 */
+	protected boolean isResizable() {
+		return true;
 	}
 
 	/* (non-Javadoc)

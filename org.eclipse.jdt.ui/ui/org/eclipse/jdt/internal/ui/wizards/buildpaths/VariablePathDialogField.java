@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,8 +50,6 @@ public class VariablePathDialogField extends StringButtonDialogField {
 
 		public ChooseVariableDialog(Shell parent, String variableSelection) {
 			super(parent);
-			int shellStyle= getShellStyle();
-			setShellStyle(shellStyle | SWT.MAX | SWT.RESIZE);			
 			
 			setTitle(NewWizardMessages.VariablePathDialogField_variabledialog_title); 
 			fVariableBlock= new VariableBlock(false, variableSelection);
@@ -70,6 +68,14 @@ public class VariablePathDialogField extends StringButtonDialogField {
 			fVariableBlock.addSelectionChangedListener(this);
 			applyDialogFont(composite);		
 			return composite;
+		}
+
+		/*
+		 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+		 * @since 3.4
+		 */
+		protected boolean isResizable() {
+			return true;
 		}
 
 		protected void okPressed() {
