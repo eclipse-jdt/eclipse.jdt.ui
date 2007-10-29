@@ -330,10 +330,6 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					return false;
 				}
 
-				public boolean isDeleted(Object o) {
-					return false;
-				}
-
 				public void dispose() {
 					if (fListener != null) {
 						JavaCore.removeElementChangedListener(fListener);
@@ -930,8 +926,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on Page
+	/*
+	 * @see org.eclipse.ui.part.Page#init(org.eclipse.ui.part.IPageSite)
 	 */
 	public void init(IPageSite pageSite) {
 		super.init(pageSite);
