@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -123,8 +123,6 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		public EditElementDialog(Shell parent, IJavaElement elementToEdit, String newName) {
 			super(parent);
 			setTitle(RefactoringMessages.RenameTypeWizardSimilarElementsPage_change_element_name);
-			setShellStyle(getShellStyle() | SWT.RESIZE);
-
 			fElementToEdit= elementToEdit;
 
 			fNameField= new StringDialogField();
@@ -132,6 +130,14 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 			fNameField.setLabelText(RefactoringMessages.RenameTypeWizardSimilarElementsPage_enter_new_name);
 
 			fNameField.setText(newName);
+		}
+
+		/*
+		 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+		 * @since 3.4
+		 */
+		protected boolean isResizable() {
+			return true;
 		}
 
 		/*

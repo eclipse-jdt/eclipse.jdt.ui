@@ -82,7 +82,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 			 * @see IDialogFieldListener#dialogFieldChanged(DialogField)
 			 */
 			public void dialogFieldChanged(DialogField field) {
-				doDialogFieldChanged(field);
+				doValidation();
 			}			
 
 			/*
@@ -100,8 +100,6 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 		public FavoriteStaticMemberInputDialog(Shell parent, List existingEntries, boolean isEditingMember) {
 			super(parent);
 			fIsEditingMember= isEditingMember;
-			setShellStyle(getShellStyle() | SWT.RESIZE);
-			
 			fExistingEntries= existingEntries;
 			
 			String label, title;
@@ -121,6 +119,14 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 			fNameDialogField.setButtonLabel(PreferencesMessages.FavoriteStaticMemberInputDialog_browse_button); 
 			fNameDialogField.setDialogFieldListener(adapter);
 			fNameDialogField.setText(""); //$NON-NLS-1$
+		}
+
+		/*
+		 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+		 * @since 3.4
+		 */
+		protected boolean isResizable() {
+			return true;
 		}
 			
 		public void setInitialSelection(String editedEntry) {
@@ -183,11 +189,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 				ExceptionHandler.handle(e, getShell(), PreferencesMessages.FavoriteStaticMemberInputDialog_ChooseTypeDialog_title, PreferencesMessages.FavoriteStaticMemberInputDialog_ChooseTypeDialog_error_message);  
 			}
 		}
-		
-		void doDialogFieldChanged(DialogField field) {
-			doValidation();
-		}
-		
+
 		private void doValidation() {
 			StatusInfo status= new StatusInfo();
 			String newText= fNameDialogField.getText();
@@ -201,7 +203,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 					else
 						status.setError(PreferencesMessages.FavoriteStaticMemberInputDialog_error_invalidTypeName);
 				} else {
-					if (doesExist(newText, fIsEditingMember)) {
+					if (doesExist(newText)) {
 						status.setError(PreferencesMessages.FavoriteStaticMemberInputDialog_error_entryExists); 
 					}
 				}
@@ -209,7 +211,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 			updateStatus(status);
 		}
 		
-		private boolean doesExist(String name, boolean isStatic) {
+		private boolean doesExist(String name) {
 			for (int i= 0; i < fExistingEntries.size(); i++) {
 				String entry= (String) fExistingEntries.get(i);
 				if (name.equals(entry)) {

@@ -63,6 +63,14 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 			setHelpAvailable(false);
 		}
 		
+		/*
+		 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+		 * @since 3.4
+		 */
+		protected boolean isResizable() {
+			return true;
+		}
+		
 		private void createHistoryList() {
 			IListAdapter adapter= new IListAdapter() {
 				public void customButtonPressed(ListDialogField field, int index) {
@@ -180,14 +188,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 		
 		public int getMaxEntries() {
 			return fMaxEntries;
-		}
-		
-		/*
-		 * @see org.eclipse.jface.dialogs.StatusDialog#create()
-		 */
-		public void create() {
-			setShellStyle(getShellStyle() | SWT.RESIZE);
-			super.create();
 		}
 
 	}

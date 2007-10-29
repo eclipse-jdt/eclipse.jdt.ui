@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.OperationCanceledException;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
@@ -25,9 +24,9 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IConfirmQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 
-import org.eclipse.jdt.internal.ui.dialogs.ListDialog;
-
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.ui.dialogs.ListDialog;
 
 public class ReorgQueries implements IReorgQueries {
 	
@@ -400,7 +399,7 @@ public class ReorgQueries implements IReorgQueries {
 	private static final class YesNoListDialog extends ListDialog {
 		private final boolean fYesToAllNoToAll;
 		private YesNoListDialog(Shell parent, boolean includeYesToAllNoToAll) {
-			super(parent, SWT.TITLE | SWT.BORDER | SWT.RESIZE | SWT.APPLICATION_MODAL);
+			super(parent);
 			fYesToAllNoToAll= includeYesToAllNoToAll;
 		}
 

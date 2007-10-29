@@ -109,7 +109,6 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	public TypeSelectionDialog2(Shell parent, boolean multi, IRunnableContext context, 
 			IJavaSearchScope scope, int elementKinds, TypeSelectionExtension extension) {
 		super(parent);
-		setShellStyle(getShellStyle() | SWT.RESIZE);
 		fMultipleSelection= multi;
 		fRunnableContext= context;
 		fScope= scope;

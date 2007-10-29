@@ -102,7 +102,6 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 		 * {@inheritDoc}
 		 */
 		public void create() {
-			setShellStyle(getShellStyle() | SWT.RESIZE);
 			super.create();
 			getShell().setText(RefactoringMessages.ExtractSupertypeMemberPage_choose_type_caption);
 		}

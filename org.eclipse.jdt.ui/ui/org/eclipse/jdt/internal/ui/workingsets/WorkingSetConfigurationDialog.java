@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,7 +82,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		public Image getImage(Object object) {
 			Assert.isTrue(object instanceof IWorkingSet);
 			IWorkingSet workingSet= (IWorkingSet)object;
-			ImageDescriptor imageDescriptor= workingSet.getImage();
+			ImageDescriptor imageDescriptor= workingSet.getImageDescriptor();
 			if (imageDescriptor == null)
 				return null;
 			Image icon= (Image)fIcons.get(imageDescriptor);
@@ -156,7 +156,6 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 			if (filter.select(null, null, allWorkingSets[i]))
 				fAllWorkingSets.add(allWorkingSets[i]);
 		}
-		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
 
 	/**

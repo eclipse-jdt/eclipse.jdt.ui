@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,8 +54,6 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 	public SortMembersMessageDialog(Shell parentShell) {
 		super(OPTIONAL_ID, parentShell, DialogsMessages.SortMembersMessageDialog_dialog_title, null, new String(), INFORMATION, new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 0);
 		
-		setShellStyle(getShellStyle() | SWT.RESIZE);
-		
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 		
 		boolean isSortAll= fDialogSettings.getBoolean(DIALOG_SETTINGS_SORT_ALL);
@@ -67,6 +65,14 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 		fSortAllRadio= new SelectionButtonDialogField(SWT.RADIO);
 		fSortAllRadio.setLabelText(DialogsMessages.SortMembersMessageDialog_sort_all_label);
 		fSortAllRadio.setSelection(isSortAll);
+	}
+
+	/*
+	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+	 * @since 3.4
+	 */
+	protected boolean isResizable() {
+		return true;
 	}
 		
 	private Control createLinkControl(Composite composite) {

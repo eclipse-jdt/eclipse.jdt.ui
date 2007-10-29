@@ -336,8 +336,15 @@ public class LinkFolderDialog extends StatusDialog {
     	fContainer = container;
 		fCreateLink= createLink;
         setTitle(NewWizardMessages.LinkFolderDialog_title); 
-        setShellStyle(getShellStyle() | SWT.RESIZE);
         setStatusLineAboveButtons(true);
+	}
+
+    /*
+	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+	 * @since 3.4
+	 */
+	protected boolean isResizable() {
+		return true;
 	}
 
 	/* (non-Javadoc)

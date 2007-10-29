@@ -110,7 +110,6 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 
 		fProfileManager= profileManager;
 		fNewProfile= newProfile;
-		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX );
 				
 		fProfile= profile;
 		setTitle(Messages.format(FormatterMessages.ModifyDialog_dialog_title, profile.getName()));
@@ -118,6 +117,14 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		setStatusLineAboveButtons(false);
 		fTabPages= new ArrayList();
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();	
+	}
+	
+	/*
+	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+	 * @since 3.4
+	 */
+	protected boolean isResizable() {
+		return true;
 	}
 
 	protected abstract void addPages(Map values);
@@ -138,6 +145,8 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 			((IModifyDialogTabPage)fTabFolder.getSelection()[0].getData()).setInitialFocus();
 		}
 	}
+	
+	
 
 	protected Control createDialogArea(Composite parent) {
 		

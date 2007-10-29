@@ -155,12 +155,12 @@ public class HistoryListAction extends Action {
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.HISTORY_LIST_DIALOG);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.window.Window#create()
+		/*
+		 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+		 * @since 3.4
 		 */
-		public void create() {
-			setShellStyle(getShellStyle() | SWT.RESIZE);
-			super.create();
+		protected boolean isResizable() {
+			return true;
 		}
 
 	}

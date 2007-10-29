@@ -32,12 +32,10 @@ public class ListDialog extends SelectionDialog {
 	private Object fInput;
 	private TableViewer fTableViewer;
 	private boolean fAddCancelButton;
-	private final int fShellStyle;
 	
-	public ListDialog(Shell parent, int shellStyle) {
+	public ListDialog(Shell parent) {
 		super(parent);
 		fAddCancelButton= false;
-		fShellStyle= shellStyle;
 	}
 
 	public void setInput(Object input) {
@@ -62,11 +60,6 @@ public class ListDialog extends SelectionDialog {
 			
 	public boolean hasFilters(){
 		return fTableViewer.getFilters() != null && fTableViewer.getFilters().length != 0;
-	}
-	
-	public void create() {
-		setShellStyle(fShellStyle);
-		super.create();
 	}
 	
 	protected Label createMessageArea(Composite composite) {

@@ -353,11 +353,6 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			setLabelProvider(createLabelProvider());
 		}
 
-		public void create() {
-			setShellStyle(SWT.DIALOG_TRIM | SWT.RESIZE | SWT.MIN);
-			super.create();
-		}
-
 		protected Point getInitialSize() {
 			return getShell().computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.compare;
 
 import java.util.ResourceBundle;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.graphics.Point;
@@ -43,12 +42,18 @@ public abstract class ResizableDialog extends TrayDialog {
 
 	public ResizableDialog(Shell parent, ResourceBundle bundle) {
 		super(parent);
-		setShellStyle(getShellStyle() | SWT.RESIZE  | SWT.MAX);
-		
 		fBundle= bundle;
-		
 		fSettings= CompareUI.getPlugin().getDialogSettings();
 	}
+
+	/*
+	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+	 * @since 3.4
+	 */
+	protected boolean isResizable() {
+		return true;
+	}
+
 	
 	protected Point getInitialSize() {
 		

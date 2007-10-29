@@ -103,8 +103,6 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	
 	public NLSAccessorConfigurationDialog(Shell parent, NLSRefactoring refactoring) {
 		super(parent);
-		setShellStyle(getShellStyle() | SWT.RESIZE);
-		
 		fRefactoring= refactoring;
 		fStati= new IStatus[] { StatusInfo.OK_STATUS, StatusInfo.OK_STATUS, StatusInfo.OK_STATUS, StatusInfo.OK_STATUS, StatusInfo.OK_STATUS };
 		
@@ -142,6 +140,14 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 				NLSUIMessages.NLSAccessorConfigurationDialog_browse5, updateListener); 
 
 		initFields();
+	}
+
+	/*
+	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+	 * @since 3.4
+	 */
+	protected boolean isResizable() {
+		return true;
 	}
 
 	private void initFields() {

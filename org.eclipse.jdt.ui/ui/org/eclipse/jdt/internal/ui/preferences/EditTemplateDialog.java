@@ -177,8 +177,6 @@ class EditTemplateDialog extends StatusDialog {
 	public EditTemplateDialog(Shell parent, Template template, boolean edit, boolean isNameModifiable, ContextTypeRegistry registry) {
 		super(parent);
 		
-		setShellStyle(getShellStyle() | SWT.MAX | SWT.RESIZE);
-		
 		String title= edit
 			? PreferencesMessages.EditTemplateDialog_title_edit
 			: PreferencesMessages.EditTemplateDialog_title_new; 
@@ -205,6 +203,14 @@ class EditTemplateDialog extends StatusDialog {
 		
 		TemplateContextType type= fContextTypeRegistry.getContextType(template.getContextTypeId());
 		fTemplateProcessor.setContextType(type);
+	}
+
+	/*
+	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+	 * @since 3.4
+	 */
+	protected boolean isResizable() {
+		return true;
 	}
 	
 	/*

@@ -77,14 +77,19 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 
 	public CleanUpSelectionDialog(Shell parent, Map settings, String title) {
 		super(parent);
-
-		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX);
-
 		setTitle(title);
 		fWorkingValues= settings;
 		setStatusLineAboveButtons(false);
 		fTabPages= new ArrayList();
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
+	}
+
+	/*
+	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+	 * @since 3.4
+	 */
+	protected boolean isResizable() {
+		return true;
 	}
 
 	protected abstract NamedCleanUpTabPage[] createTabPages(Map workingValues);

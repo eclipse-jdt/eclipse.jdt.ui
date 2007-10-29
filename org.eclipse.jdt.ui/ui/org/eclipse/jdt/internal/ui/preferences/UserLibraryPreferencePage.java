@@ -253,8 +253,6 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			super(shell);
 			initializeDialogUnits(shell);
 			
-			setShellStyle(getShellStyle() | SWT.MAX | SWT.RESIZE);
-			
 			fExistingLibraries= existingLibraries;
 			fSettings= dialogSettings;
 			fLastFile= null;
@@ -302,6 +300,14 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			} else {
 				fLocationField.setText(""); //$NON-NLS-1$
 			}
+		}
+
+		/*
+		 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+		 * @since 3.4
+		 */
+		protected boolean isResizable() {
+			return true;
 		}
 				
 		protected Point getInitialSize() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,8 +49,15 @@ public class RenameTypeWizardSimilarElementsOptionsDialog extends MessageDialog 
 
 	public RenameTypeWizardSimilarElementsOptionsDialog(Shell parentShell, int defaultStrategy) {
 		super(parentShell, RefactoringMessages.RenameTypeWizardSimilarElementsOptionsDialog_title, null, new String(), INFORMATION, new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 0);
-		setShellStyle(getShellStyle() | SWT.RESIZE);
 		fSelectedStrategy= defaultStrategy;
+	}
+
+	/*
+	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+	 * @since 3.4
+	 */
+	protected boolean isResizable() {
+		return true;
 	}
 
 	/*

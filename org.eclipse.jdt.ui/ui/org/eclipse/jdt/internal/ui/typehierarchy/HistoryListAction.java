@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,7 +85,14 @@ public class HistoryListAction extends Action {
 			
 			fHistoryList.selectElements(sel);
 		}
-
+		
+		/*
+		 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+		 * @since 3.4
+		 */
+		protected boolean isResizable() {
+			return true;
+		}
 			
 		/*
 		 * @see Dialog#createDialogArea(Composite)
@@ -151,14 +158,6 @@ public class HistoryListAction extends Action {
 		protected void configureShell(Shell newShell) {
 			super.configureShell(newShell);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.HISTORY_LIST_DIALOG);
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.window.Window#create()
-		 */
-		public void create() {
-			setShellStyle(getShellStyle() | SWT.RESIZE);
-			super.create();
 		}
 
 	}

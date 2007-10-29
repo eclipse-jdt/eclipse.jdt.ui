@@ -295,7 +295,6 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			
 			setTitle(WorkingSetMessages.ConfigureWorkingSetAssignementAction_WorkingSetAssignments_title);
 			setHelpAvailable(false);
-			setShellStyle(getShellStyle() | SWT.RESIZE);
 			
 			fModel= model;
 			fShowVisibleOnly= true;

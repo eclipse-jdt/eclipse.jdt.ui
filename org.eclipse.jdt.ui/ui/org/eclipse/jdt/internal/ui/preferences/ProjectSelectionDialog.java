@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,16 +69,13 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 		setMessage(PreferencesMessages.ProjectSelectionDialog_desciption); 
 		fProjectsWithSpecifics= projectsWithSpecifics;
 		
-        int shellStyle = getShellStyle();
-        setShellStyle(shellStyle | SWT.MAX | SWT.RESIZE);
-		
 		fFilter= new ViewerFilter() {
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				return fProjectsWithSpecifics.contains(element);
 			}
 		};
-		
 	}
+	
 
 	/* (non-Javadoc)
 	 * Method declared on Dialog.
