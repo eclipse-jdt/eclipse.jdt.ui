@@ -341,7 +341,8 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 		try {
 			IEditorPart part= EditorUtility.openInEditor(keyReference.storage, true);
-			EditorUtility.revealInEditor(part, keyReference.offset, keyReference.length);
+			if (part != null)
+				EditorUtility.revealInEditor(part, keyReference.offset, keyReference.length);
 		} catch (PartInitException x) {
 
 			String message= null;

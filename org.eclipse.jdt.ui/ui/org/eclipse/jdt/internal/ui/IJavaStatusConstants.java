@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui;
 
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
 
 /**
@@ -67,5 +68,12 @@ public interface IJavaStatusConstants {
 	 * @since 3.4
 	 */
 	public static final int EDITOR_CHANGED_REGION_CALCULATION= 10007;
+	
+	/**
+	 * Status constant indication that a problem occurred while opening an editor:
+	 * no editor input could be created. See {@link EditorUtility#openInEditor(Object, boolean)}.
+	 * @since 3.4
+	 */
+	public static final int EDITOR_NO_EDITOR_INPUT= 10008;
 	
  }

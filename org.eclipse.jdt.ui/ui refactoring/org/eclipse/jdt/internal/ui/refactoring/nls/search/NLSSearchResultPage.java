@@ -12,21 +12,22 @@
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.search.JavaSearchResultPage;
-import org.eclipse.jdt.internal.ui.search.TextSearchTableContentProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 
-import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
-import org.eclipse.search.ui.text.Match;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
+import org.eclipse.search.ui.text.Match;
+
+import org.eclipse.jdt.internal.ui.search.JavaSearchResultPage;
+import org.eclipse.jdt.internal.ui.search.TextSearchTableContentProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 
 
 public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements IAdaptable {
@@ -43,16 +44,12 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements 
 	 *      int, int)
 	 */
 	protected void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
-		try {
-			IEditorPart editor= fEditorOpener.openMatch(match);
-			if (editor != null && activate)
-				editor.getEditorSite().getPage().activate(editor);
-			if (editor instanceof ITextEditor) {
-				ITextEditor textEditor= (ITextEditor) editor;
-				textEditor.selectAndReveal(currentOffset, currentLength);
-			}
-		} catch (JavaModelException e1) {
-			throw new PartInitException(e1.getStatus());
+		IEditorPart editor= fEditorOpener.openMatch(match);
+		if (editor != null && activate)
+			editor.getEditorSite().getPage().activate(editor);
+		if (editor instanceof ITextEditor) {
+			ITextEditor textEditor= (ITextEditor) editor;
+			textEditor.selectAndReveal(currentOffset, currentLength);
 		}
 	}
 	

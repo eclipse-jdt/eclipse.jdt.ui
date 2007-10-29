@@ -111,7 +111,6 @@ import org.eclipse.jdt.internal.ui.text.LineComparator;
  */
 public class EditorUtility {
 
-
 	/**
 	 * Tests if a CU is currently shown in an editor
 	 * 
@@ -137,7 +136,9 @@ public class EditorUtility {
 	 * 
 	 * @param inputElement the input element
 	 * @return an open editor or <code>null</code> if an external editor was opened
-	 * @throws PartInitException if the editor could not be opened or the input element is not valid
+	 * @throws PartInitException if the editor could not be opened or the input element is not valid.
+	 * Status code {@link IJavaStatusConstants#EDITOR_NO_EDITOR_INPUT} if opening the editor failed as
+	 * no editor input could be created for the given element.
 	 */
 	public static IEditorPart openInEditor(Object inputElement) throws PartInitException {
 		return openInEditor(inputElement, true);
@@ -150,6 +151,8 @@ public class EditorUtility {
 	 * @param activate <code>true</code> if the editor should be activated
 	 * @return an open editor or <code>null</code> if an external editor was opened
 	 * @throws PartInitException if the editor could not be opened or the input element is not valid
+	 * Status code {@link IJavaStatusConstants#EDITOR_NO_EDITOR_INPUT} if opening the editor failed as
+	 * no editor input could be created for the given element.
 	 */
 	public static IEditorPart openInEditor(Object inputElement, boolean activate) throws PartInitException {
 
@@ -330,11 +333,15 @@ public class EditorUtility {
 		return editorPart;
 	}
 
-	private static void throwPartInitException(String message) throws PartInitException {
-		IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, null);
+	private static void throwPartInitException(String message, int code) throws PartInitException {
+		IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, code, message, null);
 		throw new PartInitException(status);
 	}
-
+	
+	private static void throwPartInitException(String message) throws PartInitException {
+		throwPartInitException(message, IStatus.OK);
+	}
+		
 	private static void initializeHighlightRange(IEditorPart editorPart) {
 		if (editorPart instanceof ITextEditor) {
 			IAction toggleAction= editorPart.getEditorSite().getActionBars().getGlobalActionHandler(ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY);

@@ -67,7 +67,6 @@ import org.eclipse.search.ui.text.Match;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -178,12 +177,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	}
 	
 	public void showMatch(Match match, int offset, int length, boolean activate) throws PartInitException {
-		IEditorPart editor;
-		try {
-			editor= fEditorOpener.openMatch(match);
-		} catch (JavaModelException e) {
-			throw new PartInitException(e.getStatus());
-		}
+		IEditorPart editor= fEditorOpener.openMatch(match);
 		
 		if (editor != null && activate)
 			editor.getEditorSite().getPage().activate(editor);
@@ -191,7 +185,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		if (editor instanceof ITextEditor) {
 			ITextEditor textEditor= (ITextEditor) editor;
 			textEditor.selectAndReveal(offset, length);
-		} else if (editor != null){
+		} else if (editor != null) {
 			if (element instanceof IFile) {
 				IFile file= (IFile) element;
 				showWithMarker(editor, file, offset, length);

@@ -33,10 +33,11 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ISourceReference;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
@@ -45,7 +46,7 @@ public class JavaSearchEditorOpener {
 	
 	private IEditorReference fReusedEditor;
 
-	public IEditorPart openElement(Object element) throws PartInitException, JavaModelException {
+	public IEditorPart openElement(Object element) throws PartInitException {
 		IWorkbenchPage wbPage= JavaPlugin.getActivePage();
 		IEditorPart editor;
 		if (NewSearchUI.reuseEditor())
@@ -59,7 +60,7 @@ public class JavaSearchEditorOpener {
 		return editor;
 	}
 		
-	public IEditorPart openMatch(Match match) throws PartInitException, JavaModelException {
+	public IEditorPart openMatch(Match match) throws PartInitException {
 		Object element= getElementToOpen(match);
 		return openElement(element);
 	}
@@ -68,11 +69,18 @@ public class JavaSearchEditorOpener {
 		return match.getElement();
 	}
 
-	private IEditorPart showWithoutReuse(Object element) throws PartInitException, JavaModelException {
-		return EditorUtility.openInEditor(element, false);
+	private IEditorPart showWithoutReuse(Object element) throws PartInitException {
+		try {
+			return EditorUtility.openInEditor(element, false);
+		} catch (PartInitException e) {
+			if (e.getStatus().getCode() != IJavaStatusConstants.EDITOR_NO_EDITOR_INPUT) {
+				throw e;
+			}
+		}
+		return null;
 	}
 
-	private IEditorPart showWithReuse(Object element, IWorkbenchPage wbPage) throws JavaModelException, PartInitException {
+	private IEditorPart showWithReuse(Object element, IWorkbenchPage wbPage) throws PartInitException {
 		IFile file= getFile(element);
 		if (file != null) {
 			String editorID= getEditorID(file);
@@ -85,18 +93,17 @@ public class JavaSearchEditorOpener {
 		return null;
 	}
 
-	private IFile getFile(Object element) throws JavaModelException {
+	private IFile getFile(Object element) {
 		if (element instanceof IFile)
 			return (IFile) element;
-		if (element instanceof IJavaElement) {
+		if (element instanceof ISourceReference) {
 			IJavaElement jElement= (IJavaElement) element;
 			ICompilationUnit cu= (ICompilationUnit) jElement.getAncestor(IJavaElement.COMPILATION_UNIT);
-			if (cu != null) {
-				return (IFile) cu.getCorrespondingResource();
-			}
+			if (cu != null)
+				return (IFile) cu.getResource();
 			IClassFile cf= (IClassFile) jElement.getAncestor(IJavaElement.CLASS_FILE);
 			if (cf != null)
-				return (IFile) cf.getCorrespondingResource();
+				return (IFile) cf.getResource();
 		}
 		return null;
 	}
