@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,7 +79,6 @@ public class AccessRulesDialog extends StatusDialog {
 	
 	public AccessRulesDialog(Shell parent, CPListElement entryToEdit, IJavaProject project, boolean parentCanSwitchPage) {
 		super(parent);
-		setShellStyle(getShellStyle() | SWT.RESIZE);
 		
 		fCurrElement= entryToEdit;
 		fProject= project; // can be null
@@ -95,7 +94,14 @@ public class AccessRulesDialog extends StatusDialog {
 		fParentCanSwitchPage= parentCanSwitchPage;
 	}
 	
-	
+	/*
+	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+	 * @since 3.4
+	 */
+	protected boolean isResizable() {
+		return true;
+	}
+
 	private ListDialogField createListContents(CPListElement entryToEdit) {
 		String label= NewWizardMessages.AccessRulesDialog_rules_label; 
 		String[] buttonLabels= new String[] {

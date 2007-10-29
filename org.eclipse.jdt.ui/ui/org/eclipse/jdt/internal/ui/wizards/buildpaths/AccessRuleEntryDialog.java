@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,7 +49,6 @@ public class AccessRuleEntryDialog extends StatusDialog {
 		
 	public AccessRuleEntryDialog(Shell parent, IAccessRule ruleToEdit, CPListElement entryToEdit) {
 		super(parent);
-		setShellStyle(getShellStyle() | SWT.RESIZE);
 		
 		String title, message;
 		if (ruleToEdit == null) {
@@ -96,7 +95,14 @@ public class AccessRuleEntryDialog extends StatusDialog {
 			}
 		}
 	}
-	
+
+	/*
+	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+	 * @since 3.4
+	 */
+	protected boolean isResizable() {
+		return true;
+	}
 	
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);

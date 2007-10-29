@@ -44,8 +44,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 
-/**
-  */
+
 public class EditVariableEntryDialog extends StatusDialog {
 
 	/**
@@ -60,14 +59,10 @@ public class EditVariableEntryDialog extends StatusDialog {
 	private VariablePathDialogField fFileNameField;
 	private CLabel fFullPathResolvedLabel;
 
-	/**
-	 * Constructor for EditVariableEntryDialog.
-	 * @param parent
-	 */
+
 	public EditVariableEntryDialog(Shell parent, IPath initialEntry, IPath[] existingEntries) {
 		super(parent);
 		setTitle(NewWizardMessages.EditVariableEntryDialog_title); 
-		setShellStyle(getShellStyle() | SWT.RESIZE);
 		
 		fExistingEntries= new HashSet();
 		if (existingEntries != null) {
@@ -89,7 +84,15 @@ public class EditVariableEntryDialog extends StatusDialog {
 		String initialString= initialEntry != null ? initialEntry.toString() : ""; //$NON-NLS-1$
 		fFileNameField.setText(initialString);
 	}
-	
+
+	/*
+	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+	 * @since 3.4
+	 */
+	protected boolean isResizable() {
+		return true;
+	}
+
 	public IPath getPath() {
 		return Path.fromOSString(fFileNameField.getText());
 	}
@@ -197,7 +200,11 @@ public class EditVariableEntryDialog extends StatusDialog {
 		
 	/**
 	 * Takes a path and replaces the beginning with a variable name
-	 * (if the beginning matches with the variables value)
+	 * (if the beginning matches with the variables value).
+	 * 
+	 * @param path the path 
+	 * @param varName the variable name
+	 * @return the modified path
 	 */
 	private IPath modifyPath(IPath path, String varName) {
 		if (varName == null || path == null) {
