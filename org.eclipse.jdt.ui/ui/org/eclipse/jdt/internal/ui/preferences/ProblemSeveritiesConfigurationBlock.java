@@ -85,6 +85,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_PB_POTENTIAL_NULL_REFERENCE= getJDTCoreKey(JavaCore.COMPILER_PB_POTENTIAL_NULL_REFERENCE);
 	private static final Key PREF_PB_REDUNDANT_NULL_CHECK= getJDTCoreKey(JavaCore.COMPILER_PB_REDUNDANT_NULL_CHECK);
 	
+	private static final Key PREF_PB_UNUSED_WARNING_TOKEN= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_WARNING_TOKEN);
+	
 	private static final Key PREF_15_PB_UNCHECKED_TYPE_OPERATION= getJDTCoreKey(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION);
 	private static final Key PREF_15_PB_FINAL_PARAM_BOUND= getJDTCoreKey(JavaCore.COMPILER_PB_FINAL_PARAMETER_BOUND);
 	private static final Key PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST= getJDTCoreKey(JavaCore.COMPILER_PB_VARARGS_ARGUMENT_NEED_CAST);
@@ -99,7 +101,6 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_PB_SUPPRESS_WARNINGS= getJDTCoreKey(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS);
 	private static final Key PREF_PB_UNHANDLED_WARNING_TOKEN= getJDTCoreKey(JavaCore.COMPILER_PB_UNHANDLED_WARNING_TOKEN);
 	private static final Key PREF_PB_FATAL_OPTIONAL_ERROR= getJDTCoreKey(JavaCore.COMPILER_PB_FATAL_OPTIONAL_ERROR);
-
 	
 	// values
 	private static final String ERROR= JavaCore.ERROR;
@@ -139,10 +140,11 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_INCLUDE_DOC_COMMENT_REFERENCE, 
 				PREF_PB_MISSING_SERIAL_VERSION, PREF_PB_PARAMETER_ASSIGNMENT, PREF_PB_NULL_REFERENCE, PREF_PB_POTENTIAL_NULL_REFERENCE,
 				PREF_PB_REDUNDANT_NULL_CHECK, PREF_PB_FALLTHROUGH_CASE,
+				PREF_PB_UNUSED_WARNING_TOKEN,
 				PREF_15_PB_UNCHECKED_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST,
 				PREF_15_PB_AUTOBOXING_PROBLEM, PREF_15_PB_MISSING_OVERRIDE_ANNOTATION, PREF_15_PB_ANNOTATION_SUPER_INTERFACE,
 				PREF_15_PB_TYPE_PARAMETER_HIDING, PREF_15_PB_INCOMPLETE_ENUM_SWITCH, PREF_PB_MISSING_DEPRECATED_ANNOTATION,
-				PREF_15_PB_RAW_TYPE_REFERENCE, PREF_PB_FATAL_OPTIONAL_ERROR,
+				PREF_15_PB_RAW_TYPE_REFERENCE, PREF_PB_FATAL_OPTIONAL_ERROR, 
 				PREF_PB_FORBIDDEN_REFERENCE, PREF_PB_DISCOURRAGED_REFERENCE, PREF_PB_SUPPRESS_WARNINGS, PREF_PB_UNHANDLED_WARNING_TOKEN
 			};
 	}
@@ -390,8 +392,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_label_label; 
 		addComboBox(inner, label, PREF_PB_UNUSED_LABEL, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
-	
-		
+			
 		// --- generics
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_section_generics;
@@ -438,6 +439,10 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_enable_surpresswarning_annotation; 
 		addCheckBox(inner, label, PREF_PB_SUPPRESS_WARNINGS, enabledDisabled, 0);
+		
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_unused_suppresswarnings_token;
+		addComboBox(inner, label, PREF_PB_UNUSED_WARNING_TOKEN, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
+
 
 		new Label(composite, SWT.NONE);
 		
