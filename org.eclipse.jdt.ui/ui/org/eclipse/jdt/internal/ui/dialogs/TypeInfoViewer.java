@@ -75,8 +75,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
-import org.eclipse.jdt.internal.corext.util.TypeInfoRequestorAdapter;
 import org.eclipse.jdt.internal.corext.util.TypeInfoFilter;
+import org.eclipse.jdt.internal.corext.util.TypeInfoRequestorAdapter;
 
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstallType;
@@ -211,8 +211,7 @@ public class TypeInfoViewer {
 				if (type.getPackageFragmentRoot().getKind() == IPackageFragmentRoot.K_SOURCE)
 					return 0;
 			} catch (JavaModelException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				JavaPlugin.log(e);
 			}
 			return 1;
 		}
@@ -499,7 +498,7 @@ public class TypeInfoViewer {
 		protected TypeInfoFilter fFilter;
 		protected OpenTypeHistory fHistory;
 		
-		protected AbstractSearchJob(int ticket, TypeInfoViewer viewer, TypeInfoFilter filter, OpenTypeHistory history, int numberOfVisibleItems, int mode) {
+		protected AbstractSearchJob(int ticket, TypeInfoViewer viewer, TypeInfoFilter filter, OpenTypeHistory history, int mode) {
 			super(JavaUIMessages.TypeInfoViewer_job_label, viewer);
 			fMode= mode;
 			fTicket= ticket;
@@ -613,7 +612,7 @@ public class TypeInfoViewer {
 					throw new OperationCanceledException();
 			}
 		}
-		private void internalRunVirtual(ProgressMonitor monitor) throws CoreException, InterruptedException {
+		private void internalRunVirtual(ProgressMonitor monitor) throws CoreException, OperationCanceledException {
 			if (monitor.isCanceled())
 				throw new OperationCanceledException();
 			
@@ -649,9 +648,9 @@ public class TypeInfoViewer {
 		private int fElementKind;
 		private SearchRequestor fReqestor;
 		
-		public SearchEngineJob(int ticket, TypeInfoViewer viewer, TypeInfoFilter filter, OpenTypeHistory history, int numberOfVisibleItems, int mode, 
-				IJavaSearchScope scope, int elementKind) {
-			super(ticket, viewer, filter, history, numberOfVisibleItems, mode);
+		public SearchEngineJob(int ticket, TypeInfoViewer viewer, TypeInfoFilter filter, OpenTypeHistory history, int mode, IJavaSearchScope scope, 
+				int elementKind) {
+			super(ticket, viewer, filter, history, mode);
 			fScope= scope;
 			fElementKind= elementKind;
 			fReqestor= new SearchRequestor(filter);
@@ -690,8 +689,8 @@ public class TypeInfoViewer {
 	
 	private static class CachedResultJob extends AbstractSearchJob {
 		private TypeNameMatch[] fLastResult;
-		public CachedResultJob(int ticket, TypeNameMatch[] lastResult, TypeInfoViewer viewer, TypeInfoFilter filter, OpenTypeHistory history, int numberOfVisibleItems, int mode) {
-			super(ticket, viewer, filter, history, numberOfVisibleItems, mode);
+		public CachedResultJob(int ticket, TypeNameMatch[] lastResult, TypeInfoViewer viewer, TypeInfoFilter filter, OpenTypeHistory history, int mode) {
+			super(ticket, viewer, filter, history, mode);
 			fLastResult= lastResult;
 		}
 		protected TypeNameMatch[] getSearchResult(Set filteredHistory, ProgressMonitor monitor) throws CoreException {
@@ -928,7 +927,7 @@ public class TypeInfoViewer {
 		});
 		fTable.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
-				stop(true, true);
+				stop(true);
 				fDashLineColor.dispose();
 				fSeparatorIcon.dispose();
 				fImageManager.dispose();
@@ -1029,11 +1028,7 @@ public class TypeInfoViewer {
 		return (TypeNameMatch[])result.toArray(new TypeNameMatch[result.size()]);
 	}
 	
-	public void stop() {
-		stop(true, false);
-	}
-	
-	public void stop(boolean stopSyncJob, boolean dispose) {
+	public void stop(boolean stopSyncJob) {
 		if (fSyncJob != null && stopSyncJob) {
 			fSyncJob.stop();
 			fSyncJob= null;
@@ -1045,7 +1040,7 @@ public class TypeInfoViewer {
 	}
 	
 	public void forceSearch() {
-		stop(false, false);
+		stop(false);
 		if (fTypeInfoFilter == null) {
 			reset();
 		} else {
@@ -1057,7 +1052,7 @@ public class TypeInfoViewer {
 	}
 	
 	public void setSearchPattern(String text) {
-		stop(false, false);
+		stop(false);
 		if (text.length() == 0 || "*".equals(text)) { //$NON-NLS-1$
 			fTypeInfoFilter= null;
 			reset();
@@ -1071,7 +1066,7 @@ public class TypeInfoViewer {
 		fSearchScope= scope;
 		if (!refresh)
 			return;
-		stop(false, false);
+		stop(false);
 		fLastCompletedFilter= null;
 		fLastCompletedResult= null;
 		if (fTypeInfoFilter == null) {
@@ -1085,7 +1080,7 @@ public class TypeInfoViewer {
 		fLabelProvider.setFullyQualifyDuplicates(value);
 		if (!refresh)
 			return;
-		stop(false, false);
+		stop(false);
 		if (fTypeInfoFilter == null) {
 			reset();
 		} else {
@@ -1326,14 +1321,12 @@ public class TypeInfoViewer {
 		fSearchJobTicket++;
 		if (fLastCompletedFilter != null && fTypeInfoFilter.isSubFilter(fLastCompletedFilter.getText())) {
 			fSearchJob= new CachedResultJob(fSearchJobTicket, fLastCompletedResult, this, fTypeInfoFilter, 
-				fHistory, fNumberOfVisibleItems, 
-				mode);
+				fHistory, mode);
 		} else {
 			fLastCompletedFilter= null;
 			fLastCompletedResult= null;
 			fSearchJob= new SearchEngineJob(fSearchJobTicket, this, fTypeInfoFilter, 
-				fHistory, fNumberOfVisibleItems, 
-				mode, fSearchScope, fElementKind);
+				fHistory, mode, fSearchScope, fElementKind);
 		}
 		fSearchJob.schedule();
 	}
