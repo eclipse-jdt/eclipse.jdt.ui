@@ -30,8 +30,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage;
@@ -80,7 +78,7 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 		link.setText(DialogsMessages.SortMembersMessageDialog_description); 
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				openCodeTempatePage(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID);
+				openMembersSortOrderPage();
 			}
 		});
 		link.setToolTipText(DialogsMessages.SortMembersMessageDialog_link_tooltip); 
@@ -91,11 +89,14 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 		
 		return link;
 	}
-	
-	protected void openCodeTempatePage(String id) {
+
+	/**
+	 * Opens the 'Members Sort Order' preference page.
+	 */
+	protected void openMembersSortOrderPage() {
 		PreferencesUtil.createPreferenceDialogOn(getShell(), MembersOrderPreferencePage.PREF_ID, null, null).open();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.dialogs.IconAndMessageDialog#createContents(org.eclipse.swt.widgets.Composite)
 	 */
