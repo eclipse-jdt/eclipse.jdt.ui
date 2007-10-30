@@ -35,7 +35,15 @@ public class SearchLeakTest extends LeakTestCase {
 	public static Test suite() {
 		return allTests();
 	}
+
+	protected void setUp() throws Exception {
+		super.setUp();
+	}
 	
+	protected void tearDown() throws Exception {
+		super.tearDown();
+	}
+
 	public void testRemoveSearchQueries() throws Exception {
 		JavaSearchQuery query1= SearchTestHelper.runMethodRefQuery("junit.framework.Test", "countTestCases", new String[0]);
 		JavaSearchQuery query2= SearchTestHelper.runMethodRefQuery("junit.framework.TestCase", "countTestCases", new String[0]);

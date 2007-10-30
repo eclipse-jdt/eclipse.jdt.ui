@@ -16,7 +16,7 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.ui.tests.leaks.JavaLeakTest;
 import org.eclipse.jdt.ui.tests.leaks.TextViewerUndoManagerLeakTest;
 import org.eclipse.jdt.ui.tests.leaks.UndoManagerLeakTest;
-import org.eclipse.jdt.ui.tests.search.SearchLeakTest;
+import org.eclipse.jdt.ui.tests.search.SearchLeakTestWrapper;
 
 
 /**
@@ -39,7 +39,7 @@ public class LeakTestSuite extends TestSuite {
 	 */
 	public LeakTestSuite() {
 		addTest(JavaLeakTest.suite());
-		addTest(SearchLeakTest.suite());
+		addTest(SearchLeakTestWrapper.suite());
 		addTest(UndoManagerLeakTest.suite());
 		addTest(TextViewerUndoManagerLeakTest.suite());
 	}
