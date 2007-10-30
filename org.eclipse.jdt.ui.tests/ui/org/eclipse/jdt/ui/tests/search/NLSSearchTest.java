@@ -72,7 +72,7 @@ public class NLSSearchTest extends TestCase {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 
-	private IFile write(IFolder folder, final String content, final String fileName) throws IOException, CoreException {
+	private IFile write(IFolder folder, final String content, final String fileName) throws CoreException {
 		InputStream stream= new InputStream() {
 			private Reader fReader= new StringReader(content);
 			public int read() throws IOException {
