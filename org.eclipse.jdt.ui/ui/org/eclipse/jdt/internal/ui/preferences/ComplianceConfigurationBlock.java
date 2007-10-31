@@ -467,8 +467,12 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#useProjectSpecificSettings(boolean)
 	 */
 	public void useProjectSpecificSettings(boolean enable) {
+		String isDefault= getValue(INTR_DEFAULT_COMPLIANCE);
 		super.useProjectSpecificSettings(enable);
+		setValue(INTR_DEFAULT_COMPLIANCE, isDefault);
+		updateCheckBox(getCheckBox(INTR_DEFAULT_COMPLIANCE));
 		validateComplianceStatus();
+
 	}
 		
 	/*
