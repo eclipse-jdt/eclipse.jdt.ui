@@ -69,15 +69,7 @@ public class CodeFormatFix implements IFix {
 				if (regions.length == 0)
 					return null;
 
-				//Bug 203304: https://bugs.eclipse.org/bugs/show_bug.cgi?id=201063
 				edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT, content, regions, 0, lineDelemiter, formatterSettings);
-				edit= new MultiTextEdit();
-				for (int i= 0; i < regions.length; i++) {
-					TextEdit formatEdit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT, content, regions[i].getOffset(), regions[i].getLength(), 0, lineDelemiter, formatterSettings);
-					if (formatEdit != null && (!(formatEdit instanceof MultiTextEdit) || formatEdit.hasChildren())) {
-						edit.addChild(formatEdit);
-					}
-				}
 			}
 			if (edit != null && (!(edit instanceof MultiTextEdit) || edit.hasChildren())) {
 				multiEdit.addChild(edit);

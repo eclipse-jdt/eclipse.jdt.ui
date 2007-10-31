@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -285,6 +286,41 @@ public class CodeFormatterUtil {
 			throw new IllegalArgumentException("offset or length outside of string. offset: " + offset + ", length: " + length + ", string size: " + source.length()); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 		}
 		return ToolFactory.createCodeFormatter(options, ToolFactory.M_FORMAT_EXISTING).format(kind, source, offset, length, indentationLevel, lineSeparator);
+	}
+
+	/**
+	 * Creates edits that describe how to re-format the regions in the given string. 
+	 * This method should be used for formatting existing code.
+	 * Returns <code>null</code> if the code could not be formatted for the given kind.
+	 * 
+	 * <p>No region in <code>regions</code> must overlap with any other region in <code>regions</code>.
+	 * Each region must be within source. There must be at least one region. Regions must be sorted
+	 * by their offsets, smaller offset first.</p>
+	 * 
+	 * @param kind
+	 *        Use to specify the kind of the code snippet to format.
+	 *        It can be any of K_EXPRESSION, K_STATEMENTS, K_CLASS_BODY_DECLARATIONS, K_COMPILATION_UNIT, K_UNKNOWN
+	 * @param source
+	 *        The source to format
+	 * @param regions
+	 *        a set of regions in the string to format
+	 * @param indentationLevel
+	 *        The initial indentation level, used to shift left/right the entire source fragment. 
+	 *        An initial indentation level of zero or below has no effect.
+	 * @param lineSeparator
+	 *        The line separator to use in formatted source, 
+	 *        if set to <code>null</code>, then the platform default one will be used.
+	 * @param options
+	 *        The options map to use for formatting with the default code formatter. 
+	 *        Recognized options are documented on <code>JavaCore#getDefaultOptions()</code>. 
+	 *        If set to <code>null</code>, then use the current settings from <code>JavaCore#getOptions</code>.
+	 * @return an TextEdit describing the changes required to format source 
+	 * @throws IllegalArgumentException if there is no region, a region overlaps with another region, or the regions are not
+	 *         sorted in the ascending order.
+	 * @since 3.4
+	 */
+	public static TextEdit reformat(int kind, String source, IRegion[] regions, int indentationLevel, String lineSeparator, Map options) {
+		return ToolFactory.createCodeFormatter(options, ToolFactory.M_FORMAT_EXISTING).format(kind, source, regions, indentationLevel, lineSeparator);
 	}
 
 	/**
