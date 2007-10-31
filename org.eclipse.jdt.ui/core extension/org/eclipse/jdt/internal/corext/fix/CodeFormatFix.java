@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.ui.text.IJavaPartitions;
@@ -110,7 +111,7 @@ public class CodeFormatFix implements IFix {
 							if (j < lineExclusiveEnd) {
 								DeleteEdit edit= new DeleteEdit(j, lineExclusiveEnd - j);
 								if (!contains(regions, j)) {
-									multiEdit.addChild(edit);
+									TextChangeCompatibility.insert(multiEdit, edit);
 									group.addTextEdit(edit);
 								}
 							}
@@ -123,7 +124,7 @@ public class CodeFormatFix implements IFix {
 								if (j < lineExclusiveEnd) {
 									DeleteEdit edit= new DeleteEdit(j, lineExclusiveEnd - j);
 									if (!contains(regions, j)) {
-										multiEdit.addChild(edit);
+										TextChangeCompatibility.insert(multiEdit, edit);
 										group.addTextEdit(edit);
 									}
 								}
@@ -150,13 +151,13 @@ public class CodeFormatFix implements IFix {
 								TextEdit child= children[i];
 								edit.removeChild(child);
 								if (!contains(regions, child.getOffset())) {
-									multiEdit.addChild(child);
+									TextChangeCompatibility.insert(multiEdit, child);
 									group.addTextEdit(child);
 								}
 							}
 						} else {
 							if (!contains(regions, edit.getOffset())) {
-								multiEdit.addChild(edit);
+								TextChangeCompatibility.insert(multiEdit, edit);
 								group.addTextEdit(edit);
 							}
 						}

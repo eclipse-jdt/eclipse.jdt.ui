@@ -344,4 +344,41 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
+	
+	public void testFormatChangesBug207965_2() throws Exception {
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public int i = 10;\n");
+		buf.append("    \n");
+		buf.append("    public int j = 10;\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
+		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
+		enable(CleanUpConstants.FORMAT_CORRECT_INDENTATION);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public int i= 10;\n");
+		buf.append("    \n");
+		buf.append("    public int j= 10;\n");
+		buf.append("}\n");
+
+		editCUInEditor(cu1, buf.toString());
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public int i = 10;\n");
+		buf.append("\n");
+		buf.append("    public int j = 10;\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertEquals(expected1, cu1.getBuffer().getContents());
+	}
 }
