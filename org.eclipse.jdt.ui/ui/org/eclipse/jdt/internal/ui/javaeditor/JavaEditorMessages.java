@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Andre Soereng <andreis@fast.no> - [syntax highlighting] highlight numbers - https://bugs.eclipse.org/bugs/show_bug.cgi?id=63573
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
@@ -145,6 +146,7 @@ final class JavaEditorMessages extends NLS {
 	public static String SemanticHighlighting_typeVariables;
 	public static String SemanticHighlighting_method;
 	public static String SemanticHighlighting_autoboxing;
+	public static String SemanticHighlighting_numbers;
 	public static String SemanticHighlighting_classes;
 	public static String SemanticHighlighting_enums;
 	public static String SemanticHighlighting_interfaces;

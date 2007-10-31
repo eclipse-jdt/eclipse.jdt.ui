@@ -7,13 +7,11 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Andre Soereng <andreis@fast.no> - [syntax highlighting] highlight numbers - https://bugs.eclipse.org/bugs/show_bug.cgi?id=63573
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
-
 
 /**
  * Defines the constants used in the <code>org.eclipse.ui.themes</code>
@@ -79,11 +77,6 @@ public interface IJavaThemeConstants {
 	 * A theme constant that holds the color used to render brackets.
 	 */
 	public final String EDITOR_JAVA_BRACKET_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVA_BRACKET_COLOR;
-	
-	/**
-	 * A theme constant that holds the color used to render numbers.
-	 */
-	public final String EDITOR_JAVA_NUMBER_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVA_NUMBER_COLOR;
 
 	/**
 	 * A theme constant that holds the color used to render task tags.

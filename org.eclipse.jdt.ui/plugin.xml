@@ -5705,12 +5705,6 @@
          value="0,0,0">
       </colorDefinition>
       <colorDefinition
-         id="org.eclipse.jdt.ui.java_number"
-         isEditable="false"
-         label="%Dummy.label"
-         value="42,0,255">
-      </colorDefinition>
-      <colorDefinition
          id="org.eclipse.jdt.ui.java_doc_keyword"
          isEditable="false"
          label="%Dummy.label"
@@ -5950,6 +5944,13 @@
          label="%Dummy.label"
          value="0,0,0">
       </colorDefinition>
+      <colorDefinition
+         id="org.eclipse.jdt.ui.numberHighlighting"
+         isEditable="false"
+         label="%Dummy.label"
+         value="42,0,255">
+      </colorDefinition>
+
 
       <theme
          id="org.eclipse.ui.ide.systemDefault">
@@ -5979,10 +5980,6 @@
          </colorOverride>
          <colorOverride
             id="org.eclipse.jdt.ui.java_operator"
-            value="COLOR_LIST_FOREGROUND">
-         </colorOverride>
-         <colorOverride
-            id="org.eclipse.jdt.ui.java_number"
             value="COLOR_LIST_FOREGROUND">
          </colorOverride>
          <colorOverride
@@ -6146,7 +6143,7 @@
             value="COLOR_LIST_FOREGROUND">
          </colorOverride>
          <colorOverride
-            id="org.eclipse.jdt.ui.staticMethodDeclarationHighlighting"
+            id="org.eclipse.jdt.ui.numberHighlighting"
             value="COLOR_LIST_FOREGROUND">
          </colorOverride>
       </theme>

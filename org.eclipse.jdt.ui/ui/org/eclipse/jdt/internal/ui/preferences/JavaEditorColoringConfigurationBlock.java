@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *     Andre Soereng <andreis@fast.no> - [syntax highlighting] highlight numbers - https://bugs.eclipse.org/bugs/show_bug.cgi?id=63573
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.io.BufferedReader;
@@ -308,7 +307,6 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			{ PreferencesMessages.JavaEditorPreferencePage_returnKeyword, PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_COLOR }, 
 			{ PreferencesMessages.JavaEditorPreferencePage_operators, PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR }, 
 			{ PreferencesMessages.JavaEditorPreferencePage_brackets, PreferenceConstants.EDITOR_JAVA_BRACKET_COLOR },
-			{ PreferencesMessages.JavaEditorPreferencePage_numbers, PreferenceConstants.EDITOR_JAVA_NUMBER_COLOR },
 			{ PreferencesMessages.JavaEditorPreferencePage_strings, PreferenceConstants.EDITOR_STRING_COLOR }, 
 			{ PreferencesMessages.JavaEditorPreferencePage_others, PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR }, 
 	};
@@ -884,6 +882,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			{ createHighlightedRange(16, 16,  8, SemanticHighlightings.INHERITED_METHOD_INVOCATION), createHighlightedRange(16, 16,  8, SemanticHighlightings.METHOD) },
 			{ createHighlightedRange(17,  2, 12, SemanticHighlightings.STATIC_METHOD_INVOCATION), createHighlightedRange(17,  2, 12, SemanticHighlightings.METHOD) },
 			{ createHighlightedRange(18, 9,  3, SemanticHighlightings.METHOD) },
+			{ createHighlightedRange(16, 13, 2, SemanticHighlightings.NUMBER) },
 			{ createHighlightedRange(18, 13,  5, SemanticHighlightings.LOCAL_VARIABLE) },
 			{ createHighlightedRange(18, 22,  9, SemanticHighlightings.AUTOBOXING) },
 		};
