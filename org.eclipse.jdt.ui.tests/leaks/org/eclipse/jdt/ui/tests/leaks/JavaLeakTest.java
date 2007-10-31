@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,7 +39,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -138,7 +137,7 @@ public class JavaLeakTest extends LeakTestCase {
 		assertInstanceCount(clazz, 0);
 	}
 
-	private IEditorPart internalTestEditorOpen(Object objectToOpen, final Class clazz) throws JavaModelException, PartInitException {
+	private IEditorPart internalTestEditorOpen(Object objectToOpen, final Class clazz) throws PartInitException {
 		// verify that no instance is there when we start
 		assertInstanceCount(clazz, 0);
 		
