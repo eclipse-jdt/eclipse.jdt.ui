@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,6 +26,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
@@ -48,6 +51,10 @@ public class CodeFormatFix implements IFix {
 		if (!format && !removeTrailingWhitespacesAll && !removeTrailingWhitespacesIgnorEmpty && !correctIndentation)
 			return null;
 		
+		CompilationUnitChange change= new CompilationUnitChange("", cu); //$NON-NLS-1$
+		MultiTextEdit multiEdit= new MultiTextEdit();
+		change.setEdit(multiEdit);
+		
 		if (format) {
 			Map formatterSettings= new HashMap(cu.getJavaProject().getOptions(true));
 			
@@ -63,7 +70,7 @@ public class CodeFormatFix implements IFix {
 					return null;
 
 				//Bug 203304: https://bugs.eclipse.org/bugs/show_bug.cgi?id=201063
-//				edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT, content, regions, 0, lineDelemiter, formatterSettings);
+				edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT, content, regions, 0, lineDelemiter, formatterSettings);
 				edit= new MultiTextEdit();
 				for (int i= 0; i < regions.length; i++) {
 					TextEdit formatEdit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT, content, regions[i].getOffset(), regions[i].getLength(), 0, lineDelemiter, formatterSettings);
@@ -72,16 +79,19 @@ public class CodeFormatFix implements IFix {
 					}
 				}
 			}
-			if (edit == null || (edit instanceof MultiTextEdit && !edit.hasChildren()))
-				return null;
+			if (edit != null && (!(edit instanceof MultiTextEdit) || edit.hasChildren())) {
+				multiEdit.addChild(edit);
 
-			return new TextEditFix(edit, cu, MultiFixMessages.CodeFormatFix_description);
-		} else if (removeTrailingWhitespacesAll || removeTrailingWhitespacesIgnorEmpty || correctIndentation) {
+				String label= MultiFixMessages.CodeFormatFix_description;
+				CategorizedTextEditGroup group= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
+				group.addTextEdit(edit);
+
+				change.addTextEditGroup(group);
+			}
+		}
+
+		if ((removeTrailingWhitespacesAll || removeTrailingWhitespacesIgnorEmpty || correctIndentation) && (!format || regions != null)) {
 			try {
-				CompilationUnitChange change= new CompilationUnitChange("", cu); //$NON-NLS-1$
-				MultiTextEdit multiEdit= new MultiTextEdit();
-				change.setEdit(multiEdit);
-				
 				if (correctIndentation && removeTrailingWhitespacesAll) {
 					removeTrailingWhitespacesAll= false;
 					removeTrailingWhitespacesIgnorEmpty= true;
@@ -107,8 +117,10 @@ public class CodeFormatFix implements IFix {
 							j++;
 							if (j < lineExclusiveEnd) {
 								DeleteEdit edit= new DeleteEdit(j, lineExclusiveEnd - j);
-								multiEdit.addChild(edit);
-								group.addTextEdit(edit);
+								if (!contains(regions, j)) {
+									multiEdit.addChild(edit);
+									group.addTextEdit(edit);
+								}
 							}
 						} else if (removeTrailingWhitespacesIgnorEmpty) {
 							if (j >= lineStart) {
@@ -118,8 +130,10 @@ public class CodeFormatFix implements IFix {
 								j++;
 								if (j < lineExclusiveEnd) {
 									DeleteEdit edit= new DeleteEdit(j, lineExclusiveEnd - j);
-									multiEdit.addChild(edit);
-									group.addTextEdit(edit);
+									if (!contains(regions, j)) {
+										multiEdit.addChild(edit);
+										group.addTextEdit(edit);
+									}
 								}
 							}
 						}
@@ -141,31 +155,61 @@ public class CodeFormatFix implements IFix {
 						if (edit instanceof MultiTextEdit) {
 							TextEdit[] children= ((MultiTextEdit)edit).getChildren();
 							for (int i= 0; i < children.length; i++) {
-								edit.removeChild(children[i]);
-								multiEdit.addChild(children[i]);
-								group.addTextEdit(children[i]);
+								TextEdit child= children[i];
+								edit.removeChild(child);
+								if (!contains(regions, child.getOffset())) {
+									multiEdit.addChild(child);
+									group.addTextEdit(child);
+								}
 							}
 						} else {
-							multiEdit.addChild(edit);
-							group.addTextEdit(edit);
+							if (!contains(regions, edit.getOffset())) {
+								multiEdit.addChild(edit);
+								group.addTextEdit(edit);
+							}
 						}
 						
 						change.addTextEditGroup(group);
 					}
 				}
 				
-				if (!multiEdit.hasChildren())
-					return null;
-				
-				return new CodeFormatFix(change);
 			} catch (BadLocationException x) {
 				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "", x)); //$NON-NLS-1$
 			}
 		}
 		
-		return null;
+		if (!multiEdit.hasChildren())
+			return null;
+
+		return new CodeFormatFix(change);
 	}
 	
+	private static boolean contains(IRegion[] regions, int offset) {
+		if (regions == null || regions.length == 0)
+			return false;
+
+		int index= Arrays.binarySearch(regions, new Region(offset, 0), new Comparator() {
+			public int compare(Object o1, Object o2) {
+				IRegion region1= (IRegion) o1;
+				IRegion region2= (IRegion) o2;
+
+				return region1.getOffset() - region2.getOffset();
+			}
+		});
+		if (index >= 0)
+			return true;
+
+		int insertionPoint= -(index + 1);
+		if (insertionPoint <= 0)
+			return false;
+
+		IRegion beforeRegion= regions[insertionPoint - 1];
+		if (beforeRegion.getOffset() + beforeRegion.getLength() > offset)
+			return true;
+
+		return false;
+	}
+
 	/**
 	 * Returns the index in document of a none whitespace character 
 	 * between start (inclusive) and end (inclusive) such that if 
