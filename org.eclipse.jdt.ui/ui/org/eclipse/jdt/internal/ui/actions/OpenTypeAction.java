@@ -12,6 +12,9 @@ package org.eclipse.jdt.internal.ui.actions;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
@@ -19,12 +22,14 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.ui.IActionDelegate2;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.NewProjectAction;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import org.eclipse.jdt.core.IType;
@@ -56,6 +61,10 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 	
 	public void runWithEvent(Event e) {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
+		if (! doCreateProjectFirstOnEmptyWorkspace(parent)) {
+			return;
+		}
+		
 		SelectionDialog dialog;
 		if (e != null && e.stateMask == SWT.MOD1) {
 			// use old open type dialog when MOD1 (but no other modifier) is down:
@@ -93,6 +102,26 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 		return new org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog2(parent, false, PlatformUI.getWorkbench().getProgressService(), null, IJavaSearchConstants.TYPE);
 	}
 
+	/**
+	 * Opens the new project dialog if the workspace is empty.
+	 * @param parent the parent shell
+	 * @return returns <code>true</code> when a project has been created, or <code>false</code> when the
+	 * new project has been canceled.
+	 */
+	protected boolean doCreateProjectFirstOnEmptyWorkspace(Shell parent) {
+		IWorkspaceRoot workspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
+		if (workspaceRoot.getProjects().length == 0) {
+			String title= JavaUIMessages.OpenTypeAction_dialogTitle; 
+			String message= JavaUIMessages.OpenTypeAction_createProjectFirst; 
+			if (MessageDialog.openQuestion(parent, title, message)) {
+				new NewProjectAction().run();
+				return workspaceRoot.getProjects().length != 0;
+			}
+			return false;
+		}
+		return true;
+	}
+	
 	// ---- IWorkbenchWindowActionDelegate
 	// ------------------------------------------------
 

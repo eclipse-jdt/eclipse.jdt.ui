@@ -27,6 +27,7 @@ public final class JavaUIMessages extends NLS {
 	
 	public static String JavaElementProperties_name;
 
+	public static String OpenTypeAction_createProjectFirst;
 	public static String OpenTypeAction_description;
 	public static String OpenTypeAction_tooltip;
 	public static String OpenTypeAction_errorMessage;
