@@ -44,13 +44,14 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
@@ -340,10 +341,10 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 */
 	private final java.util.List fListModel= new ArrayList();
 	/**
-	 * Highlighting color list viewer
+	 * Highlighting color tree viewer
 	 * @since  3.0
 	 */
-	private StructuredViewer fListViewer;
+	private TreeViewer fTreeViewer;
 	/**
 	 * Semantic highlighting manager
 	 * @since  3.0
@@ -479,8 +480,8 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	public void initialize() {
 		super.initialize();
 		
-		fListViewer.setInput(fListModel);
-		fListViewer.setSelection(new StructuredSelection(fJavaCategory));
+		fTreeViewer.setInput(fListModel);
+		fTreeViewer.setSelection(new StructuredSelection(fJavaCategory));
 	}
 
 	public void performDefaults() {
@@ -584,10 +585,10 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		GridData gd= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		editorComposite.setLayoutData(gd);
 	
-		fListViewer= new TreeViewer(editorComposite, SWT.SINGLE | SWT.BORDER);
-		fListViewer.setLabelProvider(new ColorListLabelProvider());
-		fListViewer.setContentProvider(new ColorListContentProvider());
-		fListViewer.setComparator(new ViewerComparator() {
+		fTreeViewer= new TreeViewer(editorComposite, SWT.SINGLE | SWT.BORDER);
+		fTreeViewer.setLabelProvider(new ColorListLabelProvider());
+		fTreeViewer.setContentProvider(new ColorListContentProvider());
+		fTreeViewer.setComparator(new ViewerComparator() {
 			public int category(Object element) {
 				// don't sort the top level categories
 				if (fJavaCategory.equals(element))
@@ -609,12 +610,13 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			HighlightingColorListItem item= (HighlightingColorListItem) it.next();
 			maxWidth= Math.max(maxWidth, convertWidthInCharsToPixels(item.getDisplayName().length()));
 		}
-		ScrollBar vBar= ((Scrollable) fListViewer.getControl()).getVerticalBar();
+		ScrollBar vBar= ((Scrollable) fTreeViewer.getControl()).getVerticalBar();
 		if (vBar != null)
 			maxWidth += vBar.getSize().x * 3; // scrollbars and tree indentation guess
 		gd.widthHint= maxWidth;
 		
-		fListViewer.getControl().setLayoutData(gd);
+		fTreeViewer.getControl().setLayoutData(gd);
+		installDoubleClickListener();
 						
 		Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
 		layout= new GridLayout();
@@ -680,7 +682,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		gd.heightHint= convertHeightInCharsToPixels(5);
 		previewer.setLayoutData(gd);
 		
-		fListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+		fTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				handleSyntaxColorListSelection();
 			}
@@ -762,6 +764,26 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		return colorComposite;
 	}
 	
+	/**
+	 * Installs a double-click listener which allows
+	 * to expand and collapse tree items.
+	 * 
+	 * @since 3.4
+	 */
+	private void installDoubleClickListener() {
+		fTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
+			/*
+			 * @see org.eclipse.jface.viewers.IDoubleClickListener#doubleClick(org.eclipse.jface.viewers.DoubleClickEvent)
+			 */
+			public void doubleClick(DoubleClickEvent event) {
+				IStructuredSelection s= (IStructuredSelection) event.getSelection();
+				Object element= s.getFirstElement();
+				if (fTreeViewer.isExpandable(element))
+					fTreeViewer.setExpandedState(element, !fTreeViewer.getExpandedState(element));
+			}
+		});
+	}
+
 	private void addFiller(Composite composite, int horizontalSpan) {
 		PixelConverter pixelConverter= new PixelConverter(composite);
 		Label filler= new Label(composite, SWT.LEFT );
@@ -918,7 +940,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * @since 3.0
 	 */
 	private HighlightingColorListItem getHighlightingColorListItem() {
-		IStructuredSelection selection= (IStructuredSelection) fListViewer.getSelection();
+		IStructuredSelection selection= (IStructuredSelection) fTreeViewer.getSelection();
 		Object element= selection.getFirstElement();
 		if (element instanceof String)
 			return null;
