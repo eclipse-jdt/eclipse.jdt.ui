@@ -14,9 +14,11 @@ import java.util.Hashtable;
 
 import junit.framework.TestCase;
 
+import org.eclipse.swt.graphics.Point;
+
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -31,26 +33,28 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.IJavaPartitions;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+
 import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 
 public class AbstractCompletionTest extends TestCase {
 	protected static String suiteName(Class fqn) {
@@ -137,6 +141,7 @@ public class AbstractCompletionTest extends TestCase {
 		store.setToDefault(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION);
 		store.setToDefault(PreferenceConstants.CODEASSIST_AUTOINSERT);
 		fCU= null;
+		fEditor= null;
 	}
 	
 	protected void addImport(String imp) {

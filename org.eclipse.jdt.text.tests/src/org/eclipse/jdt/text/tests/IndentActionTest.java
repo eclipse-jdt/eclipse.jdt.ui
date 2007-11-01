@@ -19,18 +19,20 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.SourceViewer;
-
-import org.eclipse.jdt.internal.ui.actions.IndentAction;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
 import org.eclipse.jdt.text.tests.performance.ResourceTestHelper;
+
+import org.eclipse.jdt.internal.ui.actions.IndentAction;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
  * 
@@ -100,6 +102,8 @@ public class IndentActionTest extends TestCase {
 	 */
 	protected void tearDown() throws Exception {
 		EditorTestHelper.closeEditor(fEditor);
+		fEditor= null;
+		fSourceViewer= null;
 	}
 	
 	private void assertIndentResult() throws Exception {
