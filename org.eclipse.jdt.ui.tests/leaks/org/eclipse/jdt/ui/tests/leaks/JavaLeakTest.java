@@ -69,7 +69,7 @@ public class JavaLeakTest extends LeakTestCase {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new JavaLeakTest("testJavaEditorActionDelegate"));
 			return new LeakTestSetup(suite);
-		}	
+		}
 	}
 	
 	public void testTextEditorClose() throws Exception {
@@ -94,12 +94,14 @@ public class JavaLeakTest extends LeakTestCase {
 	}
 
 	protected void setUp() throws Exception {
+		super.setUp();
 		fJProject= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		assertTrue("RT not found", JavaProjectHelper.addRTJar(fJProject) != null);
 		assertTrue(JavaPlugin.getActivePage().closeAllEditors(false));
 	}
 
 	protected void tearDown() throws Exception {
+		super.tearDown();
 		JavaProjectHelper.delete(fJProject);
 	}
 
@@ -168,7 +170,7 @@ public class JavaLeakTest extends LeakTestCase {
 		assertInstanceCount(JavaProjectWizard.class, 0);
 		doWizardLeakTest(new JavaProjectWizard());
 		assertInstanceCount(JavaProjectWizard.class, 0);
-	}		
+	}
 	
 	private void doWizardLeakTest(INewWizard wizard) throws Exception {
 		wizard.init(JavaPlugin.getDefault().getWorkbench(), new StructuredSelection(fJProject));
