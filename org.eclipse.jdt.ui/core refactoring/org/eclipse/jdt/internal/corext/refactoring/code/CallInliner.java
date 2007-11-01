@@ -608,7 +608,7 @@ public class CallInliner {
 
 	private void replaceCall(RefactoringStatus status, String[] blocks, TextEditGroup textEditGroup) {
 		// Inline empty body
-		if (blocks.length == 0) {
+		if (blocks.length == 0 && fTargetNode != null) {
 			if (fNeedsStatement) {
 				fRewrite.replace(fTargetNode, fTargetNode.getAST().newEmptyStatement(), textEditGroup);
 			} else {
@@ -633,7 +633,7 @@ public class CallInliner {
 							fInvocationScope.createName(fSourceProvider.getMethodName(), true), 
 							(Expression)fRewrite.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION));
 					} else {
-						node= fTargetNode.getAST().newExpressionStatement(
+						node= fRewrite.getAST().newExpressionStatement(
 							(Expression)fRewrite.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION));
 					}
 				} else {

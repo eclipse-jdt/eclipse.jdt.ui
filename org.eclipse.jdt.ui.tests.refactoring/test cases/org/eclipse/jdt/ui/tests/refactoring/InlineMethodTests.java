@@ -611,6 +611,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performControlStatementTest();
 	}
 	
+	public void testIfWithVariable() throws Exception {
+		performControlStatementTest();
+	}
+	
 	/* *********************** Receiver Tests ******************************* */
 		
 	private void performReceiverTest() throws Exception {
