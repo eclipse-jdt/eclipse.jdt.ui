@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,9 +76,9 @@ public class JavadocHelpContext implements IContext2 {
 
 		public String getLabel() {
 			String label= JavaElementLabels.getTextLabel(fElement, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED);
-			return Messages.format(JavaUIMessages.JavaUIHelp_link_label, label); 
+			return Messages.format(JavaUIMessages.JavaUIHelp_link_label, label);
 		}
-	}	
+	}
 	
 
 	private IHelpResource[] fHelpResources;
@@ -86,8 +86,8 @@ public class JavadocHelpContext implements IContext2 {
 	private String fTitle;
 	
 	
-	// see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=85719
-	private static final boolean BUG_85719_FIXED= false; 
+	// see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=85721
+	private static final boolean BUG_85721_FIXED= false;
 
 	public JavadocHelpContext(IContext context, Object[] elements) throws JavaModelException {
 		Assert.isNotNull(elements);
@@ -105,7 +105,7 @@ public class JavadocHelpContext implements IContext2 {
 					continue;
 				
 				// Create Javadoc summary
-				if (BUG_85719_FIXED) {
+				if (BUG_85721_FIXED) {
 					if (javadocSummary == null) {
 						javadocSummary= retrieveText(element);
 						if (javadocSummary != null) {
@@ -116,7 +116,7 @@ public class JavadocHelpContext implements IContext2 {
 						}
 					} else {
 						javadocSummary= ""; // no Javadoc summary for multiple selection //$NON-NLS-1$
-					}	
+					}
 				}
 				
 				URL url= JavaUI.getJavadocLocation(element, true);
@@ -133,7 +133,7 @@ public class JavadocHelpContext implements IContext2 {
 					}
 				}
 				if (url != null) {
-					IHelpResource javaResource= new JavaUIHelpResource(element, getURLString(url)); 
+					IHelpResource javaResource= new JavaUIHelpResource(element, getURLString(url));
 					helpResources.add(javaResource);
 				}
 			}
@@ -154,7 +154,7 @@ public class JavadocHelpContext implements IContext2 {
 		if (context != null)
 			fText= context.getText();
 		
-		if (BUG_85719_FIXED) {
+		if (BUG_85721_FIXED) {
 			if (javadocSummary != null && javadocSummary.length() > 0) {
 				if (fText != null)
 					fText= context.getText() + "<br><br>" + javadocSummary; //$NON-NLS-1$
@@ -201,9 +201,12 @@ public class JavadocHelpContext implements IContext2 {
 		}
 		return ""; //$NON-NLS-1$
 	}
-	
+
 	/**
-	 * Gets the reader content as a String
+	 * Gets the reader content as a String.
+	 * 
+	 * @param reader the reader
+	 * @return the string
 	 */
 	private static String getString(Reader reader) {
 		StringBuffer buf= new StringBuffer();
@@ -232,7 +235,7 @@ public class JavadocHelpContext implements IContext2 {
 
 	public String getCategory(IHelpResource topic) {
 		if (topic instanceof JavaUIHelpResource)
-			return JavaUIMessages.JavaUIHelpContext_javaHelpCategory_label; 
+			return JavaUIMessages.JavaUIHelpContext_javaHelpCategory_label;
 
 		return null;
 	}
