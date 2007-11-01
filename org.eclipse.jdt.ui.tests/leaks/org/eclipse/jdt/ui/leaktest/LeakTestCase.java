@@ -14,9 +14,14 @@ import junit.framework.TestCase;
 
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.WorkbenchException;
+
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
 
 import org.eclipse.jdt.ui.leaktest.reftracker.ReferenceTracker;
+
 
 /**
  * Base class for leak test cases. 
@@ -33,7 +38,24 @@ public class LeakTestCase extends TestCase {
 		new ReferenceTracker(requestor).start(getClass().getClassLoader());
 		return requestor;
 	}
-	
+
+	/*
+	 * @see junit.framework.TestCase#setUp()
+	 * @since 3.4
+	 */
+	protected void setUp() throws Exception {
+		super.setUp();
+		// Ensure active page to allow test being run upfront.
+		IWorkbenchWindow activeWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if (activeWindow.getActivePage() == null) {
+			try {
+				activeWindow.openPage(null);
+			} catch (WorkbenchException e) {
+				fail();
+			}
+		}
+	}
+
 	private void calmDown() {
 		for (int i= 0; i < 10; i++) {
 			System.gc();
