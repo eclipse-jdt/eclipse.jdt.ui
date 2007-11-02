@@ -21,7 +21,6 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
-import org.eclipse.text.edits.TextEditVisitor;
 import org.eclipse.text.edits.UndoEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -67,7 +66,6 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MultiStateCompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -273,17 +271,13 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			}
 			
 			if (solution != null) {
-				try {
-					integrateSolution(solution, context.getCompilationUnit());
-				} catch (JavaModelException e) {
-					throw new FixCalculationException(e);
-				}
+				integrateSolution(solution, context.getCompilationUnit());
 			}
 			
 			return (ICleanUp[])result.toArray(new ICleanUp[result.size()]);
 		}
 		
-		private void integrateSolution(CleanUpChange solution, ICompilationUnit source) throws JavaModelException {
+		private void integrateSolution(CleanUpChange solution, ICompilationUnit source) {
 			ICompilationUnit primary= source.getPrimary();
 			
 			List changes= (List)fSolutions.get(primary);
@@ -407,7 +401,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			fWorkingCopies.clear();
 		}
 		
-		private boolean requiresAST(ICleanUp[] cleanUps) throws CoreException {
+		private boolean requiresAST(ICleanUp[] cleanUps) {
 			for (int i= 0; i < cleanUps.length; i++) {
 				if (cleanUps[i].getRequirements().requiresAST())
 					return true;
@@ -688,7 +682,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		}
 	}
 	
-	private RefactoringStatus setProjectOptions(IJavaProject javaProject, ICleanUp[] cleanUps) throws CoreException {
+	private RefactoringStatus setProjectOptions(IJavaProject javaProject, ICleanUp[] cleanUps) {
 		Map options= CleanUpPreferenceUtil.loadOptions(new ProjectScope(javaProject.getProject()));
 		if (options == null) {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(FixMessages.CleanUpRefactoring_could_not_retrive_profile, javaProject.getElementName()));
@@ -765,10 +759,13 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			IFix fix= cleanUp.createFix(context);
 			if (fix != null) {
 				CompilationUnitChange current= fix.createChange();
-				TextEdit currentEdit= pack(current.getEdit());
+				TextEdit currentEdit= current.getEdit();
+				if (!isPacked(currentEdit)) {
+					currentEdit= flatten(currentEdit);
+				}
 				
 				if (solution != null) {
-					if (intersects(currentEdit, solution.getEdit())) {
+					if (overlaps(currentEdit, solution.getEdit())) {
 						undoneCleanUps.add(cleanUp);
 					} else {
 						CleanUpChange merge= new CleanUpChange(FixMessages.CleanUpRefactoring_clean_up_multi_chang_name, context.getCompilationUnit());
@@ -814,35 +811,96 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		}
 	}
 	
-	private static TextEdit pack(TextEdit edit) {
-		if (!edit.hasChildren())
-			return edit;
+	/**
+	 * Returns true if the given <code>edit</code> is minimal.
+	 * <p>
+	 * That is if:
+	 * <ul>
+	 * <li><b>true</b> if <code>edit</code> is a leaf</li>
+	 * <li>if <code>edit</code> is a inner node then <b>true</b> if
+	 *   <ul>
+	 *   <li><code>edit</code> has same size as all its children</li>
+	 *   <li><code>isPacked</code> is <b>true</b> for all children</li>
+	 *   </ul>
+	 * </li>
+	 * </ul>
+	 * </p>
+	 * 
+	 * @param edit the edit to verify
+	 * @return true if edit is minimal
+	 * @since 3.4
+	 */
+	public static boolean isPacked(TextEdit edit) {
+		if (!(edit instanceof MultiTextEdit))
+			return true;
 		
-		final List edits= new ArrayList();
-		edit.accept(new TextEditVisitor() {
-			public boolean visitNode(TextEdit node) {
-				if (node instanceof MultiTextEdit)
-					return true;
-				
-				edits.add(node);
+		if (!edit.hasChildren())
+			return true;
+		
+		TextEdit[] children= edit.getChildren();
+		if (edit.getOffset() != children[0].getOffset())
+			return false;
+
+		if (edit.getExclusiveEnd() != children[children.length - 1].getExclusiveEnd())
+			return false;
+		
+		for (int i= 0; i < children.length; i++) {
+			if (!isPacked(children[i]))
 				return false;
-			}
-		});
-		MultiTextEdit result= new MultiTextEdit();
-		for (Iterator iterator= edits.iterator(); iterator.hasNext();) {
-			TextEdit child= (TextEdit)iterator.next();
-			child.getParent().removeChild(child);
-			TextChangeCompatibility.insert(result, child);
 		}
+		
+		return true;
+	}
+
+	/**
+	 * Degenerates the given edit tree into a list.<br>
+	 * All nodes of the result are leafs.<br>
+	 * <strong>The given edit is modified and can no longer be used.</strong>
+	 * 
+	 * @param edit the edit tree to flatten
+	 * @return a list of edits
+	 * @since 3.4
+	 */
+	public static MultiTextEdit flatten(TextEdit edit) {
+		MultiTextEdit result= new MultiTextEdit();
+		flatten(edit, result);
 		return result;
 	}
-	
-	private static boolean intersects(TextEdit edit1, TextEdit edit2) {
+
+	private static void flatten(TextEdit edit, MultiTextEdit result) {
+		if (!edit.hasChildren()) {
+			result.addChild(edit);
+		} else {
+			TextEdit[] children= edit.getChildren();
+			for (int i= 0; i < children.length; i++) {
+				TextEdit child= children[i];
+				child.getParent().removeChild(0);
+				flatten(child, result);
+			}
+		}
+	}
+
+	/**
+	 * Does any node in <code>edit1</code> overlap with any other node
+	 * in <code>edit2</code>.
+	 * <p>If this returns true then the two edit trees can be merged into one.</p>
+	 * 
+	 * @param edit1 the edit to compare against edit2
+	 * @param edit2 the edit to compare against edit1
+	 * @return true of no node overlaps with any other node
+	 * @since 3.4
+	 */
+	public static boolean overlaps(TextEdit edit1, TextEdit edit2) {
 		if (edit1 instanceof MultiTextEdit && edit2 instanceof MultiTextEdit) {
 			MultiTextEdit multiTextEdit1= (MultiTextEdit)edit1;
-			TextEdit[] children1= multiTextEdit1.getChildren();
+			if (!multiTextEdit1.hasChildren()) 
+				return false;
 			
 			MultiTextEdit multiTextEdit2= (MultiTextEdit)edit2;
+			if (!multiTextEdit2.hasChildren())
+				return false;
+
+			TextEdit[] children1= multiTextEdit1.getChildren();
 			TextEdit[] children2= multiTextEdit2.getChildren();
 			
 			int i1= 0;
@@ -858,38 +916,65 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 					if (i2 >= children2.length)
 						return false;
 				}
-				if (intersects(children1[i1], children2[i2]))
-					return true;
 				
-				if (children1[i1].getExclusiveEnd() < children2[i2].getExclusiveEnd()) {
-					i1++;
-				} else {
-					i2++;
+				if (children1[i1].getExclusiveEnd() < children2[i2].getOffset())
+					continue;
+				
+				if (overlaps(children1[i1], children2[i2]))
+					return true;
+
+				int mergeEnd= Math.max(children1[i1].getExclusiveEnd(), children2[i2].getExclusiveEnd());
+				
+				i1++;
+				i2++;
+				
+				if (i1 < children1.length && children1[i1].getOffset() < mergeEnd) {
+					return true;
+				}
+				if (i2 < children2.length && children2[i2].getOffset() < mergeEnd) {
+					return true;
 				}
 			}
 			
 			return false;
-			
 		} else if (edit1 instanceof MultiTextEdit) {
 			MultiTextEdit multiTextEdit1= (MultiTextEdit)edit1;
-			TextEdit[] children= multiTextEdit1.getChildren();
-			for (int i= 0; i < children.length; i++) {
-				TextEdit child= children[i];
-				if (intersects(child, edit2))
-					return true;
-			}
-			return false;
+			if (!multiTextEdit1.hasChildren())
+				return false;
 			
+			TextEdit[] children= multiTextEdit1.getChildren();
+			
+			int i= 0;
+			while (children[i].getExclusiveEnd() < edit2.getOffset()) {
+				i++;
+				if (i >= children.length)
+					return false;
+			}
+			
+			
+
+			if (overlaps(children[i], edit2))
+				return true;
+			
+			return false;
 		} else if (edit2 instanceof MultiTextEdit) {
 			MultiTextEdit multiTextEdit2= (MultiTextEdit)edit2;
-			TextEdit[] children= multiTextEdit2.getChildren();
-			for (int i= 0; i < children.length; i++) {
-				TextEdit child= children[i];
-				if (intersects(child, edit1))
-					return true;
-			}
-			return false;
+			if (!multiTextEdit2.hasChildren())
+				return false;
 			
+			TextEdit[] children= multiTextEdit2.getChildren();
+			
+			int i= 0;
+			while (children[i].getExclusiveEnd() < edit1.getOffset()) {
+				i++;
+				if (i >= children.length)
+					return false;
+			}
+
+			if (overlaps(children[i], edit1))
+				return true;
+			
+			return false;
 		} else {
 			int start1= edit1.getOffset();
 			int end1= start1 + edit1.getLength();
@@ -906,20 +991,48 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		}
 	}
 	
-	private static TextEdit merge(TextEdit edit1, TextEdit edit2) {
+	/**
+	 * Create an edit which contains <code>edit1</code> and <code>edit2</code>
+	 * <p>If <code>edit1</code> overlaps <code>edit2</code> this method fails with a {@link MalformedTreeException}</p>
+	 * <p><strong>The given edits are modified and they can no longer be used.</strong></p>
+	 * 
+	 * @param edit1 the edit to merge with edit2
+	 * @param edit2 the edit to merge with edit1
+	 * @return the merged tree
+	 * @throws MalformedTreeException if {@link #overlaps(TextEdit, TextEdit)} returns <b>true</b>
+	 * @see #overlaps(TextEdit, TextEdit)
+	 * @since 3.4
+	 */
+	public static TextEdit merge(TextEdit edit1, TextEdit edit2) {
+		if (edit1 instanceof MultiTextEdit && !edit1.hasChildren()) {
+			return edit2;
+		}
+
+		if (edit2 instanceof MultiTextEdit && !edit2.hasChildren()) {
+			return edit1;
+		}
+		
 		MultiTextEdit result= new MultiTextEdit();
+		merge(edit1, edit2, result);
+		return result;
+	}
+
+	private static void merge(TextEdit edit1, TextEdit edit2, MultiTextEdit result) {
 		if (edit1 instanceof MultiTextEdit && edit2 instanceof MultiTextEdit) {
 			MultiTextEdit multiTextEdit1= (MultiTextEdit)edit1;
+			if (!multiTextEdit1.hasChildren()) {
+				result.addChild(edit2);
+				return;
+			}
+							
+			MultiTextEdit multiTextEdit2= (MultiTextEdit) edit2;
+			if (!multiTextEdit2.hasChildren()) {
+				result.addChild(edit1);
+				return;
+			}
+			
 			TextEdit[] children1= multiTextEdit1.getChildren();
-			
-			if (children1.length == 0)
-				return edit2;
-			
-			MultiTextEdit multiTextEdit2= (MultiTextEdit)edit2;
 			TextEdit[] children2= multiTextEdit2.getChildren();
-			
-			if (children2.length == 0)
-				return edit1;
 			
 			int i1= 0;
 			int i2= 0;
@@ -930,36 +1043,39 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 					result.addChild(children1[i1]);
 					i1++;
 				}
-				if (i1 >= children1.length) {
-					for (int i= i2; i < children2.length; i++) {
-						edit2.removeChild(0);
-						result.addChild(children2[i]);
-					}
-					return result;
-				}
+				if (i1 >= children1.length)
+					break;
+					
 				while (i2 < children2.length && children2[i2].getExclusiveEnd() < children1[i1].getOffset()) {
 					edit2.removeChild(0);
 					result.addChild(children2[i2]);
 					i2++;
 				}
-				if (i2 >= children2.length) {
-					for (int i= i1; i < children1.length; i++) {
-						edit1.removeChild(0);
-						result.addChild(children1[i]);
-					}
-					return result;
-				}
+				if (i2 >= children2.length)
+					break;
 				
-				if (!(children1[i1].getExclusiveEnd() < children2[i2].getOffset())) {
-					edit1.removeChild(0);
-					edit2.removeChild(0);
-					result.addChild(merge(children1[i1], children2[i2]));
-					i1++;
-					i2++;
-				}
+				if (children1[i1].getExclusiveEnd() < children2[i2].getOffset())
+					continue;
+
+				edit1.removeChild(0);
+				edit2.removeChild(0);
+				merge(children1[i1], children2[i2], result);
+				
+				i1++;
+				i2++;
 			}
-			
-			return result;
+
+			while (i1 < children1.length) {
+				edit1.removeChild(0);
+				result.addChild(children1[i1]);
+				i1++;
+			}
+
+			while (i2 < children2.length) {
+				edit2.removeChild(0);
+				result.addChild(children2[i2]);
+				i2++;
+			}
 		} else if (edit1 instanceof MultiTextEdit) {
 			TextEdit[] children= edit1.getChildren();
 			
@@ -970,19 +1086,17 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				i++;
 				if (i >= children.length) {
 					result.addChild(edit2);
-					return result;
+					return;
 				}
 			}
 			edit1.removeChild(0);
-			result.addChild(merge(children[i], edit2));
+			merge(children[i], edit2, result);
 			i++;
 			while (i < children.length) {
 				edit1.removeChild(0);
 				result.addChild(children[i]);
 				i++;
 			}
-			
-			return result;
 		} else if (edit2 instanceof MultiTextEdit) {
 			TextEdit[] children= edit2.getChildren();
 			
@@ -993,19 +1107,17 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				i++;
 				if (i >= children.length) {
 					result.addChild(edit1);
-					return result;
+					return;
 				}
 			}
 			edit2.removeChild(0);
-			result.addChild(merge(edit1, children[i]));
+			merge(edit1, children[i], result);
 			i++;
 			while (i < children.length) {
 				edit2.removeChild(0);
 				result.addChild(children[i]);
 				i++;
 			}
-			
-			return result;
 		} else {
 			if (edit1.getExclusiveEnd() < edit2.getOffset()) {
 				result.addChild(edit1);
@@ -1014,8 +1126,6 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				result.addChild(edit2);
 				result.addChild(edit1);
 			}
-			
-			return result;
 		}
 	}
 	
