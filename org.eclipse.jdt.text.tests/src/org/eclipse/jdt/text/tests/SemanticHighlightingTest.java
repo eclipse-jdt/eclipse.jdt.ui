@@ -91,6 +91,21 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 		assertEqualPositions(expected, actual);
 	}
 	
+	public void testNumberHighlighting() throws Exception {
+		setUpSemanticHighlighting(SemanticHighlightings.NUMBER);
+		Position[] expected= new Position[] {
+				createPosition(5, 23, 1),
+				createPosition(6, 36, 1),
+				createPosition(8, 21, 1),
+				createPosition(13, 19, 1),
+				createPosition(13, 31, 2),
+			};
+
+		Position[] actual= getSemanticHighlightingPositions();
+//		System.out.println(toString(actual));
+		assertEqualPositions(expected, actual);
+	}
+	
 	public void testMethodDeclarationHighlighting() throws Exception {
 		setUpSemanticHighlighting(SemanticHighlightings.METHOD_DECLARATION);
 		Position[] expected= new Position[] {
