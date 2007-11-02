@@ -883,9 +883,11 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		runnables.add(new Runnable() {
 			public void run() {
 				Widget[] items= fViewer.testFindItems(element);
-				if (items != null) {
-					for (int i= 0; i < items.length; i++) {
-						if (parent.equals(((TreeItem) items[i]).getParent().getData())) {
+				for (int i= 0; i < items.length; i++) {
+					Widget item= items[i];
+					if (item instanceof TreeItem && !item.isDisposed()) {
+						TreeItem parentItem= ((TreeItem) item).getParentItem();
+						if (parentItem != null && !parentItem.isDisposed() && parent.equals(parentItem.getData())) {
 							return; // no add, element already added (most likely by a refresh)
 						}
 					}
