@@ -24,6 +24,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -882,9 +884,18 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	protected void postAdd(final Object parent, final Object element, Collection runnables) {
 		runnables.add(new Runnable() {
 			public void run() {
-				if (fViewer.testFindItem(element) == null) 
-					fViewer.add(parent, element);
+				Widget[] items= fViewer.testFindItems(element);
+				for (int i= 0; i < items.length; i++) {
+					Widget item= items[i];
+					if (item instanceof TreeItem && !item.isDisposed()) {
+						TreeItem parentItem= ((TreeItem) item).getParentItem();
+						if (parentItem != null && !parentItem.isDisposed() && parent.equals(parentItem.getData())) {
+							return;  // no add, element already added (most likely by a refresh)
+						}
+					}
 				}
+				fViewer.add(parent, element);
+			}
 		});
 	}
 
