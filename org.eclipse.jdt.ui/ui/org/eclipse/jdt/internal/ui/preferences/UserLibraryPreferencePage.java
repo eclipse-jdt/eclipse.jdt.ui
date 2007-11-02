@@ -452,12 +452,13 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 					final IPath workspacePath= ResourcesPlugin.getWorkspace().getRoot().getLocation();
 					if (filePath.matchingFirstSegments(workspacePath) == workspacePath.segmentCount()) {
 						IPath path= filePath.removeFirstSegments(workspacePath.segmentCount());
-						path= path.makeRelative();
-						final IFile result= ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-						try {
-							encoding= result.getCharset(true);
-						} catch (CoreException exception) {
-							JavaPlugin.log(exception);
+						if (path.segmentCount() > 1) {
+							IFile result= ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+							try {
+								encoding= result.getCharset(true);
+							} catch (CoreException exception) {
+								JavaPlugin.log(exception);
+							}
 						}
 					}
 					final List elements= fExportImportList.getCheckedElements();
