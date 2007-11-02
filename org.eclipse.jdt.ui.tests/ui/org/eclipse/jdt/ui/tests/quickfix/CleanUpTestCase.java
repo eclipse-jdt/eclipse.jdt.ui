@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -197,7 +196,7 @@ public class CleanUpTestCase extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(previews, expected);
 	}
 
-	protected RefactoringStatus assertRefactoringHasNoChange(ICompilationUnit[] cus) throws CoreException, InvocationTargetException {
+	protected RefactoringStatus assertRefactoringHasNoChange(ICompilationUnit[] cus) throws CoreException {
 		String[] expected= new String[cus.length];
 		for (int i= 0; i < cus.length; i++) {
 			expected[i]= cus[i].getBuffer().getContents();
