@@ -35,6 +35,8 @@ import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.refactoring.util.TextEditUtil;
+
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -60,6 +62,9 @@ public class CommentFormatFix extends TextEditFix {
 		
 		MultiTextEdit resultEdit= new MultiTextEdit();
 		resultEdit.addChildren((TextEdit[])edits.toArray(new TextEdit[edits.size()]));
+		if (!TextEditUtil.isPacked(resultEdit)) {
+			resultEdit= TextEditUtil.flatten(resultEdit);
+		}
 		return new CommentFormatFix(resultEdit, unit, MultiFixMessages.CommentFormatFix_description);
 	}
 	

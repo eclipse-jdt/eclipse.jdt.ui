@@ -670,6 +670,7 @@ public class EditorUtility {
 	 * Return the regions of all lines which have changed in the given buffer since the
 	 * last save occurred. Each region in the result spans over the size of at least one line.
 	 * If successive lines have changed a region spans over the size of all successive lines.
+	 * The regions include line delimiters.
 	 * 
 	 * @param buffer the buffer to compare contents from
 	 * @param monitor to report progress to
@@ -740,6 +741,8 @@ public class EditorUtility {
 					//2. Successive changed lines are merged into on RangeDifference
 					//     forAll r1,r2 element differences: r1.rightStart()<r2.rightStart() -> r1.rightEnd()<r2.rightStart
 
+					int numberOfLines= currentDocument.getNumberOfLines();
+					
 					ArrayList regions= new ArrayList();
 					for (int i= 0; i < differences.length; i++) {
 						RangeDifference curr= differences[i];
@@ -747,15 +750,23 @@ public class EditorUtility {
 							int startLine= curr.rightStart();
 							int endLine= curr.rightEnd() - 1;
 
-							IRegion startLineRegion= currentDocument.getLineInformation(startLine);
-							if (startLine == endLine) {
-								regions.add(startLineRegion);
+							int startOffset;
+							if (startLine == 0) {
+								startOffset= currentDocument.getLineOffset(startLine);
 							} else {
-								IRegion endLineRegion= currentDocument.getLineInformation(endLine);
-								int startOffset= startLineRegion.getOffset();
-								int endOffset= endLineRegion.getOffset() + endLineRegion.getLength();
-								regions.add(new Region(startOffset, endOffset - startOffset));
+								IRegion previousLine= currentDocument.getLineInformation(startLine - 1);
+								startOffset= previousLine.getOffset() + previousLine.getLength();
 							}
+							
+							int endOffset;
+							if (endLine + 1 == numberOfLines) {
+								IRegion endLineRegion= currentDocument.getLineInformation(endLine);
+								endOffset= endLineRegion.getOffset() + endLineRegion.getLength();
+							} else {
+								endOffset= currentDocument.getLineOffset(endLine + 1);
+							}
+							
+							regions.add(new Region(startOffset, endOffset - startOffset));
 						}
 					}
 

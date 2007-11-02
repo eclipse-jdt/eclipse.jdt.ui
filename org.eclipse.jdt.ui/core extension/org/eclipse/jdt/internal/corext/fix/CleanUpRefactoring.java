@@ -760,9 +760,6 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			if (fix != null) {
 				CompilationUnitChange current= fix.createChange();
 				TextEdit currentEdit= current.getEdit();
-				if (!TextEditUtil.isPacked(currentEdit)) {
-					currentEdit= TextEditUtil.flatten(currentEdit);
-				}
 				
 				if (solution != null) {
 					if (TextEditUtil.overlaps(currentEdit, solution.getEdit())) {
