@@ -14,9 +14,9 @@ import junit.framework.TestCase;
 
 import org.eclipse.swt.widgets.Display;
 
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.WorkbenchException;
 
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
 
@@ -24,7 +24,7 @@ import org.eclipse.jdt.ui.leaktest.reftracker.ReferenceTracker;
 
 
 /**
- * Base class for leak test cases.
+ * Base class for leak test cases. 
  */
 public class LeakTestCase extends TestCase {
 	
@@ -45,14 +45,15 @@ public class LeakTestCase extends TestCase {
 	 */
 	protected void setUp() throws Exception {
 		super.setUp();
-		// Ensure active page to allow test being run upfront.
-		IWorkbenchWindow[] allWindows= PlatformUI.getWorkbench().getWorkbenchWindows();
-		for (int i= 1; i < allWindows.length; i++)
-			allWindows[i].close();
-		IWorkbenchPage[] pages= allWindows[0].getPages();
-		for (int j= 0; j < pages.length; j++)
-			pages[j].closeAllPerspectives(false, true);
-		allWindows[0].openPage(null);
+		// Ensure active page to allow test being run
+		IWorkbenchWindow activeWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if (activeWindow.getActivePage() == null) {
+			try {
+				activeWindow.openPage(null);
+			} catch (WorkbenchException e) {
+				fail();
+			}
+		}
 	}
 
 	private void calmDown() {
