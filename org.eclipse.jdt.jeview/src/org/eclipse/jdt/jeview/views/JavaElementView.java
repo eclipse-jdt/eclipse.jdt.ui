@@ -12,6 +12,7 @@ package org.eclipse.jdt.jeview.views;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -251,7 +252,9 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		Object[] elements= tcp.getElements(fInput);
 		if (elements.length > 0) {
 			fViewer.setSelection(new StructuredSelection(elements[0]));
-			fViewer.setExpandedState(elements[0], true);
+			if (elements.length == 1) {
+				fViewer.setExpandedState(elements[0], true);
+			}
 		}
 		fDrillDownAdapter.reset();
 	}
@@ -396,7 +399,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 					return;
 				}
 				
-				setSingleInput(resolved[0]);
+				setInput(Arrays.asList(resolved));
 			}
 		};
 		fCodeSelectAction.setToolTipText("Set input from current editor's selection (codeSelect)");
