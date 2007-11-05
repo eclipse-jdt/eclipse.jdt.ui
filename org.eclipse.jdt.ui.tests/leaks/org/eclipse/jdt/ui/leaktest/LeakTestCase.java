@@ -16,7 +16,6 @@ import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.WorkbenchException;
 
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
 
@@ -48,11 +47,7 @@ public class LeakTestCase extends TestCase {
 		// Ensure active page to allow test being run
 		IWorkbenchWindow activeWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		if (activeWindow.getActivePage() == null) {
-			try {
-				activeWindow.openPage(null);
-			} catch (WorkbenchException e) {
-				fail();
-			}
+			activeWindow.openPage(null);
 		}
 	}
 
