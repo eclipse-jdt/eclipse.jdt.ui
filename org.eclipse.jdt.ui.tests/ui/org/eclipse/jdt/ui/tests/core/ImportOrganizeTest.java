@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -94,7 +95,7 @@ public class ImportOrganizeTest extends CoreTests {
 					assertTrue(name + "-query-setlen" + i, selection.length > 0);
 					TypeNameMatch found= null;
 					for (int k= 0; k < selection.length; k++) {
-						if (selection[k].getFullyQualifiedName().equals(choices[i])) {
+						if (JavaModelUtil.getFullyQualifiedName(selection[k]).equals(choices[i])) {
 							found= selection[k];
 						}
 					}
