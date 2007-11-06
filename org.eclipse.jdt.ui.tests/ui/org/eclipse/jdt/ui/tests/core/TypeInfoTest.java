@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.core.search.TypeNameMatchRequestor;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -146,13 +147,13 @@ public class TypeInfoTest extends TestCase {
 		if (!resolvedType.exists()) {
 			assertTrue("Resolved type does not exist: " + ref.toString(), false);
 		}
-		StringAsserts.assertEqualString(resolvedType.getFullyQualifiedName('.'), ref.getFullyQualifiedName());
+		StringAsserts.assertEqualString(resolvedType.getFullyQualifiedName('.'), JavaModelUtil.getFullyQualifiedName(ref));
 	}
 	
 	private void findTypeRef(List refs, String fullname) {
 		for (int i= 0; i <refs.size(); i++) {
 			TypeNameMatch curr= (TypeNameMatch) refs.get(i);
-			if (fullname.equals(curr.getFullyQualifiedName())) {
+			if (fullname.equals(JavaModelUtil.getFullyQualifiedName(curr))) {
 				return;
 			}
 		}
