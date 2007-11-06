@@ -25,8 +25,11 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
@@ -140,7 +143,8 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
 					}
 					break;
 			}
-			if (CallHierarchy.isPossibleInputElement(enclosingElement)) {
+			if (enclosingElement instanceof IMethod || enclosingElement instanceof IInitializer || enclosingElement instanceof IField) {
+				// opening on the enclosing type would be too confusing (since the type resolves to the constructors)
 				return enclosingElement;
 			}
 		} catch (JavaModelException e) {
