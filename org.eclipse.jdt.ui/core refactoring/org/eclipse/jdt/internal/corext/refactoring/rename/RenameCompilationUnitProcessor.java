@@ -168,7 +168,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 	public boolean canEnableTextUpdating() {
 		if (fRenameTypeProcessor == null)
 			return false;
-		return fRenameTypeProcessor.canEnableUpdateReferences();
+		return fRenameTypeProcessor.canEnableTextUpdating();
 	}
 
 	public boolean getUpdateTextualMatches() {
