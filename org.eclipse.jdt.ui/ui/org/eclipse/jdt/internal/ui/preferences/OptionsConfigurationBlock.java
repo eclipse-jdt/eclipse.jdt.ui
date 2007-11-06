@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,7 +73,7 @@ import org.osgi.service.prefs.BackingStoreException;
  */
 public abstract class OptionsConfigurationBlock {
 	
-	public static final class Key {
+	public static class Key {
 		
 		private String fQualifier;
 		private String fKey;
@@ -128,6 +128,30 @@ public abstract class OptionsConfigurationBlock {
 			return fQualifier;
 		}
 
+	}
+
+	/**
+	 * Key that is only managed locally ans not part of preference store.
+	 */
+	private static class LocalKey extends Key {
+		private HashMap fValues;
+
+		private LocalKey(String key) {
+			super("local", key); //$NON-NLS-1$
+			fValues= new HashMap();
+		}
+
+		public String getStoredValue(IScopeContext context, IWorkingCopyManager manager) {
+			return (String) fValues.get(context);
+		}
+
+		public void setStoredValue(IScopeContext context, String value, IWorkingCopyManager manager) {
+			if (value != null) {
+				fValues.put(context, value);
+			} else {
+				fValues.remove(context);
+			}
+		}
 	}
 	
 
@@ -254,7 +278,10 @@ public abstract class OptionsConfigurationBlock {
 	protected final static Key getJDTUIKey(String key) {
 		return getKey(JavaUI.ID_PLUGIN, key);
 	}
-	
+
+	protected final static Key getLocalKey(String key) {
+		return new LocalKey(key);
+	}
 		
 	private void testIfOptionsComplete(Key[] allKeys) {
 		for (int i= 0; i < allKeys.length; i++) {

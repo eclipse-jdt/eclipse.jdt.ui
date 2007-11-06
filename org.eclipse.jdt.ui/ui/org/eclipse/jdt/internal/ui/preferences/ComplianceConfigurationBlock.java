@@ -69,7 +69,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_PB_ASSERT_AS_IDENTIFIER= getJDTCoreKey(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER);
 	private static final Key PREF_PB_ENUM_AS_IDENTIFIER= getJDTCoreKey(JavaCore.COMPILER_PB_ENUM_IDENTIFIER);
 	
-	private static final Key INTR_DEFAULT_COMPLIANCE= getJDTUIKey("internal.default.compliance"); //$NON-NLS-1$
+	private static final Key INTR_DEFAULT_COMPLIANCE= getLocalKey("internal.default.compliance"); //$NON-NLS-1$
 
 	// values
 	private static final String GENERATE= JavaCore.GENERATE;
@@ -467,12 +467,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#useProjectSpecificSettings(boolean)
 	 */
 	public void useProjectSpecificSettings(boolean enable) {
-		String isDefault= getValue(INTR_DEFAULT_COMPLIANCE);
 		super.useProjectSpecificSettings(enable);
-		setValue(INTR_DEFAULT_COMPLIANCE, isDefault);
-		updateCheckBox(getCheckBox(INTR_DEFAULT_COMPLIANCE));
 		validateComplianceStatus();
-
 	}
 		
 	/*
@@ -646,23 +642,5 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		}
 		return new String[] { title, message };
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performOk()
-	 */
-	public boolean performOk() {
-		setValue(INTR_DEFAULT_COMPLIANCE, null);
-		return super.performOk();
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performApply()
-	 */
-	public boolean performApply() {
-		setValue(INTR_DEFAULT_COMPLIANCE, null);
-		boolean result= super.performApply();
-		setValue(INTR_DEFAULT_COMPLIANCE, getCurrentCompliance());
-		return result;
-	}
-		
+			
 }
