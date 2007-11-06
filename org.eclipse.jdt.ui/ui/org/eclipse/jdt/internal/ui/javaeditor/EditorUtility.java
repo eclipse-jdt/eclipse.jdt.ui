@@ -366,7 +366,7 @@ public class EditorUtility {
 		}
 	}
 
-	private static String getEditorID(IEditorInput input) throws PartInitException {
+	public static String getEditorID(IEditorInput input) throws PartInitException {
 		Assert.isNotNull(input);
 		IEditorDescriptor editorDescriptor;
 		if (input instanceof IFileEditorInput)
