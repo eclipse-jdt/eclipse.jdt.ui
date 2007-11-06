@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 public class ReorgMoveWizard extends RefactoringWizard {
 
 	public ReorgMoveWizard(MoveRefactoring ref) {
-		super(ref, DIALOG_BASED_USER_INTERFACE | computeHasPreviewPage(ref));
+		super(ref, DIALOG_BASED_USER_INTERFACE);
 		if (isTextualMove(ref))
 			setDefaultPageTitle(ReorgMessages.ReorgMoveWizard_textual_move); 
 		else
@@ -58,13 +58,6 @@ public class ReorgMoveWizard extends RefactoringWizard {
 	private static boolean isTextualMove(MoveRefactoring ref) {
 		JavaMoveProcessor moveProcessor= (JavaMoveProcessor) ref.getAdapter(JavaMoveProcessor.class);
 		return moveProcessor.isTextualMove();
-	}
-
-	private static int computeHasPreviewPage(MoveRefactoring refactoring) {
-		JavaMoveProcessor processor= (JavaMoveProcessor)refactoring.getAdapter(JavaMoveProcessor.class);
-		if (processor.canUpdateReferences() || processor.canEnableQualifiedNameUpdating())
-			return NONE;
-		return NO_PREVIEW_PAGE;
 	}
 
 	protected void addUserInputPages() {
