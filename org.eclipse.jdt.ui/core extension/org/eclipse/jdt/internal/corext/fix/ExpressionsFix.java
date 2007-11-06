@@ -137,6 +137,26 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				} else if (isAssociative(parentInfix)) {
 					//we have parent op (expr op expr) and op is associative
 					//left op (right) == (right) op left == right op left
+					if (expression instanceof InfixExpression) {
+						InfixExpression infixExpression= (InfixExpression) expression;
+						Operator operator= infixExpression.getOperator();
+						if (operator != InfixExpression.Operator.DIVIDE)
+							return true;
+						
+						ITypeBinding binding= infixExpression.resolveTypeBinding();
+						if (binding == null)
+							return false;
+						
+						if (!binding.isPrimitive())
+							return false;
+						
+						String name= binding.getName();
+						if (isIntegerNumber(name))
+							//rounding involved
+							return false;
+						
+						return true;
+					}
 					return true;
 				} else {
 					return false;
@@ -148,6 +168,10 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			}
 
 			return true;
+		}
+
+		private boolean isIntegerNumber(String name) {
+			return "int".equals(name) || "long".equals(name) || "byte".equals(name) || "char".equals(name) || "short".equals(name); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 
 		/*
@@ -292,7 +316,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 	
-	public static ExpressionsFix createAddParanoidalParenthesisFix(CompilationUnit compilationUnit, ASTNode[] coveredNodes) throws CoreException {
+	public static ExpressionsFix createAddParanoidalParenthesisFix(CompilationUnit compilationUnit, ASTNode[] coveredNodes) {
 		if (coveredNodes == null)
 			return null;
 		
