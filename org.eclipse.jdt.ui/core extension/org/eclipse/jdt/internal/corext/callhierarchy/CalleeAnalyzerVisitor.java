@@ -46,10 +46,10 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
-    private CallSearchResultCollector fSearchResults;
-    private IMember fMember;
-    private CompilationUnit fCompilationUnit;
-    private IProgressMonitor fProgressMonitor;
+    private final CallSearchResultCollector fSearchResults;
+    private final IMember fMember;
+    private final CompilationUnit fCompilationUnit;
+    private final IProgressMonitor fProgressMonitor;
     private int fMethodEndPosition;
     private int fMethodStartPosition;
 
@@ -69,9 +69,7 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
     }
 
     /**
-     * Method getCallees.
-     *
-     * @return CallerElement
+     * @return a map from handle identifier ({@link String}) to {@link MethodCall}
      */
     public Map getCallees() {
         return fSearchResults.getCallers();
@@ -192,6 +190,8 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
      * Find all method invocations from the called method. Since we only traverse into
      * the AST on the wanted method declaration, this method should not hit on more
      * method invocations than those in the wanted method.
+     * @param node node to visit
+	 * @return whether children should be visited
      *
      * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodInvocation)
      */

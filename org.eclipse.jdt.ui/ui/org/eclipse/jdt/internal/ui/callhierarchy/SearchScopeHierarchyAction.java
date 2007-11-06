@@ -18,6 +18,7 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -28,6 +29,8 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 
 
 class SearchScopeHierarchyAction extends SearchScopeAction {
+	//TODO: does such a scope make sense at all?
+	
 	private final SearchScopeActionGroup fGroup;
 	
 	public SearchScopeHierarchyAction(SearchScopeActionGroup group) {
@@ -39,10 +42,11 @@ class SearchScopeHierarchyAction extends SearchScopeAction {
 	
 	public IJavaSearchScope getSearchScope() {
 		try {
-			IMember member = this.fGroup.getView().getRootElement();
+			IMember[] members = fGroup.getView().getInputElements();
 			
-			if (member != null) {
-				return SearchEngine.createHierarchyScope(member.getDeclaringType());
+			if (members != null && members.length == 1) {
+				IType type= members[0] instanceof IType ? (IType) members[0] : members[0].getDeclaringType();
+				return SearchEngine.createHierarchyScope(type);
 			} else {
 				return null;
 			}
@@ -64,8 +68,13 @@ class SearchScopeHierarchyAction extends SearchScopeAction {
 	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getFullDescription()
 	 */
 	public String getFullDescription() {
-		IMember member= this.fGroup.getView().getRootElement();
-		return JavaSearchScopeFactory.getInstance().getHierarchyScopeDescription(member.getDeclaringType());
+		IMember[] members= fGroup.getView().getInputElements();
+		if (members != null && members.length == 1) {
+			IType type= members[0] instanceof IType ? (IType) members[0] : members[0].getDeclaringType();
+			return JavaSearchScopeFactory.getInstance().getHierarchyScopeDescription(type);
+		} else {
+			return JavaSearchScopeFactory.getInstance().getWorkspaceScopeDescription(true);
+		}
 	}
 
 }

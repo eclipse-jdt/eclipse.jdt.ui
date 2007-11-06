@@ -74,6 +74,13 @@ class CalleeMethodWrapper extends MethodWrapper {
     protected MethodWrapper createMethodWrapper(MethodCall methodCall) {
         return new CalleeMethodWrapper(this, methodCall);
     }
+    
+    /*
+     * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#canHaveChildren()
+     */
+    public boolean canHaveChildren() {
+    	return true;
+    }
 
 	/**
      * Find callees called from the current method.

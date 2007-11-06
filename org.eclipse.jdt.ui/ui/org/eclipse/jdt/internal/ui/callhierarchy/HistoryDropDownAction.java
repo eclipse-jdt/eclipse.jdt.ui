@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,8 @@
  *          - bug 75800: [call hierarchy] should allow searches for fields
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import java.util.Arrays;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Control;
@@ -42,8 +44,8 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
 		}
 			
 		public void run() {
-			fView.setHistoryEntries(new IMember[0]);
-			fView.setRootElement(null);
+			fView.setHistoryEntries(new IMember[0][]);
+			fView.setInputElements(null);
 		}
 	}
 	
@@ -71,7 +73,7 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
             fMenu.dispose();
         }
         fMenu= new Menu(parent);
-        IMember[] elements= fView.getHistoryEntries();
+        IMember[][] elements= fView.getHistoryEntries();
         addEntries(fMenu, elements);
 		new MenuItem(fMenu, SWT.SEPARATOR);
 		addActionToMenu(fMenu, new HistoryListAction(fView));
@@ -93,14 +95,14 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
         item.fill(parent, -1);
     }
 
-    private boolean addEntries(Menu menu, IMember[] elements) {
+    private boolean addEntries(Menu menu, IMember[][] elements) {
         boolean checked = false;
 
         int min = Math.min(elements.length, RESULTS_IN_DROP_DOWN);
 
         for (int i = 0; i < min; i++) {
             HistoryAction action = new HistoryAction(fView, elements[i]);
-            action.setChecked(elements[i].equals(fView.getRootElement()));
+            action.setChecked(Arrays.equals(elements[i], fView.getInputElements()));
             checked = checked || action.isChecked();
             addActionToMenu(menu, action);
         }
@@ -109,6 +111,6 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
     }
 
     public void run() {
-        (new HistoryListAction(fView)).run();
+        new HistoryListAction(fView).run();
     }
 }

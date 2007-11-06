@@ -16,7 +16,11 @@
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -155,16 +159,16 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private static final int PAGE_VIEWER = 1;
     private Label fNoHierarchyShownLabel;
     private PageBook fPagebook;
-    private IDialogSettings fDialogSettings;
+    private final IDialogSettings fDialogSettings;
     private int fCurrentOrientation;
     int fOrientation= VIEW_ORIENTATION_AUTOMATIC;
     private int fCurrentCallMode;
-    private MethodWrapper fCalleeRoot;
-    private MethodWrapper fCallerRoot;
+    private MethodWrapper[] fCalleeRoots;
+    private MethodWrapper[] fCallerRoots;
     private IMemento fMemento;
-    private IMember fRootElement;
+    private IMember[] fInputElements;
     private CallHierarchySelectionProvider fSelectionProviderMediator;
-    private List fMethodHistory;
+    private final List/*<IMember[]>*/ fMethodHistory;
     private LocationViewer fLocationViewer;
     private SashForm fHierarchyLocationSplitter;
     private Clipboard fClipboard;
@@ -199,13 +203,13 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     /**
      * Sets the history entries
-     * @param elems the new history elements
+     * @param entries the new history entries
      */
-    public void setHistoryEntries(IMember[] elems) {
+    public void setHistoryEntries(IMember[][] entries) {
         fMethodHistory.clear();
 
-        for (int i = 0; i < elems.length; i++) {
-            fMethodHistory.add(elems[i]);
+        for (int i = 0; i < entries.length; i++) {
+            fMethodHistory.add(entries[i]);
         }
 
         updateHistoryEntries();
@@ -215,42 +219,39 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * Gets all history entries.
      * @return all history entries
      */
-    public IMember[] getHistoryEntries() {
+    public IMember[][] getHistoryEntries() {
         if (fMethodHistory.size() > 0) {
             updateHistoryEntries();
         }
 
-        return (IMember[]) fMethodHistory.toArray(new IMember[fMethodHistory.size()]);
+        return (IMember[][]) fMethodHistory.toArray(new IMember[fMethodHistory.size()][]);
     }
 
-    /**
-     * Method setRootElement
-     * @param member
-     */
-    public void setRootElement(IMember member) {
-        if (member == null) {
+    public void setInputElements(IMember[] members) {
+    	IMember[] oldMembers= fInputElements;
+    	fInputElements= members;
+        
+    	if (members == null || members.length == 0) {
             showPage(PAGE_EMPTY);
-
             return;
         }
-        if (! member.equals(fRootElement)) {
-            addHistoryEntry(member);
-        }
 
-        this.fRootElement = member;
-
-        refresh();
+    	if (! Arrays.equals(members, oldMembers)) {
+    		addHistoryEntry(members);
+    	}
+        
+    	refresh();
     }
 
-    public IMember getRootElement() {
-        return fRootElement;
+    public IMember[] getInputElements() {
+        return fInputElements;
     }
 
-    public MethodWrapper getCurrentMethodWrapper() {
+    public MethodWrapper[] getCurrentMethodWrappers() {
         if (fCurrentCallMode == CALL_MODE_CALLERS) {
-            return fCallerRoot;
+            return fCallerRoots;
         } else {
-            return fCalleeRoot;
+            return fCalleeRoots;
         }
     }
            
@@ -569,10 +570,13 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * Goes to the selected entry, without updating the order of history entries.
      * @param entry the history entry
      */
-    public void gotoHistoryEntry(IMember entry) {
-        if (fMethodHistory.contains(entry)) {
-            setRootElement(entry);
-        }
+    public void gotoHistoryEntry(IMember[] entry) {
+    	for (Iterator iter= fMethodHistory.iterator(); iter.hasNext(); ) {
+			if (Arrays.equals(entry, (IMember[]) iter.next())) {
+				setInputElements(entry);
+				return;
+			}
+		}
     }
 
     /* (non-Javadoc)
@@ -588,8 +592,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      *
      */
     public void refresh() {
-        setCalleeRoot(null);
-        setCallerRoot(null);
+        setCalleeRoots(null);
+        setCallerRoots(null);
 
         updateView();
     }
@@ -731,41 +735,43 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         return getViewSite().getActionBars();
     }
 
-    private void setCalleeRoot(MethodWrapper calleeRoot) {
-        this.fCalleeRoot = calleeRoot;
+    private void setCalleeRoots(MethodWrapper[] calleeRoots) {
+        this.fCalleeRoots = calleeRoots;
     }
 
-    private MethodWrapper getCalleeRoot() {
-        if (fCalleeRoot == null) {
-            fCalleeRoot = CallHierarchy.getDefault().getCalleeRoot(fRootElement);
+    private MethodWrapper[] getCalleeRoots() {
+        if (fCalleeRoots == null) {
+            fCalleeRoots = CallHierarchy.getDefault().getCalleeRoots(fInputElements);
         }
 
-        return fCalleeRoot;
+        return fCalleeRoots;
     }
 
-    private void setCallerRoot(MethodWrapper callerRoot) {
-        this.fCallerRoot = callerRoot;
+    private void setCallerRoots(MethodWrapper[] callerRoots) {
+        this.fCallerRoots = callerRoots;
     }
 
-    private MethodWrapper getCallerRoot() {
-        if (fCallerRoot == null) {
-            fCallerRoot = CallHierarchy.getDefault().getCallerRoot(fRootElement);
+    private MethodWrapper[] getCallerRoots() {
+        if (fCallerRoots == null) {
+            fCallerRoots = CallHierarchy.getDefault().getCallerRoots(fInputElements);
         }
 
-        return fCallerRoot;
+        return fCallerRoots;
     }
 
     /**
      * Adds the entry if new. Inserted at the beginning of the history entries list.
      * @param entry the entry to add
      */
-    private void addHistoryEntry(IJavaElement entry) {
-        if (fMethodHistory.contains(entry)) {
-            fMethodHistory.remove(entry);
-        }
+    private void addHistoryEntry(IMember[] entry) {
+    	for (Iterator iter= fMethodHistory.iterator(); iter.hasNext(); ) {
+			if (Arrays.equals(entry, (IMember[]) iter.next())) {
+				iter.remove();
+			}
+		}
 
         fMethodHistory.add(0, entry);
-        fHistoryDropDownAction.setEnabled(!fMethodHistory.isEmpty());
+        fHistoryDropDownAction.setEnabled(true);
     }
 
     /**
@@ -903,42 +909,112 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     private void updateHistoryEntries() {
         for (int i = fMethodHistory.size() - 1; i >= 0; i--) {
-            IMember member = (IMember) fMethodHistory.get(i);
-
-            if (!member.exists()) {
-                fMethodHistory.remove(i);
-            }
+            IMember[] members = (IMember[]) fMethodHistory.get(i);
+            for (int j= 0; j < members.length; j++) {
+				IMember member= members[j];
+				if (! member.exists()) {
+					fMethodHistory.remove(i);
+					break;
+				}
+			}
         }
 
         fHistoryDropDownAction.setEnabled(!fMethodHistory.isEmpty());
     }
 
-    /**
-	 * Method updateView.
-	 */
 	private void updateView() {
-		if ( (fRootElement != null)) {
+		if (fInputElements != null) {
 			showPage(PAGE_VIEWER);
 
 			CallHierarchy.getDefault().setSearchScope(getSearchScope());
 
-			String elementName= JavaElementLabels.getElementLabel(fRootElement, JavaElementLabels.ALL_DEFAULT);
-			String scopeDescription= fSearchScopeActions.getFullDescription();
-			String[] args= new String[] { elementName, scopeDescription };
-			// set input to null so that setSorter does not cause a refresh on the old contents:
+			// set input to null so that setComparator does not cause a refresh on the old contents:
 			fCallHierarchyViewer.setInput(null);
 			if (fCurrentCallMode == CALL_MODE_CALLERS) {
-				setContentDescription(Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMethod, args)); 
 				fCallHierarchyViewer.setComparator(new ViewerComparator()); // bug 111423: sort caller hierarchy alphabetically
-    			fCallHierarchyViewer.setMethodWrapper(getCallerRoot());
+    			fCallHierarchyViewer.setMethodWrappers(getCallerRoots());
 			} else {
-				setContentDescription(Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMethod, args));
 				fCallHierarchyViewer.setComparator(null);
-				fCallHierarchyViewer.setMethodWrapper(getCalleeRoot());
+				fCallHierarchyViewer.setMethodWrappers(getCalleeRoots());
 			}
+			setContentDescription(computeContentDescription()); 
 		}
     }
+	
+	private String computeContentDescription() {
+		// see also HistoryAction.getElementLabel(IMember[])
+		String scopeDescription= fSearchScopeActions.getFullDescription();
+		
+		if (fInputElements.length == 1) {
+			IMember element= fInputElements[0];
+			String elementName= JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT);
+			String[] args= new String[] { elementName, scopeDescription };
+			if (fCurrentCallMode == CALL_MODE_CALLERS) {
+				switch (element.getElementType()) {
+					case IJavaElement.TYPE:
+						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToConstructors, args);
+					case IJavaElement.FIELD:
+						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToField, args);
+					case IJavaElement.METHOD:
+					case IJavaElement.INITIALIZER:
+					default:
+						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMethod, args);
+				}
+			} else {
+				switch (element.getElementType()) {
+					case IJavaElement.TYPE:
+						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromConstructors, args);
+					case IJavaElement.FIELD:
+					case IJavaElement.METHOD:
+					case IJavaElement.INITIALIZER:
+					default:
+						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMethod, args);
+				}
+			}
+			
+		} else {
+			if (fCurrentCallMode == CALL_MODE_CALLERS) {
+				switch (fInputElements.length) {
+		        	case 0:
+		        		Assert.isTrue(false);
+		        		return null;
+		        	case 2:
+		        		return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMembers_2,
+		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
+		        		
+		        	case 3:
+		        		return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMembers_3,
+		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), getShortLabel(fInputElements[2]), scopeDescription });
+		        		
+		        	default:
+		        		return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToMembers_more,
+		        				new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), getShortLabel(fInputElements[2]), scopeDescription });
+				}
+			} else {
+				switch (fInputElements.length) {
+					case 0:
+						Assert.isTrue(false);
+						return null;
+					case 2:
+						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMembers_2,
+								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), scopeDescription });
+						
+					case 3:
+						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMembers_3,
+								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), getShortLabel(fInputElements[2]), scopeDescription });
+						
+					default:
+						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsFromMembers_more,
+								new String[] { getShortLabel(fInputElements[0]), getShortLabel(fInputElements[1]), getShortLabel(fInputElements[2]), scopeDescription });
+				}
+			}
+		}
+	}
 
+	private static String getShortLabel(IMember member) {
+		return JavaElementLabels.getElementLabel(member, 0L);
+	}
+	
     static CallHierarchyViewPart findAndShowCallersView(IWorkbenchPartSite site) {
         IWorkbenchPage workbenchPage = site.getPage();
         CallHierarchyViewPart callersView = null;

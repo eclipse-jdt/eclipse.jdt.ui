@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.corext.callhierarchy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -26,6 +27,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -33,6 +35,8 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
@@ -95,13 +99,54 @@ public class CallHierarchy {
         return new ArrayList(0);
     }
 
-    public MethodWrapper getCallerRoot(IMember member) {
-        return new CallerMethodWrapper(null, new MethodCall(member));
+    public MethodWrapper[] getCallerRoots(IMember[] members) {
+    	return getRoots(members, true);
     }
 
-    public MethodWrapper getCalleeRoot(IMember member) {
-        return new CalleeMethodWrapper(null, new MethodCall(member));
+    public MethodWrapper[] getCalleeRoots(IMember[] members) {
+    	return getRoots(members, false);
     }
+    
+	private MethodWrapper[] getRoots(IMember[] members, boolean callers) {
+		ArrayList roots= new ArrayList();
+    	for (int i= 0; i < members.length; i++) {
+			IMember member= members[i];
+			if (member instanceof IType) {
+				IType type= (IType) member;
+				try {
+					if (! type.isAnonymous()) {
+						IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
+						if (constructors.length == 0) {
+							addRoot(member, roots, callers); // IType is a stand-in for the non-existing default constructor
+						} else {
+							for (int j= 0; j < constructors.length; j++) {
+								IMethod constructor= constructors[j];
+								addRoot(constructor, roots, callers);
+							}
+						}
+					} else {
+						addRoot(member, roots, callers);
+					}
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+				}
+			} else {
+				addRoot(member, roots, callers);
+			}
+		}
+    	return (MethodWrapper[]) roots.toArray(new MethodWrapper[roots.size()]);
+	}
+
+	private void addRoot(IMember member, ArrayList roots, boolean callers) {
+		MethodCall methodCall= new MethodCall(member);
+		MethodWrapper root;
+		if (callers) {
+			root= new CallerMethodWrapper(null, methodCall);
+		} else {
+			root= new CalleeMethodWrapper(null, methodCall);
+		}
+		roots.add(root);
+	}
 
     public static CallLocation getCallLocation(Object element) {
         CallLocation callLocation = null;
@@ -207,7 +252,17 @@ public class CallHierarchy {
         return fFilters;
     }
 
-    /**
+    public static boolean arePossibleInputElements(List elements) {
+		if (elements.size() < 1)
+			return false;
+		for (Iterator iter= elements.iterator(); iter.hasNext();) {
+			if (! isPossibleInputElement(iter.next()))
+				return false;
+		}
+		return true;
+	}
+
+	/**
      * Parses the comma separated string into an array of StringMatcher objects
      * @param listString the string to parse
      *
@@ -240,7 +295,19 @@ public class CallHierarchy {
         return null;
     }
     
-    public static boolean isPossibleParent(Object element) {
-    	return element instanceof IMember;
+    public static boolean isPossibleInputElement(Object element){
+    	if (! (element instanceof IMember))
+    		return false;
+    	
+    	if (element instanceof IType) {
+			IType type= (IType) element;
+			try {
+				return type.isClass() || type.isEnum();
+			} catch (JavaModelException e) {
+				return false;
+			}
+		}
+    	
+    	return true;
     }
 }

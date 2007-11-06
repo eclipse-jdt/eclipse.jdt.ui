@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,6 +65,17 @@ public class CallHierarchyTest extends TestCase {
         helper= null;
     }
 
+	static MethodWrapper getSingleCallerRoot(IMethod method) {
+		MethodWrapper[] methodWrappers= CallHierarchy.getDefault().getCallerRoots(new IMember[] { method });
+		assertEquals(1, methodWrappers.length);
+		return methodWrappers[0];
+	}
+	static MethodWrapper getSingleCalleeRoot(IMethod method) {
+		MethodWrapper[] methodWrappers= CallHierarchy.getDefault().getCalleeRoots(new IMember[] { method });
+		assertEquals(1, methodWrappers.length);
+		return methodWrappers[0];
+	}
+	
     public void testCallers() throws Exception {
         helper.createSimpleClasses();
 
@@ -75,7 +86,7 @@ public class CallHierarchyTest extends TestCase {
         expectedMethods.add(helper.getMethod2());
         expectedMethods.add(secondLevelMethod);
 
-        MethodWrapper wrapper= CallHierarchy.getDefault().getCallerRoot(method);
+        MethodWrapper wrapper= getSingleCallerRoot(method);
 
         MethodWrapper[] uncachedCalls= wrapper.getCalls(new NullProgressMonitor());
         helper.assertCalls(expectedMethods, uncachedCalls);
@@ -97,7 +108,7 @@ public class CallHierarchyTest extends TestCase {
 
         Collection expectedMethods= new ArrayList();
 
-        MethodWrapper wrapper= CallHierarchy.getDefault().getCallerRoot(method);
+        MethodWrapper wrapper= getSingleCallerRoot(method);
 
         MethodWrapper[] uncachedCalls= wrapper.getCalls(new NullProgressMonitor());
         helper.assertCalls(expectedMethods, uncachedCalls);
@@ -115,7 +126,7 @@ public class CallHierarchyTest extends TestCase {
         Collection expectedMethods= new ArrayList();
         expectedMethods.add(secondLevelMethod);
 
-        MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(method);
+        MethodWrapper wrapper= getSingleCalleeRoot(method);
 
         MethodWrapper[] uncachedCalls= wrapper.getCalls(new NullProgressMonitor());
         helper.assertCalls(expectedMethods, uncachedCalls);
@@ -139,7 +150,7 @@ public class CallHierarchyTest extends TestCase {
 
         Collection expectedMethods= new ArrayList();
 
-        MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(method);
+        MethodWrapper wrapper= getSingleCalleeRoot(method);
 
         MethodWrapper[] uncachedCalls= wrapper.getCalls(new NullProgressMonitor());
         helper.assertCalls(expectedMethods, uncachedCalls);
@@ -160,7 +171,7 @@ public class CallHierarchyTest extends TestCase {
         Collection expectedMethodsTo2= new ArrayList();
         expectedMethodsTo2.add(method1);
 
-        MethodWrapper wrapper= CallHierarchy.getDefault().getCallerRoot(method1);
+        MethodWrapper wrapper= getSingleCallerRoot(method1);
         MethodWrapper[] callsTo1= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callsTo1, false);
 
@@ -191,7 +202,7 @@ public class CallHierarchyTest extends TestCase {
         Collection expectedMethodsFrom2= new ArrayList();
         expectedMethodsFrom2.add(method1);
 
-        MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(method1);
+        MethodWrapper wrapper= getSingleCalleeRoot(method1);
         MethodWrapper[] callsFrom1= wrapper.getCalls(new NullProgressMonitor());
         helper.assertCalls(expectedMethodsFrom1, callsFrom1);
 
@@ -212,6 +223,7 @@ public class CallHierarchyTest extends TestCase {
 
     /**
      * Tests calls that origin from an inner class  
+     * @throws Exception 
      */
     public void testInnerClassCallers() throws Exception {
         helper.createInnerClass();
@@ -224,7 +236,7 @@ public class CallHierarchyTest extends TestCase {
         Collection expectedCallers= new ArrayList();
         expectedCallers.add(innerMethod1);
 
-        MethodWrapper wrapper= CallHierarchy.getDefault().getCallerRoot(someMethod);
+        MethodWrapper wrapper= getSingleCallerRoot(someMethod);
         MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callers, false);
         helper.assertCalls(expectedCallers, callers);
@@ -237,6 +249,7 @@ public class CallHierarchyTest extends TestCase {
 
     /**
      * Tests callees that enter an inner class  
+     * @throws Exception 
      */
     public void testInnerClassCalleesEntering() throws Exception {
         helper.createInnerClass();
@@ -249,7 +262,7 @@ public class CallHierarchyTest extends TestCase {
         Collection expectedCallers= new ArrayList();
         expectedCallers.add(innerMethod2);
 
-        MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(someMethod);
+        MethodWrapper wrapper= getSingleCalleeRoot(someMethod);
         MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callers, false);
         helper.assertCalls(expectedCallers, callers);
@@ -262,6 +275,7 @@ public class CallHierarchyTest extends TestCase {
 
     /**
      * Tests callees that exits an inner class  
+     * @throws Exception 
      */
     public void testInnerClassCalleesExiting() throws Exception {
         helper.createInnerClass();
@@ -274,7 +288,7 @@ public class CallHierarchyTest extends TestCase {
         Collection expectedCallers= new ArrayList();
         expectedCallers.add(innerMethod1);
 
-        MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(innerMethod2);
+        MethodWrapper wrapper= getSingleCalleeRoot(innerMethod2);
         MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callers, false);
         helper.assertCalls(expectedCallers, callers);
@@ -287,6 +301,7 @@ public class CallHierarchyTest extends TestCase {
 
     /**
      * Tests calls that origin from an inner class  
+     * @throws Exception 
      */
     public void testAnonymousInnerClassCallers() throws Exception {
         helper.createAnonymousInnerClass();
@@ -297,7 +312,7 @@ public class CallHierarchyTest extends TestCase {
         Collection expectedCallers= new ArrayList();
         expectedCallers.add(result);
 
-        MethodWrapper wrapper= CallHierarchy.getDefault().getCallerRoot(someMethod);
+        MethodWrapper wrapper= getSingleCallerRoot(someMethod);
         MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callers, false);
         helper.assertCalls(expectedCallers, callers);
@@ -305,6 +320,7 @@ public class CallHierarchyTest extends TestCase {
 
     /**
      * Tests calls that origin from an inner class  
+     * @throws Exception 
      */
     public void testAnonymousInnerClassOnInterfaceCallees() throws Exception {
     	//regression test for bug 37290 call hierarchy: Searching for callees into anonymous inner classes fails 
@@ -312,7 +328,7 @@ public class CallHierarchyTest extends TestCase {
         
         IMethod method= helper.getType2().getMethod("anonymousOnInterface", EMPTY);
 
-        MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(method);
+        MethodWrapper wrapper= getSingleCalleeRoot(method);
         MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callers, false);
         
@@ -324,6 +340,7 @@ public class CallHierarchyTest extends TestCase {
 
     /**
      * Tests calls that origin from an inner class  
+     * @throws Exception 
      */
     public void testAnonymousInnerClassInsideMethodCallees() throws Exception {
         //regression test for bug 56732 call hierarchy: Call Hierarchy doesn't show callees of method from anonymous type 
@@ -331,7 +348,7 @@ public class CallHierarchyTest extends TestCase {
         
         IMethod methodM= helper.getType1().getMethod("m", EMPTY);
 
-        MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(methodM);
+        MethodWrapper wrapper= getSingleCalleeRoot(methodM);
         MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callers, false);
         
@@ -339,7 +356,7 @@ public class CallHierarchyTest extends TestCase {
         
         IMethod methodRun= methodM.getType("", 1).getMethod("run", EMPTY); 
 
-        wrapper= CallHierarchy.getDefault().getCalleeRoot(methodRun);
+        wrapper= getSingleCalleeRoot(methodRun);
         callers= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callers, false);
         
@@ -350,6 +367,7 @@ public class CallHierarchyTest extends TestCase {
 
     /**
      * Tests calls that origin from an inner class  
+     * @throws Exception 
      */
     public void testAnonymousInnerClassOnClassCallees() throws Exception {
 		//regression test for bug 37290 call hierarchy: Searching for callees into anonymous inner classes fails 
@@ -357,7 +375,7 @@ public class CallHierarchyTest extends TestCase {
         
         IMethod method= helper.getType2().getMethod("anonymousOnClass", EMPTY);
 
-        MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(method);
+        MethodWrapper wrapper= getSingleCalleeRoot(method);
         MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callers, false);
         
@@ -369,6 +387,7 @@ public class CallHierarchyTest extends TestCase {
 
     /**
      * Tests calls that origin from a static initializer block.
+     * @throws Exception 
      */
     public void testInitializerCallers() throws Exception {
         helper.createStaticInitializerClass();
@@ -380,7 +399,7 @@ public class CallHierarchyTest extends TestCase {
         Collection expectedCallers= new ArrayList();
         expectedCallers.add(initializer);
 
-        MethodWrapper wrapper= CallHierarchy.getDefault().getCallerRoot(someMethod);
+        MethodWrapper wrapper= getSingleCallerRoot(someMethod);
         MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callers, false);
         helper.assertCalls(expectedCallers, callers);
@@ -394,7 +413,7 @@ public class CallHierarchyTest extends TestCase {
         Collection expectedCallers= new ArrayList();
         expectedCallers.add(helper.getType2());
 
-        MethodWrapper wrapper= CallHierarchy.getDefault().getCallerRoot(constructorA);
+        MethodWrapper wrapper= getSingleCallerRoot(constructorA);
         MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callers, false);
         helper.assertCalls(expectedCallers, callers);
@@ -408,7 +427,7 @@ public class CallHierarchyTest extends TestCase {
         Collection expectedCallers= new ArrayList();
         expectedCallers.add(helper.getType1());
 
-        MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(constructorB);
+        MethodWrapper wrapper= getSingleCalleeRoot(constructorB);
         MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
         assertRecursive(callers, false);
         helper.assertCalls(expectedCallers, callers);
@@ -417,12 +436,12 @@ public class CallHierarchyTest extends TestCase {
     public void testLineNumberCallers() throws Exception {
         helper.createSimpleClasses();
         
-        MethodWrapper wrapper= CallHierarchy.getDefault().getCallerRoot(helper.getMethod1());
+        MethodWrapper wrapper= getSingleCallerRoot(helper.getMethod1());
         MethodWrapper[] calls= wrapper.getCalls(new NullProgressMonitor());
         MethodWrapper method2Wrapper= helper.findMethodWrapper(helper.getMethod2(), calls);
         assertEquals("Wrong line number", 9, method2Wrapper.getMethodCall().getFirstCallLocation().getLineNumber());
 
-        wrapper= CallHierarchy.getDefault().getCallerRoot(helper.getRecursiveMethod2());
+        wrapper= getSingleCallerRoot(helper.getRecursiveMethod2());
         calls= wrapper.getCalls(new NullProgressMonitor());
         MethodWrapper recursiveMethod1Wrapper= helper.findMethodWrapper(helper.getRecursiveMethod1(), calls);
         assertEquals("Wrong line number", 12, recursiveMethod1Wrapper.getMethodCall().getFirstCallLocation().getLineNumber());
@@ -431,12 +450,12 @@ public class CallHierarchyTest extends TestCase {
     public void testLineNumberCallees() throws Exception {
         helper.createSimpleClasses();
         
-        MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(helper.getMethod2());
+        MethodWrapper wrapper= getSingleCalleeRoot(helper.getMethod2());
         MethodWrapper[] calls= wrapper.getCalls(new NullProgressMonitor());
         MethodWrapper method1Wrapper= helper.findMethodWrapper(helper.getMethod1(), calls);
         assertEquals("Wrong line number", 9, method1Wrapper.getMethodCall().getFirstCallLocation().getLineNumber());
         
-        wrapper= CallHierarchy.getDefault().getCalleeRoot(helper.getRecursiveMethod1());
+        wrapper= getSingleCalleeRoot(helper.getRecursiveMethod1());
         calls= wrapper.getCalls(new NullProgressMonitor());
         MethodWrapper recursiveMethod2Wrapper= helper.findMethodWrapper(helper.getRecursiveMethod2(), calls);
         assertEquals("Wrong line number", 12, recursiveMethod2Wrapper.getMethodCall().getFirstCallLocation().getLineNumber());

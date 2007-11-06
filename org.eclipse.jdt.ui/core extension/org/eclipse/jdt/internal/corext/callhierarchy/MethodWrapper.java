@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,6 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 
-
 import org.eclipse.jdt.internal.ui.callhierarchy.MethodWrapperWorkbenchAdapter;
 
 /**
@@ -42,13 +41,10 @@ public abstract class MethodWrapper extends PlatformObject {
      * This way previously found methods won't be searched again.
      */
     private Map fMethodCache;
-    private MethodCall fMethodCall;
-    private MethodWrapper fParent;
+    private final MethodCall fMethodCall;
+    private final MethodWrapper fParent;
     private int fLevel;
 
-    /**
-     * Constructor CallerElement.
-     */
     public MethodWrapper(MethodWrapper parent, MethodCall methodCall) {
         Assert.isNotNull(methodCall);
 
@@ -74,9 +70,6 @@ public abstract class MethodWrapper extends PlatformObject {
 	    }
 	}
 
-    /**
-     * @return the child caller elements of this element
-     */
     public MethodWrapper[] getCalls(IProgressMonitor progressMonitor) {
         if (fElements == null) {
             doFindChildren(progressMonitor);
@@ -235,10 +228,17 @@ public abstract class MethodWrapper extends PlatformObject {
         return false;
     }
 
+	/**
+	 * @return whether this member can have children
+	 */
+	public abstract boolean canHaveChildren();
+	
     /**
-     * This method finds the children of the current IMethod (either callers or
-     * callees, depending on the concrete subclass.
-     * @return The result of the search for children
+     * This method finds the children of the current IMember (either callers or
+     * callees, depending on the concrete subclass).
+     * @param progressMonitor a progress monitor
+     * 
+     * @return a map from handle identifier ({@link String}) to {@link MethodCall}
      */
     protected abstract Map findChildren(IProgressMonitor progressMonitor);
 
@@ -254,6 +254,7 @@ public abstract class MethodWrapper extends PlatformObject {
 
     /**
      * Looks up a previously created search result in the "global" cache.
+     * @param methodCall the method call
      * @return the List of previously found search results
      */
     private Map lookupMethod(MethodCall methodCall) {
@@ -285,6 +286,7 @@ public abstract class MethodWrapper extends PlatformObject {
      * should be canceled. Should be regularly called
      * so that the user can cancel.
      *
+     * @param progressMonitor the progress monitor
      * @exception OperationCanceledException if cancelling the operation has been requested
      * @see IProgressMonitor#isCanceled
      */
@@ -299,6 +301,7 @@ public abstract class MethodWrapper extends PlatformObject {
      * a recursive node is reached.
      *  
      * @param visitor
+     * @param progressMonitor the progress monitor
      */
     public void accept(CallHierarchyVisitor visitor, IProgressMonitor progressMonitor) {
         if (getParent() != null && getParent().isRecursive()) {

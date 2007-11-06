@@ -19,6 +19,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -50,9 +51,9 @@ public class HistoryListAction extends Action {
 		
 		private ListDialogField fHistoryList;
 		private IStatus fHistoryStatus;
-		private IMember fResult;
+		private IMember[] fResult;
 		
-		private HistoryListDialog(Shell shell, IMember[] elements) {
+		private HistoryListDialog(Shell shell, IMember[][] elements) {
 			super(shell);
 			setTitle(CallHierarchyMessages.HistoryListDialog_title); 
 			
@@ -73,7 +74,25 @@ public class HistoryListAction extends Action {
 				}				
 			};
 		
-			JavaElementLabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_QUALIFIED | JavaElementLabelProvider.SHOW_ROOT);
+			JavaElementLabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_QUALIFIED | JavaElementLabelProvider.SHOW_ROOT) {
+				/*
+				 * @see org.eclipse.jdt.ui.JavaElementLabelProvider#getText(java.lang.Object)
+				 */
+				public String getText(Object element) {
+					IMember[] members= (IMember[]) element;
+					return HistoryAction.getElementLabel(members);
+				}
+				/*
+				 * @see org.eclipse.jdt.ui.JavaElementLabelProvider#getImage(java.lang.Object)
+				 */
+				public Image getImage(Object element) {
+					IMember[] members= (IMember[]) element;
+					if (members.length == 1)
+						return super.getImage(members[0]);
+					else
+						return null;
+				}
+			};
 			
 			fHistoryList= new ListDialogField(adapter, buttonLabels, labelProvider);
 			fHistoryList.setLabelText(CallHierarchyMessages.HistoryListDialog_label); 
@@ -131,20 +150,20 @@ public class HistoryListAction extends Action {
         		status.setError(""); //$NON-NLS-1$
         		fResult= null;
         	} else {
-        		fResult= (IMember) selected.get(0);
+        		fResult= (IMember[]) selected.get(0);
         	}
         	fHistoryList.enableButton(0, fHistoryList.getSize() > selected.size() && selected.size() != 0);			
         	fHistoryStatus= status;
         	updateStatus(status);	
         }
 				
-		public IMember getResult() {
+		public IMember[] getResult() {
 			return fResult;
 		}
 		
-		public IMember[] getRemaining() {
+		public IMember[][] getRemaining() {
 			List elems= fHistoryList.getElements();
-			return (IMember[]) elems.toArray(new IMember[elems.size()]);
+			return (IMember[][]) elems.toArray(new IMember[elems.size()][]);
 		}	
 		
 		/*
@@ -177,11 +196,11 @@ public class HistoryListAction extends Action {
 	 * @see IAction#run()
 	 */
 	public void run() {
-		IMember[] historyEntries= fView.getHistoryEntries();
+		IMember[][] historyEntries= fView.getHistoryEntries();
 		HistoryListDialog dialog= new HistoryListDialog(JavaPlugin.getActiveWorkbenchShell(), historyEntries);
 		if (dialog.open() == Window.OK) {
 			fView.setHistoryEntries(dialog.getRemaining());
-			fView.setRootElement(dialog.getResult());
+			fView.setInputElements(dialog.getResult());
 		}
 	}
 

@@ -23,7 +23,6 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.progress.DeferredTreeContentManager;
 
-import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -66,8 +65,8 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
     public Object[] getChildren(Object parentElement) {
         if (parentElement instanceof TreeRoot) {
             TreeRoot dummyRoot = (TreeRoot) parentElement;
-
-            return new Object[] { dummyRoot.getRoot() };
+            return dummyRoot.getRoots();
+            
         } else if (parentElement instanceof MethodWrapper) {
             MethodWrapper methodWrapper = ((MethodWrapper) parentElement);
 
@@ -138,11 +137,11 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 			return false;
 		}
 
-		// Only methods can have subelements, so there's no need to fool the
+		// Only certain members can have subelements, so there's no need to fool the
 		// user into believing that there is more
 		if (element instanceof MethodWrapper) {
 			MethodWrapper methodWrapper= (MethodWrapper) element;
-			if (! CallHierarchy.isPossibleParent(methodWrapper.getMember())) {
+			if (! methodWrapper.canHaveChildren()) {
 				return false;
 			}
 			if (shouldStopTraversion(methodWrapper)) {
@@ -166,10 +165,8 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 	 */
     public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
     	if (oldInput instanceof TreeRoot) {
-    		Object root = ((TreeRoot) oldInput).getRoot();
-    		if (root instanceof MethodWrapper) {
-    			cancelJobs((MethodWrapper) root);
-    		}
+    		MethodWrapper[] roots = ((TreeRoot) oldInput).getRoots();
+   			cancelJobs(roots);
     	}
         if (viewer instanceof AbstractTreeViewer) {
             fManager = new DeferredTreeContentManager((AbstractTreeViewer) viewer, fPart.getSite());
@@ -178,11 +175,14 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 
     /**
      * Cancel all current jobs. 
-     * @param wrapper the parent to cancel jobs for
+     * @param wrappers the parents to cancel jobs for
      */
-    void cancelJobs(MethodWrapper wrapper) {
-        if (fManager != null && wrapper != null) {
-			fManager.cancel(wrapper);
+    void cancelJobs(MethodWrapper[] wrappers) {
+        if (fManager != null && wrappers != null) {
+        	for (int i= 0; i < wrappers.length; i++) {
+				MethodWrapper wrapper= wrappers[i];
+				fManager.cancel(wrapper);
+			}
             if (fPart != null) {
                 fPart.setCancelEnabled(false);
             }

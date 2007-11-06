@@ -201,28 +201,33 @@ public class CallHierarchyUI {
         return null;
     }
 
-    public static CallHierarchyViewPart open(IJavaElement[] candidates, IWorkbenchWindow window) {
-        Assert.isTrue(candidates != null && candidates.length != 0);
-            
-        IJavaElement input= null;
+    public static CallHierarchyViewPart openSelectionDialog(IMember[] candidates, IWorkbenchWindow window) {
+        Assert.isTrue(candidates != null);
+        
+        IMember input= null;
         if (candidates.length > 1) {
             String title= CallHierarchyMessages.CallHierarchyUI_selectionDialog_title;  
             String message= CallHierarchyMessages.CallHierarchyUI_selectionDialog_message; 
-            input= SelectionConverter.selectJavaElement(candidates, window.getShell(), title, message);         
-        } else {
+            input= (IMember) SelectionConverter.selectJavaElement(candidates, window.getShell(), title, message);         
+        } else if (candidates.length == 1) {
             input= candidates[0];
         }
         if (input == null)
-            return null;
+            return openView(new IMember[] {}, window);
             
-        return openInViewPart(window, input);
+        return openView(new IMember[] { input }, window);
     }
     
-    private static CallHierarchyViewPart openInViewPart(IWorkbenchWindow window, IJavaElement input) {
+    public static CallHierarchyViewPart openView(IMember[] input, IWorkbenchWindow window) {
+    	if (input.length == 0) {
+			MessageDialog.openInformation(window.getShell(), CallHierarchyMessages.CallHierarchyUI_selectionDialog_title,
+					CallHierarchyMessages.CallHierarchyUI_open_operation_unavialable);
+			return null;
+		}
         IWorkbenchPage page= window.getActivePage();
         try {
             CallHierarchyViewPart result= (CallHierarchyViewPart)page.showView(CallHierarchyViewPart.ID_CALL_HIERARCHY);
-            result.setRootElement((IMember)input);
+            result.setInputElements(input);
             return result;
         } catch (CoreException e) {
             ExceptionHandler.handle(e, window.getShell(), 

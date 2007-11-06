@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,12 +21,12 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+
 import org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyContentProvider;
 import org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyUI;
 import org.eclipse.jdt.internal.ui.callhierarchy.TreeRoot;
-
-import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
-import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 public class CallHierarchyContentProviderTest extends TestCase {
     private static final int DEFAULT_MAX_DEPTH= 10;
@@ -274,11 +274,11 @@ public class CallHierarchyContentProviderTest extends TestCase {
     }
 
     private TreeRoot wrapCalleeRoot(IMethod method) {
-        return new TreeRoot(CallHierarchy.getDefault().getCalleeRoot(method));
+        return new TreeRoot(CallHierarchy.getDefault().getCalleeRoots(new IMember[] { method }));
     }
 
     private TreeRoot wrapCallerRoot(IMethod method) {
-        return new TreeRoot(CallHierarchy.getDefault().getCallerRoot(method));
+        return new TreeRoot(CallHierarchy.getDefault().getCallerRoots(new IMember[] { method }));
     }
 
 }

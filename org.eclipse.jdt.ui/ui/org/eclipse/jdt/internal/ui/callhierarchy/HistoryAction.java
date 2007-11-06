@@ -20,62 +20,80 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
-/**
- * Action used for the type hierarchy forward / backward buttons
- */
 class HistoryAction extends Action {
-    private static JavaElementLabelProvider fLabelProvider = new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_POST_QUALIFIED |
-            JavaElementLabelProvider.SHOW_PARAMETERS |
-            JavaElementLabelProvider.SHOW_RETURN_TYPE);
-    private CallHierarchyViewPart fView;
-    private IMember fMember;
+	
+	private static long LABEL_FLAGS= JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.T_TYPE_PARAMETERS;
+	private static long LABEL_MULTI_FLAGS= 0L;
+	
+	private CallHierarchyViewPart fView;
+	private IMember[] fMembers;
 
-    public HistoryAction(CallHierarchyViewPart viewPart, IMember element) {
-        super("", AS_RADIO_BUTTON); //$NON-NLS-1$
-        fView = viewPart;
-        fMember = element;
+	public HistoryAction(CallHierarchyViewPart viewPart, IMember[] members) {
+		super("", AS_RADIO_BUTTON); //$NON-NLS-1$
+		fView= viewPart;
+		fMembers= members;
 
-        String elementName = getElementLabel(element);
-        setText(elementName);
-        setImageDescriptor(getImageDescriptor(element));
+		String elementName= getElementLabel(members);
+		setText(elementName);
+		setImageDescriptor(getImageDescriptor(members));
 
-        setDescription(Messages.format(CallHierarchyMessages.HistoryAction_description, elementName)); 
-        setToolTipText(Messages.format(CallHierarchyMessages.HistoryAction_tooltip, elementName)); 
-        
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_HISTORY_ACTION);
+		setDescription(Messages.format(CallHierarchyMessages.HistoryAction_description, elementName));
+		setToolTipText(Messages.format(CallHierarchyMessages.HistoryAction_tooltip, elementName));
+
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_HISTORY_ACTION);
+	}
+
+	private static ImageDescriptor getImageDescriptor(IMember[] members) {
+		if (members.length == 1) {
+			JavaElementImageProvider imageProvider= new JavaElementImageProvider();
+			ImageDescriptor desc= imageProvider.getBaseImageDescriptor(members[0], 0);
+			imageProvider.dispose();
+			return desc;
+		} else {
+			return null;
+		}
+	}
+
+	/*
+	 * @see Action#run()
+	 */
+	public void run() {
+		fView.gotoHistoryEntry(fMembers);
+	}
+
+	static String getElementLabel(IMember[] members) {
+		switch (members.length) {
+        	case 0:
+        		Assert.isTrue(false);
+        		return null;
+        		
+        	case 1:
+        		return JavaElementLabels.getElementLabel(members[0], LABEL_FLAGS);
+        	
+        	case 2:
+        		return Messages.format(CallHierarchyMessages.HistoryAction_inputElements_2,
+        				new String[] { getShortLabel(members[0]), getShortLabel(members[1]) });
+        		
+        	case 3:
+        		return Messages.format(CallHierarchyMessages.HistoryAction_inputElements_3,
+        				new String[] { getShortLabel(members[0]), getShortLabel(members[1]), getShortLabel(members[2]) });
+        		
+        	default:
+        		return Messages.format(CallHierarchyMessages.HistoryAction_inputElements_more,
+        				new String[] { getShortLabel(members[0]), getShortLabel(members[1]), getShortLabel(members[2]) });
+		} 
     }
 
-    private ImageDescriptor getImageDescriptor(IJavaElement elem) {
-        JavaElementImageProvider imageProvider = new JavaElementImageProvider();
-        ImageDescriptor desc = imageProvider.getBaseImageDescriptor(elem, 0);
-        imageProvider.dispose();
-
-        return desc;
-    }
-
-    /*
-     * @see Action#run()
-     */
-    public void run() {
-        fView.gotoHistoryEntry(fMember);
-    }
-
-    /**
-     * @param element
-     * @return String
-     */
-    private String getElementLabel(IJavaElement element) {
-        Assert.isNotNull(element);
-        return fLabelProvider.getText(element);
-    }
+	private static String getShortLabel(IMember member) {
+		return JavaElementLabels.getElementLabel(member, LABEL_MULTI_FLAGS);
+	}
 }

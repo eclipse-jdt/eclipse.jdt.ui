@@ -67,14 +67,12 @@ class CallHierarchyViewer extends TreeViewer {
         clearViewer();
     }
 
-    /**
-     * @param wrapper
-     */
-    void setMethodWrapper(MethodWrapper wrapper) {
-        setInput(getTreeRoot(wrapper));
+    void setMethodWrappers(MethodWrapper[] wrappers) {
+        setInput(getTreeRoot(wrappers));
 
         setFocus();
-        setSelection(new StructuredSelection(wrapper), true);
+        if (wrappers != null && wrappers.length > 0)
+        	setSelection(new StructuredSelection(wrappers[0]), true);
     }
 
     CallHierarchyViewPart getPart() {
@@ -100,20 +98,20 @@ class CallHierarchyViewer extends TreeViewer {
     }
 
     /**
-     * Wraps the root of a MethodWrapper tree in a dummy root in order to show
+     * Wraps the roots of a MethodWrapper tree in a dummy root in order to show
      * it in the tree.
      *
-     * @param root The root of the MethodWrapper tree.
-     * @return A new MethodWrapper which is a dummy root above the specified root.
+     * @param roots The visible roots of the MethodWrapper tree.
+     * @return A new TreeRoot which is a dummy root above the specified root.
      */
-    private TreeRoot getTreeRoot(MethodWrapper root) {
-        TreeRoot dummyRoot = new TreeRoot(root);
+    private TreeRoot getTreeRoot(MethodWrapper[] roots) {
+        TreeRoot dummyRoot = new TreeRoot(roots);
 
         return dummyRoot;
     }
 
     /**
-     * Attaches a contextmenu listener to the tree
+     * Attaches a context menu listener to the tree
      * @param menuListener the menu listener
      * @param viewSite the view site
      * @param selectionProvider the selection provider
@@ -137,6 +135,6 @@ class CallHierarchyViewer extends TreeViewer {
     void cancelJobs() {
     	if (fPart == null)
     		return;
-        fContentProvider.cancelJobs(fPart.getCurrentMethodWrapper());
+        fContentProvider.cancelJobs(fPart.getCurrentMethodWrappers());
     }
 }

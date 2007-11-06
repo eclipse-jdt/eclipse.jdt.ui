@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -32,7 +33,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
@@ -59,6 +59,14 @@ class CallerMethodWrapper extends MethodWrapper {
         return new CallerMethodWrapper(this, methodCall);
     }
 
+	/*
+	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#canHaveChildren()
+	 */
+	public boolean canHaveChildren() {
+		IMember member= getMember();
+		return member instanceof IMethod || member instanceof IType || member instanceof IField;
+	}
+	
 	/**
 	 * @return The result of the search for children
 	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#findChildren(org.eclipse.core.runtime.IProgressMonitor)
@@ -80,23 +88,10 @@ class CallerMethodWrapper extends MethodWrapper {
 			}
 			if (type != null) {
 				if (! type.isAnonymous()) {
-					IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
-					if (constructors.length == 0) {
-						pattern= SearchPattern.createPattern(JavaModelUtil.getFullyQualifiedName(type), 
-								IJavaSearchConstants.CONSTRUCTOR, 
-								IJavaSearchConstants.REFERENCES, 
-								SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
-					} else {
-						CallSearchResultCollector resultCollector= new CallSearchResultCollector();
-						for (int i= 0; i < constructors.length; i++) {
-							IMethod constructor= constructors[i];
-							ISourceRange nameRange= constructor.getNameRange();
-							int start= nameRange != null ? nameRange.getOffset() : -1;
-							int len= nameRange != null ? nameRange.getLength() : 0;
-							resultCollector.addMember(type, constructor, start, start + len);
-						}
-						return resultCollector.getCallers();
-					}
+					pattern= SearchPattern.createPattern(JavaModelUtil.getFullyQualifiedName(type), 
+							IJavaSearchConstants.CONSTRUCTOR, 
+							IJavaSearchConstants.REFERENCES, 
+							SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 				} else {
 					CallSearchResultCollector resultCollector= new CallSearchResultCollector();
 					IJavaElement parent= type.getParent();

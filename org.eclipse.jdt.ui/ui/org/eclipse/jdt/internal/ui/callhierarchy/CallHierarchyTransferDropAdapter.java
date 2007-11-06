@@ -13,7 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
+import java.util.List;
+
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 
 import org.eclipse.jdt.core.IMember;
@@ -21,7 +24,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
 
 import org.eclipse.jdt.internal.ui.dnd.ViewerInputDropAdapter;
-import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 class CallHierarchyTransferDropAdapter extends ViewerInputDropAdapter {
 	
@@ -35,25 +37,20 @@ class CallHierarchyTransferDropAdapter extends ViewerInputDropAdapter {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void doInputView(Object inputElement) {
-		fCallHierarchyViewPart.setRootElement((IMember) inputElement);
+	protected void doInputView(Object inputElements) {
+		fCallHierarchyViewPart.setInputElements((IMember[]) inputElements);
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	protected Object getInputElement(ISelection selection) {
-		Object single= SelectionUtil.getSingleElement(selection);
-		if (single == null)
-			return null;
-		
-		return getCandidate(single);
+		if (selection instanceof IStructuredSelection) {
+			List elements= ((IStructuredSelection) selection).toList();
+			if (CallHierarchy.arePossibleInputElements(elements)) {
+				return elements.toArray(new IMember[elements.size()]);
+			}
+		}
+		return null;
 	}
-    
-    private static IMember getCandidate(Object input) {
-        if (! CallHierarchy.isPossibleParent(input))
-            return null;
-        
-        return (IMember) input;
-    }
 }

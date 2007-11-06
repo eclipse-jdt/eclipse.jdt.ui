@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,9 @@ public final class CallHierarchyMessages extends NLS {
 	public static String ToggleCallModeAction_callees_description;
 	public static String HistoryDropDownAction_tooltip;
 	public static String HistoryAction_description;
+	public static String HistoryAction_inputElements_2;
+	public static String HistoryAction_inputElements_3;
+	public static String HistoryAction_inputElements_more;
 	public static String HistoryAction_tooltip;
 	public static String HistoryListDialog_title;
 	public static String HistoryListDialog_label;
@@ -61,11 +64,21 @@ public final class CallHierarchyMessages extends NLS {
 	public static String CallHierarchyLabelProvider_updatePending;
 	public static String CallHierarchyLabelProvider_matches;
 	public static String CallHierarchyViewPart_empty;
+	public static String CallHierarchyViewPart_callsToConstructors;
+	public static String CallHierarchyViewPart_callsToField;
+	public static String CallHierarchyViewPart_callsToMembers_2;
+	public static String CallHierarchyViewPart_callsToMembers_3;
+	public static String CallHierarchyViewPart_callsToMembers_more;
 	public static String CallHierarchyViewPart_callsToMethod;
+	public static String CallHierarchyViewPart_callsFromConstructors;
+	public static String CallHierarchyViewPart_callsFromMembers_2;
+	public static String CallHierarchyViewPart_callsFromMembers_3;
+	public static String CallHierarchyViewPart_callsFromMembers_more;
 	public static String CallHierarchyViewPart_callsFromMethod;
 	public static String FocusOnSelectionAction_focusOnSelection_text;
 	public static String FocusOnSelectionAction_focusOnSelection_description;
 	public static String FocusOnSelectionAction_focusOnSelection_tooltip;
+	public static String FocusOnSelectionAction_focusOn_selected;
 	public static String FocusOnSelectionAction_focusOn_text;
 	public static String RefreshAction_text;
 	public static String RefreshAction_tooltip;
@@ -86,6 +99,7 @@ public final class CallHierarchyMessages extends NLS {
 	public static String OpenLocationAction_error_title;
 	public static String CallHierarchyUI_open_in_editor_error_message;
 	public static String CallHierarchyUI_open_in_editor_error_messageArgs;
+	public static String CallHierarchyUI_open_operation_unavialable;
 	public static String CallHierarchyUI_error_open_view;
 	public static String CopyCallHierarchyAction_label;
 	public static String CopyCallHierarchyAction_problem;
@@ -93,9 +107,6 @@ public final class CallHierarchyMessages extends NLS {
 	public static String OpenCallHierarchyAction_label;
 	public static String OpenCallHierarchyAction_tooltip;
 	public static String OpenCallHierarchyAction_description;
-	public static String OpenCallHierarchyAction_messages_no_java_element;
-	public static String OpenCallHierarchyAction_messages_no_valid_java_element;
-	public static String OpenCallHierarchyAction_messages_title;
 	public static String OpenCallHierarchyAction_dialog_title;
 	public static String CancelSearchAction_label;
 	public static String CancelSearchAction_tooltip;
