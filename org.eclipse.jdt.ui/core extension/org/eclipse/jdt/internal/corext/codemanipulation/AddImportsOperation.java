@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -59,6 +60,7 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
@@ -177,6 +179,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		String name, simpleName, containerName;
 		int qualifierStart;
 		int simpleNameStart;
+
 		if (nameNode != null) {
 			simpleName= nameNode.getIdentifier();
 			simpleNameStart= nameNode.getStartPosition();
@@ -266,6 +269,13 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			
 			simpleName= Signature.getSimpleName(name);
 			containerName= Signature.getQualifier(name);
+			
+			IJavaProject javaProject= fCompilationUnit.getJavaProject();
+			if (simpleName.length() == 0 || JavaConventionsUtil.validateJavaTypeName(simpleName, javaProject).matches(IStatus.ERROR)
+					|| (containerName.length() > 0 && JavaConventionsUtil.validateJavaTypeName(containerName, javaProject).matches(IStatus.ERROR))) {
+				fStatus= JavaUIStatus.createError(IStatus.ERROR, CodeGenerationMessages.AddImportsOperation_error_invalid_selection, null);
+				return null;
+			}
 			
 			simpleNameStart= getSimpleNameStart(buffer, qualifierStart, containerName);
 			
