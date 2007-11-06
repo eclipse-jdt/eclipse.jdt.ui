@@ -95,6 +95,10 @@ import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariablePro
 
 /**
  * Dialog to edit a template.
+ * <p>
+ * <strong>Note:</strong> This is a copy of org.eclipse.ui.texteditor.templates.TemplatePreferencePage.EditTemplateDialog
+ * which we should try to eliminate (see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=208865).
+ * </p>
  */
 class EditTemplateDialog extends StatusDialog {
 
@@ -103,7 +107,7 @@ class EditTemplateDialog extends StatusDialog {
 		private int fOperationCode= -1;
 		private ITextOperationTarget fOperationTarget;
 	
-		/** 
+		/**
 		 * Creates a new action.
 		 * 
 		 * @param viewer the viewer
@@ -143,25 +147,25 @@ class EditTemplateDialog extends StatusDialog {
 				fOperationTarget.doOperation(fOperationCode);
 			}
 		}
-	}	
+	}
 
 	private Template fTemplate;
 	
 	private Text fNameText;
 	private Text fDescriptionText;
 	private Combo fContextCombo;
-	private SourceViewer fPatternEditor;	
+	private SourceViewer fPatternEditor;
 	private Button fInsertVariableButton;
 	private Button fAutoInsertCheckbox;
 	private boolean fIsNameModifiable;
 
 	private StatusInfo fValidationStatus;
-	private boolean fSuppressError= true; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=4354	
+	private boolean fSuppressError= true; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=4354
 	private Map fGlobalActions= new HashMap(10);
-	private List fSelectionActions = new ArrayList(3);	
+	private List fSelectionActions = new ArrayList(3);
 	private String[][] fContextTypes;
 	
-	private ContextTypeRegistry fContextTypeRegistry; 
+	private ContextTypeRegistry fContextTypeRegistry;
 	
 	private final TemplateVariableProcessor fTemplateProcessor= new TemplateVariableProcessor();
 		
@@ -179,7 +183,7 @@ class EditTemplateDialog extends StatusDialog {
 		
 		String title= edit
 			? PreferencesMessages.EditTemplateDialog_title_edit
-			: PreferencesMessages.EditTemplateDialog_title_new; 
+			: PreferencesMessages.EditTemplateDialog_title_new;
 		setTitle(title);
 
 		fTemplate= template;
@@ -239,11 +243,11 @@ class EditTemplateDialog extends StatusDialog {
 		};
 		
 		if (fIsNameModifiable) {
-			createLabel(parent, PreferencesMessages.EditTemplateDialog_name); 
+			createLabel(parent, PreferencesMessages.EditTemplateDialog_name);
 			
 			Composite composite= new Composite(parent, SWT.NONE);
 			composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			layout= new GridLayout();		
+			layout= new GridLayout();
 			layout.numColumns= 4;
 			layout.marginWidth= 0;
 			layout.marginHeight= 0;
@@ -263,7 +267,7 @@ class EditTemplateDialog extends StatusDialog {
 				}
 			});
 			
-			createLabel(composite, PreferencesMessages.EditTemplateDialog_context); 
+			createLabel(composite, PreferencesMessages.EditTemplateDialog_context);
 			fContextCombo= new Combo(composite, SWT.READ_ONLY);
 	
 			for (int i= 0; i < fContextTypes.length; i++) {
@@ -276,35 +280,35 @@ class EditTemplateDialog extends StatusDialog {
 			fAutoInsertCheckbox.setSelection(fTemplate.isAutoInsertable());
 		}
 		
-		createLabel(parent, PreferencesMessages.EditTemplateDialog_description); 
+		createLabel(parent, PreferencesMessages.EditTemplateDialog_description);
 		
 		int descFlags= fIsNameModifiable ? SWT.BORDER : SWT.BORDER | SWT.READ_ONLY;
 		fDescriptionText= new Text(parent, descFlags );
-		fDescriptionText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
+		fDescriptionText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		fDescriptionText.addModifyListener(listener);
 
-		Label patternLabel= createLabel(parent, PreferencesMessages.EditTemplateDialog_pattern); 
+		Label patternLabel= createLabel(parent, PreferencesMessages.EditTemplateDialog_pattern);
 		patternLabel.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
 		fPatternEditor= createEditor(parent);
 		
-		Label filler= new Label(parent, SWT.NONE);		
+		Label filler= new Label(parent, SWT.NONE);
 		filler.setLayoutData(new GridData());
 		
 		Composite composite= new Composite(parent, SWT.NONE);
-		layout= new GridLayout();		
+		layout= new GridLayout();
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
-		composite.setLayout(layout);		
+		composite.setLayout(layout);
 		composite.setLayoutData(new GridData());
 		
 		fInsertVariableButton= new Button(composite, SWT.NONE);
 		fInsertVariableButton.setLayoutData(getButtonGridData());
-		fInsertVariableButton.setText(PreferencesMessages.EditTemplateDialog_insert_variable); 
+		fInsertVariableButton.setText(PreferencesMessages.EditTemplateDialog_insert_variable);
 		fInsertVariableButton.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				fPatternEditor.getTextWidget().setFocus();
-				fPatternEditor.doOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);			
+				fPatternEditor.doOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);
 			}
 
 			public void widgetDefaultSelected(SelectionEvent e) {}
@@ -338,7 +342,7 @@ class EditTemplateDialog extends StatusDialog {
 			updateStatusAndButtons();
 		} else if (w == fDescriptionText) {
 			// nothing
-		}	
+		}
 	}
 	
 	private String getContextId() {
@@ -346,7 +350,7 @@ class EditTemplateDialog extends StatusDialog {
 			String name= fContextCombo.getText();
 			for (int i= 0; i < fContextTypes.length; i++) {
 				if (name.equals(fContextTypes[i][1])) {
-					return fContextTypes[i][0];	
+					return fContextTypes[i][0];
 				}
 			}
 		}
@@ -368,10 +372,10 @@ class EditTemplateDialog extends StatusDialog {
 
 		updateAction(ITextEditorActionConstants.UNDO);
 		updateStatusAndButtons();
-	}	
+	}
 
 	private static GridData getButtonGridData() {
-		GridData data= new GridData(GridData.FILL_HORIZONTAL);	
+		GridData data= new GridData(GridData.FILL_HORIZONTAL);
 		return data;
 	}
 
@@ -393,7 +397,7 @@ class EditTemplateDialog extends StatusDialog {
 	
 	private static Text createText(Composite parent) {
 		Text text= new Text(parent, SWT.BORDER);
-		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));		
+		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		return text;
 	}
@@ -418,7 +422,7 @@ class EditTemplateDialog extends StatusDialog {
 		if (nLines < 5) {
 			nLines= 5;
 		} else if (nLines > 12) {
-			nLines= 12;	
+			nLines= 12;
 		}
 				
 		Control control= viewer.getControl();
@@ -434,7 +438,7 @@ class EditTemplateDialog extends StatusDialog {
 			}
 		});
 
-		viewer.addSelectionChangedListener(new ISelectionChangedListener() {			
+		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				updateSelectionDependentActions();
 			}
@@ -464,7 +468,7 @@ class EditTemplateDialog extends StatusDialog {
 		Expression expression= new ActiveShellExpression(fPatternEditor.getControl().getShell());
 
 		TextViewerAction action= new TextViewerAction(fPatternEditor, ITextOperationTarget.UNDO);
-		action.setText(PreferencesMessages.EditTemplateDialog_undo); 
+		action.setText(PreferencesMessages.EditTemplateDialog_undo);
 		fGlobalActions.put(ITextEditorActionConstants.UNDO, action);
 		handlerActivations.add(handlerService.activateHandler(IWorkbenchActionDefinitionIds.UNDO, new ActionHandler(action), expression));
 
@@ -474,23 +478,23 @@ class EditTemplateDialog extends StatusDialog {
 		handlerActivations.add(handlerService.activateHandler(IWorkbenchActionDefinitionIds.REDO, new ActionHandler(action), expression));
 
 		action= new TextViewerAction(fPatternEditor, ITextOperationTarget.CUT);
-		action.setText(PreferencesMessages.EditTemplateDialog_cut); 
+		action.setText(PreferencesMessages.EditTemplateDialog_cut);
 		fGlobalActions.put(ITextEditorActionConstants.CUT, action);
 
 		action= new TextViewerAction(fPatternEditor, ITextOperationTarget.COPY);
-		action.setText(PreferencesMessages.EditTemplateDialog_copy); 
+		action.setText(PreferencesMessages.EditTemplateDialog_copy);
 		fGlobalActions.put(ITextEditorActionConstants.COPY, action);
 
 		action= new TextViewerAction(fPatternEditor, ITextOperationTarget.PASTE);
-		action.setText(PreferencesMessages.EditTemplateDialog_paste); 
+		action.setText(PreferencesMessages.EditTemplateDialog_paste);
 		fGlobalActions.put(ITextEditorActionConstants.PASTE, action);
 
 		action= new TextViewerAction(fPatternEditor, ITextOperationTarget.SELECT_ALL);
-		action.setText(PreferencesMessages.EditTemplateDialog_select_all); 
+		action.setText(PreferencesMessages.EditTemplateDialog_select_all);
 		fGlobalActions.put(ITextEditorActionConstants.SELECT_ALL, action);
 
 		action= new TextViewerAction(fPatternEditor, ISourceViewer.CONTENTASSIST_PROPOSALS);
-		action.setText(PreferencesMessages.EditTemplateDialog_content_assist); 
+		action.setText(PreferencesMessages.EditTemplateDialog_content_assist);
 		fGlobalActions.put("ContentAssistProposal", action); //$NON-NLS-1$
 		handlerActivations.add(handlerService.activateHandler(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS, new ActionHandler(action), expression));
 
@@ -507,7 +511,7 @@ class EditTemplateDialog extends StatusDialog {
 			}
 		});
 
-		StyledText text= fPatternEditor.getTextWidget();		
+		StyledText text= fPatternEditor.getTextWidget();
 		Menu menu= manager.createContextMenu(text);
 		text.setMenu(menu);
 	}
@@ -517,7 +521,7 @@ class EditTemplateDialog extends StatusDialog {
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_UNDO, (IAction) fGlobalActions.get(ITextEditorActionConstants.UNDO));
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_UNDO, (IAction) fGlobalActions.get(ITextEditorActionConstants.REDO));
 		
-		menu.add(new Separator(ITextEditorActionConstants.GROUP_EDIT));		
+		menu.add(new Separator(ITextEditorActionConstants.GROUP_EDIT));
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, (IAction) fGlobalActions.get(ITextEditorActionConstants.CUT));
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, (IAction) fGlobalActions.get(ITextEditorActionConstants.COPY));
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, (IAction) fGlobalActions.get(ITextEditorActionConstants.PASTE));
@@ -531,7 +535,7 @@ class EditTemplateDialog extends StatusDialog {
 	protected void updateSelectionDependentActions() {
 		Iterator iterator= fSelectionActions.iterator();
 		while (iterator.hasNext())
-			updateAction((String)iterator.next());		
+			updateAction((String)iterator.next());
 	}
 
 	protected void updateAction(String actionId) {
@@ -547,7 +551,7 @@ class EditTemplateDialog extends StatusDialog {
 		
 		for (int i= 0; i < fContextTypes.length; i++) {
 			if (contextid.equals(fContextTypes[i][0])) {
-				return i;	
+				return i;
 			}
 		}
 		return -1;
@@ -560,15 +564,15 @@ class EditTemplateDialog extends StatusDialog {
 		super.okPressed();
 	}
 	
-	private void updateStatusAndButtons() {		
+	private void updateStatusAndButtons() {
 		StatusInfo status= fValidationStatus;
 		boolean isEmpty= fNameText != null && fNameText.getText().length() == 0;
 		if (!fSuppressError && isEmpty) {
 			status= new StatusInfo();
-			status.setError(PreferencesMessages.EditTemplateDialog_error_noname); 
+			status.setError(PreferencesMessages.EditTemplateDialog_error_noname);
 		} else if (fNameText != null && !isValidTemplateName(fNameText.getText())) {
 			status= new StatusInfo();
-			status.setError(PreferencesMessages.EditTemplateDialog_error_invalidName); 
+			status.setError(PreferencesMessages.EditTemplateDialog_error_invalidName);
 		}
 		updateStatus(status);
 	}
@@ -576,7 +580,7 @@ class EditTemplateDialog extends StatusDialog {
 	/**
 	 * Checks whether the given string is a valid
 	 * template name.
-	 *  
+	 * 
 	 * @param name the string to test
 	 * @return <code>true</code> if the name is valid
 	 * @since 3.3.1
