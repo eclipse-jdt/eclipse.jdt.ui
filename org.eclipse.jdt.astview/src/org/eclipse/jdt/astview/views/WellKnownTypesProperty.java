@@ -15,11 +15,44 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-public class SettingsProperty extends ASTAttribute {
+public class WellKnownTypesProperty extends ASTAttribute {
+	
+	public static final String[] WELL_KNOWN_TYPES = {
+		"boolean",
+		"byte",
+		"char",
+		"double",
+		"float",
+		"int",
+		"long",
+		"short",
+		"void",
+		"java.lang.Boolean",
+		"java.lang.Byte",
+		"java.lang.Character",
+		"java.lang.Class",
+		"java.lang.Cloneable",
+		"java.lang.Double",
+		"java.lang.Error",
+		"java.lang.Exception",
+		"java.lang.Float",
+		"java.lang.Integer",
+		"java.lang.Long",
+		"java.lang.Object",
+		"java.lang.RuntimeException",
+		"java.lang.Short",
+		"java.lang.String",
+		"java.lang.StringBuffer",
+		"java.lang.Throwable",
+		"java.lang.Void",
+		"java.io.Serializable",
+
+		"_.$UnknownType$"
+	};
 	
 	private final CompilationUnit fRoot;
 
-	public SettingsProperty(CompilationUnit root) {
+	public WellKnownTypesProperty(CompilationUnit root) {
 		fRoot= root;
 	}
 
@@ -35,12 +68,12 @@ public class SettingsProperty extends ASTAttribute {
 	 */
 	public Object[] getChildren() {
 		AST ast= fRoot.getAST();
-		Object[] res= {
-				new GeneralAttribute(this, "apiLevel", String.valueOf(ast.apiLevel())),
-				new GeneralAttribute(this, "hasResolvedBindings", String.valueOf(ast.hasResolvedBindings())),
-				new GeneralAttribute(this, "hasStatementsRecovery", String.valueOf(ast.hasStatementsRecovery())),
-				new GeneralAttribute(this, "hasBindingsRecovery", String.valueOf(ast.hasBindingsRecovery())),
-		};
+		
+		Binding[] res= new Binding[WELL_KNOWN_TYPES.length];
+		for (int i= 0; i < WELL_KNOWN_TYPES.length; i++) {
+			String type= WELL_KNOWN_TYPES[i];
+			res[i]= new Binding(this, type, ast.resolveWellKnownType(type), true);
+		}
 		return res;
 	}
 
@@ -48,7 +81,7 @@ public class SettingsProperty extends ASTAttribute {
 	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getLabel()
 	 */
 	public String getLabel() {
-		return "> AST settings";  //$NON-NLS-1$
+		return "> RESOLVE_WELL_KNOWN_TYPES";  //$NON-NLS-1$
 	}
 
 	/* (non-Javadoc)
@@ -74,6 +107,6 @@ public class SettingsProperty extends ASTAttribute {
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
-		return 19;
+		return 57;
 	}
 }

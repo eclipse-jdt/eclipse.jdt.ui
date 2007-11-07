@@ -207,6 +207,7 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 			res.add(new CommentsProperty(root));
 			res.add(new ProblemsProperty(root));
 			res.add(new SettingsProperty(root));
+			res.add(new WellKnownTypesProperty(root));
 		}
 		
 		return res.toArray();
