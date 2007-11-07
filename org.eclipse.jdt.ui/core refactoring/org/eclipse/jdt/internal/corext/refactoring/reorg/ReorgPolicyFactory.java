@@ -94,6 +94,7 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -3571,6 +3572,8 @@ public final class ReorgPolicyFactory {
 				listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, CompilationUnit.TYPES_PROPERTY);
 			} else if (destinationContainer instanceof Block) {
 				listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, Block.STATEMENTS_PROPERTY);
+			} else if (destinationContainer instanceof SwitchStatement) {
+				listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, SwitchStatement.STATEMENTS_PROPERTY);				
 			} else if (destinationContainer instanceof AnonymousClassDeclaration) {
 				listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
 			} else {

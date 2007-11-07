@@ -3396,6 +3396,67 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	public void testUnusedVariablesAsSwitchStatement() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
+		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PARAMETER, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class B {\n");
+		buf.append("    void test(int i){\n");
+		buf.append("        switch (i) {\n");
+		buf.append("            case 3:\n");
+		buf.append("                String c=\"Test\",d=String.valueOf(true),e=c;\n");
+		buf.append("                e+=\"\";\n");//makes e an used variable
+		buf.append("                d=\"blubb\";\n");
+		buf.append("                d=String.valueOf(12);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class B {\n");
+		buf.append("    void test(int i){\n");
+		buf.append("        switch (i) {\n");
+		buf.append("            case 3:\n");
+		buf.append("                String c=\"Test\";\n");
+		buf.append("                String.valueOf(true);\n");
+		buf.append("                String e=c;\n");
+		buf.append("                e+=\"\";\n");
+		buf.append("                String.valueOf(12);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class B {\n");
+		buf.append("    void test(int i){\n");
+		buf.append("        switch (i) {\n");
+		buf.append("            case 3:\n");
+		buf.append("                String c=\"Test\",e=c;\n");
+		buf.append("                e+=\"\";\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 
 	
 	public void testUnusedVariableBug120579() throws Exception {
@@ -5025,6 +5086,55 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("            if (i == 42)\n");
 		buf.append("                return true;\n");
 		buf.append("            i = i + 3;\n");
+		buf.append("        }\n");
+		buf.append("        return false;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	public void testUnnecessaryElse5() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNNECESSARY_ELSE, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    boolean foo(int i) {\n");
+		buf.append("        switch (i) {\n");
+		buf.append("            case 42:\n");
+		buf.append("                if (foo(i+1))\n");
+		buf.append("                    return true;\n");
+		buf.append("                else\n");
+		buf.append("                    i = i + 3;\n");
+		buf.append("        }\n");
+		buf.append("        return false;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    boolean foo(int i) {\n");
+		buf.append("        switch (i) {\n");
+		buf.append("            case 42:\n");
+		buf.append("                if (foo(i+1))\n");
+		buf.append("                    return true;\n");
+		buf.append("                i = i + 3;\n");
 		buf.append("        }\n");
 		buf.append("        return false;\n");
 		buf.append("    }\n");

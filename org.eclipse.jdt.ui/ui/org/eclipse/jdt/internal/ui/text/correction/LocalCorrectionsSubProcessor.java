@@ -758,7 +758,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 		IfStatement ifStatement= (IfStatement) parent;
 		ASTNode ifParent= ifStatement.getParent();
-		if (!(ifParent instanceof Block) && !ASTNodes.isControlStatementBody(ifStatement.getLocationInParent())) {
+		if (!(ifParent instanceof Block) && !(ifParent instanceof SwitchStatement) && !ASTNodes.isControlStatementBody(ifStatement.getLocationInParent())) {
 			return;
 		}
 
@@ -772,6 +772,9 @@ public class LocalCorrectionsSubProcessor {
 		if (ifParent instanceof Block) {
 			ListRewrite listRewrite= rewrite.getListRewrite(ifParent, Block.STATEMENTS_PROPERTY);
 			listRewrite.insertAfter(placeholder, ifStatement, null);
+		} else if (ifParent instanceof SwitchStatement) {
+			ListRewrite listRewrite= rewrite.getListRewrite(ifParent, SwitchStatement.STATEMENTS_PROPERTY);
+			listRewrite.insertAfter(placeholder, ifStatement, null);			
 		} else {
 			Block block= root.getAST().newBlock();
 			rewrite.replace(ifStatement, block, null);

@@ -630,6 +630,14 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		boolean declareStatic= false;
 		passHelper(4, 33, 4, 33, "fFinisheds", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
+
+	public void test25() throws Exception{ //test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=136911
+		int accessModifier= Modifier.PRIVATE;
+		int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
+		boolean declareFinal= false;
+		boolean declareStatic= false;
+		passHelper(7, 22, 7, 22, "i", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
 	
 	public void testGenerics01() throws Exception {
         int accessModifier= Modifier.PRIVATE;

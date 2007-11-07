@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -50,6 +51,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
@@ -298,8 +300,15 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 					}
 					if (declaration instanceof VariableDeclarationStatement) {
 						ASTNode lst = declaration.getParent();
-						if (lst instanceof Block)
-							splitUpDeclarations(rewrite, group, frag, lst, (VariableDeclarationStatement) declaration);
+						ListRewrite listRewrite= null;
+						if (lst instanceof Block) {
+							listRewrite= rewrite.getListRewrite(lst, Block.STATEMENTS_PROPERTY);
+						} else if (lst instanceof SwitchStatement) {
+							listRewrite= rewrite.getListRewrite(lst, SwitchStatement.STATEMENTS_PROPERTY);
+						} else {
+							Assert.isTrue(false);
+						}
+						splitUpDeclarations(rewrite, group, frag, listRewrite, (VariableDeclarationStatement) declaration);
 						rewrite.remove(frag, group);
 						return;
 					}
@@ -313,12 +322,12 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			}
 		}
 
-		private void splitUpDeclarations(ASTRewrite rewrite, TextEditGroup group, VariableDeclarationFragment frag, ASTNode block, VariableDeclarationStatement originalStatement) {
+		private void splitUpDeclarations(ASTRewrite rewrite, TextEditGroup group, VariableDeclarationFragment frag, ListRewrite statementRewrite, VariableDeclarationStatement originalStatement) {
 			Expression initializer = frag.getInitializer();
 			//keep constructors and method invocations
 			if (initializer instanceof MethodInvocation || initializer instanceof ClassInstanceCreation){
 				Expression movedInitializer= (Expression) rewrite.createMoveTarget(initializer);
-				ListRewrite statementRewrite= rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+
 				ExpressionStatement newInitializer= rewrite.getAST().newExpressionStatement( movedInitializer);
 				statementRewrite.insertAfter(newInitializer, originalStatement, group);
 

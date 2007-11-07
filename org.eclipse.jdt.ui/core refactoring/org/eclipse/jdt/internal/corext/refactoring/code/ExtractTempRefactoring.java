@@ -79,6 +79,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -679,12 +680,12 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 		return vds;
 	}
 
-	private void insertAt(ASTNode target, Statement declaration) throws JavaModelException {
+	private void insertAt(ASTNode target, Statement declaration) {
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
 		TextEditGroup groupDescription= fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_declare_local_variable);
 		
 		ASTNode parent= target.getParent();
-		while (! (parent instanceof Block)) {
+		while (!(parent instanceof Block) && !(parent instanceof SwitchStatement)) {
 			StructuralPropertyDescriptor locationInParent= target.getLocationInParent();
 			if (locationInParent == IfStatement.THEN_STATEMENT_PROPERTY
 					|| locationInParent == IfStatement.ELSE_STATEMENT_PROPERTY
@@ -702,8 +703,13 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 			target= parent;
 			parent= parent.getParent();
 		}
-		ListRewrite listRewrite= rewrite.getListRewrite(parent, Block.STATEMENTS_PROPERTY);
-		listRewrite.insertBefore(declaration, target, groupDescription);
+		if (parent instanceof Block) {
+			ListRewrite listRewrite= rewrite.getListRewrite(parent, Block.STATEMENTS_PROPERTY);
+			listRewrite.insertBefore(declaration, target, groupDescription);
+		} else if (parent instanceof SwitchStatement) {
+			ListRewrite listRewrite= rewrite.getListRewrite(parent, SwitchStatement.STATEMENTS_PROPERTY);
+			listRewrite.insertBefore(declaration, target, groupDescription);
+		}
 	}
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {

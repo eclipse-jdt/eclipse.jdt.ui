@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,8 @@ import java.util.List;
 
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -23,6 +25,7 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -100,7 +103,16 @@ public class VariableDeclarationRewrite {
 		List fragments= declarationNode.fragments();
 		Iterator iter= fragments.iterator();
 		
-		ListRewrite blockRewrite= rewrite.getListRewrite(declarationNode.getParent(), Block.STATEMENTS_PROPERTY);
+		ListRewrite blockRewrite= null;
+		ASTNode parentStatement= declarationNode.getParent();
+		if (parentStatement instanceof SwitchStatement) {
+			blockRewrite= rewrite.getListRewrite(parentStatement, SwitchStatement.STATEMENTS_PROPERTY);
+		} else if (parentStatement instanceof Block) {
+			blockRewrite= rewrite.getListRewrite(parentStatement, Block.STATEMENTS_PROPERTY);
+		} else {
+			// should not happen. VariableDeclaration's can not be in a control statement body
+			Assert.isTrue(false);
+		}
 		
 		VariableDeclarationFragment lastFragment= (VariableDeclarationFragment)iter.next();
 		ASTNode lastStatement= declarationNode;
