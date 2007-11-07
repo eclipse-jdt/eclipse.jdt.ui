@@ -91,4 +91,13 @@ public class PluginsNotLoadedTest extends TestCase {
 	public void testComparePluginNotLoaded() {
 		assertFalse(Platform.getBundle("org.eclipse.compare").getState() == Bundle.ACTIVE);
 	}
+
+	public void testDebugPluginNotLoaded() {
+		Bundle bundle= Platform.getBundle("org.eclipse.jdt.text.tests");
+		Bundle[] bundles= bundle.getBundleContext().getBundles();
+		for (int i= 0; i < bundles.length; i++) {
+			if (bundles[i].getState() != Bundle.ACTIVE)
+				System.out.println(bundles[i].getSymbolicName());
+		}
+	}
 }
