@@ -641,6 +641,24 @@ public class ASTView extends ViewPart implements IShowInSource {
 		return root;
 	}
 
+	protected void refreshASTSettingsActions() {
+		boolean enabled;
+		switch (getCurrentInputKind()) {
+			case ASTInputKindAction.USE_RECONCILE:
+			case ASTInputKindAction.USE_CACHE:
+				enabled= false;
+				break;
+			default:
+				enabled= true;
+				break;
+		}
+		fBindingsRecoveryAction.setEnabled(enabled);
+		fCreateBindingsAction.setEnabled(enabled);
+		fStatementsRecoveryAction.setEnabled(enabled);
+		fASTVersionToggleActions[0].setEnabled(enabled);
+		fASTVersionToggleActions[1].setEnabled(enabled);
+	}
+
 	private void updateContentDescription(IJavaElement element, CompilationUnit root, long time) {
 		String version= root.getAST().apiLevel() == JLS2 ? "AST Level 2" : "AST Level 3";  //$NON-NLS-1$//$NON-NLS-2$
 		if (getCurrentInputKind() == ASTInputKindAction.USE_RECONCILE) {		
@@ -896,7 +914,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 				new ASTInputKindAction("Use ASTParser.&createAST", ASTInputKindAction.USE_PARSER), //$NON-NLS-1$
 				new ASTInputKindAction("Use ASTParser with &focal position", ASTInputKindAction.USE_FOCAL), //$NON-NLS-1$
 				new ASTInputKindAction("Use ICompilationUnit.&reconcile", ASTInputKindAction.USE_RECONCILE), //$NON-NLS-1$
-				new ASTInputKindAction("Use ASTProvider.&getAST", ASTInputKindAction.USE_CACHE) //$NON-NLS-1$
+				new ASTInputKindAction("Use SharedASTProvider.&getAST", ASTInputKindAction.USE_CACHE) //$NON-NLS-1$
 		};
 		
 		fCreateBindingsAction = new Action("&Create Bindings", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
@@ -1031,9 +1049,10 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fDeleteAction.setImageDescriptor(ASTViewPlugin.getDefault().getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_DELETE));
 		fDeleteAction.setId(ActionFactory.DELETE.getId());
 		fDeleteAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.DELETE);
+		
+		refreshASTSettingsActions();
 	}
 	
-
 
 	private void refreshAST() throws CoreException {
 		ASTNode node= getASTNodeNearSelection((IStructuredSelection) fViewer.getSelection());
@@ -1077,6 +1096,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 				ASTInputKindAction curr= fASTInputKindActions[i];
 				curr.setChecked(curr.getInputKind() == inputKind);
 			}
+			refreshASTSettingsActions();
 			performRefresh();
 		}
 	}
