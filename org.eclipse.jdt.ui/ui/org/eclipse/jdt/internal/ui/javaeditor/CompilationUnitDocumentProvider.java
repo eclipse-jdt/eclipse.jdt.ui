@@ -76,8 +76,10 @@ import org.eclipse.jface.text.source.IAnnotationPresentation;
 import org.eclipse.jface.text.source.ImageUtilities;
 
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IURIEditorInput;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
@@ -88,6 +90,8 @@ import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.ForwardingDocumentProvider;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
+
+import org.eclipse.ui.ide.IDE.SharedImages;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -173,13 +177,17 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 
 		private static Image fgQuickFixImage;
 		private static Image fgQuickFixErrorImage;
-		private static boolean fgQuickFixImagesInitialized= false;
+		private static Image fgTaskImage;
+		private static Image fgInfoImage;
+		private static Image fgWarningImage;
+		private static Image fgErrorImage;
+		private static boolean fgImagesInitialized= false;
 
 		private ICompilationUnit fCompilationUnit;
 		private List fOverlaids;
 		private IProblem fProblem;
 		private Image fImage;
-		private boolean fQuickFixImagesInitialized= false;
+		private boolean fImageInitialized= false;
 		private int fLayer= IAnnotationAccessExtension.DEFAULT_LAYER;
 		private boolean fIsQuickFixable;
 		private boolean fIsQuickFixableStateSet= false;
@@ -215,24 +223,46 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			return fLayer;
 		}
 
-		private void initializeImages() {
+		private void initializeImage() {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=18936
-			if (!fQuickFixImagesInitialized) {
+			if (!fImageInitialized) {
+				initializeImages();
 				if (!isQuickFixableStateSet())
 					setQuickFixable(isProblem() && indicateQuixFixableProblems() && JavaCorrectionProcessor.hasCorrections(this)); // no light bulb for tasks
 				if (isQuickFixable()) {
-					if (!fgQuickFixImagesInitialized) {
-						fgQuickFixImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
-						fgQuickFixErrorImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
-						fgQuickFixImagesInitialized= true;
-					}
 					if (JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(getType()))
 						fImage= fgQuickFixErrorImage;
 					else
 						fImage= fgQuickFixImage;
+				} else {
+					String type= getType();
+					if (JavaMarkerAnnotation.TASK_ANNOTATION_TYPE.equals(type))
+						fImage= fgTaskImage;
+					else if (JavaMarkerAnnotation.INFO_ANNOTATION_TYPE.equals(type))
+						fImage= fgInfoImage;
+					else if (JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE.equals(type))
+						fImage= fgWarningImage;
+					else if (JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(type))
+						fImage= fgErrorImage;
 				}
-				fQuickFixImagesInitialized= true;
+				fImageInitialized= true;
 			}
+		}
+		
+		private void initializeImages() {
+			if (fgImagesInitialized)
+				return;
+			
+			fgQuickFixImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
+			fgQuickFixErrorImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
+			
+			ISharedImages sharedImages= PlatformUI.getWorkbench().getSharedImages();
+			fgTaskImage= sharedImages.getImage(SharedImages.IMG_OBJS_TASK_TSK);
+			fgInfoImage= sharedImages.getImage(ISharedImages.IMG_OBJS_INFO_TSK);
+			fgWarningImage= sharedImages.getImage(ISharedImages.IMG_OBJS_WARN_TSK);
+			fgErrorImage= sharedImages.getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
+			
+			fgImagesInitialized= true;
 		}
 
 		private boolean indicateQuixFixableProblems() {
@@ -243,7 +273,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		 * @see Annotation#paint
 		 */
 		public void paint(GC gc, Canvas canvas, Rectangle r) {
-			initializeImages();
+			initializeImage();
 			if (fImage != null)
 				ImageUtilities.drawImage(fImage, gc, canvas, r, SWT.CENTER, SWT.TOP);
 		}
