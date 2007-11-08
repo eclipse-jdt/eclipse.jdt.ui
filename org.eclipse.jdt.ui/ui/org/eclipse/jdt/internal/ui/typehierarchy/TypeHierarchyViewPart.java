@@ -123,6 +123,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
+import org.eclipse.jdt.internal.ui.dnd.EditorInputTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -753,6 +754,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		dragAdapter.addDragSourceListener(new SelectionTransferDragAdapter(viewer));
 		dragAdapter.addDragSourceListener(new ResourceTransferDragAdapter(viewer));
 		dragAdapter.addDragSourceListener(new FileTransferDragAdapter(viewer));
+		dragAdapter.addDragSourceListener(new EditorInputTransferDragAdapter(viewer));
 		
 		viewer.addDragSupport(ops, transfers, dragAdapter);
 	}	

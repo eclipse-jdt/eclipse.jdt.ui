@@ -26,6 +26,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
@@ -47,6 +48,7 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.util.DelegatingDragAdapter;
 import org.eclipse.jface.util.DelegatingDropAdapter;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -103,7 +105,7 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
+import org.eclipse.jdt.internal.ui.dnd.EditorInputTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.FileTransferDragAdapter;
@@ -346,10 +348,20 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		
 		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance(), ResourceTransfer.getInstance(), FileTransfer.getInstance()};
 
-		JdtViewerDragAdapter dragAdapter= new JdtViewerDragAdapter(viewer);
-		dragAdapter.addDragSourceListener(new SelectionTransferDragAdapter(viewer));
-		dragAdapter.addDragSourceListener(new ResourceTransferDragAdapter(viewer));
-		dragAdapter.addDragSourceListener(new FileTransferDragAdapter(viewer));
+		DelegatingDragAdapter dragAdapter= new DelegatingDragAdapter() {
+			public void dragStart(DragSourceEvent event) {
+				IStructuredSelection selection= (IStructuredSelection) fSelectionProviderMediator.getSelection();
+				if (selection.isEmpty()) {
+					event.doit= false;
+					return;
+				}
+				super.dragStart(event);
+			}
+		};
+		dragAdapter.addDragSourceListener(new SelectionTransferDragAdapter(fSelectionProviderMediator));
+		dragAdapter.addDragSourceListener(new ResourceTransferDragAdapter(fSelectionProviderMediator));
+		dragAdapter.addDragSourceListener(new FileTransferDragAdapter(fSelectionProviderMediator));
+		dragAdapter.addDragSourceListener(new EditorInputTransferDragAdapter(fSelectionProviderMediator));
 		
 		viewer.addDragSupport(ops, transfers, dragAdapter);
 	}	
@@ -367,8 +379,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         // Page 2: Nothing selected
         fNoHierarchyShownLabel = new Label(fPagebook, SWT.TOP + SWT.LEFT + SWT.WRAP);
         fNoHierarchyShownLabel.setText(CallHierarchyMessages.CallHierarchyViewPart_empty); //   
-
-		initDragAndDrop();
 
         showPage(PAGE_EMPTY);
         
@@ -395,6 +405,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         makeActions();
         fillViewMenu();
         fillActionBars();
+		initDragAndDrop();
 
         initOrientation();
         initCallMode();

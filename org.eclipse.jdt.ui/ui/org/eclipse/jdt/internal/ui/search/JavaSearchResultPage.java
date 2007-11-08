@@ -77,6 +77,7 @@ import org.eclipse.jdt.ui.search.IMatchPresentation;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.CopyQualifiedNameAction;
+import org.eclipse.jdt.internal.ui.dnd.EditorInputTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
@@ -296,12 +297,9 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		int ops= DND.DROP_COPY | DND.DROP_LINK;
 		
 		JdtViewerDragAdapter dragAdapter= new JdtViewerDragAdapter(viewer);
-		dragAdapter.addDragSourceListener(
-			new SelectionTransferDragAdapter(viewer)
-		);
-		dragAdapter.addDragSourceListener(
-			new ResourceTransferDragAdapter(viewer)
-		);
+		dragAdapter.addDragSourceListener(new SelectionTransferDragAdapter(viewer));
+		dragAdapter.addDragSourceListener(new ResourceTransferDragAdapter(viewer));
+		dragAdapter.addDragSourceListener(new EditorInputTransferDragAdapter(viewer));
 		viewer.addDragSupport(ops, transfers, dragAdapter);
 	}	
 
