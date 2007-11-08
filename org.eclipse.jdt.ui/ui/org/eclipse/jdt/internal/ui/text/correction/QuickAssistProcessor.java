@@ -8,13 +8,16 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sebastian Davids <sdavids@gmx.de> - Bug 37432 getInvertEqualsProposal
+ *     Benjamin Muskalla <b.muskalla@gmx.net> - Bug 36350 convertToStringBufferPropsal
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -68,6 +71,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -82,6 +86,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -138,6 +143,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	public static final String INLINE_LOCAL_ID= "org.eclipse.jdt.ui.correction.inlineLocal.assist"; //$NON-NLS-1$
 	public static final String CONVERT_LOCAL_TO_FIELD_ID= "org.eclipse.jdt.ui.correction.convertLocalToField.assist"; //$NON-NLS-1$
 	public static final String CONVERT_ANONYMOUS_TO_LOCAL_ID= "org.eclipse.jdt.ui.correction.convertAnonymousToLocal.assist"; //$NON-NLS-1$
+	public static final String CONVERT_TO_STRING_BUFFER_ID= "org.eclipse.jdt.ui.correction.convertToStringBuffer.assist"; //$NON-NLS-1$
 	
 	public QuickAssistProcessor() {
 		super();
@@ -166,7 +172,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getConvertAnonymousToNestedProposal(context, coveringNode, null)
 				|| getConvertIterableLoopProposal(context, coveringNode, null)
 				|| getRemoveBlockProposals(context, coveringNode, null)
-				|| getMakeVariableDeclarationFinalProposals(context, null);
+				|| getMakeVariableDeclarationFinalProposals(context, null)
+				|| getConvertToStringBufferProposal(context, null);
 		}
 		return false;
 	}
@@ -201,6 +208,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
 				getRemoveBlockProposals(context, coveringNode, resultingCollections);
 				getMakeVariableDeclarationFinalProposals(context, resultingCollections);
+				getConvertToStringBufferProposal(context, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -507,6 +515,115 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
+	private static boolean getConvertToStringBufferProposal(IInvocationContext context, Collection resultingCollections) {
+		ASTNode node= context.getCoveringNode();
+		BodyDeclaration parentDecl= ASTResolving.findParentBodyDeclaration(node);
+		if (!(parentDecl instanceof MethodDeclaration || parentDecl instanceof Initializer))
+			return false;
+
+		AST ast= node.getAST();
+		ITypeBinding stringBinding= ast.resolveWellKnownType("java.lang.String"); //$NON-NLS-1$
+
+		if (node instanceof StringLiteral || node instanceof SimpleName) {
+			node= node.getParent();
+		}
+		if (node instanceof VariableDeclarationFragment) {
+			node= ((VariableDeclarationFragment) node).getInitializer();
+		} else if (node instanceof Assignment) {
+			node= ((Assignment) node).getRightHandSide();
+		}
+
+		InfixExpression oldInfixExpression= null;
+		while (node instanceof InfixExpression) {
+			InfixExpression curr= (InfixExpression) node;
+			if (curr.resolveTypeBinding() == stringBinding && curr.getOperator() == InfixExpression.Operator.PLUS) {
+				oldInfixExpression= curr; // is a infix expression we can use
+			} else {
+				break;
+			}
+			node= node.getParent();
+		}
+		if (oldInfixExpression == null)
+			return false;
+
+		if (resultingCollections == null) {
+			return true;
+		}
+
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+
+		// create buffer
+		VariableDeclarationFragment frag= ast.newVariableDeclarationFragment();
+		// check if name is already in use and provide alternative
+		List fExcludedVariableNames= Arrays.asList(ASTResolving.getUsedVariableNames(oldInfixExpression));
+		String bufferQName= "StringBuffer"; //$NON-NLS-1$
+		SimpleType bufferType= ast.newSimpleType(ast.newName(bufferQName));
+		ICompilationUnit cu= context.getCompilationUnit();
+		ClassInstanceCreation newBufferExpression= ast.newClassInstanceCreation();
+		
+		String[] newBufferNames= StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, cu.getJavaProject(), bufferQName, 0, fExcludedVariableNames, true);
+		String newBufferName= newBufferNames[0];
+
+		frag.setName(ast.newSimpleName(newBufferName));
+
+		newBufferExpression.setType(bufferType);
+		frag.setInitializer(newBufferExpression);
+
+		VariableDeclarationStatement bufferDeclaration= ast.newVariableDeclarationStatement(frag);
+		bufferDeclaration.setType(ast.newSimpleType(ast.newName(bufferQName)));
+
+		Statement statement= ASTResolving.findParentStatement(oldInfixExpression);
+		ListRewrite listRewrite;
+		if (ASTNodes.isControlStatementBody(statement.getLocationInParent())) {
+			Block newBlock= ast.newBlock();
+			listRewrite= rewrite.getListRewrite(newBlock, Block.STATEMENTS_PROPERTY);
+			listRewrite.insertFirst(bufferDeclaration, null);
+			listRewrite.insertLast(rewrite.createMoveTarget(statement), null);
+			rewrite.replace(statement, newBlock, null);
+		} else {
+			listRewrite= rewrite.getListRewrite(statement.getParent(), (ChildListPropertyDescriptor) statement.getLocationInParent());
+			listRewrite.insertBefore(bufferDeclaration, statement, null);
+		}
+		
+		// collect operands
+		List operands= new ArrayList();
+		operands.add(rewrite.createCopyTarget(oldInfixExpression.getLeftOperand()));
+		operands.add(rewrite.createCopyTarget(oldInfixExpression.getRightOperand()));
+		for (int i= 0; i < oldInfixExpression.extendedOperands().size(); i++) {
+			ASTNode extNode= (ASTNode) oldInfixExpression.extendedOperands().get(i);
+			operands.add(rewrite.createCopyTarget(extNode));
+		}
+
+		Statement lastAppend= bufferDeclaration;
+		for (Iterator iter= operands.iterator(); iter.hasNext();) {
+			Expression operand= (Expression) iter.next();
+
+			MethodInvocation appendIncovationExpression= ast.newMethodInvocation();
+			appendIncovationExpression.setName(ast.newSimpleName("append")); //$NON-NLS-1$
+			appendIncovationExpression.setExpression(ast.newSimpleName(newBufferName));
+			appendIncovationExpression.arguments().add(operand);
+
+			ExpressionStatement appendExpressionStatement= ast.newExpressionStatement(appendIncovationExpression);
+			listRewrite.insertAfter(appendExpressionStatement, lastAppend, null);
+			lastAppend= appendExpressionStatement;
+		}
+
+		// replace old expression with toString
+		MethodInvocation bufferToString= ast.newMethodInvocation();
+		bufferToString.setName(ast.newSimpleName("toString")); //$NON-NLS-1$
+		bufferToString.setExpression(ast.newSimpleName(newBufferName));
+
+		rewrite.replace(oldInfixExpression, bufferToString, null);
+
+		String label= CorrectionMessages.QuickAssistProcessor_convert_to_string_buffer_description;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
+		proposal.setCommandId(CONVERT_TO_STRING_BUFFER_ID);
+
+		resultingCollections.add(proposal);
+		return true;
+	}
+	
 	private static boolean getAssignToVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (!(statement instanceof ExpressionStatement)) {
