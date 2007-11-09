@@ -16,6 +16,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
@@ -41,25 +43,33 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 	public ColoredString getRichTextLabel(Object element) {
 		return getColoredLabelWithCounts(element, internalGetRichText(element)); 
 	}
+
+	private String getLineNumberLabel(JavaElementLine element) {
+		return Messages.format(SearchMessages.OccurrencesSearchLabelProvider_line_number, new Integer(element.getLine()));
+	}
 	
 	private String internalGetText(Object element) {
 		JavaElementLine jel= (JavaElementLine) element;
-		return jel.getLineContents();
+		return getLineNumberLabel(jel) + jel.getLineContents();
 	}
 	
 	private ColoredString internalGetRichText(Object element) {
 		JavaElementLine jel= (JavaElementLine) element;
+
+		String lineNumberString= getLineNumberLabel(jel);
 		
 		Style highlightStyle= ColoredJavaElementLabels.HIGHLIGHT_STYLE;
 		if (jel instanceof OccurrencesGroupKey && ((OccurrencesGroupKey) jel).isWriteAccess()) {
 			highlightStyle= ColoredJavaElementLabels.HIGHLIGHT_WRITE_STYLE;
 		}
 		
-		ColoredString res= new ColoredString(jel.getLineContents());
+		ColoredString res= new ColoredString();
+		res.append(lineNumberString, ColoredJavaElementLabels.QUALIFIER_STYLE);
+		res.append(jel.getLineContents());
 		Match[] matches= getPage().getInput().getMatches(jel);
 		for (int i= 0; i < matches.length; i++) {
 			Match curr= matches[i];
-			int offset= curr.getOffset() - jel.getLineStartOffset();
+			int offset= curr.getOffset() - jel.getLineStartOffset() + lineNumberString.length();
 			int length= curr.getLength();
 			
 			if (offset >= 0 && (offset + length < res.length())) {
