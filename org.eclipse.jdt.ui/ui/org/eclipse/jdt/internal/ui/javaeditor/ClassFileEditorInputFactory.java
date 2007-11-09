@@ -37,8 +37,8 @@ public class ClassFileEditorInputFactory implements IElementFactory {
 	public ClassFileEditorInputFactory() {
 	}
 
-	/**
-	 * @see IElementFactory#createElement
+	/*
+	 * @see org.eclipse.ui.IElementFactory#createElement(org.eclipse.ui.IMemento)
 	 */
 	public IAdaptable createElement(IMemento memento) {
 		String identifier= memento.getString(KEY);
@@ -51,7 +51,7 @@ public class ClassFileEditorInputFactory implements IElementFactory {
 				/*
 				 * Let's try to find the class file,
 				 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=83221
-				 */ 
+				 */
 				IClassFile cf= (IClassFile)element;
 				IType type= cf.getType(); // this will work, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=154667
 				IJavaProject project= element.getJavaProject();
