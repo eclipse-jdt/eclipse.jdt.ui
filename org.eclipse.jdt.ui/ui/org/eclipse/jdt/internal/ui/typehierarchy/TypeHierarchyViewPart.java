@@ -752,9 +752,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 		JdtViewerDragAdapter dragAdapter= new JdtViewerDragAdapter(viewer);
 		dragAdapter.addDragSourceListener(new SelectionTransferDragAdapter(viewer));
+		dragAdapter.addDragSourceListener(new EditorInputTransferDragAdapter(viewer));
 		dragAdapter.addDragSourceListener(new ResourceTransferDragAdapter(viewer));
 		dragAdapter.addDragSourceListener(new FileTransferDragAdapter(viewer));
-		dragAdapter.addDragSourceListener(new EditorInputTransferDragAdapter(viewer));
 		
 		viewer.addDragSupport(ops, transfers, dragAdapter);
 	}	

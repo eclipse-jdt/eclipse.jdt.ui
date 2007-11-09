@@ -298,8 +298,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		
 		JdtViewerDragAdapter dragAdapter= new JdtViewerDragAdapter(viewer);
 		dragAdapter.addDragSourceListener(new SelectionTransferDragAdapter(viewer));
-		dragAdapter.addDragSourceListener(new ResourceTransferDragAdapter(viewer));
 		dragAdapter.addDragSourceListener(new EditorInputTransferDragAdapter(viewer));
+		dragAdapter.addDragSourceListener(new ResourceTransferDragAdapter(viewer));
 		viewer.addDragSupport(ops, transfers, dragAdapter);
 	}	
 

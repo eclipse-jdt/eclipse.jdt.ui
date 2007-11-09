@@ -36,9 +36,9 @@ public class JdtViewerDragSupport {
 		
 		fDragAdapter= new JdtViewerDragAdapter(fViewer);
 		fDragAdapter.addDragSourceListener(new SelectionTransferDragAdapter(fViewer));
+		fDragAdapter.addDragSourceListener(new EditorInputTransferDragAdapter(viewer));
 		fDragAdapter.addDragSourceListener(new ResourceTransferDragAdapter(fViewer));
 		fDragAdapter.addDragSourceListener(new FileTransferDragAdapter(fViewer));
-		fDragAdapter.addDragSourceListener(new EditorInputTransferDragAdapter(viewer));
 		
 		fStarted= false;
 	}

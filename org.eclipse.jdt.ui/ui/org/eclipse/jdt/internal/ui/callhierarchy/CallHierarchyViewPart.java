@@ -359,9 +359,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			}
 		};
 		dragAdapter.addDragSourceListener(new SelectionTransferDragAdapter(fSelectionProviderMediator));
+		dragAdapter.addDragSourceListener(new EditorInputTransferDragAdapter(fSelectionProviderMediator));
 		dragAdapter.addDragSourceListener(new ResourceTransferDragAdapter(fSelectionProviderMediator));
 		dragAdapter.addDragSourceListener(new FileTransferDragAdapter(fSelectionProviderMediator));
-		dragAdapter.addDragSourceListener(new EditorInputTransferDragAdapter(fSelectionProviderMediator));
 		
 		viewer.addDragSupport(ops, transfers, dragAdapter);
 	}	
