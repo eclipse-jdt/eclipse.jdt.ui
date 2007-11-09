@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -111,7 +111,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 			
 			fUseProjectSettings= new SelectionButtonDialogField(SWT.CHECK);
 			fUseProjectSettings.setDialogFieldListener(listener);
-			fUseProjectSettings.setLabelText(PreferencesMessages.PropertyAndPreferencePage_useprojectsettings_label); 
+			fUseProjectSettings.setLabelText(PreferencesMessages.PropertyAndPreferencePage_useprojectsettings_label);
 			fUseProjectSettings.doFillIntoGrid(composite, 1);
 			LayoutUtil.setHorizontalGrabbing(fUseProjectSettings.getSelectionButton(null));
 			
@@ -186,6 +186,11 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		return fProject;
 	}
 	
+	/**
+	 * Handle link activation.
+	 * 
+	 * @param link the link
+	 */
 	final void doLinkActivated(Link link) {
 		Map data= new HashMap();
 		data.put(DATA_NO_LINK, Boolean.TRUE);
@@ -259,7 +264,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 			public void statusChanged(IStatus status) {
 				setPreferenceContentStatus(status);
 			}
-		};		
+		};
 	}
 	
 	protected IStatus getPreferenceContentStatus() {
@@ -284,7 +289,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 			if (fBlockEnableState == null) {
 				fBlockEnableState= ControlEnableState.disable(fConfigurationBlockControl);
 			}
-		}	
+		}
 	}
 	
 	/*
