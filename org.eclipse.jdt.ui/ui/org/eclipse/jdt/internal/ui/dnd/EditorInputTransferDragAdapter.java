@@ -25,9 +25,13 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorInputTransfer;
+import org.eclipse.ui.part.EditorInputTransfer.EditorInputData;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -35,6 +39,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 public class EditorInputTransferDragAdapter extends DragSourceAdapter implements TransferDragSourceListener {
 
 	private ISelectionProvider fProvider;
+	private ArrayList/*<EditorInputData>*/fEditorInputDatas;
 
 	public EditorInputTransferDragAdapter(ISelectionProvider provider) {
 		Assert.isNotNull(provider);
@@ -52,40 +57,39 @@ public class EditorInputTransferDragAdapter extends DragSourceAdapter implements
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragStart
 	 */
 	public void dragStart(DragSourceEvent event) {
+		fEditorInputDatas= new ArrayList();
+		
 		ISelection selection= fProvider.getSelection();
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= (IStructuredSelection) selection;
-			if (structuredSelection.size() > 0) {
-				event.doit= true;
-				return;
+			for (Iterator iter= structuredSelection.iterator(); iter.hasNext();) {
+				Object element= iter.next();
+				IEditorInput editorInput= EditorUtility.getEditorInput(element);
+				if (editorInput != null && editorInput.getPersistable() != null) {
+					try {
+						String editorId= EditorUtility.getEditorID(editorInput);
+						// see org.eclipse.ui.internal.ide.EditorAreaDropAdapter.openNonExternalEditor(..):
+						IEditorRegistry editorReg= PlatformUI.getWorkbench().getEditorRegistry();
+						IEditorDescriptor editorDesc= editorReg.findEditor(editorId);
+						if (editorDesc != null && !editorDesc.isOpenExternal()) {
+							fEditorInputDatas.add(EditorInputTransfer.createEditorInputData(editorId, editorInput));
+						}
+					} catch (PartInitException e) {
+						JavaPlugin.log(e);
+					}
+				}
 			}
 		}
-		event.doit= false;
+
+		event.doit= fEditorInputDatas.size() > 0;
 	}
 
 	/*
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragSetData
 	 */
 	public void dragSetData(DragSourceEvent event) {
-		if (EditorInputTransfer.getInstance().isSupportedType(event.dataType)) {
-			ISelection selection= fProvider.getSelection();
-			if (selection instanceof IStructuredSelection) {
-				IStructuredSelection structuredSelection= (IStructuredSelection) selection;
-				ArrayList transferData= new ArrayList();
-				for (Iterator iter= structuredSelection.iterator(); iter.hasNext();) {
-					Object element= iter.next();
-					IEditorInput editorInput= EditorUtility.getEditorInput(element);
-					if (editorInput != null) {
-						try {
-							String editorId= EditorUtility.getEditorID(editorInput);
-							transferData.add(EditorInputTransfer.createEditorInputData(editorId, editorInput));
-						} catch (PartInitException e) {
-							JavaPlugin.log(e);
-						}
-					}
-				}
-				event.data= transferData.toArray(new EditorInputTransfer.EditorInputData[transferData.size()]);
-			}
+		if (EditorInputTransfer.getInstance().isSupportedType(event.dataType) && fEditorInputDatas.size() > 0) {
+			event.data= fEditorInputDatas.toArray(new EditorInputData[fEditorInputDatas.size()]);
 		}
 	}
 
@@ -94,6 +98,7 @@ public class EditorInputTransferDragAdapter extends DragSourceAdapter implements
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragFinished
 	 */
 	public void dragFinished(DragSourceEvent event) {
+		fEditorInputDatas= null;
 		Assert.isTrue(event.detail != DND.DROP_MOVE);
 	}
 }
