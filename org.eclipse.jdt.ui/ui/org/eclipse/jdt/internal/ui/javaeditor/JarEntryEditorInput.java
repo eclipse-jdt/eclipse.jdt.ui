@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.IEditorRegistry;
+import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.PlatformUI;
@@ -26,6 +27,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import org.eclipse.jdt.internal.ui.JarEntryEditorInputFactory;
 
 /**
  * An EditorInput for a JarEntryFile.
@@ -53,7 +55,19 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 	 * @see IEditorInput#getPersistable()
 	 */
 	public IPersistableElement getPersistable() {
-		return null;
+		if (fJarEntryFile instanceof IJarEntryResource) {
+			return new IPersistableElement() {
+				public void saveState(IMemento memento) {
+					JarEntryEditorInputFactory.saveState(memento, (IJarEntryResource) fJarEntryFile);
+				}
+
+				public String getFactoryId() {
+					return JarEntryEditorInputFactory.FACTORY_ID;
+				}
+			};
+		} else {
+			return null;
+		}
 	}
 
 	/*

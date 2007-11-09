@@ -855,6 +855,10 @@
             class="org.eclipse.jdt.internal.ui.PersistableJavaElementFactory"
             id="org.eclipse.jdt.ui.PersistableJavaElementFactory">
       </factory>
+      <factory
+            class="org.eclipse.jdt.internal.ui.JarEntryEditorInputFactory"
+            id="org.eclipse.jdt.ui.internal.JarEntryEditorInputFactory">
+      </factory>
    </extension>
    <extension
          id="javaeditor"
