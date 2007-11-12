@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
+import java.util.ArrayList;
+
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.ui.IElementFactory;
@@ -18,6 +21,8 @@ import org.eclipse.ui.IMemento;
 
 import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -33,7 +38,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 public class JarEntryEditorInputFactory implements IElementFactory {
 
 	public static final String FACTORY_ID= "org.eclipse.jdt.ui.internal.JarEntryEditorInputFactory"; //$NON-NLS-1$
-	private static final String KEY_ROOT= "packageFragmentRoot"; //$NON-NLS-1$
+	private static final String KEY_ELEMENT= "element"; //$NON-NLS-1$
 	private static final String KEY_PATH= "path"; //$NON-NLS-1$
 
 	/**
@@ -47,53 +52,114 @@ public class JarEntryEditorInputFactory implements IElementFactory {
 	 */
 	public IAdaptable createElement(IMemento memento) {
 	
-		String rootIdentifier= memento.getString(KEY_ROOT);
+		String rootIdentifier= memento.getString(KEY_ELEMENT);
 		String pathIdentifier= memento.getString(KEY_PATH);
 		if (rootIdentifier != null && pathIdentifier != null) {
-			IJavaElement restoredRoot= JavaCore.create(rootIdentifier);
-			if (!(restoredRoot instanceof IPackageFragmentRoot))
-				return null;
-			
-			IPackageFragmentRoot root= (IPackageFragmentRoot) restoredRoot;
-			String[] pathSegments= new Path(pathIdentifier).segments();
+			IJavaElement restoredParent= JavaCore.create(rootIdentifier);
 			try {
-				Object[] children= root.getNonJavaResources();
-				int depth= pathSegments.length;
-				segments: for (int i= 0; i < depth; i++) {
-					String name= pathSegments[i];
-					for (int j= 0; j < children.length; j++) {
-						Object child= children[j];
-						if (child instanceof IJarEntryResource) {
-							IJarEntryResource jarEntryResource= (IJarEntryResource) child;
-							if (name.equals(jarEntryResource.getName())) {
-								boolean isFile= jarEntryResource.isFile();
-								if (isFile) {
-									if (i == depth - 1) {
-										return new JarEntryEditorInput(jarEntryResource);
-									} else {
-										return null; // got a file for a directory name
-									}
-								} else {
-									children= jarEntryResource.getChildren();
-									continue segments;
-								}
-							}
+				Object[] children;
+				if (restoredParent instanceof IPackageFragmentRoot) {
+					IPackageFragmentRoot restoredRoot= (IPackageFragmentRoot) restoredParent;
+					if (!restoredParent.exists()) {
+						restoredRoot= fuzzyResolveRoot(restoredRoot);
+						if (restoredRoot == null) {
+							return null;
 						}
 					}
-					return null; // no child found on this level
+					children= restoredRoot.getNonJavaResources();
+
+				} else if (restoredParent instanceof IPackageFragment) {
+					IPackageFragment restoredPackage= (IPackageFragment) restoredParent;
+					if (!restoredPackage.exists()) {
+						IPackageFragmentRoot restoredRoot= (IPackageFragmentRoot) restoredPackage.getParent();
+						restoredRoot= fuzzyResolveRoot(restoredRoot);
+						if (restoredRoot == null) {
+							return null;
+						}
+						restoredPackage= restoredRoot.getPackageFragment(restoredPackage.getElementName());
+						if (!restoredPackage.exists()) {
+							return null;
+						}
+					}
+					children= restoredPackage.getNonJavaResources();
+				} else {
+					return null; // should not happen
 				}
+
+				String[] pathSegments= new Path(pathIdentifier).segments();
+				return createEditorInput(pathSegments, children);
 			} catch (JavaModelException e) {
 				return null;
 			}
 		}
 		return null;
 	}
-	
+
+	private IPackageFragmentRoot fuzzyResolveRoot(IPackageFragmentRoot restoredRoot) throws JavaModelException {
+		IJavaProject project= restoredRoot.getJavaProject();
+		String rootName= restoredRoot.getElementName();
+		int versionSepIndex= rootName.indexOf('_');
+		if (versionSepIndex > 0) {
+			// try stripping plug-in version number
+			String prefix= rootName.substring(0, versionSepIndex);
+			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
+			for (int i= 0; i < roots.length; i++) {
+				if (roots[i].getElementName().startsWith(prefix)) {
+					return roots[i];
+				}
+			}
+		}
+		return null;
+	}
+
+	private JarEntryEditorInput createEditorInput(String[] pathSegments, Object[] children) {
+		int depth= pathSegments.length;
+		segments: for (int i= 0; i < depth; i++) {
+			String name= pathSegments[i];
+			for (int j= 0; j < children.length; j++) {
+				Object child= children[j];
+				if (child instanceof IJarEntryResource) {
+					IJarEntryResource jarEntryResource= (IJarEntryResource) child;
+					if (name.equals(jarEntryResource.getName())) {
+						boolean isFile= jarEntryResource.isFile();
+						if (isFile) {
+							if (i == depth - 1) {
+								return new JarEntryEditorInput(jarEntryResource);
+							} else {
+								return null; // got a file for a directory name
+							}
+						} else {
+							children= jarEntryResource.getChildren();
+							continue segments;
+						}
+					}
+				}
+			}
+			return null; // no child found on this level
+		}
+		return null;
+	}
+
 	/*
 	 * @see IPersistableElement#saveState(IMemento)
 	 */
 	public static void saveState(IMemento memento, IJarEntryResource jarEntryResource) {
-		memento.putString(KEY_ROOT, jarEntryResource.getPackageFragmentRoot().getHandleIdentifier());
-		memento.putString(KEY_PATH, jarEntryResource.getFullPath().toString());
+		ArrayList reversePath= new ArrayList();
+		reversePath.add(jarEntryResource.getName());
+
+		Object parent= jarEntryResource.getParent();
+		while (parent instanceof IJarEntryResource) {
+			jarEntryResource= (IJarEntryResource) parent;
+			reversePath.add(jarEntryResource.getName());
+			parent= jarEntryResource.getParent();
+		}
+		if (parent instanceof IPackageFragmentRoot || parent instanceof IPackageFragment) {
+			memento.putString(KEY_ELEMENT, ((IJavaElement) parent).getHandleIdentifier());
+			IPath path= new Path((String) reversePath.get(reversePath.size() - 1));
+			for (int i= reversePath.size() - 2; i >= 0; i--) {
+				path= path.append((String) reversePath.get(i));
+			}
+			memento.putString(KEY_PATH, path.toString());
+		}
 	}
 }
