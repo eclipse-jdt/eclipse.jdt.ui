@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
@@ -208,11 +207,17 @@ class ImportFilter extends JavaMatchFilter {
 		if (spec instanceof ElementQuerySpecification) {
 			ElementQuerySpecification elementSpec= (ElementQuerySpecification) spec;
 			IJavaElement element= elementSpec.getElement();
-			return element instanceof IType || element instanceof IPackageFragment;
+			switch (element.getElementType()) {
+				case IJavaElement.TYPE:
+				case IJavaElement.METHOD:
+				case IJavaElement.FIELD:
+				case IJavaElement.PACKAGE_FRAGMENT:
+					return true;
+				default:
+					return false;
+			}
 		} else if (spec instanceof PatternQuerySpecification) {
-			PatternQuerySpecification patternSpec= (PatternQuerySpecification) spec;
-			int searchFor= patternSpec.getSearchFor();
-			return searchFor == IJavaSearchConstants.TYPE || searchFor == IJavaSearchConstants.PACKAGE;
+			return true;
 		}
 		return false;
 	}
