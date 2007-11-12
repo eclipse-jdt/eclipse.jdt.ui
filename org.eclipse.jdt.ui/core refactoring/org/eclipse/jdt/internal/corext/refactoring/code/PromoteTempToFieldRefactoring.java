@@ -48,7 +48,6 @@ import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -58,6 +57,7 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -531,7 +531,13 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
     			addInitializersToConstructors(rewrite);
    			addTempRenames(rewrite);
     		addFieldDeclaration(rewrite);
-            return createChange(rewrite);
+
+			CompilationUnitChange result= new CompilationUnitChange(RefactoringCoreMessages.PromoteTempToFieldRefactoring_name, fCu);
+			result.setDescriptor(new RefactoringChangeDescriptor(getRefactoringDescriptor()));
+			TextEdit resultingEdits= rewrite.rewriteAST();
+			TextChangeCompatibility.addTextEdit(result, RefactoringCoreMessages.PromoteTempToFieldRefactoring_editName, resultingEdits);
+			return result;
+
     	} finally {
     		pm.done();
     	}
@@ -624,7 +630,7 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
     private void addFieldInitializationToConstructor(ASTRewrite rewrite, MethodDeclaration constructor) {
     	if (constructor.getBody() == null)
 	    	constructor.setBody(getAST().newBlock());
-        ExpressionStatement newStatement= createExpressionStatementThatInitializesField(rewrite);
+		Statement newStatement= createNewAssignmentStatement(rewrite);
 		rewrite.getListRewrite(constructor.getBody(), Block.STATEMENTS_PROPERTY).insertLast(newStatement, null);
     }
     
@@ -654,7 +660,8 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 		return new MethodDeclaration[] {};
 	}
 
-    private Change createChange(ASTRewrite rewrite) throws CoreException {
+
+	private ConvertLocalVariableDescriptor getRefactoringDescriptor() {
 		final Map arguments= new HashMap();
 		String project= null;
 		IJavaProject javaProject= fCu.getJavaProject();
@@ -695,11 +702,7 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 		arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
 		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
 		arguments.put(ATTRIBUTE_INITIALIZE, new Integer(fInitializeIn).toString());
-		final CompilationUnitChange result= new CompilationUnitChange(RefactoringCoreMessages.PromoteTempToFieldRefactoring_name, fCu);
-		result.setDescriptor(new RefactoringChangeDescriptor(descriptor));
-		TextEdit resultingEdits= rewrite.rewriteAST();
-		TextChangeCompatibility.addTextEdit(result, RefactoringCoreMessages.PromoteTempToFieldRefactoring_editName, resultingEdits);
-		return result;
+		return descriptor;
 	}
 
     private void addLocalDeclarationSplit(ASTRewrite rewrite) {
@@ -718,9 +721,18 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
 		}
     	int statementIndex= listRewrite.getOriginalList().indexOf(tempDeclarationStatement);
    	   	Assert.isTrue(statementIndex != -1);
+
+		Statement newStatement= createNewAssignmentStatement(rewrite);
+   	   	
     	List fragments= tempDeclarationStatement.fragments();
-        int fragmentIndex= fragments.indexOf(fTempDeclarationNode);
-    	Assert.isTrue(fragmentIndex != -1);
+
+		int fragmentIndex= fragments.indexOf(fTempDeclarationNode);
+		Assert.isTrue(fragmentIndex != -1);
+    	
+		if (fragments.size() == 1) {
+			rewrite.replace(tempDeclarationStatement, newStatement, null);
+			return;
+		}
 
         for (int i1= fragmentIndex, n = fragments.size(); i1 < n; i1++) {
         	VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragments.get(i1);
@@ -731,7 +743,7 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
         
         Assert.isTrue(tempHasInitializer());
 
-        listRewrite.insertAt(createExpressionStatementThatInitializesField(rewrite), statementIndex + 1, null);
+        listRewrite.insertAt(newStatement, statementIndex + 1, null);
         
         if (fragmentIndex + 1 < fragments.size()){
             VariableDeclarationFragment firstFragmentAfter= (VariableDeclarationFragment)fragments.get(fragmentIndex + 1);
@@ -756,7 +768,7 @@ public class PromoteTempToFieldRefactoring extends ScriptableRefactoring {
         }
     }
     
-    private ExpressionStatement createExpressionStatementThatInitializesField(ASTRewrite rewrite) {
+    private Statement createNewAssignmentStatement(ASTRewrite rewrite) {
 		AST ast= getAST();
 		Assignment assignment= ast.newAssignment();
 		SimpleName fieldName= ast.newSimpleName(fFieldName);
