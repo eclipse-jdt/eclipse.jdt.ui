@@ -1798,6 +1798,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenameMethodRefactoring_update_occurrence;
 
+	public static String RenameMethodRefactoringContribution_could_not_create;
+
 	public static String RenamePackageChange_checking_change;
 
 	public static String RenamePackageChange_name;
