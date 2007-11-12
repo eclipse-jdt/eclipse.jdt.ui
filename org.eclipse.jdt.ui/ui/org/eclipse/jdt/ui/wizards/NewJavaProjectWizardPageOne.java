@@ -455,10 +455,10 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		public Control createControl(Composite composite) {
 			fGroup= new Group(composite, SWT.NONE);
 			fGroup.setFont(composite.getFont());
-			fGroup.setLayout(initGridLayout(new GridLayout(3, false), true));
+			fGroup.setLayout(initGridLayout(new GridLayout(2, false), true));
 			fGroup.setText(NewWizardMessages.NewJavaProjectWizardPageOne_JREGroup_title);
 
-			fUseDefaultJRE.doFillIntoGrid(fGroup, 2);
+			fUseDefaultJRE.doFillIntoGrid(fGroup, 1);
 
 			fPreferenceLink= new Link(fGroup, SWT.NONE);
 			fPreferenceLink.setFont(fGroup.getFont());
@@ -466,21 +466,24 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fPreferenceLink.setLayoutData(new GridData(GridData.END, GridData.CENTER, false, false));
 			fPreferenceLink.addSelectionListener(this);
 
-			fUseProjectJRE.doFillIntoGrid(fGroup, 1);
+			Composite nonDefaultJREComposite= new Composite(fGroup, SWT.NONE);
+			nonDefaultJREComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			GridLayout layout= new GridLayout(2, false);
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			nonDefaultJREComposite.setLayout(layout);
 
-			Combo comboControl= fJRECombo.getComboControl(fGroup);
-			comboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false)); // make sure column 2 is grabbing (but no fill)
+			fUseProjectJRE.doFillIntoGrid(nonDefaultJREComposite, 1);
+
+			Combo comboControl= fJRECombo.getComboControl(nonDefaultJREComposite);
+			comboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
 			comboControl.setVisibleItemCount(30);
 
-			DialogField.createEmptySpace(fGroup);
+			fUseEEJRE.doFillIntoGrid(nonDefaultJREComposite, 1);
 
-			fUseEEJRE.doFillIntoGrid(fGroup, 1);
-
-			Combo eeComboControl= fEECombo.getComboControl(fGroup);
-			eeComboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false)); // make sure column 2 is grabbing (but no fill)
+			Combo eeComboControl= fEECombo.getComboControl(nonDefaultJREComposite);
+			eeComboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
 			eeComboControl.setVisibleItemCount(30);
-
-			DialogField.createEmptySpace(fGroup);
 
 			updateEnableState();
 			return fGroup;
