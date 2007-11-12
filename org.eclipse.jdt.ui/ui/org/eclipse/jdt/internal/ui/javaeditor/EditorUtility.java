@@ -189,7 +189,7 @@ public class EditorUtility {
 
 		IEditorInput input= getEditorInput(inputElement);
 		if (input == null)
-			throwPartInitException(JavaEditorMessages.EditorUtility_no_editorInput);
+			throwPartInitException(JavaEditorMessages.EditorUtility_no_editorInput, IJavaStatusConstants.EDITOR_NO_EDITOR_INPUT);
 		
 		return openInEditor(input, getEditorID(input), activate);
 	}
