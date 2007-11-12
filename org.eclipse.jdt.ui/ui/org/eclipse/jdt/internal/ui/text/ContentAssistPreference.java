@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,10 +15,11 @@ import org.eclipse.swt.graphics.RGB;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.util.PropertyChangeEvent;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
-import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IColorManager;
@@ -118,6 +119,9 @@ public class ContentAssistPreference {
 
 	/**
 	 * Configure the given content assistant from the given store.
+	 * 
+	 * @param assistant the content assistant
+	 * @param store the preference store
 	 */
 	public static void configure(ContentAssistant assistant, IPreferenceStore store) {
 
@@ -192,6 +196,10 @@ public class ContentAssistPreference {
 	/**
 	 * Changes the configuration of the given content assistant according to the given property
 	 * change event and the given preference store.
+	 * 
+	 * @param assistant the content assistant
+	 * @param store the preference store
+	 * @param event the property change event
 	 */
 	public static void changeConfiguration(ContentAssistant assistant, IPreferenceStore store, PropertyChangeEvent event) {
 
