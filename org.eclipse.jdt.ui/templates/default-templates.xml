@@ -177,4 +177,7 @@ System.arraycopy(${array}, 0, ${result}, ${array1}.length, ${array}.length);</te
 System.arraycopy(${array}, 0, ${result}, 0, ${array}.length);
 ${result}[${array}.length]= ${var};</template>
 
+<template name="static_final" description="%Templates.static_final" id="org.eclipse.jdt.ui.templates.static_final" context="java" enabled="true" autoinsert="false">${visibility:link(public,protected,private)} static final
+${type:link(String,int)} ${name};</template>
+
 </templates>
