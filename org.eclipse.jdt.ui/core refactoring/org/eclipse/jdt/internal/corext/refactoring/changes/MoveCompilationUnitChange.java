@@ -39,7 +39,7 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 		fStampToRestore= IResource.NULL_STAMP;
 		fDeletePackages= null;
 		
-		setValidationMethod(VALIDATE_NOT_DIRTY | VALIDATE_NOT_READ_ONLY);
+		setValidationMethod(SAVE_IF_DIRTY | VALIDATE_NOT_READ_ONLY);
 	}
 	
 	private MoveCompilationUnitChange(IPackageFragment oldPackage, String cuName, IPackageFragment newPackage, long stampToRestore, IPackageFragment[] deletePackages) {
@@ -47,7 +47,7 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 		fStampToRestore= stampToRestore;
 		fDeletePackages= deletePackages;
 		
-		setValidationMethod(VALIDATE_NOT_DIRTY | VALIDATE_NOT_READ_ONLY);
+		setValidationMethod(SAVE_IF_DIRTY | VALIDATE_NOT_READ_ONLY);
 	}
 	
 	public String getName() {
