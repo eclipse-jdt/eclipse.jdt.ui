@@ -23,8 +23,11 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
@@ -47,7 +50,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -56,6 +61,8 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 import org.eclipse.jdt.internal.junit.launcher.AssertionVMArg;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
@@ -92,9 +99,37 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	public void launch(IEditorPart editor, String mode) {
 		IJavaElement element= JavaUI.getEditorInputJavaElement(editor.getEditorInput());
 		if (element != null) {
+			element= resolveSelectedMethodName(editor, element);
 			launch(new Object[] { element }, mode);
 		} else {
 			showNoTestsFoundDialog();
+		}
+	}
+
+	private IJavaElement resolveSelectedMethodName(IEditorPart editor, IJavaElement element) {
+		try {
+			ISelectionProvider selectionProvider= editor.getSite().getSelectionProvider();
+			if (selectionProvider == null)
+				return element;
+			
+			ISelection selection= selectionProvider.getSelection();
+			if (!(selection instanceof ITextSelection))
+				return element;
+
+			ITextSelection textSelection= (ITextSelection) selection;
+			IJavaElement elementAtOffset;
+			elementAtOffset= SelectionConverter.getElementAtOffset(element, textSelection);
+			if (! (elementAtOffset instanceof IMethod))
+				return element;
+			
+			ISourceRange nameRange= ((IMethod) elementAtOffset).getNameRange();
+			if (nameRange.getOffset() <= textSelection.getOffset()
+					&& textSelection.getOffset() + textSelection.getLength() <= nameRange.getOffset() + nameRange.getLength())
+				return elementAtOffset;
+			else
+				return element;
+		} catch (JavaModelException e) {
+			return element;
 		}
 	}
 
@@ -155,7 +190,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		MessageDialog.openInformation(getShell(), JUnitMessages.JUnitLaunchShortcut_dialog_title, JUnitMessages.JUnitLaunchShortcut_message_notests);
 	}
 
-	private IType findTypeToLaunch(ICompilationUnit cu, String mode) throws CoreException, InterruptedException, InvocationTargetException {
+	private IType findTypeToLaunch(ICompilationUnit cu, String mode) throws InterruptedException, InvocationTargetException {
 		ITestKind testKind= TestKindRegistry.getContainerTestKind(cu);
 		IType[] types= TestSearchEngine.findTests(PlatformUI.getWorkbench().getActiveWorkbenchWindow(), cu, testKind);
 		if (types.length == 0) {
