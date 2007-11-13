@@ -35,6 +35,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.search.ui.NewSearchUI;
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
 
@@ -66,13 +68,21 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 	private class LinkWithEditorListener implements IPartListener2, ISelectionListenerWithAST {
 
 		private ITextEditor fActiveEditor;
-
+		private boolean fIsVisible;
+		
 		public void install(IWorkbenchPage page) {
 			page.addPartListener(this);
+			fIsVisible= page.isPartVisible(getViewPart());
+			if (fIsVisible) {
+				installOnActiveEditor(page);
+			}
+		}
+
+		private void installOnActiveEditor(IWorkbenchPage page) {
 			IEditorPart activeEditor= page.getActiveEditor();
 			if (activeEditor instanceof ITextEditor) {
 				editorActive(activeEditor);
-				ISelection selection= page.getSelection();
+				ISelection selection= activeEditor.getSite().getSelectionProvider().getSelection();
 				ITypeRoot typeRoot= JavaUI.getEditorInputTypeRoot(activeEditor.getEditorInput());
 				if (typeRoot != null && selection instanceof ITextSelection) {
 					CompilationUnit astRoot= SharedASTProvider.getAST(typeRoot, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
@@ -83,16 +93,20 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 			}
 		}
 
-		public void uninstall(IWorkbenchPage page) {
-			page.removePartListener(this);
+		private void uninstallOnActiveEditor() {
 			if (fActiveEditor != null) {
 				SelectionListenerWithASTManager.getDefault().removeListener(fActiveEditor, this);
-				fActiveEditor= null;
+				fActiveEditor= null;	
 			}
 		}
 
+		public void uninstall(IWorkbenchPage page) {
+			page.removePartListener(this);
+			uninstallOnActiveEditor();
+		}
+
 		public void partActivated(IWorkbenchPartReference partRef) {
-			if (partRef instanceof IEditorReference) {
+			if (fIsVisible && partRef instanceof IEditorReference) {
 				editorActive(((IEditorReference) partRef).getEditor(true));
 			}
 		}
@@ -105,9 +119,8 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 		}
 
 		public void partDeactivated(IWorkbenchPartReference partRef) {
-			if (fActiveEditor != null) {
-				SelectionListenerWithASTManager.getDefault().removeListener(fActiveEditor, this);
-				fActiveEditor= null;
+			if (partRef instanceof IEditorReference && partRef.getPart(true) == fActiveEditor) {
+				uninstallOnActiveEditor();
 			}
 		}
 
@@ -115,11 +128,19 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 			preformEditorSelectionChanged(selection, astRoot);
 		}
 
-
 		public void partVisible(IWorkbenchPartReference partRef) {
+			if (NewSearchUI.SEARCH_VIEW_ID.equals(partRef.getId()) && partRef.getPart(true) == getViewPart()) {
+				if (fActiveEditor == null) {
+					fIsVisible= true;
+				}
+			}
 		}
 
 		public void partHidden(IWorkbenchPartReference partRef) {
+			if (NewSearchUI.SEARCH_VIEW_ID.equals(partRef.getId()) && partRef.getPart(true) == getViewPart()) {
+				fIsVisible= false;
+				uninstallOnActiveEditor();
+			}
 		}
 
 		public void partBroughtToTop(IWorkbenchPartReference partRef) {
@@ -261,8 +282,22 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 		if (!isLinkingEnabled()) {
 			return;
 		}
+		IOccurrencesFinder finder;
+
+		AbstractTextSearchResult input= getInput();
+		if (input == null) {
+			finder= new OccurrencesFinder();
+		} else {
+			String id= ((OccurrencesSearchQuery) input.getQuery()).getFinderId();
+			if (id == OccurrencesFinder.ID) {
+				finder= new OccurrencesFinder();
+			} else if (id == ExceptionOccurrencesFinder.ID) {
+				finder= new ExceptionOccurrencesFinder();
+			} else {
+				finder= new ImplementOccurrencesFinder();
+			}
+		}
 		
-		OccurrencesFinder finder= new OccurrencesFinder();
 		if (finder.initialize(astRoot, selection.getOffset(), selection.getLength()) == null) {
 			final OccurrencesSearchQuery query= new OccurrencesSearchQuery(finder, astRoot.getTypeRoot());
 			query.run(null);

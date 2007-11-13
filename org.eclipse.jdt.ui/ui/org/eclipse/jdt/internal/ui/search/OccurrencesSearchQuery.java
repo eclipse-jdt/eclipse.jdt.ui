@@ -38,6 +38,7 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 	private final String fSingularLabel;
 	private final String fPluralLabel;
 	private final String fName;
+	private final String fFinderId;
 	
 	public OccurrencesSearchQuery(IOccurrencesFinder finder, ITypeRoot element) {
 		fFinder= finder;
@@ -47,6 +48,7 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 		fSingularLabel= fFinder.getUnformattedSingularLabel();
 		fPluralLabel= fFinder.getUnformattedPluralLabel();
 		fName= fFinder.getElementName();
+		fFinderId= fFinder.getID();
 	}
 	
 	/*
@@ -107,5 +109,13 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 	 */
 	public ISearchResult getSearchResult() {
 		return fResult;
+	}
+
+	/**
+	 * Returns the finder ID.
+	 * @return the finder ID
+	 */
+	public String getFinderId() {
+		return fFinderId;
 	}
 }
