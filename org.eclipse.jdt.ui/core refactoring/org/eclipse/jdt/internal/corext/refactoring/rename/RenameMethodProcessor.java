@@ -325,7 +325,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 					//cause the reference to bind to the new ripple method instead of to
 					//its old binding (a method of an enclosing scope).
 					//-> Getting *more* references than before -> Semantics not preserved.
-					//Example: RenamePrivateMethodTests#testFail6()
+					//Examples: RenameVirtualMethodInClassTests#testFail39() and #testFail41()
 					//TODO: could pass declaringTypes to the RippleMethodFinder and check whether
 					//a hierarchy contains one of outerTypes (or an outer type of an outerType, recursively).
 					mustAnalyzeShadowing= true;
@@ -385,7 +385,10 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		IJavaSearchScope scope= createRefactoringScope(getMethod());
 		SearchRequestor requestor= new SearchRequestor() {
 			public void acceptSearchMatch(SearchMatch match) throws CoreException {
-				IMember member= (IMember) match.getElement();
+				Object element= match.getElement();
+				if (!(element instanceof IMember))
+					return; // e.g. an IImportDeclaration for a static method import
+				IMember member= (IMember) element;
 				IType declaring= member.getDeclaringType();
 				if (declaring == null)
 					return;
@@ -416,7 +419,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return (IMethod[]) results.toArray(new IMethod[results.size()]);
 	}
 	
-	private SearchPattern createNewMethodPattern() throws JavaModelException {
+	private SearchPattern createNewMethodPattern() {
 		StringBuffer stringPattern= new StringBuffer(getNewElementName()).append('(');
 		int paramCount= getMethod().getNumberOfParameters();
 		for (int i= 0; i < paramCount; i++) {
@@ -628,7 +631,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return (ICompilationUnit[]) cus.toArray(new ICompilationUnit[cus.size()]);
 	}
 	
-	private IMethod getMethodInWorkingCopy(IMethod method, String elementName, IType typeWc) throws CoreException{
+	private IMethod getMethodInWorkingCopy(IMethod method, String elementName, IType typeWc) {
 		String[] paramTypeSignatures= method.getParameterTypes();
 		return typeWc.getMethod(elementName, paramTypeSignatures);
 	}
