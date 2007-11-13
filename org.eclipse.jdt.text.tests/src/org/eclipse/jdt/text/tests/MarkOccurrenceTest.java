@@ -17,19 +17,20 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.swt.custom.StyleRange;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.graphics.RGB;
-
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
-
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
+import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
+import org.eclipse.jdt.text.tests.performance.DisplayHelper;
+import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IDocument;
@@ -39,26 +40,15 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
-
-import org.eclipse.ui.editors.text.EditorsUI;
-
+import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.texteditor.AnnotationPreference;
-
-import org.eclipse.jdt.core.dom.CompilationUnit;
-
-import org.eclipse.jdt.text.tests.performance.DisplayHelper;
-import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
-import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 
 
 /**
@@ -69,6 +59,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 public class MarkOccurrenceTest extends TestCase {
 	
 	private static final String OCCURRENCE_ANNOTATION= "org.eclipse.jdt.ui.occurrences";
+	private static final String OCCURRENCE_WRITE_ANNOTATION= "org.eclipse.jdt.ui.occurrences.write";
 	private static final RGB fgHighlightRGB= getHighlightRGB();
 	
 	private JavaEditor fEditor;
@@ -124,6 +115,9 @@ public class MarkOccurrenceTest extends TestCase {
 					Annotation annotation= (Annotation)iter.next();
 					if (OCCURRENCE_ANNOTATION.equals(annotation.getType()))
 						fOccurrences++;
+					if (OCCURRENCE_WRITE_ANNOTATION.equals(annotation.getType()))
+						fOccurrences++;
+					
 				}
 			}
 		};
@@ -295,7 +289,7 @@ public class MarkOccurrenceTest extends TestCase {
 
 		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
 		
-		assertOccurrences(0);
+		assertOccurrences(1); // 1 type occurrence
 		assertOccurrencesInWidget();
 	}
 	
@@ -370,6 +364,9 @@ public class MarkOccurrenceTest extends TestCase {
 	private void assertOccurrences(final int expected) {
 		DisplayHelper helper= new DisplayHelper() {
 			protected boolean condition() {
+				if (fOccurrences > 0 && fOccurrences != Integer.MAX_VALUE) {
+					assertEquals(expected, fOccurrences);
+				}
 				return fOccurrences == expected;
 			}
 		};
