@@ -615,7 +615,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 						final TypeReferenceMatch match= (TypeReferenceMatch) results[j];
 						final List matches= new ArrayList();
 
-						if (match.getLocalElement() != null)
+						if (match.getLocalElement() instanceof ILocalVariable)
 							matches.add(match.getLocalElement());
 						else
 							matches.add(match.getElement());
@@ -640,14 +640,12 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 
 								if (newFieldName != null)
 									fPreloadedElementToName.put(currentField, newFieldName);
-							}
-
-							if (element instanceof IMethod) {
+								
+							} else if (element instanceof IMethod) {
 								final IMethod currentMethod= (IMethod) element;
 								addMethodRename(unQualifiedTypeName, sugg, currentMethod);
-							}
-
-							if (element instanceof ILocalVariable) {
+								
+							} else if (element instanceof ILocalVariable) {
 								final ILocalVariable currentLocal= (ILocalVariable) element;
 								final boolean isParameter;
 								
