@@ -95,6 +95,8 @@ public class MarkOccurrenceTest extends TestCase {
 		fFindReplaceDocumentAdapter= new FindReplaceDocumentAdapter(fDocument);
 		fAnnotationModel= fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
 	
+		fOccurrences= -1; // initialize
+		
 		fMatch= null;
 		fSelWASTListener= new ISelectionListenerWithAST() {
 			
@@ -109,16 +111,17 @@ public class MarkOccurrenceTest extends TestCase {
 			}
 	
 			private synchronized void countOccurrences() {
-				fOccurrences= 0;
+				int occurrences= 0;
 				Iterator iter= fAnnotationModel.getAnnotationIterator();
 				while (iter.hasNext()) {
 					Annotation annotation= (Annotation)iter.next();
 					if (OCCURRENCE_ANNOTATION.equals(annotation.getType()))
-						fOccurrences++;
+						occurrences++;
 					if (OCCURRENCE_WRITE_ANNOTATION.equals(annotation.getType()))
-						fOccurrences++;
+						occurrences++;
 					
 				}
+				fOccurrences= occurrences;
 			}
 		};
 		SelectionListenerWithASTManager.getDefault().addListener(fEditor, fSelWASTListener);
@@ -133,6 +136,10 @@ public class MarkOccurrenceTest extends TestCase {
 		EditorTestHelper.closeAllEditors();
 		fEditor= null;
 		fTextWidget= null;
+		fAnnotationModel= null;
+		fDocument= null;
+		fFindReplaceDocumentAdapter= null;
+		fSelWASTListener= null;
 	}
 	
 	private JavaEditor openJavaEditor(IPath path) {
@@ -167,28 +174,32 @@ public class MarkOccurrenceTest extends TestCase {
 		int reuseOpenEditors= store.getInt("REUSE_OPEN_EDITORS");
 		store.setValue("REUSE_OPEN_EDITORS", 1);
 		
-		SelectionListenerWithASTManager.getDefault().removeListener(fEditor, fSelWASTListener);
-		fEditor= openJavaEditor(new Path("/" + JUnitProjectTestSetup.getProject().getElementName() + "/src/junit/framework/Test.java"));
-		SelectionListenerWithASTManager.getDefault().addListener(fEditor, fSelWASTListener);
-		fDocument= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-		assertNotNull(fDocument);
-		fFindReplaceDocumentAdapter= new FindReplaceDocumentAdapter(fDocument);
-		fAnnotationModel= fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
-		
 		try {
-			fMatch= fFindReplaceDocumentAdapter.find(0, "Test {", true, true, false, false);
-		} catch (BadLocationException e) {
-			fail();
+			SelectionListenerWithASTManager.getDefault().removeListener(fEditor, fSelWASTListener);
+			
+			JavaEditor newEditor= openJavaEditor(new Path("/" + JUnitProjectTestSetup.getProject().getElementName() + "/src/junit/framework/Test.java"));
+			assertEquals(fEditor, newEditor);
+			SelectionListenerWithASTManager.getDefault().addListener(fEditor, fSelWASTListener);
+			fDocument= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
+			assertNotNull(fDocument);
+			fFindReplaceDocumentAdapter= new FindReplaceDocumentAdapter(fDocument);
+			fAnnotationModel= fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
+			
+			try {
+				fMatch= fFindReplaceDocumentAdapter.find(0, "Test {", true, true, false, false);
+			} catch (BadLocationException e) {
+				fail();
+			}
+			assertNotNull(fMatch);
+			fMatch= new Region(fMatch.getOffset(), 4);
+			fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
+			
+			assertOccurrences(1);
+			assertOccurrencesInWidget();
+		} finally {
+			store.setValue("REUSE_OPEN_EDITORS_BOOLEAN", false);
+			store.setValue("REUSE_OPEN_EDITORS", reuseOpenEditors);
 		}
-		assertNotNull(fMatch);
-		fMatch= new Region(fMatch.getOffset(), 4);
-		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
-		
-		assertOccurrences(1);
-		assertOccurrencesInWidget();
-		
-		store.setValue("REUSE_OPEN_EDITORS_BOOLEAN", false);
-		store.setValue("REUSE_OPEN_EDITORS", reuseOpenEditors);
 	}
 	
 	public void testMarkMethodOccurrences() {
@@ -277,7 +288,6 @@ public class MarkOccurrenceTest extends TestCase {
 	}
 	public void testMarkImplementOccurrences2() {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_IMPLEMENTORS, false);
-		fOccurrences= Integer.MAX_VALUE;
 		
 		try {
 			fMatch= fFindReplaceDocumentAdapter.find(0, "Test {", true, true, false, false);
@@ -309,7 +319,6 @@ public class MarkOccurrenceTest extends TestCase {
 	
 	public void testNoOccurrencesIfDisabled() {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, false);
-		fOccurrences= Integer.MAX_VALUE;
 		try {
 			fMatch= fFindReplaceDocumentAdapter.find(0, "TestResult", true, true, true, false);
 		} catch (BadLocationException e) {
@@ -364,10 +373,11 @@ public class MarkOccurrenceTest extends TestCase {
 	private void assertOccurrences(final int expected) {
 		DisplayHelper helper= new DisplayHelper() {
 			protected boolean condition() {
-				if (fOccurrences > 0 && fOccurrences != Integer.MAX_VALUE) {
+				if (fOccurrences != -1) {
 					assertEquals(expected, fOccurrences);
+					return true;
 				}
-				return fOccurrences == expected;
+				return false;
 			}
 		};
 		assertTrue(helper.waitForCondition(EditorTestHelper.getActiveDisplay(), 80000));
