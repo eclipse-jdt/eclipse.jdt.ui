@@ -10,8 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
+
 /**
  * Defines action IDs for private JavaEditor actions.
+ * <p>
+ * This interface is not intended to be implemented or extended.
+ * </p>.
  */
 public interface IJavaEditorActionConstants {
 
