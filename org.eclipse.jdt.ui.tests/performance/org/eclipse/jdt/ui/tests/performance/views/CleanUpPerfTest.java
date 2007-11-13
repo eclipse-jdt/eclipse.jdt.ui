@@ -56,6 +56,7 @@ import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
+import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
@@ -435,6 +436,21 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		storeSettings(node);
 		
 		cleanUpRefactoring.addCleanUp(new VariableDeclarationCleanUp());
+		
+		doCleanUp(cleanUpRefactoring);
+	}
+	
+	public void testOrganizeImports() throws Exception {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+
+		Map node= getNullSettings();
+
+		node.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpConstants.TRUE);
+
+		storeSettings(node);
+
+		cleanUpRefactoring.addCleanUp(new ImportsCleanUp());
 		
 		doCleanUp(cleanUpRefactoring);
 	}
