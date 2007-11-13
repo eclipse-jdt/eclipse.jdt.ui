@@ -15,6 +15,7 @@ import java.util.ArrayList;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.search.ui.ISearchQuery;
@@ -55,10 +56,12 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 		if (fFinder == null) {
 			return new StatusInfo(IStatus.ERROR, "Query has already been running"); //$NON-NLS-1$
 		}
+		if (monitor == null)
+			monitor= new NullProgressMonitor();
+		
 		try {
-			fFinder.perform();
 			ArrayList resultingMatches= new ArrayList();
-			fFinder.collectOccurrenceMatches(fElement, resultingMatches);
+			fFinder.collectMatches(resultingMatches);
 			if (!resultingMatches.isEmpty()) {
 				fResult.addMatches((Match[]) resultingMatches.toArray(new Match[resultingMatches.size()]));
 			}

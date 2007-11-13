@@ -18,7 +18,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
@@ -34,10 +33,11 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.FindOccurrencesEngine;
 import org.eclipse.jdt.internal.ui.search.OccurrencesFinder;
@@ -159,10 +159,10 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 		IMember member= getMember(selection);
 		if (!ActionUtil.isProcessable(getShell(), member))
 			return;
-		FindOccurrencesEngine engine= FindOccurrencesEngine.create(member.getTypeRoot(), new OccurrencesFinder());
+		FindOccurrencesEngine engine= FindOccurrencesEngine.create(new OccurrencesFinder());
 		try {
 			ISourceRange range= member.getNameRange();
-			String result= engine.run(range.getOffset(), range.getLength());
+			String result= engine.run(member.getTypeRoot(), range.getOffset(), range.getLength());
 			if (result != null)
 				showMessage(getShell(), fActionBars, result);
 		} catch (JavaModelException e) {
@@ -194,9 +194,10 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 		ITypeRoot input= getEditorInput(fEditor);
 		if (!ActionUtil.isProcessable(getShell(), input))
 			return;
-		FindOccurrencesEngine engine= FindOccurrencesEngine.create(input, new OccurrencesFinder());
+		OccurrencesFinder finder= new OccurrencesFinder();
+		FindOccurrencesEngine engine= FindOccurrencesEngine.create(finder);
 		try {
-			String result= engine.run(ts.getOffset(), ts.getLength());
+			String result= engine.run(input, ts.getOffset(), ts.getLength());
 			if (result != null)
 				showMessage(getShell(), fEditor, result);
 		} catch (JavaModelException e) {
@@ -205,11 +206,8 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 	}
 
 	private static ITypeRoot getEditorInput(JavaEditor editor) {
-		IEditorInput input= editor.getEditorInput();
-		if (input instanceof IClassFileEditorInput)
-			return ((IClassFileEditorInput)input).getClassFile();
-		return  JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(input);
-	} 
+		return JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
+	}
 		
 	private static void showMessage(Shell shell, JavaEditor editor, String msg) {
 		IEditorStatusLine statusLine= (IEditorStatusLine) editor.getAdapter(IEditorStatusLine.class);

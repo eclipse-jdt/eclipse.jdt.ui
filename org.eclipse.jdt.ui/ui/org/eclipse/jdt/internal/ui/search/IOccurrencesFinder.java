@@ -11,10 +11,9 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.Collection;
-import java.util.List;
 
+import org.eclipse.search.ui.text.Match;
 
-import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -23,9 +22,7 @@ public interface IOccurrencesFinder {
 	public String initialize(CompilationUnit root, int offset, int length);
 	
 	public String initialize(CompilationUnit root, ASTNode node);
-	
-	public List perform();
-	
+
 	public String getJobLabel();
 
 	/**
@@ -50,11 +47,23 @@ public interface IOccurrencesFinder {
 	public String getUnformattedSingularLabel();
 	
 	/**
-	 * Returns the name of the lement to look for or <code>null</code> if the finder hasn't
+	 * Returns the name of the element to look for or <code>null</code> if the finder hasn't
 	 * been initialized yet.
 	 * @return the name of the element
 	 */
 	public String getElementName();
-	
-	public void collectOccurrenceMatches(ITypeRoot element, Collection resultingMatches);
+
+	/**
+	 * Collects matches for all occurrences. API avoids search plugin activation
+	 * 
+	 * @param resultingMatches the resulting matches of type {@link Match}
+	 */
+	public void collectMatches(Collection resultingMatches);
+		
+	/**
+	 * Returns the id of this finder.
+	 * @return returns the id of this finder.
+	 */
+	public String getID();
+
 }

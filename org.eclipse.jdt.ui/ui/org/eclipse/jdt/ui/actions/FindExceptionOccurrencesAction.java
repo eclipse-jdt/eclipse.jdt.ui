@@ -16,7 +16,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
 
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
@@ -24,11 +23,12 @@ import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.FindOccurrencesEngine;
@@ -93,9 +93,9 @@ public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 		ITypeRoot input= getEditorInput(fEditor);
 		if (!ActionUtil.isProcessable(getShell(), input))
 			return;
-		FindOccurrencesEngine engine= FindOccurrencesEngine.create(input, new ExceptionOccurrencesFinder());
+		FindOccurrencesEngine engine= FindOccurrencesEngine.create(new ExceptionOccurrencesFinder());
 		try {
-			String result= engine.run(ts.getOffset(), ts.getLength());
+			String result= engine.run(input, ts.getOffset(), ts.getLength());
 			if (result != null)
 				showMessage(getShell(), fEditor, result);
 		} catch (JavaModelException e) {
@@ -104,10 +104,7 @@ public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 	}
 
 	private static ITypeRoot getEditorInput(JavaEditor editor) {
-		IEditorInput input= editor.getEditorInput();
-		if (input instanceof IClassFileEditorInput)
-			return ((IClassFileEditorInput)input).getClassFile();
-		return  JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(input);
+		return JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
 	} 
 		
 	private static void showMessage(Shell shell, JavaEditor editor, String msg) {

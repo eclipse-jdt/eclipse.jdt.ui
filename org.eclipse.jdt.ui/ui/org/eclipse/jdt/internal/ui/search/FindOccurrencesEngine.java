@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.search.ui.NewSearchUI;
 
-import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -22,48 +21,37 @@ import org.eclipse.jdt.ui.SharedASTProvider;
 
 public final class FindOccurrencesEngine {
 
-	public static FindOccurrencesEngine create(ITypeRoot root, IOccurrencesFinder finder) {
-		if (root == null || finder == null)
-			return null;
-		return new FindOccurrencesEngine(root, finder);
+	public static FindOccurrencesEngine create(IOccurrencesFinder finder) {
+		return new FindOccurrencesEngine(finder);
 	}
 	
 	private IOccurrencesFinder fFinder;
-	private ITypeRoot fTypeRoot;
 		
-	private FindOccurrencesEngine(ITypeRoot typeRoot, IOccurrencesFinder finder) {
+	private FindOccurrencesEngine(IOccurrencesFinder finder) {
+		if (finder == null)
+			throw new IllegalArgumentException();
 		fFinder= finder;
-		fTypeRoot= typeRoot;
-	}
-
-	public CompilationUnit createAST() {
-		return SharedASTProvider.getAST(fTypeRoot, SharedASTProvider.WAIT_YES, null);
 	}
 	
-	public ITypeRoot getInput() {
-		return fTypeRoot;
+	private String run(CompilationUnit astRoot, int offset, int length) {
+		String message= fFinder.initialize(astRoot, offset, length);
+		if (message != null)
+			return message;
+
+		performNewSearch(fFinder, astRoot.getTypeRoot());
+		return null;
 	}
 	
-	public IOccurrencesFinder getOccurrencesFinder() {
-		return fFinder;
-	}
-
-	public String run(int offset, int length) throws JavaModelException {
-		ISourceReference sr= getInput();
-		if (sr.getSourceRange() == null) {
+	public String run(ITypeRoot input, int offset, int length) throws JavaModelException {
+		if (input.getSourceRange() == null) {
 			return SearchMessages.FindOccurrencesEngine_noSource_text; 
 		}
 		
-		final CompilationUnit root= createAST();
+		final CompilationUnit root= SharedASTProvider.getAST(input, SharedASTProvider.WAIT_YES, null);
 		if (root == null) {
 			return SearchMessages.FindOccurrencesEngine_cannotParse_text; 
 		}
-		String message= fFinder.initialize(root, offset, length);
-		if (message != null)
-			return message;
-		
-		performNewSearch(fFinder, getInput());
-		return null;
+		return run(root, offset, length);
 	}
 	
 	private void performNewSearch(IOccurrencesFinder finder, ITypeRoot element) {

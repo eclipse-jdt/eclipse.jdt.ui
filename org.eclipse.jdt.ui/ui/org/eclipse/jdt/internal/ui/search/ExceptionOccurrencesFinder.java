@@ -18,9 +18,10 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.Position;
+
 import org.eclipse.search.ui.text.Match;
 
-import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -52,6 +53,8 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 
 public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrencesFinder {
 
+	public static final String ID= "ExceptionOccurrencesFinder"; //$NON-NLS-1$
+	
 	public static final String IS_EXCEPTION= "isException"; //$NON-NLS-1$
 	
 	private CompilationUnit fASTRoot;
@@ -120,21 +123,35 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return false;
 	}
 	
-	public List perform() {
+	private void performSearch() {
 		fStart.accept(this);
 		if (fSelectedName != null) {
 			fResult.add(fSelectedName);
 		}
-		return fResult;
+	}
+
+	public Position[] getOccurrencePositions() {
+		performSearch();
+		if (fResult.isEmpty())
+			return null;
+
+		Position[] positions= new Position[fResult.size()];
+		for (int i= 0; i < fResult.size(); i++) {
+			ASTNode node= (ASTNode) fResult.get(i);
+			positions[i]= new Position(node.getStartPosition(), node.getLength());
+		}
+		return positions;
 	}
 	
-	public void collectOccurrenceMatches(ITypeRoot element, Collection resultingMatches) {
+	public void collectMatches(Collection resultingMatches) {
+		performSearch();
+		
 		HashMap lineToGroup= new HashMap();
 		
 		for (Iterator iter= fResult.iterator(); iter.hasNext();) {
 			ASTNode node= (ASTNode) iter.next();
 
-			JavaElementLine lineKey= getLineElement(node, lineToGroup, element);
+			JavaElementLine lineKey= getLineElement(node, lineToGroup);
 			if (lineKey != null) {
 				Match match= new Match(lineKey, node.getStartPosition(), node.getLength());
 				resultingMatches.add(match);
@@ -142,7 +159,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		}
 	}
 		
-	private JavaElementLine getLineElement(ASTNode node, HashMap lineToGroup, ITypeRoot element) {
+	private JavaElementLine getLineElement(ASTNode node, HashMap lineToGroup) {
 		int lineNumber= fASTRoot.getLineNumber(node.getStartPosition());
 		if (lineNumber <= 0) {
 			return null;
@@ -156,7 +173,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 			if (groupKey == null) {
 				int lineStartOffset= fASTRoot.getPosition(lineNumber, 0);
 				if (lineStartOffset >= 0) {
-					groupKey= new ExceptionOccurrencesGroupKey(element, lineNumber - 1, lineStartOffset, isException);
+					groupKey= new ExceptionOccurrencesGroupKey(fASTRoot.getTypeRoot(), lineNumber - 1, lineStartOffset, isException);
 					lineToGroup.put(key, groupKey);
 				}
 			} else if (isException) {
@@ -276,5 +293,12 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return false;
 	}
 
+	public IOccurrencesFinder getNewInstance() {
+		return new ExceptionOccurrencesFinder();
+	}
+
+	public String getID() {
+		return ID;
+	}
 
 }

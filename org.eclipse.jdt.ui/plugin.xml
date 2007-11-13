@@ -1038,6 +1038,11 @@
          name="org.eclipse.jdt.ui.occurrences">
       </type>
       <type
+         name="org.eclipse.jdt.ui.occurrences.write"
+         super="org.eclipse.jdt.ui.occurrences">
+      </type>
+      
+      <type
          name="org.eclipse.jdt.ui.overrideIndicator">
       </type>
    </extension>
@@ -1078,6 +1083,30 @@
             isGoToPreviousNavigationTargetKey="isOccurrenceGoToPreviousNavigationTarget"
 	        isGoToPreviousNavigationTarget="false">
 	  </specification>
+	  <specification
+            annotationType="org.eclipse.jdt.ui.occurrences.write"
+            label="%WriteOccurrenceAnnotation.label"
+            icon="$nl$/icons/full/obj16/searchm_obj.gif"
+            textPreferenceKey="writeOccurrenceIndication"
+            textPreferenceValue="false"
+            highlightPreferenceKey="writeOccurrenceHighlighting"
+            highlightPreferenceValue="true"
+            contributesToHeader="false"
+            overviewRulerPreferenceKey="writeOccurrenceIndicationInOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            verticalRulerPreferenceKey="writeOccurrenceIndicationInVerticalRuler"
+            verticalRulerPreferenceValue="false"
+            colorPreferenceKey="writeOccurrenceIndicationColor"
+            colorPreferenceValue="240,216,168"
+            presentationLayer="4"
+            showInNextPrevDropdownToolbarActionKey="showWriteOccurrenceInNextPrevDropdownToolbarAction"
+            showInNextPrevDropdownToolbarAction="true"
+            isGoToNextNavigationTargetKey="isWriteOccurrenceGoToNextNavigationTarget"
+	        isGoToNextNavigationTarget="false"
+            isGoToPreviousNavigationTargetKey="isWriteOccurrenceGoToPreviousNavigationTarget"
+	        isGoToPreviousNavigationTarget="false">
+	  </specification>	  
+	  
 	  <specification
             annotationType="org.eclipse.jdt.ui.overrideIndicator"
             label="%OverrideIndicator.label"

@@ -169,6 +169,7 @@ import org.eclipse.jdt.core.util.IModifierConstants;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
@@ -2715,10 +2716,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		private boolean fCanceled= false;
 		private IProgressMonitor fProgressMonitor;
 		private Position[] fPositions;
+		private Map fSpecialAnnotationTypes;
 
-		public OccurrencesFinderJob(IDocument document, Position[] positions, ISelection selection) {
+		public OccurrencesFinderJob(IDocument document, Position[] positions, Map specialAnnotationTypes, ISelection selection) {
 			super(JavaEditorMessages.JavaEditor_markOccurrences_job_name);
 			fDocument= document;
+			fSpecialAnnotationTypes= specialAnnotationTypes;
 			fSelection= selection;
 			fPositions= positions;
 
@@ -2777,14 +2780,16 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 				// Create & add annotation
 				try {
-					message= document.get(position.offset, position.length);
+					message= Messages.format(JavaEditorMessages.JavaEditor_occurrence_tooltip, document.get(position.offset, position.length));
 				} catch (BadLocationException ex) {
 					// Skip this match
 					continue;
 				}
-				annotationMap.put(
-						new Annotation("org.eclipse.jdt.ui.occurrences", false, message), //$NON-NLS-1$
-						position);
+				String annotationType= (String) fSpecialAnnotationTypes.get(position);
+				if (annotationType == null)
+					annotationType= "org.eclipse.jdt.ui.occurrences"; //$NON-NLS-1$
+				
+				annotationMap.put(new Annotation(annotationType, false, message), position);
 			}
 
 			if (isCanceled())
@@ -2843,78 +2848,62 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fMarkOccurrenceModificationStamp= currentModificationStamp;
 		}
 
-		List matches= null;
+		Position[] positions= null;
+		Map specialAnnotationTypes= new HashMap();
 		
 		ASTNode selectedNode= NodeFinder.perform(astRoot, selection.getOffset(), selection.getLength());
-		
-		if (fMarkExceptions || fMarkTypeOccurrences) {
-			ExceptionOccurrencesFinder exceptionFinder= new ExceptionOccurrencesFinder();
-			String message= exceptionFinder.initialize(astRoot, selectedNode);
-			if (message == null) {
-				matches= exceptionFinder.perform();
-				if (!fMarkExceptions && !matches.isEmpty())
-					matches.clear();
+		if (fMarkExceptions) {
+			ExceptionOccurrencesFinder finder= new ExceptionOccurrencesFinder();
+			if (finder.initialize(astRoot, selectedNode) == null) {
+				positions= finder.getOccurrencePositions();
 			}
 		}
 
-		if ((matches == null || matches.isEmpty()) && (fMarkMethodExitPoints || fMarkTypeOccurrences)) {
+		if (positions == null && fMarkMethodExitPoints) {
 			MethodExitsFinder finder= new MethodExitsFinder();
-			String message= finder.initialize(astRoot, selectedNode);
-			if (message == null) {
-				matches= finder.perform();
-				if (!fMarkMethodExitPoints && !matches.isEmpty())
-					matches.clear();
+			if (finder.initialize(astRoot, selectedNode) == null) {
+				positions= finder.getOccurrencePositions();
 			}
 		}
 
-		if ((matches == null || matches.isEmpty()) && (fMarkBreakContinueTargets || fMarkTypeOccurrences)) {
+		if (positions == null && fMarkBreakContinueTargets) {
 			BreakContinueTargetFinder finder= new BreakContinueTargetFinder();
-			String message= finder.initialize(astRoot, selectedNode);
-			if (message == null) {
-				matches= finder.perform();
-				if (!fMarkBreakContinueTargets && !matches.isEmpty())
-					matches.clear();
+			if (finder.initialize(astRoot, selectedNode) == null) {
+				positions= finder.getOccurrencePositions();
 			}
 		}
-
-		if ((matches == null || matches.isEmpty()) && (fMarkImplementors || fMarkTypeOccurrences)) {
+		
+		if (positions == null && fMarkImplementors) {
 			ImplementOccurrencesFinder finder= new ImplementOccurrencesFinder();
-			String message= finder.initialize(astRoot, selectedNode);
-			if (message == null) {
-				matches= finder.perform();
-				if (!fMarkImplementors && !matches.isEmpty())
-					matches.clear();
+			if (finder.initialize(astRoot, selectedNode) == null) {
+				positions= finder.getOccurrencePositions();
 			}
 		}
 
-		if (matches == null) {
-			IBinding binding= null;
-			if (selectedNode instanceof Name)
-				binding= ((Name)selectedNode).resolveBinding();
-
+		if (positions == null && selectedNode instanceof Name) {
+			IBinding binding= ((Name)selectedNode).resolveBinding();
 			if (binding != null && markOccurrencesOfType(binding)) {
 				// Find the matches && extract positions so we can forget the AST
-				OccurrencesFinder finder = new OccurrencesFinder(binding);
-				String message= finder.initialize(astRoot, selectedNode);
-				if (message == null)
-					matches= finder.perform();
+				OccurrencesFinder finder= new OccurrencesFinder();
+				if (finder.initialize(astRoot, selectedNode) == null) {
+					positions= finder.getOccurrencePositions();
+					Position[] writes= finder.getOccurrenceWritePositions();
+					if (writes != null) {
+						for (int i= 0; i < writes.length; i++) {
+							specialAnnotationTypes.put(writes[i], "org.eclipse.jdt.ui.occurrences.write"); //$NON-NLS-1$
+						}
+					}
+				}
 			}
 		}
 
-		if (matches == null || matches.size() == 0) {
+		if (positions == null) {
 			if (!fStickyOccurrenceAnnotations)
 				removeOccurrenceAnnotations();
 			return;
 		}
 
-		Position[] positions= new Position[matches.size()];
-		int i= 0;
-		for (Iterator each= matches.iterator(); each.hasNext();) {
-			ASTNode currentNode= (ASTNode)each.next();
-			positions[i++]= new Position(currentNode.getStartPosition(), currentNode.getLength());
-		}
-
-		fOccurrencesFinderJob= new OccurrencesFinderJob(document, positions, selection);
+		fOccurrencesFinderJob= new OccurrencesFinderJob(document, positions, specialAnnotationTypes, selection);
 		//fOccurrencesFinderJob.setPriority(Job.DECORATE);
 		//fOccurrencesFinderJob.setSystem(true);
 		//fOccurrencesFinderJob.schedule();

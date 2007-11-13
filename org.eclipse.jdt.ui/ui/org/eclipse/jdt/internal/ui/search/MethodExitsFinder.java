@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.search;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -90,7 +92,7 @@ public class MethodExitsFinder extends ASTVisitor {
 		return null;
 	}
 
-	public List perform() {
+	private void performSearch() {
 		fResult= new ArrayList();
 		markReferences();
 		if (fResult.size() > 0) {
@@ -98,7 +100,19 @@ public class MethodExitsFinder extends ASTVisitor {
 			if (returnType != null)
 				fResult.add(fMethodDeclaration.getReturnType2());
 		}
-		return fResult;
+	}
+
+	public Position[] getOccurrencePositions() {
+		performSearch();
+		if (fResult.isEmpty())
+			return null;
+
+		Position[] positions= new Position[fResult.size()];
+		for (int i= 0; i < fResult.size(); i++) {
+			ASTNode node= (ASTNode) fResult.get(i);
+			positions[i]= new Position(node.getStartPosition(), node.getLength());
+		}
+		return positions;
 	}
 	
 	private void markReferences() {

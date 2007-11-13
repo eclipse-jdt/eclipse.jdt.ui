@@ -18,10 +18,10 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.Position;
 
 import org.eclipse.search.ui.text.Match;
 
-import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -46,6 +46,8 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
  */
 public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 	
+	
+	public static final String ID= "ImplementOccurrencesFinder"; //$NON-NLS-1$
 	
 	private class MethodVisitor extends ASTVisitor {
 		
@@ -114,23 +116,33 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 		return null;
 	}
 	
-	/*
-	 * @see org.eclipse.jdt.internal.ui.search.IOccurrencesFinder#perform()
-	 */
-	public List perform() {
+	private void performSearch() {
 		fStart.accept(new MethodVisitor());
 		if (fSelectedNode != null)
 			fResult.add(fSelectedNode);
-		
-		return fResult;
+	}
+
+	public Position[] getOccurrencePositions() {
+		performSearch();
+		if (fResult.isEmpty())
+			return null;
+
+		Position[] positions= new Position[fResult.size()];
+		for (int i= 0; i < fResult.size(); i++) {
+			ASTNode node= (ASTNode) fResult.get(i);
+			positions[i]= new Position(node.getStartPosition(), node.getLength());
+		}
+		return positions;
 	}
 	
-	public void collectOccurrenceMatches(ITypeRoot element, Collection resultingMatches) {
+	public void collectMatches(Collection resultingMatches) {
+		performSearch();
+		
 		HashMap lineToGroup= new HashMap();
-
+		
 		for (Iterator iter= fResult.iterator(); iter.hasNext();) {
 			ASTNode node= (ASTNode) iter.next();
-			JavaElementLine lineKey= getLineElement(node, lineToGroup, element);
+			JavaElementLine lineKey= getLineElement(node, lineToGroup);
 			if (lineKey != null) {
 				Match match= new Match(lineKey, node.getStartPosition(), node.getLength());
 				resultingMatches.add(match);
@@ -138,7 +150,7 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 		}
 	}
 	
-	private JavaElementLine getLineElement(ASTNode node, HashMap lineToGroup, ITypeRoot element) {
+	private JavaElementLine getLineElement(ASTNode node, HashMap lineToGroup) {
 		int lineNumber= fASTRoot.getLineNumber(node.getStartPosition());
 		if (lineNumber <= 0) {
 			return null;
@@ -151,7 +163,7 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 			if (groupKey == null) {
 				int lineStartOffset= fASTRoot.getPosition(lineNumber, 0);
 				if (lineStartOffset >= 0) {
-					groupKey= new JavaElementLine(element, lineNumber - 1, lineStartOffset);
+					groupKey= new JavaElementLine(fASTRoot.getTypeRoot(), lineNumber - 1, lineStartOffset);
 					lineToGroup.put(key, groupKey);
 				}
 			}
@@ -188,4 +200,12 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 		fSelectedType= null;
 	}
 	
+	public IOccurrencesFinder getNewInstance() {
+		return new ImplementOccurrencesFinder();
+	}
+
+	public String getID() {
+		return ID;
+	}
+
 }

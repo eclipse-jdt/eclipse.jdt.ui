@@ -12,8 +12,9 @@ package org.eclipse.jdt.internal.ui.search;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+
+import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -117,9 +118,6 @@ public class BreakContinueTargetFinder extends ASTVisitor {
 		return null;
 	}
 
-	public List perform() {
-		return getNodesToHighlight();
-	}
 
 	private SimpleName getLabel() {
 		if (fIsBreak){
@@ -131,24 +129,31 @@ public class BreakContinueTargetFinder extends ASTVisitor {
 		} 
 	}
 	
-	private List getNodesToHighlight() {
+	/**
+	 * Returns the locations of all occurrences or <code>null</code> if no matches are found
+	 * 
+	 * @return the locations of all occurrences or <code>null</code> if no matches are found
+	 */
+	public Position[] getOccurrencePositions() {
 		ASTNode targetNode= findTargetNode(fSelected);
 		if (!isEnclosingStatement(targetNode))
-			return Collections.EMPTY_LIST;
+			return null;
 		
 		List list= new ArrayList();
 		ASTNode node= makeFakeNodeForFirstToken(targetNode);
-		if (node != null)
-			list.add(node);
-		
+		if (node != null) {
+			list.add(new Position(node.getStartPosition(), node.getLength()));
+		}
 		if (fIsBreak) {
 			node= makeFakeNodeForClosingBrace(targetNode);
-			if (node != null)
-				list.add(node);
+			if (node != null) {
+				list.add(new Position(node.getStartPosition(), node.getLength()));
+			}
 		}
-		
-		return list;
-			
+		if (!list.isEmpty()) {
+			return (Position[]) list.toArray(new Position[list.size()]);
+		}
+		return null;
 	}
 
 	private boolean isEnclosingStatement(ASTNode targetNode) {
