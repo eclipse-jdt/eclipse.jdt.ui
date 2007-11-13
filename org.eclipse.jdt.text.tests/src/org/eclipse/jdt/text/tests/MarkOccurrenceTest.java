@@ -370,7 +370,7 @@ public class MarkOccurrenceTest extends TestCase {
 				return fOccurrences == expected;
 			}
 		};
-		assertTrue(helper.waitForCondition(EditorTestHelper.getActiveDisplay(), 60000));
+		assertTrue(helper.waitForCondition(EditorTestHelper.getActiveDisplay(), 80000));
 	}
 	
 }
