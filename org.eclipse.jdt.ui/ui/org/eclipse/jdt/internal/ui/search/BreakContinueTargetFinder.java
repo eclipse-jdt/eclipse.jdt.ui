@@ -11,17 +11,11 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.jface.text.Position;
+import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.compiler.InvalidInputException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
@@ -40,8 +34,10 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.dom.TokenScanner;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
 
 /**
  * Class used to find the target for a break or continue statement according 
@@ -56,7 +52,9 @@ public class BreakContinueTargetFinder extends ASTVisitor {
 	private ASTNode fSelected;
 	private boolean fIsBreak;
 	private SimpleName fLabel;
-	private String fContents;//contents are used for scanning to select the right extent of the keyword
+	private String fDescription;
+	private CompilationUnit fASTRoot;
+
 	private static final Class[] STOPPERS=        {MethodDeclaration.class, Initializer.class};
 	private static final Class[] BREAKTARGETS=    {ForStatement.class, EnhancedForStatement.class, WhileStatement.class, DoStatement.class, SwitchStatement.class};
 	private static final Class[] CONTINUETARGETS= {ForStatement.class, EnhancedForStatement.class, WhileStatement.class, DoStatement.class};
@@ -74,36 +72,25 @@ public class BreakContinueTargetFinder extends ASTVisitor {
 	 */
 	public String initialize(CompilationUnit root, ASTNode node) {
 		ASTNode controlNode= getBreakOrContinueNode(node);
-		if (controlNode != null){
-			fContents= getContents(root);
-			if (fContents == null)
-				return SearchMessages.BreakContinueTargetFinder_cannot_highlight;
+		if (controlNode != null) {
+			fASTRoot= root;
 
+			try {
+				if (root.getTypeRoot() == null || root.getTypeRoot().getBuffer() == null)
+					return SearchMessages.BreakContinueTargetFinder_cannot_highlight;
+			} catch (JavaModelException e) {
+				return SearchMessages.BreakContinueTargetFinder_cannot_highlight;
+			}
 			fSelected= controlNode;
 			fIsBreak= fSelected instanceof BreakStatement;
 			fLabel= getLabel();
+			fDescription= Messages.format(SearchMessages.BreakContinueTargetFinder_occurrence_description, ASTNodes.asString(fSelected));
 			return null;
 		} else {
 			return SearchMessages.BreakContinueTargetFinder_no_break_or_continue_selected;
 		}
 	}
 
-	/* Returns contents or <code>null</code> if there's trouble. */
-	private String getContents(CompilationUnit root) {
-		try {
-			ITypeRoot rootElem= root.getTypeRoot();
-			if (rootElem != null)
-				return rootElem.getSource();
-			return null;
-		} catch (JavaModelException e) {
-			//We must handle it here because JavaEditor does not expect an exception
-			
-			/* showing a dialog here would be too heavy but we cannot just 
-             * swallow the exception */
-			JavaPlugin.log(e); 
-			return null;
-		}
-	}
 
 	//extract the control node: handle labels
 	private ASTNode getBreakOrContinueNode(ASTNode selectedNode) {
@@ -128,30 +115,30 @@ public class BreakContinueTargetFinder extends ASTVisitor {
 			return cs.getLabel();
 		} 
 	}
-	
+		
 	/**
 	 * Returns the locations of all occurrences or <code>null</code> if no matches are found
 	 * 
 	 * @return the locations of all occurrences or <code>null</code> if no matches are found
 	 */
-	public Position[] getOccurrencePositions() {
+	public OccurrenceLocation[] getOccurrences() {
 		ASTNode targetNode= findTargetNode(fSelected);
 		if (!isEnclosingStatement(targetNode))
 			return null;
 		
 		List list= new ArrayList();
-		ASTNode node= makeFakeNodeForFirstToken(targetNode);
-		if (node != null) {
-			list.add(new Position(node.getStartPosition(), node.getLength()));
+		OccurrenceLocation location= getLocationForFirstToken(targetNode);
+		if (location != null) {
+			list.add(location);
 		}
 		if (fIsBreak) {
-			node= makeFakeNodeForClosingBrace(targetNode);
-			if (node != null) {
-				list.add(new Position(node.getStartPosition(), node.getLength()));
+			location= getLocationForClosingBrace(targetNode);
+			if (location != null) {
+				list.add(location);
 			}
 		}
 		if (!list.isEmpty()) {
-			return (Position[]) list.toArray(new Position[list.size()]);
+			return (OccurrenceLocation[]) list.toArray(new OccurrenceLocation[list.size()]);
 		}
 		return null;
 	}
@@ -167,32 +154,25 @@ public class BreakContinueTargetFinder extends ASTVisitor {
 		return node;
 	}
 
-	private ASTNode makeFakeNodeForFirstToken(ASTNode node) {
+	private OccurrenceLocation getLocationForFirstToken(ASTNode node) {
 		try {
-			int length= getLengthOfFirstTokenOf(node);
-			if (length < 1)
-				return node;//fallback
-			return makeFakeNode(node.getStartPosition(), length, node.getAST());
-		} catch (InvalidInputException e) {
-			return node;//fallback
+			int nextEndOffset= new TokenScanner(fASTRoot.getTypeRoot()).getNextEndOffset(node.getStartPosition(), true);
+			return new OccurrenceLocation(node.getStartPosition(), nextEndOffset - node.getStartPosition(), 0, fDescription);
+		} catch (CoreException e) {
+			// ignore
 		}
+		return new OccurrenceLocation(node.getStartPosition(), node.getLength(), 0, fDescription);
 	}
 
-	private SimpleName makeFakeNode(int start, int length, AST ast) {
-		String fakeName= makeStringOfLength(length);
-		SimpleName name= ast.newSimpleName(fakeName);
-		name.setSourceRange(start, length);
-		return name;
-	}
-
-	private ASTNode makeFakeNodeForClosingBrace(ASTNode targetNode) {
+	private OccurrenceLocation getLocationForClosingBrace(ASTNode targetNode) {
 		ASTNode maybeBlock= getOptionalBlock(targetNode);
 		if (maybeBlock == null)
 			return null;
 		
 		/* Ideally, we'd scan backwards to find the '}' token, but it may be an overkill
 		 * so I'll just assume the closing brace token has a fixed length. */
-		return makeFakeNode(ASTNodes.getExclusiveEnd(maybeBlock)-BRACE_LENGTH, BRACE_LENGTH, targetNode.getAST());
+		int offset= ASTNodes.getExclusiveEnd(maybeBlock) - BRACE_LENGTH;
+		return new OccurrenceLocation(offset, BRACE_LENGTH, 0, fDescription);
 	}
 
 	/*
@@ -230,24 +210,6 @@ public class BreakContinueTargetFinder extends ASTVisitor {
 		return maybeBlock[0];
 	}
 
-	private static String makeStringOfLength(int length) {
-		char[] chars= new char[length];
-		Arrays.fill(chars, 'x');
-		return new String(chars);
-	}
-
-	//must scan because of unicode
-	private int getLengthOfFirstTokenOf(ASTNode node) throws InvalidInputException {
-		IScanner scanner= ToolFactory.createScanner(true, true, false, true);
-		scanner.setSource(getSource(node).toCharArray());
-		scanner.getNextToken();
-		return scanner.getRawTokenSource().length;
-	}
-
-	private String getSource(ASTNode node) {
-		return fContents.substring(node.getStartPosition(), ASTNodes.getInclusiveEnd(node));
-	}
-
 	private boolean keepWalkingUp(ASTNode node) {
 		if (node == null)
 			return false;
@@ -264,8 +226,6 @@ public class BreakContinueTargetFinder extends ASTVisitor {
 		return true;
 	}
 
-	//TODO see bug 33739 - resolveBinding always returns null
-	//so we just compare names
 	private static boolean areEqualLabels(SimpleName labelToMatch, SimpleName labelSelected) {
 		return labelSelected.getIdentifier().equals(labelToMatch.getIdentifier());
 	}

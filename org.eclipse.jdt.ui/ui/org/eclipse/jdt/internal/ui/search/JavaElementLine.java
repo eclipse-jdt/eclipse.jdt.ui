@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 
@@ -24,10 +23,13 @@ import org.eclipse.jdt.ui.JavaUI;
 
 public class JavaElementLine {
 	
+	
 	private final ITypeRoot fElement;
 	private final String fLineContents;
 	private final int fLineNumber;
 	private final int fLineStartOffset;
+	
+	private int fFlags;
 	
 	/**
 	 * @param element either an ICompilationUnit or an IClassFile
@@ -37,6 +39,7 @@ public class JavaElementLine {
 	 */
 	public JavaElementLine(ITypeRoot element, int lineNumber, int lineStartOffset) throws CoreException {
 		fElement= element;
+		fFlags= 0;
 		
 		IBuffer buffer= element.getBuffer();
 		if (buffer == null) {
@@ -66,7 +69,15 @@ public class JavaElementLine {
 		fLineNumber= lineNumber;
 	}
 
-	public IJavaElement getJavaElement() {
+	public void setFlags(int flags) {
+		fFlags= flags;
+	}
+
+	public int getFlags() {
+		return fFlags;
+	}
+
+	public ITypeRoot getJavaElement() {
 		return fElement;
 	}
 	

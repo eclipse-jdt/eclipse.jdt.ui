@@ -10,14 +10,61 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import java.util.Collection;
-
-import org.eclipse.search.ui.text.Match;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 public interface IOccurrencesFinder {
+	
+	public static final int K_OCCURRENCE= 5;
+
+	public static final int K_EXCEPTION_OCCURRENCE= 6;
+	public static final int K_EXIT_POINT_OCCURRENCE= 7;
+	public static final int K_IMPLEMENTS_OCCURRENCE= 8;
+	public static final int K_BREAK_TARGET_OCCURRENCE= 9;
+
+	public static final int F_WRITE_OCCURRENCE= 1;
+	public static final int F_READ_OCCURRENCE= 2;
+	public static final int F_EXCEPTION_DECLARATION= 8;
+
+
+	/**
+	 * Element representing a occurrence
+	 */
+	public static class OccurrenceLocation {
+		private final int fOffset;
+		private final int fLength;
+		private final int fFlags;
+		private final String fDescription;
+
+		public OccurrenceLocation(int offset, int length, int flags, String description) {
+			fOffset= offset;
+			fLength= length;
+			fFlags= flags;
+			fDescription= description;
+		}
+
+		public int getOffset() {
+			return fOffset;
+		}
+
+		public int getLength() {
+			return fLength;
+		}
+
+		public int getFlags() {
+			return fFlags;
+		}
+
+		public String getDescription() {
+			return fDescription;
+		}
+
+		public String toString() {
+			return "[" + fOffset + " / " + fLength + "] " + fDescription; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		}
+		
+	}
+	
 	
 	public String initialize(CompilationUnit root, int offset, int length);
 	
@@ -53,13 +100,24 @@ public interface IOccurrencesFinder {
 	 */
 	public String getElementName();
 
+	
 	/**
-	 * Collects matches for all occurrences. API avoids search plugin activation
+	 * Returns the AST root.
 	 * 
-	 * @param resultingMatches the resulting matches of type {@link Match}
+	 * @return the AST root
 	 */
-	public void collectMatches(Collection resultingMatches);
-		
+	public CompilationUnit getASTRoot();
+
+	/**
+	 * Returns the occurrences
+	 * 
+	 * @return the occurrences
+	 */
+	public OccurrenceLocation[] getOccurrences();
+
+
+	public int getSearchKind();
+			
 	/**
 	 * Returns the id of this finder.
 	 * @return returns the id of this finder.

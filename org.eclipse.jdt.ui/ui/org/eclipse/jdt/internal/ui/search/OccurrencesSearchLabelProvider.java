@@ -59,7 +59,7 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 		String lineNumberString= getLineNumberLabel(jel);
 		
 		Style highlightStyle= ColoredJavaElementLabels.HIGHLIGHT_STYLE;
-		if (jel instanceof OccurrencesGroupKey && ((OccurrencesGroupKey) jel).isWriteAccess()) {
+		if (jel.getFlags() == IOccurrencesFinder.F_WRITE_OCCURRENCE) {
 			highlightStyle= ColoredJavaElementLabels.HIGHLIGHT_WRITE_STYLE;
 		}
 		
@@ -80,21 +80,16 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 	}
 	
 	public Image getImage(Object element) {
-		if (element instanceof OccurrencesGroupKey) {
-			OccurrencesGroupKey group= (OccurrencesGroupKey) element;
-			if (group.isVariable()) {
-				if (group.isWriteAccess())
-					return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_WRITEACCESS);
-				else
-					return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_READACCESS);
-			}
-			
-		} else if (element instanceof ExceptionOccurrencesGroupKey) {
-			ExceptionOccurrencesGroupKey group= (ExceptionOccurrencesGroupKey) element;
-			if (group.isException())
+		if (element instanceof JavaElementLine) {
+			int flags= ((JavaElementLine) element).getFlags();
+			if (flags == IOccurrencesFinder.F_READ_OCCURRENCE) {
+				return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_READACCESS);
+			} else if (flags == IOccurrencesFinder.F_WRITE_OCCURRENCE) {
+				return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_WRITEACCESS);
+			} else if (flags == IOccurrencesFinder.F_EXCEPTION_DECLARATION) {
 				return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
+			}
 		}
-		
 		return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_OCCURRENCE);
 	}
 }

@@ -12,7 +12,9 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -23,10 +25,12 @@ import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
 
 
 public class OccurrencesSearchQuery implements ISearchQuery {
@@ -62,17 +66,57 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 			monitor= new NullProgressMonitor();
 		
 		try {
-			ArrayList resultingMatches= new ArrayList();
-			fFinder.collectMatches(resultingMatches);
-			if (!resultingMatches.isEmpty()) {
-				fResult.addMatches((Match[]) resultingMatches.toArray(new Match[resultingMatches.size()]));
+			OccurrenceLocation[] occurrences= fFinder.getOccurrences();
+			if (occurrences != null) {
+				HashMap lineMap= new HashMap();
+				CompilationUnit astRoot= fFinder.getASTRoot();
+				ArrayList resultingMatches= new ArrayList();
+				
+				for (int i= 0; i < occurrences.length; i++) {
+					OccurrenceLocation loc= occurrences[i];
+
+					JavaElementLine lineKey= getLineElement(astRoot, loc, lineMap);
+					if (lineKey != null) {
+						Match match= new Match(lineKey, loc.getOffset(), loc.getLength());
+						resultingMatches.add(match);
+						
+						lineKey.setFlags(lineKey.getFlags() | loc.getFlags());
+					}
+				}
+
+				if (!resultingMatches.isEmpty()) {
+					fResult.addMatches((Match[]) resultingMatches.toArray(new Match[resultingMatches.size()]));
+				}
 			}
+
+		} finally {
 			//Don't leak AST:
 			fFinder= null;
-		} finally {
 			monitor.done();
 		}
 		return Status.OK_STATUS;
+	}
+
+	private JavaElementLine getLineElement(CompilationUnit astRoot, OccurrenceLocation location, HashMap lineToGroup) {
+		int lineNumber= astRoot.getLineNumber(location.getOffset());
+		if (lineNumber <= 0) {
+			return null;
+		}
+		JavaElementLine lineElement= null;
+		try {
+			Integer key= new Integer(lineNumber);
+			lineElement= (JavaElementLine) lineToGroup.get(key);
+			if (lineElement == null) {
+				int lineStartOffset= astRoot.getPosition(lineNumber, 0);
+				if (lineStartOffset >= 0) {
+					lineElement= new JavaElementLine(astRoot.getTypeRoot(), lineNumber - 1, lineStartOffset);
+					lineToGroup.put(key, lineElement);
+				}
+			}
+		} catch (CoreException e) {
+			//nothing
+		}
+		return lineElement;
 	}
 	
 	/*

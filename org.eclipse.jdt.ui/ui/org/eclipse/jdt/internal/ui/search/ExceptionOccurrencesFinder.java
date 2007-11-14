@@ -11,16 +11,8 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jface.text.Position;
-
-import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -50,6 +42,7 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrencesFinder {
 
@@ -63,6 +56,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	private ITypeBinding fException;
 	private ASTNode fStart;
 	private List fResult;
+	private String fDescription;
 	
 	public ExceptionOccurrencesFinder() {
 		fResult= new ArrayList();
@@ -98,7 +92,8 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 			}
 		}
 		if (fException == null || fStart == null)
-			return SearchMessages.ExceptionOccurrencesFinder_no_exception;  
+			return SearchMessages.ExceptionOccurrencesFinder_no_exception;
+		fDescription= Messages.format(SearchMessages.ExceptionOccurrencesFinder_occurrence_description, fException.getName());
 		return null;
 	}
 	
@@ -126,66 +121,26 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	private void performSearch() {
 		fStart.accept(this);
 		if (fSelectedName != null) {
-			fResult.add(fSelectedName);
+			fResult.add(new OccurrenceLocation(fSelectedName.getStartPosition(), fSelectedName.getLength(), F_EXCEPTION_DECLARATION, fDescription));
 		}
 	}
 
-	public Position[] getOccurrencePositions() {
+	public OccurrenceLocation[] getOccurrences() {
 		performSearch();
 		if (fResult.isEmpty())
 			return null;
 
-		Position[] positions= new Position[fResult.size()];
-		for (int i= 0; i < fResult.size(); i++) {
-			ASTNode node= (ASTNode) fResult.get(i);
-			positions[i]= new Position(node.getStartPosition(), node.getLength());
-		}
-		return positions;
+		return (OccurrenceLocation[]) fResult.toArray(new OccurrenceLocation[fResult.size()]);
 	}
 	
-	public void collectMatches(Collection resultingMatches) {
-		performSearch();
-		
-		HashMap lineToGroup= new HashMap();
-		
-		for (Iterator iter= fResult.iterator(); iter.hasNext();) {
-			ASTNode node= (ASTNode) iter.next();
-
-			JavaElementLine lineKey= getLineElement(node, lineToGroup);
-			if (lineKey != null) {
-				Match match= new Match(lineKey, node.getStartPosition(), node.getLength());
-				resultingMatches.add(match);
-			}
-		}
-	}
-		
-	private JavaElementLine getLineElement(ASTNode node, HashMap lineToGroup) {
-		int lineNumber= fASTRoot.getLineNumber(node.getStartPosition());
-		if (lineNumber <= 0) {
-			return null;
-		}
-		boolean isException= node == fSelectedName;
-		
-		ExceptionOccurrencesGroupKey groupKey= null;
-		try {
-			Integer key= new Integer(lineNumber);
-			groupKey= (ExceptionOccurrencesGroupKey) lineToGroup.get(key);
-			if (groupKey == null) {
-				int lineStartOffset= fASTRoot.getPosition(lineNumber, 0);
-				if (lineStartOffset >= 0) {
-					groupKey= new ExceptionOccurrencesGroupKey(fASTRoot.getTypeRoot(), lineNumber - 1, lineStartOffset, isException);
-					lineToGroup.put(key, groupKey);
-				}
-			} else if (isException) {
-				// the line with the target exception always has the exception icon:
-				groupKey.setException(true);
-			}
-		} catch (CoreException e) {
-			//nothing
-		}
-		return groupKey;
+	public int getSearchKind() {
+		return K_EXCEPTION_OCCURRENCE;
 	}
 	
+	
+	public CompilationUnit getASTRoot() {
+		return fASTRoot;
+	}
 		
 	public String getJobLabel() {
 		return SearchMessages.ExceptionOccurrencesFinder_searchfor ; 
@@ -225,42 +180,40 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	
 	public boolean visit(ConstructorInvocation node) {
 		if (matches(node.resolveConstructorBinding())) {
-			// mark this
-			SimpleName name= fASTRoot.getAST().newSimpleName("xxxx"); //$NON-NLS-1$
-			name.setSourceRange(node.getStartPosition(), 4);
-			fResult.add(name);
+			// mark 'this'
+			fResult.add(new OccurrenceLocation(node.getStartPosition(), 4, 0, fDescription));
 		}
 		return super.visit(node);
 	}
 	
 	public boolean visit(MethodInvocation node) {
-		if (matches(node.resolveMethodBinding()))
-			fResult.add(node.getName());
+		if (matches(node.resolveMethodBinding())) {
+			SimpleName name= node.getName();
+			fResult.add(new OccurrenceLocation(name.getStartPosition(), name.getLength(), 0, fDescription));
+		}
 		return super.visit(node);
 	}
 	
 	public boolean visit(SuperConstructorInvocation node) {
 		if (matches(node.resolveConstructorBinding())) {
-			SimpleName name= fASTRoot.getAST().newSimpleName("xxxxx"); //$NON-NLS-1$
-			name.setSourceRange(node.getStartPosition(), 5);
-			fResult.add(name);
+			// mark 'super'
+			fResult.add(new OccurrenceLocation(node.getStartPosition(), 5, 0, fDescription));
 		}
 		return super.visit(node);
 	}
 	
 	public boolean visit(SuperMethodInvocation node) {
 		if (matches(node.resolveMethodBinding())) {
-			fResult.add(node.getName());
+			SimpleName name= node.getName();
+			fResult.add(new OccurrenceLocation(name.getStartPosition(), name.getLength(), 0, fDescription));
 		}
 		return super.visit(node);
 	}
 	
 	public boolean visit(ThrowStatement node) {
 		if (matches(node.getExpression().resolveTypeBinding())) {
-			SimpleName name= fASTRoot.getAST().newSimpleName("xxxxx"); //$NON-NLS-1$
-			name.setSourceRange(node.getStartPosition(), 5);
-			fResult.add(name);
-			
+			// mark 'throw'
+			fResult.add(new OccurrenceLocation(node.getStartPosition(), 5, 0, fDescription));
 		}
 		return super.visit(node);
 	}

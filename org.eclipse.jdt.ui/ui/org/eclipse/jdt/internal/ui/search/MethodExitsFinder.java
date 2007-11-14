@@ -14,9 +14,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jface.text.Position;
-
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
@@ -50,22 +47,28 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InOutFlowAnalyzer;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
 
 
 public class MethodExitsFinder extends ASTVisitor {
 	
-	private AST fAST;
 	private MethodDeclaration fMethodDeclaration;
 	private List fResult;
 	private List fCatchedExceptions;
+	private String fExitDescription;
 
 	public String initialize(CompilationUnit root, int offset, int length) {
 		return initialize(root, NodeFinder.perform(root, offset, length));
 	}
 	
+	/**
+	 * @param root the AST root
+	 * @param node the selected node
+	 * @return returns a message if there is a problem
+	 */
 	public String initialize(CompilationUnit root, ASTNode node) {
-		fAST= root.getAST();
-		
 		if (node instanceof ReturnStatement) {
 			fMethodDeclaration= (MethodDeclaration)ASTNodes.getParent(node, ASTNode.METHOD_DECLARATION);
 			if (fMethodDeclaration == null)
@@ -77,7 +80,7 @@ public class MethodExitsFinder extends ASTVisitor {
 		Type type= null;
 		if (node instanceof Type) {
 			type= (Type)node;
-		} else  if (node instanceof Name) {
+		} else if (node instanceof Name) {
 			Name name= ASTNodes.getTopMostName((Name)node);
 			if (name.getParent() instanceof Type) {
 				type= (Type)name.getParent();
@@ -89,31 +92,31 @@ public class MethodExitsFinder extends ASTVisitor {
 		if (!(type.getParent() instanceof MethodDeclaration))
 			return SearchMessages.MethodExitsFinder_no_return_type_selected; 
 		fMethodDeclaration= (MethodDeclaration)type.getParent();
+
+		fExitDescription= Messages.format(SearchMessages.MethodExitsFinder_occurrence_exit_description, fMethodDeclaration.getName().toString());
 		return null;
 	}
 
 	private void performSearch() {
 		fResult= new ArrayList();
 		markReferences();
-		if (fResult.size() > 0) {
+		if (!fResult.isEmpty()) {
 			Type returnType= fMethodDeclaration.getReturnType2();
-			if (returnType != null)
-				fResult.add(fMethodDeclaration.getReturnType2());
+			if (returnType != null) {
+				String desc= Messages.format(SearchMessages.MethodExitsFinder_occurrence_return_description, fMethodDeclaration.getName().toString());
+				fResult.add(new OccurrenceLocation(returnType.getStartPosition(), returnType.getLength(), 0, desc));
+			}
 		}
 	}
 
-	public Position[] getOccurrencePositions() {
+	public OccurrenceLocation[] getOccurrences() {
 		performSearch();
 		if (fResult.isEmpty())
 			return null;
 
-		Position[] positions= new Position[fResult.size()];
-		for (int i= 0; i < fResult.size(); i++) {
-			ASTNode node= (ASTNode) fResult.get(i);
-			positions[i]= new Position(node.getStartPosition(), node.getLength());
-		}
-		return positions;
-	}
+		return (OccurrenceLocation[]) fResult.toArray(new OccurrenceLocation[fResult.size()]);
+	}	
+	
 	
 	private void markReferences() {
 		fCatchedExceptions= new ArrayList();
@@ -140,9 +143,8 @@ public class MethodExitsFinder extends ASTVisitor {
 						return;
 				}
 			}
-			SimpleName name= fAST.newSimpleName("x"); //$NON-NLS-1$
-			name.setSourceRange(fMethodDeclaration.getStartPosition() + fMethodDeclaration.getLength() - 1, 1);
-			fResult.add(name);
+			int offset= fMethodDeclaration.getStartPosition() + fMethodDeclaration.getLength() - 1; // closing bracket
+			fResult.add(new OccurrenceLocation(offset, 1, 0, fExitDescription));
 		}
 	}
 
@@ -167,7 +169,7 @@ public class MethodExitsFinder extends ASTVisitor {
 	}
 
 	public boolean visit(ReturnStatement node) {
-		fResult.add(node);
+		fResult.add(new OccurrenceLocation(node.getStartPosition(), node.getLength(), 0, fExitDescription));
 		return super.visit(node);
 	}
 	
@@ -200,49 +202,48 @@ public class MethodExitsFinder extends ASTVisitor {
 	public boolean visit(ThrowStatement node) {
 		ITypeBinding exception= node.getExpression().resolveTypeBinding();
 		if (isExitPoint(exception)) {
-			SimpleName name= fAST.newSimpleName("xxxxx"); //$NON-NLS-1$
-			name.setSourceRange(node.getStartPosition(), 5);
-			fResult.add(name);
+			// mark 'throw'
+			fResult.add(new OccurrenceLocation(node.getStartPosition(), 5, 0, fExitDescription));
 		}	
 		return true;
 	}
 	
 	public boolean visit(MethodInvocation node) {
 		if (isExitPoint(node.resolveMethodBinding())) {
-			fResult.add(node.getName());
+			SimpleName name= node.getName();
+			fResult.add(new OccurrenceLocation(name.getStartPosition(), name.getLength(), 0, fExitDescription));
 		}
 		return true;
 	}
 	
 	public boolean visit(SuperMethodInvocation node) {
 		if (isExitPoint(node.resolveMethodBinding())) {
-			fResult.add(node.getName());
+			SimpleName name= node.getName();
+			fResult.add(new OccurrenceLocation(name.getStartPosition(), name.getLength(), 0, fExitDescription));
 		}
 		return true;
 	}
 	
 	public boolean visit(ClassInstanceCreation node) {
 		if (isExitPoint(node.resolveConstructorBinding())) {
-			fResult.add(node.getType());
+			Type name= node.getType();
+			fResult.add(new OccurrenceLocation(name.getStartPosition(), name.getLength(), 0, fExitDescription));
 		}
 		return true;
 	}
 	
 	public boolean visit(ConstructorInvocation node) {
 		if (isExitPoint(node.resolveConstructorBinding())) {
-			// mark this
-			SimpleName name= fAST.newSimpleName("xxxx"); //$NON-NLS-1$
-			name.setSourceRange(node.getStartPosition(), 4);
-			fResult.add(name);
+			// mark 'this'
+			fResult.add(new OccurrenceLocation(node.getStartPosition(), 4, 0, fExitDescription));
 		}
 		return true;
 	}
 	
 	public boolean visit(SuperConstructorInvocation node) {
 		if (isExitPoint(node.resolveConstructorBinding())) {
-			SimpleName name= fAST.newSimpleName("xxxxx"); //$NON-NLS-1$
-			name.setSourceRange(node.getStartPosition(), 5);
-			fResult.add(name);
+			// mark 'super'
+			fResult.add(new OccurrenceLocation(node.getStartPosition(), 5, 0, fExitDescription));
 		}
 		return true;
 	}
@@ -280,5 +281,7 @@ public class MethodExitsFinder extends ASTVisitor {
 			throwTypeBinding= throwTypeBinding.getSuperclass();	
 		}
 		return false;
-	}	
+	}
+
+
 }

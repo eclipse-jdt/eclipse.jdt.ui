@@ -11,16 +11,9 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
-
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jface.text.Position;
-
-import org.eclipse.search.ui.text.Match;
+import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -52,6 +45,7 @@ import org.eclipse.jdt.core.dom.PrefixExpression.Operator;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder {
 	
@@ -63,9 +57,14 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 	private CompilationUnit fRoot;
 	private Name fSelectedNode;
 	private IBinding fTarget;
-	private List/*<ASTNode>*/fUsages;
-	private List/*<ASTNode>*/fWriteUsages;
+
+	private List/*<OccurrenceLocation>*/fResult;
+	private Set fWriteUsages;
+	
 	private boolean fTargetIsStaticMethodImport;
+
+	private String fReadDescription;
+	private String fWriteDescription;
 	
 	public OccurrencesFinder() {
 		super(true);
@@ -86,91 +85,30 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		fTarget= getBindingDeclaration(fTarget);
 		
 		fTargetIsStaticMethodImport= isStaticImport(fSelectedNode.getParent());
+		fReadDescription= Messages.format(SearchMessages.OccurrencesFinder_occurrence_description, fTarget.getName());
+		fWriteDescription= Messages.format(SearchMessages.OccurrencesFinder_occurrence_write_description, fTarget.getName());
 		return null;
 	}
 	
 	private void performSearch() {
-		if (fUsages == null) {
-			fUsages= new ArrayList/*<ASTNode>*/();
-			fWriteUsages= new ArrayList/*<ASTNode>*/();
+		if (fResult == null) {
+			fResult= new ArrayList/*<OccurrenceLocation>*/();
+			fWriteUsages= new HashSet/*ASTNode*/();
 			fRoot.accept(this);
 		}
 	}
-
-	public Position[] getOccurrencePositions() {
+	
+	public OccurrenceLocation[] getOccurrences() {
 		performSearch();
-		if (fUsages.isEmpty())
+		if (fResult.isEmpty())
 			return null;
-
-		Position[] positions= new Position[fUsages.size()];
-		for (int i= 0; i < fUsages.size(); i++) {
-			ASTNode node= (ASTNode) fUsages.get(i);
-			positions[i]= new Position(node.getStartPosition(), node.getLength());
-		}
-		return positions;
+		return (OccurrenceLocation[]) fResult.toArray(new OccurrenceLocation[fResult.size()]);
 	}
-	
-	public Position[] getOccurrenceWritePositions() {
-		performSearch();
-		if (fWriteUsages.isEmpty())
-			return null;
 
-		Position[] positions= new Position[fWriteUsages.size()];
-		for (int i= 0; i < fWriteUsages.size(); i++) {
-			ASTNode node= (ASTNode) fWriteUsages.get(i);
-			positions[i]= new Position(node.getStartPosition(), node.getLength());
-		}
-		return positions;
+	public CompilationUnit getASTRoot() {
+		return fRoot;
 	}
-	
-	
-	public void collectMatches(Collection resultingMatches) {
-		performSearch();
-		HashMap lineToGroup= new HashMap();
 		
-		for (Iterator iter= fUsages.iterator(); iter.hasNext();) {
-			ASTNode node= (ASTNode) iter.next();
-
-			JavaElementLine lineKey= getLineElement(node, lineToGroup);
-			if (lineKey != null) {
-				Match match= new Match(lineKey, node.getStartPosition(), node.getLength());
-				resultingMatches.add(match);
-			}
-		}
-	}
-	
-	private boolean isWriteAccess(ASTNode node) {
-		return fWriteUsages.contains(node);
-	}
-	
-	private JavaElementLine getLineElement(ASTNode node, HashMap lineToGroup) {
-		int lineNumber= fRoot.getLineNumber(node.getStartPosition());
-		if (lineNumber <= 0) {
-			return null;
-		}
-		boolean isWriteAccess= isWriteAccess(node);
-		
-		OccurrencesGroupKey groupKey= null;
-		try {
-			Integer key= new Integer(lineNumber);
-			groupKey= (OccurrencesGroupKey) lineToGroup.get(key);
-			if (groupKey == null) {
-				int lineStartOffset= fRoot.getPosition(lineNumber, 0);
-				if (lineStartOffset >= 0) {
-					boolean isVariable= fTarget instanceof IVariableBinding;
-					groupKey= new OccurrencesGroupKey(fRoot.getTypeRoot(), lineNumber - 1, lineStartOffset, isWriteAccess, isVariable);
-					lineToGroup.put(key, groupKey);
-				}
-			} else if (isWriteAccess) {
-				// a line with read an write access is considered as write access:
-				groupKey.setWriteAccess(true);
-			}
-		} catch (CoreException e) {
-			//nothing
-		}
-		return groupKey;
-	}
-	
 	/*
 	 * @see org.eclipse.jdt.internal.ui.search.IOccurrencesFinder#getJobLabel()
 	 */
@@ -292,11 +230,25 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 	
 	private boolean addUsage(Name node, IBinding binding) {
 		if (binding != null && Bindings.equals(getBindingDeclaration(binding), fTarget)) {
-			fUsages.add(node);
+			int flag= 0;
+			String description= fReadDescription;
+			if (fTarget instanceof IVariableBinding) {
+				boolean isWrite= fWriteUsages.remove(node);
+				flag= isWrite ? F_WRITE_OCCURRENCE : F_READ_OCCURRENCE;
+				if (isWrite)
+					description= fWriteDescription;
+			}
+			fResult.add(new OccurrenceLocation(node.getStartPosition(), node.getLength(), flag, description));
 			return true;
 		}
 		return false;
 	}
+
+	public int getSearchKind() {
+		return K_OCCURRENCE;
+	}
+	
+	
 	
 	private boolean addPossibleStaticImport(Name node, IMethodBinding binding) {
 		if (binding == null || node == null || !(fTarget instanceof IMethodBinding) || !Modifier.isStatic(binding.getModifiers()))
@@ -305,7 +257,7 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		IMethodBinding targetMethodBinding= (IMethodBinding)fTarget;
 		if ((fTargetIsStaticMethodImport || Modifier.isStatic(targetMethodBinding.getModifiers())) && (targetMethodBinding.getDeclaringClass().getTypeDeclaration() == binding.getDeclaringClass().getTypeDeclaration())) {
 			if (node.getFullyQualifiedName().equals(targetMethodBinding.getName())) {
-				fUsages.add(node);
+				fResult.add(new OccurrenceLocation(node.getStartPosition(), node.getLength(), 0, fReadDescription));
 				return true;
 			}
 		}

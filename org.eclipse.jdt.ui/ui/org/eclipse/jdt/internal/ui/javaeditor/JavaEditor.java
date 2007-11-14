@@ -169,7 +169,6 @@ import org.eclipse.jdt.core.util.IModifierConstants;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
@@ -201,9 +200,11 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPr
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
+import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.ImplementOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.MethodExitsFinder;
 import org.eclipse.jdt.internal.ui.search.OccurrencesFinder;
+import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
 import org.eclipse.jdt.internal.ui.text.DocumentCharacterIterator;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
@@ -2710,23 +2711,22 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	class OccurrencesFinderJob extends Job {
 
-		private IDocument fDocument;
-		private ISelection fSelection;
-		private ISelectionValidator fPostSelectionValidator;
+		private final IDocument fDocument;
+		private final ISelection fSelection;
+		private final ISelectionValidator fPostSelectionValidator;
 		private boolean fCanceled= false;
-		private IProgressMonitor fProgressMonitor;
-		private Position[] fPositions;
-		private Map fSpecialAnnotationTypes;
+		private final OccurrenceLocation[] fLocations;
 
-		public OccurrencesFinderJob(IDocument document, Position[] positions, Map specialAnnotationTypes, ISelection selection) {
+		public OccurrencesFinderJob(IDocument document, OccurrenceLocation[] locations, ISelection selection) {
 			super(JavaEditorMessages.JavaEditor_markOccurrences_job_name);
 			fDocument= document;
-			fSpecialAnnotationTypes= specialAnnotationTypes;
 			fSelection= selection;
-			fPositions= positions;
+			fLocations= locations;
 
 			if (getSelectionProvider() instanceof ISelectionValidator)
 				fPostSelectionValidator= (ISelectionValidator)getSelectionProvider();
+			else
+				fPostSelectionValidator= null;
 		}
 
 		// cannot use cancel() because it is declared final
@@ -2735,8 +2735,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			cancel();
 		}
 
-		private boolean isCanceled() {
-			return fCanceled || fProgressMonitor.isCanceled()
+		private boolean isCanceled(IProgressMonitor progressMonitor) {
+			return fCanceled || progressMonitor.isCanceled()
 				||  fPostSelectionValidator != null && !(fPostSelectionValidator.isValid(fSelection) || fForcedMarkOccurrencesSelection == fSelection)
 				|| LinkedModeModel.hasInstalledModel(fDocument);
 		}
@@ -2745,10 +2745,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * @see Job#run(org.eclipse.core.runtime.IProgressMonitor)
 		 */
 		public IStatus run(IProgressMonitor progressMonitor) {
-
-			fProgressMonitor= progressMonitor;
-
-			if (isCanceled())
+			if (isCanceled(progressMonitor))
 				return Status.CANCEL_STATUS;
 
 			ITextViewer textViewer= getViewer();
@@ -2768,31 +2765,23 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				return Status.CANCEL_STATUS;
 
 			// Add occurrence annotations
-			int length= fPositions.length;
+			int length= fLocations.length;
 			Map annotationMap= new HashMap(length);
 			for (int i= 0; i < length; i++) {
 
-				if (isCanceled())
+				if (isCanceled(progressMonitor))
 					return Status.CANCEL_STATUS;
-
-				String message;
-				Position position= fPositions[i];
-
-				// Create & add annotation
-				try {
-					message= Messages.format(JavaEditorMessages.JavaEditor_occurrence_tooltip, document.get(position.offset, position.length));
-				} catch (BadLocationException ex) {
-					// Skip this match
-					continue;
-				}
-				String annotationType= (String) fSpecialAnnotationTypes.get(position);
-				if (annotationType == null)
-					annotationType= "org.eclipse.jdt.ui.occurrences"; //$NON-NLS-1$
 				
-				annotationMap.put(new Annotation(annotationType, false, message), position);
+				OccurrenceLocation location= fLocations[i];
+				Position position= new Position(location.getOffset(), location.getLength());
+
+				String description= location.getDescription();
+				String annotationType= (location.getFlags() == IOccurrencesFinder.F_WRITE_OCCURRENCE) ? "org.eclipse.jdt.ui.occurrences.write" : "org.eclipse.jdt.ui.occurrences"; //$NON-NLS-1$ //$NON-NLS-2$
+				
+				annotationMap.put(new Annotation(annotationType, false, description), position);
 			}
 
-			if (isCanceled())
+			if (isCanceled(progressMonitor))
 				return Status.CANCEL_STATUS;
 
 			synchronized (getLockObject(annotationModel)) {
@@ -2848,62 +2837,54 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fMarkOccurrenceModificationStamp= currentModificationStamp;
 		}
 
-		Position[] positions= null;
-		Map specialAnnotationTypes= new HashMap();
+		OccurrenceLocation[] locations= null;
 		
 		ASTNode selectedNode= NodeFinder.perform(astRoot, selection.getOffset(), selection.getLength());
 		if (fMarkExceptions) {
 			ExceptionOccurrencesFinder finder= new ExceptionOccurrencesFinder();
 			if (finder.initialize(astRoot, selectedNode) == null) {
-				positions= finder.getOccurrencePositions();
+				locations= finder.getOccurrences();
 			}
 		}
 
-		if (positions == null && fMarkMethodExitPoints) {
+		if (locations == null && fMarkMethodExitPoints) {
 			MethodExitsFinder finder= new MethodExitsFinder();
 			if (finder.initialize(astRoot, selectedNode) == null) {
-				positions= finder.getOccurrencePositions();
+				locations= finder.getOccurrences();
 			}
 		}
 
-		if (positions == null && fMarkBreakContinueTargets) {
+		if (locations == null && fMarkBreakContinueTargets) {
 			BreakContinueTargetFinder finder= new BreakContinueTargetFinder();
 			if (finder.initialize(astRoot, selectedNode) == null) {
-				positions= finder.getOccurrencePositions();
+				locations= finder.getOccurrences();
 			}
 		}
 		
-		if (positions == null && fMarkImplementors) {
+		if (locations == null && fMarkImplementors) {
 			ImplementOccurrencesFinder finder= new ImplementOccurrencesFinder();
 			if (finder.initialize(astRoot, selectedNode) == null) {
-				positions= finder.getOccurrencePositions();
+				locations= finder.getOccurrences();
 			}
 		}
 
-		if (positions == null && selectedNode instanceof Name) {
+		if (locations == null && selectedNode instanceof Name) {
 			IBinding binding= ((Name)selectedNode).resolveBinding();
 			if (binding != null && markOccurrencesOfType(binding)) {
-				// Find the matches && extract positions so we can forget the AST
 				OccurrencesFinder finder= new OccurrencesFinder();
 				if (finder.initialize(astRoot, selectedNode) == null) {
-					positions= finder.getOccurrencePositions();
-					Position[] writes= finder.getOccurrenceWritePositions();
-					if (writes != null) {
-						for (int i= 0; i < writes.length; i++) {
-							specialAnnotationTypes.put(writes[i], "org.eclipse.jdt.ui.occurrences.write"); //$NON-NLS-1$
-						}
-					}
+					locations= finder.getOccurrences();
 				}
 			}
 		}
 
-		if (positions == null) {
+		if (locations == null) {
 			if (!fStickyOccurrenceAnnotations)
 				removeOccurrenceAnnotations();
 			return;
 		}
 
-		fOccurrencesFinderJob= new OccurrencesFinderJob(document, positions, specialAnnotationTypes, selection);
+		fOccurrencesFinderJob= new OccurrencesFinderJob(document, locations, selection);
 		//fOccurrencesFinderJob.setPriority(Job.DECORATE);
 		//fOccurrencesFinderJob.setSystem(true);
 		//fOccurrencesFinderJob.schedule();

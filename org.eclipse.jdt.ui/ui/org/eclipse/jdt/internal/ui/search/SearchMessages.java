@@ -137,15 +137,19 @@ public final class SearchMessages extends NLS {
 	public static String OccurrencesFinder_searchfor;
 	public static String OccurrencesFinder_label_singular;
 	public static String OccurrencesFinder_label_plural;
+	public static String OccurrencesFinder_occurrence_description;
+	public static String OccurrencesFinder_occurrence_write_description;
 	public static String OccurrencesSearchLabelProvider_line_number;
 	public static String ExceptionOccurrencesFinder_no_exception;
 	public static String ExceptionOccurrencesFinder_searchfor;
 	public static String ExceptionOccurrencesFinder_label_singular;
 	public static String ExceptionOccurrencesFinder_label_plural;
+	public static String ExceptionOccurrencesFinder_occurrence_description;
 	public static String ImplementOccurrencesFinder_invalidTarget;
 	public static String ImplementOccurrencesFinder_searchfor;
 	public static String ImplementOccurrencesFinder_label_singular;
 	public static String ImplementOccurrencesFinder_label_plural;
+	public static String ImplementOccurrencesFinder_occurrence_description;
 	public static String JavaSearchOperation_singularDeclarationsPostfix;
 	public static String JavaSearchOperation_singularReferencesPostfix;
 	public static String JavaSearchOperation_singularReadReferencesPostfix;
@@ -238,8 +242,11 @@ public final class SearchMessages extends NLS {
 	public static String MatchFilter_InexactFilter_actionLabel;
 	public static String MatchFilter_InexactFilter_description;
 	public static String MethodExitsFinder_no_return_type_selected;
+	public static String MethodExitsFinder_occurrence_exit_description;
+	public static String MethodExitsFinder_occurrence_return_description;
 	public static String BreakContinueTargetFinder_cannot_highlight;
 	public static String BreakContinueTargetFinder_no_break_or_continue_selected;
+	public static String BreakContinueTargetFinder_occurrence_description;
 	public static String TextSearchLabelProvider_matchCountFormat;
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, SearchMessages.class);

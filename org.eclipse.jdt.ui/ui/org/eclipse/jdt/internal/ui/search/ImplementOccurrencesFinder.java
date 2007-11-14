@@ -11,32 +11,27 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jface.text.Position;
-
-import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 
 /**
@@ -58,8 +53,10 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 			IMethodBinding binding= node.resolveBinding();
 			if (binding != null) {
 				IMethodBinding method= Bindings.findOverriddenMethodInHierarchy(fSelectedType, binding);
-				if (method != null)
-					fResult.add(node.getName());
+				if (method != null) {
+					SimpleName name= node.getName();
+					fResult.add(new OccurrenceLocation(name.getStartPosition(), name.getLength(), 0, fDescription));
+				}
 			}
 			return super.visit(node);
 		}
@@ -86,6 +83,7 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 	private List fResult;
 	private ASTNode fSelectedNode;
 	private ITypeBinding fSelectedType;
+	private String fDescription;
 	
 	public ImplementOccurrencesFinder() {
 		fResult= new ArrayList();
@@ -103,74 +101,40 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 		if (!(fSelectedNode instanceof Type))
 			return SearchMessages.ImplementOccurrencesFinder_invalidTarget;
 		
-		ASTNode typeDeclaration= fSelectedNode.getParent();
-		if (!(typeDeclaration instanceof AbstractTypeDeclaration))
+		StructuralPropertyDescriptor location= fSelectedNode.getLocationInParent();
+		if (location != TypeDeclaration.SUPERCLASS_TYPE_PROPERTY && location != TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY && location != EnumDeclaration.SUPER_INTERFACE_TYPES_PROPERTY)
 			return SearchMessages.ImplementOccurrencesFinder_invalidTarget;  
 		
 		fSelectedType= ((Type)fSelectedNode).resolveBinding();
 		if (fSelectedType == null)
 			return SearchMessages.ImplementOccurrencesFinder_invalidTarget;  
 
-		fStart= typeDeclaration;
+		fStart= fSelectedNode.getParent(); // type declaration
 		fASTRoot= root;
+		fDescription= Messages.format(SearchMessages.ImplementOccurrencesFinder_occurrence_description, fSelectedType.getName());
+		
 		return null;
 	}
 	
 	private void performSearch() {
 		fStart.accept(new MethodVisitor());
 		if (fSelectedNode != null)
-			fResult.add(fSelectedNode);
+			fResult.add(new OccurrenceLocation(fSelectedNode.getStartPosition(), fSelectedNode.getLength(), 0, fDescription));
 	}
 
-	public Position[] getOccurrencePositions() {
+	public OccurrenceLocation[] getOccurrences() {
 		performSearch();
 		if (fResult.isEmpty())
 			return null;
+		return (OccurrenceLocation[]) fResult.toArray(new OccurrenceLocation[fResult.size()]);
+	}
 
-		Position[] positions= new Position[fResult.size()];
-		for (int i= 0; i < fResult.size(); i++) {
-			ASTNode node= (ASTNode) fResult.get(i);
-			positions[i]= new Position(node.getStartPosition(), node.getLength());
-		}
-		return positions;
+	public int getSearchKind() {
+		return K_IMPLEMENTS_OCCURRENCE;
 	}
-	
-	public void collectMatches(Collection resultingMatches) {
-		performSearch();
-		
-		HashMap lineToGroup= new HashMap();
-		
-		for (Iterator iter= fResult.iterator(); iter.hasNext();) {
-			ASTNode node= (ASTNode) iter.next();
-			JavaElementLine lineKey= getLineElement(node, lineToGroup);
-			if (lineKey != null) {
-				Match match= new Match(lineKey, node.getStartPosition(), node.getLength());
-				resultingMatches.add(match);
-			}
-		}
-	}
-	
-	private JavaElementLine getLineElement(ASTNode node, HashMap lineToGroup) {
-		int lineNumber= fASTRoot.getLineNumber(node.getStartPosition());
-		if (lineNumber <= 0) {
-			return null;
-		}
-		
-		JavaElementLine groupKey= null;
-		try {
-			Integer key= new Integer(lineNumber);
-			groupKey= (JavaElementLine) lineToGroup.get(key);
-			if (groupKey == null) {
-				int lineStartOffset= fASTRoot.getPosition(lineNumber, 0);
-				if (lineStartOffset >= 0) {
-					groupKey= new JavaElementLine(fASTRoot.getTypeRoot(), lineNumber - 1, lineStartOffset);
-					lineToGroup.put(key, groupKey);
-				}
-			}
-		} catch (CoreException e) {
-			//nothing
-		}
-		return groupKey;
+
+	public CompilationUnit getASTRoot() {
+		return fASTRoot;
 	}
 	
 	/*
@@ -195,15 +159,6 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 		return SearchMessages.ImplementOccurrencesFinder_label_singular;
 	}
 	
-	public void releaseAST() {
-		fStart= null;
-		fSelectedType= null;
-	}
-	
-	public IOccurrencesFinder getNewInstance() {
-		return new ImplementOccurrencesFinder();
-	}
-
 	public String getID() {
 		return ID;
 	}
