@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,8 +12,9 @@ package org.eclipse.jdt.internal.corext.refactoring.surround;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -38,7 +39,7 @@ public class SurroundWithAnalyzer extends CodeAnalyzer {
 	
 	private VariableDeclaration[] fLocals;
 
-	public SurroundWithAnalyzer(ICompilationUnit cunit, Selection selection) throws JavaModelException {
+	public SurroundWithAnalyzer(ICompilationUnit cunit, Selection selection) throws CoreException {
 		super(cunit, selection, false);
 	}
 	

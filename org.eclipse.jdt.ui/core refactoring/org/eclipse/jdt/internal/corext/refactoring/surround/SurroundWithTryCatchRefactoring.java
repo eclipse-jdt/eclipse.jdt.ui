@@ -30,7 +30,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -125,7 +124,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		return RefactoringCoreMessages.SurroundWithTryCatchRefactoring_name; 
 	}
 
-	public RefactoringStatus checkActivationBasics(CompilationUnit rootNode) throws JavaModelException {
+	public RefactoringStatus checkActivationBasics(CompilationUnit rootNode) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		fRootNode= rootNode;
 			

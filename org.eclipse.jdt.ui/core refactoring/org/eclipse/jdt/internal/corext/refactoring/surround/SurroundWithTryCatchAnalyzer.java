@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.surround;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -26,7 +27,7 @@ public class SurroundWithTryCatchAnalyzer extends SurroundWithAnalyzer {
 	private ISurroundWithTryCatchQuery fQuery;
 	private ITypeBinding[] fExceptions;
 
-	public SurroundWithTryCatchAnalyzer(ICompilationUnit unit, Selection selection, ISurroundWithTryCatchQuery query) throws JavaModelException {
+	public SurroundWithTryCatchAnalyzer(ICompilationUnit unit, Selection selection, ISurroundWithTryCatchQuery query) throws CoreException {
 		super(unit, selection);
 		fQuery= query;
 	}

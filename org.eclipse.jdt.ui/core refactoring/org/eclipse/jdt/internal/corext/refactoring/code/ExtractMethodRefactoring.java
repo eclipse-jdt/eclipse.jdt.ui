@@ -42,7 +42,6 @@ import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -284,7 +283,7 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 		return result;
 	}
 	
-	private ASTVisitor createVisitor() throws JavaModelException {
+	private ASTVisitor createVisitor() throws CoreException {
 		fAnalyzer= new ExtractMethodAnalyzer(fCUnit, Selection.createFromStartLength(fSelectionStart, fSelectionLength));
 		return fAnalyzer;
 	}

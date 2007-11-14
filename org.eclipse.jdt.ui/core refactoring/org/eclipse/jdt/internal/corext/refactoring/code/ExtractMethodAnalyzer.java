@@ -22,7 +22,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -110,7 +109,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 	private boolean fForceStatic;
 	private boolean fIsLastStatementSelected;
 	
-	public ExtractMethodAnalyzer(ICompilationUnit unit, Selection selection) throws JavaModelException {
+	public ExtractMethodAnalyzer(ICompilationUnit unit, Selection selection) throws CoreException {
 		super(unit, selection, false);
 	}
 	

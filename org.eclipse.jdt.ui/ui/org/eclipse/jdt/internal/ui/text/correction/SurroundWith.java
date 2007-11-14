@@ -17,7 +17,6 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -162,7 +161,7 @@ public abstract class SurroundWith {
 	}
 
 
-	public static boolean isApplicable(IInvocationContext context) throws JavaModelException {
+	public static boolean isApplicable(IInvocationContext context) throws CoreException {
 		ICompilationUnit unit= context.getCompilationUnit();
 		CompilationUnit ast= SharedASTProvider.getAST(unit, SharedASTProvider.WAIT_NO, null);
 		if (ast == null)
@@ -179,9 +178,9 @@ public abstract class SurroundWith {
 	 * Selected nodes in <code>context</code> under <code>selection</code> or null if no valid selection.
 	 * @param context The context in which the proposal is applyed.
 	 * @return Selected nodes or null if no valid selection.
-	 * @throws JavaModelException
+	 * @throws CoreException
 	 */
-	public static Statement[] getSelectedStatements(IInvocationContext context) throws JavaModelException {
+	public static Statement[] getSelectedStatements(IInvocationContext context) throws CoreException {
 		Selection selection= Selection.createFromStartLength(context.getSelectionOffset(), context.getSelectionLength());
 		SurroundWithAnalyzer analyzer= new SurroundWithAnalyzer(context.getCompilationUnit(), selection);
 		context.getASTRoot().accept(analyzer);

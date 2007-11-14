@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,10 +17,10 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
-import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
@@ -64,6 +64,7 @@ public class TokenScanner {
 	/**
 	 * Creates a TokenScanner
 	 * @param document The textbuffer to create the scanner on
+	 * @param project the current Java project
 	 */
 	public TokenScanner(IDocument document, IJavaProject project) {
 		String sourceLevel= project.getOption(JavaCore.COMPILER_SOURCE, true);
@@ -76,15 +77,20 @@ public class TokenScanner {
 	
 	/**
 	 * Creates a TokenScanner
-	 * @param cu The compliation unit to can on
-	 * @throws JavaModelException thorwn if the buffer cannot be accessed
+	 * @param typeRoot The type root to scan on
+	 * @throws CoreException thrown if the buffer cannot be accessed
 	 */
-	public TokenScanner(ICompilationUnit cu) throws JavaModelException {
-		IJavaProject project= cu.getJavaProject();
+	public TokenScanner(ITypeRoot typeRoot) throws CoreException {
+		IJavaProject project= typeRoot.getJavaProject();
+		IBuffer buffer= typeRoot.getBuffer();
+		if (buffer == null) {
+			throw new CoreException(createError(DOCUMENT_ERROR, "Element has no source", null)); //$NON-NLS-1$
+		}
 		String sourceLevel= project.getOption(JavaCore.COMPILER_SOURCE, true);
 		String complianceLevel= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
 		fScanner= ToolFactory.createScanner(true, false, true, sourceLevel, complianceLevel); // line info required
-		fScanner.setSource(cu.getBuffer().getCharacters());
+
+		fScanner.setSource(buffer.getCharacters());
 		fDocument= null; // use scanner for line information
 		fEndPosition= fScanner.getSource().length - 1;
 	}	
@@ -197,7 +203,7 @@ public class TokenScanner {
 	 * Reads the next token from the given offset and returns the offset after the token.
 	 * @param offset The offset to start reading from.
 	 * @param ignoreComments If set, comments will be overread
-	 * @return Returns the start position of the next token. 
+	 * @return Returns the end position of the next token. 
 	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
 	 * or a lexical error was detected while scanning (code LEXICAL_ERROR)
 	 */		
@@ -442,8 +448,7 @@ public class TokenScanner {
 	}
 	
 	private IStatus createError(int code, String message, Throwable e) {
-		return JavaUIStatus.createError(DOCUMENT_ERROR, message, e);
-		//		return new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, code, message, throwable);
+		return JavaUIStatus.createError(code, message, e);
 	}
 
 }
