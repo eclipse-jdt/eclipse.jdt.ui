@@ -1086,25 +1086,16 @@
 	  <specification
             annotationType="org.eclipse.jdt.ui.occurrences.write"
             label="%WriteOccurrenceAnnotation.label"
-            icon="$nl$/icons/full/obj16/searchm_obj.gif"
             textPreferenceKey="writeOccurrenceIndication"
             textPreferenceValue="false"
             highlightPreferenceKey="writeOccurrenceHighlighting"
             highlightPreferenceValue="true"
-            contributesToHeader="false"
             overviewRulerPreferenceKey="writeOccurrenceIndicationInOverviewRuler"
             overviewRulerPreferenceValue="true"
             verticalRulerPreferenceKey="writeOccurrenceIndicationInVerticalRuler"
             verticalRulerPreferenceValue="false"
             colorPreferenceKey="writeOccurrenceIndicationColor"
-            colorPreferenceValue="240,216,168"
-            presentationLayer="4"
-            showInNextPrevDropdownToolbarActionKey="showWriteOccurrenceInNextPrevDropdownToolbarAction"
-            showInNextPrevDropdownToolbarAction="true"
-            isGoToNextNavigationTargetKey="isWriteOccurrenceGoToNextNavigationTarget"
-	        isGoToNextNavigationTarget="false"
-            isGoToPreviousNavigationTargetKey="isWriteOccurrenceGoToPreviousNavigationTarget"
-	        isGoToPreviousNavigationTarget="false">
+            colorPreferenceValue="240,216,168">
 	  </specification>	  
 	  
 	  <specification
