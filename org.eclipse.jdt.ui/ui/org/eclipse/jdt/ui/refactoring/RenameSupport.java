@@ -265,7 +265,7 @@ public class RenameSupport {
 		return new RenameSupport(descriptor);
 	}
 	
-	private RenameSupport(JavaRenameProcessor processor, String newName, int flags) throws CoreException {
+	private RenameSupport(JavaRenameProcessor processor, String newName, int flags) {
 		fRefactoring= new JavaRenameRefactoring(processor);
 		initialize(fRefactoring, newName, flags);
 	}
