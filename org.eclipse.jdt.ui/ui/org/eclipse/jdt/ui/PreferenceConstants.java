@@ -49,8 +49,11 @@ import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 
 /**
  * Preference constants used in the JDT-UI preference store. Clients should only read the
- * JDT-UI preference store using these values. Clients are not allowed to modify the 
+ * JDT-UI preference store using these values. Clients are not allowed to modify the
  * preference store programmatically.
+ * <p>
+ * This class it is not intended to be instantiated or subclassed by clients.
+ * </p>
  * 
  * @since 2.0
   */
@@ -81,7 +84,7 @@ public class PreferenceConstants {
 	/**
 	 * A named preference that controls if override indicators are rendered in the UI.
 	 * <p>
-	 * Value is of type <code>Boolean</code>: if <code>true</code> override 
+	 * Value is of type <code>Boolean</code>: if <code>true</code> override
 	 * indicators are rendered
 	 * </p>
 	 * @deprecated Override Indicator is now controlled on the platform's decorator preference page
@@ -107,7 +110,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>String</code>. For example for the given package name 'org.eclipse.jdt' pattern
 	 * '.' will compress it to '..jdt', '1~' to 'o~.e~.jdt'.
 	 * </p>
-	 */	
+	 */
 	public static final String APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW= "PackagesView.pkgNamePatternForPackagesView";//$NON-NLS-1$
 
 	/**
@@ -117,7 +120,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * 
 	 * @see #APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW
-	 */	
+	 */
 	public static final String APPEARANCE_COMPRESS_PACKAGE_NAMES= "org.eclipse.jdt.ui.compresspackagenames";//$NON-NLS-1$
 
 	/**
@@ -172,7 +175,7 @@ public class PreferenceConstants {
 	public static final String APPEARANCE_VISIBILITY_SORT_ORDER= "org.eclipse.jdt.ui.visibility.order"; //$NON-NLS-1$
 	
 	/**
-	 * A named preferences that controls if Java elements are also sorted by 
+	 * A named preferences that controls if Java elements are also sorted by
 	 * visibility.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -191,7 +194,7 @@ public class PreferenceConstants {
 	public static final String APPEARANCE_CATEGORY= "org.eclipse.jdt.ui.category";//$NON-NLS-1$
 
 	/**
-	 * The symbolic font name for the font used to display Javadoc 
+	 * The symbolic font name for the font used to display Javadoc
 	 * (value <code>"org.eclipse.jdt.ui.javadocfont"</code>).
 	 * 
 	 * @since 3.3
@@ -199,17 +202,17 @@ public class PreferenceConstants {
 	public final static String APPEARANCE_JAVADOC_FONT= "org.eclipse.jdt.ui.javadocfont"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls if prefix removal during setter/getter generation is turned on or off. 
+	 * A named preference that controls if prefix removal during setter/getter generation is turned on or off.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 * @deprecated Use JavaCore preference store (key JavaCore.
 	 * CODEASSIST_FIELD_PREFIXES and CODEASSIST_STATIC_FIELD_PREFIXES)
-	 */	
+	 */
 	public static final String CODEGEN_USE_GETTERSETTER_PREFIX= "org.eclipse.jdt.ui.gettersetter.prefix.enable";//$NON-NLS-1$
 
 	/**
-	 * A named preference that holds a list of prefixes to be removed from a local variable to compute setter 
+	 * A named preference that holds a list of prefixes to be removed from a local variable to compute setter
 	 * and getter names.
 	 * <p>
 	 * Value is of type <code>String</code>: comma separated list of prefixed
@@ -217,7 +220,7 @@ public class PreferenceConstants {
 	 * 
 	 * @deprecated Use JavaCore preference store (key JavaCore.
 	 * CODEASSIST_FIELD_PREFIXES and CODEASSIST_STATIC_FIELD_PREFIXES)
-	 */	
+	 */
 	public static final String CODEGEN_GETTERSETTER_PREFIX= "org.eclipse.jdt.ui.gettersetter.prefix.list";//$NON-NLS-1$
 
 	/**
@@ -227,18 +230,18 @@ public class PreferenceConstants {
 	 * </p>
 	 * @deprecated Use JavaCore preference store (key JavaCore.
 	 * CODEASSIST_FIELD_PREFIXES and CODEASSIST_STATIC_FIELD_PREFIXES)
-	 */	
+	 */
 	public static final String CODEGEN_USE_GETTERSETTER_SUFFIX= "org.eclipse.jdt.ui.gettersetter.suffix.enable";//$NON-NLS-1$
 
 	/**
-	 * A named preference that holds a list of suffixes to be removed from a local variable to compute setter 
+	 * A named preference that holds a list of suffixes to be removed from a local variable to compute setter
 	 * and getter names.
 	 * <p>
 	 * Value is of type <code>String</code>: comma separated list of suffixes
 	 * </p>
 	 * @deprecated Use setting from JavaCore preference store (key JavaCore.
 	 * CODEASSIST_FIELD_SUFFIXES and CODEASSIST_STATIC_FIELD_SUFFIXES)
-	 */	
+	 */
 	public static final String CODEGEN_GETTERSETTER_SUFFIX= "org.eclipse.jdt.ui.gettersetter.suffix.list"; //$NON-NLS-1$
 
 	/**
@@ -269,7 +272,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>String</code>.
 	 * </p>
 	 * @since 3.0
-	 */	
+	 */
 	public static final String CODEGEN_EXCEPTION_VAR_NAME= "org.eclipse.jdt.ui.exception.name"; //$NON-NLS-1$
 	
 	/**
@@ -293,7 +296,7 @@ public class PreferenceConstants {
 	public static final String CODEGEN__JAVADOC_STUBS= CODEGEN_ADD_COMMENTS;
 
 	/**
-	 * A named preference that controls if a non-javadoc comment gets added to methods generated via the 
+	 * A named preference that controls if a non-javadoc comment gets added to methods generated via the
 	 * "Override Methods" operation.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -325,13 +328,13 @@ public class PreferenceConstants {
 	/**
 	 * A named preference that holds a list of semicolon separated fully qualified type names with wild card characters.
 	 * @since 3.0
-	 */	
+	 */
 	public static final String TYPEFILTER_ENABLED= "org.eclipse.jdt.ui.typefilter.enabled"; //$NON-NLS-1$
 	
 	/**
 	 * A named preference that holds a list of semicolon separated fully qualified type names with wild card characters.
 	 * @since 3.0
-	 */	
+	 */
 	public static final String TYPEFILTER_DISABLED= "org.eclipse.jdt.ui.typefilter.disabled"; //$NON-NLS-1$
 	
 	
@@ -451,7 +454,7 @@ public class PreferenceConstants {
 	 * A named preference that specifies the source folder name used when creating a new Java project. Value is inactive
 	 * if <code>SRCBIN_FOLDERS_IN_NEWPROJ</code> is set to <code>false</code>.
 	 * <p>
-	 * Value is of type <code>String</code>. 
+	 * Value is of type <code>String</code>.
 	 * </p>
 	 * 
 	 * @see #SRCBIN_FOLDERS_IN_NEWPROJ
@@ -462,7 +465,7 @@ public class PreferenceConstants {
 	 * A named preference that specifies the output folder name used when creating a new Java project. Value is inactive
 	 * if <code>SRCBIN_FOLDERS_IN_NEWPROJ</code> is set to <code>false</code>.
 	 * <p>
-	 * Value is of type <code>String</code>. 
+	 * Value is of type <code>String</code>.
 	 * </p>
 	 * 
 	 * @see #SRCBIN_FOLDERS_IN_NEWPROJ
@@ -470,11 +473,11 @@ public class PreferenceConstants {
 	public static final String SRCBIN_BINNAME= "org.eclipse.jdt.ui.wizards.srcBinFoldersBinName"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that holds a list of possible JRE libraries used by the New Java Project wizard. A library 
-	 * consists of a description and an arbitrary number of <code>IClasspathEntry</code>s, that will represent the 
-	 * JRE on the new project's class path. 
+	 * A named preference that holds a list of possible JRE libraries used by the New Java Project wizard. A library
+	 * consists of a description and an arbitrary number of <code>IClasspathEntry</code>s, that will represent the
+	 * JRE on the new project's class path.
 	 * <p>
-	 * Value is of type <code>String</code>: a semicolon separated list of encoded JRE libraries. 
+	 * Value is of type <code>String</code>: a semicolon separated list of encoded JRE libraries.
 	 * <code>NEWPROJECT_JRELIBRARY_INDEX</code> defines the currently used library. Clients
 	 * should use the method <code>encodeJRELibrary</code> to encode a JRE library into a string
 	 * and the methods <code>decodeJRELibraryDescription(String)</code> and <code>
@@ -500,7 +503,7 @@ public class PreferenceConstants {
 	public static final String NEWPROJECT_JRELIBRARY_INDEX= "org.eclipse.jdt.ui.wizards.jre.index"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls if a new type hierarchy gets opened in a 
+	 * A named preference that controls if a new type hierarchy gets opened in a
 	 * new type hierarchy perspective or inside the type hierarchy view part.
 	 * <p>
 	 * Value is of type <code>String</code>: possible values are <code>
@@ -528,7 +531,7 @@ public class PreferenceConstants {
 	public static final String OPEN_TYPE_HIERARCHY_IN_VIEW_PART= "viewPart"; //$NON-NLS-1$
 	
 	/**
-	 * A named preference that controls the behavior when double clicking on a container in the packages view. 
+	 * A named preference that controls the behavior when double clicking on a container in the packages view.
 	 * <p>
 	 * Value is of type <code>String</code>: possible values are <code>
 	 * DOUBLE_CLICK_GOES_INTO</code> or <code>
@@ -556,7 +559,7 @@ public class PreferenceConstants {
 
 	/**
 	 * A named preference that controls whether Java views update their presentation while editing or when saving the
-	 * content of an editor. 
+	 * content of an editor.
 	 * <p>
 	 * Value is of type <code>String</code>: possible values are <code>
 	 * UPDATE_ON_SAVE</code> or <code>
@@ -665,7 +668,7 @@ public class PreferenceConstants {
 	/**
 	 * A named preference that holds the color used to highlight matching brackets.
 	 * <p>
-	 * Value is of type <code>String</code>. A RGB color value encoded as a string 
+	 * Value is of type <code>String</code>. A RGB color value encoded as a string
 	 * using class <code>PreferenceConverter</code>
 	 * </p>
 	 * 
@@ -777,7 +780,7 @@ public class PreferenceConstants {
 	public final static String EDITOR_CORRECTION_INDICATION= "JavaEditor.ShowTemporaryProblem"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls whether the editor shows problem indicators in text (squiggly lines). 
+	 * A named preference that controls whether the editor shows problem indicators in text (squiggly lines).
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -801,7 +804,7 @@ public class PreferenceConstants {
 	public final static String EDITOR_PROBLEM_INDICATION_COLOR= "problemIndicationColor"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls whether the editor shows warning indicators in text (squiggly lines). 
+	 * A named preference that controls whether the editor shows warning indicators in text (squiggly lines).
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -826,7 +829,7 @@ public class PreferenceConstants {
 	public final static String EDITOR_WARNING_INDICATION_COLOR= "warningIndicationColor"; //$NON-NLS-1$
 	
 	/**
-	 * A named preference that controls whether the editor shows task indicators in text (squiggly lines). 
+	 * A named preference that controls whether the editor shows task indicators in text (squiggly lines).
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -1212,7 +1215,7 @@ public class PreferenceConstants {
 	 * A named preference that describes if the system default background color
 	 * is used as the text background.
 	 * <p>
-	 * Value is of type <code>Boolean</code>. 
+	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 * @deprecated As of 3.1, replaced by {@link AbstractTextEditor#PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT}
 	 */
@@ -1259,7 +1262,7 @@ public class PreferenceConstants {
 	public final static String EDITOR_MULTI_LINE_COMMENT_COLOR= IJavaColorConstants.JAVA_MULTI_LINE_COMMENT;
 
 	/**
-	 * The symbolic font name for the Java editor text font 
+	 * The symbolic font name for the Java editor text font
 	 * (value <code>"org.eclipse.jdt.ui.editors.textfont"</code>).
 	 * 
 	 * @since 2.1
@@ -1273,7 +1276,7 @@ public class PreferenceConstants {
 	 * in bold. If <code>false</code> the are rendered using no font style attribute.
 	 * </p>
 	 */
-	public final static String EDITOR_MULTI_LINE_COMMENT_BOLD= IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + EDITOR_BOLD_SUFFIX; 
+	public final static String EDITOR_MULTI_LINE_COMMENT_BOLD= IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + EDITOR_BOLD_SUFFIX;
 
 	/**
 	 * A named preference that controls whether multi-line comments are rendered in italic.
@@ -1306,7 +1309,7 @@ public class PreferenceConstants {
 	 * 
 	 * @since 3.1
 	 */
-	public final static String EDITOR_MULTI_LINE_COMMENT_UNDERLINE= IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + EDITOR_UNDERLINE_SUFFIX; 
+	public final static String EDITOR_MULTI_LINE_COMMENT_UNDERLINE= IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + EDITOR_UNDERLINE_SUFFIX;
 
 	/**
 	 * A named preference that holds the color used to render single line comments.
@@ -1327,7 +1330,7 @@ public class PreferenceConstants {
 	 * in bold. If <code>false</code> the are rendered using no font style attribute.
 	 * </p>
 	 */
-	public final static String EDITOR_SINGLE_LINE_COMMENT_BOLD= IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + EDITOR_BOLD_SUFFIX; 
+	public final static String EDITOR_SINGLE_LINE_COMMENT_BOLD= IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + EDITOR_BOLD_SUFFIX;
 
 	/**
 	 * A named preference that controls whether single line comments are rendered in italic.
@@ -1360,7 +1363,7 @@ public class PreferenceConstants {
 	 * 
 	 * @since 3.1
 	 */
-	public final static String EDITOR_SINGLE_LINE_COMMENT_UNDERLINE= IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + EDITOR_UNDERLINE_SUFFIX; 
+	public final static String EDITOR_SINGLE_LINE_COMMENT_UNDERLINE= IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + EDITOR_UNDERLINE_SUFFIX;
 
 	/**
 	 * A named preference that holds the color used to render java keywords.
@@ -1509,7 +1512,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @since 3.0
 	 */
-	public final static String EDITOR_JAVA_KEYWORD_RETURN_COLOR= IJavaColorConstants.JAVA_KEYWORD_RETURN;	
+	public final static String EDITOR_JAVA_KEYWORD_RETURN_COLOR= IJavaColorConstants.JAVA_KEYWORD_RETURN;
 
 	/**
 	 * A named preference that controls whether 'return' keyword is rendered in bold.
@@ -1562,7 +1565,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @since 3.0
 	 */
-	public final static String EDITOR_JAVA_OPERATOR_COLOR= IJavaColorConstants.JAVA_OPERATOR;	
+	public final static String EDITOR_JAVA_OPERATOR_COLOR= IJavaColorConstants.JAVA_OPERATOR;
  
 	/**
 	 * A named preference that controls whether operators are rendered in bold.
@@ -1669,7 +1672,7 @@ public class PreferenceConstants {
 	 * @since 3.1
 	 * @deprecated the annotation highlighting has been replaced by a semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#ANNOTATION}
 	 */
-	public final static String EDITOR_JAVA_ANNOTATION_COLOR= IJavaColorConstants.JAVA_ANNOTATION;	
+	public final static String EDITOR_JAVA_ANNOTATION_COLOR= IJavaColorConstants.JAVA_ANNOTATION;
  
 	/**
 	 * A named preference that controls whether annotations are rendered in bold.
@@ -2230,7 +2233,7 @@ public class PreferenceConstants {
 	 * </p>
 	 *
 	 * @since 3.0
-	 */	
+	 */
 	public static final String EDITOR_MARK_OCCURRENCES= "markOccurrences"; //$NON-NLS-1$
 
 	/**
@@ -2240,7 +2243,7 @@ public class PreferenceConstants {
 	 * </p>
 	 *
 	 * @since 3.0
-	 */	
+	 */
 	public static final String EDITOR_STICKY_OCCURRENCES= "stickyOccurrences"; //$NON-NLS-1$
 	
 	/**
@@ -2430,7 +2433,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 3.0
 	 * @deprecated as of 3.1 replaced by {@link AbstractDecoratedTextEditorPreferenceConstants#EDITOR_DISABLE_OVERWRITE_MODE}
-	 */	
+	 */
 	public static final String EDITOR_DISABLE_OVERWRITE_MODE= "disable_overwrite_mode"; //$NON-NLS-1$
 
 	/**
@@ -2440,7 +2443,7 @@ public class PreferenceConstants {
 	 * </p>
 	 *
 	 * @since 3.0
-	 */	
+	 */
 	public static final String EDITOR_SMART_SEMICOLON= "smart_semicolon"; //$NON-NLS-1$
 
 	/**
@@ -2459,7 +2462,7 @@ public class PreferenceConstants {
 	 * </p>
 	 *
 	 * @since 3.0
-	 */	
+	 */
 	public static final String EDITOR_SMART_OPENING_BRACE= "smart_opening_brace"; //$NON-NLS-1$
 
 	/**
@@ -2656,7 +2659,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_SOURCE}
-	 */	
+	 */
 	public final static String FORMATTER_COMMENT_FORMATSOURCE= "comment_format_source_code"; //$NON-NLS-1$
 	
 	/**
@@ -2668,7 +2671,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION}
-	 */	
+	 */
 	public final static String FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION= "comment_indent_parameter_description"; //$NON-NLS-1$
 
 	/**
@@ -2680,7 +2683,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_HEADER}
-	 */	
+	 */
 	public final static String FORMATTER_COMMENT_FORMATHEADER= "comment_format_header"; //$NON-NLS-1$
 
 	/**
@@ -2692,7 +2695,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INDENT_ROOT_TAGS}
-	 */	
+	 */
 	public final static String FORMATTER_COMMENT_INDENTROOTTAGS= "comment_indent_root_tags"; //$NON-NLS-1$
 	
 	/**
@@ -2704,7 +2707,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT}
-	 */	
+	 */
 	public final static String FORMATTER_COMMENT_FORMAT= "comment_format_comments"; //$NON-NLS-1$
 
 	/**
@@ -2716,7 +2719,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER}
-	 */	
+	 */
 	public final static String FORMATTER_COMMENT_NEWLINEFORPARAMETER= "comment_new_line_for_parameter"; //$NON-NLS-1$
 
 	/**
@@ -2728,7 +2731,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS}
-	 */	
+	 */
 	public final static String FORMATTER_COMMENT_SEPARATEROOTTAGS= "comment_separate_root_tags"; //$NON-NLS-1$
 
 	/**
@@ -2739,7 +2742,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_CLEAR_BLANK_LINES}
-	 */	
+	 */
 	public final static String FORMATTER_COMMENT_CLEARBLANKLINES= "comment_clear_blank_lines"; //$NON-NLS-1$
 
 	/**
@@ -2750,7 +2753,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_LINE_LENGTH}
-	 */	
+	 */
 	public final static String FORMATTER_COMMENT_LINELENGTH= "comment_line_length"; //$NON-NLS-1$
 
 	/**
@@ -2761,7 +2764,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_HTML}
-	 */	
+	 */
 	public final static String FORMATTER_COMMENT_FORMATHTML= "comment_format_html"; //$NON-NLS-1$
 
 	/**
@@ -2783,7 +2786,7 @@ public class PreferenceConstants {
 	/**
 	 * A named preference that controls if code assist contains only visible proposals.
 	 * <p>
-	 * Value is of type <code>Boolean</code>. if <code>true</code> code assist only contains visible members. If 
+	 * Value is of type <code>Boolean</code>. if <code>true</code> code assist only contains visible members. If
 	 * <code>false</code> all members are included.
 	 * </p>
 	 */
@@ -2817,7 +2820,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @since 2.1
 	 */
-	public final static String CODEASSIST_INSERT_COMPLETION= "content_assist_insert_completion"; //$NON-NLS-1$	
+	public final static String CODEASSIST_INSERT_COMPLETION= "content_assist_insert_completion"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether code assist proposals filtering is case sensitive or not.
@@ -2830,7 +2833,7 @@ public class PreferenceConstants {
 	/**
 	 * A named preference that defines if code assist proposals are sorted in alphabetical order.
 	 * <p>
-	 * Value is of type <code>Boolean</code>. If <code>true</code> that are sorted in alphabetical 
+	 * Value is of type <code>Boolean</code>. If <code>true</code> that are sorted in alphabetical
 	 * order. If <code>false</code> that are unsorted.
 	 * </p>
 	 * @deprecated use {@link #CODEASSIST_SORTER} instead
@@ -2962,9 +2965,9 @@ public class PreferenceConstants {
 
 
 	/**
-	 * A named preference that controls the behavior of the refactoring wizard for showing the error page. 
+	 * A named preference that controls the behavior of the refactoring wizard for showing the error page.
 	 * <p>
-	 * Value is of type <code>String</code>. Valid values are: 
+	 * Value is of type <code>String</code>. Valid values are:
 	 * <code>REFACTOR_FATAL_SEVERITY</code>,
 	 * <code>REFACTOR_ERROR_SEVERITY</code>,
 	 * <code>REFACTOR_WARNING_SEVERITY</code>
@@ -2986,7 +2989,7 @@ public class PreferenceConstants {
 	 * A string value used by the named preference <code>REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD</code>.
 	 * 
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
-	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#FATAL} 
+	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#FATAL}
 	 */
 	public static final String REFACTOR_FATAL_SEVERITY= "4"; //$NON-NLS-1$
 	
@@ -2994,15 +2997,15 @@ public class PreferenceConstants {
 	 * A string value used by the named preference <code>REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD</code>.
 	 * 
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
-	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#ERROR} 
-	 */	
+	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#ERROR}
+	 */
 	public static final String REFACTOR_ERROR_SEVERITY= "3"; //$NON-NLS-1$
 
 	/**
 	 * A string value used by the named preference <code>REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD</code>.
 	 * 
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
-	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#WARNING} 
+	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#WARNING}
 	 */
 	public static final String REFACTOR_WARNING_SEVERITY= "2"; //$NON-NLS-1$
 
@@ -3010,7 +3013,7 @@ public class PreferenceConstants {
 	 * A string value used by the named preference <code>REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD</code>.
 	 * 
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
-	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#INFO} 
+	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#INFO}
 	 */
 	public static final String REFACTOR_INFO_SEVERITY= "1"; //$NON-NLS-1$
 
@@ -3018,7 +3021,7 @@ public class PreferenceConstants {
 	 * A string value used by the named preference <code>REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD</code>.
 	 * 
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
-	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#OK} 
+	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#OK}
 	 */
 	public static final String REFACTOR_OK_SEVERITY= "0"; //$NON-NLS-1$
 
@@ -3079,7 +3082,7 @@ public class PreferenceConstants {
 	 * </p>
 	 *
 	 * @since 2.1
-	 */	
+	 */
 	public static final String TEMPLATES_USE_CODEFORMATTER= "org.eclipse.jdt.ui.template.format"; //$NON-NLS-1$
 	
 	/**
@@ -3089,7 +3092,7 @@ public class PreferenceConstants {
 	 * </p>
 	 *
 	 * @since 3.0
-	 */	
+	 */
 	public static final String FORMATTER_PROFILE= "formatter_profile"; //$NON-NLS-1$
 	
 	/**
@@ -3218,7 +3221,7 @@ public class PreferenceConstants {
 	//---------- Properties File Editor ----------
 	
 	/**
-	 * The symbolic font name for the Java properties file editor text font 
+	 * The symbolic font name for the Java properties file editor text font
 	 * (value <code>"org.eclipse.jdt.ui.PropertiesFileEditor.textfont"</code>).
 	 * 
 	 * @since 3.1
@@ -3556,7 +3559,7 @@ public class PreferenceConstants {
 		// JavaBasePreferencePage
 		store.setDefault(PreferenceConstants.OPEN_TYPE_HIERARCHY, PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
 		store.setDefault(PreferenceConstants.DOUBLE_CLICK, PreferenceConstants.DOUBLE_CLICK_EXPANDS);
-		store.setDefault(PreferenceConstants.UPDATE_JAVA_VIEWS, PreferenceConstants.UPDATE_WHILE_EDITING);	
+		store.setDefault(PreferenceConstants.UPDATE_JAVA_VIEWS, PreferenceConstants.UPDATE_WHILE_EDITING);
 		store.setToDefault(PreferenceConstants.UPDATE_JAVA_VIEWS); // clear preference, update on save not supported anymore
 		
 		store.setDefault(PreferenceConstants.LINK_BROWSING_PROJECTS_TO_EDITOR, true);
@@ -3595,8 +3598,8 @@ public class PreferenceConstants {
 		
 		// RefactoringPreferencePage
 		store.setDefault(PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, PreferenceConstants.REFACTOR_WARNING_SEVERITY);
-		store.setDefault(PreferenceConstants.REFACTOR_SAVE_ALL_EDITORS, false);		
-		store.setDefault(PreferenceConstants.REFACTOR_LIGHTWEIGHT, true);		
+		store.setDefault(PreferenceConstants.REFACTOR_SAVE_ALL_EDITORS, false);
+		store.setDefault(PreferenceConstants.REFACTOR_LIGHTWEIGHT, true);
 
 		// TemplatePreferencePage
 		store.setDefault(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER, true);
@@ -3633,8 +3636,8 @@ public class PreferenceConstants {
 		// JavaEditorPreferencePage
 		store.setDefault(PreferenceConstants.EDITOR_MATCHING_BRACKETS, true);
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, 
+				store,
+				PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR,
 				findRGB(registry, IJavaThemeConstants.EDITOR_MATCHING_BRACKETS_COLOR, new RGB(192, 192,192)));
 
 		store.setDefault(PreferenceConstants.EDITOR_CORRECTION_INDICATION, true);
@@ -3648,24 +3651,24 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_SPACES_FOR_TABS, false);
 
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR, 
+				store,
+				PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR,
 				findRGB(registry, IJavaThemeConstants.EDITOR_MULTI_LINE_COMMENT_COLOR, new RGB(63, 127, 95)));
 		
 		store.setDefault(PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_ITALIC, false);
 
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR, 
+				store,
+				PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR,
 				findRGB(registry, IJavaThemeConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR, new RGB(63, 127, 95)));
 		
 		store.setDefault(PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_ITALIC, false);
 
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR, 
+				store,
+				PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR,
 				findRGB(registry, IJavaThemeConstants.EDITOR_JAVA_KEYWORD_COLOR, new RGB(127, 0, 85)));
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_KEYWORD_BOLD, true);
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_KEYWORD_ITALIC, false);
@@ -3675,16 +3678,16 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_ANNOTATION_ITALIC, false);
 
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.EDITOR_STRING_COLOR, 
+				store,
+				PreferenceConstants.EDITOR_STRING_COLOR,
 				findRGB(registry, IJavaThemeConstants.EDITOR_STRING_COLOR, new RGB(42, 0, 255)));
 		
 		store.setDefault(PreferenceConstants.EDITOR_STRING_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_STRING_ITALIC, false);
 
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR, 
+				store,
+				PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR,
 				findRGB(registry, IJavaThemeConstants.EDITOR_JAVA_DEFAULT_COLOR, new RGB(0, 0, 0)));
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_DEFAULT_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_DEFAULT_ITALIC, false);
@@ -3694,57 +3697,57 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_METHOD_NAME_ITALIC, false);
 
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_COLOR, 
+				store,
+				PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_COLOR,
 				findRGB(registry, IJavaThemeConstants.EDITOR_JAVA_KEYWORD_RETURN_COLOR, new RGB(127, 0, 85)));
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_BOLD, true);
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_ITALIC, false);
 
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR, 
+				store,
+				PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR,
 				findRGB(registry, IJavaThemeConstants.EDITOR_JAVA_OPERATOR_COLOR, new RGB(0, 0, 0)));
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_OPERATOR_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_OPERATOR_ITALIC, false);
 
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.EDITOR_JAVA_BRACKET_COLOR, 
+				store,
+				PreferenceConstants.EDITOR_JAVA_BRACKET_COLOR,
 				findRGB(registry, IJavaThemeConstants.EDITOR_JAVA_BRACKET_COLOR, new RGB(0, 0, 0)));
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_BRACKET_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_BRACKET_ITALIC, false);
 
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.EDITOR_TASK_TAG_COLOR, 
+				store,
+				PreferenceConstants.EDITOR_TASK_TAG_COLOR,
 				findRGB(registry, IJavaThemeConstants.EDITOR_TASK_TAG_COLOR, new RGB(127, 159, 191)));
 		store.setDefault(PreferenceConstants.EDITOR_TASK_TAG_BOLD, true);
 		store.setDefault(PreferenceConstants.EDITOR_TASK_TAG_ITALIC, false);
 
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR, 
+				store,
+				PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR,
 				findRGB(registry, IJavaThemeConstants.EDITOR_JAVADOC_KEYWORD_COLOR, new RGB(127, 159, 191)));
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_KEYWORD_BOLD, true);
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_KEYWORD_ITALIC, false);
 
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.EDITOR_JAVADOC_TAG_COLOR, 
+				store,
+				PreferenceConstants.EDITOR_JAVADOC_TAG_COLOR,
 				findRGB(registry, IJavaThemeConstants.EDITOR_JAVADOC_TAG_COLOR, new RGB(127, 127, 159)));
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_TAG_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_TAG_ITALIC, false);
 
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR, 
+				store,
+				PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR,
 				findRGB(registry, IJavaThemeConstants.EDITOR_JAVADOC_LINKS_COLOR, new RGB(63, 63, 191)));
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_LINKS_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_LINKS_ITALIC, false);
 
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR, 
+				store,
+				PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR,
 				findRGB(registry, IJavaThemeConstants.EDITOR_JAVADOC_DEFAULT_COLOR, new RGB(63, 95, 191)));
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_DEFAULT_BOLD, false);
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_DEFAULT_ITALIC, false);
@@ -3754,28 +3757,28 @@ public class PreferenceConstants {
 
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, 
+				store,
+				PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND,
 				findRGB(registry, IJavaThemeConstants.CODEASSIST_PROPOSALS_BACKGROUND, new RGB(255, 255, 255)));
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, 
+				store,
+				PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND,
 				findRGB(registry, IJavaThemeConstants.CODEASSIST_PROPOSALS_FOREGROUND, new RGB(0, 0, 0)));
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND, 
+				store,
+				PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND,
 				findRGB(registry, IJavaThemeConstants.CODEASSIST_PARAMETERS_BACKGROUND, new RGB(255, 255, 255)));
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND, 
+				store,
+				PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND,
 				findRGB(registry, IJavaThemeConstants.CODEASSIST_PARAMETERS_FOREGROUND, new RGB(0, 0, 0)));
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND, 
+				store,
+				PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND,
 				findRGB(registry, IJavaThemeConstants.CODEASSIST_REPLACEMENT_BACKGROUND, new RGB(255, 255, 0)));
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND, 
+				store,
+				PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND,
 				findRGB(registry, IJavaThemeConstants.CODEASSIST_REPLACEMENT_FOREGROUND, new RGB(255, 0, 0)));
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, "."); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, "@#"); //$NON-NLS-1$
@@ -3877,36 +3880,36 @@ public class PreferenceConstants {
 		
 		// properties file editor
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.PROPERTIES_FILE_COLORING_KEY, 
+				store,
+				PreferenceConstants.PROPERTIES_FILE_COLORING_KEY,
 				findRGB(registry, IJavaThemeConstants.PROPERTIES_FILE_COLORING_KEY, new RGB(0, 0, 0)));
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_KEY_BOLD, false);
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_KEY_ITALIC, false);
 		
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE, 
+				store,
+				PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE,
 				findRGB(registry, IJavaThemeConstants.PROPERTIES_FILE_COLORING_VALUE, new RGB(42, 0, 255)));
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE_BOLD, false);
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE_ITALIC, false);
 		
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT, 
+				store,
+				PreferenceConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT,
 				findRGB(registry, IJavaThemeConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT, new RGB(0, 0, 0)));
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT_BOLD, false);
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_ASSIGNMENT_ITALIC, false);
 		
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT, 
+				store,
+				PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT,
 				findRGB(registry, IJavaThemeConstants.PROPERTIES_FILE_COLORING_ARGUMENT, new RGB(127, 0, 85)));
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT_BOLD, true);
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT_ITALIC, false);
 		
 		setDefaultAndFireEvent(
-				store, 
-				PreferenceConstants.PROPERTIES_FILE_COLORING_COMMENT,  
+				store,
+				PreferenceConstants.PROPERTIES_FILE_COLORING_COMMENT,
 				findRGB(registry, IJavaThemeConstants.PROPERTIES_FILE_COLORING_COMMENT, new RGB(63, 127, 95)));
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_COMMENT_BOLD, false);
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_COMMENT_ITALIC, false);
@@ -3961,7 +3964,7 @@ public class PreferenceConstants {
 	}
 	
 	/**
-	 * Encodes a JRE library to be used in the named preference <code>NEWPROJECT_JRELIBRARY_LIST</code>. 
+	 * Encodes a JRE library to be used in the named preference <code>NEWPROJECT_JRELIBRARY_LIST</code>.
 	 * 
 	 * @param description a string value describing the JRE library. The description is used
 	 * to identify the JDR library in the UI
@@ -4001,7 +4004,7 @@ public class PreferenceConstants {
 	 * </code> with the index defined by <code> NEWPROJECT_JRELIBRARY_INDEX</code>.
 	 *
 	 * @return the current default set of class path entries
-	 *  
+	 * 
 	 * @see #NEWPROJECT_JRELIBRARY_LIST
 	 * @see #NEWPROJECT_JRELIBRARY_INDEX
 	 */
