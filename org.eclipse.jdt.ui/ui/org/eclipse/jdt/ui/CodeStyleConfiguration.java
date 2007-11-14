@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,10 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 /**
  * Gives access to the import rewrite configured with the settings as specified in the user interface.
  * These settings are kept in JDT UI for compatibility reasons. 
+ * 
+ * <p>
+ * This class is not intended to be subclassed or instantiated by clients.
+ * </p>
  * 
  * @since 3.2
  */

@@ -44,6 +44,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * the non-modifying {@link ASTRewrite} to get update scripts.
  * </p>
  * 
+ * <p>
+ * This class is not intended to be subclassed or instantiated by clients.
+ * </p>
+ * 
  * @since 3.4 
  */
 public final class SharedASTProvider {
