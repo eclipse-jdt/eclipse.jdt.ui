@@ -26,9 +26,9 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
+import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-import org.eclipse.jface.text.Position;
 
 /**
  * Tests for the BreakContinueTargerFinder class.
@@ -65,11 +65,11 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 
-	private Position[] getHighlights(StringBuffer source, int offset, int length) throws Exception {
+	private OccurrenceLocation[] getHighlights(StringBuffer source, int offset, int length) throws Exception {
 		CompilationUnit root = createCompilationUnit(source);
 		String errorString = fFinder.initialize(root, offset, length);
 		assertNull(errorString, errorString);
-		return fFinder.getOccurrencePositions();
+		return fFinder.getOccurrences();
 	}
 
 	private CompilationUnit createCompilationUnit(StringBuffer source) throws JavaModelException {
@@ -79,41 +79,42 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		return (CompilationUnit) fParser.createAST(null);
 	}
 
-	private void checkSelection(StringBuffer s, int offset, int length, Position[] expected) throws Exception {
-		Position[] selectedNodes= getHighlights(s, offset, length);
+	private void checkSelection(StringBuffer s, int offset, int length, OccurrenceLocation[] expected) throws Exception {
+		OccurrenceLocation[] selectedNodes= getHighlights(s, offset, length);
 		assertEquals("number of selections", expected.length, selectedNodes.length);
 		sortByStartIndex(selectedNodes);
 		sortByStartIndex(expected);
 		for (int i= 0; i < selectedNodes.length; i++) {
-			assertEquals(expected[i], selectedNodes[i]);
+			assertEquals(expected[i].getOffset(), selectedNodes[i].getOffset());
+			assertEquals(expected[i].getLength(), selectedNodes[i].getLength());
 		}
 	}
 
-	private void sortByStartIndex(Position[] positions) {
-		Arrays.sort(positions, new Comparator() {
+	private void sortByStartIndex(OccurrenceLocation[] OccurrenceLocations) {
+		Arrays.sort(OccurrenceLocations, new Comparator() {
 			public int compare(Object arg0, Object arg1) {
-				Position node0= (Position) arg0;
-				Position node1= (Position) arg1;
+				OccurrenceLocation node0= (OccurrenceLocation) arg0;
+				OccurrenceLocation node1= (OccurrenceLocation) arg1;
 				return node0.getOffset() - node1.getOffset();
 			}
 		});
 	}
 
 	//pattern must be found - otherwise it's assumed to be an error
-	private Position find(StringBuffer s, String pattern, int ithOccurrence) {
+	private OccurrenceLocation find(StringBuffer s, String pattern, int ithOccurrence) {
 		if (ithOccurrence < 1)
 			throw new IllegalStateException("ithOccurrence = " + ithOccurrence);
 		return find(s, pattern, ithOccurrence, 0);
 	}
 
-	private Position find(StringBuffer s, String pattern, int ithOccurrence, int startIdx) {
+	private OccurrenceLocation find(StringBuffer s, String pattern, int ithOccurrence, int startIdx) {
 		if (startIdx < 0 || startIdx > s.length())
 			throw new IllegalStateException("startIdx = " + startIdx);
 		int idx = s.indexOf(pattern, startIdx);
 		if (idx == -1)
 			throw new IllegalStateException("not found \"" + pattern + "\" in \"" + s.substring(startIdx));
 		if (ithOccurrence == 1)
-			return new Position(idx, pattern.length());
+			return new OccurrenceLocation(idx, pattern.length(), 0, "");
 	    return find(s, pattern, ithOccurrence-1, idx+1);
 	}
 	
@@ -128,7 +129,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("}\n");
 		int offset= 1 + s.indexOf("break");//middle of word
 		int length= 0;
-		Position[] ranges= { find(s, "for", 1), find(s, "}", 1) };
+		OccurrenceLocation[] ranges= { find(s, "for", 1), find(s, "}", 1) };
 		checkSelection(s, offset, length, ranges);
 	}
 
@@ -143,7 +144,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("}\n");
 		int offset= 1 + s.indexOf("break");//middle of word
 		int length= 0;
-		Position[] ranges= { find(s, "for", 1), find(s, "}", 1) };
+		OccurrenceLocation[] ranges= { find(s, "for", 1), find(s, "}", 1) };
 		checkSelection(s, offset, length, ranges);
 	}
 
@@ -159,7 +160,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("}");
 		int offset= 1 + s.indexOf("break");//middle of word
 		int length= 0;
-		Position[] ranges= { find(s, "while", 1), find(s, "}", 1) };
+		OccurrenceLocation[] ranges= { find(s, "while", 1), find(s, "}", 1) };
 		checkSelection(s, offset, length, ranges);
 	}
 
@@ -175,7 +176,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("}");
 		int offset= 1 + s.indexOf("break");//middle of word
 		int length= 0;
-		Position[] ranges= { find(s, "do", 1), find(s, "}", 1) };
+		OccurrenceLocation[] ranges= { find(s, "do", 1), find(s, "}", 1) };
 		checkSelection(s, offset, length, ranges);
 	}
 
@@ -191,7 +192,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("}\n");
 		int offset= 1 + s.indexOf("break");//middle of word
 		int length= 2;
-		Position[] ranges= { find(s, "switch", 1), find(s, "}", 1) };
+		OccurrenceLocation[] ranges= { find(s, "switch", 1), find(s, "}", 1) };
 		checkSelection(s, offset, length, ranges);
 	}
 
@@ -208,7 +209,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("}\n");
 		int offset= 1 + s.indexOf("break");//middle of word
 		int length= 0;
-		Position[] ranges= { find(s, "bar", 1), find(s, "}", 2) };
+		OccurrenceLocation[] ranges= { find(s, "bar", 1), find(s, "}", 2) };
 		checkSelection(s, offset, length, ranges);
 	}
 	
@@ -225,7 +226,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("}\n");
 		int offset= 1 + s.indexOf("break");//middle of word
 		int length= 0;
-		Position[] ranges= { find(s, "bar", 1), find(s, "}", 2) };
+		OccurrenceLocation[] ranges= { find(s, "bar", 1), find(s, "}", 2) };
 		checkSelection(s, offset, length, ranges);
 	}
 
@@ -240,7 +241,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("}\n");
 		int offset= 1 + s.indexOf("continue");//middle of word
 		int length= 0;
-		Position[] ranges= { find(s, "for", 1) };
+		OccurrenceLocation[] ranges= { find(s, "for", 1) };
 		checkSelection(s, offset, length, ranges);
 	}
 	
@@ -255,7 +256,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("}\n");
 		int offset= 1 + s.indexOf("continue");//middle of word
 		int length= 0;
-		Position[] ranges= { find(s, "for", 1) };
+		OccurrenceLocation[] ranges= { find(s, "for", 1) };
 		checkSelection(s, offset, length, ranges);
 	}
 
@@ -271,7 +272,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("}");
 		int offset= 1 + s.indexOf("continue");//middle of word
 		int length= 0;
-		Position[] ranges= { find(s, "while", 1) };
+		OccurrenceLocation[] ranges= { find(s, "while", 1) };
 		checkSelection(s, offset, length, ranges);
 	}
 
@@ -287,7 +288,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("}");
 		int offset= 1 + s.indexOf("continue");//middle of word
 		int length= 0;
-		Position[] ranges= { find(s, "do", 1) };
+		OccurrenceLocation[] ranges= { find(s, "do", 1) };
 		checkSelection(s, offset, length, ranges);
 	}
 
@@ -306,7 +307,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("}\n");
 		int offset= 1 + s.indexOf("continue");//middle of word
 		int length= 2;
-		Position[] ranges= { find(s, "do", 1) };
+		OccurrenceLocation[] ranges= { find(s, "do", 1) };
 		checkSelection(s, offset, length, ranges);
 	}
 
@@ -323,7 +324,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("}\n");
 		int offset= 1 + s.indexOf("continue");//middle of word
 		int length= 0;
-		Position[] ranges= { find(s, "bar", 1) };
+		OccurrenceLocation[] ranges= { find(s, "bar", 1) };
 		checkSelection(s, offset, length, ranges);
 	}
 	
@@ -340,7 +341,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("}\n");
 		int offset= 1 + s.indexOf("continue");//middle of word
 		int length= 0;
-		Position[] ranges= { find(s, "bar", 1) };
+		OccurrenceLocation[] ranges= { find(s, "bar", 1) };
 		checkSelection(s, offset, length, ranges);
 	}
 
@@ -357,7 +358,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("}\n");
 		int offset= s.indexOf("continue bar;") + 1+ "continue ".length();//middle of label reference
 		int length= 0;
-		Position[] ranges= { find(s, "bar", 1) };
+		OccurrenceLocation[] ranges= { find(s, "bar", 1) };
 		checkSelection(s, offset, length, ranges);
 	}
 }
