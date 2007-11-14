@@ -615,10 +615,14 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 						final TypeReferenceMatch match= (TypeReferenceMatch) results[j];
 						final List matches= new ArrayList();
 
-						if (match.getLocalElement() instanceof ILocalVariable)
-							matches.add(match.getLocalElement());
-						else
+						if (match.getLocalElement() != null) {
+							if (match.getLocalElement() instanceof ILocalVariable) {
+								matches.add(match.getLocalElement());
+							}
+							// else don't update (e.g. match in type parameter, annotation, ...
+						} else {
 							matches.add(match.getElement());
+						}
 
 						final IJavaElement[] others= match.getOtherElements();
 						if (others != null)
