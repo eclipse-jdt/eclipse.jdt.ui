@@ -10,16 +10,23 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
-import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
-import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.progress.IProgressConstants;
 
+import org.eclipse.ui.console.IConsoleConstants;
+
+import org.eclipse.search.ui.NewSearchUI;
+
+import org.eclipse.debug.ui.IDebugUIConstants;
+
+import org.eclipse.jdt.ui.JavaUI;
+
 public class JavaPerspectiveFactory implements IPerspectiveFactory {
+	
+	// located in 'org.eclipse.ui.navigator.resources (ProjectExplorer)' which we don't need to import ar the moment
+	public static final String ID_PROJECT_EXPLORER= "org.eclipse.ui.navigator.ProjectExplorer"; //$NON-NLS-1$
 	
 	/**
 	 * Constructs a new Default layout engine.
@@ -35,6 +42,7 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		folder.addView(JavaUI.ID_PACKAGES);
 		folder.addView(JavaUI.ID_TYPE_HIERARCHY);
 		folder.addPlaceholder(IPageLayout.ID_RES_NAV);
+		folder.addPlaceholder(ID_PROJECT_EXPLORER);
 		
 		IFolderLayout outputfolder= layout.createFolder("bottom", IPageLayout.BOTTOM, (float)0.75, editorArea); //$NON-NLS-1$
 		outputfolder.addView(IPageLayout.ID_PROBLEM_VIEW);
@@ -58,6 +66,7 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(JavaUI.ID_SOURCE_VIEW);
 		layout.addShowViewShortcut(JavaUI.ID_JAVADOC_VIEW);
 
+
 		// views - search
 		layout.addShowViewShortcut(NewSearchUI.SEARCH_VIEW_ID);
 		
@@ -70,6 +79,7 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(IPageLayout.ID_RES_NAV);
 		layout.addShowViewShortcut(IPageLayout.ID_TASK_LIST);
 		layout.addShowViewShortcut(IProgressConstants.PROGRESS_VIEW_ID);
+		layout.addShowViewShortcut(ID_PROJECT_EXPLORER);
 				
 		// new actions - Java project creation wizard
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.JavaProjectWizard"); //$NON-NLS-1$

@@ -11,15 +11,19 @@
 
 package org.eclipse.jdt.internal.ui;
 
-import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.IPlaceholderFolderLayout;
-import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.progress.IProgressConstants;
+
+import org.eclipse.ui.console.IConsoleConstants;
+
+import org.eclipse.search.ui.NewSearchUI;
+
+import org.eclipse.debug.ui.IDebugUIConstants;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		
@@ -38,6 +42,7 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		folder.addPlaceholder(IPageLayout.ID_OUTLINE);
 		folder.addPlaceholder(JavaUI.ID_PACKAGES);
 		folder.addPlaceholder(IPageLayout.ID_RES_NAV);
+		folder.addPlaceholder(JavaPerspectiveFactory.ID_PROJECT_EXPLORER);
 		
 		IPlaceholderFolderLayout outputfolder= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, editorArea); //$NON-NLS-1$
 		outputfolder.addPlaceholder(IPageLayout.ID_PROBLEM_VIEW);
@@ -67,6 +72,7 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(IPageLayout.ID_RES_NAV);
 		layout.addShowViewShortcut(IPageLayout.ID_TASK_LIST);
 		layout.addShowViewShortcut(IProgressConstants.PROGRESS_VIEW_ID);
+		layout.addShowViewShortcut(JavaPerspectiveFactory.ID_PROJECT_EXPLORER);
 		
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.JavaProjectWizard"); //$NON-NLS-1$
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.NewPackageCreationWizard"); //$NON-NLS-1$

@@ -11,17 +11,24 @@
 package org.eclipse.jdt.internal.ui.browsing;
 
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.IPlaceholderFolderLayout;
-import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.progress.IProgressConstants;
+
+import org.eclipse.ui.console.IConsoleConstants;
+
+import org.eclipse.search.ui.NewSearchUI;
+
+import org.eclipse.debug.ui.IDebugUIConstants;
+
+import org.eclipse.jdt.core.IJavaElement;
+
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPerspectiveFactory;
 
 
 public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
@@ -72,6 +79,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(IPageLayout.ID_RES_NAV);
 		layout.addShowViewShortcut(IPageLayout.ID_TASK_LIST);
 		layout.addShowViewShortcut(IProgressConstants.PROGRESS_VIEW_ID);
+		layout.addShowViewShortcut(JavaPerspectiveFactory.ID_PROJECT_EXPLORER);
 
 		// new actions - Java project creation wizard
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.JavaProjectWizard"); //$NON-NLS-1$
@@ -96,6 +104,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		placeHolderLeft.addPlaceholder(IPageLayout.ID_OUTLINE);
 		placeHolderLeft.addPlaceholder(JavaUI.ID_PACKAGES);
 		placeHolderLeft.addPlaceholder(IPageLayout.ID_RES_NAV);
+		placeHolderLeft.addPlaceholder(JavaPerspectiveFactory.ID_PROJECT_EXPLORER);
 
 		if (shouldShowProjectsView()) {
 			layout.addView(JavaUI.ID_PROJECTS_VIEW, IPageLayout.LEFT, (float)0.25, IPageLayout.ID_EDITOR_AREA);
@@ -142,6 +151,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		placeHolderLeft.addPlaceholder(IPageLayout.ID_OUTLINE);
 		placeHolderLeft.addPlaceholder(JavaUI.ID_PACKAGES);
 		placeHolderLeft.addPlaceholder(IPageLayout.ID_RES_NAV);
+		placeHolderLeft.addPlaceholder(JavaPerspectiveFactory.ID_PROJECT_EXPLORER);
 
 
 		IPlaceholderFolderLayout placeHolderBottom= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
