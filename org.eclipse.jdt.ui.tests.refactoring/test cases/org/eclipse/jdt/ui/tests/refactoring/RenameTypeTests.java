@@ -80,7 +80,7 @@ public class RenameTypeTests extends RefactoringTest {
 		return getType(createCUfromTestFile(pack, className), className);
 	}
 		
-	private RenameJavaElementDescriptor createRefactoringDescriptor(IType type, String newName) throws CoreException {
+	private RenameJavaElementDescriptor createRefactoringDescriptor(IType type, String newName) {
 		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_TYPE);
 		descriptor.setJavaElement(type);
 		descriptor.setNewName(newName);
@@ -153,8 +153,12 @@ public class RenameTypeTests extends RefactoringTest {
 		fIsPreDeltaTest= true;
 	}
 	
+	private void helper3(String oldName, String newName, boolean updateRef, boolean updateTextual, boolean updateSimilar) throws JavaModelException, CoreException, IOException, Exception {
+		helper3(oldName, newName, updateRef, updateTextual, updateSimilar, null);
+	}
+	
 	private void helper3(String oldName, String newName, boolean updateRef, boolean updateTextual, boolean updateSimilar, String nonJavaFiles) throws JavaModelException, CoreException, IOException, Exception {
-		RefactoringDescriptor descriptor= initWithAllOptions(oldName, oldName, newName, newName, updateRef, updateTextual, updateSimilar, nonJavaFiles, RenamingNameSuggestor.STRATEGY_EMBEDDED);
+		RefactoringDescriptor descriptor= initWithAllOptions(oldName, oldName, newName, updateRef, updateTextual, updateSimilar, nonJavaFiles, RenamingNameSuggestor.STRATEGY_EMBEDDED);
 		Refactoring ref= createRefactoring(descriptor);
 		RefactoringStatus status= performRefactoring(ref);
 		assertNull("was supposed to pass", status);
@@ -163,7 +167,7 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	private void helper3_inner(String oldName, String oldInnerName, String newName, String innerNewName, boolean updateRef, boolean updateTextual, boolean updateSimilar, String nonJavaFiles) throws JavaModelException, CoreException, IOException, Exception {
-		RefactoringDescriptor descriptor= initWithAllOptions(oldName, oldInnerName, newName, innerNewName, updateRef, updateTextual, updateSimilar, nonJavaFiles, RenamingNameSuggestor.STRATEGY_EMBEDDED);
+		RefactoringDescriptor descriptor= initWithAllOptions(oldName, oldInnerName, innerNewName, updateRef, updateTextual, updateSimilar, nonJavaFiles, RenamingNameSuggestor.STRATEGY_EMBEDDED);
 		Refactoring ref= createRefactoring(descriptor);
 		assertNull("was supposed to pass", performRefactoring(ref));
 		checkResultInClass(newName);
@@ -187,21 +191,17 @@ public class RenameTypeTests extends RefactoringTest {
 		
 	}
 
-	private void helper3(String oldName, String newName, boolean updateSimilar, boolean updateTextual, boolean updateRef) throws JavaModelException, CoreException, IOException, Exception {
-		helper3(oldName, newName, updateSimilar, updateTextual, updateRef, null);
-	}
-	
 	private void helper3_fail(String oldName, String newName, boolean updateSimilar, boolean updateTextual, boolean updateRef, int matchStrategy) throws JavaModelException, CoreException, IOException, Exception {
-		RefactoringDescriptor descriptor= initWithAllOptions(oldName, oldName, newName, newName, updateRef, updateTextual, updateRef, null, matchStrategy);
+		RefactoringDescriptor descriptor= initWithAllOptions(oldName, oldName, newName, updateRef, updateTextual, updateSimilar, null, matchStrategy);
 		assertNotNull("was supposed to fail", performRefactoring(descriptor));
 	}
 	
 	private void helper3_fail(String oldName, String newName, boolean updateSimilar, boolean updateTextual, boolean updateRef) throws JavaModelException, CoreException, IOException, Exception {
-		RefactoringDescriptor descriptor= initWithAllOptions(oldName, oldName, newName, newName, updateRef, updateTextual, updateSimilar, null, RenamingNameSuggestor.STRATEGY_SUFFIX);
+		RefactoringDescriptor descriptor= initWithAllOptions(oldName, oldName, newName, updateRef, updateTextual, updateSimilar, null, RenamingNameSuggestor.STRATEGY_SUFFIX);
 		assertNotNull("was supposed to fail", performRefactoring(descriptor));
 	}
 
-	private RefactoringDescriptor initWithAllOptions(String oldName, String innerOldName, String newName, String innerNewName, boolean updateReferences, boolean updateTextualMatches, boolean updateSimilar, String nonJavaFiles, int matchStrategy) throws Exception, JavaModelException, CoreException {
+	private RefactoringDescriptor initWithAllOptions(String oldName, String innerOldName, String innerNewName, boolean updateReferences, boolean updateTextualMatches, boolean updateSimilar, String nonJavaFiles, int matchStrategy) throws Exception, JavaModelException, CoreException {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), oldName);
 		IType classA= getType(cu, innerOldName);
 		RenameJavaElementDescriptor descriptor= createRefactoringDescriptor(classA, innerNewName);
@@ -1588,7 +1588,7 @@ public class RenameTypeTests extends RefactoringTest {
 		checkMappers(ref, someClass, "SomeNewClass.java", someClassMembers);
 	}
 
-	private void checkMappers(Refactoring refactoring, IType type, String newCUName, IJavaElement[] someClassMembers) throws JavaModelException {
+	private void checkMappers(Refactoring refactoring, IType type, String newCUName, IJavaElement[] someClassMembers) {
 		RenameTypeProcessor rtp= (RenameTypeProcessor)((RenameRefactoring) refactoring).getProcessor();
 		
 		ICompilationUnit newUnit= (ICompilationUnit)rtp.getRefactoredJavaElement(type.getCompilationUnit());
@@ -1666,5 +1666,14 @@ public class RenameTypeTests extends RefactoringTest {
 	public void testSimilarElements33() throws Exception {
 		// Test two local variables inside anonymous types do not generate warnings
 		helper3("Why", "WhyNot", true, false, true);
+	}
+	
+	public void testSimilarElements34() throws Exception {
+		if (true) {
+			printTestDisabledMessage("https://bugs.eclipse.org/bugs/show_bug.cgi?id=209778");
+			return;
+		}
+		// Test references in annotations and type parameters
+		helper3("Try", "Bla", true, false, true);
 	}	
 }
