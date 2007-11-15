@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
@@ -4795,7 +4796,228 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});	
 	}
-	
 
-	
+	public void testConvertToStringBuffer1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String strX = \"foo\"+\"bar\"+\"baz\"+\"biz\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\"+\""), 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        StringBuffer stringBuffer = new StringBuffer();\n");
+		buf.append("        stringBuffer.append(\"foo\");\n");
+		buf.append("        stringBuffer.append(\"bar\");\n");
+		buf.append("        stringBuffer.append(\"baz\");\n");
+		buf.append("        stringBuffer.append(\"biz\");\n");
+		buf.append("        String strX = stringBuffer.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	public void testConvertToStringBufferStringAndVar() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String foo = \"foo\";\n");
+		buf.append("        String fuu = \"fuu\";\n");
+		buf.append("        String strX = foo+\"bar\"+fuu;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String foo = \"foo\";\n");
+		buf.append("        String fuu = \"fuu\";\n");
+		buf.append("        StringBuffer stringBuffer = new StringBuffer();\n");
+		buf.append("        stringBuffer.append(foo);\n");
+		buf.append("        stringBuffer.append(\"bar\");\n");
+		buf.append("        stringBuffer.append(fuu);\n");
+		buf.append("        String strX = stringBuffer.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	public void testConvertToStringBufferNoFixWithoutString() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int strX = 5+1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
+		List proposals= collectAssists(context, false);
+
+		assertCommandIdDoesNotExists(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
+	}
+
+	public void testConvertToStringBufferNoFixWithoutString2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int strX;\n");
+		buf.append("        strX = 5+1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
+		List proposals= collectAssists(context, false);
+
+		assertCommandIdDoesNotExists(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
+	}
+
+	public void testConvertToStringBufferNoFixOutsideMethod() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    String strX = \"foo\"+\"bar\"\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
+		List proposals= collectAssists(context, false);
+
+		assertCommandIdDoesNotExists(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
+	}
+
+	public void testConvertToStringBufferDupVarName() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int stringBuffer = 5;\n");
+		buf.append("        String stringBuffer2;\n");
+		buf.append("        StringBuffer stringBuffer3 = null;\n");
+		buf.append("        String strX = \"foo\"+\"bar\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int stringBuffer = 5;\n");
+		buf.append("        String stringBuffer2;\n");
+		buf.append("        StringBuffer stringBuffer3 = null;\n");
+		buf.append("        StringBuffer stringBuffer4 = new StringBuffer();\n");
+		buf.append("        stringBuffer4.append(\"foo\");\n");
+		buf.append("        stringBuffer4.append(\"bar\");\n");
+		buf.append("        String strX = stringBuffer4.toString();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	public void testConvertToStringBufferInIfStatement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String strX;\n");
+		buf.append("        if(true) strX = \"foo\"+\"bar\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\"+\""), 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String strX;\n");
+		buf.append("        if(true) {\n");
+		buf.append("            StringBuffer stringBuffer = new StringBuffer();\n");
+		buf.append("            stringBuffer.append(\"foo\");\n");
+		buf.append("            stringBuffer.append(\"bar\");\n");
+		buf.append("            strX = stringBuffer.toString();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	public void testConvertToStringBufferAsParamter() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(\"foo\"+\"bar\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\"+\""), 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        StringBuffer stringBuffer = new StringBuffer();\n");
+		buf.append("        stringBuffer.append(\"foo\");\n");
+		buf.append("        stringBuffer.append(\"bar\");\n");
+		buf.append("        System.out.println(stringBuffer.toString());\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
 }
