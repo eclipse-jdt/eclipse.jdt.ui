@@ -35,7 +35,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
-import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
@@ -4866,57 +4865,57 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
-	public void testConvertToStringBufferNoFixWithoutString() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int strX = 5+1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
-		List proposals= collectAssists(context, false);
-
-		assertCommandIdDoesNotExists(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
-	}
-
-	public void testConvertToStringBufferNoFixWithoutString2() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int strX;\n");
-		buf.append("        strX = 5+1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
-		List proposals= collectAssists(context, false);
-
-		assertCommandIdDoesNotExists(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
-	}
-
-	public void testConvertToStringBufferNoFixOutsideMethod() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    String strX = \"foo\"+\"bar\"\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
-		List proposals= collectAssists(context, false);
-
-		assertCommandIdDoesNotExists(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
-	}
+//	public void testConvertToStringBufferNoFixWithoutString() throws Exception {
+//		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+//		StringBuffer buf= new StringBuffer();
+//		buf.append("package test1;\n");
+//		buf.append("public class A {\n");
+//		buf.append("    public void foo() {\n");
+//		buf.append("        int strX = 5+1;\n");
+//		buf.append("    }\n");
+//		buf.append("}\n");
+//		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+//
+//		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
+//		List proposals= collectAssists(context, false);
+//
+//		assertCommandIdDoesNotExists(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
+//	}
+//
+//	public void testConvertToStringBufferNoFixWithoutString2() throws Exception {
+//		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+//		StringBuffer buf= new StringBuffer();
+//		buf.append("package test1;\n");
+//		buf.append("public class A {\n");
+//		buf.append("    public void foo() {\n");
+//		buf.append("        int strX;\n");
+//		buf.append("        strX = 5+1;\n");
+//		buf.append("    }\n");
+//		buf.append("}\n");
+//		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+//
+//		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
+//		List proposals= collectAssists(context, false);
+//
+//		assertCommandIdDoesNotExists(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
+//	}
+//
+//	public void testConvertToStringBufferNoFixOutsideMethod() throws Exception {
+//		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+//		StringBuffer buf= new StringBuffer();
+//		buf.append("package test1;\n");
+//		buf.append("public class A {\n");
+//		buf.append("    String strX = \"foo\"+\"bar\"\n");
+//		buf.append("    public void foo() {\n");
+//		buf.append("    }\n");
+//		buf.append("}\n");
+//		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+//
+//		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
+//		List proposals= collectAssists(context, false);
+//
+//		assertCommandIdDoesNotExists(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
+//	}
 
 	public void testConvertToStringBufferDupVarName() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
