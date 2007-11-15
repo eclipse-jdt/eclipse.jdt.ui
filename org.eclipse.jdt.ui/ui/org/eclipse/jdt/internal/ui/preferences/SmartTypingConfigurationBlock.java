@@ -73,7 +73,7 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_TAB),
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_OPENING_BRACE),
 		};
-	}	
+	}
 
 	/**
 	 * Creates page for mark occurrences preferences.
@@ -94,19 +94,19 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 
 		Composite composite;
 		
-		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_autoclose_title); 
+		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_autoclose_title);
 		addAutoclosingSection(composite);
 		
-		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_automove_title); 
+		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_automove_title);
 		addAutopositionSection(composite);
 		
-		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_tabs_title); 
+		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_tabs_title);
 		addTabSection(composite);
 
-		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_pasting_title); 
+		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_pasting_title);
 		addPasteSection(composite);
 		
-		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_strings_title); 
+		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_strings_title);
 		addStringsSection(composite);
 
 		scrolled.setContent(control);
@@ -120,13 +120,11 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		composite.setLayout(layout);
 
 		String label;
-		Button master, slave;
-		label= PreferencesMessages.JavaEditorPreferencePage_wrapStrings; 
-		master= addCheckBox(composite, label, PreferenceConstants.EDITOR_WRAP_STRINGS, 0);
+		label= PreferencesMessages.JavaEditorPreferencePage_wrapStrings;
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_WRAP_STRINGS, 0);
 		
-		label= PreferencesMessages.JavaEditorPreferencePage_escapeStrings; 
-		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_ESCAPE_STRINGS, 0);
-		createDependency(master, slave);
+		label= PreferencesMessages.JavaEditorPreferencePage_escapeStrings;
+		addCheckBox(composite, label, PreferenceConstants.EDITOR_ESCAPE_STRINGS, 0);
 	}
 
 	private void addPasteSection(Composite composite) {
@@ -134,10 +132,10 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		composite.setLayout(layout);
 
 		String label;
-		label= PreferencesMessages.JavaEditorPreferencePage_smartPaste; 
+		label= PreferencesMessages.JavaEditorPreferencePage_smartPaste;
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_PASTE, 0);
 
-		label= PreferencesMessages.JavaEditorPreferencePage_importsOnPaste; 
+		label= PreferencesMessages.JavaEditorPreferencePage_importsOnPaste;
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_IMPORTS_ON_PASTE, 0);
 	}
 
@@ -146,7 +144,7 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		composite.setLayout(layout);
 
 		String label;
-		label= PreferencesMessages.JavaEditorPreferencePage_typing_smartTab; 
+		label= PreferencesMessages.JavaEditorPreferencePage_typing_smartTab;
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_TAB, 0);
 		
 		createMessage(composite);
@@ -159,10 +157,10 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 
 		String label;
 		
-		label= PreferencesMessages.JavaEditorPreferencePage_typing_smartSemicolon; 
+		label= PreferencesMessages.JavaEditorPreferencePage_typing_smartSemicolon;
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_SEMICOLON, 0);
 		
-		label= PreferencesMessages.JavaEditorPreferencePage_typing_smartOpeningBrace; 
+		label= PreferencesMessages.JavaEditorPreferencePage_typing_smartOpeningBrace;
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_OPENING_BRACE, 0);
 	}
 
@@ -175,33 +173,33 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		String label;
 		Button master, slave;
 
-		label= PreferencesMessages.JavaEditorPreferencePage_closeStrings; 
+		label= PreferencesMessages.JavaEditorPreferencePage_closeStrings;
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_STRINGS, 0);
 
-		label= PreferencesMessages.JavaEditorPreferencePage_closeBrackets; 
+		label= PreferencesMessages.JavaEditorPreferencePage_closeBrackets;
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_BRACKETS, 0);
 
-		label= PreferencesMessages.JavaEditorPreferencePage_closeBraces; 
+		label= PreferencesMessages.JavaEditorPreferencePage_closeBraces;
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_BRACES, 0);
 
-		label= PreferencesMessages.JavaEditorPreferencePage_closeJavaDocs; 
+		label= PreferencesMessages.JavaEditorPreferencePage_closeJavaDocs;
 		master= addCheckBox(composite, label, PreferenceConstants.EDITOR_CLOSE_JAVADOCS, 0);
 
-		label= PreferencesMessages.JavaEditorPreferencePage_addJavaDocTags; 
+		label= PreferencesMessages.JavaEditorPreferencePage_addJavaDocTags;
 		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, 0);
 		createDependency(master, slave);
 	}
 	
 	private void createMessage(final Composite composite) {
-		// TODO create a link with an argument, so the formatter preference page can open the 
+		// TODO create a link with an argument, so the formatter preference page can open the
 		// current profile automatically.
-		String linkTooltip= PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_tooltip; 
+		String linkTooltip= PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_tooltip;
 		String text;
 		String indentMode= JavaPlugin.getDefault().getCombinedPreferenceStore().getString(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
 		if (JavaCore.TAB.equals(indentMode))
 			text= Messages.format(PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_tab_text, new String[] {Integer.toString(getTabDisplaySize())});
 		else
-			text= Messages.format(PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_others_text, new String[] {Integer.toString(getTabDisplaySize()), Integer.toString(getIndentSize()), getIndentMode()}); 
+			text= Messages.format(PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_others_text, new String[] {Integer.toString(getTabDisplaySize()), Integer.toString(getIndentSize()), getIndentMode()});
 		
 		final Link link= new Link(composite, SWT.NONE);
 		link.setText(text);
@@ -247,7 +245,7 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		String indentMode= JavaPlugin.getDefault().getCombinedPreferenceStore().getString(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
 		
 		if (JavaCore.SPACE.equals(indentMode))
-			return PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_spaces; 
+			return PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_spaces;
 		
 		if (JavaCore.TAB.equals(indentMode))
 			return PreferencesMessages.SmartTypingConfigurationBlock_tabs_message_tabs;

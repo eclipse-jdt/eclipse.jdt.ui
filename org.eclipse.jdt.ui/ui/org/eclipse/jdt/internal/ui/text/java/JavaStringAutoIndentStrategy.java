@@ -101,9 +101,6 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 					case '\"' :
 						tokenBuffer.append("\\\""); //$NON-NLS-1$
 						break;
-					case '\'' :
-						tokenBuffer.append("\\'"); //$NON-NLS-1$
-						break;
 					case '\\' :
 						tokenBuffer.append("\\\\"); //$NON-NLS-1$
 						break;
@@ -168,7 +165,7 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 			indentation += String.valueOf("\t\t"); //$NON-NLS-1$
 
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-		if (isLineDelimiter(document, command.text))
+		if (preferenceStore.getBoolean(PreferenceConstants.EDITOR_WRAP_STRINGS) && isLineDelimiter(document, command.text))
 			command.text= "\" +" + command.text + indentation + "\"";  //$NON-NLS-1$//$NON-NLS-2$
 		else if (command.text.length() > 1 && preferenceStore.getBoolean(PreferenceConstants.EDITOR_ESCAPE_STRINGS))
 			command.text= getModifiedText(command.text, indentation, delimiter);
@@ -193,13 +190,8 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 		try {
 			if (command.text == null)
 				return;
-
-			IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-
-			if (preferenceStore.getBoolean(PreferenceConstants.EDITOR_WRAP_STRINGS) && isSmartMode()) {
+			if (isSmartMode())
 				javaStringIndentAfterNewLine(document, command);
-			}
-
 		} catch (BadLocationException e) {
 		}
 	}
