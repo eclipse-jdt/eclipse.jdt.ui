@@ -144,6 +144,11 @@ public class QuickFixTest extends TestCase {
 		StringAsserts.assertExpectedExistInProposals(getPreviewContents(actualProposals), expecteds);
 	}
 
+	
+	public static void assertCommandIdDoesNotExists(List actualProposals, String commandId) {
+		assertTrue(findProposalByCommandId(commandId, actualProposals) == null);
+	}
+		
 	public static TypeDeclaration findTypeDeclaration(CompilationUnit astRoot, String simpleTypeName) {
 		List types= astRoot.types();
 		for (int i= 0; i < types.size(); i++) {
@@ -405,7 +410,7 @@ public class QuickFixTest extends TestCase {
 		}
 	}
 
-	protected ICommandAccess findProposalByCommandId(String commandId, List proposals) {
+	protected static ICommandAccess findProposalByCommandId(String commandId, List proposals) {
 		for (int i= 0; i < proposals.size(); i++) {
 			Object curr= proposals.get(i);
 			if (curr instanceof ICommandAccess) {
