@@ -25,7 +25,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 public class JavaPerspectiveFactory implements IPerspectiveFactory {
 	
-	// located in 'org.eclipse.ui.navigator.resources (ProjectExplorer)' which we don't need to import ar the moment
+	// located in 'org.eclipse.ui.navigator.resources (ProjectExplorer)' which we don't need to import at the moment
 	public static final String ID_PROJECT_EXPLORER= "org.eclipse.ui.navigator.ProjectExplorer"; //$NON-NLS-1$
 	
 	/**
