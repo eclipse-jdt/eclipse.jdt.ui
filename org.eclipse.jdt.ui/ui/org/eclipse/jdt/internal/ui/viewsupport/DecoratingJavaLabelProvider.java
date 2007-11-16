@@ -69,7 +69,7 @@ public class DecoratingJavaLabelProvider extends DecoratingLabelProvider impleme
 		if (enable) {
 			setDecorationContext(DecorationContext.DEFAULT_CONTEXT);
 		} else {
-			setDecorationContext(HierarchicalDecorationContext.CONTEXT);
+			setDecorationContext(HierarchicalDecorationContext.getContext());
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.mapping.ResourceMappingContext;
 import org.eclipse.core.resources.mapping.ResourceTraversal;
 
+import org.eclipse.jface.viewers.DecorationContext;
 import org.eclipse.jface.viewers.IDecorationContext;
 
 import org.eclipse.team.ui.mapping.SynchronizationStateTester;
@@ -29,30 +30,17 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
-public class HierarchicalDecorationContext implements IDecorationContext {
+public class HierarchicalDecorationContext {
 	
-	private HierarchicalSynchronizationStateTester fStateTester;
-	public static final HierarchicalDecorationContext CONTEXT= new HierarchicalDecorationContext();
+	private static IDecorationContext fgContext= null;
 	
-	private HierarchicalDecorationContext() {
-		fStateTester= new HierarchicalSynchronizationStateTester();
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IDecorationContext#getProperties()
-	 */
-	public String[] getProperties() {
-		return new String[] { SynchronizationStateTester.PROP_TESTER };
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IDecorationContext#getProperty(java.lang.String)
-	 */
-	public Object getProperty(String property) {
-		if (property == SynchronizationStateTester.PROP_TESTER) {
-			return fStateTester;
+	public static IDecorationContext getContext() {
+		if (fgContext == null) {
+			DecorationContext context= new DecorationContext();
+			context.putProperty(SynchronizationStateTester.PROP_TESTER, new HierarchicalSynchronizationStateTester());
+			fgContext= context;
 		}
-		return null;
+		return fgContext;
 	}
 		
 	private static final class HierarchicalSynchronizationStateTester extends SynchronizationStateTester {
