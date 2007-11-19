@@ -14,16 +14,19 @@ package org.eclipse.jdt.text.tests;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
-import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
-import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.rules.FastPartitioner;
 import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.tests.AbstractPairMatcherTest;
+
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+
+import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
+import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 /**
  * Tests for the java pair matcher
  * 
@@ -50,7 +53,7 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 	}
 	
 	protected void setUp() {
-		Document document= new Document("xx(yy(xx)yy)xx");
+		Document document= new Document("xx(yy(xx)yy)xx()/*  */");
 		String[] types= new String[] {
 				IJavaPartitions.JAVA_DOC,
 				IJavaPartitions.JAVA_MULTI_LINE_COMMENT,
@@ -68,7 +71,7 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 	}
 	
 	public static Test suite() {
-		return new TestSuite(JavaPairMatcherTest.class); 
+		return new TestSuite(JavaPairMatcherTest.class);
 	}
 	
 	protected void tearDown () {
@@ -90,7 +93,7 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 			assertNull(match);
 		} else {
 			assertNotNull(match);
-			assertTrue(match.getOffset() == 5 && match.getLength() == 4);		
+			assertTrue(match.getOffset() == 5 && match.getLength() == 4);
 		}
 	}
 	
@@ -101,7 +104,7 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 		
 		match= fPairMatcher.match(fDocument, 6);
 		assertNotNull(match);
-		assertTrue(match.getOffset() == 5 && match.getLength() == 4);		
+		assertTrue(match.getOffset() == 5 && match.getLength() == 4);
 	}
 	
 	public void testBeforeClosingMatch() {
@@ -118,7 +121,7 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 			assertNull(match);
 		} else {
 			assertNotNull(match);
-			assertTrue(match.getOffset() == 5 && match.getLength() == 4);		
+			assertTrue(match.getOffset() == 5 && match.getLength() == 4);
 		}
 	}
 	
@@ -129,8 +132,8 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 		
 		match= fPairMatcher.match(fDocument, 9);
 		assertNotNull(match);
-		assertTrue(match.getOffset() == 5 && match.getLength() == 4);		
-	}	
+		assertTrue(match.getOffset() == 5 && match.getLength() == 4);
+	}
 	
 	public void testBeforeClosingMatchWithNL() {
 		fDocument.set("x(y\ny)x");
@@ -141,7 +144,7 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 			assertNotNull(match);
 			assertTrue(match.getOffset() == 1 && match.getLength() == 5);
 		}
-	}	
+	}
 	
 	public void testAfterClosingMatchWithNL() {
 		fDocument.set("x(y\ny)x");
@@ -159,7 +162,7 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 			assertNotNull(match);
 			assertTrue(match.getOffset() == 3 && match.getLength() == 12);
 		}
-	}	
+	}
 	
 	public void testAfterClosingMatchWithNLAndSingleLineComment() {
 		fDocument.set("x\nx(y\nx //(x\ny)x");
@@ -197,5 +200,13 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 		performMatch(matcher, " final <% T ># ");
 		matcher.dispose();
 	}
+
+	public void testBug209505() {
+		fDocument.set("(xny)/*  */");
+		IRegion match= fPairMatcher.match(fDocument, 5);
+		assertNotNull(match);
+		assertTrue(match.getOffset() == 0 && match.getLength() == 5);
+	}
+
 
 }
