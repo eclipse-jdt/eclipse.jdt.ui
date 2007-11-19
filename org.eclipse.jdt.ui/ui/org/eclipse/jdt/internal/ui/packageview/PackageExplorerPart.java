@@ -1097,6 +1097,12 @@ public class PackageExplorerPart extends ViewPart
 	
 	private Object getInputFromEditor(IEditorInput editorInput) {
 		Object input= JavaUI.getEditorInputJavaElement(editorInput);
+		if (input instanceof ICompilationUnit) {
+			ICompilationUnit cu= (ICompilationUnit) input;
+			if (!cu.getJavaProject().isOnClasspath(cu)) { // test needed for Java files in non-source folders (bug 207839)
+				input= cu.getResource();
+			}
+		}
 		if (input == null) {
 			input= editorInput.getAdapter(IFile.class);
 		}
