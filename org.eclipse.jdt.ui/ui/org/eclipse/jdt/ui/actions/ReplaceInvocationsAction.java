@@ -20,7 +20,6 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -130,9 +129,8 @@ public class ReplaceInvocationsAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */
 	public void run(ITextSelection selection) {
-		IJavaElement editorInput= SelectionConverter.getInput(fEditor);
-		if (editorInput instanceof ITypeRoot && ActionUtil.isProcessable(getShell(), editorInput)) {
-			ITypeRoot typeRoot= (ITypeRoot) editorInput;
+		ITypeRoot typeRoot= SelectionConverter.getInput(fEditor);
+		if (ActionUtil.isProcessable(getShell(), typeRoot)) {
 			RefactoringExecutionStarter.startReplaceInvocationsRefactoring(typeRoot, selection.getOffset(), selection.getLength(), getShell());
 		}
 	}

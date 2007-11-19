@@ -391,7 +391,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			
 			try {
 				if (delta.getAffectedChildren().length == 1 && delta.getAffectedChildren()[0].getElement() instanceof IImportContainer) {
-					IJavaElement elem= SelectionConverter.getElementAtOffset(ast.getJavaElement(), new TextSelection(editor.getCachedSelectedRange().x, editor.getCachedSelectedRange().y));
+					IJavaElement elem= SelectionConverter.getElementAtOffset(ast.getTypeRoot(), new TextSelection(editor.getCachedSelectedRange().x, editor.getCachedSelectedRange().y));
 					if (!(elem instanceof IImportDeclaration))
 						return false;
 					
@@ -407,7 +407,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				return false; // can't compute
 			}
 			
-			if (caretLine > 0 && ast != null) {
+			if (caretLine > 0) {
 				IProblem[] problems= ast.getProblems();
 				for (int i= 0; i < problems.length; i++) {
 					if (problems[i].isError() && caretLine == problems[i].getSourceLineNumber())

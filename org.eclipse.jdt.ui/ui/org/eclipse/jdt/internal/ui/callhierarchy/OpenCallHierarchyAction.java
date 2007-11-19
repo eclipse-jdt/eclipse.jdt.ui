@@ -23,13 +23,12 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
@@ -94,7 +93,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void run(ITextSelection selection) {
-		IJavaElement input= SelectionConverter.getInput(fEditor);
+		ITypeRoot input= SelectionConverter.getInput(fEditor);
 		if (!ActionUtil.isProcessable(getShell(), input))
 			return;
 
@@ -126,23 +125,9 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
 		}
 	}
 
-	private IJavaElement getEnclosingMethod(IJavaElement input, ITextSelection selection) {
-		IJavaElement enclosingElement= null;
+	private IJavaElement getEnclosingMethod(ITypeRoot input, ITextSelection selection) {
 		try {
-			switch (input.getElementType()) {
-				case IJavaElement.CLASS_FILE:
-					IClassFile classFile= (IClassFile) input.getAncestor(IJavaElement.CLASS_FILE);
-					if (classFile != null) {
-						enclosingElement= classFile.getElementAt(selection.getOffset());
-					}
-					break;
-				case IJavaElement.COMPILATION_UNIT:
-					ICompilationUnit cu= (ICompilationUnit) input.getAncestor(IJavaElement.COMPILATION_UNIT);
-					if (cu != null) {
-						enclosingElement= cu.getElementAt(selection.getOffset());
-					}
-					break;
-			}
+			IJavaElement enclosingElement= input.getElementAt(selection.getOffset());
 			if (enclosingElement instanceof IMethod || enclosingElement instanceof IInitializer || enclosingElement instanceof IField) {
 				// opening on the enclosing type would be too confusing (since the type resolves to the constructors)
 				return enclosingElement;

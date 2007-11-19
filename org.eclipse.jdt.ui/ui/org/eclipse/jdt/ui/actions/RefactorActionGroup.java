@@ -48,19 +48,16 @@ import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.operations.UndoRedoActionGroup;
 import org.eclipse.ui.part.Page;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ITypeRoot;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.ExtractSuperClassAction;
 import org.eclipse.jdt.internal.ui.actions.IntroduceParameterObjectAction;
 import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -124,7 +121,7 @@ public class RefactorActionGroup extends ActionGroup {
 	 * 
 	 * @since 3.2
 	 */
-	private static final String GROUP_REORG2= "reorgGroup2"; //$NON-NLS-1$ //TODO(3.3): make public
+	public static final String GROUP_REORG2= "reorgGroup2"; //$NON-NLS-1$
 	
 	/**
 	 * Pop-up menu: id of the type group 2 of the refactor sub menu (value
@@ -132,7 +129,7 @@ public class RefactorActionGroup extends ActionGroup {
 	 * 
 	 * @since 3.2
 	 */
-	private static final String GROUP_TYPE2= "typeGroup2"; //$NON-NLS-1$ //TODO(3.3): make public
+	public static final String GROUP_TYPE2= "typeGroup2"; //$NON-NLS-1$
 	
 	/**
 	 * Pop-up menu: id of the type group 2 of the refactor sub menu (value
@@ -140,7 +137,7 @@ public class RefactorActionGroup extends ActionGroup {
 	 * 
 	 * @since 3.4
 	 */
-	private static final String GROUP_TYPE3= "typeGroup3"; //$NON-NLS-1$ //TODO(3.3): make public
+	public static final String GROUP_TYPE3= "typeGroup3"; //$NON-NLS-1$
 	
 	private IWorkbenchSite fSite;
 	private JavaEditor fEditor;
@@ -548,7 +545,7 @@ public class RefactorActionGroup extends ActionGroup {
 		}
 		IMenuManager refactorSubmenu= new MenuManager(menuText, MENU_ID);  
 		if (fEditor != null) {
-			IJavaElement element= SelectionConverter.getInput(fEditor);
+			final ITypeRoot element= getEditorInput();
 			if (element != null && ActionUtil.isOnBuildPath(element)) {
 				refactorSubmenu.addMenuListener(new IMenuListener() {
 					public void menuAboutToShow(IMenuManager manager) {
@@ -625,8 +622,7 @@ public class RefactorActionGroup extends ActionGroup {
 			}
 		});
 		ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
-		JavaTextSelection javaSelection= new JavaTextSelection(
-			getEditorInput(), getDocument(), textSelection.getOffset(), textSelection.getLength());
+		JavaTextSelection javaSelection= new JavaTextSelection(getEditorInput(), getDocument(), textSelection.getOffset(), textSelection.getLength());
 		
 		for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
 			SelectionDispatchAction action= (SelectionDispatchAction)iter.next();
@@ -650,20 +646,18 @@ public class RefactorActionGroup extends ActionGroup {
 	}
 	
 	private IDocument getDocument() {
-		return JavaPlugin.getDefault().getCompilationUnitDocumentProvider().
-			getDocument(fEditor.getEditorInput());
+		return JavaUI.getDocumentProvider().getDocument(fEditor.getEditorInput());
 	}
 	
 	private void fillQuickMenu(IMenuManager menu) {
 		if (fEditor != null) {
-			IJavaElement element= SelectionConverter.getInput(fEditor);
+			ITypeRoot element= getEditorInput();
 			if (element == null || !ActionUtil.isOnBuildPath(element)) {
 				menu.add(fNoActionAvailable);
 				return;
 			}
 			ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
-			JavaTextSelection javaSelection= new JavaTextSelection(
-				getEditorInput(), getDocument(), textSelection.getOffset(), textSelection.getLength());
+			JavaTextSelection javaSelection= new JavaTextSelection(element, getDocument(), textSelection.getOffset(), textSelection.getLength());
 			
 			for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
 				((SelectionDispatchAction)iter.next()).update(javaSelection);

@@ -65,6 +65,9 @@ public class SelectionConverter {
 	 * 	if it is a structured selection.</li>
 	 * <li><code>default</code>: returns an empty structured selection.</li>
 	 * </ul>
+	 * @param part the part
+	 * @return the selection
+	 * @throws JavaModelException 
 	 */
 	public static IStructuredSelection getStructuredSelection(IWorkbenchPart part) throws JavaModelException {
 		if (part instanceof JavaEditor)
@@ -83,6 +86,8 @@ public class SelectionConverter {
 	 * Converts the given structured selection into an array of Java elements.
 	 * An empty array is returned if one of the elements stored in the structured
 	 * selection is not of type <code>IJavaElement</code>
+	 * @param selection the selection
+	 * @return the Java element contained in the selection
 	 */
 	public static IJavaElement[] getElements(IStructuredSelection selection) {
 		if (!selection.isEmpty()) {
@@ -107,7 +112,7 @@ public class SelectionConverter {
 	}
 		
 	public static IJavaElement[] codeResolveOrInputForked(JavaEditor editor) throws InvocationTargetException, InterruptedException {
-		IJavaElement input= getInput(editor);
+		ITypeRoot input= getInput(editor);
 		ITextSelection selection= (ITextSelection)editor.getSelectionProvider().getSelection();
 		IJavaElement[] result= performForkedCodeResolve(input, selection);
 		if (result.length == 0) {
@@ -121,7 +126,12 @@ public class SelectionConverter {
 	}
 		
 	/**
+	 * Perform a code resolve at the current selection of an editor
+	 * 
+	 * @param editor the editor
 	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
+	 * @return the resolved elements
+	 * @throws JavaModelException 
 	 * @since 3.2
 	 */
 	public static IJavaElement[] codeResolve(JavaEditor editor, boolean primaryOnly) throws JavaModelException {
@@ -130,7 +140,10 @@ public class SelectionConverter {
 	
 	/**
 	 * Perform a code resolve in a separate thread.
+	 * 
+	 * @param editor the editor
 	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
+	 * @return the resolved elements
 	 * @throws InterruptedException 
 	 * @throws InvocationTargetException 
 	 * @since 3.2
@@ -144,7 +157,12 @@ public class SelectionConverter {
 	}
 	
 	/**
+	 * Returns the element surrounding the selection of the given editor.
+	 * 
+	 * @param editor the editor
 	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
+	 * @return the element surrounding the current selection
+	 * @throws JavaModelException 
 	 * @since 3.2
 	 */
 	private static IJavaElement getElementAtOffset(JavaEditor editor, boolean primaryOnly) throws JavaModelException {
@@ -162,25 +180,26 @@ public class SelectionConverter {
 		return type;
 	}
 	
-	public static IJavaElement getInput(JavaEditor editor) {
+	public static ITypeRoot getInput(JavaEditor editor) {
 		return getInput(editor, true);
 	}
 	
 	/**
+	 * Returns the input element of the given editor
+	 * 
+	 * @param editor the Java editor
 	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
+	 * @return the type root which is the editor input
 	 * @since 3.2
 	 */
-	private static IJavaElement getInput(JavaEditor editor, boolean primaryOnly) {
+	private static ITypeRoot getInput(JavaEditor editor, boolean primaryOnly) {
 		if (editor == null)
 			return null;
 		return EditorUtility.getEditorInputJavaElement(editor, primaryOnly);
 	}
 	
 	public static ITypeRoot getInputAsTypeRoot(JavaEditor editor) {
-		Object editorInput= SelectionConverter.getInput(editor);
-		if (editorInput instanceof ITypeRoot)
-			return (ITypeRoot)editorInput;
-		return null;
+		return SelectionConverter.getInput(editor);
 	}
 	
 	public static ICompilationUnit getInputAsCompilationUnit(JavaEditor editor) {
@@ -197,7 +216,7 @@ public class SelectionConverter {
 		return null;
 	}
 
-	private static IJavaElement[] performForkedCodeResolve(final IJavaElement input, final ITextSelection selection) throws InvocationTargetException, InterruptedException {
+	private static IJavaElement[] performForkedCodeResolve(final ITypeRoot input, final ITextSelection selection) throws InvocationTargetException, InterruptedException {
 		final class CodeResolveRunnable implements IRunnableWithProgress {
 			IJavaElement[] result;
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {
@@ -226,23 +245,14 @@ public class SelectionConverter {
 			return EMPTY_RESULT;
 	}
 	
-	public static IJavaElement getElementAtOffset(IJavaElement input, ITextSelection selection) throws JavaModelException {
+	public static IJavaElement getElementAtOffset(ITypeRoot input, ITextSelection selection) throws JavaModelException {
 		if (input instanceof ICompilationUnit) {
-			ICompilationUnit cunit= (ICompilationUnit) input;
-			JavaModelUtil.reconcile(cunit);
-			IJavaElement ref= cunit.getElementAt(selection.getOffset());
-			if (ref == null)
-				return input;
-			else
-				return ref;
-		} else if (input instanceof IClassFile) {
-			IJavaElement ref= ((IClassFile)input).getElementAt(selection.getOffset());
-			if (ref == null)
-				return input;
-			else
-				return ref;
+			JavaModelUtil.reconcile((ICompilationUnit) input);
 		}
-		return null;
+		IJavaElement ref= input.getElementAt(selection.getOffset());
+		if (ref == null)
+			return input;
+		return ref;
 	}
 	
 //	public static IJavaElement[] resolveSelectedElements(IJavaElement input, ITextSelection selection) throws JavaModelException {
@@ -293,8 +303,13 @@ public class SelectionConverter {
 	}
 
 	/**
-	 * Shows a dialog for resolving an ambiguous java element.
-	 * Utility method that can be called by subclasses.
+	 * Shows a dialog for resolving an ambiguous Java element. Utility method that can be called by subclasses.
+	 * 
+	 * @param elements the elements to select from
+	 * @param shell the parent shell
+	 * @param title the title of the selection dialog
+	 * @param message the message of the selection dialog
+	 * @return returns the selected element or <code>null</code> if the dialog has been cancelled
 	 */
 	public static IJavaElement selectJavaElement(IJavaElement[] elements, Shell shell, String title, String message) {
 		int nResults= elements.length;

@@ -23,6 +23,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
@@ -126,30 +127,26 @@ public class IntroduceIndirectionAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */
 	public void run(ITextSelection selection) {
-		try {
-			Object editorInput= SelectionConverter.getInput(fEditor);
-			if (editorInput instanceof ICompilationUnit)
-				run(selection.getOffset(), selection.getLength(), (ICompilationUnit) editorInput);
-			else if (editorInput instanceof IClassFile)
-				run(selection.getOffset(), selection.getLength(), (IClassFile) editorInput);
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), RefactoringMessages.IntroduceIndirectionAction_dialog_title, RefactoringMessages.IntroduceIndirectionAction_unknown_exception);
-		}
+		ITypeRoot editorInput= SelectionConverter.getInput(fEditor);
+		if (editorInput instanceof ICompilationUnit)
+			run(selection.getOffset(), selection.getLength(), (ICompilationUnit) editorInput);
+		else if (editorInput instanceof IClassFile)
+			run(selection.getOffset(), selection.getLength(), (IClassFile) editorInput);
 	}
 
-	private void run(int offset, int length, ICompilationUnit unit) throws JavaModelException {
+	private void run(int offset, int length, ICompilationUnit unit) {
 		if (!ActionUtil.isEditable(fEditor, getShell(), unit))
 			return;
 		RefactoringExecutionStarter.startIntroduceIndirectionRefactoring(unit, offset, length, getShell());
 	}
 
-	private void run(int offset, int length, IClassFile file) throws JavaModelException {
+	private void run(int offset, int length, IClassFile file) {
 		if (!ActionUtil.isEditable(fEditor, getShell(), file))
 			return;
 		RefactoringExecutionStarter.startIntroduceIndirectionRefactoring(file, offset, length, getShell());
 	}
 
-	private void run(IMethod method) throws JavaModelException {
+	private void run(IMethod method) {
 		if (!ActionUtil.isEditable(fEditor, getShell(), method))
 			return;
 		RefactoringExecutionStarter.startIntroduceIndirectionRefactoring(method, getShell());
