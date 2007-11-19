@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -97,40 +98,45 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	 * @see org.eclipse.debug.ui.ILaunchShortcut#launch(org.eclipse.ui.IEditorPart, java.lang.String)
 	 */
 	public void launch(IEditorPart editor, String mode) {
-		IJavaElement element= JavaUI.getEditorInputJavaElement(editor.getEditorInput());
+		ITypeRoot element= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
 		if (element != null) {
-			element= resolveSelectedMethodName(editor, element);
-			launch(new Object[] { element }, mode);
+			IMethod selectedMethod= resolveSelectedMethodName(editor, element);
+			if (selectedMethod != null) {
+				launch(new Object[] { selectedMethod }, mode);
+			} else {
+				launch(new Object[] { element }, mode);
+			}
 		} else {
 			showNoTestsFoundDialog();
 		}
 	}
 
-	private IJavaElement resolveSelectedMethodName(IEditorPart editor, IJavaElement element) {
+	private IMethod resolveSelectedMethodName(IEditorPart editor, ITypeRoot element) {
 		try {
 			ISelectionProvider selectionProvider= editor.getSite().getSelectionProvider();
 			if (selectionProvider == null)
-				return element;
+				return null;
 			
 			ISelection selection= selectionProvider.getSelection();
 			if (!(selection instanceof ITextSelection))
-				return element;
+				return null;
 
 			ITextSelection textSelection= (ITextSelection) selection;
-			IJavaElement elementAtOffset;
-			elementAtOffset= SelectionConverter.getElementAtOffset(element, textSelection);
+
+			IJavaElement elementAtOffset= SelectionConverter.getElementAtOffset(element, textSelection);
 			if (! (elementAtOffset instanceof IMethod))
-				return element;
+				return null;
+
+			IMethod method= (IMethod) elementAtOffset;
 			
-			ISourceRange nameRange= ((IMethod) elementAtOffset).getNameRange();
+			ISourceRange nameRange= method.getNameRange();
 			if (nameRange.getOffset() <= textSelection.getOffset()
 					&& textSelection.getOffset() + textSelection.getLength() <= nameRange.getOffset() + nameRange.getLength())
-				return elementAtOffset;
-			else
-				return element;
+				return method;
 		} catch (JavaModelException e) {
-			return element;
+			// ignore
 		}
+		return null;
 	}
 
 	/* (non-Javadoc)
