@@ -105,7 +105,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
 public class ReorgCorrectionsSubProcessor {
 
-	public static void getWrongTypeNameProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void getWrongTypeNameProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 		boolean isLinked= cu.getResource().isLinked();
 
@@ -191,7 +191,7 @@ public class ReorgCorrectionsSubProcessor {
 		}
 	}
 
-	public static void removeImportStatementProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void removeImportStatementProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		IProposableFix fix= UnusedCodeFix.createRemoveUnusedImportFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_DELETE_IMPORT);

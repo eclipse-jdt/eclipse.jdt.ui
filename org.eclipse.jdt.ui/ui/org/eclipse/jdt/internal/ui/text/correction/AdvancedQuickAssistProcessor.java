@@ -616,7 +616,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getAddParanoidalParenthesisProposals(IInvocationContext context, ArrayList coveredNodes, Collection resultingCollections) throws CoreException {
+	private static boolean getAddParanoidalParenthesisProposals(IInvocationContext context, ArrayList coveredNodes, Collection resultingCollections) {
 
 		IProposableFix fix= ExpressionsFix.createAddParanoidalParenthesisFix(context.getASTRoot(), (ASTNode[]) coveredNodes.toArray(new ASTNode[coveredNodes.size()]));
 		if (fix == null)

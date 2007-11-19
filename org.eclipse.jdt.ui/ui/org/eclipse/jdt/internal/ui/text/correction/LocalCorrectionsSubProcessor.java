@@ -466,7 +466,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
-	public static void addUnusedMemberProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void addUnusedMemberProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		int problemId = problem.getProblemId();
 		UnusedCodeFix fix= UnusedCodeFix.createUnusedMemberFix(context.getASTRoot(), problem, false);
 		if (fix != null) {
@@ -545,7 +545,7 @@ public class LocalCorrectionsSubProcessor {
 
 	}
 
-	public static void addUnnecessaryThrownExceptionProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void addUnnecessaryThrownExceptionProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		if (selectedNode == null || !(selectedNode.getParent() instanceof MethodDeclaration)) {
 			return;

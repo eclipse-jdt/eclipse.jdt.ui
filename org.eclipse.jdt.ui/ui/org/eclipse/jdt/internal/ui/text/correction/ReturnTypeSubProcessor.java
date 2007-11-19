@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -132,7 +130,7 @@ public class ReturnTypeSubProcessor {
 
 	}
 
-	public static void addVoidMethodReturnsProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void addVoidMethodReturnsProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();
@@ -204,7 +202,7 @@ public class ReturnTypeSubProcessor {
 
 
 
-	public static void addMissingReturnTypeProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void addMissingReturnTypeProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();
