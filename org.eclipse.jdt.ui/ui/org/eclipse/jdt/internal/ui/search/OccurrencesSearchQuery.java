@@ -77,9 +77,9 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 
 					JavaElementLine lineKey= getLineElement(astRoot, loc, lineMap);
 					if (lineKey != null) {
-						Match match= new Match(lineKey, loc.getOffset(), loc.getLength());
+						OccurrenceMatch match= new OccurrenceMatch(lineKey, loc.getOffset(), loc.getLength(), loc.getFlags());
 						resultingMatches.add(match);
-						
+
 						lineKey.setFlags(lineKey.getFlags() | loc.getFlags());
 					}
 				}

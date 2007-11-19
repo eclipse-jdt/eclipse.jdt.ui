@@ -57,23 +57,24 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 		JavaElementLine jel= (JavaElementLine) element;
 
 		String lineNumberString= getLineNumberLabel(jel);
-		
+
 		Style highlightStyle= ColoredJavaElementLabels.HIGHLIGHT_STYLE;
-		if (jel.getFlags() == IOccurrencesFinder.F_WRITE_OCCURRENCE) {
-			highlightStyle= ColoredJavaElementLabels.HIGHLIGHT_WRITE_STYLE;
-		}
 		
 		ColoredString res= new ColoredString();
 		res.append(lineNumberString, ColoredJavaElementLabels.QUALIFIER_STYLE);
 		res.append(jel.getLineContents());
 		Match[] matches= getPage().getInput().getMatches(jel);
 		for (int i= 0; i < matches.length; i++) {
-			Match curr= matches[i];
+			OccurrenceMatch curr= (OccurrenceMatch) matches[i];
 			int offset= curr.getOffset() - jel.getLineStartOffset() + lineNumberString.length();
 			int length= curr.getLength();
 			
 			if (offset >= 0 && (offset + length <= res.length())) {
-				res.colorize(offset, length, highlightStyle);
+				if ((curr.getFlags() & IOccurrencesFinder.F_WRITE_OCCURRENCE) != 0) {
+					res.colorize(offset, length, ColoredJavaElementLabels.HIGHLIGHT_WRITE_STYLE);
+				} else {
+					res.colorize(offset, length, highlightStyle);
+				}
 			}
 		}
 		return res;
@@ -82,11 +83,13 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 	public Image getImage(Object element) {
 		if (element instanceof JavaElementLine) {
 			int flags= ((JavaElementLine) element).getFlags();
-			if (flags == IOccurrencesFinder.F_READ_OCCURRENCE) {
-				return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_READACCESS);
-			} else if (flags == IOccurrencesFinder.F_WRITE_OCCURRENCE) {
+			if ((flags & IOccurrencesFinder.F_WRITE_OCCURRENCE) != 0) {
 				return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_WRITEACCESS);
-			} else if (flags == IOccurrencesFinder.F_EXCEPTION_DECLARATION) {
+			}
+			if ((flags & IOccurrencesFinder.F_READ_OCCURRENCE) != 0) {
+				return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_READACCESS);
+			}
+			if ((flags & IOccurrencesFinder.F_EXCEPTION_DECLARATION) != 0) {				
 				return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			}
 		}
