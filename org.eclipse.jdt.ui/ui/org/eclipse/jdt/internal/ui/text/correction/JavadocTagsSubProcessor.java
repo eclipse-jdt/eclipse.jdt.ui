@@ -369,8 +369,12 @@ public class JavadocTagsSubProcessor {
 	 	proposals.add(addAllMissing);
 	}
 	
-	public static void getUnusedAndUndocumentedParameterOrExceptionProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void getUnusedAndUndocumentedParameterOrExceptionProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
+		
+		if (!JavaCore.ENABLED.equals(JavaCore.COMPILER_DOC_COMMENT_SUPPORT)) {
+			return;
+		}
 		
 		boolean isUnusedParam= problem.getProblemId() == IProblem.ArgumentIsNeverUsed;
 		String key= isUnusedParam ? JavaCore.COMPILER_PB_UNUSED_PARAMETER_INCLUDE_DOC_COMMENT_REFERENCE : JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION_INCLUDE_DOC_COMMENT_REFERENCE;
