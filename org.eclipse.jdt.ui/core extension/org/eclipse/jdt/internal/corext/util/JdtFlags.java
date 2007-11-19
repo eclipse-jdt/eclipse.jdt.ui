@@ -28,6 +28,11 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 
+/**
+ * The methods of this utility class are implemented from a Java language model
+ * point of view. They do not only take the declared flags from the source into account
+ * but also the implicit properties as defined in the Java Language Specification, version 3 (JLS3).
+ */
 public class JdtFlags {
 	private JdtFlags(){
 	}
