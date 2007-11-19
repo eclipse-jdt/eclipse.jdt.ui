@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -51,7 +52,7 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 		 */
 		public boolean visit(MethodDeclaration node) {
 			IMethodBinding binding= node.resolveBinding();
-			if (binding != null) {
+			if (binding != null && !Modifier.isStatic(binding.getModifiers())) {
 				IMethodBinding method= Bindings.findOverriddenMethodInHierarchy(fSelectedType, binding);
 				if (method != null) {
 					SimpleName name= node.getName();
