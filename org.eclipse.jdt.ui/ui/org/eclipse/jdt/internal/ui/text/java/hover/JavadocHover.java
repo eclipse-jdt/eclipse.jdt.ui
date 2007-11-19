@@ -33,7 +33,6 @@ import org.eclipse.jface.text.information.IInformationProviderExtension2;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -52,6 +51,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -270,10 +270,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 	private boolean isStaticFinal(IJavaElement member) {
 		if (member.getElementType() != IJavaElement.FIELD)
 			return false;
+		
 		IField field= (IField)member;
 		try {
-			int fieldFlags= field.getFlags();
-			return Flags.isFinal(fieldFlags) && Flags.isStatic(fieldFlags);
+			return JdtFlags.isFinal(field) && JdtFlags.isStatic(field);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 			return false;
