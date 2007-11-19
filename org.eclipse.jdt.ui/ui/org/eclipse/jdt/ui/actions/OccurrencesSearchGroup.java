@@ -12,12 +12,16 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.core.runtime.Assert;
 
-import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
+
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchSite;
@@ -26,9 +30,14 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.core.ITypeRoot;
 
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 /**
@@ -52,6 +61,8 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 	private FindOccurrencesInFileAction fOccurrencesInFileAction;
 	private FindExceptionOccurrencesAction fExceptionOccurrencesAction;
 	private FindImplementOccurrencesAction fFindImplementorOccurrencesAction;
+	private FindBreakContinueTargetOccurrencesAction fBreakContinueTargetOccurrencesAction;
+	private FindMethodExitOccurrencesAction fMethodExitOccurrencesAction;
 
 	/**
 	 * Creates a new <code>ImplementorsSearchGroup</code>. The group 
@@ -75,12 +86,21 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 		fFindImplementorOccurrencesAction= new FindImplementOccurrencesAction(site);
 		fFindImplementorOccurrencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_IMPLEMENT_OCCURRENCES_IN_FILE);
 
+		fBreakContinueTargetOccurrencesAction= new FindBreakContinueTargetOccurrencesAction(site);
+		fBreakContinueTargetOccurrencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_BREAK_CONTINUE_TARGET_OCCURRENCES);
+
+		fMethodExitOccurrencesAction= new FindMethodExitOccurrencesAction(site);
+		fMethodExitOccurrencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_METHOD_EXIT_OCCURRENCES);
+
+		
 		// register the actions as selection listeners
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();
 		registerAction(fOccurrencesInFileAction, provider, selection);
 		registerAction(fExceptionOccurrencesAction, provider, selection);
 		registerAction(fFindImplementorOccurrencesAction, provider, selection);
+		registerAction(fBreakContinueTargetOccurrencesAction, provider, selection);
+		registerAction(fMethodExitOccurrencesAction, provider, selection);
 	}
 
 	/**
@@ -106,19 +126,27 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 		fFindImplementorOccurrencesAction= new FindImplementOccurrencesAction(fEditor);
 		fFindImplementorOccurrencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_IMPLEMENT_OCCURRENCES_IN_FILE);
 		fEditor.setAction("SearchImplementOccurrences", fFindImplementorOccurrencesAction); //$NON-NLS-1$
+
+		fBreakContinueTargetOccurrencesAction= new FindBreakContinueTargetOccurrencesAction(fEditor);
+		fBreakContinueTargetOccurrencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_BREAK_CONTINUE_TARGET_OCCURRENCES);
+		fEditor.setAction("BreakContinueTargetOccurrences", fBreakContinueTargetOccurrencesAction); //$NON-NLS-1$
+
+		fMethodExitOccurrencesAction= new FindMethodExitOccurrencesAction(fEditor);
+		fMethodExitOccurrencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_METHOD_EXIT_OCCURRENCES);
+		fEditor.setAction("ExitOccurrencesAction", fMethodExitOccurrencesAction); //$NON-NLS-1$
+
+//
+//		ISelectionProvider provider= fSite.getSelectionProvider();
+//		ISelection selection= provider.getSelection();
+//
+//		registerAction(fOccurrencesInFileAction, provider, selection);
+//		registerAction(fExceptionOccurrencesAction, provider, selection);
+//		registerAction(fFindImplementorOccurrencesAction, provider, selection);
 	}
 
 	private void registerAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection){
 		action.update(selection);
 		provider.addSelectionChangedListener(action);
-	}
-
-	private IAction[] getActions() {
-		IAction[] actions= new IAction[3];
-		actions[0]= fOccurrencesInFileAction;
-		actions[1]= fExceptionOccurrencesAction;
-		actions[2]= fFindImplementorOccurrencesAction;
-		return actions;
 	}
 
 	/* 
@@ -132,15 +160,51 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 		}
 
 		MenuManager javaSearchMM= new MenuManager(menuText, IContextMenuConstants.GROUP_SEARCH);
-		IAction[] actions= getActions();
-		for (int i= 0; i < actions.length; i++) {
-			IAction action= actions[i];
-			if (action.isEnabled())
-				javaSearchMM.add(action);
-		}
+		javaSearchMM.add(new Action() {
+		});
+		javaSearchMM.addMenuListener(new IMenuListener() {
+			public void menuAboutToShow(IMenuManager mm) {
+				mm.removeAll();
+				updateActionsInJavaEditor();
+				addAction(fOccurrencesInFileAction, mm);
+				addAction(fFindImplementorOccurrencesAction, mm);
+				addAction(fExceptionOccurrencesAction, mm);
+				addAction(fMethodExitOccurrencesAction, mm);
+				addAction(fBreakContinueTargetOccurrencesAction, mm);
+				if (mm.isEmpty()) {
+					mm.add(new Action(SearchMessages.group_occurrences_quickMenu_noEntriesAvailable) {
+						public boolean isEnabled() {
+							return false;
+						}
+					});
+				}
+			}
+
+			private void addAction(Action action, IMenuManager mm) {
+				if (action.isEnabled())
+					mm.add(action);
+			}
+		});
+		manager.appendToGroup(fGroupId, javaSearchMM);
+	}
+
+	private void updateActionsInJavaEditor() {
+		if (fEditor == null)
+			return;
 		
-		if (!javaSearchMM.isEmpty())
-			manager.appendToGroup(fGroupId, javaSearchMM);
+		ITypeRoot element= SelectionConverter.getInput(fEditor);
+		if (element == null)
+			return;
+
+		ITextSelection textSelection= (ITextSelection) fEditor.getSelectionProvider().getSelection();
+		IDocument document= JavaUI.getDocumentProvider().getDocument(fEditor.getEditorInput());
+		JavaTextSelection javaSelection= new JavaTextSelection(element, document, textSelection.getOffset(), textSelection.getLength());
+
+		fExceptionOccurrencesAction.update(javaSelection);
+		fOccurrencesInFileAction.update(javaSelection);
+		fFindImplementorOccurrencesAction.update(javaSelection);
+		fBreakContinueTargetOccurrencesAction.update(javaSelection);
+		fMethodExitOccurrencesAction.update(javaSelection);
 	}
 	
 	private String getShortcutString() {
@@ -169,11 +233,15 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 			disposeAction(fFindImplementorOccurrencesAction, provider);
 			disposeAction(fExceptionOccurrencesAction, provider);
 			disposeAction(fOccurrencesInFileAction, provider);
+			disposeAction(fMethodExitOccurrencesAction, provider);
+			disposeAction(fBreakContinueTargetOccurrencesAction, provider);
 		}
 		super.dispose();
 		fFindImplementorOccurrencesAction= null;
 		fExceptionOccurrencesAction= null;
 		fOccurrencesInFileAction= null;
+		fMethodExitOccurrencesAction= null;
+		fBreakContinueTargetOccurrencesAction= null;
 		updateGlobalActionHandlers();
 	}
 
@@ -182,6 +250,9 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_OCCURRENCES_IN_FILE, fOccurrencesInFileAction);
 			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_EXCEPTION_OCCURRENCES, fExceptionOccurrencesAction);
 			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_IMPLEMENT_OCCURRENCES, fFindImplementorOccurrencesAction);
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_BREAK_CONTINUE_TARGET_OCCURRENCES, fBreakContinueTargetOccurrencesAction);
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_METHOD_EXIT_OCCURRENCES, fMethodExitOccurrencesAction);
+
 		}
 	}
 

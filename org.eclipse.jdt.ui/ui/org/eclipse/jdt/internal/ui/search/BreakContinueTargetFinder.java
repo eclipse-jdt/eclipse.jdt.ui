@@ -37,8 +37,6 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
-
 /**
  * Class used to find the target for a break or continue statement according 
  * to the language specification.
@@ -48,7 +46,10 @@ import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
  * 
  * @since 3.2
  */
-public class BreakContinueTargetFinder extends ASTVisitor {
+public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrencesFinder {
+
+	public static final String ID= "BreakContinueTargetFinder"; //$NON-NLS-1$
+	
 	private ASTNode fSelected;
 	private boolean fIsBreak;
 	private SimpleName fLabel;
@@ -236,5 +237,41 @@ public class BreakContinueTargetFinder extends ASTVisitor {
 				return true;
 		}
 		return false;
+	}
+
+	public CompilationUnit getASTRoot() {
+		return fASTRoot;
+	}
+
+	public String getElementName() {
+		return ASTNodes.asString(fSelected);
+	}
+
+	public String getID() {
+		return ID;
+	}
+
+	public String getJobLabel() {
+		return SearchMessages.BreakContinueTargetFinder_job_label;
+	}
+
+	public int getSearchKind() {
+		return IOccurrencesFinder.K_BREAK_TARGET_OCCURRENCE;
+	}
+
+	public String getUnformattedPluralLabel() {
+		if (fIsBreak) {
+			return SearchMessages.BreakContinueTargetFinder_break_label_plural;
+		} else {
+			return SearchMessages.BreakContinueTargetFinder_continue_label_plural;
+		}
+	}
+
+	public String getUnformattedSingularLabel() {
+		if (fIsBreak) {
+			return SearchMessages.BreakContinueTargetFinder_break_label_singular;
+		} else {
+			return SearchMessages.BreakContinueTargetFinder_continue_label_singular;
+		}
 	}
 }

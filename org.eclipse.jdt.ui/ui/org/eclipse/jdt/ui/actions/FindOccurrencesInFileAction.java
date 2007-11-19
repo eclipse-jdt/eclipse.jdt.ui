@@ -32,6 +32,8 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -39,6 +41,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.search.FindOccurrencesEngine;
 import org.eclipse.jdt.internal.ui.search.OccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
@@ -185,6 +188,16 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 	 * Method declared in SelectionDispatchAction.
 	 */
 	public void selectionChanged(ITextSelection selection) {
+		setEnabled(true);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		CompilationUnit astRoot= selection.resolvePartialAstAtOffset();
+		ASTNode node= selection.resolveCoveringNode();
+		setEnabled(astRoot != null && node != null && new OccurrencesFinder().initialize(astRoot, node) == null);
 	}
 
 	/* (non-JavaDoc)

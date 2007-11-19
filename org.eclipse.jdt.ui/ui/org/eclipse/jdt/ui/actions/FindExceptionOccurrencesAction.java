@@ -22,6 +22,8 @@ import org.eclipse.ui.texteditor.IEditorStatusLine;
 
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -30,6 +32,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.FindOccurrencesEngine;
 
@@ -77,6 +80,16 @@ public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 	 * {@inheritDoc}
 	 */
 	public void selectionChanged(ITextSelection selection) {
+		setEnabled(true);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		CompilationUnit astRoot= selection.resolvePartialAstAtOffset();
+		ASTNode node= selection.resolveCoveringNode();
+		setEnabled(astRoot != null && node != null && new ExceptionOccurrencesFinder().initialize(astRoot, node) == null);
 	}
 	
 	/**

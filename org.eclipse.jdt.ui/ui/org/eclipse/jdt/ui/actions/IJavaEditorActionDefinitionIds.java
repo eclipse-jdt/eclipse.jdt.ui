@@ -646,6 +646,21 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 */
 	public static final String SEARCH_IMPLEMENT_OCCURRENCES_IN_FILE= "org.eclipse.jdt.ui.edit.text.java.search.implement.occurrences"; //$NON-NLS-1$
 
+	/**
+	 * Action definition ID of the search -> occurrences in file > method exits action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.search.method.exits"</code>).
+	 * @since 3.4
+	 */
+	public static final String SEARCH_METHOD_EXIT_OCCURRENCES= "org.eclipse.jdt.ui.edit.text.java.search.method.exits"; //$NON-NLS-1$
+
+	/**
+	 * Action definition ID of the search -> occurrences in file > break/continue target action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.search.return.continue.targets"</code>).
+	 * @since 3.4
+	 */
+	public static final String SEARCH_BREAK_CONTINUE_TARGET_OCCURRENCES= "org.eclipse.jdt.ui.edit.text.java.search.return.continue.targets"; //$NON-NLS-1$
+	
+	
 	// miscellaneous
 	
 	/**

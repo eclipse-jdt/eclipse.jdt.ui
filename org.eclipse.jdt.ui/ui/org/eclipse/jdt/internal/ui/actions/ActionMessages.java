@@ -43,6 +43,8 @@ public final class ActionMessages extends NLS {
 	public static String CopyQualifiedNameAction_NoElementToQualify;
 	public static String CopyQualifiedNameAction_ToolTipText;
 	
+	public static String FindBreakContinueTargetOccurrencesAction_label;
+	public static String FindBreakContinueTargetOccurrencesAction_tooltip;
 	public static String FindNLSProblemsAction_Description;
 	public static String FindNLSProblemsAction_ErrorDialogTitle;
 	public static String FindNLSProblemsAction_Name;
@@ -57,6 +59,12 @@ public final class ActionMessages extends NLS {
 	public static String IntroduceParameterObjectAction_can_not_run_refactoring_message;
 	public static String IntroduceParameterObjectAction_exceptiondialog_title;
 	public static String IntroduceParameterObjectAction_unexpected_exception;
+	public static String OccurrencesSearchMenuAction_break_continue_target_label;
+	public static String OccurrencesSearchMenuAction_implementing_methods_label;
+	public static String OccurrencesSearchMenuAction_method_exits_label;
+	public static String OccurrencesSearchMenuAction_no_entries_available;
+	public static String OccurrencesSearchMenuAction_occurrences_in_file_label;
+	public static String OccurrencesSearchMenuAction_throwing_exception_label;
 	public static String OpenAction_error_problem_opening_editor;
 	public static String OpenAction_multistatus_message;
 	public static String OpenViewActionGroup_showInAction_label;
@@ -369,6 +377,8 @@ public final class ActionMessages extends NLS {
 	public static String FindExceptionOccurrences_toolTip;
 	public static String FindImplementOccurrencesAction_text;
 	public static String FindImplementOccurrencesAction_toolTip;
+	public static String FindMethodExitOccurrencesAction_label;
+	public static String FindMethodExitOccurrencesAction_tooltip;
 
 	public static String CategoryFilterActionGroup_JavaCategoryFilter_title;
 	public static String CategoryFilterActionGroup_SelectAllCategories;

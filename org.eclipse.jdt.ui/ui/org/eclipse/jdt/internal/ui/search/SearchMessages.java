@@ -241,10 +241,18 @@ public final class SearchMessages extends NLS {
 	public static String MatchFilter_InexactFilter_name;
 	public static String MatchFilter_InexactFilter_actionLabel;
 	public static String MatchFilter_InexactFilter_description;
+	public static String MethodExitsFinder_job_label;
+	public static String MethodExitsFinder_label_plural;
+	public static String MethodExitsFinder_label_singular;
 	public static String MethodExitsFinder_no_return_type_selected;
 	public static String MethodExitsFinder_occurrence_exit_description;
 	public static String MethodExitsFinder_occurrence_return_description;
+	public static String BreakContinueTargetFinder_break_label_plural;
+	public static String BreakContinueTargetFinder_break_label_singular;
 	public static String BreakContinueTargetFinder_cannot_highlight;
+	public static String BreakContinueTargetFinder_continue_label_plural;
+	public static String BreakContinueTargetFinder_continue_label_singular;
+	public static String BreakContinueTargetFinder_job_label;
 	public static String BreakContinueTargetFinder_no_break_or_continue_selected;
 	public static String BreakContinueTargetFinder_occurrence_description;
 	public static String TextSearchLabelProvider_matchCountFormat;

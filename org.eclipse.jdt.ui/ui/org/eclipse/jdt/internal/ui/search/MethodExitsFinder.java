@@ -49,15 +49,16 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InOutFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
 
+public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder {
 
-public class MethodExitsFinder extends ASTVisitor {
+	public static final String ID= "MethodExitsFinder"; //$NON-NLS-1$
 	
 	private MethodDeclaration fMethodDeclaration;
 	private List fResult;
 	private List fCatchedExceptions;
 	private String fExitDescription;
+	private CompilationUnit fASTRoot;
 
 	public String initialize(CompilationUnit root, int offset, int length) {
 		return initialize(root, NodeFinder.perform(root, offset, length));
@@ -69,6 +70,8 @@ public class MethodExitsFinder extends ASTVisitor {
 	 * @return returns a message if there is a problem
 	 */
 	public String initialize(CompilationUnit root, ASTNode node) {
+		fASTRoot= root;
+		
 		if (node instanceof ReturnStatement) {
 			fMethodDeclaration= (MethodDeclaration)ASTNodes.getParent(node, ASTNode.METHOD_DECLARATION);
 			if (fMethodDeclaration == null)
@@ -283,5 +286,32 @@ public class MethodExitsFinder extends ASTVisitor {
 		return false;
 	}
 
+	public CompilationUnit getASTRoot() {
+		return fASTRoot;
+	}
+
+	public String getElementName() {
+		return fMethodDeclaration.getName().getIdentifier();
+	}
+
+	public String getID() {
+		return ID;
+	}
+
+	public String getJobLabel() {
+		return SearchMessages.MethodExitsFinder_job_label;
+	}
+
+	public int getSearchKind() {
+		return IOccurrencesFinder.K_BREAK_TARGET_OCCURRENCE;
+	}
+
+	public String getUnformattedPluralLabel() {
+		return SearchMessages.MethodExitsFinder_label_plural;
+	}
+
+	public String getUnformattedSingularLabel() {
+		return SearchMessages.MethodExitsFinder_label_singular;
+	}
 
 }

@@ -34,17 +34,17 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.search.FindOccurrencesEngine;
-import org.eclipse.jdt.internal.ui.search.ImplementOccurrencesFinder;
+import org.eclipse.jdt.internal.ui.search.MethodExitsFinder;
 
 /**
- * Action to find all implement occurrences of an extended class or an implemented interface.
+ * Action to find all method exits for a given method.
  * <p> 
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  * 
- * @since 3.1
+ * @since 3.4
  */
-public class FindImplementOccurrencesAction extends SelectionDispatchAction {
+public class FindMethodExitOccurrencesAction extends SelectionDispatchAction {
 	
 	private JavaEditor fEditor;
 	
@@ -53,24 +53,24 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 	 * 
 	 * @param editor the Java editor
 	 */
-	public FindImplementOccurrencesAction(JavaEditor editor) {
+	public FindMethodExitOccurrencesAction(JavaEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
 		setEnabled(getEditorInput(editor) != null);
 	}
 	
 	/**
-	 * Creates a new <code>FindImplementOccurrencesAction</code>. The action 
+	 * Creates a new {@link FindMethodExitOccurrencesAction}. The action 
 	 * requires that the selection provided by the site's selection provider is of type 
 	 * <code>IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public FindImplementOccurrencesAction(IWorkbenchSite site) {
+	public FindMethodExitOccurrencesAction(IWorkbenchSite site) {
 		super(site);
-		setText(ActionMessages.FindImplementOccurrencesAction_text); 
-		setToolTipText(ActionMessages.FindImplementOccurrencesAction_toolTip); 
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENT_OCCURRENCES);
+		setText(ActionMessages.FindMethodExitOccurrencesAction_label);
+		setToolTipText(ActionMessages.FindMethodExitOccurrencesAction_tooltip);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_METHOD_EXIT_OCCURRENCES);
 	}
 	
 	//---- Text Selection ----------------------------------------------------------------------
@@ -88,26 +88,24 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 	public void selectionChanged(JavaTextSelection selection) {
 		CompilationUnit astRoot= selection.resolvePartialAstAtOffset();
 		ASTNode node= selection.resolveCoveringNode();
-		setEnabled(astRoot != null && node != null && new ImplementOccurrencesFinder().initialize(astRoot, node) == null);
+		setEnabled(astRoot != null && node != null && new MethodExitsFinder().initialize(astRoot, node) == null);
 	}
 	
 	/**
 	 * {@inheritDoc}
-	 * 
-	 * @since 3.2
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(false);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.text.ITextSelection)
+	/* (non-JavaDoc)
+	 * Method declared in SelectionDispatchAction.
 	 */
 	public final void run(ITextSelection ts) {
 		ITypeRoot input= getEditorInput(fEditor);
 		if (!ActionUtil.isProcessable(getShell(), input))
 			return;
-		FindOccurrencesEngine engine= FindOccurrencesEngine.create(new ImplementOccurrencesFinder());
+		FindOccurrencesEngine engine= FindOccurrencesEngine.create(new MethodExitsFinder());
 		try {
 			String result= engine.run(input, ts.getOffset(), ts.getLength());
 			if (result != null)

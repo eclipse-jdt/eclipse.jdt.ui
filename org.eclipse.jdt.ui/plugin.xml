@@ -2749,6 +2749,18 @@
                id="org.eclipse.jdt.ui.actions.OccurrencesInFile">
          </action>
          <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.search.method.exits"
+               label="%MethodExitOccurrences.label"
+               retarget="true"
+               id="org.eclipse.jdt.ui.actions.MethodExitOccurrences">
+         </action>
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.search.return.continue.targets"
+               label="%BreakContinueTargetOccurrences.label"
+               retarget="true"
+               id="org.eclipse.jdt.ui.actions.BreakContinueTargetOccurrences">
+         </action>         
+         <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set"
                label="%InWorkingSet.label"
                retarget="true"

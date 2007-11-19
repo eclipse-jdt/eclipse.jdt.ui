@@ -145,6 +145,14 @@ public interface IJavaHelpContextIds {
 	public static final String FIND_OCCURRENCES_IN_FILE_ACTION= 								PREFIX + "find_occurrences_in_file_action"; //$NON-NLS-1$
 	public static final String FIND_EXCEPTION_OCCURRENCES= 								PREFIX + "find_exception_occurrences"; //$NON-NLS-1$
 	public static final String FIND_IMPLEMENT_OCCURRENCES= 								PREFIX + "find_implement_occurrences"; //$NON-NLS-1$
+	/**
+	 * @since 3.4
+	 */
+	public static final String FIND_BREAK_CONTINUE_TARGET_OCCURRENCES= PREFIX + "find_break_continue_target_occurrences"; //$NON-NLS-1$
+	/**
+	 * @since 3.4
+	 */
+	public static final String FIND_METHOD_EXIT_OCCURRENCES= PREFIX + "find_return_target_occurrences"; //$NON-NLS-1$
 	public static final String WORKING_SET_FIND_ACTION=										PREFIX + "working_set_find_action"; //$NON-NLS-1$
 	public static final String FIND_STRINGS_TO_EXTERNALIZE_ACTION= 					PREFIX + "find_strings_to_externalize_action"; //$NON-NLS-1$
 	public static final String INLINE_ACTION= 												PREFIX + "inline_action"; //$NON-NLS-1$

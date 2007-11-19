@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.swt.events.MenuAdapter;
+import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -19,18 +25,25 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelection;
 
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextSelection;
+
 import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
 import org.eclipse.ui.actions.RetargetAction;
 
+import org.eclipse.jdt.core.ITypeRoot;
+
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.search.SearchMessages;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 
 /**
  * <p>
@@ -42,7 +55,7 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
  */
 public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDelegate2 {
 	
-	private static Action NO_ACTION_AVAILABLE= new Action(SearchMessages.group_occurrences_quickMenu_noEntriesAvailable) {
+	private static Action NO_ACTION_AVAILABLE= new Action(ActionMessages.OccurrencesSearchMenuAction_no_entries_available) {
 		public boolean isEnabled() {
 			return false;
 		}
@@ -59,6 +72,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 	public Menu getMenu(Menu parent) {
 		setMenu(new Menu(parent));
 		fillMenu(fMenu);
+		initMenu(fMenu);
 		return fMenu;
 	}
 
@@ -68,7 +82,21 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 	public Menu getMenu(Control parent) {
 		setMenu(new Menu(parent));
 		fillMenu(fMenu);
+		initMenu(fMenu);
 		return fMenu;
+	}
+
+	protected void initMenu(Menu menu) {
+		menu.addMenuListener(new MenuAdapter() {
+			public void menuShown(MenuEvent e) {
+				Menu m= (Menu) e.widget;
+				MenuItem[] items= m.getItems();
+				for (int i= 0; i < items.length; i++) {
+					items[i].dispose();
+				}
+				fillMenu(m);
+			}
+		});
 	}
 
 	/**
@@ -111,9 +139,11 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 			fPartService= window.getPartService();
 			if (fPartService != null) {
 				fRetargetActions= new RetargetAction[] {
-					createSubmenuAction(fPartService, JdtActionConstants.FIND_OCCURRENCES_IN_FILE, SearchMessages.Search_FindOccurrencesInFile_shortLabel, IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE),
-					createSubmenuAction(fPartService, JdtActionConstants.FIND_IMPLEMENT_OCCURRENCES, ActionMessages.FindImplementOccurrencesAction_text, IJavaEditorActionDefinitionIds.SEARCH_IMPLEMENT_OCCURRENCES_IN_FILE),
-					createSubmenuAction(fPartService, JdtActionConstants.FIND_EXCEPTION_OCCURRENCES, ActionMessages.FindExceptionOccurrences_text, IJavaEditorActionDefinitionIds.SEARCH_EXCEPTION_OCCURRENCES_IN_FILE),
+					createSubmenuAction(fPartService, JdtActionConstants.FIND_OCCURRENCES_IN_FILE, ActionMessages.OccurrencesSearchMenuAction_occurrences_in_file_label, IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE),
+					createSubmenuAction(fPartService, JdtActionConstants.FIND_IMPLEMENT_OCCURRENCES, ActionMessages.OccurrencesSearchMenuAction_implementing_methods_label, IJavaEditorActionDefinitionIds.SEARCH_IMPLEMENT_OCCURRENCES_IN_FILE),
+					createSubmenuAction(fPartService, JdtActionConstants.FIND_EXCEPTION_OCCURRENCES, ActionMessages.OccurrencesSearchMenuAction_throwing_exception_label, IJavaEditorActionDefinitionIds.SEARCH_EXCEPTION_OCCURRENCES_IN_FILE),
+					createSubmenuAction(fPartService, JdtActionConstants.FIND_METHOD_EXIT_OCCURRENCES, ActionMessages.OccurrencesSearchMenuAction_method_exits_label, IJavaEditorActionDefinitionIds.SEARCH_METHOD_EXIT_OCCURRENCES),
+					createSubmenuAction(fPartService, JdtActionConstants.FIND_BREAK_CONTINUE_TARGET_OCCURRENCES, ActionMessages.OccurrencesSearchMenuAction_break_continue_target_label, IJavaEditorActionDefinitionIds.SEARCH_BREAK_CONTINUE_TARGET_OCCURRENCES)
 				};
 			}	
 		}
@@ -122,50 +152,94 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 	/**
 	 * {@inheritDoc}
 	 */
-	public void run(IAction action) {
-		JavaEditor editor= null;
-		IWorkbenchPart activePart= JavaPlugin.getActivePage().getActivePart();
-		if (activePart instanceof JavaEditor)
-			editor= (JavaEditor) activePart;
+	public void run(IAction a) {
+		if (fRetargetActions == null)
+			return;
 		
-		(new JDTQuickMenuAction(editor, IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE_QUICK_MENU) {
-			protected void fillMenu(IMenuManager menu) {
-				fillQuickMenu(menu);
-			}
-		}).run();
+		
+		IWorkbenchPart activePart= JavaPlugin.getActivePage().getActivePart();
+		if (!(activePart instanceof JavaEditor))
+			return;
+		
+		JavaEditor editor= (JavaEditor) activePart;
+		ITypeRoot element= SelectionConverter.getInput(editor);
+		if (element == null)
+			return;
+		
+		ITextSelection textSelection= (ITextSelection) editor.getSelectionProvider().getSelection();
+		IDocument document= JavaUI.getDocumentProvider().getDocument(editor.getEditorInput());
+		JavaTextSelection javaSelection= new JavaTextSelection(element, document, textSelection.getOffset(), textSelection.getLength());
 
+		final ArrayList activeActions= new ArrayList(fRetargetActions.length);
+		for (int i= 0; i < fRetargetActions.length; i++) {
+			RetargetAction action= fRetargetActions[i];
+			IAction actionHandler= action.getActionHandler();
+			if (actionHandler instanceof SelectionDispatchAction) {
+				((SelectionDispatchAction) actionHandler).update(javaSelection);
+				if (actionHandler.isEnabled()) {
+					activeActions.add(actionHandler);
+				}
+			}
+		}
+		if (activeActions.size() == 1) {
+			((IAction) activeActions.get(0)).run();
+		} else {
+			(new JDTQuickMenuAction(editor, IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE_QUICK_MENU) {
+				protected void fillMenu(IMenuManager menu) {
+					fillQuickMenu(menu, activeActions);
+				}
+			}).run();
+		}
 	}
 
+	private void updateActions() {
+		IWorkbenchPart activePart= JavaPlugin.getActivePage().getActivePart();
+		if (!(activePart instanceof JavaEditor))
+			return;
+
+		JavaEditor editor= (JavaEditor) activePart;
+		ITypeRoot element= SelectionConverter.getInput(editor);
+		if (element == null)
+			return;
+
+		ITextSelection textSelection= (ITextSelection) editor.getSelectionProvider().getSelection();
+		IDocument document= JavaUI.getDocumentProvider().getDocument(editor.getEditorInput());
+		JavaTextSelection javaSelection= new JavaTextSelection(element, document, textSelection.getOffset(), textSelection.getLength());
+
+		for (int i= 0; i < fRetargetActions.length; i++) {
+			RetargetAction action= fRetargetActions[i];
+			IAction actionHandler= action.getActionHandler();
+			if (actionHandler instanceof SelectionDispatchAction) {
+				((SelectionDispatchAction) actionHandler).update(javaSelection);
+			}
+		}
+
+	}
+	
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public void selectionChanged(IAction action, ISelection selection) {
 	}
 	
-	private void fillQuickMenu(IMenuManager manager) {
-		IAction[] actions= fRetargetActions;
-		if (actions != null) {
-			boolean hasAction= false;
-			for (int i= 0; i < actions.length; i++) {
-				IAction action= actions[i];
-				if (action.isEnabled()) {
-					hasAction= true;
-					manager.add(action);
-				}
-			}
-			if (!hasAction) {
-				manager.add(NO_ACTION_AVAILABLE);
-			}
-		} else {
+	private void fillQuickMenu(IMenuManager manager, List activeActions) {
+		if (activeActions.isEmpty()) {
 			manager.add(NO_ACTION_AVAILABLE);
+		} else {
+			for (int i= 0; i < activeActions.size(); i++) {
+				manager.add((IAction) activeActions.get(i));
+			}
 		}
 	}
 	
 	/**
 	 * The menu to show in the workbench menu
+	 * @param menu the menu to fill
 	 */
-	private void fillMenu(Menu menu) {
+	public void fillMenu(Menu menu) {
 		if (fRetargetActions != null) {
+			updateActions();
 			for (int i= 0; i < fRetargetActions.length; i++) {
 				ActionContributionItem item= new ActionContributionItem(fRetargetActions[i]);
 				item.fill(menu, -1);

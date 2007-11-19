@@ -72,7 +72,7 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 			int offset= curr.getOffset() - jel.getLineStartOffset() + lineNumberString.length();
 			int length= curr.getLength();
 			
-			if (offset >= 0 && (offset + length < res.length())) {
+			if (offset >= 0 && (offset + length <= res.length())) {
 				res.colorize(offset, length, highlightStyle);
 			}
 		}

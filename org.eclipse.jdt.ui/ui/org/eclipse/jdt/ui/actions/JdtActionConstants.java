@@ -596,5 +596,21 @@ public class JdtActionConstants {
 	 */
 	public static final String FIND_IMPLEMENT_OCCURRENCES= "org.eclipse.jdt.ui.actions.ImplementOccurrences"; //$NON-NLS-1$		
 
+	/**
+	 * Search menu: name of standard method exit occurrences global action (value
+	 * <code>"org.eclipse.jdt.ui.actions.MethodExitOccurrences"</code>).
+	 * 
+	 * @since 3.4
+	 */
+	public static final String FIND_METHOD_EXIT_OCCURRENCES= "org.eclipse.jdt.ui.actions.MethodExitOccurrences"; //$NON-NLS-1$		
+
+	/**
+	 * Search menu: name of standard Find break/continue occurrences global action (value
+	 * <code>"org.eclipse.jdt.ui.actions.BreakContinueTargetOccurrences"</code>).
+	 * 
+	 * @since 3.4
+	 */
+	public static final String FIND_BREAK_CONTINUE_TARGET_OCCURRENCES= "org.eclipse.jdt.ui.actions.BreakContinueTargetOccurrences"; //$NON-NLS-1$		
+	
 
 }
