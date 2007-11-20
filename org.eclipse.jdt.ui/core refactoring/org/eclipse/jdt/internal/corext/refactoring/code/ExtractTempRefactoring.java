@@ -763,7 +763,8 @@ public class ExtractTempRefactoring extends ScriptableRefactoring {
 	private String[] getExcludedVariableNames() {
 		if (fExcludedVariableNames == null) {
 			try {
-				IBinding[] bindings= new ScopeAnalyzer(fCompilationUnitNode).getDeclarationsInScope(getSelectedExpression().getStartPosition(), ScopeAnalyzer.VARIABLES);
+				IBinding[] bindings= new ScopeAnalyzer(fCompilationUnitNode).getDeclarationsInScope(getSelectedExpression().getStartPosition(), ScopeAnalyzer.VARIABLES
+						| ScopeAnalyzer.CHECK_VISIBILITY);
 				fExcludedVariableNames= new String[bindings.length];
 				for (int i= 0; i < bindings.length; i++) {
 					fExcludedVariableNames[i]= bindings[i].getName();
