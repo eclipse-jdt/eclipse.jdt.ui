@@ -113,6 +113,9 @@ public class SelectionConverter {
 		
 	public static IJavaElement[] codeResolveOrInputForked(JavaEditor editor) throws InvocationTargetException, InterruptedException {
 		ITypeRoot input= getInput(editor);
+		if (input == null)
+			return EMPTY_RESULT;
+		
 		ITextSelection selection= (ITextSelection)editor.getSelectionProvider().getSelection();
 		IJavaElement[] result= performForkedCodeResolve(input, selection);
 		if (result.length == 0) {
@@ -135,7 +138,10 @@ public class SelectionConverter {
 	 * @since 3.2
 	 */
 	public static IJavaElement[] codeResolve(JavaEditor editor, boolean primaryOnly) throws JavaModelException {
-		return codeResolve(getInput(editor, primaryOnly), (ITextSelection)editor.getSelectionProvider().getSelection());
+		ITypeRoot input= getInput(editor, primaryOnly);
+		if (input != null)
+			return codeResolve(input, (ITextSelection) editor.getSelectionProvider().getSelection());
+		return EMPTY_RESULT;
 	}
 	
 	/**
@@ -149,7 +155,10 @@ public class SelectionConverter {
 	 * @since 3.2
 	 */
 	public static IJavaElement[] codeResolveForked(JavaEditor editor, boolean primaryOnly) throws InvocationTargetException, InterruptedException {
-		return performForkedCodeResolve(getInput(editor, primaryOnly), (ITextSelection)editor.getSelectionProvider().getSelection());
+		ITypeRoot input= getInput(editor, primaryOnly);
+		if (input != null)
+			return performForkedCodeResolve(input, (ITextSelection) editor.getSelectionProvider().getSelection());
+		return EMPTY_RESULT;
 	}
 			
 	public static IJavaElement getElementAtOffset(JavaEditor editor) throws JavaModelException {
@@ -166,7 +175,10 @@ public class SelectionConverter {
 	 * @since 3.2
 	 */
 	private static IJavaElement getElementAtOffset(JavaEditor editor, boolean primaryOnly) throws JavaModelException {
-		return getElementAtOffset(getInput(editor, primaryOnly), (ITextSelection)editor.getSelectionProvider().getSelection());
+		ITypeRoot input= getInput(editor, primaryOnly);
+		if (input != null)
+			return getElementAtOffset(input, (ITextSelection) editor.getSelectionProvider().getSelection());
+		return null;
 	}
 	
 	public static IType getTypeAtOffset(JavaEditor editor) throws JavaModelException {
@@ -267,7 +279,10 @@ public class SelectionConverter {
 //	}
 	
 	public static IJavaElement resolveEnclosingElement(JavaEditor editor, ITextSelection selection) throws JavaModelException {
-		return resolveEnclosingElement(getInput(editor), selection);
+		ITypeRoot input= getInput(editor);
+		if (input != null)
+			return resolveEnclosingElement(input, selection);
+		return null;
 	}
 	
 	public static IJavaElement resolveEnclosingElement(IJavaElement input, ITextSelection selection) throws JavaModelException {
