@@ -371,15 +371,16 @@ public class JavadocTagsSubProcessor {
 	
 	public static void getUnusedAndUndocumentedParameterOrExceptionProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
+		IJavaProject project= cu.getJavaProject();
 		
-		if (!JavaCore.ENABLED.equals(JavaCore.COMPILER_DOC_COMMENT_SUPPORT)) {
+		if (!JavaCore.ENABLED.equals(project.getOption(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, true))) {
 			return;
 		}
 		
 		boolean isUnusedParam= problem.getProblemId() == IProblem.ArgumentIsNeverUsed;
 		String key= isUnusedParam ? JavaCore.COMPILER_PB_UNUSED_PARAMETER_INCLUDE_DOC_COMMENT_REFERENCE : JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION_INCLUDE_DOC_COMMENT_REFERENCE;
 		
-		if (!JavaCore.ENABLED.equals(cu.getJavaProject().getOption(key, true))) {
+		if (!JavaCore.ENABLED.equals(project.getOption(key, true))) {
 			return;
 		}
 		
