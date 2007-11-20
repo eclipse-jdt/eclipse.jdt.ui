@@ -453,8 +453,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 			assertNotNull(operation.getUndoChange());
 		}
 		//undo the change, to have same code for each run
-//wait for new baseline
-//		RefactoringCore.getUndoManager().performUndo(null, null);
+		RefactoringCore.getUndoManager().performUndo(null, null);
 		RefactoringCore.getUndoManager().flush();
 		System.gc();
 	}
