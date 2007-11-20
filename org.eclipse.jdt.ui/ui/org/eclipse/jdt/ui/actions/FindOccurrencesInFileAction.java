@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -196,8 +195,7 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		CompilationUnit astRoot= selection.resolvePartialAstAtOffset();
-		ASTNode node= selection.resolveCoveringNode();
-		setEnabled(astRoot != null && node != null && new OccurrencesFinder().initialize(astRoot, node) == null);
+		setEnabled(astRoot != null && new OccurrencesFinder().initialize(astRoot, selection.getOffset(), selection.getLength()) == null);
 	}
 
 	/* (non-JavaDoc)

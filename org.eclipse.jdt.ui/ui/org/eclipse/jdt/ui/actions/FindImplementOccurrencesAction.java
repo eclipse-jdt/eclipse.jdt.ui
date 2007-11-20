@@ -22,7 +22,6 @@ import org.eclipse.ui.texteditor.IEditorStatusLine;
 
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -87,8 +86,7 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		CompilationUnit astRoot= selection.resolvePartialAstAtOffset();
-		ASTNode node= selection.resolveCoveringNode();
-		setEnabled(astRoot != null && node != null && new ImplementOccurrencesFinder().initialize(astRoot, node) == null);
+		setEnabled(astRoot != null && new ImplementOccurrencesFinder().initialize(astRoot, selection.getOffset(), selection.getLength()) == null);
 	}
 	
 	/**
