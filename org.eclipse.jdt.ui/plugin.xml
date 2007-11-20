@@ -4518,6 +4518,10 @@
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
         label="%MarkerCategory.potential"
         priority="70"/>        
+    <markerGroupingEntry id="org.eclipse.jdt.ui.category.namingconflicts"
+        markerGrouping="org.eclipse.jdt.ui.java_marker_category"
+        label="%MarkerCategory.namingconflicts"
+        priority="65"/>        
     <markerGroupingEntry id="org.eclipse.jdt.ui.category.codestyle"
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
         label="%MarkerCategory.codestyle"
@@ -4552,7 +4556,7 @@
         <markerAttributeMapping value="70" markerGroupingEntry="org.eclipse.jdt.ui.category.documentation"/>
         <markerAttributeMapping value="80" markerGroupingEntry="org.eclipse.jdt.ui.category.codestyle"/>
         <markerAttributeMapping value="90" markerGroupingEntry="org.eclipse.jdt.ui.category.potential"/>
-        <markerAttributeMapping value="100" markerGroupingEntry="org.eclipse.jdt.ui.category.potential"/>
+        <markerAttributeMapping value="100" markerGroupingEntry="org.eclipse.jdt.ui.category.namingconflicts"/>
         <markerAttributeMapping value="110" markerGroupingEntry="org.eclipse.jdt.ui.category.deprecation"/>
         <markerAttributeMapping value="120" markerGroupingEntry="org.eclipse.jdt.ui.category.unnecessary"/>
         <markerAttributeMapping value="130" markerGroupingEntry="org.eclipse.jdt.ui.category.generictypes"/>
