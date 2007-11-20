@@ -166,14 +166,17 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	}
 
 	public boolean visit(CastExpression node) {
-		if ("java.lang.ClassCastException".equals(fException.getQualifiedName())) //$NON-NLS-1$
-			fResult.add(node.getType());
+		if ("java.lang.ClassCastException".equals(fException.getQualifiedName())) { //$NON-NLS-1$
+			Type type= node.getType();
+			fResult.add(new OccurrenceLocation(type.getStartPosition(), type.getLength(), 0, fDescription));
+		}
 		return super.visit(node);
 	}
 	
 	public boolean visit(ClassInstanceCreation node) {
 		if (matches(node.resolveConstructorBinding())) {
-			fResult.add(node.getType());
+			Type type= node.getType();
+			fResult.add(new OccurrenceLocation(type.getStartPosition(), type.getLength(), 0, fDescription));
 		}
 		return super.visit(node);
 	}
