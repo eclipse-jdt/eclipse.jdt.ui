@@ -438,7 +438,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		return true;
 	}
 	
-	private boolean isReturnTypeSameAsInitial() throws JavaModelException {
+	private boolean isReturnTypeSameAsInitial() {
 		return ! fReturnTypeInfo.isTypeNameChanged();
 	}
 	
@@ -563,7 +563,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 		return null;
 	}
 	
-	private RefactoringStatus checkTypeVariables() throws JavaModelException {
+	private RefactoringStatus checkTypeVariables() {
 		if (fRippleMethods.length == 1)
 			return null;
 		
@@ -1692,10 +1692,16 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			}
 		}
 
+		/**
+		 * @param info the parameter info 
+		 */
 		protected void changeParamgumentName(ParameterInfo info) {
 			// no-op
 		}
 
+		/**
+		 * @param info the parameter info 
+		 */
 		protected void changeParamgumentType(ParameterInfo info) {
 			// no-op
 		}
@@ -1972,7 +1978,7 @@ public class ChangeSignatureRefactoring extends ScriptableRefactoring implements
 			}
 		}
 	
-		private void changeReturnType() throws JavaModelException {
+		private void changeReturnType() {
 		    if (isReturnTypeSameAsInitial())
 		    	return;
 			replaceTypeNode(fMethDecl.getReturnType2(), fReturnTypeInfo.getNewTypeName(), fReturnTypeInfo.getNewTypeBinding());
