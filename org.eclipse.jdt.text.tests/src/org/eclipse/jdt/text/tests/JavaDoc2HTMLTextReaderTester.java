@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Brock Janiczak (brockj_eclipse@ihug.com.au) - https://bugs.eclipse.org/bugs/show_bug.cgi?id=83697
+ *     Benjamin Muskalla <b.muskalla@gmx.net> - [navigation][hovering] Javadoc view cannot find URL with anchor - https://bugs.eclipse.org/bugs/show_bug.cgi?id=70870
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
@@ -37,7 +38,7 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
 
 	private static final boolean DEBUG= false;
 	
-	
+
 	public JavaDoc2HTMLTextReaderTester(String name) {
 		super(name);
 	}
@@ -211,6 +212,19 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
     	verify(string, expected);
     }
     
+	public void test21(){
+		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=70870
+		String string= "/**@see <a href=\"http://foo.bar#baz\">foo</a>*/"; //$NON-NLS-1$
+		String expected= "<dl><dt>See Also:</dt><dd><a href=\"http://foo.bar#baz\">foo</a></dd></dl>"; //$NON-NLS-1$
+		verify(string, expected);
+	}
+
+	public void test22(){
+		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=70870
+		String string= "/**@see <a href=\"http://foo.bar#baz\">foo</a> and {@link Foo#bar(String, int)} and <a href=\"http://foo.bar#baz\">foo</a>*/"; //$NON-NLS-1$
+		String expected= "<dl><dt>See Also:</dt><dd><a href=\"http://foo.bar#baz\">foo</a> and <code>Foo.bar(String, int)</code> and <a href=\"http://foo.bar#baz\">foo</a></dd></dl>"; //$NON-NLS-1$
+		verify(string, expected);
+	}
 }
 
 class MockBuffer implements IBuffer{

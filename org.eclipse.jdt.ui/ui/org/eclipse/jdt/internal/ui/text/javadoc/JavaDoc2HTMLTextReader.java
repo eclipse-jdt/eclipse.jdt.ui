@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Brock Janiczak (brockj_eclipse@ihug.com.au) - https://bugs.eclipse.org/bugs/show_bug.cgi?id=20644
  *     Brock Janiczak (brockj_eclipse@ihug.com.au) - https://bugs.eclipse.org/bugs/show_bug.cgi?id=83607
+ *     Benjamin Muskalla <b.muskalla@gmx.net> - [navigation][hovering] Javadoc view cannot find URL with anchor - https://bugs.eclipse.org/bugs/show_bug.cgi?id=70870
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
@@ -102,10 +103,28 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 	}
 
 	private String substituteQualification(String qualification) {
-		String result= qualification.replace('#', '.');
-		if (result.startsWith(".")) { //$NON-NLS-1$
-			result= result.substring(1);
+		String result;
+		if (qualification.indexOf("<a") == -1) { //$NON-NLS-1$
+			// No tag at all, use smart way
+			result= qualification.replace('#', '.');
+		} else {
+			// Handle tags
+			int length= qualification.length();
+			result= qualification;
+			boolean insideTag= false;
+			for (int i= 0; i < length; i++) {
+				char charAt= result.charAt(i);
+				if (charAt == '<' && result.charAt(i + 1) == 'a')
+					insideTag= true;
+				if (charAt == '>')
+					insideTag= false;
+				if (charAt == '#' && !insideTag)
+					result= result.substring(0, i) + "." + result.substring(i + 1); //$NON-NLS-1$
+			}
 		}
+
+		if (result.startsWith(".")) //$NON-NLS-1$
+			result= result.substring(1);
 		return result;
 	}
 
@@ -214,17 +233,17 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 
 		if (TagElement.TAG_PARAM.equals(tag))
 			fParameters.add(tagContent);
-		else if (TagElement.TAG_RETURN.equals(tag)) 
+		else if (TagElement.TAG_RETURN.equals(tag))
 			fReturn= tagContent;
-		else if (TagElement.TAG_EXCEPTION.equals(tag)) 
+		else if (TagElement.TAG_EXCEPTION.equals(tag))
 			fExceptions.add(tagContent);
-		else if (TagElement.TAG_THROWS.equals(tag)) 
+		else if (TagElement.TAG_THROWS.equals(tag))
 			fExceptions.add(tagContent);
-		else if (TagElement.TAG_AUTHOR.equals(tag)) 
+		else if (TagElement.TAG_AUTHOR.equals(tag))
 			fAuthors.add(substituteQualification(tagContent));
-		else if (TagElement.TAG_SEE.equals(tag)) 
+		else if (TagElement.TAG_SEE.equals(tag))
 			fSees.add(substituteQualification(tagContent));
-		else if (TagElement.TAG_SINCE.equals(tag)) 
+		else if (TagElement.TAG_SINCE.equals(tag))
 			fSince.add(substituteQualification(tagContent));
 		else if (tagContent != null)
 			fRest.add(new Pair(tag, tagContent));
