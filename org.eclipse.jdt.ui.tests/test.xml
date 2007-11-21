@@ -46,6 +46,7 @@
     <delete dir="${jdt-folder}" quiet="true"/>
     
 	<ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
+	  <property name="vmargs" value="-Xms250M -Xmx250M"/>
       <property name="data-dir" value="${jdt-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.jdt.ui.tests.LeakTestSuite"/>
