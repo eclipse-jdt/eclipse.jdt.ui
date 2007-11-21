@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -177,6 +177,7 @@ public class ResourceModifications {
 	 * to be moved.
 	 * 
 	 * @param move the resource to be moved
+	 * @param arguments the move arguments
 	 */
 	public void addMove(IResource move, MoveArguments arguments) {
 		if (fMove == null) {
@@ -196,6 +197,7 @@ public class ResourceModifications {
 	 * to be copied.
 	 * 
 	 * @param copy the resource to be copied
+	 * @param arguments the copy arguments
 	 */
 	public void addCopy(IResource copy, CopyArguments arguments) {
 		if (fCopy == null) {
