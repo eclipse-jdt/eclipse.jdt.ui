@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
@@ -49,7 +50,6 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
@@ -62,14 +62,16 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class UseSupertypeWizard extends RefactoringWizard{
 
 	/* package */ static final String DIALOG_SETTING_SECTION= "UseSupertypeWizard"; //$NON-NLS-1$
+	private final UseSuperTypeProcessor fProcessor;
 	
-	public UseSupertypeWizard(UseSuperTypeRefactoring ref) {
+	public UseSupertypeWizard(UseSuperTypeProcessor processor, Refactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE);
+		fProcessor= processor;
 		setDefaultPageTitle(RefactoringMessages.UseSupertypeWizard_Use_Super_Type_Where_Possible); 
 	}
 
 	protected void addUserInputPages(){
-		addPage(new UseSupertypeInputPage());
+		addPage(new UseSupertypeInputPage(fProcessor));
 	}
 
 	private static class UseSupertypeInputPage extends UserInputWizardPage{
@@ -138,10 +140,12 @@ public class UseSupertypeWizard extends RefactoringWizard{
 		private final static String MESSAGE= RefactoringMessages.UseSupertypeInputPage_Select_supertype; 
 		private JavaElementLabelProvider fLabelProvider;
 		private IDialogSettings fSettings;
+		private UseSuperTypeProcessor fProcessor;
 		
-		public UseSupertypeInputPage() {
+		public UseSupertypeInputPage(UseSuperTypeProcessor processor) {
 			super(PAGE_NAME);
 			fFileCount= new HashMap(2);
+			fProcessor= processor;
 			setMessage(MESSAGE);
 		}
 
@@ -155,12 +159,8 @@ public class UseSupertypeWizard extends RefactoringWizard{
 		}
 
 		private UseSuperTypeProcessor getUseSupertypeProcessor() {
-			return getUseSupertypeRefactoring().getUseSuperTypeProcessor();
+			return fProcessor;
 		}
-
-		private UseSuperTypeRefactoring getUseSupertypeRefactoring() {
-			return ((UseSuperTypeRefactoring)getRefactoring());
-		}	
 
 		public void createControl(Composite parent) {
 			initializeDialogUnits(parent);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,10 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -31,13 +35,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class PullUpTests extends RefactoringTest {
 	
@@ -65,12 +66,15 @@ public class PullUpTests extends RefactoringTest {
 	
 	//-------------------
 	
-	private static PullUpRefactoring createRefactoring(IMember[] methods) throws JavaModelException{
+	private static PullUpRefactoringProcessor createRefactoringProcessor(IMember[] methods) throws JavaModelException{
 		IJavaProject project= null;
 		if (methods != null && methods.length > 0)
 			project= methods[0].getJavaProject();
-		if (RefactoringAvailabilityTester.isPullUpAvailable(methods))
-			return new PullUpRefactoring(new PullUpRefactoringProcessor(methods, JavaPreferencesSettings.getCodeGenerationSettings(project)));
+		if (RefactoringAvailabilityTester.isPullUpAvailable(methods)) {
+			PullUpRefactoringProcessor processor= new PullUpRefactoringProcessor(methods, JavaPreferencesSettings.getCodeGenerationSettings(project));
+			new ProcessorBasedRefactoring(processor);
+			return processor;
+		}
 		return null;
 	}
 	
@@ -81,11 +85,12 @@ public class PullUpTests extends RefactoringTest {
 			IField[] fields= getFields(type, fieldNames);
 			IMethod[] methods= getMethods(type, methodNames, signatures);
 
-			PullUpRefactoring ref= createRefactoring(merge(methods, fields));
-			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setSuperclassAsTargetClass(ref);
+			PullUpRefactoringProcessor processor= createRefactoringProcessor(merge(methods, fields));
 
-			final PullUpRefactoringProcessor processor= ref.getPullUpProcessor();
+			Refactoring ref= processor.getRefactoring();
+			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+			setSuperclassAsTargetClass(processor);
+
 			if (deleteAllInSourceType)
 				processor.setDeletedMethods(methods);
 			if (deleteAllMatchingMethods)
@@ -104,18 +109,18 @@ public class PullUpTests extends RefactoringTest {
 		}	
 	}
 
-	private IType[] getPossibleTargetClasses(PullUpRefactoring ref) throws JavaModelException{
-		return ref.getPullUpProcessor().getCandidateTypes(new RefactoringStatus(), new NullProgressMonitor());
+	private IType[] getPossibleTargetClasses(PullUpRefactoringProcessor processor) throws JavaModelException {
+		return processor.getCandidateTypes(new RefactoringStatus(), new NullProgressMonitor());
 	}
 	
-	private void setSuperclassAsTargetClass(PullUpRefactoring ref) throws JavaModelException {
-		IType[] possibleClasses= getPossibleTargetClasses(ref);
-		ref.getPullUpProcessor().setDestinationType(possibleClasses[possibleClasses.length - 1]);
+	private void setSuperclassAsTargetClass(PullUpRefactoringProcessor processor) throws JavaModelException {
+		IType[] possibleClasses= getPossibleTargetClasses(processor);
+		processor.setDestinationType(possibleClasses[possibleClasses.length - 1]);
 	}
 	
-	private void setTargetClass(PullUpRefactoring ref, int targetClassIndex) throws JavaModelException{
-		IType[] possibleClasses= getPossibleTargetClasses(ref);
-		ref.getPullUpProcessor().setDestinationType(getPossibleTargetClasses(ref)[possibleClasses.length - 1 - targetClassIndex]);
+	private void setTargetClass(PullUpRefactoringProcessor processor, int targetClassIndex) throws JavaModelException {
+		IType[] possibleClasses= getPossibleTargetClasses(processor);
+		processor.setDestinationType(getPossibleTargetClasses(processor)[possibleClasses.length - 1 - targetClassIndex]);
 	}
 	
 	private void addRequiredMembersHelper(String[] fieldNames, String[] methodNames, String[][] methodSignatures, String[] expectedFieldNames, String[] expectedMethodNames, String[][] expectedMethodSignatures) throws Exception {
@@ -126,11 +131,14 @@ public class PullUpTests extends RefactoringTest {
 			IMethod[] methods= getMethods(type, methodNames, methodSignatures);
 
 			IMember[] members= merge(methods, fields);
-			PullUpRefactoring ref= createRefactoring(members);
-			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setSuperclassAsTargetClass(ref);
 
-			List  additionalRequired= Arrays.asList(ref.getPullUpProcessor().getAdditionalRequiredMembersToPullUp(new NullProgressMonitor()));
+			PullUpRefactoringProcessor processor= createRefactoringProcessor(members);
+			Refactoring ref= processor.getRefactoring();
+			
+			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+			setSuperclassAsTargetClass(processor);
+
+			List additionalRequired= Arrays.asList(processor.getAdditionalRequiredMembersToPullUp(new NullProgressMonitor()));
 			List required= new ArrayList();
 			required.addAll(additionalRequired);
 			required.addAll(Arrays.asList(members));
@@ -157,10 +165,12 @@ public class PullUpTests extends RefactoringTest {
 		try{
 			IType type= getType(cu, "B");
 			IField[] fields= getFields(type, fieldNames);
+
+			PullUpRefactoringProcessor processor= createRefactoringProcessor(fields);
+			Refactoring ref= processor.getRefactoring();
 			
-			PullUpRefactoring ref= createRefactoring(fields);
 			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setTargetClass(ref, targetClassIndex);
+			setTargetClass(processor, targetClassIndex);
 		
 			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 			assertTrue("precondition was supposed to pass", !checkInputResult.hasError());	
@@ -180,9 +190,12 @@ public class PullUpTests extends RefactoringTest {
 		try{
 			IType type= getType(cu, "B");
 			IField[] fields= getFields(type, fieldNames);
-			PullUpRefactoring ref= createRefactoring(fields);
+
+			PullUpRefactoringProcessor processor= createRefactoringProcessor(fields);
+			Refactoring ref= processor.getRefactoring();
+			
 			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setTargetClass(ref, targetClassIndex);
+			setTargetClass(processor, targetClassIndex);
 
 			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 			assertTrue("precondition was supposed to fail", !checkInputResult.isOK());	
@@ -197,7 +210,7 @@ public class PullUpTests extends RefactoringTest {
 		return (IMethod[]) l.toArray(new IMethod[l.size()]);
 	}
 
-	private PullUpRefactoring createRefactoringPrepareForInputCheck(String[] selectedMethodNames, String[][] selectedMethodSignatures, 
+	private Refactoring createRefactoringPrepareForInputCheck(String[] selectedMethodNames, String[][] selectedMethodSignatures, 
 						String[] selectedFieldNames, 
 						String[] selectedTypeNames, String[] namesOfMethodsToPullUp, 
 						String[][] signaturesOfMethodsToPullUp, 
@@ -209,11 +222,13 @@ public class PullUpTests extends RefactoringTest {
 		IField[] selectedFields= getFields(type, selectedFieldNames);
 		IType[] selectedTypes= getMemberTypes(type, selectedTypeNames);
 		IMember[] selectedMembers= merge(selectedFields, selectedMethods, selectedTypes);
+
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(selectedMembers);
+		Refactoring ref= processor.getRefactoring();
 		
-		PullUpRefactoring ref= createRefactoring(selectedMembers);
 		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
 		
-		setTargetClass(ref, targetClassIndex);
+		setTargetClass(processor, targetClassIndex);
 		
 		IMethod[] methodsToPullUp= findMethods(selectedMethods, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp);
 		IField[] fieldsToPullUp= findFields(selectedFields, namesOfFieldsToPullUp);
@@ -221,7 +236,7 @@ public class PullUpTests extends RefactoringTest {
 		IMember[] membersToPullUp= merge(methodsToPullUp, fieldsToPullUp, typesToPullUp);
 		
 		IMethod[] methodsToDeclareAbstract= findMethods(selectedMethods, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
-		final PullUpRefactoringProcessor processor= ref.getPullUpProcessor();
+
 		processor.setMembersToMove(membersToPullUp);
 		processor.setAbstractMethods(methodsToDeclareAbstract);
 		if (deleteAllPulledUpMethods && methodsToPullUp.length != 0)
@@ -240,7 +255,9 @@ public class PullUpTests extends RefactoringTest {
 											boolean deleteAllPulledUpMethods, boolean deleteAllMatchingMethods, int targetClassIndex) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
-			PullUpRefactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, selectedTypeNames, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfTypesToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, deleteAllPulledUpMethods, deleteAllMatchingMethods, targetClassIndex, cu);
+			Refactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, selectedTypeNames, namesOfMethodsToPullUp,
+					signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfTypesToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, deleteAllPulledUpMethods,
+					deleteAllMatchingMethods, targetClassIndex, cu);
 
 			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 			assertTrue("precondition was supposed to fail", !checkInputResult.isOK());	
@@ -259,7 +276,9 @@ public class PullUpTests extends RefactoringTest {
 											boolean deleteAllPulledUpMethods, boolean deleteAllMatchingMethods, int targetClassIndex) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
-			PullUpRefactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, selectedTypeNames, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfTypesToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, deleteAllPulledUpMethods, deleteAllMatchingMethods, targetClassIndex, cu);
+			Refactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, selectedTypeNames, namesOfMethodsToPullUp,
+					signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfTypesToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, deleteAllPulledUpMethods,
+					deleteAllMatchingMethods, targetClassIndex, cu);
 
 			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 			assertTrue("precondition was supposed to pass", !checkInputResult.hasError());	
@@ -279,11 +298,14 @@ public class PullUpTests extends RefactoringTest {
 		try{
 			IType type= getType(cu, "B");
 			IMethod[] methods= getMethods(type, methodNames, signatures);
-			PullUpRefactoring ref= createRefactoring(methods);
+
+			PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+			Refactoring ref= processor.getRefactoring();
+			
 			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
 
-			setTargetClass(ref, targetClassIndex);
-			final PullUpRefactoringProcessor processor= ref.getPullUpProcessor();
+			setTargetClass(processor, targetClassIndex);
+
 			if (deleteAllInSourceType)
 				processor.setDeletedMethods(methods);
 			if (deleteAllMatchingMethods)
@@ -307,10 +329,13 @@ public class PullUpTests extends RefactoringTest {
 		try{
 			IType type= getType(cu, "B");
 			IMethod[] methods= getMethods(type, methodNames, signatures);
-			PullUpRefactoring ref= createRefactoring(methods);
+
+			PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+			Refactoring ref= processor.getRefactoring();
+
 			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setTargetClass(ref, targetClassIndex);
-			final PullUpRefactoringProcessor processor= ref.getPullUpProcessor();
+			setTargetClass(processor, targetClassIndex);
+
 			if (deleteAllInSourceType)
 				processor.setDeletedMethods(methods);
 			if (deleteAllMatchingMethods)
@@ -330,12 +355,15 @@ public class PullUpTests extends RefactoringTest {
 		try{
 			IType type= getType(cuB, "B");
 			IMethod[] methods= getMethods(type, methodNames, signatures);
-			PullUpRefactoring ref= createRefactoring(methods);
+
+			PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+			Refactoring ref= processor.getRefactoring();
+			
 			assertEquals("activation", shouldActivationCheckPass, ref.checkInitialConditions(new NullProgressMonitor()).isOK());
 			if (! shouldActivationCheckPass)
 				return;
-			setTargetClass(ref, targetClassIndex);			
-			final PullUpRefactoringProcessor processor= ref.getPullUpProcessor();
+			setTargetClass(processor, targetClassIndex);			
+
 			if (deleteAllInSourceType)
 				processor.setDeletedMethods(methods);
 			if (deleteAllMatchingMethods)
@@ -378,11 +406,13 @@ public class PullUpTests extends RefactoringTest {
 			
 			IType type= getType(cuB, "B");
 			IMethod[] methods= getMethods(type, methodNames, signatures);
-			PullUpRefactoring ref= createRefactoring(methods);
-			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setSuperclassAsTargetClass(ref);
 
-			final PullUpRefactoringProcessor processor= ref.getPullUpProcessor();
+			PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+			Refactoring ref= processor.getRefactoring();
+			
+			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+			setSuperclassAsTargetClass(processor);
+
 			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 		
 			RefactoringStatus result= performRefactoring(ref);
@@ -407,11 +437,13 @@ public class PullUpTests extends RefactoringTest {
 			
 			IType type= getType(cuB, "B");
 			IMethod[] methods= getMethods(type, methodNames, signatures);
-			PullUpRefactoring ref= createRefactoring(methods);
-			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setSuperclassAsTargetClass(ref);
 
-			final PullUpRefactoringProcessor processor= ref.getPullUpProcessor();
+			PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+			Refactoring ref= processor.getRefactoring();
+			
+			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+			setSuperclassAsTargetClass(processor);
+
 			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 		
 			RefactoringStatus result= performRefactoring(ref);
@@ -461,10 +493,13 @@ public class PullUpTests extends RefactoringTest {
 			
 			IType type= getType(cuB, "B");
 			IMethod[] methods= getMethods(type, methodNames, signatures);
-			PullUpRefactoring ref= createRefactoring(methods);
+
+			PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+			Refactoring ref= processor.getRefactoring();
+			
 			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setSuperclassAsTargetClass(ref);
-			final PullUpRefactoringProcessor processor= ref.getPullUpProcessor();
+			setSuperclassAsTargetClass(processor);
+
 			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 		
 			RefactoringStatus result= performRefactoring(ref);
@@ -1607,11 +1642,13 @@ public class PullUpTests extends RefactoringTest {
 			
 			IType type= getType(cuB, "B");
 			IMethod[] methods= getMethods(type, methodNames, signatures);
-			PullUpRefactoring ref= createRefactoring(methods);
+
+			PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+			Refactoring ref= processor.getRefactoring();
+			
 			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setSuperclassAsTargetClass(ref);
+			setSuperclassAsTargetClass(processor);
 	
-			final PullUpRefactoringProcessor processor= ref.getPullUpProcessor();
 			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 		
 			RefactoringStatus result= performRefactoring(ref);
@@ -1636,11 +1673,13 @@ public class PullUpTests extends RefactoringTest {
 			
 			IType type= getType(cuB, "B");
 			IMethod[] methods= getMethods(type, methodNames, signatures);
-			PullUpRefactoring ref= createRefactoring(methods);
+
+			PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+			Refactoring ref= processor.getRefactoring();
+			
 			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setSuperclassAsTargetClass(ref);
+			setSuperclassAsTargetClass(processor);
 	
-			final PullUpRefactoringProcessor processor= ref.getPullUpProcessor();
 			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 		
 			RefactoringStatus result= performRefactoring(ref);
@@ -1711,11 +1750,13 @@ public class PullUpTests extends RefactoringTest {
 			
 			IType type= getType(cuB, "B");
 			IMethod[] methods= getMethods(type, methodNames, signatures);
-			PullUpRefactoring ref= createRefactoring(methods);
+
+			PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+			Refactoring ref= processor.getRefactoring();
+			
 			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setSuperclassAsTargetClass(ref);
+			setSuperclassAsTargetClass(processor);
 	
-			final PullUpRefactoringProcessor processor= ref.getPullUpProcessor();
 			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 		
 			RefactoringStatus result= performRefactoring(ref);
@@ -1770,10 +1811,13 @@ public class PullUpTests extends RefactoringTest {
 			
 			IType type= getType(cuB, "B");
 			IMethod[] methods= getMethods(type, methodNames, signatures);
-			PullUpRefactoring ref= createRefactoring(methods);
+
+			PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+			Refactoring ref= processor.getRefactoring();
+			
 			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-			setSuperclassAsTargetClass(ref);
-			final PullUpRefactoringProcessor processor= ref.getPullUpProcessor();
+			setSuperclassAsTargetClass(processor);
+
 			processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
 		
 			RefactoringStatus result= performRefactoring(ref);

@@ -18,7 +18,9 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -31,7 +33,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -47,14 +48,16 @@ public final class ExtractSupertypeTests extends RefactoringTest {
 
 	private static final String REFACTORING_PATH= "ExtractSupertype/";
 
-	private static ExtractSupertypeRefactoring createRefactoring(IMember[] members) throws JavaModelException {
+	private static ExtractSupertypeProcessor createRefactoringProcessor(IMember[] members) throws JavaModelException {
 		IJavaProject project= null;
 		if (members != null && members.length > 0)
 			project= members[0].getJavaProject();
 		if (RefactoringAvailabilityTester.isExtractSupertypeAvailable(members)) {
 			final CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(project);
 			settings.createComments= false;
-			return new ExtractSupertypeRefactoring(new ExtractSupertypeProcessor(members, settings));
+			ExtractSupertypeProcessor processor= new ExtractSupertypeProcessor(members, settings);
+			new ProcessorBasedRefactoring(processor);
+			return processor;
 		}
 		return null;
 	}
@@ -86,8 +89,8 @@ public final class ExtractSupertypeTests extends RefactoringTest {
 			IType type= getType(cu, "B");
 			IMethod[] methods= getMethods(type, methodNames, signatures);
 
-			ExtractSupertypeRefactoring refactoring= createRefactoring(methods);
-			ExtractSupertypeProcessor processor= refactoring.getExtractSupertypeProcessor();
+			ExtractSupertypeProcessor processor= createRefactoringProcessor(methods);
+			Refactoring refactoring= processor.getRefactoring();
 			processor.setMembersToMove(methods);
 
 			assertTrue("activation", refactoring.checkInitialConditions(new NullProgressMonitor()).isOK());

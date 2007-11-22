@@ -46,7 +46,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -374,14 +373,26 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	 * Creates a new pull up refactoring processor.
 	 * 
 	 * @param members
-	 *            the members to pull up, or <code>null</code> if invoked by
-	 *            scripting
+	 *            the members to pull up
 	 * @param settings
-	 *            the code generation settings, or <code>null</code> if
-	 *            invoked by scripting
+	 *            the code generation settings
 	 */
 	public PullUpRefactoringProcessor(final IMember[] members, final CodeGenerationSettings settings) {
 		this(members, settings, false);
+	}
+
+	/**
+	 * Creates a new pull up processor from refactoring arguments.
+	 * 
+	 * @param arguments
+	 *            the refactoring arguments
+	 * @param status
+	 *            the resulting status
+	 */
+	public PullUpRefactoringProcessor(JavaRefactoringArguments arguments, RefactoringStatus status) {
+		this(null, null, false);
+		RefactoringStatus initializeStatus= initialize(arguments);
+		status.merge(initializeStatus);
 	}
 
 	/**
@@ -1634,117 +1645,110 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.PULL_UP);
-				else
-					fDestinationType= (IType) element;
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
-			final String stubs= extended.getAttribute(ATTRIBUTE_STUBS);
-			if (stubs != null) {
-				fCreateMethodStubs= Boolean.valueOf(stubs).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_STUBS));
-			final String instance= extended.getAttribute(ATTRIBUTE_INSTANCEOF);
-			if (instance != null) {
-				fInstanceOf= Boolean.valueOf(instance).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INSTANCEOF));
-			final String replace= extended.getAttribute(ATTRIBUTE_REPLACE);
-			if (replace != null) {
-				fReplace= Boolean.valueOf(replace).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
-			int pullCount= 0;
-			int abstractCount= 0;
-			int deleteCount= 0;
-			String value= extended.getAttribute(ATTRIBUTE_ABSTRACT);
-			if (value != null && !"".equals(value)) {//$NON-NLS-1$
-				try {
-					abstractCount= Integer.parseInt(value);
-				} catch (NumberFormatException exception) {
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ABSTRACT));
-				}
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ABSTRACT));
-			value= extended.getAttribute(ATTRIBUTE_DELETE);
-			if (value != null && !"".equals(value)) {//$NON-NLS-1$
-				try {
-					deleteCount= Integer.parseInt(value);
-				} catch (NumberFormatException exception) {
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELETE));
-				}
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELETE));
-			value= extended.getAttribute(ATTRIBUTE_PULL);
-			if (value != null && !"".equals(value)) {//$NON-NLS-1$
-				try {
-					pullCount= Integer.parseInt(value);
-				} catch (NumberFormatException exception) {
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PULL));
-				}
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PULL));
-			final RefactoringStatus status= new RefactoringStatus();
-			List elements= new ArrayList();
-			for (int index= 0; index < pullCount; index++) {
-				final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1);
-				handle= extended.getAttribute(attribute);
-				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
-					final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-					if (element == null || !element.exists())
-						status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.PULL_UP));
-					else
-						elements.add(element);
-				} else
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
-			}
-			fMembersToMove= (IMember[]) elements.toArray(new IMember[elements.size()]);
-			elements= new ArrayList();
-			for (int index= 0; index < deleteCount; index++) {
-				final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (pullCount + index + 1);
-				handle= extended.getAttribute(attribute);
-				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
-					final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-					if (element == null || !element.exists())
-						status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.PULL_UP));
-					else
-						elements.add(element);
-				} else
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
-			}
-			fDeletedMethods= (IMethod[]) elements.toArray(new IMethod[elements.size()]);
-			elements= new ArrayList();
-			for (int index= 0; index < abstractCount; index++) {
-				final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (pullCount + abstractCount + index + 1);
-				handle= extended.getAttribute(attribute);
-				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
-					final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-					if (element == null || !element.exists())
-						status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.PULL_UP));
-					else
-						elements.add(element);
-				} else
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
-			}
-			fAbstractMethods= (IMethod[]) elements.toArray(new IMethod[elements.size()]);
-			IJavaProject project= null;
-			if (fMembersToMove.length > 0)
-				project= fMembersToMove[0].getJavaProject();
-			fSettings= JavaPreferencesSettings.getCodeGenerationSettings(project);
-			if (!status.isOK())
-				return status;
+	private RefactoringStatus initialize(final JavaRefactoringArguments extended) {
+		String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		if (handle != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+			if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
+				return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.PULL_UP);
+			else
+				fDestinationType= (IType) element;
 		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+		final String stubs= extended.getAttribute(ATTRIBUTE_STUBS);
+		if (stubs != null) {
+			fCreateMethodStubs= Boolean.valueOf(stubs).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_STUBS));
+		final String instance= extended.getAttribute(ATTRIBUTE_INSTANCEOF);
+		if (instance != null) {
+			fInstanceOf= Boolean.valueOf(instance).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INSTANCEOF));
+		final String replace= extended.getAttribute(ATTRIBUTE_REPLACE);
+		if (replace != null) {
+			fReplace= Boolean.valueOf(replace).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
+		int pullCount= 0;
+		int abstractCount= 0;
+		int deleteCount= 0;
+		String value= extended.getAttribute(ATTRIBUTE_ABSTRACT);
+		if (value != null && !"".equals(value)) {//$NON-NLS-1$
+			try {
+				abstractCount= Integer.parseInt(value);
+			} catch (NumberFormatException exception) {
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ABSTRACT));
+			}
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ABSTRACT));
+		value= extended.getAttribute(ATTRIBUTE_DELETE);
+		if (value != null && !"".equals(value)) {//$NON-NLS-1$
+			try {
+				deleteCount= Integer.parseInt(value);
+			} catch (NumberFormatException exception) {
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELETE));
+			}
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELETE));
+		value= extended.getAttribute(ATTRIBUTE_PULL);
+		if (value != null && !"".equals(value)) {//$NON-NLS-1$
+			try {
+				pullCount= Integer.parseInt(value);
+			} catch (NumberFormatException exception) {
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PULL));
+			}
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PULL));
+		final RefactoringStatus status= new RefactoringStatus();
+		List elements= new ArrayList();
+		for (int index= 0; index < pullCount; index++) {
+			final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1);
+			handle= extended.getAttribute(attribute);
+			if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists())
+					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.PULL_UP));
+				else
+					elements.add(element);
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+		}
+		fMembersToMove= (IMember[]) elements.toArray(new IMember[elements.size()]);
+		elements= new ArrayList();
+		for (int index= 0; index < deleteCount; index++) {
+			final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (pullCount + index + 1);
+			handle= extended.getAttribute(attribute);
+			if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists())
+					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.PULL_UP));
+				else
+					elements.add(element);
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+		}
+		fDeletedMethods= (IMethod[]) elements.toArray(new IMethod[elements.size()]);
+		elements= new ArrayList();
+		for (int index= 0; index < abstractCount; index++) {
+			final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (pullCount + abstractCount + index + 1);
+			handle= extended.getAttribute(attribute);
+			if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+				if (element == null || !element.exists())
+					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.PULL_UP));
+				else
+					elements.add(element);
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+		}
+		fAbstractMethods= (IMethod[]) elements.toArray(new IMethod[elements.size()]);
+		IJavaProject project= null;
+		if (fMembersToMove.length > 0)
+			project= fMembersToMove[0].getJavaProject();
+		fSettings= JavaPreferencesSettings.getCodeGenerationSettings(project);
+		if (!status.isOK())
+			return status;
 		return new RefactoringStatus();
 	}
 
@@ -1855,7 +1859,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		}
 	}
 
-	protected void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit copy, final Set replacements, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
+	protected void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit copy, final Set replacements, final RefactoringStatus status, final IProgressMonitor monitor) {
 		try {
 			monitor.beginTask("", 100); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.PullUpRefactoring_checking);

@@ -61,7 +61,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeRefactoring;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -226,9 +225,11 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	 *            the page name
 	 * @param page
 	 *            the method page
+	 * @param processor 
+	 * 	           the processor
 	 */
-	public ExtractSupertypeMemberPage(final String name, final ExtractSupertypeMethodPage page) {
-		super(name, page);
+	public ExtractSupertypeMemberPage(final String name, final ExtractSupertypeMethodPage page, ExtractSupertypeProcessor processor) {
+		super(name, page, processor);
 		setDescription(RefactoringMessages.ExtractSupertypeMemberPage_page_title);
 		METHOD_LABELS[PULL_UP_ACTION]= RefactoringMessages.ExtractSupertypeMemberPage_extract;
 		METHOD_LABELS[DECLARE_ABSTRACT_ACTION]= RefactoringMessages.ExtractSupertypeMemberPage_declare_abstract;
@@ -499,14 +500,6 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	}
 
 	/**
-	 * Returns the extract supertype refactoring.
-	 * @return the refactoring
-	 */
-	public ExtractSupertypeRefactoring getExtractSuperTypeRefactoring() {
-		return (ExtractSupertypeRefactoring) getRefactoring();
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	protected String getInstanceofButtonLabel() {
@@ -526,7 +519,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	 * @return the refactoring processor
 	 */
 	protected ExtractSupertypeProcessor getProcessor() {
-		return getExtractSuperTypeRefactoring().getExtractSupertypeProcessor();
+		return (ExtractSupertypeProcessor) getPullUpRefactoringProcessor();
 	}
 
 	/**

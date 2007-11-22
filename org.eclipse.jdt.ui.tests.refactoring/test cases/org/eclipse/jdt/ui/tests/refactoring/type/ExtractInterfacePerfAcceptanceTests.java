@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,13 +16,15 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -35,7 +37,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetu
 public class ExtractInterfacePerfAcceptanceTests extends RefactoringPerformanceTestCase {
 	
 	private SWTTestProject fProject;
-	private ExtractInterfaceRefactoring fRefactoring;
+	private Refactoring fRefactoring;
 	
 	public static Test suite() {
 		// we must make sure that cold is executed before warm
@@ -56,7 +58,10 @@ public class ExtractInterfacePerfAcceptanceTests extends RefactoringPerformanceT
 		super.setUp();
 		fProject= new SWTTestProject();
 		IType control= fProject.getProject().findType("org.eclipse.swt.widgets.Control");
-		fRefactoring= new ExtractInterfaceRefactoring(new ExtractInterfaceProcessor(control, JavaPreferencesSettings.getCodeGenerationSettings(fProject.getProject())));
+
+		ExtractInterfaceProcessor processor= new ExtractInterfaceProcessor(control, JavaPreferencesSettings.getCodeGenerationSettings(fProject.getProject()));
+		fRefactoring= new ProcessorBasedRefactoring(processor);
+		
 		IMethod[] methods= control.getMethods();
 		List extractedMembers= new ArrayList();
 		for (int i= 0; i < methods.length; i++) {
@@ -66,7 +71,6 @@ public class ExtractInterfacePerfAcceptanceTests extends RefactoringPerformanceT
 				extractedMembers.add(method);
 			}
 		}
-		ExtractInterfaceProcessor processor= fRefactoring.getExtractInterfaceProcessor();
 		processor.setTypeName("IControl");
 		processor.setExtractedMembers((IMember[])extractedMembers.toArray(new IMember[extractedMembers.size()]));
 		processor.setReplace(true);

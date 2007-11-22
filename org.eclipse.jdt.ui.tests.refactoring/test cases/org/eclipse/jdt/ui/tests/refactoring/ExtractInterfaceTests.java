@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,9 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -27,7 +29,6 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -95,9 +96,10 @@ public class ExtractInterfaceTests extends RefactoringTest {
 
 	private void validatePassingTest(String className, String[] cuNames, String newInterfaceName, boolean replaceOccurrences, String[] extractedMethodNames, String[][] extractedSignatures, String[] extractedFieldNames) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
-				
-		ExtractInterfaceRefactoring ref= new ExtractInterfaceRefactoring(new ExtractInterfaceProcessor(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject())));
-		ExtractInterfaceProcessor processor= ref.getExtractInterfaceProcessor();
+
+		ExtractInterfaceProcessor processor= new ExtractInterfaceProcessor(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject()));
+		Refactoring ref= new ProcessorBasedRefactoring(processor);
+		
 		processor.setTypeName(newInterfaceName);
 		assertEquals("interface name should be accepted", RefactoringStatus.OK, processor.checkTypeName(newInterfaceName).getSeverity());
 		
@@ -125,9 +127,10 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		IType clas= getClassFromTestFile(getPackageP(), className);
 		ICompilationUnit cu= clas.getCompilationUnit();
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
-				
-		ExtractInterfaceRefactoring ref= new ExtractInterfaceRefactoring(new ExtractInterfaceProcessor(clas, JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject())));
-		ExtractInterfaceProcessor processor= ref.getExtractInterfaceProcessor();
+
+		ExtractInterfaceProcessor processor= new ExtractInterfaceProcessor(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject()));
+		Refactoring ref= new ProcessorBasedRefactoring(processor);
+		
 		processor.setTypeName(newInterfaceName);
 		assertEquals("interface name should be accepted", RefactoringStatus.OK, processor.checkTypeName(newInterfaceName).getSeverity());
 		
@@ -147,8 +150,8 @@ public class ExtractInterfaceTests extends RefactoringTest {
 
 	private void validateFailingTest(String className, String newInterfaceName, boolean extractAll, int expectedSeverity) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
-		ExtractInterfaceRefactoring ref= new ExtractInterfaceRefactoring(new ExtractInterfaceProcessor(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject())));
-		ExtractInterfaceProcessor processor= ref.getExtractInterfaceProcessor();
+		ExtractInterfaceProcessor processor= new ExtractInterfaceProcessor(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject()));
+		Refactoring ref= new ProcessorBasedRefactoring(processor);
 		processor.setTypeName(newInterfaceName);
 		if (extractAll)
 			processor.setExtractedMembers(processor.getExtractableMembers());

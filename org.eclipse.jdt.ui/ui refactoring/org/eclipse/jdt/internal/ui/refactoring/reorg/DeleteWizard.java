@@ -46,17 +46,20 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class DeleteWizard extends RefactoringWizard {
 
+	private final JavaDeleteProcessor fProcessor;
+	
 	public DeleteWizard(Refactoring refactoring) {
 		super(refactoring, DIALOG_BASED_USER_INTERFACE);
 		setDefaultPageTitle(RefactoringMessages.DeleteWizard_1); 
-		((JavaDeleteProcessor)((DeleteRefactoring)getRefactoring()).getProcessor()).setQueries(new ReorgQueries(this));
+		fProcessor= (JavaDeleteProcessor) refactoring.getAdapter(JavaDeleteProcessor.class);
+		fProcessor.setQueries(new ReorgQueries(this));
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#addUserInputPages()
 	 */
 	protected void addUserInputPages() {
-		addPage(new DeleteInputPage());
+		addPage(new DeleteInputPage(fProcessor));
 	}
 
 	/* (non-Javadoc)
@@ -82,9 +85,11 @@ public class DeleteWizard extends RefactoringWizard {
 		private static final String PAGE_NAME= "DeleteInputPage"; //$NON-NLS-1$
 		private static final String DIALOG_SETTINGS_DELETE_SUB_PACKAGES= "deleteSubPackages"; //$NON-NLS-1$
 		private Button fDeleteSubPackagesCheckBox;
+		private final JavaDeleteProcessor fProcessor;
 
-		public DeleteInputPage() {
+		public DeleteInputPage(JavaDeleteProcessor processor) {
 			super(PAGE_NAME, true, MessageWizardPage.STYLE_QUESTION);
+			fProcessor= processor;
 		}
 
 		protected String getMessageString() {
@@ -286,7 +291,7 @@ public class DeleteWizard extends RefactoringWizard {
 		}
 		
 		private JavaDeleteProcessor getDeleteProcessor() {
-			return (JavaDeleteProcessor) ((DeleteRefactoring) getRefactoring()).getProcessor();
+			return fProcessor;
 		}
 		
 	}

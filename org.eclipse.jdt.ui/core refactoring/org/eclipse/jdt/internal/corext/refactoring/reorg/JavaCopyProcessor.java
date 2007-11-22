@@ -30,7 +30,6 @@ import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.CopyProcessor;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
@@ -44,12 +43,11 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
-public final class JavaCopyProcessor extends CopyProcessor implements IReorgDestinationValidator, IScriptableRefactoring {
+public final class JavaCopyProcessor extends CopyProcessor implements IReorgDestinationValidator {
 
 	private ICopyPolicy fCopyPolicy;
 
@@ -63,6 +61,12 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 		fCopyPolicy= copyPolicy;
 	}
 
+	public JavaCopyProcessor(JavaRefactoringArguments refactoringArguments, RefactoringStatus status) {
+		RefactoringStatus initStatus= initialize(refactoringArguments);
+		status.merge(initStatus);
+	}
+	
+	
 	public boolean canChildrenBeDestinations(IReorgDestination destination) {
 		return fCopyPolicy.canChildrenBeDestinations(destination);
 	}
@@ -170,22 +174,18 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 		return fCopyPolicy.getResources();
 	}
 
-	public RefactoringStatus initialize(RefactoringArguments arguments) {
+	private RefactoringStatus initialize(JavaRefactoringArguments extended) {
 		setReorgQueries(new NullReorgQueries());
 		final RefactoringStatus status= new RefactoringStatus();
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			fCopyPolicy= ReorgPolicyFactory.createCopyPolicy(status, extended);
-			if (fCopyPolicy != null && !status.hasFatalError()) {
-				status.merge(fCopyPolicy.initialize(arguments));
-				if (!status.hasFatalError()) {
-					final ReorgExecutionLog log= ReorgPolicyFactory.loadReorgExecutionLog(extended);
-					if (log != null && !status.hasFatalError())
-						setNewNameQueries(new LoggedNewNameQueries(log));
-				}
+		fCopyPolicy= ReorgPolicyFactory.createCopyPolicy(status, extended);
+		if (fCopyPolicy != null && !status.hasFatalError()) {
+			status.merge(fCopyPolicy.initialize(extended));
+			if (!status.hasFatalError()) {
+				final ReorgExecutionLog log= ReorgPolicyFactory.loadReorgExecutionLog(extended);
+				if (log != null && !status.hasFatalError())
+					setNewNameQueries(new LoggedNewNameQueries(log));
 			}
-		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+		}
 		return status;
 	}
 

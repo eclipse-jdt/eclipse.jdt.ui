@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,13 +59,14 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor.MemberActionInfo;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -78,6 +79,8 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
 public final class PushDownWizard extends RefactoringWizard {
+
+	private final PushDownRefactoringProcessor fProcessor;
 
 	private static class PushDownInputPage extends UserInputWizardPage {
 
@@ -210,8 +213,11 @@ public final class PushDownWizard extends RefactoringWizard {
 
 		private PullPushCheckboxTableViewer fTableViewer;
 
-		public PushDownInputPage() {
+		private final PushDownRefactoringProcessor fProcessor;
+
+		public PushDownInputPage(PushDownRefactoringProcessor processor) {
 			super(PAGE_NAME);
+			fProcessor= processor;
 		}
 
 		private boolean areAllElementsMarkedAsNoAction() {
@@ -371,7 +377,7 @@ public final class PushDownWizard extends RefactoringWizard {
 				}
 			});
 
-			fTableViewer.setInput(getPushDownRefactoring().getPushDownProcessor().getMemberActionInfos());
+			fTableViewer.setInput(fProcessor.getMemberActionInfos());
 			updateWizardPage(null, false);
 			setupCellEditors(table);
 		}
@@ -441,7 +447,7 @@ public final class PushDownWizard extends RefactoringWizard {
 		}
 
 		private MemberActionInfo[] getActiveInfos() {
-			final MemberActionInfo[] infos= getPushDownRefactoring().getPushDownProcessor().getMemberActionInfos();
+			final MemberActionInfo[] infos= fProcessor.getMemberActionInfos();
 			final List result= new ArrayList(infos.length);
 			for (int index= 0; index < infos.length; index++) {
 				final MemberActionInfo info= infos[index];
@@ -491,10 +497,6 @@ public final class PushDownWizard extends RefactoringWizard {
 			return (IMember[]) result.toArray(new IMember[result.size()]);
 		}
 
-		private PushDownRefactoring getPushDownRefactoring() {
-			return (PushDownRefactoring) getRefactoring();
-		}
-
 		private MemberActionInfo[] getSelectedMemberActionInfos() {
 			Assert.isTrue(fTableViewer.getSelection() instanceof IStructuredSelection);
 			final List result= ((IStructuredSelection) fTableViewer.getSelection()).toList();
@@ -507,7 +509,7 @@ public final class PushDownWizard extends RefactoringWizard {
 
 					public void run(final IProgressMonitor pm) throws InvocationTargetException {
 						try {
-							getPushDownRefactoring().getPushDownProcessor().computeAdditionalRequiredMembersToPushDown(pm);
+							fProcessor.computeAdditionalRequiredMembersToPushDown(pm);
 							updateWizardPage(null, true);
 						} catch (final JavaModelException e) {
 							throw new InvocationTargetException(e);
@@ -596,12 +598,13 @@ public final class PushDownWizard extends RefactoringWizard {
 		}
 	}
 
-	public PushDownWizard(final PushDownRefactoring ref) {
+	public PushDownWizard(PushDownRefactoringProcessor processor, Refactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE);
+		fProcessor= processor;
 		setDefaultPageTitle(RefactoringMessages.PushDownWizard_defaultPageTitle);
 	}
 
 	protected void addUserInputPages() {
-		addPage(new PushDownInputPage());
+		addPage(new PushDownInputPage(fProcessor));
 	}
 }

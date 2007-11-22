@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,9 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -29,10 +31,8 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor.MemberActionInfo;
 
@@ -58,13 +58,7 @@ public class PushDownTests extends RefactoringTest {
 		return REFACTORING_PATH;
 	}
 
-	private static PushDownRefactoring createRefactoring(IMember[] members) throws JavaModelException{
-		if (RefactoringAvailabilityTester.isPushDownAvailable(members))
-			return new PushDownRefactoring(new PushDownRefactoringProcessor(members));
-		return null;
-	}
-
-	private PushDownRefactoring createRefactoringPrepareForInputCheck(String[] selectedMethodNames, String[][] selectedMethodSignatures, 
+	private Refactoring createRefactoringPrepareForInputCheck(String[] selectedMethodNames, String[][] selectedMethodSignatures, 
 						String[] selectedFieldNames, 
 						String[] namesOfMethodsToPullUp, String[][] signaturesOfMethodsToPullUp, 
 						String[] namesOfFieldsToPullUp, 
@@ -76,20 +70,24 @@ public class PushDownTests extends RefactoringTest {
 		IField[] selectedFields= getFields(type, selectedFieldNames);
 		IMember[] selectedMembers= merge(selectedFields, selectedMethods);
 		
-		PushDownRefactoring ref= createRefactoring(selectedMembers);
+		assertTrue(RefactoringAvailabilityTester.isPushDownAvailable(selectedMembers));
+		PushDownRefactoringProcessor processor= new PushDownRefactoringProcessor(selectedMembers);
+		Refactoring ref= new ProcessorBasedRefactoring(processor);
+		
 		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
 		
-		prepareForInputCheck(ref, selectedMethods, selectedFields, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+		prepareForInputCheck(processor, selectedMethods, selectedFields, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract);
 		return ref;
 	}
 
-	private void prepareForInputCheck(PushDownRefactoring ref, IMethod[] selectedMethods, IField[] selectedFields, String[] namesOfMethodsToPullUp, String[][] signaturesOfMethodsToPullUp, String[] namesOfFieldsToPullUp, String[] namesOfMethodsToDeclareAbstract, String[][] signaturesOfMethodsToDeclareAbstract) {
+	private void prepareForInputCheck(PushDownRefactoringProcessor processor, IMethod[] selectedMethods, IField[] selectedFields, String[] namesOfMethodsToPullUp, String[][] signaturesOfMethodsToPullUp, String[] namesOfFieldsToPullUp, String[] namesOfMethodsToDeclareAbstract, String[][] signaturesOfMethodsToDeclareAbstract) {
 		IMethod[] methodsToPushDown= findMethods(selectedMethods, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp);
 		IField[] fieldsToPushDown= findFields(selectedFields, namesOfFieldsToPullUp);
 		List membersToPushDown= Arrays.asList(merge(methodsToPushDown, fieldsToPushDown));
 		List methodsToDeclareAbstract= Arrays.asList(findMethods(selectedMethods, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract));
 		
-		MemberActionInfo[] infos= ref.getPushDownProcessor().getMemberActionInfos();
+		MemberActionInfo[] infos= processor.getMemberActionInfos();
 		for (int i= 0; i < infos.length; i++) {
 			if (membersToPushDown.contains(infos[i].getMember())){
 				infos[i].setAction(MemberActionInfo.PUSH_DOWN_ACTION);
@@ -113,7 +111,8 @@ public class PushDownTests extends RefactoringTest {
 		ICompilationUnit[] additonalCus= createAdditionalCus(additionalCuNames, addtionalPacks);
 		
 		try{
-			PushDownRefactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, cuA);
+			Refactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp,
+					namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, cuA);
 
 			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 			assertTrue("precondition was supposed to pass but got " + checkInputResult.toString(), !checkInputResult.hasError());	
@@ -180,7 +179,10 @@ public class PushDownTests extends RefactoringTest {
 			IField[] selectedFields= getFields(type, selectedFieldNames);
 			IMember[] selectedMembers= merge(selectedFields, selectedMethods);
 		
-			PushDownRefactoring ref= createRefactoring(selectedMembers);
+			assertTrue(RefactoringAvailabilityTester.isPushDownAvailable(selectedMembers));
+			PushDownRefactoringProcessor processor= new PushDownRefactoringProcessor(selectedMembers);
+			Refactoring ref= new ProcessorBasedRefactoring(processor);
+			
 			assertEquals("activation was expected to fail", expectedSeverity, ref.checkInitialConditions(new NullProgressMonitor()).getSeverity());
 		} finally{
 			performDummySearch();
@@ -197,7 +199,10 @@ public class PushDownTests extends RefactoringTest {
 												
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
-			PushDownRefactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, cu);
+
+
+			Refactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp,
+					namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, cu);
 			RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 			assertEquals("precondition was expected to fail", expectedSeverity, checkInputResult.getSeverity());	
 		} finally{
@@ -214,12 +219,14 @@ public class PushDownTests extends RefactoringTest {
 			IMethod[] methods= getMethods(type, methodNames, methodSignatures);
 
 			IMember[] members= merge(methods, fields);
-			PushDownRefactoring ref= createRefactoring(members);
+			assertTrue(RefactoringAvailabilityTester.isPushDownAvailable(members));
+			PushDownRefactoringProcessor processor= new PushDownRefactoringProcessor(members);
+			Refactoring ref= new ProcessorBasedRefactoring(processor);
+			
 			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
 
-			final PushDownRefactoringProcessor processor= ref.getPushDownProcessor();
 			processor.computeAdditionalRequiredMembersToPushDown(new NullProgressMonitor());
-			List required= getMembersToPushDown(ref);
+			List required= getMembersToPushDown(processor);
 			processor.getMemberActionInfos();
 			IField[] expectedFields= getFields(type, expectedFieldNames);
 			IMethod[] expectedMethods= getMethods(type, expectedMethodNames, expectedMethodSignatures);
@@ -239,8 +246,8 @@ public class PushDownTests extends RefactoringTest {
 		}	
 	}
 	
-	private static List getMembersToPushDown(PushDownRefactoring ref){
-		MemberActionInfo[] infos= ref.getPushDownProcessor().getMemberActionInfos();
+	private static List getMembersToPushDown(PushDownRefactoringProcessor processor) {
+		MemberActionInfo[] infos= processor.getMemberActionInfos();
 		List result= new ArrayList(infos.length);
 		for (int i= 0; i < infos.length; i++) {
 			if (infos[i].isToBePushedDown())

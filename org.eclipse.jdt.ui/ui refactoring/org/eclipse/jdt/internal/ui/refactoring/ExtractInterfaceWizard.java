@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
@@ -42,8 +43,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
@@ -58,8 +57,11 @@ import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 
 public class ExtractInterfaceWizard extends RefactoringWizard {
 	
-	public ExtractInterfaceWizard(ExtractInterfaceRefactoring refactoring) {
-		super(refactoring, DIALOG_BASED_USER_INTERFACE); 
+	private final ExtractInterfaceProcessor fProcessor;
+
+	public ExtractInterfaceWizard(ExtractInterfaceProcessor processor, Refactoring refactoring) {
+		super(refactoring, DIALOG_BASED_USER_INTERFACE);
+		fProcessor= processor; 
 		setDefaultPageTitle(RefactoringMessages.ExtractInterfaceWizard_Extract_Interface); 
 	}
 
@@ -67,7 +69,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
-		addPage(new ExtractInterfaceInputPage());
+		addPage(new ExtractInterfaceInputPage(fProcessor));
 	}
 	
 	private static class ExtractInterfaceInputPage extends TextInputWizardPage {
@@ -86,9 +88,12 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		private static final String SETTING_INSTANCEOF= "InstanceOf"; //$NON-NLS-1$
 		private Button fSelectAllButton;
 		private Button fDeselectAllButton;
+		
+		private final ExtractInterfaceProcessor fProcessor;
 
-		public ExtractInterfaceInputPage() {
+		public ExtractInterfaceInputPage(ExtractInterfaceProcessor processor) {
 			super(DESCRIPTION, true);
+			fProcessor= processor;
 		}
 
 		public void createControl(Composite parent) {
@@ -138,19 +143,17 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		}
 
 		private void addGenerateCommentsCheckbox(Composite result) {
-			final ExtractInterfaceProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
 			String title= RefactoringMessages.ExtractInterfaceWizard_generate_comments; 
 			fGenerateCommentsCheckbox= createCheckbox(result,  title, false);
-			processor.setComments(fGenerateCommentsCheckbox.getSelection());
+			fProcessor.setComments(fGenerateCommentsCheckbox.getSelection());
 			fGenerateCommentsCheckbox.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
-					processor.setComments(fGenerateCommentsCheckbox.getSelection());
+					fProcessor.setComments(fGenerateCommentsCheckbox.getSelection());
 				}
 			});		
 		}
 
 		private void addInstanceofCheckbox(Composite result, int margin) {
-			final SuperTypeRefactoringProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
 			String title= RefactoringMessages.ExtractInterfaceWizard_use_supertype;
 			fInstanceofCheckbox= new Button(result, SWT.CHECK);
 			fInstanceofCheckbox.setSelection(false);
@@ -159,10 +162,10 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			gd.horizontalSpan= 2;
 			fInstanceofCheckbox.setLayoutData(gd);
 			fInstanceofCheckbox.setText(title);
-			processor.setInstanceOf(fInstanceofCheckbox.getSelection());
+			fProcessor.setInstanceOf(fInstanceofCheckbox.getSelection());
 			fInstanceofCheckbox.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
-					processor.setInstanceOf(fInstanceofCheckbox.getSelection());
+					fProcessor.setInstanceOf(fInstanceofCheckbox.getSelection());
 				}
 			});		
 		}
@@ -201,7 +204,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		}
 
 		private IMember[] getExtractableMembers() throws JavaModelException {
-			return getExtractInterfaceRefactoring().getExtractInterfaceProcessor().getExtractableMembers();
+			return fProcessor.getExtractableMembers();
 		}
 
 		protected void updateUIElementEnablement() {
@@ -283,34 +286,32 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		}
 
 		private void addReplaceAllCheckbox(Composite result) {
-			final ExtractInterfaceProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
 			String title= RefactoringMessages.ExtractInterfaceInputPage_change_references;  
-			boolean defaultValue= processor.isReplace();
+			boolean defaultValue= fProcessor.isReplace();
 			fReplaceAllCheckbox= createCheckbox(result,  title, defaultValue);
-			processor.setReplace(fReplaceAllCheckbox.getSelection());
+			fProcessor.setReplace(fReplaceAllCheckbox.getSelection());
 			fReplaceAllCheckbox.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
-					processor.setReplace(fReplaceAllCheckbox.getSelection());
+					fProcessor.setReplace(fReplaceAllCheckbox.getSelection());
 				}
 			});		
 		}
 		
 		private void addDeclareAsPublicCheckbox(Composite result) {
-			final ExtractInterfaceProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
 			String[] keys= {RefactoringMessages.ExtractInterfaceWizard_public_label};
 			String title= Messages.format(RefactoringMessages.ExtractInterfaceWizard_12, keys); 
-			boolean defaultValue= processor.getPublic();
+			boolean defaultValue= fProcessor.getPublic();
 			fDeclarePublicCheckbox= createCheckbox(result,  title, defaultValue);
-			processor.setPublic(fDeclarePublicCheckbox.getSelection());
+			fProcessor.setPublic(fDeclarePublicCheckbox.getSelection());
 			fDeclarePublicCheckbox.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
-					processor.setPublic(fDeclarePublicCheckbox.getSelection());
+					fProcessor.setPublic(fDeclarePublicCheckbox.getSelection());
 				}
 			});		
 		}
 
 		private void addDeclareAsAbstractCheckbox(Composite result) {
-			final ExtractInterfaceProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
+			final ExtractInterfaceProcessor processor= fProcessor;
 			String[] keys= {RefactoringMessages.ExtractInterfaceWizard_abstract_label};
 			String title= Messages.format(RefactoringMessages.ExtractInterfaceWizard_12, keys); 
 			boolean defaultValue= processor.getAbstract();
@@ -338,13 +339,9 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#validateTextField(String)
 		 */
 		protected RefactoringStatus validateTextField(String text) {
-			final ExtractInterfaceProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
+			final ExtractInterfaceProcessor processor= fProcessor;
 			processor.setTypeName(text);
 			return processor.checkTypeName(text);
-		}
-
-		private ExtractInterfaceRefactoring getExtractInterfaceRefactoring() {
-			return (ExtractInterfaceRefactoring) getRefactoring();
 		}
 	
 		/*
@@ -376,14 +373,13 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		}
 
 		private void initializeRefactoring() throws JavaModelException {
-			final ExtractInterfaceProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
-			processor.setTypeName(getText());
-			processor.setReplace(fReplaceAllCheckbox.getSelection());
-			processor.setExtractedMembers(getCheckedMembers());
-			processor.setAbstract(fDeclareAbstractCheckbox.getSelection());
-			processor.setPublic(fDeclarePublicCheckbox.getSelection());
-			processor.setComments(fGenerateCommentsCheckbox.getSelection());
-			processor.setInstanceOf(fInstanceofCheckbox.getSelection());
+			fProcessor.setTypeName(getText());
+			fProcessor.setReplace(fReplaceAllCheckbox.getSelection());
+			fProcessor.setExtractedMembers(getCheckedMembers());
+			fProcessor.setAbstract(fDeclareAbstractCheckbox.getSelection());
+			fProcessor.setPublic(fDeclarePublicCheckbox.getSelection());
+			fProcessor.setComments(fGenerateCommentsCheckbox.getSelection());
+			fProcessor.setInstanceOf(fInstanceofCheckbox.getSelection());
 		}
 		
 		private IMember[] getCheckedMembers() {

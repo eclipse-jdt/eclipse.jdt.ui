@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,7 +47,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
@@ -97,8 +96,8 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
@@ -207,6 +206,20 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		fSubType= type;
 		if (fSubType != null)
 			fSuperName= fSubType.getElementName();
+	}
+
+	/**
+	 * Creates a new extract interface processor from refactoring arguments.
+	 * 
+	 * @param arguments
+	 *            the refactoring arguments
+	 * @param status
+	 *            the resulting status
+	 */
+	public ExtractInterfaceProcessor(JavaRefactoringArguments arguments, RefactoringStatus status) {
+		super(null);
+		RefactoringStatus initializeStatus= initialize(arguments);
+		status.merge(initializeStatus);
 	}
 
 	/*
@@ -827,73 +840,66 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		return fSuperName;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public final RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.EXTRACT_INTERFACE);
-				else
-					fSubType= (IType) element;
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
-			final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-			if (name != null) {
-				fSuperName= name;
-				final RefactoringStatus status= checkTypeName(name);
-				if (status.hasError())
-					return status;
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
-			final String deferred= extended.getAttribute(ATTRIBUTE_ABSTRACT);
-			if (deferred != null) {
-				fAbstract= Boolean.valueOf(deferred).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ABSTRACT));
-			final String comment= extended.getAttribute(ATTRIBUTE_COMMENTS);
-			if (comment != null) {
-				fComments= Boolean.valueOf(comment).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_COMMENTS));
-			final String instance= extended.getAttribute(ATTRIBUTE_INSTANCEOF);
-			if (instance != null) {
-				fInstanceOf= Boolean.valueOf(instance).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INSTANCEOF));
-			final String visibility= extended.getAttribute(ATTRIBUTE_PUBLIC);
-			if (visibility != null) {
-				fPublic= Boolean.valueOf(visibility).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PUBLIC));
-			final String replace= extended.getAttribute(ATTRIBUTE_REPLACE);
-			if (replace != null) {
-				fReplace= Boolean.valueOf(replace).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
-			int count= 1;
-			final List elements= new ArrayList();
-			String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
-			final RefactoringStatus status= new RefactoringStatus();
-			while ((handle= extended.getAttribute(attribute)) != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists())
-					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.EXTRACT_INTERFACE));
-				else
-					elements.add(element);
-				count++;
-				attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
-			}
-			fMembers= (IMember[]) elements.toArray(new IMember[elements.size()]);
-			fSettings= JavaPreferencesSettings.getCodeGenerationSettings(fSubType.getJavaProject());
-			if (!status.isOK())
+	private RefactoringStatus initialize(JavaRefactoringArguments extended) {
+		String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		if (handle != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+			if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
+				return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.EXTRACT_INTERFACE);
+			else
+				fSubType= (IType) element;
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+		final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
+		if (name != null) {
+			fSuperName= name;
+			final RefactoringStatus status= checkTypeName(name);
+			if (status.hasError())
 				return status;
 		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
+		final String deferred= extended.getAttribute(ATTRIBUTE_ABSTRACT);
+		if (deferred != null) {
+			fAbstract= Boolean.valueOf(deferred).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ABSTRACT));
+		final String comment= extended.getAttribute(ATTRIBUTE_COMMENTS);
+		if (comment != null) {
+			fComments= Boolean.valueOf(comment).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_COMMENTS));
+		final String instance= extended.getAttribute(ATTRIBUTE_INSTANCEOF);
+		if (instance != null) {
+			fInstanceOf= Boolean.valueOf(instance).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INSTANCEOF));
+		final String visibility= extended.getAttribute(ATTRIBUTE_PUBLIC);
+		if (visibility != null) {
+			fPublic= Boolean.valueOf(visibility).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PUBLIC));
+		final String replace= extended.getAttribute(ATTRIBUTE_REPLACE);
+		if (replace != null) {
+			fReplace= Boolean.valueOf(replace).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
+		int count= 1;
+		final List elements= new ArrayList();
+		String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
+		final RefactoringStatus status= new RefactoringStatus();
+		while ((handle= extended.getAttribute(attribute)) != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+			if (element == null || !element.exists())
+				status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.EXTRACT_INTERFACE));
+			else
+				elements.add(element);
+			count++;
+			attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
+		}
+		fMembers= (IMember[]) elements.toArray(new IMember[elements.size()]);
+		fSettings= JavaPreferencesSettings.getCodeGenerationSettings(fSubType.getJavaProject());
+		if (!status.isOK())
+			return status;
 		return new RefactoringStatus();
 	}
 

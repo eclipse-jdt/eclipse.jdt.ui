@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractSuperclassDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
@@ -24,7 +25,6 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeRefactoring;
 
 /**
  * Refactoring contribution for the extract supertype refactoring.
@@ -37,9 +37,9 @@ public final class ExtractSupertypeRefactoringContribution extends JavaRefactori
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
-		ExtractSupertypeRefactoring refactoring= new ExtractSupertypeRefactoring(new ExtractSupertypeProcessor(null, null));
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
-		return refactoring;
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+		ExtractSupertypeProcessor processor= new ExtractSupertypeProcessor(arguments, status);
+		return new ProcessorBasedRefactoring(processor);
 	}
 
 	public RefactoringDescriptor createDescriptor() {

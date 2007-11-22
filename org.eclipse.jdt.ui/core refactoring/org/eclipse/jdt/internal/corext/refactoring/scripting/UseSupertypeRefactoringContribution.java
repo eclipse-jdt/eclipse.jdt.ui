@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
@@ -24,7 +25,6 @@ import org.eclipse.jdt.core.refactoring.descriptors.UseSupertypeDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeRefactoring;
 
 /**
  * Refactoring contribution for the use supertype refactoring.
@@ -32,14 +32,14 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeRefacto
  * @since 3.2
  */
 public final class UseSupertypeRefactoringContribution extends JavaRefactoringContribution {
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
-	public final Refactoring createRefactoring(final JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
-		UseSuperTypeRefactoring refactoring= new UseSuperTypeRefactoring(new UseSuperTypeProcessor(null, null));
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
-		return refactoring;
+	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+		UseSuperTypeProcessor processor= new UseSuperTypeProcessor(arguments, status);
+		return new ProcessorBasedRefactoring(processor);
 	}
 
 	public RefactoringDescriptor createDescriptor() {

@@ -28,7 +28,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
@@ -125,8 +124,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 * Creates a new super type processor.
 	 * 
 	 * @param subType
-	 *            the subtype to replace its occurrences, or <code>null</code>
-	 *            if invoked by scripting
+	 *            the subtype to replace its occurrences
 	 */
 	public UseSuperTypeProcessor(final IType subType) {
 		super(null);
@@ -138,17 +136,30 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 * Creates a new super type processor.
 	 * 
 	 * @param subType
-	 *            the subtype to replace its occurrences, or <code>null</code>
-	 *            if invoked by scripting
+	 *            the subtype to replace its occurrences
 	 * @param superType
-	 *            the supertype as replacement, or <code>null</code> if
-	 *            invoked by scripting
+	 *            the supertype as replacement
 	 */
 	public UseSuperTypeProcessor(final IType subType, final IType superType) {
 		super(null);
 		fReplace= true;
 		fSubType= subType;
 		fSuperType= superType;
+	}
+
+	/**
+	 * Creates a new super type processor from refactoring arguments.
+	 * 
+	 * @param arguments
+	 *            the refactoring arguments
+	 * @param status
+	 *            the resulting status
+	 */
+	public UseSuperTypeProcessor(JavaRefactoringArguments arguments, RefactoringStatus status) {
+		super(null);
+		fReplace= true;
+		RefactoringStatus initializeStatus= initialize(arguments);
+		status.merge(initializeStatus);
 	}
 
 	/*
@@ -364,37 +375,30 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 		return fSuperType;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public final RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.USE_SUPER_TYPE);
-				else
-					fSubType= (IType) element;
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
-			handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + 1);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.USE_SUPER_TYPE);
-				else
-					fSuperType= (IType) element;
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + 1));
-			final String instance= extended.getAttribute(ATTRIBUTE_INSTANCEOF);
-			if (instance != null) {
-				fInstanceOf= Boolean.valueOf(instance).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INSTANCEOF));
+	private final RefactoringStatus initialize(JavaRefactoringArguments extended) {
+		String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		if (handle != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+			if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
+				return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.USE_SUPER_TYPE);
+			else
+				fSubType= (IType) element;
 		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+		handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + 1);
+		if (handle != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+			if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
+				return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.USE_SUPER_TYPE);
+			else
+				fSuperType= (IType) element;
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + 1));
+		final String instance= extended.getAttribute(ATTRIBUTE_INSTANCEOF);
+		if (instance != null) {
+			fInstanceOf= Boolean.valueOf(instance).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INSTANCEOF));
 		return new RefactoringStatus();
 	}
 

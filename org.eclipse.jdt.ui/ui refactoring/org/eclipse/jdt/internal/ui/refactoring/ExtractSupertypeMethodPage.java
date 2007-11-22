@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,6 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -33,20 +32,18 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class ExtractSupertypeMethodPage extends PullUpMethodPage {
 
-	/**
-	 * Returns the extract supertype refactoring.
-	 */
-	public ExtractSupertypeRefactoring getExtractSuperTypeRefactoring() {
-		return (ExtractSupertypeRefactoring) getRefactoring();
-	}
 
+	public ExtractSupertypeMethodPage(ExtractSupertypeProcessor processor) {
+		super(processor);
+	}
+	
 	/**
 	 * Returns the refactoring processor.
 	 * 
 	 * @return the refactoring processor
 	 */
-	protected ExtractSupertypeProcessor getProcessor() {
-		return getExtractSuperTypeRefactoring().getExtractSupertypeProcessor();
+	private ExtractSupertypeProcessor getProcessor() {
+		return (ExtractSupertypeProcessor) getPullUpRefactoringProcessor();
 	}
 
 	/**

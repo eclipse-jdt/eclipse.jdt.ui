@@ -39,7 +39,6 @@ import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -79,8 +78,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -306,8 +305,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 	 * Creates a new push down refactoring processor.
 	 * 
 	 * @param members
-	 *            the members to pull up, or <code>null</code> if invoked by
-	 *            scripting
+	 *            the members to pull up
 	 */
 	public PushDownRefactoringProcessor(IMember[] members) {
 		super(members, null, false);
@@ -322,6 +320,20 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 				JavaPlugin.log(exception);
 			}
 		}
+	}
+
+	/**
+	 * Creates a new push down refactoring processor from refactoring arguments.
+	 * 
+	 * @param arguments
+	 *            the refactoring arguments
+	 * @param status
+	 *            the resulting status
+	 */
+	public PushDownRefactoringProcessor(JavaRefactoringArguments arguments, RefactoringStatus status) {
+		super(null, null, false);
+		RefactoringStatus initializeStatus= initialize(arguments);
+		status.merge(initializeStatus);
 	}
 
 	private void addAllRequiredPushableMembers(List queue, IMember member, IProgressMonitor monitor) throws JavaModelException {
@@ -953,46 +965,39 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		return RefactoringCoreMessages.PushDownRefactoring_name;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public RefactoringStatus initialize(RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.PUSH_DOWN);
-				else
-					fCachedDeclaringType= (IType) element;
-			}
-			int count= 1;
-			final List elements= new ArrayList();
-			final List infos= new ArrayList();
-			String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
-			final RefactoringStatus status= new RefactoringStatus();
-			while ((handle= extended.getAttribute(attribute)) != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists())
-					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.PUSH_DOWN));
-				else
-					elements.add(element);
-				if (extended.getAttribute(ATTRIBUTE_ABSTRACT + count) != null)
-					infos.add(MemberActionInfo.create((IMember) element, MemberActionInfo.PUSH_ABSTRACT_ACTION));
-				else if (extended.getAttribute(ATTRIBUTE_PUSH + count) != null)
-					infos.add(MemberActionInfo.create((IMember) element, MemberActionInfo.PUSH_DOWN_ACTION));
-				else
-					infos.add(MemberActionInfo.create((IMember) element, MemberActionInfo.NO_ACTION));
-				count++;
-				attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
-			}
-			fMembersToMove= (IMember[]) elements.toArray(new IMember[elements.size()]);
-			fMemberInfos= (MemberActionInfo[]) infos.toArray(new MemberActionInfo[infos.size()]);
-			if (!status.isOK())
-				return status;
-		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+	private RefactoringStatus initialize(JavaRefactoringArguments extended) {
+		String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		if (handle != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+			if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
+				return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.PUSH_DOWN);
+			else
+				fCachedDeclaringType= (IType) element;
+		}
+		int count= 1;
+		final List elements= new ArrayList();
+		final List infos= new ArrayList();
+		String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
+		final RefactoringStatus status= new RefactoringStatus();
+		while ((handle= extended.getAttribute(attribute)) != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+			if (element == null || !element.exists())
+				status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.PUSH_DOWN));
+			else
+				elements.add(element);
+			if (extended.getAttribute(ATTRIBUTE_ABSTRACT + count) != null)
+				infos.add(MemberActionInfo.create((IMember) element, MemberActionInfo.PUSH_ABSTRACT_ACTION));
+			else if (extended.getAttribute(ATTRIBUTE_PUSH + count) != null)
+				infos.add(MemberActionInfo.create((IMember) element, MemberActionInfo.PUSH_DOWN_ACTION));
+			else
+				infos.add(MemberActionInfo.create((IMember) element, MemberActionInfo.NO_ACTION));
+			count++;
+			attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
+		}
+		fMembersToMove= (IMember[]) elements.toArray(new IMember[elements.size()]);
+		fMemberInfos= (MemberActionInfo[]) infos.toArray(new MemberActionInfo[infos.size()]);
+		if (!status.isOK())
+			return status;
 		return new RefactoringStatus();
 	}
 

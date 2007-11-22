@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 
 import org.eclipse.jdt.core.refactoring.descriptors.DeleteDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
@@ -24,7 +25,6 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteRefactoring;
 
 /**
  * Refactoring contribution for the delete refactoring.
@@ -37,9 +37,9 @@ public final class DeleteRefactoringContribution extends JavaRefactoringContribu
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
-		JavaDeleteRefactoring refactoring= new JavaDeleteRefactoring(new JavaDeleteProcessor(null));
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
-		return refactoring;
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+		JavaDeleteProcessor processor= new JavaDeleteProcessor(arguments, status);
+		return new ProcessorBasedRefactoring(processor);
 	}
 	
 	public RefactoringDescriptor createDescriptor() {

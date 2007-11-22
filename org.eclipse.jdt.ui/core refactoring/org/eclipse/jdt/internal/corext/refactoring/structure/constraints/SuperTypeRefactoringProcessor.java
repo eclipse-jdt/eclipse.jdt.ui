@@ -96,7 +96,6 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRewriteUtil;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
@@ -117,7 +116,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 3.1
  */
-public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor implements IScriptableRefactoring {
+public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor {
 
 	// TODO: remove
 	protected static final String ATTRIBUTE_INSTANCEOF= "instanceof"; //$NON-NLS-1$

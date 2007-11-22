@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 
 import org.eclipse.jdt.core.refactoring.descriptors.CopyDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
@@ -24,7 +25,6 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyRefactoring;
 
 /**
  * Refactoring contribution for the copy refactoring.
@@ -37,9 +37,9 @@ public final class CopyRefactoringContribution extends JavaRefactoringContributi
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(final JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
-		JavaCopyRefactoring refactoring= new JavaCopyRefactoring(new JavaCopyProcessor(null));
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
-		return refactoring;
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+		JavaCopyProcessor processor= new JavaCopyProcessor(arguments, status);
+		return new ProcessorBasedRefactoring(processor);
 	}
 	
 	public RefactoringDescriptor createDescriptor() {

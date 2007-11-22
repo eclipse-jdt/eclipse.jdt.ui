@@ -37,8 +37,6 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
-import org.eclipse.ltk.core.refactoring.participants.CopyRefactoring;
-import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.resource.RenameResourceWizard;
@@ -73,9 +71,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefact
 import org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
@@ -85,21 +81,16 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProc
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractClassRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.IntroduceParameterObjectProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.JavaMoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
@@ -268,8 +259,8 @@ public final class RefactoringExecutionStarter {
 		ICopyPolicy copyPolicy= ReorgPolicyFactory.createCopyPolicy(resources, javaElements);
 		if (copyPolicy.canEnable()) {
 			JavaCopyProcessor processor= new JavaCopyProcessor(copyPolicy);
-			CopyRefactoring refactoring= new JavaCopyRefactoring(processor);
-			RefactoringWizard wizard= new ReorgCopyWizard(refactoring);
+			Refactoring refactoring= new ProcessorBasedRefactoring(processor);
+			RefactoringWizard wizard= new ReorgCopyWizard(processor, refactoring);
 			processor.setNewNameQueries(new NewNameQueries(wizard));
 			processor.setReorgQueries(new ReorgQueries(wizard));
 			new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, processor.getSaveMode());
@@ -277,20 +268,24 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startCutRefactoring(final Object[] elements, final Shell shell) throws InterruptedException, InvocationTargetException {
-		final JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
+		JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
 		processor.setSuggestGetterSetterDeletion(false);
 		processor.setQueries(new ReorgQueries(shell));
-		new RefactoringExecutionHelper(new JavaDeleteRefactoring(processor), RefactoringCore.getConditionCheckingFailedSeverity(), RefactoringSaveHelper.SAVE_NOTHING, shell, new ProgressMonitorDialog(shell)).perform(false, false);
+		Refactoring refactoring= new ProcessorBasedRefactoring(processor);
+		int stopSeverity= RefactoringCore.getConditionCheckingFailedSeverity();
+		new RefactoringExecutionHelper(refactoring, stopSeverity, RefactoringSaveHelper.SAVE_NOTHING, shell, new ProgressMonitorDialog(shell)).perform(false, false);
 	}
 
 	public static void startDeleteRefactoring(final Object[] elements, final Shell shell) throws CoreException {
-		final DeleteRefactoring refactoring= new JavaDeleteRefactoring(new JavaDeleteProcessor(elements));
+		Refactoring refactoring= new ProcessorBasedRefactoring(new JavaDeleteProcessor(elements));
 		DeleteUserInterfaceManager.getDefault().getStarter(refactoring).activate(refactoring, shell, RefactoringSaveHelper.SAVE_NOTHING);
 	}
 
 	public static void startExtractInterfaceRefactoring(final IType type, final Shell shell) {
-		final ExtractInterfaceRefactoring refactoring= new ExtractInterfaceRefactoring(new ExtractInterfaceProcessor(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject())));
-		new RefactoringStarter().activate(new ExtractInterfaceWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
+		ExtractInterfaceProcessor processor= new ExtractInterfaceProcessor(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject()));
+		Refactoring refactoring= new ProcessorBasedRefactoring(processor);
+		new RefactoringStarter().activate(new ExtractInterfaceWizard(processor, refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring,
+				RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
 	}
 
 	public static void startExtractSupertypeRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
@@ -299,8 +294,10 @@ public final class RefactoringExecutionStarter {
 		IJavaProject project= null;
 		if (members != null && members.length > 0)
 			project= members[0].getJavaProject();
-		final ExtractSupertypeRefactoring refactoring= new ExtractSupertypeRefactoring(new ExtractSupertypeProcessor(members, JavaPreferencesSettings.getCodeGenerationSettings(project)));
-		new RefactoringStarter().activate(new ExtractSupertypeWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
+		ExtractSupertypeProcessor processor= new ExtractSupertypeProcessor(members, JavaPreferencesSettings.getCodeGenerationSettings(project));
+		Refactoring refactoring= new ProcessorBasedRefactoring(processor);
+		ExtractSupertypeWizard wizard= new ExtractSupertypeWizard(processor, refactoring);
+		new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
 	}
 
 	public static void startInferTypeArgumentsRefactoring(final IJavaElement[] elements, final Shell shell) {
@@ -414,15 +411,18 @@ public final class RefactoringExecutionStarter {
 		IJavaProject project= null;
 		if (members != null && members.length > 0)
 			project= members[0].getJavaProject();
-		final PullUpRefactoring refactoring= new PullUpRefactoring(new PullUpRefactoringProcessor(members, JavaPreferencesSettings.getCodeGenerationSettings(project)));
-		new RefactoringStarter().activate(new PullUpWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
+		PullUpRefactoringProcessor processor= new PullUpRefactoringProcessor(members, JavaPreferencesSettings.getCodeGenerationSettings(project));
+		Refactoring refactoring= new ProcessorBasedRefactoring(processor);
+		new RefactoringStarter().activate(new PullUpWizard(processor, refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
 	}
 
 	public static void startPushDownRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
 		if (!RefactoringAvailabilityTester.isPushDownAvailable(members))
 			return;
-		final PushDownRefactoring refactoring= new PushDownRefactoring(new PushDownRefactoringProcessor(members));
-		new RefactoringStarter().activate(new PushDownWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
+		PushDownRefactoringProcessor processor= new PushDownRefactoringProcessor(members);
+		Refactoring refactoring= new ProcessorBasedRefactoring(processor);
+		PushDownWizard wizard= new PushDownWizard(processor, refactoring);
+		new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
 	}
 
 	public static void startRenameRefactoring(final IJavaElement element, final Shell shell) throws CoreException {
@@ -458,8 +458,10 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startUseSupertypeRefactoring(final IType type, final Shell shell) {
-		final UseSuperTypeRefactoring refactoring= new UseSuperTypeRefactoring(new UseSuperTypeProcessor(type));
-		new RefactoringStarter().activate(new UseSupertypeWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
+		UseSuperTypeProcessor processor= new UseSuperTypeProcessor(type);
+		Refactoring refactoring= new ProcessorBasedRefactoring(processor);
+		UseSupertypeWizard wizard= new UseSupertypeWizard(processor, refactoring);
+		new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
 	}
 
 	private RefactoringExecutionStarter() {
@@ -516,8 +518,8 @@ public final class RefactoringExecutionStarter {
 		ExtractClassDescriptor descriptor= new ExtractClassDescriptor();
 		descriptor.setType(type);
 		ExtractClassRefactoring refactoring= new ExtractClassRefactoring(descriptor);
-		new RefactoringStarter().activate(new ExtractClassWizard(descriptor, refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring,
-				RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
+		ExtractClassWizard wizard= new ExtractClassWizard(descriptor, refactoring);
+		new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
 	}
 	
 }

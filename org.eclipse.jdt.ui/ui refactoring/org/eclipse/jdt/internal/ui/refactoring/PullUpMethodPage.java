@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,8 +68,6 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.structure.HierarchyProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -257,9 +255,16 @@ public class PullUpMethodPage extends UserInputWizardPage {
 
 	private Label fTypeHierarchyLabel;
 
-	public PullUpMethodPage() {
+	private final PullUpRefactoringProcessor fProcessor;
+
+	public PullUpMethodPage(PullUpRefactoringProcessor processor) {
 		super(PAGE_NAME);
+		fProcessor= processor;
 		setMessage(RefactoringMessages.PullUpInputPage_select_methods);
+	}
+
+	protected PullUpRefactoringProcessor getPullUpRefactoringProcessor() {
+		return fProcessor;
 	}
 
 	private void checkAllParents(final IType parent) {
@@ -275,9 +280,8 @@ public class PullUpMethodPage extends UserInputWizardPage {
 
 	public void checkPulledUp() {
 		uncheckAll();
-		final HierarchyProcessor processor= getPullUpRefactoring().getPullUpProcessor();
-		fTreeViewer.setCheckedElements(processor.getMembersToMove());
-		final IType parent= processor.getDeclaringType();
+		fTreeViewer.setCheckedElements(fProcessor.getMembersToMove());
+		final IType parent= fProcessor.getDeclaringType();
 		fTreeViewer.setChecked(parent, true);
 		checkAllParents(parent);
 	}
@@ -442,12 +446,8 @@ public class PullUpMethodPage extends UserInputWizardPage {
 		return super.getNextPage();
 	}
 
-	private PullUpRefactoring getPullUpRefactoring() {
-		return (PullUpRefactoring) getRefactoring();
-	}
-
 	private String getSupertypeSignature() {
-		return JavaElementUtil.createSignature(getPullUpRefactoring().getPullUpProcessor().getDestinationType());
+		return JavaElementUtil.createSignature(fProcessor.getDestinationType());
 	}
 
 	private ITypeHierarchy getTreeInput() {
@@ -455,7 +455,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 	}
 
 	private void initializeRefactoring() {
-		getPullUpRefactoring().getPullUpProcessor().setDeletedMethods(getCheckedMethods());
+		fProcessor.setDeletedMethods(getCheckedMethods());
 	}
 
 	private void initializeTreeViewer() {
@@ -480,12 +480,11 @@ public class PullUpMethodPage extends UserInputWizardPage {
 	private void initializeTreeViewer(final IProgressMonitor pm) {
 		try {
 			pm.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, 2);
-			final PullUpRefactoringProcessor processor= getPullUpRefactoring().getPullUpProcessor();
-			final IMember[] matchingMethods= processor.getMatchingElements(new SubProgressMonitor(pm, 1), false);
-			final ITypeHierarchy hierarchy= processor.getDestinationTypeHierarchy(new SubProgressMonitor(pm, 1));
+			final IMember[] matchingMethods= fProcessor.getMatchingElements(new SubProgressMonitor(pm, 1), false);
+			final ITypeHierarchy hierarchy= fProcessor.getDestinationTypeHierarchy(new SubProgressMonitor(pm, 1));
 			removeAllTreeViewFilters();
 			fTreeViewer.addFilter(new PullUpFilter(hierarchy, matchingMethods));
-			fTreeViewer.setContentProvider(new PullUpHierarchyContentProvider(processor.getDeclaringType(), matchingMethods));
+			fTreeViewer.setContentProvider(new PullUpHierarchyContentProvider(fProcessor.getDeclaringType(), matchingMethods));
 			fTreeViewer.setInput(hierarchy);
 			precheckElements(fTreeViewer);
 			fTreeViewer.expandAll();
@@ -504,7 +503,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 	}
 
 	private void precheckElements(final ContainerCheckedTreeViewer treeViewer) {
-		final IMember[] members= getPullUpRefactoring().getPullUpProcessor().getMembersToMove();
+		final IMember[] members= fProcessor.getMembersToMove();
 		for (int i= 0; i < members.length; i++) {
 			treeViewer.setChecked(members[i], true);
 		}
@@ -524,7 +523,7 @@ public class PullUpMethodPage extends UserInputWizardPage {
 
 	private void setSourceViewerContents(String contents) {
 		if (contents != null) {
-			final IJavaProject project= getPullUpRefactoring().getPullUpProcessor().getDestinationType().getJavaProject();
+			final IJavaProject project= fProcessor.getDestinationType().getJavaProject();
 			final String[] lines= Strings.convertIntoLines(contents);
 			if (lines.length > 0) {
 				final int indent= Strings.computeIndentUnits(lines[lines.length - 1], project);

@@ -72,9 +72,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.structure.HierarchyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.IMemberActionInfo;
-import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -330,9 +328,12 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	protected final String[] TYPE_LABELS;
 
-	public PullUpMemberPage(final String name, final PullUpMethodPage page) {
+	private final PullUpRefactoringProcessor fProcessor;
+
+	public PullUpMemberPage(final String name, final PullUpMethodPage page, PullUpRefactoringProcessor processor) {
 		super(name);
 		fSuccessorPage= page;
+		fProcessor= processor;
 		setDescription(RefactoringMessages.PullUpInputPage1_page_message);
 		METHOD_LABELS= new String[2];
 		METHOD_LABELS[PULL_UP_ACTION]= RefactoringMessages.PullUpInputPage1_pull_up;
@@ -340,6 +341,10 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 		TYPE_LABELS= new String[1];
 		TYPE_LABELS[PULL_UP_ACTION]= RefactoringMessages.PullUpInputPage1_pull_up;
+	}
+
+	public PullUpRefactoringProcessor getPullUpRefactoringProcessor() {
+		return fProcessor;
 	}
 
 	private boolean areAllMembersMarkedAsPullUp() {
@@ -351,9 +356,8 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	}
 
 	private MemberActionInfo[] asMemberActionInfos() {
-		final PullUpRefactoringProcessor processor= getPullUpRefactoring().getPullUpProcessor();
-		final List toPullUp= Arrays.asList(processor.getMembersToMove());
-		final IMember[] members= processor.getPullableMembersOfDeclaringType();
+		final List toPullUp= Arrays.asList(fProcessor.getMembersToMove());
+		final IMember[] members= fProcessor.getPullableMembersOfDeclaringType();
 		final MemberActionInfo[] result= new MemberActionInfo[members.length];
 		for (int i= 0; i < members.length; i++) {
 			final IMember member= members[i];
@@ -377,7 +381,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 				public IMember[] result;
 				public void run(final IProgressMonitor pm) throws InvocationTargetException {
 					try {
-						this.result= getPullUpRefactoring().getPullUpProcessor().getAdditionalRequiredMembersToPullUp(pm);
+						this.result= fProcessor.getAdditionalRequiredMembersToPullUp(pm);
 					} catch (JavaModelException e) {
 						throw new InvocationTargetException(e);
 					} finally {
@@ -500,7 +504,6 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	}
 
 	protected void createInstanceOfCheckbox(final Composite result, final int margin) {
-		final HierarchyProcessor processor= getPullUpRefactoring().getPullUpProcessor();
 		fInstanceofButton= new Button(result, SWT.CHECK);
 		fInstanceofButton.setSelection(false);
 		final GridData gd= new GridData();
@@ -508,11 +511,11 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		gd.horizontalSpan= 2;
 		fInstanceofButton.setLayoutData(gd);
 		fInstanceofButton.setText(getInstanceofButtonLabel());
-		processor.setInstanceOf(fInstanceofButton.getSelection());
+		fProcessor.setInstanceOf(fInstanceofButton.getSelection());
 		fInstanceofButton.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(final SelectionEvent e) {
-				processor.setInstanceOf(fInstanceofButton.getSelection());
+				fProcessor.setInstanceOf(fInstanceofButton.getSelection());
 			}
 		});
 		fReplaceButton.addSelectionListener(new SelectionAdapter() {
@@ -576,7 +579,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		});
 
 		setTableInput();
-		checkPullUp(getPullUpRefactoring().getPullUpProcessor().getMembersToMove(), false);
+		checkPullUp(fProcessor.getMembersToMove(), false);
 		setupCellEditors(table);
 	}
 
@@ -634,7 +637,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		data.horizontalSpan= 2;
 		fCreateStubsButton.setLayoutData(data);
 		fCreateStubsButton.setEnabled(false);
-		fCreateStubsButton.setSelection(getPullUpRefactoring().getPullUpProcessor().getCreateMethodStubs());
+		fCreateStubsButton.setSelection(fProcessor.getCreateMethodStubs());
 	}
 
 	protected void createSuperTypeCheckbox(final Composite parent) {
@@ -644,7 +647,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		data.horizontalSpan= 2;
 		fReplaceButton.setLayoutData(data);
 		fReplaceButton.setEnabled(true);
-		fReplaceButton.setSelection(getPullUpRefactoring().getPullUpProcessor().isReplace());
+		fReplaceButton.setSelection(fProcessor.isReplace());
 	}
 
 	private void createSuperTypeCombo(Composite parent) {
@@ -668,7 +671,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, false, new IRunnableWithProgress() {
 				public void run(final IProgressMonitor monitor) throws InvocationTargetException {
 					try {
-						fCandidateTypes= getPullUpRefactoring().getPullUpProcessor().getCandidateTypes(new RefactoringStatus(), monitor);
+						fCandidateTypes= fProcessor.getCandidateTypes(new RefactoringStatus(), monitor);
 					} catch (JavaModelException exception) {
 						throw new InvocationTargetException(exception);
 					} finally {
@@ -834,10 +837,6 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		return RefactoringMessages.PullUpInputPage1_pull_up;
 	}
 
-	private PullUpRefactoring getPullUpRefactoring() {
-		return (PullUpRefactoring) getRefactoring();
-	}
-
 	protected String getReplaceButtonLabel() {
 		return RefactoringMessages.PullUpInputPage1_label_use_destination;
 	}
@@ -880,16 +879,15 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	}
 
 	private void initializeRefactoring() {
-		final PullUpRefactoringProcessor processor= getPullUpRefactoring().getPullUpProcessor();
-		processor.setMembersToMove(getMembersForAction(PULL_UP_ACTION));
-		processor.setAbstractMethods(getMethodsForAction(DECLARE_ABSTRACT_ACTION));
+		fProcessor.setMembersToMove(getMembersForAction(PULL_UP_ACTION));
+		fProcessor.setAbstractMethods(getMethodsForAction(DECLARE_ABSTRACT_ACTION));
 		final IType destination= getDestinationType();
 		if (destination != null)
-			processor.setDestinationType(destination);
-		processor.setCreateMethodStubs(fCreateStubsButton.getSelection());
-		processor.setReplace(fReplaceButton.getSelection());
-		processor.setInstanceOf(fInstanceofButton.getSelection());
-		processor.setDeletedMethods(getMethodsForAction(PULL_UP_ACTION));
+			fProcessor.setDestinationType(destination);
+		fProcessor.setCreateMethodStubs(fCreateStubsButton.getSelection());
+		fProcessor.setReplace(fReplaceButton.getSelection());
+		fProcessor.setInstanceOf(fInstanceofButton.getSelection());
+		fProcessor.setDeletedMethods(getMethodsForAction(PULL_UP_ACTION));
 	}
 
 	protected boolean performFinish() {
@@ -942,7 +940,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		super.setVisible(visible);
 		if (visible) {
 			try {
-				getPullUpRefactoring().getPullUpProcessor().resetEnvironment();
+				fProcessor.resetEnvironment();
 			} finally {
 				fTableViewer.setSelection(new StructuredSelection(getActiveInfos()), true);
 				fTableViewer.getControl().setFocus();

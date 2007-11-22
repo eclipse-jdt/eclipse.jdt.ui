@@ -17,13 +17,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.PushDownDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
-import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor;
 
 /**
@@ -32,14 +32,14 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring
  * @since 3.2
  */
 public final class PushDownRefactoringContribution extends JavaRefactoringContribution {
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
-		PushDownRefactoring refactoring= new PushDownRefactoring(new PushDownRefactoringProcessor(null));
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
-		return refactoring;
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+		PushDownRefactoringProcessor processor= new PushDownRefactoringProcessor(arguments, status);
+		return new ProcessorBasedRefactoring(processor);
 	}
 
 	public RefactoringDescriptor createDescriptor() {
