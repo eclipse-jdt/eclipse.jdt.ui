@@ -86,7 +86,8 @@ public class JavaTokenComparator implements ITokenComparator {
 				// Comments are treated as a single token (see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=78063)
 				if (TokenScanner.isComment(tokenType) || tokenType == ITerminalSymbols.TokenNameStringLiteral) {
 					int dl= fTextTokenComparatorFactory == null ? getCommentStartTokenLength(tokenType) : 0;
-					recordTokenRange(start, dl);
+					if (dl > 0)
+						recordTokenRange(start, dl);
 					parseText(start + dl, text.substring(start + dl, end));
 				} else {
 					recordTokenRange(start, end - start);
@@ -112,12 +113,15 @@ public class JavaTokenComparator implements ITokenComparator {
 	private void recordTokenRange(int start, int length) {
 		fStarts[fCount]= start;
 		fLengths[fCount]= length;
-		fCount++;
 		if (DEBUG)
-			System.out.println(fText.substring(start, start + length));
+			System.out.println(fCount + " (" + start + "-" + length + ")>" + fText.substring(start, start + length) + "<"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		fCount++;
 	}
 
 	private void parseText(int start, String text) {
+		if (DEBUG)
+			System.out.println("parsingText>" + text + "<(" + start + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		
 		ITokenComparator subTokenizer= fTextTokenComparatorFactory == null
 				? new JavaTokenComparator(text)
 				: fTextTokenComparatorFactory.createTokenComparator(text);
@@ -125,13 +129,16 @@ public class JavaTokenComparator implements ITokenComparator {
 		for (int i= 0; i < count; i++) {
 			int subStart= subTokenizer.getTokenStart(i);
 			int subLength= subTokenizer.getTokenLength(i);
+			if (DEBUG)
+				System.out.println("   " + i + " (" + subStart + "-" + subLength + ")"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
+
 			recordTokenRange(start + subStart, subLength);
 		}
 	}
 
 	/**
 	 * Returns the length of the token that
-	 * initiates the given comment type. 
+	 * initiates the given comment type.
 	 * 
 	 * @param tokenType
 	 * @return the length of the token that start a comment
