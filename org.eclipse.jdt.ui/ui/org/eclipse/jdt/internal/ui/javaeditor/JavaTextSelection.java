@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,11 +13,9 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextSelection;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
@@ -102,8 +100,6 @@ public class JavaTextSelection extends TextSelection {
 		if (fPartialASTRequested)
 			return fPartialAST;
 		fPartialASTRequested= true;
-		if (! (fElement instanceof ICompilationUnit))
-			return null;
 		// long start= System.currentTimeMillis();
 		fPartialAST= SharedASTProvider.getAST(fElement, SharedASTProvider.WAIT_YES, null);
 		// System.out.println("Time requesting partial AST: " + (System.currentTimeMillis() - start));
