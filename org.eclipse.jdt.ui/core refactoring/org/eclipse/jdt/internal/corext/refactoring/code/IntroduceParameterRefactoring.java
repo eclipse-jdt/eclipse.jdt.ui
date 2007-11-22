@@ -30,8 +30,10 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.text.TextSelection;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
+import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -76,7 +78,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.BodyUpdater;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -97,10 +99,11 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 	private int fSelectionLength;
 	
 	private IMethod fMethod;
-	private ChangeSignatureRefactoring fChangeSignatureRefactoring;
+	private Refactoring fChangeSignatureRefactoring;
+	private ChangeSignatureProcessor fChangeSignatureProcessor;
 	private ParameterInfo fParameter;
 	private String fParameterName;
-	private RefactoringArguments fArguments;
+	private JavaRefactoringArguments fArguments;
 
 	private Expression fSelectedExpression;
 	private String[] fExcludedParameterNames;
@@ -126,21 +129,21 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 	}
 
 	public boolean getDelegateUpdating() {
-		return (fChangeSignatureRefactoring != null) ? fChangeSignatureRefactoring.getDelegateUpdating() : false;
+		return (fChangeSignatureProcessor != null) ? fChangeSignatureProcessor.getDelegateUpdating() : false;
 	}
 
 	public void setDelegateUpdating(boolean updating) {
-		if (fChangeSignatureRefactoring != null)
-			fChangeSignatureRefactoring.setDelegateUpdating(updating);
+		if (fChangeSignatureProcessor != null)
+			fChangeSignatureProcessor.setDelegateUpdating(updating);
 	}
 
 	public void setDeprecateDelegates(boolean deprecate) {
-		if (fChangeSignatureRefactoring != null)
-			fChangeSignatureRefactoring.setDeprecateDelegates(deprecate);
+		if (fChangeSignatureProcessor != null)
+			fChangeSignatureProcessor.setDeprecateDelegates(deprecate);
 	}
 
 	public boolean getDeprecateDelegates() {
-		return (fChangeSignatureRefactoring != null) ? fChangeSignatureRefactoring.getDeprecateDelegates() : false;
+		return (fChangeSignatureProcessor != null) ? fChangeSignatureProcessor.getDeprecateDelegates() : false;
 	}
 
 	// ------------------- /IDelegateUpdating ---------------------
@@ -168,11 +171,11 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 			RefactoringStatus result= new RefactoringStatus();
 			if (fArguments != null) {
 				// invoked by script
-				fChangeSignatureRefactoring= new ChangeSignatureRefactoring(null);
-				result= fChangeSignatureRefactoring.initialize(fArguments);
+				fChangeSignatureProcessor= new ChangeSignatureProcessor(fArguments, result);
 				if (!result.hasFatalError()) {
+					fChangeSignatureRefactoring= new ProcessorBasedRefactoring(fChangeSignatureProcessor);
 					fChangeSignatureRefactoring.setValidationContext(getValidationContext());
-					result.merge(fChangeSignatureRefactoring.checkInitialConditions(new SubProgressMonitor(pm, 2)));
+					result.merge(fChangeSignatureProcessor.checkInitialConditions(new SubProgressMonitor(pm, 2)));
 					if (result.hasFatalError())
 						return result;
 				} else {
@@ -181,22 +184,23 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 				}
 			} else {
 				// first try:
-				fChangeSignatureRefactoring= RefactoringAvailabilityTester.isChangeSignatureAvailable(fMethod) ? new ChangeSignatureRefactoring(fMethod) : null;
-				if (fChangeSignatureRefactoring == null)
+				fChangeSignatureProcessor= RefactoringAvailabilityTester.isChangeSignatureAvailable(fMethod) ? new ChangeSignatureProcessor(fMethod) : null;
+				if (fChangeSignatureProcessor == null)
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method);
+				fChangeSignatureRefactoring= new ProcessorBasedRefactoring(fChangeSignatureProcessor);
 				fChangeSignatureRefactoring.setValidationContext(getValidationContext());
-				result.merge(fChangeSignatureRefactoring.checkInitialConditions(new SubProgressMonitor(pm, 1)));
+				result.merge(fChangeSignatureProcessor.checkInitialConditions(new SubProgressMonitor(pm, 1)));
 				if (result.hasFatalError()) {
 					RefactoringStatusEntry entry= result.getEntryMatchingSeverity(RefactoringStatus.FATAL);
 					if (entry.getCode() == RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD || entry.getCode() == RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE) {
 						// second try:
 						IMethod method= (IMethod) entry.getData();
-						fChangeSignatureRefactoring= RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null;
-						if (fChangeSignatureRefactoring == null) {
+						fChangeSignatureProcessor= RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureProcessor(method) : null;
+						if (fChangeSignatureProcessor == null) {
 							String msg= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_cannot_introduce, entry.getMessage());
 							return RefactoringStatus.createFatalErrorStatus(msg);
 						}
-						result= fChangeSignatureRefactoring.checkInitialConditions(new SubProgressMonitor(pm, 1));
+						result= fChangeSignatureProcessor.checkInitialConditions(new SubProgressMonitor(pm, 1));
 						if (result.hasFatalError())
 							return result;
 					} else {
@@ -207,7 +211,7 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 				}
 			}
 
-			CompilationUnitRewrite cuRewrite= fChangeSignatureRefactoring.getBaseCuRewrite();
+			CompilationUnitRewrite cuRewrite= fChangeSignatureProcessor.getBaseCuRewrite();
 			if (! cuRewrite.getCu().equals(fSourceCU))
 				cuRewrite= new CompilationUnitRewrite(fSourceCU); // TODO: should try to avoid throwing away this AST
 			
@@ -222,7 +226,7 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 			
 			addParameterInfo(cuRewrite);
 			
-			fChangeSignatureRefactoring.setBodyUpdater(new BodyUpdater() {
+			fChangeSignatureProcessor.setBodyUpdater(new BodyUpdater() {
 				public void updateBody(MethodDeclaration methodDeclaration, CompilationUnitRewrite rewrite, RefactoringStatus updaterResult) {
 					replaceSelectedExpression(rewrite);
 				}
@@ -243,7 +247,7 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 		String defaultValue= fSourceCU.getBuffer().getText(fSelectedExpression.getStartPosition(), fSelectedExpression.getLength());
 		fParameter= ParameterInfo.createInfoForAddedParameter(typeBinding, typeName, name, defaultValue);
 		if (fArguments == null) {
-			List parameterInfos= fChangeSignatureRefactoring.getParameterInfos();
+			List parameterInfos= fChangeSignatureProcessor.getParameterInfos();
 			int parametersCount= parameterInfos.size();
 			if (parametersCount > 0 && ((ParameterInfo) parameterInfos.get(parametersCount - 1)).isOldVarargs())
 				parameterInfos.add(parametersCount - 1, fParameter);
@@ -373,7 +377,7 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 	}	
 
 	public List getParameterInfos() {
-		return fChangeSignatureRefactoring.getParameterInfos();
+		return fChangeSignatureProcessor.getParameterInfos();
 	}
 	
 	public ParameterInfo getAddedParameterInfo() {
@@ -381,7 +385,7 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 	}
 	
 	public String getMethodSignaturePreview() throws JavaModelException {
-		return fChangeSignatureRefactoring.getNewMethodSignature();
+		return fChangeSignatureProcessor.getNewMethodSignature();
 	}
 	
 //--- Input setting/validation
@@ -476,7 +480,7 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 	}
 	
 	public RefactoringStatus validateInput() {
-		return fChangeSignatureRefactoring.checkSignature();
+		return fChangeSignatureProcessor.checkSignature();
 	}
 	
 //--- checkInput
@@ -493,7 +497,7 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		fChangeSignatureRefactoring.setValidationContext(getValidationContext());
 		try {
-			Change[] changes= fChangeSignatureRefactoring.getAllChanges();
+			Change[] changes= fChangeSignatureProcessor.getAllChanges();
 			return new DynamicValidationRefactoringChange(getRefactoringDescriptor(), RefactoringCoreMessages.IntroduceParameterRefactoring_name, changes);
 		} finally {
 			fChangeSignatureRefactoring.setValidationContext(null);
@@ -502,31 +506,32 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 	}
 	
 	private IntroduceParameterDescriptor getRefactoringDescriptor() {
-		ChangeMethodSignatureDescriptor extended= (ChangeMethodSignatureDescriptor) fChangeSignatureRefactoring.createDescriptor();
+		ChangeMethodSignatureDescriptor extended= (ChangeMethodSignatureDescriptor) fChangeSignatureProcessor.createDescriptor();
 
 		final Map arguments= new HashMap();
 		arguments.put(ATTRIBUTE_ARGUMENT, fParameter.getNewName());
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 		arguments.putAll(extended.getArguments()); //REVIEW Is this the correct order?
-		String signature= fChangeSignatureRefactoring.getMethodName();
+		String signature= fChangeSignatureProcessor.getMethodName();
 		try {
-			signature= fChangeSignatureRefactoring.getOldMethodSignature();
+			signature= fChangeSignatureProcessor.getOldMethodSignature();
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 		}
-		final String description= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description_short, fChangeSignatureRefactoring.getMethod().getElementName());
+		final String description= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description_short, fChangeSignatureProcessor.getMethod().getElementName());
 		final String header= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description, new String[] { fParameter.getNewName(), signature, ASTNodes.asString(fSelectedExpression)});
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(extended.getProject(), this, header);
-		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_original_pattern, JavaElementLabels.getTextLabel(fChangeSignatureRefactoring.getMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_original_pattern, JavaElementLabels.getTextLabel(fChangeSignatureProcessor.getMethod(),
+				JavaElementLabels.ALL_FULLY_QUALIFIED)));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_pattern, ASTNodes.asString(fSelectedExpression)));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_parameter_pattern, getAddedParameterInfo().getNewName()));
 		return new IntroduceParameterDescriptor(extended.getProject(), description, comment.asString(), arguments, extended.getFlags());
 	}	
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		fArguments= arguments;
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+			fArguments= extended;
 			final String selection= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION);
 			if (selection != null) {
 				int offset= -1;

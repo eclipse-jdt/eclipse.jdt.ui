@@ -75,8 +75,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.structure.IntroduceParameterObjectRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.structure.IntroduceParameterObjectProcessor;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -93,13 +93,16 @@ import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
 public class IntroduceParameterObjectWizard extends RefactoringWizard {
 
-	public IntroduceParameterObjectWizard(Refactoring refactoring) {
+	private final IntroduceParameterObjectProcessor fProcessor;
+
+	public IntroduceParameterObjectWizard(IntroduceParameterObjectProcessor processor, Refactoring refactoring) {
 		super(refactoring, DIALOG_BASED_USER_INTERFACE);
+		fProcessor= processor;
 		setDefaultPageTitle(RefactoringMessages.IntroduceParameterObjectWizard_wizardpage_title);
 	}
 
 	protected void addUserInputPages() {
-		addPage(new IntroduceParameterObjectInputPage());
+		addPage(new IntroduceParameterObjectInputPage(fProcessor));
 	}
 
 	private static class IntroduceParameterObjectInputPage extends UserInputWizardPage {
@@ -116,8 +119,8 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			}
 
 			public Object[] getElements(Object inputElement) {
-				if (inputElement instanceof IntroduceParameterObjectRefactoring) {
-					IntroduceParameterObjectRefactoring refactoring= (IntroduceParameterObjectRefactoring) inputElement;
+				if (inputElement instanceof IntroduceParameterObjectProcessor) {
+					IntroduceParameterObjectProcessor refactoring= (IntroduceParameterObjectProcessor) inputElement;
 					List parameterInfos= refactoring.getParameterInfos();
 					List result= new ArrayList(parameterInfos.size());
 					for (Iterator iter= parameterInfos.iterator(); iter.hasNext();) {
@@ -183,21 +186,21 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			}
 		}
 
-		private IntroduceParameterObjectRefactoring fRefactoring;
+		private IntroduceParameterObjectProcessor fProcessor;
 		private JavaSourceViewer fSignaturePreview;
 		private IDocument fSignaturePreviewDocument= new Document();
 		private Button fLeaveDelegateCheckBox;
 		private Button fDeprecateDelegateCheckBox;
 
-		public IntroduceParameterObjectInputPage() {
+		public IntroduceParameterObjectInputPage(IntroduceParameterObjectProcessor processor) {
 			super(RefactoringMessages.IntroduceParameterObjectWizard_wizardpage_name);
+			fProcessor= processor;
 			setTitle(RefactoringMessages.IntroduceParameterObjectWizard_wizardpage_title);
 			setDescription(RefactoringMessages.IntroduceParameterObjectWizard_wizardpage_description);
 		}
 
 		public void createControl(Composite parent) {
 			initializeDialogUnits(parent);
-			fRefactoring= (IntroduceParameterObjectRefactoring) getRefactoring();
 			Composite result= new Composite(parent, SWT.NONE);
 			result.setLayout(new GridLayout(2, false));
 			Group group= createGroup(result, RefactoringMessages.IntroduceParameterObjectWizard_type_group);
@@ -223,11 +226,11 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			Label l= new Label(group, SWT.NONE);
 			l.setText(RefactoringMessages.IntroduceParameterObjectWizard_parameterfield_label);
 			final Text text= new Text(group, SWT.BORDER);
-			text.setText(fRefactoring.getParameterName());
+			text.setText(fProcessor.getParameterName());
 			text.addModifyListener(new ModifyListener() {
 
 				public void modifyText(ModifyEvent e) {
-					fRefactoring.setParameterName(text.getText());
+					fProcessor.setParameterName(text.getText());
 					updateSignaturePreview();
 					validateRefactoring();
 				}
@@ -242,10 +245,10 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			setMessage(null);
 			setErrorMessage(null);
 			setPageComplete(true);
-			IJavaProject project= fRefactoring.getMethod().getJavaProject();
+			IJavaProject project= fProcessor.getMethod().getJavaProject();
 			String sourceLevel= project.getOption(JavaCore.COMPILER_SOURCE, true);
 			String compliance= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-			List parameterInfos= fRefactoring.getParameterInfos();
+			List parameterInfos= fProcessor.getParameterInfos();
 			for (Iterator iter= parameterInfos.iterator(); iter.hasNext();) {
 				ParameterInfo pi= (ParameterInfo) iter.next();
 				if (names.contains(pi.getNewName())) {
@@ -265,29 +268,31 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 				setPageComplete(false);
 				return;
 			}
-			IStatus validateJavaTypeName= JavaConventions.validateJavaTypeName(fRefactoring.getClassName(), sourceLevel, compliance);
+			IStatus validateJavaTypeName= JavaConventions.validateJavaTypeName(fProcessor.getClassName(), sourceLevel, compliance);
 			if (isErrorMessage(validateJavaTypeName))
 				return;
-			if (fRefactoring.getClassName().indexOf('.') != -1) {
+			if (fProcessor.getClassName().indexOf('.') != -1) {
 				setErrorMessage(RefactoringMessages.IntroduceParameterObjectWizard_dot_not_allowed_error);
 				setPageComplete(false);
 			}
-			if (!"".equals(fRefactoring.getPackage())) { //$NON-NLS-1$
-				IStatus validatePackageName= JavaConventions.validatePackageName(fRefactoring.getPackage(), sourceLevel, compliance);
+			if (!"".equals(fProcessor.getPackage())) { //$NON-NLS-1$
+				IStatus validatePackageName= JavaConventions.validatePackageName(fProcessor.getPackage(), sourceLevel, compliance);
 				if (isErrorMessage(validatePackageName))
 					return;
 			}
 			try {
-				IType type= project.findType(fRefactoring.getNewTypeName());
+				IType type= project.findType(fProcessor.getNewTypeName());
 				if (type != null) {
 					StringBuffer packageName= new StringBuffer();
 					JavaElementLabels.getPackageFragmentLabel(type.getPackageFragment(), JavaElementLabels.ALL_DEFAULT, packageName);
-					if (fRefactoring.isCreateAsTopLevel()) {
-						setErrorMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_type_already_exists_in_package_info, new Object[]  {fRefactoring.getClassName(), packageName.toString() }));
+					if (fProcessor.isCreateAsTopLevel()) {
+						setErrorMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_type_already_exists_in_package_info, new Object[] { fProcessor.getClassName(),
+								packageName.toString() }));
 						setPageComplete(false);
 						return;
 					} else {
-						setErrorMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_parametername_check_alreadyexists, new Object[] { fRefactoring.getClassName(), type.getCompilationUnit().getElementName()}));
+						setErrorMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_parametername_check_alreadyexists, new Object[] { fProcessor.getClassName(),
+								type.getCompilationUnit().getElementName() }));
 						setPageComplete(false);
 						return;
 					}
@@ -369,7 +374,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 				data.horizontalSpan= 2;
 				fDeprecateDelegateCheckBox.setLayoutData(data);
 				fDeprecateDelegateCheckBox.setText(DelegateUIHelper.getDeprecateDelegateCheckBoxTitle());
-				final ChangeSignatureRefactoring refactoring= fRefactoring;
+				final ChangeSignatureProcessor refactoring= fProcessor;
 				fDeprecateDelegateCheckBox.setSelection(DelegateUIHelper.loadDeprecateDelegateSetting(refactoring));
 				refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
 				fDeprecateDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
@@ -414,16 +419,16 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			topLvlRadio.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					boolean fAsTopLevel= topLvlRadio.getSelection();
-					fRefactoring.setCreateAsTopLevel(fAsTopLevel);
+					fProcessor.setCreateAsTopLevel(fAsTopLevel);
 					updateSignaturePreview();
 					validateRefactoring();
 				}
 			});
 
 			Button nestedRadio= new Button(composite, SWT.RADIO);
-			nestedRadio.setText(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_createasnestedclass_radio, fRefactoring.getContainingClass().getName()));
-			boolean createAsTopLevel= getBooleanSetting(CREATE_TOP_LEVEL_SETTING, fRefactoring.isCreateAsTopLevel());
-			fRefactoring.setCreateAsTopLevel(createAsTopLevel);
+			nestedRadio.setText(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_createasnestedclass_radio, fProcessor.getContainingClass().getName()));
+			boolean createAsTopLevel= getBooleanSetting(CREATE_TOP_LEVEL_SETTING, fProcessor.isCreateAsTopLevel());
+			fProcessor.setCreateAsTopLevel(createAsTopLevel);
 			topLvlRadio.setSelection(createAsTopLevel);
 			nestedRadio.setSelection(!createAsTopLevel);
 
@@ -458,8 +463,8 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			table.setHeaderVisible(true);
 			gridData= new GridData(GridData.FILL_BOTH);
 			table.setLayoutData(gridData);
-			tv.setInput(fRefactoring);
-			List parameterInfos= fRefactoring.getParameterInfos();
+			tv.setInput(fProcessor);
+			List parameterInfos= fProcessor.getParameterInfos();
 			for (Iterator iter= parameterInfos.iterator(); iter.hasNext();) {
 				ParameterInfo pi= (ParameterInfo) iter.next();
 				tv.setChecked(pi, pi.isCreateField());
@@ -508,7 +513,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 						InputDialog inputDialog= new InputDialog(getShell(), title, message, selected.getNewName(), new IInputValidator() {
 
 							public String isValid(String newText) {
-								IStatus status= JavaConventionsUtil.validateIdentifier(newText, fRefactoring.getCompilationUnit());
+								IStatus status= JavaConventionsUtil.validateIdentifier(newText, fProcessor.getCompilationUnit());
 								if (!status.isOK())
 									return status.getMessage();
 								return null;
@@ -532,7 +537,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 					for (int i= indices.length-1; i >=0; i--) {
 						int idx= indices[i];
 						ParameterInfo pi= (ParameterInfo) tv.getElementAt(idx);
-						fRefactoring.moveFieldDown(pi);
+						fProcessor.moveFieldDown(pi);
 					}
 					tv.refresh();
 					updateButtons(tv, upButton, downButton, editButton);
@@ -546,7 +551,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 					for (int i= 0; i <indices.length; i++) {
 						int idx= indices[i];
 						ParameterInfo pi= (ParameterInfo) tv.getElementAt(idx);
-						fRefactoring.moveFieldUp(pi);
+						fProcessor.moveFieldUp(pi);
 					}
 					tv.refresh();
 					updateButtons(tv, upButton, downButton, editButton);
@@ -561,7 +566,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 					if (element.isCreateField()){
 						String lastName= (String) fLastNames.get(element);
 						if (lastName==null){
-							lastName=fRefactoring.getFieldName(element);
+							lastName= fProcessor.getFieldName(element);
 						}
 						element.setNewName(lastName);
 					} else {
@@ -633,13 +638,13 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			button.addSelectionListener(new SelectionAdapter() {
 
 				public void widgetSelected(SelectionEvent e) {
-					fRefactoring.setCreateGetter(button.getSelection());
+					fProcessor.setCreateGetter(button.getSelection());
 					validateRefactoring();
 				}
 
 			});
-			button.setSelection(getBooleanSetting(CREATE_GETTERS_SETTING, fRefactoring.isCreateGetter()));
-			fRefactoring.setCreateGetter(button.getSelection());
+			button.setSelection(getBooleanSetting(CREATE_GETTERS_SETTING, fProcessor.isCreateGetter()));
+			fProcessor.setCreateGetter(button.getSelection());
 			gridData= new GridData();
 			button.setLayoutData(gridData);
 		}
@@ -650,13 +655,13 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			button.addSelectionListener(new SelectionAdapter() {
 
 				public void widgetSelected(SelectionEvent e) {
-					fRefactoring.setCreateSetter(button.getSelection());
+					fProcessor.setCreateSetter(button.getSelection());
 					validateRefactoring();
 				}
 
 			});
-			button.setSelection(getBooleanSetting(CREATE_SETTERS_SETTING, fRefactoring.isCreateSetter()));
-			fRefactoring.setCreateSetter(button.getSelection());
+			button.setSelection(getBooleanSetting(CREATE_SETTERS_SETTING, fProcessor.isCreateSetter()));
+			fProcessor.setCreateSetter(button.getSelection());
 			GridData gridData= new GridData();
 			button.setLayoutData(gridData);
 		}
@@ -665,13 +670,13 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			Label label= new Label(result, SWT.LEAD);
 			label.setText(RefactoringMessages.IntroduceParameterObjectWizard_classnamefield_label);
 			final Text text= new Text(result, SWT.SINGLE | SWT.BORDER);
-			text.setText(fRefactoring.getClassName());
+			text.setText(fProcessor.getClassName());
 			text.selectAll();
 			text.setFocus();
 			text.addModifyListener(new ModifyListener() {
 
 				public void modifyText(ModifyEvent e) {
-					fRefactoring.setClassName(text.getText());
+					fProcessor.setClassName(text.getText());
 					updateSignaturePreview();
 					validateRefactoring();
 				}
@@ -693,14 +698,14 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 				downButton.setEnabled(selectionIndex[selectionIndex.length-1] != tv.getTable().getItemCount() - 1);
 				editButton.setEnabled(firstElement.isCreateField() && selectionIndex.length==1);
 			}
-			fRefactoring.updateParameterPosition();
+			fProcessor.updateParameterPosition();
 			updateSignaturePreview();
 		}
 
 		private void updateSignaturePreview() {
 			try {
 				int top= fSignaturePreview.getTextWidget().getTopPixel();
-				fSignaturePreviewDocument.set(fRefactoring.getNewMethodSignature());
+				fSignaturePreviewDocument.set(fProcessor.getNewMethodSignature());
 				fSignaturePreview.getTextWidget().setTopPixel(top);
 			} catch (JavaModelException e) {
 				ExceptionHandler.handle(e, RefactoringMessages.IntroduceParameterObjectWizard_error_title, RefactoringMessages.IntroduceParameterObjectWizard_error_description);
@@ -711,9 +716,9 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			DelegateUIHelper.saveDeprecateDelegateSetting(fDeprecateDelegateCheckBox);
 			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);
 			IDialogSettings settings= getRefactoringSettings();
-			settings.put(IntroduceParameterObjectInputPage.CREATE_GETTERS_SETTING, fRefactoring.isCreateGetter());
-			settings.put(IntroduceParameterObjectInputPage.CREATE_SETTERS_SETTING, fRefactoring.isCreateSetter());
-			settings.put(IntroduceParameterObjectInputPage.CREATE_TOP_LEVEL_SETTING, fRefactoring.isCreateAsTopLevel());
+			settings.put(IntroduceParameterObjectInputPage.CREATE_GETTERS_SETTING, fProcessor.isCreateGetter());
+			settings.put(IntroduceParameterObjectInputPage.CREATE_SETTERS_SETTING, fProcessor.isCreateSetter());
+			settings.put(IntroduceParameterObjectInputPage.CREATE_TOP_LEVEL_SETTING, fProcessor.isCreateAsTopLevel());
 			super.dispose();
 		}
 		

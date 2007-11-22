@@ -17,12 +17,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.structure.IntroduceParameterObjectRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.IntroduceParameterObjectProcessor;
 
 public class IntroduceParameterObjectContribution extends JavaRefactoringContribution {
 
@@ -31,8 +32,8 @@ public class IntroduceParameterObjectContribution extends JavaRefactoringContrib
 
 	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		if (descriptor instanceof IntroduceParameterObjectDescriptor) {
-			IntroduceParameterObjectDescriptor ipod= (IntroduceParameterObjectDescriptor) descriptor;
-			return new IntroduceParameterObjectRefactoring(ipod);
+			IntroduceParameterObjectProcessor processor= new IntroduceParameterObjectProcessor((IntroduceParameterObjectDescriptor) descriptor);
+			return new ProcessorBasedRefactoring(processor);
 		}
 		return null;
 	}

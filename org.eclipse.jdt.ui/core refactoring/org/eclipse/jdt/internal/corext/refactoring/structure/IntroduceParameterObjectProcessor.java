@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -83,7 +83,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
-public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactoring {
+public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor {
 
 	private final class ParameterObjectCreator implements IDefaultValueAdvisor {
 		public Expression createDefaultExpression(List invocationArguments, ParameterInfo addedInfo, List parameterInfos, MethodDeclaration enclosingMethod, boolean isRecursive, CompilationUnitRewrite cuRewrite) {
@@ -309,7 +309,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 	
 	private List/*<Change>*/ fOtherChanges;
 
-	public IntroduceParameterObjectRefactoring(IntroduceParameterObjectDescriptor descriptor) throws JavaModelException {
+	public IntroduceParameterObjectProcessor(IntroduceParameterObjectDescriptor descriptor) throws JavaModelException {
 		super(descriptor.getMethod());
 		IMethod method= descriptor.getMethod();
 		Assert.isNotNull(method);
@@ -319,7 +319,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		configureRefactoring(descriptor, this);
 	}
 
-	private void configureRefactoring(final IntroduceParameterObjectDescriptor parameter, IntroduceParameterObjectRefactoring ref) throws JavaModelException {
+	private void configureRefactoring(final IntroduceParameterObjectDescriptor parameter, IntroduceParameterObjectProcessor ref) {
 		ref.setCreateAsTopLevel(parameter.isTopLevel());
 		ref.setCreateGetter(parameter.isGetters());
 		ref.setCreateSetter(parameter.isSetters());
@@ -357,7 +357,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		}
 	}
 
-	private void initializeFields(IMethod method) throws JavaModelException {
+	private void initializeFields(IMethod method) {
 		fParameterObjectFactory= new ParameterObjectFactory();
 		String methodName= method.getElementName();
 		String className= String.valueOf(Character.toUpperCase(methodName.charAt(0)));
@@ -375,15 +375,15 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		updateReferenceType();
 	}
 
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException, OperationCanceledException {
 		RefactoringStatus status= new RefactoringStatus();
-		IMethod context= getMethod();
+		IMethod method= getMethod();
 		// TODO: Check for availability
-		status.merge(Checks.checkTypeName(fParameterObjectFactory.getClassName(), context));
-		status.merge(Checks.checkIdentifier(getParameterName(), context));
+		status.merge(Checks.checkTypeName(fParameterObjectFactory.getClassName(), method));
+		status.merge(Checks.checkIdentifier(getParameterName(), method));
 		if (status.hasFatalError())
 			return status;
-		status.merge(super.checkFinalConditions(pm));
+		status.merge(super.checkFinalConditions(pm, context));
 		return status;
 	}
 
@@ -493,8 +493,12 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 		fOtherChanges= new ArrayList();
 	}
 	
-	public String getName() {
+	public String getProcessorName() {
 		return RefactoringCoreMessages.IntroduceParameterObjectRefactoring_refactoring_name;
+	}
+
+	public String getIdentifier() {
+		return "org.eclipse.jdt.ui.introduceParameterObjectRefactoring"; //$NON-NLS-1$;
 	}
 
 	public JavaRefactoringDescriptor createDescriptor() {
@@ -532,7 +536,7 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 			JavaPlugin.log(e);
 		}
 		ipod.setProject(project);
-		ipod.setDescription(getName());
+		ipod.setDescription(getProcessorName());
 		ipod.setFlags(getDescriptorFlags());
 		return ipod;
 	}
@@ -571,17 +575,11 @@ public class IntroduceParameterObjectRefactoring extends ChangeSignatureRefactor
 	}
 
 	protected String doGetRefactoringChangeName() {
-		return getName();
+		return getProcessorName();
 	}
 
 	public String getParameterName() {
 		return fParameterObjectReference.getNewName();
-	}
-
-	public RefactoringStatus initialize(RefactoringArguments arguments) {
-		RefactoringStatus refactoringStatus= new RefactoringStatus();
-		// this refactoring is initialized using the descriptor from constructor
-		return refactoringStatus;
 	}
 
 	public boolean isCreateGetter() {

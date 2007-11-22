@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ import org.eclipse.jface.text.Document;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
@@ -43,7 +44,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -60,13 +61,16 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 public class ChangeSignatureWizard extends RefactoringWizard {
 
-	public ChangeSignatureWizard(ChangeSignatureRefactoring ref) {
-		super(ref, DIALOG_BASED_USER_INTERFACE);
+	private final ChangeSignatureProcessor fProcessor;
+
+	public ChangeSignatureWizard(ChangeSignatureProcessor processor, Refactoring refactoring) {
+		super(refactoring, DIALOG_BASED_USER_INTERFACE);
+		fProcessor= processor;
 		setDefaultPageTitle(RefactoringMessages.ChangeSignatureRefactoring_modify_Parameters); 
 	}
 
 	protected void addUserInputPages(){
-		addPage(new ChangeSignatureInputPage());
+		addPage(new ChangeSignatureInputPage(fProcessor));
 	}
 	
 	private static class ChangeSignatureInputPage extends UserInputWizardPage {
@@ -76,9 +80,12 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 		private Document fSignaturePreviewDocument;
 		private Button fLeaveDelegateCheckBox;
 		private Button fDeprecateDelegateCheckBox;
+
+		private final ChangeSignatureProcessor fProcessor;
 		
-		public ChangeSignatureInputPage() {
+		public ChangeSignatureInputPage(ChangeSignatureProcessor processor) {
 			super(PAGE_NAME);
+			fProcessor= processor;
 			setMessage(RefactoringMessages.ChangeSignatureInputPage_change); 
 			fSignaturePreviewDocument= new Document();
 		}
@@ -105,12 +112,12 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 					data.horizontalSpan= 2;
 					fDeprecateDelegateCheckBox.setLayoutData(data);
 					fDeprecateDelegateCheckBox.setText(DelegateUIHelper.getDeprecateDelegateCheckBoxTitle());
-					final ChangeSignatureRefactoring refactoring= getChangeMethodSignatureRefactoring();
-					fDeprecateDelegateCheckBox.setSelection(DelegateUIHelper.loadDeprecateDelegateSetting(refactoring));
-					refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
+					final ChangeSignatureProcessor processor= getChangeMethodSignatureProcessor();
+					fDeprecateDelegateCheckBox.setSelection(DelegateUIHelper.loadDeprecateDelegateSetting(processor));
+					processor.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
 					fDeprecateDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
 						public void widgetSelected(SelectionEvent e) {
-							refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
+							processor.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
 						}
 					});
 					fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
@@ -154,8 +161,8 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			layout.marginWidth= 0;
 			access.setLayout(layout);
 			
-			final int[] availableVisibilities= getChangeMethodSignatureRefactoring().getAvailableVisibilities();
-			int currentVisibility= getChangeMethodSignatureRefactoring().getVisibility();
+			final int[] availableVisibilities= getChangeMethodSignatureProcessor().getAvailableVisibilities();
+			int currentVisibility= getChangeMethodSignatureProcessor().getVisibility();
 						
 			Label label= new Label(access, SWT.NONE);
 			label.setText(RefactoringMessages.ChangeSignatureInputPage_access_modifier); 
@@ -170,7 +177,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 				combo.addSelectionListener(new SelectionAdapter() {
 					public void widgetSelected(SelectionEvent e) {
 						int newVisibility= availableVisibilities[combo.getSelectionIndex()];
-						getChangeMethodSignatureRefactoring().setVisibility(newVisibility);
+						getChangeMethodSignatureProcessor().setVisibility(newVisibility);
 						update(true);
 					}
 				});
@@ -213,14 +220,14 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			label.setText(RefactoringMessages.ChangeSignatureInputPage_return_type); 
 
 			final Text text= new Text(returnType, SWT.BORDER);
-			text.setText(getChangeMethodSignatureRefactoring().getReturnTypeString());
+			text.setText(getChangeMethodSignatureProcessor().getReturnTypeString());
 			text.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
 			TextFieldNavigationHandler.install(text);
 
-			if (getChangeMethodSignatureRefactoring().canChangeNameAndReturnType()) {
+			if (getChangeMethodSignatureProcessor().canChangeNameAndReturnType()) {
 				text.addModifyListener(new ModifyListener(){
 					public void modifyText(ModifyEvent e) {
-						getChangeMethodSignatureRefactoring().setNewReturnTypeName(text.getText());
+						getChangeMethodSignatureProcessor().setNewReturnTypeName(text.getText());
 						update(true);
 					}
 				});
@@ -229,7 +236,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			}
 			
 			JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(true, true);
-			StubTypeContext stubTypeContext= getChangeMethodSignatureRefactoring().getStubTypeContext();
+			StubTypeContext stubTypeContext= getChangeMethodSignatureProcessor().getStubTypeContext();
 			processor.setCompletionContext(stubTypeContext.getCuHandle(), stubTypeContext.getBeforeString(), stubTypeContext.getAfterString());
 			ControlContentAssistHelper.createTextContentAssistant(text, processor);
 		}
@@ -246,14 +253,14 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			label.setText(RefactoringMessages.ChangeSignatureInputPage_method_name); 
 			
 			final Text text= new Text(name, SWT.BORDER);
-			text.setText(getChangeMethodSignatureRefactoring().getMethodName());
+			text.setText(getChangeMethodSignatureProcessor().getMethodName());
 			text.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
 			TextFieldNavigationHandler.install(text);
 
-			if (getChangeMethodSignatureRefactoring().canChangeNameAndReturnType()) {
+			if (getChangeMethodSignatureProcessor().canChangeNameAndReturnType()) {
 				text.addModifyListener(new ModifyListener(){
 					public void modifyText(ModifyEvent e) {
-						getChangeMethodSignatureRefactoring().setNewMethodName(text.getText());
+						getChangeMethodSignatureProcessor().setNewMethodName(text.getText());
 						update(true);
 					}
 				});
@@ -296,9 +303,9 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 				public void parameterAdded(ParameterInfo parameter) {
 					update(true);
 				}
-			}, ChangeParametersControl.Mode.CHANGE_METHOD_SIGNATURE, getChangeMethodSignatureRefactoring().getStubTypeContext());
+			}, ChangeParametersControl.Mode.CHANGE_METHOD_SIGNATURE, getChangeMethodSignatureProcessor().getStubTypeContext());
 			cp.setLayoutData(new GridData(GridData.FILL_BOTH));
-			cp.setInput(getChangeMethodSignatureRefactoring().getParameterInfos());
+			cp.setInput(getChangeMethodSignatureProcessor().getParameterInfos());
 			return border;
 		}
 		
@@ -310,9 +317,9 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 				public void exceptionListChanged() {
 					update(true);
 				}
-			}, getChangeMethodSignatureRefactoring().getMethod().getJavaProject());
+			}, getChangeMethodSignatureProcessor().getMethod().getJavaProject());
 			cp.setLayoutData(new GridData(GridData.FILL_BOTH));
-			cp.setInput(getChangeMethodSignatureRefactoring().getExceptionInfos());
+			cp.setInput(getChangeMethodSignatureProcessor().getExceptionInfos());
 			return border;
 		}
 
@@ -354,8 +361,8 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 //			border.setLayoutData(borderData);
 		}
 
-		private ChangeSignatureRefactoring getChangeMethodSignatureRefactoring(){
-			return	(ChangeSignatureRefactoring)getRefactoring();
+		private ChangeSignatureProcessor getChangeMethodSignatureProcessor() {
+			return fProcessor;
 		}
 
 		private void update(boolean displayErrorMessage){
@@ -365,7 +372,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 
 		private void updateStatus(boolean displayErrorMessage) {
 			try{
-				if (getChangeMethodSignatureRefactoring().isSignatureSameAsInitial()){
+				if (getChangeMethodSignatureProcessor().isSignatureSameAsInitial()) {
 					if (displayErrorMessage)
 						setErrorMessage(RefactoringMessages.ChangeSignatureInputPage_unchanged); 
 					else
@@ -373,7 +380,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 					setPageComplete(false);
 					return;
 				}
-				RefactoringStatus nameCheck= getChangeMethodSignatureRefactoring().checkSignature();
+				RefactoringStatus nameCheck= getChangeMethodSignatureProcessor().checkSignature();
 				if (displayErrorMessage) {
 					setPageComplete(nameCheck);
 				} else {
@@ -390,7 +397,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 		private void updateSignaturePreview() {
 			try{
 				int top= fSignaturePreview.getTextWidget().getTopPixel();
-				fSignaturePreviewDocument.set(getChangeMethodSignatureRefactoring().getNewMethodSignature()); 
+				fSignaturePreviewDocument.set(getChangeMethodSignatureProcessor().getNewMethodSignature()); 
 				fSignaturePreview.getTextWidget().setTopPixel(top);
 			} catch (JavaModelException e){
 				ExceptionHandler.handle(e, RefactoringMessages.ChangeSignatureRefactoring_modify_Parameters, RefactoringMessages.ChangeSignatureInputPage_exception); 

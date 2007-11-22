@@ -33,11 +33,13 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.CopyRefactoring;
 import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
+import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.resource.RenameResourceWizard;
 
@@ -79,14 +81,14 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractClassRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.structure.IntroduceParameterObjectRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.IntroduceParameterObjectProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.JavaMoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;
@@ -185,8 +187,8 @@ public final class RefactoringExecutionStarter {
 		if (!RefactoringAvailabilityTester.isChangeSignatureAvailable(method))
 			return;
 		try {
-			ChangeSignatureRefactoring refactoring= new ChangeSignatureRefactoring(method);
-			RefactoringStatus status= refactoring.checkInitialConditions(new NullProgressMonitor());
+			ChangeSignatureProcessor processor= new ChangeSignatureProcessor(method);
+			RefactoringStatus status= processor.checkInitialConditions(new NullProgressMonitor());
 			if (status.hasFatalError()) {
 				final RefactoringStatusEntry entry= status.getEntryMatchingSeverity(RefactoringStatus.FATAL);
 				if (entry.getCode() == RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD || entry.getCode() == RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE) {
@@ -212,7 +214,9 @@ public final class RefactoringExecutionStarter {
 					return;
 				}
 			}
-			ChangeSignatureWizard wizard= new ChangeSignatureWizard(refactoring);
+
+			Refactoring refactoring= new ProcessorBasedRefactoring(processor);
+			ChangeSignatureWizard wizard= new ChangeSignatureWizard(processor, refactoring);
 			new RefactoringStarter().activate(wizard, shell, wizard.getDefaultPageTitle(), RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.RefactoringStarter_unexpected_exception);
@@ -478,8 +482,10 @@ public final class RefactoringExecutionStarter {
 		}
 		IntroduceParameterObjectDescriptor ipod= new IntroduceParameterObjectDescriptor();
 		ipod.setMethod(method);
-		IntroduceParameterObjectRefactoring refactoring= new IntroduceParameterObjectRefactoring(ipod);
-		final RefactoringStatus status= refactoring.checkInitialConditions(new NullProgressMonitor());
+
+		IntroduceParameterObjectProcessor processor= new IntroduceParameterObjectProcessor(ipod);
+		
+		final RefactoringStatus status= processor.checkInitialConditions(new NullProgressMonitor());
 		if (status.hasFatalError()) {
 			final RefactoringStatusEntry entry= status.getEntryMatchingSeverity(RefactoringStatus.FATAL);
 			if (entry.getCode() == RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD || entry.getCode() == RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE) {
@@ -494,14 +500,16 @@ public final class RefactoringExecutionStarter {
 				if (element != null && MessageDialog.openQuestion(shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, message)) {
 					ipod= new IntroduceParameterObjectDescriptor();
 					ipod.setMethod(superMethod);
-					refactoring=new IntroduceParameterObjectRefactoring(ipod);
+					processor= new IntroduceParameterObjectProcessor(ipod);
 				}
-				else refactoring=null;
+				else processor=null;
 			}
 		}
-		if (refactoring!=null)
-			new RefactoringStarter().activate(new IntroduceParameterObjectWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring,
-					RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
+		if (processor != null) {
+			Refactoring refactoring= new ProcessorBasedRefactoring(processor);
+			IntroduceParameterObjectWizard wizard= new IntroduceParameterObjectWizard(processor, refactoring);
+			new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
+		}
 	}
 	
 	public static void startExtractClassRefactoring(IType type, Shell shell) {

@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -219,7 +219,7 @@ public class ParameterEditDialog extends StatusDialog {
 		String defaultValue= fDefaultValue.getText();
 		if (defaultValue.length() == 0)
 			return createErrorStatus(RefactoringMessages.ParameterEditDialog_defaultValue_error);
-		if (ChangeSignatureRefactoring.isValidExpression(defaultValue))
+		if (ChangeSignatureProcessor.isValidExpression(defaultValue))
 			return createOkStatus();
 		String msg= Messages.format(RefactoringMessages.ParameterEditDialog_defaultValue_invalid, new String[]{defaultValue}); 
 		return createErrorStatus(msg);

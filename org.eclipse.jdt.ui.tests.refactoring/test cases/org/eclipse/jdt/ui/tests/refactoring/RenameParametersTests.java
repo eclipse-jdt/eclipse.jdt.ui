@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,10 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -23,9 +27,7 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor;
 
 public class RenameParametersTests extends RefactoringTest{
 	
@@ -66,11 +68,13 @@ public class RenameParametersTests extends RefactoringTest{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, "A");
 		IMethod method= classA.getMethod("m", signature);
-		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
+		assertTrue("refactoring not available", RefactoringAvailabilityTester.isChangeSignatureAvailable(method));
+		ChangeSignatureProcessor processor= new ChangeSignatureProcessor(method);
+		Refactoring ref= new ProcessorBasedRefactoring(processor);
 		//ref.setUpdateReferences(updateReferences);
 		//ref.setNewParameterNames(newNames);
 		//ref.setNewNames(createRenamings(method, newNames));
-		modifyInfos(ref.getParameterInfos(), newNames);
+		modifyInfos(processor.getParameterInfos(), newNames);
 		
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -87,8 +91,10 @@ public class RenameParametersTests extends RefactoringTest{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
 		//DebugUtils.dump("classA" + classA);
 		IMethod method= classA.getMethod("m", signature);
-		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
-		modifyInfos(ref.getParameterInfos(), newNames);
+		assertTrue("refactoring not available", RefactoringAvailabilityTester.isChangeSignatureAvailable(method));
+		ChangeSignatureProcessor processor= new ChangeSignatureProcessor(method);
+		Refactoring ref= new ProcessorBasedRefactoring(processor);
+		modifyInfos(processor.getParameterInfos(), newNames);
 		
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);		
