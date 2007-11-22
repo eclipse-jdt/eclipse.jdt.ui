@@ -1307,6 +1307,7 @@ action enablement
 		fTestIgnoredIcon.dispose();
 		
 		fSuiteIcon.dispose();
+		fSuiteOkIcon.dispose();
 		fSuiteRunningIcon.dispose();
 		fSuiteErrorIcon.dispose();
 		fSuiteFailIcon.dispose();
