@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IRegion;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
@@ -48,8 +49,6 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
-
-import org.eclipse.jdt.internal.corext.SourceRange;
 
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
@@ -73,7 +72,7 @@ public class JUnit4TestFinder implements ITestFinder {
 			return fName;
 		}
 		
-		private boolean annotates(IAnnotationBinding[] annotations) throws JavaModelException {
+		private boolean annotates(IAnnotationBinding[] annotations) {
 			for (int i= 0; i < annotations.length; i++) {
 				ITypeBinding annotationType= annotations[i].getAnnotationType();
 				if (annotationType != null && (annotationType.getQualifiedName().equals(fName))) {
@@ -83,7 +82,7 @@ public class JUnit4TestFinder implements ITestFinder {
 			return  false;
 		}
 		
-		public boolean annotatesTypeOrSuperTypes(ITypeBinding type) throws JavaModelException {
+		public boolean annotatesTypeOrSuperTypes(ITypeBinding type) {
 			while (type != null) {
 				if (annotates(type.getAnnotations())) {
 					return true;
@@ -93,7 +92,7 @@ public class JUnit4TestFinder implements ITestFinder {
 			return false;
 		}
 		
-		public boolean annotatesAtLeastOneMethod(ITypeBinding type) throws JavaModelException {
+		public boolean annotatesAtLeastOneMethod(ITypeBinding type) {
 			while (type != null) {
 				IMethodBinding[] declaredMethods= type.getDeclaredMethods();
 				for (int i= 0; i < declaredMethods.length; i++) {
@@ -222,7 +221,7 @@ public class JUnit4TestFinder implements ITestFinder {
 			
 			if (type.getCompilationUnit() != null) {
 				parser.setSource(type.getCompilationUnit());
-			} else if (! SourceRange.isAvailable(type.getSourceRange())) { // class file with no source
+			} else if (!isAvailable(type.getSourceRange())) { // class file with no source
 				parser.setProject(type.getJavaProject());
 				IBinding[] bindings= parser.createBindings(new IJavaElement[] { type }, monitor);
 				if (bindings.length == 1 && bindings[0] instanceof ITypeBinding) {
@@ -248,8 +247,12 @@ public class JUnit4TestFinder implements ITestFinder {
 		
 	}
 	
+    private static boolean isAvailable(ISourceRange range) {
+		return range != null && range.getOffset() != -1;
+	}
+
 	
-	private boolean isTest(ITypeBinding binding) throws JavaModelException {
+	private boolean isTest(ITypeBinding binding) {
 		if (Modifier.isAbstract(binding.getModifiers()))
 			return false;
 		
