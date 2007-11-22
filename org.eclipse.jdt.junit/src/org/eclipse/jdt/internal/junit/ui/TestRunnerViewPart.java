@@ -21,6 +21,7 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -197,18 +198,18 @@ public class TestRunnerViewPart extends ViewPart {
 	private RunnerViewHistory fViewHistory;
 	private TestRunSessionListener fTestRunSessionListener;
 
-	final Image fStackViewIcon= TestRunnerViewPart.createImage("eview16/stackframe.gif");//$NON-NLS-1$
-	final Image fTestRunOKIcon= TestRunnerViewPart.createImage("eview16/junitsucc.gif"); //$NON-NLS-1$
-	final Image fTestRunFailIcon= TestRunnerViewPart.createImage("eview16/juniterr.gif"); //$NON-NLS-1$
-	final Image fTestRunOKDirtyIcon= TestRunnerViewPart.createImage("eview16/junitsuccq.gif"); //$NON-NLS-1$
-	final Image fTestRunFailDirtyIcon= TestRunnerViewPart.createImage("eview16/juniterrq.gif"); //$NON-NLS-1$
+	final Image fStackViewIcon;
+	final Image fTestRunOKIcon;
+	final Image fTestRunFailIcon;
+	final Image fTestRunOKDirtyIcon;
+	final Image fTestRunFailDirtyIcon;
 	
-	final Image fTestIcon= TestRunnerViewPart.createImage("obj16/test.gif"); //$NON-NLS-1$
-	final Image fTestOkIcon= TestRunnerViewPart.createImage("obj16/testok.gif"); //$NON-NLS-1$
-	final Image fTestErrorIcon= TestRunnerViewPart.createImage("obj16/testerr.gif"); //$NON-NLS-1$
-	final Image fTestFailIcon= TestRunnerViewPart.createImage("obj16/testfail.gif"); //$NON-NLS-1$
-	final Image fTestRunningIcon= TestRunnerViewPart.createImage("obj16/testrun.gif"); //$NON-NLS-1$
-	final Image fTestIgnoredIcon= TestRunnerViewPart.createImage("obj16/testignored.gif"); //$NON-NLS-1$
+	final Image fTestIcon;
+	final Image fTestOkIcon;
+	final Image fTestErrorIcon;
+	final Image fTestFailIcon;
+	final Image fTestRunningIcon;
+	final Image fTestIgnoredIcon;
 	
 	final ImageDescriptor fSuiteIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuite.gif"); //$NON-NLS-1$
 	final ImageDescriptor fSuiteOkIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuiteok.gif"); //$NON-NLS-1$
@@ -216,11 +217,13 @@ public class TestRunnerViewPart extends ViewPart {
 	final ImageDescriptor fSuiteFailIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuitefail.gif"); //$NON-NLS-1$
 	final ImageDescriptor fSuiteRunningIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuiterun.gif"); //$NON-NLS-1$
 	
-	final Image fSuiteIcon= fSuiteIconDescriptor.createImage();
-	final Image fSuiteOkIcon= fSuiteOkIconDescriptor.createImage();
-	final Image fSuiteErrorIcon= fSuiteErrorIconDescriptor.createImage();
-	final Image fSuiteFailIcon= fSuiteFailIconDescriptor.createImage();
-	final Image fSuiteRunningIcon= fSuiteRunningIconDescriptor.createImage();
+	final Image fSuiteIcon;
+	final Image fSuiteOkIcon;
+	final Image fSuiteErrorIcon;
+	final Image fSuiteFailIcon;
+	final Image fSuiteRunningIcon;
+
+	final List fImagesToDispose;
 	
 	// Persistence tags.
 	static final String TAG_PAGE= "page"; //$NON-NLS-1$
@@ -840,6 +843,43 @@ public class TestRunnerViewPart extends ViewPart {
 			store.setValue(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, checked);
 		}
 	}
+
+	public TestRunnerViewPart() {
+		fImagesToDispose= new ArrayList();
+
+		fStackViewIcon= createManagedImage("eview16/stackframe.gif");//$NON-NLS-1$
+		fTestRunOKIcon= createManagedImage("eview16/junitsucc.gif"); //$NON-NLS-1$
+		fTestRunFailIcon= createManagedImage("eview16/juniterr.gif"); //$NON-NLS-1$
+		fTestRunOKDirtyIcon= createManagedImage("eview16/junitsuccq.gif"); //$NON-NLS-1$
+		fTestRunFailDirtyIcon= createManagedImage("eview16/juniterrq.gif"); //$NON-NLS-1$
+
+		fTestIcon= createManagedImage("obj16/test.gif"); //$NON-NLS-1$
+		fTestOkIcon= createManagedImage("obj16/testok.gif"); //$NON-NLS-1$
+		fTestErrorIcon= createManagedImage("obj16/testerr.gif"); //$NON-NLS-1$
+		fTestFailIcon= createManagedImage("obj16/testfail.gif"); //$NON-NLS-1$
+		fTestRunningIcon= createManagedImage("obj16/testrun.gif"); //$NON-NLS-1$
+		fTestIgnoredIcon= createManagedImage("obj16/testignored.gif"); //$NON-NLS-1$
+
+		fSuiteIcon= createManagedImage(fSuiteIconDescriptor);
+		fSuiteOkIcon= createManagedImage(fSuiteOkIconDescriptor);
+		fSuiteErrorIcon= createManagedImage(fSuiteErrorIconDescriptor);
+		fSuiteFailIcon= createManagedImage(fSuiteFailIconDescriptor);
+		fSuiteRunningIcon= createManagedImage(fSuiteRunningIconDescriptor);
+	}
+
+	private Image createManagedImage(String path) {
+		return createManagedImage(JUnitPlugin.getImageDescriptor(path));
+	}
+	
+	private Image createManagedImage(ImageDescriptor descriptor) {
+		Image image= descriptor.createImage();
+		if (image == null) {
+			image= ImageDescriptor.getMissingImageDescriptor().createImage();
+		}
+		fImagesToDispose.add(image);
+		return image;
+	}
+	
 	
 	public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
@@ -1301,23 +1341,9 @@ action enablement
 	}
 
 	private void disposeImages() {
-		fTestRunOKIcon.dispose();
-		fTestRunFailIcon.dispose();
-		fStackViewIcon.dispose();
-		fTestRunOKDirtyIcon.dispose();
-		fTestRunFailDirtyIcon.dispose();
-		
-		fTestIcon.dispose();
-		fTestRunningIcon.dispose();
-		fTestOkIcon.dispose();
-		fTestErrorIcon.dispose();
-		fTestFailIcon.dispose();
-		fTestIgnoredIcon.dispose();
-		
-		fSuiteIcon.dispose();
-		fSuiteRunningIcon.dispose();
-		fSuiteErrorIcon.dispose();
-		fSuiteFailIcon.dispose();
+		for (int i= 0; i < fImagesToDispose.size(); i++) {
+			((Image) fImagesToDispose.get(i)).dispose();
+		}
 	}
 
 	private void postSyncRunnable(Runnable r) {
@@ -1669,10 +1695,6 @@ action enablement
 	 */
 	public IJavaProject getLaunchedProject() {
 		return fTestRunSession == null ? null : fTestRunSession.getLaunchedProject();
-	}
-	
-	public static Image createImage(String path) {
-		return JUnitPlugin.getImageDescriptor(path).createImage();
 	}
 
 	private boolean isDisposed() {

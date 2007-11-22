@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
@@ -160,6 +161,10 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	public static ImageDescriptor getImageDescriptor(String relativePath) {
 		IPath path= ICONS_PATH.append(relativePath);
 		return createImageDescriptor(getDefault().getBundle(), path, true);
+	}
+
+	public static Image createImage(String path) {
+		return getImageDescriptor(path).createImage();
 	}
 	
 	/**

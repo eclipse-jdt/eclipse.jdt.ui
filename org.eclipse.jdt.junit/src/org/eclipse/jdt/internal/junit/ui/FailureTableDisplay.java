@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,11 +23,9 @@ import org.eclipse.swt.widgets.TableItem;
 public class FailureTableDisplay implements ITraceDisplay {
 	private final Table fTable;
 
-	private final Image fExceptionIcon = TestRunnerViewPart
-			.createImage("obj16/exc_catch.gif"); //$NON-NLS-1$
+	private final Image fExceptionIcon= JUnitPlugin.createImage("obj16/exc_catch.gif"); //$NON-NLS-1$
 
-	private final Image fStackIcon = TestRunnerViewPart
-			.createImage("obj16/stkfrm_obj.gif"); //$NON-NLS-1$
+	private final Image fStackIcon= JUnitPlugin.createImage("obj16/stkfrm_obj.gif"); //$NON-NLS-1$
 
 	public FailureTableDisplay(Table table) {
 		fTable = table;

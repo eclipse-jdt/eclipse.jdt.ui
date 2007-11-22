@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,8 +33,8 @@ public class CounterPanel extends Composite {
 	protected int fTotal;
 	protected int fIgnoredCount;
 	
-	private final Image fErrorIcon= TestRunnerViewPart.createImage("ovr16/error_ovr.gif"); //$NON-NLS-1$
-	private final Image fFailureIcon= TestRunnerViewPart.createImage("ovr16/failed_ovr.gif"); //$NON-NLS-1$
+	private final Image fErrorIcon= JUnitPlugin.createImage("ovr16/error_ovr.gif"); //$NON-NLS-1$
+	private final Image fFailureIcon= JUnitPlugin.createImage("ovr16/failed_ovr.gif"); //$NON-NLS-1$
 			
 	public CounterPanel(Composite parent) {
 		super(parent, SWT.WRAP);

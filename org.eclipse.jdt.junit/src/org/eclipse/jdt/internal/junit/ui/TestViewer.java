@@ -154,7 +154,7 @@ public class TestViewer {
 		fTestRunnerPart= runner;
 		fClipboard= clipboard;
 
-		fHierarchyIcon= TestRunnerViewPart.createImage("obj16/testhier.gif"); //$NON-NLS-1$
+		fHierarchyIcon= JUnitPlugin.createImage("obj16/testhier.gif"); //$NON-NLS-1$
 		parent.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
 				disposeIcons();
