@@ -173,11 +173,11 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				Object element= iter.next();
 				if (element instanceof JavaElement) {
 					IJavaElement javaElement= ((JavaElement) element).getJavaElement();
-					if (! (javaElement instanceof IJavaModel)) // various selection listeners assume getJavaProject() is non-null 
+					if (javaElement != null && ! (javaElement instanceof IJavaModel)) // various selection listeners assume getJavaProject() is non-null 
 						externalSelection.add(javaElement);
 				} else if (element instanceof JEResource) {
 					IResource resource= ((JEResource) element).getResource();
-					if (! (resource instanceof IWorkspaceRoot)) // various selection listeners assume getProject() is non-null
+					if (resource != null &&! (resource instanceof IWorkspaceRoot)) // various selection listeners assume getProject() is non-null
 						externalSelection.add(resource);
 				} else if (element instanceof JEAttribute) {
 					Object wrappedObject= ((JEAttribute) element).getWrappedObject();
