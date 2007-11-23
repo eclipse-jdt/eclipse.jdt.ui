@@ -55,7 +55,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 		try {
 			IDocument document= textEditor.getDocumentProvider().getDocument(textEditor.getEditorInput());
 			IRegion wordRegion= JavaWordFinder.findWord(document, offset);
-			if (wordRegion == null)
+			if (wordRegion == null || wordRegion.getLength() == 0)
 				return null;
 			
 			IJavaElement[] elements= null;
