@@ -52,6 +52,14 @@ public class LeakTestCase extends TestCase {
 	}
 
 	private void calmDown() {
+		// Make sure we wait > 500, to allow e.g. TextViewer.queuePostSelectionChanged(boolean)
+		// and OpenStrategy to time out and release references in delayed runnables.
+		new DisplayHelper() {
+			protected boolean condition() {
+				return false;
+			}
+		}.waitForCondition(Display.getCurrent(), 1000);
+		
 		for (int i= 0; i < 10; i++) {
 			System.gc();
 			try {
@@ -59,7 +67,6 @@ public class LeakTestCase extends TestCase {
 			} catch (InterruptedException e) {
 			}
 		}
-		DisplayHelper.runEventLoop(Display.getCurrent(), 500);
 	}
 	
   	/**
