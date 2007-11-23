@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -194,7 +195,7 @@ public class JavaStructureCreator extends StructureCreator {
 		boolean matches() {
 			return !fIsOut && fAncestor != null && fLeft != null && fRight != null;
 		}
-	}		
+	}
 	
 	public JavaStructureCreator() {
 	}
@@ -207,7 +208,7 @@ public class JavaStructureCreator extends StructureCreator {
 	 * @return the name that appears in the enclosing pane title bar
 	 */
 	public String getName() {
-		return CompareMessages.JavaStructureViewer_title; 
+		return CompareMessages.JavaStructureViewer_title;
 	}
 	
 	/**
@@ -221,13 +222,13 @@ public class JavaStructureCreator extends StructureCreator {
 		IDocument doc= CompareUI.getDocument(input);
 		if (doc == null) {
 			if (input instanceof IStreamContentAccessor) {
-				IStreamContentAccessor sca= (IStreamContentAccessor) input;			
+				IStreamContentAccessor sca= (IStreamContentAccessor) input;
 				try {
 					contents= JavaCompareUtilities.readString(sca);
 				} catch (CoreException ex) {
 					// return null indicates the error.
 					return null;
-				}			
+				}
 			}
 			
 			if (contents != null) {
@@ -236,7 +237,7 @@ public class JavaStructureCreator extends StructureCreator {
 				contents.getChars(0, n, buffer, 0);
 				
 				doc= new Document(contents);
-				setupDocument(doc);				
+				setupDocument(doc);
 			}
 		}
 		
@@ -304,13 +305,14 @@ public class JavaStructureCreator extends StructureCreator {
 	 * for equality. Is is never shown in the UI, so any string representing
 	 * the content will do.
 	 * @param node must implement the IStreamContentAccessor interface
-	 * @param ignoreWhiteSpace if true all Java white space (including comments) is removed from the contents.
+	 * @param ignoreWhiteSpace if <code>true</code> all Java white space (including comments) is removed from the contents.
 	 * @return contents for equality test
 	 */
 	public String getContents(Object node, boolean ignoreWhiteSpace) {
 		
 		if (! (node instanceof IStreamContentAccessor))
 			return null;
+		
 			
 		IStreamContentAccessor sca= (IStreamContentAccessor) node;
 		String content= null;
@@ -320,40 +322,48 @@ public class JavaStructureCreator extends StructureCreator {
 			JavaPlugin.log(ex);
 			return null;
 		}
-				
-		if (ignoreWhiteSpace) { 	// we return everything but Java whitespace
-			
-			// replace comments and whitespace by a single blank
-			StringBuffer buf= new StringBuffer();
-			char[] b= content.toCharArray();
-			
-			// to avoid the trouble when dealing with Unicode
-			// we use the Java scanner to extract non-whitespace and non-comment tokens
-			IScanner scanner= ToolFactory.createScanner(true, true, false, false);	// however we request Whitespace and Comments
-			scanner.setSource(b);
-			try {
-				int token;
-				while ((token= scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
-					switch (token) {
-					case ITerminalSymbols.TokenNameWHITESPACE:						
-						int l= buf.length();
-						if (l > 0 && buf.charAt(l-1) != ' ')
+
+
+		if (!ignoreWhiteSpace)
+			return content;
+
+		// replace whitespace by a single blank
+		StringBuffer buf= new StringBuffer();
+		char[] b= content.toCharArray();
+
+		// to avoid the trouble when dealing with Unicode
+		// we use the Java scanner to extract non-whitespace and comment tokens
+		IScanner scanner= ToolFactory.createScanner(true, false, false, false); // however we request Whitespace and Comments
+		scanner.setSource(b);
+		try {
+			int token;
+			while ((token= scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
+				char[] currentTokenSource= scanner.getCurrentTokenSource();
+				switch (token) {
+					case ITerminalSymbols.TokenNameCOMMENT_LINE:
+					case ITerminalSymbols.TokenNameCOMMENT_BLOCK:
+					case ITerminalSymbols.TokenNameCOMMENT_JAVADOC:
+						StringBuffer tokenStr= new StringBuffer(currentTokenSource.length);
+						tokenStr.append(currentTokenSource);
+						StringTokenizer tokenizer= new StringTokenizer(tokenStr.toString());
+						while (tokenizer.hasMoreTokens()) {
+							buf.append(tokenizer.nextToken());
 							buf.append(' ');
+						}
 						break;
 					default:
-						buf.append(scanner.getCurrentTokenSource());
+						buf.append(currentTokenSource);
 						buf.append(' ');
 						break;
-					}
 				}
-				content= buf.toString();	// success!
-			} catch (InvalidInputException ex) {
-				// NeedWork
 			}
+			content= buf.toString(); // success!
+		} catch (InvalidInputException ex) {
+			// NeedWork
 		}
 		return content;
 	}
-	
+
 	/**
 	 * @return true since this IStructureCreator can rewrite the diff tree
 	 * in order to fold certain combinations of additions and deletions.
@@ -365,8 +375,8 @@ public class JavaStructureCreator extends StructureCreator {
 	/**
 	 * Tries to detect certain combinations of additions and deletions
 	 * as renames or signature changes and folders them into a single node.
-	 * @param differencer 
-	 * @param root 
+	 * @param differencer
+	 * @param root
 	 */
 	public void rewriteTree(Differencer differencer, IDiffContainer root) {
 		
