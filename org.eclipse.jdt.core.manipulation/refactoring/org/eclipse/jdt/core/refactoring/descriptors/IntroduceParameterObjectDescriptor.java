@@ -74,6 +74,9 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 		/**
 		 * The index of the parameter in the original method signature. The parameter object has the special index {@link IntroduceParameterObjectDescriptor#PARAMETER_OBJECT_IDX}. 
 		 * The position in the new method signature depends on the position in the array passed to {@link IntroduceParameterObjectDescriptor#setParameters(IntroduceParameterObjectDescriptor.Parameter[])}
+		 * 
+		 * @return returns the index of the parameter in the original method signature or {@link IntroduceParameterObjectDescriptor#PARAMETER_OBJECT_IDX}
+		 * for the parameter object
 		 *  
 		 * @see IntroduceParameterObjectDescriptor#PARAMETER_OBJECT
 		 * @see IntroduceParameterObjectDescriptor#PARAMETER_OBJECT_IDX
