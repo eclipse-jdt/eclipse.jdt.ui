@@ -34,15 +34,15 @@ public class JavaManipulationPlugin extends Plugin {
 		fgDefault = this;
 	}
 
-	/**
-	 * This method is called upon plug-in activation
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.Plugin#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 	}
 
-	/**
-	 * This method is called when the plug-in is stopped
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
 		super.stop(context);

@@ -98,6 +98,10 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 */
 	public static final int STRATEGY_SUFFIX= 3;
 
+	/** @deprecated */
+	private static final String RENAME_RESOURCE= IJavaRefactorings.RENAME_RESOURCE;
+	
+	
 	/** The delegate attribute */
 	private boolean fDelegate= false;
 
@@ -155,7 +159,9 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	
 	/**
 	 * Note: This constructor is experimental and for internal use only. Clients should not call this constructor.
-	 *
+	 * 
+	 * @param id 
+	 *            the ID of this descriptor
 	 * @param project
 	 *            the non-empty name of the project associated with this
 	 *            refactoring, or <code>null</code> for a workspace
@@ -201,6 +207,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 			case IJavaElement.TYPE:
 			case IJavaElement.FIELD:
 				fTextual= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_TEXTUAL_MATCHES, fTextual);
+				break;
 			default:
 				break;
 		}
@@ -209,6 +216,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 			case IJavaElement.FIELD:
 				fDeprecate= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_DEPRECATE, fDeprecate);
 				fDelegate= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_DELEGATE, fDelegate);
+				break;
 			default:
 				break;
 		}
@@ -217,6 +225,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 			case IJavaElement.TYPE:
 				fQualified= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_QUALIFIED, fQualified);
 				fPatterns= JavaRefactoringDescriptorUtil.getString(fArguments, ATTRIBUTE_PATTERNS, true);
+				break;
 			default:
 				break;
 		}
@@ -224,12 +233,14 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 			case IJavaElement.TYPE:
 				fSimilarDeclarations= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_SIMILAR_DECLARATIONS, fSimilarDeclarations);
 				fMatchStrategy= JavaRefactoringDescriptorUtil.getInt(fArguments, ATTRIBUTE_MATCH_STRATEGY, fMatchStrategy);
+				break;
 			default:
 				break;
 		}
 		switch (type) {
 			case IJavaElement.PACKAGE_FRAGMENT:
 				fHierarchical= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_HIERARCHICAL, fHierarchical);
+				break;
 			default:
 				break;
 		}
@@ -258,7 +269,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 			return true;
 		else if (id.equals(IJavaRefactorings.RENAME_PACKAGE))
 			return true;
-		else if (id.equals(IJavaRefactorings.RENAME_RESOURCE))
+		else if (id.equals(RENAME_RESOURCE))
 			return true;
 		else if (id.equals(IJavaRefactorings.RENAME_SOURCE_FOLDER))
 			return true;
@@ -293,6 +304,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 			case IJavaElement.TYPE:
 			case IJavaElement.FIELD:
 				JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_TEXTUAL_MATCHES, fTextual);
+				break;
 			default:
 				break;
 		}
@@ -301,6 +313,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 			case IJavaElement.FIELD:
 				JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_DEPRECATE, fDeprecate);
 				JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_DELEGATE, fDelegate);
+				break;
 			default:
 				break;
 		}
@@ -309,6 +322,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 			case IJavaElement.TYPE:
 				JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_QUALIFIED, fQualified);
 				JavaRefactoringDescriptorUtil.setString(fArguments, ATTRIBUTE_PATTERNS, fPatterns);
+				break;
 			default:
 				break;
 		}
@@ -316,12 +330,14 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 			case IJavaElement.TYPE:
 				JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_SIMILAR_DECLARATIONS, fSimilarDeclarations);
 				JavaRefactoringDescriptorUtil.setInt(fArguments, ATTRIBUTE_MATCH_STRATEGY, fMatchStrategy);
+				break;
 			default:
 				break;
 		}
 		switch (type) {
 			case IJavaElement.PACKAGE_FRAGMENT:
 				JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_HIERARCHICAL, fHierarchical);
+				break;
 			default:
 				break;
 		}
