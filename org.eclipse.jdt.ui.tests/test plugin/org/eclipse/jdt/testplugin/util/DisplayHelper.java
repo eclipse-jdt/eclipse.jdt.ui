@@ -113,41 +113,6 @@ public abstract class DisplayHelper {
 	}
 	
 	/**
-	 * Call {@link Display#sleep()} and run the event loop once if
-	 * <code>sleep</code> returns before the timeout elapses. Returns
-	 * <code>true</code> if any events were processed, <code>false</code> if
-	 * not.
-	 * <p>
-	 * If <code>timeout &lt; 0</code>, nothing happens and false is returned.
-	 * If <code>timeout == 0</code>, the event loop is driven exactly once,
-	 * but <code>Display.sleep()</code> is never invoked.
-	 * </p>
-	 * 
-	 * @param display the display to run the event loop of
-	 * @param timeout the timeout in milliseconds
-	 * @return <code>true</code> if any event was taken off the event queue,
-	 *         <code>false</code> if not
-	 */
-	public static boolean runEventLoop(Display display, long timeout) {
-		if (timeout < 0)
-			return false;
-		
-		if (timeout == 0)
-			return driveEventQueue(display);
-		
-		// repeatedly sleep until condition becomes true or timeout elapses
-		DisplayWaiter waiter= new DisplayWaiter(display);
-		DisplayWaiter.Timeout timeoutState= waiter.start(timeout);
-		boolean events= false;
-		if (display.sleep() && !timeoutState.hasTimedOut()) {
-			driveEventQueue(display);
-			events= true;
-		}
-		waiter.stop();
-		return events;
-	}
-	
-	/**
 	 * The condition which has to be met in order for
 	 * {@link #waitForCondition(Display, int)} to return before the timeout
 	 * elapses.
