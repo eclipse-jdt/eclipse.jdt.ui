@@ -24,8 +24,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -73,12 +71,7 @@ public class DeleteWizard extends RefactoringWizard {
 	 * @see org.eclipse.jface.wizard.Wizard#needsProgressMonitor()
 	 */
 	public boolean needsProgressMonitor() {
-		DeleteRefactoring refactoring= (DeleteRefactoring)getRefactoring();
-		RefactoringProcessor processor= refactoring.getProcessor();
-		if (processor instanceof JavaDeleteProcessor) {
-			return ((JavaDeleteProcessor)processor).needsProgressMonitor();
-		}
-		return super.needsProgressMonitor();
+		return fProcessor.needsProgressMonitor();
 	}
 	
 	private static class DeleteInputPage extends MessageWizardPage {
