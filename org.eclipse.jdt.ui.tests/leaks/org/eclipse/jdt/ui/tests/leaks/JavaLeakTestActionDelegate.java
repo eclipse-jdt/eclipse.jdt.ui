@@ -36,6 +36,7 @@ public class JavaLeakTestActionDelegate implements IWorkbenchWindowActionDelegat
 	}
 	
 	public void run(IAction action) {
+		System.out.println("running JavaLeakTestActionDelegate");
 	}
 	
 	public void dispose() {
