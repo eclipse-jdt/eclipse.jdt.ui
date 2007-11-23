@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.JarFile;
 
 import org.eclipse.core.filesystem.EFS;
@@ -45,7 +46,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.ui.refactoring.history.RefactoringHistoryWizard;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -57,16 +57,13 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.binary.SourceCreationOperation;
 import org.eclipse.jdt.internal.corext.refactoring.binary.StubCreationOperation;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -237,16 +234,10 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	}
 
 	/** Is auto build enabled? */
-	protected boolean fAutoBuild= true;
+	private boolean fAutoBuild= true;
 
 	/** Has the wizard been cancelled? */
 	protected boolean fCancelled= false;
-
-	/** The current refactoring arguments, or <code>null</code> */
-	protected RefactoringArguments fCurrentArguments= null;
-
-	/** The current refactoring to be initialized, or <code>null</code> */
-	protected IScriptableRefactoring fCurrentRefactoring= null;
 
 	/** The java project or <code>null</code> */
 	protected IJavaProject fJavaProject= null;
@@ -255,10 +246,10 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	 * The packages which already have been processed (element type:
 	 * &lt;IPackageFragment&gt;)
 	 */
-	protected final Collection fProcessedFragments= new HashSet();
+	private final Collection fProcessedFragments= new HashSet();
 
 	/** The temporary source folder, or <code>null</code> */
-	protected IFolder fSourceFolder= null;
+	private IFolder fSourceFolder= null;
 
 	/**
 	 * Creates a new stub refactoring history wizard.
@@ -347,12 +338,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	protected RefactoringStatus aboutToPerformRefactoring(final Refactoring refactoring, final RefactoringDescriptor descriptor, final IProgressMonitor monitor) {
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
-			monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 100);
-			status.merge(createNecessarySourceCode(refactoring, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
-			if (!status.hasFatalError()) {
-				if (fCurrentRefactoring != null && fCurrentArguments != null)
-					status.merge(fCurrentRefactoring.initialize(fCurrentArguments));
-			}
+			// nothing to do
 		} finally {
 			monitor.done();
 		}
@@ -411,14 +397,12 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	/**
 	 * Creates the necessary source code for the refactoring.
 	 * 
-	 * @param refactoring
-	 *            the refactoring to create the source code for
 	 * @param monitor
 	 *            the progress monitor to use
 	 * @return
 	 *            the resulting status
 	 */
-	private RefactoringStatus createNecessarySourceCode(final Refactoring refactoring, final IProgressMonitor monitor) {
+	private RefactoringStatus createNecessarySourceCode(final IProgressMonitor monitor) {
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
 			monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 240);
@@ -492,46 +476,45 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	/**
 	 * {@inheritDoc}
 	 */
-	protected Refactoring createRefactoring(final RefactoringDescriptor descriptor, final RefactoringStatus status) throws CoreException {
+	protected Refactoring createRefactoring(RefactoringDescriptor descriptor, RefactoringStatus status, IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(descriptor);
-		Refactoring refactoring= null;
+		
+		createNecessarySourceCode(monitor);
+		
 		if (descriptor instanceof JavaRefactoringDescriptor) {
-			final JavaRefactoringDescriptor javaDescriptor= (JavaRefactoringDescriptor) descriptor;
-			final RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(javaDescriptor.getID());
-			if (contribution instanceof JavaRefactoringContribution) {
-				final JavaRefactoringContribution extended= (JavaRefactoringContribution) contribution;
-				refactoring= extended.createRefactoring(javaDescriptor, status);
+			JavaRefactoringDescriptor javaDescriptor= (JavaRefactoringDescriptor) descriptor;
+			RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(javaDescriptor.getID());
+			
+			Map map= contribution.retrieveArgumentMap(descriptor);
+			if (fJavaProject == null) {
+				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments));
+				return null;
 			}
-			if (refactoring != null) {
-				final RefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), contribution.retrieveArgumentMap(descriptor));
-				if (arguments instanceof JavaRefactoringArguments) {
-					final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-					if (fJavaProject != null) {
-						final String name= fJavaProject.getElementName();
-						extended.setProject(name);
-						String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-						if (handle != null && !"".equals(handle)) //$NON-NLS-1$
-							extended.setAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, getTransformedHandle(name, handle));
-						int count= 1;
-						String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
-						while ((handle= extended.getAttribute(attribute)) != null) {
-							if (!"".equals(handle)) //$NON-NLS-1$
-								extended.setAttribute(attribute, getTransformedHandle(name, handle));
-							count++;
-							attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
-						}
-					}
-				} else
-					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments));
-				if (refactoring instanceof IScriptableRefactoring) {
-					fCurrentRefactoring= (IScriptableRefactoring) refactoring;
-					fCurrentArguments= arguments;
-				} else
-					status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_initialization_error, javaDescriptor.getID())));
+				
+			String name= fJavaProject.getElementName();
+
+			String handle= (String) map.get(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+			if (handle != null && handle.length() > 0)
+				map.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, getTransformedHandle(name, handle));
+			
+			int count= 1;
+			String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
+			while ((handle= (String) map.get(attribute)) != null) {
+				if (handle.length() > 0)
+					map.put(attribute, getTransformedHandle(name, handle));
+				count++;
+				attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
 			}
-			return refactoring;
+			
+			// create adapted descriptor
+			try {
+				descriptor= contribution.createDescriptor(descriptor.getID(), name, descriptor.getDescription(), descriptor.getComment(), map, descriptor.getFlags());
+			} catch (IllegalArgumentException e) {
+				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments));
+				return null;
+			}
 		}
-		return null;
+		return descriptor.createRefactoring(status);
 	}
 
 	/**
