@@ -482,6 +482,11 @@ public class JavaElement extends JEAttribute {
 				return createJavaElements(this, method.getTypeParameters());
 			}
 		});
+		try {
+			result.add(new JEMemberValuePair(this, "DEFAULT_VALUE", method.getDefaultValue()));
+		} catch (JavaModelException e) {
+			result.add(new Error(this, "DEFAULT_VALUE", e));
+		}
 	}
 	
 	static JavaElement[] createJavaElements(JEAttribute parent, Object[] javaElements) {

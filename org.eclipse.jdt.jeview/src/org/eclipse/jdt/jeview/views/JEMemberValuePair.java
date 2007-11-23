@@ -21,15 +21,20 @@ import org.eclipse.jdt.core.JavaModelException;
 public class JEMemberValuePair extends JEAttribute {
 	
 	private final JEAttribute fParent;
-	private IMemberValuePair fMemberValuePair;
+	private String fName; // can be null
+	private IMemberValuePair fMemberValuePair; // can be null
 	
-	JEMemberValuePair(JEAttribute parent, IMemberValuePair memberValuePair) {
+	JEMemberValuePair(JEAttribute parent, String name, IMemberValuePair memberValuePair) {
 		Assert.isNotNull(parent);
-		Assert.isNotNull(memberValuePair);
 		fParent= parent;
+		fName= name;
 		fMemberValuePair= memberValuePair;
 	}
 
+	JEMemberValuePair(JEAttribute parent, IMemberValuePair memberValuePair) {
+		this(parent, null, memberValuePair);
+	}
+	
 	@Override
 	public JEAttribute getParent() {
 		return fParent;
@@ -51,7 +56,17 @@ public class JEMemberValuePair extends JEAttribute {
 			return false;
 		}
 		
-		if (! fMemberValuePair.getMemberName().equals(other.fMemberValuePair.getMemberName())) {
+		if (fName == null) {
+			if (other.fName != null)
+				return false;
+		} else if (! fName.equals(other.fName)) {
+			return false;
+		}
+		
+		if (fMemberValuePair == null) {
+			if (other.fMemberValuePair != null)
+				return false;
+		} else if (! fMemberValuePair.getMemberName().equals(other.fMemberValuePair.getMemberName())) {
 			return false;
 		}
 		
@@ -61,7 +76,8 @@ public class JEMemberValuePair extends JEAttribute {
 	@Override
 	public int hashCode() {
 		return (fParent != null ? fParent.hashCode() : 0)
-				+ fMemberValuePair.getMemberName().hashCode();
+				+ (fName != null ? fName.hashCode() : 0)
+				+ (fMemberValuePair != null ? fMemberValuePair.getMemberName().hashCode() : 0);
 	}
 	
 	@Override
@@ -71,13 +87,25 @@ public class JEMemberValuePair extends JEAttribute {
 	
 	@Override
 	public JEAttribute[] getChildren() {
+		if (fMemberValuePair == null)
+			return EMPTY;
 		Object value= fMemberValuePair.getValue();
 		return new JEAttribute[] { createMVPairValue(this, "VALUE", value)};
 	}
 
 	@Override
 	public String getLabel() {
-		return "IMemberValuePair: " + fMemberValuePair.getMemberName();
+		StringBuffer sb= new StringBuffer();
+		if (fName != null) {
+			sb.append(fName).append(": ");
+		}
+		sb.append("IMemberValuePair: ");
+		if (fMemberValuePair == null) {
+			sb.append(fMemberValuePair);
+		} else {
+			sb.append(fMemberValuePair.getMemberName());
+		}
+		return sb.toString();
 	}
 
 	static JEAttribute createMVPairValue(JEAttribute parent, String name, Object value) {
