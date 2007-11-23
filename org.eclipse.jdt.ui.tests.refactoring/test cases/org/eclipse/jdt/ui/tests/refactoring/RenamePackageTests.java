@@ -52,6 +52,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
+import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
@@ -71,7 +72,6 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
-import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
@@ -127,7 +127,7 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 	
 	// -------------
-	private RenameJavaElementDescriptor createRefactoringDescriptor(IPackageFragment pack, String newName) throws CoreException {
+	private RenameJavaElementDescriptor createRefactoringDescriptor(IPackageFragment pack, String newName) {
 		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
 		descriptor.setJavaElement(pack);
 		descriptor.setNewName(newName);
@@ -280,7 +280,7 @@ public class RenamePackageTests extends RefactoringTest {
 					assertEqualLines("invalid update in file " + cu.getElementName(), s1,	s2);
 				}
 			}
-			RefactoringProcessor processor= ((JavaRenameRefactoring) refactoring).getProcessor();
+			RefactoringProcessor processor= ((ProcessorBasedRefactoring) refactoring).getProcessor();
 			return (RenamePackageProcessor) processor;
 	}
 	

@@ -22,7 +22,9 @@ import org.eclipse.jface.operation.IRunnableContext;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -32,7 +34,6 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestination;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
-import org.eclipse.jdt.internal.corext.refactoring.structure.JavaMoveRefactoring;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -61,14 +62,14 @@ public class ReorgMoveStarter {
 	}
 	
 	public void run(Shell parent) throws InterruptedException, InvocationTargetException {
-		JavaMoveRefactoring ref= new JavaMoveRefactoring(fMoveProcessor);
+		Refactoring ref= new MoveRefactoring(fMoveProcessor);
 		if (fMoveProcessor.hasAllInputSet()) {
 			IRunnableContext context= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 			fMoveProcessor.setCreateTargetQueries(new CreateTargetQueries(parent));
 			fMoveProcessor.setReorgQueries(new ReorgQueries(parent));
 			new RefactoringExecutionHelper(ref, RefactoringCore.getConditionCheckingFailedSeverity(), fMoveProcessor.getSaveMode(), parent, context).perform(false, false);
 		} else {
-			RefactoringWizard wizard= new ReorgMoveWizard(ref);
+			RefactoringWizard wizard= new ReorgMoveWizard(fMoveProcessor, ref);
 			/*
 			 * We want to get the shell from the refactoring dialog but it's not known at this point, 
 			 * so we pass the wizard and then, once the dialog is open, we will have access to its shell.

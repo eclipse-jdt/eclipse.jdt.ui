@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
@@ -24,7 +25,6 @@ import org.eclipse.jdt.core.refactoring.descriptors.MoveMethodDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 
 /**
  * Refactoring contribution for the move method refactoring.
@@ -37,9 +37,9 @@ public final class MoveMethodRefactoringContribution extends JavaRefactoringCont
 	 * {@inheritDoc}
 	 */
 	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
-		MoveInstanceMethodRefactoring refactoring= new MoveInstanceMethodRefactoring(new MoveInstanceMethodProcessor(null, null));
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
-		return refactoring;
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+		MoveInstanceMethodProcessor processor= new MoveInstanceMethodProcessor(arguments, status);
+		return new MoveRefactoring(processor);
 	}
 
 	public RefactoringDescriptor createDescriptor() {

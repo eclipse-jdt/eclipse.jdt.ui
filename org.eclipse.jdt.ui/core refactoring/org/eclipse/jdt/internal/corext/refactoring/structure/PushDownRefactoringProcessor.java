@@ -970,7 +970,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		if (handle != null) {
 			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
 			if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-				return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.PUSH_DOWN);
+				return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.PUSH_DOWN);
 			else
 				fCachedDeclaringType= (IType) element;
 		}
@@ -982,7 +982,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		while ((handle= extended.getAttribute(attribute)) != null) {
 			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
 			if (element == null || !element.exists())
-				status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.PUSH_DOWN));
+				status.merge(ScriptableRefactoring.createInputWarningStatus(element, getProcessorName(), IJavaRefactorings.PUSH_DOWN));
 			else
 				elements.add(element);
 			if (extended.getAttribute(ATTRIBUTE_ABSTRACT + count) != null)

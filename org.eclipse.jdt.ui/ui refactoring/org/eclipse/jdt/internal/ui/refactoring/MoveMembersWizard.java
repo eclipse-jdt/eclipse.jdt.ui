@@ -36,7 +36,7 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
-import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
@@ -68,8 +68,11 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class MoveMembersWizard extends RefactoringWizard {
 
-	public MoveMembersWizard(MoveRefactoring ref) {
+	private final MoveStaticMembersProcessor fProcessor;
+
+	public MoveMembersWizard(MoveStaticMembersProcessor processor, Refactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE);
+		fProcessor= processor;
 		setDefaultPageTitle(RefactoringMessages.MoveMembersWizard_page_title); 
 	}
 
@@ -77,7 +80,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
-		addPage(new MoveMembersInputPage());
+		addPage(new MoveMembersInputPage(fProcessor));
 	}
 	
 	private static class MoveMembersInputPage extends UserInputWizardPage {
@@ -90,9 +93,11 @@ public class MoveMembersWizard extends RefactoringWizard {
 		private Button fDeprecateDelegateCheckBox;
 		private static final int MRU_COUNT= 10;
 		private static List fgMruDestinations= new ArrayList(MRU_COUNT);
+		private final MoveStaticMembersProcessor fProcessor;
 
-		public MoveMembersInputPage() {
+		public MoveMembersInputPage(MoveStaticMembersProcessor processor) {
 			super(PAGE_NAME);
+			fProcessor= processor;
 		}
 	
 		public void setVisible(boolean visible){
@@ -297,7 +302,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 		}
 	
 		private MoveStaticMembersProcessor getMoveProcessor() {
-			return (MoveStaticMembersProcessor)getRefactoring().getAdapter(MoveStaticMembersProcessor.class);
+			return fProcessor;
 		}
 	}
 }

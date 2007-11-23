@@ -37,6 +37,9 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
+import org.eclipse.ltk.core.refactoring.participants.CopyRefactoring;
+import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.resource.RenameResourceWizard;
@@ -83,10 +86,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractClassRefacto
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.IntroduceParameterObjectProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.JavaMoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor;
@@ -259,7 +260,7 @@ public final class RefactoringExecutionStarter {
 		ICopyPolicy copyPolicy= ReorgPolicyFactory.createCopyPolicy(resources, javaElements);
 		if (copyPolicy.canEnable()) {
 			JavaCopyProcessor processor= new JavaCopyProcessor(copyPolicy);
-			Refactoring refactoring= new ProcessorBasedRefactoring(processor);
+			Refactoring refactoring= new CopyRefactoring(processor);
 			RefactoringWizard wizard= new ReorgCopyWizard(processor, refactoring);
 			processor.setNewNameQueries(new NewNameQueries(wizard));
 			processor.setReorgQueries(new ReorgQueries(wizard));
@@ -271,13 +272,13 @@ public final class RefactoringExecutionStarter {
 		JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
 		processor.setSuggestGetterSetterDeletion(false);
 		processor.setQueries(new ReorgQueries(shell));
-		Refactoring refactoring= new ProcessorBasedRefactoring(processor);
+		Refactoring refactoring= new DeleteRefactoring(processor);
 		int stopSeverity= RefactoringCore.getConditionCheckingFailedSeverity();
 		new RefactoringExecutionHelper(refactoring, stopSeverity, RefactoringSaveHelper.SAVE_NOTHING, shell, new ProgressMonitorDialog(shell)).perform(false, false);
 	}
 
 	public static void startDeleteRefactoring(final Object[] elements, final Shell shell) throws CoreException {
-		Refactoring refactoring= new ProcessorBasedRefactoring(new JavaDeleteProcessor(elements));
+		Refactoring refactoring= new DeleteRefactoring(new JavaDeleteProcessor(elements));
 		DeleteUserInterfaceManager.getDefault().getStarter(refactoring).activate(refactoring, shell, RefactoringSaveHelper.SAVE_NOTHING);
 	}
 
@@ -376,16 +377,18 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startMoveMethodRefactoring(final IMethod method, final Shell shell) {
-		final MoveInstanceMethodRefactoring refactoring= new MoveInstanceMethodRefactoring(new MoveInstanceMethodProcessor(method, JavaPreferencesSettings.getCodeGenerationSettings(method.getJavaProject())));
-		new RefactoringStarter().activate(new MoveInstanceMethodWizard(refactoring), shell, RefactoringMessages.MoveInstanceMethodAction_dialog_title, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
+		MoveInstanceMethodProcessor processor= new MoveInstanceMethodProcessor(method, JavaPreferencesSettings.getCodeGenerationSettings(method.getJavaProject()));
+		Refactoring refactoring= new MoveRefactoring(processor);
+		MoveInstanceMethodWizard wizard= new MoveInstanceMethodWizard(processor, refactoring);
+		new RefactoringStarter().activate(wizard, shell, RefactoringMessages.MoveInstanceMethodAction_dialog_title, RefactoringSaveHelper.SAVE_JAVA_ONLY_UPDATES);
 	}
 
 	public static void startMoveRefactoring(final IResource[] resources, final IJavaElement[] elements, final Shell shell) throws JavaModelException {
 		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(resources, elements);
 		if (policy.canEnable()) {
-			final JavaMoveProcessor processor= new JavaMoveProcessor(policy);
-			final JavaMoveRefactoring refactoring= new JavaMoveRefactoring(processor);
-			final RefactoringWizard wizard= new ReorgMoveWizard(refactoring);
+			JavaMoveProcessor processor= new JavaMoveProcessor(policy);
+			Refactoring refactoring= new MoveRefactoring(processor);
+			RefactoringWizard wizard= new ReorgMoveWizard(processor, refactoring);
 			processor.setCreateTargetQueries(new CreateTargetQueries(wizard));
 			processor.setReorgQueries(new ReorgQueries(wizard));
 			new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, processor.getSaveMode());
@@ -401,8 +404,10 @@ public final class RefactoringExecutionStarter {
 		IJavaProject project= null;
 		if (elements.length > 0)
 			project= elements[0].getJavaProject();
-		final JavaMoveRefactoring refactoring= new JavaMoveRefactoring(new MoveStaticMembersProcessor(elements, JavaPreferencesSettings.getCodeGenerationSettings(project)));
-		new RefactoringStarter().activate(new MoveMembersWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_NON_JAVA_UPDATES);
+		MoveStaticMembersProcessor processor= new MoveStaticMembersProcessor(elements, JavaPreferencesSettings.getCodeGenerationSettings(project));
+		Refactoring refactoring= new MoveRefactoring(processor);
+		MoveMembersWizard wizard= new MoveMembersWizard(processor, refactoring);
+		new RefactoringStarter().activate(wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringSaveHelper.SAVE_NON_JAVA_UPDATES);
 	}
 
 	public static void startPullUpRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {

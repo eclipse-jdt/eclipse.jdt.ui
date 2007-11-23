@@ -14,7 +14,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
@@ -46,12 +45,27 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	 * Creates a new rename enum const processor.
 	 * 
 	 * @param field
-	 *            the enum constant, or <code>null</code> if invoked by
-	 *            scripting
+	 *            the enum constant
 	 */
 	public RenameEnumConstProcessor(IField field) {
 		super(field);
 	}
+
+	/**
+	 * Creates a new rename enum const processor.
+	 * 
+	 * @param arguments
+	 *            the arguments
+	 *            
+	 * @param status
+	 *            the status
+	 */
+	public RenameEnumConstProcessor(JavaRefactoringArguments arguments, RefactoringStatus status) {
+		super(null);
+		RefactoringStatus initializeStatus= initialize(arguments);
+		status.merge(initializeStatus);
+	}
+	
 
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor#canEnableGetterRenaming()
@@ -124,38 +138,31 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 		return RefactoringCoreMessages.RenameEnumConstRefactoring_name;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor#initialize(org.eclipse.ltk.core.refactoring.participants.RefactoringArguments)
-	 */
-	public RefactoringStatus initialize(RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.FIELD)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_ENUM_CONSTANT);
-				else
-					fField= (IField) element;
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
-			final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-			if (name != null && !"".equals(name)) //$NON-NLS-1$
-				setNewElementName(name);
+	private RefactoringStatus initialize(JavaRefactoringArguments extended) {
+		final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		if (handle != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+			if (element == null || !element.exists() || element.getElementType() != IJavaElement.FIELD)
+				return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.RENAME_ENUM_CONSTANT);
 			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
-			final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
-			if (references != null) {
-				setUpdateReferences(Boolean.valueOf(references).booleanValue());
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
-			final String matches= extended.getAttribute(ATTRIBUTE_TEXTUAL_MATCHES);
-			if (matches != null) {
-				setUpdateTextualMatches(Boolean.valueOf(matches).booleanValue());
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TEXTUAL_MATCHES));
+				fField= (IField) element;
 		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+		final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
+		if (name != null && !"".equals(name)) //$NON-NLS-1$
+			setNewElementName(name);
+		else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
+		final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
+		if (references != null) {
+			setUpdateReferences(Boolean.valueOf(references).booleanValue());
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
+		final String matches= extended.getAttribute(ATTRIBUTE_TEXTUAL_MATCHES);
+		if (matches != null) {
+			setUpdateTextualMatches(Boolean.valueOf(matches).booleanValue());
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TEXTUAL_MATCHES));
 		return new RefactoringStatus();
 	}
 

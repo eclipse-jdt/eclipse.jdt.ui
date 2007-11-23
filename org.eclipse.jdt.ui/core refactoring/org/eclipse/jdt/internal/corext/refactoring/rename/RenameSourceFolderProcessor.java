@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,6 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -64,6 +63,12 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 		if (root != null)
 			setNewElementName(root.getElementName());
 	}
+
+	public RenameSourceFolderProcessor(JavaRefactoringArguments arguments, RefactoringStatus status) {
+		this(null);
+		status.merge(initialize(arguments));
+	}
+	
 
 	public String getIdentifier() {
 		return IRefactoringProcessorIds.RENAME_SOURCE_FOLDER_PROCESSOR;
@@ -184,25 +189,21 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 		}
 	}
 
-	public RefactoringStatus initialize(RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			final String path= generic.getAttribute(ATTRIBUTE_PATH);
-			if (path != null) {
-				final IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(path));
-				if (resource == null || !resource.exists())
-					return ScriptableRefactoring.createInputFatalStatus(resource, getRefactoring().getName(), IJavaRefactorings.RENAME_SOURCE_FOLDER);
-				else
-					fSourceFolder= (IPackageFragmentRoot) JavaCore.create(resource);
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PATH));
-			final String name= generic.getAttribute(ATTRIBUTE_NAME);
-			if (name != null && !"".equals(name)) //$NON-NLS-1$
-				setNewElementName(name);
+	private RefactoringStatus initialize(JavaRefactoringArguments generic) {
+		final String path= generic.getAttribute(ATTRIBUTE_PATH);
+		if (path != null) {
+			final IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(path));
+			if (resource == null || !resource.exists())
+				return ScriptableRefactoring.createInputFatalStatus(resource, getProcessorName(), IJavaRefactorings.RENAME_SOURCE_FOLDER);
 			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_NAME));
+				fSourceFolder= (IPackageFragmentRoot) JavaCore.create(resource);
 		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PATH));
+		final String name= generic.getAttribute(ATTRIBUTE_NAME);
+		if (name != null && !"".equals(name)) //$NON-NLS-1$
+			setNewElementName(name);
+		else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_NAME));
 		return new RefactoringStatus();
 	}
 }

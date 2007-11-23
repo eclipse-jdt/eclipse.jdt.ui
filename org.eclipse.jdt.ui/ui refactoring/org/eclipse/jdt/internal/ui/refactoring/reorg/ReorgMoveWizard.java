@@ -28,8 +28,8 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -47,21 +47,23 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class ReorgMoveWizard extends RefactoringWizard {
 
-	public ReorgMoveWizard(MoveRefactoring ref) {
+	private final JavaMoveProcessor fMoveProcessor;
+
+	public ReorgMoveWizard(JavaMoveProcessor moveProcessor, Refactoring ref) {
 		super(ref, DIALOG_BASED_USER_INTERFACE);
-		if (isTextualMove(ref))
+		fMoveProcessor= moveProcessor;
+		if (isTextualMove(fMoveProcessor))
 			setDefaultPageTitle(ReorgMessages.ReorgMoveWizard_textual_move); 
 		else
 			setDefaultPageTitle(ReorgMessages.ReorgMoveWizard_3); 
 	}
 	
-	private static boolean isTextualMove(MoveRefactoring ref) {
-		JavaMoveProcessor moveProcessor= (JavaMoveProcessor) ref.getAdapter(JavaMoveProcessor.class);
+	private static boolean isTextualMove(JavaMoveProcessor moveProcessor) {
 		return moveProcessor.isTextualMove();
 	}
 
 	protected void addUserInputPages() {
-		addPage(new MoveInputPage());
+		addPage(new MoveInputPage(fMoveProcessor));
 	}
 	
 	private static class MoveInputPage extends ReorgUserInputPage{
@@ -73,13 +75,15 @@ public class ReorgMoveWizard extends RefactoringWizard {
 		private ICreateTargetQuery fCreateTargetQuery;
 		
 		private Object fDestination;
+		private final JavaMoveProcessor fMoveProcessor;
 		
-		public MoveInputPage() {
+		public MoveInputPage(JavaMoveProcessor moveProcessor) {
 			super(PAGE_NAME);
+			fMoveProcessor= moveProcessor;
 		}
 
 		private JavaMoveProcessor getJavaMoveProcessor(){
-			return (JavaMoveProcessor)getRefactoring().getAdapter(JavaMoveProcessor.class);
+			return fMoveProcessor;
 		}
 
 		protected Object getInitiallySelectedElement() {

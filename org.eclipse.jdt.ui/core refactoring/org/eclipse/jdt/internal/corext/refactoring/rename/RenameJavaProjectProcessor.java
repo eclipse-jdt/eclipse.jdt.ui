@@ -28,7 +28,6 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -68,6 +67,12 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 		if (fProject != null)
 			setNewElementName(fProject.getElementName());
 		fUpdateReferences= true;
+	}
+
+	public RenameJavaProjectProcessor(JavaRefactoringArguments arguments, RefactoringStatus status) {
+		this(null);
+		RefactoringStatus initializeStatus= initialize(arguments);
+		status.merge(initializeStatus);
 	}
 
 	public String getIdentifier() {
@@ -204,30 +209,26 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 		}
 	}
 
-	public RefactoringStatus initialize(RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.JAVA_PROJECT)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_JAVA_PROJECT);
-				else
-					fProject= (IJavaProject) element;
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
-			final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-			if (name != null && !"".equals(name)) //$NON-NLS-1$
-				setNewElementName(name);
+	private RefactoringStatus initialize(JavaRefactoringArguments extended) {
+		final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		if (handle != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+			if (element == null || !element.exists() || element.getElementType() != IJavaElement.JAVA_PROJECT)
+				return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.RENAME_JAVA_PROJECT);
 			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
-			final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
-			if (references != null) {
-				fUpdateReferences= Boolean.valueOf(references).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
+				fProject= (IJavaProject) element;
 		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+		final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
+		if (name != null && !"".equals(name)) //$NON-NLS-1$
+			setNewElementName(name);
+		else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
+		final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
+		if (references != null) {
+			fUpdateReferences= Boolean.valueOf(references).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
 		return new RefactoringStatus();
 	}
 }

@@ -30,7 +30,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -102,6 +101,12 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 			fCu= (ICompilationUnit) localVariable.getAncestor(IJavaElement.COMPILATION_UNIT);
 		fNewName= ""; //$NON-NLS-1$
 		fIsComposite= false;
+	}
+	
+	public RenameLocalVariableProcessor(JavaRefactoringArguments arguments, RefactoringStatus status) {
+		this(null);
+		RefactoringStatus initializeStatus= initialize(arguments);
+		status.merge(initializeStatus);
 	}
 	
 	/**
@@ -220,7 +225,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		return new RefactoringStatus();
 	}
 
-	private void initAST() throws JavaModelException {
+	private void initAST() {
 		if (!fIsComposite)
 			fCompilationUnitNode= RefactoringASTParser.parseWithASTProvider(fCu, true, null);
 		ISourceRange sourceRange= fLocalVariable.getNameRange();
@@ -374,68 +379,66 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		return descriptor;
 	}
 
-	public RefactoringStatus initialize(RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element != null && element.exists()) {
-					if (element.getElementType() == IJavaElement.COMPILATION_UNIT) {
-						fCu= (ICompilationUnit) element;
-					} else if (element.getElementType() == IJavaElement.LOCAL_VARIABLE) {
-						fLocalVariable= (ILocalVariable) element;
-						fCu= (ICompilationUnit) fLocalVariable.getAncestor(IJavaElement.COMPILATION_UNIT);
-						if (fCu == null)
-							return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_LOCAL_VARIABLE);
-					} else
-						return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_LOCAL_VARIABLE);
+	private RefactoringStatus initialize(JavaRefactoringArguments extended) {
+		final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		if (handle != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+			if (element != null && element.exists()) {
+				if (element.getElementType() == IJavaElement.COMPILATION_UNIT) {
+					fCu= (ICompilationUnit) element;
+				} else if (element.getElementType() == IJavaElement.LOCAL_VARIABLE) {
+					fLocalVariable= (ILocalVariable) element;
+					fCu= (ICompilationUnit) fLocalVariable.getAncestor(IJavaElement.COMPILATION_UNIT);
+					if (fCu == null)
+						return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.RENAME_LOCAL_VARIABLE);
 				} else
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_LOCAL_VARIABLE);
+					return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.RENAME_LOCAL_VARIABLE);
 			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
-			final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-			if (name != null && !"".equals(name)) //$NON-NLS-1$
-				setNewElementName(name);
-			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
-			if (fCu != null && fLocalVariable == null) {
-				final String selection= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION);
-				if (selection != null) {
-					int offset= -1;
-					int length= -1;
-					final StringTokenizer tokenizer= new StringTokenizer(selection);
-					if (tokenizer.hasMoreTokens())
-						offset= Integer.valueOf(tokenizer.nextToken()).intValue();
-					if (tokenizer.hasMoreTokens())
-						length= Integer.valueOf(tokenizer.nextToken()).intValue();
-					if (offset >= 0 && length >= 0) {
-						try {
-							final IJavaElement[] elements= fCu.codeSelect(offset, length);
-							if (elements != null) {
-								for (int index= 0; index < elements.length; index++) {
-									final IJavaElement element= elements[index];
-									if (element instanceof ILocalVariable)
-										fLocalVariable= (ILocalVariable) element;
-								}
-							}
-							if (fLocalVariable == null)
-								return ScriptableRefactoring.createInputFatalStatus(null, getRefactoring().getName(), IJavaRefactorings.RENAME_LOCAL_VARIABLE);
-						} catch (JavaModelException exception) {
-							JavaPlugin.log(exception);
-						}
-					} else
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION}));
-				} else
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION));
-			}
-			final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
-			if (references != null) {
-				fUpdateReferences= Boolean.valueOf(references).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
+				return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.RENAME_LOCAL_VARIABLE);
 		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+		final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
+		if (name != null && !"".equals(name)) //$NON-NLS-1$
+			setNewElementName(name);
+		else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
+		if (fCu != null && fLocalVariable == null) {
+			final String selection= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION);
+			if (selection != null) {
+				int offset= -1;
+				int length= -1;
+				final StringTokenizer tokenizer= new StringTokenizer(selection);
+				if (tokenizer.hasMoreTokens())
+					offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+				if (tokenizer.hasMoreTokens())
+					length= Integer.valueOf(tokenizer.nextToken()).intValue();
+				if (offset >= 0 && length >= 0) {
+					try {
+						final IJavaElement[] elements= fCu.codeSelect(offset, length);
+						if (elements != null) {
+							for (int index= 0; index < elements.length; index++) {
+								final IJavaElement element= elements[index];
+								if (element instanceof ILocalVariable)
+									fLocalVariable= (ILocalVariable) element;
+							}
+						}
+						if (fLocalVariable == null)
+							return ScriptableRefactoring.createInputFatalStatus(null, getProcessorName(), IJavaRefactorings.RENAME_LOCAL_VARIABLE);
+					} catch (JavaModelException exception) {
+						JavaPlugin.log(exception);
+					}
+				} else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection,
+							JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION }));
+			} else
+				return RefactoringStatus
+						.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION));
+		}
+		final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
+		if (references != null) {
+			fUpdateReferences= Boolean.valueOf(references).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
 		return new RefactoringStatus();
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,9 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -26,7 +28,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -42,9 +43,9 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 
 	private static final String REFACTORING_PATH= "MoveInstanceMethod/";
 
-	private static void chooseNewTarget(MoveInstanceMethodRefactoring ref, int newTargetType, String newTargetName) {
+	private static void chooseNewTarget(MoveInstanceMethodProcessor processor, int newTargetType, String newTargetName) {
 		IVariableBinding target= null;
-		IVariableBinding[] targets= ref.getMoveMethodProcessor().getPossibleTargets();
+		IVariableBinding[] targets= processor.getPossibleTargets();
 		for (int i= 0; i < targets.length; i++) {
 			IVariableBinding candidate= targets[i];
 			if (candidate.getName().equals(newTargetName) && typeMatches(newTargetType, candidate)) {
@@ -53,7 +54,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 			}
 		}
 		assertNotNull("Expected new target not available.", target);
-		ref.getMoveMethodProcessor().setTarget(target);
+		processor.setTarget(target);
 	}
 
 	private static IMethod getMethod(ICompilationUnit cu, ISourceRange sourceRange) throws JavaModelException {
@@ -105,14 +106,14 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
 		IMethod method= getMethod(selectionCu, selection);
 		assertNotNull(method);
-		MoveInstanceMethodRefactoring ref= new MoveInstanceMethodRefactoring(new MoveInstanceMethodProcessor(method, JavaPreferencesSettings.getCodeGenerationSettings(selectionCu.getJavaProject())));
+		MoveInstanceMethodProcessor processor= new MoveInstanceMethodProcessor(method, JavaPreferencesSettings.getCodeGenerationSettings(selectionCu.getJavaProject()));
+		Refactoring ref= new MoveRefactoring(processor);
 		RefactoringStatus result= ref.checkInitialConditions(new NullProgressMonitor());
 		if (!result.isOK())
 			return;
 		else {
-			chooseNewTarget(ref, newReceiverType, newReceiverName);
+			chooseNewTarget(processor, newReceiverType, newReceiverName);
 
-			MoveInstanceMethodProcessor processor= ref.getMoveMethodProcessor();
 			if (newTargetName != null)
 				processor.setTargetName(newTargetName);
 			processor.setInlineDelegator(inlineDelegator);
@@ -170,15 +171,16 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
 		IMethod method= getMethod(selectionCu, selection);
 		assertNotNull(method);
-		MoveInstanceMethodRefactoring ref= new MoveInstanceMethodRefactoring(new MoveInstanceMethodProcessor(method, JavaPreferencesSettings.getCodeGenerationSettings(selectionCu.getJavaProject())));
-
+		MoveInstanceMethodProcessor processor= new MoveInstanceMethodProcessor(method, JavaPreferencesSettings.getCodeGenerationSettings(selectionCu.getJavaProject()));
+		Refactoring ref= new MoveRefactoring(processor);
+		
 		assertNotNull("refactoring should be created", ref);
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
 
 		assertTrue("activation was supposed to be successful", preconditionResult.isOK());
 
-		chooseNewTarget(ref, newTargetType, newTargetName);
-		MoveInstanceMethodProcessor processor= ref.getMoveMethodProcessor();
+		chooseNewTarget(processor, newTargetType, newTargetName);
+
 		processor.setInlineDelegator(inlineDelegator);
 		processor.setRemoveDelegator(removeDelegator);
 		processor.setDeprecateDelegates(false);
@@ -208,15 +210,16 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
 		IMethod method= getMethod(selectionCu, selection);
 		assertNotNull(method);
-		MoveInstanceMethodRefactoring ref= new MoveInstanceMethodRefactoring(new MoveInstanceMethodProcessor(method, JavaPreferencesSettings.getCodeGenerationSettings(selectionCu.getJavaProject())));
+		MoveInstanceMethodProcessor processor= new MoveInstanceMethodProcessor(method, JavaPreferencesSettings.getCodeGenerationSettings(selectionCu.getJavaProject()));
+		Refactoring ref= new MoveRefactoring(processor);
 
 		assertNotNull("refactoring should be created", ref);
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
 
 		assertTrue("activation was supposed to be successful", preconditionResult.isOK());
 
-		chooseNewTarget(ref, newTargetType, newTargetName);
-		MoveInstanceMethodProcessor processor= ref.getMoveMethodProcessor();
+		chooseNewTarget(processor, newTargetType, newTargetName);
+
 		processor.setInlineDelegator(inlineDelegator);
 		processor.setRemoveDelegator(removeDelegator);
 		processor.setDeprecateDelegates(deprecate);

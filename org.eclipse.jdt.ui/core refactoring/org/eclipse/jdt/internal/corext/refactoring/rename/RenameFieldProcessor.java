@@ -31,7 +31,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 
 import org.eclipse.jdt.core.Flags;
@@ -125,6 +124,21 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		fIsComposite= false;
 	}
 	
+	/**
+	 * Creates a new rename enum const processor.
+	 * 
+	 * @param arguments
+	 *            the arguments
+	 *            
+	 * @param status
+	 *            the status
+	 */
+	public RenameFieldProcessor(JavaRefactoringArguments arguments, RefactoringStatus status) {
+		this(null);
+		RefactoringStatus initializeStatus= initialize(arguments);
+		status.merge(initializeStatus);
+	}
+
 	/**
 	 * Creates a new rename field processor.
 	 * <p>
@@ -849,7 +863,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return RefactoringSearchEngine.search(newPattern, owner, createRefactoringScope(), requestor, new SubProgressMonitor(pm, 1), status);
 	}
 	
-	private IField getFieldInWorkingCopy(ICompilationUnit newWorkingCopyOfDeclaringCu, String elementName) throws CoreException{
+	private IField getFieldInWorkingCopy(ICompilationUnit newWorkingCopyOfDeclaringCu, String elementName) {
 		IType type= fField.getDeclaringType();
 		IType typeWc= (IType) JavaModelUtil.findInCompilationUnit(newWorkingCopyOfDeclaringCu, type);
 		if (typeWc == null)
@@ -858,55 +872,51 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return typeWc.getField(elementName);
 	}
 
-	public RefactoringStatus initialize(RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.FIELD)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_FIELD);
-				else
-					fField= (IField) element;
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
-			final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-			if (name != null && !"".equals(name)) //$NON-NLS-1$
-				setNewElementName(name);
+	private RefactoringStatus initialize(JavaRefactoringArguments extended) {
+		final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		if (handle != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+			if (element == null || !element.exists() || element.getElementType() != IJavaElement.FIELD)
+				return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.RENAME_FIELD);
 			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
-			final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
-			if (references != null) {
-				fUpdateReferences= Boolean.valueOf(references).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
-			final String matches= extended.getAttribute(ATTRIBUTE_TEXTUAL_MATCHES);
-			if (matches != null) {
-				fUpdateTextualMatches= Boolean.valueOf(matches).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TEXTUAL_MATCHES));
-			final String getters= extended.getAttribute(ATTRIBUTE_RENAME_GETTER);
-			if (getters != null)
-				fRenameGetter= Boolean.valueOf(getters).booleanValue();
-			else
-				fRenameGetter= false;
-			final String setters= extended.getAttribute(ATTRIBUTE_RENAME_SETTER);
-			if (setters != null)
-				fRenameSetter= Boolean.valueOf(setters).booleanValue();
-			else
-				fRenameSetter= false;
-			final String delegate= extended.getAttribute(ATTRIBUTE_DELEGATE);
-			if (delegate != null) {
-				fDelegateUpdating= Boolean.valueOf(delegate).booleanValue();
-			} else
-				fDelegateUpdating= false;
-			final String deprecate= extended.getAttribute(ATTRIBUTE_DEPRECATE);
-			if (deprecate != null) {
-				fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
-			} else
-				fDelegateDeprecation= false;
+				fField= (IField) element;
 		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+		final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
+		if (name != null && !"".equals(name)) //$NON-NLS-1$
+			setNewElementName(name);
+		else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
+		final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
+		if (references != null) {
+			fUpdateReferences= Boolean.valueOf(references).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
+		final String matches= extended.getAttribute(ATTRIBUTE_TEXTUAL_MATCHES);
+		if (matches != null) {
+			fUpdateTextualMatches= Boolean.valueOf(matches).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TEXTUAL_MATCHES));
+		final String getters= extended.getAttribute(ATTRIBUTE_RENAME_GETTER);
+		if (getters != null)
+			fRenameGetter= Boolean.valueOf(getters).booleanValue();
+		else
+			fRenameGetter= false;
+		final String setters= extended.getAttribute(ATTRIBUTE_RENAME_SETTER);
+		if (setters != null)
+			fRenameSetter= Boolean.valueOf(setters).booleanValue();
+		else
+			fRenameSetter= false;
+		final String delegate= extended.getAttribute(ATTRIBUTE_DELEGATE);
+		if (delegate != null) {
+			fDelegateUpdating= Boolean.valueOf(delegate).booleanValue();
+		} else
+			fDelegateUpdating= false;
+		final String deprecate= extended.getAttribute(ATTRIBUTE_DEPRECATE);
+		if (deprecate != null) {
+			fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
+		} else
+			fDelegateDeprecation= false;
 		return new RefactoringStatus();
 	}
 

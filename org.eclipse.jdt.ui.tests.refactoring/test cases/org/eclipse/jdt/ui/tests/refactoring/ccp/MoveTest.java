@@ -29,6 +29,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
@@ -53,7 +54,6 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
-import org.eclipse.jdt.internal.corext.refactoring.structure.JavaMoveRefactoring;
 
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CreateTargetQueries;
 
@@ -2071,7 +2071,7 @@ public class MoveTest extends RefactoringTest {
 			assertTrue(processor.setDestination(ReorgDestinationFactory.createDestination(destination, location)).isOK());
 		}
 		
-		JavaMoveRefactoring ref= new JavaMoveRefactoring(processor);
+		Refactoring ref= new MoveRefactoring(processor);
 		
 		processor.setCreateTargetQueries(new CreateTargetQueries(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()));
 		if (confirmAll) {

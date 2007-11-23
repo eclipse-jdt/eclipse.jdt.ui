@@ -46,7 +46,6 @@ import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
 import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
@@ -109,7 +108,6 @@ import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreat
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -123,7 +121,7 @@ import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-public final class MoveStaticMembersProcessor extends MoveProcessor implements IDelegateUpdating, IScriptableRefactoring {
+public final class MoveStaticMembersProcessor extends MoveProcessor implements IDelegateUpdating {
 
 	private static final String ATTRIBUTE_DELEGATE="delegate"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DEPRECATE="deprecate"; //$NON-NLS-1$
@@ -185,6 +183,13 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		fPreferences= settings;
 		fDelegateUpdating= false;
 		fDelegateDeprecation= true;
+	}
+	
+	public MoveStaticMembersProcessor(JavaRefactoringArguments arguments, RefactoringStatus status) {
+		fDelegateUpdating= false;
+		fDelegateDeprecation= true;
+		RefactoringStatus initializeStatus= initialize(arguments);
+		status.merge(initializeStatus);
 	}
 	
 	/**
@@ -1024,54 +1029,50 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		return result;
 	}
 
-	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.MOVE_STATIC_MEMBERS);
-				else {
-					fDestinationType= (IType) element;
-					fDestinationTypeName= fDestinationType.getFullyQualifiedName();
-				}
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
-			final String delegate= extended.getAttribute(ATTRIBUTE_DELEGATE);
-			if (delegate != null) {
-				fDelegateUpdating= Boolean.valueOf(delegate).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATE));
-			final String deprecate= extended.getAttribute(ATTRIBUTE_DEPRECATE);
-			if (deprecate != null) {
-				fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
-			int count= 1;
-			final List elements= new ArrayList();
-			String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
-			final RefactoringStatus status= new RefactoringStatus();
-			while ((handle= extended.getAttribute(attribute)) != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists())
-					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.MOVE_STATIC_MEMBERS));
-				else
-					elements.add(element);
-				count++;
-				attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
+	private RefactoringStatus initialize(JavaRefactoringArguments extended) {
+		String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		if (handle != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+			if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
+				return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.MOVE_STATIC_MEMBERS);
+			else {
+				fDestinationType= (IType) element;
+				fDestinationTypeName= fDestinationType.getFullyQualifiedName();
 			}
-			fMembersToMove= (IMember[]) elements.toArray(new IMember[elements.size()]);
-			if (elements.isEmpty())
-				return ScriptableRefactoring.createInputFatalStatus(null, getRefactoring().getName(), IJavaRefactorings.MOVE_STATIC_MEMBERS);
-			IJavaProject project= null;
-			if (fMembersToMove.length > 0)
-				project= fMembersToMove[0].getJavaProject();
-			fPreferences= JavaPreferencesSettings.getCodeGenerationSettings(project);
-			if (!status.isOK())
-				return status;
 		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+		final String delegate= extended.getAttribute(ATTRIBUTE_DELEGATE);
+		if (delegate != null) {
+			fDelegateUpdating= Boolean.valueOf(delegate).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATE));
+		final String deprecate= extended.getAttribute(ATTRIBUTE_DEPRECATE);
+		if (deprecate != null) {
+			fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
+		int count= 1;
+		final List elements= new ArrayList();
+		String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
+		final RefactoringStatus status= new RefactoringStatus();
+		while ((handle= extended.getAttribute(attribute)) != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+			if (element == null || !element.exists())
+				status.merge(ScriptableRefactoring.createInputWarningStatus(element, getProcessorName(), IJavaRefactorings.MOVE_STATIC_MEMBERS));
+			else
+				elements.add(element);
+			count++;
+			attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
+		}
+		fMembersToMove= (IMember[]) elements.toArray(new IMember[elements.size()]);
+		if (elements.isEmpty())
+			return ScriptableRefactoring.createInputFatalStatus(null, getProcessorName(), IJavaRefactorings.MOVE_STATIC_MEMBERS);
+		IJavaProject project= null;
+		if (fMembersToMove.length > 0)
+			project= fMembersToMove[0].getJavaProject();
+		fPreferences= JavaPreferencesSettings.getCodeGenerationSettings(project);
+		if (!status.isOK())
+			return status;
 		return new RefactoringStatus();
 	}
 

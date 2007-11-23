@@ -1650,7 +1650,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		if (handle != null) {
 			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
 			if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-				return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.PULL_UP);
+				return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.PULL_UP);
 			else
 				fDestinationType= (IType) element;
 		} else
@@ -1708,7 +1708,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists())
-					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.PULL_UP));
+					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getProcessorName(), IJavaRefactorings.PULL_UP));
 				else
 					elements.add(element);
 			} else
@@ -1722,7 +1722,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists())
-					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.PULL_UP));
+					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getProcessorName(), IJavaRefactorings.PULL_UP));
 				else
 					elements.add(element);
 			} else
@@ -1736,7 +1736,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists())
-					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.PULL_UP));
+					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getProcessorName(), IJavaRefactorings.PULL_UP));
 				else
 					elements.add(element);
 			} else

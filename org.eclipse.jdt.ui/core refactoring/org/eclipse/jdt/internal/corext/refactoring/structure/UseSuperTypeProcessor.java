@@ -380,7 +380,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 		if (handle != null) {
 			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
 			if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-				return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.USE_SUPER_TYPE);
+				return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.USE_SUPER_TYPE);
 			else
 				fSubType= (IType) element;
 		} else
@@ -389,7 +389,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 		if (handle != null) {
 			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
 			if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-				return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.USE_SUPER_TYPE);
+				return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.USE_SUPER_TYPE);
 			else
 				fSuperType= (IType) element;
 		} else

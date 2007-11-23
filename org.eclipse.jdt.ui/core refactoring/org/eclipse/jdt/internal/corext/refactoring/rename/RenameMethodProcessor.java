@@ -33,7 +33,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 
 import org.eclipse.jdt.core.Flags;
@@ -104,7 +103,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	private boolean fUpdateReferences;
 	private IMethod fMethod;
 	private Set/*<IMethod>*/ fMethodsToRename;
-	private TextChangeManager fChangeManager;
+	private TextChangeManager fChangeManager;  
 	private WorkingCopyOwner fWorkingCopyOwner;
 	private boolean fIsComposite;
 	private GroupCategorySet fCategorySet;
@@ -119,8 +118,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	protected RenameMethodProcessor(IMethod method) {
 		this(method, new TextChangeManager(true), null);
 		fIsComposite= false;
-	}
-	
+	}  
 	/**
 	 * Creates a new rename method processor.
 	 * <p>
@@ -663,21 +661,25 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 
 	final static IMethod[] hierarchyDeclaresMethodName(IProgressMonitor pm, ITypeHierarchy hierarchy, IMethod method, String newName) throws CoreException {
-		Set result= new HashSet();
-		IType type= method.getDeclaringType();
-		IMethod foundMethod= Checks.findMethod(newName, method.getParameterTypes().length, false, type);
-		if (foundMethod != null) 
-			result.add(foundMethod);
-
-		IMethod[] foundInHierarchyClasses= classesDeclareMethodName(hierarchy, Arrays.asList(hierarchy.getAllClasses()), method, newName);
-		if (foundInHierarchyClasses != null)
-			result.addAll(Arrays.asList(foundInHierarchyClasses));
-		
-		IType[] implementingClasses= hierarchy.getImplementingClasses(type);	
-		IMethod[] foundInImplementingClasses= classesDeclareMethodName(hierarchy, Arrays.asList(implementingClasses), method, newName);
-		if (foundInImplementingClasses != null)
-			result.addAll(Arrays.asList(foundInImplementingClasses));
-		return (IMethod[]) result.toArray(new IMethod[result.size()]);	
+		try {
+			Set result= new HashSet();
+			IType type= method.getDeclaringType();
+			IMethod foundMethod= Checks.findMethod(newName, method.getParameterTypes().length, false, type);
+			if (foundMethod != null)
+				result.add(foundMethod);
+			IMethod[] foundInHierarchyClasses= classesDeclareMethodName(hierarchy, Arrays.asList(hierarchy.getAllClasses()), method, newName);
+			if (foundInHierarchyClasses != null)
+				result.addAll(Arrays.asList(foundInHierarchyClasses));
+			IType[] implementingClasses= hierarchy.getImplementingClasses(type);
+			IMethod[] foundInImplementingClasses= classesDeclareMethodName(hierarchy, Arrays.asList(implementingClasses), method, newName);
+			if (foundInImplementingClasses != null)
+				result.addAll(Arrays.asList(foundInImplementingClasses));
+			return (IMethod[]) result.toArray(new IMethod[result.size()]);
+		} finally {
+			if (pm != null) {
+				pm.done();
+			}
+		}	
 	}
 
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
@@ -729,6 +731,14 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return fChangeManager;
 	}
 	
+	/**
+	 * Add occurrences
+	 * 
+	 * @param manager the text change manager
+	 * @param pm the progress monitor
+	 * @param status the status
+	 * @throws CoreException 
+	 */
 	void addOccurrences(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException/*thrown in subtype*/{
 		pm.beginTask("", fOccurrences.length);				 //$NON-NLS-1$
 		for (int i= 0; i < fOccurrences.length; i++){
@@ -818,54 +828,57 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		}
 	}
 
-	public RefactoringStatus initialize(RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			fInitialized= true;
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				final String refactoring= getRefactoring().getName();
-				if (element instanceof IMethod) {
-					final IMethod method= (IMethod) element;
-					final IType declaring= method.getDeclaringType();
-					if (declaring != null && declaring.exists()) {
-						final IMethod[] methods= declaring.findMethods(method);
-						if (methods != null && methods.length == 1 && methods[0] != null) {
-							if (!methods[0].exists())
-								return ScriptableRefactoring.createInputFatalStatus(methods[0], refactoring, IJavaRefactorings.RENAME_METHOD);
-							fMethod= methods[0];
-							initializeWorkingCopyOwner();
-						} else
-							return ScriptableRefactoring.createInputFatalStatus(null, refactoring, IJavaRefactorings.RENAME_METHOD);
+	/**
+	 * Initializes the refactoring from scripting arguments.
+	 * Used by {@link RenameVirtualMethodProcessor} and {@link RenameNonVirtualMethodProcessor}
+	 * 
+	 * @param extended the arguments
+	 * @return the resulting status
+	 */
+	protected final RefactoringStatus initialize(JavaRefactoringArguments extended) {
+		fInitialized= true;
+		final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		if (handle != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+			final String refactoring= getProcessorName();
+			if (element instanceof IMethod) {
+				final IMethod method= (IMethod) element;
+				final IType declaring= method.getDeclaringType();
+				if (declaring != null && declaring.exists()) {
+					final IMethod[] methods= declaring.findMethods(method);
+					if (methods != null && methods.length == 1 && methods[0] != null) {
+						if (!methods[0].exists())
+							return ScriptableRefactoring.createInputFatalStatus(methods[0], refactoring, IJavaRefactorings.RENAME_METHOD);
+						fMethod= methods[0];
+						initializeWorkingCopyOwner();
 					} else
-						return ScriptableRefactoring.createInputFatalStatus(element, refactoring, IJavaRefactorings.RENAME_METHOD);
+						return ScriptableRefactoring.createInputFatalStatus(null, refactoring, IJavaRefactorings.RENAME_METHOD);
 				} else
 					return ScriptableRefactoring.createInputFatalStatus(element, refactoring, IJavaRefactorings.RENAME_METHOD);
 			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
-			final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-			if (name != null && !"".equals(name)) //$NON-NLS-1$
-				setNewElementName(name);
-			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
-			final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
-			if (references != null) {
-				fUpdateReferences= Boolean.valueOf(references).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
-			final String delegate= extended.getAttribute(ATTRIBUTE_DELEGATE);
-			if (delegate != null) {
-				fDelegateUpdating= Boolean.valueOf(delegate).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATE));
-			final String deprecate= extended.getAttribute(ATTRIBUTE_DEPRECATE);
-			if (deprecate != null) {
-				fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
+				return ScriptableRefactoring.createInputFatalStatus(element, refactoring, IJavaRefactorings.RENAME_METHOD);
 		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+		final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
+		if (name != null && !"".equals(name)) //$NON-NLS-1$
+			setNewElementName(name);
+		else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
+		final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
+		if (references != null) {
+			fUpdateReferences= Boolean.valueOf(references).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
+		final String delegate= extended.getAttribute(ATTRIBUTE_DELEGATE);
+		if (delegate != null) {
+			fDelegateUpdating= Boolean.valueOf(delegate).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATE));
+		final String deprecate= extended.getAttribute(ATTRIBUTE_DEPRECATE);
+		if (deprecate != null) {
+			fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
 		return new RefactoringStatus();
 	}
 

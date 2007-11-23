@@ -15,6 +15,7 @@ import java.util.Map;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
@@ -27,7 +28,6 @@ import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
@@ -44,24 +44,22 @@ public final class RenameMethodRefactoringContribution extends JavaRefactoringCo
 	 * {@inheritDoc}
 	 */
 	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws JavaModelException {
-		String project= descriptor.getProject();
-		Map arguments= retrieveArgumentMap(descriptor);
-		String input= (String) arguments.get(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-		IMethod method= (IMethod) JavaRefactoringDescriptorUtil.handleToElement(project, input);
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+
+		String input= arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		IMethod method= (IMethod) JavaRefactoringDescriptorUtil.handleToElement(arguments.getProject(), input);
 		if (method == null) {
-			status.addFatalError(Messages.format(RefactoringCoreMessages.RenameMethodRefactoringContribution_could_not_create, new Object[] { project, input }));
+			status.addFatalError(Messages.format(RefactoringCoreMessages.RenameMethodRefactoringContribution_could_not_create, new Object[] { arguments.getProject(), input }));
 			return null;
 		}
 		
 		JavaRenameProcessor processor;
 		if (MethodChecks.isVirtual(method)) {
-			processor= new RenameVirtualMethodProcessor(method);
+			processor= new RenameVirtualMethodProcessor(method, arguments, status);
 		} else {
-			processor= new RenameNonVirtualMethodProcessor(method);
+			processor= new RenameNonVirtualMethodProcessor(method, arguments, status);
 		}
-		JavaRenameRefactoring refactoring = new JavaRenameRefactoring(processor);
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(project, arguments)));
-		return refactoring;
+		return new RenameRefactoring(processor);
 	}
 
 	public RefactoringDescriptor createDescriptor() {

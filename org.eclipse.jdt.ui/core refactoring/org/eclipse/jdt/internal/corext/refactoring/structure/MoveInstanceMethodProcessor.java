@@ -50,7 +50,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
@@ -133,7 +132,6 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IVisibilityAdjustment;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -152,7 +150,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 /**
  * Refactoring processor to move instance methods.
  */
-public final class MoveInstanceMethodProcessor extends MoveProcessor implements IScriptableRefactoring, IDelegateUpdating {
+public final class MoveInstanceMethodProcessor extends MoveProcessor implements IDelegateUpdating {
 
 	/**
 	 * AST visitor to find references to parameters occurring in anonymous
@@ -1126,6 +1124,11 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		fMethod= method;
 		if (method != null)
 			initialize(method);
+	}
+
+	public MoveInstanceMethodProcessor(JavaRefactoringArguments arguments, RefactoringStatus status) {
+		RefactoringStatus initializeStatus= initialize(arguments);
+		status.merge(initializeStatus);
 	}
 
 	/**
@@ -2751,83 +2754,76 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			fSettings= JavaPreferencesSettings.getCodeGenerationSettings(fMethod.getJavaProject());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.METHOD)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.MOVE_METHOD);
-				else {
-					fMethod= (IMethod) element;
-					initialize(fMethod);
-				}
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
-			final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-			if (name != null) {
-				final RefactoringStatus status= setMethodName(name);
-				if (status.hasError())
-					return status;
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
-			final String deprecate= extended.getAttribute(ATTRIBUTE_DEPRECATE);
-			if (deprecate != null) {
-				fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
-			final String remove= extended.getAttribute(ATTRIBUTE_REMOVE);
-			if (remove != null) {
-				fRemove= Boolean.valueOf(remove).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REMOVE));
-			final String inline= extended.getAttribute(ATTRIBUTE_INLINE);
-			if (inline != null) {
-				fInline= Boolean.valueOf(inline).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INLINE));
-			final String getter= extended.getAttribute(ATTRIBUTE_USE_GETTER);
-			if (getter != null)
-				fUseGetters= Boolean.valueOf(getter).booleanValue();
-			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_USE_GETTER));
-			final String setter= extended.getAttribute(ATTRIBUTE_USE_SETTER);
-			if (setter != null)
-				fUseSetters= Boolean.valueOf(setter).booleanValue();
-			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_USE_SETTER));
-			final String target= extended.getAttribute(ATTRIBUTE_TARGET_NAME);
-			if (target != null) {
-				final RefactoringStatus status= setTargetName(target);
-				if (status.hasError())
-					return status;
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TARGET_NAME));
-			final String value= extended.getAttribute(ATTRIBUTE_TARGET_INDEX);
-			if (value != null) {
-				try {
-					final int index= Integer.valueOf(value).intValue();
-					if (index >= 0) {
-						final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fSourceRewrite.getRoot());
-						if (declaration != null) {
-							final IVariableBinding[] bindings= computeTargetCategories(declaration);
-							if (bindings != null && index < bindings.length)
-								setTarget(bindings[index]);
-						}
-					}
-				} catch (NumberFormatException exception) {
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { value, ATTRIBUTE_TARGET_INDEX }));
-				} catch (JavaModelException exception) {
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { value, ATTRIBUTE_TARGET_INDEX }));
-				}
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TARGET_INDEX));
+	private RefactoringStatus initialize(JavaRefactoringArguments extended) {
+		final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		if (handle != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+			if (element == null || !element.exists() || element.getElementType() != IJavaElement.METHOD)
+				return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.MOVE_METHOD);
+			else {
+				fMethod= (IMethod) element;
+				initialize(fMethod);
+			}
 		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+		final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
+		if (name != null) {
+			final RefactoringStatus status= setMethodName(name);
+			if (status.hasError())
+				return status;
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
+		final String deprecate= extended.getAttribute(ATTRIBUTE_DEPRECATE);
+		if (deprecate != null) {
+			fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
+		final String remove= extended.getAttribute(ATTRIBUTE_REMOVE);
+		if (remove != null) {
+			fRemove= Boolean.valueOf(remove).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REMOVE));
+		final String inline= extended.getAttribute(ATTRIBUTE_INLINE);
+		if (inline != null) {
+			fInline= Boolean.valueOf(inline).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INLINE));
+		final String getter= extended.getAttribute(ATTRIBUTE_USE_GETTER);
+		if (getter != null)
+			fUseGetters= Boolean.valueOf(getter).booleanValue();
+		else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_USE_GETTER));
+		final String setter= extended.getAttribute(ATTRIBUTE_USE_SETTER);
+		if (setter != null)
+			fUseSetters= Boolean.valueOf(setter).booleanValue();
+		else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_USE_SETTER));
+		final String target= extended.getAttribute(ATTRIBUTE_TARGET_NAME);
+		if (target != null) {
+			final RefactoringStatus status= setTargetName(target);
+			if (status.hasError())
+				return status;
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TARGET_NAME));
+		final String value= extended.getAttribute(ATTRIBUTE_TARGET_INDEX);
+		if (value != null) {
+			try {
+				final int index= Integer.valueOf(value).intValue();
+				if (index >= 0) {
+					final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fSourceRewrite.getRoot());
+					if (declaration != null) {
+						final IVariableBinding[] bindings= computeTargetCategories(declaration);
+						if (bindings != null && index < bindings.length)
+							setTarget(bindings[index]);
+					}
+				}
+			} catch (NumberFormatException exception) {
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { value, ATTRIBUTE_TARGET_INDEX }));
+			} catch (JavaModelException exception) {
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { value, ATTRIBUTE_TARGET_INDEX }));
+			}
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TARGET_INDEX));
 		return new RefactoringStatus();
 	}
 

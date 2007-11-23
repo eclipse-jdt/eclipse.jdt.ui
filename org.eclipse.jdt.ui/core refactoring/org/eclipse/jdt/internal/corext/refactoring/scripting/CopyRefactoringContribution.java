@@ -17,7 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
+import org.eclipse.ltk.core.refactoring.participants.CopyRefactoring;
 
 import org.eclipse.jdt.core.refactoring.descriptors.CopyDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
@@ -39,7 +39,7 @@ public final class CopyRefactoringContribution extends JavaRefactoringContributi
 	public final Refactoring createRefactoring(final JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
 		JavaCopyProcessor processor= new JavaCopyProcessor(arguments, status);
-		return new ProcessorBasedRefactoring(processor);
+		return new CopyRefactoring(processor);
 	}
 	
 	public RefactoringDescriptor createDescriptor() {

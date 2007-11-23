@@ -27,11 +27,10 @@ import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 
-public abstract class JavaRenameProcessor extends RenameProcessor implements IScriptableRefactoring, INameUpdating {
+public abstract class JavaRenameProcessor extends RenameProcessor implements INameUpdating {
 	
 	private String fNewElementName;
 	private RenameModifications fRenameModifications;

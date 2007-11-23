@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,7 @@ import org.eclipse.jface.viewers.TableViewer;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
@@ -48,7 +49,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -330,11 +330,12 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 	/**
 	 * Creates a new move instance method wizard.
 	 * 
+	 * @param processor the processor
 	 * @param refactoring the refactoring to host
 	 */
-	public MoveInstanceMethodWizard(final MoveInstanceMethodRefactoring refactoring) {
+	public MoveInstanceMethodWizard(MoveInstanceMethodProcessor processor, Refactoring refactoring) {
 		super(refactoring, DIALOG_BASED_USER_INTERFACE);
-		fProcessor= refactoring.getMoveMethodProcessor();
+		fProcessor= processor;
 		setDefaultPageTitle(RefactoringMessages.MoveInstanceMethodWizard_Move_Method); 
 	}
 

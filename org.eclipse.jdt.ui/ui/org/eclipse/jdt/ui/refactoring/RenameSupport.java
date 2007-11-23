@@ -38,7 +38,6 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameEnumConstProcessor;
@@ -266,8 +265,8 @@ public class RenameSupport {
 	}
 	
 	private RenameSupport(JavaRenameProcessor processor, String newName, int flags) {
-		fRefactoring= new JavaRenameRefactoring(processor);
-		initialize(fRefactoring, newName, flags);
+		fRefactoring= new RenameRefactoring(processor);
+		initialize(processor, newName, flags);
 	}
 
 	private JavaRenameProcessor getJavaRenameProcessor() {
@@ -445,16 +444,16 @@ public class RenameSupport {
 		return new RenameSupport(processor, newName, flags);
 	}
 
-	private static void initialize(RenameRefactoring refactoring, String newName, int flags) {
-		if (refactoring.getProcessor() == null)
-			return;
-		setNewName((INameUpdating)refactoring.getAdapter(INameUpdating.class), newName);
-		IReferenceUpdating reference= (IReferenceUpdating)refactoring.getAdapter(IReferenceUpdating.class);
-		if (reference != null) {
+	private static void initialize(JavaRenameProcessor processor, String newName, int flags) {
+
+		setNewName(processor, newName);
+		if (processor instanceof IReferenceUpdating) {
+			IReferenceUpdating reference= (IReferenceUpdating) processor;
 			reference.setUpdateReferences(updateReferences(flags));
 		}
-		ITextUpdating text= (ITextUpdating)refactoring.getAdapter(ITextUpdating.class);
-		if (text != null) {
+
+		if (processor instanceof ITextUpdating) {
+			ITextUpdating text= (ITextUpdating) processor;
 			text.setUpdateTextualMatches(updateTextualMatches(flags));
 		}
 	}
@@ -497,7 +496,7 @@ public class RenameSupport {
 	}
 	
 	private RenameSelectionState createSelectionState() {
-		RenameProcessor processor= (RenameProcessor) fRefactoring.getAdapter(RenameProcessor.class);
+		RenameProcessor processor= (RenameProcessor) fRefactoring.getProcessor();
 		Object[] elements= processor.getElements();
 		RenameSelectionState state= elements.length == 1 ? new RenameSelectionState(elements[0]) : null;
 		return state;

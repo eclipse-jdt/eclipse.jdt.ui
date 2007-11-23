@@ -22,7 +22,6 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -188,6 +187,11 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 		fTypeParameter= parameter;
 		if (parameter != null)
 			setNewElementName(parameter.getElementName());
+	}
+
+	public RenameTypeParameterProcessor(JavaRefactoringArguments arguments, RefactoringStatus status) {
+		this(null);
+		status.merge(initialize(arguments));
 	}
 
 	public final boolean canEnableUpdateReferences() {
@@ -370,41 +374,38 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 		return fUpdateReferences;
 	}
 
-	public final RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String parameter= extended.getAttribute(ATTRIBUTE_PARAMETER);
-			if (parameter == null || "".equals(parameter)) //$NON-NLS-1$
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PARAMETER));
-			final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists())
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_TYPE_PARAMETER);
-				else {
-					if (element instanceof IMethod)
-						fTypeParameter= ((IMethod) element).getTypeParameter(parameter);
-					else if (element instanceof IType)
-						fTypeParameter= ((IType) element).getTypeParameter(parameter);
-					else
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { handle, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT}));
-					if (fTypeParameter == null || !fTypeParameter.exists())
-						return ScriptableRefactoring.createInputFatalStatus(fTypeParameter, getRefactoring().getName(), IJavaRefactorings.RENAME_TYPE_PARAMETER);
-				}
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
-			final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-			if (name != null && !"".equals(name)) //$NON-NLS-1$
-				setNewElementName(name);
-			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
-			final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
-			if (references != null) {
-				fUpdateReferences= Boolean.valueOf(references).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
+	private final RefactoringStatus initialize(JavaRefactoringArguments extended) {
+		final String parameter= extended.getAttribute(ATTRIBUTE_PARAMETER);
+		if (parameter == null || "".equals(parameter)) //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PARAMETER));
+		final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		if (handle != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+			if (element == null || !element.exists())
+				return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.RENAME_TYPE_PARAMETER);
+			else {
+				if (element instanceof IMethod)
+					fTypeParameter= ((IMethod) element).getTypeParameter(parameter);
+				else if (element instanceof IType)
+					fTypeParameter= ((IType) element).getTypeParameter(parameter);
+				else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { handle,
+							JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT }));
+				if (fTypeParameter == null || !fTypeParameter.exists())
+					return ScriptableRefactoring.createInputFatalStatus(fTypeParameter, getProcessorName(), IJavaRefactorings.RENAME_TYPE_PARAMETER);
+			}
 		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+		final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
+		if (name != null && !"".equals(name)) //$NON-NLS-1$
+			setNewElementName(name);
+		else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
+		final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
+		if (references != null) {
+			fUpdateReferences= Boolean.valueOf(references).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
 		return new RefactoringStatus();
 	}
 

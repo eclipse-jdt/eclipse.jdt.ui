@@ -17,13 +17,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.MoveStaticMembersDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
-import org.eclipse.jdt.internal.corext.refactoring.structure.JavaMoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
 
 /**
@@ -37,9 +37,10 @@ public final class MoveStaticMembersRefactoringContribution extends JavaRefactor
 	 * {@inheritDoc}
 	 */
 	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
-		JavaMoveRefactoring refactoring= new JavaMoveRefactoring(new MoveStaticMembersProcessor(null, null));
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
-		return refactoring;
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+
+		MoveStaticMembersProcessor processor= new MoveStaticMembersProcessor(arguments, status);
+		return new MoveRefactoring(processor);
 	}
 
 	public RefactoringDescriptor createDescriptor() {

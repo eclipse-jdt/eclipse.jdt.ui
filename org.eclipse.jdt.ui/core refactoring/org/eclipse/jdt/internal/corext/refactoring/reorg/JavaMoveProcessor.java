@@ -30,7 +30,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
@@ -44,12 +43,11 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
-public final class JavaMoveProcessor extends MoveProcessor implements IScriptableRefactoring, IQualifiedNameUpdating, IReorgDestinationValidator {
+public final class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUpdating, IReorgDestinationValidator {
 
 	private ICreateTargetQueries fCreateTargetQueries;
 
@@ -61,6 +59,11 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 
 	public JavaMoveProcessor(IMovePolicy policy) {
 		fMovePolicy= policy;
+	}
+
+	public JavaMoveProcessor(JavaRefactoringArguments arguments, RefactoringStatus status) {
+		RefactoringStatus initializeStatus= initialize(arguments);
+		status.merge(initializeStatus);
 	}
 
 	public boolean canChildrenBeDestinations(IReorgDestination destination) {
@@ -222,22 +225,18 @@ public final class JavaMoveProcessor extends MoveProcessor implements IScriptabl
 		return fMovePolicy.getJavaElementDestination() != null || fMovePolicy.getResourceDestination() != null;
 	}
 
-	public RefactoringStatus initialize(RefactoringArguments arguments) {
+	private RefactoringStatus initialize(JavaRefactoringArguments arguments) {
 		setReorgQueries(new NullReorgQueries());
 		final RefactoringStatus status= new RefactoringStatus();
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			fMovePolicy= ReorgPolicyFactory.createMovePolicy(status, arguments);
-			if (fMovePolicy != null && !status.hasFatalError()) {
-				final CreateTargetExecutionLog log= ReorgPolicyFactory.loadCreateTargetExecutionLog(extended);
-				if (log != null && !status.hasFatalError()) {
-					fMovePolicy.setDestinationCheck(false);
-					fCreateTargetQueries= new MonitoringCreateTargetQueries(new LoggedCreateTargetQueries(log), log);
-				}
-				status.merge(fMovePolicy.initialize(arguments));
+		fMovePolicy= ReorgPolicyFactory.createMovePolicy(status, arguments);
+		if (fMovePolicy != null && !status.hasFatalError()) {
+			final CreateTargetExecutionLog log= ReorgPolicyFactory.loadCreateTargetExecutionLog(arguments);
+			if (log != null && !status.hasFatalError()) {
+				fMovePolicy.setDestinationCheck(false);
+				fCreateTargetQueries= new MonitoringCreateTargetQueries(new LoggedCreateTargetQueries(log), log);
 			}
-		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			status.merge(fMovePolicy.initialize(arguments));
+		}
 		return status;
 	}
 

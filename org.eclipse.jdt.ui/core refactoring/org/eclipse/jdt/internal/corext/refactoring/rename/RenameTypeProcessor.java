@@ -49,7 +49,6 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.IParticipantDescriptorFilter;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.resource.RenameResourceChange;
@@ -203,6 +202,11 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		fUpdateTextualMatches= false;
 		fUpdateSimilarElements= false; // default is no
 		fRenamingStrategy= RenamingNameSuggestor.STRATEGY_EXACT;
+	}
+	
+	public RenameTypeProcessor(JavaRefactoringArguments arguments, RefactoringStatus status) {
+		this(null);
+		status.merge(initialize(arguments));
 	}
 	
 	public IType getType() {
@@ -1161,57 +1165,54 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			fFilePatterns, fType.getJavaProject().getProject(), pm);
 	}
 
-	public RefactoringStatus initialize(RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_TYPE);
-				else
-					fType= (IType) element;
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
-			final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-			if (name != null && !"".equals(name)) //$NON-NLS-1$
-				setNewElementName(name);
+	private RefactoringStatus initialize(JavaRefactoringArguments extended) {
+		final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		if (handle != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+			if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
+				return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.RENAME_TYPE);
 			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
-			final String patterns= extended.getAttribute(ATTRIBUTE_PATTERNS);
-			if (patterns != null && !"".equals(patterns)) //$NON-NLS-1$
-				fFilePatterns= patterns;
-			final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
-			if (references != null) {
-				fUpdateReferences= Boolean.valueOf(references).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
-			final String matches= extended.getAttribute(ATTRIBUTE_TEXTUAL_MATCHES);
-			if (matches != null) {
-				fUpdateTextualMatches= Boolean.valueOf(matches).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TEXTUAL_MATCHES));
-			final String qualified= extended.getAttribute(ATTRIBUTE_QUALIFIED);
-			if (qualified != null) {
-				fUpdateQualifiedNames= Boolean.valueOf(qualified).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_QUALIFIED));
-			final String similarDeclarations= extended.getAttribute(ATTRIBUTE_SIMILAR_DECLARATIONS);
-			if (similarDeclarations != null)
-				fUpdateSimilarElements= Boolean.valueOf(similarDeclarations).booleanValue();
-			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SIMILAR_DECLARATIONS));
-			final String similarDeclarationsMatchingStrategy= extended.getAttribute(ATTRIBUTE_MATCHING_STRATEGY);
-			if (similarDeclarationsMatchingStrategy != null) {
-				try {
-					fRenamingStrategy= Integer.valueOf(similarDeclarationsMatchingStrategy).intValue();
-				} catch (NumberFormatException e) {
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] {similarDeclarationsMatchingStrategy, ATTRIBUTE_QUALIFIED}));
-				}
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_MATCHING_STRATEGY));
+				fType= (IType) element;
 		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+		final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
+		if (name != null && !"".equals(name)) //$NON-NLS-1$
+			setNewElementName(name);
+		else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
+		final String patterns= extended.getAttribute(ATTRIBUTE_PATTERNS);
+		if (patterns != null && !"".equals(patterns)) //$NON-NLS-1$
+			fFilePatterns= patterns;
+		final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
+		if (references != null) {
+			fUpdateReferences= Boolean.valueOf(references).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
+		final String matches= extended.getAttribute(ATTRIBUTE_TEXTUAL_MATCHES);
+		if (matches != null) {
+			fUpdateTextualMatches= Boolean.valueOf(matches).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TEXTUAL_MATCHES));
+		final String qualified= extended.getAttribute(ATTRIBUTE_QUALIFIED);
+		if (qualified != null) {
+			fUpdateQualifiedNames= Boolean.valueOf(qualified).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_QUALIFIED));
+		final String similarDeclarations= extended.getAttribute(ATTRIBUTE_SIMILAR_DECLARATIONS);
+		if (similarDeclarations != null)
+			fUpdateSimilarElements= Boolean.valueOf(similarDeclarations).booleanValue();
+		else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SIMILAR_DECLARATIONS));
+		final String similarDeclarationsMatchingStrategy= extended.getAttribute(ATTRIBUTE_MATCHING_STRATEGY);
+		if (similarDeclarationsMatchingStrategy != null) {
+			try {
+				fRenamingStrategy= Integer.valueOf(similarDeclarationsMatchingStrategy).intValue();
+			} catch (NumberFormatException e) {
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { similarDeclarationsMatchingStrategy,
+						ATTRIBUTE_QUALIFIED }));
+			}
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_MATCHING_STRATEGY));
 		return new RefactoringStatus();
 	}
 	

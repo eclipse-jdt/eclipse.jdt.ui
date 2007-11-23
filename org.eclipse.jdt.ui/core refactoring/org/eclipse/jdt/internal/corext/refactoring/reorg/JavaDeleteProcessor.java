@@ -854,7 +854,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 				final IResource resource= JavaRefactoringDescriptorUtil.handleToResource(extended.getProject(), handle);
 				if (resource == null || !resource.exists())
-					status.merge(ScriptableRefactoring.createInputWarningStatus(resource, getRefactoring().getName(), IJavaRefactorings.DELETE));
+					status.merge(ScriptableRefactoring.createInputWarningStatus(resource, getProcessorName(), IJavaRefactorings.DELETE));
 				else
 					elements.add(resource);
 			} else
@@ -868,7 +868,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists())
-					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getRefactoring().getName(), IJavaRefactorings.DELETE));
+					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getProcessorName(), IJavaRefactorings.DELETE));
 				else
 					elements.add(element);
 			} else

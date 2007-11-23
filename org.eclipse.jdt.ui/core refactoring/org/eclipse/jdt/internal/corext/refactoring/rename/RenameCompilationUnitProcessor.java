@@ -25,7 +25,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.resource.RenameResourceChange;
 import org.eclipse.ltk.core.refactoring.resource.RenameResourceDescriptor;
@@ -82,6 +81,11 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 		}
 	}
 
+	public RenameCompilationUnitProcessor(JavaRefactoringArguments arguments, RefactoringStatus status) {
+		RefactoringStatus initializeStatus= initialize(arguments);
+		status.merge(initializeStatus);
+	}
+	
 	public String getIdentifier() {
 		return IRefactoringProcessorIds.RENAME_COMPILATION_UNIT_PROCESSOR;
 	}
@@ -429,12 +433,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 		return super.postCreateChange(participantChanges, pm);
 	}
 
-	public RefactoringStatus initialize(RefactoringArguments arguments) {
-		if (!(arguments instanceof JavaRefactoringArguments)) {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
-		}
-		
-		final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+	private RefactoringStatus initialize(JavaRefactoringArguments extended) {
 		final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
 		if (handle == null) {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
@@ -442,7 +441,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 			
 		final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
 		if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-			return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_COMPILATION_UNIT);
+			return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.RENAME_COMPILATION_UNIT);
 		
 		final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
 		if (name == null || name.length() == 0)
@@ -454,7 +453,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 			setNewElementName(name);
 		} catch (CoreException exception) {
 			JavaPlugin.log(exception);
-			return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_COMPILATION_UNIT);
+			return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.RENAME_COMPILATION_UNIT);
 		}
 		return new RefactoringStatus();
 	}

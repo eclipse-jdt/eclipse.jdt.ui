@@ -42,7 +42,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 
 import org.eclipse.jdt.core.Flags;
@@ -137,6 +136,11 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 		fUpdateReferences= true;
 		fUpdateTextualMatches= false;
 		fRenameSubpackages= false;
+	}
+
+	public RenamePackageProcessor(JavaRefactoringArguments arguments, RefactoringStatus status) {
+		this(null);
+		status.merge(initialize(arguments));
 	}
 
 	public String getIdentifier() {
@@ -639,7 +643,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 		return null;
 	}
 	
-	private void computeQualifiedNameMatches(IProgressMonitor pm) throws CoreException {
+	private void computeQualifiedNameMatches(IProgressMonitor pm) {
 		if (fQualifiedNameSearchResult == null)
 			fQualifiedNameSearchResult= new QualifiedNameSearchResult();
 		QualifiedNameFinder.process(fQualifiedNameSearchResult, fPackage.getElementName(), getNewElementName(), 
@@ -1076,50 +1080,46 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 		}
 	}
 
-	public RefactoringStatus initialize(RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.PACKAGE_FRAGMENT)
-					return ScriptableRefactoring.createInputFatalStatus(element, getRefactoring().getName(), IJavaRefactorings.RENAME_PACKAGE);
-				else
-					fPackage= (IPackageFragment) element;
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
-			final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-			if (name != null && !"".equals(name)) //$NON-NLS-1$
-				setNewElementName(name);
+	private RefactoringStatus initialize(JavaRefactoringArguments extended) {
+		final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		if (handle != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+			if (element == null || !element.exists() || element.getElementType() != IJavaElement.PACKAGE_FRAGMENT)
+				return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.RENAME_PACKAGE);
 			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
-			final String patterns= extended.getAttribute(ATTRIBUTE_PATTERNS);
-			if (patterns != null && !"".equals(patterns)) //$NON-NLS-1$
-				fFilePatterns= patterns;
-			else
-				fFilePatterns= ""; //$NON-NLS-1$
-			final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
-			if (references != null) {
-				fUpdateReferences= Boolean.valueOf(references).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
-			final String matches= extended.getAttribute(ATTRIBUTE_TEXTUAL_MATCHES);
-			if (matches != null) {
-				fUpdateTextualMatches= Boolean.valueOf(matches).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TEXTUAL_MATCHES));
-			final String qualified= extended.getAttribute(ATTRIBUTE_QUALIFIED);
-			if (qualified != null) {
-				fUpdateQualifiedNames= Boolean.valueOf(qualified).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_QUALIFIED));
-			final String hierarchical= extended.getAttribute(ATTRIBUTE_HIERARCHICAL);
-			if (hierarchical != null) {
-				fRenameSubpackages= Boolean.valueOf(hierarchical).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_HIERARCHICAL));
+				fPackage= (IPackageFragment) element;
 		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+		final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
+		if (name != null && !"".equals(name)) //$NON-NLS-1$
+			setNewElementName(name);
+		else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
+		final String patterns= extended.getAttribute(ATTRIBUTE_PATTERNS);
+		if (patterns != null && !"".equals(patterns)) //$NON-NLS-1$
+			fFilePatterns= patterns;
+		else
+			fFilePatterns= ""; //$NON-NLS-1$
+		final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
+		if (references != null) {
+			fUpdateReferences= Boolean.valueOf(references).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
+		final String matches= extended.getAttribute(ATTRIBUTE_TEXTUAL_MATCHES);
+		if (matches != null) {
+			fUpdateTextualMatches= Boolean.valueOf(matches).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TEXTUAL_MATCHES));
+		final String qualified= extended.getAttribute(ATTRIBUTE_QUALIFIED);
+		if (qualified != null) {
+			fUpdateQualifiedNames= Boolean.valueOf(qualified).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_QUALIFIED));
+		final String hierarchical= extended.getAttribute(ATTRIBUTE_HIERARCHICAL);
+		if (hierarchical != null) {
+			fRenameSubpackages= Boolean.valueOf(hierarchical).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_HIERARCHICAL));
 		return new RefactoringStatus();
 	}
 }

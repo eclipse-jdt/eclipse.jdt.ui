@@ -15,6 +15,7 @@ import java.util.Map;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
@@ -22,7 +23,6 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
-import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeParameterProcessor;
 
 /**
@@ -36,9 +36,9 @@ public final class RenameTypeParameterRefactoringContribution extends JavaRefact
 	 * {@inheritDoc}
 	 */
 	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) {
-		JavaRenameRefactoring refactoring= new JavaRenameRefactoring(new RenameTypeParameterProcessor(null));
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
-		return refactoring;
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+		RenameTypeParameterProcessor processor= new RenameTypeParameterProcessor(arguments, status);
+		return new RenameRefactoring(processor);
 	}
 
 	public RefactoringDescriptor createDescriptor() {
