@@ -146,6 +146,12 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	private IPropertyChangeListener fFontListener;
 
+	/**
+	 * Holds original Javadoc input string.
+	 * @since 3.4
+	 */
+	private String fOriginalInput;
+
 	
 	/**
 	 * The Javadoc view's select all action.
@@ -300,7 +306,7 @@ public class JavadocView extends AbstractInfoView {
 				String title= InfoViewMessages.JavadocView_error_noBrowser_title;
 				String message= InfoViewMessages.JavadocView_error_noBrowser_message;
 				String toggleMessage= InfoViewMessages.JavadocView_error_noBrowser_doNotWarn;
-				MessageDialogWithToggle dialog= MessageDialogWithToggle.openError(parent.getShell(), title, message, toggleMessage, false, null, null); 
+				MessageDialogWithToggle dialog= MessageDialogWithToggle.openError(parent.getShell(), title, message, toggleMessage, false, null, null);
 				if (dialog.getReturnCode() == Window.OK)
 					store.setValue(DO_NOT_WARN_PREFERENCE_KEY, dialog.getToggleState());
 			}
@@ -318,7 +324,7 @@ public class JavadocView extends AbstractInfoView {
 				 * @see org.eclipse.swt.events.ControlAdapter#controlResized(org.eclipse.swt.events.ControlEvent)
 				 */
 				public void controlResized(ControlEvent e) {
-					setInput(fText.getText());
+					setInput(fOriginalInput);
 				}
 			});
 		}
@@ -516,6 +522,7 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	protected void setInput(Object input) {
 		String javadocHtml= (String)input;
+		fOriginalInput= javadocHtml;
 
 		if (fIsUsingBrowserWidget) {
 			if (javadocHtml != null && javadocHtml.length() > 0) {
