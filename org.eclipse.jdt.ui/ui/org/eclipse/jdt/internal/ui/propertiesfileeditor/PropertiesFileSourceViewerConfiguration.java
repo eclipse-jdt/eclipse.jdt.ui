@@ -265,7 +265,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	 * @see SourceViewerConfiguration#getAnnotationHover(ISourceViewer)
 	 */
 	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
-		return new HTMLAnnotationHover() {
+		return new HTMLAnnotationHover(false) {
 			protected boolean isIncluded(Annotation annotation) {
 				return isShowInVerticalRuler(annotation);
 			}
@@ -276,7 +276,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	 * @see SourceViewerConfiguration#getOverviewRulerAnnotationHover(ISourceViewer)
 	 */
 	public IAnnotationHover getOverviewRulerAnnotationHover(ISourceViewer sourceViewer) {
-		return new HTMLAnnotationHover() {
+		return new HTMLAnnotationHover(true) {
 			protected boolean isIncluded(Annotation annotation) {
 				return isShowInOverviewRuler(annotation);
 			}
@@ -305,14 +305,14 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 			protected IContentType getContentType() {
 				return PROPERTIES_CONTENT_TYPE;
 			}
-		}; 
+		};
 		
 		MonoReconciler reconciler= new MonoReconciler(strategy, false);
 		reconciler.setIsIncrementalReconciler(false);
 		reconciler.setProgressMonitor(new NullProgressMonitor());
 		reconciler.setDelay(500);
 		return reconciler;
-	}	
+	}
 
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getDefaultPrefixes(org.eclipse.jface.text.source.ISourceViewer, java.lang.String)

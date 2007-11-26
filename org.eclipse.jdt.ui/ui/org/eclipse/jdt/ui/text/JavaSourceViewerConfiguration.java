@@ -591,7 +591,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * @see SourceViewerConfiguration#getAnnotationHover(ISourceViewer)
 	 */
 	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
-		return new HTMLAnnotationHover() {
+		return new HTMLAnnotationHover(false) {
 			protected boolean isIncluded(Annotation annotation) {
 				return isShowInVerticalRuler(annotation);
 			}
@@ -603,7 +603,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * @since 3.0
 	 */
 	public IAnnotationHover getOverviewRulerAnnotationHover(ISourceViewer sourceViewer) {
-		return new HTMLAnnotationHover() {
+		return new HTMLAnnotationHover(true) {
 			protected boolean isIncluded(Annotation annotation) {
 				return isShowInOverviewRuler(annotation);
 			}
