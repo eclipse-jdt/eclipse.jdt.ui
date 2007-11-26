@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -118,6 +118,7 @@ public class DeleteModifications extends RefactoringModifications {
 	
 	/**
 	 * @return a List of IResources that are removed by package deletes
+	 * @throws CoreException 
 	 */
 	public List/*<IResource>*/ postProcess() throws CoreException {
 		ArrayList resourcesCollector= new ArrayList();
@@ -154,8 +155,10 @@ public class DeleteModifications extends RefactoringModifications {
 	 *   is not removed as well.
 	 *   
 	 * All deleted resources are added to <code>resourcesCollector</code>
+	 * @param pack the package
 	 * 
 	 * @param resourcesCollector a collector for IResources to be deleted
+	 * @throws CoreException 
 	 */
 	private void handlePackageFragmentDelete(IPackageFragment pack, ArrayList resourcesCollector) throws CoreException {		
 		final IContainer container= (IContainer)pack.getResource();
@@ -231,6 +234,9 @@ public class DeleteModifications extends RefactoringModifications {
 	/**
 	 * Returns true if this initially selected package is really deletable
 	 * (if it has non-selected sub packages, it may only be cleared).
+	 * @param pack the package
+	 * @return  true if this initially selected package is really deletable
+	 * @throws JavaModelException 
 	 */
 	private boolean canRemoveCompletely(IPackageFragment pack) throws JavaModelException {
 		final IPackageFragment[] subPackages= JavaElementUtil.getPackageAndSubpackages(pack);
