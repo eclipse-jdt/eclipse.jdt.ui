@@ -18,7 +18,6 @@ import java.io.StringReader;
 import java.net.URL;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
 
@@ -372,7 +371,6 @@ public class JavadocView extends AbstractInfoView {
 			return null;
 
 		try {
-			styleSheetURL= FileLocator.toFileURL(styleSheetURL);
 			BufferedReader reader= new BufferedReader(new InputStreamReader(styleSheetURL.openStream()));
 			StringBuffer buffer= new StringBuffer(200);
 			String line= reader.readLine();

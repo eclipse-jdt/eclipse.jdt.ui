@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.SWT;
@@ -169,7 +168,6 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 		URL styleSheetURL= bundle.getEntry("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
 		if (styleSheetURL != null) {
 			try {
-				styleSheetURL= FileLocator.toFileURL(styleSheetURL);
 				BufferedReader reader= new BufferedReader(new InputStreamReader(styleSheetURL.openStream()));
 				StringBuffer buffer= new StringBuffer(200);
 				String line= reader.readLine();
