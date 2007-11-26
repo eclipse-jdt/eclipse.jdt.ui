@@ -107,6 +107,18 @@ Non-breaking API changes from R3.3 to R3.4</b></font> <br>
     </tr> 
     <tr>
       <td>
+      Added API for the jar packager:
+      <ul>
+      <li>Added <code>org.eclipse.jdt.ui.jarpackager.IJarBuilder</code></li>
+      <li>Added methods to set and get jar builder in <code>org.eclipse.jdt.ui.jarpackager.JarPackageData</code></li>
+      <li>Added factories to create jar builders in <code>org.eclipse.jdt.ui.jarpackager.JarPackageData</code></li>
+      <li>Added methods to set and get launch configuration name in <code>org.eclipse.jdt.ui.jarpackager.JarPackageData</code></li>
+      <li>Added method <code>org.eclipse.jdt.ui.jarpackager.JarWriter3.addEntry(JarEntry, InputStream)</code></li>
+      </ul>
+      </td>
+    </tr>  
+    <tr>
+      <td>
       All occurrence actions available in for find occurrence. New actions and constants.
       <ul>
       <li>FindBreakContinueTargetOccurrencesAction</li>

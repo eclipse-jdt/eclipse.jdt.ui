@@ -25,6 +25,7 @@ Export-Package:
  org.eclipse.jdt.ui.tests.core;x-internal:=true,
  org.eclipse.jdt.ui.tests.core.source;x-internal:=true,
  org.eclipse.jdt.ui.tests.dialogs;x-internal:=true,
+ org.eclipse.jdt.ui.tests.jarexport;x-internal:=true,
  org.eclipse.jdt.ui.tests.leaks;x-internal:=true,
  org.eclipse.jdt.ui.tests.model;x-internal:=true,
  org.eclipse.jdt.ui.tests.packageview;x-internal:=true,

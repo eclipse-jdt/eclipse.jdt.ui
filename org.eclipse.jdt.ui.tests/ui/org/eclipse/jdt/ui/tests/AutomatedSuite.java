@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests;
 
@@ -21,6 +22,7 @@ import org.eclipse.jdt.ui.tests.browsing.PackagesViewDeltaTests;
 import org.eclipse.jdt.ui.tests.buildpath.BuildpathModifierActionTest;
 import org.eclipse.jdt.ui.tests.callhierarchy.CallHierarchyContentProviderTest;
 import org.eclipse.jdt.ui.tests.core.CoreTests;
+import org.eclipse.jdt.ui.tests.jarexport.JarExportTests;
 import org.eclipse.jdt.ui.tests.packageview.PackageExplorerTests;
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
 import org.eclipse.jdt.ui.tests.search.SearchTest;
@@ -67,6 +69,8 @@ public class AutomatedSuite extends TestSuite {
 		addTest(JUnitJUnitTests.suite());
 		
 		addTest(BuildpathModifierActionTest.suite());
+		
+		addTest(JarExportTests.suite());
 	}
 }
 

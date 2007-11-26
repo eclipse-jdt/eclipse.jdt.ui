@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,20 +7,21 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
  *******************************************************************************/
 package org.eclipse.jdt.ui.jarpackager;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -31,13 +32,13 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.jarpackager.JarFileExportOperation;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackageReader;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackageWriter;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
-import org.eclipse.jdt.internal.ui.jarpackager.ManifestProvider;
+import org.eclipse.jdt.internal.ui.jarpackager.PlainJarBuilder;
+import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarBuilder;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 /**
@@ -143,6 +144,12 @@ public class JarPackageData {
 
 	// The refactoring descriptors to export
 	private RefactoringDescriptorProxy[] fRefactoringDescriptors= {};
+
+	// Builder used by the JarFileExportOperation to build the jar file
+	private IJarBuilder fJarBuilder;
+	
+	// The launch configuration used by the fat jar builder to determine dependencies
+ 	private String  fLaunchConfigurationName;
 
 	/**
 	 * Creates a new Jar Package Data structure
@@ -474,7 +481,7 @@ public class JarPackageData {
 	 */
 	public IManifestProvider getManifestProvider() {
 		if (fManifestProvider == null)
-			fManifestProvider= new ManifestProvider();
+			return getJarBuilder().getManifestProvider();
 		return fManifestProvider;
 	}
 	
@@ -876,9 +883,34 @@ public class JarPackageData {
 	 * @throws CoreException if an unexpected exception happens
 	 * 
 	 * @since 3.2
+	 * @deprecated use {@link #createPlainJarBuilder()} instead
 	 */
 	public JarWriter3 createJarWriter3(Shell parent) throws CoreException {
 		return new JarWriter3(this, parent);
+	}
+	
+	/**
+	 * Creates and returns a jar builder capable of handling
+	 * files but not archives.
+	 * 
+	 * @return a new instance of a plain jar builder
+	 * 
+	 * @since 3.4
+	 */
+	public IJarBuilder createPlainJarBuilder() {
+		return new PlainJarBuilder();
+	}
+
+	/**
+	 * Creates and returns a jar builder capable of handling 
+	 * files and archives.
+	 * 
+	 * @return a new instance of a fat jar builder
+	 * 
+	 * @since 3.4
+	 */
+	public IJarBuilder createFatJarBuilder() {
+		return new FatJarBuilder();
 	}
 	
 	/**
@@ -1162,4 +1194,52 @@ public class JarPackageData {
 	public void setExportStructuralOnly(boolean structural) {
 		fRefactoringStructural= structural;
 	}
+	
+	/**
+	 * Returns the jar builder which can be used to build the jar 
+	 * described by this package data.
+	 * 
+	 * @return the builder to use
+	 * @since 3.4
+	 */
+	public IJarBuilder getJarBuilder() {
+		if (fJarBuilder == null)
+			fJarBuilder= createPlainJarBuilder();
+		return fJarBuilder;
+	}
+
+	/**
+	 * Set the jar builder to use to build the jar.
+	 * 
+	 * @param jarBuilder
+	 *        the builder to use
+	 * @since 3.4
+	 */
+	public void setJarBuilder(IJarBuilder jarBuilder) {
+		fJarBuilder= jarBuilder;
+	}
+
+	/**
+	 * Get the name of the launch configuration from 
+	 * which to retrieve classpath information.
+	 * 
+	 * @return the name of the launch configuration
+	 * @since 3.4
+	 */
+	public String getLaunchConfigurationName() {
+		return fLaunchConfigurationName;
+	}
+
+	/**
+	 * Set the name of the launch configuration form which 
+	 * to retrieve classpath information.
+	 * 
+	 * @param name
+	 *        name of the launch configuration
+	 * @since 3.4
+	 */
+	public void setLaunchConfigurationName(String name) {
+		fLaunchConfigurationName= name;
+	}
+
 }

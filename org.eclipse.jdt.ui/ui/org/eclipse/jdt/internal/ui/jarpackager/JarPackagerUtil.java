@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,26 +7,35 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.zip.CRC32;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
+
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -107,14 +116,15 @@ public final class JarPackagerUtil {
 	 * Computes and returns the elements as resources.
 	 * The underlying resource is used for Java elements.
 	 * 
+	 * @param elements elements for which to retrieve the resources from
 	 * @return a List with the selected resources
 	 */
-	public static List asResources(Object[] fSelectedElements) {
-		if (fSelectedElements == null)
+	public static List asResources(Object[] elements) {
+		if (elements == null)
 			return null;
-		List selectedResources= new ArrayList(fSelectedElements.length);
-		for (int i= 0; i < fSelectedElements.length; i++) {
-			Object element= fSelectedElements[i];
+		List selectedResources= new ArrayList(elements.length);
+		for (int i= 0; i < elements.length; i++) {
+			Object element= elements[i];
 			if (element instanceof IJavaElement) {
 				selectedResources.add(((IJavaElement)element).getResource());
 			}
@@ -133,6 +143,7 @@ public final class JarPackagerUtil {
 	/**
 	 * Gets the name of the manifest's main class
 	 * 
+	 * @param jarPackage 
 	 * @return a string with the name
 	 */
 	static String getMainClassName(JarPackageData jarPackage) {
@@ -173,6 +184,8 @@ public final class JarPackagerUtil {
 	/**
 	 * Tells whether the specified manifest main class is valid.
 	 * 
+	 * @param data 
+	 * @param context 
 	 * @return <code>true</code> if a main class is specified and valid
 	 */
 	public static boolean isMainClassValid(JarPackageData data, IRunnableContext context) {
@@ -256,5 +269,46 @@ public final class JarPackagerUtil {
 		}
 		entry.setSize(size);
 		entry.setCrc(crc.getValue());
+	}
+	
+	/**
+	 * The archive file at the given location
+	 * 
+	 * @param location
+	 *        the location of the archive file
+	 * @return the archive or null if it could not be retrieved
+	 * @throws CoreException
+	 *         if the archive could not be read
+	 * 
+	 * @since 3.4
+	 */
+	public static ZipFile getArchiveFile(IPath location) throws CoreException {
+		File localFile= null;
+
+		IResource file= ResourcesPlugin.getWorkspace().getRoot().findMember(location);
+		if (file != null) {
+			// internal resource
+			URI fileLocation= file.getLocationURI();
+
+			IFileStore fileStore= EFS.getStore(fileLocation);
+			localFile= fileStore.toLocalFile(EFS.NONE, null);
+			if (localFile == null)
+				// non local file system
+				localFile= fileStore.toLocalFile(EFS.CACHE, null);
+		} else {
+			// external resource -> it is ok to use toFile()
+			localFile= location.toFile();
+		}
+
+		if (localFile == null)
+			return null;
+
+		try {
+			return new ZipFile(localFile);
+		} catch (ZipException e) {
+			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, e.getLocalizedMessage(), e));
+		} catch (IOException e) {
+			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, e.getLocalizedMessage(), e));
+		}
 	}
 }

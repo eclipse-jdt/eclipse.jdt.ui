@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
  *******************************************************************************/
 package org.eclipse.jdt.ui.jarpackager;
 
@@ -233,14 +234,30 @@ public class JarWriter3 {
 
 		InputStream contentStream = resource.getContents(false);
 
+		addEntry(newEntry, contentStream);
+	}
+
+	/**
+	 * Write the given entry describing the given content to the
+	 * current archive
+	 * 
+	 * @param   entry            the entry to write
+	 * @param   content          the content to write
+	 * 
+	 * @throws IOException       If an I/O error occurred
+	 * 
+	 * @since 3.4
+	 */
+	protected void addEntry(JarEntry entry, InputStream content) throws IOException {
+		byte[] readBuffer= new byte[4096];
 		try {		
-			fJarOutputStream.putNextEntry(newEntry);
+			fJarOutputStream.putNextEntry(entry);
 			int count;
-			while ((count= contentStream.read(readBuffer, 0, readBuffer.length)) != -1)
+			while ((count= content.read(readBuffer, 0, readBuffer.length)) != -1)
 				fJarOutputStream.write(readBuffer, 0, count);
 		} finally  {
-			if (contentStream != null)
-				contentStream.close();
+			if (content != null)
+				content.close();
 
 			/*
 			 * Commented out because some JREs throw an NPE if a stream

@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Matt Chapman, mpchapman@gmail.com - 89977 Make JDT .java agnostic
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackager;
 
@@ -29,8 +30,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.Manifest;
 import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
 import org.eclipse.core.filesystem.EFS;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -73,10 +76,10 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+import org.eclipse.jdt.ui.jarpackager.IJarBuilder;
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionWriter;
 import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
-import org.eclipse.jdt.ui.jarpackager.JarWriter3;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -100,7 +103,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		}
 	}
 
-	private JarWriter3 fJarWriter;
+	private IJarBuilder fJarBuilder;
 	private JarPackageData fJarPackage;
 	private JarPackageData[] fJarPackages;
 	private Shell fParentShell;
@@ -206,9 +209,21 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 					continue;
 				}
 				
-				// Should not happen since we only export source files
-				if (resource == null)
+				if (resource == null) {
+					if (element instanceof IPackageFragmentRoot) {
+						IPackageFragmentRoot root= (IPackageFragmentRoot) element;
+						if (root.isArchive()) {
+							try {
+								ZipFile file= JarPackagerUtil.getArchiveFile(root.getPath());
+								if (file != null)
+									count+= file.size();
+							} catch (CoreException e) {
+								JavaPlugin.log(e);
+							}
+						}
+					}
 					continue;
+				}
 			}
 			else
 				resource= (IResource)element;
@@ -340,8 +355,25 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	}
 
 	private void exportJavaElement(IProgressMonitor progressMonitor, IJavaElement je) throws InterruptedException {
-		if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT && ((IPackageFragmentRoot)je).isArchive())
+		if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT && ((IPackageFragmentRoot) je).isArchive()) {
+			IPackageFragmentRoot root= (IPackageFragmentRoot) je;
+			ZipFile jarFile= null;
+			try {
+				jarFile= JarPackagerUtil.getArchiveFile(root.getPath());
+				fJarBuilder.writeArchive(jarFile, progressMonitor);
+			} catch (CoreException e) {
+				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_OpenZipFileError_message, new Object[] { root.getElementName(), e.getLocalizedMessage() }), e);
+			} finally {
+				try {
+					if (jarFile != null) {
+						jarFile.close();
+					}
+				} catch (IOException e) {
+					addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_CloseZipFileError_message, new Object[] { root.getElementName(), e.getLocalizedMessage() }), e);
+				}
+			}
 			return;
+		}
 
 		Object[] children= fJavaElementContentProvider.getChildren(je);
 		for (int i= 0; i < children.length; i++)
@@ -365,7 +397,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			try {
 				IPath destinationPath= resource.getFullPath().removeFirstSegments(leadingSegmentsToRemove);
 				progressMonitor.subTask(Messages.format(JarPackagerMessages.JarFileExportOperation_exporting, destinationPath.toString())); 
-				fJarWriter.write((IFile)resource, destinationPath);
+				fJarBuilder.writeFile((IFile)resource, destinationPath);
 			} catch (CoreException ex) {
 				Throwable realEx= ex.getStatus().getException();
 				if (realEx instanceof ZipException && realEx.getMessage() != null && realEx.getMessage().startsWith("duplicate entry:")) //$NON-NLS-1$
@@ -428,7 +460,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			|| (fJarPackage.areJavaFilesExported() && (isNonJavaResource || (pkgRoot != null && !isClassFile(resource)) || (isInClassFolder && isClassFile(resource) && !fJarPackage.areClassFilesExported())))) {
 			try {
 				progressMonitor.subTask(Messages.format(JarPackagerMessages.JarFileExportOperation_exporting, destinationPath.toString())); 
-				fJarWriter.write((IFile) resource, destinationPath);
+				fJarBuilder.writeFile((IFile)resource, destinationPath);
 			} catch (CoreException ex) {
 				Throwable realEx= ex.getStatus().getException();
 				if (realEx instanceof ZipException && realEx.getMessage() != null && realEx.getMessage().startsWith("duplicate entry:")) //$NON-NLS-1$
@@ -462,7 +494,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 					IFile file= (IFile)iter.next();
 					IPath classFilePath= baseDestinationPath.append(file.getName());
 					progressMonitor.subTask(Messages.format(JarPackagerMessages.JarFileExportOperation_exporting, classFilePath.toString())); 
-					fJarWriter.write(file, classFilePath);
+					fJarBuilder.writeFile(file, classFilePath);
 				}
 			} catch (CoreException ex) {
 				addToStatus(ex);
@@ -798,7 +830,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		return fStatus;
 	}
 
-	private boolean canBeExported(boolean hasErrors, boolean hasWarnings) throws CoreException {
+	private boolean canBeExported(boolean hasErrors, boolean hasWarnings) {
 		return (!hasErrors && !hasWarnings)
 			|| (hasErrors && fJarPackage.areErrorsExported())
 			|| (hasWarnings && fJarPackage.exportWarnings());
@@ -857,8 +889,10 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				buildProjects(subProgressMonitor);
 			} else
 				progressMonitor.beginTask("", totalWork); //$NON-NLS-1$
-						
-			fJarWriter= fJarPackage.createJarWriter3(fParentShell);
+			
+			fJarBuilder = fJarPackage.getJarBuilder();
+			fJarBuilder.open(fJarPackage, fParentShell, fStatus);
+			
 			exportSelectedElements(progressMonitor);
 			if (getStatus().getSeverity() != IStatus.ERROR) {
 				progressMonitor.subTask(JarPackagerMessages.JarFileExportOperation_savingFiles); 
@@ -868,8 +902,8 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			addToStatus(ex);
 		} finally {
 			try {
-				if (fJarWriter != null)
-					fJarWriter.close();
+				if (fJarBuilder != null)
+					fJarBuilder.close();
 			} catch (CoreException ex) {
 				addToStatus(ex);
 			}

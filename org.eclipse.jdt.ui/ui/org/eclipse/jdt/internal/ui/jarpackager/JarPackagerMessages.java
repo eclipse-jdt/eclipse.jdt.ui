@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackager;
 
@@ -32,6 +33,8 @@ public final class JarPackagerMessages extends NLS {
 
 	public static String JarFileExportOperation_creationOfSomeJARsFailed;
 
+	public static String JarFileExportOperation_OpenZipFileError_message;
+
 	public static String JarFileExportOperation_didNotAddManifestToJar;
 
 	public static String JarFileExportOperation_errorCannotCloseConnection;
@@ -48,7 +51,7 @@ public final class JarPackagerMessages extends NLS {
 
 	public static String JarFileExportOperation_errorSavingManifest;
 
-	public static String JarFileExportOperation_errorSavingModifiedResources;
+	public static String JarFileExportOperation_CloseZipFileError_message;
 
 	public static String JarFileExportOperation_exportedWithCompileErrors;
 
@@ -93,10 +96,6 @@ public final class JarPackagerMessages extends NLS {
 	public static String JarFileExportOperation_resourceNotFound;
 
 	public static String JarFileExportOperation_savingFiles;
-
-	public static String JarFileExportOperation_savingModifiedResources;
-
-	public static String JarFileExportOperation_underlyingResourceNotFound;
 
 	public static String JarManifestWizardPage_description;
 
@@ -248,6 +247,8 @@ public final class JarPackagerMessages extends NLS {
 
 	public static String JarPackageReader_error_tagPathNotFound;
 
+	public static String JarPackageReader_error_unknownJarBuilder;
+
 	public static String JarPackageReader_jarPackageReaderWarnings;
 
 	public static String JarPackageReader_warning_javaElementDoesNotExist;
@@ -319,38 +320,6 @@ public final class JarPackagerMessages extends NLS {
 	public static String JarWriter_error_couldNotGetXmlBuilder;
 
 	public static String JarWriter_error_couldNotTransformToXML;
-
-	public static String JarWriter_output_compressed;
-
-	public static String JarWriter_output_descriptionFile;
-
-	public static String JarWriter_output_exportBin;
-
-	public static String JarWriter_output_exportJava;
-
-	public static String JarWriter_output_exportOutputFolders;
-
-	public static String JarWriter_output_generateManifest;
-
-	public static String JarWriter_output_jarFileName;
-
-	public static String JarWriter_output_jarSealed;
-
-	public static String JarWriter_output_lineSeparator;
-
-	public static String JarWriter_output_mainClass;
-
-	public static String JarWriter_output_manifestName;
-
-	public static String JarWriter_output_overwrite;
-
-	public static String JarWriter_output_reuseManifest;
-
-	public static String JarWriter_output_saveDescription;
-
-	public static String JarWriter_output_saveManifest;
-
-	public static String JarWriter_output_title;
 
 	public static String JarWriter_writeProblem;
 

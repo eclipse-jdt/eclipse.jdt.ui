@@ -1932,6 +1932,19 @@
                class="org.eclipse.core.resources.IResource">
          </selection>
       </wizard>
+      <wizard
+            name="%fatJarExportWizard.label"
+            icon="$nl$/icons/full/etool16/exportfatjar_wiz.gif"
+            class="org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarPackageWizard"
+            category="org.eclipse.jdt.ui.Java"
+            id="org.eclipse.jdt.internal.ui.fatjarpackager.JarPackageWizard">
+         <description>
+            %fatJarExportWizard.description
+         </description>
+         <selection
+               class="org.eclipse.core.resources.IResource">
+         </selection>
+      </wizard>
    </extension>
    <extension
          point="org.eclipse.ui.popupMenus">

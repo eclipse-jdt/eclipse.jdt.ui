@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
  *******************************************************************************/
 package org.eclipse.jdt.testplugin;
 
@@ -79,6 +80,8 @@ public class JavaProjectHelper {
 	public static final String JUNIT_SRC_ENCODING= "ISO-8859-1";
 	
 	public static final IPath MYLIB= new Path("testresources/mylib.jar");
+	public static final IPath MYLIB_STDOUT= new Path("testresources/mylib_stdout.jar");
+	public static final IPath MYLIB_SIG= new Path("testresources/mylib_sig.jar");
 	public static final IPath NLS_LIB= new Path("testresources/nls.jar");
 	
 	private static final int MAX_RETRY= 5;
@@ -339,6 +342,20 @@ public class JavaProjectHelper {
 	 * @throws CoreException Creation failed
 	 */				
 	public static IPackageFragmentRoot addSourceContainer(IJavaProject jproject, String containerName, IPath[] inclusionFilters, IPath[] exclusionFilters) throws CoreException {
+		return addSourceContainer(jproject, containerName, inclusionFilters, exclusionFilters, null);
+	}
+	
+	/**
+	 * Adds a source container to a IJavaProject.
+	 * @param jproject The parent project
+	 * @param containerName The name of the new source container
+	 * @param inclusionFilters Inclusion filters to set
+	 * @param exclusionFilters Exclusion filters to set
+	 * @param outputLocation The location where class files are written to, <b>null</b> for project output folder
+	 * @return The handle to the new source container
+	 * @throws CoreException Creation failed
+	 */
+	public static IPackageFragmentRoot addSourceContainer(IJavaProject jproject, String containerName, IPath[] inclusionFilters, IPath[] exclusionFilters, String outputLocation) throws CoreException {
 		IProject project= jproject.getProject();
 		IContainer container= null;
 		if (containerName == null || containerName.length() == 0) {
@@ -352,7 +369,15 @@ public class JavaProjectHelper {
 		}
 		IPackageFragmentRoot root= jproject.getPackageFragmentRoot(container);
 		
-		IClasspathEntry cpe= JavaCore.newSourceEntry(root.getPath(), inclusionFilters, exclusionFilters, null);
+		IPath outputPath= null;
+		if (outputLocation != null) {
+			IFolder folder= project.getFolder(outputLocation);
+			if (!folder.exists()) {
+				CoreUtility.createFolder(folder, false, true, null);
+			}
+			outputPath= folder.getFullPath();
+		}
+		IClasspathEntry cpe= JavaCore.newSourceEntry(root.getPath(), inclusionFilters, exclusionFilters, outputPath);
 		addToClasspath(jproject, cpe);		
 		return root;
 	}

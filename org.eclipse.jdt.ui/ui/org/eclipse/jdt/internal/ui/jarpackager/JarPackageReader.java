@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackager;
 
@@ -23,11 +24,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -36,18 +32,16 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.core.refactoring.history.IRefactoringHistoryService;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -56,11 +50,19 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.jarpackager.IJarBuilder;
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionReader;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarBuilder;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * Reads data from an InputStream and returns a JarPackage
@@ -74,6 +76,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	/**
 	 * Reads a Jar Package from the underlying stream.
 	 * It is the client's responsibility to close the stream.
+	 * @param inputStream 
 	 */
 	public JarPackageReader(InputStream inputStream) {
 		Assert.isNotNull(inputStream);
@@ -139,6 +142,9 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 			if (jarPackage.areGeneratedFilesExported())
 				xmlReadManifest(jarPackage, element);
 			xmlReadSelectedElements(jarPackage, element);
+			
+			// fatjar read builder props
+			xmlReadFatjar(jarPackage, element);
 		}
 		return jarPackage;
 	}
@@ -403,4 +409,22 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	protected void addWarning(String message, Throwable error) {
 		fWarnings.add(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, message, error));
 	}
+
+	private void xmlReadFatjar(JarPackageData jarPackage, Element element) throws java.io.IOException {
+		if (element.getNodeName().equals("fatjar")) { //$NON-NLS-1$
+			String id = element.getAttribute("builder"); //$NON-NLS-1$
+			IJarBuilder builder= jarPackage.getJarBuilder();
+			if (builder == null || !builder.getId().equals(id)) {
+				if (FatJarBuilder.BUILDER_ID.equals(id)) {
+					jarPackage.setJarBuilder(jarPackage.createFatJarBuilder());
+				} else if (PlainJarBuilder.BUILDER_ID.equals(id)) {
+					jarPackage.setJarBuilder(jarPackage.createPlainJarBuilder());
+				} else {
+					throw new IOException(Messages.format(JarPackagerMessages.JarPackageReader_error_unknownJarBuilder, id));
+				}
+			}
+			jarPackage.setLaunchConfigurationName(element.getAttribute("launchConfig")); //$NON-NLS-1$
+		}
+	}
+
 }
