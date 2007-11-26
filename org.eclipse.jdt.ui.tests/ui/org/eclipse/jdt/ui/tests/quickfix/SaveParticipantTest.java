@@ -394,8 +394,6 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
-		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
-		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
