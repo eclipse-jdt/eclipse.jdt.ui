@@ -20,12 +20,32 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
 
 import org.eclipse.jdt.ui.leaktest.reftracker.ReferenceTracker;
+import org.eclipse.jdt.ui.leaktest.reftracker.ReferenceVisitor;
+import org.eclipse.jdt.ui.leaktest.reftracker.ReferencedObject;
 
 
 /**
  * Base class for leak test cases. 
  */
 public class LeakTestCase extends TestCase {
+	
+	public class MulipleCollectorVisitor extends ReferenceVisitor {
+		private ReferenceVisitor[] fVisitors;
+		
+		public MulipleCollectorVisitor(ReferenceVisitor[] visitors) {
+			fVisitors= visitors;
+		}
+		
+		public boolean visit(ReferencedObject object, Class clazz, boolean firstVisit) {
+			boolean visitChildren= false;
+			for (int i= 0; i < fVisitors.length; i++) {
+				boolean res= fVisitors[i].visit(object, clazz, firstVisit);
+				visitChildren |= res;
+			}
+			return visitChildren;
+		}
+		
+	}
 	
 	public LeakTestCase(String name) {
 		super(name);
@@ -36,6 +56,25 @@ public class LeakTestCase extends TestCase {
 		calmDown();
 		new ReferenceTracker(requestor).start(getClass().getClassLoader());
 		return requestor;
+	}
+	
+	private InstancesOfTypeCollector[] collect(String[] requestedTypeNames) {
+		final InstancesOfTypeCollector[] requestors= new InstancesOfTypeCollector[requestedTypeNames.length];
+		for (int i= 0; i < requestors.length; i++) {
+			requestors[i]= new InstancesOfTypeCollector(requestedTypeNames[i], false);
+		}
+		calmDown();
+		ReferenceVisitor visitor= new ReferenceVisitor() {
+			public boolean visit(ReferencedObject object, Class clazz, boolean firstVisit) {
+				for (int i= 0; i < requestors.length; i++) {
+					requestors[i].visit(object, clazz, firstVisit);
+				}
+				return true;
+			}
+		};
+		
+		new ReferenceTracker(visitor).start(getClass().getClassLoader());
+		return requestors;
 	}
 
 	/*
@@ -86,6 +125,41 @@ public class LeakTestCase extends TestCase {
 			numTries--;
 			if (numTries == 0) {
   				assertTrue("Expected: " + expected + ", actual: " + actual + "\n" + requestor.getResultString(), false);
+			}
+  		}
+	}
+  	
+  	
+  	/**
+   	 * Asserts that the instance count of the given class is as expected.
+   	 * 
+	 * @param classNames the types names of the instances to count
+  	 * @param expected the expected instance count
+	 */
+  	public void assertInstanceCount(final String[] classNames, final int[] expected) {
+  		int numTries= 2;
+  		while (true) {
+	  		InstancesOfTypeCollector[] requestors= collect(classNames);
+	  		
+	  		boolean success= true;
+	  		for (int k= 0; success && k < requestors.length; k++) {
+				if (expected[k] != requestors[k].getNumberOfResults()) {
+					success= false;
+				}
+			}
+	  		if (success)
+	  			return;
+
+	  		numTries--;
+			if (numTries == 0) {
+	  			StringBuffer buf= new StringBuffer();
+		  		for (int k= 0; k < requestors.length; k++) {
+					int actual= requestors[k].getNumberOfResults();
+					if (expected[k] != actual) {
+						buf.append("Expected: " + expected[k] + ", actual: " + actual + "\n" + requestors[k].getResultString()).append("\n---------------------\n");
+					}
+				}
+  				assertTrue(buf.toString(), false);
 			}
   		}
 	}

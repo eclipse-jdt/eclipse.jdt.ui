@@ -69,7 +69,7 @@ public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 		fUndoManager.connect(fTextViewer);
 	}
 	
-	public void testLeak() throws Exception{
+	public void testTextViewerUndoManager() throws Exception{
 		// There is always a document instance around, hence a DocumentUndoManager.
 		// So count instances first.
 		// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=61432
@@ -86,16 +86,21 @@ public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 		
 		fTextViewer= null;
 		
-		assertInstanceCount(TextViewer.class, 0);
-		assertInstanceCount(TextViewerUndoManager.class, 0);
-		assertInstanceCount(getSharedUndoManagersInnerClass("TextInputListener"), 0);
-		assertInstanceCount(getSharedUndoManagersInnerClass("DocumentUndoListener"), 0);
-		assertInstanceCount(getSharedUndoManagersInnerClass("KeyAndMouseListener"), 0);
-
-		assertInstanceCount(DocumentUndoManager.class, instanceCount);
-		assertInstanceCount(getDocumentUndoManagersInnerClass("DocumentListener"), 0);
-		assertInstanceCount(getDocumentUndoManagersInnerClass("HistoryListener"), 0);
+		String[] types= {
+			TextViewer.class.getName(),
+			TextViewerUndoManager.class.getName(),
+			
+			getSharedUndoManagersInnerClass("TextInputListener").getName(),
+			getSharedUndoManagersInnerClass("DocumentUndoListener").getName(),
+			getSharedUndoManagersInnerClass("KeyAndMouseListener").getName(),
+			
+			DocumentUndoManager.class.getName(),
+			getDocumentUndoManagersInnerClass("DocumentListener").getName(),
+			getDocumentUndoManagersInnerClass("HistoryListener").getName(),
+		};
+		int expected[]= new int[] { 0, 0,    0, 0, 0,    instanceCount, 0, 0};
 		
+		assertInstanceCount(types, expected);
 	}
 	
 	private Class getSharedUndoManagersInnerClass(String className) {

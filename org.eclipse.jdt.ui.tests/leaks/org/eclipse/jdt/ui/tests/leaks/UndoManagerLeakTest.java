@@ -67,7 +67,7 @@ public class UndoManagerLeakTest extends LeakTestCase {
 		fUndoManager.connect(fTextViewer);
 	}
 	
-	public void testLeak() {
+	public void testUndoManagerLeak() {
 		internalTestConvertLineDelimiters();
 		internalTestRandomAccess();
 		internalTestRandomAccessAsCompound();
@@ -80,12 +80,18 @@ public class UndoManagerLeakTest extends LeakTestCase {
 		
 		fTextViewer= null;
 		
-		assertInstanceCount(TextViewer.class, 0);
-		assertInstanceCount(DefaultUndoManager.class, 0);
-		assertInstanceCount(getDefaultUndoManagersInnerClass("HistoryListener"), 0);
-		assertInstanceCount(getDefaultUndoManagersInnerClass("TextCommand"), 0);
-		assertInstanceCount(getDefaultUndoManagersInnerClass("CompoundTextCommand"), 0);
 		
+		String[] types= {
+			TextViewer.class.getName(),
+			DefaultUndoManager.class.getName(),
+			
+			getDefaultUndoManagersInnerClass("HistoryListener").getName(),
+			getDefaultUndoManagersInnerClass("TextCommand").getName(),
+			getDefaultUndoManagersInnerClass("CompoundTextCommand").getName(),
+		};
+		int expected[]= new int[] { 0, 0, 0, 0, 0};
+			
+		assertInstanceCount(types, expected);
 	}
 	
 	private Class getDefaultUndoManagersInnerClass(String className) {
