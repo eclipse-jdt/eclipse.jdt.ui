@@ -36,9 +36,8 @@ public final class MoveMemberTypeRefactoringContribution extends JavaRefactoring
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
-		MoveInnerToTopRefactoring refactoring= new MoveInnerToTopRefactoring(null, null);
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
-		return refactoring;
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+		return new MoveInnerToTopRefactoring(arguments, status);
 	}
 
 	public RefactoringDescriptor createDescriptor() {

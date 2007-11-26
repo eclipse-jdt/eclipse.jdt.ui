@@ -27,13 +27,13 @@ import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IScriptableRefactoring;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 
-public interface IReorgPolicy extends IScriptableRefactoring, IReorgDestinationValidator {
+public interface IReorgPolicy extends IReorgDestinationValidator {
 	
 	/**
 	 * @return the unique id of this policy
@@ -94,6 +94,17 @@ public interface IReorgPolicy extends IScriptableRefactoring, IReorgDestinationV
 	 */
 	public ChangeDescriptor getDescriptor();
 
+	
+	/**
+	 * Initializes the reorg policy with arguments from a script.
+	 * 
+	 * @param arguments
+	 *            the arguments
+	 * @return an object describing the status of the initialization. If the
+	 *         status has severity <code>FATAL_ERROR</code>, the refactoring
+	 *         will not be executed.
+	 */
+	public RefactoringStatus initialize(JavaRefactoringArguments arguments);
 	
 	public RefactoringStatus checkFinalConditions(IProgressMonitor monitor, CheckConditionsContext context, IReorgQueries queries) throws CoreException;
 	

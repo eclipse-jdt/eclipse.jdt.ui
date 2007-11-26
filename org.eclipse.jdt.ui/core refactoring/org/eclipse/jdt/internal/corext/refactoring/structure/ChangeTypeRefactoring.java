@@ -32,9 +32,9 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -76,8 +76,8 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -85,7 +85,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
-import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
@@ -115,7 +114,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 /**
  * @author tip
  */
-public class ChangeTypeRefactoring extends ScriptableRefactoring {
+public class ChangeTypeRefactoring extends Refactoring {
 
 	private static final String ATTRIBUTE_TYPE= "type"; //$NON-NLS-1$
 
@@ -240,6 +239,10 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 
 	/**
 	 * Constructor for ChangeTypeRefactoring (invoked from tests only)
+	 * @param cu the compilation unit
+	 * @param selectionStart selection offset
+	 * @param selectionLength selection length
+	 * @param selectedType selected type
 	 */
 	public ChangeTypeRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, String selectedType) {
 		Assert.isTrue(selectionStart >= 0);
@@ -260,6 +263,12 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 		fValidTypes= new HashSet();
 	}
 
+    public ChangeTypeRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
+   		this(null, 0, 0, null);
+   		RefactoringStatus initializeStatus= initialize(arguments);
+   		status.merge(initializeStatus);
+    }
+	
 	// ------------------------------------------------------------------------------------------------- //
 
 	/*
@@ -281,8 +290,10 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 	/**
 	 * Check if the right type of AST Node is selected. Create the TypeHierarchy needed to
 	 * bring up the wizard.
+	 * @param pm progress monitor
+	 * @return returns the resulting status
 	 */
-	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
+	private RefactoringStatus checkSelection(IProgressMonitor pm) {
 		try {
 			pm.beginTask("", 5); //$NON-NLS-1$
 
@@ -373,7 +384,7 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 		}
 	}
 	
-	private boolean checkOverriddenBinaryMethods() throws JavaModelException {
+	private boolean checkOverriddenBinaryMethods() {
 		if (fMethodBinding != null){
 			Set declaringSupertypes= getDeclaringSuperTypes(fMethodBinding);
 			for (Iterator iter= declaringSupertypes.iterator(); iter.hasNext();) {
@@ -411,6 +422,8 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 	/**
 	 * Do the actual work of computing allowable types. Invoked by the wizard when
 	 * "compute" button is pressed
+	 * @param pm the progress monitor
+	 * @return the valid types
 	 */
 	public Collection/*<IType>*/ computeValidTypes(IProgressMonitor pm) {
 		
@@ -506,6 +519,10 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 
 	/**
 	 * Apply all changes related to a single ICompilationUnit
+	 * @param icu the compilation unit
+	 * @param vars 
+	 * @param unitChange 
+	 * @throws CoreException 
 	 */
 	private void addAllChangesFor(ICompilationUnit icu, Set vars, CompilationUnitChange unitChange) throws CoreException {
 		CompilationUnit	unit= new RefactoringASTParser(AST.JLS3).parse(icu, false);
@@ -576,6 +593,9 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 	/**
 	 * Creates the appropriate ParameterizedType node. Recursion is needed to
 	 * handle the nested case (e.g., Vector<Vector<String>>).
+	 * @param ast 
+	 * @param typeBinding 
+	 * @return the created type
 	 */
 	private Type createParameterizedType(AST ast, ITypeBinding typeBinding){
 		if (typeBinding.isParameterizedType() && !typeBinding.isRawType()){
@@ -598,7 +618,7 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 	
 	
 	
-	private void groupChangesByCompilationUnit(Map relevantVarsByUnit) throws JavaModelException {
+	private void groupChangesByCompilationUnit(Map relevantVarsByUnit) {
 		for (Iterator it= fRelevantVars.iterator(); it.hasNext();) {
 			ConstraintVariable cv= (ConstraintVariable) it.next();
 			if (!(cv instanceof ExpressionVariable) && !(cv instanceof ReturnTypeVariable)){
@@ -680,7 +700,9 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 	// its parents in the AST are stored in fields fBinding, theMethod, and theField
 
 	/**
-	 * Determines what kind of ASTNode has been selected. A non-null String containing an error message
+	 * Determines what kind of ASTNode has been selected.
+	 * @param node the node
+	 * @return  A non-null String containing an error message
 	 * is returned if the ChangeTypeRefactoring refactoring cannot be applied to the selected ASTNode.
 	 * A return value of null indicates a valid selection.  
 	 */
@@ -744,6 +766,7 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 	}
 	/**
 	 * The selection corresponds to an ASTNode on which "ChangeTypeRefactoring" is not defined.
+	 * @return the message
 	 */
 	private static String nodeTypeNotSupported() {
 		return RefactoringCoreMessages.ChangeTypeRefactoring_notSupportedOnNodeType; 
@@ -751,6 +774,8 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 
 	/**
 	  * The selection corresponds to a SingleVariableDeclaration
+	 * @param svd 
+	 * @return the message
 	  */
 	private String singleVariableDeclarationSelected(SingleVariableDeclaration svd) {
 		SimpleName name = svd.getName();
@@ -760,6 +785,8 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 
 	/**
 	  * The selection corresponds to a ParameterizedType (return type of method)
+	 * @param pt the type
+	 * @return the message
 	  */
 	private String parameterizedTypeSelected(ParameterizedType pt) {
 		ASTNode parent= pt.getParent();
@@ -783,6 +810,8 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 	
 	/**
 	 * The selection corresponds to a VariableDeclarationStatement
+	 * @param vds the name
+	 * @return the message
 	 */
 	private String variableDeclarationStatementSelected(VariableDeclarationStatement vds) {
 		if (vds.fragments().size() != 1) {
@@ -797,6 +826,8 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 
 	/**
 	 * The selection corresponds to a FieldDeclaration
+	 * @param fieldDeclaration the field
+	 * @return the message
 	 */
 	private String fieldDeclarationSelected(FieldDeclaration fieldDeclaration) {
 		if (fieldDeclaration.fragments().size() != 1) {
@@ -812,6 +843,8 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 
 	/**
 	 * The selection corresponds to a SimpleName
+	 * @param simpleName the name
+	 * @return the message
 	 */
 	private String simpleNameSelected(SimpleName simpleName) {
 		ASTNode parent= simpleName.getParent();
@@ -913,6 +946,8 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
  
 	/**
 	 * Find a ConstraintVariable that corresponds to the selected ASTNode.
+	 * @param pm 
+	 * @return the ConstraintVariable
 	 */
 	private ConstraintVariable findConstraintVariableForSelectedNode(IProgressMonitor pm) {
 		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, 100);  
@@ -945,6 +980,8 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 
 	/**
 	 * Determine if a given ConstraintVariable matches the selected ASTNode.
+	 * @param cv the ConstraintVariable
+	 * @return <code>true</code> if the given ConstraintVariable matches the selected ASTNode
 	 */
 	private boolean matchesSelection(ConstraintVariable cv){
 		if (cv instanceof ExpressionVariable){
@@ -971,6 +1008,10 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 	 * expression. In addition to the expression itself, this consists of
 	 * any expression that is defines-equal to it, and any expression equal
 	 * to it. 
+	 * @param cv 
+	 * @param pm 
+	 * @return the constraint variables
+	 * @throws CoreException 
 	 */
 	private Collection/*<ConstraintVariable>*/ findRelevantConstraintVars(ConstraintVariable cv, IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, 150); 
@@ -1019,6 +1060,10 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 
 	/**
 	 * Select the type constraints that involve the selected ASTNode.
+	 * @param relevantConstraintVars 
+	 * @param pm 
+	 * @return the result
+	 * @throws CoreException 
 	 */
 	private Collection/*<ITypeConstraint>*/ findRelevantConstraints(Collection/*<ConstraintVariable>*/ relevantConstraintVars, 
 																	IProgressMonitor pm) throws CoreException {
@@ -1064,6 +1109,10 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 	
 	/**
 	 * Finds the declaration of the ASTNode in a given AST at a specified offset and with a specified length
+	 * @param root the AST
+	 * @param start start
+	 * @param length length
+	 * @return the declaring node
 	 */
 	private static ASTNode findDeclaration(final ASTNode root, final int start, final int length){
 		ASTNode node= NodeFinder.perform(root, start, length);
@@ -1092,6 +1141,12 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 	
 	/**
 	 * Determines the set of types for which a set of type constraints is satisfied.
+	 * @param originalType 
+	 * @param relevantVars 
+	 * @param relevantConstraints 
+	 * @param pm 
+	 * @return the valid types
+	 * @throws JavaModelException 
 	 */
 	private Collection/*<ITypeBinding>*/ computeValidTypes(ITypeBinding originalType, 
 													Collection/*<ConstraintVariable>*/ relevantVars,
@@ -1099,7 +1154,6 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 													IProgressMonitor pm) throws JavaModelException {
 		
 		Collection/*<ITypeBinding>*/ result= new HashSet();
-		IJavaProject project= fCu.getJavaProject();
 
 		Collection/*<ITypeBinding>*/ allTypes = new HashSet/*<IType>*/();
 		allTypes.addAll(getAllSuperTypes(originalType)); 
@@ -1108,7 +1162,7 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 
 		for (Iterator/*<ITypeBinding>*/ it= allTypes.iterator(); it.hasNext(); ) {
 			ITypeBinding type= (ITypeBinding)it.next();
-			if (isValid(project, type, relevantVars, relevantConstraints, new SubProgressMonitor(pm, 1))) {
+			if (isValid(type, relevantVars, relevantConstraints, new SubProgressMonitor(pm, 1))) {
 				result.add(type);
 			}
 		} 		
@@ -1125,9 +1179,14 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 
 	/**
 	 * Determines if a given type satisfies a set of type constraints.
+	 * @param type 
+	 * @param relevantVars 
+	 * @param constraints 
+	 * @param pm 
+	 * @return <code>true</code> if a the type satisfies a set of type constraints.
+	 * @throws JavaModelException 
 	 */
-	private boolean isValid(IJavaProject project,
-							ITypeBinding type,
+	private boolean isValid(ITypeBinding type,
 						    Collection/*<ConstraintVariable>*/ relevantVars, 
 						    Collection/*<ITypeConstraint>*/ constraints,
 							IProgressMonitor pm) throws JavaModelException {
@@ -1135,10 +1194,10 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 		for (Iterator it= constraints.iterator(); it.hasNext(); ) {
 			ITypeConstraint tc= (ITypeConstraint)it.next();
 			if (tc instanceof SimpleTypeConstraint) {
-				if (!(isValidSimpleConstraint(project, type,  relevantVars, (SimpleTypeConstraint) tc)))
+				if (!(isValidSimpleConstraint(type,  relevantVars, (SimpleTypeConstraint) tc)))
 					return false;
 			} else if (tc instanceof CompositeOrTypeConstraint) {
-				if (!(isValidOrConstraint(project, type,  relevantVars, (CompositeOrTypeConstraint) tc)))
+				if (!(isValidOrConstraint(type,  relevantVars, (CompositeOrTypeConstraint) tc)))
 					return false;
 			} 
 			pm.worked(1);
@@ -1147,9 +1206,9 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 		return true;
 	}
 	
-	private boolean isValidSimpleConstraint(IJavaProject project, ITypeBinding type, 
+	private boolean isValidSimpleConstraint(ITypeBinding type, 
 											Collection/*<ConstraintVariable>*/ relevantVars,
-											SimpleTypeConstraint stc) throws JavaModelException{
+											SimpleTypeConstraint stc){
 		if (relevantVars.contains(stc.getLeft())) { // upper bound
 			if (!isSubTypeOf(type, findType(stc.getRight()))) {
 				return false;
@@ -1158,9 +1217,9 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 		return true;
 	}
 	
-	private boolean isValidOrConstraint(IJavaProject project, ITypeBinding type, 
+	private boolean isValidOrConstraint(ITypeBinding type, 
 										Collection/*<ConstraintVariable>*/ relevantVars,
-										CompositeOrTypeConstraint cotc) throws JavaModelException{
+										CompositeOrTypeConstraint cotc){
 		ITypeConstraint[] components= cotc.getConstraints();
 		for (int i= 0; i < components.length; i++) {
 			if (components[i] instanceof SimpleTypeConstraint) {
@@ -1184,6 +1243,9 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 
 	/**
 	 * Gather constraints associated with a set of compilation units.
+	 * @param referringCus 
+	 * @param pm 
+	 * @return the constraints
 	 */
 	private Collection/*<ITypeConstraint>*/ getConstraints(ICompilationUnit[] referringCus, IProgressMonitor pm) {
 		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, referringCus.length); 
@@ -1230,6 +1292,10 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 	
 	/**
 	 * update a CompilationUnit's imports after changing the type of declarations
+	 * @param astRoot the AST
+	 * @param rootEdit the resulting edit
+	 * @return the type name to use
+	 * @throws CoreException 
 	 */
 	private String updateImports(CompilationUnit astRoot, MultiTextEdit rootEdit) throws CoreException{	
 		ImportRewrite rewrite= StubUtility.createImportRewrite(astRoot, true);
@@ -1278,6 +1344,7 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 	/**
 	 * Returns the Collection<String> of names of types that can be given to the selected declaration.
 	 * (used in tests only)
+	 * @return Collection<String> of names of types that can be given to the selected declaration
 	 */
 	public Collection/*<String>*/ getValidTypeNames() {
 		Collection/*<String>*/ typeNames= new ArrayList();
@@ -1307,6 +1374,9 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 	 * Determines the set of compilation units that may give rise to type constraints that
 	 * we are interested in. This involves searching for overriding/overridden methods,
 	 * method calls, field accesses.
+	 * @param pm the monitor
+	 * @return the affected units
+	 * @throws CoreException 
 	 */
 	private ICompilationUnit[] collectAffectedUnits(IProgressMonitor pm) throws CoreException {
 		// BUG: currently, no type constraints are generated for methods that are related
@@ -1401,13 +1471,15 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 
 	/**
 	 * Determines if a constraint variable corresponds to the constant "null".
+	 * @param cv 
+	 * @return <code>true</code> if the constraint variable corresponds to the constant "null".
 	 */
 	private static boolean isNull(ConstraintVariable cv) {
 		return cv instanceof ExpressionVariable && ((ExpressionVariable)cv).getExpressionType() == ASTNode.NULL_LITERAL;
 	}
 
 
-	/**
+	/*
 	 * For debugging.
 	 */
 	void printCollection(String title, Collection/*<Object>*/ l) {
@@ -1419,6 +1491,8 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 
 	/**
 	 * Returns the compilation units that contain the search results.
+	 * @param groups 
+	 * @return the CUs
 	 */
 	private ICompilationUnit[] getCus(SearchResultGroup[] groups) {
 		List result= new ArrayList(groups.length);
@@ -1436,6 +1510,8 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
     /**
 	 * This always includes the type itself. It will include type
 	 * Object for any type other than Object
+     * @param type 
+     * @return the super types
 	 */
 	public Set/*<ITypeBinding>*/ getAllSuperTypes(ITypeBinding type){
 		Set/*<ITypeBinding>*/ result= new HashSet();
@@ -1482,44 +1558,37 @@ public class ChangeTypeRefactoring extends ScriptableRefactoring {
 		return false;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public RefactoringStatus initialize(RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String selection= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION);
-			if (selection != null) {
-				int offset= -1;
-				int length= -1;
-				final StringTokenizer tokenizer= new StringTokenizer(selection);
-				if (tokenizer.hasMoreTokens())
-					offset= Integer.valueOf(tokenizer.nextToken()).intValue();
-				if (tokenizer.hasMoreTokens())
-					length= Integer.valueOf(tokenizer.nextToken()).intValue();
-				if (offset >= 0 && length >= 0) {
-					fSelectionStart= offset;
-					fSelectionLength= length;
-				} else
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION}));
+	private RefactoringStatus initialize(JavaRefactoringArguments arguments) {
+		final String selection= arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION);
+		if (selection != null) {
+			int offset= -1;
+			int length= -1;
+			final StringTokenizer tokenizer= new StringTokenizer(selection);
+			if (tokenizer.hasMoreTokens())
+				offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+			if (tokenizer.hasMoreTokens())
+				length= Integer.valueOf(tokenizer.nextToken()).intValue();
+			if (offset >= 0 && length >= 0) {
+				fSelectionStart= offset;
+				fSelectionLength= length;
 			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION));
-			final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-					return createInputFatalStatus(element, IJavaRefactorings.GENERALIZE_TYPE);
-				else
-					fCu= (ICompilationUnit) element;
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
-			final String type= extended.getAttribute(ATTRIBUTE_TYPE);
-			if (type != null && !"".equals(type)) //$NON-NLS-1$
-				fSelectedTypeName= type;
-			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TYPE));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION}));
 		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION));
+		final String handle= arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		if (handle != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(arguments.getProject(), handle, false);
+			if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
+				return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, getName(), IJavaRefactorings.GENERALIZE_TYPE);
+			else
+				fCu= (ICompilationUnit) element;
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+		final String type= arguments.getAttribute(ATTRIBUTE_TYPE);
+		if (type != null && !"".equals(type)) //$NON-NLS-1$
+			fSelectedTypeName= type;
+		else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TYPE));
 		return new RefactoringStatus();
 	}
 }

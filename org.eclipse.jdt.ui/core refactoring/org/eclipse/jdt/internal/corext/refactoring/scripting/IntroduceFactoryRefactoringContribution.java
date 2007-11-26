@@ -36,9 +36,8 @@ public final class IntroduceFactoryRefactoringContribution extends JavaRefactori
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
-		IntroduceFactoryRefactoring refactoring= new IntroduceFactoryRefactoring(null, 0, 0);
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
-		return refactoring;
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+		return new IntroduceFactoryRefactoring(arguments, status);
 	}
 
 	public RefactoringDescriptor createDescriptor() {

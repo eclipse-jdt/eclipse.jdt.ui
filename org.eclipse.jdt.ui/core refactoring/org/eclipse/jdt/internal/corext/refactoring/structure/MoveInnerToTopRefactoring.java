@@ -32,11 +32,11 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IRefactoringStatusEntryComparator;
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -116,7 +116,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
-import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
@@ -136,7 +135,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
-public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
+public final class MoveInnerToTopRefactoring extends Refactoring {
 
 	private static final String ATTRIBUTE_FIELD= "field"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_MANDATORY= "mandatory"; //$NON-NLS-1$
@@ -529,6 +528,14 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 		if (fType != null)
 			initialize();
 	}
+	
+    public MoveInnerToTopRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
+		fType= null;
+		fCodeGenerationSettings= null;
+		fMarkInstanceFieldAsFinal= true; // default
+   		RefactoringStatus initializeStatus= initialize(arguments);
+   		status.merge(initializeStatus);
+    }
 
 	private void initialize() throws JavaModelException {
 		fQualifiedTypeName= JavaModelUtil.concatenateName(fType.getPackageFragment().getElementName(), fType.getElementName());
@@ -896,7 +903,7 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 					fTypeImports.remove(binding);
 			}
 			addEnclosingInstanceTypeParameters(parameters, declaration, rewrite);
-			modifyAccessToEnclosingInstance(targetRewrite, declaration, status, monitor);
+			modifyAccessToEnclosingInstance(targetRewrite, declaration, monitor);
 			if (binding != null) {
 				modifyInterfaceMemberModifiers(binding);
 				final ITypeBinding declaring= binding.getDeclaringClass();
@@ -1309,20 +1316,18 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 	 * type of the moved type. Note that all visibility changes have already been scheduled
 	 * in the visibility adjustor.
 	 */
-	private void modifyAccessToEnclosingInstance(final CompilationUnitRewrite targetRewrite, final AbstractTypeDeclaration declaration, final RefactoringStatus status, final IProgressMonitor monitor) throws JavaModelException {
+	private void modifyAccessToEnclosingInstance(final CompilationUnitRewrite targetRewrite, final AbstractTypeDeclaration declaration, final IProgressMonitor monitor) throws JavaModelException {
 		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(declaration);
 		Assert.isNotNull(monitor);
-		final Set handledMethods= new HashSet();
-		final Set handledFields= new HashSet();
 		final MemberAccessNodeCollector collector= new MemberAccessNodeCollector(fType.getDeclaringType().newSupertypeHierarchy(new SubProgressMonitor(monitor, 1)));
 		declaration.accept(collector);
-		modifyAccessToMethodsFromEnclosingInstance(targetRewrite, handledMethods, collector.getMethodInvocations(), declaration, status);
-		modifyAccessToFieldsFromEnclosingInstance(targetRewrite, handledFields, collector.getFieldAccesses(), declaration, status);
-		modifyAccessToFieldsFromEnclosingInstance(targetRewrite, handledFields, collector.getSimpleFieldNames(), declaration, status);
+		modifyAccessToMethodsFromEnclosingInstance(targetRewrite, collector.getMethodInvocations(), declaration);
+		modifyAccessToFieldsFromEnclosingInstance(targetRewrite, collector.getFieldAccesses(), declaration);
+		modifyAccessToFieldsFromEnclosingInstance(targetRewrite, collector.getSimpleFieldNames(), declaration);
 	}
 
-	private void modifyAccessToFieldsFromEnclosingInstance(CompilationUnitRewrite targetRewrite, Set handledFields, FieldAccess[] fieldAccesses, AbstractTypeDeclaration declaration, RefactoringStatus status) {
+	private void modifyAccessToFieldsFromEnclosingInstance(CompilationUnitRewrite targetRewrite, FieldAccess[] fieldAccesses, AbstractTypeDeclaration declaration) {
 		FieldAccess access= null;
 		for (int index= 0; index < fieldAccesses.length; index++) {
 			access= fieldAccesses[index];
@@ -1338,7 +1343,7 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	private void modifyAccessToFieldsFromEnclosingInstance(CompilationUnitRewrite targetRewrite, Set handledFields, SimpleName[] simpleNames, AbstractTypeDeclaration declaration, RefactoringStatus status) {
+	private void modifyAccessToFieldsFromEnclosingInstance(CompilationUnitRewrite targetRewrite, SimpleName[] simpleNames, AbstractTypeDeclaration declaration) {
 		IBinding binding= null;
 		SimpleName simpleName= null;
 		IVariableBinding variable= null;
@@ -1356,7 +1361,7 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	private void modifyAccessToMethodsFromEnclosingInstance(CompilationUnitRewrite targetRewrite, Set handledMethods, MethodInvocation[] methodInvocations, AbstractTypeDeclaration declaration, RefactoringStatus status) {
+	private void modifyAccessToMethodsFromEnclosingInstance(CompilationUnitRewrite targetRewrite, MethodInvocation[] methodInvocations, AbstractTypeDeclaration declaration) {
 		IMethodBinding binding= null;
 		MethodInvocation invocation= null;
 		for (int index= 0; index < methodInvocations.length; index++) {
@@ -1528,7 +1533,7 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 			return false;
 	}
 
-	private void updateReferenceInImport(ImportDeclaration enclosingImport, ASTNode node, CompilationUnitRewrite rewrite) throws CoreException {
+	private void updateReferenceInImport(ImportDeclaration enclosingImport, ASTNode node, CompilationUnitRewrite rewrite) {
 		final IBinding binding= enclosingImport.resolveBinding();
 		if (binding instanceof ITypeBinding) {
 			final ITypeBinding type= (ITypeBinding) binding;
@@ -1557,7 +1562,7 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	private void updateTypeReference(ITypeBinding[] parameters, ASTNode node, CompilationUnitRewrite rewrite, ICompilationUnit cu) throws CoreException {
+	private void updateTypeReference(ITypeBinding[] parameters, ASTNode node, CompilationUnitRewrite rewrite, ICompilationUnit cu) {
 		ImportDeclaration enclosingImport= (ImportDeclaration) ASTNodes.getParent(node, ImportDeclaration.class);
 		if (enclosingImport != null)
 			updateReferenceInImport(enclosingImport, node, rewrite);
@@ -1572,53 +1577,49 @@ public final class MoveInnerToTopRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-					return createInputFatalStatus(element, IJavaRefactorings.CONVERT_MEMBER_TYPE);
-				else {
-					fType= (IType) element;
-					fCodeGenerationSettings= JavaPreferencesSettings.getCodeGenerationSettings(fType.getJavaProject());
-					try {
-						initialize();
-					} catch (JavaModelException exception) {
-						JavaPlugin.log(exception);
-					}
+	private RefactoringStatus initialize(JavaRefactoringArguments arguments) {
+		final String handle= arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		if (handle != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(arguments.getProject(), handle, false);
+			if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
+				return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, getName(), IJavaRefactorings.CONVERT_MEMBER_TYPE);
+			else {
+				fType= (IType) element;
+				fCodeGenerationSettings= JavaPreferencesSettings.getCodeGenerationSettings(fType.getJavaProject());
+				try {
+					initialize();
+				} catch (JavaModelException exception) {
+					JavaPlugin.log(exception);
 				}
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
-			final String fieldName= extended.getAttribute(ATTRIBUTE_FIELD_NAME);
-			if (fieldName != null && !"".equals(fieldName)) //$NON-NLS-1$
-				fEnclosingInstanceFieldName= fieldName;
-			final String parameterName= extended.getAttribute(ATTRIBUTE_PARAMETER_NAME);
-			if (parameterName != null && !"".equals(parameterName)) //$NON-NLS-1$
-				fNameForEnclosingInstanceConstructorParameter= parameterName;
-			final String createField= extended.getAttribute(ATTRIBUTE_FIELD);
-			if (createField != null) {
-				fCreateInstanceField= Boolean.valueOf(createField).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FIELD));
-			final String markFinal= extended.getAttribute(ATTRIBUTE_FINAL);
-			if (markFinal != null) {
-				fMarkInstanceFieldAsFinal= Boolean.valueOf(markFinal).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FINAL));
-			final String possible= extended.getAttribute(ATTRIBUTE_POSSIBLE);
-			if (possible != null) {
-				fIsInstanceFieldCreationPossible= Boolean.valueOf(possible).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_POSSIBLE));
-			final String mandatory= extended.getAttribute(ATTRIBUTE_MANDATORY);
-			if (mandatory != null)
-				fIsInstanceFieldCreationMandatory= Boolean.valueOf(mandatory).booleanValue();
-			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_MANDATORY));
+			}
 		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+		final String fieldName= arguments.getAttribute(ATTRIBUTE_FIELD_NAME);
+		if (fieldName != null && !"".equals(fieldName)) //$NON-NLS-1$
+			fEnclosingInstanceFieldName= fieldName;
+		final String parameterName= arguments.getAttribute(ATTRIBUTE_PARAMETER_NAME);
+		if (parameterName != null && !"".equals(parameterName)) //$NON-NLS-1$
+			fNameForEnclosingInstanceConstructorParameter= parameterName;
+		final String createField= arguments.getAttribute(ATTRIBUTE_FIELD);
+		if (createField != null) {
+			fCreateInstanceField= Boolean.valueOf(createField).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FIELD));
+		final String markFinal= arguments.getAttribute(ATTRIBUTE_FINAL);
+		if (markFinal != null) {
+			fMarkInstanceFieldAsFinal= Boolean.valueOf(markFinal).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FINAL));
+		final String possible= arguments.getAttribute(ATTRIBUTE_POSSIBLE);
+		if (possible != null) {
+			fIsInstanceFieldCreationPossible= Boolean.valueOf(possible).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_POSSIBLE));
+		final String mandatory= arguments.getAttribute(ATTRIBUTE_MANDATORY);
+		if (mandatory != null)
+			fIsInstanceFieldCreationMandatory= Boolean.valueOf(mandatory).booleanValue();
+		else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_MANDATORY));
 		return new RefactoringStatus();
 	}
 }

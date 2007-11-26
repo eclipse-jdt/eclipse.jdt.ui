@@ -68,7 +68,6 @@ import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
-import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -854,7 +853,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 				final IResource resource= JavaRefactoringDescriptorUtil.handleToResource(extended.getProject(), handle);
 				if (resource == null || !resource.exists())
-					status.merge(ScriptableRefactoring.createInputWarningStatus(resource, getProcessorName(), IJavaRefactorings.DELETE));
+					status.merge(JavaRefactoringDescriptorUtil.createInputWarningStatus(resource, getProcessorName(), IJavaRefactorings.DELETE));
 				else
 					elements.add(resource);
 			} else
@@ -868,7 +867,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
 				if (element == null || !element.exists())
-					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getProcessorName(), IJavaRefactorings.DELETE));
+					status.merge(JavaRefactoringDescriptorUtil.createInputWarningStatus(element, getProcessorName(), IJavaRefactorings.DELETE));
 				else
 					elements.add(element);
 			} else

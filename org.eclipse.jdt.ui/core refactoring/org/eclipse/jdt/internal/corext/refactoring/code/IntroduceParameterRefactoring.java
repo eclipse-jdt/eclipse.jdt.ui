@@ -34,7 +34,6 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -88,7 +87,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
-public class IntroduceParameterRefactoring extends ScriptableRefactoring implements IDelegateUpdating {
+public class IntroduceParameterRefactoring extends Refactoring implements IDelegateUpdating {
 
 	private static final String ATTRIBUTE_ARGUMENT= "argument"; //$NON-NLS-1$
 
@@ -121,6 +120,12 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 	}
+	
+    public IntroduceParameterRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
+   		this(null, 0, 0);
+   		RefactoringStatus initializeStatus= initialize(arguments);
+   		status.merge(initializeStatus);
+    }
 	
 	// ------------------- IDelegateUpdating ----------------------
 
@@ -528,42 +533,38 @@ public class IntroduceParameterRefactoring extends ScriptableRefactoring impleme
 		return new IntroduceParameterDescriptor(extended.getProject(), description, comment.asString(), arguments, extended.getFlags());
 	}	
 
-	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			fArguments= extended;
-			final String selection= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION);
-			if (selection != null) {
-				int offset= -1;
-				int length= -1;
-				final StringTokenizer tokenizer= new StringTokenizer(selection);
-				if (tokenizer.hasMoreTokens())
-					offset= Integer.valueOf(tokenizer.nextToken()).intValue();
-				if (tokenizer.hasMoreTokens())
-					length= Integer.valueOf(tokenizer.nextToken()).intValue();
-				if (offset >= 0 && length >= 0) {
-					fSelectionStart= offset;
-					fSelectionLength= length;
-				} else
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION}));
+	private RefactoringStatus initialize(JavaRefactoringArguments arguments) {
+		fArguments= arguments;
+		final String selection= arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION);
+		if (selection != null) {
+			int offset= -1;
+			int length= -1;
+			final StringTokenizer tokenizer= new StringTokenizer(selection);
+			if (tokenizer.hasMoreTokens())
+				offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+			if (tokenizer.hasMoreTokens())
+				length= Integer.valueOf(tokenizer.nextToken()).intValue();
+			if (offset >= 0 && length >= 0) {
+				fSelectionStart= offset;
+				fSelectionLength= length;
 			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION));
-			final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-					return createInputFatalStatus(element, IJavaRefactorings.INTRODUCE_PARAMETER);
-				else
-					fSourceCU= ((IMethod) element).getCompilationUnit();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
-			final String name= extended.getAttribute(ATTRIBUTE_ARGUMENT);
-			if (name != null && !"".equals(name)) //$NON-NLS-1$
-				fParameterName= name;
-			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ARGUMENT));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION}));
 		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION));
+		final String handle= arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		if (handle != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(arguments.getProject(), handle, false);
+			if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
+				return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, getName(), IJavaRefactorings.INTRODUCE_PARAMETER);
+			else
+				fSourceCU= ((IMethod) element).getCompilationUnit();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+		final String name= arguments.getAttribute(ATTRIBUTE_ARGUMENT);
+		if (name != null && !"".equals(name)) //$NON-NLS-1$
+			fParameterName= name;
+		else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ARGUMENT));
 		return new RefactoringStatus();
 	}
 

@@ -18,7 +18,6 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractLocalDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
@@ -37,9 +36,8 @@ public final class ExtractTempRefactoringContribution extends JavaRefactoringCon
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
-		ExtractTempRefactoring refactoring= new ExtractTempRefactoring((ICompilationUnit) null, 0, 0);
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
-		return refactoring;
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+		return new ExtractTempRefactoring(arguments, status);
 	}
 
 	public RefactoringDescriptor createDescriptor() {

@@ -34,10 +34,10 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -72,7 +72,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
-import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsUpdate.CuUpdate;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
@@ -93,7 +92,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class InferTypeArgumentsRefactoring extends ScriptableRefactoring {
+public class InferTypeArgumentsRefactoring extends Refactoring {
 
 	private static final String ATTRIBUTE_CLONE= "clone"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_LEAVE= "leave"; //$NON-NLS-1$
@@ -114,6 +113,12 @@ public class InferTypeArgumentsRefactoring extends ScriptableRefactoring {
 	public InferTypeArgumentsRefactoring(IJavaElement[] elements) {
 		fElements= elements;
 	}
+	
+    public InferTypeArgumentsRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
+   		this(null);
+   		RefactoringStatus initializeStatus= initialize(arguments);
+   		status.merge(initializeStatus);
+    }
 	
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#getName()
@@ -249,8 +254,8 @@ public class InferTypeArgumentsRefactoring extends ScriptableRefactoring {
 
 	private HashMap getJavaElementsPerProject(IJavaElement[] elements) {
 		HashMap/*<IJavaProject, List<JavaElement>>*/ result= new HashMap/*<IJavaProject, List<JavaElement>>*/();
-		for (int i= 0; i < fElements.length; i++) {
-			IJavaElement element= fElements[i];
+		for (int i= 0; i < elements.length; i++) {
+			IJavaElement element= elements[i];
 			IJavaProject javaProject= element.getJavaProject();
 			ArrayList javaElements= (ArrayList) result.get(javaProject);
 			if (javaElements == null) {
@@ -580,40 +585,36 @@ public class InferTypeArgumentsRefactoring extends ScriptableRefactoring {
 		return first;
 	}
 
-	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			final String clone= generic.getAttribute(ATTRIBUTE_CLONE);
-			if (clone != null) {
-				fAssumeCloneReturnsSameType= Boolean.valueOf(clone).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_CLONE));
-			final String leave= generic.getAttribute(ATTRIBUTE_LEAVE);
-			if (leave != null) {
-				fLeaveUnconstrainedRaw= Boolean.valueOf(leave).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_LEAVE));
-			int count= 1;
-			final List elements= new ArrayList();
-			String handle= null;
-			String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
-			final RefactoringStatus status= new RefactoringStatus();
-			while ((handle= generic.getAttribute(attribute)) != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(generic.getProject(), handle, false);
-				if (element == null || !element.exists())
-					return createInputFatalStatus(element, IJavaRefactorings.INFER_TYPE_ARGUMENTS);
-				else
-					elements.add(element);
-				count++;
-				attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
-			}
-			fElements= (IJavaElement[]) elements.toArray(new IJavaElement[elements.size()]);
-			if (elements.isEmpty())
-				return createInputFatalStatus(null, IJavaRefactorings.INFER_TYPE_ARGUMENTS);
-			if (!status.isOK())
-				return status;
+	private RefactoringStatus initialize(JavaRefactoringArguments arguments) {
+		final String clone= arguments.getAttribute(ATTRIBUTE_CLONE);
+		if (clone != null) {
+			fAssumeCloneReturnsSameType= Boolean.valueOf(clone).booleanValue();
 		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_CLONE));
+		final String leave= arguments.getAttribute(ATTRIBUTE_LEAVE);
+		if (leave != null) {
+			fLeaveUnconstrainedRaw= Boolean.valueOf(leave).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_LEAVE));
+		int count= 1;
+		final List elements= new ArrayList();
+		String handle= null;
+		String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
+		final RefactoringStatus status= new RefactoringStatus();
+		while ((handle= arguments.getAttribute(attribute)) != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(arguments.getProject(), handle, false);
+			if (element == null || !element.exists())
+				return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, getName(), IJavaRefactorings.INFER_TYPE_ARGUMENTS);
+			else
+				elements.add(element);
+			count++;
+			attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
+		}
+		fElements= (IJavaElement[]) elements.toArray(new IJavaElement[elements.size()]);
+		if (elements.isEmpty())
+			return JavaRefactoringDescriptorUtil.createInputFatalStatus(null, getName(), IJavaRefactorings.INFER_TYPE_ARGUMENTS);
+		if (!status.isOK())
+			return status;
 		return new RefactoringStatus();
 	}
 }

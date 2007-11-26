@@ -36,9 +36,8 @@ public final class IntroduceParameterRefactoringContribution extends JavaRefacto
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
-		IntroduceParameterRefactoring refactoring= new IntroduceParameterRefactoring(null, 0, 0);
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
-		return refactoring;
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+		return new IntroduceParameterRefactoring(arguments, status);
 	}
 
 	public RefactoringDescriptor createDescriptor() {

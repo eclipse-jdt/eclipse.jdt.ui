@@ -1,5 +1,6 @@
 package org.eclipse.jdt.internal.corext.refactoring;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
@@ -7,11 +8,17 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 public class JavaRefactoringDescriptorUtil {
 	/* TODO: share implementation with
@@ -214,6 +221,47 @@ public class JavaRefactoringDescriptorUtil {
 		if (project != null && !"".equals(project) && project.equals(resource.getProject().getName())) //$NON-NLS-1$
 			return resource.getProjectRelativePath().toPortableString();
 		return resource.getFullPath().toPortableString();
+	}
+
+	/**
+	 * Creates a fatal error status telling that the input element does not
+	 * exist.
+	 * 
+	 * @param element
+	 *            the input element, or <code>null</code>
+	 * @param name
+	 *            the name of the refactoring
+	 * @param id
+	 *            the id of the refactoring
+	 * @return the refactoring status
+	 */
+	public static RefactoringStatus createInputFatalStatus(final Object element, final String name, final String id) {
+		Assert.isNotNull(name);
+		Assert.isNotNull(id);
+		if (element != null)
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, new String[] { JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_FULLY_QUALIFIED), name, id}));
+		else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_inputs_do_not_exist, new String[] { name, id}));
+	}
+
+	/**
+	 * Creates a warning status telling that the input element does not exist.
+	 * 
+	 * @param element
+	 *            the input element, or <code>null</code>
+	 * @param name
+	 *            the name of the refactoring
+	 * @param id
+	 *            the id of the refactoring
+	 * @return the refactoring status
+	 */
+	public static RefactoringStatus createInputWarningStatus(final Object element, final String name, final String id) {
+		Assert.isNotNull(name);
+		Assert.isNotNull(id);
+		if (element != null)
+			return RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, new String[] { JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_FULLY_QUALIFIED), name, id}));
+		else
+			return RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_inputs_do_not_exist, new String[] { name, id}));
 	}
 
 }

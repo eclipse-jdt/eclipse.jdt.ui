@@ -36,9 +36,8 @@ public final class InlineTempRefactoringContribution extends JavaRefactoringCont
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
-		InlineTempRefactoring refactoring= new InlineTempRefactoring(null, 0, 0);
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
-		return refactoring;
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+		return new InlineTempRefactoring(arguments, status);
 	}
 
 	public RefactoringDescriptor createDescriptor() {

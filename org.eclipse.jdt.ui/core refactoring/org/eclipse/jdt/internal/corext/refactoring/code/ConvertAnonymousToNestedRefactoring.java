@@ -31,10 +31,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -107,7 +107,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
-public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
+public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_FINAL= "final"; //$NON-NLS-1$
@@ -186,6 +186,12 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
         fCu= (ICompilationUnit) javaElement;
         fSelectionStart= declaration.getStartPosition();
         fSelectionLength= declaration.getLength();
+    }
+    
+    public ConvertAnonymousToNestedRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
+   		this(null, 0, 0);
+   		RefactoringStatus initializeStatus= initialize(arguments);
+   		status.merge(initializeStatus);
     }
     
 	public void setLinkedProposalModel(LinkedProposalModel linkedProposalModel) {
@@ -558,14 +564,14 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 			type= ast.newSimpleType(newNameNode);
 		newClassCreation.setType(type);
 		copyArguments(rewrite, newClassCreation);
-		addArgumentsForLocalsUsedInInnerClass(rewrite, newClassCreation);
+		addArgumentsForLocalsUsedInInnerClass(newClassCreation);
 		
 		addLinkedPosition(KEY_TYPE_NAME, newNameNode, rewrite.getASTRewrite(), true);
 
 		return newClassCreation;
 	}
 
-    private void addArgumentsForLocalsUsedInInnerClass(CompilationUnitRewrite rewrite, ClassInstanceCreation newClassCreation) {
+    private void addArgumentsForLocalsUsedInInnerClass(ClassInstanceCreation newClassCreation) {
         IVariableBinding[] usedLocals= getUsedLocalVariables();
         for (int i= 0; i < usedLocals.length; i++) {
             final AST ast= fAnonymousInnerClassNode.getAST();
@@ -697,7 +703,7 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 		return newDeclaration;
 	}
 
-	private void updateAndMoveBodyDeclarations(CompilationUnitRewrite rewriter, IVariableBinding[] bindings, String[] fieldNames, List newBodyDeclarations, MethodDeclaration newConstructorDecl) throws JavaModelException {
+	private void updateAndMoveBodyDeclarations(CompilationUnitRewrite rewriter, IVariableBinding[] bindings, String[] fieldNames, List newBodyDeclarations, MethodDeclaration newConstructorDecl) {
 		final ASTRewrite astRewrite= rewriter.getASTRewrite();
 		final AST ast= astRewrite.getAST();
 		
@@ -1031,7 +1037,7 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
 		return param;
     }
 
-    private void setSuperType(TypeDeclaration declaration) throws JavaModelException {
+    private void setSuperType(TypeDeclaration declaration) {
         ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) fAnonymousInnerClassNode.getParent();
 		ITypeBinding binding= classInstanceCreation.resolveTypeBinding();
         if (binding == null)
@@ -1106,63 +1112,59 @@ public class ConvertAnonymousToNestedRefactoring extends ScriptableRefactoring {
         return ans;
     }
 
-    public RefactoringStatus initialize(final RefactoringArguments arguments) {
+    private RefactoringStatus initialize(JavaRefactoringArguments arguments) {
 		fSelfInitializing= true;
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
-			if (handle != null) {
-				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-				if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-					return createInputFatalStatus(element, IJavaRefactorings.CONVERT_ANONYMOUS);
-				else {
-					fCu= (ICompilationUnit) element;
-				}
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
-			final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
-			if (name != null && !"".equals(name)) //$NON-NLS-1$
-				fClassName= name;
-			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
-			final String visibility= extended.getAttribute(ATTRIBUTE_VISIBILITY);
-			if (visibility != null && !"".equals(visibility)) {//$NON-NLS-1$
-				int flag= 0;
-				try {
-					flag= Integer.parseInt(visibility);
-				} catch (NumberFormatException exception) {
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_VISIBILITY));
-				}
-				fVisibility= flag;
+		final String handle= arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		if (handle != null) {
+			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(arguments.getProject(), handle, false);
+			if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
+				return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, getName(), IJavaRefactorings.CONVERT_ANONYMOUS);
+			else {
+				fCu= (ICompilationUnit) element;
 			}
-			final String selection= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION);
-			if (selection != null) {
-				int offset= -1;
-				int length= -1;
-				final StringTokenizer tokenizer= new StringTokenizer(selection);
-				if (tokenizer.hasMoreTokens())
-					offset= Integer.valueOf(tokenizer.nextToken()).intValue();
-				if (tokenizer.hasMoreTokens())
-					length= Integer.valueOf(tokenizer.nextToken()).intValue();
-				if (offset >= 0 && length >= 0) {
-					fSelectionStart= offset;
-					fSelectionLength= length;
-				} else
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION}));
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION));
-			final String declareStatic= extended.getAttribute(ATTRIBUTE_STATIC);
-			if (declareStatic != null) {
-				fDeclareStatic= Boolean.valueOf(declareStatic).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_STATIC));
-			final String declareFinal= extended.getAttribute(ATTRIBUTE_FINAL);
-			if (declareFinal != null) {
-				fDeclareFinal= Boolean.valueOf(declareStatic).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FINAL));
 		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+		final String name= arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
+		if (name != null && !"".equals(name)) //$NON-NLS-1$
+			fClassName= name;
+		else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
+		final String visibility= arguments.getAttribute(ATTRIBUTE_VISIBILITY);
+		if (visibility != null && !"".equals(visibility)) {//$NON-NLS-1$
+			int flag= 0;
+			try {
+				flag= Integer.parseInt(visibility);
+			} catch (NumberFormatException exception) {
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_VISIBILITY));
+			}
+			fVisibility= flag;
+		}
+		final String selection= arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION);
+		if (selection != null) {
+			int offset= -1;
+			int length= -1;
+			final StringTokenizer tokenizer= new StringTokenizer(selection);
+			if (tokenizer.hasMoreTokens())
+				offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+			if (tokenizer.hasMoreTokens())
+				length= Integer.valueOf(tokenizer.nextToken()).intValue();
+			if (offset >= 0 && length >= 0) {
+				fSelectionStart= offset;
+				fSelectionLength= length;
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION}));
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION));
+		final String declareStatic= arguments.getAttribute(ATTRIBUTE_STATIC);
+		if (declareStatic != null) {
+			fDeclareStatic= Boolean.valueOf(declareStatic).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_STATIC));
+		final String declareFinal= arguments.getAttribute(ATTRIBUTE_FINAL);
+		if (declareFinal != null) {
+			fDeclareFinal= Boolean.valueOf(declareStatic).booleanValue();
+		} else
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FINAL));
 		return new RefactoringStatus();
 	}
 }

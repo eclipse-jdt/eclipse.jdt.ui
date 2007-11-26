@@ -34,10 +34,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 
 import org.eclipse.jdt.core.Flags;
@@ -69,7 +69,6 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
@@ -94,7 +93,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  *    assigned to a parameter again. No need for a separate local (important to be able
  *    to reverse extract method correctly).
  */
-public class InlineMethodRefactoring extends ScriptableRefactoring {
+public class InlineMethodRefactoring extends Refactoring {
 
 	private static final String ATTRIBUTE_MODE= "mode"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DELETE= "delete";	 //$NON-NLS-1$
@@ -376,7 +375,7 @@ public class InlineMethodRefactoring extends ScriptableRefactoring {
 		return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.InlineMethodRefactoring_edit_inlineCall, fChangeManager.getAllChanges());
 	}
 	
-	private static SourceProvider resolveSourceProvider(RefactoringStatus status, ITypeRoot typeRoot, ASTNode invocation) throws JavaModelException {
+	private static SourceProvider resolveSourceProvider(RefactoringStatus status, ITypeRoot typeRoot, ASTNode invocation) {
 		CompilationUnit root= (CompilationUnit)invocation.getRoot();
 		IMethodBinding methodBinding= Invocations.resolveBinding(invocation);
 		if (methodBinding == null) {
@@ -549,30 +548,4 @@ public class InlineMethodRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			final String delete= generic.getAttribute(ATTRIBUTE_DELETE);
-			if (delete != null) {
-				fDeleteSource= Boolean.valueOf(delete).booleanValue();
-			} else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELETE));
-			final String value= generic.getAttribute(ATTRIBUTE_MODE);
-			if (value != null && !"".equals(value)) {//$NON-NLS-1$
-				int mode= 0;
-				try {
-					mode= Integer.parseInt(value);
-				} catch (NumberFormatException exception) {
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_MODE));
-				}
-				try {
-					setCurrentMode(mode == 1 ? Mode.INLINE_ALL : Mode.INLINE_SINGLE);
-				} catch (JavaModelException exception) {
-					return RefactoringStatus.createFatalErrorStatus(exception.getLocalizedMessage());
-				}
-			}
-		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
-		return new RefactoringStatus();
-	}
 }

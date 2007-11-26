@@ -32,11 +32,11 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -114,7 +114,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 /**
  * Extracts a method in a compilation unit based on a text selection range.
  */
-public class ExtractMethodRefactoring extends ScriptableRefactoring {
+public class ExtractMethodRefactoring extends Refactoring {
 
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DESTINATION= "destination"; //$NON-NLS-1$
@@ -221,6 +221,12 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 		fSelectionLength= selectionLength;
 		fVisibility= -1;
 	}
+	
+    public ExtractMethodRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
+   		this((ICompilationUnit) null, 0, 0);
+   		RefactoringStatus initializeStatus= initialize(arguments);
+   		status.merge(initializeStatus);
+    }
 	
 	/**
 	 * Creates a new extract method refactoring
@@ -978,12 +984,8 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 		return fCUnit;
 	}
 
-	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (!(arguments instanceof JavaRefactoringArguments))
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
-
-		final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-		final String selection= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION);
+	private RefactoringStatus initialize(JavaRefactoringArguments arguments) {
+		final String selection= arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION);
 		if (selection == null)
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION));
 		
@@ -1000,16 +1002,16 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 		fSelectionStart= offset;
 		fSelectionLength= length;
 
-		final String handle= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
+		final String handle= arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
 		if (handle == null)
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
 			
-		IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
+		IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(arguments.getProject(), handle, false);
 		if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-			return createInputFatalStatus(element, IJavaRefactorings.EXTRACT_METHOD);
+			return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, getName(), IJavaRefactorings.EXTRACT_METHOD);
 
 		fCUnit= (ICompilationUnit) element;
-		final String visibility= extended.getAttribute(ATTRIBUTE_VISIBILITY);
+		final String visibility= arguments.getAttribute(ATTRIBUTE_VISIBILITY);
 		if (visibility != null && visibility.length() != 0) {
 			int flag= 0;
 			try {
@@ -1019,13 +1021,13 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 			}
 			fVisibility= flag;
 		}
-		final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
+		final String name= arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
 		if (name == null || name.length() == 0)
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
 
 		fMethodName= name;
 		
-		final String destination= extended.getAttribute(ATTRIBUTE_DESTINATION);
+		final String destination= arguments.getAttribute(ATTRIBUTE_DESTINATION);
 		if (destination != null && destination.length() == 0) {
 			int index= 0;
 			try {
@@ -1035,19 +1037,19 @@ public class ExtractMethodRefactoring extends ScriptableRefactoring {
 			}
 			fDestinationIndex= index;
 		}
-		final String replace= extended.getAttribute(ATTRIBUTE_REPLACE);
+		final String replace= arguments.getAttribute(ATTRIBUTE_REPLACE);
 		if (replace == null)
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
 
 		fReplaceDuplicates= Boolean.valueOf(replace).booleanValue();
 
-		final String comments= extended.getAttribute(ATTRIBUTE_COMMENTS);
+		final String comments= arguments.getAttribute(ATTRIBUTE_COMMENTS);
 		if (comments == null)
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_COMMENTS));
 
 		fGenerateJavadoc= Boolean.valueOf(comments).booleanValue();
 
-		final String exceptions= extended.getAttribute(ATTRIBUTE_EXCEPTIONS);
+		final String exceptions= arguments.getAttribute(ATTRIBUTE_EXCEPTIONS);
 		if (exceptions == null)
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_EXCEPTIONS));
 

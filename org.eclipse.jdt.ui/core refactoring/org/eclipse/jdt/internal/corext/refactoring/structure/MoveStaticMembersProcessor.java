@@ -102,7 +102,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
-import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateFieldCreator;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
@@ -1034,7 +1033,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		if (handle != null) {
 			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
 			if (element == null || !element.exists() || element.getElementType() != IJavaElement.TYPE)
-				return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.MOVE_STATIC_MEMBERS);
+				return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.MOVE_STATIC_MEMBERS);
 			else {
 				fDestinationType= (IType) element;
 				fDestinationTypeName= fDestinationType.getFullyQualifiedName();
@@ -1058,7 +1057,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		while ((handle= extended.getAttribute(attribute)) != null) {
 			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
 			if (element == null || !element.exists())
-				status.merge(ScriptableRefactoring.createInputWarningStatus(element, getProcessorName(), IJavaRefactorings.MOVE_STATIC_MEMBERS));
+				status.merge(JavaRefactoringDescriptorUtil.createInputWarningStatus(element, getProcessorName(), IJavaRefactorings.MOVE_STATIC_MEMBERS));
 			else
 				elements.add(element);
 			count++;
@@ -1066,7 +1065,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		}
 		fMembersToMove= (IMember[]) elements.toArray(new IMember[elements.size()]);
 		if (elements.isEmpty())
-			return ScriptableRefactoring.createInputFatalStatus(null, getProcessorName(), IJavaRefactorings.MOVE_STATIC_MEMBERS);
+			return JavaRefactoringDescriptorUtil.createInputFatalStatus(null, getProcessorName(), IJavaRefactorings.MOVE_STATIC_MEMBERS);
 		IJavaProject project= null;
 		if (fMembersToMove.length > 0)
 			project= fMembersToMove[0].getJavaProject();

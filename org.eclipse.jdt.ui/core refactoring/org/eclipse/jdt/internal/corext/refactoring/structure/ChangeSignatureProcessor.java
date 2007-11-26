@@ -122,7 +122,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
-import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
@@ -2549,7 +2548,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		if (handle != null) {
 			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
 			if (element == null || !element.exists() || element.getElementType() != IJavaElement.METHOD)
-				return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.CHANGE_METHOD_SIGNATURE);
+				return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.CHANGE_METHOD_SIGNATURE);
 			else {
 				fMethod= (IMethod) element;
 				fMethodName= fMethod.getElementName();
@@ -2629,7 +2628,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			if (kind != null) {
 				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), value, false);
 				if (element == null || !element.exists())
-					return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.CHANGE_METHOD_SIGNATURE);
+					return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.CHANGE_METHOD_SIGNATURE);
 				else {
 					try {
 						info= new ExceptionInfo((IType) element, Integer.valueOf(kind).intValue(), null);

@@ -55,7 +55,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
-import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -382,7 +381,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 		if (handle != null) {
 			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
 			if (element == null || !element.exists())
-				return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.RENAME_TYPE_PARAMETER);
+				return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.RENAME_TYPE_PARAMETER);
 			else {
 				if (element instanceof IMethod)
 					fTypeParameter= ((IMethod) element).getTypeParameter(parameter);
@@ -392,7 +391,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { handle,
 							JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT }));
 				if (fTypeParameter == null || !fTypeParameter.exists())
-					return ScriptableRefactoring.createInputFatalStatus(fTypeParameter, getProcessorName(), IJavaRefactorings.RENAME_TYPE_PARAMETER);
+					return JavaRefactoringDescriptorUtil.createInputFatalStatus(fTypeParameter, getProcessorName(), IJavaRefactorings.RENAME_TYPE_PARAMETER);
 			}
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));

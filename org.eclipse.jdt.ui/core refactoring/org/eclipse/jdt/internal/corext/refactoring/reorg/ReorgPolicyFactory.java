@@ -49,7 +49,6 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.CopyArguments;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
@@ -121,7 +120,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageFragmentRootChange;
-import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory.JavaElementDestination;
@@ -960,85 +958,81 @@ public final class ReorgPolicyFactory {
 			return result;
 		}
 
-		public RefactoringStatus initialize(RefactoringArguments arguments) {
-			final RefactoringStatus status= new RefactoringStatus();
-			if (arguments instanceof JavaRefactoringArguments) {
-				final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-				int fileCount= 0;
-				int folderCount= 0;
-				int unitCount= 0;
-				String value= extended.getAttribute(ATTRIBUTE_FILES);
-				if (value != null && !"".equals(value)) {//$NON-NLS-1$
-					try {
-						fileCount= Integer.parseInt(value);
-					} catch (NumberFormatException exception) {
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FILES));
-					}
-				} else
+		public RefactoringStatus initialize(JavaRefactoringArguments arguments) {
+			RefactoringStatus status= new RefactoringStatus();
+			int fileCount= 0;
+			int folderCount= 0;
+			int unitCount= 0;
+			String value= arguments.getAttribute(ATTRIBUTE_FILES);
+			if (value != null && !"".equals(value)) {//$NON-NLS-1$
+				try {
+					fileCount= Integer.parseInt(value);
+				} catch (NumberFormatException exception) {
 					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FILES));
-				value= extended.getAttribute(ATTRIBUTE_FOLDERS);
-				if (value != null && !"".equals(value)) {//$NON-NLS-1$
-					try {
-						folderCount= Integer.parseInt(value);
-					} catch (NumberFormatException exception) {
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FOLDERS));
-					}
-				} else
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FOLDERS));
-				value= extended.getAttribute(ATTRIBUTE_UNITS);
-				if (value != null && !"".equals(value)) {//$NON-NLS-1$
-					try {
-						unitCount= Integer.parseInt(value);
-					} catch (NumberFormatException exception) {
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_UNITS));
-					}
-				} else
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_UNITS));
-				String handle= null;
-				List elements= new ArrayList();
-				for (int index= 0; index < fileCount; index++) {
-					final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1);
-					handle= extended.getAttribute(attribute);
-					if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
-						final IResource resource= JavaRefactoringDescriptorUtil.handleToResource(extended.getProject(), handle);
-						if (resource == null || !resource.exists())
-							status.merge(ScriptableRefactoring.createInputWarningStatus(resource, getProcessorId(), getRefactoringId()));
-						else
-							elements.add(resource);
-					} else
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
 				}
-				fFiles= (IFile[]) elements.toArray(new IFile[elements.size()]);
-				elements= new ArrayList();
-				for (int index= 0; index < folderCount; index++) {
-					final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (fileCount + index + 1);
-					handle= extended.getAttribute(attribute);
-					if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
-						final IResource resource= JavaRefactoringDescriptorUtil.handleToResource(extended.getProject(), handle);
-						if (resource == null || !resource.exists())
-							status.merge(ScriptableRefactoring.createInputWarningStatus(resource, getProcessorId(), getRefactoringId()));
-						else
-							elements.add(resource);
-					} else
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
-				}
-				fFolders= (IFolder[]) elements.toArray(new IFolder[elements.size()]);
-				elements= new ArrayList();
-				for (int index= 0; index < unitCount; index++) {
-					final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (folderCount + fileCount + index + 1);
-					handle= extended.getAttribute(attribute);
-					if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
-						final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-						if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
-							status.merge(ScriptableRefactoring.createInputWarningStatus(element, getProcessorId(), getRefactoringId()));
-						else
-							elements.add(element);
-					} else
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
-				}
-				fCus= (ICompilationUnit[]) elements.toArray(new ICompilationUnit[elements.size()]);
 			} else
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FILES));
+			value= arguments.getAttribute(ATTRIBUTE_FOLDERS);
+			if (value != null && !"".equals(value)) {//$NON-NLS-1$
+				try {
+					folderCount= Integer.parseInt(value);
+				} catch (NumberFormatException exception) {
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FOLDERS));
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FOLDERS));
+			value= arguments.getAttribute(ATTRIBUTE_UNITS);
+			if (value != null && !"".equals(value)) {//$NON-NLS-1$
+				try {
+					unitCount= Integer.parseInt(value);
+				} catch (NumberFormatException exception) {
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_UNITS));
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_UNITS));
+			String handle= null;
+			List elements= new ArrayList();
+			for (int index= 0; index < fileCount; index++) {
+				final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1);
+				handle= arguments.getAttribute(attribute);
+				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+					final IResource resource= JavaRefactoringDescriptorUtil.handleToResource(arguments.getProject(), handle);
+					if (resource == null || !resource.exists())
+						status.merge(JavaRefactoringDescriptorUtil.createInputWarningStatus(resource, getProcessorId(), getRefactoringId()));
+					else
+						elements.add(resource);
+				} else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+			}
+			fFiles= (IFile[]) elements.toArray(new IFile[elements.size()]);
+			elements= new ArrayList();
+			for (int index= 0; index < folderCount; index++) {
+				final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (fileCount + index + 1);
+				handle= arguments.getAttribute(attribute);
+				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+					final IResource resource= JavaRefactoringDescriptorUtil.handleToResource(arguments.getProject(), handle);
+					if (resource == null || !resource.exists())
+						status.merge(JavaRefactoringDescriptorUtil.createInputWarningStatus(resource, getProcessorId(), getRefactoringId()));
+					else
+						elements.add(resource);
+				} else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+			}
+			fFolders= (IFolder[]) elements.toArray(new IFolder[elements.size()]);
+			elements= new ArrayList();
+			for (int index= 0; index < unitCount; index++) {
+				final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (folderCount + fileCount + index + 1);
+				handle= arguments.getAttribute(attribute);
+				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+					final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(arguments.getProject(), handle, false);
+					if (element == null || !element.exists() || element.getElementType() != IJavaElement.COMPILATION_UNIT)
+						status.merge(JavaRefactoringDescriptorUtil.createInputWarningStatus(element, getProcessorId(), getRefactoringId()));
+					else
+						elements.add(element);
+				} else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+			}
+			fCus= (ICompilationUnit[]) elements.toArray(new ICompilationUnit[elements.size()]);
 			status.merge(super.initialize(arguments));
 			return status;
 		}
@@ -1497,26 +1491,22 @@ public final class ReorgPolicyFactory {
 			return !canUpdateReferences() && !canUpdateQualifiedNames();
 		}
 
-		public RefactoringStatus initialize(RefactoringArguments arguments) {
-			if (arguments instanceof JavaRefactoringArguments) {
-				final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-				final String patterns= extended.getAttribute(ATTRIBUTE_PATTERNS);
-				if (patterns != null && !"".equals(patterns)) //$NON-NLS-1$
-					fFilePatterns= patterns;
-				else
-					fFilePatterns= ""; //$NON-NLS-1$
-				final String references= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
-				if (references != null) {
-					fUpdateReferences= Boolean.valueOf(references).booleanValue();
-				} else
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
-				final String qualified= extended.getAttribute(ATTRIBUTE_QUALIFIED);
-				if (qualified != null) {
-					fUpdateQualifiedNames= Boolean.valueOf(qualified).booleanValue();
-				} else
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_QUALIFIED));
+		public RefactoringStatus initialize(JavaRefactoringArguments arguments) {
+			final String patterns= arguments.getAttribute(ATTRIBUTE_PATTERNS);
+			if (patterns != null && !"".equals(patterns)) //$NON-NLS-1$
+				fFilePatterns= patterns;
+			else
+				fFilePatterns= ""; //$NON-NLS-1$
+			final String references= arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES);
+			if (references != null) {
+				fUpdateReferences= Boolean.valueOf(references).booleanValue();
 			} else
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_REFERENCES));
+			final String qualified= arguments.getAttribute(ATTRIBUTE_QUALIFIED);
+			if (qualified != null) {
+				fUpdateQualifiedNames= Boolean.valueOf(qualified).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_QUALIFIED));
 			return super.initialize(arguments);
 		}
 
@@ -2536,7 +2526,7 @@ public final class ReorgPolicyFactory {
 			return new IResource[0];
 		}
 
-		public RefactoringStatus initialize(RefactoringArguments arguments) {
+		public RefactoringStatus initialize(JavaRefactoringArguments arguments) {
 			return new RefactoringStatus();
 		}
 
@@ -2603,7 +2593,7 @@ public final class ReorgPolicyFactory {
 			return new IResource[0];
 		}
 
-		public RefactoringStatus initialize(RefactoringArguments arguments) {
+		public RefactoringStatus initialize(JavaRefactoringArguments arguments) {
 			return new RefactoringStatus();
 		}
 
@@ -2820,37 +2810,33 @@ public final class ReorgPolicyFactory {
 			return result;
 		}
 
-		public RefactoringStatus initialize(RefactoringArguments arguments) {
+		public RefactoringStatus initialize(JavaRefactoringArguments arguments) {
 			final RefactoringStatus status= new RefactoringStatus();
-			if (arguments instanceof JavaRefactoringArguments) {
-				final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-				int rootCount= 0;
-				String value= extended.getAttribute(ATTRIBUTE_ROOTS);
-				if (value != null && !"".equals(value)) {//$NON-NLS-1$
-					try {
-						rootCount= Integer.parseInt(value);
-					} catch (NumberFormatException exception) {
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ROOTS));
-					}
-				} else
+			int rootCount= 0;
+			String value= arguments.getAttribute(ATTRIBUTE_ROOTS);
+			if (value != null && !"".equals(value)) {//$NON-NLS-1$
+				try {
+					rootCount= Integer.parseInt(value);
+				} catch (NumberFormatException exception) {
 					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ROOTS));
-				String handle= null;
-				List elements= new ArrayList();
-				for (int index= 0; index < rootCount; index++) {
-					final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1);
-					handle= extended.getAttribute(attribute);
-					if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
-						final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-						if (element == null || !element.exists() || element.getElementType() != IJavaElement.PACKAGE_FRAGMENT_ROOT)
-							status.merge(ScriptableRefactoring.createInputWarningStatus(element, getProcessorId(), getRefactoringId()));
-						else
-							elements.add(element);
-					} else
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
 				}
-				fPackageFragmentRoots= (IPackageFragmentRoot[]) elements.toArray(new IPackageFragmentRoot[elements.size()]);
 			} else
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ROOTS));
+			String handle= null;
+			List elements= new ArrayList();
+			for (int index= 0; index < rootCount; index++) {
+				final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1);
+				handle= arguments.getAttribute(attribute);
+				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+					final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(arguments.getProject(), handle, false);
+					if (element == null || !element.exists() || element.getElementType() != IJavaElement.PACKAGE_FRAGMENT_ROOT)
+						status.merge(JavaRefactoringDescriptorUtil.createInputWarningStatus(element, getProcessorId(), getRefactoringId()));
+					else
+						elements.add(element);
+				} else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+			}
+			fPackageFragmentRoots= (IPackageFragmentRoot[]) elements.toArray(new IPackageFragmentRoot[elements.size()]);
 			status.merge(super.initialize(arguments));
 			return status;
 		}
@@ -3045,37 +3031,33 @@ public final class ReorgPolicyFactory {
 			return result;
 		}
 
-		public RefactoringStatus initialize(RefactoringArguments arguments) {
+		public RefactoringStatus initialize(JavaRefactoringArguments arguments) {
 			final RefactoringStatus status= new RefactoringStatus();
-			if (arguments instanceof JavaRefactoringArguments) {
-				final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-				int fragmentCount= 0;
-				String value= extended.getAttribute(ATTRIBUTE_FRAGMENTS);
-				if (value != null && !"".equals(value)) {//$NON-NLS-1$
-					try {
-						fragmentCount= Integer.parseInt(value);
-					} catch (NumberFormatException exception) {
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FRAGMENTS));
-					}
-				} else
+			int fragmentCount= 0;
+			String value= arguments.getAttribute(ATTRIBUTE_FRAGMENTS);
+			if (value != null && !"".equals(value)) {//$NON-NLS-1$
+				try {
+					fragmentCount= Integer.parseInt(value);
+				} catch (NumberFormatException exception) {
 					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FRAGMENTS));
-				String handle= null;
-				List elements= new ArrayList();
-				for (int index= 0; index < fragmentCount; index++) {
-					final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1);
-					handle= extended.getAttribute(attribute);
-					if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
-						final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-						if (element == null || !element.exists() || element.getElementType() != IJavaElement.PACKAGE_FRAGMENT)
-							status.merge(ScriptableRefactoring.createInputWarningStatus(element, getProcessorId(), getRefactoringId()));
-						else
-							elements.add(element);
-					} else
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
 				}
-				fPackageFragments= (IPackageFragment[]) elements.toArray(new IPackageFragment[elements.size()]);
 			} else
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FRAGMENTS));
+			String handle= null;
+			List elements= new ArrayList();
+			for (int index= 0; index < fragmentCount; index++) {
+				final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1);
+				handle= arguments.getAttribute(attribute);
+				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+					final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(arguments.getProject(), handle, false);
+					if (element == null || !element.exists() || element.getElementType() != IJavaElement.PACKAGE_FRAGMENT)
+						status.merge(JavaRefactoringDescriptorUtil.createInputWarningStatus(element, getProcessorId(), getRefactoringId()));
+					else
+						elements.add(element);
+				} else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+			}
+			fPackageFragments= (IPackageFragment[]) elements.toArray(new IPackageFragment[elements.size()]);
 			status.merge(super.initialize(arguments));
 			return status;
 		}
@@ -3324,64 +3306,60 @@ public final class ReorgPolicyFactory {
 			return resourceDestination.getResource();
 		}
 
-		public RefactoringStatus initialize(RefactoringArguments arguments) {
-			if (arguments instanceof JavaRefactoringArguments) {
-				final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-				String handle= extended.getAttribute(ATTRIBUTE_DESTINATION);
-				if (handle != null) {
-					final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-					if (element != null) {
-						if (fCheckDestination && !element.exists())
-							return ScriptableRefactoring.createInputFatalStatus(element, getProcessorId(), getRefactoringId());
-						else {
-							try {
-								IReorgDestination destination= ReorgDestinationFactory.createDestination(element);
-								setDestination(destination);
-								return verifyDestination(destination);
-							} catch (JavaModelException exception) {
-								JavaPlugin.log(exception);
-								return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { handle, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT}));
-							}
-						}
-					} else {
-						// Leave for compatibility
-						// https://bugs.eclipse.org/bugs/show_bug.cgi?id=157479
-						final IResource resource= JavaRefactoringDescriptorUtil.handleToResource(extended.getProject(), handle);
-						if (resource == null || fCheckDestination && !resource.exists())
-							return ScriptableRefactoring.createInputFatalStatus(resource, getProcessorId(), getRefactoringId());
-						else {
-							try {
-								IReorgDestination destination= ReorgDestinationFactory.createDestination(resource);
-								setDestination(destination);
-								return verifyDestination(destination);
-							} catch (JavaModelException exception) {
-								JavaPlugin.log(exception);
-								return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { handle, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT}));
-							}
+		public RefactoringStatus initialize(JavaRefactoringArguments arguments) {
+			String handle= arguments.getAttribute(ATTRIBUTE_DESTINATION);
+			if (handle != null) {
+				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(arguments.getProject(), handle, false);
+				if (element != null) {
+					if (fCheckDestination && !element.exists())
+						return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, getProcessorId(), getRefactoringId());
+					else {
+						try {
+							IReorgDestination destination= ReorgDestinationFactory.createDestination(element);
+							setDestination(destination);
+							return verifyDestination(destination);
+						} catch (JavaModelException exception) {
+							JavaPlugin.log(exception);
+							return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { handle, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT}));
 						}
 					}
 				} else {
+					// Leave for compatibility
 					// https://bugs.eclipse.org/bugs/show_bug.cgi?id=157479
-					handle= extended.getAttribute(ATTRIBUTE_TARGET);
-					if (handle != null) {
-						final IResource resource= JavaRefactoringDescriptorUtil.handleToResource(extended.getProject(), handle);
-						if (resource == null || fCheckDestination && !resource.exists())
-							return ScriptableRefactoring.createInputFatalStatus(resource, getProcessorId(), getRefactoringId());
-						else {
-							try {
-								IReorgDestination destination= ReorgDestinationFactory.createDestination(resource);
-								setDestination(destination);
-								return verifyDestination(destination);
-							} catch (JavaModelException exception) {
-								JavaPlugin.log(exception);
-								return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { handle, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT}));
-							}
+					final IResource resource= JavaRefactoringDescriptorUtil.handleToResource(arguments.getProject(), handle);
+					if (resource == null || fCheckDestination && !resource.exists())
+						return JavaRefactoringDescriptorUtil.createInputFatalStatus(resource, getProcessorId(), getRefactoringId());
+					else {
+						try {
+							IReorgDestination destination= ReorgDestinationFactory.createDestination(resource);
+							setDestination(destination);
+							return verifyDestination(destination);
+						} catch (JavaModelException exception) {
+							JavaPlugin.log(exception);
+							return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { handle, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT}));
 						}
-					} else
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+					}
 				}
-			} else
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			} else {
+				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=157479
+				handle= arguments.getAttribute(ATTRIBUTE_TARGET);
+				if (handle != null) {
+					final IResource resource= JavaRefactoringDescriptorUtil.handleToResource(arguments.getProject(), handle);
+					if (resource == null || fCheckDestination && !resource.exists())
+						return JavaRefactoringDescriptorUtil.createInputFatalStatus(resource, getProcessorId(), getRefactoringId());
+					else {
+						try {
+							IReorgDestination destination= ReorgDestinationFactory.createDestination(resource);
+							setDestination(destination);
+							return verifyDestination(destination);
+						} catch (JavaModelException exception) {
+							JavaPlugin.log(exception);
+							return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { handle, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT}));
+						}
+					}
+				} else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
+			}
 		}
 
 		public final RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException {
@@ -3770,37 +3748,33 @@ public final class ReorgPolicyFactory {
 			return getEnclosingCompilationUnit(fJavaElements[0]);
 		}
 
-		public RefactoringStatus initialize(RefactoringArguments arguments) {
+		public RefactoringStatus initialize(JavaRefactoringArguments arguments) {
 			final RefactoringStatus status= new RefactoringStatus();
-			if (arguments instanceof JavaRefactoringArguments) {
-				final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-				int memberCount= 0;
-				String value= extended.getAttribute(ATTRIBUTE_MEMBERS);
-				if (value != null && !"".equals(value)) {//$NON-NLS-1$
-					try {
-						memberCount= Integer.parseInt(value);
-					} catch (NumberFormatException exception) {
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_MEMBERS));
-					}
-				} else
+			int memberCount= 0;
+			String value= arguments.getAttribute(ATTRIBUTE_MEMBERS);
+			if (value != null && !"".equals(value)) {//$NON-NLS-1$
+				try {
+					memberCount= Integer.parseInt(value);
+				} catch (NumberFormatException exception) {
 					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_MEMBERS));
-				String handle= null;
-				List elements= new ArrayList();
-				for (int index= 0; index < memberCount; index++) {
-					final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1);
-					handle= extended.getAttribute(attribute);
-					if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
-						final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
-						if (element == null || !element.exists())
-							status.merge(ScriptableRefactoring.createInputWarningStatus(element, getProcessorId(), getRefactoringId()));
-						else
-							elements.add(element);
-					} else
-						return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
 				}
-				fJavaElements= (IJavaElement[]) elements.toArray(new IJavaElement[elements.size()]);
 			} else
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_MEMBERS));
+			String handle= null;
+			List elements= new ArrayList();
+			for (int index= 0; index < memberCount; index++) {
+				final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1);
+				handle= arguments.getAttribute(attribute);
+				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+					final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(arguments.getProject(), handle, false);
+					if (element == null || !element.exists())
+						status.merge(JavaRefactoringDescriptorUtil.createInputWarningStatus(element, getProcessorId(), getRefactoringId()));
+					else
+						elements.add(element);
+				} else
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+			}
+			fJavaElements= (IJavaElement[]) elements.toArray(new IJavaElement[elements.size()]);
 			status.merge(super.initialize(arguments));
 			return status;
 		}
@@ -3951,25 +3925,21 @@ public final class ReorgPolicyFactory {
 		return (ICopyPolicy) createReorgPolicy(true, resources, javaElements);
 	}
 
-	public static ICopyPolicy createCopyPolicy(RefactoringStatus status, RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String policy= extended.getAttribute(ATTRIBUTE_POLICY);
-			if (policy != null && !"".equals(policy)) { //$NON-NLS-1$
-				if (CopyFilesFoldersAndCusPolicy.POLICY_COPY_RESOURCE.equals(policy)) {
-					return new CopyFilesFoldersAndCusPolicy(null, null, null);
-				} else if (CopyPackageFragmentRootsPolicy.POLICY_COPY_ROOTS.equals(policy)) {
-					return new CopyPackageFragmentRootsPolicy(null);
-				} else if (CopyPackagesPolicy.POLICY_COPY_PACKAGES.equals(policy)) {
-					return new CopyPackagesPolicy(null);
-				} else if (CopySubCuElementsPolicy.POLICY_COPY_MEMBERS.equals(policy)) {
-					return new CopySubCuElementsPolicy(null);
-				} else
-					status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { policy, ATTRIBUTE_POLICY})));
+	public static ICopyPolicy createCopyPolicy(RefactoringStatus status, JavaRefactoringArguments arguments) {
+		final String policy= arguments.getAttribute(ATTRIBUTE_POLICY);
+		if (policy != null && !"".equals(policy)) { //$NON-NLS-1$
+			if (CopyFilesFoldersAndCusPolicy.POLICY_COPY_RESOURCE.equals(policy)) {
+				return new CopyFilesFoldersAndCusPolicy(null, null, null);
+			} else if (CopyPackageFragmentRootsPolicy.POLICY_COPY_ROOTS.equals(policy)) {
+				return new CopyPackageFragmentRootsPolicy(null);
+			} else if (CopyPackagesPolicy.POLICY_COPY_PACKAGES.equals(policy)) {
+				return new CopyPackagesPolicy(null);
+			} else if (CopySubCuElementsPolicy.POLICY_COPY_MEMBERS.equals(policy)) {
+				return new CopySubCuElementsPolicy(null);
 			} else
-				status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_POLICY)));
+				status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { policy, ATTRIBUTE_POLICY})));
 		} else
-			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments));
+			status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_POLICY)));
 		return null;
 	}
 
@@ -3977,10 +3947,8 @@ public final class ReorgPolicyFactory {
 		return (IMovePolicy) createReorgPolicy(false, resources, javaElements);
 	}
 
-	public static IMovePolicy createMovePolicy(RefactoringStatus status, RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String policy= extended.getAttribute(ATTRIBUTE_POLICY);
+	public static IMovePolicy createMovePolicy(RefactoringStatus status, JavaRefactoringArguments arguments) {
+			final String policy= arguments.getAttribute(ATTRIBUTE_POLICY);
 			if (policy != null && !"".equals(policy)) { //$NON-NLS-1$
 				if (MoveFilesFoldersAndCusPolicy.POLICY_MOVE_RESOURCES.equals(policy)) {
 					return new MoveFilesFoldersAndCusPolicy(null, null, null);
@@ -3996,8 +3964,6 @@ public final class ReorgPolicyFactory {
 					status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new String[] { policy, ATTRIBUTE_POLICY})));
 			} else
 				status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_POLICY)));
-		} else
-			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments));
 		return null;
 	}
 

@@ -36,9 +36,8 @@ public final class InferTypeArgumentsRefactoringContribution extends JavaRefacto
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
-		InferTypeArgumentsRefactoring refactoring= new InferTypeArgumentsRefactoring(null);
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
-		return refactoring;
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+		return new InferTypeArgumentsRefactoring(arguments, status);
 	}
 
 	public RefactoringDescriptor createDescriptor() {

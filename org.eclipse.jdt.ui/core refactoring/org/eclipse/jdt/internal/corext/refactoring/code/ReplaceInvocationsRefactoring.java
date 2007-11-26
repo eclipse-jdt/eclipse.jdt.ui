@@ -34,9 +34,9 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 
 import org.eclipse.jdt.core.Flags;
@@ -86,7 +86,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
-public class ReplaceInvocationsRefactoring extends ScriptableRefactoring {
+public class ReplaceInvocationsRefactoring extends Refactoring {
 
 	private static final String ID_REPLACE_INVOCATIONS= "org.eclipse.jdt.ui.replace.invocations"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_MODE= "mode"; //$NON-NLS-1$
@@ -136,6 +136,12 @@ public class ReplaceInvocationsRefactoring extends ScriptableRefactoring {
 		fSelectionLength= -1;
 	}
 	
+    public ReplaceInvocationsRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
+   		this(null, 0, 0);
+   		RefactoringStatus initializeStatus= initialize(arguments);
+   		status.merge(initializeStatus);
+    }
+	
 	public String getName() {
 		return RefactoringCoreMessages.ReplaceInvocationsRefactoring_name;
 	}
@@ -147,7 +153,7 @@ public class ReplaceInvocationsRefactoring extends ScriptableRefactoring {
 		return fSelectionNode instanceof MethodInvocation;
 	}
 	
-	/**
+	/*
 	 * Only to be called after {@link #checkInitialConditions(IProgressMonitor)}
 	 */
 	public RefactoringStatus setCurrentMode(Mode mode) throws JavaModelException {
@@ -293,16 +299,16 @@ public class ReplaceInvocationsRefactoring extends ScriptableRefactoring {
 	private static ASTNode getTargetNode(ICompilationUnit unit, CompilationUnit root, int offset, int length) {
 		ASTNode node= null;
 		try {
-			node= checkNode(NodeFinder.perform(root, offset, length, unit), unit);
+			node= checkNode(NodeFinder.perform(root, offset, length, unit));
 		} catch(JavaModelException e) {
 			// Do nothing
 		}
 		if (node != null)
 			return node;
-		return checkNode(NodeFinder.perform(root, offset, length), unit);
+		return checkNode(NodeFinder.perform(root, offset, length));
 	}
 
-	private static ASTNode checkNode(ASTNode node, ICompilationUnit unit) {
+	private static ASTNode checkNode(ASTNode node) {
 		if (node == null)
 			return null;
 		if (node.getNodeType() == ASTNode.SIMPLE_NAME) {
@@ -540,25 +546,21 @@ public class ReplaceInvocationsRefactoring extends ScriptableRefactoring {
 		}
 	}
 
-	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			final String value= generic.getAttribute(ATTRIBUTE_MODE);
-			if (value != null && !"".equals(value)) {//$NON-NLS-1$
-				int mode= 0;
-				try {
-					mode= Integer.parseInt(value);
-				} catch (NumberFormatException exception) {
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_MODE));
-				}
-				try {
-					setCurrentMode(mode == 1 ? Mode.REPLACE_ALL : Mode.REPLACE_SINGLE);
-				} catch (JavaModelException exception) {
-					return RefactoringStatus.createFatalErrorStatus(exception.getLocalizedMessage());
-				}
+	private RefactoringStatus initialize(JavaRefactoringArguments arguments) {
+		final String value= arguments.getAttribute(ATTRIBUTE_MODE);
+		if (value != null && !"".equals(value)) {//$NON-NLS-1$
+			int mode= 0;
+			try {
+				mode= Integer.parseInt(value);
+			} catch (NumberFormatException exception) {
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_MODE));
 			}
-		} else
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+			try {
+				setCurrentMode(mode == 1 ? Mode.REPLACE_ALL : Mode.REPLACE_SINGLE);
+			} catch (JavaModelException exception) {
+				return RefactoringStatus.createFatalErrorStatus(exception.getLocalizedMessage());
+			}
+		}
 		return new RefactoringStatus();
 	}
 

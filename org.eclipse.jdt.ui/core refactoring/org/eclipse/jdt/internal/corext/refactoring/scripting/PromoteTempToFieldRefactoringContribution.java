@@ -36,9 +36,8 @@ public final class PromoteTempToFieldRefactoringContribution extends JavaRefacto
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
-		PromoteTempToFieldRefactoring refactoring= new PromoteTempToFieldRefactoring(null, 0, 0);
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
-		return refactoring;
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+		return new PromoteTempToFieldRefactoring(arguments, status);
 	}
 
 	public RefactoringDescriptor createDescriptor() {

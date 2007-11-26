@@ -36,9 +36,8 @@ public final class ChangeTypeRefactoringContribution extends JavaRefactoringCont
 	 * {@inheritDoc}
 	 */
 	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
-		ChangeTypeRefactoring refactoring = new ChangeTypeRefactoring(null, 0, 0);
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
-		return refactoring;
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+		return new ChangeTypeRefactoring(arguments, status);
 	}
 	
 	public RefactoringDescriptor createDescriptor() {

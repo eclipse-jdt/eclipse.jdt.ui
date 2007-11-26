@@ -36,9 +36,8 @@ public final class IntroduceIndirectionRefactoringContribution extends JavaRefac
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
-		IntroduceIndirectionRefactoring refactoring= new IntroduceIndirectionRefactoring(null);
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
-		return refactoring;
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+		return new IntroduceIndirectionRefactoring(arguments, status);
 	}
 
 	public RefactoringDescriptor createDescriptor() {

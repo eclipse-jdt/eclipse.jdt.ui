@@ -36,9 +36,8 @@ public final class ConvertAnonymousRefactoringContribution extends JavaRefactori
 	 * {@inheritDoc}
 	 */
 	public Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
-		ConvertAnonymousToNestedRefactoring refactoring = new ConvertAnonymousToNestedRefactoring(null, 0, 0);
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
-		return refactoring;
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+		return new ConvertAnonymousToNestedRefactoring(arguments, status);
 	}
 	
 	public RefactoringDescriptor createDescriptor() {

@@ -36,9 +36,8 @@ public final class InlineConstantRefactoringContribution extends JavaRefactoring
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
-		InlineConstantRefactoring refactoring= new InlineConstantRefactoring(null, null, 0, 0);
-		status.merge(refactoring.initialize(new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor))));
-		return refactoring;
+		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
+		return new InlineConstantRefactoring(arguments, status);
 	}
 
 	public RefactoringDescriptor createDescriptor() {

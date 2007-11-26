@@ -90,7 +90,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MultiStateCompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextEditBasedChangeManager;
@@ -946,7 +945,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 		if (handle != null) {
 			final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(extended.getProject(), handle, false);
 			if (element == null || element.getElementType() != IJavaElement.TYPE)
-				return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.EXTRACT_SUPERCLASS);
+				return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.EXTRACT_SUPERCLASS);
 			IType type= null;
 			final ICompilationUnit unit= ((IType) element).getCompilationUnit();
 			if (unit != null && unit.exists()) {
@@ -962,7 +961,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			if (type != null)
 				fCachedDeclaringType= type;
 			else
-				return ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.EXTRACT_SUPERCLASS);
+				return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.EXTRACT_SUPERCLASS);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
 		final String stubs= extended.getAttribute(ATTRIBUTE_STUBS);
@@ -1028,7 +1027,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(fOwner, extended.getProject(), handle, false);
 				if (element == null || !element.exists())
-					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getProcessorName(), IJavaRefactorings.EXTRACT_SUPERCLASS));
+					status.merge(JavaRefactoringDescriptorUtil.createInputWarningStatus(element, getProcessorName(), IJavaRefactorings.EXTRACT_SUPERCLASS));
 				else
 					elements.add(element);
 			} else
@@ -1042,7 +1041,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(fOwner, extended.getProject(), handle, false);
 				if (element == null || !element.exists())
-					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getProcessorName(), IJavaRefactorings.EXTRACT_SUPERCLASS));
+					status.merge(JavaRefactoringDescriptorUtil.createInputWarningStatus(element, getProcessorName(), IJavaRefactorings.EXTRACT_SUPERCLASS));
 				else
 					elements.add(element);
 			} else
@@ -1056,7 +1055,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(fOwner, extended.getProject(), handle, false);
 				if (element == null || !element.exists())
-					status.merge(ScriptableRefactoring.createInputWarningStatus(element, getProcessorName(), IJavaRefactorings.EXTRACT_SUPERCLASS));
+					status.merge(JavaRefactoringDescriptorUtil.createInputWarningStatus(element, getProcessorName(), IJavaRefactorings.EXTRACT_SUPERCLASS));
 				else
 					elements.add(element);
 			} else
@@ -1070,7 +1069,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 				final IJavaElement element= JavaRefactoringDescriptorUtil.handleToElement(fOwner, extended.getProject(), handle, false);
 				if (element == null || !element.exists())
-					status.merge(ScriptableRefactoring.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.EXTRACT_SUPERCLASS));
+					status.merge(JavaRefactoringDescriptorUtil.createInputFatalStatus(element, getProcessorName(), IJavaRefactorings.EXTRACT_SUPERCLASS));
 				else
 					elements.add(element);
 			} else

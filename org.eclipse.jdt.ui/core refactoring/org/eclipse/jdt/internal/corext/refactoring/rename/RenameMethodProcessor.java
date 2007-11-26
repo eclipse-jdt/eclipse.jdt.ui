@@ -72,7 +72,6 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
-import org.eclipse.jdt.internal.corext.refactoring.code.ScriptableRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateCreator;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
@@ -848,15 +847,15 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 					final IMethod[] methods= declaring.findMethods(method);
 					if (methods != null && methods.length == 1 && methods[0] != null) {
 						if (!methods[0].exists())
-							return ScriptableRefactoring.createInputFatalStatus(methods[0], refactoring, IJavaRefactorings.RENAME_METHOD);
+							return JavaRefactoringDescriptorUtil.createInputFatalStatus(methods[0], refactoring, IJavaRefactorings.RENAME_METHOD);
 						fMethod= methods[0];
 						initializeWorkingCopyOwner();
 					} else
-						return ScriptableRefactoring.createInputFatalStatus(null, refactoring, IJavaRefactorings.RENAME_METHOD);
+						return JavaRefactoringDescriptorUtil.createInputFatalStatus(null, refactoring, IJavaRefactorings.RENAME_METHOD);
 				} else
-					return ScriptableRefactoring.createInputFatalStatus(element, refactoring, IJavaRefactorings.RENAME_METHOD);
+					return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, refactoring, IJavaRefactorings.RENAME_METHOD);
 			} else
-				return ScriptableRefactoring.createInputFatalStatus(element, refactoring, IJavaRefactorings.RENAME_METHOD);
+				return JavaRefactoringDescriptorUtil.createInputFatalStatus(element, refactoring, IJavaRefactorings.RENAME_METHOD);
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT));
 		final String name= extended.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME);
