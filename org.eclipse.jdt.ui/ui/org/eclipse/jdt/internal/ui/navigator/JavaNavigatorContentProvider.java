@@ -109,6 +109,9 @@ public class JavaNavigatorContentProvider extends
 		if (parent instanceof IJavaModel) {
 			return getViewerInput() != null ? fRealInput : parent;
 		}
+		if (parent instanceof IJavaProject) {
+			return ((IJavaProject)parent).getProject();
+		}
 		return parent;
 	}
 
@@ -163,14 +166,15 @@ public class JavaNavigatorContentProvider extends
 		return getParent(object);
 	}
 
-	public PipelinedShapeModification interceptAdd(
-			PipelinedShapeModification addModification) {
+	public PipelinedShapeModification interceptAdd(PipelinedShapeModification addModification) {
 		
-		if(addModification.getParent() instanceof IJavaProject) {
-			addModification.setParent(((IJavaProject)addModification.getParent()).getProject());
-		} else if(addModification.getParent() instanceof IWorkspaceRoot || 
-				addModification.getParent() instanceof IJavaProject){
+		Object parent= addModification.getParent();
 		
+		if (parent instanceof IJavaProject) {
+			addModification.setParent(((IJavaProject)parent).getProject());
+		} 
+		
+		if (parent instanceof IWorkspaceRoot) {		
 			deconvertJavaProjects(addModification);
 		}
 		
@@ -307,6 +311,8 @@ public class JavaNavigatorContentProvider extends
 	protected void postAdd(final Object parent, final Object element, Collection runnables) {
 		if (parent instanceof IJavaModel)
 			super.postAdd(((IJavaModel) parent).getWorkspace(), element, runnables);
+		else if (parent instanceof IJavaProject) 
+			super.postAdd( ((IJavaProject)parent).getProject(), element, runnables);
 		else
 			super.postAdd(parent, element, runnables);
 	}
