@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,15 +11,18 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import org.eclipse.jdt.text.tests.performance.DisplayWaiter.Timeout;
+import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.Performance;
+import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.test.performance.Dimension;
-import org.eclipse.test.performance.Performance;
-import org.eclipse.test.performance.PerformanceMeter;
+
 import org.eclipse.ui.texteditor.AbstractTextEditor;
+
+import org.eclipse.jdt.text.tests.performance.DisplayWaiter.Timeout;
 
 public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 	
@@ -139,7 +142,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 	protected void measure(ScrollingMode mode, PerformanceMeter performanceMeter, int warmUpRuns, int measuredRuns) throws Exception {
 		AbstractTextEditor editor= null;
 		try {
-			editor= openEditor(mode);
+			editor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(mode.getFile()), getEditor(), true);
 			setUp(editor);
 			StyledText text= (StyledText) editor.getAdapter(Control.class);
 			EditorTestHelper.joinBackgroundActivities(editor);
@@ -164,10 +167,6 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 		}
 	}
 
-	protected AbstractTextEditor openEditor(ScrollingMode mode) throws Exception {
-		return (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(mode.getFile()), getEditor(), true);
-	}
-
 	protected abstract String getEditor();
 
 	private void measure(final StyledText text, ScrollingMode mode, PerformanceMeter performanceMeter, int runs) {
@@ -184,7 +183,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 				assertTrue("selection must be at (0,0) before starting", text.getSelection().x == 0 && text.getSelection().y == 0);
 				
 				// 1: post scroll events
-				long delay= 5000;
+				long delay= 3000;
 				Timeout timeout= waiter.restart(delay);
 				performanceMeter.start();
 				for (int j= 0; j < operations && !timeout.hasTimedOut(); j++) {
