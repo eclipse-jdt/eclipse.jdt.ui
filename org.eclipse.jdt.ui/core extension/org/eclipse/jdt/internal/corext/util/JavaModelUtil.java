@@ -273,7 +273,7 @@ public final class JavaModelUtil {
 			if (type.isBinary() && !type.isAnonymous()) {
 				IType declaringType= type.getDeclaringType();
 				if (declaringType != null) {
-					return getFullyQualifiedName(declaringType) + '.' + type.getElementName();
+					return internalGetQualifiedName(declaringType) + '.' + type.getElementName();
 				}
 			}
 		} catch (JavaModelException e) {
@@ -283,6 +283,22 @@ public final class JavaModelUtil {
 	}
 	
 	/**
+	 * Get the fully qualified type name of an non-anonymous type
+	 * @param type the type
+	 * @return the qualified name
+	 */
+	private static String internalGetQualifiedName(IType type) {
+		if (type.isBinary()) {
+			IType declaringType= type.getDeclaringType();
+			if (declaringType != null) {
+				return internalGetQualifiedName(declaringType) + '.' + type.getElementName();
+			}
+		}
+		return type.getFullyQualifiedName('.');
+	}
+	
+	
+	/**
 	 * Returns the fully qualified name of the given {@link TypeNameMatch}  using '.' as separators.
 	 * This is a replace for {@link TypeNameMatch#getFullyQualifiedName()}.
 	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=182179.
@@ -290,7 +306,7 @@ public final class JavaModelUtil {
 	 * @return the fully qualified name
 	 */
 	public static String getFullyQualifiedName(TypeNameMatch typeNameMatch) {
-		return getFullyQualifiedName(typeNameMatch.getType());
+		return internalGetQualifiedName(typeNameMatch.getType()); // type name matches can never be anonymous
 	}
 
 	/**
@@ -301,7 +317,7 @@ public final class JavaModelUtil {
 	public static String getTypeContainerName(IType type) {
 		IType outerType= type.getDeclaringType();
 		if (outerType != null) {
-			return getFullyQualifiedName(outerType);
+			return internalGetQualifiedName(outerType);
 		} else {
 			return type.getPackageFragment().getElementName();
 		}
