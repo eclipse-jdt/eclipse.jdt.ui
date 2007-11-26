@@ -139,6 +139,23 @@ public class ExpressionsFix extends AbstractFix {
 								}
 							}
 						}
+						if (expression instanceof InfixExpression) {
+							InfixExpression infixExpression= (InfixExpression) expression;
+							Operator operator= infixExpression.getOperator();
+							if (operator == InfixExpression.Operator.DIVIDE) {
+								ITypeBinding binding= infixExpression.resolveTypeBinding();
+								if (binding == null)
+									return;
+								
+								if (!binding.isPrimitive())
+									return;
+								
+								String name= binding.getName();
+								if (isIntegerNumber(name))
+									//rounding involved
+									return;
+							}
+						}
 						fNodes.add(node);
 					}
 					return;
@@ -148,6 +165,10 @@ public class ExpressionsFix extends AbstractFix {
 				}
 			}
 			fNodes.add(node);
+		}
+		
+		private boolean isIntegerNumber(String name) {
+			return "int".equals(name) || "long".equals(name) || "byte".equals(name) || "char".equals(name) || "short".equals(name); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 
 		//is e1 op (e2 op e3) == (e1 op e2) op e3 == e1 op e2 op e3 for 'operator'? 
