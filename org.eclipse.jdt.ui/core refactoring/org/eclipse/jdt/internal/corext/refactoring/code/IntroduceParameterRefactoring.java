@@ -31,6 +31,8 @@ import org.eclipse.jface.text.TextSelection;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringContribution;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
@@ -512,11 +514,14 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 	
 	private IntroduceParameterDescriptor getRefactoringDescriptor() {
 		ChangeMethodSignatureDescriptor extended= (ChangeMethodSignatureDescriptor) fChangeSignatureProcessor.createDescriptor();
-
+		RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(IJavaRefactorings.CHANGE_METHOD_SIGNATURE);
+		
+		Map argumentsMap= contribution.retrieveArgumentMap(extended);
+		
 		final Map arguments= new HashMap();
 		arguments.put(ATTRIBUTE_ARGUMENT, fParameter.getNewName());
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
-		arguments.putAll(extended.getArguments()); //REVIEW Is this the correct order?
+		arguments.putAll(argumentsMap);
 		String signature= fChangeSignatureProcessor.getMethodName();
 		try {
 			signature= fChangeSignatureProcessor.getOldMethodSignature();
