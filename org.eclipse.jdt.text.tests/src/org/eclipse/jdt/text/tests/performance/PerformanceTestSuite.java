@@ -49,5 +49,7 @@ public class PerformanceTestSuite extends TestSuite {
 		addTest(SynchronizedLineDifferInitializationTest.suite());
 		addTest(DocumentLineDifferModificationTest.suite());
 		addTest(new OpenJavaEditorTest.Setup(EmptyTestCase.suite(), false)); // the actual test runs in its own workbench (see test.xml)
+		
+		addTest(AnnotationModelPerformanceTest.suite());
 	}
 }
