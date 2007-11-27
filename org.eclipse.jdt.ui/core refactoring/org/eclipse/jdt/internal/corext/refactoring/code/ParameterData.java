@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,12 +85,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 			return false;
 		return true;
 	}
-
-	public void setOperatorPrecedence(ASTNode node, int precedence) {
-		setOperatorPrecedence(precedence);
-	}
 	
-	private void setOperatorPrecedence(int newValue) {
+	public void setOperatorPrecedence(int newValue) {
 		if (newValue == -1) {
 			fOperatorPrecedence= newValue;
 		} else if (fOperatorPrecedence == -1) {

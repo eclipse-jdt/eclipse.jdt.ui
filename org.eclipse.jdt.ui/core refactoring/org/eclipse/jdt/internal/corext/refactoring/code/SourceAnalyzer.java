@@ -217,7 +217,7 @@ class SourceAnalyzer  {
 			}
 			return true;
 		}
-		public boolean visist(SuperConstructorInvocation node) {
+		public boolean visit(SuperConstructorInvocation node) {
 			if (fTypeCounter == 0) {
 				fHasSuperMethodInvocation= true;
 			}
@@ -270,7 +270,7 @@ class SourceAnalyzer  {
 						if (parent instanceof Expression) {
 							int precedence= OperatorPrecedence.getExpressionPrecedence((Expression)parent);
 							if (precedence != Integer.MAX_VALUE) {
-								data.setOperatorPrecedence(node, precedence);
+								data.setOperatorPrecedence(precedence);
 							}
 						}
 					}

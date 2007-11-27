@@ -472,7 +472,7 @@ public class CallInliner {
 		}
 	}
 	
-	public RefactoringStatus perform(TextEditGroup textEditGroup) throws CoreException {
+	public RefactoringStatus perform(TextEditGroup textEditGroup) {
 		RefactoringStatus result= new RefactoringStatus();
 		String[] blocks= fSourceProvider.getCodeBlocks(fContext);
 		if(!fFieldInitializer) {

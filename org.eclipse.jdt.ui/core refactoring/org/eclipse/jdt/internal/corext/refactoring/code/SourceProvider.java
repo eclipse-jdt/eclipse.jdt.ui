@@ -30,7 +30,6 @@ import org.eclipse.text.edits.TextEditProcessor;
 import org.eclipse.text.edits.UndoEdit;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -131,6 +130,9 @@ public class SourceProvider {
 	
 	/**
 	 * TODO: unit's source does not match contents of source document and declaration node.
+	 * @param typeRoot the type root
+	 * @param source document contining the content of the type root
+	 * @param declaration 
 	 */
 	public SourceProvider(ITypeRoot typeRoot, IDocument source, MethodDeclaration declaration) {
 		this(typeRoot, declaration);
@@ -308,7 +310,7 @@ public class SourceProvider {
 		return rewriter.rewriteAST(fDocument, fTypeRoot.getJavaProject().getOptions(true));
 	}
 	
-	public String[] getCodeBlocks(CallContext context) throws CoreException {
+	public String[] getCodeBlocks(CallContext context) {
 		final ASTRewrite rewriter= ASTRewrite.create(fDeclaration.getAST());
 		replaceParameterWithExpression(rewriter, context.arguments);
 		updateImplicitReceivers(rewriter, context);
