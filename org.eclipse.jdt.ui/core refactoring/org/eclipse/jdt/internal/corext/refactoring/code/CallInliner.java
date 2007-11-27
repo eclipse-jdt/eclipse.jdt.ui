@@ -211,6 +211,8 @@ public class CallInliner {
 		/**
 		 * Returns <code>true</code> if the method can be called without explicit casts; 
 		 * otherwise <code>false</code>.
+		 * @param candidate the method to test
+		 * @return <code>true</code> if the method can be called without explicit casts
 		 */
 		private boolean canImplicitlyCall(IMethodBinding candidate) {
 			ITypeBinding[] parameters= candidate.getParameterTypes();
@@ -677,6 +679,7 @@ public class CallInliner {
 	}
 
 	/**
+	 * @param status the status
 	 * @return <code>true</code> if explicit cast is needed otherwise <code>false</code>
 	 */
 	private boolean needsExplicitCast(RefactoringStatus status) {
@@ -756,6 +759,8 @@ public class CallInliner {
      * </code>
      * Field might not be initialized when the arguments are reorder in the called
      * method.
+     * @param arguments the arguments
+     * @return all arguments that cannot be inlined
      */
 	private Set crossCheckArguments(List arguments) {
 		final Set assigned= new HashSet();
