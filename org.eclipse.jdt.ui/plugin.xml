@@ -1081,7 +1081,9 @@
             isGoToNextNavigationTargetKey="isOccurrenceGoToNextNavigationTarget"
 	        isGoToNextNavigationTarget="false"
             isGoToPreviousNavigationTargetKey="isOccurrenceGoToPreviousNavigationTarget"
-	        isGoToPreviousNavigationTarget="false">
+	        isGoToPreviousNavigationTarget="false"
+            textStylePreferenceKey="occurrenceTextStyle"
+            textStylePreferenceValue="NONE">
 	  </specification>
 	  <specification
             annotationType="org.eclipse.jdt.ui.occurrences.write"
@@ -1095,7 +1097,9 @@
             verticalRulerPreferenceKey="writeOccurrenceIndicationInVerticalRuler"
             verticalRulerPreferenceValue="false"
             colorPreferenceKey="writeOccurrenceIndicationColor"
-            colorPreferenceValue="240,216,168">
+            colorPreferenceValue="240,216,168"
+            textStylePreferenceKey="writeOccurrenceTextStyle"
+            textStylePreferenceValue="NONE">
 	  </specification>	  
 	  
 	  <specification
@@ -1120,7 +1124,9 @@
             isGoToNextNavigationTargetKey="isOverrideIndicatorGoToNextNavigationTarget"
 	        isGoToNextNavigationTarget="false"
             isGoToPreviousNavigationTargetKey="isOverrideIndicatorGoToPreviousNavigationTarget"
-	        isGoToPreviousNavigationTarget="false">
+	        isGoToPreviousNavigationTarget="false"
+            textStylePreferenceKey="overrideIndicatorTextStyle"
+            textStylePreferenceValue="SQUIGGLES">
 	  </specification>
 
       <!-- linked annotations -->
