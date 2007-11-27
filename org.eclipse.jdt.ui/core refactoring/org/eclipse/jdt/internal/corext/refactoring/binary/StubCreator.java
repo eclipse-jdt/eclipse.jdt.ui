@@ -253,7 +253,7 @@ public class StubCreator {
 	}
 
 	/**
-	 * Appens a parameter name
+	 * Appends a parameter name
 	 * 
 	 * @param method the method
 	 * @param index the index of the parameter
