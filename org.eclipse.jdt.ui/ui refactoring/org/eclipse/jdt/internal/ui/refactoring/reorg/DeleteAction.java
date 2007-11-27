@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,25 +11,25 @@
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.actions.DeleteResourceAction;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.DeleteResourceAction;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 
 public class DeleteAction extends SelectionDispatchAction {
@@ -54,15 +54,7 @@ public class DeleteAction extends SelectionDispatchAction {
 			setEnabled(createWorkbenchAction(selection).isEnabled());
 			return;
 		}
-		try {
-			setEnabled(RefactoringAvailabilityTester.isDeleteAvailable(selection.toArray()));
-		} catch (CoreException e) {
-			//no ui here - this happens on selection changes
-			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.isExceptionToBeLogged(e))
-				JavaPlugin.log(e);
-			setEnabled(false);
-		}
+		setEnabled(RefactoringAvailabilityTester.isDeleteAvailable(selection.toArray()));
 	}
 
 	private IAction createWorkbenchAction(IStructuredSelection selection) {

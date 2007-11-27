@@ -230,7 +230,7 @@ public final class RefactoringAvailabilityTester {
 		 */);
 	}
 
-	public static boolean isDeleteAvailable(final IJavaElement element) throws JavaModelException {
+	public static boolean isDeleteAvailable(final IJavaElement element) {
 		if (!element.exists())
 			return false;
 		if (element instanceof IJavaModel || element instanceof IJavaProject)
@@ -262,13 +262,13 @@ public final class RefactoringAvailabilityTester {
 		return true;
 	}
 
-	public static boolean isDeleteAvailable(final IStructuredSelection selection) throws JavaModelException {
+	public static boolean isDeleteAvailable(final IStructuredSelection selection) {
 		if (!selection.isEmpty())
 			return isDeleteAvailable(selection.toArray());
 		return false;
 	}
 
-	public static boolean isDeleteAvailable(final Object[] objects) throws JavaModelException {
+	public static boolean isDeleteAvailable(final Object[] objects) {
 		if (objects.length != 0) {
 			final IResource[] resources= RefactoringAvailabilityTester.getResources(objects);
 			final IJavaElement[] elements= RefactoringAvailabilityTester.getJavaElements(objects);

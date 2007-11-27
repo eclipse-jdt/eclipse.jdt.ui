@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.dnd.Clipboard;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -29,7 +27,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
@@ -57,21 +54,13 @@ public class CutAction extends SelectionDispatchAction{
 
 	public void selectionChanged(IStructuredSelection selection) {
 		if (!selection.isEmpty()) {
-			try {
-				// cannot cut top-level types. this deletes the cu and then you cannot paste because the cu is gone.
-				if (!containsOnlyElementsInsideCompilationUnits(selection) || containsTopLevelTypes(selection)) {
-					setEnabled(false);
-					return;
-				}
-				fCopyToClipboardAction.selectionChanged(selection);
-				setEnabled(fCopyToClipboardAction.isEnabled() && RefactoringAvailabilityTester.isDeleteAvailable(selection));
-			} catch (CoreException e) {
-				// no ui here - this happens on selection changes
-				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-				if (JavaModelUtil.isExceptionToBeLogged(e))
-					JavaPlugin.log(e);
+			// cannot cut top-level types. this deletes the cu and then you cannot paste because the cu is gone.
+			if (!containsOnlyElementsInsideCompilationUnits(selection) || containsTopLevelTypes(selection)) {
 				setEnabled(false);
+				return;
 			}
+			fCopyToClipboardAction.selectionChanged(selection);
+			setEnabled(fCopyToClipboardAction.isEnabled() && RefactoringAvailabilityTester.isDeleteAvailable(selection));
 		} else
 			setEnabled(false);
 	}
