@@ -148,7 +148,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 			}	
 		}
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -156,26 +156,30 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 		if (fRetargetActions == null)
 			return;
 		
+		JavaEditor editor;
+		ISelection selection;
 		
 		IWorkbenchPart activePart= JavaPlugin.getActivePage().getActivePart();
-		if (!(activePart instanceof JavaEditor))
-			return;
+		if (activePart instanceof JavaEditor) {
+			editor= (JavaEditor) activePart;
+			ITypeRoot element= SelectionConverter.getInput(editor);
+			if (element == null)
+				return;
+			
+			ITextSelection textSelection= (ITextSelection) editor.getSelectionProvider().getSelection();
+			IDocument document= JavaUI.getDocumentProvider().getDocument(editor.getEditorInput());
+			selection= new JavaTextSelection(element, document, textSelection.getOffset(), textSelection.getLength());
+		} else {
+			editor= null;
+			selection= activePart.getSite().getSelectionProvider().getSelection();
+		}
 		
-		JavaEditor editor= (JavaEditor) activePart;
-		ITypeRoot element= SelectionConverter.getInput(editor);
-		if (element == null)
-			return;
-		
-		ITextSelection textSelection= (ITextSelection) editor.getSelectionProvider().getSelection();
-		IDocument document= JavaUI.getDocumentProvider().getDocument(editor.getEditorInput());
-		JavaTextSelection javaSelection= new JavaTextSelection(element, document, textSelection.getOffset(), textSelection.getLength());
-
 		final ArrayList activeActions= new ArrayList(fRetargetActions.length);
 		for (int i= 0; i < fRetargetActions.length; i++) {
 			RetargetAction action= fRetargetActions[i];
 			IAction actionHandler= action.getActionHandler();
 			if (actionHandler instanceof SelectionDispatchAction) {
-				((SelectionDispatchAction) actionHandler).update(javaSelection);
+				((SelectionDispatchAction) actionHandler).update(selection);
 				if (actionHandler.isEnabled()) {
 					activeActions.add(actionHandler);
 				}
