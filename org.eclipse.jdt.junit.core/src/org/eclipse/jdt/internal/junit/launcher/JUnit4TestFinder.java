@@ -135,17 +135,12 @@ public class JUnit4TestFinder implements ITestFinder {
 			
 			IJavaSearchScope scope= SearchEngine.createJavaSearchScope(allClasses, IJavaSearchScope.SOURCES);
 			int matchRule= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
-			SearchPattern runWithPattern= SearchPattern.createPattern(Annotation.RUN_WITH.getName(), IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.REFERENCES, matchRule);
-			SearchPattern testPattern= SearchPattern.createPattern(Annotation.TEST.getName(), IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.REFERENCES, matchRule);
+			SearchPattern runWithPattern= SearchPattern.createPattern(Annotation.RUN_WITH.getName(), IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE, matchRule);
+			SearchPattern testPattern= SearchPattern.createPattern(Annotation.TEST.getName(), IJavaSearchConstants.ANNOTATION_TYPE, IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE, matchRule);
 			
-			// TODO: Core bug (no results with OR pattern):
-//			SearchPattern annotationsPattern= SearchPattern.createOrPattern(runWithPattern, testPattern);
-//			SearchParticipant[] searchParticipants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
-//			new SearchEngine().search(annotationsPattern, searchParticipants, scope, requestor, new SubProgressMonitor(pm, 2));
-
+			SearchPattern annotationsPattern= SearchPattern.createOrPattern(runWithPattern, testPattern);
 			SearchParticipant[] searchParticipants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
-			new SearchEngine().search(runWithPattern, searchParticipants, scope, requestor, new SubProgressMonitor(pm, 1));
-			new SearchEngine().search(testPattern, searchParticipants, scope, requestor, new SubProgressMonitor(pm, 1));
+			new SearchEngine().search(annotationsPattern, searchParticipants, scope, requestor, new SubProgressMonitor(pm, 2));
 			
 			// find all classes in the region
 			for (Iterator iterator= candidates.iterator(); iterator.hasNext();) {

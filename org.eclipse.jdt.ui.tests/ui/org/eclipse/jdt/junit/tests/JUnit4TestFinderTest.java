@@ -61,6 +61,7 @@ public class JUnit4TestFinderTest extends TestCase {
 	
 	/**
 	 * Copy from {@link JUnit3TestFinderTest}: All tests must work in Junit 4 as well
+	 * @throws Exception 
 	 */
 	public void testTestCase() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
@@ -351,7 +352,29 @@ public class JUnit4TestFinderTest extends TestCase {
 		assertTestFound(fProject, validTests);
 	}
 
+	public void testTestAnnotation_bug204682() throws Exception {
 	
+		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import org.junit.Test;\n");
+		buf.append("\n");
+		buf.append("public class Test1 {\n");
+		buf.append("        Test testFoo1() {\n");
+		buf.append("            return null;\n");
+		buf.append("        }\n");
+		buf.append("        public void testFoo2() {\n");
+		buf.append("            Test test;\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		IType validTest1= p.createCompilationUnit("Test1.java", buf.toString(), false, null).getType("Test1");
+		
+		assertTestFound(validTest1, new String[] { });
+		assertTestFound(validTest1.getCompilationUnit(), new String[] { });
+	}
+		
+		
 	private void assertTestFound(IJavaElement container, String[] expectedTypes) throws CoreException {
 		ITestKind testKind= TestKindRegistry.getContainerTestKind(container);
 		assertEquals(TestKindRegistry.JUNIT4_TEST_KIND_ID, testKind.getId());
