@@ -66,18 +66,4 @@ public final class ChangeMethodSignatureDescriptor extends JavaRefactoringDescri
 		super(IJavaRefactorings.CHANGE_METHOD_SIGNATURE, project, description, comment, arguments, flags);
 	}
 
-	/**
-	 * This method is work in progress. Do NOT use it, it will be removed in later revisions
-	 * <p>
-	 * <strong>EXPERIMENTAL</strong>. This class or interface has been added as
-	 * part of a work in progress. There is a guarantee neither that this API will
-	 * work nor that it will remain the same. Please do not use this API without
-	 * consulting with the JDT/UI team.
-	 * </p>
-	 */
-	//REVIEW Remove before making API
-	public Map getArguments() { 
-		return super.getArguments();
-	}
-
 }

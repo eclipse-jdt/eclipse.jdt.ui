@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
@@ -143,8 +144,14 @@ public class ChangeSignatureTests extends RefactoringTest {
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		String expectedFileContents= getFileContents(getTestFileName(true, false));
 		assertEqualLines("invalid renaming", expectedFileContents, newcu.getSource());
+		
+		assertParticipant(classA);
 	}
 	
+	private static void assertParticipant(IType typeOfMethod) throws JavaModelException {
+		TestChangeMethodSignaturParticipant.testParticipant(typeOfMethod);
+	}
+
 	/*
 	 * Rename method 'A.m(signature)' to 'A.newMethodName(signature)'
 	 */
@@ -171,6 +178,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		String expectedFileContents= getFileContents(getTestFileName(true, false));
 		assertEqualLines("invalid change of method name", expectedFileContents, newcu.getSource());
+		
+		assertParticipant(classA);
 	}
 
 	private void helperDoAll(String typeName, 
@@ -217,6 +226,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		String expectedFileContents= getFileContents(getTestFileName(true, false));
 		assertEqualLines(expectedFileContents, newcu.getSource());
+		
+		assertParticipant(method.getDeclaringType());
 	}
 	
 	private void helperDoAll(String typeName, String methodName, String[] signature, ParameterInfo[] newParamInfos, int[] newIndices,
@@ -270,6 +281,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		String expectedFileContents= getFileContents(getTestFileName(true, false));
 //		assertEquals("invalid renaming", expectedFileContents, newcu.getSource());
 		assertEqualLines(expectedFileContents, newcu.getSource());
+		
+		assertParticipant(classA);
 	}
 
 	private void modifyInfos(List infos, ParameterInfo[] newParamInfos, int[] newIndices, String[] oldParamNames, String[] newParamNames, String[] newParamTypeNames, int[] permutation) {

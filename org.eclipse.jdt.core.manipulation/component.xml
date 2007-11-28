@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<component xmlns="http://eclipse.org/component"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://eclipse.org/component ../component.xsd "
+   name="Eclipse JDT Code Manipulation">
+ <plugin id="org.eclipse.jdt.core.manipulation"/>
+
+ <package name="org.eclipse.jdt.core.refactoring">
+   <type name="IJavaElementMapper"/>
+   <type name="IJavaRefactorings" implement="false"/>
+   <type name="RenameTypeArguments" subclass="false"/>
+ </package>
+
+ <package name="org.eclipse.jdt.core.refactoring.descriptors">
+   <type name="ChangeMethodSignatureDescriptor" subclass="false" instantiate="false"/>
+   <type name="ConvertAnonymousDescriptor" subclass="false" instantiate="false"/>
+   <type name="ConvertLocalVariableDescriptor" subclass="false" instantiate="false"/>
+   <type name="ConvertMemberTypeDescriptor" subclass="false" instantiate="false"/>
+   <type name="CopyDescriptor" subclass="false" instantiate="false"/>
+   <type name="DeleteDescriptor" subclass="false" instantiate="false"/>
+   <type name="EncapsulateFieldDescriptor" subclass="false" instantiate="false"/>
+   <type name="ExtractClassDescriptor" subclass="false" instantiate="false"/>
+   <type name="ExtractConstantDescriptor" subclass="false" instantiate="false"/>
+   <type name="ExtractInterfaceDescriptor" subclass="false" instantiate="false"/>
+   <type name="ExtractLocalDescriptor" subclass="false" instantiate="false"/>
+   <type name="ExtractMethodDescriptor" subclass="false" instantiate="false"/>
+   <type name="ExtractSuperclassDescriptor" subclass="false" instantiate="false"/>
+   <type name="GeneralizeTypeDescriptor" subclass="false" instantiate="false"/>
+   <type name="InferTypeArgumentsDescriptor" subclass="false" instantiate="false"/>
+   <type name="InlineConstantDescriptor" subclass="false" instantiate="false"/>
+   <type name="InlineLocalVariableDescriptor" subclass="false" instantiate="false"/>
+   <type name="InlineMethodDescriptor" subclass="false" instantiate="false"/>
+   <type name="IntroduceFactoryDescriptor" subclass="false" instantiate="false"/>
+   <type name="IntroduceIndirectionDescriptor" subclass="false" instantiate="false"/>
+   <type name="IntroduceParameterDescriptor" subclass="false" instantiate="false"/>
+   <type name="IntroduceParameterObjectDescriptor" subclass="false" instantiate="false"/>
+   <type name="JavaRefactoringContribution" subclass="false" instantiate="false"/>
+   <type name="JavaRefactoringDescriptor" subclass="false" instantiate="false"/>
+   <type name="MoveDescriptor" subclass="false" instantiate="false"/>
+   <type name="MoveMethodDescriptor" subclass="false" instantiate="false"/>
+   <type name="MoveStaticMembersDescriptor" subclass="false" instantiate="false"/>
+   <type name="PullUpDescriptor" subclass="false" instantiate="false"/>
+   <type name="PushDownDescriptor" subclass="false" instantiate="false"/>
+   <type name="RenameJavaElementDescriptor" subclass="false" instantiate="false"/>
+   <type name="RenameLocalVariableDescriptor" subclass="false" instantiate="false"/>
+   <type name="RenameResourceDescriptor" subclass="false" instantiate="false"/>
+   <type name="UseSupertypeDescriptor" subclass="false" instantiate="false"/>
+
+ </package>
+
+ <package name="org.eclipse.jdt.core.refactoring.participants">
+   <type name="ChangeMethodSignatureArguments" subclass="false"/>
+   <type name="ChangeMethodSignatureParticipant"/>
+   <type name="JavaParticipantManager" subclass="false" instantiate="false/>
+ </package>
+
+ <component-depends unrestricted="true"/>
+</component>

@@ -12,6 +12,9 @@
 <!-- ====================================================================== -->
 <plugin>
 
+   <extension-point id="changeMethodSignatureParticipants" name="%ChangeMethodSignatureParticipantsExtensionPoint" schema="schema/changeMethodSignatureParticipants.exsd"/>
+
+
    <extension point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
         id="org.eclipse.jdt.core.javaElementPropertyTester"

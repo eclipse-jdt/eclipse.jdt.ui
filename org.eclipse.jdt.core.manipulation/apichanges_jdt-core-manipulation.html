@@ -43,6 +43,7 @@ Non-breaking API changes from R3.3 to R3.4</b></font> <br>
        </ul>
       </td>
     </tr>
+    <tr><td><hr></td></tr>
      <tr>
       <td>Rename resource refactoring has been pushed down to <code>ltk.core.refactoring</code>
       <ul><li> Deprecated <code>ResourceRenameDescriptor (org.eclipse.jdt.core.refactoring.descriptors)</code></li>
@@ -50,7 +51,17 @@ Non-breaking API changes from R3.3 to R3.4</b></font> <br>
       </ul>
       Use <code>ResourceRenameDescriptor</code> and <code>ResourceRenameDescriptor.ID</code> from <code>ltk.core.refactoring</code> instead.
       </td>
-    </tr>    
+    </tr>
+    <tr><td><hr></td></tr>
+     <tr>
+      <td>Added refactoring participation for 'Change Method Signature'
+      <ul><li>New extension point <code>changeMethodSignatureParticipants</code></li>
+      <li>New API <code>ChangeMethodSignatureParticipant</code> to be implemented by contributors</li>
+      <li>New API <code>ChangeMethodSignatureArguments</code> to describe refactoring changes</li>
+      <li>New API <code>JavaParticipantManager</code> to get all participants</li>
+      </ul>
+      </td>
+    </tr>        
   </tbody>
 </table>
 <p>

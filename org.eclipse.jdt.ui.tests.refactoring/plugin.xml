@@ -194,7 +194,20 @@
          </enablement>
       </copyParticipant>
    </extension>
-   
+   <extension point="org.eclipse.jdt.core.manipulation.changeMethodSignatureParticipants">
+      <changeMethodSignatureParticipant
+            class="org.eclipse.jdt.ui.tests.refactoring.TestChangeMethodSignaturParticipant"
+            name="org.eclipse.jdt.ui.tests.refactoring.TestChangeMethodSignataturParticipant"
+            id="org.eclipse.jdt.ui.tests.refactoring.TestChangeMethodSignataturParticipant">
+         <enablement>
+           <with variable="affectedNatures">
+             <iterate operator="or">
+               <equals value="org.eclipse.jdt.core.javanature"/>
+             </iterate>
+           </with>
+         </enablement>
+      </changeMethodSignatureParticipant>
+   </extension>
    <extension
          id="modelProvider"
          name="TestModelProvider"

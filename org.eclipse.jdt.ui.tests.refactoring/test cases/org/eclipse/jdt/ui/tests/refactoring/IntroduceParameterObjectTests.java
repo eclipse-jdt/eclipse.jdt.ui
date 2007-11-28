@@ -158,6 +158,12 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 			assertNotNull(result);
 			assertEqualLines(expected, result);
 		}
+		
+		assertParticipant(fDescriptor.getMethod().getDeclaringType());
+	}
+	
+	private void assertParticipant(IType typeOfMethod) throws JavaModelException {
+		TestChangeMethodSignaturParticipant.testParticipant(typeOfMethod);
 	}
 	
 	protected void setUp() throws Exception {
