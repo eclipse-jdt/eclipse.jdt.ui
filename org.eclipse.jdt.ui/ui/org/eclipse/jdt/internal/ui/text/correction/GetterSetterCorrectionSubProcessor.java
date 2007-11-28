@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.core.runtime.CoreException;
@@ -37,6 +38,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
@@ -181,11 +183,32 @@ public class GetterSetterCorrectionSubProcessor {
 		}
 	}
 	
-	public static boolean addGetterSetterProposal(IInvocationContext context, IProblemLocation location, Collection proposals) {
-		return addGetterSetterProposal(context, location.getCoveringNode(context.getASTRoot()), proposals);
+	/**
+	 * Used by quick assist
+	 * @param context the invocation context
+	 * @param coveringNode the covering node
+	 * @param locations the problems at the corrent location
+	 * @param resultingCollections the resulting proposals
+	 * @return <code>true</code> if the quick assist is applicable at this offset
+	 */
+	public static boolean addGetterSetterProposal(IInvocationContext context, ASTNode coveringNode, IProblemLocation[] locations, ArrayList resultingCollections) {
+		if (locations != null) {
+			for (int i= 0; i < locations.length; i++) {
+				int problemId= locations[i].getProblemId();
+				if (problemId == IProblem.UnusedPrivateField)
+					return false;
+				if (problemId == IProblem.UnqualifiedFieldAccess)
+					return false;
+			}
+		}
+		return addGetterSetterProposal(context, coveringNode, resultingCollections, 7);
 	}
 	
-	public static boolean addGetterSetterProposal(IInvocationContext context, ASTNode coveringNode, Collection proposals) {
+	public static void addGetterSetterProposal(IInvocationContext context, IProblemLocation location, Collection proposals, int relevance) {
+		addGetterSetterProposal(context, location.getCoveringNode(context.getASTRoot()), proposals, relevance);
+	}
+	
+	private static boolean addGetterSetterProposal(IInvocationContext context, ASTNode coveringNode, Collection proposals, int relevance) {
 		if (!(coveringNode instanceof SimpleName)) {
 			return false;
 		}
@@ -201,7 +224,7 @@ public class GetterSetterCorrectionSubProcessor {
 		if (proposals == null)
 			return true;
 		
-		ChangeCorrectionProposal proposal= getProposal(context.getCompilationUnit(), sn, variableBinding, 7);
+		ChangeCorrectionProposal proposal= getProposal(context.getCompilationUnit(), sn, variableBinding, relevance);
 		if (proposal != null)
 			proposals.add(proposal);
 		return true;
@@ -357,4 +380,5 @@ public class GetterSetterCorrectionSubProcessor {
 		}
 		return result;
 	}
+
 }

@@ -2973,23 +2973,39 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    private int fCount;\n");
+		buf.append("    private int count;\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
+		String[] expected= new String[2];
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		expected[0]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int count;\n");
+		buf.append("\n");
+		buf.append("    public void setCount(int count) {\n");
+		buf.append("        this.count = count;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public int getCount() {\n");
+		buf.append("        return count;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+				
+		assertExpectedExistInProposals(proposals, expected);
 	}	
 
 	public void testUnusedPrivateField1() throws Exception {
@@ -3001,24 +3017,40 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    private int fCount, fColor= fCount;\n");
+		buf.append("    private int count, color= count;\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
+		String[] expected= new String[2];
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    private int fCount;\n");
+		buf.append("    private int count;\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		expected[0]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int count, color= count;\n");
+		buf.append("\n");
+		buf.append("    public void setColor(int color) {\n");
+		buf.append("        this.color = color;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public int getColor() {\n");
+		buf.append("        return color;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+	
+		assertExpectedExistInProposals(proposals, expected);
 	}
 	
 	public void testUnusedPrivateField2() throws Exception {
@@ -3030,28 +3062,45 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    private int fCount= 0;\n");
+		buf.append("    private int count= 0;\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        fCount= 1 + 2;\n");		
+		buf.append("        count= 1 + 2;\n");		
 		buf.append("    }\n");		
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
-
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
+		
+		String[] expected= new String[2];
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
 		buf.append("    }\n");		
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		expected[0]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int count= 0;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        setCount(1 + 2);\n");		
+		buf.append("    }\n");		
+		buf.append("    public void setCount(int count) {\n");
+		buf.append("        this.count = count;\n");
+		buf.append("    }\n");
+		buf.append("    public int getCount() {\n");
+		buf.append("        return count;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+	
+		assertExpectedExistInProposals(proposals, expected);
 	}
 	
 	public void testUnusedPrivateField3() throws Exception {
@@ -3076,12 +3125,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
+		String[] expected= new String[2];
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -3089,7 +3137,29 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    public void foo() {\n");
 		buf.append("    }\n");		
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		expected[0]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private E e= new E();\n");
+		buf.append("    private int value;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        setValue(0);\n");
+		buf.append("        this.setValue(0);\n");
+		buf.append("        e.setValue(0);\n");
+		buf.append("        this.e.setValue(0);\n");
+		buf.append("    }\n");		
+		buf.append("    public void setValue(int value) {\n");
+		buf.append("        this.value = value;\n");
+		buf.append("    }\n");
+		buf.append("    public int getValue() {\n");
+		buf.append("        return value;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+	
+		assertExpectedExistInProposals(proposals, expected);
 	}
 
 	
@@ -3290,7 +3360,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package pack;\n");
 		buf.append("public class B {\n");
-		buf.append("    private String c=\"Test\";\n");
+		buf.append("    private final String c=\"Test\";\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
 
@@ -3298,16 +3368,28 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 
-		String[] expected= new String[1];
+		String[] expected=new String[2];
 		buf= new StringBuffer();
 		buf.append("package pack;\n");
 		buf.append("public class B {\n");
 		buf.append("}\n");
-		expected[0]= buf.toString();
-
+		expected[0]=buf.toString(); 
+		
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class B {\n");
+		buf.append("    private final String c=\"Test\";\n");
+		buf.append("\n");
+		buf.append("    public String getC() {\n");
+		buf.append("        return c;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]=buf.toString();
+		
 		assertExpectedExistInProposals(proposals, expected);
+		
 	}
 	
 	public void testUnusedVariables6() throws Exception {
@@ -3329,9 +3411,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 
-		String[] expected= new String[1];
+		String[] expected= new String[2];
 		buf= new StringBuffer();
 		buf.append("package pack;\n");
 		buf.append("public class B {\n");
@@ -3340,6 +3422,20 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[0]= buf.toString();
 
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class B {\n");
+		buf.append("    private String c=String.valueOf(true),d=\"test\";\n");
+		buf.append("    String f=d;\n");
+		buf.append("    public void setC(String c) {\n");
+		buf.append("        this.c = c;\n");
+		buf.append("    }\n");
+		buf.append("    public String getC() {\n");
+		buf.append("        return c;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]=buf.toString();
+		
 		assertExpectedExistInProposals(proposals, expected);
 	}
 	

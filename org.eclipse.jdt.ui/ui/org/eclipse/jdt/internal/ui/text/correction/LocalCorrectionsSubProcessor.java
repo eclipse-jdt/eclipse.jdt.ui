@@ -481,6 +481,11 @@ public class LocalCorrectionsSubProcessor {
 		if (problemId == IProblem.ArgumentIsNeverUsed) {
 			JavadocTagsSubProcessor.getUnusedAndUndocumentedParameterOrExceptionProposals(context, problem, proposals);
 		}
+		
+		if (problemId == IProblem.UnusedPrivateField) {
+			GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, problem, proposals, 8);
+		}
+		
 	}
 
 	private static void addProposal(IInvocationContext context, Collection proposals, final UnusedCodeFix fix) {
@@ -578,7 +583,7 @@ public class LocalCorrectionsSubProcessor {
 			Map options= new HashMap();
 			options.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS, CleanUpOptions.TRUE);
 			options.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS, CleanUpOptions.TRUE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleCleanUp(options), 5, image, context);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleCleanUp(options), 8, image, context);
 			proposal.setCommandId(ADD_FIELD_QUALIFICATION_ID);
 			proposals.add(proposal);
 		}

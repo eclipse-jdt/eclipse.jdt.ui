@@ -123,7 +123,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					|| getReplaceIfElseWithConditionalProposals(context, coveringNode, null) || getReplaceConditionalWithIfElseProposals(context, coveringNode, null)
 					|| getInverseLocalVariableProposals(context, coveringNode, null) || getPushNegationDownProposals(context, coveringNode, null)
 					|| getPullNegationUpProposals(context, coveredNodes, null) || getJoinIfListInIfElseIfProposals(context, coveringNode, coveredNodes, null)
-					|| getConvertSwitchToIfProposals(context, coveringNode, null) || GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, null);
+					|| getConvertSwitchToIfProposals(context, coveringNode, null) || GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, null, null);
 		}
 		return false;
 	}
@@ -160,7 +160,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				getPullNegationUpProposals(context, coveredNodes, resultingCollections);
 				getJoinIfListInIfElseIfProposals(context, coveringNode, coveredNodes, resultingCollections);
 				getConvertSwitchToIfProposals(context, coveringNode, resultingCollections);
-				GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, resultingCollections);
+				GetterSetterCorrectionSubProcessor.addGetterSetterProposal(context, coveringNode, locations, resultingCollections);
 			}
 
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
