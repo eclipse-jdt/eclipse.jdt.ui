@@ -41,7 +41,10 @@ public class JUnitJUnitTests {
 		return suite;
 	}
 	
-	/** @deprecated */
+	/** 
+	 * @param suite the suite
+	 * @deprecated
+	 */
 	private static void addDeprecatedTests(TestSuite suite) {
 		suite.addTestSuite(LegacyTestRunListenerTest.class);
 	}
