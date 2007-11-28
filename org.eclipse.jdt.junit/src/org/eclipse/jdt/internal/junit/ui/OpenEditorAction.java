@@ -103,7 +103,7 @@ public abstract class OpenEditorAction extends Action {
 	
 	protected abstract void reveal(ITextEditor editor);
 
-	protected final IType findType(final IJavaProject project, String className) throws JavaModelException {
+	protected final IType findType(final IJavaProject project, String className) {
 		final IType[] result= { null };
 		final String dottedName= className.replace('$', '.'); // for nested classes...
 		try {

@@ -93,7 +93,7 @@ public class TestSearchEngine {
 		}
 	}
 	
-	public static boolean isAccessibleClass(ITypeBinding type) throws JavaModelException {
+	public static boolean isAccessibleClass(ITypeBinding type) {
 		if (type.isInterface()) {
 			return false;
 		}

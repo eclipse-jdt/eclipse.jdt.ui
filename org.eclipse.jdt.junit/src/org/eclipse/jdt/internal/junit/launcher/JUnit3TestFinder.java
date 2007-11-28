@@ -87,7 +87,7 @@ public class JUnit3TestFinder implements ITestFinder {
 		TestSearchEngine.findTestImplementorClasses(typeHierarchy, testCaseType, region, result);
 	}
 
-	public boolean isTest(ITypeBinding type) throws JavaModelException {
+	public boolean isTest(ITypeBinding type) {
 		if (!type.isClass() || !Modifier.isPublic(type.getModifiers())) {
 			return false;
 		}

@@ -122,7 +122,7 @@ public class ClasspathVariableMarkerResolutionGenerator implements IMarkerResolu
 		return -1;
 	}
 	
-	private static void setClasspath(final IJavaProject project, final IClasspathEntry[] entries, IRunnableContext context) throws JavaModelException {
+	private static void setClasspath(final IJavaProject project, final IClasspathEntry[] entries, IRunnableContext context) {
 		/*
 		 * @see org.eclipse.jdt.internal.junit.ui.JUnitAddLibraryProposal#addToClasspath()
 		 */
