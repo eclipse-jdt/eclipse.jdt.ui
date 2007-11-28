@@ -14,7 +14,7 @@
 R3.3 and R3.4 and
 how to migrate from the R3.3 API to the R3.4 API.
 </p>
-<table border="1" cellpadding="2" cellspacing="5" width="100%" summary="Breaking API changes">
+<table border="0" cellpadding="2" cellspacing="5" width="100%" summary="Breaking API changes">
   <tbody>
     <tr>
       <td align="left" width="72%"> <font size="+3"><b>jdt ui -
@@ -29,7 +29,7 @@ Breaking API changes from R3.3 to R3.4</b></font> <br>
   </tbody>
 </table>
 <p> </p>
-<table border="1" cellpadding="2" cellspacing="5" width="100%" summary="Non-breaking API changes">
+<table border="0" cellpadding="2" cellspacing="5" width="100%" summary="Non-breaking API changes">
   <tbody>
     <tr>
       <td align="left" width="72%"> <font size="+3"><b>jdt ui -
@@ -41,6 +41,7 @@ Non-breaking API changes from R3.3 to R3.4</b></font> <br>
       Added API <code>org.eclipse.jdt.ui.actions.OpenNewPackageWizardAction.setConfiguredWizardPage(NewPackageWizardPage)</code>.
       </td>
     </tr>
+    <tr><td><hr></td></tr>
     <tr>
       <td>
       Added constants for new refactorings:
@@ -56,6 +57,7 @@ Non-breaking API changes from R3.3 to R3.4</b></font> <br>
       <li>EXTRACT_CLASS</li>
       </ul>
     </tr>
+    <tr><td><hr></td></tr>    
     <tr>
       <td>
       Constants to <code>org.eclipse.jdt.ui.PreferenceConstants</code>:
@@ -64,11 +66,13 @@ Non-breaking API changes from R3.3 to R3.4</b></font> <br>
       <li>SPELLING_PROBLEMS_THRESHOLD</li>
       </ul>
     </tr>
+    <tr><td><hr></td></tr>    
     <tr>
       <td>
       Added API <code>org.eclipse.jdt.ui.JavaUI.getEditorInputTypeRoot(IEditorInput)</code></td>
     </tr>
-     <tr>
+    <tr><td><hr></td></tr>    
+    <tr>
       <td>
       <code>org.eclipse.jdt.ui.SharedASTProvider</code> gives access to the AST used by the active
       Java editor
@@ -77,6 +81,7 @@ Non-breaking API changes from R3.3 to R3.4</b></font> <br>
       </ul>
       </td>
     </tr>
+    <tr><td><hr></td></tr>    
     <tr>
       <td>
       New extension point <code>javadocExportWizardPage</code> allows to add pages to the Javadoc export wizard
@@ -85,6 +90,7 @@ Non-breaking API changes from R3.3 to R3.4</b></font> <br>
       </ul>
       </td>
     </tr>
+    <tr><td><hr></td></tr>    
     <tr>
       <td>
       Both new Java project wizard pages are now API. Clients
@@ -96,6 +102,7 @@ Non-breaking API changes from R3.3 to R3.4</b></font> <br>
       </ul>
       </td>
     </tr>
+    <tr><td><hr></td></tr>    
     <tr>
       <td>
       New extension point <code>classpathFixProcessors</code> allows to add functionality to fix a project class path when a type can not be resolved. For example
@@ -105,6 +112,7 @@ Non-breaking API changes from R3.3 to R3.4</b></font> <br>
       </ul>
       </td>
     </tr> 
+    <tr><td><hr></td></tr>    
     <tr>
       <td>
       Added API for the jar packager:
@@ -116,7 +124,8 @@ Non-breaking API changes from R3.3 to R3.4</b></font> <br>
       <li>Added method <code>org.eclipse.jdt.ui.jarpackager.JarWriter3.addEntry(JarEntry, InputStream)</code></li>
       </ul>
       </td>
-    </tr>  
+    </tr>
+    <tr><td><hr></td></tr>    
     <tr>
       <td>
       All occurrence actions available in for find occurrence. New actions and constants.
