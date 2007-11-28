@@ -2825,11 +2825,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (document == null)
 			return;
 
+		boolean hasChanged= false;
 		if (document instanceof IDocumentExtension4) {
 			int offset= selection.getOffset();
 			long currentModificationStamp= ((IDocumentExtension4)document).getModificationStamp();
-			IRegion markOccurrenceTargetRegion= fMarkOccurrenceTargetRegion; 
-			if (markOccurrenceTargetRegion != null && currentModificationStamp == fMarkOccurrenceModificationStamp) {
+			IRegion markOccurrenceTargetRegion= fMarkOccurrenceTargetRegion;
+			hasChanged= currentModificationStamp != fMarkOccurrenceModificationStamp;
+			if (markOccurrenceTargetRegion != null && !hasChanged) {
 				if (markOccurrenceTargetRegion.getOffset() <= offset && offset <= markOccurrenceTargetRegion.getOffset() + markOccurrenceTargetRegion.getLength())
 					return;
 			}
@@ -2880,6 +2882,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		if (locations == null) {
 			if (!fStickyOccurrenceAnnotations)
+				removeOccurrenceAnnotations();
+			else if (hasChanged) // check consistency of current annotations
 				removeOccurrenceAnnotations();
 			return;
 		}
