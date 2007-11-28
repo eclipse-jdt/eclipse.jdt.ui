@@ -373,6 +373,27 @@ public class JUnit4TestFinderTest extends TestCase {
 		assertTestFound(validTest1, new String[] { });
 		assertTestFound(validTest1.getCompilationUnit(), new String[] { });
 	}
+	
+	public void testTestAnnotation2() throws Exception {
+		
+		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import org.junit.Test;\n");
+		buf.append("\n");
+		buf.append("@RunWith(Suite.class)\n");
+		buf.append("@SuiteClasses(Test1.class)\n");
+		buf.append("public class Test1 {\n");
+		buf.append("        @Test Test testFoo1() {\n");
+		buf.append("            return null;\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		IType validTest1= p.createCompilationUnit("Test1.java", buf.toString(), false, null).getType("Test1");
+		
+		assertTestFound(validTest1, new String[] { "p.Test1" });
+		assertTestFound(validTest1.getCompilationUnit(), new String[] { "p.Test1" });
+	}
 		
 		
 	private void assertTestFound(IJavaElement container, String[] expectedTypes) throws CoreException {
