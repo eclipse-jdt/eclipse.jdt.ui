@@ -798,8 +798,8 @@ public final class ReorgPolicyFactory {
 		}
 
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws CoreException {
-			RefactoringStatus status= super.checkFinalConditions(pm, context, reorgQueries);
 			confirmOverwriting(reorgQueries);
+			RefactoringStatus status= super.checkFinalConditions(pm, context, reorgQueries);
 			return status;
 		}
 
@@ -2735,8 +2735,8 @@ public final class ReorgPolicyFactory {
 		}
 
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws CoreException {
-			RefactoringStatus status= super.checkFinalConditions(pm, context, reorgQueries);
 			confirmOverwriting(reorgQueries);
+			RefactoringStatus status= super.checkFinalConditions(pm, context, reorgQueries);
 			return status;
 		}
 
@@ -2949,8 +2949,8 @@ public final class ReorgPolicyFactory {
 		}
 
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws CoreException {
-			RefactoringStatus refactoringStatus= super.checkFinalConditions(pm, context, reorgQueries);
 			confirmOverwriting(reorgQueries);
+			RefactoringStatus refactoringStatus= super.checkFinalConditions(pm, context, reorgQueries);
 			return refactoringStatus;
 		}
 

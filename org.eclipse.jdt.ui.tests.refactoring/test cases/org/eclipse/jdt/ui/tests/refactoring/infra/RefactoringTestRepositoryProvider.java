@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,11 +20,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFileModificationValidator;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.team.FileModificationValidationContext;
+import org.eclipse.core.resources.team.FileModificationValidator;
 
 import org.eclipse.team.core.RepositoryProvider;
 
@@ -50,7 +51,7 @@ public class RefactoringTestRepositoryProvider extends RepositoryProvider {
 		return null;
 	}
 	
-	private static class RefactoringTestFileModificationValidator implements IFileModificationValidator {
+	private static class RefactoringTestFileModificationValidator extends FileModificationValidator {
 
 		private ArrayList fValidatedEditPaths;
 		private ArrayList fValidatedSavePaths;
@@ -68,16 +69,13 @@ public class RefactoringTestRepositoryProvider extends RepositoryProvider {
 			return fValidatedSavePaths;
 		}
 		
-		public IStatus validateEdit(IFile[] files, Object context) {
+		public IStatus validateEdit(IFile[] files, FileModificationValidationContext context) {
 			for (int i= 0; i < files.length; i++) {
 				fValidatedEditPaths.add(files[i].getFullPath());
 			}
 			return makeWritable(files);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.core.resources.IFileModificationValidator#validateSave(org.eclipse.core.resources.IFile)
-		 */
 		public IStatus validateSave(IFile file) {
 			fValidatedSavePaths.add(file.getFullPath());
 			return makeWritable(new IFile[] { file });
@@ -117,7 +115,7 @@ public class RefactoringTestRepositoryProvider extends RepositoryProvider {
 		return PROVIDER_ID;
 	}
 	
-	public IFileModificationValidator getFileModificationValidator() {
+	public FileModificationValidator getFileModificationValidator2() {
 		return fValidator;
 	}
 	

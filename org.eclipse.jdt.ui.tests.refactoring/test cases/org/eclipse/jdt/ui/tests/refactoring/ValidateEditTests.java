@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.team.core.RepositoryProvider;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.CopyRefactoring;
 import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -34,9 +35,11 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 
 import org.eclipse.jdt.ui.tests.refactoring.ccp.MockReorgQueries;
@@ -46,9 +49,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestRepositoryProvi
 public class ValidateEditTests extends RefactoringTest {
 	
 	private static final Class clazz= ValidateEditTests.class;
-	
-	private static final boolean BUG_154511= true; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=154511
-	
+		
 	public ValidateEditTests(String name) {
 		super(name);
 	}
@@ -274,13 +275,10 @@ public class ValidateEditTests extends RefactoringTest {
 	}
 	
 	public void testMoveCU2() throws Exception {
-		if (BUG_154511)
-			return;
-		
 		// Move CU and file: Only CU be validated as file doesn't change 
 		
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
-		IPackageFragment otherFragment= getRoot().createPackageFragment("org.test", true, null);
+		IPackageFragment otherFragment= getRoot().createPackageFragment("org.test1", true, null);
 		
 		StringBuffer buf= new StringBuffer();
 		buf.append("package org.test;\n");
@@ -307,7 +305,7 @@ public class ValidateEditTests extends RefactoringTest {
 		JavaMoveProcessor javaMoveProcessor= new JavaMoveProcessor(policy);
 		javaMoveProcessor.setDestination(ReorgDestinationFactory.createDestination(otherFragment));
 		javaMoveProcessor.setReorgQueries(new MockReorgQueries());
-		RefactoringStatus status= performRefactoring(new MoveRefactoring(javaMoveProcessor), false);
+		RefactoringStatus status= performRefactoring(new MoveRefactoring(javaMoveProcessor));
 		if (status != null)
 			assertTrue(status.toString(), status.isOK());
 	
@@ -316,6 +314,112 @@ public class ValidateEditTests extends RefactoringTest {
 		assertTrue(validatedEditPaths.contains(cu1.getPath())); // moved and changed
 		assertTrue(validatedEditPaths.contains(cu2.getPath())); // changed
 	}
+	
+	public void testMoveFileWithReplace() throws Exception {
+		// Move file to a existing location
+		
+		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
+		IPackageFragment otherFragment= getRoot().createPackageFragment("org.test1", true, null);
+		
+		IFile file= ((IFolder) fragment.getResource()).getFile("x.properties");
+		String content= "A file with no references";
+		file.create(getStream(content), true, null);
+		setReadOnly(file);
+		
+		IFile file2= ((IFolder) otherFragment.getResource()).getFile("x.properties");
+		file2.create(getStream(content), true, null);
+		setReadOnly(file2);
+		
+		
+		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(new IResource[] { file }, new IJavaElement[] {});
+		assertTrue(policy.canEnable());
+		
+		JavaMoveProcessor javaMoveProcessor= new JavaMoveProcessor(policy);
+		javaMoveProcessor.setDestination(ReorgDestinationFactory.createDestination(otherFragment));
+		javaMoveProcessor.setReorgQueries(new MockReorgQueries());
+		RefactoringStatus status= performRefactoring(new MoveRefactoring(javaMoveProcessor), true);
+		if (status != null)
+			assertTrue(status.toString(), status.isOK());
+	
+		Collection validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
+		assertEquals(1, validatedEditPaths.size());
+		assertTrue(validatedEditPaths.contains(file2.getFullPath())); // replaced
+	}
+	
+	public void testMoveCuWithReplace() throws Exception {
+		// Move CU to an existing location
+		
+		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
+		IPackageFragment otherFragment= getRoot().createPackageFragment("org.test1", true, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package org.test;\n");
+		buf.append("public class MyClass {\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= fragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
+		setReadOnly(cu1);
+		
+		
+		buf= new StringBuffer();
+		buf.append("package org.test1;\n");
+		buf.append("public class MyClass {\n");
+		buf.append("}\n");
+		ICompilationUnit cu2= otherFragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
+		setReadOnly(cu2);
+		
+		
+		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(new IResource[0], new IJavaElement[] { cu1 });
+		assertTrue(policy.canEnable());
+		
+		JavaMoveProcessor javaMoveProcessor= new JavaMoveProcessor(policy);
+		javaMoveProcessor.setDestination(ReorgDestinationFactory.createDestination(otherFragment));
+		javaMoveProcessor.setReorgQueries(new MockReorgQueries());
+		RefactoringStatus status= performRefactoring(new MoveRefactoring(javaMoveProcessor), false);
+		if (status != null)
+			assertTrue(status.toString(), status.isOK());
+	
+		Collection validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
+		assertEquals(2, validatedEditPaths.size());
+		assertTrue(validatedEditPaths.contains(cu1.getPath())); // moved and changed
+		assertTrue(validatedEditPaths.contains(cu2.getPath())); // replaced
+	}
+	
+	public void testCopyCuWithReplace() throws Exception {
+		// Copy CU to a existing location 
+		
+		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
+		IPackageFragment otherFragment= getRoot().createPackageFragment("org.test1", true, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package org.test;\n");
+		buf.append("public class MyClass {\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= fragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
+		setReadOnly(cu1);
+		
+		buf= new StringBuffer();
+		buf.append("package org.test1;\n");
+		buf.append("public class MyClass {\n");
+		buf.append("}\n");
+		ICompilationUnit cu2= otherFragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
+		setReadOnly(cu2);
+		
+		ICopyPolicy policy= ReorgPolicyFactory.createCopyPolicy(new IResource[0], new IJavaElement[] { cu1 });
+		assertTrue(policy.canEnable());
+		
+		JavaCopyProcessor javaCopyProcessor= new JavaCopyProcessor(policy);
+		javaCopyProcessor.setDestination(ReorgDestinationFactory.createDestination(otherFragment));
+		javaCopyProcessor.setReorgQueries(new MockReorgQueries());
+		javaCopyProcessor.setNewNameQueries(new MockReorgQueries());
+		RefactoringStatus status= performRefactoring(new CopyRefactoring(javaCopyProcessor), false);
+		if (status != null)
+			assertTrue(status.toString(), status.isOK());
+	
+		Collection validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
+		assertEquals(1, validatedEditPaths.size());
+		assertTrue(validatedEditPaths.contains(cu2.getPath())); // replaced
+	}
+	
 	
 	private static void setReadOnly(ICompilationUnit cu) throws CoreException {
 		setReadOnly(cu.getResource());

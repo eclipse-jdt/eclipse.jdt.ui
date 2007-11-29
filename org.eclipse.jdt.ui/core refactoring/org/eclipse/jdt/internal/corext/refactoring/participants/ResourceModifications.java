@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.mapping.IResourceChangeDescriptionFactory;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -110,6 +111,10 @@ public class ResourceModifications {
 			fDestination= destination;
 		}
 		public void buildDelta(IResourceChangeDescriptionFactory builder) {
+			IResource existing= ResourcesPlugin.getWorkspace().getRoot().findMember(fDestination);
+			if (existing != null) {
+				builder.delete(existing);
+			}
 			builder.move(fResource, fDestination);
 		}
 		public IPath getDestinationPath() {
@@ -123,6 +128,10 @@ public class ResourceModifications {
 			fDestination= destination;
 		}
 		public void buildDelta(IResourceChangeDescriptionFactory builder) {
+			IResource existing= ResourcesPlugin.getWorkspace().getRoot().findMember(fDestination);
+			if (existing != null) {
+				builder.delete(existing);
+			}
 			builder.copy(fResource, fDestination);
 		}
 		public IPath getDestinationPath() {
@@ -335,19 +344,19 @@ public class ResourceModifications {
 	
 	public static void buildMoveDelta(IResourceChangeDescriptionFactory builder, IResource resource, RenameArguments args) {
 		IPath newPath= resource.getFullPath().removeLastSegments(1).append(args.getNewName());
-		builder.move(resource, newPath);
+		new MoveDescription(resource, newPath).buildDelta(builder);
 	}
 	
 	public static void buildMoveDelta(IResourceChangeDescriptionFactory builder, IResource resource, MoveArguments args) {
 		IPath destination= ((IResource)args.getDestination()).getFullPath().append(resource.getName());
-		builder.move(resource, destination);
+		new MoveDescription(resource, destination).buildDelta(builder);
 	}
-	
+
 	public static void buildCopyDelta(IResourceChangeDescriptionFactory builder, IResource resource, CopyArguments args) {
 		IPath destination= ((IResource)args.getDestination()).getFullPath().append(resource.getName());
-		builder.copy(resource, destination);
+		new CopyDescription(resource, destination).buildDelta(builder);
 	}
-	
+		
 	private void internalAdd(DeltaDescription description) {
 		if (fDeltaDescriptions == null)
 			fDeltaDescriptions= new ArrayList();
