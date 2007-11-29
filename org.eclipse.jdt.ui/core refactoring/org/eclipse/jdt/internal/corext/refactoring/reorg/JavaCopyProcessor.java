@@ -79,9 +79,7 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 		Assert.isNotNull(fNewNameQueries, "Missing new name queries"); //$NON-NLS-1$
 		Assert.isNotNull(fReorgQueries, "Missing reorg queries"); //$NON-NLS-1$
 		pm.beginTask("", 2); //$NON-NLS-1$
-		RefactoringStatus result= fCopyPolicy.checkFinalConditions(new SubProgressMonitor(pm, 1), context, fReorgQueries);
-		result.merge(context.check(new SubProgressMonitor(pm, 1)));
-		return result;
+		return fCopyPolicy.checkFinalConditions(new SubProgressMonitor(pm, 1), context, fReorgQueries);
 	}
 
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
