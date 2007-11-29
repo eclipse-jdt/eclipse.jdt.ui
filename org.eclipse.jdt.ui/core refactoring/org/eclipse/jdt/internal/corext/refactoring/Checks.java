@@ -26,8 +26,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.mapping.IResourceChangeDescriptionFactory;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -692,6 +695,16 @@ public class Checks {
 		}
 		return result;
 	}
+	
+	public static void addModifiedFilesToChecker(IFile[] filesToModify, CheckConditionsContext context) {
+		ResourceChangeChecker checker= (ResourceChangeChecker) context.getChecker(ResourceChangeChecker.class);
+		IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
+		
+		for (int i= 0; i < filesToModify.length; i++) {
+			deltaFactory.change(filesToModify[i]);
+		}
+	}
+	
 	
 	public static RefactoringStatus validateEdit(ICompilationUnit unit, Object context) {
 		IResource resource= unit.getPrimary().getResource();

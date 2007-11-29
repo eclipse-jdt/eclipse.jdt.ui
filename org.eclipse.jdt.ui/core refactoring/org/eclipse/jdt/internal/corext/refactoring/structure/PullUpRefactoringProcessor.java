@@ -743,7 +743,9 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			fCompilationUnitRewrites= new HashMap(3);
 			result.merge(checkProjectCompliance(getCompilationUnitRewrite(fCompilationUnitRewrites, getDeclaringType().getCompilationUnit()), getDestinationType(), fMembersToMove));
 			fChangeManager= createChangeManager(new SubProgressMonitor(monitor, 1), result);
-			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits()), getRefactoring().getValidationContext()));
+			
+			Checks.addModifiedFilesToChecker(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits()), context);
+
 			return result;
 		} finally {
 			monitor.done();

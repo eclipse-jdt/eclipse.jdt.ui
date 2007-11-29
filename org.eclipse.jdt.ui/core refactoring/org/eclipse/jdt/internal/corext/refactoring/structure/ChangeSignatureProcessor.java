@@ -844,7 +844,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			if (result.hasFatalError())
 				return result;
 
-			result.merge(validateModifiesFiles());
+			Checks.addModifiedFilesToChecker(getAllFilesToModify(), context);
 			return result;
 		} finally {
 			pm.done();
@@ -1160,11 +1160,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	private IFile[] getAllFilesToModify(){
 		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 	}
-	
-	private RefactoringStatus validateModifiesFiles(){
-		return Checks.validateModifiesFiles(getAllFilesToModify(), getRefactoring().getValidationContext());
-	}
-
+	  
 	public Change[] getAllChanges() {
 		return fChangeManager.getAllChanges();
 	}

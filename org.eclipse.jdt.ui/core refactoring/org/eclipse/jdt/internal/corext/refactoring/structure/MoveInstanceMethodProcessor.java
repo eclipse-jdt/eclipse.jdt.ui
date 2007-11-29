@@ -1232,7 +1232,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 									status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_binary, JavaStatusContext.create(fMethod)));
 								checkConflictingTarget(new SubProgressMonitor(monitor, 1), status);
 								checkConflictingMethod(new SubProgressMonitor(monitor, 1), status);
-								status.merge(Checks.validateModifiesFiles(computeModifiedFiles(fMethod.getCompilationUnit(), type.getCompilationUnit()), null));
+								
+								Checks.addModifiedFilesToChecker(computeModifiedFiles(fMethod.getCompilationUnit(), type.getCompilationUnit()), context);
+
 								monitor.worked(1);
 								if (!status.hasFatalError())
 									fChangeManager= createChangeManager(status, new SubProgressMonitor(monitor, 1));
