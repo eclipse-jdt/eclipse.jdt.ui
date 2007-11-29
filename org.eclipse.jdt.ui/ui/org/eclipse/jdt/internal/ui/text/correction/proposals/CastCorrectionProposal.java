@@ -57,7 +57,7 @@ public class CastCorrectionProposal extends LinkedCorrectionProposal {
 		setCommandId(ADD_CAST_ID);
 	}
 
-	private Type getNewCastTypeNode(ASTRewrite rewrite, ImportRewrite importRewrite) throws CoreException {
+	private Type getNewCastTypeNode(ASTRewrite rewrite, ImportRewrite importRewrite) {
 		AST ast= rewrite.getAST();
 
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext((CompilationUnit) fNodeToCast.getRoot(), fNodeToCast.getStartPosition(), importRewrite);

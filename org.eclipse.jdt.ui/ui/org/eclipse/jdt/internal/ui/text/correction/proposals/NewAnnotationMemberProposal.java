@@ -80,7 +80,7 @@ public class NewAnnotationMemberProposal extends LinkedCorrectionProposal {
 		return null;
 	}
 
-	private AnnotationTypeMemberDeclaration getStub(ASTRewrite rewrite, AnnotationTypeDeclaration targetTypeDecl) throws CoreException {
+	private AnnotationTypeMemberDeclaration getStub(ASTRewrite rewrite, AnnotationTypeDeclaration targetTypeDecl) {
 		AST ast= targetTypeDecl.getAST();
 
 		AnnotationTypeMemberDeclaration decl= ast.newAnnotationTypeMemberDeclaration();

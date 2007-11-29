@@ -188,7 +188,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		return decl;
 	}
 
-	private SuperConstructorInvocation addEnclosingInstanceAccess(ASTRewrite rewrite, List parameters, String[] paramNames, ITypeBinding enclosingInstance) throws CoreException {
+	private SuperConstructorInvocation addEnclosingInstanceAccess(ASTRewrite rewrite, List parameters, String[] paramNames, ITypeBinding enclosingInstance) {
 		AST ast= rewrite.getAST();
 		SuperConstructorInvocation invocation= ast.newSuperConstructorInvocation();
 

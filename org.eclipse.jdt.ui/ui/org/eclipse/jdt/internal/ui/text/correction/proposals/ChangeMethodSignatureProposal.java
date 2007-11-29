@@ -135,7 +135,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		return null;
 	}
 
-	private void modifyParameters(ASTRewrite rewrite, MethodDeclaration methodDecl) throws CoreException {
+	private void modifyParameters(ASTRewrite rewrite, MethodDeclaration methodDecl) {
 		AST ast= methodDecl.getAST();
 
 		ArrayList usedNames= new ArrayList();
@@ -355,7 +355,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		return newTagElement;
 	}
 
-	private void modifyExceptions(ASTRewrite rewrite, MethodDeclaration methodDecl) throws CoreException {
+	private void modifyExceptions(ASTRewrite rewrite, MethodDeclaration methodDecl) {
 		AST ast= methodDecl.getAST();
 
 		ImportRewrite imports= getImportRewrite();

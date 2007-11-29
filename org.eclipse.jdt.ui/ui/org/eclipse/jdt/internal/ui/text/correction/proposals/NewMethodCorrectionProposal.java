@@ -232,7 +232,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 		}
 	}
 
-	private Type evaluateParameterType(AST ast, Expression elem, String key) throws CoreException {
+	private Type evaluateParameterType(AST ast, Expression elem, String key) {
 		ITypeBinding binding= Bindings.normalizeTypeBinding(elem.resolveTypeBinding());
 		if (binding != null && binding.isWildcardType()) {
 			binding= ASTResolving.normalizeWildcardType(binding, true, ast);

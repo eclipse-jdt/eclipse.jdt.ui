@@ -116,7 +116,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 		}
 	}
 
-	private ASTRewrite doAddParam(CompilationUnit cu) throws CoreException {
+	private ASTRewrite doAddParam(CompilationUnit cu) {
 		AST ast= cu.getAST();
 		SimpleName node= fOriginalNode;
 
@@ -191,7 +191,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 	}
 
 
-	private ASTRewrite doAddLocal(CompilationUnit cu) throws CoreException {
+	private ASTRewrite doAddLocal(CompilationUnit cu) {
 		AST ast= cu.getAST();
 
 		Block body;
@@ -340,7 +340,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 		return parent;
 	}
 
-	private ASTRewrite doAddField(CompilationUnit astRoot) throws CoreException {
+	private ASTRewrite doAddField(CompilationUnit astRoot) {
 		SimpleName node= fOriginalNode;
 		boolean isInDifferentCU= false;
 
@@ -409,7 +409,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 		return ASTNodes.getInsertionIndex(newDecl, decls);
 	}
 
-	private Type evaluateVariableType(AST ast, ImportRewrite imports, IBinding targetContext) throws CoreException {
+	private Type evaluateVariableType(AST ast, ImportRewrite imports, IBinding targetContext) {
 		if (fOriginalNode.getParent() instanceof MethodInvocation) {
 			MethodInvocation parent= (MethodInvocation) fOriginalNode.getParent();
 			if (parent.getExpression() == fOriginalNode) {
@@ -498,7 +498,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 		return modifiers;
 	}
 
-	private ASTRewrite doAddEnumConst(CompilationUnit astRoot) throws CoreException {
+	private ASTRewrite doAddEnumConst(CompilationUnit astRoot) {
 		SimpleName node= fOriginalNode;
 
 		ASTNode newTypeDecl= astRoot.findDeclaringNode(fSenderBinding);

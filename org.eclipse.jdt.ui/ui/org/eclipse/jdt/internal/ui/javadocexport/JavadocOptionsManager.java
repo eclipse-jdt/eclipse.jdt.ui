@@ -1072,7 +1072,7 @@ public class JavadocOptionsManager {
 		return null;
 	}
 
-	private boolean isValidProject(IJavaProject project) throws JavaModelException {
+	private boolean isValidProject(IJavaProject project) {
 		if (project != null && project.exists() && project.isOpen()) {
 			return true;
 		}

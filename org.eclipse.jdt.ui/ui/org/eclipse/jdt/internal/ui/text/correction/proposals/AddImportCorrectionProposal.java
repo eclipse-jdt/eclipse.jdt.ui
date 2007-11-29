@@ -48,7 +48,7 @@ public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 	}
 
 
-	private void rememberSelection() throws CoreException {
+	private void rememberSelection() {
 		QualifiedTypeNameHistory.remember(getQualifiedTypeName());
 	}
 

@@ -122,7 +122,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		}
 	}
 
-	private ASTRewrite doAddLocal() throws CoreException {
+	private ASTRewrite doAddLocal() {
 		Expression expression= ((ExpressionStatement) fNodeToAssign).getExpression();
 		AST ast= fNodeToAssign.getAST();
 
@@ -171,7 +171,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		return false;
 	}
 
-	private ASTRewrite doAddField() throws CoreException {
+	private ASTRewrite doAddField() {
 		boolean isParamToField= fNodeToAssign.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION;
 
 		ASTNode newTypeDecl= ASTResolving.findParentType(fNodeToAssign);
@@ -259,7 +259,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		return rewrite;
 	}
 
-	private VariableDeclarationFragment addFieldDeclaration(ASTRewrite rewrite, ASTNode newTypeDecl, int modifiers, Expression expression) throws CoreException {
+	private VariableDeclarationFragment addFieldDeclaration(ASTRewrite rewrite, ASTNode newTypeDecl, int modifiers, Expression expression) {
 		if (fExistingFragment != null) {
 			return fExistingFragment;
 		}
@@ -291,7 +291,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	}
 	
 	
-	private Type evaluateType(AST ast) throws CoreException {
+	private Type evaluateType(AST ast) {
 		ITypeBinding[] proposals= ASTResolving.getRelaxingTypes(ast, fTypeBinding);
 		for (int i= 0; i < proposals.length; i++) {
 			addLinkedPositionProposal(KEY_TYPE, proposals[i]);
