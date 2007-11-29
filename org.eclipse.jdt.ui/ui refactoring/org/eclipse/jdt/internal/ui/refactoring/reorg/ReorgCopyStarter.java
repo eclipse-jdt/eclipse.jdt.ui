@@ -24,7 +24,6 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.participants.CopyRefactoring;
-import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
@@ -65,7 +64,7 @@ public class ReorgCopyStarter {
 		IRunnableContext context= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		fCopyProcessor.setNewNameQueries(new NewNameQueries(parent));
 		fCopyProcessor.setReorgQueries(new ReorgQueries(parent));
-		ProcessorBasedRefactoring refactoring= new CopyRefactoring(fCopyProcessor);
+		CopyRefactoring refactoring= new CopyRefactoring(fCopyProcessor);
 		new RefactoringExecutionHelper(refactoring, RefactoringCore.getConditionCheckingFailedSeverity(), fCopyProcessor.getSaveMode(), parent, context).perform(false, false);
 	}
 }
