@@ -112,7 +112,7 @@ public class ResourceModifications {
 		}
 		public void buildDelta(IResourceChangeDescriptionFactory builder) {
 			IResource existing= ResourcesPlugin.getWorkspace().getRoot().findMember(fDestination);
-			if (existing != null) {
+			if (existing != null && !existing.equals(fResource)) {
 				builder.delete(existing);
 			}
 			builder.move(fResource, fDestination);
@@ -129,7 +129,7 @@ public class ResourceModifications {
 		}
 		public void buildDelta(IResourceChangeDescriptionFactory builder) {
 			IResource existing= ResourcesPlugin.getWorkspace().getRoot().findMember(fDestination);
-			if (existing != null) {
+			if (existing != null && !existing.equals(fResource)) {
 				builder.delete(existing);
 			}
 			builder.copy(fResource, fDestination);
