@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,11 +57,15 @@ public class TestModelProvider extends ModelProvider {
 	
 	public static void assertTrue(IResourceDelta expected) {
 		Assert.assertNotNull(LAST_DELTA);
-		assertTrue(expected, LAST_DELTA);
+		boolean res= assertTrue(expected, LAST_DELTA);
+		if (!res) {
+			Assert.assertEquals(printDelta(expected), printDelta(LAST_DELTA));
+		}
+		
 		LAST_DELTA= null;
 	}
 	
-	private static void assertTrue(IResourceDelta expected, IResourceDelta actual) {
+	private static boolean assertTrue(IResourceDelta expected, IResourceDelta actual) {
 		assertEqual(expected.getResource(), actual.getResource());
 		int actualKind= actual.getKind();
 		int actualFlags= actual.getFlags();
@@ -78,17 +82,95 @@ public class TestModelProvider extends ModelProvider {
 		if ((expectKind & IResourceDelta.ADDED) != 0 && (expectedFlags & IResourceDelta.MOVED_FROM) != 0) {
 			expectedFlags= expectedFlags & ~IResourceDelta.OPEN;
 		}
-		Assert.assertEquals("Same kind", expectKind, actualKind);
-		Assert.assertEquals("Same flags", expectedFlags, actualFlags);
+		if (expectKind != actualKind || expectedFlags != actualFlags) {
+			return false;
+		}
 		IResourceDelta[] expectedChildren=  getExpectedChildren(expected);
 		IResourceDelta[] actualChildren= getActualChildren(actual, expectedChildren);
-		Assert.assertEquals("Same number of children", expectedChildren.length, actualChildren.length);
+		if (expectedChildren.length != actualChildren.length) {
+			return false;
+		}
 		Arrays.sort(expectedChildren, COMPARATOR);
 		Arrays.sort(actualChildren, COMPARATOR);
 		for (int i= 0; i < expectedChildren.length; i++) {
-			assertTrue(expectedChildren[i], actualChildren[i]);
+			boolean res= assertTrue(expectedChildren[i], actualChildren[i]);
+			if (!res) {
+				Assert.assertEquals(printDelta(expected), printDelta(actual));
+			}
+		}
+		return true;
+	}
+	
+	private static String printDelta(IResourceDelta delta) {
+		StringBuffer buf= new StringBuffer();
+		appendDelta(delta, 0, buf);
+		return buf.toString();
+	}
+	
+	private static StringBuffer appendDelta(IResourceDelta delta, int indent, StringBuffer buf) {
+		for (int i= 0; i < indent; i++) {
+			buf.append("  ");
+		}
+		buf.append(delta.getResource().toString());
+		buf.append("-").append(getKindString(delta.getKind()));
+		int flags= delta.getKind();
+		if (flags != 0) {
+			buf.append("-").append(getFlagString(flags)).append('\n');
+		}
+		
+		IResourceDelta[] affectedChildren= delta.getAffectedChildren();
+		Arrays.sort(affectedChildren, COMPARATOR);
+		
+		for (int i= 0; i < affectedChildren.length; i++) {
+			appendDelta(affectedChildren[i], indent + 1, buf);
+		}
+		return buf;
+	}
+	
+	
+	
+	private static String getKindString(int kind) {
+		switch (kind) {
+			case IResourceDelta.CHANGED:
+				return "CHANGED";
+			case IResourceDelta.ADDED:
+				return "ADDED";
+			case IResourceDelta.REMOVED:
+				return "REMOVED";
+			case IResourceDelta.ADDED_PHANTOM:
+				return "ADDED_PHANTOM";
+			case IResourceDelta.REMOVED_PHANTOM:
+				return "REMOVED_PHANTOM";
+			default:
+				return "NULL";
 		}
 	}
+	
+	private static String getFlagString(int flags) {
+		StringBuffer buf= new StringBuffer();
+		appendFlag(flags, IResourceDelta.CONTENT, "CONTENT", buf);
+		appendFlag(flags, IResourceDelta.DESCRIPTION, "DESCRIPTION", buf);
+		appendFlag(flags, IResourceDelta.ENCODING, "ENCODING", buf);
+		appendFlag(flags, IResourceDelta.OPEN, "OPEN", buf);
+		appendFlag(flags, IResourceDelta.MOVED_TO, "MOVED_TO", buf);
+		appendFlag(flags, IResourceDelta.MOVED_FROM, "MOVED_FROM", buf);
+		appendFlag(flags, IResourceDelta.TYPE, "TYPE", buf);
+		appendFlag(flags, IResourceDelta.SYNC, "SYNC", buf);
+		appendFlag(flags, IResourceDelta.MARKERS, "MARKERS", buf);
+		appendFlag(flags, IResourceDelta.REPLACED, "REPLACED", buf);
+		return buf.toString();
+	}
+	
+	private static void appendFlag(int flags, int flag, String name, StringBuffer res) {
+		if ((flags & flag) != 0) {
+			if (res.length() > 0) {
+				res.append("-");
+			}
+			res.append(name);
+		}
+	}
+	
+	
 
 	private static void assertEqual(IResource expected, IResource actual) {
 		// This is a simple approach to deal with renamed resources in the deltas.
