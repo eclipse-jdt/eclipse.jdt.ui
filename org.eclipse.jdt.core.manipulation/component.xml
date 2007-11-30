@@ -52,7 +52,7 @@
  <package name="org.eclipse.jdt.core.refactoring.participants">
    <type name="ChangeMethodSignatureArguments" subclass="false"/>
    <type name="ChangeMethodSignatureParticipant"/>
-   <type name="JavaParticipantManager" subclass="false" instantiate="false/>
+   <type name="JavaParticipantManager" subclass="false" instantiate="false"/>
  </package>
 
  <component-depends unrestricted="true"/>
