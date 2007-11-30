@@ -349,7 +349,7 @@ public class ColoredJavaElementLabels {
 
 			// category
 			if (getFlag(flags, JavaElementLabels.M_CATEGORY) && method.exists()) 
-				getCategoryLabel(method, result);
+				getCategoryLabel(method, flags, result);
 			
 			// post qualification
 			if (getFlag(flags, JavaElementLabels.M_POST_QUALIFIED)) {
@@ -366,9 +366,10 @@ public class ColoredJavaElementLabels {
 		}
 	}
 
-	private static void getCategoryLabel(IMember member, ColoredString result) throws JavaModelException {
+	private static void getCategoryLabel(IMember member, long flags, ColoredString result) throws JavaModelException {
 		String[] categories= member.getCategories();
 		if (categories.length > 0) {
+			int offset= result.length();
 			ColoredString categoriesBuf= new ColoredString();
 			for (int i= 0; i < categories.length; i++) {
 				if (i > 0)
@@ -377,6 +378,9 @@ public class ColoredJavaElementLabels {
 			}
 			result.append(JavaElementLabels.CONCAT_STRING);
 			result.append(Messages.format(JavaUIMessages.JavaElementLabels_category , categoriesBuf.toString()));
+			if (getFlag(flags, COLORIZE)) {
+				result.colorize(offset, result.length() - offset, COUNTER_STYLE);
+			}
 		}
 	}
 	
@@ -439,7 +443,7 @@ public class ColoredJavaElementLabels {
 
 			// category
 			if (getFlag(flags, JavaElementLabels.F_CATEGORY) && field.exists())
-				getCategoryLabel(field, result);
+				getCategoryLabel(field, flags, result);
 
 			// post qualification
 			if (getFlag(flags, JavaElementLabels.F_POST_QUALIFIED)) {
@@ -664,7 +668,7 @@ public class ColoredJavaElementLabels {
 		// category
 		if (getFlag(flags, JavaElementLabels.T_CATEGORY) && type.exists()) {
 			try {
-				getCategoryLabel(type, result);
+				getCategoryLabel(type, flags, result);
 			} catch (JavaModelException e) {
 				// ignore
 			}
