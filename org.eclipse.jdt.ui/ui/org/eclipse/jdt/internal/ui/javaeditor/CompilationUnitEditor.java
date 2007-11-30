@@ -75,6 +75,7 @@ import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
 import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.ISourceViewerExtension4;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
@@ -92,6 +93,7 @@ import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
+import org.eclipse.ui.texteditor.KeyBindingSupportForAssistant;
 import org.eclipse.ui.texteditor.ResourceAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
@@ -1005,8 +1007,11 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 */
 	private final Object fReconcilerLock= new Object();
 
-
-
+	/**
+	 * Key binding support for the content assistant.
+	 * @since 3.4
+	 */
+	private KeyBindingSupportForAssistant fKeyBindingSupportForAssistant;
 
 
 	/**
@@ -1037,6 +1042,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		setAction("ContentAssistProposal", action); //$NON-NLS-1$
 		markAsStateDependentAction("ContentAssistProposal", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.CONTENT_ASSIST_ACTION);
+		ISourceViewer sourceViewer= getSourceViewer();
+		if (sourceViewer instanceof ISourceViewerExtension4)
+			fKeyBindingSupportForAssistant= new KeyBindingSupportForAssistant(((ISourceViewerExtension4) sourceViewer).getContentAssistantFacade());
 
 		action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION);	//$NON-NLS-1$
 		action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);
@@ -1382,7 +1390,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @since 3.3
 	 */
 	protected void installTabsToSpacesConverter() {
-		ISourceViewer sourceViewer= getSourceViewer(); 
+		ISourceViewer sourceViewer= getSourceViewer();
 		SourceViewerConfiguration config= getSourceViewerConfiguration();
 		if (config != null && sourceViewer instanceof ITextViewerExtension7) {
 			int tabWidth= config.getTabWidth(sourceViewer);
@@ -1428,6 +1436,11 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		if (fCorrectionCommands != null) {
 			fCorrectionCommands.deregisterCommands();
 			fCorrectionCommands= null;
+		}
+		
+		if (fKeyBindingSupportForAssistant != null) {
+			fKeyBindingSupportForAssistant.dispose();
+			fKeyBindingSupportForAssistant= null;
 		}
 
 		super.dispose();
