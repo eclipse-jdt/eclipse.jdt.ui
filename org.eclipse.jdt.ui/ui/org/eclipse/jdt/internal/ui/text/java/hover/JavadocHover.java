@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Genady Beryozkin <eclipse@genady.org> [hovering] tooltip for constant string does not show constant value - https://bugs.eclipse.org/bugs/show_bug.cgi?id=85382
+ *     Genady Beryozkin <eclipse@genady.org> - [hovering] tooltip for constant string does not show constant value - https://bugs.eclipse.org/bugs/show_bug.cgi?id=85382
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
@@ -267,7 +267,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 	/*
 	 * @since 3.4
 	 */
-	private boolean isStaticFinal(IJavaElement member) {
+	private static boolean isStaticFinal(IJavaElement member) {
 		if (member.getElementType() != IJavaElement.FIELD)
 			return false;
 		
