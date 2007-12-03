@@ -56,6 +56,13 @@ public class CoreUtility {
 	 * Project must exist.
 	 * <code> org.eclipse.ui.dialogs.ContainerGenerator</code> is too heavy
 	 * (creates a runnable)
+	 * @param folder the folder to create
+	 * @param force a flag controlling how to deal with resources that
+	 *    are not in sync with the local file system
+	 * @param local a flag controlling whether or not the folder will be local
+	 *    after the creation
+	 * @param monitor the progress monitor
+	 * @throws CoreException thrown if the creation failed
 	 */
 	public static void createFolder(IFolder folder, boolean force, boolean local, IProgressMonitor monitor) throws CoreException {
 		if (!folder.exists()) {
@@ -75,6 +82,7 @@ public class CoreUtility {
 	 * @param element the config element defining the extension
 	 * @param classAttribute the name of the attribute carrying the class
 	 * @return the extension object
+	 * @throws CoreException thrown if the creation failed
 	 */
 	public static Object createExtension(final IConfigurationElement element, final String classAttribute) throws CoreException {
 		// If plugin has been loaded create extension.
@@ -172,6 +180,7 @@ public class CoreUtility {
 	/**
 	 * Returns a build job
 	 * @param project The project to build or <code>null</code> to build the workspace.
+	 * @return the build job
 	 */
 	public static Job getBuildJob(final IProject project) {
 		Job buildJob= new BuildJob(JavaUIMessages.CoreUtility_job_title, project);
@@ -186,6 +195,7 @@ public class CoreUtility {
      * 
      * @param state the value to be set for autobuilding.
      * @return the old value of the autobuild state
+	 * @throws CoreException thrown if the operation failed
      */
     public static boolean enableAutoBuild(boolean state) throws CoreException {
         IWorkspace workspace= ResourcesPlugin.getWorkspace();
