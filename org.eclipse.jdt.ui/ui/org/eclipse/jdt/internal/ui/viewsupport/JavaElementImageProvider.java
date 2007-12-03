@@ -409,7 +409,7 @@ public class JavaElementImageProvider {
 		return false;
 	}	
 	
-	private static boolean isEnumConstant(IMember element, int modifiers) throws JavaModelException {
+	private static boolean isEnumConstant(IMember element, int modifiers) {
 		if (element.getElementType() == IJavaElement.FIELD) {
 			return Flags.isEnum(modifiers);
 		}

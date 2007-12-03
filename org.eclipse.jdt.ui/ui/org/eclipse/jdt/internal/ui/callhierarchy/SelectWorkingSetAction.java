@@ -11,17 +11,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jface.action.Action;
 
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 class SelectWorkingSetAction extends Action {
 	private final SearchScopeActionGroup fGroup;
@@ -47,10 +43,6 @@ class SelectWorkingSetAction extends Action {
 			} else {
 				this.fGroup.setActiveWorkingSets(null);
 			}
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, JavaPlugin.getActiveWorkbenchShell(), 
-					CallHierarchyMessages.SelectWorkingSetAction_error_title, 
-					CallHierarchyMessages.SelectWorkingSetAction_error_message); 
 		} catch (InterruptedException e) {
 			// cancel pressed
 		}

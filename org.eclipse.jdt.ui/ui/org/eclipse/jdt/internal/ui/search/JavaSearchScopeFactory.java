@@ -80,7 +80,7 @@ public class JavaSearchScopeFactory {
 		return fgInstance;
 	}
 
-	public IWorkingSet[] queryWorkingSets() throws JavaModelException, InterruptedException {
+	public IWorkingSet[] queryWorkingSets() throws InterruptedException {
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		if (shell == null)
 			return null;
