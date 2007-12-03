@@ -31,7 +31,7 @@ import org.eclipse.jdt.ui.search.IQueryParticipant;
 public class ParticipantTest extends TestCase {
 	
 	static class TestExtensionPoint extends SearchParticipantsExtensionPoint {
-		public SearchParticipantRecord[] getSearchParticipants(IProject[] concernedProjects) throws CoreException {
+		public SearchParticipantRecord[] getSearchParticipants(IProject[] concernedProjects) {
 			return new SearchParticipantRecord[] { new SearchParticipantRecord(new TestParticipantRecord(), new TestParticipant()) };
 		}
 	}

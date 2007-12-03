@@ -15,10 +15,11 @@ import java.io.File;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -26,6 +27,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.search.SearchParticipantRecord;
 import org.eclipse.jdt.internal.ui.search.SearchParticipantsExtensionPoint;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -40,7 +42,7 @@ public class JUnitSourceSetup extends TestSetup {
 	private SearchParticipantsExtensionPoint fExtensionPoint;
 	
 	static class NullExtensionPoint extends SearchParticipantsExtensionPoint {
-		public SearchParticipantRecord[] getSearchParticipants(IProject[] concernedProjects) throws CoreException {
+		public SearchParticipantRecord[] getSearchParticipants(IProject[] concernedProjects) {
 			return new SearchParticipantRecord[0];
 		}
 	}
