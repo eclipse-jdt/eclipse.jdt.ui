@@ -666,7 +666,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * {@inheritDoc}
 	 */
 	public boolean isFocusControl() {
-		return fTreeViewer.getControl().isFocusControl() || fFilterText.isFocusControl();
+		return getShell().getDisplay().getActiveShell() == getShell();
 	}
 
 	/**

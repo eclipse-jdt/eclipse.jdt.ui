@@ -424,7 +424,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * @see IInformationControl#isFocusControl()
 	 */
 	public boolean isFocusControl() {
-		return fText.isFocusControl();
+		return fShell.getDisplay().getActiveShell() == fShell;
 	}
 
 	/*
