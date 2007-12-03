@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,10 +7,13 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Genady Beryozkin <eclipse@genady.org> - [misc] Display values for constant fields in the Javadoc view - https://bugs.eclipse.org/bugs/show_bug.cgi?id=204914
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.infoviews;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -122,6 +125,12 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	private GotoInputAction fGotoInputAction;
 	/** Counts the number of background computation requests. */
 	private volatile int fComputeCount;
+	
+	/**
+	 * Progress monitor used to cancel pending computations.
+	 * @since 3.4
+	 */
+	private IProgressMonitor fComputeProgressMonitor;
 	
 	/**
 	 * Background color.
@@ -369,6 +378,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 * if the current input is the same.
 	 *
 	 * @param je the new input
+	 * @param part the workbench part
 	 * @param selection the current selection from the part that provides the input
 	 * @return <code>true</code> if the new input should be ignored
 	 */
@@ -456,6 +466,8 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	final public void dispose() {
 		// cancel possible running computation
 		fComputeCount++;
+		if (fComputeProgressMonitor != null)
+			fComputeProgressMonitor.setCanceled(true);
 
 		getSite().getWorkbenchWindow().getPartService().removePartListener(fPartListener);
 
@@ -496,6 +508,10 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 		final ISelection selection= provider.getSelection();
 		if (selection == null || selection.isEmpty())
 			return;
+		
+		if (fComputeProgressMonitor != null)
+			fComputeProgressMonitor.setCanceled(true);
+		fComputeProgressMonitor= new NullProgressMonitor();
 
 		Thread thread= new Thread("Info view input computer") { //$NON-NLS-1$
 			public void run() {
@@ -511,6 +527,8 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 				final Object input= computeInput(je);
 				if (input == null)
 					return;
+				
+				final String description= computeDescription(part, selection, je, fComputeProgressMonitor);
 
 				Shell shell= getSite().getShell();
 				if (shell.isDisposed())
@@ -530,7 +548,9 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 							return;
 
 						fCurrentViewInput= je;
-						doSetInput(input);
+						doSetInput(input, description);
+						
+						fComputeProgressMonitor= null;
 					}
 				});
 			}
@@ -541,20 +561,35 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 		thread.start();
 	}
 
-	private void doSetInput(Object input) {
-		setInput(input);
-
-		fGotoInputAction.setEnabled(true);
-
-		IJavaElement inputElement= getInput();
-		
+	/**
+	 * Computes the contents description that will be displayed for the current element.
+	 * 
+	 * @param part the part that triggered the current element update
+	 * @param selection the new selection
+	 * @param inputElement the new java element that will be displayed
+	 * @param localASTMonitor a progress monitor
+	 * @return the contents description for the provided <code>inputElement</code>
+	 * @since 3.4
+	 */
+	protected String computeDescription(IWorkbenchPart part, ISelection selection, IJavaElement inputElement, IProgressMonitor localASTMonitor) {
 		long flags;
 		if (inputElement instanceof ILocalVariable)
 			flags= LOCAL_VARIABLE_TITLE_FLAGS;
 		else
 			flags= TITLE_FLAGS;
-		
-		setContentDescription(JavaElementLabels.getElementLabel(inputElement, flags));
+
+		return JavaElementLabels.getElementLabel(inputElement, flags);
+	}
+
+	private void doSetInput(Object input, String description) {
+		setInput(input);
+
+		fGotoInputAction.setEnabled(true);
+
+		IJavaElement inputElement= getInput();
+
+		setContentDescription(description);
 		setTitleToolTip(JavaElementLabels.getElementLabel(inputElement, TOOLTIP_LABEL_FLAGS));
 	}
+
 }

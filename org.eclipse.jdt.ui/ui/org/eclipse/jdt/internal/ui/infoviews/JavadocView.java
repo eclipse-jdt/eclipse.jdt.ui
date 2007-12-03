@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Genady Beryozkin <eclipse@genady.org> - [misc] Display values for constant fields in the Javadoc view - https://bugs.eclipse.org/bugs/show_bug.cgi?id=204914
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.infoviews;
 
@@ -18,7 +19,9 @@ import java.io.StringReader;
 import java.net.URL;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.SWT;
@@ -65,6 +68,7 @@ import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TextUtilities;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
@@ -73,22 +77,42 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.JavadocContentAccess;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 
 import org.osgi.framework.Bundle;
 
@@ -518,6 +542,23 @@ public class JavadocView extends AbstractInfoView {
 	}
 
 	/*
+	 * @see AbstractInfoView#computeDescription(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection, org.eclipse.jdt.core.IJavaElement, org.eclipse.core.runtime.IProgressMonitor)
+	 * @since 3.4
+	 */
+	protected String computeDescription(IWorkbenchPart part, ISelection selection, IJavaElement inputElement, IProgressMonitor monitor) {
+		StringBuffer description= new StringBuffer(super.computeDescription(part, selection, inputElement, monitor));
+
+		if (inputElement.getElementType() != IJavaElement.FIELD)
+			return description.toString();
+
+		String constantValue= computeFieldConstant(part, selection, (IField) inputElement, monitor);
+		if (constantValue != null)
+			description.append(constantValue);
+
+		return description.toString();
+	}
+	
+	/*
 	 * @see AbstractInfoView#setInput(Object)
 	 */
 	protected void setInput(Object input) {
@@ -713,5 +754,231 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	protected String getHelpContextId() {
 		return IJavaHelpContextIds.JAVADOC_VIEW;
+	}
+	
+	/**
+	 * Compute the textual representation of a 'static' 'final' field's constant initializer value.
+	 * 
+	 * @param activePart the part that triggered the computation
+	 * @param selection the selection that references the field
+	 * @param resolvedField the filed whose constant value will be computed
+	 * @param monitor the progress monitor
+	 * 
+	 * @return the textual representation of the constant, or <code>null</code> if the
+	 *   field is not a constant field, the initializer value could not be computed, or
+	 *   the progress monitor was cancelled
+	 * @since 3.4
+	 */
+	private String computeFieldConstant(IWorkbenchPart activePart, ISelection selection, IField resolvedField, IProgressMonitor monitor) {
+
+		if (!isStaticFinal(resolvedField))
+			return null;
+
+		Object constantValue;
+		IJavaProject javaProject;
+		
+		if (selection instanceof ITextSelection && activePart instanceof JavaEditor) {
+			IEditorPart editor= (IEditorPart) activePart;
+			ITypeRoot activeType= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
+			constantValue= getConstantValueFromActiveEditor(activeType, resolvedField, (ITextSelection) selection, monitor);
+			javaProject= activeType.getJavaProject();
+		} else {
+			constantValue= computeFieldConstantFromTypeAST(resolvedField, monitor);
+			javaProject= resolvedField.getJavaProject();
+		}
+
+		if (constantValue != null)
+			return getFormattedAssignmentOperator(javaProject) + formatCompilerConstantValue(constantValue);
+
+		return null;
+	}
+
+	/**
+	 * Retrieve a constant initializer value of a field by (AST) parsing field's type.
+	 * 
+	 * @param constantField the constant field
+	 * @param monitor the progress monitor
+	 * @return the constant value of the field, or <code>null</code> if it could not be computed
+	 *   (or if the progress was cancelled).
+	 * @since 3.4
+	 */
+	private Object computeFieldConstantFromTypeAST(IField constantField, IProgressMonitor monitor) {
+		if (monitor.isCanceled())
+			return null;
+		
+		CompilationUnit ast= SharedASTProvider.getAST(constantField.getTypeRoot(), SharedASTProvider.WAIT_NO, monitor);
+		if (ast != null) {
+			try {
+				VariableDeclarationFragment fieldDecl= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(constantField, ast);
+				return fieldDecl.getInitializer().resolveConstantExpressionValue();
+			} catch (JavaModelException e) {
+				// ignore the exception and try the next method
+			}
+		}
+
+		if (monitor.isCanceled())
+			return null;
+
+		ASTParser p= ASTParser.newParser(AST.JLS3);
+		p.setProject(constantField.getJavaProject());
+		IBinding[] createBindings;
+		try {
+			createBindings= p.createBindings(new IJavaElement[] { constantField }, monitor);
+		} catch (OperationCanceledException e) {
+			return null;
+		}
+
+		IVariableBinding variableBinding= (IVariableBinding) createBindings[0];
+		if (variableBinding != null)
+			return variableBinding.getConstantValue();
+
+		return null;
+	}
+
+	/**
+	 * Tells whether the given member is static final.
+	 * <p>
+	 * XXX: Copied from {@link JavadocHover}.
+	 * </p>
+	 * @param member the member to test
+	 * @return <code>true</code> if static final
+	 * @since 3.4
+	 */
+	private static boolean isStaticFinal(IJavaElement member) {
+		if (member.getElementType() != IJavaElement.FIELD)
+			return false;
+		
+		IField field= (IField)member;
+		try {
+			return JdtFlags.isFinal(field) && JdtFlags.isStatic(field);
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			return false;
+		}
+	}
+
+	/**
+	 * Returns the constant value for a field that is referenced by the currently active type.
+	 * This method does may not run in the main UI thread.
+	 * <p>
+	 * XXX: This method was part of the JavadocHover#getConstantValue(IField field, IRegion hoverRegion)
+	 * 		method (lines 299-314).
+	 * </p>
+	 * @param activeType the type that is currently active
+	 * @param field the field that is being referenced (usually not declared in <code>activeType</code>)
+	 * @param selection the region in <code>activeType</code> that contains the field reference
+	 * @param monitor a progress monitor
+	 * 
+	 * @return the constant value for the given field or <code>null</code> if none
+	 * @since 3.4
+	 */
+	private static Object getConstantValueFromActiveEditor(ITypeRoot activeType, IField field, ITextSelection selection, IProgressMonitor monitor) {
+		Object constantValue= null;
+		
+		CompilationUnit unit= SharedASTProvider.getAST(activeType, SharedASTProvider.WAIT_ACTIVE_ONLY, monitor);
+		if (unit == null)
+			return null;
+		
+		ASTNode node= NodeFinder.perform(unit, selection.getOffset(), selection.getLength());
+		if (node != null && node.getNodeType() == ASTNode.SIMPLE_NAME) {
+			IBinding binding= ((SimpleName)node).resolveBinding();
+			if (binding != null && binding.getKind() == IBinding.VARIABLE) {
+				IVariableBinding variableBinding= (IVariableBinding)binding;
+				if (field.equals(variableBinding.getJavaElement())) {
+					constantValue= variableBinding.getConstantValue();
+				}
+			}
+		}
+		return constantValue;
+	}
+
+	/**
+	 * Returns the string representation of the given constant value.
+	 * <p>
+	 * XXX: In {@link JavadocHover} this method was part of JavadocHover#getConstantValue lines 318-361.
+	 * </p>
+	 * @param constantValue the constant value
+	 * @return the string representation of the given constant value.
+	 * @since 3.4
+	 */
+	private static String formatCompilerConstantValue(Object constantValue) {
+		if (constantValue instanceof String) {
+			StringBuffer result= new StringBuffer();
+			result.append('"');
+			String stringConstant= (String)constantValue;
+			if (stringConstant.length() > 80) {
+				result.append(stringConstant.substring(0, 80));
+				result.append(JavaElementLabels.ELLIPSIS_STRING);
+			} else {
+				result.append(stringConstant);
+			}
+			result.append('"');
+			return result.toString();
+			
+		} else if (constantValue instanceof Character) {
+			String constantResult= '\'' + constantValue.toString() + '\'';
+			
+			char charValue= ((Character) constantValue).charValue();
+			String hexString= Integer.toHexString(charValue);
+			StringBuffer hexResult= new StringBuffer("\\u"); //$NON-NLS-1$
+			for (int i= hexString.length(); i < 4; i++) {
+				hexResult.append('0');
+			}
+			hexResult.append(hexString);
+			return formatWithHexValue(constantResult, hexResult.toString());
+			
+		} else if (constantValue instanceof Byte) {
+			int byteValue= ((Byte) constantValue).intValue() & 0xFF;
+			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(byteValue)); //$NON-NLS-1$
+			
+		} else if (constantValue instanceof Short) {
+			int shortValue= ((Short) constantValue).shortValue() & 0xFFFF;
+			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(shortValue)); //$NON-NLS-1$
+			
+		} else if (constantValue instanceof Integer) {
+			int intValue= ((Integer) constantValue).intValue();
+			return formatWithHexValue(constantValue, "0x" + Integer.toHexString(intValue)); //$NON-NLS-1$
+			
+		} else if (constantValue instanceof Long) {
+			long longValue= ((Long) constantValue).longValue();
+			return formatWithHexValue(constantValue, "0x" + Long.toHexString(longValue)); //$NON-NLS-1$
+			
+		} else {
+			return constantValue.toString();
+		}
+	}
+
+	/**
+	 * Creates and returns the a formatted message for the given
+	 * constant with its hex value.
+	 * <p>
+	 * XXX: Copied from {@link JavadocHover}.
+	 * </p>
+	 * @param constantValue
+	 * @param hexValue
+	 * @return a formatted string with constant and hex values
+	 * @since 3.4
+	 */
+	private static String formatWithHexValue(Object constantValue, String hexValue) {
+		return Messages.format(InfoViewMessages.JavadocView_constantValue_hexValue, new String[] { constantValue.toString(), hexValue });
+	}
+
+	/**
+	 * Returns the assignment operator string with the project's formatting applied to it.
+	 * <p>
+	 * XXX: This method was extracted from JavadocHover#getInfoText method.
+	 * </p>
+	 * @param javaProject the Java project whose formatting options will be used.
+	 * @return the formatted assignment operator string.
+	 * @since 3.4
+	 */
+	private static String getFormattedAssignmentOperator(IJavaProject javaProject) {
+		StringBuffer buffer= new StringBuffer();
+		if (JavaCore.INSERT.equals(javaProject.getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, true)))
+			buffer.append(' ');
+		buffer.append('=');
+		if (JavaCore.INSERT.equals(javaProject.getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR, true)))
+			buffer.append(' ');
+		return buffer.toString();
 	}
 }

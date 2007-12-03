@@ -42,6 +42,7 @@ final class InfoViewMessages extends NLS {
 	public static String JavadocView_noAttachedJavadoc;
 	public static String JavadocView_noInformation;
 	public static String JavadocView_error_gettingJavadoc;
+	public static String JavadocView_constantValue_hexValue;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, InfoViewMessages.class);
