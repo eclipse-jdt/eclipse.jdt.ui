@@ -775,20 +775,22 @@ public class JavadocView extends AbstractInfoView {
 			return null;
 
 		Object constantValue;
-		IJavaProject javaProject;
-		
+		IJavaProject preferenceProject;
+
 		if (selection instanceof ITextSelection && activePart instanceof JavaEditor) {
 			IEditorPart editor= (IEditorPart) activePart;
 			ITypeRoot activeType= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
+			preferenceProject= activeType.getJavaProject();
 			constantValue= getConstantValueFromActiveEditor(activeType, resolvedField, (ITextSelection) selection, monitor);
-			javaProject= activeType.getJavaProject();
+			if (constantValue == null) // fall back - e.g. when selection is inside Javadoc of the element
+				constantValue= computeFieldConstantFromTypeAST(resolvedField, monitor);
 		} else {
 			constantValue= computeFieldConstantFromTypeAST(resolvedField, monitor);
-			javaProject= resolvedField.getJavaProject();
+			preferenceProject= resolvedField.getJavaProject();
 		}
 
 		if (constantValue != null)
-			return getFormattedAssignmentOperator(javaProject) + formatCompilerConstantValue(constantValue);
+			return getFormattedAssignmentOperator(preferenceProject) + formatCompilerConstantValue(constantValue);
 
 		return null;
 	}
