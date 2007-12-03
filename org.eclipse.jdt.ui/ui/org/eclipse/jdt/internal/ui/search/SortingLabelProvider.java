@@ -56,7 +56,7 @@ public class SortingLabelProvider extends SearchLabelProvider {
 		if (text.length() > 0) {
 			String labelWithCount= getLabelWithCounts(element, text);
 			if (fCurrentOrder == SHOW_ELEMENT_CONTAINER) {
-				labelWithCount += getPostQualification(element, text);
+				labelWithCount += getPostQualification(element);
 			}
 			return labelWithCount;
 		}
@@ -74,14 +74,14 @@ public class SortingLabelProvider extends SearchLabelProvider {
 		if (text.length() > 0) {
 			ColoredString countLabel= getColoredLabelWithCounts(element, text);
 			if (fCurrentOrder == SHOW_ELEMENT_CONTAINER) {
-				countLabel.append(getPostQualification(element, text.getString()), ColoredJavaElementLabels.QUALIFIER_STYLE);
+				countLabel.append(getPostQualification(element), ColoredJavaElementLabels.QUALIFIER_STYLE);
 			}
 			return countLabel;
 		}
 		return new ColoredString(getParticipantText(element));	
 	}
 
-	private String getPostQualification(Object element, String text) {
+	private String getPostQualification(Object element) {
 		String textLabel= JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_POST_QUALIFIED);
 		int indexOf= textLabel.indexOf(JavaElementLabels.CONCAT_STRING);
 		if (indexOf != -1) {
