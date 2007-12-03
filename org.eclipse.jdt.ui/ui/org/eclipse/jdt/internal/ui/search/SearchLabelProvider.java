@@ -159,6 +159,11 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 		}
 	}
 	
+	/**
+	 * Returns <code>true</code> if the given element has children
+	 * @param elem the element
+	 * @return returns <code>true</code> if the given element has children
+	 */
 	protected boolean hasChildren(Object elem) {
 		return false;
 	}

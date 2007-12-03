@@ -295,6 +295,15 @@ public abstract class FindAction extends SelectionDispatchAction {
 		}
 	}
 	
+	/**
+	 * Creates a query for the given element. Subclasses reimplement this method.
+	 * 
+	 * @param element the element to create a query for
+	 * 
+	 * @return returns the query
+	 * @throws JavaModelException thrown when accessing the element failed
+	 * @throws InterruptedException thrown when the user interrupted the query selection
+	 */
 	QuerySpecification createQuery(IJavaElement element) throws JavaModelException, InterruptedException {
 		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 		IJavaSearchScope scope= factory.createWorkspaceScope(true);
