@@ -80,7 +80,7 @@ public class SearchParticipantsExtensionPoint {
 
 
 
-	public SearchParticipantRecord[] getSearchParticipants(IProject[] concernedProjects) throws CoreException {
+	public SearchParticipantRecord[] getSearchParticipants(IProject[] concernedProjects) {
 		Set participantSet= new HashSet();
 		collectParticipants(participantSet, concernedProjects);
 		SearchParticipantRecord[] participants= new SearchParticipantRecord[participantSet.size()];

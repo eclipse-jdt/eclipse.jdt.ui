@@ -128,11 +128,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */		
 	public void run(ITextSelection selection) {
-		try{
-			run(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
-		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, RefactoringMessages.ConvertAnonymousToNestedAction_dialog_title, RefactoringMessages.NewTextRefactoringAction_exception); 
-		}	
+		run(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());	
 	}
 
 	/* (non-Javadoc)
@@ -156,7 +152,7 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 
 	//---- helpers -------------------------------------------------------------------
 	
-	private void run(ICompilationUnit unit, int offset, int length) throws JavaModelException {
+	private void run(ICompilationUnit unit, int offset, int length) {
 		if (!ActionUtil.isEditable(fEditor, getShell(), unit))
 			return;
 		RefactoringExecutionStarter.startConvertAnonymousRefactoring(unit, offset, length, getShell());
