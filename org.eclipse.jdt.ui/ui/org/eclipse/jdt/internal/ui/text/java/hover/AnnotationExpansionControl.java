@@ -316,8 +316,6 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 
 	
 	/**
-	 *
-	 *
 	 * @since 3.0
 	 */
 	public class LinearLayouter {
@@ -350,6 +348,12 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 			return BORDER_WIDTH;
 		}
 
+		/**
+		 * Gets the shell region for the given number of items.
+		 * 
+		 * @param itemCount the item count
+		 * @return the shell region
+		 */
 		public org.eclipse.swt.graphics.Region getShellRegion(int itemCount) {
 			// no special region - set to null for default shell size
 			return null;
@@ -550,6 +554,13 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		inputChanged(fInput, null);
 	}
 
+	/**
+     * Internal hook method called when the input is
+	 * initially set or subsequently changed.
+	 * 
+	 * @param newInput the new input
+	 * @param newSelection  the new selection
+	 */
 	protected void inputChanged(Object newInput, Object newSelection) {
 		refresh();
 	}
@@ -714,15 +725,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	 * @see IInformationControl#isFocusControl()
 	 */
 	public boolean isFocusControl() {
-		if (fComposite.isFocusControl())
-			return true;
-
-		Control[] children= fComposite.getChildren();
-		for (int i= 0; i < children.length; i++) {
-			if (children[i].isFocusControl())
-				return true;
-		}
-		return false;
+		return fShell.getDisplay().getActiveShell() == fShell;
 	}
 
 	/*
