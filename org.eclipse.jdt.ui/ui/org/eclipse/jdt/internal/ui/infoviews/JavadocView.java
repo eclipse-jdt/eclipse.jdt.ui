@@ -759,8 +759,8 @@ public class JavadocView extends AbstractInfoView {
 	/**
 	 * Compute the textual representation of a 'static' 'final' field's constant initializer value.
 	 * 
-	 * @param activePart the part that triggered the computation
-	 * @param selection the selection that references the field
+	 * @param activePart the part that triggered the computation, or <code>null</code>
+	 * @param selection the selection that references the field, or <code>null</code>
 	 * @param resolvedField the filed whose constant value will be computed
 	 * @param monitor the progress monitor
 	 * 
