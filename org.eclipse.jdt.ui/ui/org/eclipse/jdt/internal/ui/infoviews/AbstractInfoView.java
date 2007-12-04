@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.infoviews;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -145,7 +146,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 *
 	 * @param input the input object
 	 */
-	abstract protected void setInput(Object input);
+	abstract protected void doSetInput(Object input);
 
 	/**
 	 * Computes the input for this view based on the given element.
@@ -377,7 +378,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 * Tells whether the new input should be ignored
 	 * if the current input is the same.
 	 *
-	 * @param je the new input
+	 * @param je the new input, may be <code>null</code>
 	 * @param part the workbench part
 	 * @param selection the current selection from the part that provides the input
 	 * @return <code>true</code> if the new input should be ignored
@@ -498,37 +499,69 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 * @param part the workbench part
 	 */
 	private void computeAndSetInput(final IWorkbenchPart part) {
+		computeAndDoSetInput(part, null);
+	}
+
+	/**
+	 * Sets the input for this view.
+	 *
+	 * @param element the java element
+	 */
+	public final void setInput(final IJavaElement element) {
+		computeAndDoSetInput(null, element);
+	}
+
+	/**
+	 * Determines all necessary details and delegates the computation into
+	 * a background thread. One of part or element must be non-null.
+	 *
+	 * @param part the workbench part, or <code>null</code> if <code>element</code> not <code>null</code>
+	 * @param element the java element, or <code>null</code> if <code>part</code> not <code>null</code>
+	 */
+	private void computeAndDoSetInput(final IWorkbenchPart part, final IJavaElement element) {
+		Assert.isLegal(part != null || element != null);
 
 		final int currentCount= ++fComputeCount;
-
-		ISelectionProvider provider= part.getSite().getSelectionProvider();
-		if (provider == null)
-			return;
-
-		final ISelection selection= provider.getSelection();
-		if (selection == null || selection.isEmpty())
-			return;
 		
+		final ISelection selection;
+		if (element != null)
+			selection= null;
+		else {
+			ISelectionProvider provider= part.getSite().getSelectionProvider();
+			if (provider == null)
+				return;
+
+			selection= provider.getSelection();
+			if (selection == null || selection.isEmpty())
+				return;
+		}
+
 		if (fComputeProgressMonitor != null)
 			fComputeProgressMonitor.setCanceled(true);
-		fComputeProgressMonitor= new NullProgressMonitor();
+		final IProgressMonitor computeProgressMonitor= new NullProgressMonitor();
+		fComputeProgressMonitor= computeProgressMonitor;
 
 		Thread thread= new Thread("Info view input computer") { //$NON-NLS-1$
 			public void run() {
 				if (currentCount != fComputeCount)
 					return;
 
-				final IJavaElement je= findSelectedJavaElement(part, selection);
+				final IJavaElement je;
+				if (element != null)
+					je= element;
+				else {
+					je= findSelectedJavaElement(part, selection);
+					if (isIgnoringNewInput(je, part, selection))
+						return;
+				}
 
-				if (isIgnoringNewInput(je, part, selection))
-					return;
 
 				// The actual computation
 				final Object input= computeInput(je);
 				if (input == null)
 					return;
 				
-				final String description= computeDescription(part, selection, je, fComputeProgressMonitor);
+				final String description= computeDescription(part, selection, je, computeProgressMonitor);
 
 				Shell shell= getSite().getShell();
 				if (shell.isDisposed())
@@ -564,8 +597,8 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	/**
 	 * Computes the contents description that will be displayed for the current element.
 	 * 
-	 * @param part the part that triggered the current element update
-	 * @param selection the new selection
+	 * @param part the part that triggered the current element update, or <code>null</code>
+	 * @param selection the new selection, or <code>null</code>
 	 * @param inputElement the new java element that will be displayed
 	 * @param localASTMonitor a progress monitor
 	 * @return the contents description for the provided <code>inputElement</code>
@@ -582,14 +615,13 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	}
 
 	private void doSetInput(Object input, String description) {
-		setInput(input);
+		doSetInput(input);
 
 		fGotoInputAction.setEnabled(true);
 
 		IJavaElement inputElement= getInput();
-
+		
 		setContentDescription(description);
 		setTitleToolTip(JavaElementLabels.getElementLabel(inputElement, TOOLTIP_LABEL_FLAGS));
 	}
-
 }

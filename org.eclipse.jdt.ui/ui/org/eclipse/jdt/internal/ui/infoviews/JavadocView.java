@@ -348,7 +348,7 @@ public class JavadocView extends AbstractInfoView {
 				 * @see org.eclipse.swt.events.ControlAdapter#controlResized(org.eclipse.swt.events.ControlEvent)
 				 */
 				public void controlResized(ControlEvent e) {
-					setInput(fOriginalInput);
+					doSetInput(fOriginalInput);
 				}
 			});
 		}
@@ -477,9 +477,9 @@ public class JavadocView extends AbstractInfoView {
 		if (input == null) {
 			StringBuffer buffer= new StringBuffer(""); //$NON-NLS-1$
 			HTMLPrinter.insertPageProlog(buffer, 0, fBackgroundColorRGB, fgStyleSheet);
-			setInput(buffer.toString());
+			doSetInput(buffer.toString());
 		} else {
-			setInput(computeInput(input));
+			doSetInput(computeInput(input));
 		}
 	}
 	
@@ -561,7 +561,7 @@ public class JavadocView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#setInput(Object)
 	 */
-	protected void setInput(Object input) {
+	protected void doSetInput(Object input) {
 		String javadocHtml= (String)input;
 		fOriginalInput= javadocHtml;
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -428,14 +428,14 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	/*
 	 * @see AbstractInfoView#setInput(Object)
 	 */
-	protected void setInput(Object input) {
+	protected void doSetInput(Object input) {
 		if (input instanceof IDocument)
 			fViewer.setInput(input);
 		else if (input == null)
 			fViewer.setInput(new Document("")); //$NON-NLS-1$
 		else {
 			IDocument document= new Document(input.toString());
-			JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);			
+			JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 			fViewer.setInput(document);
 		}
 	}
@@ -462,8 +462,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 			i= 0;
 		} finally {
 			try {
-				if (reader != null)
-					reader.close();
+				reader.close();
 			} catch (IOException ex) {
 				JavaPlugin.log(ex);
 			}
