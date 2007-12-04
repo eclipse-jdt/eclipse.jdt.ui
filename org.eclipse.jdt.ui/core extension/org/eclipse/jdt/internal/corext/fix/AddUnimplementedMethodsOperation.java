@@ -111,7 +111,7 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 		if (fTypeNode instanceof EnumDeclaration)
 			return CorrectionMessages.UnimplementedMethodsCorrectionProposal_enum_info;
 
-		IMethodBinding[] methodsToOverride= getMethodsToOverride();
+		IMethodBinding[] methodsToOverride= getMethodsToImplement();
 		StringBuffer buf= new StringBuffer();
 		buf.append("<b>"); //$NON-NLS-1$
 		buf.append(Messages.format(CorrectionMessages.UnimplementedMethodsCorrectionProposal_info, String.valueOf(methodsToOverride.length)));
@@ -125,7 +125,7 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 		return buf.toString();
 	}
 
-	private IMethodBinding[] getMethodsToOverride() {
+	public IMethodBinding[] getMethodsToImplement() {
 		return getUnimplementedMethods(fTypeNode);
 	}
 

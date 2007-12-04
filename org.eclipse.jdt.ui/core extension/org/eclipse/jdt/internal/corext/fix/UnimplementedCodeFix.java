@@ -12,11 +12,25 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
 
+import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.ErrorDialog;
+
+import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.NullChange;
+
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -28,9 +42,11 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
@@ -98,7 +114,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 		return new UnimplementedCodeFix(label, root, (CompilationUnitRewriteOperation[]) operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
 	}
 
-	public static UnimplementedCodeFix createAddUnimplementedMethodsFix(CompilationUnit root, IProblemLocation problem) {
+	public static IProposableFix createAddUnimplementedMethodsFix(final CompilationUnit root, IProblemLocation problem) {
 		ASTNode typeNode= getSelectedTypeNode(root, problem);
 		if (typeNode == null)
 			return null;
@@ -107,7 +123,38 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 			return null;
 
 		AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(typeNode);
-		return new UnimplementedCodeFix(CorrectionMessages.UnimplementedMethodsCorrectionProposal_description, root, new CompilationUnitRewriteOperation[] { operation });
+		if (operation.getMethodsToImplement().length > 0) {
+			return new UnimplementedCodeFix(CorrectionMessages.UnimplementedMethodsCorrectionProposal_description, root, new CompilationUnitRewriteOperation[] { operation });
+		} else {
+			return new IProposableFix() {
+				public CompilationUnitChange createChange() throws CoreException {
+					CompilationUnitChange change= new CompilationUnitChange(CorrectionMessages.UnimplementedMethodsCorrectionProposal_description, (ICompilationUnit) root.getJavaElement()) {
+						public Change perform(IProgressMonitor pm) throws CoreException {
+							Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+							String dialogTitle= CorrectionMessages.UnimplementedMethodsCorrectionProposal_description;
+							IStatus status= getStatus();
+							ErrorDialog.openError(shell, dialogTitle, CorrectionMessages.UnimplementedCodeFix_DependenciesErrorMessage, status);
+							
+							return new NullChange();
+						}
+					};
+					change.setEdit(new MultiTextEdit());
+					return change;
+				}
+
+				public String getAdditionalProposalInfo() {
+					return new String();
+				}
+
+				public String getDisplayString() {
+					return CorrectionMessages.UnimplementedMethodsCorrectionProposal_description;
+				}
+
+				public IStatus getStatus() {
+					return new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, CorrectionMessages.UnimplementedCodeFix_DependenciesStatusMessage);
+				}
+			};
+		}
 	}
 
 	public static UnimplementedCodeFix createMakeTypeAbstractFix(CompilationUnit root, IProblemLocation problem) {

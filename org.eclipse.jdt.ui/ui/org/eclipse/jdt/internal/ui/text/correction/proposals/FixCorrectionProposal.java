@@ -115,7 +115,7 @@ public class FixCorrectionProposal extends CUCorrectionProposal implements IComp
 			if (status.getSeverity() == IStatus.WARNING) {
 				result.append(CorrectionMessages.FixCorrectionProposal_WarningAdditionalProposalInfo);
 			} else if (status.getSeverity() == IStatus.ERROR) {
-				result.append(CorrectionMessages.FixCorrectionProposal_0);
+				result.append(CorrectionMessages.FixCorrectionProposal_ErrorAdditionalProposalInfo);
 			}
 			result.append("</b>"); //$NON-NLS-1$
 			result.append(status.getMessage());
