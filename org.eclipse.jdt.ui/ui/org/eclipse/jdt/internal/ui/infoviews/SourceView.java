@@ -426,7 +426,7 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	}
 
 	/*
-	 * @see AbstractInfoView#setInput(Object)
+	 * @see AbstractInfoView#doSetInput(Object)
 	 */
 	protected void doSetInput(Object input) {
 		if (input instanceof IDocument)
