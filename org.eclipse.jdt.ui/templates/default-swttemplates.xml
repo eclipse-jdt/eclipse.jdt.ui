@@ -115,8 +115,20 @@ ${layout}.marginWidth = ${marginW:link(5, 0)};
 ${layout}.marginHeight = ${marginH:link(5, 0)};
 ${layout}.verticalSpacing = ${vSpacing:link(0, 5)};
 ${layout}.horizontalSpacing = ${hSpacing:link(0, 5)};
-${parent:var(org.eclipse.swt.widgets.Composite)}.setLayout(${layout});</template>
+${parent:var(org.eclipse.swt.widgets.Composite)}.setLayout(${layout});
+${cursor}</template>
 
+<template 
+	name="GridData" 
+	description="%SWTTemplates.griddata" 
+	id="org.eclipse.jdt.ui.text.codetemplates.swt.griddata" 
+	context="swt" enabled="true" autoinsert="false"
+	
+>${gridData:newType(org.eclipse.swt.layout.GridData)} ${layoutData:newName(org.eclipse.swt.layout.GridData)} = new ${gridData}(SWT.${horizontal:link(FILL, BEGINNING, CENTER, END)}, SWT.${vertical:link(FILL, TOP, CENTER, BOTTOM)}, ${hex:link(true, false)}, ${vex:link(false, true)});
+${layoutData}.widthHint= ${width:link(SWT.DEFAULT)};
+${layoutData}.heightHint= ${height:link(SWT.DEFAULT)};
+${parent:var(org.eclipse.swt.widgets.Control)}.setLayoutData(${layoutData});
+${imp:import(org.eclipse.swt.SWT)}${cursor}</template>
 
 
 <!-- ************************************************** Basic Widgets ************************************************** -->
