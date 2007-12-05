@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -190,9 +190,10 @@ public class JavaSearchQuery implements ISearchQuery {
 	}
 
 	public String getResultLabel(int nMatches) {
+		int limitTo= getMaskedLimitTo();
 		if (nMatches == 1) {
 			String[] args= { getSearchPatternDescription(), fPatternData.getScopeDescription() };
-			switch (fPatternData.getLimitTo()) {
+			switch (limitTo) {
 				case IJavaSearchConstants.IMPLEMENTORS:
 					return Messages.format(SearchMessages.JavaSearchOperation_singularImplementorsPostfix, args); 
 				case IJavaSearchConstants.DECLARATIONS:
@@ -206,11 +207,12 @@ public class JavaSearchQuery implements ISearchQuery {
 				case IJavaSearchConstants.WRITE_ACCESSES:
 					return Messages.format(SearchMessages.JavaSearchOperation_singularWriteReferencesPostfix, args); 
 				default:
-					return Messages.format(SearchMessages.JavaSearchOperation_singularOccurrencesPostfix, args); 
+					String matchLocations= MatchLocations.getMatchLocationDescription(limitTo, 3);
+					return Messages.format(SearchMessages.JavaSearchQuery_singularReferencesWithMatchLocations, new Object[] { args[0], args[1], matchLocations }); 
 			}
 		} else {
 			Object[] args= { getSearchPatternDescription(), new Integer(nMatches), fPatternData.getScopeDescription() };
-			switch (fPatternData.getLimitTo()) {
+			switch (limitTo) {
 				case IJavaSearchConstants.IMPLEMENTORS:
 					return Messages.format(SearchMessages.JavaSearchOperation_pluralImplementorsPostfix, args); 
 				case IJavaSearchConstants.DECLARATIONS:
@@ -224,11 +226,12 @@ public class JavaSearchQuery implements ISearchQuery {
 				case IJavaSearchConstants.WRITE_ACCESSES:
 					return Messages.format(SearchMessages.JavaSearchOperation_pluralWriteReferencesPostfix, args); 
 				default:
-					return Messages.format(SearchMessages.JavaSearchOperation_pluralOccurrencesPostfix, args); 
+					String matchLocations= MatchLocations.getMatchLocationDescription(limitTo, 3);
+					return Messages.format(SearchMessages.JavaSearchQuery_pluralReferencesWithMatchLocations, new Object[] { args[0], args[1], args[2], matchLocations }); 
 			}
 		}
 	}
-	
+
 	private String getSearchPatternDescription() {
 		if (fPatternData instanceof ElementQuerySpecification) {
 			IJavaElement element= ((ElementQuerySpecification) fPatternData).getElement();
@@ -238,8 +241,13 @@ public class JavaSearchQuery implements ISearchQuery {
 		return ((PatternQuerySpecification) fPatternData).getPattern();
 	}
 
+	private int getMaskedLimitTo() {
+		return fPatternData.getLimitTo() & ~(IJavaSearchConstants.IGNORE_RETURN_TYPE | IJavaSearchConstants.IGNORE_DECLARING_TYPE);
+	}
+	
 	ImageDescriptor getImageDescriptor() {
-		if (fPatternData.getLimitTo() == IJavaSearchConstants.IMPLEMENTORS || fPatternData.getLimitTo() == IJavaSearchConstants.DECLARATIONS)
+		int limitTo= getMaskedLimitTo();
+		if (limitTo == IJavaSearchConstants.IMPLEMENTORS || limitTo == IJavaSearchConstants.DECLARATIONS)
 			return JavaPluginImages.DESC_OBJS_SEARCH_DECL;
 		else
 			return JavaPluginImages.DESC_OBJS_SEARCH_REF;

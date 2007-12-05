@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,7 +85,6 @@ public final class SearchMessages extends NLS {
 	public static String SearchPage_searchIn_libraries;
 	public static String SearchPage_searchIn_projects;
 	public static String SearchPage_searchIn_sources;
-	public static String SearchPage_searchJRE_label;
 	public static String SearchUtil_workingSetConcatenation;
 	public static String Search_FindDeclarationAction_label;
 	public static String Search_FindDeclarationAction_tooltip;
@@ -162,6 +161,8 @@ public final class SearchMessages extends NLS {
 	public static String JavaSearchOperation_pluralWriteReferencesPostfix;
 	public static String JavaSearchOperation_pluralImplementorsPostfix;
 	public static String JavaSearchOperation_pluralOccurrencesPostfix;
+	public static String JavaSearchPage_match_location_link_label;
+	public static String JavaSearchPage_match_locations_label;
 	public static String JavaElementAction_typeSelectionDialog_title;
 	public static String JavaElementAction_typeSelectionDialog_message;
 	public static String JavaElementAction_error_open_message;
@@ -213,6 +214,7 @@ public final class SearchMessages extends NLS {
 	public static String JavaSearchQuery_task_label;
 	public static String JavaSearchQuery_label;
 	public static String JavaSearchQuery_error_unsupported_pattern;
+	public static String JavaSearchQuery_singularReferencesWithMatchLocations;
 	public static String JavaSearchQuery_status_ok_message;
 	public static String JavaSearchQuery_error_participant_estimate;
 	public static String JavaSearchQuery_error_participant_search;
@@ -261,7 +263,62 @@ public final class SearchMessages extends NLS {
 	}
 
 	public static String JavaSearchQuery_error_element_does_not_exist;
+	public static String JavaSearchQuery_pluralReferencesWithMatchLocations;
 	public static String MatchFilter_PotentialFilter_name;
 	public static String MatchFilter_PotentialFilter_actionLabel;
 	public static String MatchFilter_PotentialFilter_description;
+	
+	public static String MatchLocations_dialog_description;
+	public static String MatchLocations_dialog_title;
+	
+	public static String MatchLocations_casts_description;
+	public static String MatchLocations_casts_label;
+	
+	public static String MatchLocations_catch_clauses_description;
+	public static String MatchLocations_catch_clauses_label;
+	
+	public static String MatchLocations_class_instance_description;
+	public static String MatchLocations_class_instance_label;
+	
+	public static String MatchLocations_implicit_this_description;
+	public static String MatchLocations_implicit_this_label;
+	
+	public static String MatchLocations_local_types_description;
+	public static String MatchLocations_local_types_label;
+
+	public static String MatchLocations_annotations_description;
+	public static String MatchLocations_annotations_label;
+
+	public static String MatchLocations_field_types_description;
+	public static String MatchLocations_field_types_label;
+	
+	public static String MatchLocations_declaration_group_label;
+	public static String MatchLocations_expression_group_label;
+	public static String MatchLocations_in_parameterized_types_group_label;
+
+	public static String MatchLocations_deselect_all_button_label;
+	public static String MatchLocations_select_all_button_label;
+
+	public static String MatchLocations_method_types_description;
+	public static String MatchLocations_method_types_label;
+	public static String MatchLocations_parameter_types_description;
+	public static String MatchLocations_parameter_types_label;
+	public static String MatchLocations_qualified_description;
+	public static String MatchLocations_qualified_label;
+	public static String MatchLocations_super_description;
+	public static String MatchLocations_super_label;
+	public static String MatchLocations_super_types_description;
+	public static String MatchLocations_super_types_label;
+	public static String MatchLocations_this_description;
+	public static String MatchLocations_this_label;
+	public static String MatchLocations_thrown_exceptions_description;
+	public static String MatchLocations_thrown_exceptions_label;
+	public static String MatchLocations_type_arguments_description;
+	public static String MatchLocations_type_arguments_label;
+	public static String MatchLocations_type_parameter_bounds_description;
+	public static String MatchLocations_type_parameter_bounds_label;
+	public static String MatchLocations_wildcard_bounds_description;
+	public static String MatchLocations_wildcard_bounds_label;
+	public static String MatchLocations_match_locations_description;
+
 }
