@@ -666,6 +666,8 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			NodeList libList= cpElement.getElementsByTagName(TAG_LIBRARY);
 			int length = libList.getLength();
 			
+			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+			
 			ArrayList result= new ArrayList(length);
 			for (int i= 0; i < length; i++) {
 				Node lib= libList.item(i);
@@ -690,7 +692,13 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 					String pathString= archiveElement.getAttribute(TAG_ARCHIVE_PATH);
 					IPath path= version.equals(VERSION1) ? Path.fromOSString(pathString) : Path.fromPortableString(pathString);
 					path= path.makeAbsolute(); // only necessary for manually edited files: bug 202373 
-					CPListElement newArchive= new CPListElement(newLibrary, null, IClasspathEntry.CPE_LIBRARY, path, null);
+					
+					IResource resource= root.findMember(path); // support internal JARs: bug 133191
+					if (!(resource instanceof IFile)) {
+						resource= null;
+					}
+					
+					CPListElement newArchive= new CPListElement(newLibrary, null, IClasspathEntry.CPE_LIBRARY, path, resource);
 					newLibrary.add(newArchive);
 					
 					if (archiveElement.hasAttribute(TAG_SOURCEATTACHMENT)) {
@@ -1328,12 +1336,20 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		}
 		String[] fileNames= dialog.getFileNames();
 		int nChosen= fileNames.length;
-			
+		
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+		
 		IPath filterPath= Path.fromOSString(dialog.getFilterPath());
 		CPListElement[] elems= new CPListElement[nChosen];
 		for (int i= 0; i < nChosen; i++) {
 			IPath path= filterPath.append(fileNames[i]).makeAbsolute();	
-			CPListElement curr= new CPListElement(parent, null, IClasspathEntry.CPE_LIBRARY, path, null);
+			
+			IFile file= root.getFileForLocation(path); // support internal JARs: bug 133191
+			if (file != null) {
+				path= file.getFullPath();
+			}
+			
+			CPListElement curr= new CPListElement(parent, null, IClasspathEntry.CPE_LIBRARY, path, file);
 			curr.setAttribute(CPListElement.SOURCEATTACHMENT, BuildPathSupport.guessSourceAttachment(curr));
 			curr.setAttribute(CPListElement.JAVADOC, BuildPathSupport.guessJavadocLocation(curr));
 			elems[i]= curr;
