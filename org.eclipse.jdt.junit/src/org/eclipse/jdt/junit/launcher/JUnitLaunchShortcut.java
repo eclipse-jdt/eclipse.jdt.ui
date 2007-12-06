@@ -19,6 +19,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -41,7 +44,7 @@ import org.eclipse.debug.core.ILaunchManager;
 
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
-import org.eclipse.debug.ui.ILaunchShortcut;
+import org.eclipse.debug.ui.ILaunchShortcut2;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -83,7 +86,7 @@ import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
  * </p>
  * @since 3.3
  */
-public class JUnitLaunchShortcut implements ILaunchShortcut {
+public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 
 	private static final String EMPTY_STRING= ""; //$NON-NLS-1$
 	
@@ -197,8 +200,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	}
 
 	private IType findTypeToLaunch(ICompilationUnit cu, String mode) throws InterruptedException, InvocationTargetException {
-		ITestKind testKind= TestKindRegistry.getContainerTestKind(cu);
-		IType[] types= TestSearchEngine.findTests(PlatformUI.getWorkbench().getActiveWorkbenchWindow(), cu, testKind);
+		IType[] types= findTypesToLaunch(cu);
 		if (types.length == 0) {
 			return null;
 		} else if (types.length > 1) {
@@ -206,6 +208,11 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		}
 		return types[0];
 	}
+	
+	private IType[] findTypesToLaunch(ICompilationUnit cu) throws InterruptedException, InvocationTargetException {
+		ITestKind testKind= TestKindRegistry.getContainerTestKind(cu);
+		return TestSearchEngine.findTests(PlatformUI.getWorkbench().getActiveWorkbenchWindow(), cu, testKind);
+	}	
 
 	private void performLaunch(IJavaElement element, String mode) throws InterruptedException, CoreException {
 		ILaunchConfigurationWorkingCopy temparary= createLaunchConfiguration(element);
@@ -370,18 +377,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	
 
 	private ILaunchConfiguration findExistingLaunchConfiguration(ILaunchConfigurationWorkingCopy temporary, String mode) throws InterruptedException, CoreException {
-		ILaunchConfigurationType configType= temporary.getType();
-
-		ILaunchConfiguration[] configs= getLaunchManager().getLaunchConfigurations(configType);
-		String[] attributeToCompare= getAttributeNamesToCompare();
-		
-		ArrayList candidateConfigs= new ArrayList(configs.length);
-		for (int i= 0; i < configs.length; i++) {
-			ILaunchConfiguration config= configs[i];
-			if (hasSameAttributes(config, temporary, attributeToCompare)) {
-				candidateConfigs.add(config);
-			}
-		}
+		List candidateConfigs= findExistingLaunchConfigurations(temporary);
 
 		// If there are no existing configs associated with the IType, create
 		// one.
@@ -402,6 +398,131 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 			ILaunchConfiguration config= chooseConfiguration(candidateConfigs, mode);
 			if (config != null) {
 				return config;
+			}
+		}
+		return null;
+	}
+	
+	private List findExistingLaunchConfigurations(ILaunchConfigurationWorkingCopy temporary) throws CoreException {
+		ILaunchConfigurationType configType= temporary.getType();
+
+		ILaunchConfiguration[] configs= getLaunchManager().getLaunchConfigurations(configType);
+		String[] attributeToCompare= getAttributeNamesToCompare();
+		
+		ArrayList candidateConfigs= new ArrayList(configs.length);
+		for (int i= 0; i < configs.length; i++) {
+			ILaunchConfiguration config= configs[i];
+			if (hasSameAttributes(config, temporary, attributeToCompare)) {
+				candidateConfigs.add(config);
+			}
+		}
+		return candidateConfigs;
+	}	
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.ui.ILaunchShortcut2#getLaunchConfigurations(org.eclipse.jface.viewers.ISelection)
+	 */
+	public ILaunchConfiguration[] getLaunchConfigurations(ISelection selection) {
+		if (selection instanceof IStructuredSelection) {
+			IStructuredSelection ss= (IStructuredSelection) selection;
+			if (ss.size() == 1) {
+				return findExistingLaunchConfigurations(ss.getFirstElement());
+			}
+		}
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.ui.ILaunchShortcut2#getLaunchConfigurations(org.eclipse.ui.IEditorPart)
+	 */
+	public ILaunchConfiguration[] getLaunchConfigurations(final IEditorPart editor) {
+		final ITypeRoot element= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
+		if (element != null) {
+			IMethod selectedMethod = null;
+			if (Display.getCurrent() == null) {
+				final IMethod[] temp = new IMethod[1];
+				Runnable runnable= new Runnable() {
+					public void run() {
+						temp[0]= resolveSelectedMethodName(editor, element);
+					}
+				};
+				Display.getDefault().syncExec(runnable);
+				selectedMethod = temp[0];
+			} else {
+				selectedMethod= resolveSelectedMethodName(editor, element);
+			}
+			Object candidate = element;
+			if (selectedMethod != null) {
+				candidate = selectedMethod;
+			}
+			return findExistingLaunchConfigurations(candidate);
+		}
+		return null;
+	}
+	
+	private ILaunchConfiguration[] findExistingLaunchConfigurations(Object candidate) {
+		if (!(candidate instanceof IJavaElement) && candidate instanceof IAdaptable) {
+			candidate= ((IAdaptable) candidate).getAdapter(IJavaElement.class);
+		}
+		if (candidate instanceof IJavaElement) {
+			IJavaElement element= (IJavaElement) candidate;
+			IJavaElement elementToLaunch = null;
+			try {
+				switch (element.getElementType()) {
+					case IJavaElement.JAVA_PROJECT:
+					case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+					case IJavaElement.PACKAGE_FRAGMENT:
+					case IJavaElement.TYPE:
+					case IJavaElement.METHOD:
+						elementToLaunch= element;
+						break;
+					case IJavaElement.CLASS_FILE:
+						elementToLaunch= ((IClassFile) element).getType();
+						break;
+					case IJavaElement.COMPILATION_UNIT:
+						elementToLaunch= ((ICompilationUnit) element).findPrimaryType();
+						break;
+				}		
+				if (elementToLaunch == null) {
+					return null;
+				}
+				ILaunchConfigurationWorkingCopy workingCopy= createLaunchConfiguration(elementToLaunch);
+				List list= findExistingLaunchConfigurations(workingCopy);
+				return (ILaunchConfiguration[]) list.toArray(new ILaunchConfiguration[list.size()]);
+			} catch (CoreException e) {
+			}
+		} 
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.ui.ILaunchShortcut2#getLaunchableResource(org.eclipse.jface.viewers.ISelection)
+	 */
+	public IResource getLaunchableResource(ISelection selection) {
+		if (selection instanceof IStructuredSelection) {
+			IStructuredSelection ss= (IStructuredSelection) selection;
+			if (ss.size() == 1) {
+				Object selected= ss.getFirstElement();
+				if (!(selected instanceof IJavaElement) && selected instanceof IAdaptable) {
+					selected= ((IAdaptable) selected).getAdapter(IJavaElement.class);
+				}
+				if (selected instanceof IJavaElement) {
+					return ((IJavaElement)selected).getResource();
+				}
+			}
+		}
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.ui.ILaunchShortcut2#getLaunchableResource(org.eclipse.ui.IEditorPart)
+	 */
+	public IResource getLaunchableResource(IEditorPart editor) {
+		ITypeRoot element= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
+		if (element != null) {
+			try {
+				return element.getCorrespondingResource();
+			} catch (JavaModelException e) {
 			}
 		}
 		return null;
