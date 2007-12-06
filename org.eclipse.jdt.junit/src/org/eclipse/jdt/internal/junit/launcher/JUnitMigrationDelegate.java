@@ -98,10 +98,12 @@ public class JUnitMigrationDelegate implements ILaunchConfigurationMigrationDele
 		String containerHandle = config.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, (String)null);
 		String typeName = config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null);
 		IJavaElement element = null;
-		if (projName != null && Path.ROOT.isValidSegment(projName)) {
+		if (containerHandle != null && containerHandle.length() > 0) {
+			element = JavaCore.create(containerHandle);
+		} else if (projName != null && Path.ROOT.isValidSegment(projName)) {
 			IJavaProject javaProject = getJavaModel().getJavaProject(projName);
 			if (javaProject.exists()) {
-				if (typeName != null) {
+				if (typeName != null && typeName.length() > 0) {
 					element = javaProject.findType(typeName);
 				}
 				if (element == null) {
@@ -113,8 +115,6 @@ public class JUnitMigrationDelegate implements ILaunchConfigurationMigrationDele
 					return project;
 				}
 			}
-		} else if (containerHandle != null) {
-			element = JavaCore.create(containerHandle);
 		}
 		IResource resource = null;
 		if (element != null) {
