@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,9 @@ import org.eclipse.jdt.internal.junit.runner.IStopListener;
 import org.eclipse.jdt.internal.junit.runner.ITestReference;
 import org.eclipse.jdt.internal.junit.runner.TestExecution;
 import org.junit.runner.Request;
+import org.junit.runner.Result;
 import org.junit.runner.Runner;
+import org.junit.runner.notification.RunListener;
 import org.junit.runner.notification.RunNotifier;
 
 public abstract class JUnit4TestReference implements ITestReference {
@@ -35,6 +37,15 @@ public abstract class JUnit4TestReference implements ITestReference {
 			}
 		});
 
-		fRunner.run(notifier);
+		Result result= new Result();
+		RunListener listener= result.createListener();
+		notifier.addListener(listener);
+		try {
+			notifier.fireTestRunStarted(fRunner.getDescription());
+			fRunner.run(notifier);
+			notifier.fireTestRunFinished(result);
+		} finally {
+			notifier.removeListener(listener);
+		}
 	}
 }
