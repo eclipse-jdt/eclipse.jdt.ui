@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 211045 [jar application] program arguments are ignored
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
@@ -34,6 +35,8 @@ public final class FatJarPackagerMessages extends NLS {
 
 	public static String FatJarPackageWizard_IPIssueDialog_title;
 
+	public static String FatJarPackageWizardPage_warning_launchConfigContainsProgramArgs;
+	public static String FatJarPackageWizardPage_warning_launchConfigContainsVMArgs;
 	public static String FatJarPackageWizardPage_error_noMainMethod;
 	public static String FatJarPackageWizardPage_launchConfigGroupTitle;
 	public static String FatJarPackageWizardPage_LaunchConfigurationWithoutMainType_warning;

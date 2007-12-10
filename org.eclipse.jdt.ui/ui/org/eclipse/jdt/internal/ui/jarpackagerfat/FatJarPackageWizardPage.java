@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 211045 [jar application] program arguments are ignored
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
@@ -39,6 +40,7 @@ import org.eclipse.swt.widgets.Listener;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -81,7 +83,11 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 		public abstract ILaunchConfiguration getLaunchConfiguration();
 
 		public abstract String getLaunchConfigurationName();
+		
+		public abstract boolean hasProgramArguments();
 
+		public abstract boolean hasVMArguments();
+		
 		public void dispose() {
 			//do nothing
 		}
@@ -117,6 +123,24 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 			return result.toString();
 		}
 
+		public boolean hasProgramArguments() {
+			try {
+				return fLaunchConfiguration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, (String) null) != null;
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+				return false;
+			}
+		}
+
+		public boolean hasVMArguments() {
+			try {
+				return fLaunchConfiguration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, (String) null) != null;
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+				return false;
+			}
+		}
+		
 	}
 
 	private static final String PAGE_NAME= "FatJarPackageWizardPage"; //$NON-NLS-1$
@@ -198,17 +222,47 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 	}
 
 	public boolean isPageComplete() {
+		clearMessages();
 		boolean complete= validateDestinationGroup();
 		complete= validateLaunchConfigurationGroup() && complete;
-		if (complete)
-			setErrorMessage(null);
 		return complete;
 	}
 
 	private boolean validateLaunchConfigurationGroup() {
-		return fLaunchConfigurationCombo.getSelectionIndex() != -1;
+		int index= fLaunchConfigurationCombo.getSelectionIndex();
+		if (index == -1)
+			return false;
+		
+		LaunchConfigurationElement element= (LaunchConfigurationElement) fLauchConfigurationModel.get(index);
+		if (element.hasProgramArguments())
+			setWarningMessage(FatJarPackagerMessages.FatJarPackageWizardPage_warning_launchConfigContainsProgramArgs);
+		
+		if (element.hasVMArguments())
+			setWarningMessage(FatJarPackagerMessages.FatJarPackageWizardPage_warning_launchConfigContainsVMArgs);
+		
+		return true;
 	}
 
+	/**
+	 * clear all previously set messages and error-messages 
+	 */
+	private void clearMessages() {
+		if (getErrorMessage() != null)
+			setErrorMessage(null);
+		if (getMessage() != null)
+			setMessage(null);
+	}
+
+	/**
+	 * set message to newMessage with severity WARNING.
+	 * overwrite existing message only if it is beyond severity WARNING
+	 * @param newMessage the warning to be set
+	 */
+	private void setWarningMessage(String newMessage) {
+		if (getMessage() == null || getMessageType() < IMessageProvider.WARNING)
+			setMessage(newMessage, IMessageProvider.WARNING);
+	}
+	
 	private LaunchConfigurationElement[] getLaunchConfigurations() {
 		ArrayList result= new ArrayList();
 
