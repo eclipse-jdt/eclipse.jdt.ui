@@ -251,6 +251,28 @@ public class AnnotationModelPerformanceTest extends TextPerformanceTestCase {
 		removeAll();
 		meter.commit();
 	}
+
+	public void testRegionBeforeAfterOld() throws Exception {
+		PerformanceMeter meter= createPerformanceMeter();
+		int warmUpRuns= getWarmUpRuns();
+		addRandom(COUNT);
+		for (int i= 0; i < warmUpRuns; i++) {
+			getInRegionOld();
+		}
+		removeAll();
+		
+		int measuredRuns= getMeasuredRuns();
+		addRandom(COUNT);
+		for (int i= 0; i < measuredRuns; i++) {
+			meter.start();
+			for (int j= 0; j < 20; j++) {
+				getInRegionOld();
+			}
+			meter.stop();
+		}
+		removeAll();
+		meter.commit();
+	}
 	
 	public void testRegionBeforeAfterCompare() throws Exception {
 		DifferenceMeter meter= new DifferenceMeter(getBaseScenarioId());
