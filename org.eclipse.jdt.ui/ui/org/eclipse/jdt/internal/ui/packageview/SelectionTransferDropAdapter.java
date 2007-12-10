@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.packageview;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
@@ -24,6 +25,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
@@ -188,8 +190,11 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		if (fElements != null)
 			return;
 		ISelection s= LocalSelectionTransfer.getInstance().getSelection();
-		if (!(s instanceof IStructuredSelection))
+		if (!(s instanceof IStructuredSelection)) {
+			fSelection= StructuredSelection.EMPTY;
+			fElements= Collections.EMPTY_LIST;
 			return;
+		}
 		fSelection= s;	
 		fElements= ((IStructuredSelection)s).toList();
 	}

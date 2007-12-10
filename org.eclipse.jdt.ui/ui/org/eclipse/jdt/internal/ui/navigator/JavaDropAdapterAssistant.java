@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.navigator;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
@@ -161,8 +162,10 @@ public class JavaDropAdapterAssistant extends CommonDropAdapterAssistant {
 		if (fElements != null)
 			return;
 		ISelection s = LocalSelectionTransfer.getInstance().getSelection();
-		if (!(s instanceof IStructuredSelection))
+		if (!(s instanceof IStructuredSelection)) {
+			fElements= Collections.EMPTY_LIST;
 			return;
+		}
 		fElements = ((IStructuredSelection) s).toList();
 	}
 
