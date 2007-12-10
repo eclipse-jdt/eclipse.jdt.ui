@@ -461,9 +461,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		performRefactoring(refactoring, false, IStatus.WARNING, true);
 		
 		for (int i= 0; i < 10; i++) {
-			startMeasuring();
-			performRefactoring(refactoring, false, IStatus.WARNING, true);
-			stopMeasuring();
+			performRefactoring(refactoring, true, IStatus.WARNING, true);
 		}
 		
 		commitMeasurements();
@@ -491,6 +489,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		RefactoringCore.getUndoManager().performUndo(null, null);
 		RefactoringCore.getUndoManager().flush();
 		System.gc();
+		joinBackgroudActivities();
 	}
 	
 }
