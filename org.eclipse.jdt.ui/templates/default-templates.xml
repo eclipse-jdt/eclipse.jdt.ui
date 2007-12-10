@@ -76,11 +76,11 @@
 
 <template name="try" description="%Templates.try" id="org.eclipse.jdt.ui.templates.try" context="java" enabled="true" autoinsert="false">try {
 	${line_selection}${cursor}
-} catch (${Exception} e) {
+} catch (${Exception} ${exception_variable_name}) {
 	// ${todo}: handle exception
 }</template>
 
-<template name="catch" description="%Templates.catch" id="org.eclipse.jdt.ui.templates.catch" context="java" enabled="true" autoinsert="false">catch (${Exception} e) {
+<template name="catch" description="%Templates.catch" id="org.eclipse.jdt.ui.templates.catch" context="java" enabled="true" autoinsert="false">catch (${Exception} ${exception_variable_name}) {
 	${cursor}// ${todo}: handle exception
 }</template>
 

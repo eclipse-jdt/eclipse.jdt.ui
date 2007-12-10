@@ -118,7 +118,7 @@ public class JavaContext extends CompilationUnitContext {
 	 * 
 	 * @param type   the context type.
 	 * @param document the document.
-	 * @param completionPosition the position defining the completion offset and length 
+	 * @param completionPosition the position defining the completion offset and length
 	 * @param compilationUnit the compilation unit (may be <code>null</code>).
 	 * @since 3.2
 	 */
@@ -151,7 +151,7 @@ public class JavaContext extends CompilationUnitContext {
 		clear();
 		
 		if (!canEvaluate(template))
-			throw new TemplateException(JavaTemplateMessages.Context_error_cannot_evaluate); 
+			throw new TemplateException(JavaTemplateMessages.Context_error_cannot_evaluate);
 		
 		TemplateTranslator translator= new TemplateTranslator() {
 			protected TemplateVariable createVariable(TemplateVariableType type, String name, int[] offsets) {
@@ -220,12 +220,12 @@ public class JavaContext extends CompilationUnitContext {
 				start++;
 			
 			if (start == end)
-				start= getCompletionOffset();	
+				start= getCompletionOffset();
 			
-				return start;	
+				return start;
 
 		} catch (BadLocationException e) {
-			return super.getStart();	
+			return super.getStart();
 		}
 	}
 
@@ -237,7 +237,7 @@ public class JavaContext extends CompilationUnitContext {
 		if (fIsManaged || getCompletionLength() == 0)
 			return super.getEnd();
 
-		try {			
+		try {
 			IDocument document= getDocument();
 
 			int start= getCompletionOffset();
@@ -246,11 +246,11 @@ public class JavaContext extends CompilationUnitContext {
 			while (start != end && Character.isWhitespace(document.getChar(end - 1)))
 				end--;
 			
-			return end;	
+			return end;
 
 		} catch (BadLocationException e) {
 			return super.getEnd();
-		}		
+		}
 	}
 
 	/*
@@ -258,7 +258,7 @@ public class JavaContext extends CompilationUnitContext {
 	 */
 	public String getKey() {
 
-		if (getCompletionLength() == 0)		
+		if (getCompletionLength() == 0)
 			return super.getKey();
 
 		try {
@@ -271,7 +271,7 @@ public class JavaContext extends CompilationUnitContext {
 				: ""; //$NON-NLS-1$
 			
 		} catch (BadLocationException e) {
-			return super.getKey();			
+			return super.getKey();
 		}
 	}
 
@@ -294,7 +294,7 @@ public class JavaContext extends CompilationUnitContext {
 	}
 
 	private static void handleException(Shell shell, Exception e) {
-		String title= JavaTemplateMessages.JavaContext_error_title; 
+		String title= JavaTemplateMessages.JavaContext_error_title;
 		if (e instanceof CoreException)
 			ExceptionHandler.handle((CoreException)e, shell, title, null);
 		else if (e instanceof InvocationTargetException)
@@ -307,7 +307,7 @@ public class JavaContext extends CompilationUnitContext {
 			}
 			MessageDialog.openError(shell, title, message);
 		}
-	}	
+	}
 
 	private CompilationUnitCompletion getCompletion() {
 		ICompilationUnit compilationUnit= getCompilationUnit();
@@ -358,7 +358,7 @@ public class JavaContext extends CompilationUnitContext {
 	/**
 	 * Returns the names of local variables matching <code>type</code>.
 	 * 
-	 * @param type the type of the variables 
+	 * @param type the type of the variables
 	 * @return the names of local variables matching <code>type</code>
 	 * @since 3.3
 	 */
@@ -403,7 +403,7 @@ public class JavaContext extends CompilationUnitContext {
 		return result;
 	}
 	
-	private String[] computeExcludes() {
+	String[] computeExcludes() {
 		String[] excludes= getCompletion().getLocalVariableNames();
 		if (!fUsedNames.isEmpty()) {
 			String[] allExcludes= new String[fUsedNames.size() + excludes.length];
@@ -434,8 +434,8 @@ public class JavaContext extends CompilationUnitContext {
 	 * Returns a string which can be used to reference the type.
 	 * 
 	 * @param type the fully qualified name of the type to import
-	 * @return returns a type to which the type binding can be assigned to. 
-	 * 	The returned type contains is unqualified when an import could be added or was already known. 
+	 * @return returns a type to which the type binding can be assigned to.
+	 * 	The returned type contains is unqualified when an import could be added or was already known.
 	 * 	It is fully qualified, if an import conflict prevented the import.
 	 * @since 3.4
 	 */
@@ -692,7 +692,7 @@ public class JavaContext extends CompilationUnitContext {
 
 		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(JavaContextType.ID);
 		if (contextType == null)
-			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, JavaTemplateMessages.JavaContext_error_message, null)); 
+			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, JavaTemplateMessages.JavaContext_error_message, null));
 
 		IDocument document= new Document();
 		if (compilationUnit != null && compilationUnit.exists())

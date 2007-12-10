@@ -5057,6 +5057,13 @@
             description="%templates.java.resolvers.ImportStatic.description"
             name="%templates.java.resolvers.ImportStatic.name"
             type="importStatic"/>
+      <resolver
+            class="org.eclipse.jdt.internal.corext.template.java.ExceptionVariableNameResolver"
+            contextTypeId="java"
+            description="%templates.java.resolvers.ExceptionVariableName.description"
+            name="%templates.java.resolvers.ExceptionVariableName.name"
+            type="exception_variable_name">
+      </resolver>
    </extension>
 
 <!-- =========================================================================== -->
