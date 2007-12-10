@@ -193,6 +193,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.FallthroughCase:
 			case IProblem.NonGenericType:
 			case IProblem.UnhandledWarningToken:
+			case IProblem.UnusedWarningToken:
 				return true;
 			default:
 				if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
@@ -548,6 +549,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnhandledWarningToken:
 				SuppressWarningsSubProcessor.addUnknownSuppressWarningProposals(context, problem, proposals);
 				break;
+			case IProblem.UnusedWarningToken:
+				SuppressWarningsSubProcessor.addRemoveUnusedSuppressWarningProposals(context, problem, proposals);
+				break;
+
 			default:
 		}
 		if (JavaModelUtil.is50OrHigher(context.getCompilationUnit().getJavaProject())) {

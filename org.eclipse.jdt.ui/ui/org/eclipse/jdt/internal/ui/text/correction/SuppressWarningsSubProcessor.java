@@ -325,4 +325,37 @@ public class SuppressWarningsSubProcessor {
 		}
 	}
 
+
+	public static void addRemoveUnusedSuppressWarningProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
+		if (!(coveringNode instanceof StringLiteral))
+			return;
+		
+		if (coveringNode.getParent() instanceof MemberValuePair) {
+			coveringNode= coveringNode.getParent();
+		}
+		
+		ASTNode parent= coveringNode.getParent();
+		
+		ASTRewrite rewrite= ASTRewrite.create(coveringNode.getAST());
+		if (parent instanceof SingleMemberAnnotation) {
+			rewrite.remove(parent, null);
+		} else if (parent instanceof NormalAnnotation) {
+			NormalAnnotation annot= (NormalAnnotation) parent;
+			if (annot.values().size() == 1) {
+				rewrite.remove(annot, null);
+			} else {
+				rewrite.remove(coveringNode, null);
+			}
+		} else if (parent instanceof ArrayInitializer) {
+			rewrite.remove(coveringNode, null);
+		} else {
+			return;
+		}
+		String label= CorrectionMessages.SuppressWarningsSubProcessor_remove_annotation_label;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
+		proposals.add(proposal);
+	}
+
 }
