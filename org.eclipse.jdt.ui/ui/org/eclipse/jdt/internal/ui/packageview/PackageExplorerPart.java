@@ -144,7 +144,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.ConfigureWorkingSetAction;
-import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
  
@@ -166,6 +165,9 @@ public class PackageExplorerPart extends ViewPart
 	
 	private static final int HIERARCHICAL_LAYOUT= 0x1;
 	private static final int FLAT_LAYOUT= 0x2;
+	
+	public static final int PROJECTS_AS_ROOTS= 1;
+	public static final int WORKING_SETS_AS_ROOTS= 2;
 	
 	private final static String VIEW_ID= JavaUI.ID_PACKAGES;
 				
@@ -341,7 +343,7 @@ public class PackageExplorerPart extends ViewPart
 		 * {@inheritDoc}
 		 */
 		protected Object[] addAditionalProblemParents(Object[] elements) {
-			if (showWorkingSets() && elements != null) {
+			if (getRootMode() == WORKING_SETS_AS_ROOTS && elements != null) {
 				return fWorkingSetModel.addWorkingSets(elements);
 			}
 			return elements;
@@ -451,7 +453,7 @@ public class PackageExplorerPart extends ViewPart
 		try {
 			fRootMode= fDialogSettings.getInt(TAG_ROOT_MODE);
 		} catch (NumberFormatException e) {
-			fRootMode= ViewActionGroup.SHOW_PROJECTS;
+			fRootMode= PROJECTS_AS_ROOTS;
 		}
 		
 	}
@@ -474,16 +476,16 @@ public class PackageExplorerPart extends ViewPart
 			restoreLinkingEnabled(memento);
 			restoreRootMode(memento);
 		}
-		if (showWorkingSets()) {
+		if (getRootMode() == WORKING_SETS_AS_ROOTS) {
 			createWorkingSetModel();
 		}
 	}
 
 	private void restoreRootMode(IMemento memento) {
 		Integer value= memento.getInteger(TAG_ROOT_MODE);
-		fRootMode= value == null ? ViewActionGroup.SHOW_PROJECTS : value.intValue();
-		if (fRootMode != ViewActionGroup.SHOW_PROJECTS && fRootMode != ViewActionGroup.SHOW_WORKING_SETS)
-			fRootMode= ViewActionGroup.SHOW_PROJECTS;
+		fRootMode= value == null ? PROJECTS_AS_ROOTS : value.intValue();
+		if (fRootMode != PROJECTS_AS_ROOTS && fRootMode != WORKING_SETS_AS_ROOTS)
+			fRootMode= PROJECTS_AS_ROOTS;
 	}
 
 	private void restoreLayoutState(IMemento memento) {
@@ -704,7 +706,7 @@ public class PackageExplorerPart extends ViewPart
 	public PackageExplorerContentProvider createContentProvider() {
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		boolean showCUChildren= store.getBoolean(PreferenceConstants.SHOW_CU_CHILDREN);
-		if (showProjects())
+		if (getRootMode() == PROJECTS_AS_ROOTS)
 			return new PackageExplorerContentProvider(showCUChildren);
 		else
 			return new WorkingSetAwareContentProvider(showCUChildren, fWorkingSetModel);
@@ -715,7 +717,7 @@ public class PackageExplorerPart extends ViewPart
 	}
 	
 	private IElementComparer createElementComparer() {
-		if (showProjects())
+		if (getRootMode() == PROJECTS_AS_ROOTS)
 			return null;
 		else
 			return WorkingSetModel.COMPARER;
@@ -727,7 +729,7 @@ public class PackageExplorerPart extends ViewPart
 	}
 	
 	private Object findInputElement() {
-		if (showWorkingSets()) {
+		if (getRootMode() == WORKING_SETS_AS_ROOTS) {
 			return fWorkingSetModel;
 		} else {
 			Object input= getSite().getPage().getInput();
@@ -797,7 +799,7 @@ public class PackageExplorerPart extends ViewPart
 			}
 		}
 
-		if (fRootMode == ViewActionGroup.SHOW_PROJECTS) {
+		if (fRootMode == PROJECTS_AS_ROOTS) {
 			if (fWorkingSetLabel == null)
 				return result;
 			if (result.length() == 0)
@@ -1503,7 +1505,7 @@ public class PackageExplorerPart extends ViewPart
 		fRootMode= newMode;
 		saveDialogSettings();
 		
-		if (showWorkingSets() && fWorkingSetModel == null) {
+		if (getRootMode() == WORKING_SETS_AS_ROOTS && fWorkingSetModel == null) {
 			createWorkingSetModel();
 			if (fActionSet != null) {
 				fActionSet.getWorkingSetActionGroup().setWorkingSetModel(fWorkingSetModel);
@@ -1529,7 +1531,7 @@ public class PackageExplorerPart extends ViewPart
 		} finally {
 			fViewer.getControl().setRedraw(true);
 		}
-		if (isRootInputChange && showWorkingSets() && fWorkingSetModel.needsConfiguration()) {
+		if (isRootInputChange && getRootMode() == WORKING_SETS_AS_ROOTS && fWorkingSetModel.needsConfiguration()) {
 			ConfigureWorkingSetAction action= new ConfigureWorkingSetAction(getSite());
 			action.setWorkingSetModel(fWorkingSetModel);
 			action.run();
@@ -1551,10 +1553,10 @@ public class PackageExplorerPart extends ViewPart
 	
 
 	/**
-	 * @return the selected working set to filter if in root mode {@link ViewActionGroup#SHOW_PROJECTS}
+	 * @return the selected working set to filter if in root mode {@link #PROJECTS_AS_ROOTS}
 	 */
 	public IWorkingSet getFilterWorkingSet() {
-		if (!showProjects())
+		if (getRootMode() != PROJECTS_AS_ROOTS)
 			return null;
 		
 		if (fActionSet == null)
@@ -1567,20 +1569,16 @@ public class PackageExplorerPart extends ViewPart
 		return fWorkingSetModel;
 	}
 	
+	/**
+	 * Returns the root mode: Either {@link #PROJECTS_AS_ROOTS} or {@link #WORKING_SETS_AS_ROOTS}.
+	 * @return returns the root mode
+	 */
 	public int getRootMode() {
 		return fRootMode;
 	}
 	
-	/* package */ boolean showProjects() {
-		return fRootMode == ViewActionGroup.SHOW_PROJECTS;
-	}
-	
-	/* package */ boolean showWorkingSets() {
-		return fRootMode == ViewActionGroup.SHOW_WORKING_SETS;
-	}
-	
 	private void setComparator() {
-		if (showWorkingSets()) {
+		if (getRootMode() == WORKING_SETS_AS_ROOTS) {
 			fViewer.setComparator(new WorkingSetAwareJavaElementSorter());
 		} else {
 			fViewer.setComparator(new JavaElementComparator());
@@ -1594,6 +1592,6 @@ public class PackageExplorerPart extends ViewPart
 			createWorkingSetModel();
 		fWorkingSetModel.setActiveWorkingSets(workingSets);
 		fWorkingSetModel.configured();
-		rootModeChanged(ViewActionGroup.SHOW_WORKING_SETS);
+		rootModeChanged(PackageExplorerPart.WORKING_SETS_AS_ROOTS);
 	}
 }

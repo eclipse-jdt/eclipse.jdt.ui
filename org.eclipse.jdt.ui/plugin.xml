@@ -619,6 +619,18 @@
             %NewAnnotationType.description
          </description>
       </wizard>
+      <wizard
+            name="%NewJavaWorkingSetWizard.label"
+            icon="$nl$/icons/full/obj16/jworkingSet_obj.gif"
+            category="org.eclipse.jdt.ui.java"
+            class="org.eclipse.jdt.internal.ui.wizards.NewJavaWorkingSetWizard"
+            preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
+            id="org.eclipse.jdt.ui.wizards.NewJavaWorkingSetWizard">
+         <description>
+            %NewJavaWorkingSetWizard.description
+         </description>
+      </wizard>      
+      
    </extension>
    <extension
          point="org.eclipse.ui.propertyPages">

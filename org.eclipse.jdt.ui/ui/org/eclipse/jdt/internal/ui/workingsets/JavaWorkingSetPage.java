@@ -19,6 +19,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -60,6 +61,8 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 
 	final private static String PAGE_TITLE= WorkingSetMessages.JavaWorkingSetPage_title; 
 	final private static String PAGE_ID= "javaWorkingSetPage"; //$NON-NLS-1$
+	
+	private IStructuredSelection fInitialSelection;
 
 	/**
 	 * Default constructor.
@@ -67,6 +70,15 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 	public JavaWorkingSetPage() {
 		super(PAGE_ID, PAGE_TITLE, JavaPluginImages.DESC_WIZBAN_JAVA_WORKINGSET);
 		setDescription(WorkingSetMessages.JavaWorkingSetPage_workingSet_description);
+		fInitialSelection= null;
+	}
+	
+	public void setInitialSelection(IStructuredSelection selection) {
+		fInitialSelection= selection;
+	}
+	
+	protected String getPageId() {
+		return "org.eclipse.jdt.ui.JavaWorkingSetPage"; //$NON-NLS-1$
 	}
 	
 	/**
@@ -160,27 +172,33 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 		final Object[][] result= new Object[1][];
 		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
 			public void run() {
-				IWorkbenchPage page= JavaPlugin.getActivePage();
-				if (page == null)
-					return;
+				IStructuredSelection selection= fInitialSelection;
+				if (selection == null) {
 				
-				IWorkbenchPart part= JavaPlugin.getActivePage().getActivePart();
-				if (part == null)
-					return;
-				
-				try {
-					Object[] elements= SelectionConverter.getStructuredSelection(part).toArray();
-					for (int i= 0; i < elements.length; i++) {
-						if (elements[i] instanceof IResource) {
-							IJavaElement je= (IJavaElement)((IResource)elements[i]).getAdapter(IJavaElement.class);
-							if (je != null && je.exists() &&  je.getJavaProject().isOnClasspath((IResource)elements[i]))
-								elements[i]= je;
-						}
+					IWorkbenchPage page= JavaPlugin.getActivePage();
+					if (page == null)
+						return;
+					
+					IWorkbenchPart part= page.getActivePart();
+					if (part == null)
+						return;
+					
+					try {
+						selection= SelectionConverter.getStructuredSelection(part);				
+					} catch (JavaModelException e) {
+						return;
 					}
-					result[0]= elements;
-				} catch (JavaModelException e) {
-					return;
 				}
+
+				Object[] elements= selection.toArray();
+				for (int i= 0; i < elements.length; i++) {
+					if (elements[i] instanceof IResource) {
+						IJavaElement je= (IJavaElement)((IResource)elements[i]).getAdapter(IJavaElement.class);
+						if (je != null && je.exists() &&  je.getJavaProject().isOnClasspath((IResource)elements[i]))
+							elements[i]= je;
+					}
+				}
+				result[0]= elements;
 			}
 		});
 		

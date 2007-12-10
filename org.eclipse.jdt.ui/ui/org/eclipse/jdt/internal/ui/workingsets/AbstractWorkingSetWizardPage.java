@@ -90,6 +90,12 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 	}
 	
 	/**
+	 * Returns the page id as specified in the extension point.
+	 * @return the page id
+	 */
+	protected abstract String getPageId();
+	
+	/**
 	 * Configure the tree viewer used on the left side of the dialog.
 	 * 
 	 * Implementors must set:
@@ -437,9 +443,12 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 	public void finish() {
 		String workingSetName= fWorkingSetName.getText();
 		HashSet elements= fSelectedElements;
+		
 		if (fWorkingSet == null) {
 			IWorkingSetManager workingSetManager= PlatformUI.getWorkbench().getWorkingSetManager();
 			fWorkingSet= workingSetManager.createWorkingSet(workingSetName, (IAdaptable[])elements.toArray(new IAdaptable[elements.size()]));
+			fWorkingSet.setId(getPageId());
+			workingSetManager.addWorkingSet(fWorkingSet);
 		} else {
 			// Add inaccessible resources
 			IAdaptable[] oldItems= fWorkingSet.getElements();

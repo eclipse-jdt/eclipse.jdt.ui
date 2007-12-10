@@ -453,11 +453,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 		
 		protected void addNewWorkingSet(IWorkingSet workingSet) {
 			if (fWorkingSetModel != null) {
-				IWorkingSet[] workingSets= fWorkingSetModel.getActiveWorkingSets();
-				IWorkingSet[] activeWorkingSets= new IWorkingSet[workingSets.length+ 1];
-				activeWorkingSets[0]= workingSet;
-				System.arraycopy(workingSets, 0, activeWorkingSets, 1, workingSets.length);
-				fWorkingSetModel.setActiveWorkingSets(activeWorkingSets);
+				fWorkingSetModel.addActiveWorkingSet(workingSet);
 			}
 			
 			int checkCount= 0;

@@ -26,13 +26,16 @@ import org.eclipse.ui.actions.ActionGroup;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
+
 /**
  * An action group to provide access to the working sets.
  */
 public class ViewActionGroup extends ActionGroup {
 
-	public static final int SHOW_PROJECTS= 1;
-	public static final int SHOW_WORKING_SETS= 2;
+	private static final int SHOW_PROJECTS= PackageExplorerPart.PROJECTS_AS_ROOTS;
+	private static final int SHOW_WORKING_SETS= PackageExplorerPart.WORKING_SETS_AS_ROOTS;
+	
 	public static final String MODE_CHANGED= ViewActionGroup.class.getName() + ".mode_changed"; //$NON-NLS-1$
 	
 	private static final Integer INT_SHOW_PROJECTS= new Integer(SHOW_PROJECTS);
@@ -64,7 +67,7 @@ public class ViewActionGroup extends ActionGroup {
 		selectionProvider.addSelectionChangedListener(fWorkingSetAssignementAction);
 		
 		fMode= mode;
-		if (showWorkingSets())
+		if (fMode == SHOW_WORKING_SETS)
 			fActiveActionGroup= fShowActionGroup;
 		else
 			fActiveActionGroup= fFilterActionGroup;
@@ -125,9 +128,9 @@ public class ViewActionGroup extends ActionGroup {
 
 	public void fillFilters(StructuredViewer viewer) {
 		ViewerFilter workingSetFilter= fFilterActionGroup.getWorkingSetFilter();
-		if (showProjects()) {
+		if (fMode == SHOW_PROJECTS) {
 			viewer.addFilter(workingSetFilter);
-		} else if (showWorkingSets()) {
+		} else {
 			viewer.removeFilter(workingSetFilter);
 		}
 	}
@@ -159,13 +162,5 @@ public class ViewActionGroup extends ActionGroup {
 
 	public void saveState(IMemento memento) {
 		fFilterActionGroup.saveState(memento);
-	}
-	
-	private boolean showProjects() {
-		return fMode == SHOW_PROJECTS;
-	}
-	
-	private boolean showWorkingSets() {
-		return fMode == SHOW_WORKING_SETS;
 	}
 }

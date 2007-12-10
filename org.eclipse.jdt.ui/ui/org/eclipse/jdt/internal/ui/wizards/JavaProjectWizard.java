@@ -42,7 +42,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
-import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
 
 public class JavaProjectWizard extends NewElementWizard implements IExecutableExtension {
 
@@ -159,7 +158,7 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 		if (explorerPart == null)
 			return EMPTY_WORKING_SET_ARRAY;
 
-		if (explorerPart.getRootMode() == ViewActionGroup.SHOW_PROJECTS) {				
+		if (explorerPart.getRootMode() == PackageExplorerPart.PROJECTS_AS_ROOTS) {				
 			//Get active filter
 			IWorkingSet filterWorkingSet= explorerPart.getFilterWorkingSet();
 			if (filterWorkingSet == null)
@@ -169,7 +168,7 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 				return EMPTY_WORKING_SET_ARRAY;
 
 			return new IWorkingSet[] {filterWorkingSet};
-		} else if (explorerPart.getRootMode() == ViewActionGroup.SHOW_WORKING_SETS) {
+		} else {
 			//If we have been gone into a working set return the working set
 			Object input= explorerPart.getViewPartInput();
 			if (!(input instanceof IWorkingSet))
@@ -181,8 +180,6 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 
 			return new IWorkingSet[] {workingSet};
 		}
-
-		return EMPTY_WORKING_SET_ARRAY;
 	}
 
 	private IWorkingSet[] getSelectedWorkingSet(IStructuredSelection selection) {

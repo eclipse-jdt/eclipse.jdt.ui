@@ -348,10 +348,10 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 			fPart.rootModeChanged(((Integer)event.getNewValue()).intValue());
 			Object oldInput= null;
 			Object newInput= null;
-			if (fPart.showProjects()) {
+			if (fPart.getRootMode() == PackageExplorerPart.PROJECTS_AS_ROOTS) {
 				oldInput= fPart.getWorkingSetModel();
 				newInput= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
-			} else if (fPart.showWorkingSets()) {
+			} else {
 				oldInput= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 				newInput= fPart.getWorkingSetModel();
 			}

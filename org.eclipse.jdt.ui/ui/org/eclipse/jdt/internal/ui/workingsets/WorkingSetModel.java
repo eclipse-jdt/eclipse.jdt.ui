@@ -457,4 +457,12 @@ public class WorkingSetModel {
 	public boolean isActiveWorkingSet(IWorkingSet changedWorkingSet) {
 		return fActiveWorkingSets.contains(changedWorkingSet);
 	}
+
+	public void addActiveWorkingSet(IWorkingSet workingSet) {
+		IWorkingSet[] workingSets= getActiveWorkingSets();
+		IWorkingSet[] activeWorkingSets= new IWorkingSet[workingSets.length+ 1];
+		activeWorkingSets[0]= workingSet;
+		System.arraycopy(workingSets, 0, activeWorkingSets, 1, workingSets.length);
+		setActiveWorkingSets(activeWorkingSets);
+	}
 }

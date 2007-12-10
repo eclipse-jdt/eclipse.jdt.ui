@@ -237,6 +237,8 @@ public final class NewWizardMessages extends NLS {
 	public static String NewJavaProjectWizardPageTwo_error_title;
 	public static String NewJavaProjectWizardPage_op_desc;
 	
+	public static String NewJavaWorkingSetWizard_add_as_root_message;
+	public static String NewJavaWorkingSetWizard_title;
 	public static String NewSourceFolderCreationWizard_title;
 	public static String NewSourceFolderCreationWizard_edit_title;
 	public static String NewSourceFolderCreationWizard_link_title;
