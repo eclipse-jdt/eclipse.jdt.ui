@@ -136,7 +136,7 @@ public class ParameterGuesser {
 
 		private String computeFQN() {
 			if (typePackage.length() != 0)
-				return typePackage + '.' + typeName; 
+				return typePackage + '.' + typeName;
 			return typeName;
 		}
 
@@ -190,7 +190,7 @@ public class ParameterGuesser {
 		/**
 		 * Return true if <code>rhs</code> is assignable to the receiver.
 		 * 
-		 * @param rhs the variable on the right-hand-side 
+		 * @param rhs the variable on the right-hand-side
 		 * @return <code>true</code> if assignable
 		 * @throws JavaModelException if it fails
 		 */
@@ -301,8 +301,8 @@ public class ParameterGuesser {
 		/**
 		 * Determine if the declaring type matches the type of the code completion invocation
 		 * 
-		 * @param declaringTypeName the name of the declaring type 
-		 * @return <code>true</code> if the given type matches 
+		 * @param declaringTypeName the name of the declaring type
+		 * @return <code>true</code> if the given type matches
 		 */
 		private final boolean isInherited(String declaringTypeName) {
 			return !declaringTypeName.equals(fEnclosingTypeName);
@@ -386,7 +386,7 @@ public class ParameterGuesser {
 							Signature.getSignatureSimpleName(proposal.getDeclarationSignature()),
 							proposal.getName(),
 							Signature.getSignatureQualifier(proposal.getSignature()),
-							Signature.getSignatureSimpleName(proposal.getSignature()), 
+							Signature.getSignatureSimpleName(proposal.getSignature()),
 							proposal.getFlags());
 					return;
 				case CompletionProposal.LOCAL_VARIABLE_REF:
@@ -486,7 +486,7 @@ public class ParameterGuesser {
 	/**
 	 * Returns the offset at which code assist is performed.
 	 * 
-	 * @return the code assist offset 
+	 * @return the code assist offset
 	 */
 	public int getCodeAssistOffset() {
 		return fCodeAssistOffset;
@@ -495,7 +495,7 @@ public class ParameterGuesser {
 	/**
 	 * Returns the compilation unit in which code assist is performed.
 	 * 
-	 * @return the compilation unit 
+	 * @return the compilation unit
 	 */
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
@@ -616,7 +616,7 @@ public class ParameterGuesser {
 	 * 	4) A better source position score will prevail (the declaration point of the variable, or
 	 * 		"how close to the point of completion?"
 	 * 
-	 * @param typeMatches the list of type matches 
+	 * @param typeMatches the list of type matches
 	 * @param paramName the parameter name
 	 */
 	private static void orderMatches(List typeMatches, String paramName) {
@@ -626,10 +626,10 @@ public class ParameterGuesser {
 	/**
 	 * Finds a local or member variable that matched the type of the parameter
 	 * 
-	 * @param proposals the list of completion proposals 
+	 * @param proposals the list of completion proposals
 	 * @param parameter the parameter
 	 * @return the list with matching proposals
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 */
 	private List findProposalsMatchingType(List proposals, Variable parameter) throws JavaModelException {
 
@@ -655,7 +655,7 @@ public class ParameterGuesser {
 	/**
 	 * Returns the longest common substring of two strings.
 	 * 
-	 * @param first the first string 
+	 * @param first the first string
 	 * @param second the second string
 	 * @return the longest common substring
 	 */
@@ -696,7 +696,7 @@ public class ParameterGuesser {
 	private static int getCompletionOffset(String source, int start) {
 		int index= start;
 		char c;
-		while (index > 0 && (c= source.charAt(index - 1)) != '{' && c != ';')
+		while (index > 0 && (c= source.charAt(index - 1)) != '{' && c != '}' && c != ';')
 			index--;
 		return Math.min(index + 1, source.length());
 	}
