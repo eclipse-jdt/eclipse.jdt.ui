@@ -162,6 +162,7 @@ public final class SearchMessages extends NLS {
 	public static String JavaSearchOperation_pluralImplementorsPostfix;
 	public static String JavaSearchOperation_pluralOccurrencesPostfix;
 	public static String JavaSearchPage_match_location_link_label;
+	public static String JavaSearchPage_match_location_link_label_tooltip;
 	public static String JavaSearchPage_match_locations_label;
 	public static String JavaElementAction_typeSelectionDialog_title;
 	public static String JavaElementAction_typeSelectionDialog_message;

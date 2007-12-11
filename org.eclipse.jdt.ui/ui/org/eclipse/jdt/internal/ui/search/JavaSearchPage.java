@@ -701,7 +701,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	private Control createLimitTo(Composite parent) {
 		fLimitToGroup= new Group(parent, SWT.NONE);
 		fLimitToGroup.setText(SearchMessages.SearchPage_limitTo_label); 
-		fLimitToGroup.setLayout(new GridLayout(2, true));
+		fLimitToGroup.setLayout(new GridLayout(2, false));
 
 		fillLimitToGroup(TYPE, ALL_OCCURRENCES);
 		
@@ -768,6 +768,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			}
 		});
 		updateMatchLocationText();
+		
 		return button;
 	}
 	
@@ -778,6 +779,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			int currNum= MatchLocations.getNumberOfSelectedSettings(fMatchLocations, searchFor);
 			
 			fMatchLocationsLink.setText(Messages.format(SearchMessages.JavaSearchPage_match_location_link_label, new Object[] { new Integer(currNum), new Integer(totNum) }));
+			fMatchLocationsLink.setToolTipText(SearchMessages.JavaSearchPage_match_location_link_label_tooltip);
 		}
 	}
 	
@@ -825,7 +827,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		Button button= new Button(parent, style);
 		button.setText(text);
 		button.setData(new Integer(data));
-		button.setLayoutData(new GridData());
+		button.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 		button.setSelection(isSelected);
 		return button;
 	}
