@@ -49,6 +49,8 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchManager;
 
+import org.eclipse.debug.ui.IDebugUIConstants;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -146,11 +148,6 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 	private static final String PAGE_NAME= "FatJarPackageWizardPage"; //$NON-NLS-1$
 	private static final String STORE_LAUNCH_CONFIGURATION_SELECTION_NAME= PAGE_NAME + ".LAUNCH_CONFIGURATION_SELECTION_NAME"; //$NON-NLS-1$
 	private static final String STORE_DESTINATION_ELEMENT= PAGE_NAME + ".DESTINATION_PATH_SELECTION"; //$NON-NLS-1$
-	
-	/*
-	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=212722
-	 */
-	private static final String SCRAPBOOK_LAUNCH= "org.eclipse.jdt.debug.ui.scrapbook_launch"; //$NON-NLS-1$
 
 	private final JarPackageData fJarPackage;
 	/**
@@ -280,7 +277,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 
 			for (int i= 0; i < launchconfigs.length; i++) {
 				ILaunchConfiguration launchconfig= launchconfigs[i];
-				if (launchconfig.getAttribute(SCRAPBOOK_LAUNCH, (String) null) == null) {
+				if (!launchconfig.getAttribute(IDebugUIConstants.ATTR_PRIVATE, false)) {
 					String projectName= launchconfig.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, ""); //$NON-NLS-1$
 					result.add(new ExistingLaunchConfigurationElement(launchconfig, projectName));
 				}
