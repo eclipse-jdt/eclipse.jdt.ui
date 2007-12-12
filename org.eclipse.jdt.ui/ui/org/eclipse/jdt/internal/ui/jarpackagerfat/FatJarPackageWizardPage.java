@@ -201,9 +201,11 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		GridLayout layout= new GridLayout(1, false);
 		layout.marginWidth= 0;
+		layout.marginHeight= 0;
 		composite.setLayout(layout);
 
 		fLaunchConfigurationCombo= new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
+		fLaunchConfigurationCombo.setVisibleItemCount(20);
 		fLaunchConfigurationCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
 		fLauchConfigurationModel.addAll(Arrays.asList(getLaunchConfigurations()));

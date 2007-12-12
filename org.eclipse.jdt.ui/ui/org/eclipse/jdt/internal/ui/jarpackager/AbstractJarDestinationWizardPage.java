@@ -81,10 +81,12 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 			new Label(destinationSelectionGroup, SWT.NONE).setText(label);
 		} else {
 			layout.marginWidth= 0;
+			layout.marginHeight= 0;
 		}
 
 		// destination name entry field
 		fDestinationNamesCombo= new Combo(destinationSelectionGroup, SWT.SINGLE | SWT.BORDER);
+		fDestinationNamesCombo.setVisibleItemCount(20);
 		fDestinationNamesCombo.addListener(SWT.Modify, this);
 		fDestinationNamesCombo.addListener(SWT.Selection, this);
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
