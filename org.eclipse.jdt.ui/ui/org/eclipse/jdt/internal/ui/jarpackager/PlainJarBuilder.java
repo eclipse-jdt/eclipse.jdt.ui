@@ -79,7 +79,9 @@ public class PlainJarBuilder extends JarBuilder {
 	 * {@inheritDoc}
 	 */
 	public void close() throws CoreException {
-		fJarWriter.close();
+		if (fJarWriter != null) {
+			fJarWriter.close();
+		}
 	}
 
 }
