@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -237,8 +238,15 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		if (operations.size() == 0)
 			return null;
 		
+		String fixName;
+		if (rawTypeReference) {
+			fixName= FixMessages.Java50Fix_add_type_parameters_change_name;
+		} else {
+			fixName= FixMessages.Java50Fix_add_annotations_change_name;
+		}
+		
 		CompilationUnitRewriteOperation[] operationsArray= (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
-		return new Java50Fix(FixMessages.Java50Fix_add_annotations_change_name, compilationUnit, operationsArray);
+		return new Java50Fix(fixName, compilationUnit, operationsArray);
 	}
 
 	public static IFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems,
@@ -332,7 +340,8 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 				} else if (node instanceof SimpleName) {
 					ASTNode rawReference= node.getParent();
 					if (isRawTypeReference(rawReference)) {
-						result.add(rawReference);
+						if (!(rawReference.getParent() instanceof ArrayType))
+							result.add(rawReference);
 					}
 				} else if (node instanceof MethodInvocation) {
 					MethodInvocation invocation= (MethodInvocation)node;

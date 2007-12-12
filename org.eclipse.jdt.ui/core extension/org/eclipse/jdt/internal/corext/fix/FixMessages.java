@@ -30,7 +30,7 @@ public final class FixMessages extends NLS {
 	public static String CleanUpRefactoring_Refactoring_name;
 	public static String CleanUpRefactoring_ProcessingCompilationUnit_message;
 	public static String CleanUpRefactoring_Initialize_message;
-	public static String CompilationUnitRewriteOperationsFix_0;
+	public static String CompilationUnitRewriteOperationsFix_nullChangeError;
 	public static String CodeStyleFix_change_name;
 	public static String ControlStatementsFix_change_name;
 	
@@ -41,6 +41,7 @@ public final class FixMessages extends NLS {
 	public static String ExpressionsFix_remove_parenthesis_change_name;
 	public static String ImportsFix_OrganizeImports_Description;
 	public static String Java50Fix_add_annotations_change_name;
+	public static String Java50Fix_add_type_parameters_change_name;
 	public static String PotentialProgrammingProblemsFix_add_id_change_name;
 	
 	public static String PotentialProgrammingProblemsFix_calculatingUIDFailed_binding;

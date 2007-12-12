@@ -101,7 +101,7 @@ public class CompilationUnitRewriteOperationsFix extends AbstractFix {
 		
 		CompilationUnitChange result= cuRewrite.createChange(getDisplayString(), true, null);
 		if (result == null)
-			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, Messages.format(FixMessages.CompilationUnitRewriteOperationsFix_0, getDisplayString())));
+			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, Messages.format(FixMessages.CompilationUnitRewriteOperationsFix_nullChangeError, getDisplayString())));
 
 		return result;
 	}
