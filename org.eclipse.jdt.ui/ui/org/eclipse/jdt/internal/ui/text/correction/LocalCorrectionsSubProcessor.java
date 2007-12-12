@@ -487,6 +487,24 @@ public class LocalCorrectionsSubProcessor {
 		}
 		
 	}
+	
+	public static void addRedundantSuperInterfaceProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (!(selectedNode instanceof Name)) {
+			return;
+		}
+		ASTNode node= ASTNodes.getNormalizedNode(selectedNode);
+		
+		ASTRewrite rewrite= ASTRewrite.create(node.getAST());
+		rewrite.remove(node, null);
+		
+		String label= CorrectionMessages.LocalCorrectionsSubProcessor_remove_redundant_superinterface;
+		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 6, image);
+		proposals.add(proposal);
+		
+	}
 
 	private static void addProposal(IInvocationContext context, Collection proposals, final UnusedCodeFix fix) {
 		if (fix != null) {

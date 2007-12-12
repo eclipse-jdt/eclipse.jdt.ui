@@ -194,6 +194,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NonGenericType:
 			case IProblem.UnhandledWarningToken:
 			case IProblem.UnusedWarningToken:
+			case IProblem.RedundantSuperinterface:
 				return true;
 			default:
 				if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
@@ -307,6 +308,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnreachableCatch:
 			case IProblem.InvalidCatchBlockSequence:
 				LocalCorrectionsSubProcessor.addUnreachableCatchProposals(context, problem, proposals);
+				break;
+			case IProblem.RedundantSuperinterface:	
+				LocalCorrectionsSubProcessor.addRedundantSuperInterfaceProposal(context, problem, proposals);
 				break;
 			case IProblem.VoidMethodReturnsValue:
 				ReturnTypeSubProcessor.addVoidMethodReturnsProposals(context, problem, proposals);

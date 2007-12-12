@@ -19,6 +19,8 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.ui.ISharedImages;
+
 import org.eclipse.jdt.core.CorrectionEngine;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
@@ -331,6 +333,8 @@ public class SuppressWarningsSubProcessor {
 		if (!(coveringNode instanceof StringLiteral))
 			return;
 		
+		StringLiteral literal= (StringLiteral) coveringNode;
+		
 		if (coveringNode.getParent() instanceof MemberValuePair) {
 			coveringNode= coveringNode.getParent();
 		}
@@ -352,8 +356,8 @@ public class SuppressWarningsSubProcessor {
 		} else {
 			return;
 		}
-		String label= CorrectionMessages.SuppressWarningsSubProcessor_remove_annotation_label;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
+		String label= Messages.format(CorrectionMessages.SuppressWarningsSubProcessor_remove_annotation_label, literal.getLiteralValue());
+		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
 		proposals.add(proposal);
 	}
