@@ -146,6 +146,11 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 	private static final String PAGE_NAME= "FatJarPackageWizardPage"; //$NON-NLS-1$
 	private static final String STORE_LAUNCH_CONFIGURATION_SELECTION_NAME= PAGE_NAME + ".LAUNCH_CONFIGURATION_SELECTION_NAME"; //$NON-NLS-1$
 	private static final String STORE_DESTINATION_ELEMENT= PAGE_NAME + ".DESTINATION_PATH_SELECTION"; //$NON-NLS-1$
+	
+	/*
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=212722
+	 */
+	private static final String SCRAPBOOK_LAUNCH= "org.eclipse.jdt.debug.ui.scrapbook_launch"; //$NON-NLS-1$
 
 	private final JarPackageData fJarPackage;
 	/**
@@ -275,9 +280,10 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 
 			for (int i= 0; i < launchconfigs.length; i++) {
 				ILaunchConfiguration launchconfig= launchconfigs[i];
-
-				String projectName= launchconfig.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, ""); //$NON-NLS-1$
-				result.add(new ExistingLaunchConfigurationElement(launchconfig, projectName));
+				if (launchconfig.getAttribute(SCRAPBOOK_LAUNCH, (String) null) == null) {
+					String projectName= launchconfig.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, ""); //$NON-NLS-1$
+					result.add(new ExistingLaunchConfigurationElement(launchconfig, projectName));
+				}
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
@@ -295,9 +301,8 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 			return getSelectedElementsWithoutContainedChildren(launchconfig, fJarPackage, getContainer(), status);
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
+			return new Object[0];
 		}
-
-		return null;
 	}
 
 	private static IJavaProject[] getProjectSearchOrder(String projectName) {
