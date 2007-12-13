@@ -113,6 +113,9 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 
 		private void editorActive(IEditorPart editor) {
 			if (editor instanceof ITextEditor) {
+				if (editor != fActiveEditor) {
+					setInput(null, null);
+				}
 				fActiveEditor= (ITextEditor) editor;
 				SelectionListenerWithASTManager.getDefault().addListener(fActiveEditor, this);
 			}
