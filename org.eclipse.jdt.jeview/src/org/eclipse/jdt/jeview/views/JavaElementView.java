@@ -35,6 +35,7 @@ import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 
 import org.eclipse.jface.action.Action;
@@ -44,7 +45,7 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -124,6 +125,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	
 	private Action fFocusAction;
 	private Action fFindTypeAction;
+	private Action fCreateFromBindingKeyAction;
 	private Action fResetAction;
 	private Action fCodeSelectAction;
 	private Action fElementAtAction;
@@ -136,7 +138,15 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	
 	private PropertySheetPage fPropertySheetPage;
 
-	
+	private static class InputDialog extends org.eclipse.jface.dialogs.InputDialog {
+		public InputDialog(Shell parentShell, String dialogTitle, String dialogMessage, String initialValue, IInputValidator validator) {
+			super(parentShell, dialogTitle, dialogMessage, initialValue, validator);
+		}
+		@Override
+		protected boolean isResizable() {
+			return true;
+		}
+	}
 	private static class JEViewSelectionProvider implements ISelectionProvider {
 		private final TreeViewer fViewer;
 		ListenerList fSelectionChangedListeners= new ListenerList();
@@ -300,7 +310,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		manager.add(fRefreshAction);
 		manager.add(new Separator());
 		
-		addFindTypeActionOrNot(manager);
+		addProjectActionsOrNot(manager);
 		manager.add(new Separator());
 		
 		manager.add(fCopyAction);
@@ -329,7 +339,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		}
 	}
 	
-	private void addFindTypeActionOrNot(IMenuManager manager) {
+	private void addProjectActionsOrNot(IMenuManager manager) {
 		if (fViewer.getSelection() instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= (IStructuredSelection) fViewer.getSelection();
 			if (structuredSelection.size() == 1) {
@@ -338,6 +348,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 					IJavaElement javaElement= ((JavaElement) first).getJavaElement();
 					if (javaElement instanceof IJavaProject) {
 						manager.add(fFindTypeAction);
+						manager.add(fCreateFromBindingKeyAction);
 					}
 				}
 			}
@@ -363,7 +374,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	}
 
 	private void makeActions() {
-		fCodeSelectAction= new Action("Set Input from Editor (codeSelect)", JEPluginImages.IMG_SET_FOCUS_CODE_SELECT) {
+		fCodeSelectAction= new Action("Set Input from Editor (&codeSelect)", JEPluginImages.IMG_SET_FOCUS_CODE_SELECT) {
 			@Override public void run() {
 				IEditorPart editor= getSite().getPage().getActiveEditor();
 				if (editor == null) {
@@ -404,7 +415,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		};
 		fCodeSelectAction.setToolTipText("Set input from current editor's selection (codeSelect)");
 		
-		fElementAtAction= new Action("Set Input from Editor location (getElementAt)", JEPluginImages.IMG_SET_FOCUS) {
+		fElementAtAction= new Action("Set Input from Editor location (&getElementAt)", JEPluginImages.IMG_SET_FOCUS) {
 			@Override public void run() {
 				IEditorPart editor= getSite().getPage().getActiveEditor();
 				if (editor == null) {
@@ -445,9 +456,9 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		};
 		fElementAtAction.setToolTipText("Set input from current editor's selection location (getElementAt)");
 		
-		fCreateFromHandleAction= new Action("Create From Handle...") {
+		fCreateFromHandleAction= new Action("Create From &Handle...") {
 			@Override public void run() {
-				InputDialog dialog= new InputDialog(getSite().getShell(), "Create Java Element From Handle Identifier", "Handle identifier:", "", null);
+				InputDialog dialog= new InputDialog(getSite().getShell(), "Create Java Element From Handle Identifier", "&Handle identifier:", "", null);
 				if (dialog.open() != Window.OK)
 					return;
 				String handleIdentifier= dialog.getValue();
@@ -498,6 +509,40 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			}
 		};
 		fFindTypeAction.setText("findType(..)...");
+		
+		fCreateFromBindingKeyAction= new Action("Create From &Binding Key...") {
+			@Override public void run() {
+				Object selected= ((IStructuredSelection) fViewer.getSelection()).getFirstElement();
+				final IJavaProject project= (IJavaProject) ((JavaElement) selected).getJavaElement();
+				
+				InputDialog dialog= new InputDialog(getSite().getShell(), "IJavaProject#findElement(String bindingKey, WorkingCopyOwner owner)", "&bindingKey:", "", null);
+				if (dialog.open() != Window.OK)
+					return;
+				final String bindingKey= dialog.getValue();
+				
+				class Runner implements IRunnableWithProgress {
+					IJavaElement element;
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						try {
+							element= project.findElement(bindingKey, null);
+						} catch (JavaModelException e) {
+							throw new InvocationTargetException(e);
+						}
+					}
+				}
+				Runner runner= new Runner();
+				try {
+					PlatformUI.getWorkbench().getProgressService().busyCursorWhile(runner);
+				} catch (InvocationTargetException e) {
+					JEViewPlugin.log(e);
+				} catch (InterruptedException e) {
+					JEViewPlugin.log(e);
+				}
+				JavaElement element= new JavaElement(fInput, bindingKey, runner.element);
+				fViewer.add(fInput, element);
+				fViewer.setSelection(new StructuredSelection(element));
+			}
+		};
 		
 		fResetAction= new Action("&Reset View", getJavaModelImageDescriptor()) {
 			@Override public void run() {
