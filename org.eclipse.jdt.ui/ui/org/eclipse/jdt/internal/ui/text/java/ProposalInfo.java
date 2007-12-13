@@ -24,7 +24,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavadocContentAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 
 
 public class ProposalInfo {
@@ -46,7 +45,7 @@ public class ProposalInfo {
 	 * Returns the Java element.
 	 * 
 	 * @throws JavaModelException if accessing the java model fails
-	 * @return the Java element 
+	 * @return the Java element
 	 */
 	public IJavaElement getJavaElement() throws JavaModelException {
 		return fElement;
@@ -107,11 +106,11 @@ public class ProposalInfo {
 	}
 
 	private Reader getHTMLContentReader(IMember member, IProgressMonitor monitor) throws JavaModelException {
-	    Reader contentReader= JavadocContentAccess.getContentReader(member, true);
+	    Reader contentReader= JavadocContentAccess.getHTMLContentReader(member, true, false);
         if (contentReader != null)
-        	return new JavaDoc2HTMLTextReader(contentReader);
+        	return contentReader;
         
-        if (true && member.getOpenable().getBuffer() == null) { // only if no source available
+        if (member.getOpenable().getBuffer() == null) { // only if no source available
         	String s= member.getAttachedJavadoc(monitor);
         	if (s != null)
         		return new StringReader(s);
@@ -122,7 +121,7 @@ public class ProposalInfo {
 	/**
 	 * Gets the reader content as a String
 	 * 
-	 * @param reader the reader 
+	 * @param reader the reader
 	 * @return the reader content as string
 	 */
 	private static String getString(Reader reader) {
