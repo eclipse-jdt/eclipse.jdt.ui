@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,10 +69,6 @@ public class JavadocContentAccess {
 			}
 		}
 
-		if (allowInherited && (member.getElementType() == IJavaElement.METHOD)) {
-			return findDocInHierarchy((IMethod) member);
-		}
-		
 		return null;
 	}
 
@@ -98,7 +94,7 @@ public class JavadocContentAccess {
 
 	/**
 	 * Gets a reader for an IMember's Javadoc comment content from the source attachment.
-	 * and renders the tags in HTML. 
+	 * and renders the tags in HTML.
 	 * Returns <code>null</code> if the member does not contain a Javadoc comment or if no source is available.
 	 * 
 	 * @param member				the member to get the Javadoc of.
@@ -121,6 +117,10 @@ public class JavadocContentAccess {
 			if (s != null)
 				return new StringReader(s);
 		}
+		
+		if (allowInherited && (member.getElementType() == IJavaElement.METHOD))
+			return findDocInHierarchy((IMethod) member, useAttachedJavadoc);
+
 		return null;
 	}
 	
@@ -128,7 +128,7 @@ public class JavadocContentAccess {
 
 	/**
 	 * Gets a reader for an IMember's Javadoc comment content from the source attachment.
-	 * and renders the tags in HTML. 
+	 * and renders the tags in HTML.
 	 * Returns <code>null</code> if the member does not contain a Javadoc comment or if no source is available.
 	 * 
 	 * @param member The member to get the Javadoc of.
@@ -143,12 +143,12 @@ public class JavadocContentAccess {
 		return getHTMLContentReader(member, allowInherited, false);
 	}
 
-	private static Reader findDocInHierarchy(IMethod method) throws JavaModelException {
+	private static Reader findDocInHierarchy(IMethod method, boolean useAttachedJavadoc) throws JavaModelException {
 		/*
 		 * Catch ExternalJavaProject in which case
 		 * no hierarchy can be built.
 		 */
-		if (!method.getJavaProject().exists())  
+		if (!method.getJavaProject().exists())
 			return null;
 		
 		IType type= method.getDeclaringType();
@@ -161,13 +161,13 @@ public class JavadocContentAccess {
 			IType curr= superTypes[i];
 			IMethod overridden= tester.findOverriddenMethodInType(curr, method);
 			if (overridden != null) {
-				Reader reader= getContentReader(overridden, false);
+				Reader reader= getHTMLContentReader(overridden, false, useAttachedJavadoc);
 				if (reader != null) {
 					return reader;
 				}
 			}
 		}
 		return null;
-	}		
+	}
 
 }
