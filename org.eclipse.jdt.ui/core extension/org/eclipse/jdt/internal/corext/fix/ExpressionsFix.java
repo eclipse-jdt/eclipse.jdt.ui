@@ -154,6 +154,8 @@ public class ExpressionsFix extends AbstractFix {
 								if (isIntegerNumber(name))
 									//rounding involved
 									return;
+							} else if (operator == InfixExpression.Operator.REMAINDER) {
+								return;
 							}
 						}
 						fNodes.add(node);

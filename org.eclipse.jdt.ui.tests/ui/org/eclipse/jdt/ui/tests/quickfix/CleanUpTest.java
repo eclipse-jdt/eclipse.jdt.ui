@@ -5024,6 +5024,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void foo() {\n");
+		buf.append("        double d = 2.0 * (0.5 / 4.0);\n");
 		buf.append("        int spaceCount = (3);\n");
 		buf.append("        spaceCount = 2 * (spaceCount / 2);\n");
 		buf.append("    }\n");
@@ -5037,8 +5038,43 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void foo() {\n");
+		buf.append("        double d = 2.0 * 0.5 / 4.0;\n");
 		buf.append("        int spaceCount = 3;\n");
 		buf.append("        spaceCount = 2 * (spaceCount / 2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
+	}
+	
+	public void testRemoveParenthesisBug212856() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public int foo() {\n");
+		buf.append("        int n= 1 + (2 - 3);\n");
+		buf.append("        n= 1 - (2 + 3);\n");
+		buf.append("        n= 1 - (2 - 3);\n");
+		buf.append("        n= 1 * (2 * 3);\n");
+		buf.append("        return 2 * (n % 10);\n");
+		buf.append("    }\n");
+		buf.append("}\n");		
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public int foo() {\n");
+		buf.append("        int n= 1 + 2 - 3;\n");
+		buf.append("        n= 1 - (2 + 3);\n");
+		buf.append("        n= 1 - (2 - 3);\n");
+		buf.append("        n= 1 * 2 * 3;\n");
+		buf.append("        return 2 * (n % 10);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 
