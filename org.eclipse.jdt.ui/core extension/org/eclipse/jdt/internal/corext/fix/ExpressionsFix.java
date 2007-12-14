@@ -140,9 +140,18 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 					if (expression instanceof InfixExpression) {
 						InfixExpression infixExpression= (InfixExpression) expression;
 						Operator operator= infixExpression.getOperator();
-						if (operator != InfixExpression.Operator.DIVIDE)
+						if (parentInfix.getOperator() != InfixExpression.Operator.TIMES)
+							return true;
+
+						if (operator == InfixExpression.Operator.TIMES)
+							// x * (y * z) == x * y * z
 							return true;
 						
+						if (operator == InfixExpression.Operator.REMAINDER)
+							// x * (y % z) != x * y % z
+							return false;
+						
+						//x * (y / z) == z * y / z  iff no rounding
 						ITypeBinding binding= infixExpression.resolveTypeBinding();
 						if (binding == null)
 							return false;
