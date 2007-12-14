@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
@@ -640,16 +641,30 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		if (fCompilationUnit == null || fJavaProject == null)
 			return null;
 
-		String completion= String.valueOf(proposal.getCompletion());
-		int start= proposal.getReplaceStart();
-		int length= getLength(proposal);
-		int relevance= computeRelevance(proposal);
+		char[] declarationKey= proposal.getDeclarationKey();
+		if (declarationKey == null)
+			return null;
+		
+		try {
+			IJavaElement element= fJavaProject.findElement(new String(declarationKey), null);
+			if (!(element instanceof IType))
+				return null;
+			
+			IType type= (IType) element;
+			
+			String completion= String.valueOf(proposal.getCompletion());
+			int start= proposal.getReplaceStart();
+			int length= getLength(proposal);
+			int relevance= computeRelevance(proposal);
 
-		String label= fLabelProvider.createAnonymousTypeLabel(proposal);
+			String label= fLabelProvider.createAnonymousTypeLabel(proposal);
 
-		JavaCompletionProposal javaProposal= new AnonymousTypeCompletionProposal(fJavaProject, fCompilationUnit, start, length, completion, label, String.valueOf(proposal.getDeclarationSignature()), relevance);
-		javaProposal.setProposalInfo(new AnonymousTypeProposalInfo(fJavaProject, proposal));
-		return javaProposal;
+			JavaCompletionProposal javaProposal= new AnonymousTypeCompletionProposal(fJavaProject, fCompilationUnit, start, length, completion, label, String.valueOf(proposal.getDeclarationSignature()), type, relevance);
+			javaProposal.setProposalInfo(new AnonymousTypeProposalInfo(fJavaProject, proposal));
+			return javaProposal;
+		} catch (JavaModelException e) {
+			return null;
+		}
 	}
 
 	private IJavaCompletionProposal createFieldProposal(CompletionProposal proposal) {
