@@ -128,6 +128,13 @@ public class JavaNavigatorContentProvider extends
 		return super.getElements(inputElement);
 	}
 	
+	public boolean hasChildren(Object element) {
+		if (element instanceof IProject) {
+			return ((IProject) element).isAccessible();
+		}
+		return super.hasChildren(element);
+	}
+	
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof IWorkspaceRoot) {
 			IWorkspaceRoot root = (IWorkspaceRoot) parentElement;

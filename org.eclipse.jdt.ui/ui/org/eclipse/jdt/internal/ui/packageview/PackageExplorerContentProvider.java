@@ -16,6 +16,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -23,6 +26,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
 
@@ -35,6 +39,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.progress.UIJob;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -138,13 +143,24 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 						fPendingUpdates.addAll(runnables);
 					}
 				}
-				ctrl.getDisplay().asyncExec(new Runnable(){
-					public void run() {
-						runPendingUpdates();
-					}
-				});
+				postAsyncUpdate(ctrl.getDisplay());
 			}
 		}
+	}
+	private void postAsyncUpdate(final Display display) {
+		UIJob updateJob= new UIJob(display, PackagesMessages.PackageExplorerContentProvider_update_job_description) {
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				TreeViewer viewer= fViewer;
+				if (viewer != null && viewer.isBusy()) {
+					schedule(100); // reschedule when viewer is busy: bug 184991
+				} else {
+					runPendingUpdates();
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		updateJob.setSystem(true);
+		updateJob.schedule();
 	}
 	
 	/**

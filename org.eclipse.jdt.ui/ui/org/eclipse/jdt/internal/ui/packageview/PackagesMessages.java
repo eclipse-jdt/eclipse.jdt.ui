@@ -82,6 +82,7 @@ public final class PackagesMessages extends NLS {
 	public static String PackageExplorer_filteredDialog_title;
 	public static String PackageExplorer_notFound;
 	public static String PackageExplorer_removeFilters;
+	public static String PackageExplorerContentProvider_update_job_description;
 	public static String SelectionTransferDropAdapter_error_title;
 	public static String SelectionTransferDropAdapter_error_message;
 	public static String SelectionTransferDropAdapter_dialog_title;
