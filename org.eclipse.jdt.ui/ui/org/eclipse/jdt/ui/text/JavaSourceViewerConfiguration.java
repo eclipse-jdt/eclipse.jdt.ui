@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
@@ -440,7 +439,6 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			JavaReconciler reconciler= new JavaReconciler(editor, strategy, false);
 			reconciler.setIsIncrementalReconciler(false);
 			reconciler.setIsAllowedToModifyDocument(false);
-			reconciler.setProgressMonitor(new NullProgressMonitor());
 			reconciler.setDelay(500);
 
 			return reconciler;

@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
 import java.util.Map;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
 
@@ -309,7 +308,6 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 		
 		MonoReconciler reconciler= new MonoReconciler(strategy, false);
 		reconciler.setIsIncrementalReconciler(false);
-		reconciler.setProgressMonitor(new NullProgressMonitor());
 		reconciler.setDelay(500);
 		return reconciler;
 	}

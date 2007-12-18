@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,6 @@
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.examples.jspeditor;
-
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.text.DefaultTextHover;
 import org.eclipse.jface.text.ITextHover;
@@ -36,8 +34,10 @@ public class JspSourceViewerConfiguration extends SourceViewerConfiguration {
 	private ITextEditor fTextEditor;
 
 	/**
-	 * Creates a new JSP source viewer configuration that behaves
-	 * according to the specification of this class' methods.
+	 * Creates a new JSP source viewer configuration that behaves according to
+	 * the specification of this class' methods.
+	 * 
+	 * @param textEditor the text editor
 	 */
 	public JspSourceViewerConfiguration(ITextEditor textEditor) {
 		fTextEditor= textEditor;
@@ -49,7 +49,6 @@ public class JspSourceViewerConfiguration extends SourceViewerConfiguration {
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 		IReconcilingStrategy reconcilingStrategy= new JspReconcilingStrategy(sourceViewer, fTextEditor);
 		MonoReconciler reconciler= new MonoReconciler(reconcilingStrategy, false);
-		reconciler.setProgressMonitor(new NullProgressMonitor());		
 		reconciler.setDelay(500);
 		return reconciler;
 	}
