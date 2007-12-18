@@ -53,7 +53,7 @@ public class CodeFormatFix implements IFix {
 		
 		ArrayList groups= new ArrayList();
 		
-		MultiTextEdit resultEdit= new MultiTextEdit();		
+		MultiTextEdit formatEdit= new MultiTextEdit();		
 		if (format) {
 			Map formatterSettings= new HashMap(cu.getJavaProject().getOptions(true));
 			
@@ -71,9 +71,9 @@ public class CodeFormatFix implements IFix {
 				edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT, content, regions, 0, lineDelemiter, formatterSettings);
 			}
 			if (edit != null && (!(edit instanceof MultiTextEdit) || edit.hasChildren())) {
-				resultEdit.addChild(edit);
-				if (!TextEditUtil.isPacked(resultEdit)) {
-					resultEdit= TextEditUtil.flatten(resultEdit);
+				formatEdit.addChild(edit);
+				if (!TextEditUtil.isPacked(formatEdit)) {
+					formatEdit= TextEditUtil.flatten(formatEdit);
 				}
 
 				String label= MultiFixMessages.CodeFormatFix_description;
@@ -84,7 +84,8 @@ public class CodeFormatFix implements IFix {
 			}
 		}
 
-		if (removeTrailingWhitespacesAll || removeTrailingWhitespacesIgnorEmpty || correctIndentation) {
+		MultiTextEdit otherEdit= new MultiTextEdit();
+		if ((removeTrailingWhitespacesAll || removeTrailingWhitespacesIgnorEmpty || correctIndentation) && (!format || regions != null)) {
 			try {
 				if (correctIndentation && removeTrailingWhitespacesAll) {
 					removeTrailingWhitespacesAll= false;
@@ -111,8 +112,10 @@ public class CodeFormatFix implements IFix {
 							j++;
 							if (j < lineExclusiveEnd) {
 								DeleteEdit edit= new DeleteEdit(j, lineExclusiveEnd - j);
-								resultEdit.addChild(edit);
-								group.addTextEdit(edit);
+								if (!TextEditUtil.overlaps(formatEdit, edit)) {
+									otherEdit.addChild(edit);
+									group.addTextEdit(edit);
+								}
 							}
 						} else if (removeTrailingWhitespacesIgnorEmpty) {
 							if (j >= lineStart) {
@@ -122,14 +125,16 @@ public class CodeFormatFix implements IFix {
 								j++;
 								if (j < lineExclusiveEnd) {
 									DeleteEdit edit= new DeleteEdit(j, lineExclusiveEnd - j);
-									resultEdit.addChild(edit);
-									group.addTextEdit(edit);
+									if (!TextEditUtil.overlaps(formatEdit, edit)) {
+										otherEdit.addChild(edit);
+										group.addTextEdit(edit);
+									}
 								}
 							}
 						}
 					}
 					
-					if (resultEdit.hasChildren()) {
+					if (otherEdit.hasChildren()) {
 						groups.add(group);
 					}
 				} 
@@ -147,12 +152,16 @@ public class CodeFormatFix implements IFix {
 							for (int i= 0; i < children.length; i++) {
 								TextEdit child= children[i];
 								edit.removeChild(child);
-								resultEdit.addChild(child);
-								group.addTextEdit(child);
+								if (!TextEditUtil.overlaps(formatEdit, child)) {
+									otherEdit.addChild(child);
+									group.addTextEdit(child);
+								}
 							}
 						} else {
-							resultEdit.addChild(edit);
-							group.addTextEdit(edit);
+							if (!TextEditUtil.overlaps(formatEdit, edit)) {
+								otherEdit.addChild(edit);
+								group.addTextEdit(edit);
+							}
 						}
 						
 						groups.add(group);
@@ -164,6 +173,7 @@ public class CodeFormatFix implements IFix {
 			}
 		}
 		
+		TextEdit resultEdit= TextEditUtil.merge(formatEdit, otherEdit);
 		if (!resultEdit.hasChildren())
 			return null;
 		
