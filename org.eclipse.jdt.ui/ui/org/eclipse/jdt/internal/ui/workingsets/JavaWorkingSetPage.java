@@ -111,6 +111,9 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 		
 		tree.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
 		
+		if (getSelection() == null)
+			return;
+		
 		Object[] selection= getInitialTreeSelection();
 		if (selection.length > 0) {
 			try {
@@ -146,10 +149,15 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 	 * {@inheritDoc}
 	 */
 	protected Object[] getInitialWorkingSetElements(IWorkingSet workingSet) {
-		if (workingSet == null)
-			return new Object[0];
-		
-		Object[] elements= workingSet.getElements();
+		Object[] elements;
+		if (workingSet == null) {
+			if (fInitialSelection == null)
+				return new Object[0];
+			
+			elements= fInitialSelection.toArray();
+		} else {
+			elements= workingSet.getElements();
+		}
 		
 		// Use closed project for elements in closed project
 		for (int i= 0; i < elements.length; i++) {
