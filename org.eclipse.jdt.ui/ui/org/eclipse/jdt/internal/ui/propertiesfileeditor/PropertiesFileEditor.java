@@ -26,6 +26,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
+import org.eclipse.ui.editors.text.ITextEditorHelpContextIds;
 import org.eclipse.ui.editors.text.TextEditor;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -50,15 +51,21 @@ public class PropertiesFileEditor extends TextEditor {
 	protected OpenAction fOpenAction;
 
 
-	/**
-	 * Creates a new properties file editor.
+	/*
+	 * @see org.eclipse.ui.editors.text.TextEditor#initializeEditor()
+	 * @since 3.4
 	 */
-	public PropertiesFileEditor() {
+	protected void initializeEditor() {
 		setDocumentProvider(JavaPlugin.getDefault().getPropertiesFileDocumentProvider());
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		setPreferenceStore(store);
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		setSourceViewerConfiguration(new PropertiesFileSourceViewerConfiguration(textTools.getColorManager(), store, this, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING));
+		setEditorContextMenuId("#TextEditorContext"); //$NON-NLS-1$
+		setRulerContextMenuId("#TextRulerContext"); //$NON-NLS-1$
+		setHelpContextId(ITextEditorHelpContextIds.TEXT_EDITOR);
+		configureInsertMode(SMART_INSERT, false);
+		setInsertMode(INSERT);
 	}
 
 	/*
