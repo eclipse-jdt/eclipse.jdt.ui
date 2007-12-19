@@ -1018,7 +1018,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * Creates a new compilation unit editor.
 	 */
 	public CompilationUnitEditor() {
-		super();
 		setDocumentProvider(JavaPlugin.getDefault().getCompilationUnitDocumentProvider());
 		setEditorContextMenuId("#CompilationUnitEditorContext"); //$NON-NLS-1$
 		setRulerContextMenuId("#CompilationUnitRulerContext"); //$NON-NLS-1$
