@@ -133,7 +133,8 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 		ColoredViewersManager.install(table);
 		
 		AppearanceAwareLabelProvider javaElementLabelProvider= new AppearanceAwareLabelProvider(
-				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
+				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED
+				| JavaElementLabels.ROOT_POST_QUALIFIED | JavaElementLabels.P_POST_QUALIFIED,
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS
 			);
 			
