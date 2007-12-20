@@ -40,12 +40,15 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
+import org.eclipse.core.filebuffers.IAnnotationModelFactory;
+
 import org.eclipse.core.resources.IEncodedStorage;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFileState;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
@@ -124,7 +127,7 @@ import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 import org.eclipse.jdt.internal.ui.text.spelling.JavaSpellingReconcileStrategy;
 
 
-public class CompilationUnitDocumentProvider extends TextFileDocumentProvider implements ICompilationUnitDocumentProvider {
+public class CompilationUnitDocumentProvider extends TextFileDocumentProvider implements ICompilationUnitDocumentProvider, IAnnotationModelFactory {
 
 	/**
 	 * Bundle of all required informations to allow working copy management.
@@ -934,10 +937,14 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	}
 
 	/*
-	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createAnnotationModel(org.eclipse.core.resources.IFile)
+	 * @see org.eclipse.core.filebuffers.IAnnotationModelFactory#createAnnotationModel(org.eclipse.core.runtime.IPath)
+	 * @since 3.4
 	 */
-	protected IAnnotationModel createAnnotationModel(IFile file) {
-		return new CompilationUnitAnnotationModel(file);
+	public IAnnotationModel createAnnotationModel(IPath path) {
+		IResource file= ResourcesPlugin.getWorkspace().getRoot().findMember(path);
+		if (file instanceof IFile)
+			return new CompilationUnitAnnotationModel(file);
+		return new AnnotationModel();
 	}
 
 	/*

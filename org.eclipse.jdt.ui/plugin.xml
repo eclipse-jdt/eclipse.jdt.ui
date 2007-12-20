@@ -921,6 +921,13 @@
       </editor>
    </extension>
    
+      <extension
+         point="org.eclipse.core.filebuffers.annotationModelCreation">
+      <factory
+            contentTypeId="org.eclipse.jdt.core.javaSource"
+            class="org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider"/>
+   </extension>
+   
    <extension
          point="org.eclipse.ui.themes">
         <themeElementCategory label="%javaPresentation.label" id="org.eclipse.jdt.ui.presentation"/>
