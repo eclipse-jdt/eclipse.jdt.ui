@@ -177,11 +177,13 @@ public class AbstractTestRunListenerTest extends TestCase {
 	protected String[] launchJUnit(IJavaElement aTest, final TestRunLog log) throws CoreException {
 		launchJUnit(aTest);
 		
-		new DisplayHelper(){
+		boolean success= new DisplayHelper(){
 			protected boolean condition() {
 				return log.isDone();
 			}
-		}.waitForCondition(Display.getCurrent(), 5*1000, 100);
+		}.waitForCondition(Display.getCurrent(), 15*1000, 100);
+		if (! success)
+			log.add("AbstractTestRunListenerTest#launchJUnit(IJavaElement, TestRunLog) timed out");
 		return log.getLog();
 	}
 	
