@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -343,6 +343,10 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	public void testFail40() throws Exception{
 		//Autoboxing -> calls to methods can be redirected due to overloading
 		helper1_0("m", "k", new String[]{Signature.SIG_INT});
+	}
+	
+	public void testFail41() throws Exception{
+		helper1();
 	}
 	
 	public void test1() throws Exception{
