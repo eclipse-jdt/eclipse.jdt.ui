@@ -30,6 +30,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -50,6 +52,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.resource.LocalResourceManager;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ILabelDecorator;
@@ -245,6 +249,11 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		setListLabelProvider(fTypeInfoLabelProvider);
 		setListSelectionLabelDecorator(fTypeInfoLabelProvider);
+		shell.addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				fTypeInfoLabelProvider.dispose();
+			}
+		});
 		setDetailsLabelProvider(new TypeItemDetailsLabelProvider(fTypeInfoUtil));
 		
 		fTypeItemsComparator= new TypeItemsComparator();
@@ -784,13 +793,18 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	private class TypeItemLabelProvider extends LabelProvider implements ILabelDecorator {
 
 		private boolean fContainerInfo;
+		private LocalResourceManager fImageManager;
 
-
-		/**
-		 * Construct a new <code>TypeItemLabelProvider</code>. F
-		 */
 		public TypeItemLabelProvider() {
+			fImageManager= new LocalResourceManager(JFaceResources.getResources());
+		}
 
+		/*
+		 * @see org.eclipse.jface.viewers.BaseLabelProvider#dispose()
+		 */
+		public void dispose() {
+			super.dispose();
+			fImageManager.dispose();
 		}
 
 		public void setContainerInfo(boolean containerInfo) {
@@ -812,11 +826,14 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 				return super.getImage(element);
 			}
 
-			TypeNameMatch type= (TypeNameMatch) element;
-
-			ImageDescriptor iD= JavaElementImageProvider.getTypeImageDescriptor(isInnerType(type), false, type.getModifiers(), false);
-			
-			return JavaPlugin.getImageDescriptorRegistry().get(iD);
+			ImageDescriptor contributedImageDescriptor= fTypeInfoUtil.getContributedImageDescriptor(element);
+			if (contributedImageDescriptor == null) {
+				TypeNameMatch type= (TypeNameMatch) element;
+				ImageDescriptor iD= JavaElementImageProvider.getTypeImageDescriptor(isInnerType(type), false, type.getModifiers(), false);
+				return JavaPlugin.getImageDescriptorRegistry().get(iD);
+			} else {
+				return fImageManager.createImage(contributedImageDescriptor);
+			}
 		}
 
 		/*
@@ -847,7 +864,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		 *      java.lang.Object)
 		 */
 		public Image decorateImage(Image image, Object element) {
-			return null;
+			return image;
 		}
 
 		/*
@@ -1063,19 +1080,13 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			return result.toString();
 		}
 
-		private boolean isInnerType(TypeNameMatch match) {
-			return match.getTypeQualifiedName().indexOf('.') != -1;
-		}
-
-		public ImageDescriptor getImageDescriptor(Object element) {
+		public ImageDescriptor getContributedImageDescriptor(Object element) {
 			TypeNameMatch type= (TypeNameMatch) element;
 			if (fProviderExtension != null) {
 				fAdapter.setMatch(type);
-				ImageDescriptor descriptor= fProviderExtension.getImageDescriptor(fAdapter);
-				if (descriptor != null)
-					return descriptor;
+				return fProviderExtension.getImageDescriptor(fAdapter);
 			}
-			return JavaElementImageProvider.getTypeImageDescriptor(isInnerType(type), false, type.getModifiers(), false);
+			return null; 
 		}
 
 		private String getTypeContainerName(TypeNameMatch info) {
