@@ -253,8 +253,9 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 		protected final void addAdjustedTypeCompletion(String name, String completion,
 				int start, int end, int relevance, ImageDescriptor descriptor, String fullyQualifiedName) {
 			JavaTypeCompletionProposal javaCompletionProposal= new JavaTypeCompletionProposal(
-					fullyQualifiedName == null ? completion : fullyQualifiedName, null,
-					fullyQualifiedName == null ? start - fOffsetReduction : 0,
+					fullyQualifiedName == null || completion.length() == 0 ? completion : fullyQualifiedName,
+					null,
+					start - fOffsetReduction,
 					end - start, getImage(descriptor), name, relevance, completion);
 			javaCompletionProposal.setTriggerCharacters(TRIGGER_CHARACTERS);
 			fProposals.add(javaCompletionProposal);
