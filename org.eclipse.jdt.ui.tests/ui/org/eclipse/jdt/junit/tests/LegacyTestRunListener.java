@@ -35,16 +35,20 @@ public class LegacyTestRunListener implements ITestRunListener {
 	}
 
 	public void testRunEnded(long elapsedTime) {
-		if (fLog != null)
+		if (fLog != null) {
 			fLog.add(testRunEndedMessage());
+			fLog.setDone();
+		}
 	}
 	public static String testRunEndedMessage() {
 		return "testRunEnded(" + ")";
 	}
 	
 	public void testRunStopped(long elapsedTime) {
-		if (fLog != null)
+		if (fLog != null) {
 			fLog.add(testRunStoppedMessage());
+			fLog.setDone();
+		}
 	}
 	public static String testRunStoppedMessage() {
 		return "testRunStopped(" + ")";
@@ -75,8 +79,10 @@ public class LegacyTestRunListener implements ITestRunListener {
 	}
 
 	public void testRunTerminated() {
-		if (fLog != null)
+		if (fLog != null) {
 			fLog.add(testRunTerminatedMessage());
+			fLog.setDone();
+		}
 	}
 	public static String testRunTerminatedMessage() {
 		return "testRunTerminated(" + ")";
