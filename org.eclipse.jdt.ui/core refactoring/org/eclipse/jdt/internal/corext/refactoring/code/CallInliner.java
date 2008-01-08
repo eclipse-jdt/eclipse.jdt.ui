@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -296,11 +296,17 @@ public class CallInliner {
 	}
 
 	private void initializeRewriteState() {
-		// field initializer can be inside of a block if used in a local class
-		// but block can't be a child of field initializer
-		if(ASTNodes.getParent(fInvocation, ASTNode.FIELD_DECLARATION) != null) {
-			fFieldInitializer= true;
-		}
+		fFieldInitializer= false;
+		ASTNode parent= fInvocation.getParent();
+		do {
+			if (parent instanceof FieldDeclaration) {
+				fFieldInitializer= true;
+				return;
+			} else if (parent instanceof Block) {
+				return;
+			}
+			parent= parent.getParent();
+		} while (parent != null);
 	}
 
 	private void initializeTargetNode() {
