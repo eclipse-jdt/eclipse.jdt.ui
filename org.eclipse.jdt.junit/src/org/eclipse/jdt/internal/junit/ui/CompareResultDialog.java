@@ -104,6 +104,7 @@ public class CompareResultDialog extends TrayDialog {
             }
 
             public void createPresentation(TextPresentation presentation, ITypedRegion damage) {
+            	presentation.setDefaultStyleRange(new StyleRange(0, fDocument.getLength(), null, null));
             	int prefix= fPrefixSuffixOffsets2[0];
                 int suffix= fPrefixSuffixOffsets2[1];
                 TextAttribute attr= new TextAttribute(Display.getDefault().getSystemColor(SWT.COLOR_RED), null, SWT.BOLD);
