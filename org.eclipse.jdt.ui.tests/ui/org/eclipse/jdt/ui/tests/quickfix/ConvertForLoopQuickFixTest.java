@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1873,6 +1873,86 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("        //Comment\n");
 		buf.append("    }\n");
 		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+	}
+	
+	public void testBug214340_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    int[] array = new int[3];\n");
+		buf.append("\n");
+		buf.append("    boolean same(E1 that) {\n");
+		buf.append("        for (int i = 0; i < array.length; i++) {\n");
+		buf.append("            if (this.array[i] != that.array[i])\n");
+		buf.append("                return false;\n");
+		buf.append("        }\n");
+		buf.append("        return true;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		assertFalse(satisfiesPrecondition(cu));
+	}
+
+	public void testBug214340_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    int[] array = new int[3];\n");
+		buf.append("    static boolean same(E1 one, E1 two) {\n");
+		buf.append("        for (int i = 0; i < one.array.length; i++) {\n");
+		buf.append("            if (one.array[i] != two.array[i])\n");
+		buf.append("                return false;\n");
+		buf.append("        }\n");
+		buf.append("        return true;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		assertFalse(satisfiesPrecondition(cu));
+	}
+
+	public void testBug214340_3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    int[] array = new int[3];\n");
+		buf.append("    static boolean same(E1 one, E1 two) {\n");
+		buf.append("        for (int i = 0; i < one.array.length; i++) {\n");
+		buf.append("            System.out.println(one.array[i]);\n");
+		buf.append("        }\n");
+		buf.append("        return true;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		List proposals= fetchConvertingProposal(buf, cu);
+		
+		assertNotNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+
+		String preview1= getPreviewContent(fConvertLoopProposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    int[] array = new int[3];\n");
+		buf.append("    static boolean same(E1 one, E1 two) {\n");
+		buf.append("        for (int element : one.array) {\n");
+		buf.append("            System.out.println(element);\n");
+		buf.append("        }\n");
+		buf.append("        return true;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
