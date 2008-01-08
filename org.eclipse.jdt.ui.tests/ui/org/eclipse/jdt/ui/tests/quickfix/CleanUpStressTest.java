@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -3217,7 +3217,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("        final ResultPrinter printer = new TestResultPrinter(new PrintStream(\n");
         buf.append("                this.output)) {\n");
         buf.append("            @Override\n");
-        buf.append("            public void printErrors(TestResult result) {\n");
+        buf.append("            public void printErrors(final TestResult result) {\n");
         buf.append("                this.getWriter().println(\"Errors here\"); //$NON-NLS-1$\n");
         buf.append("            }\n");
         buf.append("        };\n");
@@ -3240,7 +3240,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("        final ResultPrinter printer = new TestResultPrinter(new PrintStream(\n");
         buf.append("                this.output)) {\n");
         buf.append("            @Override\n");
-        buf.append("            public void printFailures(TestResult result) {\n");
+        buf.append("            public void printFailures(final TestResult result) {\n");
         buf.append("                this.getWriter().println(\"Failures here\"); //$NON-NLS-1$\n");
         buf.append("            }\n");
         buf.append("        };\n");
@@ -5499,4 +5499,5 @@ public class CleanUpStressTest extends CleanUpTestCase {
 //			}
 //		}, new NullProgressMonitor());
 //	}
+
 }

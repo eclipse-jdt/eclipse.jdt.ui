@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -6006,6 +6006,49 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
+	}
+	
+	public void testAddFinalBug213995() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private Object foo = new Object() {\n");
+		buf.append("        public boolean equals(Object obj) {\n");
+		buf.append("            return super.equals(obj);\n");
+		buf.append("        }\n");
+		buf.append("    }; \n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Object foo = new Object() {\n");
+		buf.append("            public boolean equals(Object obj) {\n");
+		buf.append("                return super.equals(obj);\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private Object foo = new Object() {\n");
+		buf.append("        public boolean equals(final Object obj) {\n");
+		buf.append("            return super.equals(obj);\n");
+		buf.append("        }\n");
+		buf.append("    }; \n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Object foo = new Object() {\n");
+		buf.append("            public boolean equals(final Object obj) {\n");
+		buf.append("                return super.equals(obj);\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
 	}
 	
 	public void testRemoveBlockReturnThrows01() throws Exception {

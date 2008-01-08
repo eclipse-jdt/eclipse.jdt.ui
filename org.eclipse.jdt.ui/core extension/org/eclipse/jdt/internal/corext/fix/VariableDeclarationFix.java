@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -114,8 +115,17 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 		 */
 		public boolean visit(FieldDeclaration node) {
 			if (fAddFinalFields)
-				return handleFragments(node.fragments(), node);
+				handleFragments(node.fragments(), node);
 			
+			List fragments= node.fragments();
+			for (Iterator iterator= fragments.iterator(); iterator.hasNext();) {
+				VariableDeclarationFragment fragment= (VariableDeclarationFragment) iterator.next();
+				Expression initializer= fragment.getInitializer();
+				if (initializer != null) {
+					initializer.accept(this);
+				}
+			}
+
 			return false;
 		}
 		
@@ -124,8 +134,17 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 		 */
 		public boolean visit(VariableDeclarationStatement node) {
 			if (fAddFinalLocals)
-				return handleFragments(node.fragments(), node);
+				handleFragments(node.fragments(), node);
 			
+			List fragments= node.fragments();
+			for (Iterator iterator= fragments.iterator(); iterator.hasNext();) {
+				VariableDeclarationFragment fragment= (VariableDeclarationFragment) iterator.next();
+				Expression initializer= fragment.getInitializer();
+				if (initializer != null) {
+					initializer.accept(this);
+				}
+			}
+
 			return false;
 		}
 
@@ -329,17 +348,17 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 			
 			IBinding binding= name.resolveBinding();
 			if (binding == null)
-				return false;
+				return true;
 			
 			if (fWrittenVariables.containsKey(binding))
-				return false;
+				return true;
 			
 			ModifierChangeOperation op= createAddFinalOperation(name, node);
 			if (op == null)
-				return false;
+				return true;
 			
 			fResult.add(op);
-			return false;
+			return true;
 		}
 		
 		/**
