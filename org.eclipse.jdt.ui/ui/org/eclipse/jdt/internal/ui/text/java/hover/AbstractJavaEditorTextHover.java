@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Brock Janiczak <brockj@tpg.com.au> - [implementation] Streams not being closed in Javadoc views - https://bugs.eclipse.org/bugs/show_bug.cgi?id=214854
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
@@ -167,9 +168,10 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 		Bundle bundle= Platform.getBundle(JavaPlugin.getPluginId());
 		URL styleSheetURL= bundle.getEntry("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
 		if (styleSheetURL != null) {
+			BufferedReader reader= null;
 			try {
-				BufferedReader reader= new BufferedReader(new InputStreamReader(styleSheetURL.openStream()));
-				StringBuffer buffer= new StringBuffer(200);
+				reader= new BufferedReader(new InputStreamReader(styleSheetURL.openStream()));
+				StringBuffer buffer= new StringBuffer(1500);
 				String line= reader.readLine();
 				while (line != null) {
 					buffer.append(line);
@@ -180,6 +182,12 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 			} catch (IOException ex) {
 				JavaPlugin.log(ex);
 				return ""; //$NON-NLS-1$
+			} finally {
+				try {
+					if (reader != null)
+						reader.close();
+				} catch (IOException e) {
+				}
 			}
 		}
 		return null;

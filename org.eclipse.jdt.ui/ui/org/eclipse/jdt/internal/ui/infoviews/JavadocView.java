@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Genady Beryozkin <eclipse@genady.org> - [misc] Display values for constant fields in the Javadoc view - https://bugs.eclipse.org/bugs/show_bug.cgi?id=204914
+ *     Brock Janiczak <brockj@tpg.com.au> - [implementation] Streams not being closed in Javadoc views - https://bugs.eclipse.org/bugs/show_bug.cgi?id=214854
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.infoviews;
 
@@ -115,6 +116,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 
 import org.osgi.framework.Bundle;
+
 
 /**
  * View which shows Javadoc for a given Java element.
@@ -400,9 +402,10 @@ public class JavadocView extends AbstractInfoView {
 		if (styleSheetURL == null)
 			return null;
 
+		BufferedReader reader= null;
 		try {
-			BufferedReader reader= new BufferedReader(new InputStreamReader(styleSheetURL.openStream()));
-			StringBuffer buffer= new StringBuffer(200);
+			reader= new BufferedReader(new InputStreamReader(styleSheetURL.openStream()));
+			StringBuffer buffer= new StringBuffer(1500);
 			String line= reader.readLine();
 			while (line != null) {
 				buffer.append(line);
@@ -415,6 +418,12 @@ public class JavadocView extends AbstractInfoView {
 		} catch (IOException ex) {
 			JavaPlugin.log(ex);
 			return null;
+		} finally {
+			try {
+				if (reader != null)
+					reader.close();
+			} catch (IOException e) {
+			}
 		}
 	}
 
