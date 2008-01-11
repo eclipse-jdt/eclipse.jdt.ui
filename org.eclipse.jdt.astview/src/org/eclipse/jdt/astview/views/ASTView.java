@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -79,6 +80,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionFactory;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.ShowInContext;
@@ -386,6 +388,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private final static String SETTINGS_SHOW_NON_RELEVANT="show_non_relevant";//$NON-NLS-1$
 	private final static String SETTINGS_JLS= "jls"; //$NON-NLS-1$
 
+	//XXX: should reference platform constant, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=54581
+	public static final String LINK_WITH_EDITOR_COMMAND_ID= "org.eclipse.ui.navigate.linkWithEditor"; //$NON-NLS-1$ 
 	
 	private SashForm fSash;
 	private TreeViewer fViewer;
@@ -833,6 +837,10 @@ public class ASTView extends ViewPart implements IShowInSource {
 		bars.setGlobalActionHandler(ActionFactory.COPY.getId(), fCopyAction);
 		bars.setGlobalActionHandler(ActionFactory.REFRESH.getId(), fFocusAction);
 		bars.setGlobalActionHandler(ActionFactory.DELETE.getId(), fDeleteAction);
+		
+		IHandlerService service= (IHandlerService) bars.getServiceLocator().getService(IHandlerService.class);
+		if (service != null) //XXX: availability not guaranteed, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=212630
+			service.activateHandler(LINK_WITH_EDITOR_COMMAND_ID, new ActionHandler(fLinkWithEditor));
 	}
 
 	private void fillLocalPullDown(IMenuManager manager) {
@@ -1021,6 +1029,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fLinkWithEditor.setChecked(fDoLinkWithEditor);
 		fLinkWithEditor.setText("&Link with Editor"); //$NON-NLS-1$
 		fLinkWithEditor.setToolTipText("Link With Editor"); //$NON-NLS-1$
+		fLinkWithEditor.setActionDefinitionId(LINK_WITH_EDITOR_COMMAND_ID);
 		ASTViewImages.setImageDescriptors(fLinkWithEditor, ASTViewImages.LINK_WITH_EDITOR);
 			
 		fASTVersionToggleActions= new ASTLevelToggle[] {

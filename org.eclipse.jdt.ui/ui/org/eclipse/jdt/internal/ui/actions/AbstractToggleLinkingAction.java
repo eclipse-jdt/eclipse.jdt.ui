@@ -26,11 +26,15 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  */
 public abstract class AbstractToggleLinkingAction extends Action {
 	
+	//XXX: should reference platform constant, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=54581
+	public static final String COMMAND_ID= "org.eclipse.ui.navigate.linkWithEditor"; //$NON-NLS-1$ 
+
 	/**
 	 * Constructs a new action.
 	 */
 	public AbstractToggleLinkingAction() {
 		super(ActionMessages.ToggleLinkingAction_label); 
+		setActionDefinitionId(COMMAND_ID);
 		setDescription(ActionMessages.ToggleLinkingAction_description); 
 		setToolTipText(ActionMessages.ToggleLinkingAction_tooltip); 
 		JavaPluginImages.setLocalImageDescriptors(this, "synced.gif"); //$NON-NLS-1$		
