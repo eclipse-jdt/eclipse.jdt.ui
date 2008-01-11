@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -186,7 +186,7 @@ public class TypesView extends JavaBrowsingPart {
 	 * @since 2.1
 	 */
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-		if (!needsToProcessSelectionChanged(part, selection))
+		if (!needsToProcessSelectionChanged(part))
 			return;
 
 		if (selection instanceof IStructuredSelection) {
@@ -196,7 +196,7 @@ public class TypesView extends JavaBrowsingPart {
 				IPackageFragment[] fragments= ((LogicalPackage)selectedElement).getFragments();
 				List selectedElements= Arrays.asList(fragments);
 				if (selectedElements.size() > 1) {
-					adjustInput(part, selectedElements);
+					adjustInput(selectedElements);
 					fPreviousSelectedElement= selectedElements;
 					fPreviousSelectionProvider= part;
 				} else if (selectedElements.size() == 1)
@@ -209,7 +209,7 @@ public class TypesView extends JavaBrowsingPart {
 		super.selectionChanged(part, selection);
 	}
 
-	private void adjustInput(IWorkbenchPart part, List selectedElements) {
+	private void adjustInput(List selectedElements) {
 		Object currentInput= getViewer().getInput();
 		if (!selectedElements.equals(currentInput))
 			setInput(selectedElements);
