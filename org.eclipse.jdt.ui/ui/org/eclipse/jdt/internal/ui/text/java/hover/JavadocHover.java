@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,10 +11,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.LocationAdapter;
+import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
@@ -30,6 +40,8 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHoverExtension;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
+
+import org.eclipse.ui.PartInitException;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 
@@ -55,10 +67,17 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.JavadocContentAccess;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
+import org.eclipse.jdt.internal.ui.infoviews.JavadocView;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
+
+import org.osgi.framework.Bundle;
 
 
 /**
@@ -80,10 +99,13 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		public IInformationControl doCreateInformationControl(Shell parent) {
 			int shellStyle= SWT.RESIZE | SWT.TOOL;
 			int style= SWT.V_SCROLL | SWT.H_SCROLL;
-			if (BrowserInformationControl.isAvailable(parent))
-				return new BrowserInformationControl(parent, shellStyle, style);
-			else
+			if (BrowserInformationControl.isAvailable(parent)) {
+				BrowserInformationControl iControl= new BrowserInformationControl(parent, shellStyle, style);
+				addLinkListener(iControl);
+				return iControl;
+			} else {
 				return new DefaultInformationControl(parent, shellStyle, style, new HTMLTextPresenter(false));
+			}
 		}
 	}
 
@@ -98,10 +120,15 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
 		public IInformationControl doCreateInformationControl(Shell parent) {
-			if (BrowserInformationControl.isAvailable(parent))
-				return new BrowserInformationControl(parent, SWT.TOOL | SWT.NO_TRIM, SWT.NONE, EditorsUI.getTooltipAffordanceString());
-			else
-				return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true), EditorsUI.getTooltipAffordanceString());
+			int shellStyle= SWT.TOOL | SWT.NO_TRIM;
+			int style= SWT.NONE;
+			if (BrowserInformationControl.isAvailable(parent)) {
+				BrowserInformationControl iControl= new BrowserInformationControl(parent, shellStyle, style, EditorsUI.getTooltipAffordanceString());
+				addLinkListener(iControl);
+				return iControl;
+			} else {
+				return new DefaultInformationControl(parent, style, new HTMLTextPresenter(true), EditorsUI.getTooltipAffordanceString());
+			}
 		}
 
 		/*
@@ -118,11 +145,11 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		}
 	}
 
-	private final long LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
+	private static final long LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
 		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS
 		| JavaElementLabels.F_PRE_TYPE_SIGNATURE | JavaElementLabels.M_PRE_TYPE_PARAMETERS | JavaElementLabels.T_TYPE_PARAMETERS
 		| JavaElementLabels.USE_RESOLVED;
-	private final long LOCAL_VARIABLE_FLAGS= LABEL_FLAGS & ~JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.F_POST_QUALIFIED;
+	private static final long LOCAL_VARIABLE_FLAGS= LABEL_FLAGS & ~JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.F_POST_QUALIFIED;
 
 	
 	/**
@@ -137,7 +164,6 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 	 * @since 3.2
 	 */
 	private IInformationControlCreator fPresenterControlCreator;
-
 
 	/*
 	 * @see IInformationProviderExtension2#getInformationPresenterControlCreator()
@@ -158,22 +184,130 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 			fHoverControlCreator= new HoverControlCreator();
 		return fHoverControlCreator;
 	}
+
+	private static void addLinkListener(final BrowserInformationControl control) {
+		control.addLocationListener(new LocationAdapter() {
+			public void changing(LocationEvent event) {
+				String loc= event.location;
+//				System.out.println("JavadocHover: changing location:" + loc);
+				URI uri;
+				try {
+					uri= new URI(loc);
+				} catch (URISyntaxException e) {
+					JavaPlugin.log(e);
+					return;
+				}
+				
+				String scheme= uri.getScheme();
+				if (JavaElementLinks.JAVADOC_VIEW_SCHEME.equals(scheme)) {
+					handleJavadocViewLink(uri);
+				} else if (JavaElementLinks.JAVADOC_SCHEME.equals(scheme)) {
+					handleInlineJavadocLink(uri);
+				} else if (JavaElementLinks.OPEN_LINK_SCHEME.equals(scheme)) {
+					handleDeclarationLink(uri);
+				} else if (!"about:blank".equals(loc) && !("carbon".equals(SWT.getPlatform()) && loc.startsWith("applewebdata:"))) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					/*
+					 * Using the Browser.setText API triggers a location change to "about:blank" with
+					 * the mozilla widget. The Browser on carbon uses yet another kind of special
+					 * initialization URLs.
+					 * XXX: remove this code once https://bugs.eclipse.org/bugs/show_bug.cgi?id=130314 is fixed
+					 */
+					if (loc.startsWith("about:")) //$NON-NLS-1$
+						return; //FIXME: handle relative links
+					
+					control.notifyDelayedInputChange(null);
+					control.dispose(); //FIXME: should have protocol to hide, rather than dispose
+					try {
+						// open external links in real browser:
+						OpenBrowserUtil.open(new URL(loc), event.display, ""); //$NON-NLS-1$
+					} catch (MalformedURLException e) {
+						JavaPlugin.log(e);
+					}
+				}
+			}
+
+			private void handleJavadocViewLink(URI uri) {
+				IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
+				if (linkTarget == null)
+					return;
+
+				control.notifyDelayedInputChange(null);
+				control.dispose(); //FIXME: should have protocol to hide, rather than dispose
+				try {
+					JavadocView view= (JavadocView) JavaPlugin.getActivePage().showView(JavaUI.ID_JAVADOC_VIEW);
+					view.setInput(linkTarget);
+				} catch (PartInitException e) {
+					JavaPlugin.log(e);
+				}
+			}
+
+			private void handleInlineJavadocLink(URI uri) {
+				IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
+				if (linkTarget == null)
+					return;
+
+				String hoverInfo= getHoverInfo(new IJavaElement[] { linkTarget }, null);
+				if (control.hasDelayedInputChangeListeners())
+					control.notifyDelayedInputChange(hoverInfo);
+				else
+					control.setInformation(hoverInfo);
+			}
+
+			private void handleDeclarationLink(URI uri) {
+				IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
+				if (linkTarget == null)
+					return;
+
+				control.notifyDelayedInputChange(null);
+				control.dispose(); //FIXME: should have protocol to hide, rather than dispose
+				try {
+					//FIXME: add hover location to editor navigation history?
+					JavaUI.openInEditor(linkTarget);
+				} catch (PartInitException e) {
+					JavaPlugin.log(e);
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+				}
+			}
+		});
+	}
 	
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
-		IJavaElement[] result= getJavaElementsAt(textViewer, hoverRegion);
-		if (result == null || result.length == 0)
+		IJavaElement[] elements= getJavaElementsAt(textViewer, hoverRegion);
+		if (elements == null || elements.length == 0)
 			return null;
+		
+		String constantValue;
+		if (elements.length == 1 && elements[0].getElementType() == IJavaElement.FIELD) {
+			constantValue= getConstantValue((IField) elements[0], hoverRegion);
+		} else {
+			constantValue= null;
+		}
+		
+		return getHoverInfo(elements, constantValue);
+	}
 
-		int nResults= result.length;
+	/**
+	 * Computes the hover info.
+	 * 
+	 * @param elements the resolved elements
+	 * @param constantValue a constant value iff result contains exactly 1 constant field, or <code>null</code>
+	 * @return the HTML hover info for the given element(s)
+	 * @since 3.4
+	 */
+	private static String getHoverInfo(IJavaElement[] elements, String constantValue) {
+		int nResults= elements.length;
 		StringBuffer buffer= new StringBuffer();
 		boolean hasContents= false;
+		String base= null;
+		
 		if (nResults > 1) {
 
-			for (int i= 0; i < result.length; i++) {
+			for (int i= 0; i < elements.length; i++) {
 				HTMLPrinter.startBulletList(buffer);
-				IJavaElement curr= result[i];
+				IJavaElement curr= elements[i];
 				if (curr instanceof IMember || curr.getElementType() == IJavaElement.LOCAL_VARIABLE) {
-					HTMLPrinter.addBullet(buffer, getInfoText(curr, hoverRegion));
+					HTMLPrinter.addBullet(buffer, getInfoText(curr, constantValue));
 					hasContents= true;
 				}
 				HTMLPrinter.endBulletList(buffer);
@@ -181,13 +315,15 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 
 		} else {
 
-			IJavaElement curr= result[0];
+			IJavaElement curr= elements[0];
 			if (curr instanceof IMember) {
 				IMember member= (IMember) curr;
-				HTMLPrinter.addSmallHeader(buffer, getInfoText(member, hoverRegion));
+				HTMLPrinter.addSmallHeader(buffer, getInfoText(member, constantValue));
 				Reader reader;
 				try {
-					reader= JavadocContentAccess.getHTMLContentReader(member, true, true);
+//					reader= JavadocContentAccess.getHTMLContentReader(member, true, true);
+					String content= JavadocContentAccess2.getHTMLContent(member, true, true);
+					reader= content == null ? null : new StringReader(content);
 					
 					// Provide hint why there's no Javadoc
 					if (reader == null && member.isBinary()) {
@@ -216,8 +352,13 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 					HTMLPrinter.addParagraph(buffer, reader);
 				}
 				hasContents= true;
+				try {
+					base= JavaElementLinks.createURI(JavaElementLinks.JAVADOC_SCHEME, member);
+				} catch (URISyntaxException e) {
+					JavaPlugin.log(e);
+				}
 			} else if (curr.getElementType() == IJavaElement.LOCAL_VARIABLE || curr.getElementType() == IJavaElement.TYPE_PARAMETER) {
-				HTMLPrinter.addSmallHeader(buffer, getInfoText(curr, hoverRegion));
+				HTMLPrinter.addSmallHeader(buffer, getInfoText(curr, constantValue));
 				hasContents= true;
 			}
 		}
@@ -227,6 +368,11 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 
 		if (buffer.length() > 0) {
 			HTMLPrinter.insertPageProlog(buffer, 0, getStyleSheet());
+			//TODO: base URI only makes sense if URI is hierarchical
+//			if (base != null) {
+//				int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
+//				buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
+//			}
 			HTMLPrinter.addPageEpilog(buffer);
 			return buffer.toString();
 		}
@@ -234,11 +380,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		return null;
 	}
 
-	private String getInfoText(IJavaElement member, IRegion hoverRegion) {
+	private static String getInfoText(IJavaElement member, String constantValue) {
 		long flags= member.getElementType() == IJavaElement.LOCAL_VARIABLE ? LOCAL_VARIABLE_FLAGS : LABEL_FLAGS;
 		StringBuffer label= new StringBuffer(JavaElementLabels.getElementLabel(member, flags));
 		if (member.getElementType() == IJavaElement.FIELD) {
-			String constantValue= getConstantValue((IField)member, hoverRegion);
 			if (constantValue != null) {
 				IJavaProject javaProject= member.getJavaProject();
 				if (JavaCore.INSERT.equals(javaProject.getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, true)))
@@ -251,6 +396,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		}
 		
 		StringBuffer buf= new StringBuffer();
+		buf.append("<span style=\"word-wrap:break-word;\">"); // qualified names can become quite long -> allow wrapping inside word (CSS3) //$NON-NLS-1$
+
 		for (int i= 0; i < label.length(); i++) {
 			char ch= label.charAt(i);
 			if (ch == '<') {
@@ -261,17 +408,37 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 				buf.append(ch);
 			}
 		}
+
+		buf.append(" <a href='"); //$NON-NLS-1$
+		try {
+			buf.append(JavaElementLinks.createURI(JavaElementLinks.JAVADOC_VIEW_SCHEME, member));
+		} catch (URISyntaxException e) {
+			JavaPlugin.log(e);
+		}
+		buf.append("'>"); //$NON-NLS-1$
+
+		buf.append("<img src='"); //$NON-NLS-1$
+		Bundle bundle= JavaPlugin.getDefault().getBundle();
+		//FIXME: move access to JavaPluginImages (or get rid of inlined button link)
+		URL javadocImg= FileLocator.find(bundle, new Path(JavaPluginImages.ICONS_PATH + "/obj16/jdoc_tag_obj.gif"), null); //$NON-NLS-1$
+		if (javadocImg != null) {
+			try {
+				buf.append(FileLocator.toFileURL(javadocImg).toString());
+			} catch (IOException e) {
+				JavaPlugin.log(e);
+			}
+		}
+		buf.append("' alt='").append("Show in Javadoc View").append("' border='0' align='top'>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		buf.append("</a>"); //$NON-NLS-1$
+
+		buf.append("</span>"); //$NON-NLS-1$
 		return buf.toString();
 	}
 
 	/*
 	 * @since 3.4
 	 */
-	private static boolean isStaticFinal(IJavaElement member) {
-		if (member.getElementType() != IJavaElement.FIELD)
-			return false;
-		
-		IField field= (IField)member;
+	private static boolean isStaticFinal(IField field) {
 		try {
 			return JdtFlags.isFinal(field) && JdtFlags.isStatic(field);
 		} catch (JavaModelException e) {
