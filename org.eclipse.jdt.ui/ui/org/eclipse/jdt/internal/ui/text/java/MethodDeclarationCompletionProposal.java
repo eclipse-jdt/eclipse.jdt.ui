@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -142,7 +142,10 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
 				buf.append("private "); //$NON-NLS-1$
 			}
 		} else {
-			buf.append("public "); //$NON-NLS-1$
+			if (fType.isEnum())
+				buf.append("private "); //$NON-NLS-1$
+			else
+				buf.append("public "); //$NON-NLS-1$
 		}
 
 		if (fReturnTypeSig != null) {
