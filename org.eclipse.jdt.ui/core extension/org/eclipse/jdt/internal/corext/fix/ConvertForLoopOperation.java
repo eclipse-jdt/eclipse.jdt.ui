@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -408,6 +408,18 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 							
 							ArrayAccess arrayAccess= (ArrayAccess)node.getParent();
 							Expression array= arrayAccess.getArray();
+							if (array instanceof QualifiedName) {
+								if (!(fArrayAccess instanceof QualifiedName))
+									throw new InvalidBodyError();
+
+								IBinding varBinding1= ((QualifiedName) array).getQualifier().resolveBinding();
+								if (varBinding1 == null)
+									throw new InvalidBodyError();
+
+								IBinding varBinding2= ((QualifiedName) fArrayAccess).getQualifier().resolveBinding();
+								if (!varBinding1.equals(varBinding2))
+									throw new InvalidBodyError();
+							}
 							
 							IBinding binding= getBinding(array);
 							if (binding == null)
