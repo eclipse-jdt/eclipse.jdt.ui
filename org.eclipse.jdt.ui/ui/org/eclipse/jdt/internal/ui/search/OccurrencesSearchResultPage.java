@@ -124,9 +124,6 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 		}
 
 		public void partDeactivated(IWorkbenchPartReference partRef) {
-			if (partRef instanceof IEditorReference && partRef.getPart(true) == fActiveEditor) {
-				uninstallOnActiveEditor();
-			}
 		}
 
 		public void selectionChanged(IEditorPart part, ITextSelection selection, CompilationUnit astRoot) {
@@ -145,6 +142,8 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 			if (NewSearchUI.SEARCH_VIEW_ID.equals(partRef.getId()) && partRef.getPart(true) == getViewPart()) {
 				fIsVisible= false;
 				uninstallOnActiveEditor();
+			} else if (partRef instanceof IEditorReference && partRef.getPart(true) == fActiveEditor) {
+				uninstallOnActiveEditor();
 			}
 		}
 
@@ -152,6 +151,9 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 		}
 
 		public void partClosed(IWorkbenchPartReference partRef) {
+			if (partRef instanceof IEditorReference && partRef.getPart(true) == fActiveEditor) {
+				uninstallOnActiveEditor();
+			}
 		}
 
 		public void partInputChanged(IWorkbenchPartReference partRef) {
