@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1173,7 +1173,15 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 				return false;
 			if (fMyTypeFilterVersion != typeItemsFilter.getMyTypeFilterVersion())
 				return false;
-			return getPattern().indexOf('.', filter.getPattern().length()) == -1;
+			String packagePattern= getPackagePattern();
+			String filterPackagePattern= typeItemsFilter.getPackagePattern();
+			if (filterPackagePattern == null)
+				return packagePattern == null;
+			else if (packagePattern == null)
+				return true;
+			else
+				return filterPackagePattern.startsWith(packagePattern)
+					&& filterPackagePattern.indexOf('.', packagePattern.length()) == -1;
 		}
 
 		public boolean equalsFilter(ItemsFilter iFilter) {
@@ -1186,7 +1194,12 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 				return false;
 			if (fMyTypeFilterVersion != typeItemsFilter.getMyTypeFilterVersion())
 				return false;
-			return true;
+			String packagePattern= getPackagePattern();
+			String filterPackagePattern= typeItemsFilter.getPackagePattern();
+			if (packagePattern == null)
+				return filterPackagePattern == null;
+			else
+				return packagePattern.equals(filterPackagePattern);
 		}
 
 		public int getElementKind() {
