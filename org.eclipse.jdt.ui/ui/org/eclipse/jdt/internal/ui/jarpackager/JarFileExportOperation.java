@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -147,9 +147,9 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		IStatus status= ex.getStatus();
 		String message= ex.getLocalizedMessage();
 		if (message == null || message.length() < 1) {
-			message= JarPackagerMessages.JarFileExportOperation_coreErrorDuringExport; 
+			message= JarPackagerMessages.JarFileExportOperation_coreErrorDuringExport;
 			status= new Status(status.getSeverity(), status.getPlugin(), status.getCode(), message, ex);
-		}		
+		}
 		fStatus.add(status);
 	}
 
@@ -303,7 +303,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			resource= (IResource)element;
 
 		if (!resource.isAccessible()) {
-			addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_resourceNotFound, resource.getFullPath()), null); 
+			addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_resourceNotFound, resource.getFullPath()), null);
 			return;
 		}
 
@@ -313,10 +313,16 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				try {
 					isInJavaProject= resource.getProject().hasNature(JavaCore.NATURE_ID);
 				} catch (CoreException ex) {
-					addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_projectNatureNotDeterminable, resource.getFullPath()), ex); 
+					addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_projectNatureNotDeterminable, resource.getFullPath()), ex);
 					return;
 				}
 				if (isInJavaProject) {
+					IJavaElement je= JavaCore.create(resource);
+					if (je instanceof ITypeRoot && je.exists()) {
+						exportElement(je, progressMonitor);
+						return;
+					}
+
 					jProject= JavaCore.create(resource.getProject());
 					try {
 						IPackageFragment pkgFragment= jProject.findPackageFragment(resource.getFullPath().removeLastSegments(1));
@@ -325,7 +331,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 						else
 							pkgRoot= findPackageFragmentRoot(jProject, resource.getFullPath().removeLastSegments(1));
 					} catch (JavaModelException ex) {
-						addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_javaPackageNotDeterminable, resource.getFullPath()), ex); 
+						addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_javaPackageNotDeterminable, resource.getFullPath()), ex);
 						return;
 					}
 				}
@@ -388,7 +394,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				children= container.members();
 			} catch (CoreException e) {
 				// this should never happen because an #isAccessible check is done before #members is invoked
-				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_errorDuringExport, container.getFullPath()), e); 
+				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_errorDuringExport, container.getFullPath()), e);
 				return;
 			}
 			for (int i= 0; i < children.length; i++)
@@ -396,7 +402,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		} else if (resource instanceof IFile) {
 			try {
 				IPath destinationPath= resource.getFullPath().removeFirstSegments(leadingSegmentsToRemove);
-				progressMonitor.subTask(Messages.format(JarPackagerMessages.JarFileExportOperation_exporting, destinationPath.toString())); 
+				progressMonitor.subTask(Messages.format(JarPackagerMessages.JarFileExportOperation_exporting, destinationPath.toString()));
 				fJarBuilder.writeFile((IFile)resource, destinationPath);
 			} catch (CoreException ex) {
 				Throwable realEx= ex.getStatus().getException();
@@ -420,7 +426,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			children= container.members();
 		} catch (CoreException exception) {
 			// this should never happen because an #isAccessible check is done before #members is invoked
-			addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_errorDuringExport, container.getFullPath()), exception); 
+			addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_errorDuringExport, container.getFullPath()), exception);
 		}
 		if (children != null) {
 			for (int i= 0; i < children.length; i++)
@@ -434,7 +440,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		IPackageFragmentRoot pkgRoot= jProject.findPackageFragmentRoot(path);
 		if (pkgRoot != null)
 			return pkgRoot;
-		else 
+		else
 			return findPackageFragmentRoot(jProject, path.removeLastSegments(1));
 	}
 
@@ -443,7 +449,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		// Handle case where META-INF/MANIFEST.MF is part of the exported files
 		if (fJarPackage.areClassFilesExported() && destinationPath.toString().equals("META-INF/MANIFEST.MF")) {//$NON-NLS-1$
 			if (fJarPackage.isManifestGenerated())
-				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_didNotAddManifestToJar, resource.getFullPath()), null); 
+				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_didNotAddManifestToJar, resource.getFullPath()), null);
 			return;
 		}
 
@@ -452,14 +458,14 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		try {
 			isInClassFolder= pkgRoot != null && !pkgRoot.isArchive() && pkgRoot.getKind() == IPackageFragmentRoot.K_BINARY;
 		} catch (JavaModelException ex) {
-			addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_cantGetRootKind, resource.getFullPath()), ex); 
+			addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_cantGetRootKind, resource.getFullPath()), ex);
 		}
 		if ((fJarPackage.areClassFilesExported() &&
 					((isNonJavaResource || (pkgRoot != null && !isJavaFile(resource) && !isClassFile(resource)))
 					|| isInClassFolder && isClassFile(resource)))
 			|| (fJarPackage.areJavaFilesExported() && (isNonJavaResource || (pkgRoot != null && !isClassFile(resource)) || (isInClassFolder && isClassFile(resource) && !fJarPackage.areClassFilesExported())))) {
 			try {
-				progressMonitor.subTask(Messages.format(JarPackagerMessages.JarFileExportOperation_exporting, destinationPath.toString())); 
+				progressMonitor.subTask(Messages.format(JarPackagerMessages.JarFileExportOperation_exporting, destinationPath.toString()));
 				fJarBuilder.writeFile((IFile)resource, destinationPath);
 			} catch (CoreException ex) {
 				Throwable realEx= ex.getStatus().getException();
@@ -468,7 +474,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				else
 					addToStatus(ex);
 			}
-		}					
+		}
 	}
 
 	private boolean isOutputFolder(IFolder folder) {
@@ -493,7 +499,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				while (iter.hasNext()) {
 					IFile file= (IFile)iter.next();
 					IPath classFilePath= baseDestinationPath.append(file.getName());
-					progressMonitor.subTask(Messages.format(JarPackagerMessages.JarFileExportOperation_exporting, classFilePath.toString())); 
+					progressMonitor.subTask(Messages.format(JarPackagerMessages.JarFileExportOperation_exporting, classFilePath.toString()));
 					fJarBuilder.writeFile(file, classFilePath);
 				}
 			} catch (CoreException ex) {
@@ -533,7 +539,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				if (project.hasNature(JavaCore.NATURE_ID))
 					return JavaCore.create(project);
 			} catch (CoreException ex) {
-				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_projectNatureNotDeterminable, project.getFullPath()), ex); 
+				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_projectNatureNotDeterminable, project.getFullPath()), ex);
 			}
 		}
 		return null;
@@ -591,7 +597,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			else {
 				IFolder outputFolder= createFolderHandle(path);
 				if (outputFolder == null || !outputFolder.isAccessible()) {
-					String msg= JarPackagerMessages.JarFileExportOperation_outputContainerNotAccessible; 
+					String msg= JarPackagerMessages.JarFileExportOperation_outputContainerNotAccessible;
 					addToStatus(new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, msg, null)));
 				} else
 					outputContainers.add(outputFolder);
@@ -608,7 +614,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * @param	pathInJar		the path that the file has in the JAR (i.e. project and source folder segments removed)
 	 * @param	progressMonitor			the progressMonitor to use
 	 * @return	the iterator over the corresponding classpath files for the given file
-	 * @throws CoreException 
+	 * @throws CoreException
 	 */
 	private Iterator filesOnClasspath(ITypeRoot typeRootElement, IPath pathInJar, IProgressMonitor progressMonitor) throws CoreException {
 		IFile file= (IFile) typeRootElement.getResource();
@@ -633,13 +639,13 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			// Use default output location
 			outputPath= javaProject.getOutputLocation();
 				
-		IContainer outputContainer;		
+		IContainer outputContainer;
 		if (javaProject.getProject().getFullPath().equals(outputPath))
 			outputContainer= javaProject.getProject();
 		else {
 			outputContainer= createFolderHandle(outputPath);
 			if (outputContainer == null || !outputContainer.isAccessible()) {
-				String msg= JarPackagerMessages.JarFileExportOperation_outputContainerNotAccessible; 
+				String msg= JarPackagerMessages.JarFileExportOperation_outputContainerNotAccessible;
 				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, msg, null));
 			}
 		}
@@ -671,7 +677,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			if (fJavaNameToClassFilesMap == null) {
 				// Could not fully build map. fallback is to export whole directory
 				String containerName= classContainer.getFullPath().toString();
-				String msg= Messages.format(JarPackagerMessages.JarFileExportOperation_missingSourceFileAttributeExportedAll, containerName); 
+				String msg= Messages.format(JarPackagerMessages.JarFileExportOperation_missingSourceFileAttributeExportedAll, containerName);
 				addInfo(msg, null);
 				fExportedClassContainers.add(classContainer);
 				return getClassesIn(classContainer);
@@ -680,7 +686,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		}
 		ArrayList classFileList= (ArrayList)fJavaNameToClassFilesMap.get(file.getName());
 		if (classFileList == null || classFileList.isEmpty()) {
-			String msg= Messages.format(JarPackagerMessages.JarFileExportOperation_classFileOnClasspathNotAccessible, file.getFullPath()); 
+			String msg= Messages.format(JarPackagerMessages.JarFileExportOperation_classFileOnClasspathNotAccessible, file.getFullPath());
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, msg, null));
 		}
 		return classFileList.iterator();
@@ -700,7 +706,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * The resource must be a file whose file name ends with ".java",
 	 * or an extension defined as Java source.
 	 * 
-	 * @param file the file to test 
+	 * @param file the file to test
 	 * @return a <code>true<code> if the given resource is a Java file
 	 */
 	private boolean isJavaFile(IResource file) {
@@ -761,12 +767,12 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 						if (sourceAttribute == null) {
 							/*
 							 * Can't fully build the map because one or more
-							 * class file does not contain the name of its 
+							 * class file does not contain the name of its
 							 * source file.
 							 */
 							addWarning(Messages.format(
-								JarPackagerMessages.JarFileExportOperation_classFileWithoutSourceFileAttribute, 
-								Resources.getLocationString(classFile)), null); 
+								JarPackagerMessages.JarFileExportOperation_classFileWithoutSourceFileAttribute,
+								Resources.getLocationString(classFile)), null);
 							return null;
 						}
 						String javaName= new String(sourceAttribute.getSourceFileName());
@@ -778,7 +784,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 						((ArrayList)classFiles).add(classFile);
 					}
 				}
-			}		
+			}
 		}
 		return map;
 	}
@@ -810,16 +816,16 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				message= ""; //$NON-NLS-1$
 				break;
 			case IStatus.INFO:
-				message= JarPackagerMessages.JarFileExportOperation_exportFinishedWithInfo; 
+				message= JarPackagerMessages.JarFileExportOperation_exportFinishedWithInfo;
 				break;
 			case IStatus.WARNING:
-				message= JarPackagerMessages.JarFileExportOperation_exportFinishedWithWarnings; 
+				message= JarPackagerMessages.JarFileExportOperation_exportFinishedWithWarnings;
 				break;
 			case IStatus.ERROR:
 				if (fJarPackages.length > 1)
-					message= JarPackagerMessages.JarFileExportOperation_creationOfSomeJARsFailed; 
+					message= JarPackagerMessages.JarFileExportOperation_creationOfSomeJARsFailed;
 				else
-					message= JarPackagerMessages.JarFileExportOperation_jarCreationFailed; 
+					message= JarPackagerMessages.JarFileExportOperation_jarCreationFailed;
 				break;
 			default:
 				// defensive code in case new severity is defined
@@ -839,15 +845,15 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	private void reportPossibleCompileProblems(IFile file, boolean hasErrors, boolean hasWarnings, boolean canBeExported) {
 		if (hasErrors) {
 			if (canBeExported)
-				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_exportedWithCompileErrors, file.getFullPath()), null); 
+				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_exportedWithCompileErrors, file.getFullPath()), null);
 			else
-				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_notExportedDueToCompileErrors, file.getFullPath()), null); 
+				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_notExportedDueToCompileErrors, file.getFullPath()), null);
 		}
 		if (hasWarnings) {
 			if (canBeExported)
-				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_exportedWithCompileWarnings, file.getFullPath()), null); 
+				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_exportedWithCompileWarnings, file.getFullPath()), null);
 			else
-				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_notExportedDueToCompileWarnings, file.getFullPath()), null); 
+				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_notExportedDueToCompileWarnings, file.getFullPath()), null);
 		}
 	}
 
@@ -877,9 +883,9 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	private void singleRun(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
 		try {
 			if (!preconditionsOK())
-				throw new InvocationTargetException(null, JarPackagerMessages.JarFileExportOperation_jarCreationFailedSeeDetails); 
+				throw new InvocationTargetException(null, JarPackagerMessages.JarFileExportOperation_jarCreationFailedSeeDetails);
 			int totalWork= countSelectedElements();
-			if (fJarPackage.areGeneratedFilesExported() 
+			if (fJarPackage.areGeneratedFilesExported()
 				&& ((!isAutoBuilding() && fJarPackage.isBuildingIfNeeded())
 					|| (isAutoBuilding() && fFilesSaved))) {
 				int subMonitorTicks= totalWork/10;
@@ -895,7 +901,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			
 			exportSelectedElements(progressMonitor);
 			if (getStatus().getSeverity() != IStatus.ERROR) {
-				progressMonitor.subTask(JarPackagerMessages.JarFileExportOperation_savingFiles); 
+				progressMonitor.subTask(JarPackagerMessages.JarFileExportOperation_savingFiles);
 				saveFiles();
 			}
 		} catch (CoreException ex) {
@@ -913,28 +919,28 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	
 	private boolean preconditionsOK() {
 		if (!fJarPackage.areGeneratedFilesExported() && !fJarPackage.areJavaFilesExported()) {
-			addError(JarPackagerMessages.JarFileExportOperation_noExportTypeChosen, null); 
+			addError(JarPackagerMessages.JarFileExportOperation_noExportTypeChosen, null);
 			return false;
 		}
 		if (fJarPackage.getElements() == null || fJarPackage.getElements().length == 0) {
-			addError(JarPackagerMessages.JarFileExportOperation_noResourcesSelected, null); 
+			addError(JarPackagerMessages.JarFileExportOperation_noResourcesSelected, null);
 			return false;
 		}
 		if (fJarPackage.getAbsoluteJarLocation() == null) {
-			addError(JarPackagerMessages.JarFileExportOperation_invalidJarLocation, null); 
+			addError(JarPackagerMessages.JarFileExportOperation_invalidJarLocation, null);
 			return false;
 		}
 		File targetFile= fJarPackage.getAbsoluteJarLocation().toFile();
 		if (targetFile.exists() && !targetFile.canWrite()) {
-			addError(JarPackagerMessages.JarFileExportOperation_jarFileExistsAndNotWritable, null); 
+			addError(JarPackagerMessages.JarFileExportOperation_jarFileExistsAndNotWritable, null);
 			return false;
 		}
 		if (!fJarPackage.isManifestAccessible()) {
-			addError(JarPackagerMessages.JarFileExportOperation_manifestDoesNotExist, null); 
+			addError(JarPackagerMessages.JarFileExportOperation_manifestDoesNotExist, null);
 			return false;
 		}
 		if (!fJarPackage.isMainClassValid(new BusyIndicatorRunnableContext())) {
-			addError(JarPackagerMessages.JarFileExportOperation_invalidMainClass, null); 
+			addError(JarPackagerMessages.JarFileExportOperation_invalidMainClass, null);
 			return false;
 		}
 		
@@ -948,7 +954,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				}
 			});
 			if (!res[0]) {
-				addError(JarPackagerMessages.JarFileExportOperation_fileUnsaved, null); 
+				addError(JarPackagerMessages.JarFileExportOperation_fileUnsaved, null);
 				return false;
 			}
 		}
@@ -962,9 +968,9 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			try {
 				saveManifest();
 			} catch (CoreException ex) {
-				addError(JarPackagerMessages.JarFileExportOperation_errorSavingManifest, ex); 
+				addError(JarPackagerMessages.JarFileExportOperation_errorSavingManifest, ex);
 			} catch (IOException ex) {
-				addError(JarPackagerMessages.JarFileExportOperation_errorSavingManifest, ex); 
+				addError(JarPackagerMessages.JarFileExportOperation_errorSavingManifest, ex);
 			}
 		}
 		
@@ -973,9 +979,9 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			try {
 				saveDescription();
 			} catch (CoreException ex) {
-				addError(JarPackagerMessages.JarFileExportOperation_errorSavingDescription, ex); 
+				addError(JarPackagerMessages.JarFileExportOperation_errorSavingDescription, ex);
 			} catch (IOException ex) {
-				addError(JarPackagerMessages.JarFileExportOperation_errorSavingDescription, ex); 
+				addError(JarPackagerMessages.JarFileExportOperation_errorSavingDescription, ex);
 			}
 		}
 	}
@@ -1041,7 +1047,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				try {
 					project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, progressMonitor);
 				} catch (CoreException ex) {
-					String message= Messages.format(JarPackagerMessages.JarFileExportOperation_errorDuringProjectBuild, project.getFullPath()); 
+					String message= Messages.format(JarPackagerMessages.JarFileExportOperation_errorDuringProjectBuild, project.getFullPath());
 					addError(message, ex);
 				} finally {
 					// don't try to build same project a second time even if it failed
