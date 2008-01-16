@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,6 +55,7 @@ public interface IJavaHelpContextIds {
 
 	public static final String TOGGLE_PRESENTATION_ACTION= 								PREFIX + "toggle_presentation_action_context"; //$NON-NLS-1$
 	public static final String TOGGLE_MARK_OCCURRENCES_ACTION= 								PREFIX + "toggle_mark_occurrences_action_context"; //$NON-NLS-1$
+	public static final String TOGGLE_BREADCRUMB_ACTION= PREFIX + "toggle_breadcrumb_action_context"; //$NON-NLS-1$
 	public static final String TOGGLE_TEXTHOVER_ACTION= 									PREFIX + "toggle_texthover_action_context"; //$NON-NLS-1$
 
 	public static final String OPEN_CLASS_WIZARD_ACTION= 									PREFIX + "open_class_wizard_action"; //$NON-NLS-1$

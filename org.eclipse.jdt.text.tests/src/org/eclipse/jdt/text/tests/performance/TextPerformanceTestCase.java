@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,11 +20,12 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.eclipse.core.runtime.Platform;
-
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
-import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 
 /**
  * Superclass of Text performance test cases.
@@ -95,6 +96,8 @@ public class TextPerformanceTestCase extends TestCase {
 		super.setUp();
 		
 		EditorTestHelper.forceFocus();
+		
+		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_SHOW_BREADCRUMB, false);
 		
 		if (DEBUG)
 			System.out.println(getClass().getName() + "." + getName() + ": " + System.currentTimeMillis());
