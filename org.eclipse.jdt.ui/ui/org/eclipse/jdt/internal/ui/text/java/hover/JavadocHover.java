@@ -368,11 +368,11 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 
 		if (buffer.length() > 0) {
 			HTMLPrinter.insertPageProlog(buffer, 0, getStyleSheet());
-			//TODO: base URI only makes sense if URI is hierarchical
-//			if (base != null) {
+			if (base != null) {
+				//TODO: base URI only makes sense if URI is hierarchical
 //				int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
 //				buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
-//			}
+			}
 			HTMLPrinter.addPageEpilog(buffer);
 			return buffer.toString();
 		}
