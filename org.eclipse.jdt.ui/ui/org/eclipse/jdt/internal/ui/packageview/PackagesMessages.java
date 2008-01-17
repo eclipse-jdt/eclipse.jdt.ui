@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Eric Rizzo - Removed unused messages for old Collapse All action
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
@@ -88,9 +89,6 @@ public final class PackagesMessages extends NLS {
 	public static String SelectionTransferDropAdapter_dialog_title;
 	public static String SelectionTransferDropAdapter_dialog_preview_label;
 	public static String SelectionTransferDropAdapter_dialog_question;
-	public static String CollapseAllAction_label;
-	public static String CollapseAllAction_tooltip;
-	public static String CollapseAllAction_description;
 	public static String LayoutActionGroup_label;
 	public static String LayoutActionGroup_flatLayoutAction_label;
 	public static String LayoutActionGroup_hierarchicalLayoutAction_label;
