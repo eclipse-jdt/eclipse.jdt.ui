@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Eric Rizzo - replaced Collaps All action with generic equivalent
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.packageview;
@@ -42,6 +43,7 @@ import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.OpenInNewWindowAction;
+import org.eclipse.ui.handlers.CollapseAllHandler;
 import org.eclipse.ui.handlers.IHandlerService;
 
 import org.eclipse.ui.views.framelist.BackAction;
@@ -74,6 +76,7 @@ import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
 import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
+import org.eclipse.jdt.internal.ui.actions.CollapseAllAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
@@ -106,7 +109,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 
 	private IAction fGotoRequiredProjectAction;
 
-	private ProjectActionGroup fProjectActionGroup;	
+	private ProjectActionGroup fProjectActionGroup;
  	
 	public PackageExplorerActionGroup(PackageExplorerPart part) {
 		super();
@@ -122,15 +125,15 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		IWorkbenchPartSite site = fPart.getSite();
 		setGroups(new ActionGroup[] {
 			new NewWizardsActionGroup(site),
-			fNavigateActionGroup= new NavigateActionGroup(fPart), 
+			fNavigateActionGroup= new NavigateActionGroup(fPart),
 			new CCPActionGroup(fPart),
             new GenerateBuildPathActionGroup(fPart),
-			new GenerateActionGroup(fPart), 
+			new GenerateActionGroup(fPart),
 			fRefactorActionGroup= new RefactorActionGroup(fPart),
 			new ImportActionGroup(fPart),
 			new BuildActionGroup(fPart),
 			new JavaSearchActionGroup(fPart),
-			fProjectActionGroup= new ProjectActionGroup(fPart), 
+			fProjectActionGroup= new ProjectActionGroup(fPart),
 			fViewActionGroup= new ViewActionGroup(fPart.getRootMode(), workingSetListener, site),
 			fCustomFiltersActionGroup= new CustomFiltersActionGroup(fPart, viewer),
 			new LayoutActionGroup(fPart)
@@ -141,7 +144,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		
 		PackagesFrameSource frameSource= new PackagesFrameSource(fPart);
 		fFrameList= new FrameList(frameSource);
-		frameSource.connectTo(fFrameList); 
+		frameSource.connectTo(fFrameList);
 		fZoomInAction= new GoIntoAction(fFrameList);
 		fBackAction= new BackAction(fFrameList);
 		fForwardAction= new ForwardAction(fFrameList);
@@ -156,8 +159,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		fGotoTypeAction= new GotoTypeAction(fPart);
 		fGotoPackageAction= new GotoPackageAction(fPart);
 		fGotoResourceAction= new GotoResourceAction(fPart);
-		fCollapseAllAction= new CollapseAllAction(fPart);	
-		fToggleLinkingAction = new ToggleLinkingAction(fPart); 
+		fCollapseAllAction= new CollapseAllAction(fPart.getTreeViewer());
+		fToggleLinkingAction = new ToggleLinkingAction(fPart);
 		fGotoRequiredProjectAction= new GotoRequiredProjectAction(fPart);
 		fSelectAllAction= new SelectAllAction(fPart.getTreeViewer());
 	}
@@ -185,7 +188,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		super.fillActionBars(actionBars);
 		setGlobalActionHandlers(actionBars);
 		fillToolBar(actionBars.getToolBarManager());
-		fillViewMenu(actionBars.getMenuManager());		
+		fillViewMenu(actionBars.getMenuManager());
 	}
 
 	/* package  */ void updateActionBars(IActionBars actionBars) {
@@ -210,8 +213,10 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		fRefactorActionGroup.retargetFileMenuActions(actionBars);
        
 		IHandlerService service= (IHandlerService) actionBars.getServiceLocator().getService(IHandlerService.class);
-		if (service != null) //XXX: availability not guaranteed, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=212630
+		if (service != null) { //XXX: availability not guaranteed, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=212630
 			service.activateHandler(AbstractToggleLinkingAction.COMMAND_ID, new ActionHandler(fToggleLinkingAction));
+			service.activateHandler(CollapseAllHandler.COMMAND_ID, new ActionHandler(fCollapseAllAction));
+		}
 	}
 
 	/* package */ void fillToolBar(IToolBarManager toolBar) {
@@ -233,17 +238,17 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		menu.add(new Separator());
 		menu.add(fToggleLinkingAction);
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$		
+		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$
 	}
 
 	//---- Context menu -------------------------------------------------------------------------
 
-	public void fillContextMenu(IMenuManager menu) {		
+	public void fillContextMenu(IMenuManager menu) {
 		IStructuredSelection selection= (IStructuredSelection)getContext().getSelection();
 		int size= selection.size();
 		Object element= selection.getFirstElement();
 		
-		if (element instanceof ClassPathContainer.RequiredProjectWrapper) 
+		if (element instanceof ClassPathContainer.RequiredProjectWrapper)
 			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fGotoRequiredProjectAction);
 		
 		addGotoMenu(menu, element, size);
@@ -265,8 +270,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 			return false;
 		if (element instanceof IJavaElement) {
 			int type= ((IJavaElement)element).getElementType();
-			return type == IJavaElement.JAVA_PROJECT || 
-				type == IJavaElement.PACKAGE_FRAGMENT_ROOT || 
+			return type == IJavaElement.JAVA_PROJECT ||
+				type == IJavaElement.PACKAGE_FRAGMENT_ROOT ||
 				type == IJavaElement.PACKAGE_FRAGMENT;
 		}
 		if (element instanceof IWorkingSet) {
@@ -280,14 +285,14 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 			element= ((IJavaElement)element).getResource();
 			
 		}
-		// fix for 64890 Package explorer out of sync when open/closing projects [package explorer] 64890  
-		if (element instanceof IProject && !((IProject)element).isOpen()) 
+		// fix for 64890 Package explorer out of sync when open/closing projects [package explorer] 64890
+		if (element instanceof IProject && !((IProject)element).isOpen())
 			return;
 		
 		if (!(element instanceof IContainer))
 			return;
 		menu.appendToGroup(
-			IContextMenuConstants.GROUP_OPEN, 
+			IContextMenuConstants.GROUP_OPEN,
 			new OpenInNewWindowAction(fPart.getSite().getWorkbenchWindow(), (IContainer)element));
 	}
 
@@ -339,8 +344,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 	}
 	
 	/* package */ void handleKeyEvent(KeyEvent event) {
-		if (event.stateMask != 0) 
-			return;		
+		if (event.stateMask != 0)
+			return;
 		
 		if (event.keyCode == SWT.BS) {
 			if (fUpAction != null && fUpAction.isEnabled()) {
