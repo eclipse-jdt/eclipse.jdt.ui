@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,6 +36,8 @@ public class SelectAllAction extends Action {
 
 	/**
 	 * Creates the action for a TreeViewer
+	 * 
+	 * @param viewer the tree viewer
 	 */
 	public SelectAllAction(TreeViewer viewer) {
 		this((StructuredViewer) viewer);
@@ -43,6 +45,8 @@ public class SelectAllAction extends Action {
 	
 	/**
 	 * Creates the action for a TableViewer
+	 * 
+	 * @param viewer the table viewer
 	 */
 	public SelectAllAction(TableViewer viewer) {
 		this((StructuredViewer) viewer);
@@ -50,8 +54,8 @@ public class SelectAllAction extends Action {
 
 	private SelectAllAction(StructuredViewer viewer) {
 		super("selectAll"); //$NON-NLS-1$
-		setText(ActionMessages.SelectAllAction_label); 
-		setToolTipText(ActionMessages.SelectAllAction_tooltip); 
+		setText(ActionMessages.SelectAllAction_label);
+		setToolTipText(ActionMessages.SelectAllAction_tooltip);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SELECT_ALL_ACTION);
 		Assert.isNotNull(viewer);
 		fViewer= viewer;
