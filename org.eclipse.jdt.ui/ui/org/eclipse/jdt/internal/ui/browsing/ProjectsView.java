@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Eric Rizzo - Added "Collapse All" toolbar action
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.browsing;
 
@@ -17,6 +18,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -26,8 +29,11 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.handlers.CollapseAllHandler;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.IShowInTargetList;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -42,6 +48,7 @@ import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.CollapseAllAction;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.viewsupport.FilterUpdater;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
@@ -49,6 +56,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 public class ProjectsView extends JavaBrowsingPart {
 
 	private FilterUpdater fFilterUpdater;
+	private CollapseAllAction fCollapseAllAction;
+
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createViewer(org.eclipse.swt.widgets.Composite)
@@ -189,6 +198,24 @@ public class ProjectsView extends JavaBrowsingPart {
 	protected void createActions() {
 		super.createActions();
 		fActionGroups.addGroup(new ProjectActionGroup(this));
+		fCollapseAllAction= new CollapseAllAction((TreeViewer) getViewer());
+		fCollapseAllAction.setActionDefinitionId(CollapseAllHandler.COMMAND_ID);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#fillActionBars(org.eclipse.ui.IActionBars)
+	 * @since 3.4
+	 */
+	protected void fillActionBars(IActionBars actionBars) {
+		super.fillActionBars(actionBars);
+		IHandlerService service= (IHandlerService) actionBars.getServiceLocator().getService(IHandlerService.class);
+		if (service != null) //XXX: availability not guaranteed, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=212630
+			service.activateHandler(CollapseAllHandler.COMMAND_ID, new ActionHandler(fCollapseAllAction));
+	}
+	
+	protected void fillToolBar(IToolBarManager tbm) {
+		super.fillToolBar(tbm);
+		tbm.add(fCollapseAllAction);
 	}
 
 	/**
