@@ -30,8 +30,8 @@ public interface IJavaHelpContextIds {
 	public static final String ADD_UNIMPLEMENTED_METHODS_ACTION= 					PREFIX + "add_unimplemented_methods_action_context"; //$NON-NLS-1$
 	/* @since 3.2 */
 	public static final String GENERATE_HASHCODE_EQUALS_ACTION=						PREFIX + "add_hashcode_equals_action_context"; //$NON-NLS-1$
-	public static final String ADD_UNIMPLEMENTED_CONSTRUCTORS_ACTION= 			PREFIX + "add_unimplemented_constructors_action_context"; //$NON-NLS-1$	
-	public static final String CREATE_NEW_CONSTRUCTOR_ACTION= 					PREFIX + "create_new_constructor_action_context"; //$NON-NLS-1$	
+	public static final String ADD_UNIMPLEMENTED_CONSTRUCTORS_ACTION= 			PREFIX + "add_unimplemented_constructors_action_context"; //$NON-NLS-1$
+	public static final String CREATE_NEW_CONSTRUCTOR_ACTION= 					PREFIX + "create_new_constructor_action_context"; //$NON-NLS-1$
 	public static final String SHOW_IN_PACKAGEVIEW_ACTION= 								PREFIX + "show_in_packageview_action_context"; //$NON-NLS-1$
 	public static final String SHOW_IN_HIERARCHYVIEW_ACTION= 							PREFIX + "show_in_hierarchyview_action_context"; //$NON-NLS-1$
 	public static final String FOCUS_ON_SELECTION_ACTION= 								PREFIX + "focus_on_selection_action"; //$NON-NLS-1$
@@ -65,7 +65,7 @@ public interface IJavaHelpContextIds {
 	/** @since 3.2 */
 	public static final String OPEN_ANNOTATION_WIZARD_ACTION= 							PREFIX + "open_annotation_wizard_action"; //$NON-NLS-1$
 
-	public static final String SORT_MEMBERS_ACTION=											PREFIX + "sort_members_action"; //$NON-NLS-1$	
+	public static final String SORT_MEMBERS_ACTION=											PREFIX + "sort_members_action"; //$NON-NLS-1$
 
 	public static final String OPEN_PACKAGE_WIZARD_ACTION= 								PREFIX + "open_package_wizard_action"; //$NON-NLS-1$
 	public static final String OPEN_PROJECT_WIZARD_ACTION= 								PREFIX + "open_project_wizard_action"; //$NON-NLS-1$
@@ -107,36 +107,36 @@ public interface IJavaHelpContextIds {
 	
 	public static final String ADD_JAVADOC_STUB_ACTION= 									PREFIX + "add_javadoc_stub_action"; //$NON-NLS-1$
 	public static final String ADD_TASK_ACTION= 												PREFIX + "add_task_action"; //$NON-NLS-1$
-	public static final String EXTERNALIZE_STRINGS_ACTION= 								PREFIX + "externalize_strings_action"; //$NON-NLS-1$	
-	public static final String EXTRACT_METHOD_ACTION= 										PREFIX + "extract_method_action"; //$NON-NLS-1$	
-	public static final String EXTRACT_TEMP_ACTION= 											PREFIX + "extract_temp_action"; //$NON-NLS-1$	
-	public static final String PROMOTE_TEMP_TO_FIELD_ACTION= 								PREFIX + "promote_temp_to_field_action"; //$NON-NLS-1$	
-	public static final String CONVERT_ANONYMOUS_TO_NESTED_ACTION= 								PREFIX + "convert_anonymous_to_nested_action"; //$NON-NLS-1$	
-	public static final String EXTRACT_CONSTANT_ACTION= 											PREFIX + "extract_constant_action"; //$NON-NLS-1$	
-	public static final String INTRODUCE_PARAMETER_ACTION=								PREFIX + "introduce_parameter_action"; //$NON-NLS-1$	
+	public static final String EXTERNALIZE_STRINGS_ACTION= 								PREFIX + "externalize_strings_action"; //$NON-NLS-1$
+	public static final String EXTRACT_METHOD_ACTION= 										PREFIX + "extract_method_action"; //$NON-NLS-1$
+	public static final String EXTRACT_TEMP_ACTION= 											PREFIX + "extract_temp_action"; //$NON-NLS-1$
+	public static final String PROMOTE_TEMP_TO_FIELD_ACTION= 								PREFIX + "promote_temp_to_field_action"; //$NON-NLS-1$
+	public static final String CONVERT_ANONYMOUS_TO_NESTED_ACTION= 								PREFIX + "convert_anonymous_to_nested_action"; //$NON-NLS-1$
+	public static final String EXTRACT_CONSTANT_ACTION= 											PREFIX + "extract_constant_action"; //$NON-NLS-1$
+	public static final String INTRODUCE_PARAMETER_ACTION=								PREFIX + "introduce_parameter_action"; //$NON-NLS-1$
 	public static final String INTRODUCE_FACTORY_ACTION= 								PREFIX + "introduce_factory_action"; //$NON-NLS-1$
 	/**
 	 * @since 3.2
 	 */
 	public static final String INTRODUCE_INDIRECTION_ACTION= 								PREFIX + "introduce_indirection_action"; //$NON-NLS-1$
 	
-	public static final String EXTRACT_INTERFACE_ACTION= 									PREFIX + "extract_interface_action"; //$NON-NLS-1$	
+	public static final String EXTRACT_INTERFACE_ACTION= 									PREFIX + "extract_interface_action"; //$NON-NLS-1$
 	public static final String CHANGE_TYPE_ACTION= 											PREFIX + "change_type_action"; //$NON-NLS-1$
 	public static final String MOVE_INNER_TO_TOP_ACTION= 									PREFIX + "move_inner_to_top_level_action"; //$NON-NLS-1$
 	public static final String USE_SUPERTYPE_ACTION= 										PREFIX + "use_supertype_action"; //$NON-NLS-1$
-	public static final String FIND_DECLARATIONS_IN_WORKSPACE_ACTION= 						PREFIX + "find_declarations_in_workspace_action"; //$NON-NLS-1$	
-	public static final String FIND_DECLARATIONS_IN_PROJECT_ACTION= 						PREFIX + "find_declarations_in_project_action"; //$NON-NLS-1$	
-	public static final String FIND_DECLARATIONS_IN_HIERARCHY_ACTION= 						PREFIX + "find_declarations_in_hierarchy_action"; //$NON-NLS-1$	
-	public static final String FIND_DECLARATIONS_IN_WORKING_SET_ACTION= 						PREFIX + "find_declarations_in_working_set_action"; //$NON-NLS-1$	
-	public static final String FIND_IMPLEMENTORS_IN_WORKSPACE_ACTION= 						PREFIX + "find_implementors_in_workspace_action"; //$NON-NLS-1$			
-	public static final String FIND_IMPLEMENTORS_IN_PROJECT_ACTION= 						PREFIX + "find_implementors_in_project_action"; //$NON-NLS-1$			
-	public static final String FIND_IMPLEMENTORS_IN_WORKING_SET_ACTION= 						PREFIX + "find_implementors_in_working_set_action"; //$NON-NLS-1$			
-	public static final String FIND_REFERENCES_IN_WORKSPACE_ACTION= 							PREFIX + "find_references_in_workspace_action"; //$NON-NLS-1$			
-	public static final String FIND_REFERENCES_IN_PROJECT_ACTION= 							PREFIX + "find_references_in_project_action"; //$NON-NLS-1$			
-	public static final String FIND_REFERENCES_IN_HIERARCHY_ACTION= 							PREFIX + "find_references_in_hierarchy_action"; //$NON-NLS-1$			
-	public static final String FIND_REFERENCES_IN_WORKING_SET_ACTION= 						PREFIX + "find_references_in_working_set_action"; //$NON-NLS-1$			
-	public static final String FIND_READ_REFERENCES_IN_WORKSPACE_ACTION= 					PREFIX + "find_read_references_in_workspace_action"; //$NON-NLS-1$			
-	public static final String FIND_READ_REFERENCES_IN_PROJECT_ACTION= 					PREFIX + "find_read_references_in_project_action"; //$NON-NLS-1$			
+	public static final String FIND_DECLARATIONS_IN_WORKSPACE_ACTION= 						PREFIX + "find_declarations_in_workspace_action"; //$NON-NLS-1$
+	public static final String FIND_DECLARATIONS_IN_PROJECT_ACTION= 						PREFIX + "find_declarations_in_project_action"; //$NON-NLS-1$
+	public static final String FIND_DECLARATIONS_IN_HIERARCHY_ACTION= 						PREFIX + "find_declarations_in_hierarchy_action"; //$NON-NLS-1$
+	public static final String FIND_DECLARATIONS_IN_WORKING_SET_ACTION= 						PREFIX + "find_declarations_in_working_set_action"; //$NON-NLS-1$
+	public static final String FIND_IMPLEMENTORS_IN_WORKSPACE_ACTION= 						PREFIX + "find_implementors_in_workspace_action"; //$NON-NLS-1$
+	public static final String FIND_IMPLEMENTORS_IN_PROJECT_ACTION= 						PREFIX + "find_implementors_in_project_action"; //$NON-NLS-1$
+	public static final String FIND_IMPLEMENTORS_IN_WORKING_SET_ACTION= 						PREFIX + "find_implementors_in_working_set_action"; //$NON-NLS-1$
+	public static final String FIND_REFERENCES_IN_WORKSPACE_ACTION= 							PREFIX + "find_references_in_workspace_action"; //$NON-NLS-1$
+	public static final String FIND_REFERENCES_IN_PROJECT_ACTION= 							PREFIX + "find_references_in_project_action"; //$NON-NLS-1$
+	public static final String FIND_REFERENCES_IN_HIERARCHY_ACTION= 							PREFIX + "find_references_in_hierarchy_action"; //$NON-NLS-1$
+	public static final String FIND_REFERENCES_IN_WORKING_SET_ACTION= 						PREFIX + "find_references_in_working_set_action"; //$NON-NLS-1$
+	public static final String FIND_READ_REFERENCES_IN_WORKSPACE_ACTION= 					PREFIX + "find_read_references_in_workspace_action"; //$NON-NLS-1$
+	public static final String FIND_READ_REFERENCES_IN_PROJECT_ACTION= 					PREFIX + "find_read_references_in_project_action"; //$NON-NLS-1$
 	public static final String FIND_READ_REFERENCES_IN_HIERARCHY_ACTION= 					PREFIX + "find_read_references_in_hierarchy_action"; //$NON-NLS-1$
 	public static final String FIND_READ_REFERENCES_IN_WORKING_SET_ACTION= 					PREFIX + "find_read_references_in_working_set_action"; //$NON-NLS-1$
 	public static final String FIND_WRITE_REFERENCES_IN_HIERARCHY_ACTION= 					PREFIX + "find_write_references_in_hierarchy_action"; //$NON-NLS-1$
@@ -177,21 +177,21 @@ public interface IJavaHelpContextIds {
 	public static final String RENAME_ACTION= 													PREFIX + "rename_action"; //$NON-NLS-1$
 	public static final String SELF_ENCAPSULATE_ACTION=									PREFIX + "self_encapsulate_action"; //$NON-NLS-1$
 	public static final String SHOW_IN_NAVIGATOR_VIEW_ACTION= 						PREFIX + "show_in_navigator_action"; //$NON-NLS-1$
-	public static final String SURROUND_WITH_TRY_CATCH_ACTION= 						PREFIX + "surround_with_try_catch_action"; //$NON-NLS-1$	
-	public static final String OPEN_RESOURCE_ACTION= 										PREFIX + "open_resource_action"; //$NON-NLS-1$	
-	public static final String SELECT_WORKING_SET_ACTION= 								PREFIX + "select_working_set_action"; //$NON-NLS-1$	
-	public static final String STRUCTURED_SELECTION_HISTORY_ACTION= 				PREFIX + "structured_selection_history_action"; //$NON-NLS-1$	
-	public static final String STRUCTURED_SELECT_ENCLOSING_ACTION= 					PREFIX + "structured_select_enclosing_action"; //$NON-NLS-1$	
-	public static final String STRUCTURED_SELECT_NEXT_ACTION= 							PREFIX + "structured_select_next_action"; //$NON-NLS-1$	
-	public static final String STRUCTURED_SELECT_PREVIOUS_ACTION= 					PREFIX + "structured_select_previous_action"; //$NON-NLS-1$	
-	public static final String TOGGLE_ORIENTATION_ACTION= 								PREFIX + "toggle_orientations_action"; //$NON-NLS-1$		
-	public static final String CUT_ACTION= 															PREFIX + "cut_action"; //$NON-NLS-1$	
-	public static final String COPY_ACTION= 														PREFIX + "copy_action"; //$NON-NLS-1$	
-	public static final String PASTE_ACTION= 														PREFIX + "paste_action"; //$NON-NLS-1$	
-	public static final String DELETE_ACTION= 													PREFIX + "delete_action"; //$NON-NLS-1$	
+	public static final String SURROUND_WITH_TRY_CATCH_ACTION= 						PREFIX + "surround_with_try_catch_action"; //$NON-NLS-1$
+	public static final String OPEN_RESOURCE_ACTION= 										PREFIX + "open_resource_action"; //$NON-NLS-1$
+	public static final String SELECT_WORKING_SET_ACTION= 								PREFIX + "select_working_set_action"; //$NON-NLS-1$
+	public static final String STRUCTURED_SELECTION_HISTORY_ACTION= 				PREFIX + "structured_selection_history_action"; //$NON-NLS-1$
+	public static final String STRUCTURED_SELECT_ENCLOSING_ACTION= 					PREFIX + "structured_select_enclosing_action"; //$NON-NLS-1$
+	public static final String STRUCTURED_SELECT_NEXT_ACTION= 							PREFIX + "structured_select_next_action"; //$NON-NLS-1$
+	public static final String STRUCTURED_SELECT_PREVIOUS_ACTION= 					PREFIX + "structured_select_previous_action"; //$NON-NLS-1$
+	public static final String TOGGLE_ORIENTATION_ACTION= 								PREFIX + "toggle_orientations_action"; //$NON-NLS-1$
+	public static final String CUT_ACTION= 															PREFIX + "cut_action"; //$NON-NLS-1$
+	public static final String COPY_ACTION= 														PREFIX + "copy_action"; //$NON-NLS-1$
+	public static final String PASTE_ACTION= 														PREFIX + "paste_action"; //$NON-NLS-1$
+	public static final String DELETE_ACTION= 													PREFIX + "delete_action"; //$NON-NLS-1$
 	public static final String SELECT_ALL_ACTION= 												PREFIX + "select_all_action"; //$NON-NLS-1$
-	public static final String OPEN_TYPE_HIERARCHY_ACTION= 								PREFIX + "open_type_hierarchy_action"; //$NON-NLS-1$	
-	public static final String COLLAPSE_ALL_ACTION= 								PREFIX + "open_type_hierarchy_action"; //$NON-NLS-1$
+	public static final String OPEN_TYPE_HIERARCHY_ACTION= 								PREFIX + "open_type_hierarchy_action"; //$NON-NLS-1$
+	public static final String COLLAPSE_ALL_ACTION= PREFIX + "collapse_all_action"; //$NON-NLS-1$
 	public static final String GOTO_RESOURCE_ACTION=							PREFIX + "goto_resource_action"; 	 //$NON-NLS-1$
 	public static final String LINK_EDITOR_ACTION=							PREFIX + "link_editor_action"; 	 //$NON-NLS-1$
 	public static final String GO_INTO_TOP_LEVEL_TYPE_ACTION=							PREFIX + "go_into_top_level_type_action"; 	 //$NON-NLS-1$
@@ -200,31 +200,31 @@ public interface IJavaHelpContextIds {
 	public static final String REPLACE_WITH_HISTORY_ACTION=							PREFIX + "replace_with_history_action"; 	 //$NON-NLS-1$
 	public static final String ADD_FROM_HISTORY_ACTION=							PREFIX + "add_from_history_action"; 	 //$NON-NLS-1$
 	public static final String LAYOUT_FLAT_ACTION=							PREFIX + "layout_flat_action"; 	 //$NON-NLS-1$
-	public static final String LAYOUT_HIERARCHICAL_ACTION=							PREFIX + "layout_hierarchical_action"; 	 //$NON-NLS-1$	
+	public static final String LAYOUT_HIERARCHICAL_ACTION=							PREFIX + "layout_hierarchical_action"; 	 //$NON-NLS-1$
 	// *** Don't delete this constants and the doc since it is still used in refactoring
-	public static final String NEXT_CHANGE_ACTION=							PREFIX + "next_change_action"; 	 //$NON-NLS-1$	
+	public static final String NEXT_CHANGE_ACTION=							PREFIX + "next_change_action"; 	 //$NON-NLS-1$
 	public static final String PREVIOUS_CHANGE_ACTION=							PREFIX + "previous_change_action"; 	 //$NON-NLS-1$
-	public static final String NEXT_PROBLEM_ACTION=							PREFIX + "next_problem_action"; 	 //$NON-NLS-1$	
+	public static final String NEXT_PROBLEM_ACTION=							PREFIX + "next_problem_action"; 	 //$NON-NLS-1$
 	public static final String PREVIOUS_PROBLEM_ACTION=							PREFIX + "previous_problem_action"; 	 //$NON-NLS-1$
 	// *** end
-	public static final String JAVA_SELECT_MARKER_RULER_ACTION=							PREFIX + "java_select_marker_ruler_action"; 	 //$NON-NLS-1$	
-	public static final String SHOW_QUALIFIED_NAMES_ACTION=							PREFIX + "show_qualified_names_action"; 	 //$NON-NLS-1$	
-	public static final String SORT_BY_DEFINING_TYPE_ACTION=							PREFIX + "sort_by_defining_type_action"; 	 //$NON-NLS-1$	
-	public static final String FORMAT_ACTION=							PREFIX + "format_action"; 	 //$NON-NLS-1$	
-	public static final String COMMENT_ACTION=							PREFIX + "comment_action"; 	 //$NON-NLS-1$	
-	public static final String UNCOMMENT_ACTION=							PREFIX + "uncomment_action"; 	 //$NON-NLS-1$	
+	public static final String JAVA_SELECT_MARKER_RULER_ACTION=							PREFIX + "java_select_marker_ruler_action"; 	 //$NON-NLS-1$
+	public static final String SHOW_QUALIFIED_NAMES_ACTION=							PREFIX + "show_qualified_names_action"; 	 //$NON-NLS-1$
+	public static final String SORT_BY_DEFINING_TYPE_ACTION=							PREFIX + "sort_by_defining_type_action"; 	 //$NON-NLS-1$
+	public static final String FORMAT_ACTION=							PREFIX + "format_action"; 	 //$NON-NLS-1$
+	public static final String COMMENT_ACTION=							PREFIX + "comment_action"; 	 //$NON-NLS-1$
+	public static final String UNCOMMENT_ACTION=							PREFIX + "uncomment_action"; 	 //$NON-NLS-1$
 	/**
 	 * @since 3.0
 	 */
 	public static final String TOGGLE_COMMENT_ACTION=							PREFIX + "toggle_comment_action"; 	 //$NON-NLS-1$
 	public static final String ADD_BLOCK_COMMENT_ACTION=				PREFIX + "add_block_comment_action"; 	//$NON-NLS-1$
 	public static final String REMOVE_BLOCK_COMMENT_ACTION=				PREFIX + "remove_block_comment_action";	//$NON-NLS-1$
-	public static final String QUICK_FIX_ACTION= 						PREFIX + "quick_fix_action"; 	 //$NON-NLS-1$	
-	public static final String CONTENT_ASSIST_ACTION= 						PREFIX + "content_assist_action"; 	 //$NON-NLS-1$	
-	public static final String PARAMETER_HINTS_ACTION= 						PREFIX + "parameter_hints_action"; 	 //$NON-NLS-1$	
-	public static final String SHOW_OUTLINE_ACTION= 						PREFIX + "show_outline_action"; 	 //$NON-NLS-1$	
-	public static final String OPEN_STRUCTURE_ACTION= 						PREFIX + "open_structure_action"; 	 //$NON-NLS-1$	
-	public static final String OPEN_HIERARCHY_ACTION= 						PREFIX + "open_hierarchy_action"; 	 //$NON-NLS-1$	
+	public static final String QUICK_FIX_ACTION= 						PREFIX + "quick_fix_action"; 	 //$NON-NLS-1$
+	public static final String CONTENT_ASSIST_ACTION= 						PREFIX + "content_assist_action"; 	 //$NON-NLS-1$
+	public static final String PARAMETER_HINTS_ACTION= 						PREFIX + "parameter_hints_action"; 	 //$NON-NLS-1$
+	public static final String SHOW_OUTLINE_ACTION= 						PREFIX + "show_outline_action"; 	 //$NON-NLS-1$
+	public static final String OPEN_STRUCTURE_ACTION= 						PREFIX + "open_structure_action"; 	 //$NON-NLS-1$
+	public static final String OPEN_HIERARCHY_ACTION= 						PREFIX + "open_hierarchy_action"; 	 //$NON-NLS-1$
 	public static final String TOGGLE_SMART_TYPING_ACTION= 					PREFIX + "toggle_smart_typing_action"; //$NON-NLS-1$
 	public static final String INDENT_ACTION= 								PREFIX + "indent_action"; //$NON-NLS-1$
 
@@ -250,17 +250,17 @@ public interface IJavaHelpContextIds {
 	public static final String ADD_UNIMPLEMENTED_CONSTRUCTORS_DIALOG= PREFIX + "add_unimplemented_constructors_dialog_context"; //$NON-NLS-1$
 	
 	public static final String MOVE_DESTINATION_DIALOG= PREFIX + "move_destination_dialog_context"; //$NON-NLS-1$
-	public static final String CHOOSE_VARIABLE_DIALOG= PREFIX + "choose_variable_dialog_context"; //$NON-NLS-1$	
-	public static final String EDIT_TEMPLATE_DIALOG= PREFIX + "edit_template_dialog_context"; //$NON-NLS-1$	
-	public static final String HISTORY_LIST_DIALOG= PREFIX + "history_list_dialog_context"; //$NON-NLS-1$	
+	public static final String CHOOSE_VARIABLE_DIALOG= PREFIX + "choose_variable_dialog_context"; //$NON-NLS-1$
+	public static final String EDIT_TEMPLATE_DIALOG= PREFIX + "edit_template_dialog_context"; //$NON-NLS-1$
+	public static final String HISTORY_LIST_DIALOG= PREFIX + "history_list_dialog_context"; //$NON-NLS-1$
 	public static final String IMPORT_ORGANIZE_INPUT_DIALOG= PREFIX + "import_organize_input_dialog_context"; //$NON-NLS-1$
 	public static final String TODO_TASK_INPUT_DIALOG= PREFIX + "todo_task_input_dialog_context"; //$NON-NLS-1$
-	public static final String JAVADOC_PROPERTY_DIALOG= PREFIX + "javadoc_property_dialog_context"; //$NON-NLS-1$	
-	public static final String NEW_CONTAINER_DIALOG= PREFIX + "new_container_dialog_context"; //$NON-NLS-1$	
+	public static final String JAVADOC_PROPERTY_DIALOG= PREFIX + "javadoc_property_dialog_context"; //$NON-NLS-1$
+	public static final String NEW_CONTAINER_DIALOG= PREFIX + "new_container_dialog_context"; //$NON-NLS-1$
 	public static final String EXCLUSION_PATTERN_DIALOG= PREFIX + "exclusion_pattern_dialog_context"; //$NON-NLS-1$
 	public static final String ACCESS_RULES_DIALOG= PREFIX + "access_rules_dialog_context"; //$NON-NLS-1$
 	public static final String OUTPUT_LOCATION_DIALOG= PREFIX + "output_location_dialog_context"; //$NON-NLS-1$
-	public static final String VARIABLE_CREATION_DIALOG= PREFIX + "variable_creation_dialog_context"; //$NON-NLS-1$	
+	public static final String VARIABLE_CREATION_DIALOG= PREFIX + "variable_creation_dialog_context"; //$NON-NLS-1$
 	public static final String JAVA_SEARCH_PAGE= PREFIX + "java_search_page_context"; //$NON-NLS-1$
 	public static final String NLS_SEARCH_PAGE= PREFIX + "nls_search_page_context"; //$NON-NLS-1$
 	public static final String JAVA_EDITOR= PREFIX + "java_editor_context"; //$NON-NLS-1$
@@ -355,7 +355,7 @@ public interface IJavaHelpContextIds {
 	public static final String JAVADOC_COMMAND_PAGE= PREFIX + "javadoc_command_page_context"; //$NON-NLS-1$
 
 	// Same help for all refactoring error pages. Indidivual help can
-	// be provided per a single refactoring status.	
+	// be provided per a single refactoring status.
 	// *** Don't delete this constants and the doc since it is still used in refactoring
 	public static final String REFACTORING_ERROR_WIZARD_PAGE=	PREFIX + "refactoring_error_wizard_page_context";  //$NON-NLS-1$
 	// same help for all refactoring preview pages
