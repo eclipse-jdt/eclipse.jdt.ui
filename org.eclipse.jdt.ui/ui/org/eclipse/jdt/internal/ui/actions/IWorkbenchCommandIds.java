@@ -18,19 +18,20 @@ package org.eclipse.jdt.internal.ui.actions;
  * XXX: Remove this interface once Platform/UI manages to provide this API.
  * 
  * @see org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds
+ * @sicen 3.4
  */
 public interface IWorkbenchCommandIds {
 	
-	public static final String LINK_WITH_EDITOR= "org.eclipse.ui.navigate.linkWithEditor"; //$NON-NLS-1$ 
+	public static final String LINK_WITH_EDITOR= "org.eclipse.ui.navigate.linkWithEditor"; //$NON-NLS-1$
 	
 
-//	public static final String COLLAPSE_ALL= CollapseAllHandler.COMMAND_ID; 
+//	public static final String COLLAPSE_ALL= CollapseAllHandler.COMMAND_ID;
 	
 	public static final String SHOW_VIEW_MENU= "org.eclipse.ui.window.showViewMenu"; //$NON-NLS-1$
 	
 	public static final String SHOW_IN_QUICK_MENU= "org.eclipse.ui.navigate.showInQuickMenu"; //$NON-NLS-1$
 	
-	public static final String REFRESH= "org.eclipse.ui.file.refresh"; //$NON-NLS-1$ 
+	public static final String REFRESH= "org.eclipse.ui.file.refresh"; //$NON-NLS-1$
 
 
 	public static final String BUILD_PROJECT= "org.eclipse.ui.project.buildProject"; //$NON-NLS-1$
