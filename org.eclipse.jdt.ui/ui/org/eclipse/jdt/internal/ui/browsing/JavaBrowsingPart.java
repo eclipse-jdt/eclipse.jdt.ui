@@ -371,8 +371,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		getViewSite().getPage().addPostSelectionListener(this);
 		getViewSite().getPage().addPartListener(fPartListener);
 
-		fillActionBars(getViewSite().getActionBars());
 		activateHandlers((IHandlerService) getViewSite().getService(IHandlerService.class));
+		fillActionBars(getViewSite().getActionBars());
 		
 		setHelp();
 	}
@@ -1017,7 +1017,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	/**
 	 * Compute if a new input must be set.
 	 * 
-	 * @param elementToSelect the element to select 
+	 * @param elementToSelect the element to select
 	 * @param oldInput old input
 	 * @param newInput new input
 	 * @return	<code>true</code> if the input has to be set
