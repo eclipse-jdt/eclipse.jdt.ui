@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchSite;
@@ -67,6 +68,21 @@ public class ReferencesSearchGroup extends ActionGroup  {
 	 * @param site the view part that owns this action group
 	 */
 	public ReferencesSearchGroup(IWorkbenchSite site) {
+		this(site, null);
+	}
+
+	/**
+	 * Creates a new <code>ReferencesSearchGroup</code>. The group requires
+	 * that the selection provided by the given selection provider is of type 
+	 * {@link IStructuredSelection}.
+	 * 
+	 * @param site the site that will own the action group.
+	 * @param specialSelectionProvider the selection provider used instead of the
+	 *  sites selection provider.
+	 *  
+	 * @since 3.4
+	 */
+	public ReferencesSearchGroup(IWorkbenchSite site, ISelectionProvider specialSelectionProvider) {
 		fSite= site;
 		fGroupId= IContextMenuConstants.GROUP_SEARCH;
 
@@ -75,22 +91,21 @@ public class ReferencesSearchGroup extends ActionGroup  {
 
 		fFindReferencesInProjectAction= new FindReferencesInProjectAction(site);
 		fFindReferencesInProjectAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_PROJECT);
-		
+
 		fFindReferencesInHierarchyAction= new FindReferencesInHierarchyAction(site);
 		fFindReferencesInHierarchyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_HIERARCHY);
-		
+
 		fFindReferencesInWorkingSetAction= new FindReferencesInWorkingSetAction(site);
 		fFindReferencesInWorkingSetAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_WORKING_SET);
 
 		// register the actions as selection listeners
-		ISelectionProvider provider= fSite.getSelectionProvider();
+		ISelectionProvider provider= specialSelectionProvider == null ? fSite.getSelectionProvider() : specialSelectionProvider;
 		ISelection selection= provider.getSelection();
-		registerAction(fFindReferencesAction, provider, selection);
-		registerAction(fFindReferencesInProjectAction, provider, selection);
-		registerAction(fFindReferencesInHierarchyAction, provider, selection);
-		registerAction(fFindReferencesInWorkingSetAction, provider, selection);
+		registerAction(fFindReferencesAction, provider, selection, specialSelectionProvider);
+		registerAction(fFindReferencesInProjectAction, provider, selection, specialSelectionProvider);
+		registerAction(fFindReferencesInHierarchyAction, provider, selection, specialSelectionProvider);
+		registerAction(fFindReferencesInWorkingSetAction, provider, selection, specialSelectionProvider);
 	}
-
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
@@ -119,9 +134,11 @@ public class ReferencesSearchGroup extends ActionGroup  {
 		fEditor.setAction("SearchReferencesInWorkingSet", fFindReferencesInWorkingSetAction); //$NON-NLS-1$
 	}
 
-	private void registerAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection) {
+	private void registerAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection, ISelectionProvider specialSelectionProvider) {
 		action.update(selection);
 		provider.addSelectionChangedListener(action);
+		if (specialSelectionProvider != null)
+			action.setSpecialSelectionProvider(specialSelectionProvider);
 	}
 
 	/**

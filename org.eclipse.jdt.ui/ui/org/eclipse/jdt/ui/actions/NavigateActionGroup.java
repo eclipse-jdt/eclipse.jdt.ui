@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,12 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 
@@ -44,6 +47,22 @@ public class NavigateActionGroup extends ActionGroup {
 	public NavigateActionGroup(IViewPart  part) {
 		fOpenEditorActionGroup= new OpenEditorActionGroup(part);
 		fOpenViewActionGroup= new OpenViewActionGroup(part);
+	}
+
+	/**
+	 * Creates a new <code>NavigateActionGroup</code>. The group requires
+	 * that the selection provided by the given selection provider is of type 
+	 * {@link IStructuredSelection}.
+	 * 
+	 * @param site the site that will own the action group.
+	 * @param specialSelectionProvider the selection provider used instead of the
+	 *  sites selection provider.
+	 *  
+	 * @since 3.4
+	 */
+	public NavigateActionGroup(IWorkbenchPartSite site, ISelectionProvider specialSelectionProvider) {
+		fOpenEditorActionGroup= new OpenEditorActionGroup(site, specialSelectionProvider);
+		fOpenViewActionGroup= new OpenViewActionGroup(site, specialSelectionProvider);
 	}
 
 	/**

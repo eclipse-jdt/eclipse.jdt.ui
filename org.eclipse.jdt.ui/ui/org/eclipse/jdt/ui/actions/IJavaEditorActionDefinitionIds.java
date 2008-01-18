@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -689,6 +689,20 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * @since 3.0
 	 */
 	public static final String TOGGLE_MARK_OCCURRENCES= "org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"; //$NON-NLS-1$
+	
+	/**
+	 * Action definition id of toggle breadcrumb action
+	 * (value: <code>"org.eclipse.jdt.ui.edit.text.java.toggleBreadcrumb"</code>).
+	 * @since 3.4
+	 */
+	public static final String TOGGLE_BREADCRUMB= "org.eclipse.jdt.ui.edit.text.java.toggleBreadcrumb"; //$NON-NLS-1$
+	
+	/**
+	 * Action definition id of show in breadcrumb action
+	 * (value: <code>"org.eclipse.jdt.ui.edit.text.java.gotoBreadcrumb"</code>).
+	 * @since 3.4
+	 */
+	public static final String SHOW_IN_BREADCRUMB= "org.eclipse.jdt.ui.edit.text.java.gotoBreadcrumb"; //$NON-NLS-1$
 
 	/**
 	 * Action definition id of the collapse members action

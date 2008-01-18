@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchSite;
@@ -66,6 +67,21 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 	 * @param site the view part that owns this action group
 	 */
 	public ImplementorsSearchGroup(IWorkbenchSite site) {
+		this(site, null);
+	}
+
+	/**
+	 * Creates a new <code>ImplementorsSearchGroup</code>. The group requires
+	 * that the selection provided by the given selection provider is of type 
+	 * {@link IStructuredSelection}.
+	 * 
+	 * @param site the site that will own the action group.
+	 * @param specialSelectionProvider the selection provider used instead of the
+	 *  sites selection provider.
+	 *  
+	 * @since 3.4
+	 */
+	public ImplementorsSearchGroup(IWorkbenchSite site, ISelectionProvider specialSelectionProvider) {
 		fSite= site;
 		fGroupId= IContextMenuConstants.GROUP_SEARCH;
 
@@ -79,11 +95,11 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 		fFindImplementorsInWorkingSetAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_IMPLEMENTORS_IN_WORKING_SET);
 
 		// register the actions as selection listeners
-		ISelectionProvider provider= fSite.getSelectionProvider();
+		ISelectionProvider provider= specialSelectionProvider == null ? fSite.getSelectionProvider() : specialSelectionProvider;
 		ISelection selection= provider.getSelection();
-		registerAction(fFindImplementorsAction, provider, selection);
-		registerAction(fFindImplementorsInProjectAction, provider, selection);
-		registerAction(fFindImplementorsInWorkingSetAction, provider, selection);
+		registerAction(fFindImplementorsAction, provider, selection, specialSelectionProvider);
+		registerAction(fFindImplementorsInProjectAction, provider, selection, specialSelectionProvider);
+		registerAction(fFindImplementorsInWorkingSetAction, provider, selection, specialSelectionProvider);
 	}
 
 	/**
@@ -108,9 +124,11 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 		fEditor.setAction("SearchImplementorsInWorkingSet", fFindImplementorsInWorkingSetAction); //$NON-NLS-1$
 	}
 
-	private void registerAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection){
+	private void registerAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection, ISelectionProvider specialSelectionProvider) {
 		action.update(selection);
 		provider.addSelectionChangedListener(action);
+		if (specialSelectionProvider != null)
+			action.setSpecialSelectionProvider(specialSelectionProvider);
 	}
 	
 	private void addAction(IAction action, IMenuManager manager) {

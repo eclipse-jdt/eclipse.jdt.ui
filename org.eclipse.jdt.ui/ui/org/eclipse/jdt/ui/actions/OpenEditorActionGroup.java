@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.core.runtime.IAdaptable;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -23,6 +24,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.OpenWithMenu;
@@ -47,6 +49,7 @@ public class OpenEditorActionGroup extends ActionGroup {
 	private IWorkbenchSite fSite;
 	private boolean fIsEditorOwner;
 	private OpenAction fOpen;
+	private ISelectionProvider fSelectionProvider;
 
 	/**
 	 * Creates a new <code>OpenActionGroup</code>. The group requires
@@ -56,10 +59,28 @@ public class OpenEditorActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public OpenEditorActionGroup(IViewPart part) {
-		fSite= part.getSite();
+		this(part.getSite(), null);
+	}
+
+	/**
+	 * Creates a new <code>OpenEditorActionGroup</code>. The group requires
+	 * that the selection provided by the given selection provider is of type 
+	 * {@link IStructuredSelection}.
+	 * 
+	 * @param site the site that will own the action group.
+	 * @param specialSelectionProvider the selection provider used instead of the
+	 *  sites selection provider.
+	 *  
+	 * @since 3.4
+	 */
+	public OpenEditorActionGroup(IWorkbenchPartSite site, ISelectionProvider specialSelectionProvider) {
+		fSite= site;
 		fOpen= new OpenAction(fSite);
 		fOpen.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EDITOR);
-		initialize(fSite.getSelectionProvider());
+		fSelectionProvider= specialSelectionProvider == null ? fSite.getSelectionProvider() : specialSelectionProvider;
+		initialize();
+		if (specialSelectionProvider != null)
+			fOpen.setSpecialSelectionProvider(specialSelectionProvider);
 	}
 	
 	/**
@@ -72,7 +93,8 @@ public class OpenEditorActionGroup extends ActionGroup {
 		fOpen.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EDITOR);
 		editor.setAction("OpenEditor", fOpen); //$NON-NLS-1$
 		fSite= editor.getEditorSite();
-		initialize(fSite.getSelectionProvider());
+		fSelectionProvider= fSite.getSelectionProvider();
+		initialize();
 	}
 
 	/**
@@ -85,11 +107,11 @@ public class OpenEditorActionGroup extends ActionGroup {
 		return fOpen;
 	}
 
-	private void initialize(ISelectionProvider provider) {
-		ISelection selection= provider.getSelection();
+	private void initialize() {
+		ISelection selection= fSelectionProvider.getSelection();
 		fOpen.update(selection);
 		if (!fIsEditorOwner) {
-			provider.addSelectionChangedListener(fOpen);
+			fSelectionProvider.addSelectionChangedListener(fOpen);
 		}
 	}
 
@@ -116,8 +138,7 @@ public class OpenEditorActionGroup extends ActionGroup {
 	 * @see ActionGroup#dispose()
 	 */
 	public void dispose() {
-		ISelectionProvider provider= fSite.getSelectionProvider();
-		provider.removeSelectionChangedListener(fOpen);
+		fSelectionProvider.removeSelectionChangedListener(fOpen);
 		super.dispose();
 	}
 	

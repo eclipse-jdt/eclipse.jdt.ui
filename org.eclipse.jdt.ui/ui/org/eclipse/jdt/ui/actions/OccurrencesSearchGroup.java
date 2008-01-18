@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
@@ -72,6 +73,21 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 	 * @param site the view part that owns this action group
 	 */
 	public OccurrencesSearchGroup(IWorkbenchSite site) {
+		this(site, null);
+	}
+
+	/**
+	 * Creates a new <code>OccurrencesSearchGroup</code>. The group requires
+	 * that the selection provided by the given selection provider is of type 
+	 * {@link IStructuredSelection}.
+	 * 
+	 * @param site the site that will own the action group.
+	 * @param specialSelectionProvider the selection provider used instead of the
+	 *  sites selection provider.
+	 *  
+	 * @since 3.4
+	 */
+	public OccurrencesSearchGroup(IWorkbenchSite site, ISelectionProvider specialSelectionProvider) {
 		fSite= site;
 		fGroupId= IContextMenuConstants.GROUP_SEARCH;
 		
@@ -94,13 +110,13 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 
 		
 		// register the actions as selection listeners
-		ISelectionProvider provider= fSite.getSelectionProvider();
+		ISelectionProvider provider= specialSelectionProvider == null ? fSite.getSelectionProvider() : specialSelectionProvider;
 		ISelection selection= provider.getSelection();
-		registerAction(fOccurrencesInFileAction, provider, selection);
-		registerAction(fExceptionOccurrencesAction, provider, selection);
-		registerAction(fFindImplementorOccurrencesAction, provider, selection);
-		registerAction(fBreakContinueTargetOccurrencesAction, provider, selection);
-		registerAction(fMethodExitOccurrencesAction, provider, selection);
+		registerAction(fOccurrencesInFileAction, provider, selection, specialSelectionProvider);
+		registerAction(fExceptionOccurrencesAction, provider, selection, specialSelectionProvider);
+		registerAction(fFindImplementorOccurrencesAction, provider, selection, specialSelectionProvider);
+		registerAction(fBreakContinueTargetOccurrencesAction, provider, selection, specialSelectionProvider);
+		registerAction(fMethodExitOccurrencesAction, provider, selection, specialSelectionProvider);
 	}
 
 	/**
@@ -144,9 +160,11 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 //		registerAction(fFindImplementorOccurrencesAction, provider, selection);
 	}
 
-	private void registerAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection){
+	private void registerAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection, ISelectionProvider specialSelectionProvider) {
 		action.update(selection);
 		provider.addSelectionChangedListener(action);
+		if (specialSelectionProvider != null)
+			action.setSpecialSelectionProvider(specialSelectionProvider);
 	}
 
 	/* 

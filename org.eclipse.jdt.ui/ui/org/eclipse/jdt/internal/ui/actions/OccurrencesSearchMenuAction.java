@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -161,14 +161,15 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 		
 		IWorkbenchPart activePart= JavaPlugin.getActivePage().getActivePart();
 		if (activePart instanceof JavaEditor) {
-			editor= (JavaEditor) activePart;
-			ITypeRoot element= SelectionConverter.getInput(editor);
-			if (element == null)
+			selection= getEditorSelection((JavaEditor) activePart);
+			if (selection == null)
 				return;
-			
-			ITextSelection textSelection= (ITextSelection) editor.getSelectionProvider().getSelection();
-			IDocument document= JavaUI.getDocumentProvider().getDocument(editor.getEditorInput());
-			selection= new JavaTextSelection(element, document, textSelection.getOffset(), textSelection.getLength());
+
+			if (selection instanceof ITextSelection) {
+				editor= (JavaEditor) activePart;
+			} else {
+				editor= null;
+			}
 		} else {
 			editor= null;
 			selection= activePart.getSite().getSelectionProvider().getSelection();
@@ -201,14 +202,9 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 		if (!(activePart instanceof JavaEditor))
 			return;
 
-		JavaEditor editor= (JavaEditor) activePart;
-		ITypeRoot element= SelectionConverter.getInput(editor);
-		if (element == null)
+		ISelection javaSelection= getEditorSelection((JavaEditor) activePart);
+		if (javaSelection == null)
 			return;
-
-		ITextSelection textSelection= (ITextSelection) editor.getSelectionProvider().getSelection();
-		IDocument document= JavaUI.getDocumentProvider().getDocument(editor.getEditorInput());
-		JavaTextSelection javaSelection= new JavaTextSelection(element, document, textSelection.getOffset(), textSelection.getLength());
 
 		for (int i= 0; i < fRetargetActions.length; i++) {
 			RetargetAction action= fRetargetActions[i];
@@ -217,7 +213,20 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 				((SelectionDispatchAction) actionHandler).update(javaSelection);
 			}
 		}
+	}
+	
+	private ISelection getEditorSelection(JavaEditor editor) {
+		ITypeRoot element= SelectionConverter.getInput(editor);
+		if (element == null)
+			return null;
 
+		if (editor.hasBreadcrumbFocus())
+			return editor.getBreadcrumb().getSelectionProvider().getSelection();
+		else {
+			ITextSelection textSelection= (ITextSelection) editor.getSelectionProvider().getSelection();
+			IDocument document= JavaUI.getDocumentProvider().getDocument(editor.getEditorInput());
+			return new JavaTextSelection(element, document, textSelection.getOffset(), textSelection.getLength());
+		}
 	}
 	
 	

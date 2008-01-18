@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -110,6 +111,18 @@ public class MoveAction extends SelectionDispatchAction{
 		fMoveInstanceMethodAction.selectionChanged(event);
 		fReorgMoveAction.selectionChanged(event);
 		setEnabled(computeEnableState());	
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#setSpecialSelectionProvider(org.eclipse.jface.viewers.ISelectionProvider)
+	 * @since 3.4
+	 */
+	public void setSpecialSelectionProvider(ISelectionProvider provider) {
+		super.setSpecialSelectionProvider(provider);
+		
+		fMoveInstanceMethodAction.setSpecialSelectionProvider(provider);
+		fMoveStaticMembersAction.setSpecialSelectionProvider(provider);
+		fReorgMoveAction.setSpecialSelectionProvider(provider);
 	}
 
 	/*
