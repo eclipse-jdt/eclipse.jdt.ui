@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -133,7 +133,7 @@ public class GenerateActionGroup extends ActionGroup {
 	private AddBookmarkAction fAddBookmark;
 	private AddTaskAction fAddTaskAction;
 	private ExternalizeStringsAction fExternalizeStrings;
-	private AllCleanUpsAction fCleanUp;	
+	private AllCleanUpsAction fCleanUp;
 	private FindBrokenNLSKeysAction fFindNLSProblems;
 	
 	private OrganizeImportsAction fOrganizeImports;
@@ -144,7 +144,7 @@ public class GenerateActionGroup extends ActionGroup {
 	
 	private class SourceQuickAccessAction extends JDTQuickMenuAction {
 		public SourceQuickAccessAction(CompilationUnitEditor editor) {
-			super(editor, QUICK_MENU_ID); 
+			super(editor, QUICK_MENU_ID);
 		}
 		protected void fillMenu(IMenuManager menu) {
 			fillQuickMenu(menu);
@@ -155,6 +155,8 @@ public class GenerateActionGroup extends ActionGroup {
 	private IHandlerActivation fQuickAccessHandlerActivation;
 	private IHandlerService fHandlerService;
 
+	private final ISelectionProvider fSelectionProvider;
+
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the compilation unit editor
@@ -162,6 +164,7 @@ public class GenerateActionGroup extends ActionGroup {
 	 */
 	public GenerateActionGroup(CompilationUnitEditor editor, String groupName) {
 		fSite= editor.getSite();
+		fSelectionProvider= fSite.getSelectionProvider();
 		fEditor= editor;
 		fGroupName= groupName;
 				
@@ -192,11 +195,11 @@ public class GenerateActionGroup extends ActionGroup {
 			
 		fAddUnimplementedConstructors= new AddUnimplementedConstructorsAction(editor);
 		fAddUnimplementedConstructors.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_UNIMPLEMENTED_CONTRUCTORS);
-		editor.setAction("AddUnimplementedConstructors", fAddUnimplementedConstructors); //$NON-NLS-1$		
+		editor.setAction("AddUnimplementedConstructors", fAddUnimplementedConstructors); //$NON-NLS-1$
 
 		fGenerateConstructorUsingFields= new GenerateNewConstructorUsingFieldsAction(editor);
 		fGenerateConstructorUsingFields.setActionDefinitionId(IJavaEditorActionDefinitionIds.GENERATE_CONSTRUCTOR_USING_FIELDS);
-		editor.setAction("GenerateConstructorUsingFields", fGenerateConstructorUsingFields); //$NON-NLS-1$		
+		editor.setAction("GenerateConstructorUsingFields", fGenerateConstructorUsingFields); //$NON-NLS-1$
 
 		fHashCodeEquals= new GenerateHashCodeEqualsAction(editor);
 		fHashCodeEquals.setActionDefinitionId(IJavaEditorActionDefinitionIds.GENERATE_HASHCODE_EQUALS);
@@ -212,37 +215,52 @@ public class GenerateActionGroup extends ActionGroup {
 		
 		fExternalizeStrings= new ExternalizeStringsAction(editor);
 		fExternalizeStrings.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTERNALIZE_STRINGS);
-		editor.setAction("ExternalizeStrings", fExternalizeStrings); //$NON-NLS-1$	
+		editor.setAction("ExternalizeStrings", fExternalizeStrings); //$NON-NLS-1$
 				
 		installQuickAccessAction();
 	}
 	
 	/**
-	 * Creates a new <code>GenerateActionGroup</code>. The group 
-	 * requires that the selection provided by the page's selection provider 
+	 * Creates a new <code>GenerateActionGroup</code>. The group
+	 * requires that the selection provided by the page's selection provider
 	 * is of type <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param page the page that owns this action group
 	 */
 	public GenerateActionGroup(Page page) {
-		this(page.getSite());
+		this(page.getSite(), null);
+		
+		installQuickAccessAction();
 	}
 
 	/**
-	 * Creates a new <code>GenerateActionGroup</code>. The group 
-	 * requires that the selection provided by the part's selection provider 
+	 * Creates a new <code>GenerateActionGroup</code>. The group
+	 * requires that the selection provided by the part's selection provider
 	 * is of type <code>org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param part the view part that owns this action group
 	 */
 	public GenerateActionGroup(IViewPart part) {
-		this(part.getSite());
+		this(part.getSite(), null);
+		
+		installQuickAccessAction();
 	}
 	
-	private GenerateActionGroup(IWorkbenchSite site) {
+	/**
+	 * Creates a new <code>GenerateActionGroup</code>. The group requires
+	 * that the selection provided by the given selection provider is of type
+	 * {@link IStructuredSelection}.
+	 * 
+	 * @param site the site that will own the action group.
+	 * @param selectionProvider the selection provider used instead of the
+	 *  page selection provider.
+	 * 
+	 * @since 3.4
+	 */
+	public GenerateActionGroup(IWorkbenchSite site, ISelectionProvider selectionProvider) {
 		fSite= site;
-		ISelectionProvider provider= fSite.getSelectionProvider();
-		ISelection selection= provider.getSelection();
+		fSelectionProvider= selectionProvider == null ? fSite.getSelectionProvider() : selectionProvider;
+		ISelection selection= fSelectionProvider.getSelection();
 		
 		fOverrideMethods= new OverrideMethodsAction(site);
 		fOverrideMethods.setActionDefinitionId(IJavaEditorActionDefinitionIds.OVERRIDE_METHODS);
@@ -295,7 +313,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fOverrideMethods.update(selection);
 		fAddGetterSetter.update(selection);
 		fAddDelegateMethods.update(selection);
-		fAddUnimplementedConstructors.update(selection);	
+		fAddUnimplementedConstructors.update(selection);
 		fGenerateConstructorUsingFields.update(selection);
 		fHashCodeEquals.update(selection);
 		fAddJavaDocStub.update(selection);
@@ -313,23 +331,34 @@ public class GenerateActionGroup extends ActionGroup {
 			fAddBookmark.setEnabled(false);
 		}
 		
-		registerSelectionListener(provider, fOverrideMethods);
-		registerSelectionListener(provider, fAddGetterSetter);
-		registerSelectionListener(provider, fAddDelegateMethods);
-		registerSelectionListener(provider, fAddUnimplementedConstructors);
-		registerSelectionListener(provider, fGenerateConstructorUsingFields);
-		registerSelectionListener(provider, fHashCodeEquals);
-		registerSelectionListener(provider, fAddJavaDocStub);
-		registerSelectionListener(provider, fAddBookmark);
-		registerSelectionListener(provider, fExternalizeStrings);
-		registerSelectionListener(provider, fFindNLSProblems);
-		registerSelectionListener(provider, fOrganizeImports);
-		registerSelectionListener(provider, fFormatAll);
-		registerSelectionListener(provider, fSortMembers);
-		registerSelectionListener(provider, fAddTaskAction);
-		registerSelectionListener(provider, fCleanUp);
+		registerSelectionListener(fSelectionProvider, fAddBookmark);
+		SelectionDispatchAction[] actions= new SelectionDispatchAction[] {
+				fOverrideMethods,
+				fAddGetterSetter,
+				fAddDelegateMethods,
+				fAddUnimplementedConstructors,
+				fGenerateConstructorUsingFields,
+				fHashCodeEquals,
+				fAddJavaDocStub,
+				fExternalizeStrings,
+				fFindNLSProblems,
+				fOrganizeImports,
+				fFormatAll,
+				fSortMembers,
+				fAddTaskAction,
+				fCleanUp
+		};
 		
-		installQuickAccessAction();
+		for (int i= 0; i < actions.length; i++) {
+			SelectionDispatchAction action= actions[i];
+			registerSelectionListener(fSelectionProvider, action);
+			if (selectionProvider != null) {
+				action.setSpecialSelectionProvider(fSelectionProvider);
+			}
+		}
+		
+		// FIXME, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=213335
+		//installQuickAccessAction();
 	}
 	
 	private void installQuickAccessAction() {
@@ -348,7 +377,7 @@ public class GenerateActionGroup extends ActionGroup {
 	}
 	
 	/*
-	 * The state of the editor owning this action group has changed. 
+	 * The state of the editor owning this action group has changed.
 	 * This method does nothing if the group's owner isn't an
 	 * editor.
 	 */
@@ -372,11 +401,11 @@ public class GenerateActionGroup extends ActionGroup {
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		String menuText= ActionMessages.SourceMenu_label; 
+		String menuText= ActionMessages.SourceMenu_label;
 		if (fQuickAccessAction != null) {
-			menuText= fQuickAccessAction.addShortcut(menuText); 
+			menuText= fQuickAccessAction.addShortcut(menuText);
 		}
-		IMenuManager subMenu= new MenuManager(menuText, MENU_ID); 
+		IMenuManager subMenu= new MenuManager(menuText, MENU_ID);
 		int added= 0;
 		if (isEditorOwner()) {
 			added= fillEditorSubMenu(subMenu);
@@ -389,12 +418,13 @@ public class GenerateActionGroup extends ActionGroup {
 
 	private void fillQuickMenu(IMenuManager menu) {
 		if (isEditorOwner()) {
-			fillEditorSubMenu(menu);
+			if (!fEditor.hasBreadcrumbFocus())
+				fillEditorSubMenu(menu);
 		} else {
 			fillViewSubMenu(menu);
 		}
 	}
-	
+
 	private int fillEditorSubMenu(IMenuManager source) {
 		int added= 0;
 		source.add(new Separator(GROUP_COMMENT));
@@ -453,7 +483,7 @@ public class GenerateActionGroup extends ActionGroup {
 	 */
 	public void dispose() {
 		if (fRegisteredSelectionListeners != null) {
-			ISelectionProvider provider= fSite.getSelectionProvider();
+			ISelectionProvider provider= fSelectionProvider;
 			for (Iterator iter= fRegisteredSelectionListeners.iterator(); iter.hasNext();) {
 				ISelectionChangedListener listener= (ISelectionChangedListener) iter.next();
 				provider.removeSelectionChangedListener(listener);
@@ -472,7 +502,7 @@ public class GenerateActionGroup extends ActionGroup {
 		actionBar.setGlobalActionHandler(JdtActionConstants.OVERRIDE_METHODS, fOverrideMethods);
 		actionBar.setGlobalActionHandler(JdtActionConstants.GENERATE_GETTER_SETTER, fAddGetterSetter);
 		actionBar.setGlobalActionHandler(JdtActionConstants.GENERATE_DELEGATE_METHODS, fAddDelegateMethods);
-		actionBar.setGlobalActionHandler(JdtActionConstants.ADD_CONSTRUCTOR_FROM_SUPERCLASS, fAddUnimplementedConstructors);		
+		actionBar.setGlobalActionHandler(JdtActionConstants.ADD_CONSTRUCTOR_FROM_SUPERCLASS, fAddUnimplementedConstructors);
 		actionBar.setGlobalActionHandler(JdtActionConstants.GENERATE_CONSTRUCTOR_USING_FIELDS, fGenerateConstructorUsingFields);
 		actionBar.setGlobalActionHandler(JdtActionConstants.GENERATE_HASHCODE_EQUALS, fHashCodeEquals);
 		actionBar.setGlobalActionHandler(JdtActionConstants.ADD_JAVA_DOC_COMMENT, fAddJavaDocStub);
@@ -495,7 +525,7 @@ public class GenerateActionGroup extends ActionGroup {
 			return 1;
 		}
 		return 0;
-	}	
+	}
 	
 	private int addEditorAction(IMenuManager menu, String actionID) {
 		if (fEditor == null)
@@ -514,5 +544,5 @@ public class GenerateActionGroup extends ActionGroup {
 	
 	private boolean isEditorOwner() {
 		return fEditor != null;
-	}	
+	}
 }

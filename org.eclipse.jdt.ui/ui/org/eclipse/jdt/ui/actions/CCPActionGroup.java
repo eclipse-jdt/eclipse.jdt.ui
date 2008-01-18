@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
@@ -44,7 +45,6 @@ import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
  */
 public class CCPActionGroup extends ActionGroup {
 
-	private IWorkbenchSite fSite;
 	private Clipboard fClipboard;
 
  	private SelectionDispatchAction[] fActions;
@@ -54,6 +54,7 @@ public class CCPActionGroup extends ActionGroup {
 	private SelectionDispatchAction fCopyQualifiedNameAction;
 	private SelectionDispatchAction fPasteAction;
 	private SelectionDispatchAction fCutAction;
+	private final ISelectionProvider fSelectionProvider;
 	
 	/**
 	 * Creates a new <code>CCPActionGroup</code>. The group requires that
@@ -63,7 +64,7 @@ public class CCPActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public CCPActionGroup(IViewPart  part) {
-		this(part.getSite());
+		this(part.getSite(), null);
 	}
 	
 	/**
@@ -74,34 +75,51 @@ public class CCPActionGroup extends ActionGroup {
 	 * @param page the page that owns this action group
 	 */
 	public CCPActionGroup(Page page) {
-		this(page.getSite());
+		this(page.getSite(), null);
 	}
 
-	private CCPActionGroup(IWorkbenchSite site) {
-		fSite= site;
+	/**
+	 * Creates a new <code>CCPActionGroup</code>. The group requires
+	 * that the selection provided by the given selection provider is of type 
+	 * {@link IStructuredSelection}.
+	 * 
+	 * @param site the site that will own the action group.
+	 * @param specialSelectionProvider the selection provider used instead of the
+	 *  sites selection provider.
+	 *  
+	 * @since 3.4
+	 */
+	public CCPActionGroup(IWorkbenchSite site, ISelectionProvider specialSelectionProvider) {
+		fSelectionProvider= specialSelectionProvider == null ? site.getSelectionProvider() : specialSelectionProvider;
 		fClipboard= new Clipboard(site.getShell().getDisplay());
 		
-		fPasteAction= new PasteAction(fSite, fClipboard);
+		fPasteAction= new PasteAction(site, fClipboard);
 		fPasteAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.PASTE);
 		
-		fCopyAction= new CopyToClipboardAction(fSite, fClipboard);
+		fCopyAction= new CopyToClipboardAction(site, fClipboard);
 		fCopyAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.COPY);
 		
-		fCopyQualifiedNameAction= new CopyQualifiedNameAction(fSite);
+		fCopyQualifiedNameAction= new CopyQualifiedNameAction(site);
 		fCopyQualifiedNameAction.setActionDefinitionId(CopyQualifiedNameAction.ACTION_DEFINITION_ID);
 		
-		fCutAction= new CutAction(fSite, fClipboard);
+		fCutAction= new CutAction(site, fClipboard);
 		fCutAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.CUT);
 		
-		fDeleteAction= new DeleteAction(fSite);
+		fDeleteAction= new DeleteAction(site);
 		fDeleteAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.DELETE);
 		
 		fActions= new SelectionDispatchAction[] { fCutAction, fCopyAction, fCopyQualifiedNameAction, fPasteAction, fDeleteAction };
+		if (specialSelectionProvider != null) {
+			for (int i= 0; i < fActions.length; i++) {
+				fActions[i].setSpecialSelectionProvider(specialSelectionProvider);
+			}
+		}
+		
 		registerActionsAsSelectionChangeListeners();
 	}
 
 	private void registerActionsAsSelectionChangeListeners() {
-		ISelectionProvider provider = fSite.getSelectionProvider();
+		ISelectionProvider provider= fSelectionProvider;
 		ISelection selection= provider.getSelection();
 		for (int i= 0; i < fActions.length; i++) {
 			SelectionDispatchAction action= fActions[i];
@@ -111,7 +129,7 @@ public class CCPActionGroup extends ActionGroup {
 	}
 	
 	private void deregisterActionsAsSelectionChangeListeners() {
-		ISelectionProvider provider = fSite.getSelectionProvider();
+		ISelectionProvider provider= fSelectionProvider;
 		for (int i= 0; i < fActions.length; i++) {
 			provider.removeSelectionChangedListener(fActions[i]);
 		}

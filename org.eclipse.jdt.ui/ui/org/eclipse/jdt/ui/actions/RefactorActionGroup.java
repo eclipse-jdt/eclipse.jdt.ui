@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
@@ -166,7 +167,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fExtractConstantAction;
 	private SelectionDispatchAction fExtractClassAction;
 	private SelectionDispatchAction fIntroduceParameterAction;
-	private SelectionDispatchAction fIntroduceParameterObjectAction; 
+	private SelectionDispatchAction fIntroduceParameterObjectAction;
 	private SelectionDispatchAction fIntroduceFactoryAction;
 	private SelectionDispatchAction fConvertLocalToFieldAction;
 	private SelectionDispatchAction fSelfEncapsulateField;
@@ -179,7 +180,7 @@ public class RefactorActionGroup extends ActionGroup {
 	
 	private class RefactorQuickAccessAction extends JDTQuickMenuAction {
 		public RefactorQuickAccessAction(JavaEditor editor) {
-			super(editor, QUICK_MENU_ID); 
+			super(editor, QUICK_MENU_ID);
 		}
 		protected void fillMenu(IMenuManager menu) {
 			fillQuickMenu(menu);
@@ -193,10 +194,12 @@ public class RefactorActionGroup extends ActionGroup {
 	private static class NoActionAvailable extends Action {
 		public NoActionAvailable() {
 			setEnabled(true);
-			setText(RefactoringMessages.RefactorActionGroup_no_refactoring_available); 
+			setText(RefactoringMessages.RefactorActionGroup_no_refactoring_available);
 		}
 	}
 	private Action fNoActionAvailable= new NoActionAvailable();
+
+	private final ISelectionProvider fSelectionProvider;
 		
 	/**
 	 * Creates a new <code>RefactorActionGroup</code>. The group requires
@@ -206,11 +209,13 @@ public class RefactorActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public RefactorActionGroup(IViewPart part) {
-		this(part.getSite());
+		this(part.getSite(), null);
 		
 		IUndoContext workspaceContext= (IUndoContext)ResourcesPlugin.getWorkspace().getAdapter(IUndoContext.class);
 		fUndoRedoActionGroup= new UndoRedoActionGroup(part.getViewSite(), workspaceContext, true);
-	}	
+		
+		installQuickAccessAction();
+	}
 	
 	/**
 	 * Creates a new <code>RefactorActionGroup</code>. The action requires
@@ -220,7 +225,9 @@ public class RefactorActionGroup extends ActionGroup {
 	 * @param page the page that owns this action group
 	 */
 	public RefactorActionGroup(Page page) {
-		this(page.getSite());
+		this(page.getSite(), null);
+		
+		installQuickAccessAction();
 	}
 	
 	/**
@@ -235,6 +242,7 @@ public class RefactorActionGroup extends ActionGroup {
 		stats.startRun();
 
 		fSite= editor.getEditorSite();
+		fSelectionProvider= fSite.getSelectionProvider();
 		fEditor= editor;
 		fGroupName= groupName;
 		fBinary= binary;
@@ -256,7 +264,7 @@ public class RefactorActionGroup extends ActionGroup {
 			editor.setAction("ModifyParameters", fModifyParametersAction); //$NON-NLS-1$
 	
 			fConvertAnonymousToNestedAction= new ConvertAnonymousToNestedAction(editor);
-			initUpdatingAction(fConvertAnonymousToNestedAction, provider, selection, IJavaEditorActionDefinitionIds.CONVERT_ANONYMOUS_TO_NESTED);
+			initUpdatingAction(fConvertAnonymousToNestedAction, provider, null, selection, IJavaEditorActionDefinitionIds.CONVERT_ANONYMOUS_TO_NESTED);
 			editor.setAction("ConvertAnonymousToNested", fConvertAnonymousToNestedAction); //$NON-NLS-1$
 	
 			fConvertNestedToTopAction= new ConvertNestedToTopAction(editor);
@@ -284,7 +292,7 @@ public class RefactorActionGroup extends ActionGroup {
 			editor.setAction("ExtractClass", fExtractClassAction); //$NON-NLS-1$
 	
 			fChangeTypeAction= new ChangeTypeAction(editor);
-			initUpdatingAction(fChangeTypeAction, provider, selection, IJavaEditorActionDefinitionIds.CHANGE_TYPE);
+			initUpdatingAction(fChangeTypeAction, provider, null, selection, IJavaEditorActionDefinitionIds.CHANGE_TYPE);
 			editor.setAction("ChangeType", fChangeTypeAction); //$NON-NLS-1$
 	
 			fInferTypeArgumentsAction= new InferTypeArgumentsAction(editor);
@@ -292,27 +300,27 @@ public class RefactorActionGroup extends ActionGroup {
 			editor.setAction("InferTypeArguments", fInferTypeArgumentsAction); //$NON-NLS-1$
 
 			fExtractMethodAction= new ExtractMethodAction(editor);
-			initUpdatingAction(fExtractMethodAction, provider, selection, IJavaEditorActionDefinitionIds.EXTRACT_METHOD);
+			initUpdatingAction(fExtractMethodAction, provider, null, selection, IJavaEditorActionDefinitionIds.EXTRACT_METHOD);
 			editor.setAction("ExtractMethod", fExtractMethodAction); //$NON-NLS-1$
 	
 			fExtractTempAction= new ExtractTempAction(editor);
-			initUpdatingAction(fExtractTempAction, provider, selection, IJavaEditorActionDefinitionIds.EXTRACT_LOCAL_VARIABLE);
+			initUpdatingAction(fExtractTempAction, provider, null, selection, IJavaEditorActionDefinitionIds.EXTRACT_LOCAL_VARIABLE);
 			editor.setAction("ExtractLocalVariable", fExtractTempAction); //$NON-NLS-1$
 	
 			fExtractConstantAction= new ExtractConstantAction(editor);
-			initUpdatingAction(fExtractConstantAction, provider, selection, IJavaEditorActionDefinitionIds.EXTRACT_CONSTANT);
+			initUpdatingAction(fExtractConstantAction, provider, null, selection, IJavaEditorActionDefinitionIds.EXTRACT_CONSTANT);
 			editor.setAction("ExtractConstant", fExtractConstantAction); //$NON-NLS-1$
 	
 			fIntroduceParameterAction= new IntroduceParameterAction(editor);
-			initUpdatingAction(fIntroduceParameterAction, provider, selection, IJavaEditorActionDefinitionIds.INTRODUCE_PARAMETER);
+			initUpdatingAction(fIntroduceParameterAction, provider, null, selection, IJavaEditorActionDefinitionIds.INTRODUCE_PARAMETER);
 			editor.setAction("IntroduceParameter", fIntroduceParameterAction); //$NON-NLS-1$
 	
 			fIntroduceFactoryAction= new IntroduceFactoryAction(editor);
-			initUpdatingAction(fIntroduceFactoryAction, provider, selection, IJavaEditorActionDefinitionIds.INTRODUCE_FACTORY);
+			initUpdatingAction(fIntroduceFactoryAction, provider, null, selection, IJavaEditorActionDefinitionIds.INTRODUCE_FACTORY);
 			editor.setAction("IntroduceFactory", fIntroduceFactoryAction); //$NON-NLS-1$
 	
 			fConvertLocalToFieldAction= new ConvertLocalToFieldAction(editor);
-			initUpdatingAction(fConvertLocalToFieldAction, provider, selection, IJavaEditorActionDefinitionIds.PROMOTE_LOCAL_VARIABLE);
+			initUpdatingAction(fConvertLocalToFieldAction, provider, null, selection, IJavaEditorActionDefinitionIds.PROMOTE_LOCAL_VARIABLE);
 			editor.setAction("PromoteTemp", fConvertLocalToFieldAction); //$NON-NLS-1$
 	
 			fSelfEncapsulateField= new SelfEncapsulateFieldAction(editor);
@@ -322,9 +330,9 @@ public class RefactorActionGroup extends ActionGroup {
 			fIntroduceParameterObjectAction= new IntroduceParameterObjectAction(editor);
 			initAction(fIntroduceParameterObjectAction, selection, IJavaEditorActionDefinitionIds.INTRODUCE_PARAMETER_OBJECT);
 			editor.setAction("IntroduceParameterObjectAction", fIntroduceParameterObjectAction); //$NON-NLS-1$
-		}		
+		}
 		fIntroduceIndirectionAction= new IntroduceIndirectionAction(editor);
-		initUpdatingAction(fIntroduceIndirectionAction, provider, selection, IJavaEditorActionDefinitionIds.INTRODUCE_INDIRECTION);
+		initUpdatingAction(fIntroduceIndirectionAction, provider, null, selection, IJavaEditorActionDefinitionIds.INTRODUCE_INDIRECTION);
 		editor.setAction("IntroduceIndirection", fIntroduceIndirectionAction); //$NON-NLS-1$
 
 		fUseSupertypeAction= new UseSupertypeAction(editor);
@@ -340,74 +348,87 @@ public class RefactorActionGroup extends ActionGroup {
 		stats.endRun();
 	}
 
-	private RefactorActionGroup(IWorkbenchSite site) {
+	/**
+	 * Creates a new <code>RefactorActionGroup</code>. The group requires
+	 * that the selection provided by the given selection provider is of type
+	 * {@link IStructuredSelection}.
+	 * 
+	 * @param site the site that will own the action group.
+	 * @param selectionProvider the selection provider used instead of the
+	 *  page selection provider.
+	 * 
+	 * @since 3.4
+	 */
+	public RefactorActionGroup(IWorkbenchSite site, ISelectionProvider selectionProvider) {
 
 		final PerformanceStats stats= PerformanceStats.getStats(PERF_REFACTOR_ACTION_GROUP, this);
 		stats.startRun();
 
 		fSite= site;
-		ISelectionProvider provider= fSite.getSelectionProvider();
-		ISelection selection= provider.getSelection();
+		fSelectionProvider= selectionProvider == null ? fSite.getSelectionProvider() : selectionProvider;
+		ISelection selection= fSelectionProvider.getSelection();
 		
 		if (!fBinary) {
 			
-			fMoveAction= new MoveAction(site);
-			initUpdatingAction(fMoveAction, provider, selection, IJavaEditorActionDefinitionIds.MOVE_ELEMENT);
+			fMoveAction= new MoveAction(fSite);
+			initUpdatingAction(fMoveAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.MOVE_ELEMENT);
 	
-			fRenameAction= new RenameAction(site);
-			initUpdatingAction(fRenameAction, provider, selection, IJavaEditorActionDefinitionIds.RENAME_ELEMENT);
+			fRenameAction= new RenameAction(fSite);
+			initUpdatingAction(fRenameAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.RENAME_ELEMENT);
 	
 			fModifyParametersAction= new ModifyParametersAction(fSite);
-			initUpdatingAction(fModifyParametersAction, provider, selection, IJavaEditorActionDefinitionIds.MODIFY_METHOD_PARAMETERS);
+			initUpdatingAction(fModifyParametersAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.MODIFY_METHOD_PARAMETERS);
 	
 			fPullUpAction= new PullUpAction(fSite);
-			initUpdatingAction(fPullUpAction, provider, selection, IJavaEditorActionDefinitionIds.PULL_UP);
+			initUpdatingAction(fPullUpAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.PULL_UP);
 	
 			fPushDownAction= new PushDownAction(fSite);
-			initUpdatingAction(fPushDownAction, provider, selection, IJavaEditorActionDefinitionIds.PUSH_DOWN);
+			initUpdatingAction(fPushDownAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.PUSH_DOWN);
 		
 			fSelfEncapsulateField= new SelfEncapsulateFieldAction(fSite);
-			initUpdatingAction(fSelfEncapsulateField, provider, selection, IJavaEditorActionDefinitionIds.SELF_ENCAPSULATE_FIELD);
+			initUpdatingAction(fSelfEncapsulateField, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.SELF_ENCAPSULATE_FIELD);
 	
 			fIntroduceParameterObjectAction= new IntroduceParameterObjectAction(fSite);
-			initUpdatingAction(fIntroduceParameterObjectAction, provider, selection, IJavaEditorActionDefinitionIds.INTRODUCE_PARAMETER_OBJECT);
+			initUpdatingAction(fIntroduceParameterObjectAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.INTRODUCE_PARAMETER_OBJECT);
 			
 			fExtractSupertypeAction= new ExtractSuperClassAction(fSite);
-			initUpdatingAction(fExtractSupertypeAction, provider, selection, ExtractSuperClassAction.EXTRACT_SUPERTYPE);
+			initUpdatingAction(fExtractSupertypeAction, fSelectionProvider, selectionProvider, selection, ExtractSuperClassAction.EXTRACT_SUPERTYPE);
 	
 			fExtractInterfaceAction= new ExtractInterfaceAction(fSite);
-			initUpdatingAction(fExtractInterfaceAction, provider, selection, IJavaEditorActionDefinitionIds.EXTRACT_INTERFACE);
+			initUpdatingAction(fExtractInterfaceAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.EXTRACT_INTERFACE);
 	
 			fExtractClassAction= new ExtractClassAction(fSite);
-			initUpdatingAction(fExtractClassAction, provider, selection, IJavaEditorActionDefinitionIds.EXTRACT_CLASS);
+			initUpdatingAction(fExtractClassAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.EXTRACT_CLASS);
 			
 			fChangeTypeAction= new ChangeTypeAction(fSite);
-			initUpdatingAction(fChangeTypeAction, provider, selection, IJavaEditorActionDefinitionIds.CHANGE_TYPE);
+			initUpdatingAction(fChangeTypeAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.CHANGE_TYPE);
 	
 			fConvertNestedToTopAction= new ConvertNestedToTopAction(fSite);
-			initUpdatingAction(fConvertNestedToTopAction, provider, selection, IJavaEditorActionDefinitionIds.MOVE_INNER_TO_TOP);
+			initUpdatingAction(fConvertNestedToTopAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.MOVE_INNER_TO_TOP);
 	
 			fInferTypeArgumentsAction= new InferTypeArgumentsAction(fSite);
-			initUpdatingAction(fInferTypeArgumentsAction, provider, selection, IJavaEditorActionDefinitionIds.INFER_TYPE_ARGUMENTS_ACTION);
+			initUpdatingAction(fInferTypeArgumentsAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.INFER_TYPE_ARGUMENTS_ACTION);
 	
 			fIntroduceFactoryAction= new IntroduceFactoryAction(fSite);
-			initUpdatingAction(fIntroduceFactoryAction, provider, selection, IJavaEditorActionDefinitionIds.INTRODUCE_FACTORY);
+			initUpdatingAction(fIntroduceFactoryAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.INTRODUCE_FACTORY);
 	
 			fConvertAnonymousToNestedAction= new ConvertAnonymousToNestedAction(fSite);
-			initUpdatingAction(fConvertAnonymousToNestedAction, provider, selection, IJavaEditorActionDefinitionIds.CONVERT_ANONYMOUS_TO_NESTED);
-		}		
+			initUpdatingAction(fConvertAnonymousToNestedAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.CONVERT_ANONYMOUS_TO_NESTED);
+		}
 		fInlineAction= new InlineAction(fSite);
-		initUpdatingAction(fInlineAction, provider, selection, IJavaEditorActionDefinitionIds.INLINE);
+		initUpdatingAction(fInlineAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.INLINE);
 
 		fUseSupertypeAction= new UseSupertypeAction(fSite);
-		initUpdatingAction(fUseSupertypeAction, provider, selection, IJavaEditorActionDefinitionIds.USE_SUPERTYPE);
+		initUpdatingAction(fUseSupertypeAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.USE_SUPERTYPE);
 		
 		fIntroduceIndirectionAction= new IntroduceIndirectionAction(fSite);
-		initUpdatingAction(fIntroduceIndirectionAction, provider, selection, IJavaEditorActionDefinitionIds.INTRODUCE_INDIRECTION);
-		
-		installQuickAccessAction();
+		initUpdatingAction(fIntroduceIndirectionAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.INTRODUCE_INDIRECTION);
 		
 		stats.endRun();
+		
+		// FIXME, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=213335
+		//installQuickAccessAction();
+		
 	}
 	
 	private void installQuickAccessAction() {
@@ -419,23 +440,26 @@ public class RefactorActionGroup extends ActionGroup {
 	}
 	
 	private void initAction(SelectionDispatchAction action, ISelection selection, String actionDefinitionId){
-		initUpdatingAction(action, null, selection, actionDefinitionId);
+		initUpdatingAction(action, null, null, selection, actionDefinitionId);
 	}
 	
 	/**
 	 * Sets actionDefinitionId, updates enablement, adds to fActions,
 	 * and adds selection changed listener if provider is not <code>null</code>.
-	 *  
+	 * 
 	 * @param action
 	 * @param provider can be <code>null</code>
+	 * @param specialProvider a sepectil selection provider or <code>null</code>
 	 * @param selection
 	 * @param actionDefinitionId
 	 */
-	private void initUpdatingAction(SelectionDispatchAction action, ISelectionProvider provider, ISelection selection, String actionDefinitionId){
+	private void initUpdatingAction(SelectionDispatchAction action, ISelectionProvider provider, ISelectionProvider specialProvider, ISelection selection, String actionDefinitionId) {
 		action.setActionDefinitionId(actionDefinitionId);
 		action.update(selection);
 		if (provider != null)
 			provider.addSelectionChangedListener(action);
+		if (specialProvider != null)
+			action.setSpecialSelectionProvider(specialProvider);
 		fActions.add(action);
 	}
 	
@@ -497,33 +521,32 @@ public class RefactorActionGroup extends ActionGroup {
 	 * @see ActionGroup#dispose()
 	 */
 	public void dispose() {
-		ISelectionProvider provider= fSite.getSelectionProvider();
 		if (!fBinary) {
-			disposeAction(fSelfEncapsulateField, provider);
-			disposeAction(fMoveAction, provider);
-			disposeAction(fRenameAction, provider);
-			disposeAction(fModifyParametersAction, provider);
-			disposeAction(fPullUpAction, provider);
-			disposeAction(fPushDownAction, provider);
-			disposeAction(fExtractTempAction, provider);
-			disposeAction(fExtractConstantAction, provider);
-			disposeAction(fIntroduceParameterAction, provider);
-			disposeAction(fIntroduceParameterObjectAction, provider);
-			disposeAction(fIntroduceFactoryAction, provider);
-			disposeAction(fExtractMethodAction, provider);
+			disposeAction(fSelfEncapsulateField, fSelectionProvider);
+			disposeAction(fMoveAction, fSelectionProvider);
+			disposeAction(fRenameAction, fSelectionProvider);
+			disposeAction(fModifyParametersAction, fSelectionProvider);
+			disposeAction(fPullUpAction, fSelectionProvider);
+			disposeAction(fPushDownAction, fSelectionProvider);
+			disposeAction(fExtractTempAction, fSelectionProvider);
+			disposeAction(fExtractConstantAction, fSelectionProvider);
+			disposeAction(fIntroduceParameterAction, fSelectionProvider);
+			disposeAction(fIntroduceParameterObjectAction, fSelectionProvider);
+			disposeAction(fIntroduceFactoryAction, fSelectionProvider);
+			disposeAction(fExtractMethodAction, fSelectionProvider);
 			//	disposeAction(fReplaceInvocationsAction, provider);
-			disposeAction(fExtractInterfaceAction, provider);
-			disposeAction(fExtractClassAction, provider);
-			disposeAction(fExtractSupertypeAction, provider);
-			disposeAction(fChangeTypeAction, provider);
-			disposeAction(fConvertNestedToTopAction, provider);
-			disposeAction(fInferTypeArgumentsAction, provider);
-			disposeAction(fConvertLocalToFieldAction, provider);
-			disposeAction(fConvertAnonymousToNestedAction, provider);
+			disposeAction(fExtractInterfaceAction, fSelectionProvider);
+			disposeAction(fExtractClassAction, fSelectionProvider);
+			disposeAction(fExtractSupertypeAction, fSelectionProvider);
+			disposeAction(fChangeTypeAction, fSelectionProvider);
+			disposeAction(fConvertNestedToTopAction, fSelectionProvider);
+			disposeAction(fInferTypeArgumentsAction, fSelectionProvider);
+			disposeAction(fConvertLocalToFieldAction, fSelectionProvider);
+			disposeAction(fConvertAnonymousToNestedAction, fSelectionProvider);
 		}
-		disposeAction(fIntroduceIndirectionAction, provider);
-		disposeAction(fInlineAction, provider);
-		disposeAction(fUseSupertypeAction, provider);
+		disposeAction(fIntroduceIndirectionAction, fSelectionProvider);
+		disposeAction(fInlineAction, fSelectionProvider);
+		disposeAction(fUseSupertypeAction, fSelectionProvider);
 		if (fQuickAccessHandlerActivation != null && fHandlerService != null) {
 			fHandlerService.deactivateHandler(fQuickAccessHandlerActivation);
 		}
@@ -539,11 +562,11 @@ public class RefactorActionGroup extends ActionGroup {
 	}
 	
 	private void addRefactorSubmenu(IMenuManager menu) {
-		String menuText= ActionMessages.RefactorMenu_label; 
+		String menuText= ActionMessages.RefactorMenu_label;
 		if (fQuickAccessAction != null) {
-			menuText= fQuickAccessAction.addShortcut(menuText); 
+			menuText= fQuickAccessAction.addShortcut(menuText);
 		}
-		IMenuManager refactorSubmenu= new MenuManager(menuText, MENU_ID);  
+		IMenuManager refactorSubmenu= new MenuManager(menuText, MENU_ID);
 		if (fEditor != null) {
 			final ITypeRoot element= getEditorInput();
 			if (element != null && ActionUtil.isOnBuildPath(element)) {
@@ -554,9 +577,9 @@ public class RefactorActionGroup extends ActionGroup {
 				});
 				refactorSubmenu.add(fNoActionAvailable);
 				menu.appendToGroup(fGroupName, refactorSubmenu);
-			} 
+			}
 		} else {
-			ISelection selection= fSite.getSelectionProvider().getSelection();
+			ISelection selection= fSelectionProvider.getSelection();
 			for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
 				((SelectionDispatchAction)iter.next()).update(selection);
 			}
@@ -651,6 +674,9 @@ public class RefactorActionGroup extends ActionGroup {
 	
 	private void fillQuickMenu(IMenuManager menu) {
 		if (fEditor != null) {
+			if (fEditor.hasBreadcrumbFocus())
+				return;
+			
 			ITypeRoot element= getEditorInput();
 			if (element == null || !ActionUtil.isOnBuildPath(element)) {
 				menu.add(fNoActionAvailable);
@@ -668,11 +694,12 @@ public class RefactorActionGroup extends ActionGroup {
 			}
 			
 		} else {
-			ISelection selection= fSite.getSelectionProvider().getSelection();
+			ISelection selection= fSelectionProvider.getSelection();
 			for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
 				((SelectionDispatchAction)iter.next()).update(selection);
 			}
 			fillRefactorMenu(menu);
 		}
 	}
+
 }
