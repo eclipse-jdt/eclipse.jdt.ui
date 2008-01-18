@@ -2547,7 +2547,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
 		setAction(GotoMatchingBracketAction.GOTO_MATCHING_BRACKET, action);
 		
-		action= new ShowInBreadcrumbAction();
+		action= new ShowInBreadcrumbAction(this);
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB);
 		setAction(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB, action);
 
