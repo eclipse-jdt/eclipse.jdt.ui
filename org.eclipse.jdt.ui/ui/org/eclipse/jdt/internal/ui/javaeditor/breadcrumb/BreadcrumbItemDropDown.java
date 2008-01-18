@@ -145,7 +145,7 @@ class BreadcrumbItemDropDown {
 		
 		fMenuIsShown= true;
 		
-		final Shell shell= new Shell(fArrow.getShell(), SWT.TOOL | SWT.NO_TRIM | SWT.BORDER);
+		final Shell shell= new Shell(fArrow.getShell(), SWT.RESIZE | SWT.TOOL | SWT.BORDER);
 		GridLayout layout= new GridLayout(1, false);
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
@@ -153,7 +153,7 @@ class BreadcrumbItemDropDown {
 		shell.setLayout(layout);
 		installCloser(shell);
 		
-		Composite composite= new Composite(shell, SWT.BORDER);
+		Composite composite= new Composite(shell, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		GridLayout gridLayout= new GridLayout(1, false);
 		gridLayout.marginHeight= 0;
