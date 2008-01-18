@@ -838,9 +838,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 		bars.setGlobalActionHandler(ActionFactory.REFRESH.getId(), fFocusAction);
 		bars.setGlobalActionHandler(ActionFactory.DELETE.getId(), fDeleteAction);
 		
-		IHandlerService service= (IHandlerService) bars.getServiceLocator().getService(IHandlerService.class);
-		if (service != null) //XXX: availability not guaranteed, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=212630
-			service.activateHandler(LINK_WITH_EDITOR_COMMAND_ID, new ActionHandler(fLinkWithEditor));
+		IHandlerService handlerService= (IHandlerService) getViewSite().getService(IHandlerService.class);
+		handlerService.activateHandler(LINK_WITH_EDITOR_COMMAND_ID, new ActionHandler(fLinkWithEditor));
 	}
 
 	private void fillLocalPullDown(IMenuManager manager) {
