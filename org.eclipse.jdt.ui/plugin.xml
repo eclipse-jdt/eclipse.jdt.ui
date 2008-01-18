@@ -1271,6 +1271,19 @@
                retarget="true"
                tooltip="%toggleMarkOccurrences.tooltip">
          </action>
+         <action
+               allowLabelUpdate="true"
+               style="toggle"
+               toolbarPath="org.eclipse.ui.edit.text.actionSet.presentation/Presentation"
+               id="org.eclipse.jdt.ui.edit.text.java.toggleBreadcrumb"
+               definitionId="org.eclipse.jdt.ui.edit.text.java.toggleBreadcrumb"
+               disabledIcon="$nl$/icons/full/dtool16/toggle_breadcrumb.gif"
+               icon="$nl$/icons/full/etool16/toggle_breadcrumb.gif"
+               helpContextId="toggle_mini_browser_action_context"
+               label="%toggleBreadcrumb.label"
+               retarget="true"
+               tooltip="%toggleBreadcrumb.tooltip">
+         </action>
       </actionSet>
    </extension>
 
@@ -3160,6 +3173,11 @@
             parentId="org.eclipse.ui.textEditorScope"
             id="org.eclipse.jdt.ui.propertiesEditorScope">
       </context>
+      <context
+            name="%context.editorBreadcrumb.name"
+            description="%context.editorBreadcrumb.description"
+            id="org.eclipse.jdt.ui.breadcrumbEditorScope">
+      </context>
    </extension>
 
    <extension
@@ -3368,6 +3386,12 @@
 	        description="%toggleMarkOccurrences.description"
 	        categoryId="org.eclipse.jdt.ui.category.source"
 	        id="org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences">
+	  </command>
+	  <command
+	        name="%toggleBreadcrumb.label"
+	        description="%toggleBreadcrumb.description"
+	        categoryId="org.eclipse.jdt.ui.category.source"
+	        id="org.eclipse.jdt.ui.edit.text.java.toggleBreadcrumb">
 	  </command>
       <command
             name="%ActionDefinition.removeOccurrenceAnnotations.name"
@@ -3771,6 +3795,12 @@
             categoryId="org.eclipse.ui.category.navigate"
             id="org.eclipse.jdt.ui.edit.text.java.show.outline">
       </command>
+      <command
+            name="%ActionDefinition.gotoBreadcrumb.name"
+            description="%ActionDefinition.gotoBreadcrumb.description"
+            categoryId="org.eclipse.ui.category.navigate"
+            id="org.eclipse.jdt.ui.edit.text.java.gotoBreadcrumb">
+      </command>      
       <command
             name="%ActionDefinition.open.hierarchy.name"
             description="%ActionDefinition.open.hierarchy.description"
@@ -4399,6 +4429,11 @@
             sequence="M1+O"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.show.outline"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M2+M3+B"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.gotoBreadcrumb"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             sequence="M1+T"
