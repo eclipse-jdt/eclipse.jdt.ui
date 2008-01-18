@@ -29,7 +29,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 
-import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.handlers.CollapseAllHandler;
@@ -203,14 +202,12 @@ public class ProjectsView extends JavaBrowsingPart {
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#fillActionBars(org.eclipse.ui.IActionBars)
+	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#activateHandlers(org.eclipse.ui.handlers.IHandlerService)
 	 * @since 3.4
 	 */
-	protected void fillActionBars(IActionBars actionBars) {
-		super.fillActionBars(actionBars);
-		IHandlerService service= (IHandlerService) actionBars.getServiceLocator().getService(IHandlerService.class);
-		if (service != null) //XXX: availability not guaranteed, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=212630
-			service.activateHandler(CollapseAllHandler.COMMAND_ID, new ActionHandler(fCollapseAllAction));
+	protected void activateHandlers(IHandlerService handlerService) {
+		super.activateHandlers(handlerService);
+		handlerService.activateHandler(CollapseAllHandler.COMMAND_ID, new ActionHandler(fCollapseAllAction));
 	}
 	
 	protected void fillToolBar(IToolBarManager tbm) {

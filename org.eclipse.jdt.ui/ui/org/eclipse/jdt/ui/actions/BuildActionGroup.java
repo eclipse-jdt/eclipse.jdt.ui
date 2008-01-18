@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
@@ -18,22 +21,21 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.BuildAction;
+
 import org.eclipse.ui.ide.IDEActionFactory;
 
 import org.eclipse.jdt.core.IJavaProject;
 
-import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-
 import org.eclipse.jdt.ui.IContextMenuConstants;
+
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
 
 /**
  * Contributes all build related actions to the context menu and installs handlers for the 
@@ -66,10 +68,10 @@ public class BuildActionGroup extends ActionGroup {
 		
 		fBuildAction= new BuildAction(shell, IncrementalProjectBuilder.INCREMENTAL_BUILD);
 		fBuildAction.setText(ActionMessages.BuildAction_label); 
-		fBuildAction.setActionDefinitionId("org.eclipse.ui.project.buildProject"); //$NON-NLS-1$
+		fBuildAction.setActionDefinitionId(IWorkbenchCommandIds.BUILD_PROJECT);
 		
 		fRefreshAction= new RefreshAction(fSite);
-		fRefreshAction.setActionDefinitionId("org.eclipse.ui.file.refresh"); //$NON-NLS-1$
+		fRefreshAction.setActionDefinitionId(IWorkbenchCommandIds.REFRESH);
 		
 		provider.addSelectionChangedListener(fBuildAction);
 		provider.addSelectionChangedListener(fRefreshAction);

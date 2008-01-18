@@ -113,8 +113,8 @@ import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragSupport;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropSupport;
@@ -372,6 +372,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		getViewSite().getPage().addPartListener(fPartListener);
 
 		fillActionBars(getViewSite().getActionBars());
+		activateHandlers((IHandlerService) getViewSite().getService(IHandlerService.class));
 		
 		setHelp();
 	}
@@ -453,10 +454,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 		IMenuManager menu= actionBars.getMenuManager();
 		menu.add(fToggleLinkingAction);
-		
-		IHandlerService service= (IHandlerService) actionBars.getServiceLocator().getService(IHandlerService.class);
-		if (service != null) //XXX: availability not guaranteed, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=212630
-			service.activateHandler(AbstractToggleLinkingAction.COMMAND_ID, new ActionHandler(fToggleLinkingAction));
+	}
+
+	protected void activateHandlers(IHandlerService handlerService) {
+		handlerService.activateHandler(IWorkbenchCommandIds.LINK_WITH_EDITOR, new ActionHandler(fToggleLinkingAction));
 	}
 
 	//---- IWorkbenchPart ------------------------------------------------------
@@ -572,6 +573,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			fCustomFiltersActionGroup= new CustomFiltersActionGroup(this, fViewer);
 
 		fToggleLinkingAction= new ToggleLinkingAction(this);
+		fToggleLinkingAction.setActionDefinitionId(IWorkbenchCommandIds.LINK_WITH_EDITOR);
 	}
 
 	private void doWorkingSetChanged(PropertyChangeEvent event) {

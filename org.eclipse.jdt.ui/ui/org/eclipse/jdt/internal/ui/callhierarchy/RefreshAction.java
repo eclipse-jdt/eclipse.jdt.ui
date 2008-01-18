@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
 
 class RefreshAction extends Action {
     private CallHierarchyViewPart fPart;
@@ -26,7 +27,7 @@ class RefreshAction extends Action {
 		setText(CallHierarchyMessages.RefreshAction_text); 
 		setToolTipText(CallHierarchyMessages.RefreshAction_tooltip); 
 		JavaPluginImages.setLocalImageDescriptors(this, "refresh_nav.gif");//$NON-NLS-1$
-		setActionDefinitionId("org.eclipse.ui.file.refresh"); //$NON-NLS-1$
+		setActionDefinitionId(IWorkbenchCommandIds.REFRESH);
         PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_REFRESH_ACTION);
     }
 

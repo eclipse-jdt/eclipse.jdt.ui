@@ -52,6 +52,7 @@ import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
+import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
@@ -174,6 +175,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 		fLinkWithEditorListener= new LinkWithEditorListener();
 		fLinkingEnabled= false;
 		fToggleLinkingAction= new ToggleLinkingAction();
+		fToggleLinkingAction.setActionDefinitionId(IWorkbenchCommandIds.LINK_WITH_EDITOR);
 	}
 
 	public void init(IPageSite pageSite) {
@@ -201,9 +203,8 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 		IMenuManager menu= bars.getMenuManager();
 		menu.add(fToggleLinkingAction);
 		
-		IHandlerService service= (IHandlerService) bars.getServiceLocator().getService(IHandlerService.class);
-		if (service != null) //XXX: availability not guaranteed, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=212630
-			service.activateHandler(AbstractToggleLinkingAction.COMMAND_ID, new ActionHandler(fToggleLinkingAction));
+		IHandlerService handlerService= (IHandlerService) getSite().getService(IHandlerService.class);
+		handlerService.activateHandler(IWorkbenchCommandIds.LINK_WITH_EDITOR, new ActionHandler(fToggleLinkingAction));
 	}
 	
 	/*

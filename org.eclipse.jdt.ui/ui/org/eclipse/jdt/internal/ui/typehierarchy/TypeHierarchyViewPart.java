@@ -122,8 +122,8 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
 import org.eclipse.jdt.internal.ui.dnd.EditorInputTransferDragAdapter;
@@ -282,6 +282,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fFocusOnTypeAction= new FocusOnTypeAction(this);
 		
 		fToggleLinkingAction= new ToggleLinkingAction(this);
+		fToggleLinkingAction.setActionDefinitionId(IWorkbenchCommandIds.LINK_WITH_EDITOR);
 		
 		fPaneLabelProvider= new JavaUILabelProvider();
 
@@ -897,9 +898,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fSelectAllAction= new SelectAllAction(fMethodsViewer);
 		
 		actionBars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(), fSelectAllAction);
-		IHandlerService service= (IHandlerService) actionBars.getServiceLocator().getService(IHandlerService.class);
-		if (service != null) //XXX: availability not guaranteed, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=212630
-			service.activateHandler(AbstractToggleLinkingAction.COMMAND_ID, new ActionHandler(fToggleLinkingAction));
+		
+		IHandlerService handlerService= (IHandlerService) getViewSite().getService(IHandlerService.class);
+		handlerService.activateHandler(IWorkbenchCommandIds.LINK_WITH_EDITOR, new ActionHandler(fToggleLinkingAction));
 	}
 
 	private void addResizeListener(Composite parent) {

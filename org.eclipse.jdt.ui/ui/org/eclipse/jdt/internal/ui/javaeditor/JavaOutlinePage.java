@@ -118,6 +118,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
 import org.eclipse.jdt.internal.ui.actions.CategoryFilterActionGroup;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragSupport;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropSupport;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
@@ -1013,6 +1014,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		viewMenuManager.add(new Separator("EndFilterGroup")); //$NON-NLS-1$
 
 		fToggleLinkingAction= new ToggleLinkingAction(this);
+		fToggleLinkingAction.setActionDefinitionId(IWorkbenchCommandIds.LINK_WITH_EDITOR);
 		viewMenuManager.add(new ClassOnlyAction());
 		viewMenuManager.add(fToggleLinkingAction);
 
@@ -1098,9 +1100,9 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		fCustomFiltersActionGroup= new CustomFiltersActionGroup("org.eclipse.jdt.ui.JavaOutlinePage", fOutlineViewer); //$NON-NLS-1$
 
 		registerToolbarActions(actionBars);
-		IHandlerService service= (IHandlerService) actionBars.getServiceLocator().getService(IHandlerService.class);
-		if (service != null) //XXX: availability not guaranteed, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=212630
-			service.activateHandler(AbstractToggleLinkingAction.COMMAND_ID, new ActionHandler(fToggleLinkingAction));
+		
+		IHandlerService handlerService= (IHandlerService) site.getService(IHandlerService.class);
+		handlerService.activateHandler(IWorkbenchCommandIds.LINK_WITH_EDITOR, new ActionHandler(fToggleLinkingAction));
 
 		fOutlineViewer.setInput(fInput);
 	}

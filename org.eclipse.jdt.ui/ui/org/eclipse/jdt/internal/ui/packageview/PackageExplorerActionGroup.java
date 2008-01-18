@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Eric Rizzo - replaced Collaps All action with generic equivalent
+ *     Eric Rizzo - replaced Collapse All action with generic equivalent
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.packageview;
@@ -75,9 +75,9 @@ import org.eclipse.jdt.ui.actions.OpenProjectAction;
 import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
-import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
 import org.eclipse.jdt.internal.ui.actions.CollapseAllAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.GenerateBuildPathActionGroup;
@@ -159,8 +159,12 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		fGotoTypeAction= new GotoTypeAction(fPart);
 		fGotoPackageAction= new GotoPackageAction(fPart);
 		fGotoResourceAction= new GotoResourceAction(fPart);
+		
 		fCollapseAllAction= new CollapseAllAction(fPart.getTreeViewer());
+		fCollapseAllAction.setActionDefinitionId(CollapseAllHandler.COMMAND_ID);
 		fToggleLinkingAction = new ToggleLinkingAction(fPart);
+		fToggleLinkingAction.setActionDefinitionId(IWorkbenchCommandIds.LINK_WITH_EDITOR);
+		
 		fGotoRequiredProjectAction= new GotoRequiredProjectAction(fPart);
 		fSelectAllAction= new SelectAllAction(fPart.getTreeViewer());
 	}
@@ -212,11 +216,9 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		
 		fRefactorActionGroup.retargetFileMenuActions(actionBars);
        
-		IHandlerService service= (IHandlerService) actionBars.getServiceLocator().getService(IHandlerService.class);
-		if (service != null) { //XXX: availability not guaranteed, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=212630
-			service.activateHandler(AbstractToggleLinkingAction.COMMAND_ID, new ActionHandler(fToggleLinkingAction));
-			service.activateHandler(CollapseAllHandler.COMMAND_ID, new ActionHandler(fCollapseAllAction));
-		}
+		IHandlerService handlerService= (IHandlerService) fPart.getViewSite().getService(IHandlerService.class);
+		handlerService.activateHandler(IWorkbenchCommandIds.LINK_WITH_EDITOR, new ActionHandler(fToggleLinkingAction));
+		handlerService.activateHandler(CollapseAllHandler.COMMAND_ID, new ActionHandler(fCollapseAllAction));
 	}
 
 	/* package */ void fillToolBar(IToolBarManager toolBar) {
