@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,11 +22,8 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -138,14 +135,8 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		 * {@inheritDoc}
 		 */
 		protected Control createDialogArea(Composite parent) {
-			Composite composite= new Composite(parent, SWT.NONE);
-			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			composite.setLayout(new GridLayout(1, true));
-			composite.setFont(parent.getFont());
-			
-			Composite list= new Composite(composite, SWT.NONE);
-			list.setFont(composite.getFont());
-			LayoutUtil.doDefaultLayout(list, new DialogField[] { fCategoryList }, true);
+			Composite composite= (Composite) super.createDialogArea(parent);
+			LayoutUtil.doDefaultLayout(composite, new DialogField[] { fCategoryList }, true, 5, 5);
 			LayoutUtil.setHorizontalGrabbing(fCategoryList.getListControl(null));
 			Dialog.applyDialogFont(composite);
 			
