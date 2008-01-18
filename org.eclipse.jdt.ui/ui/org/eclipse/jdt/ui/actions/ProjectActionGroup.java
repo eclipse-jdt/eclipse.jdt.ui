@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,8 +44,6 @@ import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
-import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
-
 /**
  * Adds actions to open and close a project to the global menu bar.
  * 
@@ -57,13 +55,15 @@ import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
  */
 public class ProjectActionGroup extends ActionGroup {
 
-	private IWorkbenchSite fSite;
+	private final IWorkbenchSite fSite;
+	private final ISelectionProvider fSelectionProvider;
 
 	private OpenProjectAction fOpenAction;
 	private CloseResourceAction fCloseAction;
 	private CloseResourceAction fCloseUnrelatedAction;
 	
 	private ISelectionChangedListener fSelectionChangedListener;
+
 
 	/**
 	 * Creates a new <code>ProjectActionGroup</code>. The group requires
@@ -73,19 +73,34 @@ public class ProjectActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public ProjectActionGroup(IViewPart part) {
-		fSite = part.getSite();
+		this(part.getSite(), part.getSite().getSelectionProvider());
+	}
+
+	/**
+	 * Creates a new <code>ProjectActionGroup</code>. The group requires
+	 * that the selection provided by the given selection provider is of type 
+	 * {@link IStructuredSelection}.
+	 * 
+	 * @param site the site that will own the action group.
+	 * @param selectionProvider the selection provider used instead of the
+	 *  page selection provider.
+	 *  
+	 * @since 3.4
+	 */
+	public ProjectActionGroup(IWorkbenchSite site, ISelectionProvider selectionProvider) {
+		fSite= site;
+		fSelectionProvider= selectionProvider;
 		Shell shell= fSite.getShell();
-		ISelectionProvider provider= fSite.getSelectionProvider();
-		ISelection selection= provider.getSelection();
+		ISelection selection= selectionProvider.getSelection();
 		
 		fCloseAction= new CloseResourceAction(shell);
-		fCloseAction.setActionDefinitionId(IWorkbenchCommandIds.CLOSE_PROJECT);
+		fCloseAction.setActionDefinitionId("org.eclipse.ui.project.closeProject"); //$NON-NLS-1$
 		
 		fCloseUnrelatedAction= new CloseUnrelatedProjectsAction(shell);
-		fCloseUnrelatedAction.setActionDefinitionId(IWorkbenchCommandIds.CLOSE_UNRELATED_PROJECTS);
+		fCloseUnrelatedAction.setActionDefinitionId("org.eclipse.ui.project.closeUnrelatedProjects"); //$NON-NLS-1$
 		
 		fOpenAction= new OpenProjectAction(fSite);
-		fOpenAction.setActionDefinitionId(IWorkbenchCommandIds.OPEN_PROJECT);
+		fOpenAction.setActionDefinitionId("org.eclipse.ui.project.openProject"); //$NON-NLS-1$
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection s= (IStructuredSelection)selection;
 			fOpenAction.selectionChanged(s);
@@ -101,7 +116,7 @@ public class ProjectActionGroup extends ActionGroup {
 				}
 			}
 		};
-		provider.addSelectionChangedListener(fSelectionChangedListener);
+		selectionProvider.addSelectionChangedListener(fSelectionChangedListener);
 
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		workspace.addResourceChangeListener(fOpenAction);
@@ -211,8 +226,7 @@ public class ProjectActionGroup extends ActionGroup {
 	 * @see ActionGroup#dispose()
 	 */
 	public void dispose() {
-		ISelectionProvider provider= fSite.getSelectionProvider();
-		provider.removeSelectionChangedListener(fSelectionChangedListener);
+		fSelectionProvider.removeSelectionChangedListener(fSelectionChangedListener);
 		
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(fOpenAction);

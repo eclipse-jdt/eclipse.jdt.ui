@@ -40,6 +40,9 @@ import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -83,6 +86,7 @@ import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedPosition;
@@ -191,6 +195,8 @@ import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.CopyQualifiedNameAction;
 import org.eclipse.jdt.internal.ui.actions.FoldingActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb;
+import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.IBreadcrumb;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.SelectionHistory;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEnclosingAction;
@@ -1329,6 +1335,102 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		public void partHidden(IWorkbenchPartReference partRef) {}
 		public void partInputChanged(IWorkbenchPartReference partRef) {}
 	}
+	
+	
+	/**
+	 * Editor specific selection provider which wraps the source viewer's selection provider.
+	 * @since 3.4
+	 */
+	class JdtSelectionProvider extends SelectionProvider {
+
+		private ListenerList fSelectionListeners= new ListenerList();
+		private ListenerList fPostSelectionListeners= new ListenerList();
+		private ITextSelection fInvalidSelection;
+
+		/*
+		 * @see org.eclipse.jface.viewers.ISelectionProvider#addSelectionChangedListener(ISelectionChangedListener)
+		 */
+		public void addSelectionChangedListener(ISelectionChangedListener listener) {
+			super.addSelectionChangedListener(listener);
+			if (getSourceViewer() != null)
+				fSelectionListeners.add(listener);
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.ISelectionProvider#getSelection()
+		 */
+		public ISelection getSelection() {
+			if (fInvalidSelection != null)
+				return fInvalidSelection;
+			return super.getSelection();
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.ISelectionProvider#removeSelectionChangedListener(ISelectionChangedListener)
+		 */
+		public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+			super.removeSelectionChangedListener(listener);
+			if (getSourceViewer() != null)
+				fSelectionListeners.remove(listener);
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(ISelection)
+		 */
+		public void setSelection(ISelection selection) {
+			if (selection instanceof ITextSelection) {
+				fInvalidSelection= null;
+				super.setSelection(selection);
+			} else if (selection instanceof IStructuredSelection && ((IStructuredSelection) selection).getFirstElement() instanceof EditorBreadcrumb) {
+				markInvalid();
+			}
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.IPostSelectionProvider#addPostSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+		 */
+		public void addPostSelectionChangedListener(ISelectionChangedListener listener) {
+			super.addPostSelectionChangedListener(listener);
+			if (getSourceViewer() != null && getSourceViewer().getSelectionProvider() instanceof IPostSelectionProvider)
+				fPostSelectionListeners.add(listener);
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.IPostSelectionProvider#removePostSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+		 */
+		public void removePostSelectionChangedListener(ISelectionChangedListener listener) {
+			super.removePostSelectionChangedListener(listener);
+			if (getSourceViewer() != null)
+				fPostSelectionListeners.remove(listener);
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.IPostSelectionValidator#isValid()
+		 */
+		public boolean isValid(ISelection postSelection) {
+			return fInvalidSelection == null && super.isValid(postSelection);
+		}
+
+		/**
+		 * Marks this selection provider as currently being invalid. An invalid
+		 * selection is one which can not be selected in the source viewer.
+		 */
+		private void markInvalid() {
+			fInvalidSelection= new TextSelection(0, 0);
+
+			SelectionChangedEvent event= new SelectionChangedEvent(this, fInvalidSelection);
+
+			Object[] listeners= fSelectionListeners.getListeners();
+			for (int i= 0; i < listeners.length; i++)
+				((ISelectionChangedListener) listeners[i]).selectionChanged(event);
+
+			listeners= fPostSelectionListeners.getListeners();
+			for (int i= 0; i < listeners.length; i++)
+				((ISelectionChangedListener) listeners[i]).selectionChanged(event);
+		}
+	}
+
+	
 
 	/** Preference key for matching brackets */
 	protected final static String MATCHING_BRACKETS=  PreferenceConstants.EDITOR_MATCHING_BRACKETS;
@@ -1377,6 +1479,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.0
 	 */
 	private boolean fMarkOccurrenceAnnotations;
+	/**
+	 * Tells whether the editor should show a breadcrumb.
+	 * The breadcrumb shows the parent chain of the active
+	 * editor element.
+	 * @since 3.4
+	 */
+	private boolean fIsBreadcrumbVisible;
 	/**
 	 * Tells whether the occurrence annotations are sticky
 	 * i.e. whether they stay even if there's no valid Java
@@ -1509,6 +1618,26 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.3
 	 */
 	private Point fCachedSelectedRange;
+	
+	/**
+	 * The editor breadcrumb.
+	 * 
+	 * @since 3.4
+	 */
+	private IBreadcrumb fBreadcrumb;
+	
+	/**
+	 * The composite containing the breadcrumb.
+	 * 
+	 * @since 3.4
+	 */
+	private Composite fBreadcrumbComposite;
+	
+	/**
+	 * This editor's selection provider.
+	 * @since 3.4
+	 */
+	private SelectionProvider fSelectionProvider= new JdtSelectionProvider();
 
 
 	/**
@@ -1575,9 +1704,39 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	protected final ISourceViewer createSourceViewer(Composite parent, IVerticalRuler verticalRuler, int styles) {
 
-		IPreferenceStore store= getPreferenceStore();
-		ISourceViewer viewer= createJavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, store);
+		Composite composite= new Composite(parent, SWT.NONE);
+		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridLayout layout= new GridLayout(1, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		layout.horizontalSpacing= 0;
+		layout.verticalSpacing= 0;
+		composite.setLayout(layout);
 
+		fBreadcrumbComposite= new Composite(composite, SWT.NONE);
+		GridData layoutData= new GridData(SWT.FILL, SWT.TOP, true, false);
+		fBreadcrumbComposite.setLayoutData(layoutData);
+		layout= new GridLayout(1, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		layout.horizontalSpacing= 0;
+		layout.verticalSpacing= 0;
+		layoutData.exclude= true;
+		fBreadcrumbComposite.setLayout(layout);
+
+
+
+		Composite editorComposite= new Composite(composite, SWT.NONE);
+		editorComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		FillLayout fillLayout= new FillLayout(SWT.VERTICAL);
+		fillLayout.marginHeight= 0;
+		fillLayout.marginWidth= 0;
+		fillLayout.spacing= 0;
+		editorComposite.setLayout(fillLayout);
+		
+		IPreferenceStore store= getPreferenceStore();
+		ISourceViewer viewer= createJavaSourceViewer(editorComposite, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, store);
+		
 		JavaUIHelp.setHelp(this, viewer.getTextWidget(), IJavaHelpContextIds.JAVA_EDITOR);
 		
 		JavaSourceViewer javaSourceViewer= null;
@@ -1619,6 +1778,85 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		return viewer;
 	}
 
+	/**
+	 * Creates the breadcrumb to be used by this editor.
+	 * Returns <code>null</code> if this editor can not show a breadcrumb.
+	 *
+	 * @return the breadcrumb or <code>null</code>
+	 * @since 3.4
+	 */
+	protected IBreadcrumb createBreadcrumb() {
+		return new JavaEditorBreadcrumb(this);
+	}
+	
+	/**
+	 * @return the breadcrumb used by this viewer if any.
+	 * @since 3.4
+	 */
+	public IBreadcrumb getBreadcrumb() {
+		return fBreadcrumb;
+	}
+
+	/**
+	 * @return true if the breadcrumb has the keyboard focus.
+	 * @since 3.4
+	 */
+	public boolean hasBreadcrumbFocus() {
+		return fBreadcrumb != null && fBreadcrumb.hasFocus();
+	}
+	
+	/**
+	 * Makes the breadcrumb visible. Creates its content
+	 * if this is the first time it is made visible.
+	 * 
+	 * @since 3.4
+	 */
+	private void showBreadcrumb() {
+		if (fBreadcrumb == null)
+			return;
+
+		if (fBreadcrumbComposite.getChildren().length == 0) {
+			fBreadcrumb.createContent(fBreadcrumbComposite);
+		}
+		
+		((GridData) fBreadcrumbComposite.getLayoutData()).exclude= false;
+		fBreadcrumbComposite.setVisible(true);
+		
+		ISourceReference selection= computeHighlightRangeSourceReference();
+		if (selection == null)
+			selection= getInputJavaElement();
+		setBreadcrumbInput(selection);
+		fBreadcrumbComposite.getParent().layout(true, true);
+	}
+	
+	/**
+	 * Hides the breadcrumb
+	 *
+	 * @since 3.4
+	 */
+	private void hideBreadcrumb() {
+		if (fBreadcrumb == null)
+			return;
+		((GridData) fBreadcrumbComposite.getLayoutData()).exclude= true;
+		fBreadcrumbComposite.setVisible(false);
+		fBreadcrumbComposite.getParent().layout(true, true);
+	}
+
+	/**
+	 * Sets the breadcrumb input to the given element.
+	 * @param element the element to use as input for the breadcrumb
+	 * @since 3.4
+	 */
+	private void setBreadcrumbInput(ISourceReference element) {
+		if (fBreadcrumb == null)
+			return;
+
+		fBreadcrumb.setInput(element);
+	}
+
+	/**
+	 * @return the source viewer used by this editor
+	 */
 	public final ISourceViewer getViewer() {
 		return getSourceViewer();
 	}
@@ -1700,9 +1938,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fContextMenuGroup.setContext(context);
 		fContextMenuGroup.fillContextMenu(menu);
 		fContextMenuGroup.setContext(null);
+		
+		//Breadcrumb
+		IAction action= getAction(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB);
+		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, action);
 
 		// Quick views
-		IAction action= getAction(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
+		action= getAction(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, action);
 		action= getAction(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY);
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, action);
@@ -1848,6 +2090,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		ISourceReference element= computeHighlightRangeSourceReference();
 		if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE))
 			synchronizeOutlinePage(element);
+		if (fIsBreadcrumbVisible)
+			setBreadcrumbInput(element);
 		setSelection(element, false);
 		if (!fSelectionChangedViaGotoAnnotation)
 			updateStatusLine();
@@ -2210,6 +2454,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			((JavaSourceViewer)getSourceViewer()).setPreferenceStore(store);
 
 		fMarkOccurrenceAnnotations= store.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
+		fIsBreadcrumbVisible= store.getBoolean(PreferenceConstants.EDITOR_SHOW_BREADCRUMB);
 		fStickyOccurrenceAnnotations= store.getBoolean(PreferenceConstants.EDITOR_STICKY_OCCURRENCES);
 		fMarkTypeOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES);
 		fMarkMethodOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_METHOD_OCCURRENCES);
@@ -2275,9 +2520,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fActionGroups= null;
 		}
 		
+		if (fBreadcrumb != null) {
+			fBreadcrumb.dispose();
+			fBreadcrumb= null;
+		}
+		
 		super.dispose();
 	}
-
+	
 	protected void createActions() {
 		installEncodingSupport();
 		
@@ -2296,6 +2546,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		Action action= new GotoMatchingBracketAction(this);
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
 		setAction(GotoMatchingBracketAction.GOTO_MATCHING_BRACKET, action);
+		
+		action= new ShowInBreadcrumbAction();
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB);
+		setAction(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB, action);
 
 		action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(),"ShowOutline.", this, JavaSourceViewer.SHOW_OUTLINE, true); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
@@ -2374,6 +2628,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		setAction(IJavaEditorActionConstants.COPY_QUALIFIED_NAME, action);
 	}
 	
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#setActionsActivated(boolean)
+	 * @since 3.4
+	 */
+	protected void setActionsActivated(boolean state) {
+		super.setActionsActivated(state);
+	}
+	
 	/**
 	 * Installs the encoding support on the given text editor.
 	 * <p>
@@ -2435,6 +2697,16 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 						uninstallOccurrencesFinder();
 					else
 						installOccurrencesFinder(true);
+				}
+				return;
+			}
+			if (PreferenceConstants.EDITOR_SHOW_BREADCRUMB.equals(property)) {
+				if (newBooleanValue != fIsBreadcrumbVisible) {
+					fIsBreadcrumbVisible= newBooleanValue;
+					if (fIsBreadcrumbVisible)
+						showBreadcrumb();
+					else
+						hideBreadcrumb();
 				}
 				return;
 			}
@@ -2650,6 +2922,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (isSemanticHighlightingEnabled())
 			installSemanticHighlighting();
 
+		fBreadcrumb= createBreadcrumb();
+		if (fIsBreadcrumbVisible)
+			showBreadcrumb();
+		
 		PlatformUI.getWorkbench().addWindowListener(fActivationListener);
 	}
 
@@ -2936,6 +3212,15 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		return store != null && store.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
 	}
 
+	/**
+	 * @return true if editor breadcrumbs are enabled
+	 * @since 3.4
+	 */
+	protected boolean isBreadcrumbShown() {
+		IPreferenceStore store= getPreferenceStore();
+		return store != null && store.getBoolean(PreferenceConstants.EDITOR_SHOW_BREADCRUMB);
+	}
+
 	boolean markOccurrencesOfType(IBinding binding) {
 
 		if (binding == null)
@@ -3201,6 +3486,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		selection.x= widgetOffset2ModelOffset(sourceViewer, selection.x);
 
 		return new Region(selection.x, selection.y);
+	}
+	
+	public ISelectionProvider getSelectionProvider() {
+		return fSelectionProvider;
 	}
 
 	/**

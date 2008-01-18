@@ -35,7 +35,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
-import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
 
 /**
  * Contributes all build related actions to the context menu and installs handlers for the 
@@ -49,10 +48,12 @@ import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
  */
 public class BuildActionGroup extends ActionGroup {
 
-	private IWorkbenchSite fSite;
+	private final IWorkbenchSite fSite;
+	private final ISelectionProvider fSelectionProvider;
 	
 	private BuildAction fBuildAction;
  	private RefreshAction fRefreshAction;
+
 
 	/**
 	 * Creates a new <code>BuildActionGroup</code>. The group requires that
@@ -62,19 +63,34 @@ public class BuildActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public BuildActionGroup(IViewPart part) {
-		fSite= part.getSite();
+		this(part.getSite(), part.getSite().getSelectionProvider());
+	}
+
+	/**
+	 * Creates a new <code>BuildActionGroup</code>. The group requires
+	 * that the selection provided by the given selection provider is of type 
+	 * {@link IStructuredSelection}.
+	 * 
+	 * @param site the site that will own the action group.
+	 * @param selectionProvider the selection provider used instead of the
+	 *  page selection provider.
+	 *  
+	 * @since 3.4
+	 */
+	public BuildActionGroup(IWorkbenchSite site, ISelectionProvider selectionProvider) {
+		fSite= site;
+		fSelectionProvider= selectionProvider;
 		Shell shell= fSite.getShell();
-		ISelectionProvider provider= fSite.getSelectionProvider();
 		
 		fBuildAction= new BuildAction(shell, IncrementalProjectBuilder.INCREMENTAL_BUILD);
 		fBuildAction.setText(ActionMessages.BuildAction_label); 
-		fBuildAction.setActionDefinitionId(IWorkbenchCommandIds.BUILD_PROJECT);
+		fBuildAction.setActionDefinitionId("org.eclipse.ui.project.buildProject"); //$NON-NLS-1$
 		
 		fRefreshAction= new RefreshAction(fSite);
-		fRefreshAction.setActionDefinitionId(IWorkbenchCommandIds.REFRESH);
+		fRefreshAction.setActionDefinitionId("org.eclipse.ui.file.refresh"); //$NON-NLS-1$
 		
-		provider.addSelectionChangedListener(fBuildAction);
-		provider.addSelectionChangedListener(fRefreshAction);
+		selectionProvider.addSelectionChangedListener(fBuildAction);
+		selectionProvider.addSelectionChangedListener(fRefreshAction);
 	}
 	
 	/**
@@ -111,9 +127,8 @@ public class BuildActionGroup extends ActionGroup {
 	 * Method declared in ActionGroup
 	 */
 	public void dispose() {
-		ISelectionProvider provider= fSite.getSelectionProvider();
-		provider.removeSelectionChangedListener(fBuildAction);
-		provider.removeSelectionChangedListener(fRefreshAction);
+		fSelectionProvider.removeSelectionChangedListener(fBuildAction);
+		fSelectionProvider.removeSelectionChangedListener(fRefreshAction);
 		super.dispose();
 	}	
 	

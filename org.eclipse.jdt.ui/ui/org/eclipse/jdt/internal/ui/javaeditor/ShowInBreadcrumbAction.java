@@ -16,7 +16,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.IBreadcrumb;
 
 
 /**
@@ -27,11 +26,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.IBreadcrumb;
  */
 public class ShowInBreadcrumbAction extends Action {
 
-	private final JavaEditor fEditor;
-
-	public ShowInBreadcrumbAction(JavaEditor editor) {
-		super(JavaEditorMessages.ShowInBreadcrumbAction_label);
-		fEditor= editor;
+	public ShowInBreadcrumbAction() {
 		setEnabled(true);
 	}
 
@@ -39,14 +34,8 @@ public class ShowInBreadcrumbAction extends Action {
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	public void run() {
-		IBreadcrumb breadcrumb= fEditor.getBreadcrumb();
-		if (breadcrumb == null)
-			return;
-
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.EDITOR_SHOW_BREADCRUMB, true);
-
-		breadcrumb.setFocus();
 	}
 
 }
