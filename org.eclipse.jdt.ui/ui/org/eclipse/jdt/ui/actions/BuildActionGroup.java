@@ -35,9 +35,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
 
 /**
- * Contributes all build related actions to the context menu and installs handlers for the 
+ * Contributes all build related actions to the context menu and installs handlers for the
  * corresponding global menu actions.
  * 
  * <p>
@@ -68,13 +69,13 @@ public class BuildActionGroup extends ActionGroup {
 
 	/**
 	 * Creates a new <code>BuildActionGroup</code>. The group requires
-	 * that the selection provided by the given selection provider is of type 
+	 * that the selection provided by the given selection provider is of type
 	 * {@link IStructuredSelection}.
 	 * 
 	 * @param site the site that will own the action group.
 	 * @param selectionProvider the selection provider used instead of the
 	 *  page selection provider.
-	 *  
+	 * 
 	 * @since 3.4
 	 */
 	public BuildActionGroup(IWorkbenchSite site, ISelectionProvider selectionProvider) {
@@ -83,11 +84,11 @@ public class BuildActionGroup extends ActionGroup {
 		Shell shell= fSite.getShell();
 		
 		fBuildAction= new BuildAction(shell, IncrementalProjectBuilder.INCREMENTAL_BUILD);
-		fBuildAction.setText(ActionMessages.BuildAction_label); 
-		fBuildAction.setActionDefinitionId("org.eclipse.ui.project.buildProject"); //$NON-NLS-1$
+		fBuildAction.setText(ActionMessages.BuildAction_label);
+		fBuildAction.setActionDefinitionId(IWorkbenchCommandIds.BUILD_PROJECT);
 		
 		fRefreshAction= new RefreshAction(fSite);
-		fRefreshAction.setActionDefinitionId("org.eclipse.ui.file.refresh"); //$NON-NLS-1$
+		fRefreshAction.setActionDefinitionId(IWorkbenchCommandIds.REFRESH);
 		
 		selectionProvider.addSelectionChangedListener(fBuildAction);
 		selectionProvider.addSelectionChangedListener(fRefreshAction);
@@ -130,7 +131,7 @@ public class BuildActionGroup extends ActionGroup {
 		fSelectionProvider.removeSelectionChangedListener(fBuildAction);
 		fSelectionProvider.removeSelectionChangedListener(fRefreshAction);
 		super.dispose();
-	}	
+	}
 	
 	private void setGlobalActionHandlers(IActionBars actionBar) {
 		actionBar.setGlobalActionHandler(IDEActionFactory.BUILD_PROJECT.getId(), fBuildAction);

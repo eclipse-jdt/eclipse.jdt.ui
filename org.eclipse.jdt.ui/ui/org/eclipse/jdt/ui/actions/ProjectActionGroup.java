@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,8 @@ import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
+import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
+
 /**
  * Adds actions to open and close a project to the global menu bar.
  * 
@@ -78,13 +80,13 @@ public class ProjectActionGroup extends ActionGroup {
 
 	/**
 	 * Creates a new <code>ProjectActionGroup</code>. The group requires
-	 * that the selection provided by the given selection provider is of type 
+	 * that the selection provided by the given selection provider is of type
 	 * {@link IStructuredSelection}.
 	 * 
 	 * @param site the site that will own the action group.
 	 * @param selectionProvider the selection provider used instead of the
 	 *  page selection provider.
-	 *  
+	 * 
 	 * @since 3.4
 	 */
 	public ProjectActionGroup(IWorkbenchSite site, ISelectionProvider selectionProvider) {
@@ -94,13 +96,13 @@ public class ProjectActionGroup extends ActionGroup {
 		ISelection selection= selectionProvider.getSelection();
 		
 		fCloseAction= new CloseResourceAction(shell);
-		fCloseAction.setActionDefinitionId("org.eclipse.ui.project.closeProject"); //$NON-NLS-1$
+		fCloseAction.setActionDefinitionId(IWorkbenchCommandIds.CLOSE_PROJECT);
 		
 		fCloseUnrelatedAction= new CloseUnrelatedProjectsAction(shell);
-		fCloseUnrelatedAction.setActionDefinitionId("org.eclipse.ui.project.closeUnrelatedProjects"); //$NON-NLS-1$
+		fCloseUnrelatedAction.setActionDefinitionId(IWorkbenchCommandIds.CLOSE_UNRELATED_PROJECTS);
 		
 		fOpenAction= new OpenProjectAction(fSite);
-		fOpenAction.setActionDefinitionId("org.eclipse.ui.project.openProject"); //$NON-NLS-1$
+		fOpenAction.setActionDefinitionId(IWorkbenchCommandIds.OPEN_PROJECT);
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection s= (IStructuredSelection)selection;
 			fOpenAction.selectionChanged(s);
