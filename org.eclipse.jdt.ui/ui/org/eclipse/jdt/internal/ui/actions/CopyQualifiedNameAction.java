@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -218,13 +218,13 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		return JavaElementLabels.getTextLabel(element, LABEL_FLAGS);
 	}
 
-    private Object[] getSelectedElements() throws JavaModelException {
+    private Object[] getSelectedElements() {
     	if (fEditor != null) {
     		IJavaElement element= getSelectedElement(fEditor);
     		if (element == null)
     			return null;
     		
-    		return new IJavaElement[] {element}; 
+    		return new IJavaElement[] {element};
     	}
     	
     	ISelection selection= getSelection();
@@ -293,7 +293,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 			binding= ((TypeParameter)node).resolveBinding();
 		} else if (node instanceof VariableDeclaration) {
 			binding= ((VariableDeclaration)node).resolveBinding();
-		} 
+		}
 			
 		if (binding != null)
 			return binding.getJavaElement();
