@@ -111,14 +111,16 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 			final IWorkbenchPart part= fSite.getPage().getActivePart();
 			if (part != null)
 				setActivePart(this, part);
-			selectionChanged(this, fSite.getSelectionProvider().getSelection());
+			selectionChanged(this, fSelectionProvider.getSelection());
 		}
 	}
 
-    private IWorkbenchSite fSite;
-    private List/*<Action>*/ fActions;
+    private final IWorkbenchSite fSite;
+	private final ISelectionProvider fSelectionProvider;
+	private final List/*<Action>*/fActions;
 
 	private String fGroupName= IContextMenuConstants.GROUP_REORGANIZE;
+
         
     /**
      * Creates a new <code>GenerateActionGroup</code>. The group 
@@ -128,7 +130,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
      * @param page the page that owns this action group
      */
     public GenerateBuildPathActionGroup(Page page) {
-        this(page.getSite());
+		this(page.getSite(), page.getSite().getSelectionProvider());
     }
     
     /**
@@ -139,11 +141,22 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
      * @param part the view part that owns this action group
      */
     public GenerateBuildPathActionGroup(IViewPart part) {
-        this(part.getSite());
+		this(part.getSite(), part.getSite().getSelectionProvider());
     }
-    
-    private GenerateBuildPathActionGroup(IWorkbenchSite site) {
+    /**
+	 * Creates a new <code>GenerateActionGroup</code>. The group requires
+	 * that the selection provided by the given selection provider is of type 
+	 * {@link IStructuredSelection}.
+	 * 
+	 * @param site the site that will own the action group.
+	 * @param selectionProvider the selection provider used instead of the
+	 *  page selection provider.
+	 *  
+	 * @since 3.4
+	 */
+	public GenerateBuildPathActionGroup(IWorkbenchSite site, ISelectionProvider selectionProvider) {
         fSite= site;
+		fSelectionProvider= selectionProvider;
         fActions= new ArrayList();
         
 		final CreateLinkedSourceFolderAction addLinkedSourceFolderAction= new CreateLinkedSourceFolderAction(site);
@@ -185,13 +198,12 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		final ConfigureBuildPathAction configure= new ConfigureBuildPathAction(site);
 		fActions.add(configure);
 		
-		final ISelectionProvider provider= fSite.getSelectionProvider();
 		for (Iterator iter= fActions.iterator(); iter.hasNext();) {
 			Action action= (Action)iter.next();
 			if (action instanceof ISelectionChangedListener) {
 				ISelectionChangedListener listener= (ISelectionChangedListener)action;
-				provider.addSelectionChangedListener(listener);
-				listener.selectionChanged(new SelectionChangedEvent(provider, provider.getSelection()));
+				selectionProvider.addSelectionChangedListener(listener);
+				listener.selectionChanged(new SelectionChangedEvent(selectionProvider, selectionProvider.getSelection()));
 			}
 		}
 		
@@ -263,7 +275,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     }
     
     private boolean canOperateOnSelection() {
-    	ISelection sel= fSite.getSelectionProvider().getSelection();
+		ISelection sel= fSelectionProvider.getSelection();
     	if (!(sel instanceof IStructuredSelection))
     		return false;
     	IStructuredSelection selection= (IStructuredSelection)sel;
@@ -282,14 +294,13 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 	 */
 	public void dispose() {
 		if (fActions != null) {
-			final ISelectionProvider provider= fSite.getSelectionProvider();
 			for (Iterator iter= fActions.iterator(); iter.hasNext();) {
 				Action action= (Action)iter.next();
 				if (action instanceof ISelectionChangedListener)
-					provider.removeSelectionChangedListener((ISelectionChangedListener) action);
+					fSelectionProvider.removeSelectionChangedListener((ISelectionChangedListener) action);
 			}
+			fActions.clear();
 		}
-		fActions= null;
 		super.dispose();
 	}
 }
