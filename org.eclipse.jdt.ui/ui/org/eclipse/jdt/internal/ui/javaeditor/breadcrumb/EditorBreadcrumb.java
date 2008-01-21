@@ -58,6 +58,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	private BreadcrumbViewer fBreadcrumbViewer;
 
 	private boolean fHasFocus;
+	private boolean fIsActive;
 
 	private Composite fComposite;
 
@@ -161,18 +162,17 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IBreadcrumb#setFocus()
 	 */
-	public void setFocus() {
+	public void activate() {
 		if (fBreadcrumbViewer.getSelection().isEmpty())
 			fBreadcrumbViewer.setSelection(new StructuredSelection(fBreadcrumbViewer.getInput()));
 		fBreadcrumbViewer.setFocus();
 	}
 
-
-	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.IBreadcrumb#getFocus()
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.IBreadcrumb#isActive()
 	 */
-	public boolean hasFocus() {
-		return fHasFocus;
+	public boolean isActive() {
+		return fIsActive;
 	}
 
 	/*
@@ -197,11 +197,17 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 				if (isBreadcrumbEvent(event)) {
 					if (fHasFocus)
 						return;
+					
+					fIsActive= true;
 
 					focusGained();
 				} else {
 					if (!fHasFocus)
 						return;
+					
+					if (fTextViewer.getTextWidget().isFocusControl()) {
+						fIsActive= false;
+					}
 	
 					focusLost();
 				}

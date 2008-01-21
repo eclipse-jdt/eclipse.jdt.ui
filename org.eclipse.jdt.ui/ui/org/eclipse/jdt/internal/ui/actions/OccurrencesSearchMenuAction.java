@@ -220,7 +220,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 		if (element == null)
 			return null;
 
-		if (editor.hasBreadcrumbFocus())
+		if (editor.isBreadcrumbActive())
 			return editor.getBreadcrumb().getSelectionProvider().getSelection();
 		else {
 			ITextSelection textSelection= (ITextSelection) editor.getSelectionProvider().getSelection();

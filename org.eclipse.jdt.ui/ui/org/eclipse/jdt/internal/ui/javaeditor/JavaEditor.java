@@ -1798,11 +1798,15 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 
 	/**
-	 * @return true if the breadcrumb has the keyboard focus.
+	 * Returns true if the breadcrumb is active. If true
+	 * then the breadcrumb has the focus if this part
+	 * is the active part.
+	 * 
+	 * @return true if the breadcrumb is active.
 	 * @since 3.4
 	 */
-	public boolean hasBreadcrumbFocus() {
-		return fBreadcrumb != null && fBreadcrumb.hasFocus();
+	public boolean isBreadcrumbActive() {
+		return fBreadcrumb != null && fBreadcrumb.isActive();
 	}
 	
 	/**
@@ -2227,6 +2231,18 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			resetHighlightRange();
 			markInNavigationHistory();
 		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#setFocus()
+	 */
+	public void setFocus() {
+		if (fBreadcrumb != null && fBreadcrumb.isActive()) {
+			fBreadcrumb.activate();
+			return;
+		}
+		
+		super.setFocus();
 	}
 
 	public void setSelection(IJavaElement element) {

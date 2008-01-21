@@ -418,7 +418,7 @@ public class GenerateActionGroup extends ActionGroup {
 
 	private void fillQuickMenu(IMenuManager menu) {
 		if (isEditorOwner()) {
-			if (!fEditor.hasBreadcrumbFocus())
+			if (!fEditor.isBreadcrumbActive())
 				fillEditorSubMenu(menu);
 		} else {
 			fillViewSubMenu(menu);

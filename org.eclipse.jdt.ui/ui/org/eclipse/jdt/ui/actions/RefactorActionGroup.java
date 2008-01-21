@@ -674,7 +674,7 @@ public class RefactorActionGroup extends ActionGroup {
 	
 	private void fillQuickMenu(IMenuManager menu) {
 		if (fEditor != null) {
-			if (fEditor.hasBreadcrumbFocus())
+			if (fEditor.isBreadcrumbActive())
 				return;
 			
 			ITypeRoot element= getEditorInput();

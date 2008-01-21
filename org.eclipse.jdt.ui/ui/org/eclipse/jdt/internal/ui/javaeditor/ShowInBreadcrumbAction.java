@@ -46,7 +46,7 @@ public class ShowInBreadcrumbAction extends Action {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.EDITOR_SHOW_BREADCRUMB, true);
 
-		breadcrumb.setFocus();
+		breadcrumb.activate();
 	}
 
 }

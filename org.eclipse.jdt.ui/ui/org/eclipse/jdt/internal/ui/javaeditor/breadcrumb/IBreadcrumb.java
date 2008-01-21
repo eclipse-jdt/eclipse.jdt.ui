@@ -40,14 +40,21 @@ public interface IBreadcrumb {
 	public ISelectionProvider getSelectionProvider();
 	
 	/**
-	 * Sets the keyboard focus inside this breadcrumb.
+	 * Activates the breadcrumb. This sets the keyboard focus 
+	 * inside this breadcrumb and retargets the editor
+	 * actions.
 	 */
-	public void setFocus();
+	public void activate();
 	
 	/**
-	 * @return true if this breadcrumb has the keyboard focus
+	 * A breadcrumb is active if it either has the focus or
+	 * another workbench part has the focus and the breadcrumb
+	 * had the focus before the other workbench part was made
+	 * active.
+	 * 
+	 * @return true if this breadcrumb is active
 	 */
-	public boolean hasFocus();
+	public boolean isActive();
 
 	/**
 	 * Set the input of the breadcrumb to the given element
