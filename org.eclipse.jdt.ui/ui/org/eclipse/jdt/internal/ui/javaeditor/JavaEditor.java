@@ -22,7 +22,6 @@ import java.util.Map;
 import org.eclipse.core.commands.operations.IOperationApprover;
 import org.eclipse.core.commands.operations.IUndoContext;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -1381,14 +1380,22 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 */
 		public void setSelection(ISelection selection) {
 			if (selection instanceof ITextSelection) {
-				fInvalidSelection= null;
-				super.setSelection(selection);
-			} else if (selection instanceof IStructuredSelection && ((IStructuredSelection) selection).getFirstElement() instanceof EditorBreadcrumb) {
-				if (fInvalidSelection == null) {
-					markInvalid();
+				if (fInvalidSelection != null) {
+					fInvalidSelection= null;
+					
+					ITextSelection newSelection= (ITextSelection) selection;
+					ITextSelection oldSelection= (ITextSelection) getSelection();
+					
+					if (newSelection.getOffset() == oldSelection.getOffset() && newSelection.getLength() == oldSelection.getLength()) {
+						markValid();
+					} else {
+						super.setSelection(selection);
+					}
 				} else {
-					markValid();
+					super.setSelection(selection);
 				}
+			} else if (selection instanceof IStructuredSelection && ((IStructuredSelection) selection).getFirstElement() instanceof EditorBreadcrumb) {
+				markInvalid();
 			}
 		}
 
@@ -1440,8 +1447,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * Marks this selection provider as being valid.  
 		 */
 		private void markValid() {
-			Assert.isLegal(fInvalidSelection != null);
-
 			fInvalidSelection= null;
 
 			SelectionChangedEvent event= new SelectionChangedEvent(this, fValidSelection);
