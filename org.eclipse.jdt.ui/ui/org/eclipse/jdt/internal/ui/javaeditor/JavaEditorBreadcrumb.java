@@ -373,7 +373,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		fViewer= new ProblemBreadcrumbViewer(composite, SWT.HORIZONTAL);
 
 		AppearanceAwareLabelProvider parentLabelProvider= new AppearanceAwareLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.F_APP_TYPE_SIGNATURE
-				| JavaElementLabels.ALL_CATEGORY | JavaElementImageProvider.SMALL_ICONS, AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
+				| JavaElementLabels.ALL_CATEGORY, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
 		DecoratingJavaLabelProvider decoratingJavaLabelProvider= new DecoratingJavaLabelProvider(parentLabelProvider, true);
 
 		fLabelProvider= new JavaBreadcrumbLabelProvider(decoratingJavaLabelProvider);
