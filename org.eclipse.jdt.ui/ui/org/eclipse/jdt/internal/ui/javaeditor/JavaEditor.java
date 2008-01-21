@@ -2526,6 +2526,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 		
 		super.dispose();
+		fSelectionProvider= null;
 	}
 	
 	protected void createActions() {
