@@ -42,11 +42,15 @@ public class ShowInBreadcrumbAction extends Action {
 		IBreadcrumb breadcrumb= fEditor.getBreadcrumb();
 		if (breadcrumb == null)
 			return;
+		
+		if (breadcrumb.isActive()) {
+			fEditor.getViewer().getTextWidget().setFocus();
+		} else {
+			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+			store.setValue(PreferenceConstants.EDITOR_SHOW_BREADCRUMB, true);
 
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(PreferenceConstants.EDITOR_SHOW_BREADCRUMB, true);
-
-		breadcrumb.activate();
+			breadcrumb.activate();
+		}
 	}
 
 }

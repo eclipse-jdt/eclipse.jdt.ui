@@ -14,10 +14,11 @@ import org.eclipse.core.commands.operations.IUndoContext;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
-import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.operations.UndoRedoActionGroup;
@@ -26,6 +27,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.BuildActionGroup;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.ProjectActionGroup;
@@ -68,20 +70,64 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 		}
 	}
 	
+	private static final class BreadcrumbActionGroup extends ActionGroup {
+		
+		private static final class GoToEditorAction extends Action {
+
+			private final JavaEditor fJavaEditor;
+
+			public GoToEditorAction(JavaEditor javaEditor) {
+				super(JavaEditorMessages.JavaEditorBreadcrumbActionGroup_go_to_editor_action_label);
+				setEnabled(true);
+				fJavaEditor= javaEditor;
+			}
+
+			/* (non-Javadoc)
+			 * @see org.eclipse.jface.action.Action#run()
+			 */
+			public void run() {
+				fJavaEditor.getViewer().getTextWidget().setFocus();
+			}
+		}
+		
+		private Action fGoToEditor;
+
+		public BreadcrumbActionGroup(JavaEditor javaEditor) {
+			fGoToEditor= new GoToEditorAction(javaEditor);
+			fGoToEditor.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB);
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.ui.actions.ActionGroup#fillActionBars(org.eclipse.ui.IActionBars)
+		 */
+		public void fillActionBars(IActionBars actionBars) {
+			super.fillActionBars(actionBars);
+			actionBars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB, fGoToEditor);
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.ui.actions.ActionGroup#fillContextMenu(org.eclipse.jface.action.IMenuManager)
+		 */
+		public void fillContextMenu(IMenuManager menu) {
+			super.fillContextMenu(menu);
+			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGoToEditor);
+		}
+	}
 	
-	public JavaEditorBreadcrumbActionGroup(IWorkbenchPartSite site, ISelectionProvider selectionProvider) {
+	public JavaEditorBreadcrumbActionGroup(JavaEditor javaEditor, ISelectionProvider selectionProvider) {
 		super(new ActionGroup[] {
-				new UndoRedoActionGroup(site, (IUndoContext) ResourcesPlugin.getWorkspace().getAdapter(IUndoContext.class), true),
-				new NewWizardsActionGroup(site),
-				new JavaSearchActionGroup(site, selectionProvider),
-				new OpenViewActionGroup(site, selectionProvider),
-				new CCPActionGroup(site, selectionProvider),
-				new GenerateBuildPathActionGroup(site, selectionProvider),
-				new GenerateActionGroup(site, selectionProvider),
-				new RefactorActionGroup(site, selectionProvider),
-				new BuildActionGroup(site, selectionProvider),
-				new ProjectActionGroup(site, selectionProvider),
-				new WorkingSetActionGroup(site, selectionProvider)
+				new BreadcrumbActionGroup(javaEditor),
+				new UndoRedoActionGroup(javaEditor.getEditorSite(), (IUndoContext) ResourcesPlugin.getWorkspace().getAdapter(IUndoContext.class), true),
+				new NewWizardsActionGroup(javaEditor.getEditorSite()), 
+				new JavaSearchActionGroup(javaEditor.getEditorSite(), selectionProvider),
+				new OpenViewActionGroup(javaEditor.getEditorSite(), selectionProvider), 
+				new CCPActionGroup(javaEditor.getEditorSite(), selectionProvider),
+				new GenerateBuildPathActionGroup(javaEditor.getEditorSite(), selectionProvider), 
+				new GenerateActionGroup(javaEditor.getEditorSite(), selectionProvider),
+				new RefactorActionGroup(javaEditor.getEditorSite(), selectionProvider), 
+				new BuildActionGroup(javaEditor.getEditorSite(), selectionProvider),
+				new ProjectActionGroup(javaEditor.getEditorSite(), selectionProvider), 
+				new WorkingSetActionGroup(javaEditor.getEditorSite(), selectionProvider)
 		});
 	}
 }

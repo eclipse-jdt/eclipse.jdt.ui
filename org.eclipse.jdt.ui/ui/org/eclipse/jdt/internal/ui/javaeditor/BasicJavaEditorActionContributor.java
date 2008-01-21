@@ -186,7 +186,11 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fToggleBreadcrumbAction.setEditor(textEditor);
 
 		fGotoMatchingBracket.setAction(getAction(textEditor, GotoMatchingBracketAction.GOTO_MATCHING_BRACKET));
-		fShowInBreadcrumb.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB));
+		if (textEditor == null) {
+			fShowInBreadcrumb.setText(JavaEditorMessages.BasicJavaEditorActionContributor_go_to_editor_from_breadcrumb_action_label);
+		} else {
+			fShowInBreadcrumb.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB));
+		}
 		fShowOutline.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_OUTLINE));
 		fOpenHierarchy.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.OPEN_HIERARCHY));
 		fOpenStructure.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.OPEN_STRUCTURE));

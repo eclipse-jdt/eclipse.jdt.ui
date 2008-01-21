@@ -388,7 +388,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			}
 		});
 
-		fBreadcrumbActionGroup= new JavaEditorBreadcrumbActionGroup(getJavaEditor().getSite(), fViewer);
+		fBreadcrumbActionGroup= new JavaEditorBreadcrumbActionGroup(getJavaEditor(), fViewer);
 
 		return fViewer;
 	}
