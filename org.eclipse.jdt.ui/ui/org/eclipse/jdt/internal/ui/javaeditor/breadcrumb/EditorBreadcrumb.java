@@ -68,8 +68,6 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 
 	private IPropertyChangeListener fPropertyChangeListener;
 
-	private ISelection fOldTextSelection;
-
 	
 	/**
 	 * The editor inside which this breadcrumb is shown.
@@ -333,7 +331,6 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		
 		getTextEditor().getEditorSite().getActionBars().updateActionBars();
 		
-		fOldTextSelection= getTextEditor().getSelectionProvider().getSelection();
 		getTextEditor().getSelectionProvider().setSelection(new StructuredSelection(this));
 	}
 
@@ -350,7 +347,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		
 		getTextEditor().getEditorSite().getActionBars().updateActionBars();
 		
-		getTextEditor().getSelectionProvider().setSelection(fOldTextSelection);
+		getTextEditor().getSelectionProvider().setSelection(new StructuredSelection(this));
 	}
 
 	/**

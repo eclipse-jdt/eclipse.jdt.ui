@@ -22,6 +22,7 @@ import java.util.Map;
 import org.eclipse.core.commands.operations.IOperationApprover;
 import org.eclipse.core.commands.operations.IUndoContext;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -1346,6 +1347,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		private ListenerList fSelectionListeners= new ListenerList();
 		private ListenerList fPostSelectionListeners= new ListenerList();
 		private ITextSelection fInvalidSelection;
+		private ISelection fValidSelection;
 
 		/*
 		 * @see org.eclipse.jface.viewers.ISelectionProvider#addSelectionChangedListener(ISelectionChangedListener)
@@ -1382,7 +1384,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				fInvalidSelection= null;
 				super.setSelection(selection);
 			} else if (selection instanceof IStructuredSelection && ((IStructuredSelection) selection).getFirstElement() instanceof EditorBreadcrumb) {
-				markInvalid();
+				if (fInvalidSelection == null) {
+					markInvalid();
+				} else {
+					markValid();
+				}
 			}
 		}
 
@@ -1416,9 +1422,29 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * selection is one which can not be selected in the source viewer.
 		 */
 		private void markInvalid() {
+			fValidSelection= getSelection();
 			fInvalidSelection= new TextSelection(0, 0);
 
 			SelectionChangedEvent event= new SelectionChangedEvent(this, fInvalidSelection);
+
+			Object[] listeners= fSelectionListeners.getListeners();
+			for (int i= 0; i < listeners.length; i++)
+				((ISelectionChangedListener) listeners[i]).selectionChanged(event);
+
+			listeners= fPostSelectionListeners.getListeners();
+			for (int i= 0; i < listeners.length; i++)
+				((ISelectionChangedListener) listeners[i]).selectionChanged(event);
+		}
+		
+		/**
+		 * Marks this selection provider as being valid.  
+		 */
+		private void markValid() {
+			Assert.isLegal(fInvalidSelection != null);
+
+			fInvalidSelection= null;
+
+			SelectionChangedEvent event= new SelectionChangedEvent(this, fValidSelection);
 
 			Object[] listeners= fSelectionListeners.getListeners();
 			for (int i= 0; i < listeners.length; i++)
