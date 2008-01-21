@@ -214,11 +214,14 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 		JavaElementLine element= (JavaElementLine) match.getElement();
 		IJavaElement javaElement= element.getJavaElement();
 		try {
-			IEditorPart editor= JavaUI.openInEditor(javaElement, activate, false);
+			IEditorPart editor= JavaUI.openInEditor(javaElement, false, false);
 			if (editor instanceof ITextEditor) {
 				ITextEditor textEditor= (ITextEditor) editor;
 				textEditor.selectAndReveal(currentOffset, currentLength);
 			}
+			// activating at the end avoids an outdated selection event from JavaUI.openInEditor(..):
+			if (editor != null && activate)
+				editor.getEditorSite().getPage().activate(editor);
 		} catch (PartInitException e1) {
 			return;
 		} catch (JavaModelException e1) {
@@ -310,15 +313,34 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 			}
 		}
 		
-		if (finder.initialize(astRoot, selection.getOffset(), selection.getLength()) == null) {
+		int offset= selection.getOffset();
+		int length= selection.getLength();
+		if (finder.initialize(astRoot, offset, length) == null) {
 			final OccurrencesSearchQuery query= new OccurrencesSearchQuery(finder, astRoot.getTypeRoot());
 			query.run(null);
+			OccurrencesSearchResult result= (OccurrencesSearchResult) query.getSearchResult();
+			final JavaElementLine line= getMatchingLine(result, offset, length);
+			
 			getSite().getShell().getDisplay().asyncExec(new Runnable() {
 				public void run() {
-					setInput(query.getSearchResult(), null);
-					getViewer().setSelection(StructuredSelection.EMPTY);
+					setInput(query.getSearchResult(), line == null ? null : new StructuredSelection(line));
 				}
 			});
 		}
+	}
+
+	private static JavaElementLine getMatchingLine(OccurrencesSearchResult result, int offset, int length) {
+		Object[] elements= result.getElements();
+		for (int i= 0; i < elements.length; i++) {
+			JavaElementLine line= (JavaElementLine) elements[i];
+			Match[] matches= result.getMatches(line);
+			for (int j= 0; j < matches.length; j++) {
+				Match match= matches[j];
+				if (match.getOffset() <= offset && offset + length <= match.getOffset() + match.getLength()) {
+					return line;
+				}
+			}
+		}
+		return null;
 	}
 }
