@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,7 +55,7 @@ import org.eclipse.ui.dialogs.IWorkingSetPage;
 /**
  * A tree viewer on the left is used to show the workspace content, a table viewer on the
  * right is used to show the working set content. Buttons to move content from right
- * to left and vice versa are available between the two viewers. A text field allows to 
+ * to left and vice versa are available between the two viewers. A text field allows to
  * set/change the working sets name.
  * 
  * @since 3.1
@@ -448,7 +448,6 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 			IWorkingSetManager workingSetManager= PlatformUI.getWorkbench().getWorkingSetManager();
 			fWorkingSet= workingSetManager.createWorkingSet(workingSetName, (IAdaptable[])elements.toArray(new IAdaptable[elements.size()]));
 			fWorkingSet.setId(getPageId());
-			workingSetManager.addWorkingSet(fWorkingSet);
 		} else {
 			// Add inaccessible resources
 			IAdaptable[] oldItems= fWorkingSet.getElements();
