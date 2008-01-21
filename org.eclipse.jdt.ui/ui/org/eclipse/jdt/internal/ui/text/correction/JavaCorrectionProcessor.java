@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,9 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMarkerHelpRegistry;
 import org.eclipse.ui.IMarkerResolution;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.keys.IBindingService;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SimpleMarkerAnnotation;
 
 import org.eclipse.ui.ide.IDE;
@@ -44,6 +47,8 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ltk.core.refactoring.NullChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
@@ -170,6 +175,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 		
 			public void assistSessionStarted(ContentAssistEvent event) {
 				fAssistant.setStatusLineVisible(true);
+				fAssistant.setStatusMessage(getJumpHintStatusLineMessage());
 			}
 
 			public void selectionChanged(ICompletionProposal proposal, boolean smartToggle) {
@@ -178,12 +184,32 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 					String message= statusLineProposal.getStatusMessage();
 					if (message != null) {
 						fAssistant.setStatusMessage(message);
-					} else {
-						fAssistant.setStatusMessage(""); //$NON-NLS-1$
+						return;
 					}
-				} else {
-					fAssistant.setStatusMessage(""); //$NON-NLS-1$
 				}
+				fAssistant.setStatusMessage(getJumpHintStatusLineMessage());
+			}
+
+			private String getJumpHintStatusLineMessage() {
+				if (fAssistant.isUpdatedOffset()) {
+					String key= getQuickAssistBinding();
+					if (key == null)
+						return CorrectionMessages.JavaCorrectionProcessor_go_to_original_using_menu;
+					else
+						return Messages.format(CorrectionMessages.JavaCorrectionProcessor_go_to_original_using_key, key);
+				} else if (fAssistant.isProblemLocationAvailable()) {
+					String key= getQuickAssistBinding();
+					if (key == null)
+						return CorrectionMessages.JavaCorrectionProcessor_go_to_closest_using_menu;
+					else
+						return Messages.format(CorrectionMessages.JavaCorrectionProcessor_go_to_closest_using_key, key);
+				} else
+					return ""; //$NON-NLS-1$
+			}
+			
+			private String getQuickAssistBinding() {
+				final IBindingService bindingSvc= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
+				return bindingSvc.getBestActiveBindingFormattedFor(ITextEditorActionDefinitionIds.QUICK_ASSIST);
 			}
 		});
 	}
@@ -450,8 +476,8 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 					}
 					res.add(curr);
 				}
-			} else if (allHandled) { 
-				if (i > 0) { // first non handled problem 
+			} else if (allHandled) {
+				if (i > 0) { // first non handled problem
 					res= new ArrayList(locations.length - i);
 					for (int k= 0; k < i; k++) {
 						res.add(locations[k]);

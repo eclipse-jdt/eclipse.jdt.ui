@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,9 @@ import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.contentassist.ContentAssistEvent;
+import org.eclipse.jface.text.contentassist.ICompletionListener;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
 import org.eclipse.jface.text.quickassist.QuickAssistAssistant;
 import org.eclipse.jface.text.source.Annotation;
@@ -63,6 +66,8 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 	private Annotation[] fCurrentAnnotations;
 
 	private QuickAssistLightBulbUpdater fLightBulbUpdater;
+	private boolean fIsCompletionActive;
+	private boolean fIsProblemLocationAvailable;
 
 
 	/**
@@ -90,6 +95,19 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 
 		c= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, manager);
 		setProposalSelectorBackground(c);
+		
+		addCompletionListener(new ICompletionListener() {
+			public void assistSessionEnded(ContentAssistEvent event) {
+				fIsCompletionActive= false;
+			}
+
+			public void assistSessionStarted(ContentAssistEvent event) {
+				fIsCompletionActive= true;
+			}
+
+			public void selectionChanged(ICompletionProposal proposal, boolean smartToggle) {
+			}
+		});
 	}
 
 	public IEditorPart getEditor() {
@@ -149,6 +167,18 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 	 * @see IQuickAssistAssistant#showPossibleQuickAssists()
 	 */
 	public String showPossibleQuickAssists() {
+		boolean isReinvoked= false;
+		fIsProblemLocationAvailable= false;
+		
+		if (fIsCompletionActive) {
+			if (isUpdatedOffset()) {
+				isReinvoked= true;
+				restorePosition();
+				hide();
+				fIsProblemLocationAvailable= true;
+			}
+		}
+		
 		fPosition= null;
 		fCurrentAnnotations= null;
 		
@@ -162,13 +192,17 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 			Point selectedRange= fViewer.getSelectedRange();
 			int currOffset= selectedRange.x;
 			int currLength= selectedRange.y;
-			boolean goToClosest= (currLength == 0);
+			boolean goToClosest= (currLength == 0) && !isReinvoked;
 			
 			int newOffset= collectQuickFixableAnnotations(fEditor, currOffset, goToClosest, resultingAnnotations);
 			if (newOffset != currOffset) {
 				storePosition(currOffset, currLength);
 				fViewer.setSelectedRange(newOffset, 0);
 				fViewer.revealRange(newOffset, 0);
+				fIsProblemLocationAvailable= true;
+				if (fIsCompletionActive) {
+					hide();
+				}
 			}
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
@@ -331,6 +365,14 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 	 */
 	public boolean isUpdatedOffset() {
 		return fPosition != null;
+	}
+	
+	/**
+	 * @return <code>true</code> if a problem exist on the current line and the completion was not invoked at the problem location
+	 * @since 3.4
+	 */
+	public boolean isProblemLocationAvailable() {
+		return fIsProblemLocationAvailable;
 	}
 
 	/**
