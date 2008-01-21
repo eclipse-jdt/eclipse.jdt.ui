@@ -40,9 +40,11 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -114,14 +116,14 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 	private boolean canEnable(Object[] objects) {
 		for (int i= 0; i < objects.length; i++) {
 			Object element= objects[i];
-			if (isValideElement(element))
+			if (isValidElement(element))
 				return true;
 		}
 
 		return false;
 	}
 	
-	private boolean isValideElement(Object element) {
+	private boolean isValidElement(Object element) {
 		if (element instanceof IMember)
 			return true;
 		
@@ -138,6 +140,12 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 			return true;
 		
 		if (element instanceof IPackageFragment)
+			return true;
+		
+		if (element instanceof IPackageFragmentRoot)
+			return true;
+
+		if (element instanceof IJavaProject)
 			return true;
 
 		if (element instanceof IResource)
@@ -215,6 +223,13 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 	private String getQualifiedName(Object element) {
 		if (element instanceof IResource)
 			return ((IResource) element).getFullPath().toString();
+		
+		if (element instanceof IJavaProject || element instanceof IPackageFragmentRoot) {
+			IResource resource= ((IJavaElement) element).getResource();
+			if (resource != null)
+				return getQualifiedName(resource);
+		}
+		
 		return JavaElementLabels.getTextLabel(element, LABEL_FLAGS);
 	}
 
@@ -234,7 +249,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
     	List result= new ArrayList();
     	for (Iterator iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
 			Object element= iter.next();
-			if (isValideElement(element))
+			if (isValidElement(element))
 				result.add(element);
 		}
     	if (result.isEmpty())
