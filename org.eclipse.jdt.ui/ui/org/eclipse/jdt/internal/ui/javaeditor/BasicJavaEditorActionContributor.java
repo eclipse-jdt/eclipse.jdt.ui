@@ -183,8 +183,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 
 		fTogglePresentation.setEditor(textEditor);
 		fToggleMarkOccurrencesAction.setEditor(textEditor);
-		if (textEditor != null)
-			fToggleBreadcrumbAction.setEditor(textEditor);
+		fToggleBreadcrumbAction.setEditor(textEditor);
 
 		fGotoMatchingBracket.setAction(getAction(textEditor, GotoMatchingBracketAction.GOTO_MATCHING_BRACKET));
 		fShowInBreadcrumb.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB));
@@ -201,7 +200,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fGotoPreviousMemberAction.setAction(getAction(textEditor, GoToNextPreviousMemberAction.PREVIOUS_MEMBER));
 
 		fRemoveOccurrenceAnnotationsAction.setAction(getAction(textEditor, "RemoveOccurrenceAnnotations")); //$NON-NLS-1$
-		fRetargetShowInformationAction.setAction(getAction(textEditor, ITextEditorActionConstants.SHOW_INFORMATION));		
+		fRetargetShowInformationAction.setAction(getAction(textEditor, ITextEditorActionConstants.SHOW_INFORMATION));
 
 		if (part instanceof JavaEditor) {
 			JavaEditor javaEditor= (JavaEditor) part;
@@ -224,7 +223,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		actionBars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_PREVIOUS_ANNOTATION, action);
 		actionBars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, action);
 		action= getAction(textEditor, IJavaEditorActionConstants.COPY_QUALIFIED_NAME);
-		actionBars.setGlobalActionHandler(CopyQualifiedNameAction.ACTION_HANDLER_ID, action);		
+		actionBars.setGlobalActionHandler(CopyQualifiedNameAction.ACTION_HANDLER_ID, action);
 	}
 
 	/*
