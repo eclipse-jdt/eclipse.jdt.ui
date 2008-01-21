@@ -131,7 +131,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 
 		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY, fTogglePresentation);
 		bars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.TOGGLE_MARK_OCCURRENCES, fToggleMarkOccurrencesAction);
-		bars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.TOGGLE_BREADCRUMB, fToggleBreadcrumbAction);
 	}
 
 	/*
@@ -183,7 +182,8 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 
 		fTogglePresentation.setEditor(textEditor);
 		fToggleMarkOccurrencesAction.setEditor(textEditor);
-		fToggleBreadcrumbAction.setEditor(textEditor);
+		if (textEditor != null)
+			fToggleBreadcrumbAction.setEditor(textEditor);
 
 		fGotoMatchingBracket.setAction(getAction(textEditor, GotoMatchingBracketAction.GOTO_MATCHING_BRACKET));
 		if (textEditor == null) {
@@ -228,6 +228,8 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		actionBars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, action);
 		action= getAction(textEditor, IJavaEditorActionConstants.COPY_QUALIFIED_NAME);
 		actionBars.setGlobalActionHandler(CopyQualifiedNameAction.ACTION_HANDLER_ID, action);
+
+		actionBars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.TOGGLE_BREADCRUMB, fToggleBreadcrumbAction);
 	}
 
 	/*
