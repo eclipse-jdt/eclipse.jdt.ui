@@ -232,13 +232,13 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 	}
 
-	private static final class JavaBreadcrumbElementProvider implements ITreeContentProvider {
+	private static final class JavaEditorBreadcrumbContentProvider implements ITreeContentProvider {
 
 		private final StandardJavaElementContentProvider fParent;
 		private Object[] fElements;
 		private Object fLastInputElement;
 
-		public JavaBreadcrumbElementProvider(StandardJavaElementContentProvider parent) {
+		public JavaEditorBreadcrumbContentProvider(StandardJavaElementContentProvider parent) {
 			fParent= parent;
 		}
 
@@ -270,11 +270,8 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		 * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(java.lang.Object)
 		 */
 		public Object getParent(Object element) {
-			if (element instanceof IResource)
-				return ((IResource) element).getParent();
-			
 			Object result= fParent.getParent(element);
-			
+
 			if (result instanceof ITypeRoot) {
 				if (ActionUtil.isOnBuildPath((IJavaElement) result)) {
 					result= fParent.getParent(result);
@@ -284,7 +281,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 						result= fParent.getParent(result);
 				}
 			}
-			
+
 			return result;
 		}
 
@@ -383,7 +380,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		fViewer.setLabelProvider(fLabelProvider);
 
 		StandardJavaElementContentProvider parentContentProvider= new StandardJavaElementContentProvider(true);
-		JavaBreadcrumbElementProvider contentProvider= new JavaBreadcrumbElementProvider(parentContentProvider);
+		JavaEditorBreadcrumbContentProvider contentProvider= new JavaEditorBreadcrumbContentProvider(parentContentProvider);
 		fViewer.setContentProvider(contentProvider);
 		fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -453,6 +450,10 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#open(java.lang.Object)
 	 */
 	protected boolean open(Object element) {
+		if (element instanceof IFile) {
+			return openInNewEditor(element);
+		}
+		
 		if (!(element instanceof IJavaElement))
 			return false;
 		
@@ -465,7 +466,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		if (root == null)
 			return false;
 
-		return openInNewEditor((IJavaElement) element);
+		return openInNewEditor(element);
 	}
 
 	/*
@@ -492,11 +493,11 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		return revealInEditor(javaElement);
 	}
 
-	private boolean openInNewEditor(IJavaElement element) {
+	private boolean openInNewEditor(Object element) {
 		try {
 			IEditorPart newEditor= EditorUtility.openInEditor(element);
-			if (newEditor != null)
-				EditorUtility.revealInEditor(newEditor, element);
+			if (newEditor != null && element instanceof IJavaElement)
+				EditorUtility.revealInEditor(newEditor, (IJavaElement) element);
 
 			return true;
 		} catch (PartInitException e) {
