@@ -29,8 +29,10 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.OpenEvent;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.ITextViewer;
@@ -228,6 +230,21 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 				} else if (doOpen(event.getSelection())) {
 					fTextViewer.getTextWidget().setFocus();
 					fBreadcrumbViewer.setInput(getCurrentInput());
+				}
+			}
+		});
+		
+		fBreadcrumbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				StructuredSelection selection= (StructuredSelection) event.getSelection();
+				if (selection.size() != 1)
+					return;
+
+				Object element= selection.getFirstElement();
+				if (fBreadcrumbViewer.getInput() == element || fBreadcrumbViewer.getInput().equals(element)) {
+					if (doReveal(selection)) {
+						fBreadcrumbViewer.setFocus();
+					}
 				}
 			}
 		});

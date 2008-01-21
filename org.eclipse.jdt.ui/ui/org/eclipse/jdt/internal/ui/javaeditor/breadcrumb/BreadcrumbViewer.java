@@ -393,9 +393,6 @@ public class BreadcrumbViewer extends StructuredViewer {
 		setInput(element);
 		BreadcrumbItem item= (BreadcrumbItem) doFindItem(element);
 		selectItem(item);
-		if (!((ITreeContentProvider) getContentProvider()).hasChildren(element)) {
-			fireOpen();
-		}
 	}
 	
 	/**
