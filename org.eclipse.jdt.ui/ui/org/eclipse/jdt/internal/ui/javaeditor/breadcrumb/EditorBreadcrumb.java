@@ -255,6 +255,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 				if (fBreadcrumbViewer.getInput() == element || fBreadcrumbViewer.getInput().equals(element)) {
 					if (doReveal(selection)) {
 						fBreadcrumbViewer.setFocus();
+						fBreadcrumbViewer.setInput(element);
 					}
 				}
 			}
