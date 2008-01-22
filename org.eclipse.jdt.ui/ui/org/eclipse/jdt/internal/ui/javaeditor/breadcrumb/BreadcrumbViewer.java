@@ -393,6 +393,10 @@ public class BreadcrumbViewer extends StructuredViewer {
 		setInput(element);
 		BreadcrumbItem item= (BreadcrumbItem) doFindItem(element);
 		selectItem(item);
+		BreadcrumbItem leaf= (BreadcrumbItem) fTreeItems.get(fTreeItems.size() - 1);
+		if (leaf != item)
+			leaf.openDropDownMenu(null);
+		
 	}
 	
 	/**
