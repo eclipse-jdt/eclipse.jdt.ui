@@ -253,10 +253,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 
 				Object element= selection.getFirstElement();
 				if (fBreadcrumbViewer.getInput() == element || fBreadcrumbViewer.getInput().equals(element)) {
-					if (doReveal(selection)) {
-						fBreadcrumbViewer.setFocus();
-						fBreadcrumbViewer.setInput(element);
-					}
+					doReveal(selection);
 				}
 			}
 		});
@@ -317,7 +314,17 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		if (structuredSelection.isEmpty())
 			return false;
 
-		return reveal(structuredSelection.getFirstElement());
+		if (fOldTextSelection != null) {
+			getTextEditor().getSelectionProvider().setSelection(fOldTextSelection);
+			
+			boolean result= reveal(structuredSelection.getFirstElement());
+			
+			fOldTextSelection= getTextEditor().getSelectionProvider().getSelection();
+			getTextEditor().getSelectionProvider().setSelection(new StructuredSelection(this));
+			return result;
+		} else {
+			return reveal(structuredSelection.getFirstElement());
+		}
 	}
 
 	/**
@@ -351,6 +358,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		getTextEditor().getEditorSite().getActionBars().updateActionBars();
 		
 		getTextEditor().getSelectionProvider().setSelection(fOldTextSelection);
+		fOldTextSelection= null;
 	}
 
 	/**
@@ -425,6 +433,9 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		Widget item= event.widget;
 		if (!(item instanceof Control))
 			return false;
+		
+		if (fBreadcrumbViewer.isDropDownOpen())
+			return true;
 
 		return isChild((Control) item, fBreadcrumbViewer.getControl());
 	}

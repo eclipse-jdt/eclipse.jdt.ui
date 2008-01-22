@@ -507,7 +507,6 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	}
 
 	private boolean revealInEditor(IJavaElement element) {
-		getJavaEditor().getViewer().getTextWidget().setFocus();
 		EditorUtility.revealInEditor(getJavaEditor(), element);
 		return true;
 	}
