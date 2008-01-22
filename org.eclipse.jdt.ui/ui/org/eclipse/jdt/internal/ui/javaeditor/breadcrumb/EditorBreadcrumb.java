@@ -228,7 +228,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 				if (doReveal(event.getSelection())) {
 					fTextViewer.getTextWidget().setFocus();
 				} else if (doOpen(event.getSelection())) {
-					fTextViewer.getTextWidget().setFocus();
+					fIsActive= false;
 					fBreadcrumbViewer.setInput(getCurrentInput());
 				}
 			}
@@ -239,7 +239,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 				if (doReveal(event.getSelection())) {
 					fTextViewer.getTextWidget().setFocus();
 				} else if (doOpen(event.getSelection())) {
-					fTextViewer.getTextWidget().setFocus();
+					fIsActive= false;
 					fBreadcrumbViewer.setInput(getCurrentInput());
 				}
 			}
