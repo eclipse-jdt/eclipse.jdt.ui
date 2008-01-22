@@ -224,7 +224,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		if (element instanceof IResource)
 			return ((IResource) element).getFullPath().toString();
 		
-		if (element instanceof IJavaProject || element instanceof IPackageFragmentRoot) {
+		if (element instanceof IPackageFragmentRoot) {
 			IResource resource= ((IJavaElement) element).getResource();
 			if (resource != null)
 				return getQualifiedName(resource);
