@@ -91,14 +91,10 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 		}
 		
 		private Action fGoToEditor;
-		private ToggleBreadcrumbAction fToggleBreadcrumbAction;
 
 		public BreadcrumbActionGroup(JavaEditor javaEditor) {
 			fGoToEditor= new GoToEditorAction(javaEditor);
 			fGoToEditor.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB);
-			
-			fToggleBreadcrumbAction= new ToggleBreadcrumbAction();
-			fToggleBreadcrumbAction.setEditor(javaEditor);
 		}
 
 		/* (non-Javadoc)
@@ -107,7 +103,6 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 		public void fillActionBars(IActionBars actionBars) {
 			super.fillActionBars(actionBars);
 			actionBars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB, fGoToEditor);
-			actionBars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.TOGGLE_BREADCRUMB, fToggleBreadcrumbAction);
 		}
 		
 		/* (non-Javadoc)

@@ -161,7 +161,6 @@ final class JavaEditorMessages extends NLS {
 	public static String Editor_OpenPropertiesFile_error_openEditor_dialogMessage;
 	public static String Editor_MoveLines_IllegalMove_status;
 	public static String BasicEditorActionContributor_specific_content_assist_menu;
-	public static String BasicJavaEditorActionContributor_go_to_editor_from_breadcrumb_action_label;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaEditorMessages.class);

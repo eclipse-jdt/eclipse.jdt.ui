@@ -2130,6 +2130,15 @@
                tooltip="%OpenTypeAction.tooltip">
          </action>
          <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.gotoBreadcrumb"
+               label="%ShowInBreadcrumbAction.label"
+               tooltip="%ShowInBreadcrumbAction.tooltip"
+               menubarPath="navigate/show.ext"
+               retarget="true"
+               allowLabelUpdate="true"
+               id="org.eclipse.jdt.ui.edit.text.java.gotoBreadcrumb">
+         </action>
+         <action
                definitionId="org.eclipse.jdt.ui.generate.javadoc"
                label="%GenerateJavadocAction.label"
                helpContextId="org.eclipse.jdt.ui.generate_javadoc_action"

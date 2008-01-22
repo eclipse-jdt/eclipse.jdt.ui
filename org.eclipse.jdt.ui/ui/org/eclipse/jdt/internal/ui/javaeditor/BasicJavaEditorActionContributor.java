@@ -131,6 +131,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 
 		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY, fTogglePresentation);
 		bars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.TOGGLE_MARK_OCCURRENCES, fToggleMarkOccurrencesAction);
+		bars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.TOGGLE_BREADCRUMB, fToggleBreadcrumbAction);
 	}
 
 	/*
@@ -155,7 +156,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 
 		IMenuManager navigateMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_NAVIGATE);
 		if (navigateMenu != null) {
-			navigateMenu.appendToGroup(IWorkbenchActionConstants.SHOW_EXT, fShowInBreadcrumb);
 			navigateMenu.appendToGroup(IWorkbenchActionConstants.SHOW_EXT, fShowOutline);
 			navigateMenu.appendToGroup(IWorkbenchActionConstants.SHOW_EXT, fOpenHierarchy);
 		}
@@ -182,15 +182,9 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 
 		fTogglePresentation.setEditor(textEditor);
 		fToggleMarkOccurrencesAction.setEditor(textEditor);
-		if (textEditor != null)
-			fToggleBreadcrumbAction.setEditor(textEditor);
 
 		fGotoMatchingBracket.setAction(getAction(textEditor, GotoMatchingBracketAction.GOTO_MATCHING_BRACKET));
-		if (textEditor == null) {
-			fShowInBreadcrumb.setText(JavaEditorMessages.BasicJavaEditorActionContributor_go_to_editor_from_breadcrumb_action_label);
-		} else {
-			fShowInBreadcrumb.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB));
-		}
+		fShowInBreadcrumb.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB));
 		fShowOutline.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_OUTLINE));
 		fOpenHierarchy.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.OPEN_HIERARCHY));
 		fOpenStructure.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.OPEN_STRUCTURE));
@@ -229,7 +223,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		action= getAction(textEditor, IJavaEditorActionConstants.COPY_QUALIFIED_NAME);
 		actionBars.setGlobalActionHandler(CopyQualifiedNameAction.ACTION_HANDLER_ID, action);
 
-		actionBars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.TOGGLE_BREADCRUMB, fToggleBreadcrumbAction);
+		actionBars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB, fShowInBreadcrumb);
 	}
 
 	/*
@@ -243,6 +237,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fPartListeners.clear();
 
 		setActiveEditor(null);
+		fToggleBreadcrumbAction.dispose();
 		super.dispose();
 	}
 }

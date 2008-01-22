@@ -16,8 +16,7 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.TextEditorAction;
+import org.eclipse.ui.texteditor.ResourceAction;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -31,7 +30,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
  * @since 3.4
  */
-public class ToggleBreadcrumbAction extends TextEditorAction implements IPropertyChangeListener {
+public class ToggleBreadcrumbAction extends ResourceAction implements IPropertyChangeListener {
 
 	private IPreferenceStore fStore;
 
@@ -39,7 +38,7 @@ public class ToggleBreadcrumbAction extends TextEditorAction implements IPropert
 	 * Constructs and updates the action.
 	 */
 	public ToggleBreadcrumbAction() {
-		super(JavaEditorMessages.getBundleForConstructedKeys(), "ToggleBreadcrumbAction.", null, IAction.AS_CHECK_BOX); //$NON-NLS-1$
+		super(JavaEditorMessages.getBundleForConstructedKeys(), "ToggleBreadcrumbAction.", IAction.AS_CHECK_BOX); //$NON-NLS-1$
 		JavaPluginImages.setToolImageDescriptors(this, "toggle_breadcrumb.gif"); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.TOGGLE_BREADCRUMB_ACTION);
 		update();
@@ -56,36 +55,14 @@ public class ToggleBreadcrumbAction extends TextEditorAction implements IPropert
 	 * @see TextEditorAction#update
 	 */
 	public void update() {
-		ITextEditor editor= getTextEditor();
-
-		boolean checked= false;
-		if (editor instanceof JavaEditor)
-			checked= ((JavaEditor) editor).isBreadcrumbShown();
-
-		setChecked(checked);
-		setEnabled(editor != null);
-	}
-
-	/*
-	 * @see TextEditorAction#setEditor(ITextEditor)
-	 */
-	public void setEditor(ITextEditor editor) {
-
-		super.setEditor(editor);
-
-		if (editor != null) {
-
-			if (fStore == null) {
-				fStore= JavaPlugin.getDefault().getPreferenceStore();
-				fStore.addPropertyChangeListener(this);
-			}
-
-		} else if (fStore != null) {
-			fStore.removePropertyChangeListener(this);
-			fStore= null;
+		
+		if (fStore == null) {
+			fStore= JavaPlugin.getDefault().getPreferenceStore();
+			fStore.addPropertyChangeListener(this);
 		}
 
-		update();
+		setChecked(fStore.getBoolean(PreferenceConstants.EDITOR_SHOW_BREADCRUMB));
+		setEnabled(true);
 	}
 
 	/*
@@ -94,5 +71,15 @@ public class ToggleBreadcrumbAction extends TextEditorAction implements IPropert
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getProperty().equals(PreferenceConstants.EDITOR_SHOW_BREADCRUMB))
 			setChecked(Boolean.valueOf(event.getNewValue().toString()).booleanValue());
+	}
+
+	/**
+	 * Dispose this action
+	 */
+	public void dispose() {
+		if (fStore != null) {
+			fStore.removePropertyChangeListener(this);
+			fStore= null;
+		}
 	}
 }
