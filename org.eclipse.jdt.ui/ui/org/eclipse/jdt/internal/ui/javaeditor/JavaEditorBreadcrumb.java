@@ -399,8 +399,11 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	public void dispose() {
 		super.dispose();
 
-		fBreadcrumbActionGroup.dispose();
-		fLabelProvider.internalDispose();
+		if (fViewer != null) {
+			fBreadcrumbActionGroup.dispose();
+			fLabelProvider.internalDispose();
+			fViewer= null;
+		}
 	}
 
 	/*
