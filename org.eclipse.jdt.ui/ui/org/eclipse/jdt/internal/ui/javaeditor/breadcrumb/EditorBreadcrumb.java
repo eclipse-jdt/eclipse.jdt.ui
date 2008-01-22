@@ -168,7 +168,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		fBreadcrumbViewer.setFocus();
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.IBreadcrumb#isActive()
 	 */
 	public boolean isActive() {
