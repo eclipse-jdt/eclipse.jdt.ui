@@ -238,7 +238,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		label= PreferencesMessages.JavaEditorPreferencePage_showJavaElementOnly; 
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_SHOW_SEGMENTS, 0);
 		
-		label= PreferencesMessages.JavaEditorAppearanceConfigurationBlock_showEditorBreadcrumb;
+		label= PreferencesMessages.JavaEditorPreferencePage_showEditorBreadcrumb;
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_SHOW_BREADCRUMB, 0);
 
 		Label l= new Label(appearanceComposite, SWT.LEFT );

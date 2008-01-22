@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -118,7 +118,6 @@ public final class PreferencesMessages extends NLS {
 	public static String JavadocConfigurationPropertyPage_invalid_container;
 	public static String JavadocConfigurationPropertyPage_not_supported;
 	public static String JavadocConfigurationPropertyPage_read_only;
-	public static String JavaEditorAppearanceConfigurationBlock_showEditorBreadcrumb;
 	public static String JavaEditorPropertyPage_SaveActionLink_Text;
 	public static String NativeLibrariesPropertyPage_invalid_container;
 	public static String NativeLibrariesPropertyPage_not_supported;
@@ -223,6 +222,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_typing_smartOpeningBrace;
 	public static String JavaEditorPreferencePage_typing_smartTab;
 	public static String JavaEditorPreferencePage_hoverTab_title;
+	public static String JavaEditorPreferencePage_showEditorBreadcrumb;
 	public static String JavaEditorColoringConfigurationBlock_link;
 	public static String JavaBasePreferencePage_openTypeHierarchy;
 	public static String JavaBasePreferencePage_inView;
@@ -790,16 +790,16 @@ public final class PreferencesMessages extends NLS {
 	public static String CodeAssistConfigurationBlock_hideDeprecated_label;
 	
 	public static String CodeAssistStaticMembersConfigurationBlock_description;
-	public static String CodeAssistStaticMembersConfigurationBlock_newType_button; 
-	public static String CodeAssistStaticMembersConfigurationBlock_newMember_button; 
-	public static String CodeAssistStaticMembersConfigurationBlock_edit_button; 
-	public static String CodeAssistStaticMembersConfigurationBlock_remove_button; 
+	public static String CodeAssistStaticMembersConfigurationBlock_newType_button;
+	public static String CodeAssistStaticMembersConfigurationBlock_newMember_button;
+	public static String CodeAssistStaticMembersConfigurationBlock_edit_button;
+	public static String CodeAssistStaticMembersConfigurationBlock_remove_button;
 
 	public static String FavoriteStaticMemberInputDialog_member_title;
-	public static String FavoriteStaticMemberInputDialog_member_labelText; 
-	public static String FavoriteStaticMemberInputDialog_type_title; 
-	public static String FavoriteStaticMemberInputDialog_type_labelText; 
-	public static String FavoriteStaticMemberInputDialog_browse_button; 
+	public static String FavoriteStaticMemberInputDialog_member_labelText;
+	public static String FavoriteStaticMemberInputDialog_type_title;
+	public static String FavoriteStaticMemberInputDialog_type_labelText;
+	public static String FavoriteStaticMemberInputDialog_browse_button;
 	public static String FavoriteStaticMemberInputDialog_ChooseTypeDialog_title;
 	public static String FavoriteStaticMemberInputDialog_ChooseTypeDialog_description;
 	public static String FavoriteStaticMemberInputDialog_ChooseTypeDialog_error_message;
