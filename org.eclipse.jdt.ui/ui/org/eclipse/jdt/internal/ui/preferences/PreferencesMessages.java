@@ -118,6 +118,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavadocConfigurationPropertyPage_invalid_container;
 	public static String JavadocConfigurationPropertyPage_not_supported;
 	public static String JavadocConfigurationPropertyPage_read_only;
+	public static String JavaEditorAppearanceConfigurationBlock_showEditorBreadcrumb;
 	public static String JavaEditorPropertyPage_SaveActionLink_Text;
 	public static String NativeLibrariesPropertyPage_invalid_container;
 	public static String NativeLibrariesPropertyPage_not_supported;
