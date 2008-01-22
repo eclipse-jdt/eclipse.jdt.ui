@@ -51,7 +51,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	private ToggleBreadcrumbAction fToggleBreadcrumbAction;
 
 	private RetargetTextEditorAction fGotoMatchingBracket;
-	private RetargetTextEditorAction fShowInBreadcrumb;
 	private RetargetTextEditorAction fShowOutline;
 	private RetargetTextEditorAction fOpenStructure;
 	private RetargetTextEditorAction fOpenHierarchy;
@@ -85,9 +84,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fGotoMatchingBracket= new RetargetTextEditorAction(b, "GotoMatchingBracket."); //$NON-NLS-1$
 		fGotoMatchingBracket.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
 		
-		fShowInBreadcrumb= new RetargetTextEditorAction(b, "GotoBreadcrumb."); //$NON-NLS-1$
-		fShowInBreadcrumb.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB);
-
 		fShowOutline= new RetargetTextEditorAction(JavaEditorMessages.getBundleForConstructedKeys(), "ShowOutline."); //$NON-NLS-1$
 		fShowOutline.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
 
@@ -184,7 +180,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fToggleMarkOccurrencesAction.setEditor(textEditor);
 
 		fGotoMatchingBracket.setAction(getAction(textEditor, GotoMatchingBracketAction.GOTO_MATCHING_BRACKET));
-		fShowInBreadcrumb.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB));
 		fShowOutline.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_OUTLINE));
 		fOpenHierarchy.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.OPEN_HIERARCHY));
 		fOpenStructure.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.OPEN_STRUCTURE));
@@ -223,7 +218,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		action= getAction(textEditor, IJavaEditorActionConstants.COPY_QUALIFIED_NAME);
 		actionBars.setGlobalActionHandler(CopyQualifiedNameAction.ACTION_HANDLER_ID, action);
 
-		actionBars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB, fShowInBreadcrumb);
+		actionBars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB, getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB));
 	}
 
 	/*
