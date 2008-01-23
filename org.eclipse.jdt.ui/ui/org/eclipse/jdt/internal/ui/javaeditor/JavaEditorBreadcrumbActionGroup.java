@@ -29,7 +29,7 @@ import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
-import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
+import org.eclipse.jdt.ui.actions.NavigateActionGroup;
 import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
@@ -120,7 +120,7 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 				new UndoRedoActionGroup(javaEditor.getEditorSite(), (IUndoContext) ResourcesPlugin.getWorkspace().getAdapter(IUndoContext.class), true),
 				new NewWizardsActionGroup(javaEditor.getEditorSite()), 
 				new JavaSearchActionGroup(javaEditor.getEditorSite(), selectionProvider),
-				new OpenViewActionGroup(javaEditor.getEditorSite(), selectionProvider), 
+				new NavigateActionGroup(javaEditor.getEditorSite(), selectionProvider), 
 				new CCPActionGroup(javaEditor.getEditorSite(), selectionProvider),
 				new GenerateBuildPathActionGroup(javaEditor.getEditorSite(), selectionProvider), 
 				new GenerateActionGroup(javaEditor.getEditorSite(), selectionProvider),
