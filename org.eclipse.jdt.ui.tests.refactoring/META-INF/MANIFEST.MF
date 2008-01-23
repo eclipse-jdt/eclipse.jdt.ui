@@ -5,6 +5,7 @@ Bundle-SymbolicName: org.eclipse.jdt.ui.tests.refactoring; singleton:=true
 Bundle-Version: 3.4.0
 Bundle-ClassPath: refactoringtests.jar
 Bundle-Activator: org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin
+Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %Plugin.providerName
 Bundle-Localization: plugin
 Export-Package: 
@@ -37,5 +38,4 @@ Require-Bundle:
  org.eclipse.ui.ide,
  org.eclipse.ui.workbench.texteditor,
  org.junit;bundle-version="[3.8.2,3.9.0)"
-Eclipse-LazyStart: true
 Bundle-RequiredExecutionEnvironment: J2SE-1.4
