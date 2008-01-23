@@ -5,6 +5,7 @@ Bundle-SymbolicName: org.eclipse.jdt.ui.examples.projects; singleton:=true
 Bundle-Version: 3.1.100.qualifier
 Bundle-ClassPath: jdtexamples.jar
 Bundle-Activator: org.eclipse.jdt.internal.ui.exampleprojects.ExampleProjectsPlugin
+Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.core.resources,
@@ -12,5 +13,5 @@ Require-Bundle: org.eclipse.core.resources,
  org.eclipse.ui.ide,
  org.eclipse.ui.workbench,
  org.eclipse.jface
-Eclipse-LazyStart: true
 Export-Package: org.eclipse.jdt.internal.ui.exampleprojects;x-internal:=true
+Bundle-RequiredExecutionEnvironment: J2SE-1.4
