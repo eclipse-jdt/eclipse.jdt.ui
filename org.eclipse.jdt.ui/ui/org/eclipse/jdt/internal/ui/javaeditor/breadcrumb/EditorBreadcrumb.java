@@ -202,14 +202,17 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 
 					focusGained();
 				} else {
-					if (!fHasFocus)
+					if (!fIsActive)
 						return;
 					
 					boolean hasTextFocus= fTextViewer.getTextWidget().isFocusControl();
 					if (hasTextFocus) {
 						fIsActive= false;
 					}
-	
+					
+					if (!fHasFocus)
+						return;
+					
 					focusLost();
 					
 					if (hasTextFocus) {
