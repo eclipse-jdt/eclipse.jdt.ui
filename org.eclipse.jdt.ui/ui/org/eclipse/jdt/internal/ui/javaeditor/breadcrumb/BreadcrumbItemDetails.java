@@ -133,9 +133,15 @@ class BreadcrumbItemDetails {
 		fParent.setImage(image);
 
 		if (isTextVisible()) {
-			setToolTipText(toolTipText);
+			fElementText.getParent().setToolTipText(toolTipText);
+			fElementText.setToolTipText(toolTipText);
+
+			fElementImage.setToolTipText(toolTipText);
 		} else {
-			setToolTipText(null);
+			fElementText.getParent().setToolTipText(null);
+			fElementText.setToolTipText(null);
+
+			fElementImage.setToolTipText(toolTipText);
 		}
 	}
 
@@ -246,12 +252,6 @@ class BreadcrumbItemDetails {
 
 		fTextComposite.redraw();
 		fImageComposite.redraw();
-	}
-	
-	private void setToolTipText(String toolTipText) {
-		fElementText.getParent().setToolTipText(toolTipText);
-		fElementImage.setToolTipText(toolTipText);
-		fElementText.setToolTipText(toolTipText);
 	}
 
 	/**
