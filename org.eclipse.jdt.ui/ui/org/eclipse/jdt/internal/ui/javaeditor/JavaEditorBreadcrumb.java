@@ -12,7 +12,10 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
@@ -259,6 +262,12 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			fLastInputElement= inputElement;
 			if (inputElement instanceof IPackageFragment) {
 				fElements= getTypes((IPackageFragment) inputElement);
+			} else if (inputElement instanceof IProject) {
+				try {
+					fElements= ((IProject) inputElement).members();
+				} catch (CoreException e) {
+					JavaPlugin.log(e);
+				}
 			} else {
 				fElements= fParent.getChildren(inputElement);
 			}
@@ -289,7 +298,16 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		 * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
 		 */
 		public boolean hasChildren(Object element) {
-			return fParent.hasChildren(element);
+			if (element instanceof IProject) {
+				try {
+					return ((IProject) element).members().length > 0;
+				} catch (CoreException e) {
+					JavaPlugin.log(e);
+				}
+				return false;
+			} else {
+				return fParent.hasChildren(element);
+			}
 		}
 
 		private IType[] getTypes(IPackageFragment pack) {
