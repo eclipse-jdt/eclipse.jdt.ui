@@ -302,6 +302,17 @@ class BreadcrumbItemDetails {
 								fParent.getTree().selectItem(fParent);
 							}
 							fParent.openDropDownMenu(filterText);
+						} else if (e.character == '\t' && (e.stateMask & SWT.CTRL) != 0) {
+							if ((e.stateMask & SWT.SHIFT) != 0) {
+								fParent.getTree().getControl().getParent().traverse(SWT.TRAVERSE_TAB_NEXT);
+							} else {
+								BreadcrumbViewer viewer= fParent.getTree();
+								if (viewer.getRoot() == fParent.getData()) {
+									viewer.selectItem(viewer.getItem(fParent.getTree().getItemCount() - 1));
+								} else {
+									viewer.selectItem(viewer.getItem(0));
+								}
+							}
 						}
 						break;
 				}

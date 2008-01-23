@@ -18,6 +18,8 @@ import java.util.List;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -77,6 +79,11 @@ public class BreadcrumbViewer extends StructuredViewer {
 		fContainer= new Composite(parent, SWT.NONE);
 		GridData layoutData= new GridData(SWT.FILL, SWT.TOP, true, false);
 		fContainer.setLayoutData(layoutData);
+		fContainer.addTraverseListener(new TraverseListener() {
+			public void keyTraversed(TraverseEvent e) {
+				e.doit= true;
+			}
+		});
 
 		hookControl(fContainer);
 		
@@ -104,6 +111,16 @@ public class BreadcrumbViewer extends StructuredViewer {
 	 */
 	public Control getControl() {
 		return fContainer;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.StructuredViewer#getRoot()
+	 */
+	protected Object getRoot() {
+		if (fTreeItems.isEmpty())
+			return null;
+
+		return ((BreadcrumbItem) fTreeItems.get(0)).getData();
 	}
 
 	/* (non-Javadoc)
@@ -368,6 +385,21 @@ public class BreadcrumbViewer extends StructuredViewer {
 		}
 		
 		fireSelectionChanged(new SelectionChangedEvent(this, getSelection()));
+	}
+
+	/**
+	 * @return number of items shown in the viewer
+	 */
+	int getItemCount() {
+		return fTreeItems.size();
+	}
+
+	/**
+	 * @param index the index of the item
+	 * @return the item ad the given <code>index</code>
+	 */
+	BreadcrumbItem getItem(int index) {
+		return (BreadcrumbItem) fTreeItems.get(index);
 	}
 
 	/**
