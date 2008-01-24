@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -94,7 +94,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		
 		String qualifiedTypeName= getQualifiedTypeName();
  		if (qualifiedTypeName.indexOf('.') == -1)
- 			// default package - no imports needed 
+ 			// default package - no imports needed
  			return qualifiedTypeName;
 
  		/*
@@ -151,7 +151,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	}
 
 	private ImportRewrite createImportRewrite() {
-		if (fCompilationUnit != null && allowAddingImports()) {
+		if (fCompilationUnit != null && allowAddingImports() && !JavaModelUtil.isPackageInfo(fCompilationUnit)) {
 			try {
 				CompilationUnit cu= getASTRoot(fCompilationUnit);
 				if (cu == null) {
