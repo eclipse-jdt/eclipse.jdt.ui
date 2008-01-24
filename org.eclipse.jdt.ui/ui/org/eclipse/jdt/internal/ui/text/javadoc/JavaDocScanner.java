@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -169,6 +169,7 @@ public final class JavaDocScanner extends JavaCommentScanner {
 		token= getToken(IJavaColorConstants.JAVADOC_LINK);
 		list.add(new SingleLineRule("{@link", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
 		list.add(new SingleLineRule("{@value", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
+		list.add(new SingleLineRule("{@inheritDoc", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
 
 
 		// Add generic whitespace rule.
