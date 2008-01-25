@@ -315,6 +315,11 @@ class BreadcrumbItemDetails {
 									viewer.selectItem(viewer.getItem(0));
 								}
 							}
+						} else if (e.character == ' ') {
+							if (!fSelected) {
+								viewer.selectItem(fParent);
+							}
+							fParent.openDropDownMenu(null, false);
 						}
 						break;
 				}

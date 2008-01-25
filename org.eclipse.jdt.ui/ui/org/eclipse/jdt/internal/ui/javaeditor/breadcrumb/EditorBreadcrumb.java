@@ -29,10 +29,9 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.OpenEvent;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.ITextViewer;
@@ -228,36 +227,13 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 
 		fBreadcrumbViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
-				if (doReveal(event.getSelection())) {
-					fTextViewer.getTextWidget().setFocus();
-				} else if (doOpen(event.getSelection())) {
-					fIsActive= false;
-					fBreadcrumbViewer.setInput(getCurrentInput());
-				}
+				doRevealOrOpen(event.getSelection());
 			}
 		});
 
 		fBreadcrumbViewer.addOpenListener(new IOpenListener() {
 			public void open(OpenEvent event) {
-				if (doReveal(event.getSelection())) {
-					fTextViewer.getTextWidget().setFocus();
-				} else if (doOpen(event.getSelection())) {
-					fIsActive= false;
-					fBreadcrumbViewer.setInput(getCurrentInput());
-				}
-			}
-		});
-		
-		fBreadcrumbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				StructuredSelection selection= (StructuredSelection) event.getSelection();
-				if (selection.size() != 1)
-					return;
-
-				Object element= selection.getFirstElement();
-				if (fBreadcrumbViewer.getInput() == element || fBreadcrumbViewer.getInput().equals(element)) {
-					doReveal(selection);
-				}
+				doRevealOrOpen(event.getSelection());
 			}
 		});
 
@@ -288,6 +264,40 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		deinstallDisplayListeners();
 
 		setTextEditor(null);
+	}
+
+	/**
+	 * Either reveal the selection in the editor
+	 * or open the selection in a new editor. If both fail open
+	 * the child pop up of the selected element.
+	 * 
+	 * @param selection the selection to open
+	 */
+	private void doRevealOrOpen(ISelection selection) {
+		if (doReveal(selection)) {
+			fTextViewer.getTextWidget().setFocus();
+		} else if (doOpen(selection)) {
+			fIsActive= false;
+			fBreadcrumbViewer.setInput(getCurrentInput());
+		} else {
+			Object element= ((IStructuredSelection) selection).getFirstElement();
+			if (element == null)
+				return;
+			
+			BreadcrumbItem item= (BreadcrumbItem) fBreadcrumbViewer.doFindItem(element);
+			if (item == null)
+				return;
+			
+			int index= fBreadcrumbViewer.getIndexOfItem(item);
+			if (index < 0)
+				return;
+
+			if (index + 2 == fBreadcrumbViewer.getItemCount()) {
+				fBreadcrumbViewer.getItem(index + 1).openDropDownMenu(null, false);
+			} else if (index < fBreadcrumbViewer.getItemCount()) {
+				fBreadcrumbViewer.getItem(index).openDropDownMenu(null, false);
+			}
+		}
 	}
 
 	/**
