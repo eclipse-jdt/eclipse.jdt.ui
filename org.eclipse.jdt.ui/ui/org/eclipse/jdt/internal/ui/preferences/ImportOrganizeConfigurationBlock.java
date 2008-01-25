@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,8 +58,10 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
-/*
- * The page for setting the organize import settings
+
+
+/**
+ * The page for setting the organize import settings.
  */
 public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock {
 
@@ -74,7 +76,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	private static Key[] getAllKeys() {
 		return new Key[] {
 			PREF_IMPORTORDER, PREF_ONDEMANDTHRESHOLD, PREF_STATICONDEMANDTHRESHOLD, PREF_IGNORELOWERCASE
-		};	
+		};
 	}
 	
 	public static class ImportOrderEntry {
@@ -122,9 +124,9 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 				return name;
 			}
 			if (entry.isStatic) {
-				return PreferencesMessages.ImportOrganizeConfigurationBlock_other_static; 
+				return PreferencesMessages.ImportOrganizeConfigurationBlock_other_static;
 			}
-			return PreferencesMessages.ImportOrganizeConfigurationBlock_other_normal; 
+			return PreferencesMessages.ImportOrganizeConfigurationBlock_other_normal;
 		}
 	}
 	
@@ -173,21 +175,21 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	public ImportOrganizeConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
 		super(context, project, getAllKeys(), container);
 	
-		String[] buttonLabels= new String[] { 
-			PreferencesMessages.ImportOrganizeConfigurationBlock_order_add_button, 
-			PreferencesMessages.ImportOrganizeConfigurationBlock_order_add_static_button, 
-			PreferencesMessages.ImportOrganizeConfigurationBlock_order_edit_button, 
-			PreferencesMessages.ImportOrganizeConfigurationBlock_order_remove_button, 
+		String[] buttonLabels= new String[] {
+			PreferencesMessages.ImportOrganizeConfigurationBlock_order_add_button,
+			PreferencesMessages.ImportOrganizeConfigurationBlock_order_add_static_button,
+			PreferencesMessages.ImportOrganizeConfigurationBlock_order_edit_button,
+			PreferencesMessages.ImportOrganizeConfigurationBlock_order_remove_button,
 			/* 4 */  null,
-			PreferencesMessages.ImportOrganizeConfigurationBlock_order_up_button, 
-			PreferencesMessages.ImportOrganizeConfigurationBlock_order_down_button, 
+			PreferencesMessages.ImportOrganizeConfigurationBlock_order_up_button,
+			PreferencesMessages.ImportOrganizeConfigurationBlock_order_down_button,
 		};
 				
 		ImportOrganizeAdapter adapter= new ImportOrganizeAdapter();
 		
 		fOrderListField= new ListDialogField(adapter, buttonLabels, new ImportOrganizeLabelProvider());
 		fOrderListField.setDialogFieldListener(adapter);
-		fOrderListField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_order_label); 
+		fOrderListField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_order_label);
 		fOrderListField.setUpButtonIndex(IDX_UP);
 		fOrderListField.setDownButtonIndex(IDX_DOWN);
 		fOrderListField.setRemoveButtonIndex(IDX_REMOVE);
@@ -196,23 +198,23 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		
 		fImportButton= new SelectionButtonDialogField(SWT.PUSH);
 		fImportButton.setDialogFieldListener(adapter);
-		fImportButton.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_order_load_button); 
+		fImportButton.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_order_load_button);
 		
 		fExportButton= new SelectionButtonDialogField(SWT.PUSH);
 		fExportButton.setDialogFieldListener(adapter);
-		fExportButton.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_order_save_button); 
+		fExportButton.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_order_save_button);
 		
 		fThresholdField= new StringDialogField();
 		fThresholdField.setDialogFieldListener(adapter);
-		fThresholdField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_threshold_label); 
+		fThresholdField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_threshold_label);
 
 		fStaticThresholdField= new StringDialogField();
 		fStaticThresholdField.setDialogFieldListener(adapter);
-		fStaticThresholdField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_staticthreshold_label); 
+		fStaticThresholdField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_staticthreshold_label);
 
 		fIgnoreLowerCaseTypesField= new SelectionButtonDialogField(SWT.CHECK);
 		fIgnoreLowerCaseTypesField.setDialogFieldListener(adapter);
-		fIgnoreLowerCaseTypesField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_ignoreLowerCase_label); 
+		fIgnoreLowerCaseTypesField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_ignoreLowerCase_label);
 	
 		updateControls();
 	}
@@ -264,10 +266,10 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		try {
 			int threshold= Integer.parseInt(thresholdString);
 			if (threshold < 0) {
-				status.setError(PreferencesMessages.ImportOrganizeConfigurationBlock_error_invalidthreshold); 
+				status.setError(PreferencesMessages.ImportOrganizeConfigurationBlock_error_invalidthreshold);
 			}
 		} catch (NumberFormatException e) {
-			status.setError(PreferencesMessages.ImportOrganizeConfigurationBlock_error_invalidthreshold); 
+			status.setError(PreferencesMessages.ImportOrganizeConfigurationBlock_error_invalidthreshold);
 		}
 		updateStatus(status);
 		return status.isOK();
@@ -332,7 +334,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
 		
 		FileDialog dialog= new FileDialog(getShell(), SWT.OPEN);
-		dialog.setText(PreferencesMessages.ImportOrganizeConfigurationBlock_loadDialog_title); 
+		dialog.setText(PreferencesMessages.ImportOrganizeConfigurationBlock_loadDialog_title);
 		dialog.setFilterExtensions(new String[] {"*.importorder", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		String lastPath= dialogSettings.get(DIALOGSETTING_LASTLOADPATH);
 		if (lastPath != null) {
@@ -358,8 +360,8 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 					try { fis.close(); } catch (IOException e) {}
 				}
 			}
-			String title= PreferencesMessages.ImportOrganizeConfigurationBlock_loadDialog_error_title; 
-			String message= PreferencesMessages.ImportOrganizeConfigurationBlock_loadDialog_error_message; 
+			String title= PreferencesMessages.ImportOrganizeConfigurationBlock_loadDialog_error_title;
+			String message= PreferencesMessages.ImportOrganizeConfigurationBlock_loadDialog_error_message;
 			MessageDialog.openError(getShell(), title, message);
 		}
 		return null;
@@ -369,7 +371,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
 		
 		FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
-		dialog.setText(PreferencesMessages.ImportOrganizeConfigurationBlock_saveDialog_title); 
+		dialog.setText(PreferencesMessages.ImportOrganizeConfigurationBlock_saveDialog_title);
 		dialog.setFilterExtensions(new String[] {"*.importorder", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		dialog.setFileName("example.importorder"); //$NON-NLS-1$
 		String lastPath= dialogSettings.get(DIALOGSETTING_LASTSAVEPATH);
@@ -391,9 +393,9 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 				properties.store(fos, "Organize Import Order"); //$NON-NLS-1$
 			} catch (IOException e) {
 				JavaPlugin.log(e);
-				String title= PreferencesMessages.ImportOrganizeConfigurationBlock_saveDialog_error_title; 
-				String message= PreferencesMessages.ImportOrganizeConfigurationBlock_saveDialog_error_message; 
-				MessageDialog.openError(getShell(), title, message);				
+				String title= PreferencesMessages.ImportOrganizeConfigurationBlock_saveDialog_error_title;
+				String message= PreferencesMessages.ImportOrganizeConfigurationBlock_saveDialog_error_message;
+				MessageDialog.openError(getShell(), title, message);
 			} finally {
 				if (fos != null) {
 					try { fos.close(); } catch (IOException e) {}
@@ -411,7 +413,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	 */
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		// no validation
-	}	
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#updateControls()
@@ -429,7 +431,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		fThresholdField.setText(String.valueOf(threshold));
 		fStaticThresholdField.setText(String.valueOf(staticThreshold));
 		fIgnoreLowerCaseTypesField.setSelection(ignoreLowerCase);
-	}	
+	}
 	
 	
 	protected final void doDialogFieldChanged(DialogField field) {

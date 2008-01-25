@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.refactoring.RenameTypeArguments;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.RefactoringModifications;
 
+
 public class RenameModifications extends RefactoringModifications {
 	
 	private List fRename;
@@ -101,7 +102,7 @@ public class RenameModifications extends RefactoringModifications {
 			for (int i= 0; i < allSubPackages.length; i++) {
 				IPackageFragment pack= allSubPackages[i];
 				RenameArguments subArgs= new RenameArguments(
-					getNewPackageName(rootPackage, args.getNewName(), pack.getElementName()), 
+					getNewPackageName(rootPackage, args.getNewName(), pack.getElementName()),
 					args.getUpdateReferences());
 				add(pack, subArgs, null);
 			}
@@ -150,7 +151,7 @@ public class RenameModifications extends RefactoringModifications {
 	
 	public void rename(IMethod method, RenameArguments args) {
 		add(method, args, null);
-	} 
+	}
 	
 	public void rename(ILocalVariable variable, RenameArguments args) {
 		add(variable, args, null);
@@ -186,10 +187,10 @@ public class RenameModifications extends RefactoringModifications {
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared) {
 		List result= new ArrayList();
 		for (int i= 0; i < fRename.size(); i++) {
-			result.addAll(Arrays.asList(ParticipantManager.loadRenameParticipants(status, 
-				owner, fRename.get(i), 
-				(RenameArguments) fRenameArguments.get(i), 
-				(IParticipantDescriptorFilter) fParticipantDescriptorFilter.get(i), 
+			result.addAll(Arrays.asList(ParticipantManager.loadRenameParticipants(status,
+				owner, fRename.get(i),
+				(RenameArguments) fRenameArguments.get(i),
+				(IParticipantDescriptorFilter) fParticipantDescriptorFilter.get(i),
 				natures, shared)));
 		}
 		result.addAll(Arrays.asList(getResourceModifications().getParticipants(status, owner, natures, shared)));
@@ -280,4 +281,4 @@ public class RenameModifications extends RefactoringModifications {
 		String oldPackageName= rootPackage.getElementName();
 		return newPackageName + oldSubPackageName.substring(oldPackageName.length());
 	}
-} 
+}

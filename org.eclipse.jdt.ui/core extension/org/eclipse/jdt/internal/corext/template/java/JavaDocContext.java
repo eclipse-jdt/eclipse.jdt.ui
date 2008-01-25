@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,9 +17,9 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextUtilities;
-import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
+import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateTranslator;
 
@@ -41,7 +41,7 @@ public class JavaDocContext extends CompilationUnitContext {
 	// tags
 	private static final char HTML_TAG_BEGIN= '<';
 	private static final char HTML_TAG_END= '>';
-	private static final char JAVADOC_TAG_BEGIN= '@';	
+	private static final char JAVADOC_TAG_BEGIN= '@';
 
 	/**
 	 * Creates a javadoc template context.
@@ -61,7 +61,7 @@ public class JavaDocContext extends CompilationUnitContext {
 	 * 
 	 * @param type the context type.
 	 * @param document the document.
-	 * @param completionPosition the position defining the completion offset and length 
+	 * @param completionPosition the position defining the completion offset and length
 	 * @param compilationUnit the compilation unit (may be <code>null</code>).
 	 * @since 3.2
 	 */
@@ -85,7 +85,7 @@ public class JavaDocContext extends CompilationUnitContext {
 
 	/*
 	 * @see DocumentTemplateContext#getStart()
-	 */ 
+	 */
 	public int getStart() {
 		if (fIsManaged && getCompletionLength() > 0)
 			return super.getStart();
@@ -111,11 +111,11 @@ public class JavaDocContext extends CompilationUnitContext {
 					(document.getChar(start - 1) == JAVADOC_TAG_BEGIN)))
 				{
 					start--;
-				}	
+				}
 		
 				return start;
 				
-			} 
+			}
 
 			int start= getCompletionOffset();
 			int end= getCompletionOffset() + getCompletionLength();
@@ -127,13 +127,13 @@ public class JavaDocContext extends CompilationUnitContext {
 				start++;
 			
 			if (start == end)
-				start= getCompletionOffset();	
+				start= getCompletionOffset();
 			
-			return start;					
+			return start;
 			
 
 		} catch (BadLocationException e) {
-			return getCompletionOffset();	
+			return getCompletionOffset();
 		}
 	}
 
@@ -142,10 +142,10 @@ public class JavaDocContext extends CompilationUnitContext {
 	 */
 	public int getEnd() {
 		
-		if (fIsManaged || getCompletionLength() == 0)		
+		if (fIsManaged || getCompletionLength() == 0)
 			return super.getEnd();
 
-		try {			
+		try {
 			IDocument document= getDocument();
 
 			int start= getCompletionOffset();
@@ -154,11 +154,11 @@ public class JavaDocContext extends CompilationUnitContext {
 			while (start != end && Character.isWhitespace(document.getChar(end - 1)))
 				end--;
 			
-			return end;	
+			return end;
 
 		} catch (BadLocationException e) {
 			return super.getEnd();
-		}		
+		}
 	}
 
 	/*
@@ -166,7 +166,7 @@ public class JavaDocContext extends CompilationUnitContext {
 	 */
 	public String getKey() {
 
-		if (getCompletionLength() == 0)		
+		if (getCompletionLength() == 0)
 			return super.getKey();
 
 		try {
@@ -179,7 +179,7 @@ public class JavaDocContext extends CompilationUnitContext {
 				: ""; //$NON-NLS-1$
 			
 		} catch (BadLocationException e) {
-			return super.getKey();			
+			return super.getKey();
 		}
 	}
 
@@ -218,6 +218,6 @@ public class JavaDocContext extends CompilationUnitContext {
 		} catch (BadLocationException e) {
 			return 0;
 		}
-	}	
+	}
 }
 
