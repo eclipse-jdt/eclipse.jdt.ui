@@ -56,7 +56,7 @@ import org.eclipse.jface.viewers.ViewerLabel;
 public class BreadcrumbViewer extends StructuredViewer {
 	
 	private final Composite fContainer;
-	private final ArrayList fTreeItems;
+	private final ArrayList fBreadcrumbItems;
 
 	private BreadcrumbItem fSelectedItem;
 
@@ -74,7 +74,7 @@ public class BreadcrumbViewer extends StructuredViewer {
 	 * @param style the style flag used for this viewer
 	 */
 	public BreadcrumbViewer(Composite parent, int style) {
-		fTreeItems= new ArrayList();
+		fBreadcrumbItems= new ArrayList();
 
 		fContainer= new Composite(parent, SWT.NONE);
 		GridData layoutData= new GridData(SWT.FILL, SWT.TOP, true, false);
@@ -117,10 +117,10 @@ public class BreadcrumbViewer extends StructuredViewer {
 	 * @see org.eclipse.jface.viewers.StructuredViewer#getRoot()
 	 */
 	protected Object getRoot() {
-		if (fTreeItems.isEmpty())
+		if (fBreadcrumbItems.isEmpty())
 			return null;
 
-		return ((BreadcrumbItem) fTreeItems.get(0)).getData();
+		return ((BreadcrumbItem) fBreadcrumbItems.get(0)).getData();
 	}
 
 	/* (non-Javadoc)
@@ -139,15 +139,15 @@ public class BreadcrumbViewer extends StructuredViewer {
 		if (fSelectedItem != null) {
 			fSelectedItem.setFocus(true);
 		} else {
-			if (fTreeItems.size() == 0)
+			if (fBreadcrumbItems.size() == 0)
 				return;
 
-			BreadcrumbItem item= (BreadcrumbItem) fTreeItems.get(fTreeItems.size() - 1);
+			BreadcrumbItem item= (BreadcrumbItem) fBreadcrumbItems.get(fBreadcrumbItems.size() - 1);
 			if (item.getData() == null) {
-				if (fTreeItems.size() < 2)
+				if (fBreadcrumbItems.size() < 2)
 					return;
 
-				item= (BreadcrumbItem) fTreeItems.get(fTreeItems.size() - 2);
+				item= (BreadcrumbItem) fBreadcrumbItems.get(fBreadcrumbItems.size() - 2);
 			}
 			item.setFocus(true);
 		}
@@ -175,8 +175,8 @@ public class BreadcrumbViewer extends StructuredViewer {
 	 * @return true if the any of the items in the viewer is expanded
 	 */
 	public boolean isDropDownOpen() {
-		for (int i= 0, size= fTreeItems.size(); i < size; i++) {
-			BreadcrumbItem item= (BreadcrumbItem) fTreeItems.get(i);
+		for (int i= 0, size= fBreadcrumbItems.size(); i < size; i++) {
+			BreadcrumbItem item= (BreadcrumbItem) fBreadcrumbItems.get(i);
 			if (item.isMenuShown())
 				return true;
 		}
@@ -205,13 +205,13 @@ public class BreadcrumbViewer extends StructuredViewer {
 
 			if (((ITreeContentProvider) getContentProvider()).hasChildren(fInput)) {
 				BreadcrumbItem item;
-				if (lastIndex < fTreeItems.size()) {
-					item= (BreadcrumbItem) fTreeItems.get(lastIndex);
+				if (lastIndex < fBreadcrumbItems.size()) {
+					item= (BreadcrumbItem) fBreadcrumbItems.get(lastIndex);
 					if (item.getData() != null)
 						unmapElement(item.getData());
 				} else {
 					item= createItem();
-					fTreeItems.add(item);
+					fBreadcrumbItems.add(item);
 				}
 
 				if (item == fSelectedItem) {
@@ -222,8 +222,8 @@ public class BreadcrumbViewer extends StructuredViewer {
 				lastIndex++;
 			}
 
-			while (lastIndex < fTreeItems.size()) {
-				BreadcrumbItem item= (BreadcrumbItem) fTreeItems.remove(fTreeItems.size() - 1);
+			while (lastIndex < fBreadcrumbItems.size()) {
+				BreadcrumbItem item= (BreadcrumbItem) fBreadcrumbItems.remove(fBreadcrumbItems.size() - 1);
 				if (item == fSelectedItem) {
 					selectItem(null);
 				}
@@ -259,8 +259,8 @@ public class BreadcrumbViewer extends StructuredViewer {
 		if (element == null)
 			return null;
 	
-		for (int i= 0, size= fTreeItems.size(); i < size; i++) {
-			BreadcrumbItem item= (BreadcrumbItem) fTreeItems.get(i);
+		for (int i= 0, size= fBreadcrumbItems.size(); i < size; i++) {
+			BreadcrumbItem item= (BreadcrumbItem) fBreadcrumbItems.get(i);
 			if (item.getData() == element || element.equals(item.getData()))
 				return item;
 		}
@@ -318,8 +318,8 @@ public class BreadcrumbViewer extends StructuredViewer {
 		try {
 			BreadcrumbItem item= (BreadcrumbItem) doFindItem(element);
 			if (item == null) {
-				for (int i= 0, size= fTreeItems.size(); i < size; i++) {
-					BreadcrumbItem item1= (BreadcrumbItem) fTreeItems.get(i);
+				for (int i= 0, size= fBreadcrumbItems.size(); i < size; i++) {
+					BreadcrumbItem item1= (BreadcrumbItem) fBreadcrumbItems.get(i);
 					item1.refresh();
 				}
 			} else {
@@ -338,8 +338,8 @@ public class BreadcrumbViewer extends StructuredViewer {
 	protected void setSelectionToWidget(List l, boolean reveal) {
 		BreadcrumbItem focusItem= null;
 		
-		for (int i= 0, size= fTreeItems.size(); i < size; i++) {
-			BreadcrumbItem item= (BreadcrumbItem) fTreeItems.get(i);
+		for (int i= 0, size= fBreadcrumbItems.size(); i < size; i++) {
+			BreadcrumbItem item= (BreadcrumbItem) fBreadcrumbItems.get(i);
 			if (item.hasFocus())
 				focusItem= item;
 			
@@ -378,8 +378,8 @@ public class BreadcrumbViewer extends StructuredViewer {
 		if (item != null) {
 			setFocus();
 		} else {
-			for (int i= 0, size= fTreeItems.size(); i < size; i++) {
-				BreadcrumbItem listItem= (BreadcrumbItem) fTreeItems.get(i);
+			for (int i= 0, size= fBreadcrumbItems.size(); i < size; i++) {
+				BreadcrumbItem listItem= (BreadcrumbItem) fBreadcrumbItems.get(i);
 				listItem.setFocus(false);
 			}
 		}
@@ -391,7 +391,7 @@ public class BreadcrumbViewer extends StructuredViewer {
 	 * @return number of items shown in the viewer
 	 */
 	int getItemCount() {
-		return fTreeItems.size();
+		return fBreadcrumbItems.size();
 	}
 
 	/**
@@ -399,7 +399,7 @@ public class BreadcrumbViewer extends StructuredViewer {
 	 * @return the item ad the given <code>index</code>
 	 */
 	BreadcrumbItem getItem(int index) {
-		return (BreadcrumbItem) fTreeItems.get(index);
+		return (BreadcrumbItem) fBreadcrumbItems.get(index);
 	}
 	
 	/**
@@ -407,8 +407,8 @@ public class BreadcrumbViewer extends StructuredViewer {
 	 * @return the index of the item or -1 if not found
 	 */
 	int getIndexOfItem(BreadcrumbItem item) {
-		for (int i= 0, size= fTreeItems.size(); i < size; i++) {
-			BreadcrumbItem pItem= (BreadcrumbItem) fTreeItems.get(i);
+		for (int i= 0, size= fBreadcrumbItems.size(); i < size; i++) {
+			BreadcrumbItem pItem= (BreadcrumbItem) fBreadcrumbItems.get(i);
 			if (pItem == item)
 				return i;
 		}
@@ -439,7 +439,7 @@ public class BreadcrumbViewer extends StructuredViewer {
 		setInput(element);
 		BreadcrumbItem item= (BreadcrumbItem) doFindItem(element);
 		selectItem(item);
-		BreadcrumbItem leaf= (BreadcrumbItem) fTreeItems.get(fTreeItems.size() - 1);
+		BreadcrumbItem leaf= (BreadcrumbItem) fBreadcrumbItems.get(fBreadcrumbItems.size() - 1);
 		if (leaf != item)
 			leaf.openDropDownMenu(null, false);
 		
@@ -455,13 +455,13 @@ public class BreadcrumbViewer extends StructuredViewer {
 		if (fSelectedItem == null)
 			return;
 
-		int index= fTreeItems.indexOf(fSelectedItem);
+		int index= fBreadcrumbItems.indexOf(fSelectedItem);
 		if (next) {
-			if (index == fTreeItems.size() - 1)
+			if (index == fBreadcrumbItems.size() - 1)
 				return;
 
-			BreadcrumbItem nextItem= (BreadcrumbItem) fTreeItems.get(index + 1);
-			if (index == fTreeItems.size() - 2 && nextItem.getData() == null) {
+			BreadcrumbItem nextItem= (BreadcrumbItem) fBreadcrumbItems.get(index + 1);
+			if (index == fBreadcrumbItems.size() - 2 && nextItem.getData() == null) {
 				nextItem.openDropDownMenu(null, false);
 			} else {
 				selectItem(nextItem);
@@ -470,7 +470,7 @@ public class BreadcrumbViewer extends StructuredViewer {
 			if (index == 0)
 				return;
 
-			selectItem((BreadcrumbItem) fTreeItems.get(index - 1));
+			selectItem((BreadcrumbItem) fBreadcrumbItems.get(index - 1));
 		}
 	}
 	
@@ -478,7 +478,7 @@ public class BreadcrumbViewer extends StructuredViewer {
 	 * Generates the parent chain of the given element.
 	 * 
 	 * @param element element to build the parent chain for
-	 * @return the first index of an item in fTreeItems which is not part of the chain
+	 * @return the first index of an item in fBreadcrumbItems which is not part of the chain
 	 */
 	private int buildItemChain(Object element) {
 		ITreeContentProvider contentProvider= (ITreeContentProvider) getContentProvider();
@@ -489,13 +489,13 @@ public class BreadcrumbViewer extends StructuredViewer {
 		int index= buildItemChain(parent);
 	
 		BreadcrumbItem item;
-		if (index < fTreeItems.size()) {
-			item= (BreadcrumbItem) fTreeItems.get(index);
+		if (index < fBreadcrumbItems.size()) {
+			item= (BreadcrumbItem) fBreadcrumbItems.get(index);
 			if (item.getData() != null)
 				unmapElement(item.getData());
 		} else {
 			item= createItem();
-			fTreeItems.add(item);
+			fBreadcrumbItems.add(item);
 		}
 	
 		if (item == fSelectedItem && element != item.getData()) {
@@ -509,7 +509,7 @@ public class BreadcrumbViewer extends StructuredViewer {
 	}
 
 	/**
-	 * @return new instance of a list tree item
+	 * @return new instance of a breadcrumb item
 	 */
 	private BreadcrumbItem createItem() {
 		BreadcrumbItem result= new BreadcrumbItem(this, fContainer);
@@ -534,8 +534,8 @@ public class BreadcrumbViewer extends StructuredViewer {
 	
 		if (currentWidth > width) {
 			int index= 0;
-			while (currentWidth > width && index < fTreeItems.size() - 1) {
-				BreadcrumbItem viewer= (BreadcrumbItem) fTreeItems.get(index);
+			while (currentWidth > width && index < fBreadcrumbItems.size() - 1) {
+				BreadcrumbItem viewer= (BreadcrumbItem) fBreadcrumbItems.get(index);
 				if (viewer.isShowText()) {
 					viewer.setShowText(false);
 					currentWidth= getCurrentWidth();
@@ -547,10 +547,10 @@ public class BreadcrumbViewer extends StructuredViewer {
 	
 		} else if (currentWidth < width) {
 	
-			int index= fTreeItems.size() - 1;
+			int index= fBreadcrumbItems.size() - 1;
 			while (currentWidth < width && index >= 0) {
 	
-				BreadcrumbItem viewer= (BreadcrumbItem) fTreeItems.get(index);
+				BreadcrumbItem viewer= (BreadcrumbItem) fBreadcrumbItems.get(index);
 				if (!viewer.isShowText()) {
 					viewer.setShowText(true);
 					currentWidth= getCurrentWidth();
@@ -574,8 +574,8 @@ public class BreadcrumbViewer extends StructuredViewer {
 	 */
 	private int getCurrentWidth() {
 		int result= 0;
-		for (int i= 0, size= fTreeItems.size(); i < size; i++) {
-			BreadcrumbItem viewer= (BreadcrumbItem) fTreeItems.get(i);
+		for (int i= 0, size= fBreadcrumbItems.size(); i < size; i++) {
+			BreadcrumbItem viewer= (BreadcrumbItem) fBreadcrumbItems.get(i);
 			result+= viewer.getWidth();
 		}
 	
@@ -583,8 +583,8 @@ public class BreadcrumbViewer extends StructuredViewer {
 	}
 
 	private boolean containsAny(Object[] elements) {
-		for (int i= 0, size= fTreeItems.size(); i < size; i++) {
-			BreadcrumbItem item= (BreadcrumbItem) fTreeItems.get(i);
+		for (int i= 0, size= fBreadcrumbItems.size(); i < size; i++) {
+			BreadcrumbItem item= (BreadcrumbItem) fBreadcrumbItems.get(i);
 			Object child= item.getData();
 			if (contains(elements, child))
 				return true;

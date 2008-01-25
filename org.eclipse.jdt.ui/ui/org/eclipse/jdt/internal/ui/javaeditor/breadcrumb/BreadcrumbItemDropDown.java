@@ -174,21 +174,21 @@ class BreadcrumbItemDropDown {
 		filteredTable.addNavigateListener(new INavigateListener() {
 			public void navigate(Direction direction) {
 				if (direction == FilteredTable.DIRECTION_UP) {
-					int index= fParent.getTree().getIndexOfItem(fParent);
+					int index= fParent.getViewer().getIndexOfItem(fParent);
 					if (index - 1 >= 0) {
 						shell.close();
 						
-						BreadcrumbItem parent= fParent.getTree().getItem(index - 1);
-						fParent.getTree().selectItem(parent);
+						BreadcrumbItem parent= fParent.getViewer().getItem(index - 1);
+						fParent.getViewer().selectItem(parent);
 						parent.openDropDownMenu(null, true);
 					}
 				} else if (direction == FilteredTable.DIRECTION_DOWN) {
-					int index= fParent.getTree().getIndexOfItem(fParent);
-					if (index != -1 && index + 1 < fParent.getTree().getItemCount()) {
+					int index= fParent.getViewer().getIndexOfItem(fParent);
+					if (index != -1 && index + 1 < fParent.getViewer().getItemCount()) {
 						shell.close();
 						
-						BreadcrumbItem child= fParent.getTree().getItem(index + 1);
-						fParent.getTree().selectItem(child);
+						BreadcrumbItem child= fParent.getViewer().getItem(index + 1);
+						fParent.getViewer().selectItem(child);
 						child.openDropDownMenu(null, true);
 					}
 				}
@@ -240,7 +240,7 @@ class BreadcrumbItemDropDown {
 					return;
 				
 				shell.close();
-				fParent.getTree().fireMenuSelection(element);
+				fParent.getViewer().fireMenuSelection(element);
 			}
 		});
 
@@ -258,7 +258,7 @@ class BreadcrumbItemDropDown {
 					return;
 
 				shell.close();
-				fParent.getTree().fireMenuSelection(data);
+				fParent.getViewer().fireMenuSelection(data);
 			}
 
 			public void mouseDown(MouseEvent e) {
@@ -311,7 +311,7 @@ class BreadcrumbItemDropDown {
 			public void shellClosed(ShellEvent e) {
 				Display.getDefault().removeFilter(SWT.FocusIn, focusListener);
 				fArrow.setImage(JavaPluginImages.get(JavaPluginImages.IMG_ETOOL_ARROW_RIGHT));
-				fParent.getTree().setFocus();
+				fParent.getViewer().setFocus();
 				fMenuIsShown= false;
 			}
 

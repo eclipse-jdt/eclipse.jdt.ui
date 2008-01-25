@@ -48,7 +48,7 @@ class BreadcrumbItem extends Item {
 	private Label fSpacer;
 
 	/**
-	 * A new list tree item which is shown inside the given viewer.
+	 * A new breadcrumb item which is shown inside the given viewer.
 	 * 
 	 * @param viewer the items viewer
 	 * @param parent the container containing the item
@@ -85,7 +85,7 @@ class BreadcrumbItem extends Item {
 	/**
 	 * @return the viewer showing this item
 	 */
-	public BreadcrumbViewer getTree() {
+	public BreadcrumbViewer getViewer() {
 		return fParent;
 	}
 

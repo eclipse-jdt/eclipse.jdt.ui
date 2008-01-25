@@ -263,53 +263,54 @@ class BreadcrumbItemDetails {
 	private void installFocusComposite(Composite composite) {
 		composite.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {
+				BreadcrumbViewer viewer= fParent.getViewer();
+				
 				switch (e.keyCode) {
 					case SWT.ARROW_LEFT:
 						if (fSelected) {
-							fParent.getTree().doTraverse(false);
+							viewer.doTraverse(false);
 						} else {
-							fParent.getTree().selectItem(fParent);
+							viewer.selectItem(fParent);
 						}
 						break;
 					case SWT.ARROW_RIGHT:
 						if (fSelected) {
-							fParent.getTree().doTraverse(true);
+							viewer.doTraverse(true);
 						} else {
-							fParent.getTree().selectItem(fParent);
+							viewer.selectItem(fParent);
 						}
 						break;
 					case SWT.ARROW_DOWN:
 						if (!fSelected) {
-							fParent.getTree().selectItem(fParent);
+							viewer.selectItem(fParent);
 						}
 						fParent.openDropDownMenu(null, false);
 						break;
 					case SWT.KEYPAD_ADD:
 						if (!fSelected) {
-							fParent.getTree().selectItem(fParent);
+							viewer.selectItem(fParent);
 						}
 						fParent.openDropDownMenu(null, false);
 						break;
 					case SWT.CR:
 						if (!fSelected) {
-							fParent.getTree().selectItem(fParent);
+							viewer.selectItem(fParent);
 						}
-						fParent.getTree().fireOpen();
+						viewer.fireOpen();
 						break;
 					default:
 						if ((e.stateMask == SWT.NONE || e.stateMask == SWT.SHIFT) && Character.isLetterOrDigit(e.character)) {
 							String filterText= new String(new char[] { e.character });
 							if (!fSelected) {
-								fParent.getTree().selectItem(fParent);
+								viewer.selectItem(fParent);
 							}
 							fParent.openDropDownMenu(filterText, false);
 						} else if (e.character == '\t' && (e.stateMask & SWT.CTRL) != 0) {
 							if ((e.stateMask & SWT.SHIFT) != 0) {
-								fParent.getTree().getControl().getParent().traverse(SWT.TRAVERSE_TAB_NEXT);
+								viewer.getControl().getParent().traverse(SWT.TRAVERSE_TAB_NEXT);
 							} else {
-								BreadcrumbViewer viewer= fParent.getTree();
 								if (viewer.getRoot() == fParent.getData()) {
-									viewer.selectItem(viewer.getItem(fParent.getTree().getItemCount() - 1));
+									viewer.selectItem(viewer.getItem(viewer.getItemCount() - 1));
 								} else {
 									viewer.selectItem(viewer.getItem(0));
 								}
@@ -348,11 +349,11 @@ class BreadcrumbItemDetails {
 	private void addElementListener(Control control) {
 		control.addMouseListener(new MouseListener() {
 			public void mouseDoubleClick(MouseEvent e) {
-				fParent.getTree().fireDoubleClick();
+				fParent.getViewer().fireDoubleClick();
 			}
 
 			public void mouseDown(MouseEvent e) {
-				fParent.getTree().selectItem(fParent);
+				fParent.getViewer().selectItem(fParent);
 			}
 
 			public void mouseUp(MouseEvent e) {
