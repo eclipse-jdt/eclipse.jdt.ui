@@ -243,9 +243,10 @@ class BreadcrumbItem extends Item {
 	 * for default filter text.
 	 * 
 	 * @param filterText the text to use to initialize the filter text or <code>null</code>
+	 * @param selectItem true to select the item in the drop down, false to select the filter text 
 	 */
-	void openDropDownMenu(String filterText) {
-		fExpandBlock.showMenu(filterText);
+	void openDropDownMenu(String filterText, boolean selectItem) {
+		fExpandBlock.showMenu(filterText, selectItem);
 	}
 
 	/**

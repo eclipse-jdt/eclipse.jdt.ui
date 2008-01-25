@@ -57,6 +57,7 @@ class BreadcrumbItemDetails {
 		GridLayout layout= new GridLayout(2, false);
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
+		layout.horizontalSpacing= 2;
 		fDetailComposite.setLayout(layout);
 		fDetailComposite.setBackground(parentContainer.getBackground());
 		addElementListener(fDetailComposite);
@@ -64,8 +65,8 @@ class BreadcrumbItemDetails {
 		fImageComposite= new Composite(fDetailComposite, SWT.NONE);
 		fImageComposite.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 		layout= new GridLayout(1, false);
-		layout.marginHeight= 2;
-		layout.marginWidth= 2;
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
 		fImageComposite.setLayout(layout);
 		fImageComposite.addPaintListener(new PaintListener() {
 			public void paintControl(PaintEvent e) {
@@ -86,8 +87,8 @@ class BreadcrumbItemDetails {
 		fTextComposite= new Composite(fDetailComposite, SWT.NONE);
 		fTextComposite.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 		layout= new GridLayout(1, false);
-		layout.marginHeight= 2;
-		layout.marginWidth= 2;
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
 		fTextComposite.setLayout(layout);
 		fTextComposite.setBackground(parentContainer.getBackground());
 		addElementListener(fTextComposite);
@@ -281,13 +282,13 @@ class BreadcrumbItemDetails {
 						if (!fSelected) {
 							fParent.getTree().selectItem(fParent);
 						}
-						fParent.openDropDownMenu(null);
+						fParent.openDropDownMenu(null, false);
 						break;
 					case SWT.KEYPAD_ADD:
 						if (!fSelected) {
 							fParent.getTree().selectItem(fParent);
 						}
-						fParent.openDropDownMenu(null);
+						fParent.openDropDownMenu(null, false);
 						break;
 					case SWT.CR:
 						if (!fSelected) {
@@ -301,7 +302,7 @@ class BreadcrumbItemDetails {
 							if (!fSelected) {
 								fParent.getTree().selectItem(fParent);
 							}
-							fParent.openDropDownMenu(filterText);
+							fParent.openDropDownMenu(filterText, false);
 						} else if (e.character == '\t' && (e.stateMask & SWT.CTRL) != 0) {
 							if ((e.stateMask & SWT.SHIFT) != 0) {
 								fParent.getTree().getControl().getParent().traverse(SWT.TRAVERSE_TAB_NEXT);

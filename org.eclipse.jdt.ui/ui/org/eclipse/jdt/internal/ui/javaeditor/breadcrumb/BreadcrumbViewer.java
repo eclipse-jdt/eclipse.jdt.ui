@@ -401,6 +401,20 @@ public class BreadcrumbViewer extends StructuredViewer {
 	BreadcrumbItem getItem(int index) {
 		return (BreadcrumbItem) fTreeItems.get(index);
 	}
+	
+	/**
+	 * @param item the item to search
+	 * @return the index of the item or -1 if not found
+	 */
+	int getIndexOfItem(BreadcrumbItem item) {
+		for (int i= 0, size= fTreeItems.size(); i < size; i++) {
+			BreadcrumbItem pItem= (BreadcrumbItem) fTreeItems.get(i);
+			if (pItem == item)
+				return i;
+		}
+
+		return -1;
+	}
 
 	/**
 	 * Notify all double click listeners
@@ -427,7 +441,7 @@ public class BreadcrumbViewer extends StructuredViewer {
 		selectItem(item);
 		BreadcrumbItem leaf= (BreadcrumbItem) fTreeItems.get(fTreeItems.size() - 1);
 		if (leaf != item)
-			leaf.openDropDownMenu(null);
+			leaf.openDropDownMenu(null, false);
 		
 	}
 	
@@ -448,7 +462,7 @@ public class BreadcrumbViewer extends StructuredViewer {
 
 			BreadcrumbItem nextItem= (BreadcrumbItem) fTreeItems.get(index + 1);
 			if (index == fTreeItems.size() - 2 && nextItem.getData() == null) {
-				nextItem.openDropDownMenu(null);
+				nextItem.openDropDownMenu(null, false);
 			} else {
 				selectItem(nextItem);
 			}

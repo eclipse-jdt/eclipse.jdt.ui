@@ -24,11 +24,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -38,15 +38,14 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
-
-import org.eclipse.ui.dialogs.FilteredTree;
-import org.eclipse.ui.dialogs.PatternFilter;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.FilteredTable.Direction;
+import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.FilteredTable.INavigateListener;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 
 
@@ -100,7 +99,7 @@ class BreadcrumbItemDropDown {
 			}
 
 			public void mouseDown(MouseEvent e) {
-				showMenu(null);
+				showMenu(null, false);
 			}
 
 			public void mouseUp(MouseEvent e) {
@@ -138,8 +137,9 @@ class BreadcrumbItemDropDown {
 	 * filter text should be used.
 	 * 
 	 * @param filterText the text to filter for or <code>null</code>
+	 * @param selectItem true to select the item in the drop down, false to select the filter text 
 	 */
-	public void showMenu(String filterText) {
+	public void showMenu(String filterText, boolean selectItem) {
 		if (!fEnabled)
 			return;
 		
@@ -160,16 +160,40 @@ class BreadcrumbItemDropDown {
 		gridLayout.marginWidth= 0;
 		composite.setLayout(gridLayout);
 		
-		final FilteredTree filteredTree= new FilteredTree(composite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL, new PatternFilter());
+		final FilteredTable filteredTable= new FilteredTable(composite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL, new PatternFilter());
 		if (filterText != null) {
-			filteredTree.getFilterControl().setText(filterText);
-			filteredTree.getFilterControl().setSelection(filterText.length());
+			filteredTable.getFilterControl().setText(filterText);
+			filteredTable.getFilterControl().setSelection(filterText.length());
 		}
-		filteredTree.setBackground(shell.getBackground());
+		filteredTable.setBackground(shell.getBackground());
 
-		final TreeViewer viewer= filteredTree.getViewer();
+		final TableViewer viewer= filteredTable.getViewer();
 		ColoredViewersManager.install(viewer);
-		final Tree tree= (Tree) viewer.getControl();
+		final Table table= (Table) viewer.getControl();
+		
+		filteredTable.addNavigateListener(new INavigateListener() {
+			public void navigate(Direction direction) {
+				if (direction == FilteredTable.DIRECTION_UP) {
+					int index= fParent.getTree().getIndexOfItem(fParent);
+					if (index - 1 >= 0) {
+						shell.close();
+						
+						BreadcrumbItem parent= fParent.getTree().getItem(index - 1);
+						fParent.getTree().selectItem(parent);
+						parent.openDropDownMenu(null, true);
+					}
+				} else if (direction == FilteredTable.DIRECTION_DOWN) {
+					int index= fParent.getTree().getIndexOfItem(fParent);
+					if (index != -1 && index + 1 < fParent.getTree().getItemCount()) {
+						shell.close();
+						
+						BreadcrumbItem child= fParent.getTree().getItem(index + 1);
+						fParent.getTree().selectItem(child);
+						child.openDropDownMenu(null, true);
+					}
+				}
+			}
+		});
 
 		viewer.setContentProvider(new ITreeContentProvider() {  
 			public void dispose() {
@@ -220,12 +244,12 @@ class BreadcrumbItemDropDown {
 			}
 		});
 
-		tree.addMouseListener(new MouseListener() {
+		table.addMouseListener(new MouseListener() {
 			public void mouseDoubleClick(MouseEvent e) {
 				if (e.button != 1)
 					return;
 
-				TreeItem item= tree.getItem(new Point(e.x, e.y));
+				Item item= table.getItem(new Point(e.x, e.y));
 				if (item == null)
 					return;
 
@@ -249,6 +273,9 @@ class BreadcrumbItemDropDown {
 		Object child= fParent.getData();
 		if (child != null)
 			viewer.setSelection(new StructuredSelection(child), true);
+		
+		if (selectItem)
+			viewer.getTable().setFocus();
 	}
 
 	/**
@@ -306,7 +333,7 @@ class BreadcrumbItemDropDown {
 	 */
 	private void setShellBounds(Shell shell) {
 		Rectangle rect= fArrow.getBounds();
-		Point pt= new Point(rect.x + rect.width + 3, rect.y + rect.height + 5);
+		Point pt= new Point(rect.x + rect.width - 2, rect.y + rect.height + 5);
 		pt= fArrow.getParent().toDisplay(pt);
 		shell.setLocation(pt.x, pt.y);
 		fArrow.setImage(JavaPluginImages.get(JavaPluginImages.IMG_ETOOL_ARROW_DOWN));
