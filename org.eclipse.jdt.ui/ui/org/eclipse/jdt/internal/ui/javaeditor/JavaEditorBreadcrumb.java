@@ -435,32 +435,65 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 		getJavaEditor().getEditorSite().registerContextMenu(manager, fViewer, false);
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#setInput(java.lang.Object)
+	 */
+	public void setInput(Object element) {
+		if (element == null)
+			return;
+		
+		if (element instanceof IJavaElement) {
+			super.setInput(getInput((IJavaElement) element));
+		} else {
+			super.setInput(element);
+		}
+	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#getCurrentInput()
 	 */
 	protected Object getCurrentInput() {
 		try {
-			IJavaElement result= SelectionConverter.getElementAtOffset(getJavaEditor());
-			if (result instanceof IImportDeclaration)
-				result= result.getParent();
+			return getInput(SelectionConverter.getElementAtOffset(getJavaEditor()));
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			return null;
+		}		
+	}
 
-			if (result instanceof IImportContainer)
-				result= result.getParent();
+	/**
+	 * Returns the input for the given element. The Java breadcrumb
+	 * does not show some elements of the model:
+	 * ITypeRoots
+	 * IPackageDeclaration
+	 * IImportContainer
+	 * IImportDeclaration
+	 * 
+	 * @param element the potential input element
+	 * @return the element to use as input
+	 */
+	private IJavaElement getInput(IJavaElement element) {
+		try {
+			if (element instanceof IImportDeclaration)
+				element= element.getParent();
 
-			if (result instanceof IPackageDeclaration)
-				result= result.getParent();
+			if (element instanceof IImportContainer)
+				element= element.getParent();
 
-			if (result instanceof ICompilationUnit) {
-				IType[] types= ((ICompilationUnit) result).getTypes();
+			if (element instanceof IPackageDeclaration)
+				element= element.getParent();
+
+			if (element instanceof ICompilationUnit) {
+				IType[] types= ((ICompilationUnit) element).getTypes();
 				if (types.length > 0)
-					result= types[0];
+					element= types[0];
 			}
 
-			if (result instanceof IClassFile)
-				result= ((IClassFile) result).getType();
-
-			return result;
+			if (element instanceof IClassFile)
+				element= ((IClassFile) element).getType();
+			
+			return element;
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 			return null;
