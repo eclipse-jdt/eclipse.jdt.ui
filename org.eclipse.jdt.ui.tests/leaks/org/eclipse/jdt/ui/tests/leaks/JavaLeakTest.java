@@ -167,12 +167,38 @@ public class JavaLeakTest extends LeakTestCase {
 		internalTestEditorClose(cu, CompilationUnitEditor.class, false, true);
 	}
 
-	public void testJavaEditorBreadcrumbCloseOneOfTwo() throws Exception {
+	public void testJavaEditorBreadcrumbCloseOneOfTwo1() throws Exception {
 
 		ICompilationUnit cu1= createTestCU("Test1");
 		IEditorPart editor1= EditorUtility.openInEditor(cu1);
 		assertEquals(editor1.getClass(), CompilationUnitEditor.class);
 		activateBreadcrumb((JavaEditor) editor1);
+		assertInstanceCount(CompilationUnitEditor.class, 1);
+
+		ICompilationUnit cu2= createTestCU("Test2");
+		IEditorPart editor2= EditorUtility.openInEditor(cu2);
+		assertEquals(editor2.getClass(), CompilationUnitEditor.class);
+		activateBreadcrumb((JavaEditor) editor2);
+		assertInstanceCount(CompilationUnitEditor.class, 2);
+
+		assertTrue("Could not close editor", JavaPlugin.getActivePage().closeEditor(editor2, false));
+		editor2= null;
+
+		assertInstanceCount(CompilationUnitEditor.class, 1);
+
+		assertTrue("Could not close editor", JavaPlugin.getActivePage().closeEditor(editor1, false));
+		editor1= null;
+
+		assertInstanceCount(CompilationUnitEditor.class, 0);
+	}
+	
+	public void testJavaEditorBreadcrumbCloseOneOfTwo2() throws Exception {
+		if (true) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=216167
+			return;
+
+		ICompilationUnit cu1= createTestCU("Test1");
+		IEditorPart editor1= EditorUtility.openInEditor(cu1);
+		assertEquals(editor1.getClass(), CompilationUnitEditor.class);
 		assertInstanceCount(CompilationUnitEditor.class, 1);
 
 		ICompilationUnit cu2= createTestCU("Test2");
