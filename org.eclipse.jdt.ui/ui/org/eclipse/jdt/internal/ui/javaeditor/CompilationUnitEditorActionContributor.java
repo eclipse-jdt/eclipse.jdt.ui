@@ -56,11 +56,6 @@ public class CompilationUnitEditorActionContributor extends BasicCompilationUnit
 	 * @see IEditorActionBarContributor#setActiveEditor(IEditorPart)
 	 */
 	public void setActiveEditor(IEditorPart part) {
-		if (part instanceof JavaEditor) {
-			if (((JavaEditor) part).isBreadcrumbActive())
-				return;
-		}
-		
 		super.setActiveEditor(part);
 
 		ITextEditor textEditor= null;

@@ -36,6 +36,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.ITextViewer;
 
+import org.eclipse.ui.IPartListener;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 
@@ -68,6 +70,8 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	private IPropertyChangeListener fPropertyChangeListener;
 
 	private ISelection fOldTextSelection;
+
+	private IPartListener fPartListener;
 
 	
 	/**
@@ -262,6 +266,9 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 			Display.getDefault().removeFilter(SWT.FocusIn, fDisplayFocusListener);
 		}
 		deinstallDisplayListeners();
+		if (fPartListener != null) {
+			getTextEditor().getSite().getPage().removePartListener(fPartListener);
+		}
 
 		setTextEditor(null);
 	}
@@ -473,6 +480,36 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	 */
 	protected void setTextEditor(ITextEditor textEditor) {
 		fTextEditor= textEditor;
+		
+		if (fTextEditor == null)
+			return;
+		
+		fPartListener= new IPartListener() {
+
+			public void partActivated(IWorkbenchPart part) {
+				if (part == fTextEditor && fHasFocus) {
+					focusGained();
+				}
+			}
+
+			public void partBroughtToTop(IWorkbenchPart part) {
+			}
+
+			public void partClosed(IWorkbenchPart part) {
+				
+			}
+
+			public void partDeactivated(IWorkbenchPart part) {
+				if (part == fTextEditor && fHasFocus) {
+					focusLost();
+				}
+			}
+
+			public void partOpened(IWorkbenchPart part) {
+			}
+
+		};
+		fTextEditor.getSite().getPage().addPartListener(fPartListener);
 	}
 
 	/**
