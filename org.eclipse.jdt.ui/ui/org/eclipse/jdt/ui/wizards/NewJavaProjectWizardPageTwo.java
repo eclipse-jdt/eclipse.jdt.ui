@@ -135,14 +135,11 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		boolean isShownFirstTime= visible && fCurrProject == null;
 		if (visible) {
 			if (isShownFirstTime) { // entering from the first page
-				IStatus status= changeToNewProject();
-				if (status != null && !status.isOK()) {
-					ErrorDialog.openError(getShell(), NewWizardMessages.NewJavaProjectWizardPageTwo_error_title, null, status);
-				}
+				createProvisonalProject();
 			}
 		} else {
 			if (getContainer().getCurrentPage() == fFirstPage) { // leaving back to the first page
-				removeProject();
+				removeProvisonalProject();
 			}
 		}
 		super.setVisible(visible);
@@ -497,8 +494,27 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		}
 	}
 
-	private void removeProject() { 
-		if (fCurrProject == null || !fCurrProject.exists()) {
+	/**
+	 * Creates the provisional project on which the wizard is working on. The provisional project is typically
+	 * created when the page is entered the first time. The early project creation is required to configure linked folders. 
+	 * 
+	 * @return the provisional project 
+	 */
+	protected IProject createProvisonalProject() {
+		IStatus status= changeToNewProject();
+		if (status != null && !status.isOK()) {
+			ErrorDialog.openError(getShell(), NewWizardMessages.NewJavaProjectWizardPageTwo_error_title, null, status);
+		}
+		return fCurrProject;
+	}
+	
+	/**
+	 * Removes the provisional project. The provisional project is typically removed when the user cancels the wizard or goes
+	 * back to the first page.
+	 */
+	protected void removeProvisonalProject() { 
+		if (!fCurrProject.exists()) {
+			fCurrProject= null;
 			return;
 		}
 
@@ -553,6 +569,8 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 	 * Called from the wizard on cancel.
 	 */
 	public void performCancel() {
-		removeProject();
+		if (fCurrProject != null) {
+			removeProvisonalProject();
+		}
 	}      
 }
