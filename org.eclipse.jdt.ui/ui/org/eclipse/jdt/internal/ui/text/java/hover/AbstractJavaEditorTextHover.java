@@ -31,6 +31,7 @@ import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHoverExtension;
+import org.eclipse.jface.text.ITextHoverExtension2;
 import org.eclipse.jface.text.ITextViewer;
 
 import org.eclipse.ui.IEditorInput;
@@ -60,7 +61,7 @@ import org.osgi.framework.Bundle;
  *
  * @since 2.1
  */
-public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHover, ITextHoverExtension {
+public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHover, ITextHoverExtension, ITextHoverExtension2 {
 	/**
 	 * The style sheet (css).
 	 * @since 3.2
@@ -92,6 +93,14 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 		}
 
 		return null;
+	}
+
+    /*
+	 * @see org.eclipse.jface.text.ITextHoverExtension2#getHoverInfo2(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
+	 * @since 3.4
+	 */
+	public Object getHoverInfo2(ITextViewer textViewer, IRegion hoverRegion) {
+		return getHoverInfo(textViewer, hoverRegion);
 	}
 
 	/*
@@ -141,6 +150,19 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 		};
 	}
 
+	/*
+	 * @see org.eclipse.jface.text.ITextHoverExtension2#getInformationPresenterControlCreator()
+	 * @since 3.4
+	 */
+	public IInformationControlCreator getInformationPresenterControlCreator() {
+		return new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell shell) {
+				int style= SWT.V_SCROLL | SWT.H_SCROLL;
+				return new DefaultInformationControl(shell, SWT.RESIZE | SWT.TOOL, style, new HTMLTextPresenter(false));
+			}
+		};
+	}
+	
 	protected static String getStyleSheet() {
 		if (fgStyleSheet == null)
 			fgStyleSheet= loadStyleSheet();

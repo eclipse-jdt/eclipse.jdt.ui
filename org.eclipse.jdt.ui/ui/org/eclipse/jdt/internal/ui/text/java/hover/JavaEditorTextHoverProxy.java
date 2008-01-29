@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHoverExtension;
+import org.eclipse.jface.text.ITextHoverExtension2;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
 
@@ -27,7 +28,7 @@ import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
  *
  * @since 2.1
  */
-public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover implements ITextHoverExtension, IInformationProviderExtension2 {
+public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover {
 
 	private JavaEditorTextHoverDescriptor fHoverDescriptor;
 	private IJavaEditorTextHover fHover;
@@ -70,6 +71,21 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover implem
 
 		return null;
 	}
+	
+	/*
+	 * @see org.eclipse.jface.text.ITextHoverExtension2#getHoverInfo2(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
+	 * @since 3.4
+	 */
+	public Object getHoverInfo2(ITextViewer textViewer, IRegion hoverRegion) {
+		if (ensureHoverCreated()) {
+			if (fHover instanceof ITextHoverExtension2)
+				return ((ITextHoverExtension2) fHover).getHoverInfo2(textViewer, hoverRegion);
+			else
+				return fHover.getHoverInfo(textViewer, hoverRegion);
+		}
+
+		return null;
+	}
 
 	private boolean ensureHoverCreated() {
 		if (!isEnabled() || fHoverDescriptor == null)
@@ -103,8 +119,12 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover implem
 	 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {
-		if (ensureHoverCreated() && (fHover instanceof IInformationProviderExtension2))
-			return ((IInformationProviderExtension2)fHover).getInformationPresenterControlCreator();
+		if (ensureHoverCreated()) {
+			if (fHover instanceof ITextHoverExtension2)
+				return ((ITextHoverExtension2) fHover).getInformationPresenterControlCreator();
+			if (fHover instanceof IInformationProviderExtension2) // this is wrong, but left here for backwards compatibility
+				return ((IInformationProviderExtension2) fHover).getInformationPresenterControlCreator();
+		}
 
 		return null;
 	}

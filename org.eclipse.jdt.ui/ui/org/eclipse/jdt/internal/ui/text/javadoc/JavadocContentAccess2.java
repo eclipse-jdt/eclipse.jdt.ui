@@ -93,6 +93,10 @@ public class JavadocContentAccess2 {
 		if (useAttachedJavadoc && member.getOpenable().getBuffer() == null) { // only if no source available
 			return member.getAttachedJavadoc(null);
 		}
+		
+		if (allowInherited && (member.getElementType() == IJavaElement.METHOD))
+			return findDocInHierarchy((IMethod) member, useAttachedJavadoc);
+		
 		return null;
 	}
 
@@ -112,7 +116,7 @@ public class JavadocContentAccess2 {
 		}
 
 		if (allowInherited && (member.getElementType() == IJavaElement.METHOD)) {
-			return findDocInHierarchy((IMethod) member);
+			return findDocInHierarchy((IMethod) member, false);
 		}
 		
 		return null;
@@ -122,6 +126,7 @@ public class JavadocContentAccess2 {
 		//FIXME: take from SharedASTProvider if available
 		
 		//FIXME: Javadoc nodes are not available when Javadoc processing has been disabled!
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=212207
 		
 		ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setProject(member.getJavaProject());
@@ -180,7 +185,7 @@ public class JavadocContentAccess2 {
 		return javadoc != null && javadoc.trim().equals("{@inheritDoc}"); //$NON-NLS-1$
 	}
 
-	private static String findDocInHierarchy(IMethod method) throws JavaModelException {
+	private static String findDocInHierarchy(IMethod method, boolean useAttachedJavadoc) throws JavaModelException {
 		/*
 		 * Catch ExternalJavaProject in which case
 		 * no hierarchy can be built.
@@ -201,6 +206,13 @@ public class JavadocContentAccess2 {
 				String javadoc= getHTMLContentFromSource(overridden, false);
 				if (javadoc != null) {
 					return javadoc;
+				}
+				if (useAttachedJavadoc) {
+					if (overridden.getOpenable().getBuffer() == null) { // only if no source available
+						return overridden.getAttachedJavadoc(null);
+					} else {
+						return null;
+					}
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,9 +20,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextHoverExtension;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.information.IInformationProviderExtension2;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.part.IWorkbenchPartOrientation;
@@ -46,7 +44,7 @@ import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
 /**
  * Provides source as hover info for Java elements.
  */
-public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITextHoverExtension, IInformationProviderExtension2 {
+public class JavaSourceHover extends AbstractJavaEditorTextHover {
 
 	/*
 	 * @see JavaElementHover
@@ -130,7 +128,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 	}
 
 	/*
-	 * @see IInformationProviderExtension2#getInformationPresenterControlCreator()
+	 * @see org.eclipse.jface.text.ITextHoverExtension2#getInformationPresenterControlCreator()
 	 * @since 3.0
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {
