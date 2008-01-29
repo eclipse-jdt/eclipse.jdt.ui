@@ -138,7 +138,8 @@ public class JavaElementLinks {
 							
 						}
 					} else {
-						JavaPlugin.logErrorMessage("JavaElementLinks could not resolve " + uri); //$NON-NLS-1$
+						// FIXME: either remove or show dialog
+//						JavaPlugin.logErrorMessage("JavaElementLinks could not resolve " + uri); //$NON-NLS-1$
 					}
 					return type;
 				} catch (JavaModelException e) {
