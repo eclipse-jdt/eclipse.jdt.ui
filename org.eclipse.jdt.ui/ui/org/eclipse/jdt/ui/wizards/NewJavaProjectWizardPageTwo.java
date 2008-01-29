@@ -132,20 +132,26 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
 	public void setVisible(boolean visible) {
+		boolean isShownFirstTime= visible && fCurrProject == null;
 		if (visible) {
-			IStatus status= changeToNewProject();
-			if (status != null && !status.isOK()) {
-				ErrorDialog.openError(getShell(), NewWizardMessages.NewJavaProjectWizardPageTwo_error_title, null, status);
+			if (isShownFirstTime) { // entering from the first page
+				IStatus status= changeToNewProject();
+				if (status != null && !status.isOK()) {
+					ErrorDialog.openError(getShell(), NewWizardMessages.NewJavaProjectWizardPageTwo_error_title, null, status);
+				}
 			}
 		} else {
-			removeProject();
+			if (getContainer().getCurrentPage() == fFirstPage) { // leaving back to the first page
+				removeProject();
+			}
 		}
 		super.setVisible(visible);
-		if (visible) {
-
+		if (isShownFirstTime) {
 			setFocus();
 		}
 	}
+	
+	
 
 	private boolean hasExistingContent(URI realLocation) throws CoreException {
 		IFileStore file= EFS.getStore(realLocation);

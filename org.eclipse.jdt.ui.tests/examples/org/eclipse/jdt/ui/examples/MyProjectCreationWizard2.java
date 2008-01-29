@@ -22,11 +22,14 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardPage;
 
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
@@ -48,7 +51,7 @@ import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageTwo;
 	point="org.eclipse.ui.newWizards">
   	<wizard
 		id="org.eclipse.jdt.ui.examples.MyProjectCreationWizard2"
-		name="My project 2"
+		name="My Project 2"
 		class="org.eclipse.jdt.ui.examples.MyProjectCreationWizard2"
 		category="org.eclipse.jdt.ui.java"
 		project="true"
@@ -67,6 +70,7 @@ public class MyProjectCreationWizard2 extends Wizard implements IExecutableExten
 
 	private NewJavaProjectWizardPageOne fMainPage;
 	private NewJavaProjectWizardPageTwo fJavaPage;
+	private IWizardPage fExtraPage;
 
 	private IConfigurationElement fConfigElement;
 
@@ -141,8 +145,22 @@ public class MyProjectCreationWizard2 extends Wizard implements IExecutableExten
 		fJavaPage= new NewJavaProjectWizardPageTwo(fMainPage);
 
 		addPage(fJavaPage);
+		
+		fExtraPage= new WizardPage("My Page") {
 
-		//	TODO: add your pages here
+			public void createControl(Composite parent) {
+				initializeDialogUnits(parent);
+
+				Button button= new Button(parent, SWT.CHECK);
+				button.setText("Make it a special project");
+				
+				setControl(button);
+			}
+			
+		};
+		
+		
+		addPage(fExtraPage);
 	}
 
 
@@ -153,7 +171,7 @@ public class MyProjectCreationWizard2 extends Wizard implements IExecutableExten
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException, InterruptedException {
 				fJavaPage.performFinish(monitor);
-
+				// use the result from the extra page
 			}
 		};
 		try {
