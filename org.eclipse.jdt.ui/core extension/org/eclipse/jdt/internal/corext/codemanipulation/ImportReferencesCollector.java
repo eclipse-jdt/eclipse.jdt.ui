@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayType;
@@ -67,7 +68,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 	private Collection/*<Name>*/ fStaticImports;
 
 	private ImportReferencesCollector(IJavaProject project, CompilationUnit astRoot, Region rangeLimit, Collection resultingTypeImports, Collection resultingStaticImports) {
-		super(true);
+		super(!isPackageInfo(astRoot)); // don't visit Javadoc for 'package-info' (bug 216432)
 		fTypeImports= resultingTypeImports;
 		fStaticImports= resultingStaticImports;
 		fSubRange= rangeLimit;
@@ -75,6 +76,11 @@ public class ImportReferencesCollector extends GenericVisitor {
 			fStaticImports= null; // do not collect
 		}
 		fASTRoot= astRoot;
+	}
+	
+	private static boolean isPackageInfo(CompilationUnit astRoot) {
+		ITypeRoot typeRoot= astRoot.getTypeRoot();
+		return typeRoot != null && typeRoot.getElementName().equals("package-info.java"); //$NON-NLS-1$
 	}
 	
 	public ImportReferencesCollector(IJavaProject project, Region rangeLimit, Collection resultingTypeImports, Collection resultingStaticImports) {

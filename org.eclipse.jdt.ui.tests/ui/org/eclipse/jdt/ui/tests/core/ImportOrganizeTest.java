@@ -2817,6 +2817,46 @@ public class ImportOrganizeTest extends CoreTests {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
+	public void test_PackageInfoBug216432() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("/**\n");
+		buf.append(" * @see Bar\n");
+		buf.append(" */\n");
+		buf.append("@Foo\n");
+		buf.append("package pack1;");
+		ICompilationUnit cu= pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack2= sourceFolder.createPackageFragment("pack2", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack2;\n");
+		buf.append("public @interface Foo {\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("Foo.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack2;\n");
+		buf.append("public @interface Bar {\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("Bar.java", buf.toString(), false, null);
+
+		String[] order= new String[] { "", "#" };
+		IChooseImportQuery query= createQuery("test_PackageInfoBug216432", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("/**\n");
+		buf.append(" * @see Bar\n");
+		buf.append(" */\n");
+		buf.append("@Foo\n");
+		buf.append("package pack1;\n");
+		buf.append("import pack2.Foo;\n"); // no import for Bar
+		assertEqualString(cu.getSource(), buf.toString());
+	}
 
 	
 	public void testTypeArgumentImports() throws Exception {
