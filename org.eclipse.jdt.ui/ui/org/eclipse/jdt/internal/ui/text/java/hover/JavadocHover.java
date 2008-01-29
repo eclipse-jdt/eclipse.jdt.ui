@@ -215,7 +215,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			int style= SWT.V_SCROLL | SWT.H_SCROLL;
 			if (BrowserInformationControl.isAvailable(parent)) {
 				ToolBarManager tbm= new ToolBarManager(SWT.FLAT);
-				BrowserInformationControl iControl= new BrowserInformationControl(parent, shellStyle, style, tbm, null);
+				BrowserInformationControl iControl= new BrowserInformationControl(parent, shellStyle, style, tbm);
 				
 				final BackAction backAction= new BackAction(iControl);
 				backAction.setEnabled(false);
