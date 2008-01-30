@@ -66,8 +66,8 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 		Match[] matches= getPage().getInput().getMatches(jel);
 		for (int i= 0; i < matches.length; i++) {
 			OccurrenceMatch curr= (OccurrenceMatch) matches[i];
-			int offset= curr.getOffset() - jel.getLineStartOffset() + lineNumberString.length();
-			int length= curr.getLength();
+			int offset= curr.getOriginalOffset() - jel.getLineStartOffset() + lineNumberString.length();
+			int length= curr.getOriginalLength();
 			
 			if (offset >= 0 && (offset + length <= res.length())) {
 				if ((curr.getFlags() & IOccurrencesFinder.F_WRITE_OCCURRENCE) != 0) {

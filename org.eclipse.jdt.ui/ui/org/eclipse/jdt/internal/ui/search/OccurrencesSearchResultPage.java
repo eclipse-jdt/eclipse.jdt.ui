@@ -335,8 +335,8 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 			JavaElementLine line= (JavaElementLine) elements[i];
 			Match[] matches= result.getMatches(line);
 			for (int j= 0; j < matches.length; j++) {
-				Match match= matches[j];
-				if (match.getOffset() <= offset && offset + length <= match.getOffset() + match.getLength()) {
+				OccurrenceMatch match= (OccurrenceMatch) matches[j];
+				if (match.getOriginalOffset() <= offset && offset + length <= match.getOriginalOffset() + match.getOriginalLength()) {
 					return line;
 				}
 			}
