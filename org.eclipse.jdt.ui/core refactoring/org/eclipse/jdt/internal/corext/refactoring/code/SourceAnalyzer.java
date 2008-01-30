@@ -444,9 +444,7 @@ class SourceAnalyzer  {
 		// static imported fields and methods as implicit visible.
 		fTypesToImport= new ArrayList();
 		fStaticsToImport= new ArrayList();
-		ImportReferencesCollector collector= new ImportReferencesCollector(
-			fTypeRoot.getJavaProject(), null, fTypesToImport, fStaticsToImport);
-		body.accept(collector);
+		ImportReferencesCollector.collect(body, fTypeRoot.getJavaProject(), null, fTypesToImport, fStaticsToImport);
 		
 		// Now collect implicit references and name references
 		body.accept(new UpdateCollector());

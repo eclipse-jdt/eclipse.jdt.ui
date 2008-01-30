@@ -56,17 +56,21 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 public class ImportReferencesCollector extends GenericVisitor {
 
 	public static void collect(ASTNode node, IJavaProject project, Region rangeLimit, Collection resultingTypeImports, Collection resultingStaticImports) {
-		CompilationUnit astRoot= (CompilationUnit) node.getRoot();
-		node.accept(new ImportReferencesCollector(project, astRoot, rangeLimit, resultingTypeImports, resultingStaticImports));
+		collect(node, project, rangeLimit, false, resultingTypeImports, resultingStaticImports);		
 	}
 	
+	public static void collect(ASTNode node, IJavaProject project, Region rangeLimit, boolean skipMethodBodies, Collection resultingTypeImports, Collection resultingStaticImports) {
+		CompilationUnit astRoot= (CompilationUnit) node.getRoot();
+		node.accept(new ImportReferencesCollector(project, astRoot, rangeLimit, skipMethodBodies, resultingTypeImports, resultingStaticImports));
+	}
 	
 	private CompilationUnit fASTRoot;
 	private Region fSubRange;
 	private Collection/*<Name>*/ fTypeImports;
 	private Collection/*<Name>*/ fStaticImports;
+	private boolean fSkipMethodBodies;
 
-	private ImportReferencesCollector(IJavaProject project, CompilationUnit astRoot, Region rangeLimit, Collection resultingTypeImports, Collection resultingStaticImports) {
+	private ImportReferencesCollector(IJavaProject project, CompilationUnit astRoot, Region rangeLimit, boolean skipMethodBodies, Collection resultingTypeImports, Collection resultingStaticImports) {
 		super(processJavadocComments(astRoot));
 		fTypeImports= resultingTypeImports;
 		fStaticImports= resultingStaticImports;
@@ -75,6 +79,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 			fStaticImports= null; // do not collect
 		}
 		fASTRoot= astRoot;
+		fSkipMethodBodies= skipMethodBodies;
 	}
 	
 	private static boolean processJavadocComments(CompilationUnit astRoot) {
@@ -83,10 +88,6 @@ public class ImportReferencesCollector extends GenericVisitor {
 			return !"package-info.java".equals(astRoot.getTypeRoot().getElementName()); //$NON-NLS-1$
 		}
 		return true;
-	}
-	
-	public ImportReferencesCollector(IJavaProject project, Region rangeLimit, Collection resultingTypeImports, Collection resultingStaticImports) {
-		this(project, null, rangeLimit, resultingTypeImports, resultingStaticImports);
 	}
 	
 	public CompilationUnit getASTRoot(ASTNode node) {
@@ -380,7 +381,9 @@ public class ImportReferencesCollector extends GenericVisitor {
 		while (iter.hasNext()) {
 			typeRefFound((Name) iter.next());
 		}
-		doVisitNode(node.getBody());
+		if (!fSkipMethodBodies) {
+			doVisitNode(node.getBody());
+		}
 		return false;
 	}
 	

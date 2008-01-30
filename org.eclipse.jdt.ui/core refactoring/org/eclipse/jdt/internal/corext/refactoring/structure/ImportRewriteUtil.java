@@ -20,12 +20,10 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
@@ -38,7 +36,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollecto
  * @since 3.1
  */
 public final class ImportRewriteUtil {
-
+	
 	/**
 	 * Adds the necessary imports for an AST node to the specified compilation unit.
 	 * 
@@ -69,16 +67,9 @@ public final class ImportRewriteUtil {
 		Assert.isNotNull(staticImports);
 		final Set types= new HashSet();
 		final Set members= new HashSet();
-		final ImportReferencesCollector collector= new ImportReferencesCollector(rewrite.getCu().getJavaProject(), null, types, members) {
+		
+		ImportReferencesCollector.collect(node, rewrite.getCu().getJavaProject(), null, declarations, types, members);
 
-			public final boolean visit(final Block block) {
-				Assert.isNotNull(block);
-				if (declarations && block.getParent() instanceof MethodDeclaration)
-					return false;
-				return super.visit(block);
-			}
-		};
-		node.accept(collector);
 		final ImportRewrite rewriter= rewrite.getImportRewrite();
 		final ImportRemover remover= rewrite.getImportRemover();
 		Name name= null;
@@ -145,16 +136,9 @@ public final class ImportRewriteUtil {
 		Assert.isNotNull(staticBindings);
 		final Set types= new HashSet();
 		final Set members= new HashSet();
-		final ImportReferencesCollector collector= new ImportReferencesCollector(project, null, types, members) {
-
-			public final boolean visit(final Block block) {
-				Assert.isNotNull(block);
-				if (declarations && block.getParent() instanceof MethodDeclaration)
-					return false;
-				return super.visit(block);
-			}
-		};
-		node.accept(collector);
+		
+		ImportReferencesCollector.collect(node, project, null, declarations, types, members);
+		
 		Name name= null;
 		IBinding binding= null;
 		for (final Iterator iterator= types.iterator(); iterator.hasNext();) {

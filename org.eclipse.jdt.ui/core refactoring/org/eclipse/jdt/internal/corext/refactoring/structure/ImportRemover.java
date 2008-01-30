@@ -94,7 +94,9 @@ public class ImportRemover {
 	public IBinding[] getImportsToRemove() {
 		ArrayList/* <SimpleName> */importNames= new ArrayList();
 		ArrayList/* <SimpleName> */staticNames= new ArrayList();
-		fRoot.accept(new ImportReferencesCollector(fProject, null, importNames, staticNames));
+		
+		ImportReferencesCollector.collect(fRoot, fProject, null, importNames, staticNames);
+
 		List/* <SimpleName> */removedRefs= new ArrayList();
 		List/* <SimpleName> */unremovedRefs= new ArrayList();
 		divideTypeRefs(importNames, staticNames, removedRefs, unremovedRefs);

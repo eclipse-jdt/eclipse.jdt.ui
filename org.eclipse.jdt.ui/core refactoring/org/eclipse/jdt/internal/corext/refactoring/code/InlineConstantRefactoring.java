@@ -507,7 +507,8 @@ public class InlineConstantRefactoring extends Refactoring {
 			HashSet staticImportsInReference= new HashSet();
 			final IJavaProject project= fCuRewrite.getCu().getJavaProject();
 			if (fIs15)
-				location.accept(new ImportReferencesCollector(project, null, new ArrayList(), staticImportsInReference));
+				ImportReferencesCollector.collect(location, project, null, new ArrayList(), staticImportsInReference);
+
 			InitializerTraversal traversal= new InitializerTraversal(fInitializer, fStaticImportsInInitializer, location, staticImportsInReference, fCuRewrite);
 			ASTRewrite initializerRewrite= traversal.getInitializerRewrite();
 			IDocument document= new Document(fInitializerUnit.getBuffer().getContents()); // could reuse document when generating and applying undo edits
@@ -757,8 +758,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		try {
 			List/*<CompilationUnitChange>*/changes= new ArrayList();
 			HashSet staticImportsInInitializer= new HashSet();
-			ImportReferencesCollector importReferencesCollector= new ImportReferencesCollector(fField.getJavaProject(), null, new ArrayList(), staticImportsInInitializer);
-			getInitializer().accept(importReferencesCollector);
+			ImportReferencesCollector.collect(getInitializer(), fField.getJavaProject(), null, new ArrayList(), staticImportsInInitializer);
 			
 			if (getReplaceAllReferences()) {
 				SearchResultGroup[] searchResultGroups= findReferences(pm, result);
