@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -459,7 +459,8 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		final Set set= new HashSet();
 		for (int index= 0; index < children.length; index++)
 			set.add(children[index]);
-		final IResource resource= ((IPackageFragment) parent).getResource();
+		IPackageFragment packageFragment= (IPackageFragment) parent;
+		IResource resource= packageFragment.getResource();
 		if (resource != null) {
 			final IResourceDiffTree tree= context.getDiffTree();
 			final IResource[] members= tree.members(resource);
@@ -467,15 +468,18 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 				final int type= members[index].getType();
 				if (type == IResource.FILE) {
 					final IDiff diff= tree.getDiff(members[index]);
-					if (diff != null && isVisible(diff))
+					if (diff != null && isVisible(diff)) {
 						if (isInScope(context.getScope(), parent, members[index])) {
 							final IJavaElement element= JavaCore.create(members[index]);
 							if (element == null) {
-								set.add(members[index]);
+								if (!packageFragment.isDefaultPackage()) {
+									set.add(members[index]); //
+								}
 							} else {
 								set.add(element);
 							}
 						}
+					}
 				}
 			}
 		}
