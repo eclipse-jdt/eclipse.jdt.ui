@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
@@ -51,8 +52,12 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.util.Policy;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.wizard.WizardPage;
 
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -76,6 +81,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.preferences.CompliancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage;
@@ -1126,6 +1132,17 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 		initializeDefaultVM();
 	}
+	
+	/**
+	 * The wizard owning this page can call this method to initialize the fields from the
+	 * current selection and active part. 
+	 * 
+	 * @param selection used to initialize the fields
+	 * @param activePart the (typically active) part to initialize the fields or <code>null</code>
+	 */
+	public void init(IStructuredSelection selection, IWorkbenchPart activePart) {
+		setWorkingSets(getSelectedWorkingSet(selection, activePart));	
+	}
 
 	private void initializeDefaultVM() {
 		JavaRuntime.getDefaultVMInstall();
@@ -1388,5 +1405,98 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		}
 		return layout;
 	}
+	
+	private static final IWorkingSet[] EMPTY_WORKING_SET_ARRAY = new IWorkingSet[0];
+
+	private IWorkingSet[] getSelectedWorkingSet(IStructuredSelection selection, IWorkbenchPart activePart) {
+		IWorkingSet[] selected= getSelectedWorkingSet(selection);
+		if (selected != null && selected.length > 0) {
+			for (int i= 0; i < selected.length; i++) {
+				if (!isValidWorkingSet(selected[i]))
+					return EMPTY_WORKING_SET_ARRAY;
+			}
+			return selected;
+		}
+
+		if (!(activePart instanceof PackageExplorerPart))
+			return EMPTY_WORKING_SET_ARRAY;
+		
+		PackageExplorerPart explorerPart= (PackageExplorerPart) activePart;
+		if (explorerPart.getRootMode() == PackageExplorerPart.PROJECTS_AS_ROOTS) {				
+			//Get active filter
+			IWorkingSet filterWorkingSet= explorerPart.getFilterWorkingSet();
+			if (filterWorkingSet == null)
+				return EMPTY_WORKING_SET_ARRAY;
+
+			if (!isValidWorkingSet(filterWorkingSet))
+				return EMPTY_WORKING_SET_ARRAY;
+
+			return new IWorkingSet[] {filterWorkingSet};
+		} else {
+			//If we have been gone into a working set return the working set
+			Object input= explorerPart.getViewPartInput();
+			if (!(input instanceof IWorkingSet))
+				return EMPTY_WORKING_SET_ARRAY;
+
+			IWorkingSet workingSet= (IWorkingSet)input;
+			if (!isValidWorkingSet(workingSet))
+				return EMPTY_WORKING_SET_ARRAY;
+
+			return new IWorkingSet[] {workingSet};
+		}
+	}
+
+	private IWorkingSet[] getSelectedWorkingSet(IStructuredSelection selection) {
+		if (!(selection instanceof ITreeSelection))
+			return EMPTY_WORKING_SET_ARRAY;
+
+		ITreeSelection treeSelection= (ITreeSelection) selection;
+		if (treeSelection.isEmpty())
+			return EMPTY_WORKING_SET_ARRAY;
+
+		List elements= treeSelection.toList();
+		if (elements.size() == 1) {
+			Object element= elements.get(0);
+			TreePath[] paths= treeSelection.getPathsFor(element);
+			if (paths.length != 1)
+				return EMPTY_WORKING_SET_ARRAY;
+
+			TreePath path= paths[0];
+			if (path.getSegmentCount() == 0)
+				return EMPTY_WORKING_SET_ARRAY;
+
+			Object candidate= path.getSegment(0);
+			if (!(candidate instanceof IWorkingSet))
+				return EMPTY_WORKING_SET_ARRAY;
+
+			IWorkingSet workingSetCandidate= (IWorkingSet) candidate;
+			if (isValidWorkingSet(workingSetCandidate))
+				return new IWorkingSet[] { workingSetCandidate };
+
+			return EMPTY_WORKING_SET_ARRAY;
+		}
+
+		ArrayList result= new ArrayList();
+		for (Iterator iterator= elements.iterator(); iterator.hasNext();) {
+			Object element= iterator.next();
+			if (element instanceof IWorkingSet && isValidWorkingSet((IWorkingSet) element)) {
+				result.add(element);
+			}
+		}
+		return (IWorkingSet[]) result.toArray(new IWorkingSet[result.size()]);
+	}
+
+
+	private static boolean isValidWorkingSet(IWorkingSet workingSet) {
+		String id= workingSet.getId();	
+		if (!JavaWorkingSetUpdater.ID.equals(id) && !"org.eclipse.ui.resourceWorkingSetPage".equals(id)) //$NON-NLS-1$
+			return false;
+
+		if (workingSet.isAggregateWorkingSet())
+			return false;
+
+		return true;
+	}
+
 
 }

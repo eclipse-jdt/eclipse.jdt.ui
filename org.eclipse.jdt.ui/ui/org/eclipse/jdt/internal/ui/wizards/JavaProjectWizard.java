@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,9 +11,6 @@
 package org.eclipse.jdt.internal.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -23,11 +20,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeSelection;
-import org.eclipse.jface.viewers.TreePath;
-
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
@@ -41,7 +36,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
 
 public class JavaProjectWizard extends NewElementWizard implements IExecutableExtension {
 
@@ -74,8 +68,8 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 		if (fSecondPage == null)
 			fSecondPage= new NewJavaProjectWizardPageTwo(fFirstPage);
 		addPage(fSecondPage);
-
-		fFirstPage.setWorkingSets(getWorkingSets(getSelection()));
+		
+		fFirstPage.init(getSelection(), getActivePart());
 	}		
 
 	/* (non-Javadoc)
@@ -103,14 +97,25 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
-					PackageExplorerPart activePackageExplorer= getActivePackageExplorer();
-					if (activePackageExplorer != null) {
-						activePackageExplorer.tryToReveal(newElement);
+					IWorkbenchPart activePart= getActivePart();
+					if (activePart instanceof PackageExplorerPart) {
+						((PackageExplorerPart)activePart).tryToReveal(newElement);
 					}
 				}
 			});
 		}
 		return res;
+	}
+	
+	private IWorkbenchPart getActivePart() {
+		IWorkbenchWindow activeWindow= getWorkbench().getActiveWorkbenchWindow();
+		if (activeWindow != null) {
+			IWorkbenchPage activePage= activeWindow.getActivePage();
+			if (activePage != null) {
+				return activePage.getActivePart();
+			}
+		}
+		return null;
 	}
 
 	protected void handleFinishException(Shell shell, InvocationTargetException e) {
@@ -141,111 +146,4 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 	public IJavaElement getCreatedElement() {
 		return fSecondPage.getJavaProject();
 	}
-
-	private static final IWorkingSet[] EMPTY_WORKING_SET_ARRAY = new IWorkingSet[0];
-
-	private IWorkingSet[] getWorkingSets(IStructuredSelection selection) {
-		IWorkingSet[] selected= getSelectedWorkingSet(selection);
-		if (selected != null && selected.length > 0) {
-			for (int i= 0; i < selected.length; i++) {
-				if (!isValidWorkingSet(selected[i]))
-					return EMPTY_WORKING_SET_ARRAY;
-			}
-			return selected;
-		}
-
-		PackageExplorerPart explorerPart= getActivePackageExplorer();
-		if (explorerPart == null)
-			return EMPTY_WORKING_SET_ARRAY;
-
-		if (explorerPart.getRootMode() == PackageExplorerPart.PROJECTS_AS_ROOTS) {				
-			//Get active filter
-			IWorkingSet filterWorkingSet= explorerPart.getFilterWorkingSet();
-			if (filterWorkingSet == null)
-				return EMPTY_WORKING_SET_ARRAY;
-
-			if (!isValidWorkingSet(filterWorkingSet))
-				return EMPTY_WORKING_SET_ARRAY;
-
-			return new IWorkingSet[] {filterWorkingSet};
-		} else {
-			//If we have been gone into a working set return the working set
-			Object input= explorerPart.getViewPartInput();
-			if (!(input instanceof IWorkingSet))
-				return EMPTY_WORKING_SET_ARRAY;
-
-			IWorkingSet workingSet= (IWorkingSet)input;
-			if (!isValidWorkingSet(workingSet))
-				return EMPTY_WORKING_SET_ARRAY;
-
-			return new IWorkingSet[] {workingSet};
-		}
-	}
-
-	private IWorkingSet[] getSelectedWorkingSet(IStructuredSelection selection) {
-		if (!(selection instanceof ITreeSelection))
-			return EMPTY_WORKING_SET_ARRAY;
-
-		ITreeSelection treeSelection= (ITreeSelection) selection;
-		if (treeSelection.isEmpty())
-			return EMPTY_WORKING_SET_ARRAY;
-
-		List elements= treeSelection.toList();
-		if (elements.size() == 1) {
-			Object element= elements.get(0);
-			TreePath[] paths= treeSelection.getPathsFor(element);
-			if (paths.length != 1)
-				return EMPTY_WORKING_SET_ARRAY;
-
-			TreePath path= paths[0];
-			if (path.getSegmentCount() == 0)
-				return EMPTY_WORKING_SET_ARRAY;
-
-			Object candidate= path.getSegment(0);
-			if (!(candidate instanceof IWorkingSet))
-				return EMPTY_WORKING_SET_ARRAY;
-
-			IWorkingSet workingSetCandidate= (IWorkingSet) candidate;
-			if (isValidWorkingSet(workingSetCandidate))
-				return new IWorkingSet[] { workingSetCandidate };
-
-			return EMPTY_WORKING_SET_ARRAY;
-		}
-
-		ArrayList result= new ArrayList();
-		for (Iterator iterator= elements.iterator(); iterator.hasNext();) {
-			Object element= iterator.next();
-			if (element instanceof IWorkingSet && isValidWorkingSet((IWorkingSet) element)) {
-				result.add(element);
-			}
-		}
-		return (IWorkingSet[]) result.toArray(new IWorkingSet[result.size()]);
-	}
-
-	private PackageExplorerPart getActivePackageExplorer() {
-		PackageExplorerPart explorerPart= PackageExplorerPart.getFromActivePerspective();
-		if (explorerPart == null)
-			return null;
-
-		IWorkbenchPage activePage= explorerPart.getViewSite().getWorkbenchWindow().getActivePage();
-		if (activePage == null)
-			return null;
-
-		if (activePage.getActivePart() != explorerPart)
-			return null;
-
-		return explorerPart;
-	}
-
-	private static boolean isValidWorkingSet(IWorkingSet workingSet) {
-		String id= workingSet.getId();	
-		if (!JavaWorkingSetUpdater.ID.equals(id) && !"org.eclipse.ui.resourceWorkingSetPage".equals(id)) //$NON-NLS-1$
-			return false;
-
-		if (workingSet.isAggregateWorkingSet())
-			return false;
-
-		return true;
-	}
-
 }
