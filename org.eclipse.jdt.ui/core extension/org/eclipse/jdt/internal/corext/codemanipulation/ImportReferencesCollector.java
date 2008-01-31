@@ -60,7 +60,8 @@ public class ImportReferencesCollector extends GenericVisitor {
 	}
 	
 	public static void collect(ASTNode node, IJavaProject project, Region rangeLimit, boolean skipMethodBodies, Collection resultingTypeImports, Collection resultingStaticImports) {
-		CompilationUnit astRoot= (CompilationUnit) node.getRoot();
+		ASTNode root= node.getRoot();
+		CompilationUnit astRoot= root instanceof CompilationUnit ? (CompilationUnit) root : null;
 		node.accept(new ImportReferencesCollector(project, astRoot, rangeLimit, skipMethodBodies, resultingTypeImports, resultingStaticImports));
 	}
 	
@@ -78,7 +79,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		if (project == null || !JavaModelUtil.is50OrHigher(project)) {
 			fStaticImports= null; // do not collect
 		}
-		fASTRoot= astRoot;
+		fASTRoot= astRoot; // can be null
 		fSkipMethodBodies= skipMethodBodies;
 	}
 	
@@ -89,14 +90,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		}
 		return true;
 	}
-	
-	public CompilationUnit getASTRoot(ASTNode node) {
-		if (fASTRoot == null) {
-			fASTRoot= (CompilationUnit) node.getRoot();
-		}
-		return fASTRoot;
-	}
-	
+		
 	private boolean isAffected(ASTNode node) {
 		if (fSubRange == null) {
 			return true;
@@ -136,7 +130,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 	}
 	
 	private void possibleStaticImportFound(Name name) {
-		if (fStaticImports == null) {
+		if (fStaticImports == null || fASTRoot == null) {
 			return;
 		}
 		
@@ -158,7 +152,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 				varBinding= varBinding.getVariableDeclaration();
 				ITypeBinding declaringClass= varBinding.getDeclaringClass();
 				if (declaringClass != null && !declaringClass.isLocal()) {
-					if (new ScopeAnalyzer(getASTRoot(name)).isDeclaredInScope(varBinding, (SimpleName)name, ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY))
+					if (new ScopeAnalyzer(fASTRoot).isDeclaredInScope(varBinding, (SimpleName)name, ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY))
 							return;
 					fStaticImports.add(name);
 				}
@@ -167,7 +161,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 			IMethodBinding methodBinding= ((IMethodBinding) binding).getMethodDeclaration();
 			ITypeBinding declaringClass= methodBinding.getDeclaringClass();
 			if (declaringClass != null && !declaringClass.isLocal()) {
-				if (new ScopeAnalyzer(getASTRoot(name)).isDeclaredInScope(methodBinding, (SimpleName)name, ScopeAnalyzer.METHODS | ScopeAnalyzer.CHECK_VISIBILITY))
+				if (new ScopeAnalyzer(fASTRoot).isDeclaredInScope(methodBinding, (SimpleName)name, ScopeAnalyzer.METHODS | ScopeAnalyzer.CHECK_VISIBILITY))
 						return;
 				fStaticImports.add(name);
 			}
