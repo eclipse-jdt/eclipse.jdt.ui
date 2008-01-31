@@ -80,7 +80,10 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.launching.AbstractVMInstall;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -99,6 +102,7 @@ import org.eclipse.jdt.internal.junit.launcher.TestSelectionDialog;
 import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
@@ -133,6 +137,8 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	private Label fTestLabel; 
 	
 	private ComboViewer fTestLoaderViewer;
+	
+	private ILaunchConfiguration fLaunchConfiguration;
 	
 	/**
 	 * Creates a JUnit launch configuration tab.
@@ -349,6 +355,8 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#initializeFrom(org.eclipse.debug.core.ILaunchConfiguration)
 	 */
 	public void initializeFrom(ILaunchConfiguration config) {
+		fLaunchConfiguration= config;
+		
 		updateProjectFromConfig(config);
 		String containerHandle= ""; //$NON-NLS-1$
 		try {
@@ -362,6 +370,8 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			updateTestTypeFromConfig(config);
 		updateKeepRunning(config);
 		updateTestLoaderFromConfig(config);
+		
+		validatePage();
 	}
 
 
@@ -614,7 +624,8 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	/* (non-Javadoc)
 	 * @see org.eclipse.debug.ui.AbstractLaunchConfigurationTab#isValid(org.eclipse.debug.core.ILaunchConfiguration)
 	 */
-	public boolean isValid(ILaunchConfiguration config) {		
+	public boolean isValid(ILaunchConfiguration config) {
+		validatePage();
 		return getErrorMessage() == null;
 	}
 	
@@ -635,6 +646,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	}
 
 	private void validatePage() {
+		
 		setErrorMessage(null);
 		setMessage(null);
 
@@ -686,13 +698,44 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		} catch (CoreException e) {
 			JUnitPlugin.log(e);
 		}
-
+		
+		validateTestLoaderJVM();
 	}
 
 	private void validateJavaProject(IJavaProject javaProject) {
 		if (! TestSearchEngine.hasTestCaseType(javaProject)) {
 			setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_testcasenotonpath); 
 			return;				
+		}
+		TestKind testKind = getSelectedTestKind();
+		if (testKind != null && TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId())) {
+			if (! TestSearchEngine.hasTestAnnotation(javaProject)) {
+				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_testannotationnotonpath); 
+				return;				
+			}
+		}
+		
+	}
+	
+	private void validateTestLoaderJVM() {
+		if (fLaunchConfiguration == null)
+			return;
+		
+		TestKind testKind = getSelectedTestKind();
+		if (testKind == null || TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKind.getId()))
+			return;
+		try {
+			String path = fLaunchConfiguration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, (String)null);
+			if (path != null) {
+				IVMInstall vm = JavaRuntime.getVMInstall(Path.fromPortableString(path));
+				if (vm instanceof AbstractVMInstall) {
+					String compilance = ((AbstractVMInstall)vm).getJavaVersion();
+					if (compilance != null && !JUnitStubUtility.is50OrHigher(compilance)) {
+						setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_JDK15_required);
+					}
+				}
+			}
+		} catch (CoreException e) {
 		}
 	}
 

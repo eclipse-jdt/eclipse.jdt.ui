@@ -123,6 +123,8 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitLaunchConfigurationTab_error_invalidProjectName;
 
+	public static String JUnitLaunchConfigurationTab_error_JDK15_required;
+
 	public static String JUnitLaunchConfigurationTab_error_noContainer;
 
 	public static String JUnitLaunchConfigurationTab_error_notJavaProject;
@@ -132,6 +134,8 @@ public final class JUnitMessages extends NLS {
 	public static String JUnitLaunchConfigurationTab_error_projectnotexists;
 
 	public static String JUnitLaunchConfigurationTab_error_test_class_not_found;
+
+	public static String JUnitLaunchConfigurationTab_error_testannotationnotonpath;
 
 	public static String JUnitLaunchConfigurationTab_error_testcasenotonpath;
 

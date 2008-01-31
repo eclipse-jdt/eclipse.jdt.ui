@@ -292,7 +292,11 @@ public class JUnitStubUtility {
 	}
 	
 	public static boolean is50OrHigher(IJavaProject project) {
-		return !isVersionLessThan(project.getOption(JavaCore.COMPILER_COMPLIANCE, true), JavaCore.VERSION_1_5);
+		return is50OrHigher(project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
+	}
+	
+	public static boolean is50OrHigher(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.VERSION_1_5);
 	}
 	
 	public static String[] getParameterTypeNamesForSeeTag(IMethod overridden) {
