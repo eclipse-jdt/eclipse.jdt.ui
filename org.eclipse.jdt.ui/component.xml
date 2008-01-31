@@ -47,11 +47,13 @@
    <type name="CustomFiltersActionGroup" subclass="false"/>
    <type name="DeclarationsSearchGroup" subclass="false"/>
    <type name="ExternalizeStringsAction" subclass="false"/>
+   <type name="ExtractClassAction" subclass="false"/>
    <type name="ExtractConstantAction" subclass="false"/>
    <type name="ExtractInterfaceAction" subclass="false"/>
    <type name="ExtractMethodAction" subclass="false"/>
    <type name="ExtractTempAction" subclass="false"/>
    <type name="FindAction" reference="false" subclass="false"/>
+   <type name="FindBreakContinueTargetOccurrencesAction" subclass="false"/>
    <type name="FindDeclarationsAction" subclass="false"/>
    <type name="FindDeclarationsInHierarchyAction" subclass="false"/>
    <type name="FindDeclarationsInProjectAction" subclass="false"/>
@@ -61,6 +63,7 @@
    <type name="FindImplementorsAction" subclass="false"/>
    <type name="FindImplementorsInProjectAction" subclass="false"/>
    <type name="FindImplementorsInWorkingSetAction" subclass="false"/>
+   <type name="FindMethodExitOccurrencesAction" subclass="false"/>
    <type name="FindOccurrencesInFileAction" subclass="false"/>
    <type name="FindReadReferencesAction" subclass="false"/>
    <type name="FindReadReferencesInHierarchyAction" subclass="false"/>
