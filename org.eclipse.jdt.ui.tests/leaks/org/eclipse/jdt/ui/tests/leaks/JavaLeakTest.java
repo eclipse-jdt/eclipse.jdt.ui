@@ -18,7 +18,6 @@ import junit.framework.TestSuite;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
@@ -326,10 +325,6 @@ public class JavaLeakTest extends LeakTestCase {
 	
 	public void testJavaEditorContextMenu() throws Exception {
 		//regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=166761
-		if ("carbon".equals(SWT.getPlatform())) {
-			// test hangs on the Mac, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=210756
-			return;
-		}
 		
 		ICompilationUnit cu= createTestCU("Test");
 		IEditorPart part= internalTestEditorOpen(cu, CompilationUnitEditor.class);
