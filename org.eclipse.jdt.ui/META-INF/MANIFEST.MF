@@ -109,7 +109,7 @@ Export-Package: org.eclipse.jdt.internal.corext;x-friends:="org.eclipse.jdt.juni
  org.eclipse.jdt.ui.text.java.hover,
  org.eclipse.jdt.ui.wizards
 Require-Bundle: 
- org.eclipse.ui;bundle-version="[3.3.0,4.0.0)",
+ org.eclipse.ui;bundle-version="[3.4.0,4.0.0)",
  org.eclipse.ui.console;bundle-version="[3.2.0,4.0.0)",
  org.eclipse.help;bundle-version="[3.3.0,4.0.0)",
  org.eclipse.core.expressions;bundle-version="[3.4.0,4.0.0)",
