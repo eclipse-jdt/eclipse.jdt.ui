@@ -112,6 +112,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IPartService;
+import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbenchPage;
@@ -1444,7 +1445,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 		
 		/**
-		 * Marks this selection provider as being valid.  
+		 * Marks this selection provider as being valid.
 		 */
 		private void markValid() {
 			fInvalidSelection= null;
@@ -1467,6 +1468,16 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected final static String MATCHING_BRACKETS=  PreferenceConstants.EDITOR_MATCHING_BRACKETS;
 	/** Preference key for matching brackets color */
 	protected final static String MATCHING_BRACKETS_COLOR=  PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
+	/**
+	 * A named preference that controls whether the editor shows a breadcrumb.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.4
+	 */
+	public static final String EDITOR_SHOW_BREADCRUMB= "breadcrumb"; //$NON-NLS-1$
+
 
 	protected final static char[] BRACKETS= { '{', '}', '(', ')', '[', ']', '<', '>' };
 
@@ -1826,6 +1837,20 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	public IBreadcrumb getBreadcrumb() {
 		return fBreadcrumb;
+	}
+
+	/**
+	 * Returns the preference key for the breadcrumb. The
+	 * value depends on the current perspective.
+	 * 
+	 * @return the preference key or <code>null</code> if there's no perspective
+	 * @since 3.4
+	 */
+	String getBreadcrumbPreferenceKey() {
+		IPerspectiveDescriptor perspective= getSite().getPage().getPerspective();
+		if (perspective == null)
+			return null;
+		return JavaEditor.EDITOR_SHOW_BREADCRUMB + "." + perspective.getId(); //$NON-NLS-1$
 	}
 
 	/**
@@ -2501,7 +2526,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			((JavaSourceViewer)getSourceViewer()).setPreferenceStore(store);
 
 		fMarkOccurrenceAnnotations= store.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
-		fIsBreadcrumbVisible= store.getBoolean(PreferenceConstants.EDITOR_SHOW_BREADCRUMB);
+		fIsBreadcrumbVisible= isBreadcrumbShown();
 		fStickyOccurrenceAnnotations= store.getBoolean(PreferenceConstants.EDITOR_STICKY_OCCURRENCES);
 		fMarkTypeOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES);
 		fMarkMethodOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_METHOD_OCCURRENCES);
@@ -2748,7 +2773,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				}
 				return;
 			}
-			if (PreferenceConstants.EDITOR_SHOW_BREADCRUMB.equals(property)) {
+			if (getBreadcrumbPreferenceKey().equals(property)) {
 				if (newBooleanValue != fIsBreadcrumbVisible) {
 					fIsBreadcrumbVisible= newBooleanValue;
 					if (fIsBreadcrumbVisible)
@@ -3266,7 +3291,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	protected boolean isBreadcrumbShown() {
 		IPreferenceStore store= getPreferenceStore();
-		return store != null && store.getBoolean(PreferenceConstants.EDITOR_SHOW_BREADCRUMB);
+		String key= getBreadcrumbPreferenceKey();
+		return store != null && key != null && store.getBoolean(key);
 	}
 
 	boolean markOccurrencesOfType(IBinding binding) {

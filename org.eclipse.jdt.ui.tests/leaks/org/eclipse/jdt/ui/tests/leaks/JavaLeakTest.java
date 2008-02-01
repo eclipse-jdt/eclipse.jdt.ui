@@ -27,6 +27,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.INewWizard;
+import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.handlers.IHandlerService;
@@ -37,8 +38,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -107,28 +106,70 @@ public class JavaLeakTest extends LeakTestCase {
 	}
 
 	public void testJavaEditorClose() throws Exception {
-		try {
-			JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_SHOW_BREADCRUMB, false);
-
-			ICompilationUnit cu= createTestCU("Test");
-			internalTestEditorClose(cu, CompilationUnitEditor.class, false);
-		} finally {
-			JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_SHOW_BREADCRUMB, true);
-		}
+		ICompilationUnit cu= createTestCU("Test");
+		internalTestEditorClose(cu, CompilationUnitEditor.class, false);
 	}
 
 	public void testJavaEditorCloseOneOfTwo() throws Exception {
+		ICompilationUnit cu1= createTestCU("Test1");
+		IEditorPart editor1= EditorUtility.openInEditor(cu1);
+		assertEquals(editor1.getClass(), CompilationUnitEditor.class);
+		assertInstanceCount(CompilationUnitEditor.class, 1);
+
+		ICompilationUnit cu2= createTestCU("Test2");
+		IEditorPart editor2= EditorUtility.openInEditor(cu2);
+		assertEquals(editor2.getClass(), CompilationUnitEditor.class);
+		assertInstanceCount(CompilationUnitEditor.class, 2);
+
+		assertTrue("Could not close editor", JavaPlugin.getActivePage().closeEditor(editor2, false));
+		editor2= null;
+
+		assertInstanceCount(CompilationUnitEditor.class, 1);
+
+		assertTrue("Could not close editor", JavaPlugin.getActivePage().closeEditor(editor1, false));
+		editor1= null;
+
+		assertInstanceCount(CompilationUnitEditor.class, 0);
+	}
+
+	public void testJavaEditorCloseAll() throws Exception {
+		ICompilationUnit cu= createTestCU("Test");
+		internalTestEditorClose(cu, CompilationUnitEditor.class, true);
+	}
+
+	public void testJavaEditorBreadcrumbCloseAll() throws Exception {
 		try {
-			JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_SHOW_BREADCRUMB, false);
-			
+			JavaPlugin.getDefault().getPreferenceStore().setValue(getBreadcrumbPreferenceKey(), true);
+			ICompilationUnit cu= createTestCU("Test");
+			internalTestEditorClose(cu, CompilationUnitEditor.class, true, true);
+		} finally {
+			JavaPlugin.getDefault().getPreferenceStore().setValue(getBreadcrumbPreferenceKey(), false);
+		}
+	}
+
+	public void testJavaEditorBreadcrumbClose() throws Exception {
+		try {
+			JavaPlugin.getDefault().getPreferenceStore().setValue(getBreadcrumbPreferenceKey(), true);
+			ICompilationUnit cu= createTestCU("Test");
+			internalTestEditorClose(cu, CompilationUnitEditor.class, false, true);
+		} finally {
+			JavaPlugin.getDefault().getPreferenceStore().setValue(getBreadcrumbPreferenceKey(), false);
+		}
+	}
+
+	public void testJavaEditorBreadcrumbCloseOneOfTwo1() throws Exception {
+		try {
+			JavaPlugin.getDefault().getPreferenceStore().setValue(getBreadcrumbPreferenceKey(), true);
 			ICompilationUnit cu1= createTestCU("Test1");
 			IEditorPart editor1= EditorUtility.openInEditor(cu1);
 			assertEquals(editor1.getClass(), CompilationUnitEditor.class);
+			activateBreadcrumb((JavaEditor) editor1);
 			assertInstanceCount(CompilationUnitEditor.class, 1);
 
 			ICompilationUnit cu2= createTestCU("Test2");
 			IEditorPart editor2= EditorUtility.openInEditor(cu2);
 			assertEquals(editor2.getClass(), CompilationUnitEditor.class);
+			activateBreadcrumb((JavaEditor) editor2);
 			assertInstanceCount(CompilationUnitEditor.class, 2);
 
 			assertTrue("Could not close editor", JavaPlugin.getActivePage().closeEditor(editor2, false));
@@ -141,80 +182,40 @@ public class JavaLeakTest extends LeakTestCase {
 
 			assertInstanceCount(CompilationUnitEditor.class, 0);
 		} finally {
-			JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_SHOW_BREADCRUMB, true);
+			JavaPlugin.getDefault().getPreferenceStore().setValue(getBreadcrumbPreferenceKey(), false);
 		}
-	}
-	
-	public void testJavaEditorCloseAll() throws Exception {
-		try {
-			JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_SHOW_BREADCRUMB, false);
-
-			ICompilationUnit cu= createTestCU("Test");
-			internalTestEditorClose(cu, CompilationUnitEditor.class, true);
-		} finally {
-			JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_SHOW_BREADCRUMB, true);
-		}
-	}
-
-	public void testJavaEditorBreadcrumbCloseAll() throws Exception {
-		ICompilationUnit cu= createTestCU("Test");
-		internalTestEditorClose(cu, CompilationUnitEditor.class, true, true);
-	}
-
-	public void testJavaEditorBreadcrumbClose() throws Exception {
-		ICompilationUnit cu= createTestCU("Test");
-		internalTestEditorClose(cu, CompilationUnitEditor.class, false, true);
-	}
-
-	public void testJavaEditorBreadcrumbCloseOneOfTwo1() throws Exception {
-
-		ICompilationUnit cu1= createTestCU("Test1");
-		IEditorPart editor1= EditorUtility.openInEditor(cu1);
-		assertEquals(editor1.getClass(), CompilationUnitEditor.class);
-		activateBreadcrumb((JavaEditor) editor1);
-		assertInstanceCount(CompilationUnitEditor.class, 1);
-
-		ICompilationUnit cu2= createTestCU("Test2");
-		IEditorPart editor2= EditorUtility.openInEditor(cu2);
-		assertEquals(editor2.getClass(), CompilationUnitEditor.class);
-		activateBreadcrumb((JavaEditor) editor2);
-		assertInstanceCount(CompilationUnitEditor.class, 2);
-
-		assertTrue("Could not close editor", JavaPlugin.getActivePage().closeEditor(editor2, false));
-		editor2= null;
-
-		assertInstanceCount(CompilationUnitEditor.class, 1);
-
-		assertTrue("Could not close editor", JavaPlugin.getActivePage().closeEditor(editor1, false));
-		editor1= null;
-
-		assertInstanceCount(CompilationUnitEditor.class, 0);
 	}
 	
 	public void testJavaEditorBreadcrumbCloseOneOfTwo2() throws Exception {
 		if (true) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=216167
 			return;
 
-		ICompilationUnit cu1= createTestCU("Test1");
-		IEditorPart editor1= EditorUtility.openInEditor(cu1);
-		assertEquals(editor1.getClass(), CompilationUnitEditor.class);
-		assertInstanceCount(CompilationUnitEditor.class, 1);
+		try {
+			JavaPlugin.getDefault().getPreferenceStore().setValue(getBreadcrumbPreferenceKey(), true);
+			ICompilationUnit cu1= createTestCU("Test1");
+			IEditorPart editor1= EditorUtility.openInEditor(cu1);
+			assertEquals(editor1.getClass(), CompilationUnitEditor.class);
+			assertInstanceCount(CompilationUnitEditor.class, 1);
 
-		ICompilationUnit cu2= createTestCU("Test2");
-		IEditorPart editor2= EditorUtility.openInEditor(cu2);
-		assertEquals(editor2.getClass(), CompilationUnitEditor.class);
-		activateBreadcrumb((JavaEditor) editor2);
-		assertInstanceCount(CompilationUnitEditor.class, 2);
+			ICompilationUnit cu2= createTestCU("Test2");
+			IEditorPart editor2= EditorUtility.openInEditor(cu2);
+			assertEquals(editor2.getClass(), CompilationUnitEditor.class);
+			activateBreadcrumb((JavaEditor) editor2);
+			assertInstanceCount(CompilationUnitEditor.class, 2);
 
-		assertTrue("Could not close editor", JavaPlugin.getActivePage().closeEditor(editor2, false));
-		editor2= null;
+			assertTrue("Could not close editor", JavaPlugin.getActivePage().closeEditor(editor2, false));
+			editor2= null;
 
-		assertInstanceCount(CompilationUnitEditor.class, 1);
+			assertInstanceCount(CompilationUnitEditor.class, 1);
 
-		assertTrue("Could not close editor", JavaPlugin.getActivePage().closeEditor(editor1, false));
-		editor1= null;
+			assertTrue("Could not close editor", JavaPlugin.getActivePage().closeEditor(editor1, false));
+			editor1= null;
 
-		assertInstanceCount(CompilationUnitEditor.class, 0);
+			assertInstanceCount(CompilationUnitEditor.class, 0);
+		} finally {
+			JavaPlugin.getDefault().getPreferenceStore().setValue(getBreadcrumbPreferenceKey(), false);
+		}
+
 	}
 
 	protected void setUp() throws Exception {
@@ -377,5 +378,12 @@ public class JavaLeakTest extends LeakTestCase {
 		// verify that the editor instance is gone
 		assertInstanceCount(CompilationUnitEditor.class, 0);
 	}
-	
+
+	private String getBreadcrumbPreferenceKey() {
+		IPerspectiveDescriptor perspective= JavaPlugin.getActivePage().getPerspective();
+		if (perspective == null)
+			return null;
+		return JavaEditor.EDITOR_SHOW_BREADCRUMB + "." + perspective.getId(); //$NON-NLS-1$
+	}
+
 }

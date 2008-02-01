@@ -79,8 +79,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fTogglePresentation= new TogglePresentationAction();
 
 		fToggleMarkOccurrencesAction= new ToggleMarkOccurrencesAction();
-		fToggleBreadcrumbAction= new ToggleBreadcrumbAction();
-
+		
 		fGotoMatchingBracket= new RetargetTextEditorAction(b, "GotoMatchingBracket."); //$NON-NLS-1$
 		fGotoMatchingBracket.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
 		
@@ -119,6 +118,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	 * @see IEditorActionBarContributor#init(IActionBars, IWorkbenchPage)
 	 */
 	public void init(IActionBars bars, IWorkbenchPage page) {
+		fToggleBreadcrumbAction= new ToggleBreadcrumbAction(page);
 		Iterator e= fPartListeners.iterator();
 		while (e.hasNext())
 			page.addPartListener((RetargetAction) e.next());

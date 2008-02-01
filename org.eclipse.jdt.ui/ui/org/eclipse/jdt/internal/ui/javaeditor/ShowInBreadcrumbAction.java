@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.IBreadcrumb;
 
@@ -44,9 +42,19 @@ public class ShowInBreadcrumbAction extends Action {
 			return;
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(PreferenceConstants.EDITOR_SHOW_BREADCRUMB, true);
+		store.setValue(getPreferenceKey(), true);
 
 		breadcrumb.activate();
+	}
+
+	/**
+	 * Returns the preference key for the breadcrumb. The
+	 * value depends on the current perspective.
+	 * 
+	 * @return the preference key or <code>null</code> if there's no perspective
+	 */
+	private String getPreferenceKey() {
+		return fEditor.getBreadcrumbPreferenceKey();
 	}
 
 }
