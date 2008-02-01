@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 
@@ -671,19 +673,31 @@ public class ProfileVersioner implements IProfileVersioner {
     private static final String FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_THROWS = JavaCore.PLUGIN_ID + ".formatter.insert_space_after_comma_in_constructor_throws"; //$NON-NLS-1$
     private static final String FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_THROWS = JavaCore.PLUGIN_ID + ".formatter.insert_space_before_comma_in_constructor_throws"; //$NON-NLS-1$
     private static final String FORMATTER_NO_ALIGNMENT = "0";//$NON-NLS-1$
-	private static final String FORMATTER_COMMENT_FORMAT2= JavaCore.PLUGIN_ID + ".formatter.comment.format_comments"; //$NON-NLS-1$
-	private static final String FORMATTER_COMMENT_CLEAR_BLANK_LINES= JavaCore.PLUGIN_ID + ".formatter.comment.clear_blank_lines"; //$NON-NLS-1$ 
+    /** @deprecated */
+	private static final String FORMATTER_COMMENT_FORMAT2= DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT;
+	/** @deprecated */
+	private static final String FORMATTER_COMMENT_CLEAR_BLANK_LINES= DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES; 
 
 	// Old comment formatter constants
-	private static final String FORMATTER_COMMENT_FORMATSOURCE= "comment_format_source_code"; //$NON-NLS-1$
-	private static final String FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION= "comment_indent_parameter_description"; //$NON-NLS-1$
-	private static final String FORMATTER_COMMENT_FORMATHEADER= "comment_format_header"; //$NON-NLS-1$
-	private static final String FORMATTER_COMMENT_INDENTROOTTAGS= "comment_indent_root_tags"; //$NON-NLS-1$
-	private static final String FORMATTER_COMMENT_FORMAT= "comment_format_comments"; //$NON-NLS-1$
-	private static final String FORMATTER_COMMENT_NEWLINEFORPARAMETER= "comment_new_line_for_parameter"; //$NON-NLS-1$
-	private static final String FORMATTER_COMMENT_SEPARATEROOTTAGS= "comment_separate_root_tags"; //$NON-NLS-1$
-	private static final String FORMATTER_COMMENT_CLEARBLANKLINES= "comment_clear_blank_lines"; //$NON-NLS-1$
-	private static final String FORMATTER_COMMENT_LINELENGTH= "comment_line_length"; //$NON-NLS-1$
-	private static final String FORMATTER_COMMENT_FORMATHTML= "comment_format_html"; //$NON-NLS-1$
+	/** @deprecated */
+	private static final String FORMATTER_COMMENT_FORMATSOURCE= PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE;
+	/** @deprecated */
+	private static final String FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION= PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION;
+	/** @deprecated */
+	private static final String FORMATTER_COMMENT_FORMATHEADER= PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER;
+	/** @deprecated */
+	private static final String FORMATTER_COMMENT_INDENTROOTTAGS= PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS;
+	/** @deprecated */
+	private static final String FORMATTER_COMMENT_FORMAT= PreferenceConstants.FORMATTER_COMMENT_FORMAT;
+	/** @deprecated */
+	private static final String FORMATTER_COMMENT_NEWLINEFORPARAMETER= PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER;
+	/** @deprecated */
+	private static final String FORMATTER_COMMENT_SEPARATEROOTTAGS= PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS;
+	/** @deprecated */
+	private static final String FORMATTER_COMMENT_CLEARBLANKLINES= PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES;
+	/** @deprecated */
+	private static final String FORMATTER_COMMENT_LINELENGTH= PreferenceConstants.FORMATTER_COMMENT_LINELENGTH;
+	/** @deprecated */
+	private static final String FORMATTER_COMMENT_FORMATHTML= PreferenceConstants.FORMATTER_COMMENT_FORMATHTML;
 	
  }
