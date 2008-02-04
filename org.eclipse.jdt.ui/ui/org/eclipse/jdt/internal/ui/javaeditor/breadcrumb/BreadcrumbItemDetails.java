@@ -305,14 +305,21 @@ class BreadcrumbItemDetails {
 								viewer.selectItem(fParent);
 							}
 							fParent.openDropDownMenu(filterText, false);
-						} else if (e.character == '\t' && (e.stateMask & SWT.CTRL) != 0) {
-							if ((e.stateMask & SWT.SHIFT) != 0) {
-								viewer.getControl().getParent().traverse(SWT.TRAVERSE_TAB_NEXT);
+						} else if (e.character == '\t') {
+							if ((e.stateMask & SWT.SHIFT) != 0 && (e.stateMask & SWT.CTRL) != 0) {
+								viewer.getControl().getParent().traverse(SWT.TRAVERSE_TAB_PREVIOUS);
 							} else {
-								if (viewer.getRoot() == fParent.getData()) {
-									viewer.selectItem(viewer.getItem(viewer.getItemCount() - 1));
-								} else {
+								if (viewer.getIndexOfItem(fParent) == viewer.getItemCount() - 2) {
+									BreadcrumbItem item= viewer.getItem(viewer.getItemCount() - 1);
+									if (item.getData() != null) {
+										viewer.doTraverse(true);
+									} else {
+										viewer.selectItem(viewer.getItem(0));
+									}
+								} else if (viewer.getIndexOfItem(fParent) == viewer.getItemCount() - 1) {
 									viewer.selectItem(viewer.getItem(0));
+								} else {
+									viewer.doTraverse(true);
 								}
 							}
 						} else if (e.character == ' ') {
