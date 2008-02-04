@@ -57,8 +57,7 @@ import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
  */
 public class ProjectActionGroup extends ActionGroup {
 
-	private final IWorkbenchSite fSite;
-	private final ISelectionProvider fSelectionProvider;
+	private ISelectionProvider fSelectionProvider;
 
 	private OpenProjectAction fOpenAction;
 	private CloseResourceAction fCloseAction;
@@ -90,9 +89,8 @@ public class ProjectActionGroup extends ActionGroup {
 	 * @since 3.4
 	 */
 	public ProjectActionGroup(IWorkbenchSite site, ISelectionProvider selectionProvider) {
-		fSite= site;
 		fSelectionProvider= selectionProvider;
-		Shell shell= fSite.getShell();
+		Shell shell= site.getShell();
 		ISelection selection= selectionProvider.getSelection();
 		
 		fCloseAction= new CloseResourceAction(shell);
@@ -101,7 +99,7 @@ public class ProjectActionGroup extends ActionGroup {
 		fCloseUnrelatedAction= new CloseUnrelatedProjectsAction(shell);
 		fCloseUnrelatedAction.setActionDefinitionId(IWorkbenchCommandIds.CLOSE_UNRELATED_PROJECTS);
 		
-		fOpenAction= new OpenProjectAction(fSite);
+		fOpenAction= new OpenProjectAction(site);
 		fOpenAction.setActionDefinitionId(IWorkbenchCommandIds.OPEN_PROJECT);
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection s= (IStructuredSelection)selection;
@@ -229,6 +227,7 @@ public class ProjectActionGroup extends ActionGroup {
 	 */
 	public void dispose() {
 		fSelectionProvider.removeSelectionChangedListener(fSelectionChangedListener);
+		fSelectionProvider= null;
 		
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(fOpenAction);

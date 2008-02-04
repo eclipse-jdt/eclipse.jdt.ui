@@ -187,9 +187,6 @@ public class JavaLeakTest extends LeakTestCase {
 	}
 	
 	public void testJavaEditorBreadcrumbCloseOneOfTwo2() throws Exception {
-		if (true) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=216167
-			return;
-
 		try {
 			JavaPlugin.getDefault().getPreferenceStore().setValue(getBreadcrumbPreferenceKey(), true);
 			ICompilationUnit cu1= createTestCU("Test1");
