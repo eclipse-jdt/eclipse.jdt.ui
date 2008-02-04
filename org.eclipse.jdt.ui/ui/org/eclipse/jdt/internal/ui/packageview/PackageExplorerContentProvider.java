@@ -133,7 +133,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		Control ctrl= fViewer.getControl();
 		if (ctrl != null && !ctrl.isDisposed()) {
 			//Are we in the UIThread? If so spin it until we are done
-			if (ctrl.getDisplay().getThread() == Thread.currentThread()) {
+			if ((ctrl.getDisplay().getThread() == Thread.currentThread()) && !fViewer.isBusy()) {
 				runUpdates(runnables);
 			} else {
 				synchronized (this) {
