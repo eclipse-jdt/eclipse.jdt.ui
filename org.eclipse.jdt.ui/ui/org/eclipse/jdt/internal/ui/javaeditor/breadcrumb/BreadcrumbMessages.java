@@ -21,6 +21,10 @@ public class BreadcrumbMessages extends NLS {
 
 	public static String FilteredTable_accessible_listener_text;
 	public static String FilteredTable_clear_button_tooltip;
+
+	public static String FilteredTable_go_left_action_tooltip;
+
+	public static String FilteredTable_go_right_action_tooltip;
 	public static String FilteredTable_initial_filter_text;
 
 	static {

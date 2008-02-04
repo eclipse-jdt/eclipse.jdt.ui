@@ -25,6 +25,7 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
@@ -144,6 +145,13 @@ public class FilteredTable extends Composite {
 
 	private final ListenerList fNavigateListeners;
 
+	private ToolBarManager fLeftToolBar;
+
+	private ToolBarManager fRightToolBar;
+
+	private final boolean fHasChild;
+	private final boolean fHasParent;
+
 	/**
 	 * Create a new instance of the receiver.
 	 * 
@@ -153,11 +161,17 @@ public class FilteredTable extends Composite {
 	 *            the style bits for the <code>Table</code>
 	 * @param filter
 	 *            the filter to be used
+	 * @param hasChild 
+	 * 			  does this pop up have a child, if yes it is possible to navigate down
+	 * @param hasParent
+	 * 			  does this pop up have a parent, if yes it is possible to navigate up 
 	 */
-	public FilteredTable(Composite parent, int tableStyle, PatternFilter filter) {
+	public FilteredTable(Composite parent, int tableStyle, PatternFilter filter, boolean hasChild, boolean hasParent) {
 		super(parent, SWT.NONE);
 
 		fPatternFilter= filter;
+		fHasChild= hasChild;
+		fHasParent= hasParent;
 		fShowFilterControls= PlatformUI.getPreferenceStore().getBoolean(IWorkbenchPreferenceConstants.SHOW_FILTERED_TEXTS);
 
 		fNavigateListeners= new ListenerList();
@@ -194,7 +208,7 @@ public class FilteredTable extends Composite {
 
 		if (fShowFilterControls) {
 			fFilterComposite= new Composite(this, SWT.NONE);
-			GridLayout filterLayout= new GridLayout(3, false);
+			GridLayout filterLayout= new GridLayout(5, false);
 			filterLayout.marginHeight= 0;
 			filterLayout.marginWidth= 0;
 			fFilterComposite.setLayout(filterLayout);
@@ -212,6 +226,17 @@ public class FilteredTable extends Composite {
 		GridData data= new GridData(SWT.FILL, SWT.FILL, true, true);
 		tableComposite.setLayoutData(data);
 		createTableControl(tableComposite, tableStyle);
+		
+		parent.addFocusListener(new FocusListener() {
+
+			public void focusGained(FocusEvent e) {
+				fFilterText.setFocus();
+			}
+
+			public void focusLost(FocusEvent e) {
+			}
+
+		});
 	}
 
 	/**
@@ -223,14 +248,73 @@ public class FilteredTable extends Composite {
 	 * @return the <code>Composite</code> that contains the filter controls
 	 */
 	private Composite createFilterControls(Composite parent) {
+		createLeftToolBar(parent);
 		createFilterText(parent);
 		createClearText(parent);
+		createRightToolBar(parent);
 		if (fFilterToolBar != null) {
 			fFilterToolBar.update(false);
 			// initially there is no text to clear
 			fFilterToolBar.getControl().setVisible(false);
 		}
 		return parent;
+	}
+
+	private void createLeftToolBar(Composite parent) {
+		fLeftToolBar= new ToolBarManager(SWT.FLAT | SWT.HORIZONTAL);
+		fLeftToolBar.createControl(parent);
+		fLeftToolBar.getControl().setBackground(parent.getBackground());
+
+		if (fHasParent) {
+			IAction goLeft= new Action("", IAction.AS_PUSH_BUTTON) {//$NON-NLS-1$
+				/*
+				 * (non-Javadoc)
+				 * 
+				 * @see org.eclipse.jface.action.Action#run()
+				 */
+				public void run() {
+					Object[] listeners= fNavigateListeners.getListeners();
+					for (int i= 0; i < listeners.length; i++) {
+						((INavigateListener) listeners[i]).navigate(DIRECTION_UP);
+					}
+				}
+			};
+
+			goLeft.setToolTipText(BreadcrumbMessages.FilteredTable_go_left_action_tooltip);
+			goLeft.setImageDescriptor(JavaPluginImages.DESC_ETOOL_BREADCRUMB_GO_LEFT);
+
+			fLeftToolBar.add(goLeft);
+		}
+		
+		fLeftToolBar.update(true);
+	}
+	
+	private void createRightToolBar(Composite parent) {
+		fRightToolBar= new ToolBarManager(SWT.FLAT | SWT.HORIZONTAL);
+		fRightToolBar.createControl(parent);
+		fRightToolBar.getControl().setBackground(parent.getBackground());
+
+		if (fHasChild) {
+			IAction goRight= new Action("", IAction.AS_PUSH_BUTTON) {//$NON-NLS-1$
+				/*
+				 * (non-Javadoc)
+				 * 
+				 * @see org.eclipse.jface.action.Action#run()
+				 */
+				public void run() {
+					Object[] listeners= fNavigateListeners.getListeners();
+					for (int i= 0; i < listeners.length; i++) {
+						((INavigateListener) listeners[i]).navigate(DIRECTION_DOWN);
+					}
+				}
+			};
+
+			goRight.setToolTipText(BreadcrumbMessages.FilteredTable_go_right_action_tooltip);
+			goRight.setImageDescriptor(JavaPluginImages.DESC_ETOOL_BREADCRUMB_GO_RIGHT);
+
+			fRightToolBar.add(goRight);
+		}
+		fRightToolBar.update(true);
 	}
 
 	/**
@@ -541,6 +625,12 @@ public class FilteredTable extends Composite {
 		}
 		if (fFilterToolBar != null && fFilterToolBar.getControl() != null) {
 			fFilterToolBar.getControl().setBackground(background);
+		}
+		if (fRightToolBar != null && fRightToolBar.getControl() != null) {
+			fRightToolBar.getControl().setBackground(background);
+		}
+		if (fLeftToolBar != null && fLeftToolBar.getControl() != null) {
+			fLeftToolBar.getControl().setBackground(background);
 		}
 		if (fFilterSpacer != null) {
 			fFilterSpacer.setBackground(background);

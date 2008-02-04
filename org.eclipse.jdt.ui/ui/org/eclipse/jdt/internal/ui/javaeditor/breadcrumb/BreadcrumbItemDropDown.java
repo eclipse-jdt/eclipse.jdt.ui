@@ -160,7 +160,8 @@ class BreadcrumbItemDropDown {
 		gridLayout.marginWidth= 0;
 		composite.setLayout(gridLayout);
 		
-		final FilteredTable filteredTable= new FilteredTable(composite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL, new PatternFilter());
+		int parentIndex= fParent.getViewer().getIndexOfItem(fParent);
+		final FilteredTable filteredTable= new FilteredTable(composite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL, new PatternFilter(), parentIndex < fParent.getViewer().getItemCount() - 1, parentIndex > 0);
 		if (filterText != null) {
 			filteredTable.getFilterControl().setText(filterText);
 			filteredTable.getFilterControl().setSelection(filterText.length());
@@ -274,8 +275,11 @@ class BreadcrumbItemDropDown {
 		if (child != null)
 			viewer.setSelection(new StructuredSelection(child), true);
 		
-		if (selectItem)
+		if (selectItem) {
 			viewer.getTable().setFocus();
+		} else {
+			filteredTable.getFilterControl().setFocus();
+		}
 	}
 
 	/**
