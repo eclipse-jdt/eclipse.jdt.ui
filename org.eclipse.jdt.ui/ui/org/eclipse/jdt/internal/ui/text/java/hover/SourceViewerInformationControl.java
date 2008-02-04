@@ -20,6 +20,7 @@ import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
@@ -65,6 +66,8 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	private Shell fShell;
 	/** The control's text widget */
 	private StyledText fText;
+	/** The text font (do not dispose!) */
+	private Font fTextFont;
 	/** The control's source viewer */
 	private SourceViewer fViewer;
 	/**
@@ -153,6 +156,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 			layout= new GridLayout(1, false);
 			layout.marginHeight= 0;
 			layout.marginWidth= 0;
+			layout.verticalSpacing= 1;
 			composite.setLayout(layout);
 			gd= new GridData(GridData.FILL_BOTH);
 			composite.setLayoutData(gd);
@@ -200,7 +204,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 				fontDatas[i].setHeight(fontDatas[i].getHeight() * 9 / 10);
 			fStatusTextFont= new Font(fStatusField.getDisplay(), fontDatas);
 			fStatusField.setFont(fStatusTextFont);
-			GridData gd2= new GridData(GridData.FILL_VERTICAL | GridData.FILL_HORIZONTAL | GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_BEGINNING);
+			GridData gd2= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 			fStatusField.setLayoutData(gd2);
 
 			// Regarding the color see bug 41128
@@ -235,9 +239,9 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * @since 3.2
 	 */
 	private void initializeFont() {
-		Font font= JFaceResources.getFont("org.eclipse.jdt.ui.editors.textfont"); //$NON-NLS-1$
+		fTextFont= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		StyledText styledText= getViewer().getTextWidget();
-		styledText.setFont(font);
+		styledText.setFont(fTextFont);
 	}
 
 	/*
@@ -280,6 +284,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 			fStatusTextFont.dispose();
 
 		fStatusTextFont= null;
+		fTextFont= null;
 		fShell= null;
 		fText= null;
 	}
@@ -300,17 +305,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * @see IInformationControl#setSize(int, int)
 	 */
 	public void setSize(int width, int height) {
-
-		if (fStatusField != null) {
-			GridData gd= (GridData)fViewer.getTextWidget().getLayoutData();
-			Point statusSize= fStatusField.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-			Point separatorSize= fSeparator.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-			gd.heightHint= height - statusSize.y - separatorSize.y;
-		}
 		fShell.setSize(width, height);
-
-		if (fStatusField != null)
-			fShell.pack(true);
 	}
 
 	/*
@@ -441,6 +436,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		if (fStatusField != null) {
 			trim.height+= fSeparator.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 			trim.height+= fStatusField.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+			trim.height+= 1; // verticalSpacing
 		}
 	}
 
@@ -497,5 +493,18 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 */
 	public boolean isVisible() {
 		return fShell != null && !fShell.isDisposed() && fShell.isVisible();
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.IInformationControlExtension5#computeSizeConstraints(int, int)
+	 */
+	public Point computeSizeConstraints(int widthInChars, int heightInChars) {
+		GC gc= new GC(fText);
+		gc.setFont(fTextFont);
+		int width= gc.getFontMetrics().getAverageCharWidth();
+		int height= gc.getFontMetrics().getHeight();
+		gc.dispose();
+
+		return new Point(widthInChars * width, heightInChars * height);
 	}
 }

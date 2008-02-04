@@ -68,6 +68,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -167,6 +168,34 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		}
 	}
 	
+
+//	/**
+//	 * Action that opens the external Javadoc for the current element.
+//	 * 
+//	 * @since 3.4
+//	 */
+//	private static final class ShowExternalJavadocAction extends Action {
+//		private final BrowserInformationControl fInfoControl;
+//		private final Shell fParent;
+//		
+//		public ShowExternalJavadocAction(BrowserInformationControl infoControl, Shell parent) {
+//			fInfoControl= infoControl;
+//			fParent= parent;
+//			setText("Show External Javadoc");
+//			setImageDescriptor(JavaPluginImages.DESC_OBJS_JAVADOC_LOCATION_ATTRIB); //TODO: better image
+//		}
+//		
+//		/*
+//		 * @see org.eclipse.jface.action.Action#run()
+//		 */
+//		public void run() {
+//			JavadocBrowserInformationContolInput infoInput= (JavadocBrowserInformationContolInput) fInfoControl.getInput(); //TODO: check cast
+//			fInfoControl.notifyDelayedInputChange(null);
+//			fInfoControl.dispose(); //FIXME: should have protocol to hide, rather than dispose
+////			new OpenExternalJavadocAction(infoInput.getElement(), fShell) //TODO: split up reusable parts into non-api class 
+//		}
+//	}
+	
 	/**
 	 * Action that opens the current hover input element.
 	 * 
@@ -215,7 +244,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			int style= SWT.V_SCROLL | SWT.H_SCROLL;
 			if (BrowserInformationControl.isAvailable(parent)) {
 				ToolBarManager tbm= new ToolBarManager(SWT.FLAT);
-				BrowserInformationControl iControl= new BrowserInformationControl(parent, shellStyle, style, tbm);
+				String font= PreferenceConstants.APPEARANCE_JAVADOC_FONT;
+				BrowserInformationControl iControl= new BrowserInformationControl(parent, shellStyle, style, font, tbm);
 				
 				final BackAction backAction= new BackAction(iControl);
 				backAction.setEnabled(false);
@@ -238,8 +268,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				iControl.addInputChangeListener(inputChangeListener);
 				
 				tbm.add(new ShowInJavadocViewAction(iControl));
+//				tbm.add(new ShowExternalJavadocAction(iControl, parent));
 				tbm.add(new OpenDeclarationAction(iControl));
 				tbm.update(true);
+				
 				addLinkListener(iControl);
 				return iControl;
 				
@@ -263,7 +295,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			int shellStyle= SWT.TOOL | SWT.NO_TRIM;
 			int style= SWT.NONE;
 			if (BrowserInformationControl.isAvailable(parent)) {
-				BrowserInformationControl iControl= new BrowserInformationControl(parent, shellStyle, style, EditorsUI.getTooltipAffordanceString());
+				String font= PreferenceConstants.APPEARANCE_JAVADOC_FONT;
+				BrowserInformationControl iControl= new BrowserInformationControl(parent, shellStyle, style, font, EditorsUI.getTooltipAffordanceString());
 				addLinkListener(iControl);
 				return iControl;
 			} else {

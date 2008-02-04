@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -773,7 +773,8 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		for (int i= 0; i < contentTypes.length; i++)
 			presenter.setInformationProvider(provider, contentTypes[i]);
 		
-		presenter.setSizeConstraints(60, 10, true, true);
+		// sizes: see org.eclipse.jface.text.TextViewer.TEXT_HOVER_*_CHARS
+		presenter.setSizeConstraints(100, 12, true, true);
 		return presenter;
 	}
 
