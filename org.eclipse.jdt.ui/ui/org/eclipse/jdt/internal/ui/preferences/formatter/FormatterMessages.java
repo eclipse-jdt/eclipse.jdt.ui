@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -425,8 +425,10 @@ final class FormatterMessages extends NLS {
 	public static String NewLinesTabPage_arrayInitializer_group_title;
 	public static String NewLinesTabPage_array_group_option_after_opening_brace_of_array_initializer;
 	public static String NewLinesTabPage_array_group_option_before_closing_brace_of_array_initializer;
+	public static String NewLinesTabPage_annotations_group_local_variables;
+	public static String NewLinesTabPage_annotations_group_members;
+	public static String NewLinesTabPage_annotations_group_paramters;
 	public static String NewLinesTabPage_annotations_group_title;
-	public static String NewLinesTabPage_annotations_group_option_after_annotation;
 	public static String ProfileManager_default_profile_name;
 	public static String ProfileManager_eclipse_profile_name;
 	public static String ProfileManager_java_conventions_profile_name;

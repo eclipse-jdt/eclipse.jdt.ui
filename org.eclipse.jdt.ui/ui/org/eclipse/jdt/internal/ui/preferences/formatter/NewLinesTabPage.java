@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,7 +47,7 @@ public class NewLinesTabPage extends FormatterTabPage {
 	"  Listener fListener= new Listener() {" + //$NON-NLS-1$
 	"  };\n" + //$NON-NLS-1$
 	"  @Deprecated @Override " + //$NON-NLS-1$
-	"  public void\nbar\n()\n {}" + //$NON-NLS-1$
+	"  public void\nbar\n(@SuppressWarnings(\"unused\")\n int i)\n {\n@SuppressWarnings(\"unused\") int k;\n}\n" + //$NON-NLS-1$
 	"  void foo() {" + //$NON-NLS-1$
 	"    ;;" + //$NON-NLS-1$
 	"    do {} while (false);" + //$NON-NLS-1$
@@ -91,8 +91,9 @@ public class NewLinesTabPage extends FormatterTabPage {
 		createPref(emptyStatementsGroup, numColumns, FormatterMessages.NewLinesTabPage_emtpy_statement_group_option_empty_statement_on_new_line, DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, FALSE_TRUE); 
 
 		final Group annotationsGroup= createGroup(numColumns, composite, FormatterMessages.NewLinesTabPage_annotations_group_title); 
-		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_option_after_annotation, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION, DO_NOT_INSERT_INSERT); 
-
+		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_members, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_MEMBER, DO_NOT_INSERT_INSERT);
+		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_paramters, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PARAMETER, DO_NOT_INSERT_INSERT);
+		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_local_variables, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_LOCAL_VARIABLE, DO_NOT_INSERT_INSERT); 
 	}
 	
 	protected void initializePage() {

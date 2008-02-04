@@ -39,8 +39,9 @@ public class ProfileVersioner implements IProfileVersioner {
 	private static final int VERSION_9= 9; // after storing project profile names in preferences
 	private static final int VERSION_10= 10; // splitting options for annotation types
 	private static final int VERSION_11= 11; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=49412
+	private static final int VERSION_12= 12; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=122247
 	
-	private static final int CURRENT_VERSION= VERSION_11;
+	private static final int CURRENT_VERSION= VERSION_12;
 	
 	public int getFirstVersion() {
 	    return VERSION_1;
@@ -94,6 +95,9 @@ public class ProfileVersioner implements IProfileVersioner {
 
 		case VERSION_10 :
 			version10to11(oldSettings);
+			
+		case VERSION_11:
+			version11to12(oldSettings);
 		    
 		default:
 		    for (final Iterator iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
@@ -111,7 +115,7 @@ public class ProfileVersioner implements IProfileVersioner {
 		setLatestCompliance(newSettings);
 		return newSettings;
 	}
-	
+
 	/**
 	 * Updates the map to use the latest the source compliance
 	 * @param map The map to update
@@ -598,6 +602,16 @@ public class ProfileVersioner implements IProfileVersioner {
 				});
 	}
 	
+	private static void version11to12(Map oldSettings) {
+		checkAndReplace(oldSettings, 
+				FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION, 
+				new String[] {
+					DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_MEMBER,
+					DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PARAMETER,
+					DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_LOCAL_VARIABLE
+				});
+	}
+	
 	/* old format constant values */
 
     private static final String FORMATTER_METHOD_DECLARATION_ARGUMENTS_ALIGNMENT = JavaCore.PLUGIN_ID + ".formatter.method_declaration_arguments_alignment"; //$NON-NLS-1$
@@ -673,6 +687,8 @@ public class ProfileVersioner implements IProfileVersioner {
     private static final String FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_THROWS = JavaCore.PLUGIN_ID + ".formatter.insert_space_after_comma_in_constructor_throws"; //$NON-NLS-1$
     private static final String FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_THROWS = JavaCore.PLUGIN_ID + ".formatter.insert_space_before_comma_in_constructor_throws"; //$NON-NLS-1$
     private static final String FORMATTER_NO_ALIGNMENT = "0";//$NON-NLS-1$
+    private static final String FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION = JavaCore.PLUGIN_ID + ".formatter.insert_new_line_after_annotation";//$NON-NLS-1$
+    
     /** @deprecated */
 	private static final String FORMATTER_COMMENT_FORMAT2= DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT;
 	/** @deprecated */
