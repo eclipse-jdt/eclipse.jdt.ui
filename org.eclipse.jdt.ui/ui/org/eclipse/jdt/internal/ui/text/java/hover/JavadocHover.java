@@ -156,7 +156,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
 		public void run() {
-			JavadocBrowserInformationContolInput infoInput= (JavadocBrowserInformationContolInput) fInfoControl.getInput(); //TODO: check cast
+			JavadocBrowserInformationControlInput infoInput= (JavadocBrowserInformationControlInput) fInfoControl.getInput(); //TODO: check cast
 			fInfoControl.notifyDelayedInputChange(null);
 			fInfoControl.dispose(); //FIXME: should have protocol to hide, rather than dispose
 			try {
@@ -214,7 +214,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
 		public void run() {
-			JavadocBrowserInformationContolInput infoInput= (JavadocBrowserInformationContolInput) fInfoControl.getInput(); //TODO: check cast
+			JavadocBrowserInformationControlInput infoInput= (JavadocBrowserInformationControlInput) fInfoControl.getInput(); //TODO: check cast
 			fInfoControl.notifyDelayedInputChange(null);
 			fInfoControl.dispose(); //FIXME: should have protocol to hide, rather than dispose
 
@@ -259,7 +259,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 							backAction.setEnabled(false);
 							forwardAction.setEnabled(false);
 						} else {
-							JavadocBrowserInformationContolInput javaInput= (JavadocBrowserInformationContolInput) newInput;
+							JavadocBrowserInformationControlInput javaInput= (JavadocBrowserInformationControlInput) newInput;
 							backAction.setEnabled(javaInput.getPrevious() != null);
 							forwardAction.setEnabled(javaInput.getNext() != null);
 						}
@@ -419,7 +419,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				if (linkTarget == null)
 					return;
 
-				JavadocBrowserInformationContolInput hoverInfo= getHoverInfo(new IJavaElement[] { linkTarget }, null, (JavadocBrowserInformationContolInput) control.getInput());
+				JavadocBrowserInformationControlInput hoverInfo= getHoverInfo(new IJavaElement[] { linkTarget }, null, (JavadocBrowserInformationControlInput) control.getInput());
 				if (control.hasDelayedInputChangeListener())
 					control.notifyDelayedInputChange(hoverInfo);
 				else
@@ -449,7 +449,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 * @see org.eclipse.jface.text.ITextHover#getHoverInfo(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
 	 */
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
-		return ((JavadocBrowserInformationContolInput) getHoverInfo2(textViewer, hoverRegion)).getHtml();
+		return ((JavadocBrowserInformationControlInput) getHoverInfo2(textViewer, hoverRegion)).getHtml();
 	}
 
 	/*
@@ -459,7 +459,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		return internalGetHoverInfo(textViewer, hoverRegion);
 	}
 
-	private JavadocBrowserInformationContolInput internalGetHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
+	private JavadocBrowserInformationControlInput internalGetHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 		IJavaElement[] elements= getJavaElementsAt(textViewer, hoverRegion);
 		if (elements == null || elements.length == 0)
 			return null;
@@ -483,7 +483,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 * @return the HTML hover info for the given element(s) or <code>null</code> if no information is available
 	 * @since 3.4
 	 */
-	private static JavadocBrowserInformationContolInput getHoverInfo(IJavaElement[] elements, String constantValue, JavadocBrowserInformationContolInput previousInput) {
+	private static JavadocBrowserInformationControlInput getHoverInfo(IJavaElement[] elements, String constantValue, JavadocBrowserInformationControlInput previousInput) {
 		int nResults= elements.length;
 		StringBuffer buffer= new StringBuffer();
 		boolean hasContents= false;
@@ -564,7 +564,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 //				buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			HTMLPrinter.addPageEpilog(buffer);
-			return new JavadocBrowserInformationContolInput(previousInput, element, buffer.toString());
+			return new JavadocBrowserInformationControlInput(previousInput, element, buffer.toString());
 		}
 
 		return null;

@@ -22,19 +22,19 @@ import org.eclipse.jdt.core.IJavaElement;
 
  * @since 3.4
  */
-public class JavadocBrowserInformationContolInput extends BrowserInformationControlInput {
+public class JavadocBrowserInformationControlInput extends BrowserInformationControlInput {
 
 	private final IJavaElement fElement;
 	private final String fHtml;
 
 	/**
 	 * Creates a new browser information control input.
- 	 *
+	 *
 	 * @param previous previous input, or <code>null</code> if none available
 	 * @param element the element, or <code>null</code> if none available
 	 * @param html HTML contents, must not be null
 	 */
-	public JavadocBrowserInformationContolInput(JavadocBrowserInformationContolInput previous, IJavaElement element, String html) {
+	public JavadocBrowserInformationControlInput(JavadocBrowserInformationControlInput previous, IJavaElement element, String html) {
 		super(previous);
 		Assert.isNotNull(html);
 		fElement= element;
