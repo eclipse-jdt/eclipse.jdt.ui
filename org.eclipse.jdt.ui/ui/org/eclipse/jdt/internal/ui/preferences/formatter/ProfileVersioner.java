@@ -39,9 +39,8 @@ public class ProfileVersioner implements IProfileVersioner {
 	private static final int VERSION_9= 9; // after storing project profile names in preferences
 	private static final int VERSION_10= 10; // splitting options for annotation types
 	private static final int VERSION_11= 11; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=49412
-	private static final int VERSION_12= 12; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=122247
 	
-	private static final int CURRENT_VERSION= VERSION_12;
+	private static final int CURRENT_VERSION= VERSION_11;
 	
 	public int getFirstVersion() {
 	    return VERSION_1;
@@ -95,10 +94,7 @@ public class ProfileVersioner implements IProfileVersioner {
 
 		case VERSION_10 :
 			version10to11(oldSettings);
-			
-		case VERSION_11:
-			version11to12(oldSettings);
-		    
+					    
 		default:
 		    for (final Iterator iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
 		        final String key= (String)iter.next();
