@@ -5765,7 +5765,7 @@
   		<commonFilter
 		        activeByDefault="true"
 		        class="org.eclipse.jdt.internal.ui.filters.OutputFolderFilter"
-		        name="%HideOutputFolder.label"
+		        name="%HideJavaOutputFolder.label"
 		        description="%HideOutputFolder.description"
 		        id="org.eclipse.jdt.java.ui.filters.HideOutputFolder"/>
    </extension>
