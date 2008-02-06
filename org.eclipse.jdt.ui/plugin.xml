@@ -4445,25 +4445,32 @@
             commandId="org.eclipse.jdt.ui.edit.text.java.gotoBreadcrumb"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
-            sequence="M2+M3+B"
-            contextId="org.eclipse.jdt.ui.breadcrumbEditorScope"
-            commandId="org.eclipse.jdt.ui.edit.text.java.gotoBreadcrumb"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
             platform="carbon"
             sequence="M2+M3+B"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId=""
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" />
       <key
             platform="carbon"
-            contextId="org.eclipse.jdt.ui.javaEditorScope"
             sequence="COMMAND+ALT+B"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.edit.text.java.gotoBreadcrumb"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            sequence="M2+M3+B"
+            contextId="org.eclipse.jdt.ui.breadcrumbEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.gotoBreadcrumb"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             platform="carbon"
+            sequence="M2+M3+B"
             contextId="org.eclipse.jdt.ui.breadcrumbEditorScope"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" />
+      <key
+            platform="carbon"
             sequence="COMMAND+ALT+B"
+            contextId="org.eclipse.jdt.ui.breadcrumbEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.gotoBreadcrumb"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
