@@ -151,7 +151,6 @@ class BreadcrumbItemDropDown {
 		layout.marginWidth= 0;
 		shell.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		shell.setLayout(layout);
-		installCloser(shell);
 		
 		Composite composite= new Composite(shell, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -269,7 +268,13 @@ class BreadcrumbItemDropDown {
 			}
 		});
 
+		//process any pending focus events: 
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=217800
+		while (Display.getDefault().readAndDispatch()) {
+		}
+		
 		shell.open();
+		installCloser(shell);
 
 		Object child= fParent.getData();
 		if (child != null)
