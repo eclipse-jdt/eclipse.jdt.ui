@@ -97,13 +97,6 @@ public class FilteredTable extends Composite {
 	private Text fFilterText;
 
 	/**
-	 * The control representing the clear button for the filter text entry. This
-	 * value may be <code>null</code> if no such button exists, or if the
-	 * controls have not yet been created.
-	 */
-	private ToolBarManager fFilterToolBar;
-
-	/**
 	 * The viewer for the filtered table. This value should never be
 	 * <code>null</code> after the widget creation methods are complete.
 	 */
@@ -141,8 +134,6 @@ public class FilteredTable extends Composite {
 	 */
 	private boolean fShowFilterControls;
 
-	private Label fFilterSpacer;
-
 	private final ListenerList fNavigateListeners;
 
 	private ToolBarManager fLeftToolBar;
@@ -151,6 +142,10 @@ public class FilteredTable extends Composite {
 
 	private final boolean fHasChild;
 	private final boolean fHasParent;
+
+	private Label fLeftToolBarSpacer;
+
+	private Label fRightToolBarSpacer;
 
 	/**
 	 * Create a new instance of the receiver.
@@ -208,9 +203,10 @@ public class FilteredTable extends Composite {
 
 		if (fShowFilterControls) {
 			fFilterComposite= new Composite(this, SWT.NONE);
-			GridLayout filterLayout= new GridLayout(5, false);
+			GridLayout filterLayout= new GridLayout(3, false);
 			filterLayout.marginHeight= 0;
 			filterLayout.marginWidth= 0;
+			filterLayout.horizontalSpacing= 0;
 			fFilterComposite.setLayout(filterLayout);
 			fFilterComposite.setFont(parent.getFont());
 
@@ -250,22 +246,17 @@ public class FilteredTable extends Composite {
 	private Composite createFilterControls(Composite parent) {
 		createLeftToolBar(parent);
 		createFilterText(parent);
-		createClearText(parent);
 		createRightToolBar(parent);
-		if (fFilterToolBar != null) {
-			fFilterToolBar.update(false);
-			// initially there is no text to clear
-			fFilterToolBar.getControl().setVisible(false);
-		}
+		
 		return parent;
 	}
 
 	private void createLeftToolBar(Composite parent) {
-		fLeftToolBar= new ToolBarManager(SWT.FLAT | SWT.HORIZONTAL);
-		fLeftToolBar.createControl(parent);
-		fLeftToolBar.getControl().setBackground(parent.getBackground());
-
 		if (fHasParent) {
+			fLeftToolBar= new ToolBarManager(SWT.FLAT | SWT.HORIZONTAL);
+			fLeftToolBar.createControl(parent);
+			fLeftToolBar.getControl().setBackground(parent.getBackground());
+			
 			IAction goLeft= new Action("", IAction.AS_PUSH_BUTTON) {//$NON-NLS-1$
 				/*
 				 * (non-Javadoc)
@@ -284,17 +275,21 @@ public class FilteredTable extends Composite {
 			goLeft.setImageDescriptor(JavaPluginImages.DESC_ETOOL_BREADCRUMB_GO_LEFT);
 
 			fLeftToolBar.add(goLeft);
+			fLeftToolBar.update(true);
+		} else {
+			fLeftToolBarSpacer= new Label(parent, SWT.NONE);
+			GridData data= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
+			data.widthHint= 19;
+			fLeftToolBarSpacer.setLayoutData(data);
 		}
-		
-		fLeftToolBar.update(true);
 	}
 	
 	private void createRightToolBar(Composite parent) {
-		fRightToolBar= new ToolBarManager(SWT.FLAT | SWT.HORIZONTAL);
-		fRightToolBar.createControl(parent);
-		fRightToolBar.getControl().setBackground(parent.getBackground());
-
 		if (fHasChild) {
+			fRightToolBar= new ToolBarManager(SWT.FLAT | SWT.HORIZONTAL);
+			fRightToolBar.createControl(parent);
+			fRightToolBar.getControl().setBackground(parent.getBackground());
+			
 			IAction goRight= new Action("", IAction.AS_PUSH_BUTTON) {//$NON-NLS-1$
 				/*
 				 * (non-Javadoc)
@@ -313,8 +308,13 @@ public class FilteredTable extends Composite {
 			goRight.setImageDescriptor(JavaPluginImages.DESC_ETOOL_BREADCRUMB_GO_RIGHT);
 
 			fRightToolBar.add(goRight);
+			fRightToolBar.update(true);
+		} else {
+			fRightToolBarSpacer= new Label(parent, SWT.NONE);
+			GridData data= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
+			data.widthHint= 19;
+			fRightToolBarSpacer.setLayoutData(data);
 		}
-		fRightToolBar.update(true);
 	}
 
 	/**
@@ -449,17 +449,10 @@ public class FilteredTable extends Composite {
 						fTableViewer.getTable().setRedraw(true);
 				}
 
-				updateToolbar(text.length() > 0 && !initial);
 				return Status.OK_STATUS;
 			}
 		};
 		fRefreshJob.setSystem(true);
-	}
-
-	private void updateToolbar(boolean visible) {
-		if (fFilterToolBar != null) {
-			fFilterToolBar.getControl().setVisible(visible);
-		}
 	}
 
 	/**
@@ -469,11 +462,6 @@ public class FilteredTable extends Composite {
 	 *            <code>Composite</code> of the filter text
 	 */
 	private void createFilterText(Composite parent) {
-		fFilterSpacer= new Label(fFilterComposite, SWT.NONE);
-		GridData layoutData= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
-		layoutData.widthHint= 14;
-		fFilterSpacer.setLayoutData(layoutData);
-
 		fFilterText= new Text(parent, SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.CANCEL);
 
 		fFilterText.getAccessible().addAccessibleListener(new AccessibleAdapter() {
@@ -596,17 +584,21 @@ public class FilteredTable extends Composite {
 		}
 
 		GridData gridData= new GridData(SWT.FILL, SWT.CENTER, true, false);
-		// if the text widget supported cancel then it will have it's own
-		// integrated button. We can take all of the space.
-		if ((fFilterText.getStyle() & SWT.CANCEL) != 0)
-			gridData.horizontalSpan= 2;
+
 		fFilterText.setLayoutData(gridData);
+		fFilterText.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
 	}
 
 	/**
 	 * Update the receiver after the text has changed.
 	 */
 	private void textChanged() {
+		if (fFilterText.getText().equals(fInitialText)) {
+			fFilterText.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
+		} else {
+			fFilterText.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_BLACK));
+		}
+		
 		// cancel currently running job first, to prevent unnecessary redraw
 		fRefreshJob.cancel();
 		fRefreshJob.schedule(200);
@@ -623,49 +615,17 @@ public class FilteredTable extends Composite {
 		if (fFilterComposite != null) {
 			fFilterComposite.setBackground(background);
 		}
-		if (fFilterToolBar != null && fFilterToolBar.getControl() != null) {
-			fFilterToolBar.getControl().setBackground(background);
-		}
 		if (fRightToolBar != null && fRightToolBar.getControl() != null) {
 			fRightToolBar.getControl().setBackground(background);
 		}
 		if (fLeftToolBar != null && fLeftToolBar.getControl() != null) {
 			fLeftToolBar.getControl().setBackground(background);
 		}
-		if (fFilterSpacer != null) {
-			fFilterSpacer.setBackground(background);
+		if (fLeftToolBarSpacer != null) {
+			fLeftToolBarSpacer.setBackground(background);
 		}
-	}
-
-	/**
-	 * Create the button that clears the text.
-	 * 
-	 * @param parent
-	 *            parent <code>Composite</code> of toolbar button
-	 */
-	private void createClearText(Composite parent) {
-		// only create the button if the text widget doesn't support one
-		// natively
-		if ((fFilterText.getStyle() & SWT.CANCEL) == 0) {
-			fFilterToolBar= new ToolBarManager(SWT.FLAT | SWT.HORIZONTAL);
-			fFilterToolBar.createControl(parent);
-
-			IAction clearTextAction= new Action("", IAction.AS_PUSH_BUTTON) {//$NON-NLS-1$
-				/*
-				 * (non-Javadoc)
-				 * 
-				 * @see org.eclipse.jface.action.Action#run()
-				 */
-				public void run() {
-					clearText();
-				}
-			};
-
-			clearTextAction.setToolTipText(BreadcrumbMessages.FilteredTable_clear_button_tooltip);
-			clearTextAction.setImageDescriptor(JavaPluginImages.DESC_ELCL_CLEAR);
-			clearTextAction.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CLEAR);
-
-			fFilterToolBar.add(clearTextAction);
+		if (fRightToolBarSpacer != null) {
+			fRightToolBarSpacer.setBackground(background);
 		}
 	}
 
