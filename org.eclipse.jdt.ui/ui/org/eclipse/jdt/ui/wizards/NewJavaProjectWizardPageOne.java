@@ -697,14 +697,20 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			} else if (field == fUseDefaultJRE) {
 				if (fUseDefaultJRE.isSelected()) {
 					JavaPlugin.getDefault().getDialogSettings().put(LAST_SELECTED_JRE_KIND, DEFAULT_JRE);
+					fUseProjectJRE.setSelection(false);
+					fUseEEJRE.setSelection(false);
 				}
 			} else if (field == fUseProjectJRE) {
 				if (fUseProjectJRE.isSelected()) {
 					JavaPlugin.getDefault().getDialogSettings().put(LAST_SELECTED_JRE_KIND, PROJECT_JRE);
+					fUseDefaultJRE.setSelection(false);
+					fUseEEJRE.setSelection(false);
 				}
 			} else if (field == fUseEEJRE) {
 				if (fUseEEJRE.isSelected()) {
 					JavaPlugin.getDefault().getDialogSettings().put(LAST_SELECTED_JRE_KIND, EE_JRE);
+					fUseDefaultJRE.setSelection(false);
+					fUseProjectJRE.setSelection(false);
 				}
 			}
 		}
