@@ -19,6 +19,8 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -106,6 +108,8 @@ class BreadcrumbItemDetails {
 		fElementText.setLayoutData(layoutData);
 		fElementText.setBackground(parentContainer.getBackground());
 		addElementListener(fElementText);
+		
+		fDetailComposite.setTabList(new Control[] { fTextComposite });
 	}
 	
 	/**
@@ -170,6 +174,12 @@ class BreadcrumbItemDetails {
 		GridData data= (GridData) fTextComposite.getLayoutData();
 		data.exclude= !enabled;
 		fTextComposite.setVisible(enabled);
+		
+		if (fTextVisible) {
+			fDetailComposite.setTabList(new Control[] { fTextComposite });
+		} else {
+			fDetailComposite.setTabList(new Control[] { fImageComposite });
+		}
 
 		if (fHasFocus) {
 			if (isTextVisible()) {
@@ -261,6 +271,24 @@ class BreadcrumbItemDetails {
 	 * @param composite the composite which may get focus
 	 */
 	private void installFocusComposite(Composite composite) {
+		composite.addTraverseListener(new TraverseListener() {
+			public void keyTraversed(TraverseEvent e) {
+				if (e.detail == SWT.TRAVERSE_TAB_NEXT || e.detail == SWT.TRAVERSE_TAB_PREVIOUS) {
+					int index= fParent.getViewer().getIndexOfItem(fParent);
+					if (e.detail == SWT.TRAVERSE_TAB_NEXT) {
+						index++;
+					} else {
+						index--;
+					}
+
+					if (index >= 0 && index < fParent.getViewer().getItemCount()) {
+						fParent.getViewer().selectItem(fParent.getViewer().getItem(index));
+					}
+
+					e.doit= true;
+				}
+			}
+		});
 		composite.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {
 				BreadcrumbViewer viewer= fParent.getViewer();
@@ -305,23 +333,6 @@ class BreadcrumbItemDetails {
 								viewer.selectItem(fParent);
 							}
 							fParent.openDropDownMenu(filterText, false);
-						} else if (e.character == '\t') {
-							if ((e.stateMask & SWT.SHIFT) != 0 && (e.stateMask & SWT.CTRL) != 0) {
-								viewer.getControl().getParent().traverse(SWT.TRAVERSE_TAB_PREVIOUS);
-							} else {
-								if (viewer.getIndexOfItem(fParent) == viewer.getItemCount() - 2) {
-									BreadcrumbItem item= viewer.getItem(viewer.getItemCount() - 1);
-									if (item.getData() != null) {
-										viewer.doTraverse(true);
-									} else {
-										viewer.selectItem(viewer.getItem(0));
-									}
-								} else if (viewer.getIndexOfItem(fParent) == viewer.getItemCount() - 1) {
-									viewer.selectItem(viewer.getItem(0));
-								} else {
-									viewer.doTraverse(true);
-								}
-							}
 						} else if (e.character == ' ') {
 							if (!fSelected) {
 								viewer.selectItem(fParent);
