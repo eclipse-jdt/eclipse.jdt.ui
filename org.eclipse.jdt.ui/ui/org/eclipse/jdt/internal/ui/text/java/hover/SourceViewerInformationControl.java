@@ -433,6 +433,12 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		trim.width+= 2 * fBorderWidth;
 		trim.height+= 2 * fBorderWidth;
 
+		Rectangle textTrim= fText.computeTrim(0, 0, 0, 0);
+		trim.x+= textTrim.x;
+		trim.y+= textTrim.y;
+		trim.width+= textTrim.width;
+		trim.height+= textTrim.height;
+		
 		if (fStatusField != null) {
 			trim.height+= fSeparator.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 			trim.height+= fStatusField.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
