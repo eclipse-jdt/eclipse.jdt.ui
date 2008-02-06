@@ -392,6 +392,9 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 			public void handleEvent(Event event) {
 				if (!isBreadcrumbEvent(event))
 					return;
+				
+				if (fBreadcrumbViewer.isDropDownOpen())
+					return;
 
 				MenuManager manager= new MenuManager();
 				Menu menu= manager.createContextMenu(fBreadcrumbViewer.getControl());
