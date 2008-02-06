@@ -4450,6 +4450,23 @@
             commandId="org.eclipse.jdt.ui.edit.text.java.gotoBreadcrumb"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
+            platform="carbon"
+            sequence="M2+M3+B"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" />
+      <key
+            platform="carbon"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            sequence="COMMAND+ALT+B"
+            commandId="org.eclipse.jdt.ui.edit.text.java.gotoBreadcrumb"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="carbon"
+            contextId="org.eclipse.jdt.ui.breadcrumbEditorScope"
+            sequence="COMMAND+ALT+B"
+            commandId="org.eclipse.jdt.ui.edit.text.java.gotoBreadcrumb"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
             sequence="M1+T"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.open.hierarchy"
