@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.javaeditor.breadcrumb;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseTrackListener;
@@ -313,15 +315,22 @@ class BreadcrumbItemDropDown {
 		};
 		Display.getDefault().addFilter(SWT.FocusIn, focusListener);
 
+		shell.addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				Display.getDefault().removeFilter(SWT.FocusIn, focusListener);
+			}
+		});
 		shell.addShellListener(new ShellListener() {
 			public void shellActivated(ShellEvent e) {
 			}
 
 			public void shellClosed(ShellEvent e) {
-				Display.getDefault().removeFilter(SWT.FocusIn, focusListener);
+				if (!fMenuIsShown)
+					return;
+				
+				fMenuIsShown= false;
 				fArrow.setImage(JavaPluginImages.get(JavaPluginImages.IMG_ETOOL_ARROW_RIGHT));
 				fParent.getViewer().setFocus();
-				fMenuIsShown= false;
 			}
 
 			public void shellDeactivated(ShellEvent e) {
