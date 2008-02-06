@@ -394,9 +394,8 @@ public class FilteredTable extends Composite {
 			 * @see org.eclipse.ui.progress.UIJob#runInUIThread(org.eclipse.core.runtime.IProgressMonitor)
 			 */
 			public IStatus runInUIThread(IProgressMonitor monitor) {
-				if (fTableViewer.getControl().isDisposed()) {
+				if (fTableViewer.getTable().isDisposed())
 					return Status.CANCEL_STATUS;
-				}
 
 				String text= getFilterString();
 				if (text == null) {
@@ -421,7 +420,7 @@ public class FilteredTable extends Composite {
 							//see textChanged()
 						}
 
-						if (monitor.isCanceled())
+						if (monitor.isCanceled() || fTableViewer.getTable().isDisposed())
 							return Status.CANCEL_STATUS;
 
 						if (!fPatternFilter.select(fTableViewer, null, items[i].getData())) {
@@ -438,7 +437,7 @@ public class FilteredTable extends Composite {
 							//see textChanged()
 						}
 
-						if (monitor.isCanceled())
+						if (monitor.isCanceled() || fTableViewer.getTable().isDisposed())
 							return Status.CANCEL_STATUS;
 
 						if (fPatternFilter.select(fTableViewer, null, elements[i]) && !existing.contains(elements[i])) {
@@ -446,7 +445,8 @@ public class FilteredTable extends Composite {
 						}
 					}
 				} finally {
-					fTableViewer.getTable().setRedraw(true);
+					if (!fTableViewer.getTable().isDisposed())
+						fTableViewer.getTable().setRedraw(true);
 				}
 
 				updateToolbar(text.length() > 0 && !initial);
