@@ -754,15 +754,17 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private Block getEnclosingBodyNode() throws JavaModelException {
 		ASTNode node= getSelectedExpression().getAssociatedNode();
-		do {
-			switch (node.getNodeType()) {
-				case ASTNode.METHOD_DECLARATION:
-					return ((MethodDeclaration) node).getBody();
-				case ASTNode.INITIALIZER:
-					return ((Initializer) node).getBody();
-			}
+		
+		// expression must be in a method or initializer body
+		// make sure it is not in method or parameter annotation
+		StructuralPropertyDescriptor location= null;
+		while (node != null && !(node instanceof BodyDeclaration)) {
+			location= node.getLocationInParent();
 			node= node.getParent();
-		} while (node != null);
+		}
+		if (location == MethodDeclaration.BODY_PROPERTY || location == Initializer.BODY_PROPERTY) {
+			return (Block) node.getStructuralProperty(location);
+		}
 		return null;
 	}
 

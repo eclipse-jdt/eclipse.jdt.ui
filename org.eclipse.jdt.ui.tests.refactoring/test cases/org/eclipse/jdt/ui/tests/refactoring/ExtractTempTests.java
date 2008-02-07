@@ -646,6 +646,7 @@ public class ExtractTempTests extends RefactoringTest {
 		helper1(9, 24, 9, 29, true, false, "temp", "j");
 	}
 	
+	
 	public void testZeroLengthSelection0() throws Exception {
 //		printTestDisabledMessage("test for bug 30146");
 		helper1(4, 18, 4, 18, true, false, "temp", "j");
@@ -830,5 +831,9 @@ public class ExtractTempTests extends RefactoringTest {
 	public void testFail37() throws Exception {
 //		printTestDisabledMessage("test for bug 45007: QualifiedName (nested)");
 		failHelper1(5, 40, 5, 51, true, false, "temp", RefactoringStatus.FATAL);
+	}
+	
+	public void testFail38() throws Exception {
+		failHelper1(4, 45, 4, 50, true, false, "temp", RefactoringStatus.FATAL);
 	}
 }
