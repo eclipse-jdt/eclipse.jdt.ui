@@ -53,7 +53,7 @@ import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
 import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 
@@ -257,7 +257,6 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#configureTableViewer(org.eclipse.jface.viewers.TableViewer)
 	 */
 	protected void configureTableViewer(TableViewer viewer) {
-		ColoredViewersManager.install(viewer);
 		viewer.setComparator(new ViewerComparator() {
 			public int compare(Viewer v, Object e1, Object e2) {
 				JavaElementLine jel1= (JavaElementLine) e1;
@@ -265,7 +264,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 				return jel1.getLine() - jel2.getLine();
 			}
 		});
-		viewer.setLabelProvider(new OccurrencesSearchLabelProvider(this));
+		viewer.setLabelProvider(new ColoringLabelProvider(new OccurrencesSearchLabelProvider(this)));
 		fContentProvider= new TextSearchTableContentProvider();
 		viewer.setContentProvider(fContentProvider);
 	}

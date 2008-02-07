@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.filters.SyntheticMembersFilter;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 
@@ -77,7 +77,7 @@ public class MethodsViewer extends ProblemTableViewer {
 		
 		fLabelProvider= new MethodsLabelProvider(lifeCycle, this);
 	
-		setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, true));
+		setLabelProvider(new ColoringLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, true)));
 		setContentProvider(new MethodsContentProvider(lifeCycle));
 		
 		HierarchyViewerSorter sorter= new HierarchyViewerSorter(lifeCycle);
@@ -98,8 +98,6 @@ public class MethodsViewer extends ProblemTableViewer {
 		
 		showInheritedMethodsNoRedraw(false);
 		sortByDefiningTypeNoRedraw(false);
-		
-		ColoredViewersManager.install(this);
 		
 		JavaUIHelp.setHelp(this, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
 	}

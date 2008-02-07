@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.AbstractInformationControl;
 import org.eclipse.jdt.internal.ui.typehierarchy.SuperTypeHierarchyViewer.SuperTypeHierarchyContentProvider;
 import org.eclipse.jdt.internal.ui.typehierarchy.TraditionalHierarchyViewer.TraditionalHierarchyContentProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 
 /**
  * Show hierarchy in light-weight control.
@@ -129,7 +129,6 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		tree.setLayoutData(gd);
 
 		TreeViewer treeViewer= new TreeViewer(tree);
-		ColoredViewersManager.install(treeViewer);
 		treeViewer.addFilter(new ViewerFilter() {
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				return element instanceof IType;
@@ -150,7 +149,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 
 		fLabelProvider.setTextFlags(JavaElementLabels.ALL_DEFAULT | JavaElementLabels.T_POST_QUALIFIED);
 		fLabelProvider.addLabelDecorator(new ProblemsLabelDecorator(null));
-		treeViewer.setLabelProvider(fLabelProvider);
+		treeViewer.setLabelProvider(new ColoringLabelProvider(fLabelProvider));
 		
 		treeViewer.getTree().addKeyListener(getKeyAdapter());	
 		

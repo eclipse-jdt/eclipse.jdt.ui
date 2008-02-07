@@ -30,7 +30,7 @@ import org.eclipse.ui.IWorkbenchPartSite;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 
 class CallHierarchyViewer extends TreeViewer {
     private CallHierarchyViewPart fPart;
@@ -53,7 +53,7 @@ class CallHierarchyViewer extends TreeViewer {
         setAutoExpandLevel(2);
         fContentProvider = new CallHierarchyContentProvider(fPart);
         setContentProvider(fContentProvider);
-        setLabelProvider(new CallHierarchyLabelProvider());
+        setLabelProvider(new ColoringLabelProvider(new CallHierarchyLabelProvider()));
 
         fOpen= new OpenLocationAction(part, part.getSite());
         addOpenListener(new IOpenListener() {
@@ -61,8 +61,6 @@ class CallHierarchyViewer extends TreeViewer {
                 fOpen.run();
             }
         });
-        
-        ColoredViewersManager.install(this);
 
         clearViewer();
     }

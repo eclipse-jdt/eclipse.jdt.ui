@@ -22,7 +22,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
 /**
@@ -32,7 +31,6 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 
 	public PackagesViewTreeViewer(Composite parent, int style) {
 		super(parent, style);
-		ColoredViewersManager.install(this);
 	}
 
 	/*

@@ -47,7 +47,6 @@ import org.eclipse.jdt.internal.ui.actions.CategoryFilterActionGroup;
 import org.eclipse.jdt.internal.ui.actions.LexicalSortingAction;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
@@ -113,7 +112,6 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	 */
 	protected StructuredViewer createViewer(Composite parent) {
 		ProblemTreeViewer viewer= new ProblemTreeViewer(parent, SWT.MULTI);
-		ColoredViewersManager.install(viewer);
 		fMemberFilterActionGroup= new MemberFilterActionGroup(viewer, JavaUI.ID_MEMBERS_VIEW);
 		return viewer;
 	}

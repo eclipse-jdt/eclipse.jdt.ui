@@ -15,12 +15,9 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 
-import org.eclipse.swt.widgets.Composite;
-
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 
 import org.eclipse.ui.IActionBars;
@@ -44,7 +41,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
 import org.eclipse.jdt.internal.ui.filters.NonJavaElementFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 
@@ -62,14 +58,7 @@ public class TypesView extends JavaBrowsingPart {
 		return new AppearanceAwareLabelProvider(
 						AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.T_CATEGORY,
 						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
-	}
-
-	protected StructuredViewer createViewer(Composite parent) {
-		StructuredViewer viewer= super.createViewer(parent);
-		ColoredViewersManager.install(viewer);
-		return viewer;
-	}
-	
+	}	
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#getAdapter(java.lang.Class)

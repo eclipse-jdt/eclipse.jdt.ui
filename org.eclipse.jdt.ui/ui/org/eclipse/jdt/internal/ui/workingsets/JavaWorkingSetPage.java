@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
@@ -95,8 +95,6 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 	 * {@inheritDoc}
 	 */
 	protected void configureTree(TreeViewer tree) {
-		ColoredViewersManager.install(tree);
-		
 		tree.setContentProvider(new JavaWorkingSetPageContentProvider());
 		
 		AppearanceAwareLabelProvider javaElementLabelProvider= 
@@ -105,7 +103,7 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS
 			);
 		
-		tree.setLabelProvider(new DecoratingJavaLabelProvider(javaElementLabelProvider));
+		tree.setLabelProvider(new ColoringLabelProvider(new DecoratingJavaLabelProvider(javaElementLabelProvider)));
 		tree.setComparator(new JavaElementComparator());
 		tree.addFilter(new EmptyInnerPackageFilter());
 		
@@ -133,15 +131,13 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 	 * {@inheritDoc}
 	 */
 	protected void configureTable(TableViewer table) {
-		ColoredViewersManager.install(table);
-		
 		AppearanceAwareLabelProvider javaElementLabelProvider= new AppearanceAwareLabelProvider(
 				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED
 				| JavaElementLabels.ROOT_POST_QUALIFIED | JavaElementLabels.P_POST_QUALIFIED,
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS
 			);
 			
-		table.setLabelProvider(new DecoratingJavaLabelProvider(javaElementLabelProvider));
+		table.setLabelProvider(new ColoringLabelProvider(new DecoratingJavaLabelProvider(javaElementLabelProvider)));
 		table.setComparator(new JavaElementComparator());
 	}
 	

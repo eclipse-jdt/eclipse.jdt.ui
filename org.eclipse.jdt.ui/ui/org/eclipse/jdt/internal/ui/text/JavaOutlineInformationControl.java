@@ -76,6 +76,7 @@ import org.eclipse.jdt.internal.ui.typehierarchy.AbstractHierarchyViewerSorter;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.MemberFilter;
 
 /**
@@ -551,7 +552,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		tree.setLayoutData(gd);
 
 		final TreeViewer treeViewer= new OutlineTreeViewer(tree);
-		ColoredViewersManager.install(treeViewer);
 
 		// Hard-coded filters
 		treeViewer.addFilter(new NamePatternFilter());
@@ -563,7 +563,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		if (decoratorMgr.getEnabled("org.eclipse.jdt.ui.override.decorator")) //$NON-NLS-1$
 			fInnerLabelProvider.addLabelDecorator(new OverrideIndicatorLabelDecorator(null));
 
-		treeViewer.setLabelProvider(fInnerLabelProvider);
+		treeViewer.setLabelProvider(new ColoringLabelProvider(fInnerLabelProvider));
 
 		fLexicalSortingAction= new LexicalSortingAction(treeViewer);
 		fSortByDefiningTypeAction= new SortByDefiningTypeAction(treeViewer);

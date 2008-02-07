@@ -137,7 +137,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.FilterUpdater;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
@@ -243,7 +243,6 @@ public class PackageExplorerPart extends ViewPart
 		public PackageExplorerProblemTreeViewer(Composite parent, int style) {
 			super(parent, style);
 			fPendingRefreshes= Collections.synchronizedList(new ArrayList());
-			ColoredViewersManager.install(this);
 		}
 		public void add(Object parentElement, Object[] childElements) {
 			if (fPendingRefreshes.contains(parentElement)) {
@@ -663,7 +662,7 @@ public class PackageExplorerPart extends ViewPart
 		fLabelProvider= createLabelProvider();
 		fLabelProvider.setIsFlatLayout(fIsCurrentLayoutFlat);
 		fDecoratingLabelProvider= new DecoratingJavaLabelProvider(fLabelProvider, false, fIsCurrentLayoutFlat);
-		fViewer.setLabelProvider(fDecoratingLabelProvider);
+		fViewer.setLabelProvider(new ColoringLabelProvider(fDecoratingLabelProvider));
 		// problem decoration provided by PackageLabelProvider
 	}
 	

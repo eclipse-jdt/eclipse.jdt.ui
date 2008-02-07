@@ -57,7 +57,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;
 
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
@@ -174,20 +174,18 @@ public class TestViewer {
 		fViewerbook= new PageBook(parent, SWT.NULL);
 
 		fTreeViewer= new TreeViewer(fViewerbook, SWT.V_SCROLL | SWT.SINGLE);
-		ColoredViewersManager.install(fTreeViewer);
 		fTreeViewer.setUseHashlookup(true);
 		fTreeContentProvider= new TestSessionTreeContentProvider();
 		fTreeViewer.setContentProvider(fTreeContentProvider);
 		fTreeLabelProvider= new TestSessionLabelProvider(fTestRunnerPart, TestRunnerViewPart.LAYOUT_HIERARCHICAL);
-		fTreeViewer.setLabelProvider(fTreeLabelProvider);
+		fTreeViewer.setLabelProvider(new ColoringLabelProvider(fTreeLabelProvider));
 
 		fTableViewer= new TableViewer(fViewerbook, SWT.V_SCROLL | SWT.H_SCROLL | SWT.SINGLE);
-		ColoredViewersManager.install(fTableViewer);
 		fTableViewer.setUseHashlookup(true);
 		fTableContentProvider= new TestSessionTableContentProvider();
 		fTableViewer.setContentProvider(fTableContentProvider);
 		fTableLabelProvider= new TestSessionLabelProvider(fTestRunnerPart, TestRunnerViewPart.LAYOUT_FLAT);
-		fTableViewer.setLabelProvider(fTableLabelProvider);
+		fTableViewer.setLabelProvider(new ColoringLabelProvider(fTableLabelProvider));
 
 		fSelectionProvider= new SelectionProviderMediator(new StructuredViewer[] { fTreeViewer, fTableViewer }, fTreeViewer);
 		fSelectionProvider.addSelectionChangedListener(new TestSelectionListener());

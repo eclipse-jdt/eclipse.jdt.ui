@@ -48,7 +48,6 @@ import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CollapseAllAction;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.viewsupport.FilterUpdater;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
@@ -63,7 +62,6 @@ public class ProjectsView extends JavaBrowsingPart {
 	 */
 	protected StructuredViewer createViewer(Composite parent) {
 		ProblemTreeViewer result= new ProblemTreeViewer(parent, SWT.MULTI);
-		ColoredViewersManager.install(result);
 		fFilterUpdater= new FilterUpdater(result);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(fFilterUpdater);
 		return result;

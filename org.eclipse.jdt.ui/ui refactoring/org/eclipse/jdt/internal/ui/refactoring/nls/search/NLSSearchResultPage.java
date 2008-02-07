@@ -27,7 +27,7 @@ import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.internal.ui.search.JavaSearchResultPage;
 import org.eclipse.jdt.internal.ui.search.TextSearchTableContentProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 
 
 public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements IAdaptable {
@@ -80,7 +80,6 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements 
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#configureTableViewer(org.eclipse.jface.viewers.TableViewer)
 	 */
 	protected void configureTableViewer(TableViewer viewer) {
-		ColoredViewersManager.install(viewer);
 		viewer.setComparator(new ViewerComparator() {
 			public int category(Object element) {
 				if (element instanceof FileEntry) {
@@ -90,7 +89,7 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements 
 				}
 			}
 		});
-		viewer.setLabelProvider(new NLSSearchResultLabelProvider2(this));
+		viewer.setLabelProvider(new ColoringLabelProvider(new NLSSearchResultLabelProvider2(this)));
 		fContentProvider= new TextSearchTableContentProvider();
 		viewer.setContentProvider(fContentProvider);
 	}

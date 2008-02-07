@@ -48,7 +48,7 @@ import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.FilteredTable.Direction;
 import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.FilteredTable.INavigateListener;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 
 
 /**
@@ -170,7 +170,6 @@ class BreadcrumbItemDropDown {
 		filteredTable.setBackground(shell.getBackground());
 
 		final TableViewer viewer= filteredTable.getViewer();
-		ColoredViewersManager.install(viewer);
 		final Table table= (Table) viewer.getControl();
 		
 		filteredTable.addNavigateListener(new INavigateListener() {
@@ -225,7 +224,7 @@ class BreadcrumbItemDropDown {
 				return false;
 			}
 		});
-		viewer.setLabelProvider(fLabelProvider);
+		viewer.setLabelProvider(new ColoringLabelProvider(fLabelProvider));
 		viewer.setComparator(new JavaElementComparator());
 		viewer.setInput(fParent.getInput());
 

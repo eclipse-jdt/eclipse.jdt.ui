@@ -133,7 +133,7 @@ public abstract class OwnerDrawSupport implements Listener {
 		Display display= (Display) gc.getDevice();
 		Iterator ranges= richLabel.getRanges();
 		while (ranges.hasNext()) {
-			ColoredString.StyleRange curr= (ColoredString.StyleRange) ranges.next();
+			ColoredString.Range curr= (ColoredString.Range) ranges.next();
 			ColoredString.Style style= curr.style;
 			if (style != null) {
 				String foregroundColorName= style.getForegroundColorName();
