@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -312,7 +312,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		
 	public JUnitPreferencePage() {
 		super();
-		setDescription(JUnitMessages.JUnitPreferencePage_description); 
+		setDescription(JUnitMessages.JUnitPreferencePage_description);
 		setPreferenceStore(JUnitPlugin.getDefault().getPreferenceStore());
 	}
 
@@ -338,8 +338,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 	private void createEnableAssertionsCheckbox(Composite container) {
 		fEnableAssertionsCheckBox= new Button(container, SWT.CHECK | SWT.WRAP);
-		fEnableAssertionsCheckBox.setText(JUnitMessages.JUnitPreferencePage_enableassertionscheckbox_label); 
-		fEnableAssertionsCheckBox.setToolTipText(JUnitMessages.JUnitPreferencePage_enableassertionscheckbox_tooltip); 
+		fEnableAssertionsCheckBox.setText(JUnitMessages.JUnitPreferencePage_enableassertionscheckbox_label);
+		fEnableAssertionsCheckBox.setToolTipText(JUnitMessages.JUnitPreferencePage_enableassertionscheckbox_tooltip);
 		GridData gd= getButtonGridData(fEnableAssertionsCheckBox);
 		fEnableAssertionsCheckBox.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fEnableAssertionsCheckBox);
@@ -419,8 +419,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		buttonContainer.setLayout(buttonLayout);
 
 		fAddFilterButton= new Button(buttonContainer, SWT.PUSH);
-		fAddFilterButton.setText(JUnitMessages.JUnitPreferencePage_addfilterbutton_label); 
-		fAddFilterButton.setToolTipText(JUnitMessages.JUnitPreferencePage_addfilterbutton_tooltip); 
+		fAddFilterButton.setText(JUnitMessages.JUnitPreferencePage_addfilterbutton_label);
+		fAddFilterButton.setToolTipText(JUnitMessages.JUnitPreferencePage_addfilterbutton_tooltip);
 		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		fAddFilterButton.setLayoutData(gd);
 		LayoutUtil.setButtonDimensionHint(fAddFilterButton);
@@ -431,8 +431,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		});
 
 		fAddTypeButton= new Button(buttonContainer, SWT.PUSH);
-		fAddTypeButton.setText(JUnitMessages.JUnitPreferencePage_addtypebutton_label); 
-		fAddTypeButton.setToolTipText(JUnitMessages.JUnitPreferencePage_addtypebutton_tooltip); 
+		fAddTypeButton.setText(JUnitMessages.JUnitPreferencePage_addtypebutton_label);
+		fAddTypeButton.setToolTipText(JUnitMessages.JUnitPreferencePage_addtypebutton_tooltip);
 		gd= getButtonGridData(fAddTypeButton);
 		fAddTypeButton.setLayoutData(gd);
 		LayoutUtil.setButtonDimensionHint(fAddTypeButton);
@@ -443,8 +443,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		});
 
 		fAddPackageButton= new Button(buttonContainer, SWT.PUSH);
-		fAddPackageButton.setText(JUnitMessages.JUnitPreferencePage_addpackagebutton_label); 
-		fAddPackageButton.setToolTipText(JUnitMessages.JUnitPreferencePage_addpackagebutton_tooltip); 
+		fAddPackageButton.setText(JUnitMessages.JUnitPreferencePage_addpackagebutton_label);
+		fAddPackageButton.setToolTipText(JUnitMessages.JUnitPreferencePage_addpackagebutton_tooltip);
 		gd= getButtonGridData(fAddPackageButton);
 		fAddPackageButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fAddPackageButton);
@@ -455,8 +455,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		});
 
 		fRemoveFilterButton= new Button(buttonContainer, SWT.PUSH);
-		fRemoveFilterButton.setText(JUnitMessages.JUnitPreferencePage_removefilterbutton_label); 
-		fRemoveFilterButton.setToolTipText(JUnitMessages.JUnitPreferencePage_removefilterbutton_tooltip); 
+		fRemoveFilterButton.setText(JUnitMessages.JUnitPreferencePage_removefilterbutton_label);
+		fRemoveFilterButton.setToolTipText(JUnitMessages.JUnitPreferencePage_removefilterbutton_tooltip);
 		gd= getButtonGridData(fRemoveFilterButton);
 		fRemoveFilterButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fRemoveFilterButton);
@@ -468,8 +468,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		fRemoveFilterButton.setEnabled(false);
 
 		fEnableAllButton= new Button(buttonContainer, SWT.PUSH);
-		fEnableAllButton.setText(JUnitMessages.JUnitPreferencePage_enableallbutton_label); 
-		fEnableAllButton.setToolTipText(JUnitMessages.JUnitPreferencePage_enableallbutton_tooltip); 
+		fEnableAllButton.setText(JUnitMessages.JUnitPreferencePage_enableallbutton_label);
+		fEnableAllButton.setToolTipText(JUnitMessages.JUnitPreferencePage_enableallbutton_tooltip);
 		gd= getButtonGridData(fEnableAllButton);
 		fEnableAllButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fEnableAllButton);
@@ -480,8 +480,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		});
 
 		fDisableAllButton= new Button(buttonContainer, SWT.PUSH);
-		fDisableAllButton.setText(JUnitMessages.JUnitPreferencePage_disableallbutton_label); 
-		fDisableAllButton.setToolTipText(JUnitMessages.JUnitPreferencePage_disableallbutton_tooltip); 
+		fDisableAllButton.setText(JUnitMessages.JUnitPreferencePage_disableallbutton_label);
+		fDisableAllButton.setToolTipText(JUnitMessages.JUnitPreferencePage_disableallbutton_tooltip);
 		gd= getButtonGridData(fDisableAllButton);
 		fDisableAllButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fDisableAllButton);
@@ -513,16 +513,11 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 		fNewStackFilter= fStackFilterContentProvider.addFilter(DEFAULT_NEW_FILTER_TEXT, true);
 		fNewTableItem= fFilterTable.getItem(0);
+		int textStyles= SWT.SINGLE | SWT.LEFT | SWT.BORDER;
 
-		// create & configure Text widget for editor
-		// Fix for bug 1766.  Border behavior on for text fields varies per platform.
-		// On Motif, you always get a border, on other platforms,
-		// you don't.  Specifying a border on Motif results in the characters
-		// getting pushed down so that only there very tops are visible.  Thus,
-		// we have to specify different style constants for the different platforms.
-		int textStyles= SWT.SINGLE | SWT.LEFT;
-		if (!SWT.getPlatform().equals("motif")) //$NON-NLS-1$
-			textStyles |= SWT.BORDER;
+		// Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=218193
+		if (SWT.getPlatform().equals("motif")) //$NON-NLS-1$
+			textStyles^= SWT.BORDER;
 
 		fEditorText= new Text(fFilterTable, textStyles);
 		GridData gd= new GridData(GridData.FILL_BOTH);
@@ -566,7 +561,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 					validateChangeAndCleanup();
 			}
 		});
-		// Consume traversal events from the text widget so that CR doesn't 
+		// Consume traversal events from the text widget so that CR doesn't
 		// traverse away to dialog's default button.  Without this, hitting
 		// CR in the text field closes the entire dialog.
 		text.addListener(SWT.Traverse, new Listener() {
@@ -585,7 +580,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		// if it's invalid, beep and leave sitting in the editor
 		else if (!validateEditorInput(trimmedValue)) {
 			fInvalidEditorText= trimmedValue;
-			fEditorText.setText(JUnitMessages.JUnitPreferencePage_invalidstepfilterreturnescape); 
+			fEditorText.setText(JUnitMessages.JUnitPreferencePage_invalidstepfilterreturnescape);
 			getShell().getDisplay().beep();
 			return;
 			// otherwise, commit the new value if not a duplicate
@@ -630,7 +625,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	 * step filtering must be limited to exact matches or patterns that
 	 * begin with '*' or end with '*'. Beyond this, a string cannot be validated
 	 * as corresponding to an existing type or package (and this is probably not
-	 * even desirable).  
+	 * even desirable).
 	 */
 	private boolean validateEditorInput(String trimmedValue) {
 		char firstChar= trimmedValue.charAt(0);
@@ -664,14 +659,14 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 					IJavaElementSearchConstants.CONSIDER_CLASSES,
 					false);
 		} catch (JavaModelException jme) {
-			String title= JUnitMessages.JUnitPreferencePage_addtypedialog_title; 
-			String message= JUnitMessages.JUnitPreferencePage_addtypedialog_error_message; 
+			String title= JUnitMessages.JUnitPreferencePage_addtypedialog_title;
+			String message= JUnitMessages.JUnitPreferencePage_addtypedialog_error_message;
 			ExceptionHandler.handle(jme, shell, title, message);
 			return;
 		}
 
-		dialog.setTitle(JUnitMessages.JUnitPreferencePage_addtypedialog_title); 
-		dialog.setMessage(JUnitMessages.JUnitPreferencePage_addtypedialog_message); 
+		dialog.setTitle(JUnitMessages.JUnitPreferencePage_addtypedialog_title);
+		dialog.setMessage(JUnitMessages.JUnitPreferencePage_addtypedialog_message);
 		if (dialog.open() == IDialogConstants.CANCEL_ID)
 			return;
 
@@ -687,8 +682,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		IProgressService context= PlatformUI.getWorkbench().getProgressService();
 		IJavaSearchScope createWorkspaceScope= SearchEngine.createWorkspaceScope();
 		SelectionDialog dialog= JavaUI.createPackageDialog(shell, context, createWorkspaceScope, true, true, ""); //$NON-NLS-1$
-		dialog.setTitle(JUnitMessages.JUnitPreferencePage_addpackagedialog_title); 
-		dialog.setMessage(JUnitMessages.JUnitPreferencePage_addpackagedialog_message); 
+		dialog.setTitle(JUnitMessages.JUnitPreferencePage_addpackagedialog_title);
+		dialog.setMessage(JUnitMessages.JUnitPreferencePage_addpackagedialog_message);
 		if (dialog.open() != Window.OK)
 			return;
 
@@ -701,7 +696,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 			String filter= pkg.getElementName();
 			if (filter.length() < 1)
-				filter= JUnitMessages.JUnitMainTab_label_defaultpackage; 
+				filter= JUnitMessages.JUnitMainTab_label_defaultpackage;
 			else
 				filter += ".*"; //$NON-NLS-1$
 
