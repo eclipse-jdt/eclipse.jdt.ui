@@ -117,7 +117,7 @@ public class FilteredTable extends Composite {
 	/**
 	 * The text to initially show in the filter text control.
 	 */
-	private String fInitialText= ""; //$NON-NLS-1$
+	private final String fInitialText;
 
 	/**
 	 * The job used to refresh the table.
@@ -168,13 +168,13 @@ public class FilteredTable extends Composite {
 		fHasChild= hasChild;
 		fHasParent= hasParent;
 		fShowFilterControls= PlatformUI.getPreferenceStore().getBoolean(IWorkbenchPreferenceConstants.SHOW_FILTERED_TEXTS);
+		fInitialText= BreadcrumbMessages.FilteredTable_initial_filter_text;
 
 		fNavigateListeners= new ListenerList();
 
 		createControl(parent, tableStyle);
 		createRefreshJob();
 
-		setInitialText(BreadcrumbMessages.FilteredTable_initial_filter_text);
 		setFont(parent.getFont());
 	}
 
@@ -463,6 +463,8 @@ public class FilteredTable extends Composite {
 	 */
 	private void createFilterText(Composite parent) {
 		fFilterText= new Text(parent, SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.CANCEL);
+		fFilterText.setText(fInitialText);
+		fFilterText.selectAll();
 
 		fFilterText.getAccessible().addAccessibleListener(new AccessibleAdapter() {
 			/*
@@ -686,20 +688,6 @@ public class FilteredTable extends Composite {
 	 */
 	private String getFilterString() {
 		return fFilterText != null ? fFilterText.getText() : null;
-	}
-
-	/**
-	 * Set the text that will be shown until the first focus. A default value is
-	 * provided, so this method only need be called if overriding the default
-	 * initial text is desired.
-	 * 
-	 * @param text
-	 *            initial text to appear in text field
-	 */
-	public void setInitialText(String text) {
-		fInitialText= text;
-		setFilterText(fInitialText);
-		textChanged();
 	}
 
 	/**
