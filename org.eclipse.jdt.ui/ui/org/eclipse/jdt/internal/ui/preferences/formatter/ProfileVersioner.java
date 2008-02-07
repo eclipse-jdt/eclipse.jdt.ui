@@ -598,15 +598,6 @@ public class ProfileVersioner implements IProfileVersioner {
 				});
 	}
 	
-	private static void version11to12(Map oldSettings) {
-		checkAndReplace(oldSettings, 
-				FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION, 
-				new String[] {
-					DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_MEMBER,
-					DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PARAMETER,
-					DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_LOCAL_VARIABLE
-				});
-	}
 	
 	/* old format constant values */
 
