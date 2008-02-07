@@ -678,8 +678,6 @@ public class ProfileVersioner implements IProfileVersioner {
 	private static final String FORMATTER_COMMENT_FORMAT2= DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT;
 	/** @deprecated */
 	private static final String FORMATTER_COMMENT_CLEAR_BLANK_LINES= DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES; 
-	/** @deprecated */
-	private static final String FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION= DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION;
 
 	// Old comment formatter constants
 	/** @deprecated */
