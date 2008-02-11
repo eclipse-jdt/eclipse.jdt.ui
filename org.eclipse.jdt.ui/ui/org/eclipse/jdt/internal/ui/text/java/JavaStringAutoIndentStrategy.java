@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
+
+
+import java.util.StringTokenizer;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -48,7 +51,7 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 
 		int length = inputString.length();
 		StringBuffer buffer = new StringBuffer(length);
-		java.util.StringTokenizer tokenizer = new java.util.StringTokenizer(inputString, "\n\r", true); //$NON-NLS-1$
+		StringTokenizer tokenizer= new StringTokenizer(inputString, "\n\r", true); //$NON-NLS-1$
 		while (tokenizer.hasMoreTokens()){
 
 			String token = tokenizer.nextToken();
