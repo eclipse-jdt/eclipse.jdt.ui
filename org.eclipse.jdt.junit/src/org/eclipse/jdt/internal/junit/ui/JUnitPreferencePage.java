@@ -515,8 +515,9 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		fNewTableItem= fFilterTable.getItem(0);
 		int textStyles= SWT.SINGLE | SWT.LEFT | SWT.BORDER;
 
-		// Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=218193
-		if (SWT.getPlatform().equals("motif")) //$NON-NLS-1$
+		// XXX: Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=218193
+		String platform= SWT.getPlatform();
+		if ("motif".equals(platform) || "carbon".equals(platform)) //$NON-NLS-1$ //$NON-NLS-2$
 			textStyles^= SWT.BORDER;
 
 		fEditorText= new Text(fFilterTable, textStyles);
