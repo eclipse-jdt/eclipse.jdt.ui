@@ -42,6 +42,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -513,14 +514,19 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 		fNewStackFilter= fStackFilterContentProvider.addFilter(DEFAULT_NEW_FILTER_TEXT, true);
 		fNewTableItem= fFilterTable.getItem(0);
-		int textStyles= SWT.SINGLE | SWT.LEFT | SWT.BORDER;
+		int textStyles= SWT.SINGLE | SWT.LEFT;
 
-		// XXX: Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=218193
+		/*
+		 * Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=218193
+		 * which won't get fixed (advice is to not use border). We still use a
+		 * border on platforms where it looks OK and nicer with a border.
+		 */
 		String platform= SWT.getPlatform();
-		if ("motif".equals(platform) || "carbon".equals(platform)) //$NON-NLS-1$ //$NON-NLS-2$
-			textStyles^= SWT.BORDER;
+		if ("win32".equals(platform) || "gtk".equals(platform)) //$NON-NLS-1$ //$NON-NLS-2$
+			textStyles|= SWT.BORDER;
 
 		fEditorText= new Text(fFilterTable, textStyles);
+		fEditorText.setFont(JFaceResources.getDialogFont());
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		fEditorText.setLayoutData(gd);
 
