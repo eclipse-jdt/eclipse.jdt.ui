@@ -816,16 +816,20 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				// refresh one level above to deal with empty package filtering properly
 				postRefresh(internalGetParent(parent), PARENT, parent, runnables);
 				return true;
-			} else 
+			} else { 
 				postRemove(resource, runnables);
+				return false;
+			}
 		}
 		if ((status & IResourceDelta.ADDED) != 0) {
 			if (parent instanceof IPackageFragment) {
 				// refresh one level above to deal with empty package filtering properly
 				postRefresh(internalGetParent(parent), PARENT, parent, runnables);	
 				return true;
-			} else
+			} else {
 				postAdd(parent, resource, runnables);
+				return false;
+			}
 		}
 		if ((status & IResourceDelta.CHANGED) != 0) {
 			if ((flags & IResourceDelta.TYPE) != 0) {
@@ -839,6 +843,18 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			return true;		
 		}
 		IResourceDelta[] resourceDeltas= delta.getAffectedChildren();
+		
+		int count= 0;
+		for (int i= 0; i < resourceDeltas.length; i++) {
+			int kind= resourceDeltas[i].getKind();
+			if (kind == IResourceDelta.ADDED || kind == IResourceDelta.REMOVED) {
+				count++;
+				if (count > 1) {
+					postRefresh(parent, PARENT, resource, runnables);
+					return true;
+				}
+			}
+		}		
 		for (int i= 0; i < resourceDeltas.length; i++) {
 			if (processResourceDelta(resourceDeltas[i], resource, runnables)) {
 				return false; // early return, element got refreshed
