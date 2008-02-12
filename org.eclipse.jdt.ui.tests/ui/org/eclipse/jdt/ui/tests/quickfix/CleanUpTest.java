@@ -33,6 +33,9 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -6244,6 +6247,40 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected1= buf.toString();
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
+	}
+	
+	public void testSortMembersBug218542() throws Exception {
+		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER, true);
+		assertTrue(JavaPlugin.getDefault().getMemberOrderPreferenceCache().isSortByVisibility());
+		
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test;\n");
+			buf.append("   public class SM02 {\n");
+			buf.append("   private int b;\n");
+			buf.append("   public int a;\n");
+			buf.append("   void d() {};\n");
+			buf.append("   void c() {};\n");
+			buf.append("}\n");
+			ICompilationUnit cu1= pack1.createCompilationUnit("SM02.java", buf.toString(), false, null);
+
+			enable(CleanUpConstants.SORT_MEMBERS);
+
+			buf= new StringBuffer();
+			buf.append("package test;\n");
+			buf.append("   public class SM02 {\n");
+			buf.append("   private int b;\n");
+			buf.append("   public int a;\n");
+			buf.append("   void c() {};\n");
+			buf.append("   void d() {};\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+
+			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		} finally {
+			JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER, false);
+		}
 	}
 	
 	public void testOrganizeImports01() throws Exception {

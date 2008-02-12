@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -128,6 +128,10 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 			}
 			
 			if (fMemberOrderCache.isSortByVisibility()) {
+				if (fDoNotSortFields && (bodyDeclaration1.getNodeType() == ASTNode.FIELD_DECLARATION || bodyDeclaration2.getNodeType() == ASTNode.ENUM_CONSTANT_DECLARATION)) {
+					return preserveRelativeOrder(bodyDeclaration1, bodyDeclaration2);
+				}
+				
 				int flags1= JdtFlags.getVisibilityCode(bodyDeclaration1);
 				int flags2= JdtFlags.getVisibilityCode(bodyDeclaration2);
 				int vis= fMemberOrderCache.getVisibilityIndex(flags1) - fMemberOrderCache.getVisibilityIndex(flags2);
@@ -270,6 +274,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 	 * @param cu The working copy of a compilation unit.
 	 * @param positions Positions to track or <code>null</code> if no positions
 	 * should be tracked.
+	 * @param doNotSortFields no fields and enum constants are sorted if true
 	 */
 	public SortMembersOperation(ICompilationUnit cu, int[] positions, boolean doNotSortFields) {
 		fCompilationUnit= cu;
@@ -280,6 +285,15 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Runs the operation.
+	 * @param monitor a monitor to use to report progress
+	 * @throws CoreException if the compilation unit could not be
+	 * sorted. Reasons include:
+	 * <ul>
+	 * <li> The given compilation unit does not exist (ELEMENT_DOES_NOT_EXIST)</li>
+	 * <li> The given compilation unit is not a working copy (INVALID_ELEMENT_TYPES)</li>
+	 * <li> A <code>CoreException</code> occurred while accessing the underlying
+	 * resource
+	 * </ul>
 	 */
 	public void run(IProgressMonitor monitor) throws CoreException {
 		CompilationUnitSorter.sort(AST.JLS3, fCompilationUnit, fPositions, new DefaultJavaElementComparator(fDoNotSortFields), 0, monitor);
