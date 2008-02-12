@@ -154,7 +154,7 @@ class BreadcrumbItemDetails {
 	 * @return current width of this element
 	 */
 	public int getWidth() {
-		int result= 8;
+		int result= 2;
 
 		if (fElementImage.getImage() != null)
 			result+= fElementImage.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
