@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testrun name="Failures" project="JUnit4Tests" tests="7" started="7" failures="3" errors="2" ignored="1">
-  <testsuite name="pack.Failures">
-    <testcase name="testNasty" classname="pack.Failures">
+  <testsuite name="pack.Failures" time="0.0">
+    <testcase name="testNasty" classname="pack.Failures" time="0.0">
       <failure>java.lang.AssertionError: &lt;/failure&gt;
 	at org.junit.Assert.fail(Assert.java:69)
 	at pack.Failures.testNasty(Failures.java:18)
@@ -28,8 +28,8 @@
 
 </failure>
     </testcase>
-    <testcase name="ignored" classname="pack.Failures" ignored="true"/>
-    <testcase name="testError" classname="pack.Failures">
+    <testcase name="ignored" classname="pack.Failures" time="0.0" ignored="true"/>
+    <testcase name="testError" classname="pack.Failures" time="0.0">
       <error>java.lang.IllegalStateException: &lt;/failure&gt;
 	at pack.Failures.testError(Failures.java:28)
 	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
@@ -55,8 +55,8 @@
 
 </error>
     </testcase>
-    <testcase name="errorExpected" classname="pack.Failures"/>
-    <testcase name="errorExpectedOther" classname="pack.Failures">
+    <testcase name="errorExpected" classname="pack.Failures" time="0.0"/>
+    <testcase name="errorExpectedOther" classname="pack.Failures" time="0.0">
       <error>java.lang.Exception: Unexpected exception, expected&lt;java.lang.IllegalArgumentException&gt; but was&lt;java.lang.IllegalStateException&gt;
 	at org.junit.internal.runners.TestMethodRunner.runUnprotected(TestMethodRunner.java:91)
 	at org.junit.internal.runners.BeforeAndAfterRunner.runProtected(BeforeAndAfterRunner.java:34)
@@ -85,7 +85,7 @@ Caused by: java.lang.IllegalStateException: xx
 
 </error>
     </testcase>
-    <testcase name="compareTheStuff" classname="pack.Failures">
+    <testcase name="compareTheStuff" classname="pack.Failures" time="0.0">
       <failure>
         <expected>
 Hello World.
@@ -125,7 +125,7 @@ Hello my friend.]&gt;
 
 </failure>
     </testcase>
-    <testcase name="testCompareNull" classname="pack.Failures">
+    <testcase name="testCompareNull" classname="pack.Failures" time="0.0">
       <failure>java.lang.AssertionError: expected:&lt;Hello World.&gt; but was:&lt;null&gt;
 	at org.junit.Assert.fail(Assert.java:69)
 	at org.junit.Assert.failNotEquals(Assert.java:314)

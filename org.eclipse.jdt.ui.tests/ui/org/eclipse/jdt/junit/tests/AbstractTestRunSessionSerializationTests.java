@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Brock Janiczak (brockj@tpg.com.au)
+ *         - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102236: [JUnit] display execution time next to each test
  *******************************************************************************/
 
 package org.eclipse.jdt.junit.tests;
@@ -116,9 +118,13 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 		 * Strips lines like " ... 18 more"
 		 */
 		String regex2= "(?m)^\\s*\\.{3}\\s+\\d+\\s+more\\s+$\r?\n?";
+		/*
+		 * Strips running times
+		 */
+		String regex3= "(?<=time=\\\")\\d+\\.\\d+(?=\\\")";
 		String replacement= "";
-		expected= expected.replaceAll(regex, replacement).replaceAll(regex2, replacement);
-		actual= actual.replaceAll(regex, replacement).replaceAll(regex2, replacement);
+		expected= expected.replaceAll(regex, replacement).replaceAll(regex2, replacement).replaceAll(regex3, replacement);
+		actual= actual.replaceAll(regex, replacement).replaceAll(regex2, replacement).replaceAll(regex3, replacement);
 		int ibmJava6BugOffset= actual.indexOf("><");
 		if (ibmJava6BugOffset > 0) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=197842
 			actual= new StringBuffer(actual).insert(ibmJava6BugOffset + 1, " ").toString();

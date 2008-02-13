@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,11 +7,15 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Brock Janiczak (brockj@tpg.com.au)
+ *         - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102236: [JUnit] display execution time next to each test
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.junit.model;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -42,6 +46,8 @@ public class TestRunSessionSerializer implements XMLReader {
 	private final TestRunSession fTestRunSession;
 	private ContentHandler fHandler;
 	private ErrorHandler fErrorHandler;
+	
+	private final NumberFormat timeFormat= new DecimalFormat("0.0##"); //$NON-NLS-1$ // not localized, parseable by Double.parseDouble(..)
 	
 	/**
 	 * @param testRunSession the test run session to serialize
@@ -88,7 +94,8 @@ public class TestRunSessionSerializer implements XMLReader {
 			
 			AttributesImpl atts= new AttributesImpl();
 			addCDATA(atts, IXMLTags.ATTR_NAME, testSuiteElement.getSuiteTypeName());
-//			addCDATA(atts, IXMLTags.ATTR_TIME, Integer.toString(testCaseElement.getTime()));
+			if (! Double.isNaN(testSuiteElement.getElapsedTimeInSeconds()))
+				addCDATA(atts, IXMLTags.ATTR_TIME, timeFormat.format(testSuiteElement.getElapsedTimeInSeconds()));
 			if (testElement.getProgressState() != ProgressState.COMPLETED || testElement.getTestResult(false) != Result.UNDEFINED)
 				addCDATA(atts, IXMLTags.ATTR_INCOMPLETE, Boolean.TRUE.toString());
 			
@@ -107,7 +114,8 @@ public class TestRunSessionSerializer implements XMLReader {
 			AttributesImpl atts= new AttributesImpl();
 			addCDATA(atts, IXMLTags.ATTR_NAME, testCaseElement.getTestMethodName());
 			addCDATA(atts, IXMLTags.ATTR_CLASSNAME, testCaseElement.getClassName());
-//			addCDATA(atts, IXMLTags.ATTR_TIME, Integer.toString(testCaseElement.getTime()));
+			if (! Double.isNaN(testCaseElement.getElapsedTimeInSeconds()))
+				addCDATA(atts, IXMLTags.ATTR_TIME, timeFormat.format(testCaseElement.getElapsedTimeInSeconds()));
 			if (testElement.getProgressState() != ProgressState.COMPLETED)
 				addCDATA(atts, IXMLTags.ATTR_INCOMPLETE, Boolean.TRUE.toString());
 			if (testCaseElement.isIgnored())

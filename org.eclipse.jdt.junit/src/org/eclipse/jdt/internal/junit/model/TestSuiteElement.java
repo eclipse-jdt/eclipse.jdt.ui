@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -127,6 +127,20 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 	private void internalSetChildrenStatus(Status status) {
 		if (fChildrenStatus == status)
 			return;
+		
+		if (status == Status.RUNNING) {
+			if (fTime >= 0.0d) {
+				// re-running child: ignore change 
+			} else {
+				fTime= - System.currentTimeMillis() / 1000d;
+			}
+		} else if (status.convertToProgressState() == ProgressState.COMPLETED) {
+			if (fTime < 0) { // assert ! Double.isNaN(fTime)
+				double endTime= System.currentTimeMillis() / 1000d;
+				fTime= endTime + fTime;
+			}
+		}
+		
 		fChildrenStatus= status;
 		TestSuiteElement parent= getParent();
 		if (parent != null)

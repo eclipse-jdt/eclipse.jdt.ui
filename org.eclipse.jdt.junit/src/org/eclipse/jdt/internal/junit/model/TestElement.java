@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Brock Janiczak (brockj@tpg.com.au)
+ *         - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102236: [JUnit] display execution time next to each test
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.junit.model;
@@ -171,6 +173,17 @@ public abstract class TestElement implements ITestElement {
 	private String fActual;
 	
 	/**
+	 * Running time in seconds. Contents depend on the current {@link #getProgressState()}:
+	 * <ul>
+	 * <li>{@link org.eclipse.jdt.junit.model.ITestElement.ProgressState#NOT_STARTED}: {@link Double#NaN}</li>
+	 * <li>{@link org.eclipse.jdt.junit.model.ITestElement.ProgressState#RUNNING}: negated start time</li>
+	 * <li>{@link org.eclipse.jdt.junit.model.ITestElement.ProgressState#STOPPED}: elapsed time</li>
+	 * <li>{@link org.eclipse.jdt.junit.model.ITestElement.ProgressState#COMPLETED}: elapsed time</li>
+	 * </ul>
+	 */
+	/* default */ double fTime= Double.NaN;
+	
+	/**
 	 * @param parent the parent, can be <code>null</code>
 	 * @param id the test id
 	 * @param testName the test name
@@ -251,6 +264,15 @@ public abstract class TestElement implements ITestElement {
 		//TODO: notify about change?
 		//TODO: multiple errors/failures per test https://bugs.eclipse.org/bugs/show_bug.cgi?id=125296
 		
+		if (status == Status.RUNNING) {
+			fTime= - System.currentTimeMillis() / 1000d ;
+		} else if (status.convertToProgressState() == ProgressState.COMPLETED) {
+			if (fTime < 0) { // assert ! Double.isNaN(fTime)
+				double endTime= System.currentTimeMillis() / 1000.0d;
+				fTime= endTime + fTime;
+			}
+		}
+		
 		fStatus= status;
 		TestSuiteElement parent= getParent();
 		if (parent != null)
@@ -312,6 +334,18 @@ public abstract class TestElement implements ITestElement {
 	
 	public TestRoot getRoot() {
 		return getParent().getRoot();
+	}
+	
+	public void setElapsedTimeInSeconds(double time) {
+		fTime= time;
+	}
+	
+	public double getElapsedTimeInSeconds() {
+		if (Double.isNaN(fTime) || fTime < 0.0d) {
+			return Double.NaN;
+		}
+		
+		return fTime;
 	}
 	
 	public String toString() {

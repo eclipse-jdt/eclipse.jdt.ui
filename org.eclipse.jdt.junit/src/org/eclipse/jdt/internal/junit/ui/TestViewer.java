@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Brock Janiczak (brockj@tpg.com.au)
+ *         - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102236: [JUnit] display execution time next to each test
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.junit.ui;
@@ -22,11 +24,8 @@ import java.util.ListIterator;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
@@ -133,8 +132,6 @@ public class TestViewer {
 	private TestSessionLabelProvider fTableLabelProvider;
 	private SelectionProviderMediator fSelectionProvider;
 
-	private final Image fHierarchyIcon;
-
 	private int fLayoutMode;
 	private boolean fTreeHasFilter;
 	private boolean fTableHasFilter;
@@ -153,13 +150,6 @@ public class TestViewer {
 	public TestViewer(Composite parent, Clipboard clipboard, TestRunnerViewPart runner) {
 		fTestRunnerPart= runner;
 		fClipboard= clipboard;
-
-		fHierarchyIcon= JUnitPlugin.createImage("obj16/testhier.gif"); //$NON-NLS-1$
-		parent.addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				disposeIcons();
-			}
-		});
 
 		fLayoutMode= TestRunnerViewPart.LAYOUT_HIERARCHICAL;
 
@@ -306,8 +296,9 @@ public class TestViewer {
 		fTestRunnerPart.handleTestSelected(testElement);
 	}
 
-	void disposeIcons() {
-		fHierarchyIcon.dispose();
+	public synchronized void setShowTime(boolean showTime) {
+		fTreeLabelProvider.setShowTime(showTime);
+		fTableLabelProvider.setShowTime(showTime);
 	}
 
 	public synchronized void setShowFailuresOnly(boolean failuresOnly, int layoutMode) {

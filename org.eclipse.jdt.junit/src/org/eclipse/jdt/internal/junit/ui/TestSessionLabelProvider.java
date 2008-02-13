@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,13 +7,18 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Brock Janiczak (brockj@tpg.com.au)
+ *         - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102236: [JUnit] display execution time next to each test
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.junit.ui;
 
+import java.text.NumberFormat;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
@@ -33,10 +38,20 @@ public class TestSessionLabelProvider extends LabelProvider implements IRichLabe
 	
 	private final TestRunnerViewPart fTestRunnerPart;
 	private final int fLayoutMode;
+	private final NumberFormat timeFormat;
+	
+	private boolean fShowTime;
 	
 	public TestSessionLabelProvider(TestRunnerViewPart testRunnerPart, int layoutMode) {
 		fTestRunnerPart= testRunnerPart;
 		fLayoutMode= layoutMode;
+		fShowTime= true;
+		
+		timeFormat= NumberFormat.getNumberInstance();
+		timeFormat.setGroupingUsed(true);
+		timeFormat.setMinimumFractionDigits(3);
+		timeFormat.setMaximumFractionDigits(3);
+		timeFormat.setMinimumIntegerDigits(1);
 	}
 	
 	/* (non-Javadoc)
@@ -48,22 +63,39 @@ public class TestSessionLabelProvider extends LabelProvider implements IRichLabe
 			return new ColoredString(element.toString());
 		}
 		ColoredString text= new ColoredString(label);
+		
+		ITestElement testElement= (ITestElement) element;
 		if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
-			if (((ITestElement) element).getParentContainer() instanceof ITestRunSession) {
+			if (testElement.getParentContainer() instanceof ITestRunSession) {
 				String testKindDisplayName= fTestRunnerPart.getTestKindDisplayName();
 				if (testKindDisplayName != null) {
 					String decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testName_JUnitVersion, new Object[] { label, testKindDisplayName });
-					return ColoredJavaElementLabels.decorateColoredString(text, decorated, ColoredJavaElementLabels.QUALIFIER_STYLE);
+					text= ColoredJavaElementLabels.decorateColoredString(text, decorated, ColoredJavaElementLabels.QUALIFIER_STYLE);
 				}
 			}
+			
 		} else {
 			if (element instanceof ITestCaseElement) {
 				String className= ((ITestCaseElement) element).getTestClassName();
 				String decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, className });
-				return ColoredJavaElementLabels.decorateColoredString(text, decorated, ColoredJavaElementLabels.QUALIFIER_STYLE);
+				text= ColoredJavaElementLabels.decorateColoredString(text, decorated, ColoredJavaElementLabels.QUALIFIER_STYLE);
 			}
 		}
-		return text;
+		return addElapsedTime(text, testElement.getElapsedTimeInSeconds());
+	}
+	
+	private ColoredString addElapsedTime(ColoredString coloredString, double time) {
+		String string= coloredString.getString();
+		String decorated= addElapsedTime(string, time);
+		return ColoredJavaElementLabels.decorateColoredString(coloredString, decorated, ColoredJavaElementLabels.COUNTER_STYLE);
+	}
+
+	private String addElapsedTime(String string, double time) {
+		if (!fShowTime || Double.isNaN(time)) {
+			return string;
+		}
+		String formattedTime= timeFormat.format(time);
+		return Messages.format(JUnitMessages.TestSessionLabelProvider_testName_elapsedTimeInSeconds, new String[] { string, formattedTime});
 	}
 	
 	private String getSimpleLabel(Object element) {
@@ -80,20 +112,21 @@ public class TestSessionLabelProvider extends LabelProvider implements IRichLabe
 		if (label == null) {
 			return element.toString();
 		}
+		ITestElement testElement= (ITestElement) element;
 		if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
-			if (((ITestElement) element).getParentContainer() instanceof ITestRunSession) {
+			if (testElement.getParentContainer() instanceof ITestRunSession) {
 				String testKindDisplayName= fTestRunnerPart.getTestKindDisplayName();
 				if (testKindDisplayName != null) {
-					return Messages.format(JUnitMessages.TestSessionLabelProvider_testName_JUnitVersion, new Object[] { label, testKindDisplayName });
+					label= Messages.format(JUnitMessages.TestSessionLabelProvider_testName_JUnitVersion, new Object[] { label, testKindDisplayName });
 				}
 			}
 		} else {
 			if (element instanceof ITestCaseElement) {
 				String className= ((ITestCaseElement) element).getTestClassName();
-				return Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, className });
+				label= Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, className });
 			}
 		}
-		return label;
+		return addElapsedTime(label, testElement.getElapsedTimeInSeconds());
 	}
 
 	public Image getImage(Object element) {
@@ -136,5 +169,9 @@ public class TestSessionLabelProvider extends LabelProvider implements IRichLabe
 		}
 	}
 
+	public void setShowTime(boolean showTime) {
+		fShowTime= showTime;
+		fireLabelProviderChanged(new LabelProviderChangedEvent(this));
+	}
 
 }

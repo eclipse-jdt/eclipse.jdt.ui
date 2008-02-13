@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,8 @@
  *     Julien Ruaux: jruaux@octo.com see bug 25324 Ability to know when tests are finished [junit] 
  *     Vincent Massol: vmassol@octo.com 25324 Ability to know when tests are finished [junit]
  *     Sebastian Davids: sdavids@gmx.de 35762 JUnit View wasting a lot of screen space [JUnit]
+ *     Brock Janiczak (brockj@tpg.com.au)
+ *         - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102236: [JUnit] display execution time next to each test
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
@@ -189,6 +191,7 @@ public class TestRunnerViewPart extends ViewPart {
 	private ScrollLockAction fScrollLockAction;
 	private ToggleOrientationAction[] fToggleOrientationActions;
 	private ShowTestHierarchyAction fShowTestHierarchyAction;
+	private ShowTimeAction fShowTimeAction;
 	private ActivateOnErrorAction fActivateOnErrorAction;
 	private IMenuListener fViewMenuListener;
 
@@ -239,6 +242,10 @@ public class TestRunnerViewPart extends ViewPart {
 	 * @since 3.2
 	 */
 	static final String TAG_FAILURES_ONLY= "failuresOnly"; //$NON-NLS-1$
+	/**
+	 * @since 3.4
+	 */
+	static final String TAG_SHOW_TIME= "time"; //$NON-NLS-1$	
 	
 	//orientations
 	static final int VIEW_ORIENTATION_VERTICAL= 0;
@@ -814,6 +821,17 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 	}
 
+	private class ShowTimeAction extends Action {
+
+		public ShowTimeAction() {
+			super(JUnitMessages.TestRunnerViewPart_show_execution_time, IAction.AS_CHECK_BOX);
+		}
+		
+		public void run() {
+			setShowExecutionTime(isChecked());
+		}
+	}
+	
 	private class ShowTestHierarchyAction extends Action {
 
 		public ShowTestHierarchyAction() {
@@ -915,6 +933,7 @@ public class TestRunnerViewPart extends ViewPart {
 		
 		memento.putString(TAG_FAILURES_ONLY, fFailuresOnlyFilterAction.isChecked() ? "true" : "false"); //$NON-NLS-1$ //$NON-NLS-2$
 		memento.putInteger(TAG_LAYOUT, fLayout);
+		memento.putString(TAG_SHOW_TIME, fShowTimeAction.isChecked() ? "true" : "false"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	private void restoreLayoutState(IMemento memento) {
@@ -949,7 +968,13 @@ public class TestRunnerViewPart extends ViewPart {
 		if (failuresOnly != null)
 			showFailuresOnly= failuresOnly.equals("true"); //$NON-NLS-1$
 		
+		String time= memento.getString(TAG_SHOW_TIME);
+		boolean showTime= true;
+		if (time != null)
+			showTime= time.equals("true"); //$NON-NLS-1$
+		
 		setFilterAndLayout(showFailuresOnly, layoutValue);
+		setShowExecutionTime(showTime);
 	}
 	
 	/**
@@ -1512,6 +1537,7 @@ action enablement
 		getViewSite().getPage().addPartListener(fPartListener);
 
 		setFilterAndLayout(false, LAYOUT_HIERARCHICAL);
+		setShowExecutionTime(true);
 		if (fMemento != null) {
 			restoreLayoutState(fMemento);
 		}
@@ -1600,6 +1626,7 @@ action enablement
 				new ToggleOrientationAction(VIEW_ORIENTATION_AUTOMATIC)};
 		
 		fShowTestHierarchyAction= new ShowTestHierarchyAction();
+		fShowTimeAction= new ShowTimeAction();
 		
 		toolBar.add(fNextAction);
 		toolBar.add(fPreviousAction);
@@ -1613,6 +1640,7 @@ action enablement
 		
 		
 		viewMenu.add(fShowTestHierarchyAction);
+		viewMenu.add(fShowTimeAction);
 		viewMenu.add(new Separator());
 		
 		MenuManager layoutSubMenu= new MenuManager(JUnitMessages.TestRunnerViewPart_layout_menu);
@@ -1825,6 +1853,12 @@ action enablement
 		fLayout= layoutMode;
 		fFailuresOnlyFilterAction.setChecked(failuresOnly);
 		fTestViewer.setShowFailuresOnly(failuresOnly, layoutMode);
+	}
+	
+	private void setShowExecutionTime(boolean showTime) {
+		fTestViewer.setShowTime(showTime);
+		fShowTimeAction.setChecked(showTime);
+		
 	}
 
 	TestElement[] getAllFailures() {

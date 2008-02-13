@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Brock Janiczak (brockj@tpg.com.au)
+ *         - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102236: [JUnit] display execution time next to each test
  *******************************************************************************/
 package org.eclipse.jdt.junit.model;
 
@@ -165,5 +167,19 @@ public interface ITestElement {
 	 * @return the parent test run session.
 	 */
 	public ITestRunSession getTestRunSession();
+	
+	/**
+	 * Returns the estimated total time elapsed in seconds while executing this test element.
+	 * The total time for a test suite includes the time used for all tests in that suite.
+	 * The total time for a test session includes the time used for all tests in that session.
+	 * <p>
+	 * <strong>NOTE</strong>: The elapsed time is only valid for {@link ITestElement.ProgressState#COMPLETED}
+	 * test elements.
+	 * </p>
+	 * 
+	 * @return total execution time for the test element in seconds, or {@link Double#NaN}</code>
+	 * if the state of the element is not {@link ITestElement.ProgressState#COMPLETED}
+	 */
+	public double getElapsedTimeInSeconds();
 	
 }
