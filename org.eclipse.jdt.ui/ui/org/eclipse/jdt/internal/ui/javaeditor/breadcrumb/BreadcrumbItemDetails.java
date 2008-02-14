@@ -327,7 +327,7 @@ class BreadcrumbItemDetails {
 						viewer.fireOpen();
 						break;
 					default:
-						if ((e.stateMask == SWT.NONE || e.stateMask == SWT.SHIFT) && Character.isLetterOrDigit(e.character)) {
+						if ((e.stateMask == SWT.NONE || e.stateMask == SWT.SHIFT) && isFilterCharacter(e.character)) {
 							String filterText= new String(new char[] { e.character });
 							if (!fSelected) {
 								viewer.selectItem(fParent);
@@ -341,6 +341,16 @@ class BreadcrumbItemDetails {
 						}
 						break;
 				}
+			}
+
+			private boolean isFilterCharacter(char character) {
+				if (Character.isLetterOrDigit(character))
+					return true;
+
+				if ('*' == character || '?' == character)
+					return true;
+				
+				return false;
 			}
 
 			public void keyReleased(KeyEvent e) {
