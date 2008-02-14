@@ -1747,7 +1747,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected final ISourceViewer createSourceViewer(Composite parent, IVerticalRuler verticalRuler, int styles) {
 
 		Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		GridLayout layout= new GridLayout(1, false);
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
@@ -1765,8 +1764,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		layout.verticalSpacing= 0;
 		layoutData.exclude= true;
 		fBreadcrumbComposite.setLayout(layout);
-
-
 
 		Composite editorComposite= new Composite(composite, SWT.NONE);
 		editorComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
