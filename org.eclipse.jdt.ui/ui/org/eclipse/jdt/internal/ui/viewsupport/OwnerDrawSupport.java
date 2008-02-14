@@ -10,16 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
-import java.util.Iterator;
-
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.TextLayout;
-import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -130,26 +128,14 @@ public abstract class OwnerDrawSupport implements Listener {
 		fTextLayout.setFont(font);
 		
 		// apply the styled ranges only when element is not selected
-		Display display= (Display) gc.getDevice();
-		Iterator ranges= richLabel.getRanges();
-		while (ranges.hasNext()) {
-			ColoredString.Range curr= (ColoredString.Range) ranges.next();
-			ColoredString.Style style= curr.style;
-			if (style != null) {
-				String foregroundColorName= style.getForegroundColorName();
-				String backgroundColorName= style.getBackgroundColorName();
-				if (foregroundColorName != null || backgroundColorName != null) {
-					Color foreground= !isSelected && foregroundColorName != null ? getColor(foregroundColorName, display) : null;
-					Color background= !isSelected && backgroundColorName != null ? getColor(backgroundColorName, display) : null;
-
-					TextStyle textStyle= new TextStyle(null, foreground, background);
-					if (isSelected && backgroundColorName != null) {
-						textStyle.borderStyle= SWT.BORDER_DOT;
-					}
-
-					fTextLayout.setStyle(textStyle, curr.offset, curr.offset + curr.length - 1);
-				}
+		StyleRange[] styleRanges= richLabel.getStyleRanges();
+		for (int i= 0; i < styleRanges.length; i++) {
+			StyleRange styleRange= styleRanges[i];
+			if (isSelected) {
+				styleRange.foreground= null;
+				styleRange.background= null;
 			}
+			fTextLayout.setStyle(styleRange, styleRange.start, styleRange.start + styleRange.length - 1);
 		}
 		
 		Rectangle bounds= fTextLayout.getBounds();
