@@ -246,7 +246,7 @@ class BreadcrumbItemDropDown {
 		});
 
 		table.addMouseListener(new MouseListener() {
-			public void mouseDoubleClick(MouseEvent e) {
+			public void mouseUp(MouseEvent e) {
 				if (e.button != 1)
 					return;
 
@@ -265,7 +265,7 @@ class BreadcrumbItemDropDown {
 			public void mouseDown(MouseEvent e) {
 			}
 
-			public void mouseUp(MouseEvent e) {
+			public void mouseDoubleClick(MouseEvent e) {
 			}
 		});
 

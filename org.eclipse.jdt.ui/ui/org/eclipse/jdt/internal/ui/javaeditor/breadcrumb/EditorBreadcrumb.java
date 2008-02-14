@@ -231,7 +231,15 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 
 		fBreadcrumbViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
-				doRevealOrOpen(event.getSelection());
+				Object element= ((IStructuredSelection) event.getSelection()).getFirstElement();
+				if (element == null)
+					return;
+
+				BreadcrumbItem item= (BreadcrumbItem) fBreadcrumbViewer.doFindItem(element);
+				if (item == null)
+					return;
+				
+				item.openDropDownMenu(null, true);
 			}
 		});
 
