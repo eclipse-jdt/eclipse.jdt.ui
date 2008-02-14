@@ -445,10 +445,10 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			return;
 		}
 
-		// don't eat if not in preferences, XOR with modifier key 1 (Ctrl)
+		// don't eat if not in preferences, XOR with Ctrl
 		// but: if there is a selection, replace it!
 		Point selection= viewer.getSelectedRange();
-		fToggleEating= (stateMask & SWT.MOD1) != 0;
+		fToggleEating= (stateMask & SWT.CTRL) != 0;
 		int newLength= selection.x + selection.y - getReplacementOffset();
 		if ((insertCompletion() ^ fToggleEating) && newLength >= 0)
 			setReplacementLength(newLength);
