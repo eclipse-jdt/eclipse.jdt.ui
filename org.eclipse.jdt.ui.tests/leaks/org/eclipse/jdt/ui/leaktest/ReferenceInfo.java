@@ -1,6 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials 
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
@@ -39,7 +39,7 @@ public class ReferenceInfo {
 	
 	public void setPosibleLeak(boolean isPosibleLeak) {
 		fIsPosibleLeak= isPosibleLeak;
-	}	
+	}
 
 	private BacklinkNode[] getBacklinkNodes(ReferencedObject curr) {
 		ArrayList res= new ArrayList();
@@ -76,14 +76,18 @@ public class ReferenceInfo {
 		buf.append(getReference().getClass().getName()).append('\n');
 		BacklinkNode[] backlinkNodes= getBacklinkNodes();
 		for (int i= 0; i < backlinkNodes.length; i++) {
-			buf.append("  ").append(backlinkNodes[i].getBackLinkString()).append('\n');
+			buf.append("  ").append(backlinkNodes[i].getBackLinkString());
+			String value= backlinkNodes[i].getValue().toString();
+			if (value.length() > 100)
+				value= value.substring(0, 99);
+			buf.append(" -> ").append(value).append('\n');
 		}
 		return buf.toString();
 	}
 
 	private static class BacklinkNode {
 
-		private Object fValue; 
+		private Object fValue;
 		private final String fBackStrings;
 
 		public BacklinkNode(String str, Object value) {
