@@ -278,8 +278,14 @@ class BreadcrumbItemDropDown {
 		installCloser(shell);
 
 		Object child= fParent.getData();
-		if (child != null)
+		if (child != null) {
 			viewer.setSelection(new StructuredSelection(child), true);
+			
+			int selectionIndex= viewer.getTable().getSelectionIndex();
+			if (selectionIndex >= 0) {
+				viewer.getTable().setTopIndex(selectionIndex);
+			}
+		}
 		
 		if (selectItem) {
 			viewer.getTable().setFocus();
