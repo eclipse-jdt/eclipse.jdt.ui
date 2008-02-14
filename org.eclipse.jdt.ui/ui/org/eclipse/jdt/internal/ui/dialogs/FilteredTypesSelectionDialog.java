@@ -550,7 +550,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 				ColoredString str= new ColoredString(text);
 				int index= text.indexOf('-');
 				if (index != -1) {
-					str.colorize(index, str.length() - index, ColoredJavaElementLabels.QUALIFIER_STYLE);
+					str.setStyle(index, str.length() - index, ColoredJavaElementLabels.QUALIFIER_STYLE);
 				}
 				return str;
 			}

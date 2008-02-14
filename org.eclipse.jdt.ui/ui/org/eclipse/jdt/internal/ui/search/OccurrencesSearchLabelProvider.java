@@ -71,9 +71,9 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 			
 			if (offset >= 0 && (offset + length <= res.length())) {
 				if ((curr.getFlags() & IOccurrencesFinder.F_WRITE_OCCURRENCE) != 0) {
-					res.colorize(offset, length, ColoredJavaElementLabels.HIGHLIGHT_WRITE_STYLE);
+					res.setStyle(offset, length, ColoredJavaElementLabels.HIGHLIGHT_WRITE_STYLE);
 				} else {
-					res.colorize(offset, length, highlightStyle);
+					res.setStyle(offset, length, highlightStyle);
 				}
 			}
 		}
