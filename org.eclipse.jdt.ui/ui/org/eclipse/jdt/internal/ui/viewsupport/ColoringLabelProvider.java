@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.resource.ColorRegistry;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IFontProvider;
@@ -27,9 +28,11 @@ import org.eclipse.jface.viewers.ViewerColumn;
 public class ColoringLabelProvider extends SimpleStyledCellLabelProvider implements ILabelProvider {
 	
 	private ILabelProvider fLabelProvider;
+	private ColorRegistry fRegistry;
 	
 	public ColoringLabelProvider(ILabelProvider labelProvider) {
 		fLabelProvider= labelProvider;
+		fRegistry= JFaceResources.getColorRegistry();
 	}
 	
 	public void initialize(ColumnViewer viewer, ViewerColumn column) {
@@ -97,14 +100,6 @@ public class ColoringLabelProvider extends SimpleStyledCellLabelProvider impleme
 		return new LabelPresentationInfo(text, ranges, image, defaultFont, foreground, background);
 	}
 	
-	protected StyleRange prepareStyleRange(StyleRange styleRange, boolean applyColors) {
-		if (!applyColors && styleRange.background != null) {
-			StyleRange result= super.prepareStyleRange(styleRange, applyColors);
-			result.borderStyle= SWT.BORDER_DOT;
-			return result;
-		}
-		return super.prepareStyleRange(styleRange, applyColors);
-	}
 	
 	private ColoredString getRichTextLabel(Object element) {
 		if (fLabelProvider instanceof IRichLabelProvider) {
