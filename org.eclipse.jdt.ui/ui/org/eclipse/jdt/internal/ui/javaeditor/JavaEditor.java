@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import com.ibm.icu.text.BreakIterator;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.CharacterIterator;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +24,7 @@ import java.util.Map;
 import org.eclipse.core.commands.operations.IOperationApprover;
 import org.eclipse.core.commands.operations.IUndoContext;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -2697,15 +2700,40 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		action.setImageDescriptor(null);
 		setAction(IJavaEditorActionConstants.COPY_QUALIFIED_NAME, action);
 	}
-	
-	/*
-	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#setActionsActivated(boolean)
+
+	/**
+	 * Sets this editor's actions into activated (default) or deactived state.
+	 * <p>
+	 * XXX: Currently this is done by using a private method from {@link AbstractTextEditor}
+	 * as we don't want to make this risky method API at this point, since Java editor breadcrumb
+	 * might become a Platform UI feature during 3.5 and hence we can then delete this workaround.
+	 * </p>
+	 * 
+	 * @param state <code>true</code> if activated
 	 * @since 3.4
 	 */
 	protected void setActionsActivated(boolean state) {
-		super.setActionsActivated(state);
+		Method method= null;
+		try {
+			method= AbstractTextEditor.class.getDeclaredMethod("setActionActivation", new Class[] { boolean.class }); //$NON-NLS-1$
+		} catch (SecurityException ex) {
+			JavaPlugin.log(ex);
+		} catch (NoSuchMethodException ex) {
+			JavaPlugin.log(ex);
+		}
+		Assert.isNotNull(method);
+		method.setAccessible(true);
+		try {
+			method.invoke(this, new Object[] { new Boolean(state) });
+		} catch (IllegalArgumentException ex) {
+			JavaPlugin.log(ex);
+		} catch (InvocationTargetException ex) {
+			JavaPlugin.log(ex);
+		} catch (IllegalAccessException ex) {
+			JavaPlugin.log(ex);
+		}
 	}
-	
+
 	/**
 	 * Installs the encoding support on the given text editor.
 	 * <p>
