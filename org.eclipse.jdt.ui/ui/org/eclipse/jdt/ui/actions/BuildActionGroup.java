@@ -20,6 +20,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.IShellProvider;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
@@ -64,7 +65,7 @@ public class BuildActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public BuildActionGroup(IViewPart part) {
-		this(part.getSite(), part.getSite().getSelectionProvider());
+		this(part.getSite(), null);
 	}
 
 	/**
@@ -73,25 +74,33 @@ public class BuildActionGroup extends ActionGroup {
 	 * {@link IStructuredSelection}.
 	 * 
 	 * @param site the site that will own the action group.
-	 * @param selectionProvider the selection provider used instead of the
-	 *  page selection provider.
+	 * @param specialSelectionProvider the selection provider used instead of the
+	 *  sites selection provider.
 	 * 
 	 * @since 3.4
 	 */
-	public BuildActionGroup(IWorkbenchSite site, ISelectionProvider selectionProvider) {
+	public BuildActionGroup(IWorkbenchSite site, ISelectionProvider specialSelectionProvider) {
 		fSite= site;
-		fSelectionProvider= selectionProvider;
-		Shell shell= fSite.getShell();
+		fSelectionProvider= specialSelectionProvider != null ? specialSelectionProvider : site.getSelectionProvider();
 		
-		fBuildAction= new BuildAction(shell, IncrementalProjectBuilder.INCREMENTAL_BUILD);
+		IShellProvider shellProvider= new IShellProvider() {
+			public Shell getShell() {
+				return fSite.getShell();
+			}
+		};
+		fBuildAction= new BuildAction(shellProvider, IncrementalProjectBuilder.INCREMENTAL_BUILD);
 		fBuildAction.setText(ActionMessages.BuildAction_label);
 		fBuildAction.setActionDefinitionId(IWorkbenchCommandIds.BUILD_PROJECT);
 		
 		fRefreshAction= new RefreshAction(fSite);
 		fRefreshAction.setActionDefinitionId(IWorkbenchCommandIds.REFRESH);
 		
-		selectionProvider.addSelectionChangedListener(fBuildAction);
-		selectionProvider.addSelectionChangedListener(fRefreshAction);
+		if (specialSelectionProvider != null) {
+			fRefreshAction.setSpecialSelectionProvider(specialSelectionProvider);
+		}
+		
+		fSelectionProvider.addSelectionChangedListener(fBuildAction);
+		fSelectionProvider.addSelectionChangedListener(fRefreshAction);
 	}
 	
 	/**
