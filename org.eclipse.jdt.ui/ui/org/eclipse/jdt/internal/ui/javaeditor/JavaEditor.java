@@ -2104,12 +2104,26 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			
 			return new IShowInSource() {
 				public ShowInContext getShowInContext() {
-					return new ShowInContext(getEditorInput(), null) {
+					return new ShowInContext(null, null) {
+						/* 
+						 * @see org.eclipse.ui.part.ShowInContext#getInput()
+						 * @since 3.4
+						 */
+						public Object getInput() {
+							if (isBreadcrumbActive())
+								return null;
+							
+							return getEditorInput();
+						}
+						
 						/*
 						 * @see org.eclipse.ui.part.ShowInContext#getSelection()
 						 * @since 3.3
 						 */
 						public ISelection getSelection() {
+							if (isBreadcrumbActive())
+								return getBreadcrumb().getSelectionProvider().getSelection();
+							
 							try {
 								IJavaElement je= SelectionConverter.getElementAtOffset(JavaEditor.this);
 								if (je != null)
