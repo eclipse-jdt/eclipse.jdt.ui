@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Widget;
@@ -358,7 +359,6 @@ class BreadcrumbItemDropDown {
 		Rectangle rect= fArrow.getBounds();
 		Point pt= new Point(rect.x + rect.width - 2, rect.y + rect.height + 5);
 		pt= fArrow.getParent().toDisplay(pt);
-		shell.setLocation(pt.x, pt.y);
 		fArrow.setImage(JavaPluginImages.get(JavaPluginImages.IMG_ETOOL_ARROW_DOWN));
 
 		shell.pack();
@@ -366,6 +366,12 @@ class BreadcrumbItemDropDown {
 		int height= Math.min(size.y, DROP_DOWN_HIGHT);
 		int width= Math.max(Math.min(size.x, DROP_DOWN_WIDTH), 250);
 
+		Rectangle monitor= getMonitor(shell.getDisplay(), pt).getClientArea();
+		int overlap= (pt.x + width) - (monitor.x + monitor.width);
+		if (overlap > 0)
+			pt.x-= overlap;
+		
+		shell.setLocation(pt);
 		shell.setSize(width, height);
 		shell.layout(true, true);
 	}
@@ -374,4 +380,18 @@ class BreadcrumbItemDropDown {
 		return fMenuIsShown;
 	}
 
+	private Monitor getMonitor(Display display, Point point) {
+		Monitor[] monitors= display.getMonitors();
+
+		for (int i= 0; i < monitors.length; i++) {
+			Monitor current= monitors[i];
+
+			Rectangle clientArea= current.getClientArea();
+
+			if (clientArea.contains(point))
+				return current;
+		}
+
+		return monitors[0];
+	}
 }
