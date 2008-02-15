@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -199,11 +199,9 @@ public class JavaSpellingProblem extends SpellingProblem {
 		try {
 
 			IRegion line= fDocument.getLineInformationOfOffset(getOffset());
-			int end= getOffset() + getLength();
-			prefix= fDocument.get(line.getOffset(), getOffset()
-					- line.getOffset());
-			postfix= fDocument.get(end + 1, line.getOffset() + line.getLength()
-					- end);
+			prefix= fDocument.get(line.getOffset(), getOffset() - line.getOffset());
+			int postfixStart= getOffset() + getLength();
+			postfix= fDocument.get(postfixStart, line.getOffset() + line.getLength() - postfixStart);
 
 		} catch (BadLocationException exception) {
 			// Do nothing
