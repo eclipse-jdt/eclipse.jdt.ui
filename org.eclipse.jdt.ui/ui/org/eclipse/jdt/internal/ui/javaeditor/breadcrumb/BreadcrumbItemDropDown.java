@@ -135,6 +135,15 @@ class BreadcrumbItemDropDown {
 	}
 	
 	/**
+	 * Is the drop down menu open at the moment?
+	 * 
+	 * @return true if the menu is open
+	 */
+	public boolean isMenuShown() {
+		return fMenuIsShown;
+	}
+
+	/**
 	 * Opens the drop down menu. Initialize the filter with
 	 * the given text, or <code>null</code> if the default
 	 * filter text should be used.
@@ -374,10 +383,6 @@ class BreadcrumbItemDropDown {
 		shell.setLocation(pt);
 		shell.setSize(width, height);
 		shell.layout(true, true);
-	}
-
-	public boolean isMenuShown() {
-		return fMenuIsShown;
 	}
 
 	private Monitor getMonitor(Display display, Point point) {
