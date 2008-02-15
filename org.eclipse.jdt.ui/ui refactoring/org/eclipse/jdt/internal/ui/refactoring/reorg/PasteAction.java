@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.Assert;
@@ -54,6 +55,11 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.DocumentRewriteSession;
+import org.eclipse.jface.text.DocumentRewriteSessionType;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension4;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ISharedImages;
@@ -75,6 +81,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -90,12 +97,22 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.TypedSource;
@@ -113,6 +130,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
@@ -121,12 +139,14 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 
+import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
@@ -320,20 +340,47 @@ public class PasteAction extends SelectionDispatchAction{
 
 		private static class ParsedCu {
 			private final String fText;
+			private final int fKind;
 			private final String fTypeName;
 			private final String fPackageName;
 
 			public static List/*<ParsedCu>*/ parseCus(IJavaProject javaProject, String text) {
-				String packageName= IPackageFragment.DEFAULT_PACKAGE_NAME;
 				ASTParser parser= ASTParser.newParser(AST.JLS3);
 				parser.setProject(javaProject);
 				parser.setSource(text.toCharArray());
 				parser.setStatementsRecovery(true);
 				CompilationUnit unit= (CompilationUnit) parser.createAST(null);
 				
-				if (unit == null)
-					return Collections.EMPTY_LIST;
+				if (unit.types().size() > 0)
+					return parseAsTypes(text, unit);
 				
+				parser.setProject(javaProject);
+				parser.setSource(text.toCharArray());
+				parser.setStatementsRecovery(true);
+				parser.setKind(ASTParser.K_CLASS_BODY_DECLARATIONS);
+				ASTNode root= parser.createAST(null);
+				if (root instanceof TypeDeclaration) {
+					List bodyDeclarations= ((TypeDeclaration) root).bodyDeclarations();
+					if (bodyDeclarations.size() > 0)
+						return Collections.singletonList(new ParsedCu(text, ASTParser.K_CLASS_BODY_DECLARATIONS, null, null));
+				}
+				
+				parser.setProject(javaProject);
+				parser.setSource(text.toCharArray());
+				parser.setStatementsRecovery(true);
+				parser.setKind(ASTParser.K_STATEMENTS);
+				root= parser.createAST(null);
+				if (root instanceof Block) {
+					List statements= ((Block) root).statements();
+					if (statements.size() > 0)
+						return Collections.singletonList(new ParsedCu(text, ASTParser.K_STATEMENTS, null, null));
+				}
+				
+				return Collections.EMPTY_LIST;
+			}
+
+			private static List parseAsTypes(String text, CompilationUnit unit) {
+				String packageName= IPackageFragment.DEFAULT_PACKAGE_NAME;
 				PackageDeclaration pack= unit.getPackage();
 				if (pack != null) {
 					packageName= pack.getName().getFullyQualifiedName();
@@ -359,7 +406,7 @@ public class PasteAction extends SelectionDispatchAction{
 							// public => create CU for previous:
 							int prevEnd= type.getStartPosition();
 							String source= text.substring(startOffset, prevEnd);
-							cus.add(new ParsedCu(source, typeName, packageName));
+							cus.add(new ParsedCu(source, ASTParser.K_COMPILATION_UNIT, typeName, packageName));
 							// ... and restart:
 							startOffset= prevEnd;
 							typeName= type.getName().getIdentifier();
@@ -375,15 +422,16 @@ public class PasteAction extends SelectionDispatchAction{
 				if (typeName != null) {
 					// create CU for the rest:
 					String source= text.substring(startOffset);
-					cus.add(new ParsedCu(source, typeName, packageName));
+					cus.add(new ParsedCu(source, ASTParser.K_COMPILATION_UNIT, typeName, packageName));
 				}
 				return cus;
 			}
 			
-			private ParsedCu(String text, String typeName, String packageName) {
+			private ParsedCu(String text, int kind, String typeName, String packageName) {
 				fText= text;
 				fTypeName= typeName;
 				fPackageName= packageName;
+				fKind= kind;
 			}
 
 			public String getTypeName() {
@@ -397,6 +445,10 @@ public class PasteAction extends SelectionDispatchAction{
 			public String getText() {
 				return fText;
 			}
+			
+			public int getKind() {
+				return fKind;
+			}
 		}
 		
 		private IPackageFragmentRoot fDestination;
@@ -404,6 +456,8 @@ public class PasteAction extends SelectionDispatchAction{
 		 * destination pack iff pasted 1 CU to package fragment or compilation unit, <code>null</code> otherwise
 		 */
 		private IPackageFragment fDestinationPack;
+		private IType fDestinationType;
+		private IMethod fDestinationMethod; 
 		private int fPackageDeclCount;
 		private ParsedCu[] fParsedCus;
 		private TransferData[] fAvailableTypes;
@@ -447,6 +501,7 @@ public class PasteAction extends SelectionDispatchAction{
 			
 			IPackageFragmentRoot packageFragmentRoot;
 			IPackageFragment destinationPack;
+			IJavaElement cu;
 			switch (destination.getElementType()) {
 				case IJavaElement.JAVA_PROJECT :
 					IPackageFragmentRoot[] packageFragmentRoots= ((IJavaProject) destination).getPackageFragmentRoots();
@@ -486,7 +541,29 @@ public class PasteAction extends SelectionDispatchAction{
 						fDestination= packageFragmentRoot;
 						if (fPackageDeclCount <= 1) {
 							fDestinationPack= destinationPack;
+							fDestinationType= ((ICompilationUnit) destination).findPrimaryType();
 						}
+						return true;
+					}
+					return false;
+					
+				case IJavaElement.TYPE:
+					cu= ((IType) destination).getCompilationUnit();
+					if (cu != null) {
+						fDestinationType= (IType) destination;
+						fDestinationPack= (IPackageFragment) cu.getParent();
+						fDestination= (IPackageFragmentRoot) fDestinationPack.getParent();
+						return true;
+					}
+					return false;
+
+				case IJavaElement.METHOD:
+					cu= ((IMethod) destination).getCompilationUnit();
+					if (cu != null) {
+						fDestinationMethod= (IMethod) destination;
+						fDestinationType= (IType) destination.getParent();
+						fDestinationPack= (IPackageFragment) cu.getParent();
+						fDestination= (IPackageFragmentRoot) fDestinationPack.getParent();
 						return true;
 					}
 					return false;
@@ -547,7 +624,7 @@ public class PasteAction extends SelectionDispatchAction{
 					SelectionUtil.selectAndReveal(cuResources, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
 				}
 
-				private ICompilationUnit pasteCU(ParsedCu parsedCu, SubProgressMonitor pm, IConfirmQuery confirmQuery) throws CoreException, OperationCanceledException {
+				private ICompilationUnit pasteCU(ParsedCu parsedCu, IProgressMonitor pm, IConfirmQuery confirmQuery) throws CoreException, OperationCanceledException {
 					pm.beginTask("", 4); //$NON-NLS-1$
 					try {
 						IPackageFragment destinationPack;
@@ -556,6 +633,8 @@ public class PasteAction extends SelectionDispatchAction{
 							pm.worked(1);
 						} else {
 							String packageName= parsedCu.getPackageName();
+							if (packageName == null)
+								packageName= ReorgMessages.PasteAction_snippet_default_package_name;
 							destinationPack= fDestination.getPackageFragment(packageName);
 							if (! destinationPack.exists()) {
 								JavaModelUtil.getPackageFragmentRoot(destinationPack).createPackageFragment(packageName, true, new SubProgressMonitor(pm, 1));
@@ -564,41 +643,193 @@ public class PasteAction extends SelectionDispatchAction{
 							}
 						}
 						
-						final String cuName= parsedCu.getTypeName() + JavaModelUtil.DEFAULT_CU_SUFFIX;
-						ICompilationUnit cu= destinationPack.getCompilationUnit(cuName);
-						boolean alreadyExists= cu.exists();
-						if (alreadyExists) {
-							String msg= Messages.format(ReorgMessages.PasteAction_TextPaster_exists, new Object[] {cuName});
-							boolean overwrite= confirmQuery.confirm(msg);
-							if (! overwrite)
-								return null;
+						String parsedText= Strings.trimIndentation(parsedCu.getText(), destinationPack.getJavaProject(), true);
+						int kind= parsedCu.getKind();
+						if (kind == ASTParser.K_COMPILATION_UNIT) {
+							final String cuName= parsedCu.getTypeName() + JavaModelUtil.DEFAULT_CU_SUFFIX;
+							ICompilationUnit cu= destinationPack.getCompilationUnit(cuName);
+							boolean alreadyExists= cu.exists();
+							if (alreadyExists) {
+								String msg= Messages.format(ReorgMessages.PasteAction_TextPaster_exists, new Object[] {cuName});
+								boolean overwrite= confirmQuery.confirm(msg);
+								if (! overwrite)
+									return null;
+								
+								editorPart[0]= openCu(cu); //Open editor before overwriting to allow undo to restore original package declaration
+							}
 							
-							editorPart[0]= openCu(cu); //Open editor before overwriting to allow undo to restore original package declaration
-						}
-						
-						destinationPack.createCompilationUnit(cuName, parsedCu.getText(), true, new SubProgressMonitor(pm, 1));
-						
-						if (! alreadyExists) {
-							editorPart[0]= openCu(cu);
-						}
-						if (fDestinationPack != null) {
-							if (fDestinationPack.getElementName().length() == 0) {
-								removePackageDeclaration(cu);
+							destinationPack.createCompilationUnit(cuName, parsedText, true, new SubProgressMonitor(pm, 1));
+							
+							if (! alreadyExists) {
+								editorPart[0]= openCu(cu);
+							}
+							if (fDestinationPack != null) {
+								if (fDestinationPack.getElementName().length() == 0) {
+									removePackageDeclaration(cu);
+								} else {
+									cu.createPackageDeclaration(fDestinationPack.getElementName(), new SubProgressMonitor(pm, 1));
+								}
 							} else {
-								cu.createPackageDeclaration(fDestinationPack.getElementName(), new SubProgressMonitor(pm, 1));
+								String packageName= destinationPack.getElementName();
+								if (packageName.length() > 0) {
+									cu.createPackageDeclaration(packageName, new SubProgressMonitor(pm, 1));
+								}
 							}
+							if (! alreadyExists && editorPart[0] != null)
+								editorPart[0].doSave(new SubProgressMonitor(pm, 1)); //avoid showing error marker due to missing/wrong package declaration
+							return cu;
+							
+						} else if (kind == ASTParser.K_CLASS_BODY_DECLARATIONS || kind == ASTParser.K_STATEMENTS) {
+							return pasteBodyDeclsOrStatements(destinationPack, parsedText, kind, new SubProgressMonitor(pm, 2));
 						} else {
-							String parsedPackageName= parsedCu.getPackageName();
-							if (parsedPackageName.length() > 0) {
-								cu.createPackageDeclaration(parsedPackageName, new SubProgressMonitor(pm, 1));
-							}
+							throw new IllegalStateException("Unexpected kind: " + kind); //$NON-NLS-1$
 						}
-						if (! alreadyExists && editorPart[0] != null)
-							editorPart[0].doSave(new SubProgressMonitor(pm, 1)); //avoid showing error marker due to missing/wrong package declaration
-						return cu;
 					} finally {
 						pm.done();
 					}
+				}
+
+				private ICompilationUnit pasteBodyDeclsOrStatements(IPackageFragment destinationPack, String parsedText, int kind, IProgressMonitor pm) throws CoreException, JavaModelException {
+					ICompilationUnit cu;
+					IType type;
+					String typeName;
+					if (fDestinationType != null) {
+						cu= fDestinationType.getCompilationUnit();
+						type= fDestinationType;
+						typeName= fDestinationType.getElementName();
+					} else {
+						typeName= ReorgMessages.PasteAction_snippet_default_type_name;
+						cu= destinationPack.getCompilationUnit(typeName + JavaModelUtil.DEFAULT_CU_SUFFIX);
+						type= cu.getType(typeName);
+					}
+					if (cu.exists()) {
+						editorPart[0]= openCu(cu); //Open editor before pasting to allow undo to restore original contents
+						ITextFileBuffer fileBuffer= RefactoringFileBuffers.acquire(cu);
+						try {
+							IDocument document= fileBuffer.getDocument();
+
+							ASTParser parser= ASTParser.newParser(AST.JLS3);
+							parser.setProject(cu.getJavaProject());
+							parser.setSource(document.get().toCharArray());
+							parser.setStatementsRecovery(true);
+							CompilationUnit cuNode= (CompilationUnit) parser.createAST(pm);
+
+							AbstractTypeDeclaration typeDecl= type.exists() ? ASTNodeSearchUtil.getAbstractTypeDeclarationNode(type, cuNode) : null;
+							MethodDeclaration methodDecl= fDestinationMethod != null ? ASTNodeSearchUtil.getMethodDeclarationNode(fDestinationMethod, cuNode) : null;
+
+							ITrackedNodePosition textPosition= createOrFillTypeDeclaration(cuNode, document, cu, typeDecl, typeName, methodDecl, kind, parsedText);
+							EditorUtility.revealInEditor(editorPart[0], textPosition.getStartPosition() + textPosition.getLength(), 0);
+							// leave unsaved
+						} finally {
+							RefactoringFileBuffers.release(cu);
+						}
+
+					} else {
+						String delim= StubUtility.getLineDelimiterUsed(cu);
+						String fileComment= null;
+						if (StubUtility.doAddComments(cu.getJavaProject())) {
+							fileComment= CodeGeneration.getFileComment(cu, delim);
+						}
+						String cuContent= CodeGeneration.getCompilationUnitContent(cu, fileComment, null, "", delim); //$NON-NLS-1$
+						IDocument document= new Document(cuContent);
+
+						ASTParser parser= ASTParser.newParser(AST.JLS3);
+						parser.setProject(cu.getJavaProject());
+						parser.setSource(cuContent.toCharArray());
+						parser.setStatementsRecovery(true);
+						CompilationUnit cuNode= (CompilationUnit) parser.createAST(pm);
+
+						ITrackedNodePosition textPosition= createOrFillTypeDeclaration(cuNode, document, cu, null, typeName, null, kind, parsedText);
+						destinationPack.createCompilationUnit(cu.getElementName(), document.get(), false, null);
+						editorPart[0]= openCu(cu);
+						EditorUtility.revealInEditor(editorPart[0], textPosition.getStartPosition() + textPosition.getLength(), 0);
+					}
+					return cu;
+				}
+
+				private ITrackedNodePosition createOrFillTypeDeclaration(
+						CompilationUnit cuNode,
+						IDocument document,
+						ICompilationUnit cu,
+						AbstractTypeDeclaration typeDecl,
+						String typeName,
+						MethodDeclaration methodDecl,
+						int kind,
+						String parsedText) throws CoreException {
+
+					AST ast= cuNode.getAST();
+					ASTRewrite rewrite= ASTRewrite.create(ast);
+					String delim= StubUtility.getLineDelimiterUsed(cu);
+
+					if (typeDecl == null) {
+						typeDecl= ast.newTypeDeclaration();
+						typeDecl.getName().setIdentifier(typeName);
+						if (StubUtility.doAddComments(cu.getJavaProject())) {
+							String typeComment= CodeGeneration.getTypeComment(cu, typeName, delim);
+							typeDecl.setJavadoc((Javadoc) rewrite.createStringPlaceholder(typeComment, ASTNode.JAVADOC));
+						}
+						typeDecl.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
+						
+						String typeBody= CodeGeneration.getTypeBody(CodeGeneration.CLASS_BODY_TEMPLATE_ID, cu, typeName, delim);
+						if (typeBody != null) {
+							BodyDeclaration typeBodyNode= (BodyDeclaration) rewrite.createStringPlaceholder(typeBody, ASTNode.METHOD_DECLARATION);
+							ListRewrite bodyRewrite= rewrite.getListRewrite(typeDecl, typeDecl.getBodyDeclarationsProperty());
+							bodyRewrite.insertFirst(typeBodyNode, null);
+						}
+
+						rewrite.getListRewrite(cuNode, CompilationUnit.TYPES_PROPERTY).insertLast(typeDecl, null);
+					}
+
+					ITrackedNodePosition textPosition;
+					if (kind == ASTParser.K_CLASS_BODY_DECLARATIONS) {
+						ListRewrite bodyRewrite= rewrite.getListRewrite(typeDecl, typeDecl.getBodyDeclarationsProperty());
+						BodyDeclaration textNode= (BodyDeclaration) rewrite.createStringPlaceholder(parsedText, ASTNode.METHOD_DECLARATION);
+						bodyRewrite.insertLast(textNode, null);
+						textPosition= rewrite.track(textNode);
+
+					} else { // kind == ASTParser.K_STATEMENTS
+						if (methodDecl == null || methodDecl.getBody() == null) {
+							methodDecl= ast.newMethodDeclaration();
+							String qualifiedtypeName= fDestinationType != null ? JavaModelUtil.getFullyQualifiedName(fDestinationType) : cu.getParent().getElementName() + '.' + typeName;
+							if (StubUtility.doAddComments(cu.getJavaProject())) {
+								String methodComment= CodeGeneration.getMethodComment(cu, qualifiedtypeName, methodDecl, null, delim);
+								methodDecl.setJavadoc((Javadoc) rewrite.createStringPlaceholder(methodComment, ASTNode.JAVADOC));
+							}
+							methodDecl.modifiers().addAll(ast.newModifiers(Modifier.PUBLIC | Modifier.STATIC));
+							String methodName= "main"; //$NON-NLS-1$
+							methodDecl.getName().setIdentifier(methodName);
+							SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
+							param.setType(ast.newArrayType(ast.newSimpleType(ast.newSimpleName("String")))); //$NON-NLS-1$
+							param.getName().setIdentifier("args"); //$NON-NLS-1$
+							methodDecl.parameters().add(param);
+							Block block= ast.newBlock();
+							methodDecl.setBody(block);
+
+							rewrite.getListRewrite(typeDecl, typeDecl.getBodyDeclarationsProperty()).insertLast(methodDecl, null);
+						}
+						Block body= methodDecl.getBody();
+						ListRewrite statementsRewrite= rewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY);
+						Statement textNode= (Statement) rewrite.createStringPlaceholder(parsedText, ASTNode.EMPTY_STATEMENT);
+						statementsRewrite.insertLast(textNode, null);
+						textPosition= rewrite.track(textNode);
+					}
+					
+					DocumentRewriteSession rewriteSession= null;
+					if (document instanceof IDocumentExtension4)
+						rewriteSession= ((IDocumentExtension4) document).startRewriteSession(DocumentRewriteSessionType.UNRESTRICTED_SMALL);
+					TextEdit edit= rewrite.rewriteAST(document, cu.getJavaProject().getOptions(true));
+					try {
+						edit.apply(document, TextEdit.UPDATE_REGIONS);
+						return textPosition;
+					} catch (MalformedTreeException e) {
+						JavaPlugin.log(e);
+					} catch (BadLocationException e) {
+						JavaPlugin.log(e);
+					} finally {
+						if (rewriteSession != null)
+							((IDocumentExtension4) document).stopRewriteSession(rewriteSession);
+					}
+					return null;
 				}
 
 				private IPackageFragmentRoot createNewProject(SubProgressMonitor pm) throws CoreException {
