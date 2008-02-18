@@ -378,11 +378,9 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					handleInlineJavadocLink(uri);
 				} else if (JavaElementLinks.OPEN_LINK_SCHEME.equals(scheme)) {
 					handleDeclarationLink(uri);
-				} else if (!"about:blank".equals(loc) && !("carbon".equals(SWT.getPlatform()) && loc.startsWith("applewebdata:"))) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				} else if (!"about:blank".equals(loc)) { //$NON-NLS-1$
 					/*
-					 * Using the Browser.setText API triggers a location change to "about:blank" with
-					 * the mozilla widget. The Browser on carbon uses yet another kind of special
-					 * initialization URLs.
+					 * Using the Browser.setText API triggers a location change to "about:blank".
 					 * XXX: remove this code once https://bugs.eclipse.org/bugs/show_bug.cgi?id=130314 is fixed
 					 */
 					if (loc.startsWith("about:")) //$NON-NLS-1$
