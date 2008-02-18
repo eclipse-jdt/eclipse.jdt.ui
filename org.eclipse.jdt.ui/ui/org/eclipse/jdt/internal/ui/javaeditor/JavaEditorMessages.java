@@ -156,9 +156,11 @@ final class JavaEditorMessages extends NLS {
 	public static String JavaEditor_markOccurrences_job_name;
 	public static String JavaEditor_occurrence_tooltip;
 	public static String JavaEditorBreadcrumbActionGroup_go_to_editor_action_label;
+	public static String JavaElementHyperlink_hyperlinkText;
 	public static String Editor_OpenPropertiesFile_error_keyNotFound;
 	public static String Editor_OpenPropertiesFile_error_fileNotFound_dialogMessage;
 	public static String Editor_OpenPropertiesFile_error_openEditor_dialogMessage;
+	public static String Editor_OpenPropertiesFile_hyperlinkText;
 	public static String Editor_MoveLines_IllegalMove_status;
 	public static String BasicEditorActionContributor_specific_content_assist_menu;
 

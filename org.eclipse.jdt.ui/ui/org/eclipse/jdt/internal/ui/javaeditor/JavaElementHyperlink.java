@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,10 +12,14 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.core.runtime.Assert;
 
-import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
+
+import org.eclipse.jdt.core.IJavaElement;
+
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 
 /**
@@ -26,18 +30,23 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 public class JavaElementHyperlink implements IHyperlink {
 
 	private final IRegion fRegion;
-	private final IAction fOpenAction;
+	private final SelectionDispatchAction fOpenAction;
+	private final IJavaElement[] fElements;
 
 
 	/**
 	 * Creates a new Java element hyperlink.
+	 * @param region the region of the link
+	 * @param openAction the action to use to open the java elements
+	 * @param elements the java elements to open
 	 */
-	public JavaElementHyperlink(IRegion region, IAction openAction) {
+	public JavaElementHyperlink(IRegion region, SelectionDispatchAction openAction, IJavaElement[] elements) {
 		Assert.isNotNull(openAction);
 		Assert.isNotNull(region);
 
 		fRegion= region;
 		fOpenAction= openAction;
+		fElements= elements;
 	}
 
 	/*
@@ -53,7 +62,7 @@ public class JavaElementHyperlink implements IHyperlink {
 	 * @since 3.1
 	 */
 	public void open() {
-		fOpenAction.run();
+		fOpenAction.run(new StructuredSelection(fElements));
 	}
 
 	/*
@@ -69,6 +78,6 @@ public class JavaElementHyperlink implements IHyperlink {
 	 * @since 3.1
 	 */
 	public String getHyperlinkText() {
-		return null;
+		return JavaEditorMessages.JavaElementHyperlink_hyperlinkText;
 	}
 }
