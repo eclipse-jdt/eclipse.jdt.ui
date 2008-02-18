@@ -30,6 +30,7 @@ import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.NavigateActionGroup;
+import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
@@ -125,8 +126,7 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 				new GenerateActionGroup(javaEditor.getEditorSite(), selectionProvider),
 				new RefactorActionGroup(javaEditor.getEditorSite(), selectionProvider), 
 				new BuildActionGroup(javaEditor.getEditorSite(), selectionProvider),
-//https://bugs.eclipse.org/bugs/show_bug.cgi?id=216167
-//				new ProjectActionGroup(javaEditor.getEditorSite(), selectionProvider), 
+				new ProjectActionGroup(javaEditor.getEditorSite(), selectionProvider),
 				new WorkingSetActionGroup(javaEditor.getEditorSite(), selectionProvider)
 		});
 	}
