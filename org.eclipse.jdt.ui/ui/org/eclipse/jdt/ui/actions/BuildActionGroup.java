@@ -13,14 +13,11 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.IShellProvider;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
@@ -83,12 +80,7 @@ public class BuildActionGroup extends ActionGroup {
 		fSite= site;
 		fSelectionProvider= specialSelectionProvider != null ? specialSelectionProvider : site.getSelectionProvider();
 		
-		IShellProvider shellProvider= new IShellProvider() {
-			public Shell getShell() {
-				return fSite.getShell();
-			}
-		};
-		fBuildAction= new BuildAction(shellProvider, IncrementalProjectBuilder.INCREMENTAL_BUILD);
+		fBuildAction= new BuildAction(fSite.getShell(), IncrementalProjectBuilder.INCREMENTAL_BUILD);
 		fBuildAction.setText(ActionMessages.BuildAction_label);
 		fBuildAction.setActionDefinitionId(IWorkbenchCommandIds.BUILD_PROJECT);
 		
