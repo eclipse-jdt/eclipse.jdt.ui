@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.PropertyFileDocumentModel;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -194,6 +195,8 @@ public class NLSKeyHyperlink implements IHyperlink {
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getHyperlinkText()
 	 */
 	public String getHyperlinkText() {
-		return null;
+		String bundleName= fAccessorClassReference.getResourceBundleName();
+		String propertyFileName= bundleName.substring(bundleName.lastIndexOf('.') + 1, bundleName.length()) + NLSRefactoring.PROPERTY_FILE_EXT;
+		return Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_hyperlinkText, new Object[] { fKeyName, propertyFileName });
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 import java.util.ResourceBundle;
 
 import org.eclipse.osgi.util.NLS;
+
 
 /**
  * Helper class to get NLSed messages.
@@ -51,6 +52,7 @@ final class PropertiesFileEditorMessages extends NLS {
 	public static String OpenAction_error_messageErrorResolvingSelection;
 	public static String OpenAction_error_messageErrorSearchingKey;
 	public static String OpenAction_error_messageNoResult;
+	public static String OpenAction_hyperlinkText;
 	public static String OpenAction_SelectionDialog_title;
 	public static String OpenAction_SelectionDialog_details;
 	public static String OpenAction_SelectionDialog_message;
