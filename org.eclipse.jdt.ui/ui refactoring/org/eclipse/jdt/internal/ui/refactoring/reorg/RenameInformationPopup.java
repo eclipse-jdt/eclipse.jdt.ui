@@ -204,7 +204,8 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 	}
 
 	/**
-	 * Cached platform flags for dealing with platform-specific issues.
+	 * Cached platform flag for dealing with platform-specific issue:
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=219326 : Shell with custom region and SWT.NO_TRIM still has border
 	 */
 	private static boolean CARBON = "carbon".equals(SWT.getPlatform()); //$NON-NLS-1$
 
