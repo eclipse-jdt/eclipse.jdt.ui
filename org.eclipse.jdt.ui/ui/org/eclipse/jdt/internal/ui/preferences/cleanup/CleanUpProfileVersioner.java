@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.cleanup;
+
+import java.util.Iterator;
+import java.util.Map;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
@@ -46,10 +49,34 @@ public class CleanUpProfileVersioner implements IProfileVersioner {
      * @see org.eclipse.jdt.internal.ui.preferences.cleanup.IProfileVersioner#updateAndComplete(org.eclipse.jdt.internal.ui.preferences.cleanup.ProfileManager.CustomProfile)
      */
 	public void update(CustomProfile profile) {
-		if (profile.getVersion() == VERSION_1)
-			updateFrom1To2(profile);
-		
+		final Map oldSettings= profile.getSettings();
+		Map newSettings= updateAndComplete(oldSettings, profile.getVersion());
 		profile.setVersion(CURRENT_VERSION);
+		profile.setSettings(newSettings);
+	}
+
+	private Map updateAndComplete(Map oldSettings, int version) {
+		final Map newSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS).getMap();
+
+		switch (version) {
+
+			case VERSION_1:
+				updateFrom1To2(oldSettings);
+
+			default:
+				for (final Iterator iter= oldSettings.keySet().iterator(); iter.hasNext();) {
+					final String key= (String) iter.next();
+					if (!newSettings.containsKey(key))
+						continue;
+
+					final String value= (String) oldSettings.get(key);
+					if (value != null) {
+						newSettings.put(key, value);
+					}
+				}
+
+		}
+		return newSettings;
 	}
 
 	/**
@@ -59,9 +86,9 @@ public class CleanUpProfileVersioner implements IProfileVersioner {
 	    return PROFILE_KIND;
     }
     
-	private static void updateFrom1To2(CustomProfile profile) {
+	private static void updateFrom1To2(Map settings) {
 		CleanUpOptions defaultSettings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(ICleanUp.DEFAULT_CLEAN_UP_OPTIONS);
-		profile.getSettings().put(CleanUpConstants.ORGANIZE_IMPORTS, defaultSettings.getValue(CleanUpConstants.ORGANIZE_IMPORTS));
+		settings.put(CleanUpConstants.ORGANIZE_IMPORTS, defaultSettings.getValue(CleanUpConstants.ORGANIZE_IMPORTS));
     }
 	
  }
