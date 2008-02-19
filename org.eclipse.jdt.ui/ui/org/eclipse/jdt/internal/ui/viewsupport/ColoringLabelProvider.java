@@ -15,8 +15,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.resource.ColorRegistry;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IFontProvider;
@@ -28,11 +26,9 @@ import org.eclipse.jface.viewers.ViewerColumn;
 public class ColoringLabelProvider extends SimpleStyledCellLabelProvider implements ILabelProvider {
 	
 	private ILabelProvider fLabelProvider;
-	private ColorRegistry fRegistry;
 	
 	public ColoringLabelProvider(ILabelProvider labelProvider) {
 		fLabelProvider= labelProvider;
-		fRegistry= JFaceResources.getColorRegistry();
 	}
 	
 	public void initialize(ColumnViewer viewer, ViewerColumn column) {
