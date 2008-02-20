@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,7 +79,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 				boolean findUnqualifiedStaticAccesses,
 				boolean findUnqualifiedMethodAccesses,
 				boolean findUnqualifiedStaticMethodAccesses,
-				List resultingCollection) throws CoreException {
+				List resultingCollection) {
 			
 			fFindUnqualifiedAccesses= findUnqualifiedAccesses;
 			fFindUnqualifiedStaticAccesses= findUnqualifiedStaticAccesses;
@@ -247,6 +247,24 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 			if (hasConflict(expression.getStartPosition(), name, ScopeAnalyzer.VARIABLES))
 				return true;
 			
+			Name qualifier= ((ThisExpression) expression).getQualifier();
+			if (qualifier != null) {
+				ITypeBinding outerClass= (ITypeBinding) qualifier.resolveBinding();
+				if (outerClass == null)
+					return true;
+
+				IVariableBinding nameBinding= (IVariableBinding) name.resolveBinding();
+				if (nameBinding == null)
+					return true;
+
+				ITypeBinding variablesDeclaringClass= nameBinding.getDeclaringClass();
+				if (outerClass != variablesDeclaringClass)
+					//be conservative: We have a reference to a field of an outer type, and this type inherited
+					//the field. It's possible that the inner type inherits the same field. We must not remove
+					//the qualifier in this case.
+					return true;
+			}
+			
 			fOperations.add(new CompilationUnitRewriteOperation() {
 				public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 					ASTRewrite rewrite= cuRewrite.getASTRewrite();
@@ -410,7 +428,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 	
-	public static CompilationUnitRewriteOperationsFix[] createNonStaticAccessFixes(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
+	public static CompilationUnitRewriteOperationsFix[] createNonStaticAccessFixes(CompilationUnit compilationUnit, IProblemLocation problem) {
 		if (!isNonStaticAccess(problem))
 			return null;
 		
@@ -429,7 +447,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		return new CompilationUnitRewriteOperationsFix[] {fix1};
 	}
 	
-	public static CompilationUnitRewriteOperationsFix createAddFieldQualifierFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
+	public static CompilationUnitRewriteOperationsFix createAddFieldQualifierFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		if (IProblem.UnqualifiedFieldAccess != problem.getProblemId())
 			return null;
 		
@@ -441,7 +459,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		return new CodeStyleFix(groupName, compilationUnit, new CompilationUnitRewriteOperation[] {operation});
 	}
 	
-	public static CompilationUnitRewriteOperationsFix createIndirectAccessToStaticFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
+	public static CompilationUnitRewriteOperationsFix createIndirectAccessToStaticFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		if (!isIndirectStaticAccess(problem))
 			return null;
 		
@@ -461,7 +479,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 			boolean qualifyMethodAccess,
 			boolean qualifyStaticMethodAccess,
 			boolean removeFieldQualifier,
-			boolean removeMethodQualifier) throws CoreException {
+			boolean removeMethodQualifier) {
 		
 		if (!addThisQualifier && !changeNonStaticAccessToStatic && !qualifyStaticFieldAccess && !changeIndirectStaticAccessToDirect && !qualifyMethodAccess && !qualifyStaticMethodAccess && !removeFieldQualifier && !removeMethodQualifier)
 			return null;
@@ -494,7 +512,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 	public static IFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, 
 			boolean addThisQualifier, 
 			boolean changeNonStaticAccessToStatic,
-			boolean changeIndirectStaticAccessToDirect) throws CoreException {
+			boolean changeIndirectStaticAccessToDirect) {
 		
 		if (!addThisQualifier && !changeNonStaticAccessToStatic && !changeIndirectStaticAccessToDirect)
 			return null;
@@ -621,7 +639,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		return null;
 	}
 		
-	private static AddThisQualifierOperation getUnqualifiedFieldAccessResolveOperation(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
+	private static AddThisQualifierOperation getUnqualifiedFieldAccessResolveOperation(CompilationUnit compilationUnit, IProblemLocation problem) {
 		SimpleName name= getName(compilationUnit, problem);
 		if (name == null)
 			return null;

@@ -5422,6 +5422,44 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
+	public void testRemoveQualifierBug219478() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 extends E2 {\n");
+		buf.append("    private class E1Inner extends E2 {\n");
+		buf.append("        public E1Inner() {\n");
+		buf.append("            i = 2;\n");
+		buf.append("            System.out.println(i + E1.this.i);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class E2 {\n");
+		buf.append("    protected int i = 1;\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 extends E2 {\n");
+		buf.append("    private class E1Inner extends E2 {\n");
+		buf.append("        public E1Inner() {\n");
+		buf.append("            i = 2;\n");
+		buf.append("            System.out.println(i + E1.this.i);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class E2 {\n");
+		buf.append("    protected int i = 1;\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+	
 	public void testAddFinal01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
