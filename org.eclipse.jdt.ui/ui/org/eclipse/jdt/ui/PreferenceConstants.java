@@ -11,7 +11,9 @@
 package org.eclipse.jdt.ui;
 
 import java.util.Locale;
+import java.util.StringTokenizer;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
@@ -42,6 +44,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
+import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 import org.eclipse.jdt.internal.ui.text.java.ProposalSorterRegistry;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
@@ -3124,6 +3127,8 @@ public class PreferenceConstants {
 	 * Value is of type <code>String</code>, a "\0"-separated list of identifiers.
 	 * </p>
 	 * 
+	 * @see #getExcludedCompletionProposalCategories()
+	 * @see #setExcludedCompletionProposalCategories(String[])
 	 * @since 3.2
 	 */
 	public static final String CODEASSIST_EXCLUDED_CATEGORIES= "content_assist_disabled_computers"; //$NON-NLS-1$
@@ -4010,6 +4015,42 @@ public class PreferenceConstants {
 	 */
 	public static IClasspathEntry[] getDefaultJRELibrary() {
 		return NewJavaProjectPreferencePage.getDefaultJRELibrary();
+	}
+
+	/**
+	 * Returns the completion proposal categories which
+	 * are excluded from the default proposal list.
+	 * 
+	 * @return an array with the IDs of the excluded categories
+	 * @see #CODEASSIST_EXCLUDED_CATEGORIES
+	 * @since 3.4
+	 */
+	public static String[] getExcludedCompletionProposalCategories() {
+		String encodedPreference= getPreference(CODEASSIST_EXCLUDED_CATEGORIES, null);
+		StringTokenizer tokenizer= new StringTokenizer(encodedPreference, "\0"); //$NON-NLS-1$
+		String[] result= new String[tokenizer.countTokens()];
+		for (int i= 0; i < result.length; i++)
+			result[i]= tokenizer.nextToken();
+		return result;
+	}
+
+	/**
+	 * Sets the completion proposal categories which are excluded from the
+	 * default proposal list and reloads the registry.
+	 * 
+	 * @param categories the array with the IDs of the excluded categories
+	 * @see #CODEASSIST_EXCLUDED_CATEGORIES
+	 * @since 3.4
+	 */
+	public static void setExcludedCompletionProposalCategories(String[] categories) {
+		Assert.isLegal(categories != null);
+		StringBuffer buf= new StringBuffer(50 * categories.length);
+		for (int i= 0; i < categories.length; i++) {
+			buf.append(categories[i]);
+			buf.append('\0');
+		}
+		getPreferenceStore().setValue(CODEASSIST_EXCLUDED_CATEGORIES, buf.toString());
+		CompletionProposalComputerRegistry.getDefault().reload();
 	}
 
 	/**
