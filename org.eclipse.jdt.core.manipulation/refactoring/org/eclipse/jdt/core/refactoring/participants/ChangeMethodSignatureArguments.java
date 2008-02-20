@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,7 +98,7 @@ public class ChangeMethodSignatureArguments extends RefactoringArguments {
 		 * @see java.lang.Object#toString()
 		 */
 		public String toString() {
-			return "name: " + fNewName + ", type: " + fNewSignature + ", index: " + fOldIndex; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			return "name: " + fNewName + ", type: " + fNewSignature + ", oldIndex: " + fOldIndex + ", defaultValue: " + fDefaultValue; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 		
 	}
@@ -149,7 +149,7 @@ public class ChangeMethodSignatureArguments extends RefactoringArguments {
 		 * @see java.lang.Object#toString()
 		 */
 		public String toString() {
-			return "type: " + fType + ", index: " + fOldIndex; //$NON-NLS-1$ //$NON-NLS-2$
+			return "type: " + fType + ", oldIndex: " + fOldIndex; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 	
@@ -247,6 +247,17 @@ public class ChangeMethodSignatureArguments extends RefactoringArguments {
 	 * {@inheritDoc}
 	 */
 	public String toString() {
-		return "change signature of " + fNewName; //$NON-NLS-1$
+		StringBuffer buf= new StringBuffer("change signature to "); //$NON-NLS-1$
+		buf.append("\n\tvisibility: ").append(Flags.toString(fNewVisibility)); //$NON-NLS-1$
+		buf.append("\n\treturn type sig: ").append(fNewReturnType); //$NON-NLS-1$
+		buf.append("\n\tnew name: ").append(fNewName); //$NON-NLS-1$
+		buf.append("\n\tkeep original: ").append(fKeepOriginal); //$NON-NLS-1$
+		for (int i= 0; i < fNewParameters.length; i++) {
+			buf.append("\n\tparameter ").append(i).append(": ").append(fNewParameters[i]); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		for (int i= 0; i < fThrownExceptions.length; i++) {
+			buf.append("\n\texception ").append(i).append(": ").append(fThrownExceptions[i]); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return buf.toString();
 	}
 }
