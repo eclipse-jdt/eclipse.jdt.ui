@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -551,6 +551,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		ASTRewrite rewrite= ASTRewrite.create(ast);
+		ICompilationUnit cu= context.getCompilationUnit();
+		String label= CorrectionMessages.QuickAssistProcessor_convert_to_string_buffer_description;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 1, image);
+		proposal.setCommandId(CONVERT_TO_STRING_BUFFER_ID);
 
 		// create buffer
 		VariableDeclarationFragment frag= ast.newVariableDeclarationFragment();
@@ -558,13 +563,19 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		List fExcludedVariableNames= Arrays.asList(ASTResolving.getUsedVariableNames(oldInfixExpression));
 		String bufferQName= "StringBuffer"; //$NON-NLS-1$
 		SimpleType bufferType= ast.newSimpleType(ast.newName(bufferQName));
-		ICompilationUnit cu= context.getCompilationUnit();
 		ClassInstanceCreation newBufferExpression= ast.newClassInstanceCreation();
 		
 		String[] newBufferNames= StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, cu.getJavaProject(), bufferQName, 0, fExcludedVariableNames, true);
 		String newBufferName= newBufferNames[0];
 
-		frag.setName(ast.newSimpleName(newBufferName));
+		SimpleName bufferNameDeclaration= ast.newSimpleName(newBufferName);
+		frag.setName(bufferNameDeclaration);
+
+		String groupID= "bufferName"; //$NON-NLS-1$
+		proposal.addLinkedPosition(rewrite.track(bufferNameDeclaration), true, groupID);
+		for (int i= 0; i < newBufferNames.length; i++) {
+			proposal.addLinkedPositionProposal(groupID, newBufferNames[i], null);
+		}
 
 		newBufferExpression.setType(bufferType);
 		frag.setInitializer(newBufferExpression);
@@ -600,7 +611,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 			MethodInvocation appendIncovationExpression= ast.newMethodInvocation();
 			appendIncovationExpression.setName(ast.newSimpleName("append")); //$NON-NLS-1$
-			appendIncovationExpression.setExpression(ast.newSimpleName(newBufferName));
+			SimpleName bufferNameReference= ast.newSimpleName(newBufferName);
+			proposal.addLinkedPosition(rewrite.track(bufferNameReference), true, groupID);
+			appendIncovationExpression.setExpression(bufferNameReference);
 			appendIncovationExpression.arguments().add(operand);
 
 			ExpressionStatement appendExpressionStatement= ast.newExpressionStatement(appendIncovationExpression);
@@ -611,15 +624,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		// replace old expression with toString
 		MethodInvocation bufferToString= ast.newMethodInvocation();
 		bufferToString.setName(ast.newSimpleName("toString")); //$NON-NLS-1$
-		bufferToString.setExpression(ast.newSimpleName(newBufferName));
+		SimpleName bufferNameReference= ast.newSimpleName(newBufferName);
+		bufferToString.setExpression(bufferNameReference);
+		proposal.addLinkedPosition(rewrite.track(bufferNameReference), true, groupID);
 
 		rewrite.replace(oldInfixExpression, bufferToString, null);
-
-		String label= CorrectionMessages.QuickAssistProcessor_convert_to_string_buffer_description;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
-		proposal.setCommandId(CONVERT_TO_STRING_BUFFER_ID);
-
+		proposal.setEndPosition(rewrite.track(bufferToString));
+		
 		resultingCollections.add(proposal);
 		return true;
 	}
