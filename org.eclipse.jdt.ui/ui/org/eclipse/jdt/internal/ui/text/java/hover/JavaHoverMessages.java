@@ -24,6 +24,10 @@ final class JavaHoverMessages extends NLS {
 		// Do not instantiate
 	}
 
+	public static String AbstractAnnotationHover_action_configureAnnotationPreferences;
+	public static String AbstractAnnotationHover_message_singleQuickFix;
+	public static String AbstractAnnotationHover_message_multipleQuickFix;
+	
 	public static String JavadocHover_back;
 	public static String JavadocHover_noAttachments;
 	public static String JavadocHover_noAttachedJavadoc;
@@ -34,8 +38,11 @@ final class JavaHoverMessages extends NLS {
 	public static String JavadocHover_forward;
 	public static String JavadocHover_openDeclaration;
 	public static String JavadocHover_showInJavadoc;
+	
 	public static String JavaTextHover_createTextHover;
+	
 	public static String NoBreakpointAnnotation_addBreakpoint;
+	
 	public static String NLSStringHover_NLSStringHover_missingKeyWarning;
 	public static String NLSStringHover_NLSStringHover_PropertiesFileNotDetectedWarning;
 
