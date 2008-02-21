@@ -20,6 +20,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -59,6 +60,8 @@ public class NewJavaWorkingSetWizard extends Wizard implements INewWizard {
 
 		IWorkingSet ws= fPage.getSelection();
 		if (ws != null) {
+			PlatformUI.getWorkbench().getWorkingSetManager().addWorkingSet(ws);
+			
 			PackageExplorerPart explorer= getActivePackageExplorer();
 			if (explorer != null) {
 				if (explorer.getRootMode() == PackageExplorerPart.WORKING_SETS_AS_ROOTS) {
