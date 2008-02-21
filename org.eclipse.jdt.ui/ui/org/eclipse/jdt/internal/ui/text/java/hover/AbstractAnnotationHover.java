@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
@@ -171,7 +172,9 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		protected void createContent(Composite parent) {
 			fParent= new Composite(parent, SWT.NONE);
 			fParent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			fParent.setLayout(new GridLayout(1, false));
+			GridLayout layout= new GridLayout(1, false);
+			layout.verticalSpacing= 0;
+			fParent.setLayout(layout);
 		}
 		
 		/*
@@ -234,7 +237,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 			GridLayout layout= new GridLayout(2, false);
 			layout.marginHeight= 0;
-			layout.marginWidth= 2;
+			layout.marginWidth= 0;
 			composite.setLayout(layout);
 
 			final Canvas canvas= new Canvas(composite, SWT.NONE);
@@ -248,14 +251,9 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				}
 			});
 			
-			Label annotationText= new Label(composite, SWT.WRAP);
-			GridData data= new GridData(SWT.FILL, SWT.FILL, true, true);
-			annotationText.setLayoutData(data);
-			annotationText.setText(annotation.getText());
-			Point constraints= getSizeConstraints();
-			if (constraints != null) {
-				data.heightHint= annotationText.computeSize(constraints.x, SWT.DEFAULT).y;
-			}
+			Text text= new Text(composite, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY);
+			text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			text.setText(annotation.getText());
 		}
 
 		private void createCompletionProposalsControl(Composite parent, final IDocument document, ICompletionProposal[] proposals) {
@@ -456,7 +454,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		 * @see org.eclipse.jface.text.IInformationControlCreator#createInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
 		public IInformationControl createInformationControl(Shell parent) {
-			return new AnnotationInformationControl(parent, SWT.NONE, EditorsUI.getTooltipAffordanceString());
+			return new AnnotationInformationControl(parent, SWT.TOOL, EditorsUI.getTooltipAffordanceString());
 		}
 	}
 	
