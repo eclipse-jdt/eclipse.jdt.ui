@@ -244,7 +244,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 				return true;
 			
 			final SimpleName name= node.getName();
-			if (hasConflict(expression.getStartPosition(), name, ScopeAnalyzer.VARIABLES))
+			if (hasConflict(expression.getStartPosition(), name, ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY))
 				return true;
 			
 			Name qualifier= ((ThisExpression) expression).getQualifier();
@@ -290,7 +290,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 			if (name.resolveBinding() == null)
 				return true;
 			
-			if (hasConflict(expression.getStartPosition(), name, ScopeAnalyzer.METHODS))
+			if (hasConflict(expression.getStartPosition(), name, ScopeAnalyzer.METHODS | ScopeAnalyzer.CHECK_VISIBILITY))
 				return true;
 			
 			Name qualifier= ((ThisExpression)expression).getQualifier();
