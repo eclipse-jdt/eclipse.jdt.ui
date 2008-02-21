@@ -193,10 +193,11 @@ public class TypeContextChecker {
 							if (isError(problems[p], type))
 								results[i].addError(problems[p].getMessage());
 					}
-					typeBindings[i]= type.resolveBinding();
-					typeBindings[i]= handleBug84585(typeBindings[i]);
-					if (firstPass && typeBindings[i] == null)
+					ITypeBinding binding= handleBug84585(type.resolveBinding());
+					if (firstPass && (binding == null || binding.isRecovered())) {
 						types[i]= qualifyTypes(type, results[i]);
+					}
+					typeBindings[i]= binding;
 				}
 				return typeBindings;
 			} finally {
