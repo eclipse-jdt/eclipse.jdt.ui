@@ -17,6 +17,8 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.Annotation;
 
+import org.eclipse.ui.texteditor.spelling.SpellingAnnotation;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
 
@@ -54,7 +56,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 		ICompilationUnit cu= ((IJavaAnnotation) annotation).getCompilationUnit();
 
 		IInvocationContext context= new AssistContext(cu, location.getOffset(), location.getLength());
-		if (!hasProblem(context.getASTRoot().getProblems(), location))
+		if (!SpellingAnnotation.TYPE.equals(annotation.getType()) && !hasProblem(context.getASTRoot().getProblems(), location))
 			return new ICompletionProposal[0];
 
 		ArrayList proposals= new ArrayList();
