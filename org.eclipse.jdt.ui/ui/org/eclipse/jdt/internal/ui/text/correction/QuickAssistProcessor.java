@@ -139,6 +139,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	public static final String ASSIGN_PARAM_TO_FIELD_ID= "org.eclipse.jdt.ui.correction.assignParamToField.assist"; //$NON-NLS-1$
 	public static final String ADD_BLOCK_ID= "org.eclipse.jdt.ui.correction.addBlock.assist"; //$NON-NLS-1$
 	public static final String EXTRACT_LOCAL_ID= "org.eclipse.jdt.ui.correction.extractLocal.assist"; //$NON-NLS-1$
+	public static final String EXTRACT_LOCAL_NOT_REPLACE_ID= "org.eclipse.jdt.ui.correction.extractLocalNotReplaceOccurrences.assist"; //$NON-NLS-1$
 	public static final String EXTRACT_CONSTANT_ID= "org.eclipse.jdt.ui.correction.extractConstant.assist"; //$NON-NLS-1$
 	public static final String INLINE_LOCAL_ID= "org.eclipse.jdt.ui.correction.inlineLocal.assist"; //$NON-NLS-1$
 	public static final String CONVERT_LOCAL_TO_FIELD_ID= "org.eclipse.jdt.ui.correction.convertLocalToField.assist"; //$NON-NLS-1$
@@ -249,9 +250,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			extractTempRefactoring.setLinkedProposalModel(linkedProposalModel);
 			extractTempRefactoring.setCheckResultForCompileProblems(false);
 			
-			String label= CorrectionMessages.QuickAssistProcessor_extract_to_local_description;
+			String label= CorrectionMessages.QuickAssistProcessor_extract_to_local_all_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractTempRefactoring, 5, image) {
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractTempRefactoring, 6, image) {
 				protected void init(Refactoring refactoring) throws CoreException {
 					ExtractTempRefactoring etr= (ExtractTempRefactoring) refactoring;
 					etr.setTempName(etr.guessTempName()); // expensive
@@ -261,6 +262,27 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			proposal.setLinkedProposalModel(linkedProposalModel);
 			proposals.add(proposal);
 		}
+		
+		ExtractTempRefactoring extractTempRefactoringSelectedOnly= new ExtractTempRefactoring(context.getASTRoot(), expression.getStartPosition(), expression.getLength());
+		extractTempRefactoringSelectedOnly.setReplaceAllOccurrences(false);
+		if (extractTempRefactoringSelectedOnly.checkInitialConditions(new NullProgressMonitor()).isOK()) {
+			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			extractTempRefactoringSelectedOnly.setLinkedProposalModel(linkedProposalModel);
+			extractTempRefactoringSelectedOnly.setCheckResultForCompileProblems(false);
+
+			String label= CorrectionMessages.QuickAssistProcessor_extract_to_local_description;
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractTempRefactoringSelectedOnly, 5, image) {
+				protected void init(Refactoring refactoring) throws CoreException {
+					ExtractTempRefactoring etr= (ExtractTempRefactoring) refactoring;
+					etr.setTempName(etr.guessTempName()); // expensive
+				}
+			};
+			proposal.setCommandId(EXTRACT_LOCAL_NOT_REPLACE_ID);
+			proposal.setLinkedProposalModel(linkedProposalModel);
+			proposals.add(proposal);
+		}
+		
 		ExtractConstantRefactoring extractConstRefactoring= new ExtractConstantRefactoring(context.getASTRoot(), expression.getStartPosition(), expression.getLength());
 		if (extractConstRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
 			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
@@ -279,6 +301,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			proposal.setLinkedProposalModel(linkedProposalModel);
 			proposals.add(proposal);
 		}
+		
 		final ExtractMethodRefactoring extractMethodRefactoring= new ExtractMethodRefactoring(context.getASTRoot(), expression.getStartPosition(), expression.getLength());
 		extractMethodRefactoring.setMethodName("extracted"); //$NON-NLS-1$
 		if (extractMethodRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {

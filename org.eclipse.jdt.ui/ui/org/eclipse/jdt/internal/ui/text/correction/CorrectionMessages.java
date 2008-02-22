@@ -331,6 +331,7 @@ public final class CorrectionMessages extends NLS {
 	public static String ModifierCorrectionSubProcessor_default_visibility_label;
 	public static String ReorgCorrectionsSubProcessor_configure_buildpath_label;
 	public static String ReorgCorrectionsSubProcessor_configure_buildpath_description;
+	public static String QuickAssistProcessor_extract_to_local_all_description;
 	public static String QuickAssistProcessor_extract_to_local_description;
 	public static String QuickAssistProcessor_extractmethod_description;
 	public static String SuppressWarningsSubProcessor_suppress_warnings_initializer_label;
