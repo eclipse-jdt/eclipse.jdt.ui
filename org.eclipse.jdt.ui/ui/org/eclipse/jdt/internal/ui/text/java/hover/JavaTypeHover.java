@@ -41,6 +41,7 @@ public class JavaTypeHover implements IJavaEditorTextHover, ITextHoverExtension,
 	public void setEditor(IEditorPart editor) {
 		fProblemHover.setEditor(editor);
 		fJavadocHover.setEditor(editor);
+		fCurrentHover= null;
 	}
 
 	/*
