@@ -19,6 +19,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 
+import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -85,6 +86,9 @@ import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
 
 class PackageExplorerActionGroup extends CompositeActionGroup {
 
+	private static final String FRAME_ACTION_SEPARATOR_ID= "FRAME_ACTION_SEPARATOR_ID"; //$NON-NLS-1$
+	private static final String FRAME_ACTION_GROUP_ID= "FRAME_ACTION_GROUP_ID"; //$NON-NLS-1$
+	
 	private PackageExplorerPart fPart;
 
 	private FrameList fFrameList;
@@ -92,6 +96,9 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
  	private BackAction fBackAction;
 	private ForwardAction fForwardAction;
 	private UpAction fUpAction;
+	private boolean fFrameActionsShown;
+	
+	
 	private GotoTypeAction fGotoTypeAction;
 	private GotoPackageAction fGotoPackageAction;
 	private GotoResourceAction fGotoResourceAction;
@@ -114,6 +121,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 	public PackageExplorerActionGroup(PackageExplorerPart part) {
 		super();
 		fPart= part;
+		fFrameActionsShown= false;
 		TreeViewer viewer= part.getTreeViewer();
 		
 		IPropertyChangeListener workingSetListener= new IPropertyChangeListener() {
@@ -222,18 +230,37 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 	}
 
 	/* package */ void fillToolBar(IToolBarManager toolBar) {
-		toolBar.removeAll();
-		
 		if (fBackAction.isEnabled() || fUpAction.isEnabled() || fForwardAction.isEnabled()) {
 			toolBar.add(fBackAction);
 			toolBar.add(fForwardAction);
 			toolBar.add(fUpAction);
-			toolBar.add(new Separator());
+			toolBar.add(new Separator(FRAME_ACTION_SEPARATOR_ID));
+			fFrameActionsShown= true;
 		}
-		
+		toolBar.add(new GroupMarker(FRAME_ACTION_GROUP_ID));
 		toolBar.add(fCollapseAllAction);
 		toolBar.add(fToggleLinkingAction);
 		toolBar.update(true);
+	}
+	
+	public void updateToolBar(IToolBarManager toolBar) {
+		
+		boolean hasBeenFrameActionsShown= fFrameActionsShown;
+		fFrameActionsShown= fBackAction.isEnabled() || fUpAction.isEnabled() || fForwardAction.isEnabled();
+		if (fFrameActionsShown != hasBeenFrameActionsShown) {
+			if (hasBeenFrameActionsShown) {
+				toolBar.remove(fBackAction.getId());
+				toolBar.remove(fForwardAction.getId());
+				toolBar.remove(fUpAction.getId());
+				toolBar.remove(FRAME_ACTION_SEPARATOR_ID);
+			} else {
+				toolBar.prependToGroup(FRAME_ACTION_GROUP_ID, new Separator(FRAME_ACTION_SEPARATOR_ID));
+				toolBar.prependToGroup(FRAME_ACTION_GROUP_ID, fUpAction);
+				toolBar.prependToGroup(FRAME_ACTION_GROUP_ID, fForwardAction);
+				toolBar.prependToGroup(FRAME_ACTION_GROUP_ID, fBackAction);
+			}
+			toolBar.update(true);
+		}
 	}
 	
 	/* package */ void fillViewMenu(IMenuManager menu) {

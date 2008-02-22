@@ -1242,7 +1242,7 @@ public class PackageExplorerPart extends ViewPart
 	
 	void updateToolbar() {
 		IActionBars actionBars= getViewSite().getActionBars();
-		fActionSet.fillToolBar(actionBars.getToolBarManager());
+		fActionSet.updateToolBar(actionBars.getToolBarManager()); 
 	}
 	
 	/**
