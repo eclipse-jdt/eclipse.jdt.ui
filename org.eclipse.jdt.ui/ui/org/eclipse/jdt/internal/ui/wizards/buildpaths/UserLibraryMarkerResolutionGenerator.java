@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -105,7 +105,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 					Image image2= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
 					resolutions.add(new UserLibraryMarkerResolution(label2, image2) {
 						public void run(IMarker m) {
-							createUserLibrary(shell, path, project);
+							createUserLibrary(shell, path);
 						}
 					});
 				}
@@ -187,7 +187,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 		return -1;
 	}
 	
-	protected void createUserLibrary(final Shell shell, IPath unboundPath, IJavaProject project) {
+	protected void createUserLibrary(final Shell shell, IPath unboundPath) {
 		String name= unboundPath.segment(1);
 		String id= UserLibraryPreferencePage.ID;
 		HashMap data= new HashMap(3);
@@ -205,8 +205,8 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 	 */
 	private static abstract class UserLibraryMarkerResolution implements IMarkerResolution, IMarkerResolution2 {
 		
-		private String fLabel;
-		private Image fImage;
+		private final String fLabel;
+		private final Image fImage;
 		
 		public UserLibraryMarkerResolution(String label, Image image) {
 			fLabel= label;
@@ -236,7 +236,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 	}
 
 	private static class OpenBuildPathMarkerResolution implements IMarkerResolution2 {
-		private IJavaProject fProject;
+		private final IJavaProject fProject;
 
 		public OpenBuildPathMarkerResolution(IJavaProject project) {
 			fProject= project;

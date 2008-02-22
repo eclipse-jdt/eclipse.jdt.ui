@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -121,15 +121,15 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		return result;
 	}
 
-	private ListDialogField fClassPathList;
+	private final ListDialogField fClassPathList;
 	private IJavaProject fCurrJProject;
 	
 	private Control fSWTControl;
-	private TreeListDialogField fFoldersList;
+	private final TreeListDialogField fFoldersList;
 	
-	private StringDialogField fOutputLocationField;
+	private final StringDialogField fOutputLocationField;
 	
-	private SelectionButtonDialogField fUseFolderOutputs;
+	private final SelectionButtonDialogField fUseFolderOutputs;
 	
 	private final int IDX_ADD= 0;
 	private final int IDX_ADD_LINK= 1;
@@ -419,6 +419,9 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 	}
 
+	/**
+	 * @param field the dialog field 
+	 */
 	protected void sourcePageSelectionChanged(DialogField field) {
 		List selected= fFoldersList.getSelectedElements();
 		fFoldersList.enableButton(IDX_EDIT, canEdit(selected));

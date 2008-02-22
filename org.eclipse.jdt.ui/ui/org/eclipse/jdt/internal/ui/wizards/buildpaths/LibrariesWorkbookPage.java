@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,10 +78,10 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
 
 public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
-	private ListDialogField fClassPathList;
+	private final ListDialogField fClassPathList;
 	private IJavaProject fCurrJProject;
 	
-	private TreeListDialogField fLibrariesList;
+	private final TreeListDialogField fLibrariesList;
 	
 	private Control fSWTControl;
 	private final IWorkbenchPreferenceContainer fPageContainer;
@@ -235,6 +235,12 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 	}
 	
+	/**
+	 * A button has been pressed.
+	 * 
+	 * @param field the dialog field containing the button
+	 * @param index the index of the button
+	 */
 	private void libaryPageCustomButtonPressed(DialogField field, int index) {
 		CPListElement[] libentries= null;
 		switch (index) {
@@ -309,7 +315,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 	
 	protected void libaryPageDoubleClicked(TreeListDialogField field) {
-		List selection= fLibrariesList.getSelectedElements();
+		List selection= field.getSelectedElements();
 		if (canEdit(selection)) {
 			editEntry();
 		}
@@ -569,6 +575,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			
 	}
 
+	/**
+	 * @param field  the dilaog field
+	 */
 	private void libaryPageSelectionChanged(DialogField field) {
 		updateEnabledState();
 	}
@@ -609,6 +618,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		return false;
 	}
 	
+	/**
+	 * @param field the dialog field 
+	 */
 	private void libaryPageDialogFieldChanged(DialogField field) {
 		if (fCurrJProject != null) {
 			// already initialized

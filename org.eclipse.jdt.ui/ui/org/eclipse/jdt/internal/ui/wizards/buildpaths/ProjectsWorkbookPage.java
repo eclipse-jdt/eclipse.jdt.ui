@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,10 +55,10 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	private final int IDX_EDIT= 2;
 	private final int IDX_REMOVE= 3;
 	
-	private ListDialogField fClassPathList;
+	private final ListDialogField fClassPathList;
 	private IJavaProject fCurrJProject;
 	
-	private TreeListDialogField fProjectsList;
+	private final TreeListDialogField fProjectsList;
 	
 	private Control fSWTControl;
 
@@ -92,17 +92,17 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		fCurrJProject= jproject;
 		
 		if (Display.getCurrent() != null) {
-			updateProjectsList(jproject);
+			updateProjectsList();
 		} else {
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
-					updateProjectsList(jproject);
+					updateProjectsList();
 				}
 			});
 		}
 	}
 		
-	private void updateProjectsList(IJavaProject currJProject) {
+	private void updateProjectsList() {
 		// add the projects-cpentries that are already on the class path
 		List cpelements= fClassPathList.getElements();
 		
@@ -231,11 +231,15 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		}
 	}
 	
+	/**
+	 * @param field the dialog field
+	 * @param index the button index
+	 */
 	private void projectPageCustomButtonPressed(DialogField field, int index) {
 		CPListElement[] entries= null;
 		switch (index) {
 		case IDX_ADDPROJECT: /* add project */
-			entries= openProjectDialog(null);
+			entries= addProjectDialog();
 			break;			
 		case IDX_EDIT: /* edit */
 			editEntry();
@@ -351,9 +355,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			return;
 		}
 		Object elem= selElements.get(0);
-		if (fProjectsList.getIndexOfElement(elem) != -1) {
-			editElementEntry((CPListElement) elem);
-		} else if (elem instanceof CPListElementAttribute) {
+		if (elem instanceof CPListElementAttribute) {
 			editAttributeEntry((CPListElementAttribute) elem);
 		}
 	}
@@ -384,17 +386,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			}
 		}
 	}
-		
-	private void editElementEntry(CPListElement elem) {
-		CPListElement[] res= openProjectDialog(elem);
-		if (res != null && res.length > 0) {
-			CPListElement curr= res[0];
-			curr.setExported(elem.isExported());
-			fProjectsList.replaceElement(elem, curr);
-		}		
 			
-	}
-	
 	private Shell getShell() {
 		if (fSWTControl != null) {
 			return fSWTControl.getShell();
@@ -403,7 +395,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	}
 
 
-	private CPListElement[] openProjectDialog(CPListElement elem) {
+	private CPListElement[] addProjectDialog() {
 		
 		try {
 			ArrayList selectable= new ArrayList();
@@ -437,6 +429,9 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		return null;
 	}
 
+	/**
+	 * @param field the dialog field 
+	 */
 	protected void projectPageDoubleClicked(TreeListDialogField field) {
 		List selection= fProjectsList.getSelectedElements();
 		if (canEdit(selection)) {
@@ -455,6 +450,9 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		}	
 	}
 	
+	/**
+	 * @param field the dialog field 
+	 */
 	private void projectPageDialogFieldChanged(DialogField field) {
 		if (fCurrJProject != null) {
 			// already initialized
@@ -462,6 +460,9 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		}
 	}
 	
+	/**
+	 * @param field the dialog field 
+	 */
 	private void projectPageSelectionChanged(DialogField field) {
 		List selElements= fProjectsList.getSelectedElements();
 		fProjectsList.enableButton(IDX_EDIT, canEdit(selElements));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,7 +73,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
  */
 public class SourceAttachmentBlock {
 		
-	private IStatusChangeListener fContext;
+	private final IStatusChangeListener fContext;
 	
 	private StringButtonDialogField fFileNameField;
 	private SelectionButtonDialogField fWorkspaceButton;
@@ -87,15 +87,13 @@ public class SourceAttachmentBlock {
 	 */	
 	private IPath fFileVariablePath;
 		
-	private IWorkspaceRoot fWorkspaceRoot;
+	private final IWorkspaceRoot fWorkspaceRoot;
 	
 	private Control fSWTWidget;
 	private Label fFullPathResolvedLabel;
 	
 	private IJavaProject fProject;
-	private IClasspathEntry fEntry;
-	private IPath fContainerPath;
-
+	private final IClasspathEntry fEntry;
 
 	/**
 	 * @param context listeners for status updates
@@ -143,16 +141,7 @@ public class SourceAttachmentBlock {
 		// set the old settings
 		setDefaults();
 	}
-	
-	/**
-	 * @deprecated Use API {@link org.eclipse.jdt.ui.wizards.BuildPathDialogAccess#configureSourceAttachment(Shell, IClasspathEntry)}
-	 */
-	public SourceAttachmentBlock(IStatusChangeListener context, IClasspathEntry entry, IPath containerPath, IJavaProject project) {
-		this(context, entry);
-		fContainerPath= containerPath;
-		fProject= project;
-	}
-	
+		
 	public void setDefaults() {
 		if (fEntry.getSourceAttachmentPath() != null) {
 			fFileNameField.setText(fEntry.getSourceAttachmentPath().toString());
@@ -168,6 +157,7 @@ public class SourceAttachmentBlock {
 	
 	/**
 	 * Gets the source attachment path chosen by the user
+	 * @return the source attachment path
 	 */
 	public IPath getSourceAttachmentPath() {
 		if (fFileNameField.getText().length() == 0) {
@@ -179,6 +169,7 @@ public class SourceAttachmentBlock {
 	/**
 	 * Gets the source attachment root chosen by the user
 	 * Returns null to let JCore automatically detect the root.
+	 * @return the source attachment root path
 	 */
 	public IPath getSourceAttachmentRootPath() {
 		return null;
@@ -192,6 +183,8 @@ public class SourceAttachmentBlock {
 		
 	/**
 	 * Creates the control
+	 * @param parent the parent
+	 * @return the created control
 	 */
 	public Control createControl(Composite parent) {
 		PixelConverter converter= new PixelConverter(parent);
@@ -551,6 +544,9 @@ public class SourceAttachmentBlock {
 	/**
 	 * Takes a path and replaces the beginning with a variable name
 	 * (if the beginning matches with the variables value)
+	 * @param path the path
+	 * @param varName the variable
+	 * @return the modified path
 	 */
 	private IPath modifyPath(IPath path, String varName) {
 		if (varName == null || path == null) {
@@ -576,6 +572,11 @@ public class SourceAttachmentBlock {
 
 	/**
 	 * Creates a runnable that sets the source attachment by modifying the project's classpath.
+	 * @param shell the shell
+	 * @param newEntry the new entry
+	 * @param jproject the Java project
+	 * @param containerPath the path of the parent container or <code>null</code> if the element is not in a container
+	 * @return return the runnable
 	 */
 	public static IRunnableWithProgress getRunnable(final Shell shell, final IClasspathEntry newEntry, final IJavaProject jproject, final IPath containerPath) {
 		return new IRunnableWithProgress() {
@@ -589,13 +590,4 @@ public class SourceAttachmentBlock {
 			}
 		};
 	}
-
-	/**
-	 * @deprecated Use {@link #getRunnable(Shell, IClasspathEntry, IJavaProject, IPath)}
-	 */
-	public IRunnableWithProgress getRunnable(final Shell shell) {
-		return getRunnable(shell, getNewEntry(), fProject, fContainerPath);
-	}	
-	
-	
 }

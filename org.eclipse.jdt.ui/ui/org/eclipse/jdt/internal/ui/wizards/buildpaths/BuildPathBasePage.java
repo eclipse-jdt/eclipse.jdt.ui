@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public abstract class BuildPathBasePage {
 	
-	private ClasspathAttributeConfigurationDescriptors fAttributeDescriptors;
+	private final ClasspathAttributeConfigurationDescriptors fAttributeDescriptors;
 	
 	public BuildPathBasePage() {
 		fAttributeDescriptors= JavaPlugin.getDefault().getClasspathAttributeConfigurationDescriptors();
@@ -83,8 +83,13 @@ public abstract class BuildPathBasePage {
 	public abstract void setSelection(List selection, boolean expand);
 	
 	
+	/**
+	 * Adds an element to the page
+	 * 
+	 * @param element the element to add
+	 */
 	public void addElement(CPListElement element) {
-		
+		// default implementation does nothing
 	}
 	
 	public abstract boolean isEntryKind(int kind);

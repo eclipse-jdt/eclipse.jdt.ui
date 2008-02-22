@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,7 +64,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 public class VariableBlock {
 	
-	private ListDialogField fVariablesList;
+	private final ListDialogField fVariablesList;
 	private Control fControl;
 	private CLabel fWarning;
 	private boolean fHasChanges;
@@ -197,6 +197,9 @@ public class VariableBlock {
 		return selected.size() == 1 && !containsReadOnly;
 	}
 		
+	/**
+	 * @param field the dialog field 
+	 */
 	private void doSelectionChanged(DialogField field) {
 		List selected= fVariablesList.getSelectedElements();
 		boolean containsReadOnly= containsReadOnly(selected);
@@ -334,8 +337,8 @@ public class VariableBlock {
 	}
 	
 	private class VariableBlockRunnable implements IRunnableWithProgress {
-		private List fToRemove;
-		private List fToChange;
+		private final List fToRemove;
+		private final List fToChange;
 		
 		public VariableBlockRunnable(List toRemove, List toChange) {
 			fToRemove= toRemove;
@@ -390,7 +393,7 @@ public class VariableBlock {
 	}
 
 	/**
-	 * 
+	 * @param initSelection the initial selection
 	 */
 	public void refresh(String initSelection) {
 		CPVariableElement initSelectedElement= null;

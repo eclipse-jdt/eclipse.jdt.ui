@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,13 +35,13 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
   */
 public class ClasspathContainerWizard extends Wizard {
 
-	private ClasspathContainerDescriptor fPageDesc;
-	private IClasspathEntry fEntryToEdit;
+	private final ClasspathContainerDescriptor fPageDesc;
+	private final IClasspathEntry fEntryToEdit;
 
 	private IClasspathEntry[] fNewEntries;
 	private IClasspathContainerPage fContainerPage;
-	private IJavaProject fCurrProject;
-	private IClasspathEntry[] fCurrClasspath;
+	private final IJavaProject fCurrProject;
+	private final IClasspathEntry[] fCurrClasspath;
 	
 	private ClasspathContainerSelectionPage fSelectionWizardPage;
 
@@ -140,7 +140,6 @@ public class ClasspathContainerWizard extends Wizard {
 				containerPage= pageDesc.createPage();
 			} catch (CoreException e) {
 				handlePageCreationFailed(e);
-				containerPage= null;
 			}
 		}
 
