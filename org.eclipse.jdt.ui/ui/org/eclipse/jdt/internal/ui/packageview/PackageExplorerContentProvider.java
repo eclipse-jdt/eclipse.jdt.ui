@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -642,7 +642,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			}
 		}
 	
-		if (elementType == IJavaElement.COMPILATION_UNIT) {
+		if (elementType == IJavaElement.COMPILATION_UNIT || elementType == IJavaElement.CLASS_FILE) {
 			if (kind == IJavaElementDelta.CHANGED) {
 				// isStructuralCUChange already performed above
 				postRefresh(element, ORIGINAL, element, runnables);
@@ -650,10 +650,6 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			}
 			return false;
 		}
-		// no changes possible in class files
-		if (elementType == IJavaElement.CLASS_FILE)
-			return false;
-		
 		
 		if (elementType == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
 			// the contents of an external JAR has changed
