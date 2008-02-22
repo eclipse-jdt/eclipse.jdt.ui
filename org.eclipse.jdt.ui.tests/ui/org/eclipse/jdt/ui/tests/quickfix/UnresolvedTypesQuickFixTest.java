@@ -174,7 +174,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 5);
+		assertNumberOfProposals(proposals, 6);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -235,7 +235,18 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected5= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5 }, new String[] { expected1, expected2, expected3, expected4, expected5 });
+		proposal= (CUCorrectionProposal) proposals.get(5);
+		String preview6= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    <Vect1or> void foo(Vect1or[] vec) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected6= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5, preview6}, new String[] { expected1, expected2, expected3, expected4, expected5, expected6 });
 	}
 	
 	public void testTypeInMethodReturnType() throws Exception {
@@ -251,7 +262,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 5);
+		assertNumberOfProposals(proposals, 6);
 		assertCorrectLabels(proposals);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -314,7 +325,19 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected5= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5 }, new String[] { expected1, expected2, expected3, expected4, expected5 });
+		proposal= (CUCorrectionProposal) proposals.get(5);
+		String preview6= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    <Vect1or> Vect1or[] foo() {\n");
+		buf.append("        return null;\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected6= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5, preview6 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6 });
 	}
 
 	public void testTypeInExceptionType() throws Exception {

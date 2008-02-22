@@ -7,7 +7,7 @@ public class A_test802 {
 	public void foo() {
 		/*]*/extracted();
 	}
-	protected void extracted() {
-		g()/*]*/;
+	protected List extracted() {
+		return g()/*]*/;
 	}
 }
