@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
@@ -29,11 +28,6 @@ import org.eclipse.jface.text.information.IInformationProviderExtension;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
 
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IPartListener;
-import org.eclipse.ui.IPerspectiveDescriptor;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchWindow;
 
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
@@ -45,7 +39,7 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 	
 	/**
 	 * Control creator.
-	 *  
+	 * 
 	 * @since 3.3
 	 */
 	private static final class ControlCreator extends AbstractReusableInformationControlCreator {
@@ -63,46 +57,6 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 	}
 	
 
-	class EditorWatcher implements IPartListener {
-
-		/**
-		 * @see IPartListener#partOpened(IWorkbenchPart)
-		 */
-		public void partOpened(IWorkbenchPart part) {
-		}
-
-		/**
-		 * @see IPartListener#partDeactivated(IWorkbenchPart)
-		 */
-		public void partDeactivated(IWorkbenchPart part) {
-		}
-
-		/**
-		 * @see IPartListener#partClosed(IWorkbenchPart)
-		 */
-		public void partClosed(IWorkbenchPart part) {
-			if (part == fEditor) {
-				fEditor.getSite().getWorkbenchWindow().getPartService().removePartListener(fPartListener);
-				fPartListener= null;
-			}
-		}
-
-		/**
-		 * @see IPartListener#partActivated(IWorkbenchPart)
-		 */
-		public void partActivated(IWorkbenchPart part) {
-			update();
-		}
-
-		public void partBroughtToTop(IWorkbenchPart part) {
-			update();
-		}
-	}
-
-	protected IEditorPart fEditor;
-	protected IPartListener fPartListener;
-
-	protected String fCurrentPerspective;
 	protected IJavaEditorTextHover fImplementation;
 
 	/**
@@ -115,36 +69,9 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 
 
 	public JavaInformationProvider(IEditorPart editor) {
-
-		fEditor= editor;
-
-		if (fEditor != null) {
-
-			fPartListener= new EditorWatcher();
-			IWorkbenchWindow window= fEditor.getSite().getWorkbenchWindow();
-			window.getPartService().addPartListener(fPartListener);
-
-			update();
-		}
-	}
-
-	protected void update() {
-
-		IWorkbenchWindow window= fEditor.getSite().getWorkbenchWindow();
-		IWorkbenchPage page= window.getActivePage();
-		if (page != null) {
-
-			IPerspectiveDescriptor perspective= page.getPerspective();
-			if (perspective != null)  {
-				String perspectiveId= perspective.getId();
-
-				if (fCurrentPerspective == null || fCurrentPerspective != perspectiveId) {
-					fCurrentPerspective= perspectiveId;
-
-					fImplementation= new JavaTypeHover();
-					fImplementation.setEditor(fEditor);
-				}
-			}
+		if (editor != null) {
+			fImplementation= new JavaTypeHover();
+			fImplementation.setEditor(editor);
 		}
 	}
 
@@ -169,7 +96,6 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 				return s;
 			}
 		}
-
 		return null;
 	}
 
