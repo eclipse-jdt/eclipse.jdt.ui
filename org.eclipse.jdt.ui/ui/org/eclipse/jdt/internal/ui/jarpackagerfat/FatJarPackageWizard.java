@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 213638 [jar exporter] create ANT build file for current settings
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
@@ -209,7 +210,9 @@ public class FatJarPackageWizard extends Wizard implements IExportWizard {
 			if (dialog.open() != Window.OK)
 				return false;
 		}
-
+		
+		fJarPackageWizardPage.exportAntScript(status); 
+		
 		if (!executeExportOperation(fJarPackage.createJarExportRunnable(getShell()), status))
 			return false;
 

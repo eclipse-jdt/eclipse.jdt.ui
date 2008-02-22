@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,9 +9,11 @@
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 211045 [jar application] program arguments are ignored
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 213638 [jar exporter] create ANT build file for current settings
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +21,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -31,12 +34,18 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -73,6 +82,7 @@ import org.eclipse.jdt.internal.ui.jarpackager.AbstractJarDestinationWizardPage;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
  * First page for the runnable jar export wizard
@@ -143,19 +153,32 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 			}
 		}
 		
-	}
+	}	
 
 	private static final String PAGE_NAME= "FatJarPackageWizardPage"; //$NON-NLS-1$
 	private static final String STORE_LAUNCH_CONFIGURATION_SELECTION_NAME= PAGE_NAME + ".LAUNCH_CONFIGURATION_SELECTION_NAME"; //$NON-NLS-1$
 	private static final String STORE_DESTINATION_ELEMENT= PAGE_NAME + ".DESTINATION_PATH_SELECTION"; //$NON-NLS-1$
+	private static final String STORE_ANTSCRIPT_SAVE= PAGE_NAME + ".ANTSCRIPT_SAVE"; //$NON-NLS-1$
+	private static final String STORE_ANTSCRIPT_LOCATION= PAGE_NAME + ".ANTSCRIPT_LOCATION"; //$NON-NLS-1$
+	private static final String STORE_ANTSCRIPT_LOCATION_HISTORY= PAGE_NAME + ".ANTSCRIPT_LOCATION_HISTORY"; //$NON-NLS-1$
 
+	private static final String ANTSCRIPT_EXTENSION= "xml"; //$NON-NLS-1$
+	
 	private final JarPackageData fJarPackage;
+	
 	/**
 	 * Model for the launch combo box. Element: {@link LaunchConfigurationElement}
 	 */
 	private final ArrayList fLauchConfigurationModel;
 
 	private Combo fLaunchConfigurationCombo;
+
+	private Button fAntScriptSaveCheckbox;
+	private Label fAntScriptLabel;
+	private Combo fAntScriptNamesCombo;
+	private Button fAntScriptBrowseButton;
+	
+	private IPath fAntScriptLocation;
 
 	public FatJarPackageWizardPage(JarPackageData jarPackage, IStructuredSelection selection) {
 		super(PAGE_NAME, selection, jarPackage);
@@ -171,8 +194,31 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 	public void createControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		composite.setLayout(new GridLayout(1, false));
+		GridLayout layout= new GridLayout(1, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		composite.setLayout(layout);
 
+		createContentGroup(composite);
+		
+		Label seperator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
+		seperator.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+
+		createAntScriptGroup(composite);
+
+		restoreWidgetValues();
+
+		update();
+
+		Dialog.applyDialogFont(composite);
+		setControl(composite);
+	}
+
+	private void createContentGroup(Composite parent) {
+		Composite composite= new Composite(parent, SWT.NONE);
+		composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		composite.setLayout(new GridLayout(1, false));
+		
 		Label description= new Label(composite, SWT.NONE);
 		GridData gridData= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
 		description.setLayoutData(gridData);
@@ -185,13 +231,6 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 		label.setText(FatJarPackagerMessages.FatJarPackageWizardPage_destinationGroupTitle);
 
 		createDestinationGroup(composite);
-
-		restoreWidgetValues();
-
-		update();
-
-		Dialog.applyDialogFont(composite);
-		setControl(composite);
 	}
 
 	protected String getDestinationLabel() {
@@ -199,14 +238,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 	}
 
 	private void createLaunchConfigSelectionGroup(Composite parent) {
-		Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		GridLayout layout= new GridLayout(1, false);
-		layout.marginWidth= 0;
-		layout.marginHeight= 0;
-		composite.setLayout(layout);
-
-		fLaunchConfigurationCombo= new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
+		fLaunchConfigurationCombo= new Combo(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 		fLaunchConfigurationCombo.setVisibleItemCount(20);
 		fLaunchConfigurationCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
@@ -222,13 +254,111 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 		fLaunchConfigurationCombo.addListener(SWT.Modify, this);
 	}
 
+	private void createAntScriptGroup(Composite parent) {
+		Composite composite= new Composite(parent, SWT.NONE);
+		GridData layoutData= new GridData(SWT.FILL, SWT.TOP, true, false);
+		composite.setLayoutData(layoutData);
+		GridLayout layout= new GridLayout(3, false);
+		composite.setLayout(layout);
+		
+		fAntScriptSaveCheckbox= new Button(composite, SWT.CHECK | SWT.LEFT);
+		fAntScriptSaveCheckbox.setText(FatJarPackagerMessages.FatJarPackageWizardPage_saveAntScript_text); 
+		fAntScriptSaveCheckbox.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event event) {
+				update();
+			}
+		});
+		GridData data= new GridData(SWT.BEGINNING);
+		data.horizontalSpan= 3;
+		fAntScriptSaveCheckbox.setLayoutData(data);
+
+		// ant script name entry field
+		fAntScriptLabel= new Label(composite, SWT.NONE);
+		GridData gridData= new GridData(SWT.BEGINNING, SWT.LEFT, false, false);
+		gridData.horizontalIndent= 15;
+		fAntScriptLabel.setLayoutData(gridData);
+		fAntScriptLabel.setText(FatJarPackagerMessages.FatJarPackageWizardPage_antScriptLocation_text); 
+
+		fAntScriptNamesCombo= new Combo(composite, SWT.SINGLE | SWT.BORDER);
+		fAntScriptNamesCombo.setVisibleItemCount(20);
+		fAntScriptNamesCombo.addListener(SWT.Modify, this);
+		fAntScriptNamesCombo.addListener(SWT.Selection, this);
+		data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
+		data.widthHint= SIZING_TEXT_FIELD_WIDTH;
+		data.horizontalSpan= 1;
+		fAntScriptNamesCombo.setLayoutData(data);
+
+		// ant script browse button
+		fAntScriptBrowseButton= new Button(composite, SWT.PUSH);
+		fAntScriptBrowseButton.setText(FatJarPackagerMessages.FatJarPackageWizardPage_antScriptLocationBrowse_text); 
+		fAntScriptBrowseButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+		SWTUtil.setButtonDimensionHint(fAntScriptBrowseButton);
+		fAntScriptBrowseButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				handleAntScriptBrowseButtonPressed();
+			}
+		});
+	}
+
+	/**
+	 *	Open an appropriate ant script browser so that the user can specify a source
+	 *	to import from
+	 */
+	private void handleAntScriptBrowseButtonPressed() {
+		FileDialog dialog= new FileDialog(getContainer().getShell(), SWT.SAVE);
+		dialog.setFilterExtensions(new String[] { "*." + ANTSCRIPT_EXTENSION }); //$NON-NLS-1$
+
+		String currentSourceString= getAntScriptValue();
+		int lastSeparatorIndex= currentSourceString.lastIndexOf(File.separator);
+		if (lastSeparatorIndex != -1) {
+			dialog.setFilterPath(currentSourceString.substring(0, lastSeparatorIndex));
+			dialog.setFileName(currentSourceString.substring(lastSeparatorIndex + 1, currentSourceString.length()));
+		} else
+			dialog.setFileName(currentSourceString);
+		String selectedFileName= dialog.open();
+		if (selectedFileName != null)
+			fAntScriptNamesCombo.setText(selectedFileName);
+	}
+
+	/**
+	 * Answer the contents of the ant script specification widget. If this
+	 * value does not have the required suffix then add it first.
+	 * 
+	 * @return java.lang.String
+	 */
+	private String getAntScriptValue() {
+		String antScriptText= fAntScriptNamesCombo.getText().trim();
+		if (antScriptText.indexOf('.') < 0)
+			antScriptText+= "." + ANTSCRIPT_EXTENSION; //$NON-NLS-1$
+		return antScriptText;
+	}
+
+	/**
+	 *	Stores the widget values in the JAR package.
+	 */
+	protected void updateModel() {
+		super.updateModel();
+		
+		String comboText= fAntScriptNamesCombo.getText();
+		IPath path= Path.fromOSString(comboText);
+		if (path.segmentCount() > 0 && ensureAntScriptFileIsValid(path.toFile()) && path.getFileExtension() == null)
+			path= path.addFileExtension(ANTSCRIPT_EXTENSION); 
+		
+		fAntScriptLocation= path;
+	}
+	
 	protected void updateWidgetEnablements() {
+		boolean antScriptSave= fAntScriptSaveCheckbox.getSelection();
+		fAntScriptLabel.setEnabled(antScriptSave);
+		fAntScriptNamesCombo.setEnabled(antScriptSave);
+		fAntScriptBrowseButton.setEnabled(antScriptSave);
 	}
 
 	public boolean isPageComplete() {
 		clearMessages();
 		boolean complete= validateDestinationGroup();
 		complete= validateLaunchConfigurationGroup() && complete;
+		complete= validateAntScriptGroup() && complete;
 		return complete;
 	}
 
@@ -244,6 +374,52 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 		if (element.hasVMArguments())
 			setWarningMessage(FatJarPackagerMessages.FatJarPackageWizardPage_warning_launchConfigContainsVMArgs);
 		
+		return true;
+	}
+
+	private boolean validateAntScriptGroup() {
+		if (!fAntScriptSaveCheckbox.getSelection())
+			// save as ant not selected
+			return true;
+
+		if (fAntScriptNamesCombo.getText().length() == 0) {
+			setErrorMessage(FatJarPackagerMessages.FatJarPackageWizardPage_error_antScriptLocationMissing); 
+			return false;
+		}
+
+		if (fAntScriptLocation.toString().endsWith("/")) { //$NON-NLS-1$
+			setErrorMessage(FatJarPackagerMessages.FatJarPackageWizardPage_error_antScriptLocationIsDir); 
+			fAntScriptNamesCombo.setFocus();
+			return false;
+		}
+
+		// Inform user about relative directory
+		if (!(new File(fAntScriptNamesCombo.getText()).isAbsolute()))
+			setInfoMessage(FatJarPackagerMessages.FatJarPackageWizardPage_info_antScriptLocationRelative);
+
+		return ensureAntScriptFileIsValid(fAntScriptLocation.toFile());
+	}
+
+	/**
+	 * Returns a boolean indicating whether the passed File handle is
+	 * is valid and available for use.
+	 *
+	 * @param antScriptFile the ant script
+	 * @return boolean
+	 */
+	private boolean ensureAntScriptFileIsValid(File antScriptFile) {
+		if (antScriptFile.exists() && antScriptFile.isDirectory() && fAntScriptNamesCombo.getText().length() > 0) {
+			setErrorMessage(FatJarPackagerMessages.FatJarPackageWizardPage_error_antScriptLocationIsDir); 
+			fAntScriptNamesCombo.setFocus();
+			return false;
+		}
+		if (antScriptFile.exists()) {
+			if (!antScriptFile.canWrite()) {
+				setErrorMessage(FatJarPackagerMessages.FatJarPackageWizardPage_error_antScriptLocationUnwritable); 
+				fAntScriptNamesCombo.setFocus();
+				return false;
+			}
+		}
 		return true;
 	}
 
@@ -265,6 +441,16 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 	private void setWarningMessage(String newMessage) {
 		if (getMessage() == null || getMessageType() < IMessageProvider.WARNING)
 			setMessage(newMessage, IMessageProvider.WARNING);
+	}
+	
+	/**
+	 * set message to newMessage with severity WARNING.
+	 * overwrite existing message only if it is beyond severity WARNING
+	 * @param newMessage the warning to be set
+	 */
+	private void setInfoMessage(String newMessage) {
+		if (getMessage() == null || getMessageType() < IMessageProvider.INFORMATION)
+			setMessage(newMessage, IMessageProvider.INFORMATION);
 	}
 	
 	private LaunchConfigurationElement[] getLaunchConfigurations() {
@@ -511,8 +697,33 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 
 	protected void restoreWidgetValues() {
 
+		// restore JARPACKAGEDATA from SETTINGS and set widgets
 		IDialogSettings settings= getDialogSettings();
 		if (settings != null) {
+			// SAVE ANT SCRIPT
+			fAntScriptSaveCheckbox.setSelection(settings.getBoolean(STORE_ANTSCRIPT_SAVE));
+
+			// ANT SCRIPT LOCATION
+			String antScriptLocation= settings.get(STORE_ANTSCRIPT_LOCATION);
+			if (antScriptLocation != null) {
+				fAntScriptLocation= Path.fromOSString(antScriptLocation);
+				if (fAntScriptLocation.isEmpty()) {
+					fAntScriptNamesCombo.setText(""); //$NON-NLS-1$
+				} else {
+					fAntScriptNamesCombo.setText(fAntScriptLocation.toOSString());
+				}
+			}
+
+			// ANT SCRIPT LOCATION HISTORY
+			String[] directoryNames= settings.getArray(STORE_ANTSCRIPT_LOCATION_HISTORY);
+			if (directoryNames != null) {
+				if (!fAntScriptNamesCombo.getText().equals(directoryNames[0]))
+					fAntScriptNamesCombo.add(fAntScriptNamesCombo.getText());
+				for (int i= 0; i < directoryNames.length; i++)
+					fAntScriptNamesCombo.add(directoryNames[i]);
+			}
+
+			// LAUNCH CONFIG
 			String name= settings.get(STORE_LAUNCH_CONFIGURATION_SELECTION_NAME);
 			if (name != null) {
 				String[] items= fLaunchConfigurationCombo.getItems();
@@ -523,6 +734,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 				}
 			}
 
+			// DESTINATION
 			String destinationPath= settings.get(STORE_DESTINATION_ELEMENT);
 			if (destinationPath != null && destinationPath.length() > 0) {
 				fJarPackage.setJarLocation(Path.fromOSString(destinationPath));
@@ -530,6 +742,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 		}
 
 		super.restoreWidgetValues();
+		
 	}
 
 	/**
@@ -540,6 +753,25 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 
 		IDialogSettings settings= getDialogSettings();
 		if (settings != null) {
+			// ANT SCRIPT SAVE 
+			settings.put(STORE_ANTSCRIPT_SAVE, fAntScriptSaveCheckbox.getSelection());
+
+			// ANT SCRIPT LOCATION
+			IPath antScriptLocation= fAntScriptLocation;
+			if (antScriptLocation == null) {
+				settings.put(STORE_ANTSCRIPT_LOCATION, ""); //$NON-NLS-1$
+			} else {
+				settings.put(STORE_ANTSCRIPT_LOCATION, antScriptLocation.toOSString());
+			}
+
+			// ANT SCRIPT LOCATION HISTORY
+			String[] directoryNames= settings.getArray(STORE_ANTSCRIPT_LOCATION_HISTORY);
+			if (directoryNames == null)
+				directoryNames= new String[0];
+			directoryNames= addToHistory(directoryNames, getAntScriptValue());
+			settings.put(STORE_ANTSCRIPT_LOCATION_HISTORY, directoryNames);
+
+			// LAUNCH CONFIG
 			int index= fLaunchConfigurationCombo.getSelectionIndex();
 			if (index == -1) {
 				settings.put(STORE_LAUNCH_CONFIGURATION_SELECTION_NAME, ""); //$NON-NLS-1$
@@ -548,6 +780,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 				settings.put(STORE_LAUNCH_CONFIGURATION_SELECTION_NAME, selectedItem);
 			}
 
+			// DESTINATION
 			IPath location= fJarPackage.getJarLocation();
 			if (location == null) {
 				settings.put(STORE_DESTINATION_ELEMENT, ""); //$NON-NLS-1$
@@ -577,6 +810,63 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 		data.setManifestMainClass(mainType);
 
 		return classpathResources;
+	}
+
+
+	public void exportAntScript(MultiStatus status) {
+		if (!fAntScriptSaveCheckbox.getSelection())
+			return;
+		
+		if (canCreateAntScript(getShell())) {
+			LaunchConfigurationElement element= (LaunchConfigurationElement) fLauchConfigurationModel.get(fLaunchConfigurationCombo.getSelectionIndex());
+			Assert.isNotNull(element);
+			FatJarAntExporter antExporter= new FatJarAntExporter(fAntScriptLocation, fJarPackage.getAbsoluteJarLocation(), element.getLaunchConfiguration());
+			
+			try {
+				antExporter.run(status);
+			} catch (CoreException e) {
+				status.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, FatJarPackagerMessages.FatJarPackageWizardPage_error_ant_script_generation_failed, e));
+			}
+		}
+	}
+	
+	/**
+	 * Checks if the ANT script file can be overwritten.
+	 * If the JAR package setting does not allow to overwrite the JAR
+	 * then a dialog will ask the user again.
+	 * 
+	 * @param	parent	the parent for the dialog,
+	 * 			or <code>null</code> if no dialog should be presented
+	 * @return	<code>true</code> if it is OK to create the JAR
+	 */
+	private boolean canCreateAntScript(Shell parent) {
+
+		File file= fAntScriptLocation.toFile();
+		if (file.exists()) {
+			if (!file.canWrite())
+				return false;
+
+			if (fJarPackage.allowOverwrite())
+				return true;
+
+			return parent != null && JarPackagerUtil.askForOverwritePermission(parent, fAntScriptLocation.toOSString());
+		}
+
+		// Test if directory exists
+		String path= file.getAbsolutePath();
+		int separatorIndex= path.lastIndexOf(File.separator);
+		if (separatorIndex == -1) // i.e.- default directory, which is fine
+			return true;
+		
+		File directory= new File(path.substring(0, separatorIndex));
+		if (!directory.exists()) {
+			if (FatJarPackagerUtil.askToCreateAntScriptDirectory(parent, directory))
+				return directory.mkdirs();
+			else
+				return false;
+		}
+		
+		return true;
 	}
 
 }
