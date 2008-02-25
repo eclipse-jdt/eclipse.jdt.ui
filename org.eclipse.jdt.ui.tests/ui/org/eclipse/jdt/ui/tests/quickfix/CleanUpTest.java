@@ -2560,6 +2560,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
 		buf.append("    public void foo() {\n");
+		buf.append("        new E1();\n");
 		buf.append("        System.out.println(E1.i);\n");
 		buf.append("    }\n");
 		buf.append("    public static int i= 10;\n");
@@ -2987,6 +2988,108 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("        if (o != null) {\n");
 		buf.append("            System.out.println(o);\n");
 		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+	
+	public void testRemoveNonStaticQualifier_Bug219204_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void test() {\n");
+		buf.append("        E1 t = E1.bar().g().g().foo(E1.foo(null).bar()).bar();\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private static E1 foo(E1 t) {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private static E1 bar() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private E1 g() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void test() {\n");
+		buf.append("        E1.bar().g().g();\n");
+		buf.append("        E1.foo(E1.foo(null).bar());\n");
+		buf.append("        E1 t = E1.bar();\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private static E1 foo(E1 t) {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private static E1 bar() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private E1 g() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+	
+	public void testRemoveNonStaticQualifier_Bug219204_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void test() {\n");
+		buf.append("        while (true)\n");
+		buf.append("            new E1().bar1().bar2().bar3();\n");
+		buf.append("    }\n");
+		buf.append("    private static E1 bar1() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("    private static E1 bar2() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("    private static E1 bar3() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void test() {\n");
+		buf.append("        while (true) {\n");
+		buf.append("            new E1();\n");
+		buf.append("            E1.bar1();\n");
+		buf.append("            E1.bar2();\n");
+		buf.append("            E1.bar3();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    private static E1 bar1() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("    private static E1 bar2() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("    private static E1 bar3() {\n");
+		buf.append("        return null;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();

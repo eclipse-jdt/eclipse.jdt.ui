@@ -11,8 +11,7 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.text.edits.TextEditGroup;
@@ -22,11 +21,16 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -38,6 +42,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SwitchCase;
@@ -47,6 +52,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -407,11 +413,12 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 
 		private final ITypeBinding fDeclaringTypeBinding;
 		private final Expression fQualifier;
+		private final HashMap fCreatedBlocks;
 
-		public ToStaticAccessOperation(ITypeBinding declaringTypeBinding, Expression qualifier) {
-			super();
+		public ToStaticAccessOperation(ITypeBinding declaringTypeBinding, Expression qualifier, HashMap createdBlocks) {
 			fDeclaringTypeBinding= declaringTypeBinding;
 			fQualifier= qualifier;
+			fCreatedBlocks= createdBlocks;
 		}
 		
 		public String getAccessorName() {
@@ -422,9 +429,55 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		 * {@inheritDoc}
 		 */
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
-			Type type= importType(fDeclaringTypeBinding, fQualifier, cuRewrite.getImportRewrite(), cuRewrite.getRoot());
 			TextEditGroup group= createTextEditGroup(FixMessages.CodeStyleFix_ChangeAccessUsingDeclaring_description, cuRewrite);
+
+			if (fQualifier instanceof MethodInvocation || fQualifier instanceof ClassInstanceCreation)
+				extractQualifier(fQualifier, cuRewrite, group);
+			
+			Type type= importType(fDeclaringTypeBinding, fQualifier, cuRewrite.getImportRewrite(), cuRewrite.getRoot());
 			cuRewrite.getASTRewrite().replace(fQualifier, type, group);
+		}
+
+		private void extractQualifier(Expression qualifier, CompilationUnitRewrite cuRewrite, TextEditGroup group) {
+			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
+			AST ast= cuRewrite.getAST();
+
+			Expression expression= (Expression) astRewrite.createMoveTarget(qualifier);
+			ExpressionStatement newStatement= ast.newExpressionStatement(expression);
+			
+			Statement statement= (Statement) ASTNodes.getParent(qualifier, Statement.class);
+			
+			if (statement.getParent() instanceof Block) {
+				Block block= (Block) statement.getParent();
+				ListRewrite listRewrite= astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+				
+				listRewrite.insertBefore(newStatement, statement, group);
+			} else {
+				Block block;
+				if (fCreatedBlocks.containsKey(statement.getParent())) {
+					block= (Block) fCreatedBlocks.get(statement.getParent());
+				} else {
+					block= ast.newBlock();
+				}
+				
+				ListRewrite listRewrite= astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+				
+				ASTNode lastStatement;
+				if (!fCreatedBlocks.containsKey(statement.getParent())) {
+					fCreatedBlocks.put(statement.getParent(), block);
+					
+					lastStatement= astRewrite.createMoveTarget(statement);
+					listRewrite.insertLast(lastStatement, group);
+
+					ASTNode parent= statement.getParent();
+					astRewrite.set(parent, statement.getLocationInParent(), block, group);
+				} else {
+					List rewrittenList= listRewrite.getRewrittenList();
+					lastStatement= (ASTNode) rewrittenList.get(rewrittenList.size() - 1);
+				}
+				
+				listRewrite.insertBefore(newStatement, lastStatement, group);
+			}
 		}
 	}
 	
@@ -432,7 +485,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		if (!isNonStaticAccess(problem))
 			return null;
 		
-		ToStaticAccessOperation operations[]= createToStaticAccessOperations(compilationUnit, problem);
+		ToStaticAccessOperation operations[]= createToStaticAccessOperations(compilationUnit, new HashMap(), problem);
 		if (operations == null)
 			return null;
 
@@ -463,7 +516,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		if (!isIndirectStaticAccess(problem))
 			return null;
 		
-		ToStaticAccessOperation operations[]= createToStaticAccessOperations(compilationUnit, problem);
+		ToStaticAccessOperation operations[]= createToStaticAccessOperations(compilationUnit, new HashMap(), problem);
 		if (operations == null)
 			return null;
 
@@ -539,26 +592,42 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 	}
 	
 	private static void addToStaticAccessOperations(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean changeNonStaticAccessToStatic, boolean changeIndirectStaticAccessToDirect, List result) {
-	    Hashtable nonStaticAccessOps= new Hashtable();
-		if (changeNonStaticAccessToStatic || changeIndirectStaticAccessToDirect) {
-			for (int i= 0; i < problems.length; i++) {
-				IProblemLocation problem= problems[i];
-				boolean isNonStaticAccess= changeNonStaticAccessToStatic && isNonStaticAccess(problem);
-				boolean isIndirectStaticAccess= changeIndirectStaticAccessToDirect && isIndirectStaticAccess(problem);
-				if (isNonStaticAccess || isIndirectStaticAccess) {
-					ToStaticAccessOperation[] nonStaticAccessInformation= createToStaticAccessOperations(compilationUnit, problem);
-					if (nonStaticAccessInformation != null) {
-						ToStaticAccessOperation op= nonStaticAccessInformation[0];
-						nonStaticAccessOps.put(op.fQualifier, op);
+		if (!changeNonStaticAccessToStatic && !changeIndirectStaticAccessToDirect)
+			return;
+		
+		HashMap createdBlocks= new HashMap();
+		for (int i= 0; i < problems.length; i++) {
+			IProblemLocation problem= problems[i];
+			boolean isNonStaticAccess= changeNonStaticAccessToStatic && isNonStaticAccess(problem);
+			boolean isIndirectStaticAccess= changeIndirectStaticAccessToDirect && isIndirectStaticAccess(problem);
+			if (isNonStaticAccess || isIndirectStaticAccess) {
+				ToStaticAccessOperation[] nonStaticAccessInformation= createToStaticAccessOperations(compilationUnit, createdBlocks, problem);
+				if (nonStaticAccessInformation != null) {
+					ToStaticAccessOperation op= nonStaticAccessInformation[0];
+
+					Expression qualifier= op.fQualifier;
+					if (!(qualifier instanceof MethodInvocation) || !isMethodArgument(qualifier)) {
+						result.add(op);
 					}
 				}
 			}
 		}
-		for (Iterator iter= nonStaticAccessOps.values().iterator(); iter.hasNext();) {
-			ToStaticAccessOperation op= (ToStaticAccessOperation)iter.next();
-			if (!nonStaticAccessOps.containsKey(op.fQualifier.getParent()))
-				result.add(op);
+	}
+
+	private static boolean isMethodArgument(Expression expression) {
+		ASTNode parent= expression;
+		while (parent instanceof Expression) {
+
+			if (parent.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY)
+				return true;
+
+			if (parent.getLocationInParent() == ConstructorInvocation.ARGUMENTS_PROPERTY)
+				return true;
+
+			parent= ((Expression) parent).getParent();
 		}
+
+		return false;
 	}
 
 	public static boolean isIndirectStaticAccess(IProblemLocation problem) {
@@ -571,7 +640,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 				|| problem.getProblemId() == IProblem.NonStaticAccessToStaticMethod);
 	}
 	
-	private static ToStaticAccessOperation[] createToStaticAccessOperations(CompilationUnit astRoot, IProblemLocation problem) {
+	private static ToStaticAccessOperation[] createToStaticAccessOperations(CompilationUnit astRoot, HashMap createdBlocks, IProblemLocation problem) {
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (selectedNode == null) {
 			return null;
@@ -611,14 +680,14 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 			if (declaringTypeBinding != null) {
 				declaringTypeBinding= declaringTypeBinding.getTypeDeclaration(); // use generic to avoid any type arguments
 				
-				declaring= new ToStaticAccessOperation(declaringTypeBinding, qualifier);
+				declaring= new ToStaticAccessOperation(declaringTypeBinding, qualifier, createdBlocks);
 			}
 			ToStaticAccessOperation instance= null;
 			ITypeBinding instanceTypeBinding= Bindings.normalizeTypeBinding(qualifier.resolveTypeBinding());
 			if (instanceTypeBinding != null) {
 				instanceTypeBinding= instanceTypeBinding.getTypeDeclaration();  // use generic to avoid any type arguments
 				if (instanceTypeBinding.getTypeDeclaration() != declaringTypeBinding) {
-					instance= new ToStaticAccessOperation(instanceTypeBinding, qualifier);
+					instance= new ToStaticAccessOperation(instanceTypeBinding, qualifier, createdBlocks);
 				}
 			}
 			if (declaring != null && instance != null) {
