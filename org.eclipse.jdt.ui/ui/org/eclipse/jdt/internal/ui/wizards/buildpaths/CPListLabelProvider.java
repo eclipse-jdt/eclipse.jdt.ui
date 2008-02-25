@@ -243,11 +243,9 @@ public class CPListLabelProvider extends LabelProvider {
 						}
 					}
 					return buf.toString();
-				} else if (ArchiveFileFilter.isArchivePath(path)) {
+				} else {
 					return getPathString(path, resource == null);
 				}
-				// should not get here
-				return path.makeRelative().toString();
 			}
 			case IClasspathEntry.CPE_VARIABLE: {
 				return getVariableString(path);
@@ -329,10 +327,14 @@ public class CPListLabelProvider extends LabelProvider {
 				IResource res= cpentry.getResource();
 				IPath path= (IPath) cpentry.getAttribute(CPListElement.SOURCEATTACHMENT);
 				if (res == null) {
-					if (path == null || path.isEmpty()) {
-						return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_EXTERNAL_ARCHIVE);
+					if (ArchiveFileFilter.isArchivePath(cpentry.getPath())) {
+						if (path == null || path.isEmpty()) {
+							return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_EXTERNAL_ARCHIVE);
+						} else {
+							return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_EXTERNAL_ARCHIVE_WITH_SOURCE);
+						}
 					} else {
-						return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_EXTERNAL_ARCHIVE_WITH_SOURCE);
+						return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_PACKFRAG_ROOT);
 					}
 				} else if (res instanceof IFile) {
 					if (path == null || path.isEmpty()) {

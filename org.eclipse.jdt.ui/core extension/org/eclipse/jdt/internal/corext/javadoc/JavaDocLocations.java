@@ -227,6 +227,8 @@ public class JavaDocLocations {
 
 	/**
 	 * Sets the Javadoc location for an archive with the given path.
+	 * @param project the Java project
+	 * @param url the Javadoc location
 	 */
 	public static void setProjectJavadocLocation(IJavaProject project, URL url) {
 		try {

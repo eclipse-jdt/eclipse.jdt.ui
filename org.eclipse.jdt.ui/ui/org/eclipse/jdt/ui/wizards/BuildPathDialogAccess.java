@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.wizards;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -25,6 +26,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 
@@ -285,7 +287,7 @@ public final class BuildPathDialogAccess {
 	 * @param initialEntry The path of the initial archive entry 
 	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
-	 * @return Returns the configured classpath container entry path or <code>null</code> if the dialog has
+	 * @return Returns the configured JAR path or <code>null</code> if the dialog has
 	 * been canceled by the user.
 	 */
 	public static IPath configureJAREntry(Shell shell, IPath initialEntry, IPath[] usedEntries) {
@@ -335,7 +337,7 @@ public final class BuildPathDialogAccess {
 	 * @param initialSelection The path of the element (container or archive) to initially select or <code>null</code> to not select an entry. 
 	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
-	 * @return Returns the new classpath container entry paths or <code>null</code> if the dialog has
+	 * @return Returns the new JAR paths or <code>null</code> if the dialog has
 	 * been canceled by the user.
 	 */
 	public static IPath[] chooseJAREntries(Shell shell, IPath initialSelection, IPath[] usedEntries) {
@@ -384,7 +386,7 @@ public final class BuildPathDialogAccess {
 	 * 
 	 * @param shell The parent shell for the dialog.
 	 * @param initialEntry The path of the initial archive entry.
-	 * @return Returns the configured classpath container entry path or <code>null</code> if the dialog has
+	 * @return Returns the configured external JAR path or <code>null</code> if the dialog has
 	 * been canceled by the user.
 	 */
 	public static IPath configureExternalJAREntry(Shell shell, IPath initialEntry) {
@@ -415,7 +417,7 @@ public final class BuildPathDialogAccess {
 	 * been canceled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
-	 * @return Returns the new classpath container entry paths or <code>null</code> if the dialog has
+	 * @return Returns the new external JAR paths or <code>null</code> if the dialog has
 	 * been canceled by the user.
 	 */
 	public static IPath[] chooseExternalJAREntries(Shell shell) {
@@ -444,17 +446,80 @@ public final class BuildPathDialogAccess {
 		
 		return elems;
 	}
+	
+	/**
+	 * Shows the UI to select new external class folder entries.
+	 * The dialog returns the selected entry paths or <code>null</code> if the dialog has
+	 * been canceled. The dialog does not apply any changes.
+	 * 
+	 * @param shell The parent shell for the dialog.
+	 * @return Returns the new external class folder path or <code>null</code> if the dialog has
+	 * been canceled by the user.
+	 * 
+	 * @since 3.4
+	 */
+	public static IPath[] chooseExternalClassFolderEntries(Shell shell) {
+		String lastUsedPath= JavaPlugin.getDefault().getDialogSettings().get(IUIConstants.DIALOGSTORE_LASTEXTJARFOLDER);
+		if (lastUsedPath == null) {
+			lastUsedPath= ""; //$NON-NLS-1$
+		}
+		DirectoryDialog dialog= new DirectoryDialog(shell, SWT.MULTI);
+		dialog.setText(NewWizardMessages.BuildPathDialogAccess_ExtClassFolderDialog_new_title); 
+		dialog.setMessage(NewWizardMessages.BuildPathDialogAccess_ExtClassFolderDialog_new_description);
+		dialog.setFilterPath(lastUsedPath);
+		
+		String res= dialog.open();
+		if (res == null) {
+			return null;
+		}
+		
+		File file= new File(res);
+		if (file.isDirectory())
+			return new IPath[] { new Path(file.getAbsolutePath()) };
+		
+		return null;
+	}
+	
+	/**
+	 * Shows the UI to configure an external class folder.
+	 * The dialog returns the configured or <code>null</code> if the dialog has
+	 * been canceled. The dialog does not apply any changes.
+	 * 
+	 * @param shell The parent shell for the dialog.
+	 * @param initialEntry The path of the initial archive entry.
+	 * @return Returns the configured external class folder path or <code>null</code> if the dialog has
+	 * been canceled by the user.
+	 * 
+	 * @since 3.4
+	 */
+	public static IPath configureExternalClassFolderEntries(Shell shell, IPath initialEntry) {
+		DirectoryDialog dialog= new DirectoryDialog(shell, SWT.SINGLE);
+		dialog.setText(NewWizardMessages.BuildPathDialogAccess_ExtClassFolderDialog_edit_title);
+		dialog.setMessage(NewWizardMessages.BuildPathDialogAccess_ExtClassFolderDialog_edit_description); 
+		dialog.setFilterPath(initialEntry.toString());
+		
+		String res= dialog.open();
+		if (res == null) {
+			return null;
+		}
+		
+		File file= new File(res);
+		if (file.isDirectory())
+			return new Path(file.getAbsolutePath());
+		
+		return null;
+	}
 		
 	/**
 	 * Shows the UI to select new class folders.
-	 * The dialog returns the selected classpath entry paths or <code>null</code> if the dialog has
+	 * The dialog returns the selected class folder entry paths or <code>null</code> if the dialog has
 	 * been canceled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
 	 * @param initialSelection The path of the element to initially select or <code>null</code>.
 	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
-	 * @return Returns the configured classpath container entry path or <code>null</code> if the dialog has
+	 * @return Returns the configured class folder paths or <code>null</code> if the dialog has
 	 * been canceled by the user.
 	 */
 	public static IPath[] chooseClassFolderEntries(Shell shell, IPath initialSelection, IPath[] usedEntries) {
@@ -469,13 +534,13 @@ public final class BuildPathDialogAccess {
 	/**
 	 * Shows the UI to select new source folders.
 	 * The dialog returns the selected classpath entry paths or <code>null</code> if the dialog has
-	 * been canceled The dialog does not apply any changes.
+	 * been canceled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
 	 * @param initialSelection The path of the element to initially select or <code>null</code>
 	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
-	 * @return Returns the configured classpath container entry path or <code>null</code> if the dialog has
+	 * @return Returns the configured class folder entry paths or <code>null</code> if the dialog has
 	 * been canceled by the user.
 	 */
 	public static IPath[] chooseSourceFolderEntries(Shell shell, IPath initialSelection, IPath[] usedEntries) {

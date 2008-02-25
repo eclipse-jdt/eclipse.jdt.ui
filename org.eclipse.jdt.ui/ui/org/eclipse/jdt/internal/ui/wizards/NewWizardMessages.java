@@ -323,6 +323,7 @@ public final class NewWizardMessages extends NLS {
 	public static String ProjectsWorkbookPage_chooseProjects_message;
 	public static String ProjectsWorkbookPage_chooseProjects_title;
 	
+	public static String LibrariesWorkbookPage_libraries_addextfolder_button;
 	public static String LibrariesWorkbookPage_libraries_label;
 	public static String LibrariesWorkbookPage_libraries_remove_button;
 	public static String LibrariesWorkbookPage_libraries_addjar_button;
@@ -349,6 +350,10 @@ public final class NewWizardMessages extends NLS {
 	public static String BuildPathDialogAccess_JARArchiveDialog_new_description;
 	public static String BuildPathDialogAccess_JARArchiveDialog_edit_title;
 	public static String BuildPathDialogAccess_JARArchiveDialog_edit_description;
+	public static String BuildPathDialogAccess_ExtClassFolderDialog_edit_description;
+	public static String BuildPathDialogAccess_ExtClassFolderDialog_edit_title;
+	public static String BuildPathDialogAccess_ExtClassFolderDialog_new_description;
+	public static String BuildPathDialogAccess_ExtClassFolderDialog_new_title;
 	public static String BuildPathDialogAccess_ExtJARArchiveDialog_new_title;
 	public static String BuildPathDialogAccess_ExtJARArchiveDialog_edit_title;
 	

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -91,11 +92,12 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private final int IDX_ADDVAR= 2;
 	private final int IDX_ADDLIB= 3;
 	private final int IDX_ADDFOL= 4;
+	private final int IDX_ADDEXTFOL= 5;
 	
-	private final int IDX_EDIT= 6;
-	private final int IDX_REMOVE= 7;
+	private final int IDX_EDIT= 7;
+	private final int IDX_REMOVE= 8;
 
-	private final int IDX_REPLACE= 9;
+	private final int IDX_REPLACE= 10;
 		
 	public LibrariesWorkbookPage(CheckedListDialogField classPathList, IWorkbenchPreferenceContainer pageContainer) {
 		fClassPathList= classPathList;
@@ -108,6 +110,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			NewWizardMessages.LibrariesWorkbookPage_libraries_addvariable_button, 
 			NewWizardMessages.LibrariesWorkbookPage_libraries_addlibrary_button, 
 			NewWizardMessages.LibrariesWorkbookPage_libraries_addclassfolder_button, 
+			NewWizardMessages.LibrariesWorkbookPage_libraries_addextfolder_button, 
 			/* */ null,  
 			NewWizardMessages.LibrariesWorkbookPage_libraries_edit_button, 
 			NewWizardMessages.LibrariesWorkbookPage_libraries_remove_button,
@@ -258,7 +261,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			break;
 		case IDX_ADDFOL: /* add folder */
 			libentries= openClassFolderDialog(null);
-			break;			
+			break;
+		case IDX_ADDEXTFOL: /* add external folder */
+			libentries= openExternalClassFolderDialog(null);
+			break;						
 		case IDX_EDIT: /* edit */
 			editEntry();
 			return;
@@ -548,7 +554,12 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		case IClasspathEntry.CPE_LIBRARY:
 			IResource resource= elem.getResource();
 			if (resource == null) {
-				res= openExtJarFileDialog(elem);
+				File file= new File(elem.getPath().toOSString());
+				if (file.isDirectory()) {
+					res= openExternalClassFolderDialog(elem);
+				} else {
+					res= openExtJarFileDialog(elem);
+				}
 			} else if (resource.getType() == IResource.FOLDER) {
 				if (resource.exists()) {
 					res= openClassFolderDialog(elem);
@@ -591,6 +602,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		boolean noAttributes= containsOnlyTopLevelEntries(selElements);
 		fLibrariesList.enableButton(IDX_ADDEXT, noAttributes);
 		fLibrariesList.enableButton(IDX_ADDFOL, noAttributes);
+		fLibrariesList.enableButton(IDX_ADDEXTFOL, noAttributes);
 		fLibrariesList.enableButton(IDX_ADDJAR, noAttributes);
 		fLibrariesList.enableButton(IDX_ADDLIB, noAttributes);
 		fLibrariesList.enableButton(IDX_ADDVAR, noAttributes);
@@ -777,6 +789,25 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			}
 		} else {
 			IPath configured= BuildPathDialogAccess.configureExternalJAREntry(getShell(), existing.getPath());
+			if (configured != null) {
+				return new CPListElement[] { new CPListElement(fCurrJProject, IClasspathEntry.CPE_LIBRARY, configured, null) };
+			}
+		}		
+		return null;
+	}
+	
+	private CPListElement[] openExternalClassFolderDialog(CPListElement existing) {
+		if (existing == null) {
+			IPath[] selected= BuildPathDialogAccess.chooseExternalClassFolderEntries(getShell());
+			if (selected != null) {
+				ArrayList res= new ArrayList();
+				for (int i= 0; i < selected.length; i++) {
+					res.add(new CPListElement(fCurrJProject, IClasspathEntry.CPE_LIBRARY, selected[i], null));
+				}
+				return (CPListElement[]) res.toArray(new CPListElement[res.size()]);
+			}
+		} else {
+			IPath configured= BuildPathDialogAccess.configureExternalClassFolderEntries(getShell(), existing.getPath());
 			if (configured != null) {
 				return new CPListElement[] { new CPListElement(fCurrJProject, IClasspathEntry.CPE_LIBRARY, configured, null) };
 			}

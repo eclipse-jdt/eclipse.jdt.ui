@@ -559,7 +559,7 @@ public class CPListElement {
 							res= root.getFolder(path);
 						}
 					}
-					isMissing= !path.toFile().isFile(); // look for external JARs
+					isMissing= !path.toFile().exists(); // look for external JARs and folders
 				} else if (res.isLinked()) {
 					linkTarget= res.getLocation();
 				}

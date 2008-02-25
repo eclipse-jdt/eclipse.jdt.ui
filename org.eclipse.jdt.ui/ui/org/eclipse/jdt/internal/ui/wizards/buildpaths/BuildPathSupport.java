@@ -80,7 +80,6 @@ public class BuildPathSupport {
 		}
 		IJavaProject currProject= elem.getJavaProject(); // can be null
 		try {
-			// try if the jar itself contains the source
 			IJavaModel jmodel= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 			IJavaProject[] jprojects= jmodel.getJavaProjects();
 			for (int i= 0; i < jprojects.length; i++) {
