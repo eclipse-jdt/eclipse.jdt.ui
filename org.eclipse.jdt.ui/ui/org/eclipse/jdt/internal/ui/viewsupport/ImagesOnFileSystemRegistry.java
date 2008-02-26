@@ -29,6 +29,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
+ * Image registry that keeps its images on the local file system.
+ * 
  * @since 3.4
  */
 public class ImagesOnFileSystemRegistry {
@@ -65,7 +67,7 @@ public class ImagesOnFileSystemRegistry {
 		return getImageURL(descriptor);
 	}
 		
-	public URL getImageURL(ImageDescriptor descriptor) {		
+	public URL getImageURL(ImageDescriptor descriptor) {
 		if (fTempDir == null)
 			return null;
 		

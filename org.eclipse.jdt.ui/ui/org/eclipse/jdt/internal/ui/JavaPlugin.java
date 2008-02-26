@@ -112,22 +112,22 @@ import org.osgi.framework.BundleContext;
 public class JavaPlugin extends AbstractUIPlugin {
 	
 	/**
-	 * The key to store customized templates. 
+	 * The key to store customized templates.
 	 * @since 3.0
 	 */
 	private static final String TEMPLATES_KEY= "org.eclipse.jdt.ui.text.custom_templates"; //$NON-NLS-1$
 	/**
-	 * The key to store customized code templates. 
+	 * The key to store customized code templates.
 	 * @since 3.0
 	 */
 	private static final String CODE_TEMPLATES_KEY= "org.eclipse.jdt.ui.text.custom_code_templates"; //$NON-NLS-1$
 	/**
-	 * The key to store whether the legacy templates have been migrated 
+	 * The key to store whether the legacy templates have been migrated
 	 * @since 3.0
 	 */
 	private static final String TEMPLATES_MIGRATION_KEY= "org.eclipse.jdt.ui.text.templates_migrated"; //$NON-NLS-1$
 	/**
-	 * The key to store whether the legacy code templates have been migrated 
+	 * The key to store whether the legacy code templates have been migrated
 	 * @since 3.0
 	 */
 	private static final String CODE_TEMPLATES_MIGRATION_KEY= "org.eclipse.jdt.ui.text.code_templates_migrated"; //$NON-NLS-1$
@@ -141,24 +141,24 @@ public class JavaPlugin extends AbstractUIPlugin {
 		}
 	};
 	
-	/** 
-	 * The template context type registry for the java editor. 
+	/**
+	 * The template context type registry for the java editor.
 	 * @since 3.0
 	 */
 	private ContextTypeRegistry fContextTypeRegistry;
-	/** 
-	 * The code template context type registry for the java editor. 
+	/**
+	 * The code template context type registry for the java editor.
 	 * @since 3.0
 	 */
 	private ContextTypeRegistry fCodeTemplateContextTypeRegistry;
 	
 	/**
-	 * The template store for the java editor. 
+	 * The template store for the java editor.
 	 * @since 3.0
 	 */
 	private TemplateStore fTemplateStore;
 	/**
-	 * The coded template store for the java editor. 
+	 * The coded template store for the java editor.
 	 * @since 3.0
 	 */
 	private TemplateStore fCodeTemplateStore;
@@ -300,13 +300,13 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	public static void log(Throwable e) {
-		log(new Status(IStatus.ERROR, getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, JavaUIMessages.JavaPlugin_internal_error, e)); 
+		log(new Status(IStatus.ERROR, getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, JavaUIMessages.JavaPlugin_internal_error, e));
 	}
 	
 	/**
 	 * Log a message that is potentially repeated after a very short time.
 	 * The first time this method is called with a given message, the
-	 * message is written to the log along with the detail message and a stack trace. 
+	 * message is written to the log along with the detail message and a stack trace.
 	 * <p>
 	 * Only intended for use in debug statements.
 	 * 
@@ -471,10 +471,10 @@ public class JavaPlugin extends AbstractUIPlugin {
 		store.addPropertyChangeListener(fPropertyChangeListener);
 		
 		/*
-		 * Backward compatibility for the refactoring preference key. 
+		 * Backward compatibility for the refactoring preference key.
 		 */
 //		store.setValue(
-//			PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, 
+//			PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD,
 //			RefactoringCore.getConditionCheckingFailedSeverity());
 		
 		// The commented call above triggers the eager loading of the LTK core plug-in
@@ -602,7 +602,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 			// must add here to guarantee that it is the first in the listener list
 
 			OpenTypeHistory.shutdown();
-		} finally {	
+		} finally {
 			super.stop(context);
 		}
 	}
@@ -634,7 +634,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	
 	/**
 	 * Returns the shared document provider for Java properties files
-	 * used by this plug-in instance.  
+	 * used by this plug-in instance.
 	 * 
 	 * @return the shared document provider for Java properties files
 	 * @since 3.1
@@ -663,7 +663,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		if (fProblemMarkerManager == null)
 			fProblemMarkerManager= new ProblemMarkerManager();
 		return fProblemMarkerManager;
-	}	
+	}
 	
 	public synchronized JavaTextTools getJavaTextTools() {
 		if (fJavaTextTools == null)
@@ -694,13 +694,13 @@ public class JavaPlugin extends AbstractUIPlugin {
 		if (fTypeFilter == null)
 			fTypeFilter= new TypeFilter();
 		return fTypeFilter;
-	}	
+	}
 	
 	public FormToolkit getDialogsFormToolkit() {
 		if (fDialogsFormToolkit == null) {
 			FormColors colors= new FormColors(Display.getCurrent());
 			colors.setBackground(null);
-			colors.setForeground(null);	
+			colors.setForeground(null);
 			fDialogsFormToolkit= new FormToolkit(colors);
 		}
 		return fDialogsFormToolkit;
@@ -739,7 +739,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		}
 		
 		return fJavaEditorTextHoverDescriptors;
-	} 
+	}
 
 	/**
 	 * Resets the Java editor text hovers contributed to the workbench.
@@ -830,7 +830,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	/**
 	 * Private deprecated method to avoid deprecation warnings
 	 * 
-	 * @return the deprecated template store 
+	 * @return the deprecated template store
 	 * @deprecated
 	 */
 	private org.eclipse.jdt.internal.corext.template.java.Templates getOldTemplateStoreInstance() {
@@ -892,7 +892,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	/**
 	 * Private deprecated method to avoid deprecation warnings
 	 * 
-	 * @return the deprecated code template store 
+	 * @return the deprecated code template store
 	 * @deprecated
 	 */
 	private org.eclipse.jdt.internal.corext.template.java.CodeTemplates getOldCodeTemplateStoreInstance() {
@@ -914,7 +914,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	public IPreferenceStore getCombinedPreferenceStore() {
 		if (fCombinedPreferenceStore == null) {
-			IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore(); 
+			IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
 			fCombinedPreferenceStore= new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), new PreferencesAdapter(JavaCore.getPlugin().getPluginPreferences()), generalTextStore });
 		}
 		return fCombinedPreferenceStore;
@@ -1001,6 +1001,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 		return fClasspathAttributeConfigurationDescriptors;
 	}
 	
+	/**
+	 * Returns the image registry that keeps its images on the local file system.
+	 * 
+	 * @return the image registry
+	 * @since 3.4
+	 */
 	public ImagesOnFileSystemRegistry getImagesOnFSRegistry() {
 		if (fImagesOnFSRegistry == null) {
 			fImagesOnFSRegistry= new ImagesOnFileSystemRegistry();
