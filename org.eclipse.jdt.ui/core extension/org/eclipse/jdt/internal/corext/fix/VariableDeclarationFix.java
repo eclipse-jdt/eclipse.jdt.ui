@@ -545,6 +545,9 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 			}
 		}
 		
+		if (Modifier.isVolatile(varbinding.getModifiers()))
+			return false;
+		
 		return true;
 	}
 

@@ -5861,6 +5861,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
 	}
 	
+	//Changed test due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=220124
 	public void testAddFinalBug145028() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -5873,13 +5874,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS);
 		
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private final int field= 0;\n");
-		buf.append("}\n");
-		
-		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 	
 	public void testAddFinalBug157276_1() throws Exception {
