@@ -133,7 +133,7 @@ public class TestRunSession implements ITestRunSession {
 		//TODO: check assumptions about non-null fields
 
 		fLaunch= null;
-		fProject= null; //TODO
+		fProject= project;
 		
 		Assert.isNotNull(testRunName);
 		fTestRunName= testRunName;
