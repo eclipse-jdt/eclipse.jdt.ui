@@ -21,7 +21,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 
@@ -118,7 +117,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 	private IInformationControlCreator getInformationControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				return new DefaultInformationControl(parent, new HTMLTextPresenter());
+				return new DefaultInformationControl(parent, false);
 			}
 		};
 	}
@@ -294,7 +293,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 			return invocationLocation;
 		} else if (bestOffset != invocationLocation) {
 			int newClosestPosition= computeBestOffset(posBegin, invocationLocation, bestOffset);
-			if (newClosestPosition != -1) { 
+			if (newClosestPosition != -1) {
 				if (newClosestPosition != bestOffset) { // new best
 					if (JavaCorrectionProcessor.hasCorrections(annot)) { // only jump to it if there are proposals
 						return newClosestPosition;

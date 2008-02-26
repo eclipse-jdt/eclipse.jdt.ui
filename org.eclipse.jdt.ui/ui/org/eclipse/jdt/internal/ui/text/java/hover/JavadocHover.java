@@ -28,7 +28,6 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 import org.eclipse.jface.internal.text.html.BrowserInformationControlInput;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
-import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
 
 import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -277,7 +276,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				return iControl;
 				
 			} else {
-				return new DefaultInformationControl(parent, shellStyle, style, new HTMLTextPresenter(false));
+				return new DefaultInformationControl(parent, true);
 			}
 		}
 	}
@@ -301,7 +300,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				addLinkListener(iControl);
 				return iControl;
 			} else {
-				return new DefaultInformationControl(parent, style, new HTMLTextPresenter(true), EditorsUI.getTooltipAffordanceString());
+				return new DefaultInformationControl(parent, EditorsUI.getTooltipAffordanceString());
 			}
 		}
 

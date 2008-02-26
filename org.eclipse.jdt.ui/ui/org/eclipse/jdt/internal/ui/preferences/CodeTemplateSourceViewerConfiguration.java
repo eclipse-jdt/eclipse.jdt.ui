@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,12 +12,10 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.Iterator;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 
@@ -80,7 +78,7 @@ public class CodeTemplateSourceViewerConfiguration extends SimpleJavaSourceViewe
 							}
 						}
 					}
-				}				
+				}
 			} catch (BadLocationException e) {
 			}
 			return null;
@@ -93,10 +91,10 @@ public class CodeTemplateSourceViewerConfiguration extends SimpleJavaSourceViewe
 			if (textViewer != null) {
 				return JavaWordFinder.findWord(textViewer.getDocument(), offset);
 			}
-			return null;	
+			return null;
 		}
 		
-	} 
+	}
 	
 	private final TemplateVariableProcessor fProcessor;
 
@@ -112,7 +110,7 @@ public class CodeTemplateSourceViewerConfiguration extends SimpleJavaSourceViewe
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		IColorManager manager= textTools.getColorManager();					
+		IColorManager manager= textTools.getColorManager();
 		
 
 		ContentAssistant assistant= new ContentAssistant();
@@ -131,11 +129,11 @@ public class CodeTemplateSourceViewerConfiguration extends SimpleJavaSourceViewe
 		assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
 		assistant.setInformationControlCreator(new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true));
+				return new DefaultInformationControl(parent, false);
 			}
 		});
 
-		Color background= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, manager);			
+		Color background= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, manager);
 		assistant.setContextInformationPopupBackground(background);
 		assistant.setContextSelectorBackground(background);
 		assistant.setProposalSelectorBackground(background);
@@ -146,7 +144,7 @@ public class CodeTemplateSourceViewerConfiguration extends SimpleJavaSourceViewe
 		assistant.setProposalSelectorForeground(foreground);
 		
 		return assistant;
-	}	
+	}
 
 	private Color getColor(IPreferenceStore store, String key, IColorManager manager) {
 		RGB rgb= PreferenceConverter.getColor(store, key);

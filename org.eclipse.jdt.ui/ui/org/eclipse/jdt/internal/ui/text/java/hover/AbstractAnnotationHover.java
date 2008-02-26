@@ -34,6 +34,7 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -50,6 +51,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.Geometry;
 
 import org.eclipse.jface.text.AbstractInformationControl;
@@ -123,16 +125,18 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		private AnnotationInfo fInput;
 		private Composite fParent;
 
-		public AnnotationInformationControl(Shell parentShell, int shellStyle, String statusFieldText) {
-			super(parentShell, shellStyle, statusFieldText);
+		public AnnotationInformationControl(Shell parentShell, String statusFieldText) {
+			super(parentShell, statusFieldText);
 			
 			fMarkerAnnotationAccess= new DefaultMarkerAnnotationAccess();
+			create();
 		}
 
-		public AnnotationInformationControl(Shell parentShell, int shellStyle, ToolBarManager toolBarManager) {
-			super(parentShell, shellStyle, toolBarManager);
+		public AnnotationInformationControl(Shell parentShell, ToolBarManager toolBarManager) {
+			super(parentShell, toolBarManager);
 			
 			fMarkerAnnotationAccess= new DefaultMarkerAnnotationAccess();
+			create();
 		}
 		
 		/*
@@ -153,6 +157,13 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			deferredCreateContent(fParent);
 		}
 		
+		/*
+		 * @see org.eclipse.jface.text.IInformationControlExtension#hasContents()
+		 */
+		public boolean hasContents() {
+			return fInput != null;
+		}
+		
 		private AnnotationInfo getAnnotationInfo() {
 			return fInput;
 		}
@@ -171,6 +182,8 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		 */
 		protected void createContent(Composite parent) {
 			fParent= new Composite(parent, SWT.NONE);
+			fParent.setForeground(parent.getForeground());
+			fParent.setBackground(parent.getBackground());
 			fParent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			GridLayout layout= new GridLayout(1, false);
 			layout.verticalSpacing= 0;
@@ -217,17 +230,18 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			if (proposals.length > 0)
 				createCompletionProposalsControl(parent, getAnnotationInfo().document, proposals);
 
-			setColor(parent, parent.getForeground(), parent.getBackground());
+			setColorAndFont(parent, parent.getForeground(), parent.getBackground(), JFaceResources.getDialogFont());
 		}
 
-		private void setColor(Control control, Color foreground, Color background) {
+		private void setColorAndFont(Control control, Color foreground, Color background, Font font) {
 			control.setForeground(foreground);
 			control.setBackground(background);
-
+			control.setFont(font);
+			
 			if (control instanceof Composite) {
 				Control[] children= ((Composite) control).getChildren();
 				for (int i= 0; i < children.length; i++) {
-					setColor(children[i], foreground, background);
+					setColorAndFont(children[i], foreground, background, font);
 				}
 			}
 		}
@@ -265,10 +279,10 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			layout2.verticalSpacing= 2;
 			composite.setLayout(layout2);
 
-			Label seperator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
+			Label separator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 			GridData gridData= new GridData(SWT.FILL, SWT.CENTER, true, false);
 			gridData.horizontalSpan= 2;
-			seperator.setLayoutData(gridData);
+			separator.setLayoutData(gridData);
 
 			Label quickFixImage= new Label(composite, SWT.NONE);
 			quickFixImage.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
@@ -439,7 +453,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
 		public IInformationControl doCreateInformationControl(Shell parent) {
-			return new AnnotationInformationControl(parent, SWT.RESIZE | SWT.TOOL, new ToolBarManager(SWT.FLAT));
+			return new AnnotationInformationControl(parent, new ToolBarManager(SWT.FLAT));
 		}
 	}
 
@@ -454,7 +468,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		 * @see org.eclipse.jface.text.IInformationControlCreator#createInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
 		public IInformationControl createInformationControl(Shell parent) {
-			return new AnnotationInformationControl(parent, SWT.TOOL, EditorsUI.getTooltipAffordanceString());
+			return new AnnotationInformationControl(parent, EditorsUI.getTooltipAffordanceString());
 		}
 	}
 	

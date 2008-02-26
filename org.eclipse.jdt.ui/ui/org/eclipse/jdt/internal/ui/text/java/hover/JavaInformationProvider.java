@@ -14,7 +14,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
-import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
 
 import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -52,7 +51,7 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 			if (BrowserInformationControl.isAvailable(parent))
 				return new BrowserInformationControl(parent, shellStyle, style);
 			else
-				return new DefaultInformationControl(parent, shellStyle, style, new HTMLTextPresenter(false));
+				return new DefaultInformationControl(parent, true);
 		}
 	}
 	
