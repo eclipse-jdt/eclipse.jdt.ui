@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 
@@ -81,7 +82,10 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
@@ -129,6 +133,7 @@ import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
+import org.eclipse.jdt.internal.ui.viewsupport.ImagesOnFileSystemRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 import org.osgi.framework.Bundle;
@@ -846,23 +851,53 @@ public class JavadocView extends AbstractInfoView {
 	protected Object computeInput(Object input) {
 		if (getControl() == null || ! (input instanceof IJavaElement))
 			return null;
+		
+		IWorkbenchPart part= null;
+		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if (window != null) {
+			IWorkbenchPage page= window.getActivePage();
+			if (page != null) {
+				part= page.getActivePart();
+			}
+		}
+		
+		ISelection selection= null;
+		if (part != null) {
+			IWorkbenchPartSite site= part.getSite();
+			if (site != null) {
+				ISelectionProvider provider= site.getSelectionProvider();
+				if (provider != null) {
+					selection= provider.getSelection();
+				}
+			}
+		}
 
-		IJavaElement je= (IJavaElement)input;
+		return computeInput(part, selection, (IJavaElement) input, new NullProgressMonitor());
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#computeInput(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection, org.eclipse.jdt.core.IJavaElement, org.eclipse.core.runtime.IProgressMonitor)
+	 * @since 3.4
+	 */
+	protected Object computeInput(IWorkbenchPart part, ISelection selection, IJavaElement input, IProgressMonitor monitor) {
+		if (getControl() == null || input == null)
+			return null;
+
 		String javadocHtml;
 
-		switch (je.getElementType()) {
+		switch (input.getElementType()) {
 			case IJavaElement.COMPILATION_UNIT:
 				try {
-					javadocHtml= getJavadocHtml(((ICompilationUnit)je).getTypes());
+					javadocHtml= getJavadocHtml(((ICompilationUnit) input).getTypes(), part, selection, monitor);
 				} catch (JavaModelException ex) {
 					javadocHtml= null;
 				}
 				break;
 			case IJavaElement.CLASS_FILE:
-				javadocHtml= getJavadocHtml(new IJavaElement[] {((IClassFile)je).getType()});
+				javadocHtml= getJavadocHtml(new IJavaElement[] { ((IClassFile) input).getType() }, part, selection, monitor);
 				break;
 			default:
-				javadocHtml= getJavadocHtml(new IJavaElement[] { je });
+				javadocHtml= getJavadocHtml(new IJavaElement[] { input }, part, selection, monitor);
 		}
 		
 		if (javadocHtml == null)
@@ -876,16 +911,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @since 3.4
 	 */
 	protected String computeDescription(IWorkbenchPart part, ISelection selection, IJavaElement inputElement, IProgressMonitor monitor) {
-		StringBuffer description= new StringBuffer(super.computeDescription(part, selection, inputElement, monitor));
-
-		if (inputElement.getElementType() != IJavaElement.FIELD)
-			return description.toString();
-
-		String constantValue= computeFieldConstant(part, selection, (IField) inputElement, monitor);
-		if (constantValue != null)
-			description.append(constantValue);
-
-		return description.toString();
+		return ""; //$NON-NLS-1$
 	}
 	
 	/*
@@ -924,9 +950,12 @@ public class JavadocView extends AbstractInfoView {
 	 * Returns the Javadoc in HTML format.
 	 *
 	 * @param result the Java elements for which to get the Javadoc
+	 * @param activePart the active part if any 
+	 * @param selection the selection of the active site if any
+	 * @param monitor a monitor to report progress to
 	 * @return a string with the Javadoc in HTML format.
 	 */
-	private String getJavadocHtml(IJavaElement[] result) {
+	private String getJavadocHtml(IJavaElement[] result, IWorkbenchPart activePart, ISelection selection, IProgressMonitor monitor) {
 		StringBuffer buffer= new StringBuffer();
 		int nResults= result.length;
 
@@ -939,7 +968,7 @@ public class JavadocView extends AbstractInfoView {
 				HTMLPrinter.startBulletList(buffer);
 				IJavaElement curr= result[i];
 				if (curr instanceof IMember)
-					HTMLPrinter.addBullet(buffer, getInfoText((IMember) curr));
+					HTMLPrinter.addBullet(buffer, getInfoText(curr, null, false));
 				HTMLPrinter.endBulletList(buffer);
 			}
 
@@ -947,8 +976,13 @@ public class JavadocView extends AbstractInfoView {
 
 			IJavaElement curr= result[0];
 			if (curr instanceof IMember) {
-				IMember member= (IMember) curr;
-//				HTMLPrinter.addSmallHeader(buffer, getInfoText(member));
+				final IMember member= (IMember) curr;
+				
+				String constantValue= null;
+				if (member instanceof IField)
+					constantValue= computeFieldConstant(activePart, selection, (IField) member, monitor);
+				
+				HTMLPrinter.addSmallHeader(buffer, getInfoText(member, constantValue, true));
 				Reader reader;
 				try {
 					String content= JavadocContentAccess2.getHTMLContent(member, true, true);
@@ -996,10 +1030,46 @@ public class JavadocView extends AbstractInfoView {
 	 * Gets the label for the given member.
 	 *
 	 * @param member the Java member
+	 * @param constantValue the constant value if any
+	 * @param allowImage true if the java element image should be shown
 	 * @return a string containing the member's label
 	 */
-	private String getInfoText(IMember member) {
-		return JavaElementLabels.getElementLabel(member, LABEL_FLAGS);
+	private static String getInfoText(IJavaElement member, String constantValue, boolean allowImage) {
+		StringBuffer label= new StringBuffer(JavaElementLabels.getElementLabel(member, LABEL_FLAGS));
+		if (member.getElementType() == IJavaElement.FIELD && constantValue != null) {
+			label.append(constantValue);
+		}
+
+		StringBuffer buf= new StringBuffer();
+		String divStyleAddition= ""; //$NON-NLS-1$
+
+		if (allowImage) {
+			ImagesOnFileSystemRegistry store= JavaPlugin.getDefault().getImagesOnFSRegistry();
+			URL imageUrl= store.getImageURL(member);
+
+			if (imageUrl != null) {
+				// the image, with absolute placement
+				buf.append("<img style='width: 16px; height: 16px; position: absolute; top: 15px; left: 10px;' src='").append(imageUrl.toExternalForm()).append("'/>"); //$NON-NLS-1$ //$NON-NLS-2$
+				// add margin top the rest
+				divStyleAddition= "margin-left: 20px; margin-top: 0px;"; //$NON-NLS-1$
+			}
+		}
+
+		buf.append("<div style='word-wrap:break-word;"); // qualified names can become quite long -> allow wrapping inside word (CSS3) //$NON-NLS-1$
+		buf.append(divStyleAddition).append("'>"); //$NON-NLS-1$
+
+		for (int i= 0; i < label.length(); i++) {
+			char ch= label.charAt(i);
+			if (ch == '<') {
+				buf.append("&lt;"); //$NON-NLS-1$
+			} else if (ch == '>') {
+				buf.append("&gt;"); //$NON-NLS-1$
+			} else {
+				buf.append(ch);
+			}
+		}
+		buf.append("</div>"); //$NON-NLS-1$
+		return buf.toString();
 	}
 
 	/*

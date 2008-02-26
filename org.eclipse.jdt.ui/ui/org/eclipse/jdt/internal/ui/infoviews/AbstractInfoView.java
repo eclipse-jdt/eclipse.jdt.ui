@@ -155,6 +155,20 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 * @return	the input or <code>null</code> if the input was not computed successfully
 	 */
 	abstract protected Object computeInput(Object element);
+	
+	/**
+	 * Computes the input for this view based on the given elements
+	 * 
+	 * @param part the part that triggered the current element update, or <code>null</code>
+	 * @param selection the new selection, or <code>null</code>
+	 * @param element the new java element that will be displayed
+	 * @param monitor a progress monitor
+	 * @return the input or <code>null</code> if the input was not computed successfully
+	 * @since 3.4
+	 */
+	protected Object computeInput(IWorkbenchPart part, ISelection selection, IJavaElement element, IProgressMonitor monitor) {
+		return computeInput(element);
+	}
 
 	/**
 	 * Create the part control.
@@ -558,7 +572,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 
 
 				// The actual computation
-				final Object input= computeInput(je);
+				final Object input= computeInput(part, selection, je, computeProgressMonitor);
 				if (input == null)
 					return;
 				
