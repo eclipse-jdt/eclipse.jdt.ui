@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,6 +98,7 @@ import org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
+import org.eclipse.jdt.internal.ui.viewsupport.ImagesOnFileSystemRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathAttributeConfigurationDescriptors;
 
@@ -243,6 +244,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	private ClasspathAttributeConfigurationDescriptors fClasspathAttributeConfigurationDescriptors;
 	
 	private FormToolkit fDialogsFormToolkit;
+	
+	private ImagesOnFileSystemRegistry fImagesOnFSRegistry;
 	
 	/**
 	 * Theme listener.
@@ -585,6 +588,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 			if (fThemeListener != null) {
 				PlatformUI.getWorkbench().getThemeManager().removePropertyChangeListener(fThemeListener);
 				fThemeListener= null;
+			}
+			
+			if (fImagesOnFSRegistry != null) {
+				fImagesOnFSRegistry.dispose();
+				fImagesOnFSRegistry= null;
 			}
 			
 			SpellCheckEngine.shutdownInstance();
@@ -991,6 +999,13 @@ public class JavaPlugin extends AbstractUIPlugin {
 			fClasspathAttributeConfigurationDescriptors= new ClasspathAttributeConfigurationDescriptors();
 		}
 		return fClasspathAttributeConfigurationDescriptors;
+	}
+	
+	public ImagesOnFileSystemRegistry getImagesOnFSRegistry() {
+		if (fImagesOnFSRegistry == null) {
+			fImagesOnFSRegistry= new ImagesOnFileSystemRegistry();
+		}
+		return fImagesOnFSRegistry;
 	}
 	
 }

@@ -76,6 +76,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.infoviews.JavadocView;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
+import org.eclipse.jdt.internal.ui.viewsupport.ImagesOnFileSystemRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 
@@ -171,20 +172,20 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 //	/**
 //	 * Action that opens the external Javadoc for the current element.
-//	 * 
+//	 *
 //	 * @since 3.4
 //	 */
 //	private static final class ShowExternalJavadocAction extends Action {
 //		private final BrowserInformationControl fInfoControl;
 //		private final Shell fParent;
-//		
+//
 //		public ShowExternalJavadocAction(BrowserInformationControl infoControl, Shell parent) {
 //			fInfoControl= infoControl;
 //			fParent= parent;
 //			setText("Show External Javadoc");
 //			setImageDescriptor(JavaPluginImages.DESC_OBJS_JAVADOC_LOCATION_ATTRIB); //TODO: better image
 //		}
-//		
+//
 //		/*
 //		 * @see org.eclipse.jface.action.Action#run()
 //		 */
@@ -192,7 +193,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 //			JavadocBrowserInformationContolInput infoInput= (JavadocBrowserInformationContolInput) fInfoControl.getInput(); //TODO: check cast
 //			fInfoControl.notifyDelayedInputChange(null);
 //			fInfoControl.dispose(); //FIXME: should have protocol to hide, rather than dispose
-////			new OpenExternalJavadocAction(infoInput.getElement(), fShell) //TODO: split up reusable parts into non-api class 
+////			new OpenExternalJavadocAction(infoInput.getElement(), fShell) //TODO: split up reusable parts into non-api class
 //		}
 //	}
 	
@@ -488,6 +489,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		String base= null;
 		IJavaElement element= null;
 		
+		int leadingImageWidth= 0;
+		
 		if (nResults > 1) {
 
 			for (int i= 0; i < elements.length; i++) {
@@ -495,7 +498,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				IJavaElement curr= elements[i];
 				if (curr instanceof IMember || curr.getElementType() == IJavaElement.LOCAL_VARIABLE) {
 					//FIXME: provide links
-					HTMLPrinter.addBullet(buffer, getInfoText(curr, constantValue));
+					HTMLPrinter.addBullet(buffer, getInfoText(curr, constantValue, false));
 					hasContents= true;
 				}
 				HTMLPrinter.endBulletList(buffer);
@@ -506,7 +509,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			element= elements[0];
 			if (element instanceof IMember) {
 				IMember member= (IMember) element;
-				HTMLPrinter.addSmallHeader(buffer, getInfoText(member, constantValue));
+				HTMLPrinter.addSmallHeader(buffer, getInfoText(member, constantValue, true));
 				Reader reader;
 				try {
 //					reader= JavadocContentAccess.getHTMLContentReader(member, true, true);
@@ -546,9 +549,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					JavaPlugin.log(e);
 				}
 			} else if (element.getElementType() == IJavaElement.LOCAL_VARIABLE || element.getElementType() == IJavaElement.TYPE_PARAMETER) {
-				HTMLPrinter.addSmallHeader(buffer, getInfoText(element, constantValue));
+				HTMLPrinter.addSmallHeader(buffer, getInfoText(element, constantValue, true));
 				hasContents= true;
 			}
+			leadingImageWidth= 20;
 		}
 		
 		if (!hasContents)
@@ -562,13 +566,13 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 //				buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			HTMLPrinter.addPageEpilog(buffer);
-			return new JavadocBrowserInformationControlInput(previousInput, element, buffer.toString());
+			return new JavadocBrowserInformationControlInput(previousInput, element, buffer.toString(), leadingImageWidth);
 		}
 
 		return null;
 	}
 
-	private static String getInfoText(IJavaElement member, String constantValue) {
+	private static String getInfoText(IJavaElement member, String constantValue, boolean allowImage) {
 		long flags= member.getElementType() == IJavaElement.LOCAL_VARIABLE ? LOCAL_VARIABLE_FLAGS : LABEL_FLAGS;
 		StringBuffer label= new StringBuffer(JavaElementLabels.getElementLabel(member, flags));
 		if (member.getElementType() == IJavaElement.FIELD) {
@@ -584,7 +588,22 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		}
 		
 		StringBuffer buf= new StringBuffer();
-		buf.append("<span style=\"word-wrap:break-word;\">"); // qualified names can become quite long -> allow wrapping inside word (CSS3) //$NON-NLS-1$
+		String divStyleAddition= ""; //$NON-NLS-1$
+		
+		if (allowImage) {
+			ImagesOnFileSystemRegistry store= JavaPlugin.getDefault().getImagesOnFSRegistry();
+			URL imageUrl= store.getImageURL(member);
+			
+			if (imageUrl != null) {
+				// the image, with absolute placement
+				buf.append("<img style='width: 16px; height: 16px; position: absolute; top: 2px; left: 2px;' src='").append(imageUrl.toExternalForm()).append("'/>"); //$NON-NLS-1$ //$NON-NLS-2$
+				// add margin top the rest
+				divStyleAddition= "margin-left: 20px; margin-top: 2px;"; //$NON-NLS-1$
+			}
+		}
+
+		buf.append("<div style='word-wrap:break-word;"); // qualified names can become quite long -> allow wrapping inside word (CSS3) //$NON-NLS-1$
+		buf.append(divStyleAddition).append("'>"); //$NON-NLS-1$
 
 		for (int i= 0; i < label.length(); i++) {
 			char ch= label.charAt(i);
@@ -596,8 +615,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				buf.append(ch);
 			}
 		}
-
-		buf.append("</span>"); //$NON-NLS-1$
+		buf.append("</div>"); //$NON-NLS-1$
 		return buf.toString();
 	}
 
