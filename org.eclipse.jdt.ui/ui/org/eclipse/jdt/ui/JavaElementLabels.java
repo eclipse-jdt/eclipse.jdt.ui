@@ -1165,21 +1165,23 @@ public class JavaElementLabels {
 
 	private static void getFolderLabel(IPackageFragmentRoot root, long flags, StringBuffer buf) {
 		IResource resource= root.getResource();
+		if (resource == null) {
+			getExternalArchiveLabel(root, flags, buf);
+			return;
+		}
+		
 		boolean rootQualified= getFlag(flags, ROOT_QUALIFIED);
 		boolean referencedQualified= getFlag(flags, REFERENCED_ROOT_POST_QUALIFIED) && isReferenced(root);
 		if (rootQualified) {
 			buf.append(root.getPath().makeRelative().toString());
 		} else {
-			if (resource != null) {
-				IPath projectRelativePath= resource.getProjectRelativePath();
-				if (projectRelativePath.segmentCount() == 0) {
-					buf.append(resource.getName());
-					referencedQualified= false;
-				} else {
-					buf.append(projectRelativePath.toString());
-				}
-			} else
-				buf.append(root.getElementName());
+			IPath projectRelativePath= resource.getProjectRelativePath();
+			if (projectRelativePath.segmentCount() == 0) {
+				buf.append(resource.getName());
+				referencedQualified= false;
+			} else {
+				buf.append(projectRelativePath.toString());
+			}
 			if (referencedQualified) {
 				buf.append(CONCAT_STRING);
 				buf.append(resource.getProject().getName());

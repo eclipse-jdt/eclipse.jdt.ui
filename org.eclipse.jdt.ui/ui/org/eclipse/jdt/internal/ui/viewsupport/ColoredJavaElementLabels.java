@@ -946,21 +946,23 @@ public class ColoredJavaElementLabels {
 
 	private static void getFolderLabel(IPackageFragmentRoot root, long flags, ColoredString result) {
 		IResource resource= root.getResource();
+		if (resource == null) {
+			getExternalArchiveLabel(root, flags, result);
+			return;
+		}
 		boolean rootQualified= getFlag(flags, JavaElementLabels.ROOT_QUALIFIED);
 		boolean referencedQualified= getFlag(flags, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED) && isReferenced(root);
 		if (rootQualified) {
 			result.append(root.getPath().makeRelative().toString());
 		} else {
-			if (resource != null) {
-				IPath projectRelativePath= resource.getProjectRelativePath();
-				if (projectRelativePath.segmentCount() == 0) {
-					result.append(resource.getName());
-					referencedQualified= false;
-				} else {
-					result.append(projectRelativePath.toString());
-				}
-			} else
-				result.append(root.getElementName());
+			IPath projectRelativePath= resource.getProjectRelativePath();
+			if (projectRelativePath.segmentCount() == 0) {
+				result.append(resource.getName());
+				referencedQualified= false;
+			} else {
+				result.append(projectRelativePath.toString());
+			}
+				
 			int offset= result.length();
 			if (referencedQualified) {
 				result.append(JavaElementLabels.CONCAT_STRING);
