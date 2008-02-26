@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -235,6 +235,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 * @see IMenuListener#menuAboutToShow(org.eclipse.jface.action.IMenuManager)
 	 */
 	public void menuAboutToShow(IMenuManager menu) {
+		menu.add(new Separator(IContextMenuConstants.GROUP_GOTO));
 		menu.add(new Separator(IContextMenuConstants.GROUP_OPEN));
 		menu.add(new Separator(ITextEditorActionConstants.GROUP_EDIT));
 		menu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));

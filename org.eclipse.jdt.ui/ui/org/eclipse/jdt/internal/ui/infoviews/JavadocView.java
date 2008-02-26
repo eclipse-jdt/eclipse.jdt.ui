@@ -17,7 +17,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -28,6 +32,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.LocationAdapter;
+import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
@@ -43,6 +49,9 @@ import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
@@ -69,9 +78,13 @@ import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TextUtilities;
 
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -103,17 +116,20 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.JavadocContentAccess;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 import org.osgi.framework.Bundle;
 
@@ -127,6 +143,255 @@ import org.osgi.framework.Bundle;
  * @since 3.0
  */
 public class JavadocView extends AbstractInfoView {
+	
+	/**
+	 * A history stores a list of IJavaElements. The history
+	 * can be used to go forth and back.
+	 * 
+	 * @since 3.4
+	 */
+	private final static class History {
+		
+		/**
+		 * A history listener is informed about history changes.
+		 */
+		public interface IHistoryListener {
+			void changed(History history);
+		}
+		
+		private final ArrayList fBackLinkHistory;
+		private final ArrayList fForthLinkHistory;
+		private final ListenerList fHistoryList;
+
+		public History() {
+			fBackLinkHistory= new ArrayList();
+			fForthLinkHistory= new ArrayList();
+			fHistoryList= new ListenerList();
+		}
+
+		/**
+		 * Reset this history. All history entries are discarded.
+		 */
+		public void reset() {
+			fBackLinkHistory.clear();
+			fForthLinkHistory.clear();
+			notifyListeners();
+		}
+
+		/**
+		 * Set the most recent history element to the given element.
+		 * 
+		 * @param element the most recent history element
+		 */
+		public void setCurrent(IJavaElement element) {
+			fBackLinkHistory.add(element);
+			fForthLinkHistory.clear();
+			notifyListeners();
+		}
+		
+		/**
+		 * Get the current element selected in the history.
+		 * This may be different for the element set by setCurrent
+		 * if back was used.
+		 * 
+		 * @return the current selected history element.
+		 */
+		public IJavaElement getCurrent() {
+			if (fBackLinkHistory.isEmpty())
+				return null;
+
+			return (IJavaElement) fBackLinkHistory.get(fBackLinkHistory.size() - 1);
+		}
+		
+		/**
+		 * Returns the next element in the history. This is the
+		 * element that would be returned by {@link #forth()}.
+		 * 
+		 * @return the next element in the history or <code>null</code> if none exists
+		 */
+		public IJavaElement getNext() {
+			if (!canGoForth())
+				return null;
+
+			return (IJavaElement) fForthLinkHistory.get(0);
+		}
+
+		/**
+		 * Returns the previous element in the history. This is
+		 * the element that would be returned by {@link #back()}.
+		 * 
+		 * @return the previous element in the history or <code>null</code> if none exists
+		 */
+		public IJavaElement getPrevious() {
+			if (!canGoBack())
+				return null;
+
+			return (IJavaElement) fBackLinkHistory.get(fBackLinkHistory.size() - 2);
+		}
+
+		/**
+		 * True if it is possible to go back.
+		 * 
+		 * @return true if one can go back in the history
+		 */
+		public boolean canGoBack() {
+			return fBackLinkHistory.size() > 1;
+		}
+
+		/**
+		 * True if it is possible to go forth.
+		 * 
+		 * @return true if one can go forth in the history
+		 */
+		public boolean canGoForth() {
+			return !fForthLinkHistory.isEmpty();
+		}
+
+		/**
+		 * Go back in the history. Returns the element prior to the current element.
+		 * 
+		 * @return the element prior to the current element
+		 */
+		public IJavaElement back() {
+			if (!canGoBack())
+				throw new IllegalArgumentException();
+			
+			IJavaElement last= (IJavaElement) fBackLinkHistory.remove(fBackLinkHistory.size() - 1);
+			fForthLinkHistory.add(0, last);
+			
+			notifyListeners();
+
+			return (IJavaElement) fBackLinkHistory.get(fBackLinkHistory.size() - 1);
+		}
+
+		/**
+		 * Go forth in the history. Returns the element next to the current element.
+		 * 
+		 * @return the element next to the current element
+		 */
+		public IJavaElement forth() {
+			if (!canGoForth())
+				throw new IllegalArgumentException();
+			
+			IJavaElement first= (IJavaElement) fForthLinkHistory.remove(0);
+			fBackLinkHistory.add(first);
+	
+			notifyListeners();
+			
+			return first;
+		}
+		
+		/**
+		 * Add the given listener to the set of history listeners
+		 * 
+		 * @param listener the listener to add
+		 */
+		public void addHistoryListener(IHistoryListener listener) {
+			if (listener == null)
+				throw new IllegalArgumentException();
+
+			fHistoryList.add(listener);
+		}
+		
+		/**
+		 * Inform all listeners about changes in the history.
+		 */
+		private void notifyListeners() {
+			Object[] listeners= fHistoryList.getListeners();
+			for (int i= 0; i < listeners.length; i++) {
+				((IHistoryListener) listeners[i]).changed(this);
+			}
+		}
+	}
+
+	/**
+	 * Action to go forward in the history.
+	 * 
+	 * @since 3.4
+	 */
+	private final class ForthAction extends Action {
+		
+		private final History fHistory;
+
+		public ForthAction(History history) {
+			fHistory= history;
+			
+			setText(InfoViewMessages.JavadocView_action_forward_name);
+			setToolTipText(fHistory);
+			ISharedImages images= PlatformUI.getWorkbench().getSharedImages();
+			setImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_FORWARD));
+			setDisabledImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_FORWARD_DISABLED));
+			
+			fHistory.addHistoryListener(new History.IHistoryListener() {
+				public void changed(History changedHistory) {
+					setEnabled(changedHistory.canGoForth());
+					setToolTipText(changedHistory);
+				}
+			});
+			setEnabled(fHistory.canGoForth());
+		}
+		
+		private void setToolTipText(History history) {
+			if (history.canGoForth()) {
+				IJavaElement element= history.getNext();
+				setToolTipText(Messages.format(InfoViewMessages.JavadocView_action_forward_enabledTooltip, element.getElementName()));
+			} else {
+				setToolTipText(InfoViewMessages.JavadocView_action_forward_disabledTooltip);
+			}
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.action.Action#run()
+		 */
+		public void run() {
+			setInput(fHistory.forth());
+		}
+		
+	}
+
+	/**
+	 * Action to go backwards in the history.
+	 * 
+	 * @since 3.4
+	 */
+	private final class BackAction extends Action {
+		
+		private final History fHistory;
+
+		public BackAction(History history) {
+			fHistory= history;
+			
+			setText(InfoViewMessages.JavadocView_action_back_name);
+			setToolTipText(fHistory);
+			ISharedImages images= PlatformUI.getWorkbench().getSharedImages();
+			setImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_BACK));
+			setDisabledImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_BACK_DISABLED));
+			
+			fHistory.addHistoryListener(new History.IHistoryListener() {
+				public void changed(History changedHistory) {
+					setEnabled(changedHistory.canGoBack());
+					setToolTipText(changedHistory);
+				}
+			});
+			setEnabled(fHistory.canGoBack());
+		}
+
+		private void setToolTipText(History history) {
+			if (history.canGoBack()) {
+				IJavaElement element= history.getPrevious();
+				setToolTipText(Messages.format(InfoViewMessages.JavadocView_action_back_enabledTooltip, element.getElementName()));
+			} else {
+				setToolTipText(InfoViewMessages.JavadocView_action_back_disabledTooltip);
+			}
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.action.Action#run()
+		 */
+		public void run() {
+			setInput(fHistory.back());
+		}
+	}
 
 	/**
 	 * Preference key for the preference whether to show a dialog
@@ -177,8 +442,25 @@ public class JavadocView extends AbstractInfoView {
 	 * @since 3.4
 	 */
 	private String fOriginalInput;
-
 	
+	/** 
+	 * A history containing followed links.
+	 * @since 3.4
+	 */
+	private final History fLinkHistory= new History();
+	
+	/**
+	 * Action to go back in the link history.
+	 * @since 3.4
+	 */
+	private BackAction fBackAction;
+
+	/**
+	 * Action to go forth in the link history.
+	 * @since 3.4
+	 */
+	private ForthAction fForthAction;
+
 	/**
 	 * The Javadoc view's select all action.
 	 */
@@ -315,6 +597,7 @@ public class JavadocView extends AbstractInfoView {
 		try {
 			fBrowser= new Browser(parent, SWT.NONE);
 			fIsUsingBrowserWidget= true;
+			addLinkListener(fBrowser);
 			
 		} catch (SWTError er) {
 
@@ -432,9 +715,47 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	protected void createActions() {
 		super.createActions();
-		fSelectAllAction= new SelectAllAction(getControl(), (SelectionProvider)getSelectionProvider());
+		fSelectAllAction= new SelectAllAction(getControl(), (SelectionProvider) getSelectionProvider()); 
+		
+		fBackAction= new BackAction(fLinkHistory);
+		fBackAction.setActionDefinitionId("org.eclipse.ui.navigate.back"); //$NON-NLS-1$
+		fForthAction= new ForthAction(fLinkHistory);
+		fForthAction.setActionDefinitionId("org.eclipse.ui.navigate.forward"); //$NON-NLS-1$
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#fillActionBars(org.eclipse.ui.IActionBars)
+	 * @since 3.4
+	 */
+	protected void fillActionBars(IActionBars actionBars) {
+		super.fillActionBars(actionBars);
+
+		actionBars.setGlobalActionHandler(ActionFactory.BACK.getId(), fBackAction);
+		actionBars.setGlobalActionHandler(ActionFactory.FORWARD.getId(), fForthAction);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#fillToolBar(org.eclipse.jface.action.IToolBarManager)
+	 * @since 3.4
+	 */
+	protected void fillToolBar(IToolBarManager tbm) {
+		tbm.add(fBackAction);
+		tbm.add(fForthAction);
+		tbm.add(new Separator());
+		
+		super.fillToolBar(tbm);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#menuAboutToShow(org.eclipse.jface.action.IMenuManager)
+	 * @since 3.4
+	 */
+	public void menuAboutToShow(IMenuManager menu) {
+		super.menuAboutToShow(menu);
+
+		menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fBackAction);
+		menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fForthAction);
+	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getSelectAllAction()
@@ -630,7 +951,8 @@ public class JavadocView extends AbstractInfoView {
 //				HTMLPrinter.addSmallHeader(buffer, getInfoText(member));
 				Reader reader;
 				try {
-					reader= JavadocContentAccess.getHTMLContentReader(member, true, true);
+					String content= JavadocContentAccess2.getHTMLContent(member, true, true);
+					reader= content == null ? null : new StringReader(content);
 					
 					// Provide hint why there's no Javadoc
 					if (reader == null && member.isBinary()) {
@@ -992,4 +1314,107 @@ public class JavadocView extends AbstractInfoView {
 			buffer.append(' ');
 		return buffer.toString();
 	}
+	
+	/**
+	 * see also org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover.addLinkListener(BrowserInformationControl)
+	 * 
+	 * Add link listener to the given browser
+	 * @param browser the browser to add a listener to
+	 * @since 3.4
+	 */
+	private void addLinkListener(Browser browser) {
+		browser.addLocationListener(new LocationAdapter() {
+
+			public void changing(LocationEvent event) {
+				event.doit= false;
+				
+				String loc= event.location;
+				URI uri;
+				try {
+					uri= new URI(loc);
+				} catch (URISyntaxException e) {
+					JavaPlugin.log(e);
+					return;
+				}
+
+				String scheme= uri.getScheme();
+				if (JavaElementLinks.JAVADOC_VIEW_SCHEME.equals(scheme)) {
+					if (handleJavadocViewLink(uri))
+						return;
+				} else if (JavaElementLinks.JAVADOC_SCHEME.equals(scheme)) {
+					if (handleInlineJavadocLink(uri))
+						return;
+				} else if (JavaElementLinks.OPEN_LINK_SCHEME.equals(scheme)) {
+					if (handleDeclarationLink(uri))
+						return;
+				} else if (!"about:blank".equals(loc)) { //$NON-NLS-1$
+					/*
+					 * Using the Browser.setText API triggers a location change to "about:blank".
+					 * XXX: remove this code once https://bugs.eclipse.org/bugs/show_bug.cgi?id=130314 is fixed
+					 */
+					if (loc.startsWith("about:")) //$NON-NLS-1$
+						return; //FIXME: handle relative links
+					
+					try {
+						// open external links in real browser:
+						OpenBrowserUtil.open(new URL(loc), event.display, ""); //$NON-NLS-1$
+						return;
+					} catch (MalformedURLException e) {
+						JavaPlugin.log(e);
+					}
+				}
+				
+				event.doit= true;
+				
+				IJavaElement input= getInput();
+				IJavaElement current= fLinkHistory.getCurrent();
+				if (current == null || !current.equals(input)) {
+					fLinkHistory.reset();
+					if (input != null)
+						fLinkHistory.setCurrent(input);
+				}
+			}
+
+			private boolean handleJavadocViewLink(URI uri) {
+				IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
+				if (linkTarget == null)
+					return false;
+
+				fLinkHistory.setCurrent(linkTarget);
+				
+				JavadocView.this.setInput(linkTarget);
+				return true;
+			}
+
+			private boolean handleInlineJavadocLink(URI uri) {
+				IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
+				if (linkTarget == null)
+					return false;
+				
+				fLinkHistory.setCurrent(linkTarget);
+				
+				JavadocView.this.setInput(linkTarget);
+				return true;
+			}
+
+			private boolean handleDeclarationLink(URI uri) {
+				IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
+				if (linkTarget == null)
+					return false;
+
+				try {
+					//FIXME: add hover location to editor navigation history?
+					JavaUI.openInEditor(linkTarget);
+					return true;
+				} catch (PartInitException e) {
+					JavaPlugin.log(e);
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+				}
+				
+				return false;
+			}
+		});
+	}
+
 }
