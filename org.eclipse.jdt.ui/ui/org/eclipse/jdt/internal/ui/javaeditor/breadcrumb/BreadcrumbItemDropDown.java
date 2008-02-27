@@ -49,7 +49,6 @@ import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.FilteredTable.Direction;
 import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.FilteredTable.INavigateListener;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 
 
 /**
@@ -234,7 +233,7 @@ class BreadcrumbItemDropDown {
 				return false;
 			}
 		});
-		viewer.setLabelProvider(new ColoringLabelProvider(fLabelProvider));
+		viewer.setLabelProvider(fLabelProvider);
 		viewer.setComparator(new JavaElementComparator());
 		viewer.setInput(fParent.getInput());
 

@@ -124,7 +124,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -329,7 +328,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		initDragAndDrop();
 
 		fLabelProvider= createLabelProvider();
-		fViewer.setLabelProvider(new ColoringLabelProvider(createDecoratingLabelProvider(fLabelProvider)));
+		fViewer.setLabelProvider(createDecoratingLabelProvider(fLabelProvider));
 
 		fViewer.setComparator(createJavaElementComparator());
 		fViewer.setUseHashlookup(true);

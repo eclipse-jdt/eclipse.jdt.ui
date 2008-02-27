@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,10 +15,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.swt.graphics.TextStyle;
-
-import org.eclipse.jface.resource.ColorRegistry;
-import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledStringBuilder.Styler;
 
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
@@ -54,39 +52,17 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredString.Style;
 
 public class ColoredJavaElementLabels {
-	
-	public static class DefaultStyle extends Style {
-		private final String fForegroundColorName;
-		private final String fBackgroundColorName;
 
-		public DefaultStyle(String foregroundColorName, String backgroundColorName) {
-			fForegroundColorName= foregroundColorName;	
-			fBackgroundColorName= backgroundColorName;
-		}
-		
-		public void applyStyles(TextStyle textStyle) {
-			ColorRegistry colorRegistry= JFaceResources.getColorRegistry();
-			if (fForegroundColorName != null) {
-				textStyle.foreground= colorRegistry.get(fForegroundColorName);
-			}
-			if (fBackgroundColorName != null) {
-				textStyle.background= colorRegistry.get(fBackgroundColorName);
-			}
-		}
-	}
-
-
-	public static final Style QUALIFIER_STYLE= new DefaultStyle(ColoredViewersManager.QUALIFIER_COLOR_NAME, null); 
-	public static final Style COUNTER_STYLE= new DefaultStyle(ColoredViewersManager.COUNTER_COLOR_NAME, null); 
-	public static final Style DECORATIONS_STYLE= new DefaultStyle(ColoredViewersManager.DECORATIONS_COLOR_NAME, null); 
+	public static final Styler QUALIFIER_STYLE= StyledStringBuilder.QUALIFIER_STYLER; 
+	public static final Styler COUNTER_STYLE= StyledStringBuilder.COUNTER_STYLER; 
+	public static final Styler DECORATIONS_STYLE= StyledStringBuilder.DECORATIONS_STYLER; 
 	
-	public static final Style HIGHLIGHT_STYLE= new DefaultStyle(null, ColoredViewersManager.HIGHLIGHT_BG_COLOR_NAME);
-	public static final Style HIGHLIGHT_WRITE_STYLE= new DefaultStyle(null, ColoredViewersManager.HIGHLIGHT_WRITE_BG_COLOR_NAME);
+	public static final Styler HIGHLIGHT_STYLE= StyledStringBuilder.createColorRegistryStyler(null, ColoredViewersManager.HIGHLIGHT_BG_COLOR_NAME);
+	public static final Styler HIGHLIGHT_WRITE_STYLE= StyledStringBuilder.createColorRegistryStyler(null, ColoredViewersManager.HIGHLIGHT_WRITE_BG_COLOR_NAME);
 	
-	private static final Style APPENDED_TYPE_STYLE= DECORATIONS_STYLE; 
+	private static final Styler APPENDED_TYPE_STYLE= DECORATIONS_STYLE; 
 	
 	public final static long COLORIZE= 1L << 55;
 	
@@ -104,16 +80,16 @@ public class ColoredJavaElementLabels {
 	 * @param flags The rendering flags
 	 * @return Returns the label or the empty string if the object type is not supported.
 	 */
-	public static ColoredString getTextLabel(Object obj, long flags) {
+	public static StyledStringBuilder getTextLabel(Object obj, long flags) {
 		if (obj instanceof IJavaElement) {
 			return getElementLabel((IJavaElement) obj, flags);
 		} else if (obj instanceof IResource) {
-			return new ColoredString(((IResource) obj).getName());
+			return new StyledStringBuilder(((IResource) obj).getName());
 		} else if (obj instanceof ClassPathContainer) {
 			ClassPathContainer container= (ClassPathContainer) obj;
 			return getContainerEntryLabel(container.getClasspathEntry().getPath(), container.getJavaProject());
 		}
-		return new ColoredString(JavaElementLabels.getTextLabel(obj, flags));
+		return new StyledStringBuilder(JavaElementLabels.getTextLabel(obj, flags));
 	}
 				
 	/**
@@ -122,8 +98,8 @@ public class ColoredJavaElementLabels {
 	 * @param flags The rendering flags.
 	 * @return the label of the Java element
 	 */
-	public static ColoredString getElementLabel(IJavaElement element, long flags) {
-		ColoredString result= new ColoredString();
+	public static StyledStringBuilder getElementLabel(IJavaElement element, long flags) {
+		StyledStringBuilder result= new StyledStringBuilder();
 		getElementLabel(element, flags, result);
 		return result;
 	}
@@ -134,7 +110,7 @@ public class ColoredJavaElementLabels {
 	 * @param flags The rendering flags.
 	 * @param result The buffer to append the resulting label to.
 	 */
-	public static void getElementLabel(IJavaElement element, long flags, ColoredString result) {
+	public static void getElementLabel(IJavaElement element, long flags, StyledStringBuilder result) {
 		int type= element.getElementType();
 		IPackageFragmentRoot root= null;
 		
@@ -199,12 +175,12 @@ public class ColoredJavaElementLabels {
 	}
 
 	/**
-	 * Appends the label for a method to a {@link ColoredString}. Considers the M_* flags.
+	 * Appends the label for a method to a {@link StyledStringBuilder}. Considers the M_* flags.
 	 * 	@param method The element to render.
 	 * @param flags The rendering flags. Flags with names starting with 'M_' are considered.
 	 * @param result The buffer to append the resulting label to.
 	 */		
-	public static void getMethodLabel(IMethod method, long flags, ColoredString result) {
+	public static void getMethodLabel(IMethod method, long flags, StyledStringBuilder result) {
 		try {
 			BindingKey resolvedKey= getFlag(flags, JavaElementLabels.USE_RESOLVED) && method.isResolved() ? new BindingKey(method.getKey()) : null;
 			String resolvedSig= (resolvedKey != null) ? resolvedKey.toSignature() : null;
@@ -392,11 +368,11 @@ public class ColoredJavaElementLabels {
 		}
 	}
 
-	private static void getCategoryLabel(IMember member, long flags, ColoredString result) throws JavaModelException {
+	private static void getCategoryLabel(IMember member, long flags, StyledStringBuilder result) throws JavaModelException {
 		String[] categories= member.getCategories();
 		if (categories.length > 0) {
 			int offset= result.length();
-			ColoredString categoriesBuf= new ColoredString();
+			StyledStringBuilder categoriesBuf= new StyledStringBuilder();
 			for (int i= 0; i < categories.length; i++) {
 				if (i > 0)
 					categoriesBuf.append(JavaUIMessages.JavaElementLabels_category_separator_string);
@@ -416,7 +392,7 @@ public class ColoredJavaElementLabels {
 	 * @param flags flags with render options
 	 * @param result the resulting string buffer
 	 */
-	private static void getTypeParametersLabel(ITypeParameter[] typeParameters, long flags, ColoredString result) {
+	private static void getTypeParametersLabel(ITypeParameter[] typeParameters, long flags, StyledStringBuilder result) {
 		if (typeParameters.length > 0) {
 			result.append('<');
 			for (int i = 0; i < typeParameters.length; i++) {
@@ -430,12 +406,12 @@ public class ColoredJavaElementLabels {
 	}
 	
 	/**
-	 * Appends the label for a field to a {@link ColoredString}. Considers the F_* flags.
+	 * Appends the label for a field to a {@link StyledStringBuilder}. Considers the F_* flags.
 	 * 	@param field The element to render.
 	 * @param flags The rendering flags. Flags with names starting with 'F_' are considered.
 	 * @param result The buffer to append the resulting label to.
 	 */	
-	public static void getFieldLabel(IField field, long flags, ColoredString result) {
+	public static void getFieldLabel(IField field, long flags, StyledStringBuilder result) {
 		try {
 			
 			if (getFlag(flags, JavaElementLabels.F_PRE_TYPE_SIGNATURE) && field.exists() && !Flags.isEnum(field.getFlags())) {
@@ -487,12 +463,12 @@ public class ColoredJavaElementLabels {
 	}
 	
 	/**
-	 * Appends the label for a local variable to a {@link ColoredString}.
+	 * Appends the label for a local variable to a {@link StyledStringBuilder}.
 	 * 	@param localVariable The element to render.
 	 * @param flags The rendering flags. Flags with names starting with 'F_' are considered.
 	 * @param result The buffer to append the resulting label to.
 	 */	
-	public static void getLocalVariableLabel(ILocalVariable localVariable, long flags, ColoredString result) {
+	public static void getLocalVariableLabel(ILocalVariable localVariable, long flags, StyledStringBuilder result) {
 		if (getFlag(flags, JavaElementLabels.F_PRE_TYPE_SIGNATURE)) {
 			getTypeSignatureLabel(localVariable.getTypeSignature(), flags, result);
 			result.append(' ');
@@ -522,12 +498,12 @@ public class ColoredJavaElementLabels {
 	}
 	
 	/**
-	 * Appends the label for a initializer to a {@link ColoredString}. Considers the I_* flags.
+	 * Appends the label for a initializer to a {@link StyledStringBuilder}. Considers the I_* flags.
 	 * 	@param initializer The element to render.
 	 * @param flags The rendering flags. Flags with names starting with 'I_' are considered.
 	 * @param result The buffer to append the resulting label to.
 	 */	
-	public static void getInitializerLabel(IInitializer initializer, long flags, ColoredString result) {
+	public static void getInitializerLabel(IInitializer initializer, long flags, StyledStringBuilder result) {
 		// qualification
 		if (getFlag(flags, JavaElementLabels.I_FULLY_QUALIFIED)) {
 			getTypeLabel(initializer.getDeclaringType(), JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS), result);
@@ -546,7 +522,7 @@ public class ColoredJavaElementLabels {
 		}
 	}
 	
-	private static void getTypeSignatureLabel(String typeSig, long flags, ColoredString result) {
+	private static void getTypeSignatureLabel(String typeSig, long flags, StyledStringBuilder result) {
 		int sigKind= Signature.getTypeSignatureKind(typeSig);
 		switch (sigKind) {
 			case Signature.BASE_TYPE_SIGNATURE:
@@ -590,7 +566,7 @@ public class ColoredJavaElementLabels {
 		}
 	}
 	
-	private static void getTypeArgumentSignaturesLabel(String[] typeArgsSig, long flags, ColoredString result) {
+	private static void getTypeArgumentSignaturesLabel(String[] typeArgsSig, long flags, StyledStringBuilder result) {
 		if (typeArgsSig.length > 0) {
 			result.append('<');
 			for (int i = 0; i < typeArgsSig.length; i++) {
@@ -609,7 +585,7 @@ public class ColoredJavaElementLabels {
 	 * @param flags flags with render options
 	 * @param result the resulting string buffer
 	 */
-	private static void getTypeParameterSignaturesLabel(String[] typeParamSigs, long flags, ColoredString result) {
+	private static void getTypeParameterSignaturesLabel(String[] typeParamSigs, long flags, StyledStringBuilder result) {
 		if (typeParamSigs.length > 0) {
 			result.append('<');
 			for (int i = 0; i < typeParamSigs.length; i++) {
@@ -624,12 +600,12 @@ public class ColoredJavaElementLabels {
 	
 
 	/**
-	 * Appends the label for a type to a {@link ColoredString}. Considers the T_* flags.
+	 * Appends the label for a type to a {@link StyledStringBuilder}. Considers the T_* flags.
 	 * 	@param type The element to render.
 	 * @param flags The rendering flags. Flags with names starting with 'T_' are considered.
 	 * @param result The buffer to append the resulting label to.
 	 */		
-	public static void getTypeLabel(IType type, long flags, ColoredString result) {
+	public static void getTypeLabel(IType type, long flags, StyledStringBuilder result) {
 		
 		if (getFlag(flags, JavaElementLabels.T_FULLY_QUALIFIED)) {
 			IPackageFragment pack= type.getPackageFragment();
@@ -722,12 +698,12 @@ public class ColoredJavaElementLabels {
 	}
 
 	/**
-	 * Appends the label for a import container, import or package declaration to a {@link ColoredString}. Considers the D_* flags.
+	 * Appends the label for a import container, import or package declaration to a {@link StyledStringBuilder}. Considers the D_* flags.
 	 * 	@param declaration The element to render.
 	 * @param flags The rendering flags. Flags with names starting with 'D_' are considered.
 	 * @param result The buffer to append the resulting label to.
 	 */	
-	public static void getDeclarationLabel(IJavaElement declaration, long flags, ColoredString result) {
+	public static void getDeclarationLabel(IJavaElement declaration, long flags, StyledStringBuilder result) {
 		if (getFlag(flags, JavaElementLabels.D_QUALIFIED)) {
 			IJavaElement openable= (IJavaElement) declaration.getOpenable();
 			if (openable != null) {
@@ -755,12 +731,12 @@ public class ColoredJavaElementLabels {
 	}	
 	
 	/**
-	 * Appends the label for a class file to a {@link ColoredString}. Considers the CF_* flags.
+	 * Appends the label for a class file to a {@link StyledStringBuilder}. Considers the CF_* flags.
 	 * 	@param classFile The element to render.
 	 * @param flags The rendering flags. Flags with names starting with 'CF_' are considered.
 	 * @param result The buffer to append the resulting label to.
 	 */	
-	public static void getClassFileLabel(IClassFile classFile, long flags, ColoredString result) {
+	public static void getClassFileLabel(IClassFile classFile, long flags, StyledStringBuilder result) {
 		if (getFlag(flags, JavaElementLabels.CF_QUALIFIED)) {
 			IPackageFragment pack= (IPackageFragment) classFile.getParent();
 			if (!pack.isDefaultPackage()) {
@@ -781,12 +757,12 @@ public class ColoredJavaElementLabels {
 	}
 
 	/**
-	 * Appends the label for a compilation unit to a {@link ColoredString}. Considers the CU_* flags.
+	 * Appends the label for a compilation unit to a {@link StyledStringBuilder}. Considers the CU_* flags.
 	 * 	@param cu The element to render.
 	 * @param flags The rendering flags. Flags with names starting with 'CU_' are considered.
 	 * @param result The buffer to append the resulting label to.
 	 */
-	public static void getCompilationUnitLabel(ICompilationUnit cu, long flags, ColoredString result) {
+	public static void getCompilationUnitLabel(ICompilationUnit cu, long flags, StyledStringBuilder result) {
 		if (getFlag(flags, JavaElementLabels.CU_QUALIFIED)) {
 			IPackageFragment pack= (IPackageFragment) cu.getParent();
 			if (!pack.isDefaultPackage()) {
@@ -807,12 +783,12 @@ public class ColoredJavaElementLabels {
 	}
 
 	/**
-	 * Appends the label for a package fragment to a {@link ColoredString}. Considers the P_* flags.
+	 * Appends the label for a package fragment to a {@link StyledStringBuilder}. Considers the P_* flags.
 	 * 	@param pack The element to render.
 	 * @param flags The rendering flags. Flags with names starting with P_' are considered.
 	 * @param result The buffer to append the resulting label to.
 	 */	
-	public static void getPackageFragmentLabel(IPackageFragment pack, long flags, ColoredString result) {
+	public static void getPackageFragmentLabel(IPackageFragment pack, long flags, StyledStringBuilder result) {
 		if (getFlag(flags, JavaElementLabels.P_QUALIFIED)) {
 			getPackageFragmentRootLabel((IPackageFragmentRoot) pack.getParent(), JavaElementLabels.ROOT_QUALIFIED, result);
 			result.append('/');
@@ -837,19 +813,19 @@ public class ColoredJavaElementLabels {
 	}
 
 	/**
-	 * Appends the label for a package fragment root to a {@link ColoredString}. Considers the ROOT_* flags.
+	 * Appends the label for a package fragment root to a {@link StyledStringBuilder}. Considers the ROOT_* flags.
 	 * 	@param root The element to render.
 	 * @param flags The rendering flags. Flags with names starting with ROOT_' are considered.
 	 * @param result The buffer to append the resulting label to.
 	 */	
-	public static void getPackageFragmentRootLabel(IPackageFragmentRoot root, long flags, ColoredString result) {
+	public static void getPackageFragmentRootLabel(IPackageFragmentRoot root, long flags, StyledStringBuilder result) {
 		if (root.isArchive())
 			getArchiveLabel(root, flags, result);
 		else
 			getFolderLabel(root, flags, result);
 	}
 	
-	private static void getArchiveLabel(IPackageFragmentRoot root, long flags, ColoredString result) {
+	private static void getArchiveLabel(IPackageFragmentRoot root, long flags, StyledStringBuilder result) {
 		// Handle variables different	
 		if (getFlag(flags, JavaElementLabels.ROOT_VARIABLE) && getVariableLabel(root, flags, result))
 			return;
@@ -860,7 +836,7 @@ public class ColoredJavaElementLabels {
 			getInternalArchiveLabel(root, flags, result);
 	}
 	
-	private static boolean getVariableLabel(IPackageFragmentRoot root, long flags, ColoredString result) {
+	private static boolean getVariableLabel(IPackageFragmentRoot root, long flags, StyledStringBuilder result) {
 		try {
 			IClasspathEntry rawEntry= root.getRawClasspathEntry();
 			if (rawEntry != null && rawEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
@@ -898,7 +874,7 @@ public class ColoredJavaElementLabels {
 		return false;
 	}
 
-	private static void getExternalArchiveLabel(IPackageFragmentRoot root, long flags, ColoredString result) {
+	private static void getExternalArchiveLabel(IPackageFragmentRoot root, long flags, StyledStringBuilder result) {
 		IPath path= root.getPath();
 		if (getFlag(flags, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED)) {
 			int segements= path.segmentCount();
@@ -920,7 +896,7 @@ public class ColoredJavaElementLabels {
 		}
 	}
 
-	private static void getInternalArchiveLabel(IPackageFragmentRoot root, long flags, ColoredString result) {
+	private static void getInternalArchiveLabel(IPackageFragmentRoot root, long flags, StyledStringBuilder result) {
 		IResource resource= root.getResource();
 		boolean rootQualified= getFlag(flags, JavaElementLabels.ROOT_QUALIFIED);
 		boolean referencedQualified= getFlag(flags, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED) && isReferenced(root);
@@ -944,7 +920,7 @@ public class ColoredJavaElementLabels {
 		}
 	}
 
-	private static void getFolderLabel(IPackageFragmentRoot root, long flags, ColoredString result) {
+	private static void getFolderLabel(IPackageFragmentRoot root, long flags, StyledStringBuilder result) {
 		IResource resource= root.getResource();
 		if (resource == null) {
 			getExternalArchiveLabel(root, flags, result);
@@ -1002,7 +978,7 @@ public class ColoredJavaElementLabels {
 	 * @param project The project the container is resolved in.
 	 * @return Returns the label of the classpath container
 	 */
-	public static ColoredString getContainerEntryLabel(IPath containerPath, IJavaProject project) {
+	public static StyledStringBuilder getContainerEntryLabel(IPath containerPath, IJavaProject project) {
 		try {
 			IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, project);
 			String description= null;
@@ -1016,7 +992,7 @@ public class ColoredJavaElementLabels {
 				}
 			}
 			if (description != null) {
-				ColoredString str= new ColoredString(description);
+				StyledStringBuilder str= new StyledStringBuilder(description);
 				if (containerPath.segmentCount() > 0 && JavaRuntime.JRE_CONTAINER.equals(containerPath.segment(0))) {
 					int index= description.indexOf('[');
 					if (index != -1) {
@@ -1028,17 +1004,17 @@ public class ColoredJavaElementLabels {
 		} catch (JavaModelException e) {
 			// ignore
 		}
-		return new ColoredString(containerPath.toString());
+		return new StyledStringBuilder(containerPath.toString());
 	}
 
-	public static ColoredString decorateColoredString(ColoredString string, String decorated, Style color) {
-		String label= string.getString();
+	public static StyledStringBuilder decorateStyledString(StyledStringBuilder string, String decorated, Styler color) {
+		String label= string.toString();
 		int originalStart= decorated.indexOf(label);
 		if (originalStart == -1) {
-			return new ColoredString(decorated); // the decorator did something wild
+			return new StyledStringBuilder(decorated); // the decorator did something wild
 		}
 		if (originalStart > 0) {
-			ColoredString newString= new ColoredString(decorated.substring(0, originalStart), color);
+			StyledStringBuilder newString= new StyledStringBuilder(decorated.substring(0, originalStart), color);
 			newString.append(string);
 			string= newString;
 		}

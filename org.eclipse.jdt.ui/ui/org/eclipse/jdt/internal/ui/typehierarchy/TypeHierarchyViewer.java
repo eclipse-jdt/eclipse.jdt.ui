@@ -36,7 +36,6 @@ import org.eclipse.jdt.ui.actions.OpenAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
  
@@ -50,7 +49,7 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 
 		fLabelProvider= new HierarchyLabelProvider(lifeCycle);
 	
-		setLabelProvider(new ColoringLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, true)));
+		setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, true));
 		setUseHashlookup(true);
 			
 		setContentProvider(contentProvider);

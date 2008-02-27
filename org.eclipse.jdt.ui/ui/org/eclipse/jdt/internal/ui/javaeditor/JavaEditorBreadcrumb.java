@@ -30,11 +30,9 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.IViewerLabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerLabel;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
@@ -64,9 +62,7 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.BreadcrumbViewer;
 import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.IRichLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ResourceToItemsMapper;
 
@@ -164,7 +160,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		}
 	}
 
-	private static final class JavaBreadcrumbLabelProvider implements ILabelProvider, IRichLabelProvider, IViewerLabelProvider {
+	private static final class JavaBreadcrumbLabelProvider implements ILabelProvider {
 
 		private final DecoratingJavaLabelProvider fParent;
 
@@ -213,20 +209,6 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		 */
 		public void removeListener(ILabelProviderListener listener) {
 			fParent.removeListener(listener);
-		}
-
-		/*
-		 * @see org.eclipse.jdt.internal.ui.viewsupport.IRichLabelProvider#getRichTextLabel(java.lang.Object)
-		 */
-		public ColoredString getRichTextLabel(Object object) {
-			return fParent.getRichTextLabel(object);
-		}
-
-		/*
-		 * @see org.eclipse.jface.viewers.IViewerLabelProvider#updateLabel(org.eclipse.jface.viewers.ViewerLabel, java.lang.Object)
-		 */
-		public void updateLabel(ViewerLabel label, Object element) {
-			fParent.updateLabel(label, element);
 		}
 
 		private void internalDispose() {

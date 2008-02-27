@@ -137,7 +137,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.FilterUpdater;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
@@ -662,7 +661,7 @@ public class PackageExplorerPart extends ViewPart
 		fLabelProvider= createLabelProvider();
 		fLabelProvider.setIsFlatLayout(fIsCurrentLayoutFlat);
 		fDecoratingLabelProvider= new DecoratingJavaLabelProvider(fLabelProvider, false, fIsCurrentLayoutFlat);
-		fViewer.setLabelProvider(new ColoringLabelProvider(fDecoratingLabelProvider));
+		fViewer.setLabelProvider(fDecoratingLabelProvider);
 		// problem decoration provided by PackageLabelProvider
 	}
 	

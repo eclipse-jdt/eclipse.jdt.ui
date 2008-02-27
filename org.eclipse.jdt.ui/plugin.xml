@@ -980,7 +980,7 @@
             label="%coloredLabels.qualifier.label"
             categoryId="org.eclipse.jdt.ui.presentation"
             value="COLOR_DARK_GRAY"
-            id="org.eclipse.jdt.ui.ColoredLabels.qualifier">
+            id="QUALIFIER_COLOR">
          <description>
             %coloredLabels.qualifier.description
          </description>
@@ -989,7 +989,7 @@
             label="%coloredLabels.decorations.label"
             categoryId="org.eclipse.jdt.ui.presentation"
             value="149,125,71"
-            id="org.eclipse.jdt.ui.ColoredLabels.decorations">
+            id="DECORATIONS_COLOR">
          <description>
             %coloredLabels.decorations.description
          </description>
@@ -998,7 +998,7 @@
             label="%coloredLabels.counter.label"
             categoryId="org.eclipse.jdt.ui.presentation"
             value="0,127,174"
-            id="org.eclipse.jdt.ui.ColoredLabels.counter">
+            id="COUNTER_COLOR">
          <description>
             %coloredLabels.counter.description
          </description>

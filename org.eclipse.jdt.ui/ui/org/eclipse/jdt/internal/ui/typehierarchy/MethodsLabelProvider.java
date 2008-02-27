@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+import org.eclipse.jface.viewers.StyledStringBuilder;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -29,7 +30,6 @@ import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 
 /**
@@ -102,13 +102,15 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getRichTextLabel(java.lang.Object)
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
 	 */
-	public ColoredString getRichTextLabel(Object element) {
-		ColoredString text= super.getRichTextLabel(element);
+	public StyledStringBuilder getStyledText(Object element) {
+		StyledStringBuilder text= super.getStyledText(element);
 		String qualifier= getQualifier(element);
 		if (qualifier != null) {
-			return new ColoredString(qualifier).append(text);
+			StyledStringBuilder styledString= new StyledStringBuilder(qualifier);
+			styledString.append(text);
+			return styledString;
 		}
 		return text;
 		

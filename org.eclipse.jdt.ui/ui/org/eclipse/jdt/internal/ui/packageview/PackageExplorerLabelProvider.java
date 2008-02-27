@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.StyledStringBuilder;
 
 import org.eclipse.ui.IWorkingSet;
 
@@ -30,7 +31,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
@@ -60,14 +60,14 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getRichTextLabel(java.lang.Object)
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
 	 */
-	public ColoredString getRichTextLabel(Object element) {
+	public StyledStringBuilder getStyledText(Object element) {
 		String text= getSpecificText(element);
 		if (text != null) {
-			return new ColoredString(decorateText(text, element));
+			return new StyledStringBuilder(decorateText(text, element));
 		}
-		return super.getRichTextLabel(element);
+		return super.getStyledText(element);
 	}
 	
 	private String getSpecificText(Object element) {

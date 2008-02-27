@@ -17,6 +17,7 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
@@ -34,7 +35,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
@@ -183,7 +183,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 			}
 			return fSpecialColor;
 		} else if (element instanceof IType && isDifferentScope((IType) element)) {
-			return JFaceResources.getColorRegistry().get(ColoredViewersManager.QUALIFIER_COLOR_NAME);
+			return JFaceResources.getColorRegistry().get(JFacePreferences.QUALIFIER_COLOR);
 		}
 		return null;
 	}	

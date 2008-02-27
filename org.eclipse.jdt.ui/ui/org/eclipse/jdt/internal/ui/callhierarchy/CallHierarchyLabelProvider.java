@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.util.Collection;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.ILabelDecorator;
+import org.eclipse.jface.viewers.StyledStringBuilder;
 
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
@@ -26,7 +27,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
@@ -70,16 +70,16 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
     }
     
     /* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getRichTextLabel(java.lang.Object)
+     * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
      */
-    public ColoredString getRichTextLabel(Object element) {
+    public StyledStringBuilder getStyledText(Object element) {
         if (element instanceof MethodWrapper && ((MethodWrapper) element).getMember() != null) {
         	MethodWrapper wrapper= (MethodWrapper) element;
         	String decorated= getElementLabel(wrapper);
-        	ColoredString text= super.getRichTextLabel(wrapper.getMember());
-        	return ColoredJavaElementLabels.decorateColoredString(text, decorated, ColoredJavaElementLabels.COUNTER_STYLE);
+        	StyledStringBuilder text= super.getStyledText(wrapper.getMember());
+        	return ColoredJavaElementLabels.decorateStyledString(text, decorated, ColoredJavaElementLabels.COUNTER_STYLE);
         }
-        return new ColoredString(getSpecialLabel(element));
+        return new StyledStringBuilder(getSpecialLabel(element));
     }
     
     private String getSpecialLabel(Object element) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,10 +26,12 @@ import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
-public class JavaUILabelProvider implements ILabelProvider, IColorProvider, IRichLabelProvider {
+public class JavaUILabelProvider implements ILabelProvider, IColorProvider, IStyledLabelProvider {
 	
 	protected ListenerList fListeners = new ListenerList();
 	
@@ -171,14 +173,14 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, IRic
 		return decorateText(result, element);
 	}
 	
-	public ColoredString getRichTextLabel(Object element) {
-		ColoredString string= ColoredJavaElementLabels.getTextLabel(element, evaluateTextFlags(element) | ColoredJavaElementLabels.COLORIZE);
+	public StyledStringBuilder getStyledText(Object element) {
+		StyledStringBuilder string= ColoredJavaElementLabels.getTextLabel(element, evaluateTextFlags(element) | ColoredJavaElementLabels.COLORIZE);
 		if (string.length() == 0 && (element instanceof IStorage)) {
-			string= new ColoredString(fStorageLabelProvider.getText(element));
+			string= new StyledStringBuilder(fStorageLabelProvider.getText(element));
 		}
-		String decorated= decorateText(string.getString(), element);
+		String decorated= decorateText(string.toString(), element);
 		if (decorated != null) {
-			return ColoredJavaElementLabels.decorateColoredString(string, decorated, ColoredJavaElementLabels.DECORATIONS_STYLE);
+			return ColoredJavaElementLabels.decorateStyledString(string, decorated, ColoredJavaElementLabels.DECORATIONS_STYLE);
 		}
 		return string;
 	}
@@ -278,5 +280,6 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, IRic
             });
         }
     }
+
 
 }

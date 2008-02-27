@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,11 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
-import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DecorationContext;
-import org.eclipse.jface.viewers.ILabelDecorator;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.LabelDecorator;
 
 import org.eclipse.ui.PlatformUI;
 
@@ -22,7 +18,7 @@ import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 
 import org.eclipse.jdt.internal.ui.packageview.HierarchicalDecorationContext;
 
-public class DecoratingJavaLabelProvider extends DecoratingLabelProvider implements IRichLabelProvider {
+public class DecoratingJavaLabelProvider extends ColoringLabelProvider {
 	
 	/**
 	 * Decorating label provider for Java. Combines a JavaUILabelProvider
@@ -54,7 +50,7 @@ public class DecoratingJavaLabelProvider extends DecoratingLabelProvider impleme
 	 * @param flatPackageMode configure flat package mode
 	 */
 	public DecoratingJavaLabelProvider(JavaUILabelProvider labelProvider, boolean errorTick, boolean flatPackageMode) {
-		super(labelProvider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());
+		super(labelProvider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator(), DecorationContext.DEFAULT_CONTEXT);
 		if (errorTick) {
 			labelProvider.addLabelDecorator(new ProblemsLabelDecorator(null));
 		}
@@ -71,34 +67,6 @@ public class DecoratingJavaLabelProvider extends DecoratingLabelProvider impleme
 		} else {
 			setDecorationContext(HierarchicalDecorationContext.getContext());
 		}
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.IRichLabelProvider#getRichTextLabel(Object)
-	 */
-	public ColoredString getRichTextLabel(Object element) {
-		ILabelProvider labelProvider= getLabelProvider();
-		if (labelProvider instanceof IRichLabelProvider) {
-			// get a rich label from the label decorator
-			IRichLabelProvider richLabelProvider= (IRichLabelProvider) labelProvider;
-			ColoredString richLabel= richLabelProvider.getRichTextLabel(element);
-			if (richLabel != null) {
-				String decorated= null;
-				ILabelDecorator labelDecorator= getLabelDecorator();
-				if (labelDecorator != null) {
-					if (labelDecorator instanceof LabelDecorator) {
-						decorated= ((LabelDecorator) labelDecorator).decorateText(richLabel.getString(), element, getDecorationContext());
-					} else {
-						decorated= labelDecorator.decorateText(richLabel.getString(), element);
-					}
-				}
-				if (decorated != null) {
-					return ColoredJavaElementLabels.decorateColoredString(richLabel, decorated, ColoredJavaElementLabels.DECORATIONS_STYLE);
-				}
-				return richLabel;
-			}
-		}
-		return null;
 	}
 
 }

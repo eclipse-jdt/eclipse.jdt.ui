@@ -19,10 +19,10 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
-import org.eclipse.jdt.internal.ui.viewsupport.IRichLabelProvider;
 
 import org.eclipse.jdt.junit.model.ITestCaseElement;
 import org.eclipse.jdt.junit.model.ITestElement;
@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 
-public class TestSessionLabelProvider extends LabelProvider implements IRichLabelProvider {
+public class TestSessionLabelProvider extends LabelProvider implements IStyledLabelProvider {
 	
 	private final TestRunnerViewPart fTestRunnerPart;
 	private final int fLayoutMode;
@@ -54,15 +54,12 @@ public class TestSessionLabelProvider extends LabelProvider implements IRichLabe
 		timeFormat.setMinimumIntegerDigits(1);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.IRichLabelProvider#getRichTextLabel(java.lang.Object)
-	 */
-	public ColoredString getRichTextLabel(Object element) {
+	public StyledStringBuilder getStyledText(Object element) {
 		String label= getSimpleLabel(element);
 		if (label == null) {
-			return new ColoredString(element.toString());
+			return new StyledStringBuilder(element.toString());
 		}
-		ColoredString text= new ColoredString(label);
+		StyledStringBuilder text= new StyledStringBuilder(label);
 		
 		ITestElement testElement= (ITestElement) element;
 		if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
@@ -70,7 +67,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IRichLabe
 				String testKindDisplayName= fTestRunnerPart.getTestKindDisplayName();
 				if (testKindDisplayName != null) {
 					String decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testName_JUnitVersion, new Object[] { label, testKindDisplayName });
-					text= ColoredJavaElementLabels.decorateColoredString(text, decorated, ColoredJavaElementLabels.QUALIFIER_STYLE);
+					text= ColoredJavaElementLabels.decorateStyledString(text, decorated, ColoredJavaElementLabels.QUALIFIER_STYLE);
 				}
 			}
 			
@@ -78,16 +75,16 @@ public class TestSessionLabelProvider extends LabelProvider implements IRichLabe
 			if (element instanceof ITestCaseElement) {
 				String className= ((ITestCaseElement) element).getTestClassName();
 				String decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, className });
-				text= ColoredJavaElementLabels.decorateColoredString(text, decorated, ColoredJavaElementLabels.QUALIFIER_STYLE);
+				text= ColoredJavaElementLabels.decorateStyledString(text, decorated, ColoredJavaElementLabels.QUALIFIER_STYLE);
 			}
 		}
 		return addElapsedTime(text, testElement.getElapsedTimeInSeconds());
 	}
 	
-	private ColoredString addElapsedTime(ColoredString coloredString, double time) {
-		String string= coloredString.getString();
+	private StyledStringBuilder addElapsedTime(StyledStringBuilder styledString, double time) {
+		String string= styledString.toString();
 		String decorated= addElapsedTime(string, time);
-		return ColoredJavaElementLabels.decorateColoredString(coloredString, decorated, ColoredJavaElementLabels.COUNTER_STYLE);
+		return ColoredJavaElementLabels.decorateStyledString(styledString, decorated, ColoredJavaElementLabels.COUNTER_STYLE);
 	}
 
 	private String addElapsedTime(String string, double time) {

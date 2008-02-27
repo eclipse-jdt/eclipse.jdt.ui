@@ -82,7 +82,6 @@ import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
@@ -306,7 +305,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	protected void configureTableViewer(TableViewer viewer) {
 		viewer.setUseHashlookup(true);
 		fSortingLabelProvider= new SortingLabelProvider(this);
-		viewer.setLabelProvider(new ColoringLabelProvider(new DecoratingJavaLabelProvider(fSortingLabelProvider, false)));
+		viewer.setLabelProvider(new DecoratingJavaLabelProvider(fSortingLabelProvider, false));
 		fContentProvider=new JavaSearchTableContentProvider(this);
 		viewer.setContentProvider(fContentProvider);
 		viewer.setComparator(new DecoratorIgnoringViewerSorter(fSortingLabelProvider));
@@ -318,7 +317,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		PostfixLabelProvider postfixLabelProvider= new PostfixLabelProvider(this);
 		viewer.setUseHashlookup(true);
 		viewer.setComparator(new DecoratorIgnoringViewerSorter(postfixLabelProvider));
-		viewer.setLabelProvider(new ColoringLabelProvider(new DecoratingJavaLabelProvider(postfixLabelProvider, false)));
+		viewer.setLabelProvider(new DecoratingJavaLabelProvider(postfixLabelProvider, false));
 		fContentProvider= new LevelTreeContentProvider(this, fCurrentGrouping);
 		viewer.setContentProvider(fContentProvider);
 		addDragAdapters(viewer);

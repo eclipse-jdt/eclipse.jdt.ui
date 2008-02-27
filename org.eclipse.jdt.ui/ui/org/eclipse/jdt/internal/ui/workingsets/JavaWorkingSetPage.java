@@ -43,7 +43,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
@@ -103,7 +102,7 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS
 			);
 		
-		tree.setLabelProvider(new ColoringLabelProvider(new DecoratingJavaLabelProvider(javaElementLabelProvider)));
+		tree.setLabelProvider(new DecoratingJavaLabelProvider(javaElementLabelProvider));
 		tree.setComparator(new JavaElementComparator());
 		tree.addFilter(new EmptyInnerPackageFilter());
 		
@@ -137,7 +136,7 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS
 			);
 			
-		table.setLabelProvider(new ColoringLabelProvider(new DecoratingJavaLabelProvider(javaElementLabelProvider)));
+		table.setLabelProvider(new DecoratingJavaLabelProvider(javaElementLabelProvider));
 		table.setComparator(new JavaElementComparator());
 	}
 	

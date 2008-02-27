@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,10 @@ package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jface.viewers.StyledStringBuilder.Styler;
+
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
 
@@ -20,11 +24,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
-import org.eclipse.jdt.internal.ui.viewsupport.IRichLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredString.Style;
 
-class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements IRichLabelProvider {
+class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements IStyledLabelProvider {
 	
 	public OccurrencesSearchLabelProvider(AbstractTextSearchViewPage page) {
 		super(page);
@@ -37,13 +38,6 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 		return getLabelWithCounts(element, internalGetText(element)); 
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.IRichLabelProvider#getRichTextLabel(java.lang.Object)
-	 */
-	public ColoredString getRichTextLabel(Object element) {
-		return getColoredLabelWithCounts(element, internalGetRichText(element)); 
-	}
-
 	private String getLineNumberLabel(JavaElementLine element) {
 		return Messages.format(SearchMessages.OccurrencesSearchLabelProvider_line_number, new Integer(element.getLine()));
 	}
@@ -53,14 +47,14 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 		return getLineNumberLabel(jel) + jel.getLineContents();
 	}
 	
-	private ColoredString internalGetRichText(Object element) {
+	private StyledStringBuilder internalGetRichText(Object element) {
 		JavaElementLine jel= (JavaElementLine) element;
 
 		String lineNumberString= getLineNumberLabel(jel);
 
-		Style highlightStyle= ColoredJavaElementLabels.HIGHLIGHT_STYLE;
+		Styler highlightStyle= ColoredJavaElementLabels.HIGHLIGHT_STYLE;
 		
-		ColoredString res= new ColoredString();
+		StyledStringBuilder res= new StyledStringBuilder();
 		res.append(lineNumberString, ColoredJavaElementLabels.QUALIFIER_STYLE);
 		res.append(jel.getLineContents());
 		Match[] matches= getPage().getInput().getMatches(jel);
@@ -94,5 +88,12 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 			}
 		}
 		return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_OCCURRENCE);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider#getStyledText(java.lang.Object)
+	 */
+	public StyledStringBuilder getStyledText(Object element) {
+		return getColoredLabelWithCounts(element, internalGetRichText(element));			
 	}
 }

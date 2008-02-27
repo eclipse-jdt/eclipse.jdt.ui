@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,7 @@ import java.util.Set;
 
 import org.eclipse.swt.widgets.Display;
 
-import org.eclipse.jface.resource.ColorRegistry;
+import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -31,9 +31,6 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 	 */
 	public static final String PREF_COLORED_LABELS= "colored_labels_in_views"; //$NON-NLS-1$
 	
-	public static final String QUALIFIER_COLOR_NAME= "org.eclipse.jdt.ui.ColoredLabels.qualifier"; //$NON-NLS-1$
-	public static final String DECORATIONS_COLOR_NAME= "org.eclipse.jdt.ui.ColoredLabels.decorations"; //$NON-NLS-1$
-	public static final String COUNTER_COLOR_NAME= "org.eclipse.jdt.ui.ColoredLabels.counter"; //$NON-NLS-1$
 	public static final String INHERITED_COLOR_NAME= "org.eclipse.jdt.ui.ColoredLabels.inherited"; //$NON-NLS-1$
 	
 	public static final String HIGHLIGHT_BG_COLOR_NAME= "org.eclipse.jdt.ui.ColoredLabels.match_highlight"; //$NON-NLS-1$
@@ -42,12 +39,9 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 	private static ColoredViewersManager fgInstance= new ColoredViewersManager();
 	
 	private Set fManagedLabelProviders;
-	
-	private ColorRegistry fColorRegisty;
-	
+		
 	public ColoredViewersManager() {
 		fManagedLabelProviders= new HashSet();
-		fColorRegisty= JFaceResources.getColorRegistry();
 	}
 	
 	public void installColoredLabels(ColoringLabelProvider labelProvider) {
@@ -57,7 +51,7 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 		if (fManagedLabelProviders.isEmpty()) {
 			// first lp installed
 			PreferenceConstants.getPreferenceStore().addPropertyChangeListener(this);
-			fColorRegisty.addListener(this);
+			JFaceResources.getColorRegistry().addListener(this);
 		}
 		fManagedLabelProviders.add(labelProvider);
 	}
@@ -68,14 +62,14 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 		
 		if (fManagedLabelProviders.isEmpty()) {
 			PreferenceConstants.getPreferenceStore().removePropertyChangeListener(this);
-			fColorRegisty.removeListener(this);
+			JFaceResources.getColorRegistry().removeListener(this);
 			// last viewer uninstalled
 		}
 	}
 				
 	public void propertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
-		if (property.equals(QUALIFIER_COLOR_NAME) || property.equals(COUNTER_COLOR_NAME) || property.equals(DECORATIONS_COLOR_NAME)
+		if (property.equals(JFacePreferences.QUALIFIER_COLOR) || property.equals(JFacePreferences.COUNTER_COLOR) || property.equals(JFacePreferences.DECORATIONS_COLOR)
 				|| property.equals(HIGHLIGHT_BG_COLOR_NAME) || property.equals(PREF_COLORED_LABELS) || property.equals(HIGHLIGHT_WRITE_BG_COLOR_NAME)) {
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {

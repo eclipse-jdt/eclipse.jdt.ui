@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,13 +14,14 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.viewers.StyledStringBuilder;
+
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
 
 public class SortingLabelProvider extends SearchLabelProvider {
 	
@@ -64,21 +65,21 @@ public class SortingLabelProvider extends SearchLabelProvider {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getRichTextLabel(java.lang.Object)
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
 	 */
-	public ColoredString getRichTextLabel(Object element) {
+	public StyledStringBuilder getStyledText(Object element) {
 		if (element instanceof IImportDeclaration)
 			element= ((IImportDeclaration)element).getParent().getParent();
 		
-		ColoredString text= super.getRichTextLabel(element);
+		StyledStringBuilder text= super.getStyledText(element);
 		if (text.length() > 0) {
-			ColoredString countLabel= getColoredLabelWithCounts(element, text);
+			StyledStringBuilder countLabel= getColoredLabelWithCounts(element, text);
 			if (fCurrentOrder == SHOW_ELEMENT_CONTAINER) {
 				countLabel.append(getPostQualification(element), ColoredJavaElementLabels.QUALIFIER_STYLE);
 			}
 			return countLabel;
 		}
-		return new ColoredString(getParticipantText(element));	
+		return new StyledStringBuilder(getParticipantText(element));	
 	}
 
 	private String getPostQualification(Object element) {

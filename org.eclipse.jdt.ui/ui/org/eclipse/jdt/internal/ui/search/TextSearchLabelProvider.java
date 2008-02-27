@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,13 +11,13 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StyledStringBuilder;
 
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
 
 public abstract class TextSearchLabelProvider extends LabelProvider {
 
@@ -31,11 +31,11 @@ public abstract class TextSearchLabelProvider extends LabelProvider {
 		return fPage;
 	}
 			
-	protected final ColoredString getColoredLabelWithCounts(Object element, ColoredString coloredName) {
-		String name= coloredName.getString();
+	protected final StyledStringBuilder getColoredLabelWithCounts(Object element, StyledStringBuilder coloredName) {
+		String name= coloredName.toString();
 		String decorated= getLabelWithCounts(element, name);
 		if (decorated.length() > name.length()) {
-			ColoredJavaElementLabels.decorateColoredString(coloredName, decorated, ColoredJavaElementLabels.COUNTER_STYLE);
+			ColoredJavaElementLabels.decorateStyledString(coloredName, decorated, ColoredJavaElementLabels.COUNTER_STYLE);
 		}
 		return coloredName;
 	}

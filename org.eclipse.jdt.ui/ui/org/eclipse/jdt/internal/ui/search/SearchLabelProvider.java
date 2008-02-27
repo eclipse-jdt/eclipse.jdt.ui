@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+import org.eclipse.jface.viewers.StyledStringBuilder;
 
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
@@ -44,7 +45,6 @@ import org.eclipse.jdt.ui.search.IMatchPresentation;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
 
 public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 	
@@ -122,11 +122,11 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 		return res;
 	}
 		
-	protected final ColoredString getColoredLabelWithCounts(Object element, ColoredString coloredName) {
-		String name= coloredName.getString();
+	protected final StyledStringBuilder getColoredLabelWithCounts(Object element, StyledStringBuilder coloredName) {
+		String name= coloredName.toString();
 		String decorated= getLabelWithCounts(element, name);
 		if (decorated.length() > name.length()) {
-			ColoredJavaElementLabels.decorateColoredString(coloredName, decorated, ColoredJavaElementLabels.COUNTER_STYLE);
+			ColoredJavaElementLabels.decorateStyledString(coloredName, decorated, ColoredJavaElementLabels.COUNTER_STYLE);
 		}
 		return coloredName;
 	}

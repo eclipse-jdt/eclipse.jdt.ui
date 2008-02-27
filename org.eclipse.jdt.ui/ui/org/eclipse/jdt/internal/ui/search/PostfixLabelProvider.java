@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.StyledStringBuilder;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -22,7 +23,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
 
 public class PostfixLabelProvider extends SearchLabelProvider {
 	private ITreeContentProvider fContentProvider;
@@ -88,12 +88,12 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.IRichLabelProvider#getRichTextLabel(java.lang.Object)
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
 	 */
-	public ColoredString getRichTextLabel(Object element) {
-		ColoredString coloredString= getColoredLabelWithCounts(element, super.getRichTextLabel(element));
-		coloredString.append(getQualification(element), ColoredJavaElementLabels.QUALIFIER_STYLE);
-		return coloredString;
+	public StyledStringBuilder getStyledText(Object element) {
+		StyledStringBuilder styledString= getColoredLabelWithCounts(element, super.getStyledText(element));
+		styledString.append(getQualification(element), ColoredJavaElementLabels.QUALIFIER_STYLE);
+		return styledString;
 	}
 
 }

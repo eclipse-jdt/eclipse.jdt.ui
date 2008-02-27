@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,15 +32,11 @@ import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.action.Action;
@@ -60,6 +56,8 @@ import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
 import org.eclipse.jface.text.ITextSelection;
 
@@ -114,10 +112,6 @@ import org.eclipse.jdt.internal.ui.preferences.TypeFilterPreferencePage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredString;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
-import org.eclipse.jdt.internal.ui.viewsupport.OwnerDrawSupport;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 /**
@@ -529,55 +523,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		super.configureShell(shell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.TYPE_SELECTION_DIALOG2);
 	}
-	
-	protected Control createContents(Composite parent) {
-		Control contents= super.createContents(parent);
-		if (ColoredViewersManager.showColoredLabels()) {
-			if (contents instanceof Composite) {
-				Table listControl= findTableControl((Composite) contents);
-				if (listControl != null) {
-					installOwnerDraw(listControl);
-				}
-			}
-		}
-		return contents;
-	}
-	
-	private void installOwnerDraw(Table tableControl) {
-		new OwnerDrawSupport(tableControl) { // installs the owner draw listeners
-			public ColoredString getColoredLabel(Item item) {
-				String text= item.getText();
-				ColoredString str= new ColoredString(text);
-				int index= text.indexOf('-');
-				if (index != -1) {
-					str.setStyle(index, str.length() - index, ColoredJavaElementLabels.QUALIFIER_STYLE);
-				}
-				return str;
-			}
-
-			public Color getColor(String foregroundColorName, Display display) {
-				return PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry().get(foregroundColorName);
-			}
-		};
-	}
-
-	private Table findTableControl(Composite composite) {
-		Control[] children= composite.getChildren();
-		for (int i= 0; i < children.length; i++) {
-			Control curr= children[i];
-			if (curr instanceof Table) {
-				return (Table) curr;
-			} else if (curr instanceof Composite) {
-				Table res= findTableControl((Composite) curr);
-				if (res != null) {
-					return res;
-				}
-			}
-		}
-		return null;
-	}
-	
-	
 
 	/*
 	 * (non-Javadoc)
@@ -796,7 +741,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	/**
 	 * A <code>LabelProvider</code> for (the table of) types.
 	 */
-	private class TypeItemLabelProvider extends LabelProvider implements ILabelDecorator {
+	private class TypeItemLabelProvider extends LabelProvider implements ILabelDecorator, IStyledLabelProvider {
 
 		private boolean fContainerInfo;
 		private LocalResourceManager fImageManager;
@@ -882,6 +827,19 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			}
 
 			return fTypeInfoUtil.getQualifiedText((TypeNameMatch) element);
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider#getStyledText(java.lang.Object)
+		 */
+		public StyledStringBuilder getStyledText(Object element) {
+			String text= getText(element);
+			StyledStringBuilder string= new StyledStringBuilder(text);			
+			int index= text.indexOf(JavaElementLabels.CONCAT_STRING);
+			if (index != -1) {
+				string.setStyle(index, text.length() - index, StyledStringBuilder.QUALIFIER_STYLER);
+			}
+			return string;
 		}
 
 	}
