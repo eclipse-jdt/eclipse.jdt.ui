@@ -73,7 +73,7 @@ public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider imp
 	protected StyleRange prepareStyleRange(StyleRange styleRange, boolean applyColors) {
 		if (!applyColors && styleRange.background != null) {
 			styleRange= super.prepareStyleRange(styleRange, applyColors);
-			styleRange.borderStyle= SWT.BORDER_DASH;
+			styleRange.borderStyle= SWT.BORDER_DOT;
 			return styleRange;
 		}
 		return super.prepareStyleRange(styleRange, applyColors);
