@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -266,8 +267,13 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			});
 			
 			Text text= new Text(composite, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY);
-			text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			GridData data= new GridData(SWT.FILL, SWT.FILL, true, true);
+			text.setLayoutData(data);
 			text.setText(annotation.getText());
+			Point constraints= getSizeConstraints();
+			if (constraints != null) {
+				data.heightHint= text.computeSize(constraints.x, SWT.DEFAULT).y;
+			}
 		}
 
 		private void createCompletionProposalsControl(Composite parent, final IDocument document, ICompletionProposal[] proposals) {
@@ -328,8 +334,19 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			scrolledComposite.setContent(composite);
 			Point contentSize= composite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 			composite.setSize(contentSize);
-			Point scrollSize= scrolledComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-			gridData.heightHint= contentSize.y - (scrollSize.y - contentSize.y);
+			Point constraints= getSizeConstraints();
+			if (constraints != null && contentSize.x < constraints.x) {
+				ScrollBar horizontalBar= scrolledComposite.getHorizontalBar();
+				
+				int scrollBarHeight;
+				if (horizontalBar == null) {
+					Point scrollSize= scrolledComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+					scrollBarHeight= scrollSize.y - contentSize.y;
+				} else {
+					scrollBarHeight= horizontalBar.getSize().y;
+				}
+				gridData.heightHint= contentSize.y - scrollBarHeight;
+			}
 
 			fFocusControl= links[0];
 			for (int i= 0; i < links.length; i++) {
