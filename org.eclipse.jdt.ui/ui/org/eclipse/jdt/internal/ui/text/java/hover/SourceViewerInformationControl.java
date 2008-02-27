@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
@@ -60,8 +62,6 @@ import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
  */
 public class SourceViewerInformationControl implements IInformationControl, IInformationControlExtension, IInformationControlExtension3, IInformationControlExtension5, DisposeListener {
 
-	/** Border thickness in pixels. */
-	private static final int BORDER= 1;
 	/** The control's shell */
 	private Shell fShell;
 	/** The control's text widget */
@@ -98,11 +98,6 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * @since 3.2
 	 */
 	private int fMaxHeight= SWT.DEFAULT;
-	/**
-	 * The border width (inside the shell).
-	 * @since 3.4
-	 */
-	private int fBorderWidth;
 	
 	private Color fBackgroundColor;
 	private boolean fIsSystemBackgroundColor= true;
@@ -110,31 +105,23 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 
 	/**
 	 * Creates a source viewer information control with the given shell as parent. The given
-	 * styles are applied to the created styled text widget.
-	 *
-	 * @param parent the parent shell
-	 * @param shellStyle the additional styles for the shell
-	 * @param style the additional styles for the styled text widget
-	 */
-	public SourceViewerInformationControl(Shell parent, int shellStyle, int style) {
-		this(parent, shellStyle, style, null);
-	}
-
-	/**
-	 * Creates a source viewer information control with the given shell as parent. The given
 	 * styles are applied to the created styled text widget. The status field will
 	 * contain the given text or be hidden.
 	 *
 	 * @param parent the parent shell
-	 * @param shellStyle the additional styles for the shell
-	 * @param style the additional styles for the styled text widget
+	 * @param isResizable <code>true</code> if resizable
+	 * @param orientation the orientation
 	 * @param statusFieldText the text to be used in the optional status field
-	 *                         or <code>null</code> if the status field should be hidden
-	 * @since 3.0
+	 *            or <code>null</code> if the status field should be hidden
 	 */
-	public SourceViewerInformationControl(Shell parent, int shellStyle, int style, String statusFieldText) {
+	public SourceViewerInformationControl(Shell parent, boolean isResizable, int orientation, String statusFieldText) {
+		Assert.isLegal(orientation == SWT.RIGHT_TO_LEFT || orientation == SWT.LEFT_TO_RIGHT || orientation == SWT.NONE);
+		
 		GridLayout layout;
 		GridData gd;
+
+		int shellStyle= SWT.TOOL | SWT.ON_TOP | orientation | (isResizable ? SWT.RESIZE : 0);
+		int textStyle= isResizable ? SWT.V_SCROLL | SWT.H_SCROLL : SWT.NONE;
 
 		fShell= new Shell(parent, SWT.NO_FOCUS | SWT.ON_TOP | shellStyle);
 		Display display= fShell.getDisplay();
@@ -144,9 +131,8 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		
 		Composite composite= fShell;
 		layout= new GridLayout(1, false);
-		fBorderWidth= ((shellStyle & SWT.NO_TRIM) == 0) ? 0 : BORDER;
-		layout.marginHeight= fBorderWidth;
-		layout.marginWidth= fBorderWidth;
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
 		composite.setLayout(layout);
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		composite.setLayoutData(gd);
@@ -166,7 +152,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 
 		// Source viewer
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
-		fViewer= new JavaSourceViewer(composite, null, null, false, style, store);
+		fViewer= new JavaSourceViewer(composite, null, null, false, textStyle, store);
 		fViewer.configure(new SimpleJavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, IJavaPartitions.JAVA_PARTITIONING, false));
 		fViewer.setEditable(false);
 
@@ -428,11 +414,6 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * @since 3.4
 	 */
 	private void addInternalTrim(Rectangle trim) {
-		trim.x-= fBorderWidth;
-		trim.y-= fBorderWidth;
-		trim.width+= 2 * fBorderWidth;
-		trim.height+= 2 * fBorderWidth;
-
 		Rectangle textTrim= fText.computeTrim(0, 0, 0, 0);
 		trim.x+= textTrim.x;
 		trim.y+= textTrim.y;
