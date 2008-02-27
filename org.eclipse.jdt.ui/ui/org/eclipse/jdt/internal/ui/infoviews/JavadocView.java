@@ -448,7 +448,7 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	private String fOriginalInput;
 	
-	/** 
+	/**
 	 * A history containing followed links.
 	 * @since 3.4
 	 */
@@ -720,7 +720,7 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	protected void createActions() {
 		super.createActions();
-		fSelectAllAction= new SelectAllAction(getControl(), (SelectionProvider) getSelectionProvider()); 
+		fSelectAllAction= new SelectAllAction(getControl(), (SelectionProvider) getSelectionProvider());
 		
 		fBackAction= new BackAction(fLinkHistory);
 		fBackAction.setActionDefinitionId("org.eclipse.ui.navigate.back"); //$NON-NLS-1$
@@ -936,7 +936,7 @@ public class JavadocView extends AbstractInfoView {
 			Rectangle size=  fText.getClientArea();
 
 			try {
-				javadocHtml= ((DefaultInformationControl.IInformationPresenterExtension)fPresenter).updatePresentation(getSite().getShell(), javadocHtml, fPresentation, size.width, size.height);
+				javadocHtml= fPresenter.updatePresentation(getSite().getShell().getDisplay(), javadocHtml, fPresentation, size.width, size.height);
 			} catch (IllegalArgumentException ex) {
 				// the javadoc might no longer be valid
 				return;
@@ -950,7 +950,7 @@ public class JavadocView extends AbstractInfoView {
 	 * Returns the Javadoc in HTML format.
 	 *
 	 * @param result the Java elements for which to get the Javadoc
-	 * @param activePart the active part if any 
+	 * @param activePart the active part if any
 	 * @param selection the selection of the active site if any
 	 * @param monitor a monitor to report progress to
 	 * @return a string with the Javadoc in HTML format.
