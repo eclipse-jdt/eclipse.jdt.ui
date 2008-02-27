@@ -1798,14 +1798,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
 		fProjectionSupport.setHoverControlCreator(new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell shell) {
-				return new SourceViewerInformationControl(shell, SWT.TOOL | SWT.NO_TRIM | getOrientation(), SWT.NONE, EditorsUI.getTooltipAffordanceString());
+				return new SourceViewerInformationControl(shell, false, getOrientation(), EditorsUI.getTooltipAffordanceString());
 			}
 		});
 		fProjectionSupport.setInformationPresenterControlCreator(new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell shell) {
-				int shellStyle= SWT.RESIZE | SWT.TOOL | getOrientation();
-				int style= SWT.V_SCROLL | SWT.H_SCROLL;
-				return new SourceViewerInformationControl(shell, shellStyle, style);
+				return new SourceViewerInformationControl(shell, true, getOrientation(), null);
 			}
 		});
 		fProjectionSupport.install();
@@ -2105,7 +2103,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			return new IShowInSource() {
 				public ShowInContext getShowInContext() {
 					return new ShowInContext(null, null) {
-						/* 
+						/*
 						 * @see org.eclipse.ui.part.ShowInContext#getInput()
 						 * @since 3.4
 						 */

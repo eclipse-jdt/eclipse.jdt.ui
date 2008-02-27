@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,14 +63,14 @@ class ChangeHoverInformationControl extends SourceViewerInformationControl {
 	 * Creates a new information control.
 	 *
 	 * @param parent the shell that is the parent of this hover / control
-	 * @param shellStyle the additional styles for the shell
-	 * @param style the additional styles for the styled text widget
+	 * @param isResizable <code>true</code> if resizable
+	 * @param orientation the orientation
 	 * @param partition the initial partition type to be used for the underlying viewer
 	 * @param statusFieldText the text to be used in the optional status field
 	 *                         or <code>null</code> if the status field should be hidden
 	 */
-	public ChangeHoverInformationControl(Shell parent, int shellStyle, int style, String partition, String statusFieldText) {
-		super(parent, shellStyle, style, statusFieldText);
+	public ChangeHoverInformationControl(Shell parent, boolean isResizable, int orientation, String partition, String statusFieldText) {
+		super(parent, isResizable, orientation, statusFieldText);
 		setViewerFont();
 		setStartingPartitionType(partition);
 	}
