@@ -18,6 +18,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.UndoEdit;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -43,12 +46,14 @@ import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.ISynchronizable;
+import org.eclipse.jface.text.RewriteSessionEditProcessor;
 
 import org.eclipse.jdt.core.BufferChangedEvent;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IBufferChangedListener;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.IBuffer.ITextEditCapability;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -61,7 +66,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * All text inserted into the buffer is converted to this line delimiter.
  * This class is <code>public</code> for test purposes only.
  */
-public class DocumentAdapter implements IBuffer, IDocumentListener {
+public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCapability {
 
 	/**
 	 * Internal implementation of a NULL instanceof IBuffer.
@@ -153,6 +158,32 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 			DocumentAdapter.run(this);
 		}
 	}
+	
+	/**
+	 * Executes a document replace call in the UI thread.
+	 */
+	protected class ApplyTextEditCommand implements Runnable {
+
+		private TextEdit fEdit;
+		private UndoEdit fUndoEdit;
+
+		public void run() {
+			try {
+				if (!isClosed()) {
+					fUndoEdit= new RewriteSessionEditProcessor(fDocument, fEdit, TextEdit.UPDATE_REGIONS | TextEdit.CREATE_UNDO).performEdits();
+				}
+			} catch (BadLocationException x) {
+				// ignore
+			}
+		}
+
+		public UndoEdit applyTextEdit(TextEdit edit) {
+			fEdit= edit;
+			fUndoEdit= null;
+			DocumentAdapter.run(this);
+			return fUndoEdit;
+		}
+	}
 
 		
 	private static final boolean DEBUG_LINE_DELIMITERS= true;
@@ -164,6 +195,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 
 	private DocumentSetCommand fSetCmd= new DocumentSetCommand();
 	private DocumentReplaceCommand fReplaceCmd= new DocumentReplaceCommand();
+	private ApplyTextEditCommand fTextEditCmd= new ApplyTextEditCommand();
 
 	private Set fLegalLineDelimiters;
 
@@ -528,4 +560,9 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 				((IBufferChangedListener) e.next()).bufferChanged(event);
 		}
 	}
+
+	public UndoEdit applyTextEdit(TextEdit edit, IProgressMonitor monitor) throws JavaModelException {
+		return fTextEditCmd.applyTextEdit(edit);
+	}
+	
 }

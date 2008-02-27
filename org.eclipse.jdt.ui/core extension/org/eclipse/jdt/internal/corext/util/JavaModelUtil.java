@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.Assert;
@@ -27,18 +26,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
-import org.eclipse.core.filebuffers.LocationKind;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.RewriteSessionEditProcessor;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.Flags;
@@ -70,8 +60,6 @@ import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
-
-import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
  * Utility methods for the Java Model.
@@ -945,79 +933,27 @@ public final class JavaModelUtil {
 	 * @throws ValidateEditException if validate edit fails
 	 */
 	public static void applyEdit(ICompilationUnit cu, TextEdit edit, boolean save, IProgressMonitor monitor) throws CoreException, ValidateEditException {
-		if (monitor == null) {
-			monitor= new NullProgressMonitor();
-		}
-		monitor.beginTask(CorextMessages.JavaModelUtil_applyedit_operation, 3);
-
-		try {
-			IDocument document= null;
+		IFile file= (IFile) cu.getResource();
+		if (!save || !file.exists()) {
+			cu.applyTextEdit(edit, monitor);
+		} else {
+			if (monitor == null) {
+				monitor= new NullProgressMonitor();
+			}
+			monitor.beginTask(CorextMessages.JavaModelUtil_applyedit_operation, 2);
 			try {
-				boolean[] needsSave= { save };
-				document= aquireDocument(cu, needsSave, new SubProgressMonitor(monitor, 1));
-				if (needsSave[0]) {
-					commitDocument(cu, document, edit, new SubProgressMonitor(monitor, 1));
-				} else {
-					new RewriteSessionEditProcessor(document, edit, TextEdit.UPDATE_REGIONS).performEdits();
-				}
-			} catch (BadLocationException e) {
-				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
-			} finally {
-				releaseDocument(cu, document, new SubProgressMonitor(monitor, 1));
-			}
-		} finally {
-			monitor.done();
-		}
-	}
-
-	private static IDocument aquireDocument(ICompilationUnit cu, boolean[] needsSave, IProgressMonitor monitor) throws CoreException {
-		if (JavaModelUtil.isPrimary(cu)) {
-			IFile file= (IFile) cu.getResource();
-			if (file.exists()) {
-				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
-				IPath path= cu.getPath();
-				if (!needsSave[0] && bufferManager.getTextFileBuffer(path, LocationKind.IFILE) == null) {
-					needsSave[0]= true;
-				}
-				bufferManager.connect(path, LocationKind.IFILE, monitor);
-				return bufferManager.getTextFileBuffer(path, LocationKind.IFILE).getDocument();
-			}
-		}
-		monitor.done();
-		return new Document(cu.getSource());
-	}
-
-	private static void commitDocument(ICompilationUnit cu, IDocument document, TextEdit edit, IProgressMonitor monitor) throws CoreException, MalformedTreeException, BadLocationException {
-		if (JavaModelUtil.isPrimary(cu)) {
-			IFile file= (IFile) cu.getResource();
-			if (file.exists()) {
 				IStatus status= Resources.makeCommittable(file, null);
 				if (!status.isOK()) {
 					throw new ValidateEditException(status);
 				}
-				new RewriteSessionEditProcessor(document, edit, TextEdit.UPDATE_REGIONS).performEdits(); // apply after file is commitable
-
-				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
-				bufferManager.getTextFileBuffer(file.getFullPath(), LocationKind.IFILE).commit(monitor, true);
-				return;
+				
+				cu.applyTextEdit(edit, new SubProgressMonitor(monitor, 1));
+				
+				cu.save(new SubProgressMonitor(monitor, 1), true);
+			} finally {
+				monitor.done();
 			}
 		}
-		// no commit possible, make sure changes are in
-		new RewriteSessionEditProcessor(document, edit, TextEdit.UPDATE_REGIONS).performEdits();
-	}
-
-
-	private static void releaseDocument(ICompilationUnit cu, IDocument document, IProgressMonitor monitor) throws CoreException {
-		if (JavaModelUtil.isPrimary(cu)) {
-			IFile file= (IFile) cu.getResource();
-			if (file.exists()) {
-				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
-				bufferManager.disconnect(file.getFullPath(), LocationKind.IFILE, monitor);
-				return;
-			}
-		}
-		cu.getBuffer().setContents(document.get());
-		monitor.done();
 	}
 
 	public static boolean isImplicitImport(String qualifier, ICompilationUnit cu) {
