@@ -271,7 +271,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 				return status;
 			}
 			File file= resolvedPath.toFile();
-			if (!file.isFile()) {				
+			if (!file.exists()) {				
 				String message= Messages.format(NewWizardMessages.EditVariableEntryDialog_filename_error_filenotexists, resolvedPath.toOSString()); 
 				if (deprecationMessage != null) {
 					message= deprecationMessage + "\n" + message; //$NON-NLS-1$

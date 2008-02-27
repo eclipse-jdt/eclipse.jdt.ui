@@ -256,10 +256,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 					break;
 				}
 				if (file.isDirectory()) {
-					status.setError(NewWizardMessages.NewVariableEntryDialog_info_isfolder); 
 					canExtend= true;
-					isValidSelection= false;
-					break;
 				}
 			}
 		} else {
@@ -302,7 +299,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 	private IPath[] chooseExtensions(CPVariableElement elem) {
 		File file= elem.getPath().toFile();
 
-		JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), true, false);
+		JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), true, true);
 		dialog.setTitle(NewWizardMessages.NewVariableEntryDialog_ExtensionDialog_title); 
 		dialog.setMessage(Messages.format(NewWizardMessages.NewVariableEntryDialog_ExtensionDialog_description, elem.getName())); 
 		dialog.setInput(file);
