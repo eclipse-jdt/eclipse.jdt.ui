@@ -125,7 +125,6 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 
 		fShell= new Shell(parent, SWT.NO_FOCUS | SWT.ON_TOP | shellStyle);
 		Display display= fShell.getDisplay();
-		fShell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
 		
 		initializeColors();
 		
