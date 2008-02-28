@@ -10,17 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.internal.text.html.BrowserInformationControl;
-
-import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
-import org.eclipse.jface.text.DefaultInformationControl;
-import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextHoverExtension2;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.IInformationProviderExtension;
@@ -28,44 +19,12 @@ import org.eclipse.jface.text.information.IInformationProviderExtension2;
 
 import org.eclipse.ui.IEditorPart;
 
-import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
-
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
 
 public class JavaInformationProvider implements IInformationProvider, IInformationProviderExtension, IInformationProviderExtension2 {
 
-	
-	/**
-	 * Control creator.
-	 * 
-	 * @since 3.3
-	 */
-	private static final class ControlCreator extends AbstractReusableInformationControlCreator {
-		/*
-		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
-		 */
-		public IInformationControl doCreateInformationControl(Shell parent) {
-			int shellStyle= SWT.RESIZE | SWT.TOOL;
-			int style= SWT.V_SCROLL | SWT.H_SCROLL;
-			if (BrowserInformationControl.isAvailable(parent))
-				return new BrowserInformationControl(parent, shellStyle, style);
-			else
-				return new DefaultInformationControl(parent, true);
-		}
-	}
-	
-
-	protected IJavaEditorTextHover fImplementation;
-
-	/**
-	 * The presentation control creator.
-	 * 
-	 * @since 3.2
-	 */
-	private IInformationControlCreator fPresenterControlCreator;
-	
-
+	protected JavaTypeHover fImplementation;
 
 	public JavaInformationProvider(IEditorPart editor) {
 		if (editor != null) {
@@ -85,8 +44,9 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 		return null;
 	}
 
-	/*
+	/**
 	 * @see IInformationProvider#getInformation(ITextViewer, IRegion)
+	 * @deprecated
 	 */
 	public String getInformation(ITextViewer textViewer, IRegion subject) {
 		if (fImplementation != null) {
@@ -104,13 +64,7 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 	public Object getInformation2(ITextViewer textViewer, IRegion subject) {
 		if (fImplementation == null)
 			return null;
-		
-		if (fImplementation instanceof ITextHoverExtension2) {
-			ITextHoverExtension2 extension= (ITextHoverExtension2) fImplementation;
-			return extension.getHoverInfo2(textViewer, subject);
-		}
-
-		return getInformation(textViewer, subject);
+		return fImplementation.getHoverInfo2(textViewer, subject);
 	}
 
 	/*
@@ -118,12 +72,8 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 	 * @since 3.1
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {
-		if (fImplementation instanceof ITextHoverExtension2) {
-			ITextHoverExtension2 extension= (ITextHoverExtension2) fImplementation;
-			return extension.getInformationPresenterControlCreator();
-		}
-		if (fPresenterControlCreator == null)
-			fPresenterControlCreator= new ControlCreator();
-		return fPresenterControlCreator;
+		if (fImplementation == null)
+			return null;
+		return fImplementation.getInformationPresenterControlCreator();
 	}
 }
