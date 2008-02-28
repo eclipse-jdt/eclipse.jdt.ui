@@ -182,10 +182,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		 * @see org.eclipse.jface.text.AbstractInformationControl#createContent(org.eclipse.swt.widgets.Composite)
 		 */
 		protected void createContent(Composite parent) {
-			fParent= new Composite(parent, SWT.NONE);
-			fParent.setForeground(parent.getForeground());
-			fParent.setBackground(parent.getBackground());
-			fParent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			fParent= parent;
 			GridLayout layout= new GridLayout(1, false);
 			layout.verticalSpacing= 0;
 			fParent.setLayout(layout);
