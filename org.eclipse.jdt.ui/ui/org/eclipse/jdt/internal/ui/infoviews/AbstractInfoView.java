@@ -140,6 +140,17 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	private Color fBackgroundColor;
 	private RGB fBackgroundColorRGB;
 	
+	/**
+	 * True if linking with selection is enabled, false otherwise.
+	 * @since 3.4
+	 */
+	private boolean fLinking= true;
+	
+	/**
+	 * The last selected element if linking was disabled.
+	 * @since 3.4
+	 */
+	private IJavaElement fLastSelection;
 
 	/**
 	 * Set the input of this view.
@@ -378,6 +389,30 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	protected void stopListeningForSelectionChanges() {
 		getSite().getPage().removePostSelectionListener(this);
 	}
+	
+	/**
+	 * Sets whether this info view reacts to selection
+	 * changes in the workbench.
+	 * 
+	 * @param enabled if true then the input is set on selection changes
+	 */
+	protected void setLinkingEnabled(boolean enabled) {
+		fLinking= enabled;
+		
+		if (fLinking && fLastSelection != null) {
+			setInput(fLastSelection);
+		}
+	}
+	
+	/**
+	 * Returns whether this info view reacts to selection
+	 * changes in the workbench.
+	 * 
+	 * @return true if linking with selection is enabled
+	 */
+	protected boolean isLinkingEnabled() {
+		return fLinking;
+	}
 
 	/*
 	 * @see ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
@@ -386,7 +421,14 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 		if (part.equals(this))
 			return;
 
-		computeAndSetInput(part);
+		if (!fLinking) {
+			IJavaElement javaElement= findSelectedJavaElement(part, selection);
+			if (javaElement != null)
+				fLastSelection= javaElement;
+		} else {
+			fLastSelection= null;
+			computeAndSetInput(part);
+		}
 	}
 
 	/**

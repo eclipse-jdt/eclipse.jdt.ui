@@ -53,6 +53,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
@@ -89,6 +90,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -129,6 +131,8 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
@@ -397,6 +401,30 @@ public class JavadocView extends AbstractInfoView {
 			setInput(fHistory.back());
 		}
 	}
+	
+	/**
+	 * Action to toggle linking with selection.
+	 * 
+	 * @since 3.4
+	 */
+	private class LinkAction extends Action {
+
+		public LinkAction() {
+			super(InfoViewMessages.JavadocView_action_toogleLinking_text, SWT.TOGGLE);
+
+			setTitleToolTip(InfoViewMessages.JavadocView_action_toggleLinking_toolTipText);
+
+			JavaPluginImages.setLocalImageDescriptors(this, "synced.gif"); //$NON-NLS-1$
+			setChecked(isLinkingEnabled());
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.action.Action#run()
+		 */
+		public void run() {
+			setLinkingEnabled(!isLinkingEnabled());
+		}
+	}
 
 	/**
 	 * Preference key for the preference whether to show a dialog
@@ -465,6 +493,12 @@ public class JavadocView extends AbstractInfoView {
 	 * @since 3.4
 	 */
 	private ForthAction fForthAction;
+
+	/**
+	 * Actino to enable and disable link with selection.
+	 * @since 3.4
+	 */
+	private LinkAction fToggleLinkAction;
 
 	/**
 	 * The Javadoc view's select all action.
@@ -726,6 +760,10 @@ public class JavadocView extends AbstractInfoView {
 		fBackAction.setActionDefinitionId("org.eclipse.ui.navigate.back"); //$NON-NLS-1$
 		fForthAction= new ForthAction(fLinkHistory);
 		fForthAction.setActionDefinitionId("org.eclipse.ui.navigate.forward"); //$NON-NLS-1$
+		
+		fToggleLinkAction= new LinkAction();
+		fToggleLinkAction.setActionDefinitionId(IWorkbenchCommandIds.LINK_WITH_EDITOR);
+		
 	}
 	
 	/* (non-Javadoc)
@@ -737,6 +775,9 @@ public class JavadocView extends AbstractInfoView {
 
 		actionBars.setGlobalActionHandler(ActionFactory.BACK.getId(), fBackAction);
 		actionBars.setGlobalActionHandler(ActionFactory.FORWARD.getId(), fForthAction);
+
+		IHandlerService handlerService= (IHandlerService) getSite().getService(IHandlerService.class);
+		handlerService.activateHandler(IWorkbenchCommandIds.LINK_WITH_EDITOR, new ActionHandler(fToggleLinkAction));
 	}
 
 	/* (non-Javadoc)
@@ -748,6 +789,7 @@ public class JavadocView extends AbstractInfoView {
 		tbm.add(fForthAction);
 		tbm.add(new Separator());
 		
+		tbm.add(fToggleLinkAction);
 		super.fillToolBar(tbm);
 	}
 	
