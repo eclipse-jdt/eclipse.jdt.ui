@@ -240,12 +240,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
 		public IInformationControl doCreateInformationControl(Shell parent) {
-			int shellStyle= SWT.RESIZE | SWT.TOOL;
-			int style= SWT.V_SCROLL | SWT.H_SCROLL;
 			if (BrowserInformationControl.isAvailable(parent)) {
 				ToolBarManager tbm= new ToolBarManager(SWT.FLAT);
 				String font= PreferenceConstants.APPEARANCE_JAVADOC_FONT;
-				BrowserInformationControl iControl= new BrowserInformationControl(parent, shellStyle, style, font, tbm);
+				BrowserInformationControl iControl= new BrowserInformationControl(parent, font, tbm);
 				
 				final BackAction backAction= new BackAction(iControl);
 				backAction.setEnabled(false);
@@ -292,11 +290,9 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
 		public IInformationControl doCreateInformationControl(Shell parent) {
-			int shellStyle= SWT.TOOL | SWT.NO_TRIM;
-			int style= SWT.NONE;
 			if (BrowserInformationControl.isAvailable(parent)) {
 				String font= PreferenceConstants.APPEARANCE_JAVADOC_FONT;
-				BrowserInformationControl iControl= new BrowserInformationControl(parent, shellStyle, style, font, EditorsUI.getTooltipAffordanceString());
+				BrowserInformationControl iControl= new BrowserInformationControl(parent, font, EditorsUI.getTooltipAffordanceString());
 				addLinkListener(iControl);
 				return iControl;
 			} else {
