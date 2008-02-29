@@ -12,15 +12,9 @@ package org.eclipse.jdt.internal.ui.actions;
 
 import java.net.URL;
 
-import org.eclipse.swt.program.Program;
-
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.browser.IWebBrowser;
-import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
@@ -32,26 +26,29 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
- * Action to open the javadoc of the selected Java element in
- * a browser. If the javadoc is not external then the action
- * is disabled. Depending on the workbench preference settings
- * either the internal browser or the external browser is used.
+ * Action to open the selection in an external browser. If the
+ * selection is a java element its corresponding javadoc is shown
+ * if possible. If it is an URL the urls content is shown.
+ * 
+ * The action is disabled if the selection can not be opened.
  * 
  * @since 3.4
  */
-public class OpenExternalJavadocAction extends SelectionDispatchAction {
+public class OpenExternalBrowserAction extends SelectionDispatchAction {
 
 	/**
 	 * Create a new ShowExternalJavadocAction
 	 * 
 	 * @param site the site this action is working on 
 	 */
-	public OpenExternalJavadocAction(IWorkbenchSite site) {
+	public OpenExternalBrowserAction(IWorkbenchSite site) {
 		super(site);
 
 		setText(ActionMessages.ShowExternalJavadocAction_label);
 		setToolTipText(ActionMessages.ShowExternalJavadocAction_toolTip);
-		setImageDescriptor(JavaPluginImages.DESC_OBJS_JAVADOC_LOCATION_ATTRIB); //TODO: better image
+		
+		setImageDescriptor(JavaPluginImages.DESC_ELCL_EXTERNAL_BROWSER);
+		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_EXTERNAL_BROWSER);
 	}
 
 	/* (non-Javadoc)
@@ -65,27 +62,20 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
 	public void run(IStructuredSelection selection) {
-		try {
-			URL url= JavaUI.getJavadocLocation((IJavaElement) selection.getFirstElement(), true);
-
-			IWorkbenchBrowserSupport support= PlatformUI.getWorkbench().getBrowserSupport();
-			IWebBrowser browser;
+		Object element= selection.getFirstElement();
+		URL url;
+		if (element instanceof IJavaElement) {
 			try {
-				browser= support.createBrowser(null);
-			} catch (PartInitException e) {
+				url= JavaUI.getJavadocLocation((IJavaElement) element, true);
+			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
-				Program.launch(url.toExternalForm());
 				return;
 			}
-
-			try {
-				browser.openURL(url);
-			} catch (PartInitException e) {
-				Program.launch(url.toExternalForm());
-			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+		} else {
+			url= (URL) element;
 		}
+
+		OpenBrowserUtil.open(url, getShell().getDisplay(), null);
 	}
 
 	/**
@@ -99,6 +89,9 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 			return false;
 
 		Object element= selection.getFirstElement();
+		if (element instanceof URL)
+			return true;
+		
 		if (!(element instanceof IJavaElement))
 			return false;
 
