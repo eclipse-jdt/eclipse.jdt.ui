@@ -100,6 +100,8 @@ public final class ActionMessages extends NLS {
 	public static String OpenTypeHierarchyAction_messages_no_types;
 	public static String OpenTypeHierarchyAction_messages_no_valid_java_element;
 	public static String OpenTypeHierarchyAction_messages_unknown_import_decl;
+	public static String ShowExternalJavadocAction_label;
+	public static String ShowExternalJavadocAction_toolTip;
 	public static String ShowInPackageViewAction_label;
 	public static String ShowInPackageViewAction_description;
 	public static String ShowInPackageViewAction_tooltip;
