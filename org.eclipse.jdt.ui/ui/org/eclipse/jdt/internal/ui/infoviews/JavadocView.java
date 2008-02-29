@@ -17,11 +17,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -33,8 +29,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
-import org.eclipse.swt.browser.LocationAdapter;
-import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
@@ -133,7 +127,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
-import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.actions.OpenExternalJavadocAction;
 import org.eclipse.jdt.internal.ui.actions.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -154,167 +147,127 @@ import org.osgi.framework.Bundle;
  * @since 3.0
  */
 public class JavadocView extends AbstractInfoView {
-	
+
 	/**
-	 * A history stores a list of IJavaElements. The history
-	 * can be used to go forth and back.
+	 * A browser input contains an input element and
+	 * a previous and a next input, if available.
 	 * 
 	 * @since 3.4
 	 */
-	private final static class History {
-		
-		/**
-		 * A history listener is informed about history changes.
-		 */
-		public interface IHistoryListener {
-			void changed(History history);
-		}
-		
-		private final ArrayList fBackLinkHistory;
-		private final ArrayList fForthLinkHistory;
-		private final ListenerList fHistoryList;
+	public static abstract class BrowserInput {
 
-		public History() {
-			fBackLinkHistory= new ArrayList();
-			fForthLinkHistory= new ArrayList();
-			fHistoryList= new ListenerList();
-		}
+		private final BrowserInput fPrevious;
+		private BrowserInput fNext;
 
 		/**
-		 * Reset this history. All history entries are discarded.
-		 */
-		public void reset() {
-			fBackLinkHistory.clear();
-			fForthLinkHistory.clear();
-			notifyListeners();
-		}
-
-		/**
-		 * Set the most recent history element to the given element.
+		 * Create a new Browser input.
 		 * 
-		 * @param element the most recent history element
+		 * @param previous the input previous to this or <code>null</code> if this is the first
 		 */
-		public void setCurrent(IJavaElement element) {
-			fBackLinkHistory.add(element);
-			fForthLinkHistory.clear();
-			notifyListeners();
-		}
-		
-		/**
-		 * Get the current element selected in the history.
-		 * This may be different for the element set by setCurrent
-		 * if back was used.
-		 * 
-		 * @return the current selected history element.
-		 */
-		public IJavaElement getCurrent() {
-			if (fBackLinkHistory.isEmpty())
-				return null;
+		public BrowserInput(BrowserInput previous) {
+			fPrevious= previous;
 
-			return (IJavaElement) fBackLinkHistory.get(fBackLinkHistory.size() - 1);
-		}
-		
-		/**
-		 * Returns the next element in the history. This is the
-		 * element that would be returned by {@link #forth()}.
-		 * 
-		 * @return the next element in the history or <code>null</code> if none exists
-		 */
-		public IJavaElement getNext() {
-			if (!canGoForth())
-				return null;
-
-			return (IJavaElement) fForthLinkHistory.get(0);
-		}
-
-		/**
-		 * Returns the previous element in the history. This is
-		 * the element that would be returned by {@link #back()}.
-		 * 
-		 * @return the previous element in the history or <code>null</code> if none exists
-		 */
-		public IJavaElement getPrevious() {
-			if (!canGoBack())
-				return null;
-
-			return (IJavaElement) fBackLinkHistory.get(fBackLinkHistory.size() - 2);
-		}
-
-		/**
-		 * True if it is possible to go back.
-		 * 
-		 * @return true if one can go back in the history
-		 */
-		public boolean canGoBack() {
-			return fBackLinkHistory.size() > 1;
-		}
-
-		/**
-		 * True if it is possible to go forth.
-		 * 
-		 * @return true if one can go forth in the history
-		 */
-		public boolean canGoForth() {
-			return !fForthLinkHistory.isEmpty();
-		}
-
-		/**
-		 * Go back in the history. Returns the element prior to the current element.
-		 * 
-		 * @return the element prior to the current element
-		 */
-		public IJavaElement back() {
-			if (!canGoBack())
-				throw new IllegalArgumentException();
-			
-			IJavaElement last= (IJavaElement) fBackLinkHistory.remove(fBackLinkHistory.size() - 1);
-			fForthLinkHistory.add(0, last);
-			
-			notifyListeners();
-
-			return (IJavaElement) fBackLinkHistory.get(fBackLinkHistory.size() - 1);
-		}
-
-		/**
-		 * Go forth in the history. Returns the element next to the current element.
-		 * 
-		 * @return the element next to the current element
-		 */
-		public IJavaElement forth() {
-			if (!canGoForth())
-				throw new IllegalArgumentException();
-			
-			IJavaElement first= (IJavaElement) fForthLinkHistory.remove(0);
-			fBackLinkHistory.add(first);
-	
-			notifyListeners();
-			
-			return first;
-		}
-		
-		/**
-		 * Add the given listener to the set of history listeners
-		 * 
-		 * @param listener the listener to add
-		 */
-		public void addHistoryListener(IHistoryListener listener) {
-			if (listener == null)
-				throw new IllegalArgumentException();
-
-			fHistoryList.add(listener);
-		}
-		
-		/**
-		 * Inform all listeners about changes in the history.
-		 */
-		private void notifyListeners() {
-			Object[] listeners= fHistoryList.getListeners();
-			for (int i= 0; i < listeners.length; i++) {
-				((IHistoryListener) listeners[i]).changed(this);
+			if (previous != null) {
+				previous.fNext= this;
 			}
 		}
+
+		/**
+		 * The previous input or <code>null</code> if this
+		 * is the first.
+		 * 
+		 * @return the previous input or <code>null</code>
+		 */
+		public BrowserInput getPrevious() {
+			return fPrevious;
+		}
+
+		/**
+		 * The next input or <code>null</code> if this
+		 * is the last.
+		 * 
+		 * @return the next input or <code>null</code>
+		 */
+		public BrowserInput getNext() {
+			return fNext;
+		}
+
+		/**
+		 * The element to use to set the browsers input.
+		 * 
+		 * @return the input element
+		 */
+		public abstract Object getInputElement();
+
+		/**
+		 * A human readable name for the input.
+		 * 
+		 * @return the input name
+		 */
+		public abstract String getInputName();
 	}
 
+	/**
+	 * Implementation of a {@link JavadocView.BrowserInput} using
+	 * a {@link IJavaElement} as input.
+	 *  
+	 * @since 3.4
+	 */
+	private static final class JavaElementBrowserInput extends BrowserInput {
+
+		private final IJavaElement fInput;
+
+		public JavaElementBrowserInput(BrowserInput previous, IJavaElement inputElement) {
+			super(previous);
+
+			fInput= inputElement;
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.infoviews.JavadocView.IBrowserInput#getInputElement()
+		 */
+		public Object getInputElement() {
+			return fInput;
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.infoviews.JavadocView.IBrowserInput#getInputName()
+		 */
+		public String getInputName() {
+			return fInput.getElementName();
+		}
+	}
+	
+	/**
+	 * Implementation of a {@link JavadocView.BrowserInput} using an
+	 * {@link URL} as input.
+	 *  
+	 * @since 3.4
+	 */
+	private static class URLBrowserInput extends BrowserInput {
+
+		private final URL fURL;
+
+		public URLBrowserInput(BrowserInput previous, URL url) {
+			super(previous);
+			fURL= url;
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.infoviews.JavadocView.IBrowserInput#getInputElement()
+		 */
+		public Object getInputElement() {
+			return fURL;
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.infoviews.JavadocView.IBrowserInput#getInputName()
+		 */
+		public String getInputName() {
+			return fURL.toExternalForm();
+		}
+	}
+	
 	/**
 	 * Action to go forward in the history.
 	 * 
@@ -322,32 +275,23 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	private final class ForthAction extends Action {
 		
-		private final History fHistory;
-
-		public ForthAction(History history) {
-			fHistory= history;
-			
+		public ForthAction() {
 			setText(InfoViewMessages.JavadocView_action_forward_name);
-			setToolTipText(fHistory);
 			ISharedImages images= PlatformUI.getWorkbench().getSharedImages();
 			setImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_FORWARD));
 			setDisabledImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_FORWARD_DISABLED));
 			
-			fHistory.addHistoryListener(new History.IHistoryListener() {
-				public void changed(History changedHistory) {
-					setEnabled(changedHistory.canGoForth());
-					setToolTipText(changedHistory);
-				}
-			});
-			setEnabled(fHistory.canGoForth());
+			update();
 		}
 		
-		private void setToolTipText(History history) {
-			if (history.canGoForth()) {
-				IJavaElement element= history.getNext();
-				setToolTipText(Messages.format(InfoViewMessages.JavadocView_action_forward_enabledTooltip, element.getElementName()));
+		public void update() {
+			if (fCurrent != null && fCurrent.getNext() != null) {
+				BrowserInput element= fCurrent.getNext();
+				setToolTipText(Messages.format(InfoViewMessages.JavadocView_action_forward_enabledTooltip, element.getInputName()));
+				setEnabled(true);
 			} else {
 				setToolTipText(InfoViewMessages.JavadocView_action_forward_disabledTooltip);
+				setEnabled(false);
 			}
 		}
 
@@ -355,7 +299,7 @@ public class JavadocView extends AbstractInfoView {
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
 		public void run() {
-			setInput(fHistory.forth());
+			setInput(fCurrent.getNext());
 		}
 		
 	}
@@ -367,32 +311,23 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	private final class BackAction extends Action {
 		
-		private final History fHistory;
-
-		public BackAction(History history) {
-			fHistory= history;
-			
+		public BackAction() {
 			setText(InfoViewMessages.JavadocView_action_back_name);
-			setToolTipText(fHistory);
 			ISharedImages images= PlatformUI.getWorkbench().getSharedImages();
 			setImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_BACK));
 			setDisabledImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_BACK_DISABLED));
-			
-			fHistory.addHistoryListener(new History.IHistoryListener() {
-				public void changed(History changedHistory) {
-					setEnabled(changedHistory.canGoBack());
-					setToolTipText(changedHistory);
-				}
-			});
-			setEnabled(fHistory.canGoBack());
+
+			update();
 		}
 
-		private void setToolTipText(History history) {
-			if (history.canGoBack()) {
-				IJavaElement element= history.getPrevious();
-				setToolTipText(Messages.format(InfoViewMessages.JavadocView_action_back_enabledTooltip, element.getElementName()));
+		private void update() {
+			if (fCurrent != null && fCurrent.getPrevious() != null) {
+				BrowserInput element= fCurrent.getPrevious();
+				setToolTipText(Messages.format(InfoViewMessages.JavadocView_action_back_enabledTooltip, element.getInputName()));
+				setEnabled(true);
 			} else {
 				setToolTipText(InfoViewMessages.JavadocView_action_back_disabledTooltip);
+				setEnabled(false);
 			}
 		}
 
@@ -400,7 +335,7 @@ public class JavadocView extends AbstractInfoView {
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
 		public void run() {
-			setInput(fHistory.back());
+			setInput(fCurrent.getPrevious());
 		}
 	}
 	
@@ -479,11 +414,11 @@ public class JavadocView extends AbstractInfoView {
 	private String fOriginalInput;
 	
 	/**
-	 * A history containing followed links.
+	 * The current input element if any
 	 * @since 3.4
 	 */
-	private final History fLinkHistory= new History();
-	
+	private BrowserInput fCurrent;
+
 	/**
 	 * Action to go back in the link history.
 	 * @since 3.4
@@ -497,7 +432,7 @@ public class JavadocView extends AbstractInfoView {
 	private ForthAction fForthAction;
 
 	/**
-	 * Actino to enable and disable link with selection.
+	 * Action to enable and disable link with selection.
 	 * @since 3.4
 	 */
 	private LinkAction fToggleLinkAction;
@@ -771,9 +706,9 @@ public class JavadocView extends AbstractInfoView {
 		super.createActions();
 		fSelectAllAction= new SelectAllAction(getControl(), (SelectionProvider) getSelectionProvider());
 		
-		fBackAction= new BackAction(fLinkHistory);
+		fBackAction= new BackAction();
 		fBackAction.setActionDefinitionId("org.eclipse.ui.navigate.back"); //$NON-NLS-1$
-		fForthAction= new ForthAction(fLinkHistory);
+		fForthAction= new ForthAction();
 		fForthAction.setActionDefinitionId("org.eclipse.ui.navigate.forward"); //$NON-NLS-1$
 		
 		fToggleLinkAction= new LinkAction();
@@ -992,6 +927,29 @@ public class JavadocView extends AbstractInfoView {
 		return ""; //$NON-NLS-1$
 	}
 	
+	/**
+	 * Set input to the given input.
+	 * 
+	 * @param input the input for the view
+	 * @since 3.4
+	 */
+	public void setInput(BrowserInput input) {
+		fCurrent= input;
+		
+		Object inputElement= input.getInputElement();
+		if (inputElement instanceof IJavaElement) {
+			setInput((IJavaElement) inputElement);
+		} else if (inputElement instanceof URL) {
+			fBrowser.setUrl(((URL) inputElement).toExternalForm());
+			
+			if (fInputSelectionProvider != null)
+				fInputSelectionProvider.setSelection(new StructuredSelection(inputElement));
+		}
+		
+		fForthAction.update();
+		fBackAction.update();
+	}
+	
 	/*
 	 * @see AbstractInfoView#setInput(Object)
 	 */
@@ -1158,6 +1116,9 @@ public class JavadocView extends AbstractInfoView {
 	 * @since 3.2
 	 */
 	protected boolean isIgnoringNewInput(IJavaElement je, IWorkbenchPart part, ISelection selection) {
+		if (fCurrent != null && fCurrent.getInputElement() instanceof URL)
+			return false;
+		
 		if (super.isIgnoringNewInput(je, part, selection)
 				&& part instanceof ITextEditor
 				&& selection instanceof ITextSelection) {
@@ -1474,98 +1435,70 @@ public class JavadocView extends AbstractInfoView {
 	 * @since 3.4
 	 */
 	private void addLinkListener(Browser browser) {
-		browser.addLocationListener(new LocationAdapter() {
+		browser.addLocationListener(JavaElementLinks.createLocationListener(new JavaElementLinks.ILinkHandler() {
 
-			public void changing(LocationEvent event) {
-				event.doit= false;
-				
-				String loc= event.location;
-				URI uri;
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleDeclarationLink(org.eclipse.jdt.core.IJavaElement)
+			 */
+			public void handleDeclarationLink(IJavaElement target) {
 				try {
-					uri= new URI(loc);
-				} catch (URISyntaxException e) {
-					JavaPlugin.log(e);
-					return;
-				}
-
-				String scheme= uri.getScheme();
-				if (JavaElementLinks.JAVADOC_VIEW_SCHEME.equals(scheme)) {
-					if (handleJavadocViewLink(uri))
-						return;
-				} else if (JavaElementLinks.JAVADOC_SCHEME.equals(scheme)) {
-					if (handleInlineJavadocLink(uri))
-						return;
-				} else if (JavaElementLinks.OPEN_LINK_SCHEME.equals(scheme)) {
-					if (handleDeclarationLink(uri))
-						return;
-				} else if (!"about:blank".equals(loc)) { //$NON-NLS-1$
-					/*
-					 * Using the Browser.setText API triggers a location change to "about:blank".
-					 * XXX: remove this code once https://bugs.eclipse.org/bugs/show_bug.cgi?id=130314 is fixed
-					 */
-					if (loc.startsWith("about:")) //$NON-NLS-1$
-						return; //FIXME: handle relative links
-					
-					try {
-						// open external links in real browser:
-						OpenBrowserUtil.open(new URL(loc), event.display, ""); //$NON-NLS-1$
-						return;
-					} catch (MalformedURLException e) {
-						JavaPlugin.log(e);
-					}
-				}
-				
-				event.doit= true;
-				
-				IJavaElement input= getInput();
-				IJavaElement current= fLinkHistory.getCurrent();
-				if (current == null || !current.equals(input)) {
-					fLinkHistory.reset();
-					if (input != null)
-						fLinkHistory.setCurrent(input);
-				}
-			}
-
-			private boolean handleJavadocViewLink(URI uri) {
-				IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
-				if (linkTarget == null)
-					return false;
-
-				fLinkHistory.setCurrent(linkTarget);
-				
-				JavadocView.this.setInput(linkTarget);
-				return true;
-			}
-
-			private boolean handleInlineJavadocLink(URI uri) {
-				IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
-				if (linkTarget == null)
-					return false;
-				
-				fLinkHistory.setCurrent(linkTarget);
-				
-				JavadocView.this.setInput(linkTarget);
-				return true;
-			}
-
-			private boolean handleDeclarationLink(URI uri) {
-				IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
-				if (linkTarget == null)
-					return false;
-
-				try {
-					//FIXME: add hover location to editor navigation history?
-					JavaUI.openInEditor(linkTarget);
-					return true;
+					JavaUI.openInEditor(target);
 				} catch (PartInitException e) {
 					JavaPlugin.log(e);
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
 				}
+			}
+
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleExternalLink(java.net.URL, org.eclipse.swt.widgets.Display)
+			 */
+			public boolean handleExternalLink(final URL url, Display display) {
+				if (fCurrent == null || !url.equals(fCurrent.getInputElement())) {
+					fCurrent= new URLBrowserInput(fCurrent, url);
+					
+					if (fBackAction != null) {
+						fBackAction.update();
+						fForthAction.update();
+					}
+				}
 				
 				return false;
 			}
-		});
+
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleInlineJavadocLink(org.eclipse.jdt.core.IJavaElement)
+			 */
+			public void handleInlineJavadocLink(IJavaElement target) {
+				JavaElementBrowserInput newInput= new JavaElementBrowserInput(fCurrent, target);
+				JavadocView.this.setInput(newInput);
+			}
+
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleJavadocViewLink(org.eclipse.jdt.core.IJavaElement)
+			 */
+			public void handleJavadocViewLink(IJavaElement target) {
+				handleInlineJavadocLink(target);
+			}
+
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleTextSet()
+			 */
+			public void handleTextSet() {
+				IJavaElement input= getInput();
+				if (input == null)
+					return;
+				
+				if (fCurrent == null || !fCurrent.getInputElement().equals(input)) {
+					fCurrent= new JavaElementBrowserInput(null, input);
+					
+					if (fBackAction != null) {
+						fBackAction.update();
+						fForthAction.update();
+					}
+				}
+			}
+		}));
 	}
 
 }

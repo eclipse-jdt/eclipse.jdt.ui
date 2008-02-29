@@ -29,6 +29,8 @@ final class JavaHoverMessages extends NLS {
 	public static String AbstractAnnotationHover_message_multipleQuickFix;
 	
 	public static String JavadocHover_back;
+	public static String JavadocHover_back_toElement_toolTip;
+	public static String JavadocHover_back_toolTip;
 	public static String JavadocHover_noAttachments;
 	public static String JavadocHover_noAttachedJavadoc;
 	public static String JavadocHover_noAttachedSource;
@@ -36,6 +38,8 @@ final class JavaHoverMessages extends NLS {
 	public static String JavadocHover_constantValue_hexValue;
 	public static String JavadocHover_error_gettingJavadoc;
 	public static String JavadocHover_forward;
+	public static String JavadocHover_forward_toElement_toolTip;
+	public static String JavadocHover_forward_toolTip;
 	public static String JavadocHover_openDeclaration;
 	public static String JavadocHover_showInJavadoc;
 	

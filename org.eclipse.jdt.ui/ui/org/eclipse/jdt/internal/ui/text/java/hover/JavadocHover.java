@@ -13,14 +13,11 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
 
 import java.io.Reader;
 import java.io.StringReader;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.browser.LocationAdapter;
-import org.eclipse.swt.browser.LocationEvent;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
@@ -256,10 +253,27 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 						if (newInput == null) {
 							backAction.setEnabled(false);
 							forwardAction.setEnabled(false);
+							forwardAction.setToolTipText(JavaHoverMessages.JavadocHover_forward_toolTip);
+							backAction.setToolTipText(JavaHoverMessages.JavadocHover_back_toolTip);
 						} else {
 							JavadocBrowserInformationControlInput javaInput= (JavadocBrowserInformationControlInput) newInput;
-							backAction.setEnabled(javaInput.getPrevious() != null);
-							forwardAction.setEnabled(javaInput.getNext() != null);
+							if (javaInput.getPrevious() != null) {
+								backAction.setEnabled(true);
+								IJavaElement previous= ((JavadocBrowserInformationControlInput) javaInput.getPrevious()).getElement();
+								backAction.setToolTipText(Messages.format(JavaHoverMessages.JavadocHover_back_toElement_toolTip, previous.getElementName()));
+							} else {
+								backAction.setEnabled(false);
+								backAction.setToolTipText(JavaHoverMessages.JavadocHover_back_toolTip);
+							}
+							
+							if (javaInput.getNext() != null) {
+								forwardAction.setEnabled(true);
+								IJavaElement next= ((JavadocBrowserInformationControlInput) javaInput.getNext()).getElement();
+								forwardAction.setToolTipText(Messages.format(JavaHoverMessages.JavadocHover_forward_toElement_toolTip, next.getElementName()));
+							} else {
+								forwardAction.setEnabled(false);
+								forwardAction.setToolTipText(JavaHoverMessages.JavadocHover_forward_toolTip);
+							}
 						}
 					}
 				};
@@ -355,49 +369,11 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	private static void addLinkListener(final BrowserInformationControl control) {
-		control.addLocationListener(new LocationAdapter() {
-			public void changing(LocationEvent event) {
-				String loc= event.location;
-//				System.out.println("JavadocHover: changing location:" + loc);
-				URI uri;
-				try {
-					uri= new URI(loc);
-				} catch (URISyntaxException e) {
-					JavaPlugin.log(e);
-					return;
-				}
-				
-				String scheme= uri.getScheme();
-				if (JavaElementLinks.JAVADOC_VIEW_SCHEME.equals(scheme)) {
-					handleJavadocViewLink(uri);
-				} else if (JavaElementLinks.JAVADOC_SCHEME.equals(scheme)) {
-					handleInlineJavadocLink(uri);
-				} else if (JavaElementLinks.OPEN_LINK_SCHEME.equals(scheme)) {
-					handleDeclarationLink(uri);
-				} else if (!"about:blank".equals(loc)) { //$NON-NLS-1$
-					/*
-					 * Using the Browser.setText API triggers a location change to "about:blank".
-					 * XXX: remove this code once https://bugs.eclipse.org/bugs/show_bug.cgi?id=130314 is fixed
-					 */
-					if (loc.startsWith("about:")) //$NON-NLS-1$
-						return; //FIXME: handle relative links
-					
-					control.notifyDelayedInputChange(null);
-					control.dispose(); //FIXME: should have protocol to hide, rather than dispose
-					try {
-						// open external links in real browser:
-						OpenBrowserUtil.open(new URL(loc), event.display, ""); //$NON-NLS-1$
-					} catch (MalformedURLException e) {
-						JavaPlugin.log(e);
-					}
-				}
-			}
-
-			private void handleJavadocViewLink(URI uri) {
-				IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
-				if (linkTarget == null)
-					return;
-
+		control.addLocationListener(JavaElementLinks.createLocationListener(new JavaElementLinks.ILinkHandler() {
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleJavadocViewLink(org.eclipse.jdt.core.IJavaElement)
+			 */
+			public void handleJavadocViewLink(IJavaElement linkTarget) {
 				control.notifyDelayedInputChange(null);
 				control.dispose(); //FIXME: should have protocol to hide, rather than dispose
 				try {
@@ -407,24 +383,22 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					JavaPlugin.log(e);
 				}
 			}
-
-			private void handleInlineJavadocLink(URI uri) {
-				IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
-				if (linkTarget == null)
-					return;
-
+			
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleInlineJavadocLink(org.eclipse.jdt.core.IJavaElement)
+			 */
+			public void handleInlineJavadocLink(IJavaElement linkTarget) {
 				JavadocBrowserInformationControlInput hoverInfo= getHoverInfo(new IJavaElement[] { linkTarget }, null, (JavadocBrowserInformationControlInput) control.getInput());
 				if (control.hasDelayedInputChangeListener())
 					control.notifyDelayedInputChange(hoverInfo);
 				else
 					control.setInput(hoverInfo);
 			}
-
-			private void handleDeclarationLink(URI uri) {
-				IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
-				if (linkTarget == null)
-					return;
-
+			
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleDeclarationLink(org.eclipse.jdt.core.IJavaElement)
+			 */
+			public void handleDeclarationLink(IJavaElement linkTarget) {
 				control.notifyDelayedInputChange(null);
 				control.dispose(); //FIXME: should have protocol to hide, rather than dispose
 				try {
@@ -436,7 +410,23 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					JavaPlugin.log(e);
 				}
 			}
-		});
+
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleExternalLink(java.net.URL, org.eclipse.swt.widgets.Display)
+			 */
+			public boolean handleExternalLink(URL url, Display display) {
+				control.notifyDelayedInputChange(null);
+				control.dispose(); //FIXME: should have protocol to hide, rather than dispose
+
+				// open external links in real browser:
+				OpenBrowserUtil.open(url, display, ""); //$NON-NLS-1$
+				
+				return true;
+			}
+			
+			public void handleTextSet() {
+			}
+		}));
 	}
 	
 	/*

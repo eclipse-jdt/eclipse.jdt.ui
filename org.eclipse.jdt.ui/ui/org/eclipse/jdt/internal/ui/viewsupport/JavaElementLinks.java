@@ -10,10 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.LocationAdapter;
+import org.eclipse.swt.browser.LocationEvent;
+import org.eclipse.swt.browser.LocationListener;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -36,7 +44,51 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * @since 3.4
  */
 public class JavaElementLinks {
-	
+
+	/**
+	 * A handler is asked to handle links to targets.
+	 * 
+	 * @see JavaElementLinks#createLocationListener(JavaElementLinks.ILinkHandler)
+	 */
+	public interface ILinkHandler {
+
+		/**
+		 * Handle normal kind of link to given target.
+		 * 
+		 * @param target the target to show
+		 */
+		void handleInlineJavadocLink(IJavaElement target);
+
+		/**
+		 * Handle link to given target to open in javadoc view.
+		 * 
+		 * @param target the target to show 
+		 */
+		void handleJavadocViewLink(IJavaElement target);
+
+		/**
+		 * Handle link to given target to open its declaration
+		 * 
+		 * @param target the target to show
+		 */
+		void handleDeclarationLink(IJavaElement target);
+
+		/**
+		 * Handle link to given link to open in external browser
+		 * 
+		 * @param url the url to show
+		 * @param display the current display
+		 * @return <code>true</code> if the handler could open the link
+		 *         <code>false</code> if the browser should follow the link
+		 */
+		boolean handleExternalLink(URL url, Display display);
+
+		/**
+		 * Informs the handler that the text of the browser was set.
+		 */
+		void handleTextSet();
+	}
+
 	public static final String OPEN_LINK_SCHEME= "eclipse-open"; //$NON-NLS-1$
 	public static final String JAVADOC_SCHEME= "eclipse-javadoc"; //$NON-NLS-1$
 	public static final String JAVADOC_VIEW_SCHEME= "eclipse-javadoc-view"; //$NON-NLS-1$
@@ -45,6 +97,73 @@ public class JavaElementLinks {
 
 	private JavaElementLinks() {
 		// static only
+	}
+	
+	/**
+	 * Creates a location listener which uses the given handler
+	 * to handle java element links. 
+	 * 
+	 * The location listener can be attached to a {@link Browser}
+	 * 
+	 * @param handler the handler to use to handle links
+	 * @return a new {@link LocationListener}
+	 */
+	public static LocationListener createLocationListener(final ILinkHandler handler) {
+		return new LocationAdapter() {
+			public void changing(LocationEvent event) {
+				event.doit= false;
+
+				String loc= event.location;
+				URI uri;
+				try {
+					uri= new URI(loc);
+				} catch (URISyntaxException e) {
+					JavaPlugin.log(e);
+					return;
+				}
+
+				String scheme= uri.getScheme();
+				if (JavaElementLinks.JAVADOC_VIEW_SCHEME.equals(scheme)) {
+					IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
+					if (linkTarget == null)
+						return;
+					
+					handler.handleJavadocViewLink(linkTarget);
+				} else if (JavaElementLinks.JAVADOC_SCHEME.equals(scheme)) {
+					IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
+					if (linkTarget == null)
+						return;
+
+					handler.handleInlineJavadocLink(linkTarget);
+				} else if (JavaElementLinks.OPEN_LINK_SCHEME.equals(scheme)) {
+					IJavaElement linkTarget= JavaElementLinks.parseURI(uri);
+					if (linkTarget == null)
+						return;
+
+					handler.handleDeclarationLink(linkTarget);
+				} else if (!"about:blank".equals(loc)) { //$NON-NLS-1$
+					/*
+					 * Using the Browser.setText API triggers a location change to "about:blank".
+					 * XXX: remove this code once https://bugs.eclipse.org/bugs/show_bug.cgi?id=130314 is fixed
+					 */
+					if (loc.startsWith("about:")) //$NON-NLS-1$
+						return; //FIXME: handle relative links
+
+					try {
+						if (handler.handleExternalLink(new URL(loc), event.display))
+							return;
+
+						event.doit= true;
+					} catch (MalformedURLException e) {
+						JavaPlugin.log(e);
+					}
+				} else {
+					//input set with setText
+					event.doit= true;
+					handler.handleTextSet();
+				}
+			}
+		};
 	}
 	
 	public static String createURI(String scheme, IJavaElement element) throws URISyntaxException {
