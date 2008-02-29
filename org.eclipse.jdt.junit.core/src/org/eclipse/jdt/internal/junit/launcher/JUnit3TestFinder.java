@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,9 +28,6 @@ import org.eclipse.jdt.core.IRegion;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
@@ -85,30 +82,6 @@ public class JUnit3TestFinder implements ITestFinder {
 		IRegion region= TestSearchEngine.getRegion(element);
 		ITypeHierarchy typeHierarchy= javaProject.newTypeHierarchy(testCaseType, region, pm);
 		TestSearchEngine.findTestImplementorClasses(typeHierarchy, testCaseType, region, result);
-	}
-
-	public boolean isTest(ITypeBinding type) {
-		if (!type.isClass() || !Modifier.isPublic(type.getModifiers())) {
-			return false;
-		}
-		
-		IMethodBinding[] declaredMethods= type.getDeclaredMethods();
-		for (int i= 0; i < declaredMethods.length; i++) {
-			IMethodBinding curr= declaredMethods[i];
-			if ("suite".equals(curr.getName())) { //$NON-NLS-1$
-				int flags= curr.getModifiers();
-				if (Modifier.isPublic(flags) && Modifier.isStatic(flags) && curr.getParameterTypes().length == 0 &&
-						JUnitPlugin.SIMPLE_TEST_INTERFACE_NAME.equals(curr.getReturnType().getQualifiedName())) {
-					return true;
-				}
-			}
-		}
-
-		if (TestSearchEngine.isTestImplementor(type)) {
-			return true;
-		}
-		
-		return false;
 	}
 
 	public boolean isTest(IType type) throws JavaModelException {
