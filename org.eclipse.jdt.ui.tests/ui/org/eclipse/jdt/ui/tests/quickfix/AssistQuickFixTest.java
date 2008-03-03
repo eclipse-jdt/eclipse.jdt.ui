@@ -11,8 +11,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -4817,12 +4819,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        StringBuffer stringBuffer = new StringBuffer();\n");
-		buf.append("        stringBuffer.append(\"foo\");\n");
-		buf.append("        stringBuffer.append(\"bar\");\n");
-		buf.append("        stringBuffer.append(\"baz\");\n");
-		buf.append("        stringBuffer.append(\"biz\");\n");
-		buf.append("        String strX = stringBuffer.toString();\n");
+		buf.append("        StringBuilder stringBuilder = new StringBuilder();\n");
+		buf.append("        stringBuilder.append(\"foo\");\n");
+		buf.append("        stringBuilder.append(\"bar\");\n");
+		buf.append("        stringBuilder.append(\"baz\");\n");
+		buf.append("        stringBuilder.append(\"biz\");\n");
+		buf.append("        String strX = stringBuilder.toString();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected= buf.toString();
@@ -4854,11 +4856,11 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("    public void foo() {\n");
 		buf.append("        String foo = \"foo\";\n");
 		buf.append("        String fuu = \"fuu\";\n");
-		buf.append("        StringBuffer stringBuffer = new StringBuffer();\n");
-		buf.append("        stringBuffer.append(foo);\n");
-		buf.append("        stringBuffer.append(\"bar\");\n");
-		buf.append("        stringBuffer.append(fuu);\n");
-		buf.append("        String strX = stringBuffer.toString();\n");
+		buf.append("        StringBuilder stringBuilder = new StringBuilder();\n");
+		buf.append("        stringBuilder.append(foo);\n");
+		buf.append("        stringBuilder.append(\"bar\");\n");
+		buf.append("        stringBuilder.append(fuu);\n");
+		buf.append("        String strX = stringBuilder.toString();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected= buf.toString();
@@ -4924,9 +4926,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        int stringBuffer = 5;\n");
-		buf.append("        String stringBuffer2;\n");
-		buf.append("        StringBuffer stringBuffer3 = null;\n");
+		buf.append("        int stringBuilder = 5;\n");
+		buf.append("        String stringBuilder2;\n");
+		buf.append("        StringBuilder stringBuilder3 = null;\n");
 		buf.append("        String strX = \"foo\"+\"bar\";\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -4941,13 +4943,13 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        int stringBuffer = 5;\n");
-		buf.append("        String stringBuffer2;\n");
-		buf.append("        StringBuffer stringBuffer3 = null;\n");
-		buf.append("        StringBuffer stringBuffer4 = new StringBuffer();\n");
-		buf.append("        stringBuffer4.append(\"foo\");\n");
-		buf.append("        stringBuffer4.append(\"bar\");\n");
-		buf.append("        String strX = stringBuffer4.toString();\n");
+		buf.append("        int stringBuilder = 5;\n");
+		buf.append("        String stringBuilder2;\n");
+		buf.append("        StringBuilder stringBuilder3 = null;\n");
+		buf.append("        StringBuilder stringBuilder4 = new StringBuilder();\n");
+		buf.append("        stringBuilder4.append(\"foo\");\n");
+		buf.append("        stringBuilder4.append(\"bar\");\n");
+		buf.append("        String strX = stringBuilder4.toString();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected= buf.toString();
@@ -4978,10 +4980,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("    public void foo() {\n");
 		buf.append("        String strX;\n");
 		buf.append("        if(true) {\n");
-		buf.append("            StringBuffer stringBuffer = new StringBuffer();\n");
-		buf.append("            stringBuffer.append(\"foo\");\n");
-		buf.append("            stringBuffer.append(\"bar\");\n");
-		buf.append("            strX = stringBuffer.toString();\n");
+		buf.append("            StringBuilder stringBuilder = new StringBuilder();\n");
+		buf.append("            stringBuilder.append(\"foo\");\n");
+		buf.append("            stringBuilder.append(\"bar\");\n");
+		buf.append("            strX = stringBuilder.toString();\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -5010,14 +5012,55 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        StringBuffer stringBuffer = new StringBuffer();\n");
-		buf.append("        stringBuffer.append(\"foo\");\n");
-		buf.append("        stringBuffer.append(\"bar\");\n");
-		buf.append("        System.out.println(stringBuffer.toString());\n");
+		buf.append("        StringBuilder stringBuilder = new StringBuilder();\n");
+		buf.append("        stringBuilder.append(\"foo\");\n");
+		buf.append("        stringBuilder.append(\"bar\");\n");
+		buf.append("        System.out.println(stringBuilder.toString());\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+	
+	public void testConvertToStringBufferJava14() throws Exception {
+		
+		Map oldOptions= fJProject1.getOptions(false);
+		Map newOptions= new HashMap(oldOptions);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
+		fJProject1.setOptions(newOptions);
+		
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class A {\n");
+			buf.append("    public void foo() {\n");
+			buf.append("        System.out.println(\"foo\"+\"bar\");\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\"+\""), 0);
+			List proposals= collectAssists(context, false);
+
+			assertCorrectLabels(proposals);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class A {\n");
+			buf.append("    public void foo() {\n");
+			buf.append("        StringBuffer stringBuffer = new StringBuffer();\n");
+			buf.append("        stringBuffer.append(\"foo\");\n");
+			buf.append("        stringBuffer.append(\"bar\");\n");
+			buf.append("        System.out.println(stringBuffer.toString());\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+
+			assertExpectedExistInProposals(proposals, new String[] { expected1 });
+		} finally {
+			fJProject1.setOptions(oldOptions);
+		}
 	}
 }

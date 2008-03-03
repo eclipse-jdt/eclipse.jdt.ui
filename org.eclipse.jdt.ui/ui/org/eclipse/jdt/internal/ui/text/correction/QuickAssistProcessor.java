@@ -105,6 +105,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -572,29 +573,38 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (resultingCollections == null) {
 			return true;
 		}
+		
+		String bufferOrBuilderName;
+		ICompilationUnit cu= context.getCompilationUnit();
+		if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
+			bufferOrBuilderName= "StringBuilder"; //$NON-NLS-1$
+		} else {
+			bufferOrBuilderName= "StringBuffer"; //$NON-NLS-1$
+		}
 
 		ASTRewrite rewrite= ASTRewrite.create(ast);
-		ICompilationUnit cu= context.getCompilationUnit();
-		String label= CorrectionMessages.QuickAssistProcessor_convert_to_string_buffer_description;
+
+		String label= Messages.format(CorrectionMessages.QuickAssistProcessor_convert_to_string_buffer_description, bufferOrBuilderName);
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 1, image);
 		proposal.setCommandId(CONVERT_TO_STRING_BUFFER_ID);
-
+		
 		// create buffer
 		VariableDeclarationFragment frag= ast.newVariableDeclarationFragment();
 		// check if name is already in use and provide alternative
 		List fExcludedVariableNames= Arrays.asList(ASTResolving.getUsedVariableNames(oldInfixExpression));
-		String bufferQName= "StringBuffer"; //$NON-NLS-1$
-		SimpleType bufferType= ast.newSimpleType(ast.newName(bufferQName));
+
+		SimpleType bufferType= ast.newSimpleType(ast.newName(bufferOrBuilderName));
 		ClassInstanceCreation newBufferExpression= ast.newClassInstanceCreation();
 		
-		String[] newBufferNames= StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, cu.getJavaProject(), bufferQName, 0, fExcludedVariableNames, true);
+		String[] newBufferNames= StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, cu.getJavaProject(), bufferOrBuilderName, 0, fExcludedVariableNames, true);
 		String newBufferName= newBufferNames[0];
 
 		SimpleName bufferNameDeclaration= ast.newSimpleName(newBufferName);
 		frag.setName(bufferNameDeclaration);
+		
+		String groupID= "nameId"; //$NON-NLS-1$
 
-		String groupID= "bufferName"; //$NON-NLS-1$
 		proposal.addLinkedPosition(rewrite.track(bufferNameDeclaration), true, groupID);
 		for (int i= 0; i < newBufferNames.length; i++) {
 			proposal.addLinkedPositionProposal(groupID, newBufferNames[i], null);
@@ -604,7 +614,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		frag.setInitializer(newBufferExpression);
 
 		VariableDeclarationStatement bufferDeclaration= ast.newVariableDeclarationStatement(frag);
-		bufferDeclaration.setType(ast.newSimpleType(ast.newName(bufferQName)));
+		bufferDeclaration.setType(ast.newSimpleType(ast.newName(bufferOrBuilderName)));
 
 		Statement statement= ASTResolving.findParentStatement(oldInfixExpression);
 		ListRewrite listRewrite;
