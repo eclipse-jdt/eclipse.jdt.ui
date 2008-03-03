@@ -100,8 +100,8 @@ public final class ActionMessages extends NLS {
 	public static String OpenTypeHierarchyAction_messages_no_types;
 	public static String OpenTypeHierarchyAction_messages_no_valid_java_element;
 	public static String OpenTypeHierarchyAction_messages_unknown_import_decl;
-	public static String ShowExternalJavadocAction_label;
-	public static String ShowExternalJavadocAction_toolTip;
+	public static String OpenExternalBrowserAction_url_label;
+	public static String OpenExternalBrowserAction_url_toolTip;
 	public static String ShowInPackageViewAction_label;
 	public static String ShowInPackageViewAction_description;
 	public static String ShowInPackageViewAction_tooltip;
@@ -247,6 +247,8 @@ public final class ActionMessages extends NLS {
 	public static String FindStringsToExternalizeAction_non_externalized;
 	public static String FindStringsToExternalizeAction_button_label;
 	public static String FindStringsToExternalizeAction_find_strings;
+	public static String OpenExternalBrowserAction_javadoc_label;
+	public static String OpenExternalBrowserAction_javadoc_toolTip;
 	public static String OpenExternalJavadocAction_label;
 	public static String OpenExternalJavadocAction_description;
 	public static String OpenExternalJavadocAction_tooltip;

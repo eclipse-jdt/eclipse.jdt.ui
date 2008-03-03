@@ -44,8 +44,8 @@ public class OpenExternalBrowserAction extends SelectionDispatchAction {
 	public OpenExternalBrowserAction(IWorkbenchSite site) {
 		super(site);
 
-		setText(ActionMessages.ShowExternalJavadocAction_label);
-		setToolTipText(ActionMessages.ShowExternalJavadocAction_toolTip);
+		setText(ActionMessages.OpenExternalBrowserAction_javadoc_label); 
+		setToolTipText(ActionMessages.OpenExternalBrowserAction_javadoc_toolTip);
 		
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_EXTERNAL_BROWSER);
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_EXTERNAL_BROWSER);
@@ -55,7 +55,23 @@ public class OpenExternalBrowserAction extends SelectionDispatchAction {
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		setEnabled(canEnable(selection));
+		if (canEnable(selection)) {
+			setEnabled(true);
+
+			Object element= selection.getFirstElement();
+			if (element instanceof URL) {
+				setText(ActionMessages.OpenExternalBrowserAction_url_label);
+				setToolTipText(ActionMessages.OpenExternalBrowserAction_url_toolTip);
+			} else {
+				setText(ActionMessages.OpenExternalBrowserAction_javadoc_label);
+				setToolTipText(ActionMessages.OpenExternalBrowserAction_javadoc_toolTip);
+			}
+		} else {
+			setEnabled(false);
+			
+			setText(ActionMessages.OpenExternalBrowserAction_javadoc_label);
+			setToolTipText(ActionMessages.OpenExternalBrowserAction_javadoc_toolTip);
+		}
 	}
 
 	/* (non-Javadoc)
