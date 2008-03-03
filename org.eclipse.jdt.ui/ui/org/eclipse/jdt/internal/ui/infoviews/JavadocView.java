@@ -1090,7 +1090,7 @@ public class JavadocView extends AbstractInfoView {
 				// the image, with absolute placement
 				buf.append("<img style='width: 16px; height: 16px; position: absolute; top: 15px; left: 10px;' src='").append(imageUrl.toExternalForm()).append("'/>"); //$NON-NLS-1$ //$NON-NLS-2$
 				// add margin top the rest
-				divStyleAddition= "margin-left: 20px; margin-top: 0px;"; //$NON-NLS-1$
+				divStyleAddition= "margin-left: 21px; margin-top: 0px;"; //$NON-NLS-1$
 			}
 		}
 
