@@ -23,7 +23,7 @@ import org.eclipse.search.ui.text.Match;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 
 class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements IStyledLabelProvider {
 	
@@ -52,10 +52,10 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 
 		String lineNumberString= getLineNumberLabel(jel);
 
-		Styler highlightStyle= ColoredJavaElementLabels.HIGHLIGHT_STYLE;
+		Styler highlightStyle= ColoringLabelProvider.HIGHLIGHT_STYLE;
 		
 		StyledStringBuilder res= new StyledStringBuilder();
-		res.append(lineNumberString, ColoredJavaElementLabels.QUALIFIER_STYLE);
+		res.append(lineNumberString, StyledStringBuilder.QUALIFIER_STYLER);
 		res.append(jel.getLineContents());
 		Match[] matches= getPage().getInput().getMatches(jel);
 		for (int i= 0; i < matches.length; i++) {
@@ -65,7 +65,7 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 			
 			if (offset >= 0 && (offset + length <= res.length())) {
 				if ((curr.getFlags() & IOccurrencesFinder.F_WRITE_OCCURRENCE) != 0) {
-					res.setStyle(offset, length, ColoredJavaElementLabels.HIGHLIGHT_WRITE_STYLE);
+					res.setStyle(offset, length, ColoringLabelProvider.HIGHLIGHT_WRITE_STYLE);
 				} else {
 					res.setStyle(offset, length, highlightStyle);
 				}

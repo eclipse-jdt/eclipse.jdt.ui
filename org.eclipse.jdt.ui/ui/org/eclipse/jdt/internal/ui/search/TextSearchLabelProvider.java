@@ -17,7 +17,7 @@ import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 
 public abstract class TextSearchLabelProvider extends LabelProvider {
 
@@ -35,7 +35,7 @@ public abstract class TextSearchLabelProvider extends LabelProvider {
 		String name= coloredName.toString();
 		String decorated= getLabelWithCounts(element, name);
 		if (decorated.length() > name.length()) {
-			ColoredJavaElementLabels.decorateStyledString(coloredName, decorated, ColoredJavaElementLabels.COUNTER_STYLE);
+			ColoringLabelProvider.decorateStyledString(coloredName, decorated, StyledStringBuilder.COUNTER_STYLER);
 		}
 		return coloredName;
 	}

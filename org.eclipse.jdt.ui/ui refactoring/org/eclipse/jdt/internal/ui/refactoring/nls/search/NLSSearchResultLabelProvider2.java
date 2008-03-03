@@ -24,7 +24,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.search.TextSearchLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
 
 
 class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements IStyledLabelProvider {
@@ -59,17 +58,17 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements I
 		} else if (element instanceof CompilationUnitEntry) {
 			CompilationUnitEntry cuEntry= (CompilationUnitEntry) element;
 			description= cuEntry.getMessage();
-			elementLabel= ColoredJavaElementLabels.getTextLabel(cuEntry.getCompilationUnit(), JavaElementLabels.ALL_POST_QUALIFIED | ColoredJavaElementLabels.COLORIZE);
+			elementLabel= JavaElementLabels.getStyledTextLabel(cuEntry.getCompilationUnit(), (JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.COLORIZE));
 		} else {
 			description= NLSSearchMessages.NLSSearchResultLabelProvider2_undefinedKeys;
-			elementLabel= ColoredJavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_POST_QUALIFIED | ColoredJavaElementLabels.COLORIZE);
+			elementLabel= JavaElementLabels.getStyledTextLabel(element, (JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.COLORIZE));
 		}
 		return new StyledStringBuilder(description).append(' ').append(elementLabel);
 	}
 	
 	private StyledStringBuilder getPropertiesName(IFile propertiesFile) {
 		String path= propertiesFile.getFullPath().removeLastSegments(1).makeRelative().toString();
-		return new StyledStringBuilder(propertiesFile.getName()).append(" - " + path, ColoredJavaElementLabels.QUALIFIER_STYLE); //$NON-NLS-1$
+		return new StyledStringBuilder(propertiesFile.getName()).append(" - " + path, StyledStringBuilder.QUALIFIER_STYLER); //$NON-NLS-1$
 	}
 	
 	/*

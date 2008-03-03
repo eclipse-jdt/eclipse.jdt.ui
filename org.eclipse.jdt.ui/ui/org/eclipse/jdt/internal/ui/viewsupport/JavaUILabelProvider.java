@@ -174,13 +174,13 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 	}
 	
 	public StyledStringBuilder getStyledText(Object element) {
-		StyledStringBuilder string= ColoredJavaElementLabels.getTextLabel(element, evaluateTextFlags(element) | ColoredJavaElementLabels.COLORIZE);
+		StyledStringBuilder string= JavaElementLabels.getStyledTextLabel(element, (evaluateTextFlags(element) | JavaElementLabels.COLORIZE));
 		if (string.length() == 0 && (element instanceof IStorage)) {
 			string= new StyledStringBuilder(fStorageLabelProvider.getText(element));
 		}
 		String decorated= decorateText(string.toString(), element);
 		if (decorated != null) {
-			return ColoredJavaElementLabels.decorateStyledString(string, decorated, ColoredJavaElementLabels.DECORATIONS_STYLE);
+			return ColoringLabelProvider.decorateStyledString(string, decorated, StyledStringBuilder.DECORATIONS_STYLER);
 		}
 		return string;
 	}

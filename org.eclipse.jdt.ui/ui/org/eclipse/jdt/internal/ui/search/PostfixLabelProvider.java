@@ -22,7 +22,6 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
 
 public class PostfixLabelProvider extends SearchLabelProvider {
 	private ITreeContentProvider fContentProvider;
@@ -92,7 +91,7 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 	 */
 	public StyledStringBuilder getStyledText(Object element) {
 		StyledStringBuilder styledString= getColoredLabelWithCounts(element, super.getStyledText(element));
-		styledString.append(getQualification(element), ColoredJavaElementLabels.QUALIFIER_STYLE);
+		styledString.append(getQualification(element), StyledStringBuilder.QUALIFIER_STYLER);
 		return styledString;
 	}
 

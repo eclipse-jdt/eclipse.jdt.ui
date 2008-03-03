@@ -21,7 +21,6 @@ import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
 
 public class SortingLabelProvider extends SearchLabelProvider {
 	
@@ -30,7 +29,7 @@ public class SortingLabelProvider extends SearchLabelProvider {
 	public static final int SHOW_PATH= 3;
 	
 	private static final long FLAGS_QUALIFIED= DEFAULT_SEARCH_TEXTFLAGS | JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED
-		| JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.D_QUALIFIED | JavaElementLabels.CF_QUALIFIED  | JavaElementLabels.CU_QUALIFIED | ColoredJavaElementLabels.COLORIZE;
+		| JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.D_QUALIFIED | JavaElementLabels.CF_QUALIFIED  | JavaElementLabels.CU_QUALIFIED | JavaElementLabels.COLORIZE;
 	
 	
 	private int fCurrentOrder;
@@ -75,7 +74,7 @@ public class SortingLabelProvider extends SearchLabelProvider {
 		if (text.length() > 0) {
 			StyledStringBuilder countLabel= getColoredLabelWithCounts(element, text);
 			if (fCurrentOrder == SHOW_ELEMENT_CONTAINER) {
-				countLabel.append(getPostQualification(element), ColoredJavaElementLabels.QUALIFIER_STYLE);
+				countLabel.append(getPostQualification(element), StyledStringBuilder.QUALIFIER_STYLER);
 			}
 			return countLabel;
 		}

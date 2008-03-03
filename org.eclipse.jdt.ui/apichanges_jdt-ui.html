@@ -146,7 +146,19 @@ Non-breaking API changes from R3.3 to R3.4</b></font> <br>
       <li>BuildPathDialogAccess.configureExternalClassFolderEntries(Shell, IPath)</li>
        </ul>
       </td>
-    </tr>    
+    </tr>
+    <tr><td><hr></td></tr>      
+    <tr>
+      <td>
+      Support for styled text labels in <code>JavaElementLabels</code>:
+      <ul>
+      <li><code>COLORIZE</code>: Constant to signal that colors should be applied to labels</li>
+      <li><code>getStyledTextLabel(element, flags)</code>: Construct a styled text label for the given element</li>
+      <li><code>getStyledElementLabel(..)</code>: Construct a styled text label for the given Java element</li>
+      <li><code>getXYLabel(..)</code>: Construct a styled text label for the given tytpe, method, field ...</li>
+       </ul>
+      </td>
+    </tr>        
   </tbody>
 </table>
 <p>

@@ -22,7 +22,7 @@ import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.StyledStringBuilder;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 
 import org.eclipse.jdt.junit.model.ITestCaseElement;
 import org.eclipse.jdt.junit.model.ITestElement;
@@ -67,7 +67,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 				String testKindDisplayName= fTestRunnerPart.getTestKindDisplayName();
 				if (testKindDisplayName != null) {
 					String decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testName_JUnitVersion, new Object[] { label, testKindDisplayName });
-					text= ColoredJavaElementLabels.decorateStyledString(text, decorated, ColoredJavaElementLabels.QUALIFIER_STYLE);
+					text= ColoringLabelProvider.decorateStyledString(text, decorated, StyledStringBuilder.QUALIFIER_STYLER);
 				}
 			}
 			
@@ -75,7 +75,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 			if (element instanceof ITestCaseElement) {
 				String className= ((ITestCaseElement) element).getTestClassName();
 				String decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, className });
-				text= ColoredJavaElementLabels.decorateStyledString(text, decorated, ColoredJavaElementLabels.QUALIFIER_STYLE);
+				text= ColoringLabelProvider.decorateStyledString(text, decorated, StyledStringBuilder.QUALIFIER_STYLER);
 			}
 		}
 		return addElapsedTime(text, testElement.getElapsedTimeInSeconds());
@@ -84,7 +84,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 	private StyledStringBuilder addElapsedTime(StyledStringBuilder styledString, double time) {
 		String string= styledString.toString();
 		String decorated= addElapsedTime(string, time);
-		return ColoredJavaElementLabels.decorateStyledString(styledString, decorated, ColoredJavaElementLabels.COUNTER_STYLE);
+		return ColoringLabelProvider.decorateStyledString(styledString, decorated, StyledStringBuilder.COUNTER_STYLER);
 	}
 
 	private String addElapsedTime(String string, double time) {

@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
@@ -77,7 +77,7 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
         	MethodWrapper wrapper= (MethodWrapper) element;
         	String decorated= getElementLabel(wrapper);
         	StyledStringBuilder text= super.getStyledText(wrapper.getMember());
-        	return ColoredJavaElementLabels.decorateStyledString(text, decorated, ColoredJavaElementLabels.COUNTER_STYLE);
+        	return ColoringLabelProvider.decorateStyledString(text, decorated, StyledStringBuilder.COUNTER_STYLER);
         }
         return new StyledStringBuilder(getSpecialLabel(element));
     }

@@ -20,7 +20,9 @@ import org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.IDecorationContext;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.StyledStringBuilder;
 import org.eclipse.jface.viewers.ViewerColumn;
+import org.eclipse.jface.viewers.StyledStringBuilder.Styler;
 
 public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider implements ILabelProvider {
 	
@@ -34,6 +36,9 @@ public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider imp
 			return null;
 		}
 	}
+
+	public static final Styler HIGHLIGHT_STYLE= StyledStringBuilder.createColorRegistryStyler(null, ColoredViewersManager.HIGHLIGHT_BG_COLOR_NAME);
+	public static final Styler HIGHLIGHT_WRITE_STYLE= StyledStringBuilder.createColorRegistryStyler(null, ColoredViewersManager.HIGHLIGHT_WRITE_BG_COLOR_NAME);
 	
 	public ColoringLabelProvider(IStyledLabelProvider labelProvider) {
 		this(labelProvider, new VoidLD(), null);
@@ -81,6 +86,23 @@ public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider imp
 	
 	public String getText(Object element) {
 		return getStyledText(element).toString();
+	}
+
+	public static StyledStringBuilder decorateStyledString(StyledStringBuilder string, String decorated, Styler color) {
+		String label= string.toString();
+		int originalStart= decorated.indexOf(label);
+		if (originalStart == -1) {
+			return new StyledStringBuilder(decorated); // the decorator did something wild
+		}
+		if (originalStart > 0) {
+			StyledStringBuilder newString= new StyledStringBuilder(decorated.substring(0, originalStart), color);
+			newString.append(string);
+			string= newString;
+		}
+		if (decorated.length() > originalStart + label.length()) { // decorator appended something
+			return string.append(decorated.substring(originalStart + label.length()), color);
+		}
+		return string; // no change
 	}
 
 }

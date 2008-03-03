@@ -44,7 +44,7 @@ import org.eclipse.jdt.ui.search.IMatchPresentation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredJavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 
 public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 	
@@ -126,7 +126,7 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 		String name= coloredName.toString();
 		String decorated= getLabelWithCounts(element, name);
 		if (decorated.length() > name.length()) {
-			ColoredJavaElementLabels.decorateStyledString(coloredName, decorated, ColoredJavaElementLabels.COUNTER_STYLE);
+			ColoringLabelProvider.decorateStyledString(coloredName, decorated, StyledStringBuilder.COUNTER_STYLER);
 		}
 		return coloredName;
 	}
