@@ -1390,6 +1390,9 @@ public class JavaElementLabels {
 	 * @since 3.4
 	 */	
 	public static void getPackageFragmentRootLabel(IPackageFragmentRoot root, long flags, StyledStringBuilder result) {
+		// Handle variables different	
+		if (getFlag(flags, ROOT_VARIABLE) && getVariableLabel(root, flags, result))
+			return;
 		if (root.isArchive())
 			getArchiveLabel(root, flags, result);
 		else
@@ -1397,9 +1400,6 @@ public class JavaElementLabels {
 	}
 	
 	private static void getArchiveLabel(IPackageFragmentRoot root, long flags, StyledStringBuilder result) {
-		// Handle variables different	
-		if (getFlag(flags, ROOT_VARIABLE) && getVariableLabel(root, flags, result))
-			return;
 		boolean external= root.isExternal();
 		if (external)
 			getExternalArchiveLabel(root, flags, result);
@@ -1412,14 +1412,18 @@ public class JavaElementLabels {
 			IClasspathEntry rawEntry= root.getRawClasspathEntry();
 			if (rawEntry != null && rawEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
 				IPath path= rawEntry.getPath().makeRelative();
-				int offset= result.length();
+				
 				if (getFlag(flags, REFERENCED_ROOT_POST_QUALIFIED)) {
 					int segements= path.segmentCount();
 					if (segements > 0) {
 						result.append(path.segment(segements - 1));
 						if (segements > 1) {
+							int offset= result.length();
 							result.append(CONCAT_STRING);
 							result.append(path.removeLastSegments(1).toOSString());
+							if (getFlag(flags, COLORIZE)) {
+								result.setStyle(offset, result.length() - offset, QUALIFIER_STYLE);
+							}
 						}
 					} else {
 						result.append(path.toString());
@@ -1427,6 +1431,7 @@ public class JavaElementLabels {
 				} else {
 					result.append(path.toString());
 				}
+				int offset= result.length();
 				result.append(CONCAT_STRING);
 				if (root.isExternal())
 					result.append(root.getPath().toOSString());
