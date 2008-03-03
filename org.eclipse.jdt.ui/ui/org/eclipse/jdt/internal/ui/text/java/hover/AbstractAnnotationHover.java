@@ -53,7 +53,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.util.Geometry;
 
 import org.eclipse.jface.text.AbstractInformationControl;
 import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
@@ -197,8 +196,13 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			Point constrains= getSizeConstraints();
 			if (constrains == null)
 				return preferedSize;
-				
-			return Geometry.min(preferedSize, constrains);
+
+			Point constrainedSize= getShell().computeSize(constrains.x, SWT.DEFAULT, true);
+			
+			int width= Math.min(preferedSize.x, constrainedSize.x);
+			int height= Math.max(preferedSize.y, constrainedSize.y);
+			
+			return new Point(width, height);
 		}
 
 		/**
@@ -254,7 +258,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 
 			final Canvas canvas= new Canvas(composite, SWT.NONE);
 			GridData gridData= new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false);
-			gridData.widthHint= 16;
+			gridData.widthHint= 17;
 			gridData.heightHint= 16;
 			canvas.setLayoutData(gridData);
 			canvas.addPaintListener(new PaintListener() {
@@ -267,16 +271,12 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			GridData data= new GridData(SWT.FILL, SWT.FILL, true, true);
 			text.setLayoutData(data);
 			text.setText(annotation.getText());
-			Point constraints= getSizeConstraints();
-			if (constraints != null) {
-				data.heightHint= text.computeSize(constraints.x, SWT.DEFAULT).y;
-			}
 		}
 
 		private void createCompletionProposalsControl(Composite parent, final IDocument document, ICompletionProposal[] proposals) {
 			Composite composite= new Composite(parent, SWT.NONE);
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			GridLayout layout2= new GridLayout(2, false);
+			GridLayout layout2= new GridLayout(1, false);
 			layout2.marginHeight= 2;
 			layout2.marginWidth= 2;
 			layout2.verticalSpacing= 2;
@@ -284,12 +284,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 
 			Label separator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 			GridData gridData= new GridData(SWT.FILL, SWT.CENTER, true, false);
-			gridData.horizontalSpan= 2;
 			separator.setLayoutData(gridData);
-
-			Label quickFixImage= new Label(composite, SWT.NONE);
-			quickFixImage.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
-			quickFixImage.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_QUICK_FIX));
 
 			Label quickFixLabel= new Label(composite, SWT.NONE);
 			quickFixLabel.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
@@ -307,7 +302,6 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		private void createCompletionProposalsList(Composite parent, ICompletionProposal[] proposals, final IDocument document) {
 			final ScrolledComposite scrolledComposite= new ScrolledComposite(parent, SWT.V_SCROLL | SWT.H_SCROLL);
 			GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
-			gridData.horizontalSpan= 2;
 			scrolledComposite.setLayoutData(gridData);
 			scrolledComposite.setExpandVertical(false);
 			scrolledComposite.setExpandHorizontal(false);
