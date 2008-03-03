@@ -29,12 +29,13 @@ import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 
 import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.jdt.ui.IPackagesViewPart;
+import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageOne;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageTwo;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class JavaProjectWizard extends NewElementWizard implements IExecutableExtension {
@@ -98,8 +99,8 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
 					IWorkbenchPart activePart= getActivePart();
-					if (activePart instanceof PackageExplorerPart) {
-						((PackageExplorerPart)activePart).tryToReveal(newElement);
+					if (activePart instanceof IPackagesViewPart) {
+						(new ShowInPackageViewAction(activePart.getSite())).run(newElement);
 					}
 				}
 			});

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,20 +10,24 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
+
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.PlatformUI;
+
 /**
  * This action reveals the currently selected Java element in the 
  * package explorer. 
@@ -108,19 +112,15 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 		run((IJavaElement)selection.getFirstElement());
 	}
 	
-	/*
-	 * No Javadoc. The method should be internal but can't be changed since
-	 * we shipped it with a public visibility 
+	/**
+	 * Tries to reveal the given Java element
+	 * 
+	 * @param element the element to reveal
 	 */
 	public void run(IJavaElement element) {
 		if (element == null)
 			return;
 			
-		// reveal the top most element only
-		IOpenable openable= element.getOpenable();
-		if (openable instanceof IJavaElement)
-			element= (IJavaElement)openable;
-
 		PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
 		view.tryToReveal(element);
 	}
