@@ -124,7 +124,8 @@ import org.xml.sax.SAXException;
 
 public class UserLibraryPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	public static final String ID= "org.eclipse.jdt.ui.preferences.UserLibraryPreferencePage"; //$NON-NLS-1$
+	public static final String ID= JavaUI.ID_USER_LIBRARY_PREFERENCE_PAGE;
+	
 	public static final String DATA_DO_CREATE= "do_create"; //$NON-NLS-1$
 	public static final String DATA_LIBRARY_TO_SELECT= "select_library"; //$NON-NLS-1$
 	

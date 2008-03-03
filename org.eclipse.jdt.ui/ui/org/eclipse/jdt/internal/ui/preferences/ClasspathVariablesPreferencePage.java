@@ -27,13 +27,15 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.VariableBlock;
 
 public class ClasspathVariablesPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	public static final String ID= "org.eclipse.jdt.ui.preferences.ClasspathVariablesPreferencePage"; //$NON-NLS-1$
+	public static final String ID= JavaUI.ID_CLASSPATH_VARIABLES_PREFERENCE_PAGE;
 
 	public static final String DATA_SELECT_VARIABLE= "ClasspathVariablesPreferencePage.select_var"; //$NON-NLS-1$
 	

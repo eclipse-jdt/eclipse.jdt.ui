@@ -245,7 +245,25 @@ public final class JavaUI {
 	 * @since 2.0
 	 */
 	public static final String ID_MEMBERS_VIEW= "org.eclipse.jdt.ui.MembersView"; //$NON-NLS-1$
+	
+	
+	/**
+	 * The preference page id of the user library preference page
+	 * (value <code>"org.eclipse.jdt.ui.preferences.UserLibraryPreferencePage"</code>).
+	 * 
+	 * @since 3.4
+	 */
+	public static final String ID_USER_LIBRARY_PREFERENCE_PAGE= "org.eclipse.jdt.ui.preferences.UserLibraryPreferencePage"; //$NON-NLS-1$
 
+	/**
+	 * The preference page id of the class path variables preference page
+	 * (value <code>"org.eclipse.jdt.ui.preferences.ClasspathVariablesPreferencePage"</code>).
+	 * 
+	 * @since 3.4
+	 */
+	public static final String ID_CLASSPATH_VARIABLES_PREFERENCE_PAGE= "org.eclipse.jdt.ui.preferences.ClasspathVariablesPreferencePage"; //$NON-NLS-1$
+	
+	
 	/**
 	 * The class org.eclipse.debug.core.model.IProcess allows attaching
 	 * String properties to processes. The Java UI contributes a property
