@@ -548,7 +548,7 @@ public class CPListElement {
 				break;
 			case IClasspathEntry.CPE_VARIABLE:
 				IPath resolvedPath= JavaCore.getResolvedVariablePath(path);
-				isMissing=  root.findMember(resolvedPath) == null && !resolvedPath.toFile().isFile();
+				isMissing=  root.findMember(resolvedPath) == null && !resolvedPath.toFile().exists();
 				break;
 			case IClasspathEntry.CPE_LIBRARY:
 				res= root.findMember(path);
