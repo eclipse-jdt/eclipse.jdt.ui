@@ -61,9 +61,13 @@ import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IInformationControlExtension2;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -100,12 +104,12 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	private static class AnnotationInfo {
 		public final Annotation annotation;
 		public final Position position;
-		public final IDocument document;
+		public final ITextViewer viewer;
 
-		public AnnotationInfo(Annotation annotation, Position position, IDocument document) {
+		public AnnotationInfo(Annotation annotation, Position position, ITextViewer textViewer) {
 			this.annotation= annotation;
 			this.position= position;
-			this.document= document;
+			this.viewer= textViewer;
 		}
 	}
 
@@ -215,7 +219,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			if (toolBarManager == null)
 				return;
 
-			fillToolBar(toolBarManager, fInput.annotation, fInput.position, fInput.document);
+			fillToolBar(toolBarManager, fInput.annotation, fInput.position, fInput.viewer.getDocument());
 			toolBarManager.update(true);
 		}
 
@@ -230,7 +234,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 
 			ICompletionProposal[] proposals= getCompletionProposals(getAnnotationInfo().annotation, getAnnotationInfo().position);
 			if (proposals.length > 0)
-				createCompletionProposalsControl(parent, getAnnotationInfo().document, proposals);
+				createCompletionProposalsControl(parent, proposals);
 
 			setColorAndFont(parent, parent.getForeground(), parent.getBackground(), JFaceResources.getDialogFont());
 		}
@@ -273,7 +277,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			text.setText(annotation.getText());
 		}
 
-		private void createCompletionProposalsControl(Composite parent, final IDocument document, ICompletionProposal[] proposals) {
+		private void createCompletionProposalsControl(Composite parent, ICompletionProposal[] proposals) {
 			Composite composite= new Composite(parent, SWT.NONE);
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			GridLayout layout2= new GridLayout(1, false);
@@ -296,10 +300,10 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			}
 			quickFixLabel.setText(text);
 
-			createCompletionProposalsList(composite, proposals, document);
+			createCompletionProposalsList(composite, proposals);
 		}
 
-		private void createCompletionProposalsList(Composite parent, ICompletionProposal[] proposals, final IDocument document) {
+		private void createCompletionProposalsList(Composite parent, ICompletionProposal[] proposals) {
 			final ScrolledComposite scrolledComposite= new ScrolledComposite(parent, SWT.V_SCROLL | SWT.H_SCROLL);
 			GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
 			scrolledComposite.setLayoutData(gridData);
@@ -319,7 +323,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				gridData1.widthHint= 0;
 				indent.setLayoutData(gridData1);
 
-				links[i]= createCompletionProposalLink(composite, proposals[i], document);
+				links[i]= createCompletionProposalLink(composite, proposals[i]);
 			}
 
 			scrolledComposite.setContent(composite);
@@ -387,7 +391,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			}
 		}
 
-		private Link createCompletionProposalLink(Composite parent, final ICompletionProposal proposal, final IDocument document) {
+		private Link createCompletionProposalLink(Composite parent, final ICompletionProposal proposal) {
 			Label proposalImage= new Label(parent, SWT.NONE);
 			proposalImage.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 			Image image= proposal.getImage();
@@ -404,7 +408,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 
 					public void mouseUp(MouseEvent e) {
 						if (e.button == 1) {
-							apply(proposal, document);
+							apply(proposal, fInput.viewer, fInput.position.offset);
 						}
 					}
 
@@ -419,18 +423,48 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
 				 */
 				public void widgetSelected(SelectionEvent e) {
-					apply(proposal, document);
+					apply(proposal, fInput.viewer, fInput.position.offset);
 				}
 			});
 
 			return proposalLink;
 		}
 
-		private void apply(ICompletionProposal proposal, IDocument document) {
+		private void apply(ICompletionProposal p, ITextViewer viewer, int offset) {
 			//Focus needs to be in the text viewer, otherwise linked mode does not work
 			dispose();
 
-			proposal.apply(document);
+			IRewriteTarget target= null;
+			try {
+				IDocument document= viewer.getDocument();
+
+				if (viewer instanceof ITextViewerExtension) {
+					ITextViewerExtension extension= (ITextViewerExtension) viewer;
+					target= extension.getRewriteTarget();
+				}
+
+				if (target != null)
+					target.beginCompoundChange();
+
+				if (p instanceof ICompletionProposalExtension2) {
+					ICompletionProposalExtension2 e= (ICompletionProposalExtension2) p;
+					e.apply(viewer, (char) 0, SWT.NONE, offset);
+				} else if (p instanceof ICompletionProposalExtension) {
+					ICompletionProposalExtension e= (ICompletionProposalExtension) p;
+					e.apply(document, (char) 0, offset);
+				} else {
+					p.apply(document);
+				}
+
+				Point selection= p.getSelection(document);
+				if (selection != null) {
+					viewer.setSelectedRange(selection.x, selection.y);
+					viewer.revealRange(selection.x, selection.y);
+				}
+			} finally {
+				if (target != null)
+					target.endCompoundChange();
+			}
 		}
 
 		/*
@@ -598,7 +632,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				}
 			}
 			if (layer > -1)
-				return new AnnotationInfo(annotation, position, textViewer.getDocument());
+				return new AnnotationInfo(annotation, position, textViewer);
 
 		} finally {
 			try {
