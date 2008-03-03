@@ -34,6 +34,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.ViewerLabel;
 
@@ -436,10 +437,7 @@ public class BreadcrumbViewer extends StructuredViewer {
 	 * @param element the selected element
 	 */
 	void fireMenuSelection(Object element) {
-		setInput(element);
-		BreadcrumbItem item= (BreadcrumbItem) doFindItem(element);
-		selectItem(item);
-		fireOpen();
+		fireOpen(new OpenEvent(this, new StructuredSelection(element)));
 	}
 	
 	/**

@@ -293,11 +293,14 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 			fTextViewer.getTextWidget().setFocus();
 		} else if (doOpen(selection)) {
 			fIsActive= false;
+			focusLost();
 			fBreadcrumbViewer.setInput(getCurrentInput());
 		} else {
 			Object element= ((IStructuredSelection) selection).getFirstElement();
 			if (element == null)
 				return;
+			
+			fBreadcrumbViewer.setInput(element);
 			
 			BreadcrumbItem item= (BreadcrumbItem) fBreadcrumbViewer.doFindItem(element);
 			if (item == null)
