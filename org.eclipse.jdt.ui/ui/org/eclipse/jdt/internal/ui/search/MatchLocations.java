@@ -163,6 +163,7 @@ public class MatchLocations {
 			createButton(statementGroup, SearchMessages.MatchLocations_catch_clauses_label, IJavaSearchConstants.CATCH_TYPE_REFERENCE);
 			addSeparator(statementGroup);
 			createButton(statementGroup, SearchMessages.MatchLocations_class_instance_label, IJavaSearchConstants.CLASS_INSTANCE_CREATION_TYPE_REFERENCE);
+			createButton(statementGroup, SearchMessages.MatchLocations_instanceof_label, IJavaSearchConstants.INSTANCEOF_TYPE_REFERENCE);
 		}
 		
 		protected final void performSelectAction(boolean selectAll) {
@@ -267,6 +268,9 @@ public class MatchLocations {
 		if (isSet(locations, IJavaSearchConstants.WILDCARD_BOUND_TYPE_REFERENCE)) {
 			args.add(SearchMessages.MatchLocations_wildcard_bounds_description);
 		}
+		if (isSet(locations, IJavaSearchConstants.INSTANCEOF_TYPE_REFERENCE)) {
+			args.add(SearchMessages.MatchLocations_instanceof_description);
+		}
 		if (isSet(locations, IJavaSearchConstants.TYPE_ARGUMENT_TYPE_REFERENCE)) {
 			args.add(SearchMessages.MatchLocations_type_arguments_description);
 		}
@@ -310,7 +314,7 @@ public class MatchLocations {
 	
 	public static int getTotalNumberOfSettings(int searchFor) {
 		if (searchFor == IJavaSearchConstants.TYPE) {
-			return 13;
+			return 14;
 		} else if (searchFor == IJavaSearchConstants.METHOD || searchFor == IJavaSearchConstants.FIELD) {
 			return 4;
 		}
@@ -346,6 +350,9 @@ public class MatchLocations {
 				count++;
 			}
 			if (isSet(locations, IJavaSearchConstants.WILDCARD_BOUND_TYPE_REFERENCE)) {
+				count++;
+			}
+			if (isSet(locations, IJavaSearchConstants.INSTANCEOF_TYPE_REFERENCE)) {
 				count++;
 			}
 			if (isSet(locations, IJavaSearchConstants.TYPE_ARGUMENT_TYPE_REFERENCE)) {

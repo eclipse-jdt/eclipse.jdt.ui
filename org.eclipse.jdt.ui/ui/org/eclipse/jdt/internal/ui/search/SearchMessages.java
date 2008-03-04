@@ -320,6 +320,8 @@ public final class SearchMessages extends NLS {
 	public static String MatchLocations_type_parameter_bounds_label;
 	public static String MatchLocations_wildcard_bounds_description;
 	public static String MatchLocations_wildcard_bounds_label;
+	public static String MatchLocations_instanceof_description;
+	public static String MatchLocations_instanceof_label;
 	public static String MatchLocations_match_locations_description;
 
 }
