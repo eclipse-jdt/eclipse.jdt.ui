@@ -203,26 +203,6 @@ public class BreadcrumbViewer extends StructuredViewer {
 		fContainer.setRedraw(false);
 		try {
 			int lastIndex= buildItemChain(fInput);
-
-			if (((ITreeContentProvider) getContentProvider()).hasChildren(fInput)) {
-				BreadcrumbItem item;
-				if (lastIndex < fBreadcrumbItems.size()) {
-					item= (BreadcrumbItem) fBreadcrumbItems.get(lastIndex);
-					if (item.getData() != null)
-						unmapElement(item.getData());
-				} else {
-					item= createItem();
-					fBreadcrumbItems.add(item);
-				}
-
-				if (item == fSelectedItem) {
-					selectItem(null);
-				}
-				item.setInput(fInput);
-				item.setData(null);
-				lastIndex++;
-			}
-
 			while (lastIndex < fBreadcrumbItems.size()) {
 				BreadcrumbItem item= (BreadcrumbItem) fBreadcrumbItems.remove(fBreadcrumbItems.size() - 1);
 				if (item == fSelectedItem) {
@@ -452,20 +432,20 @@ public class BreadcrumbViewer extends StructuredViewer {
 
 		int index= fBreadcrumbItems.indexOf(fSelectedItem);
 		if (next) {
-			if (index == fBreadcrumbItems.size() - 1)
-				return;
-
-			BreadcrumbItem nextItem= (BreadcrumbItem) fBreadcrumbItems.get(index + 1);
-			if (index == fBreadcrumbItems.size() - 2 && nextItem.getData() == null) {
-				nextItem.openDropDownMenu(null, false);
+			if (index == fBreadcrumbItems.size() - 1) {
+				BreadcrumbItem current= (BreadcrumbItem) fBreadcrumbItems.get(index);
+				current.openDropDownMenu(null, false);
 			} else {
+				BreadcrumbItem nextItem= (BreadcrumbItem) fBreadcrumbItems.get(index + 1);
 				selectItem(nextItem);
 			}
 		} else {
-			if (index == 0)
-				return;
-
-			selectItem((BreadcrumbItem) fBreadcrumbItems.get(index - 1));
+			if (index == 1) {
+				BreadcrumbItem root= (BreadcrumbItem) fBreadcrumbItems.get(0);
+				root.openDropDownMenu(null, false);
+			} else {
+				selectItem((BreadcrumbItem) fBreadcrumbItems.get(index - 1));
+			}
 		}
 	}
 	
@@ -476,10 +456,11 @@ public class BreadcrumbViewer extends StructuredViewer {
 	 * @return the first index of an item in fBreadcrumbItems which is not part of the chain
 	 */
 	private int buildItemChain(Object element) {
+		if (element == null)
+			return 0;
+		
 		ITreeContentProvider contentProvider= (ITreeContentProvider) getContentProvider();
 		Object parent= contentProvider.getParent(element);
-		if (parent == null)
-			return 0;
 	
 		int index= buildItemChain(parent);
 	
@@ -496,8 +477,12 @@ public class BreadcrumbViewer extends StructuredViewer {
 		if (item == fSelectedItem && element != item.getData()) {
 			selectItem(null);
 		}
-		item.setInput(parent);
 		item.setData(element);
+		if (parent == null) {
+			//don't show the models root
+			item.setDetailsVisible(false);
+		}
+		
 		mapElement(element, item);
 	
 		return index + 1;

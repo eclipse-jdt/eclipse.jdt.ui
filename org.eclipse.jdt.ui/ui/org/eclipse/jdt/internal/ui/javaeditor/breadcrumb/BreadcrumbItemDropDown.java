@@ -189,7 +189,9 @@ class BreadcrumbItemDropDown {
 						shell.close();
 						
 						BreadcrumbItem parent= fParent.getViewer().getItem(index - 1);
-						fParent.getViewer().selectItem(parent);
+						if (index - 1 > 0)
+							fParent.getViewer().selectItem(parent);
+						
 						parent.openDropDownMenu(null, true);
 					}
 				} else if (direction == FilteredTable.DIRECTION_DOWN) {
@@ -235,7 +237,7 @@ class BreadcrumbItemDropDown {
 		});
 		viewer.setLabelProvider(fLabelProvider);
 		viewer.setComparator(new JavaElementComparator());
-		viewer.setInput(fParent.getInput());
+		viewer.setInput(fParent.getData());
 
 		setShellBounds(shell);
 
@@ -286,8 +288,11 @@ class BreadcrumbItemDropDown {
 		shell.open();
 		installCloser(shell);
 
-		Object child= fParent.getData();
-		if (child != null) {
+		int index= fParent.getViewer().getIndexOfItem(fParent);
+		if (index < fParent.getViewer().getItemCount() - 1) {
+			BreadcrumbItem childItem= fParent.getViewer().getItem(index + 1);
+			Object child= childItem.getData();
+			
 			viewer.setSelection(new StructuredSelection(child), true);
 			
 			int selectionIndex= viewer.getTable().getSelectionIndex();

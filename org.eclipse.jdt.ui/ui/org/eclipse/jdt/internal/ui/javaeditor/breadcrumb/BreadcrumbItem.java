@@ -38,8 +38,6 @@ class BreadcrumbItem extends Item {
 	private ILabelProvider fLabelProvider;
 	private ITreeContentProvider fContentProvider;
 
-	private Object fInput;
-
 	private final BreadcrumbViewer fParent;
 	private Composite fContainer;
 
@@ -66,6 +64,8 @@ class BreadcrumbItem extends Item {
 		fContainer.setLayout(layout);
 		fContainer.setBackground(parent.getBackground());
 
+		fDetailsBlock= new BreadcrumbItemDetails(this, fContainer);
+
 		fExpandBlock= new BreadcrumbItemDropDown(this, fContainer);
 		if (fLabelProvider != null)
 			fExpandBlock.setLabelProvider(fLabelProvider);
@@ -73,13 +73,10 @@ class BreadcrumbItem extends Item {
 		if (fContentProvider != null)
 			fExpandBlock.setContentProvider(fContentProvider);
 
-		fDetailsBlock= new BreadcrumbItemDetails(this, fContainer);
-
 		fSpacer= new Label(fContainer, SWT.VERTICAL | SWT.SEPARATOR);
 		GridData data= new GridData(SWT.BEGINNING, SWT.TOP, false, false);
 		data.heightHint= new PixelConverter(parent).convertHeightInCharsToPixels(1) + 10;
 		fSpacer.setLayoutData(data);
-		fSpacer.setVisible(false);
 	}
 
 	/**
@@ -105,27 +102,6 @@ class BreadcrumbItem extends Item {
 		fLabelProvider= labelProvider;
 		if (fExpandBlock != null)
 			fExpandBlock.setLabelProvider(labelProvider);
-	}
-
-	/**
-	 * Set the input element. The item allows to select any
-	 * children of its input element.
-	 * 
-	 * @param input the input element for this item
-	 */
-	public void setInput(Object input) {
-		if (fInput == input)
-			return;
-
-		fInput= input;
-		refresh();
-	}
-
-	/**
-	 * @return the input element of this item
-	 */
-	Object getInput() {
-		return fInput;
 	}
 
 	/* (non-Javadoc)
@@ -217,24 +193,28 @@ class BreadcrumbItem extends Item {
 	 * from its label provider.
 	 */
 	void refresh() {
-		if (getData() != null) {
-			String text= fLabelProvider.getText(getData());
-			Image image= fLabelProvider.getImage(getData());
+		String text= fLabelProvider.getText(getData());
+		Image image= fLabelProvider.getImage(getData());
 
-			fDetailsBlock.setContent(text, image, text);
-			fDetailsBlock.setVisible(true);
-			fSpacer.setVisible(true);
-		} else {
-			fDetailsBlock.setVisible(false);
-			fSpacer.setVisible(false);
-		}
+		fDetailsBlock.setContent(text, image, text);
 
-		if (fContentProvider.hasChildren(fInput)) {
+		if (fContentProvider.hasChildren(getData())) {
 			fExpandBlock.setEnabled(true);
+			fSpacer.setVisible(true);
 		} else {
 			fExpandBlock.setEnabled(false);
 			fSpacer.setVisible(false);
 		}
+	}
+	
+	/**
+	 * Sets whether or not the this item should show
+	 * the details (name and label).
+	 * 
+	 * @param visible true if the item shows details
+	 */
+	void setDetailsVisible(boolean visible) {
+		fDetailsBlock.setVisible(visible);
 	}
 
 	/**

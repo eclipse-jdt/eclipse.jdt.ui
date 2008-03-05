@@ -202,6 +202,9 @@ class BreadcrumbItemDetails {
 	 */
 	public void setVisible(boolean visible) {
 		fDetailComposite.setVisible(visible);
+		
+		GridData data= (GridData) fDetailComposite.getLayoutData();
+		data.exclude= !visible;
 	}
 
 	public void setSelected(boolean selected) {
@@ -281,7 +284,7 @@ class BreadcrumbItemDetails {
 						index--;
 					}
 
-					if (index >= 0 && index < fParent.getViewer().getItemCount()) {
+					if (index > 0 && index < fParent.getViewer().getItemCount()) {
 						fParent.getViewer().selectItem(fParent.getViewer().getItem(index));
 					}
 
