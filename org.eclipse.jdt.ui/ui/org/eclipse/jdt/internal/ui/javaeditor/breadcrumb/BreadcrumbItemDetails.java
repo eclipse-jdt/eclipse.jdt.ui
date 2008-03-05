@@ -58,8 +58,6 @@ class BreadcrumbItemDetails {
 		fDetailComposite.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 		GridLayout layout= new GridLayout(2, false);
 		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		layout.horizontalSpacing= 2;
 		fDetailComposite.setLayout(layout);
 		addElementListener(fDetailComposite);
 
@@ -186,6 +184,11 @@ class BreadcrumbItemDetails {
 		updateSelection();
 	}
 
+	/**
+	 * Does this item show a text or only an image?
+	 * 
+	 * @return true if it shows a text and an image, false if it only shows the image
+	 */
 	public boolean isTextVisible() {
 		return fTextVisible;
 	}

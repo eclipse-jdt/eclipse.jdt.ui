@@ -15,7 +15,6 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.events.ShellListener;
 import org.eclipse.swt.graphics.Point;
@@ -27,13 +26,15 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Item;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.Widget;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -61,51 +62,40 @@ class BreadcrumbItemDropDown {
 	private static final int DROP_DOWN_HIGHT= 300;
 	private static final int DROP_DOWN_WIDTH= 500;
 
-	private final Label fArrow;
 	private final BreadcrumbItem fParent;
+	private final Composite fParentComposite;
 	
 	private ITreeContentProvider fContentProvider;
 	private ILabelProvider fLabelProvider;
 
 	private boolean fMenuIsShown;
 	private boolean fEnabled;
+	private ToolBar fToolBar;
 
 	public BreadcrumbItemDropDown(BreadcrumbItem parent, Composite composite) {
 		fParent= parent;
+		fParentComposite= composite;
 		fMenuIsShown= false;
 		fEnabled= true;
+		
+		fToolBar= new ToolBar(composite, SWT.FLAT);
+		fToolBar.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
+		ToolBarManager manager= new ToolBarManager(fToolBar);
 
-		fArrow= new Label(composite, SWT.NONE);
-		GridData layoutData= new GridData(SWT.END, SWT.CENTER, false, false);
-		fArrow.setLayoutData(layoutData);
-		fArrow.setImage(JavaPluginImages.get(JavaPluginImages.IMG_ETOOL_ARROW_RIGHT));
-
-		fArrow.addMouseTrackListener(new MouseTrackListener() {
-			public void mouseEnter(MouseEvent e) {
-				fArrow.setImage(JavaPluginImages.get(JavaPluginImages.IMG_ETOOL_ARROW_DOWN));
-			}
-
-			public void mouseExit(MouseEvent e) {
-				if (!fMenuIsShown) {
-					fArrow.setImage(JavaPluginImages.get(JavaPluginImages.IMG_ETOOL_ARROW_RIGHT));
-				}
-			}
-
-			public void mouseHover(MouseEvent e) {
-			}
-		});
-
-		fArrow.addMouseListener(new MouseListener() {
-			public void mouseDoubleClick(MouseEvent e) {
-			}
-
-			public void mouseDown(MouseEvent e) {
+		Action showDropDownMenuAction= new Action(null, SWT.NONE) {
+			/* (non-Javadoc)
+			 * @see org.eclipse.jface.action.Action#run()
+			 */
+			public void run() {
 				showMenu(null, false);
 			}
+		};
 
-			public void mouseUp(MouseEvent e) {
-			}
-		});
+		showDropDownMenuAction.setImageDescriptor(JavaPluginImages.DESC_ETOOL_ARROW_RIGHT);
+		showDropDownMenuAction.setToolTipText(BreadcrumbMessages.BreadcrumbItemDropDown_showDropDownMenu_action_toolTip);
+		manager.add(showDropDownMenuAction);
+
+		manager.update(true);
 	}
 	
 	public void setContentProvider(ITreeContentProvider contentProvider) {
@@ -123,13 +113,8 @@ class BreadcrumbItemDropDown {
 	 */
 	public void setEnabled(boolean enabled) {
 		fEnabled= enabled;
-		if (enabled) {
-			fArrow.setEnabled(true);
-			fArrow.setVisible(true);
-		} else {
-			fArrow.setEnabled(false);
-			fArrow.setVisible(false);
-		}
+
+		fToolBar.setVisible(enabled);
 	}
 	
 	/**
@@ -155,7 +140,7 @@ class BreadcrumbItemDropDown {
 		
 		fMenuIsShown= true;
 		
-		final Shell shell= new Shell(fArrow.getShell(), SWT.RESIZE | SWT.TOOL | SWT.BORDER);
+		final Shell shell= new Shell(fToolBar.getShell(), SWT.RESIZE | SWT.TOOL | SWT.BORDER);
 		GridLayout layout= new GridLayout(1, false);
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
@@ -347,7 +332,6 @@ class BreadcrumbItemDropDown {
 					return;
 				
 				fMenuIsShown= false;
-				fArrow.setImage(JavaPluginImages.get(JavaPluginImages.IMG_ETOOL_ARROW_RIGHT));
 				fParent.getViewer().setFocus();
 			}
 
@@ -368,10 +352,10 @@ class BreadcrumbItemDropDown {
 	 * @param shell the shell to calculate the size for.
 	 */
 	private void setShellBounds(Shell shell) {
-		Rectangle rect= fArrow.getBounds();
-		Point pt= new Point(rect.x + rect.width - 2, rect.y + rect.height + 5);
-		pt= fArrow.getParent().toDisplay(pt);
-		fArrow.setImage(JavaPluginImages.get(JavaPluginImages.IMG_ETOOL_ARROW_DOWN));
+		Rectangle rect= fParentComposite.getBounds();
+		Rectangle toolbarBounds= fToolBar.getBounds();
+		Point pt= new Point(toolbarBounds.x + toolbarBounds.width - 2, rect.y + rect.height + 2);
+		pt= fParentComposite.toDisplay(pt);
 
 		shell.pack();
 		Point size= shell.getSize();

@@ -59,8 +59,10 @@ class BreadcrumbItem extends Item {
 		fContainer= new Composite(parent, SWT.NONE);
 		fContainer.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 		GridLayout layout= new GridLayout(3, false);
+		layout.marginBottom= 1;
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
+		layout.horizontalSpacing= 0;
 		fContainer.setLayout(layout);
 
 		fDetailsBlock= new BreadcrumbItemDetails(this, fContainer);
@@ -74,7 +76,7 @@ class BreadcrumbItem extends Item {
 
 		fSpacer= new Label(fContainer, SWT.VERTICAL | SWT.SEPARATOR);
 		GridData data= new GridData(SWT.BEGINNING, SWT.TOP, false, false);
-		data.heightHint= new PixelConverter(parent).convertHeightInCharsToPixels(1) + 10;
+		data.heightHint= new PixelConverter(parent).convertHeightInCharsToPixels(1) + 9;
 		fSpacer.setLayoutData(data);
 	}
 

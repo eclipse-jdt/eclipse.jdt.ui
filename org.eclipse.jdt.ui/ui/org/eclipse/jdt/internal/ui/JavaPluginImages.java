@@ -161,14 +161,13 @@ public class JavaPluginImages {
 	
 	public static final String IMG_OBJS_HELP= NAME_PREFIX + "help.gif"; //$NON-NLS-1$
 	
-	public static final String IMG_ETOOL_ARROW_RIGHT= NAME_PREFIX + "breadcrumb_arrow_right.gif"; //$NON-NLS-1$
-	public static final String IMG_ETOOL_ARROW_DOWN= NAME_PREFIX + "breadcrumb_arrow_down.gif"; //$NON-NLS-1$
 
 	/*
 	 * Set of predefined Image Descriptors.
 	 */
 	public static final ImageDescriptor DESC_ETOOL_BREADCRUMB_GO_RIGHT= createUnManaged(T_ETOOL, "breadcrumb_go_right.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_ETOOL_BREADCRUMB_GO_LEFT= createUnManaged(T_ETOOL, "breadcrumb_go_left.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_ETOOL_ARROW_RIGHT= createUnManaged(T_ETOOL, "breadcrumb_arrow_right.gif"); //$NON-NLS-1$
 	
 	public static final ImageDescriptor DESC_VIEW_ERRORWARNING_TAB= createUnManaged(T_EVIEW, "errorwarning_tab.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_VIEW_CLASSFILEGENERATION_TAB= createUnManaged(T_EVIEW, "classfilegeneration_tab.gif"); //$NON-NLS-1$
@@ -433,9 +432,6 @@ public class JavaPluginImages {
 
 	public static final ImageDescriptor DESC_TOOL_CLASSPATH_ORDER= createUnManaged(T_OBJ, "cp_order_obj.gif"); 		//$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_COLLAPSEALL= createUnManaged(T_ELCL, "collapseall.gif"); //$NON-NLS-1$
-
-	public static final ImageDescriptor DESC_ARROW_RIGHT= createManagedFromKey(T_ETOOL, IMG_ETOOL_ARROW_RIGHT);
-	public static final ImageDescriptor DESC_ARROW_DOWN= createManagedFromKey(T_ETOOL, IMG_ETOOL_ARROW_DOWN);
 
 	// Keys for correction proposal. We have to put the image into the registry since "code assist" doesn't
 	// have a life cycle. So no change to dispose icons.
