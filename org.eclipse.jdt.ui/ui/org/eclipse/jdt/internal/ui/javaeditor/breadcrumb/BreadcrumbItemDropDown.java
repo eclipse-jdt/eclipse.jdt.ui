@@ -79,7 +79,6 @@ class BreadcrumbItemDropDown {
 		GridData layoutData= new GridData(SWT.END, SWT.CENTER, false, false);
 		fArrow.setLayoutData(layoutData);
 		fArrow.setImage(JavaPluginImages.get(JavaPluginImages.IMG_ETOOL_ARROW_RIGHT));
-		fArrow.setBackground(composite.getBackground());
 
 		fArrow.addMouseTrackListener(new MouseTrackListener() {
 			public void mouseEnter(MouseEvent e) {

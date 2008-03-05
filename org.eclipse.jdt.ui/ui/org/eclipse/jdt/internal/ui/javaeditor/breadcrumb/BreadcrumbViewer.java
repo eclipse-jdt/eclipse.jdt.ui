@@ -18,12 +18,19 @@ import java.util.List;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Widget;
@@ -37,6 +44,8 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.ViewerLabel;
+
+import org.eclipse.ui.forms.FormColors;
 
 
 /**
@@ -59,6 +68,7 @@ public class BreadcrumbViewer extends StructuredViewer {
 	private final Composite fContainer;
 	private final ArrayList fBreadcrumbItems;
 
+	private Image fGradientBackground;
 	private BreadcrumbItem fSelectedItem;
 
 	/**
@@ -83,6 +93,27 @@ public class BreadcrumbViewer extends StructuredViewer {
 		fContainer.addTraverseListener(new TraverseListener() {
 			public void keyTraversed(TraverseEvent e) {
 				e.doit= true;
+			}
+		});
+		fContainer.setBackgroundMode(SWT.INHERIT_DEFAULT);
+
+		fContainer.addListener(SWT.Resize, new Listener() {
+			public void handleEvent(Event event) {
+				int height= fContainer.getClientArea().height;
+				
+				if (fGradientBackground == null || fGradientBackground.getBounds().height != height) {
+					Image image= createGradientImage(height, event.display);
+					fContainer.setBackgroundImage(image);
+					
+					if (fGradientBackground != null)
+						fGradientBackground.dispose();
+					fGradientBackground= image;
+				}				
+			}
+		});
+		fContainer.addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				fGradientBackground.dispose();
 			}
 		});
 
@@ -586,6 +617,77 @@ public class BreadcrumbViewer extends StructuredViewer {
 				return true;
 		}
 		return false;
+	}
+
+	/**
+	 * The image to use for the breadcrumb background as 
+	 * specified in https://bugs.eclipse.org/bugs/show_bug.cgi?id=221477
+	 * 
+	 * @param height the height of the image to create
+	 * @param display the current display
+	 * @return the image for the breadcrumb background
+	 */
+	private Image createGradientImage(int height, Display display) {
+		int width= 50;
+
+		Image result= new Image(display, width, height);
+
+		GC gc= new GC(result);
+
+		Color colorA= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_LIST_BACKGROUND, 75, display);
+		Color colorB= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_LIST_BACKGROUND, 50, display);
+		Color colorC= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_LIST_BACKGROUND, 25, display);
+		Color colorD= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_LIST_BACKGROUND, 45, display);
+		Color colorE= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_LIST_BACKGROUND, 80, display);
+		Color colorF= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_LIST_BACKGROUND, 70, display);
+		Color colorG= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_WHITE, 45, display);
+		Color colorH= createColor(SWT.COLOR_WIDGET_NORMAL_SHADOW, SWT.COLOR_LIST_BACKGROUND, 35, display);
+
+		try {
+			drawLine(width, 0, colorA, gc);
+			drawLine(width, 1, colorB, gc);
+			drawLine(width, 2, colorC, gc);
+			drawLine(width, 3, colorC, gc);
+
+			gc.setForeground(colorD);
+			gc.setBackground(colorE);
+			gc.fillGradientRectangle(0, 4, width, 4 + 8, true);
+
+			gc.setBackground(colorE);
+			gc.fillRectangle(0, 4 + 9, width, height - 4);
+
+			drawLine(width, height - 3, colorF, gc);
+			drawLine(width, height - 2, colorG, gc);
+			drawLine(width, height - 1, colorH, gc);
+
+		} finally {
+			gc.dispose();
+
+			colorA.dispose();
+			colorB.dispose();
+			colorC.dispose();
+			colorD.dispose();
+			colorE.dispose();
+			colorF.dispose();
+			colorG.dispose();
+			colorH.dispose();
+		}
+
+		return result;
+	}
+
+	private void drawLine(int width, int position, Color color, GC gc) {
+		gc.setForeground(color);
+		gc.drawLine(0, position, width, position);
+	}
+
+	private Color createColor(int color1, int color2, int ratio, Display display) {
+		RGB rgb1= display.getSystemColor(color1).getRGB();
+		RGB rgb2= display.getSystemColor(color2).getRGB();
+
+		RGB blend= FormColors.blend(rgb2, rgb1, ratio);
+
+		return new Color(display, blend);
 	}
 
 }

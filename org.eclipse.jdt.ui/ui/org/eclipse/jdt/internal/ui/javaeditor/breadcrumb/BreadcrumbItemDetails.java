@@ -61,7 +61,6 @@ class BreadcrumbItemDetails {
 		layout.marginWidth= 0;
 		layout.horizontalSpacing= 2;
 		fDetailComposite.setLayout(layout);
-		fDetailComposite.setBackground(parentContainer.getBackground());
 		addElementListener(fDetailComposite);
 
 		fImageComposite= new Composite(fDetailComposite, SWT.NONE);
@@ -77,13 +76,11 @@ class BreadcrumbItemDetails {
 				}
 			}
 		});
-		fImageComposite.setBackground(parentContainer.getBackground());
 		installFocusComposite(fImageComposite);
 
 		fElementImage= new Label(fImageComposite, SWT.NONE);
 		GridData layoutData= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
 		fElementImage.setLayoutData(layoutData);
-		fElementImage.setBackground(parentContainer.getBackground());
 		addElementListener(fElementImage);
 
 		fTextComposite= new Composite(fDetailComposite, SWT.NONE);
@@ -92,7 +89,6 @@ class BreadcrumbItemDetails {
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		fTextComposite.setLayout(layout);
-		fTextComposite.setBackground(parentContainer.getBackground());
 		addElementListener(fTextComposite);
 		fTextComposite.addPaintListener(new PaintListener() {
 			public void paintControl(PaintEvent e) {
@@ -106,7 +102,6 @@ class BreadcrumbItemDetails {
 		fElementText= new Label(fTextComposite, SWT.NONE);
 		layoutData= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
 		fElementText.setLayoutData(layoutData);
-		fElementText.setBackground(parentContainer.getBackground());
 		addElementListener(fElementText);
 		
 		fDetailComposite.setTabList(new Control[] { fTextComposite });
@@ -242,10 +237,10 @@ class BreadcrumbItemDetails {
 			foreground= Display.getDefault().getSystemColor(SWT.COLOR_LIST_SELECTION_TEXT);
 		} else if (fSelected) {
 			foreground= null;
-			background= null;
+			background= Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND);
 		} else {
 			foreground= null;
-			background= fDetailComposite.getBackground();
+			background= null;
 		}
 
 		if (isTextVisible()) {
@@ -253,14 +248,14 @@ class BreadcrumbItemDetails {
 			fElementText.setBackground(background);
 			fElementText.setForeground(foreground);
 
-			fImageComposite.setBackground(fDetailComposite.getBackground());
-			fElementImage.setBackground(fDetailComposite.getBackground());
+			fImageComposite.setBackground(null);
+			fElementImage.setBackground(null);
 		} else {
 			fImageComposite.setBackground(background);
 			fElementImage.setBackground(background);
 
-			fTextComposite.setBackground(fDetailComposite.getBackground());
-			fElementText.setBackground(fDetailComposite.getBackground());
+			fTextComposite.setBackground(null);
+			fElementText.setBackground(null);
 			fElementText.setForeground(null);
 		}
 

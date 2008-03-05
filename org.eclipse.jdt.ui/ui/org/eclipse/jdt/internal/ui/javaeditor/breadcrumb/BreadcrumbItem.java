@@ -62,7 +62,6 @@ class BreadcrumbItem extends Item {
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		fContainer.setLayout(layout);
-		fContainer.setBackground(parent.getBackground());
 
 		fDetailsBlock= new BreadcrumbItemDetails(this, fContainer);
 
