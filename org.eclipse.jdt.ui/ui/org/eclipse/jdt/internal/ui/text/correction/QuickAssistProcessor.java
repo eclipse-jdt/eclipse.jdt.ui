@@ -710,16 +710,27 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			} else {
 				formatString+= "{" + i + "}"; //$NON-NLS-1$ //$NON-NLS-2$
 				
-				if (!is50OrHigher) {
+				ASTNode argument;
+				if (is50OrHigher) {
+					argument= rewrite.createCopyTarget(operand);
+				} else {
 					ITypeBinding binding= operand.resolveTypeBinding();
 					if (binding == null)
 						return null;
 
-					if (binding.isPrimitive())
-						return null;
+					if (binding.isPrimitive()) {
+						MethodInvocation valueOfInvocation= ast.newMethodInvocation();
+						valueOfInvocation.arguments().add(rewrite.createCopyTarget(operand));
+						valueOfInvocation.setExpression(ast.newSimpleName("String")); //$NON-NLS-1$
+						valueOfInvocation.setName(ast.newSimpleName("valueOf")); //$NON-NLS-1$
+
+						argument= valueOfInvocation;
+					} else {
+						argument= rewrite.createCopyTarget(operand);
+					}
 				}
 				
-				formatArguments.add(rewrite.createCopyTarget(operand));
+				formatArguments.add(argument);
 				i++;
 			}			
 		}

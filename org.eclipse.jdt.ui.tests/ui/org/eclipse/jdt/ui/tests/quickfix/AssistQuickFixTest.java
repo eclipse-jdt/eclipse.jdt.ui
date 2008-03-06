@@ -5148,7 +5148,20 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			assertCorrectLabels(proposals);
 
-			assertCommandIdDoesNotExists(proposals, QuickAssistProcessor.CONVERT_TO_MESSAGE_FORMAT_ID);
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import java.text.MessageFormat;\n");
+			buf.append("\n");
+			buf.append("public class A {\n");
+			buf.append("    public void foo(Object o1, Object o2) {\n");
+			buf.append("        System.out.println(MessageFormat\n");
+			buf.append("                .format(\"foo{0} \\\"bar\\\" \", new Object[]{String.valueOf(1)}));\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+
+			assertExpectedExistInProposals(proposals, new String[] { expected1 });
 		} finally {
 			fJProject1.setOptions(oldOptions);
 		}
@@ -5169,7 +5182,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		List proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
-
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
