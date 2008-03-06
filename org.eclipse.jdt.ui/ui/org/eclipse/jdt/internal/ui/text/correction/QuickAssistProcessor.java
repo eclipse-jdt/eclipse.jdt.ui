@@ -86,6 +86,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -146,6 +147,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	public static final String CONVERT_LOCAL_TO_FIELD_ID= "org.eclipse.jdt.ui.correction.convertLocalToField.assist"; //$NON-NLS-1$
 	public static final String CONVERT_ANONYMOUS_TO_LOCAL_ID= "org.eclipse.jdt.ui.correction.convertAnonymousToLocal.assist"; //$NON-NLS-1$
 	public static final String CONVERT_TO_STRING_BUFFER_ID= "org.eclipse.jdt.ui.correction.convertToStringBuffer.assist"; //$NON-NLS-1$
+	public static final String CONVERT_TO_MESSAGE_FORMAT_ID= "org.eclipse.jdt.ui.correction.convertToMessageFormat.assist"; //$NON-NLS-1$;
 	
 	public QuickAssistProcessor() {
 		super();
@@ -175,7 +177,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getConvertIterableLoopProposal(context, coveringNode, null)
 				|| getRemoveBlockProposals(context, coveringNode, null)
 				|| getMakeVariableDeclarationFinalProposals(context, null)
-				|| getConvertToStringBufferProposal(context, null);
+				|| getConvertStringConcatenationProposals(context, null);
 		}
 		return false;
 	}
@@ -210,7 +212,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
 				getRemoveBlockProposals(context, coveringNode, resultingCollections);
 				getMakeVariableDeclarationFinalProposals(context, resultingCollections);
-				getConvertToStringBufferProposal(context, resultingCollections);
+				getConvertStringConcatenationProposals(context, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -539,7 +541,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getConvertToStringBufferProposal(IInvocationContext context, Collection resultingCollections) {
+	private static boolean getConvertStringConcatenationProposals(IInvocationContext context, Collection resultingCollections) {
 		ASTNode node= context.getCoveringNode();
 		BodyDeclaration parentDecl= ASTResolving.findParentBodyDeclaration(node);
 		if (!(parentDecl instanceof MethodDeclaration || parentDecl instanceof Initializer))
@@ -574,6 +576,17 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 		}
 		
+		LinkedCorrectionProposal stringBufferProposal= getConvertToStringBufferProposal(context, ast, oldInfixExpression);
+		resultingCollections.add(stringBufferProposal);
+
+		ASTRewriteCorrectionProposal messageFormatProposal= getConvertToMessageFormatProposal(context, ast, oldInfixExpression);
+		if (messageFormatProposal != null)
+			resultingCollections.add(messageFormatProposal);
+
+		return true;
+	}
+
+	private static LinkedCorrectionProposal getConvertToStringBufferProposal(IInvocationContext context, AST ast, InfixExpression oldInfixExpression) {
 		String bufferOrBuilderName;
 		ICompilationUnit cu= context.getCompilationUnit();
 		if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
@@ -664,10 +677,107 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		rewrite.replace(oldInfixExpression, bufferToString, null);
 		proposal.setEndPosition(rewrite.track(bufferToString));
 		
-		resultingCollections.add(proposal);
-		return true;
+		return proposal;
 	}
 	
+	private static ASTRewriteCorrectionProposal getConvertToMessageFormatProposal(IInvocationContext context, AST ast, InfixExpression oldInfixExpression) {
+		
+		ICompilationUnit cu= context.getCompilationUnit();
+		boolean is50OrHigher= JavaModelUtil.is50OrHigher(cu.getJavaProject());
+		
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+
+		// collect operands
+		List operands= new ArrayList();
+		operands.add(oldInfixExpression.getLeftOperand());
+		operands.add(oldInfixExpression.getRightOperand());
+		for (int i= 0; i < oldInfixExpression.extendedOperands().size(); i++) {
+			ASTNode extNode= (ASTNode) oldInfixExpression.extendedOperands().get(i);
+			operands.add(extNode);
+		}
+
+		List formatArguments= new ArrayList();
+		String formatString= ""; //$NON-NLS-1$
+		int i= 0;
+		for (Iterator iterator= operands.iterator(); iterator.hasNext();) {
+			Expression operand= (Expression) iterator.next();
+
+			if (operand instanceof StringLiteral) {
+				String value= ((StringLiteral) operand).getEscapedValue();
+				value= value.substring(1, value.length() - 1);
+				value= value.replaceAll("'", "''"); //$NON-NLS-1$ //$NON-NLS-2$
+				formatString+= value;
+			} else {
+				formatString+= "{" + i + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+				
+				if (!is50OrHigher) {
+					ITypeBinding binding= operand.resolveTypeBinding();
+					if (binding == null)
+						return null;
+
+					if (binding.isPrimitive())
+						return null;
+				}
+				
+				formatArguments.add(rewrite.createCopyTarget(operand));
+				i++;
+			}			
+		}
+		
+		if (formatArguments.size() == 0)
+			return null;
+		
+		CompilationUnit root= context.getASTRoot();
+		
+		String label= CorrectionMessages.QuickAssistProcessor_convert_to_message_format;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+	
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 0, image);
+		proposal.setCommandId(CONVERT_TO_MESSAGE_FORMAT_ID);
+
+		ImportRewrite importRewrite= ImportRewrite.create(root, true);
+		proposal.setImportRewrite(importRewrite);
+
+		ContextSensitiveImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(context.getASTRoot(), oldInfixExpression.getStartPosition(), importRewrite);
+		String messageType= importRewrite.addImport("java.text.MessageFormat", importContext); //$NON-NLS-1$
+		
+		MethodInvocation formatInvocation= ast.newMethodInvocation();
+		formatInvocation.setExpression(ast.newName(messageType));
+		formatInvocation.setName(ast.newSimpleName("format")); //$NON-NLS-1$
+		
+		List arguments= formatInvocation.arguments();
+
+		StringLiteral formatStringArgument= ast.newStringLiteral();
+		formatStringArgument.setEscapedValue("\"" + formatString + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+		arguments.add(formatStringArgument);
+		
+		if (is50OrHigher) {
+			for (Iterator iterator= formatArguments.iterator(); iterator.hasNext();) {
+				arguments.add(iterator.next());
+			}
+		} else {
+			ArrayCreation objectArrayCreation= ast.newArrayCreation();
+
+			Type objectType= ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+			ArrayType arrayType= ast.newArrayType(objectType);
+			objectArrayCreation.setType(arrayType);
+
+			ArrayInitializer arrayInitializer= ast.newArrayInitializer();
+			
+			List initializerExpressions= arrayInitializer.expressions();
+			for (Iterator iterator= formatArguments.iterator(); iterator.hasNext();) {
+				initializerExpressions.add(iterator.next());
+			}
+			objectArrayCreation.setInitializer(arrayInitializer);
+
+			arguments.add(objectArrayCreation);
+		}
+				
+		rewrite.replace(oldInfixExpression, formatInvocation, null);
+		
+		return proposal;
+	}
+
 	private static boolean getAssignToVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (!(statement instanceof ExpressionStatement)) {

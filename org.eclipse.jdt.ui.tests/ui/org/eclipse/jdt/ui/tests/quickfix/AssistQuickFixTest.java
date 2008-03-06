@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -5062,5 +5062,191 @@ public class AssistQuickFixTest extends QuickFixTest {
 		} finally {
 			fJProject1.setOptions(oldOptions);
 		}
+	}
+	
+	public void testConvertToMessageFormat14() throws Exception {
+
+		Map oldOptions= fJProject1.getOptions(false);
+		Map newOptions= new HashMap(oldOptions);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
+		fJProject1.setOptions(newOptions);
+
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class A {\n");
+			buf.append("    public void foo(Object o1, Object o2) {\n");
+			buf.append("        System.out.println(\"foo\" + o1 + \" \\\"bar\\\" \" + o2);\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + o1 + \""), 0);
+			List proposals= collectAssists(context, false);
+
+			assertCorrectLabels(proposals);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import java.text.MessageFormat;\n");
+			buf.append("\n");
+			buf.append("public class A {\n");
+			buf.append("    public void foo(Object o1, Object o2) {\n");
+			buf.append("        System.out.println(MessageFormat.format(\"foo{0} \\\"bar\\\" {1}\", new Object[]{o1,\n");
+			buf.append("                o2}));\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+
+			assertExpectedExistInProposals(proposals, new String[] { expected1 });
+		} finally {
+			fJProject1.setOptions(oldOptions);
+		}
+	}
+	
+	public void testConvertToMessageFormatStringConcat() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Object o1, Object o2) {\n");
+		buf.append("        System.out.println(\"foo\" + \"\" + \" \\\"bar\\\" \");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + \"\" + \""), 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		assertCommandIdDoesNotExists(proposals, QuickAssistProcessor.CONVERT_TO_MESSAGE_FORMAT_ID);
+	}
+	
+	public void testConvertToMessageFormatStringBoxing14() throws Exception {
+		Map oldOptions= fJProject1.getOptions(false);
+		Map newOptions= new HashMap(oldOptions);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
+		fJProject1.setOptions(newOptions);
+
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class A {\n");
+			buf.append("    public void foo(Object o1, Object o2) {\n");
+			buf.append("        System.out.println(\"foo\" + 1 + \" \\\"bar\\\" \");\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + 1 + \""), 0);
+			List proposals= collectAssists(context, false);
+
+			assertCorrectLabels(proposals);
+
+			assertCommandIdDoesNotExists(proposals, QuickAssistProcessor.CONVERT_TO_MESSAGE_FORMAT_ID);
+		} finally {
+			fJProject1.setOptions(oldOptions);
+		}
+	}
+	
+	public void testConvertToMessageFormatStringBoxing15() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Object o1, Object o2) {\n");
+		buf.append("        System.out.println(\"foo\" + 1 + \" \\\"bar\\\" \");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + 1 + \""), 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.text.MessageFormat;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Object o1, Object o2) {\n");
+		buf.append("        System.out.println(MessageFormat.format(\"foo{0} \\\"bar\\\" \", 1));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+	
+	public void testConvertToMessageFormat15() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Object o1, Object o2) {\n");
+		buf.append("        System.out.println(\"foo\" + o1 + \" \\\"bar\\\" \" + o2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + o1 + \""), 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.text.MessageFormat;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Object o1, Object o2) {\n");
+		buf.append("        System.out.println(MessageFormat.format(\"foo{0} \\\"bar\\\" {1}\", o1, o2));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+	
+	public void testConvertToMessageFormatApostrophe() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Object o1, Object o2) {\n");
+		buf.append("        System.out.println(\"foo'\" + o1 + \"' \\\"bar\\\" \" + o2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + o1 + \""), 0);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.text.MessageFormat;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Object o1, Object o2) {\n");
+		buf.append("        System.out.println(MessageFormat.format(\"foo''{0}'' \\\"bar\\\" {1}\", o1, o2));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 }
