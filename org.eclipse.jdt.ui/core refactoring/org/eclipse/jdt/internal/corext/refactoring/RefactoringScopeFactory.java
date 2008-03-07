@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -91,18 +91,19 @@ public class RefactoringScopeFactory {
 
 	/**
 	 * Creates a new search scope with all compilation units possibly referencing <code>javaElement</code>,
-	 * considering the visibility of the element.
+	 * considering the visibility of the element, references only from source
 	 * 
 	 * @param javaElement the java element
 	 * @return the search scope
 	 * @throws JavaModelException if an error occurs
 	 */
 	public static IJavaSearchScope create(IJavaElement javaElement) throws JavaModelException {
-		return RefactoringScopeFactory.create(javaElement, true);
+		return RefactoringScopeFactory.create(javaElement, true, true);
 	}
 	
 	/**
-	 * Creates a new search scope with all compilation units possibly referencing <code>javaElement</code>.
+	 * Creates a new search scope with all compilation units possibly referencing <code>javaElement</code>,
+	 * references only from source
 	 * 
 	 * @param javaElement the java element
 	 * @param considerVisibility consider visibility of javaElement iff <code>true</code>
@@ -110,6 +111,20 @@ public class RefactoringScopeFactory {
 	 * @throws JavaModelException if an error occurs
 	 */
 	public static IJavaSearchScope create(IJavaElement javaElement, boolean considerVisibility) throws JavaModelException {
+		return RefactoringScopeFactory.create(javaElement, considerVisibility, true);
+	}
+	
+	
+	/**
+	 * Creates a new search scope with all compilation units possibly referencing <code>javaElement</code>.
+	 * 
+	 * @param javaElement the java element
+	 * @param considerVisibility consider visibility of javaElement iff <code>true</code>
+	 * @param sourceReferencesOnly consider references in source only (no references in binary)
+	 * @return the search scope
+	 * @throws JavaModelException if an error occurs
+	 */
+	public static IJavaSearchScope create(IJavaElement javaElement, boolean considerVisibility, boolean sourceReferencesOnly) throws JavaModelException {
 		if (considerVisibility & javaElement instanceof IMember) {
 			IMember member= (IMember) javaElement;
 			if (JdtFlags.isPrivate(member)) {
@@ -122,11 +137,10 @@ public class RefactoringScopeFactory {
 			// there can be a package fragment with the same name in a different source folder or project. So we
 			// have to treat package visible members like public or protected members.
 		}
-		return create(javaElement.getJavaProject());
-	}
-
-	private static IJavaSearchScope create(IJavaProject javaProject) throws JavaModelException {
-		return SearchEngine.createJavaSearchScope(getAllScopeElements(javaProject), false);
+		
+		
+		IJavaProject javaProject= javaElement.getJavaProject();
+		return SearchEngine.createJavaSearchScope(getAllScopeElements(javaProject, sourceReferencesOnly), false);
 	}
 
 	/**
@@ -196,19 +210,24 @@ public class RefactoringScopeFactory {
 		return SearchEngine.createJavaSearchScope(projects, includeMask);
 	}
 
-	private static IJavaElement[] getAllScopeElements(IJavaProject project) throws JavaModelException {
-		Collection sourceRoots= getAllSourceRootsInProjects(getReferencingProjects(project));
-		return (IPackageFragmentRoot[]) sourceRoots.toArray(new IPackageFragmentRoot[sourceRoots.size()]);
-	}
-
 	/*
-	 * @param projects a collection of IJavaProject @return Collection a collection of IPackageFragmentRoot, one element for each packageFragmentRoot which lies within a project in <code> projects </code> .
+	 * @param projects a collection of IJavaProject
+	 * @return Array of IPackageFragmentRoot, one element for each packageFragmentRoot which lies within a project in <code> projects </code> .
 	 */
-	private static Collection getAllSourceRootsInProjects(Collection projects) throws JavaModelException {
+	private static IPackageFragmentRoot[] getAllScopeElements(IJavaProject project, boolean onlySourceRoots) throws JavaModelException {
+		Collection referencingProjects= getReferencingProjects(project);
 		List result= new ArrayList();
-		for (Iterator it= projects.iterator(); it.hasNext();)
-			result.addAll(getSourceRoots((IJavaProject) it.next()));
-		return result;
+		for (Iterator it= referencingProjects.iterator(); it.hasNext();) {
+			IJavaProject javaProject= (IJavaProject) it.next();
+			IPackageFragmentRoot[] roots= javaProject.getPackageFragmentRoots();
+			// Add all package fragment roots except archives
+			for (int i= 0; i < roots.length; i++) {
+				IPackageFragmentRoot root= roots[i];
+				if (!onlySourceRoots || root.getKind() == IPackageFragmentRoot.K_SOURCE)
+					result.add(root);
+			}
+		}
+		return (IPackageFragmentRoot[]) result.toArray(new IPackageFragmentRoot[result.size()]);
 	}
 
 	/*
@@ -247,18 +266,6 @@ public class RefactoringScopeFactory {
 		addReferencingProjects(focus, projects);
 		projects.add(focus);
 		return projects;
-	}
-
-	private static List getSourceRoots(IJavaProject javaProject) throws JavaModelException {
-		List elements= new ArrayList();
-		IPackageFragmentRoot[] roots= javaProject.getPackageFragmentRoots();
-		// Add all package fragment roots except archives
-		for (int i= 0; i < roots.length; i++) {
-			IPackageFragmentRoot root= roots[i];
-			if (!root.isArchive())
-				elements.add(root);
-		}
-		return elements;
 	}
 
 	private static int getVisibility(IMember member) throws JavaModelException {
