@@ -51,6 +51,9 @@ edit a classpath container entry.
                   identifies the classpath containers for which this page will be used. The id corresponds to the first segment of the path of a container classpath entry and matches the id referenced in &lt;samp&gt;org.eclipse.jdt.core.classpathContainerInitializer&lt;/samp&gt;
                </documentation>
             </annotation>
+            <appinfo>
+                 <meta.attribute kind="identifier" basedOn="org.eclipse.jdt.core.classpathContainerInitializer/classpathContainerInitializer/@id"/>
+            </appinfo>
          </attribute>
          <attribute name="name" type="string">
             <annotation>
