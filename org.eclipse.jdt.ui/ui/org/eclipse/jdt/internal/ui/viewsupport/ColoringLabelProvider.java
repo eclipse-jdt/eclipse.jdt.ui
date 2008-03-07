@@ -12,9 +12,7 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
-import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.IDecorationContext;
@@ -26,22 +24,11 @@ import org.eclipse.jface.viewers.StyledStringBuilder.Styler;
 
 public class ColoringLabelProvider extends DecoratingStyledCellLabelProvider implements ILabelProvider {
 	
-	//TODO remove after IBuild > 20080227
-	static class VoidLD extends BaseLabelProvider  implements ILabelDecorator {
-		public Image decorateImage(Image image, Object element) {
-			return null;
-		}
-
-		public String decorateText(String text, Object element) {
-			return null;
-		}
-	}
-
 	public static final Styler HIGHLIGHT_STYLE= StyledStringBuilder.createColorRegistryStyler(null, ColoredViewersManager.HIGHLIGHT_BG_COLOR_NAME);
 	public static final Styler HIGHLIGHT_WRITE_STYLE= StyledStringBuilder.createColorRegistryStyler(null, ColoredViewersManager.HIGHLIGHT_WRITE_BG_COLOR_NAME);
 	
 	public ColoringLabelProvider(IStyledLabelProvider labelProvider) {
-		this(labelProvider, new VoidLD(), null);
+		this(labelProvider, null, null);
 	}
 	
 	public ColoringLabelProvider(IStyledLabelProvider labelProvider, ILabelDecorator decorator, IDecorationContext decorationContext) {
