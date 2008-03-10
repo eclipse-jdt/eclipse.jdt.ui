@@ -189,8 +189,8 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		GridData data= new GridData(SWT.FILL, SWT.TOP, true, false);
 		fComposite.setLayoutData(data);
 		GridLayout gridLayout= new GridLayout(1, false);
-		gridLayout.marginWidth= 1;
-		gridLayout.marginHeight= 1;
+		gridLayout.marginWidth= 0;
+		gridLayout.marginHeight= 0;
 		gridLayout.verticalSpacing= 0;
 		gridLayout.horizontalSpacing= 0;
 		fComposite.setLayout(gridLayout);
