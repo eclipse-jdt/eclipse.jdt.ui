@@ -4014,6 +4014,18 @@
             id="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file">
       </command>
       <command
+            name="%ActionDefinition.methodExitOccurrences.name"
+            description="%ActionDefinition.methodExitOccurrences.description"
+            categoryId="org.eclipse.search.ui.category.search"
+            id="org.eclipse.jdt.ui.edit.text.java.search.method.exits">
+      </command>
+      <command
+            name="%ActionDefinition.breakContinueTargetOccurrences.name"
+            description="%ActionDefinition.breakContinueTargetOccurrences.description"
+            categoryId="org.eclipse.search.ui.category.search"
+            id="org.eclipse.jdt.ui.edit.text.java.search.return.continue.targets">
+      </command>          
+      <command
             name="%ActionDefinition.exceptionOccurrences.name"
             description="%ActionDefinition.exceptionOccurrences.description"
             categoryId="org.eclipse.search.ui.category.search"
