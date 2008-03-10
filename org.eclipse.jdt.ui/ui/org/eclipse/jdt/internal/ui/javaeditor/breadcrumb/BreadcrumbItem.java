@@ -140,7 +140,7 @@ class BreadcrumbItem extends Item {
 	 * @return the width of this item 
 	 */
 	int getWidth() {
-		return fSpacer.computeSize(SWT.DEFAULT, SWT.DEFAULT).x + fDetailsBlock.getWidth() + 19; //9 + 2 * 5 (arrowWidth + 2 * horizontalSpacing)
+		return fSpacer.computeSize(SWT.DEFAULT, SWT.DEFAULT).x + fDetailsBlock.getWidth() + 15; //5 + 2 * 5 (arrowWidth + 2 * horizontalSpacing)
 	}
 
 	/**

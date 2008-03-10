@@ -58,14 +58,16 @@ class BreadcrumbItemDetails {
 		fDetailComposite.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 		GridLayout layout= new GridLayout(2, false);
 		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		layout.horizontalSpacing= 0;
 		fDetailComposite.setLayout(layout);
 		addElementListener(fDetailComposite);
 
 		fImageComposite= new Composite(fDetailComposite, SWT.NONE);
 		fImageComposite.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 		layout= new GridLayout(1, false);
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
+		layout.marginHeight= 1;
+		layout.marginWidth= 2;
 		fImageComposite.setLayout(layout);
 		fImageComposite.addPaintListener(new PaintListener() {
 			public void paintControl(PaintEvent e) {
@@ -84,8 +86,8 @@ class BreadcrumbItemDetails {
 		fTextComposite= new Composite(fDetailComposite, SWT.NONE);
 		fTextComposite.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 		layout= new GridLayout(1, false);
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
+		layout.marginHeight= 2;
+		layout.marginWidth= 2;
 		fTextComposite.setLayout(layout);
 		addElementListener(fTextComposite);
 		fTextComposite.addPaintListener(new PaintListener() {
@@ -238,9 +240,6 @@ class BreadcrumbItemDetails {
 		if (fSelected && fHasFocus) {
 			background= Display.getDefault().getSystemColor(SWT.COLOR_LIST_SELECTION);
 			foreground= Display.getDefault().getSystemColor(SWT.COLOR_LIST_SELECTION_TEXT);
-		} else if (fSelected) {
-			foreground= null;
-			background= Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND);
 		} else {
 			foreground= null;
 			background= null;
