@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.eclipse.jdt.ui">
+<schema targetNamespace="org.eclipse.jdt.ui" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
-      <appInfo>
+      <appinfo>
          <meta.schema plugin="org.eclipse.jdt.ui" id="classpathContainerPage" name="Classpath Container Entry Page"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          This extension point allows to add a wizard page to create or
 edit a classpath container entry.
@@ -35,9 +35,9 @@ edit a classpath container entry.
                <documentation>
                   an optional name of the extension instance
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute translatable="true"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
       </complexType>
@@ -50,19 +50,19 @@ edit a classpath container entry.
                <documentation>
                   identifies the classpath containers for which this page will be used. The id corresponds to the first segment of the path of a container classpath entry and matches the id referenced in &lt;samp&gt;org.eclipse.jdt.core.classpathContainerInitializer&lt;/samp&gt;
                </documentation>
+               <appinfo>
+                  <meta.attribute kind="identifier" basedOn="org.eclipse.jdt.core.classpathContainerInitializer/classpathContainerInitializer/@id"/>
+               </appinfo>
             </annotation>
-            <appinfo>
-                 <meta.attribute kind="identifier" basedOn="org.eclipse.jdt.core.classpathContainerInitializer/classpathContainerInitializer/@id"/>
-            </appinfo>
          </attribute>
          <attribute name="name" type="string">
             <annotation>
                <documentation>
                   the name of the classpath container used when selecting a new container.  This attribute should be a translated string.
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute translatable="true"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
          <attribute name="class" type="string">
@@ -73,18 +73,18 @@ class must be public and implement
 &lt;samp&gt;org.eclipse.jdt.ui.wizards.IClasspathContainerPage&lt;/samp&gt;
 with a public 0-argument constructor.
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute kind="java" basedOn="org.eclipse.jface.wizard.WizardPage:org.eclipse.jdt.ui.wizards.IClasspathContainerPage"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
       </complexType>
    </element>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="examples"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          The following is an example of a classpath entry container page:
 
@@ -102,28 +102,14 @@ with a public 0-argument constructor.
       </documentation>
    </annotation>
 
-   <annotation>
-      <appInfo>
-         <meta.section type="apiInfo"/>
-      </appInfo>
-      <documentation>
-         
-      </documentation>
-   </annotation>
+
+
+
 
    <annotation>
-      <appInfo>
-         <meta.section type="implementation"/>
-      </appInfo>
-      <documentation>
-         
-      </documentation>
-   </annotation>
-
-   <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="copyright"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          Copyright (c) 2001, 2004 IBM Corporation and others.&lt;br&gt;
 All rights reserved. This program and the accompanying materials are made available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at &lt;a href=&quot;http://www.eclipse.org/legal/epl-v10.html&quot;&gt;http://www.eclipse.org/legal/epl-v10.html&lt;/a&gt;
