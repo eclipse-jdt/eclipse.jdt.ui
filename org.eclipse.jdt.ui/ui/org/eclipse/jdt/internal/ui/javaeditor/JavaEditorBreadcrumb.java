@@ -19,7 +19,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Widget;
@@ -27,7 +26,6 @@ import org.eclipse.swt.widgets.Widget;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
@@ -158,63 +156,20 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			Object contentProvider= getContentProvider();
 			return contentProvider instanceof IWorkingCopyProvider && !((IWorkingCopyProvider) contentProvider).providesWorkingCopies();
 		}
-	}
 
-	private static final class JavaBreadcrumbLabelProvider implements ILabelProvider {
-
-		private final DecoratingJavaLabelProvider fParent;
-
-		public JavaBreadcrumbLabelProvider(DecoratingJavaLabelProvider parent) {
-			fParent= parent;
-		}
-
-		/*
-		 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.BreadcrumbViewer#createDropDownContentProvider(java.lang.Object)
 		 */
-		public Image getImage(Object element) {
-			return fParent.getImage(element);
+		public ITreeContentProvider createDropDownContentProvider(Object root) {
+			return createContentProvider();
 		}
 
-		/*
-		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.BreadcrumbViewer#createDropDownLabelProvider(java.lang.Object)
 		 */
-		public String getText(Object element) {
-			return fParent.getText(element);
+		public ILabelProvider createDropDownLabelProvider(Object root) {
+			return createLabelProvider();
 		}
-
-		/*
-		 * @see org.eclipse.jface.viewers.IBaseLabelProvider#addListener(org.eclipse.jface.viewers.ILabelProviderListener)
-		 */
-		public void addListener(ILabelProviderListener listener) {
-			fParent.addListener(listener);
-		}
-
-		/*
-		 * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
-		 */
-		public void dispose() {
-			//Ignore: some viewers dispose the label provider
-			//we create it, and we dispose it in #internalDispose
-		}
-
-		/*
-		 * @see org.eclipse.jface.viewers.IBaseLabelProvider#isLabelProperty(java.lang.Object, java.lang.String)
-		 */
-		public boolean isLabelProperty(Object element, String property) {
-			return fParent.isLabelProperty(element, property);
-		}
-
-		/*
-		 * @see org.eclipse.jface.viewers.IBaseLabelProvider#removeListener(org.eclipse.jface.viewers.ILabelProviderListener)
-		 */
-		public void removeListener(ILabelProviderListener listener) {
-			fParent.removeListener(listener);
-		}
-
-		private void internalDispose() {
-			fParent.dispose();
-		}
-
 	}
 
 	private static final class JavaEditorBreadcrumbContentProvider implements ITreeContentProvider {
@@ -318,11 +273,11 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			return (IType[]) result.toArray(new IType[result.size()]);
 		}
 
-		/*
+
+		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 		 */
 		public void dispose() {
-			fElements= null;
 			fParent.dispose();
 		}
 
@@ -338,8 +293,6 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 	private ActionGroup fBreadcrumbActionGroup;
 	private BreadcrumbViewer fViewer;
-	private JavaBreadcrumbLabelProvider fLabelProvider;
-
 
 	public JavaEditorBreadcrumb(JavaEditor javaEditor) {
 		super(javaEditor);
@@ -372,16 +325,9 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	protected BreadcrumbViewer createViewer(Composite composite) {
 		fViewer= new ProblemBreadcrumbViewer(composite, SWT.HORIZONTAL);
 
-		AppearanceAwareLabelProvider parentLabelProvider= new AppearanceAwareLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.F_APP_TYPE_SIGNATURE
-				| JavaElementLabels.ALL_CATEGORY, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
-		DecoratingJavaLabelProvider decoratingJavaLabelProvider= new DecoratingJavaLabelProvider(parentLabelProvider, true);
+		fViewer.setLabelProvider(createLabelProvider());
 
-		fLabelProvider= new JavaBreadcrumbLabelProvider(decoratingJavaLabelProvider);
-		fViewer.setLabelProvider(fLabelProvider);
-
-		StandardJavaElementContentProvider parentContentProvider= new StandardJavaElementContentProvider(true);
-		JavaEditorBreadcrumbContentProvider contentProvider= new JavaEditorBreadcrumbContentProvider(parentContentProvider);
-		fViewer.setContentProvider(contentProvider);
+		fViewer.setContentProvider(createContentProvider());
 		fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				fBreadcrumbActionGroup.setContext(new ActionContext(fViewer.getSelection()));
@@ -393,6 +339,28 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		return fViewer;
 	}
 
+	/**
+	 * Create a new instance of the content provider to use for the Java editor breadcrumb.
+	 * 
+	 * @return a new content provider
+	 */
+	private static JavaEditorBreadcrumbContentProvider createContentProvider() {
+		StandardJavaElementContentProvider parentContentProvider= new StandardJavaElementContentProvider(true);
+		return new JavaEditorBreadcrumbContentProvider(parentContentProvider);
+	}
+
+	/**
+	 * Create a new instance of the lable provider to use for the Java editor breadcrumb
+	 * 
+	 * @return a new label provider
+	 */
+	private static ILabelProvider createLabelProvider() {
+		AppearanceAwareLabelProvider result= new AppearanceAwareLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.F_APP_TYPE_SIGNATURE
+				| JavaElementLabels.ALL_CATEGORY, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
+
+		return new DecoratingJavaLabelProvider(result);
+	}
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#dispose()
 	 */
@@ -401,7 +369,6 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 		if (fViewer != null) {
 			fBreadcrumbActionGroup.dispose();
-			fLabelProvider.internalDispose();
 			fViewer= null;
 		}
 	}

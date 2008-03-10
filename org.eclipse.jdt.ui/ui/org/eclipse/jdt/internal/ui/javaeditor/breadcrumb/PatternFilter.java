@@ -28,6 +28,9 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
  * determine if a node should be filtered it uses the content provider of the 
  * table to do pattern matching on its elements.
  * 
+ * <strong>Unused code, this class should be removed once 
+ * https://bugs.eclipse.org/bugs/show_bug.cgi?id=215830 is fixed!</strong>
+ * 
  * @since 3.4
  * @see org.eclipse.ui.dialogs.PatternFilter
  */

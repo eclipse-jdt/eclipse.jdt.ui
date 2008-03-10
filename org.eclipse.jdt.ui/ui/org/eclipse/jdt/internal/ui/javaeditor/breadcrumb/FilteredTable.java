@@ -63,6 +63,9 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  * A simple control that provides a text widget and a table viewer. The contents
  * of the text widget are used to drive a PatternFilter that is on the viewer.
  * 
+ * <strong>Unused code, this class should be removed once 
+ * https://bugs.eclipse.org/bugs/show_bug.cgi?id=215830 is fixed!</strong>
+ * 
  * @see PatternFilter
  * @see org.eclipse.ui.dialogs.FilteredTree
  * 

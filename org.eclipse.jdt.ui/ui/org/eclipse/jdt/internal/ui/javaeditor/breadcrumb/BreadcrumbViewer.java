@@ -63,7 +63,7 @@ import org.eclipse.ui.forms.FormColors;
  * 
  * @since 3.4
  */
-public class BreadcrumbViewer extends StructuredViewer {
+public abstract class BreadcrumbViewer extends StructuredViewer {
 	
 	private final Composite fContainer;
 	private final ArrayList fBreadcrumbItems;
@@ -137,6 +137,24 @@ public class BreadcrumbViewer extends StructuredViewer {
 			}
 		});
 	}
+	
+	/**
+	 * Return a new tree content provider which will be used for the drop
+	 * down menu for the given root element.
+	 * 
+	 * @param root the root element of the drop down menu
+	 * @return a new tree content provider
+	 */
+	public abstract ITreeContentProvider createDropDownContentProvider(Object root);
+
+	/**
+	 * Return a new label provider which will be used for the drop
+	 * down menu for the given root element.
+	 * 
+	 * @param root the root element of the drop down menu
+	 * @return a new label provider
+	 */
+	public abstract ILabelProvider createDropDownLabelProvider(Object root);
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.Viewer#getControl()
@@ -465,7 +483,7 @@ public class BreadcrumbViewer extends StructuredViewer {
 		if (next) {
 			if (index == fBreadcrumbItems.size() - 1) {
 				BreadcrumbItem current= (BreadcrumbItem) fBreadcrumbItems.get(index);
-				current.openDropDownMenu(null, false);
+				current.openDropDownMenu();
 			} else {
 				BreadcrumbItem nextItem= (BreadcrumbItem) fBreadcrumbItems.get(index + 1);
 				selectItem(nextItem);
@@ -473,7 +491,7 @@ public class BreadcrumbViewer extends StructuredViewer {
 		} else {
 			if (index == 1) {
 				BreadcrumbItem root= (BreadcrumbItem) fBreadcrumbItems.get(0);
-				root.openDropDownMenu(null, false);
+				root.openDropDownMenu();
 			} else {
 				selectItem((BreadcrumbItem) fBreadcrumbItems.get(index - 1));
 			}

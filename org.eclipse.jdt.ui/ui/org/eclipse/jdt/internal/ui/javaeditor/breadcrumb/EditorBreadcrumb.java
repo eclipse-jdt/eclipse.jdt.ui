@@ -239,7 +239,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 				if (item == null)
 					return;
 				
-				item.openDropDownMenu(null, true);
+				item.openDropDownMenu();
 			}
 		});
 
@@ -295,26 +295,6 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 			fIsActive= false;
 			focusLost();
 			fBreadcrumbViewer.setInput(getCurrentInput());
-		} else {
-			Object element= ((IStructuredSelection) selection).getFirstElement();
-			if (element == null)
-				return;
-			
-			fBreadcrumbViewer.setInput(element);
-			
-			BreadcrumbItem item= (BreadcrumbItem) fBreadcrumbViewer.doFindItem(element);
-			if (item == null)
-				return;
-			
-			int index= fBreadcrumbViewer.getIndexOfItem(item);
-			if (index < 0)
-				return;
-
-			if (index + 2 == fBreadcrumbViewer.getItemCount()) {
-				fBreadcrumbViewer.getItem(index + 1).openDropDownMenu(null, false);
-			} else if (index < fBreadcrumbViewer.getItemCount()) {
-				fBreadcrumbViewer.getItem(index).openDropDownMenu(null, false);
-			}
 		}
 	}
 

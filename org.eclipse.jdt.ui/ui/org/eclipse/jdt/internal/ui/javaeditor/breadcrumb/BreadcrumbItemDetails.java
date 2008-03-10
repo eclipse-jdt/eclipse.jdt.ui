@@ -313,13 +313,13 @@ class BreadcrumbItemDetails {
 						if (!fSelected) {
 							viewer.selectItem(fParent);
 						}
-						fParent.openDropDownMenu(null, false);
+						fParent.openDropDownMenu();
 						break;
 					case SWT.KEYPAD_ADD:
 						if (!fSelected) {
 							viewer.selectItem(fParent);
 						}
-						fParent.openDropDownMenu(null, false);
+						fParent.openDropDownMenu();
 						break;
 					case SWT.CR:
 						if (!fSelected) {
@@ -328,30 +328,14 @@ class BreadcrumbItemDetails {
 						viewer.fireOpen();
 						break;
 					default:
-						if ((e.stateMask == SWT.NONE || e.stateMask == SWT.SHIFT) && isFilterCharacter(e.character)) {
-							String filterText= new String(new char[] { e.character });
+						if (e.character == ' ') {
 							if (!fSelected) {
 								viewer.selectItem(fParent);
 							}
-							fParent.openDropDownMenu(filterText, false);
-						} else if (e.character == ' ') {
-							if (!fSelected) {
-								viewer.selectItem(fParent);
-							}
-							fParent.openDropDownMenu(null, false);
+							fParent.openDropDownMenu();
 						}
 						break;
 				}
-			}
-
-			private boolean isFilterCharacter(char character) {
-				if (Character.isLetterOrDigit(character))
-					return true;
-
-				if ('*' == character || '?' == character)
-					return true;
-				
-				return false;
 			}
 
 			public void keyReleased(KeyEvent e) {

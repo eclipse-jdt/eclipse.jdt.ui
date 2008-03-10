@@ -13,8 +13,11 @@ package org.eclipse.jdt.internal.ui.javaeditor.breadcrumb;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.events.ShellListener;
 import org.eclipse.swt.graphics.Point;
@@ -29,27 +32,25 @@ import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.TreeExpansionEvent;
+import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.FilteredTable.Direction;
-import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.FilteredTable.INavigateListener;
 
 
 /**
@@ -64,9 +65,6 @@ class BreadcrumbItemDropDown {
 
 	private final BreadcrumbItem fParent;
 	private final Composite fParentComposite;
-	
-	private ITreeContentProvider fContentProvider;
-	private ILabelProvider fLabelProvider;
 
 	private boolean fMenuIsShown;
 	private boolean fEnabled;
@@ -87,7 +85,7 @@ class BreadcrumbItemDropDown {
 			 * @see org.eclipse.jface.action.Action#run()
 			 */
 			public void run() {
-				showMenu(null, false);
+				showMenu();
 			}
 		};
 
@@ -96,14 +94,6 @@ class BreadcrumbItemDropDown {
 		manager.add(showDropDownMenuAction);
 
 		manager.update(true);
-	}
-	
-	public void setContentProvider(ITreeContentProvider contentProvider) {
-		fContentProvider= contentProvider;
-	}
-
-	public void setLabelProvider(ILabelProvider labelProvider) {
-		fLabelProvider= labelProvider;
 	}
 
 	/**
@@ -127,14 +117,9 @@ class BreadcrumbItemDropDown {
 	}
 
 	/**
-	 * Opens the drop down menu. Initialize the filter with
-	 * the given text, or <code>null</code> if the default
-	 * filter text should be used.
-	 * 
-	 * @param filterText the text to filter for or <code>null</code>
-	 * @param selectItem true to select the item in the drop down, false to select the filter text 
+	 * Opens the drop down menu.
 	 */
-	public void showMenu(String filterText, boolean selectItem) {
+	public void showMenu() {
 		if (!fEnabled)
 			return;
 		
@@ -142,9 +127,10 @@ class BreadcrumbItemDropDown {
 		
 		final Shell shell= new Shell(fToolBar.getShell(), SWT.RESIZE | SWT.TOOL | SWT.BORDER);
 		GridLayout layout= new GridLayout(1, false);
-		layout.marginHeight= 0;
+		layout.marginHeight= 5;
 		layout.marginWidth= 0;
-		shell.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		shell.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+		shell.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		shell.setLayout(layout);
 		
 		Composite composite= new Composite(shell, SWT.NONE);
@@ -154,74 +140,17 @@ class BreadcrumbItemDropDown {
 		gridLayout.marginWidth= 0;
 		composite.setLayout(gridLayout);
 		
-		int parentIndex= fParent.getViewer().getIndexOfItem(fParent);
-		final FilteredTable filteredTable= new FilteredTable(composite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL, new PatternFilter(), parentIndex < fParent.getViewer().getItemCount() - 1, parentIndex > 0);
-		if (filterText != null) {
-			filteredTable.getFilterControl().setText(filterText);
-			filteredTable.getFilterControl().setSelection(filterText.length());
-		}
-		filteredTable.setBackground(shell.getBackground());
-
-		final TableViewer viewer= filteredTable.getViewer();
-		final Table table= (Table) viewer.getControl();
+		final TreeViewer viewer= new TreeViewer(composite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL);
 		
-		filteredTable.addNavigateListener(new INavigateListener() {
-			public void navigate(Direction direction) {
-				if (direction == FilteredTable.DIRECTION_UP) {
-					int index= fParent.getViewer().getIndexOfItem(fParent);
-					if (index - 1 >= 0) {
-						shell.close();
-						
-						BreadcrumbItem parent= fParent.getViewer().getItem(index - 1);
-						if (index - 1 > 0)
-							fParent.getViewer().selectItem(parent);
-						
-						parent.openDropDownMenu(null, true);
-					}
-				} else if (direction == FilteredTable.DIRECTION_DOWN) {
-					int index= fParent.getViewer().getIndexOfItem(fParent);
-					if (index != -1 && index + 1 < fParent.getViewer().getItemCount()) {
-						shell.close();
-						
-						BreadcrumbItem child= fParent.getViewer().getItem(index + 1);
-						fParent.getViewer().selectItem(child);
-						child.openDropDownMenu(null, true);
-					}
-				}
-			}
-		});
-
-		viewer.setContentProvider(new ITreeContentProvider() {  
-			public void dispose() {
-				//do not dispose this, still needed
-			}
-
-			public void inputChanged(Viewer viewer1, Object oldInput, Object newInput) {
-				fContentProvider.inputChanged(viewer1, oldInput, newInput);
-			}
-
-			public Object[] getElements(Object inputElement) {
-				return fContentProvider.getElements(inputElement);
-			}
-
-			public Object[] getChildren(Object parentElement) {
-				if (parentElement != viewer.getInput())
-					return new Object[0];
-
-				return getElements(parentElement);
-			}
-
-			public Object getParent(Object element) {
-				return viewer.getInput();
-			}
-
-			public boolean hasChildren(Object element) {
-				return false;
-			}
-		});
-		viewer.setLabelProvider(fLabelProvider);
+		final Tree tree= (Tree) viewer.getControl();
+		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tree.setBackground(shell.getBackground());
+		
+		Object input= fParent.getData();
+		viewer.setContentProvider(fParent.getViewer().createDropDownContentProvider(input));
+		viewer.setLabelProvider(fParent.getViewer().createDropDownLabelProvider(input));
 		viewer.setComparator(new JavaElementComparator());
-		viewer.setInput(fParent.getData());
+		viewer.setInput(input);
 
 		setShellBounds(shell);
 
@@ -235,32 +164,127 @@ class BreadcrumbItemDropDown {
 				if (element == null)
 					return;
 				
-				shell.close();
 				fParent.getViewer().fireMenuSelection(element);
+				if (shell.isDisposed())
+					return;
+
+				if (viewer.getExpandedState(element)) {
+					viewer.collapseToLevel(element, 1);
+				} else {
+					viewer.expandToLevel(element, 1);
+					resizeShell(shell);
+				}
 			}
 		});
 
-		table.addMouseListener(new MouseListener() {
+		tree.addMouseListener(new MouseListener() {
 			public void mouseUp(MouseEvent e) {
 				if (e.button != 1)
 					return;
 
-				Item item= table.getItem(new Point(e.x, e.y));
+				Item item= tree.getItem(new Point(e.x, e.y));
 				if (item == null)
 					return;
 
 				Object data= item.getData();
 				if (data == null)
 					return;
-
-				shell.close();
+				
 				fParent.getViewer().fireMenuSelection(data);
+				if (shell.isDisposed())
+					return;
+
+				if (viewer.getExpandedState(data)) {
+					viewer.collapseToLevel(data, 1);
+				} else {
+					viewer.expandToLevel(data, 1);
+					resizeShell(shell);
+				}
 			}
 
 			public void mouseDown(MouseEvent e) {
 			}
 
 			public void mouseDoubleClick(MouseEvent e) {
+			}
+		});
+		
+		tree.addMouseMoveListener(new MouseMoveListener() {
+			TreeItem fLastItem= null;
+
+			public void mouseMove(MouseEvent e) {
+				if (tree.equals(e.getSource())) {
+					Object o= tree.getItem(new Point(e.x, e.y));
+					if (o instanceof TreeItem) {
+						TreeItem currentItem= (TreeItem) o;
+						if (!o.equals(fLastItem)) {
+							fLastItem= (TreeItem) o;
+							tree.setSelection(new TreeItem[] { fLastItem });
+						} else if (e.y < tree.getItemHeight() / 4) {
+							// Scroll up
+							if (currentItem.getParentItem() == null) {
+								int index= tree.indexOf((TreeItem) o);
+								if (index < 1)
+									return;
+
+								fLastItem= tree.getItem(index - 1);
+								tree.setSelection(new TreeItem[] { fLastItem });
+							} else {
+								Point p= tree.toDisplay(e.x, e.y);
+								Item item= viewer.scrollUp(p.x, p.y);
+								if (item instanceof TreeItem) {
+									fLastItem= (TreeItem) item;
+									tree.setSelection(new TreeItem[] { fLastItem });
+								}
+							}
+						} else if (e.y > tree.getBounds().height - tree.getItemHeight() / 4) {
+							// Scroll down
+							if (currentItem.getParentItem() == null) {
+								int index= tree.indexOf((TreeItem) o);
+								if (index >= tree.getItemCount() - 1)
+									return;
+
+								fLastItem= tree.getItem(index + 1);
+								tree.setSelection(new TreeItem[] { fLastItem });
+							} else {
+								Point p= tree.toDisplay(e.x, e.y);
+								Item item= viewer.scrollDown(p.x, p.y);
+								if (item instanceof TreeItem) {
+									fLastItem= (TreeItem) item;
+									tree.setSelection(new TreeItem[] { fLastItem });
+								}
+							}
+						}
+					}
+				}
+			}
+		});
+		
+		tree.addKeyListener(new KeyListener() {
+			public void keyPressed(KeyEvent e) {
+				if (e.keyCode == SWT.ARROW_UP) {
+					TreeItem[] selection= tree.getSelection();
+					if (selection.length != 1)
+						return;
+
+					int selectionIndex= tree.indexOf(selection[0]);
+					if (selectionIndex != 0)
+						return;
+					
+					shell.close();
+				}
+			}
+
+			public void keyReleased(KeyEvent e) {
+			}
+		});
+		
+		viewer.addTreeListener(new ITreeViewerListener() {
+			public void treeCollapsed(TreeExpansionEvent event) {
+			}
+
+			public void treeExpanded(TreeExpansionEvent event) {
+				resizeShell(shell);
 			}
 		});
 
@@ -278,18 +302,14 @@ class BreadcrumbItemDropDown {
 			Object child= childItem.getData();
 			
 			viewer.setSelection(new StructuredSelection(child), true);
-			
-			int selectionIndex= viewer.getTable().getSelectionIndex();
-			if (selectionIndex >= 0) {
-				viewer.getTable().setTopIndex(selectionIndex);
+
+			TreeItem[] selection= tree.getSelection();
+			if (selection.length > 0) {
+				tree.setTopItem(selection[0]);
 			}
 		}
 		
-		if (selectItem) {
-			viewer.getTable().setFocus();
-		} else {
-			filteredTable.getFilterControl().setFocus();
-		}
+		tree.setFocus();
 	}
 
 	/**
@@ -347,7 +367,7 @@ class BreadcrumbItemDropDown {
 	}
 
 	/**
-	 * Calculates a useful size for the given shell
+	 * Calculates a useful size for the given shell.
 	 * 
 	 * @param shell the shell to calculate the size for.
 	 */
@@ -371,7 +391,14 @@ class BreadcrumbItemDropDown {
 		shell.setSize(width, height);
 		shell.layout(true, true);
 	}
-
+	
+	/**
+	 * Returns the monitor which contains the given point.
+	 * 
+	 * @param display the current display
+	 * @param point a point in the result
+	 * @return monitor containing <code>point</code>
+	 */
 	private Monitor getMonitor(Display display, Point point) {
 		Monitor[] monitors= display.getMonitors();
 
@@ -386,4 +413,38 @@ class BreadcrumbItemDropDown {
 
 		return monitors[0];
 	}
+
+	/**
+	 * Set the size of the given shell such that more content
+	 * can be shown. The shell size does not exceed {@link #DROP_DOWN_HIGHT}
+	 * and {@link #DROP_DOWN_WIDTH}.
+	 * 
+	 * @param shell the shell to resize
+	 */
+	private void resizeShell(final Shell shell) {
+		shell.getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				if (shell.isDisposed())
+					return;
+
+				Point size= shell.getSize();
+				int currentWidth= size.x;
+				int currentHeight= size.y;
+
+				if (currentHeight >= DROP_DOWN_HIGHT && currentWidth >= DROP_DOWN_WIDTH)
+					return;
+
+				Point preferedSize= shell.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+
+				int newWidth= Math.min(Math.max(preferedSize.x, currentWidth), DROP_DOWN_WIDTH);
+				int newHeight= Math.min(Math.max(preferedSize.y, currentHeight), DROP_DOWN_HIGHT);
+
+				if (newHeight != currentHeight || newWidth != currentWidth) {
+					shell.setSize(newWidth, newHeight);
+					shell.layout(true, true);
+				}
+			}
+		});
+	}
+
 }

@@ -68,11 +68,6 @@ class BreadcrumbItem extends Item {
 		fDetailsBlock= new BreadcrumbItemDetails(this, fContainer);
 
 		fExpandBlock= new BreadcrumbItemDropDown(this, fContainer);
-		if (fLabelProvider != null)
-			fExpandBlock.setLabelProvider(fLabelProvider);
-
-		if (fContentProvider != null)
-			fExpandBlock.setContentProvider(fContentProvider);
 
 		fSpacer= new Label(fContainer, SWT.VERTICAL | SWT.SEPARATOR);
 		GridData data= new GridData(SWT.BEGINNING, SWT.TOP, false, false);
@@ -92,8 +87,6 @@ class BreadcrumbItem extends Item {
 	 */
 	public void setContentProvider(ITreeContentProvider contentProvider) {
 		fContentProvider= contentProvider;
-		if (fExpandBlock != null)
-			fExpandBlock.setContentProvider(contentProvider);
 	}
 
 	/**
@@ -101,8 +94,6 @@ class BreadcrumbItem extends Item {
 	 */
 	public void setLabelProvider(ILabelProvider labelProvider) {
 		fLabelProvider= labelProvider;
-		if (fExpandBlock != null)
-			fExpandBlock.setLabelProvider(labelProvider);
 	}
 
 	/* (non-Javadoc)
@@ -219,15 +210,10 @@ class BreadcrumbItem extends Item {
 	}
 
 	/**
-	 * Expand this item, shows the drop down menu.
-	 * Initialize the filter with the given text. <code>null</code>
-	 * for default filter text.
-	 * 
-	 * @param filterText the text to use to initialize the filter text or <code>null</code>
-	 * @param selectItem true to select the item in the drop down, false to select the filter text 
+	 * Expand this item, shows the drop down menu. 
 	 */
-	void openDropDownMenu(String filterText, boolean selectItem) {
-		fExpandBlock.showMenu(filterText, selectItem);
+	void openDropDownMenu() {
+		fExpandBlock.showMenu();
 	}
 
 	/**
