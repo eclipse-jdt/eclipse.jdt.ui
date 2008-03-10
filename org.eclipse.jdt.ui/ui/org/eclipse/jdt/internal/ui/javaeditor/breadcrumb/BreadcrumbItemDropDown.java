@@ -171,8 +171,13 @@ class BreadcrumbItemDropDown {
 				if (viewer.getExpandedState(element)) {
 					viewer.collapseToLevel(element, 1);
 				} else {
-					viewer.expandToLevel(element, 1);
-					resizeShell(shell);
+					tree.setRedraw(false);
+					try {
+						viewer.expandToLevel(element, 1);
+						resizeShell(shell);
+					} finally {
+						tree.setRedraw(true);
+					}
 				}
 			}
 		});
@@ -197,8 +202,13 @@ class BreadcrumbItemDropDown {
 				if (viewer.getExpandedState(data)) {
 					viewer.collapseToLevel(data, 1);
 				} else {
-					viewer.expandToLevel(data, 1);
-					resizeShell(shell);
+					tree.setRedraw(false);
+					try {
+						viewer.expandToLevel(data, 1);
+						resizeShell(shell);
+					} finally {
+						tree.setRedraw(true);
+					}
 				}
 			}
 
@@ -284,7 +294,19 @@ class BreadcrumbItemDropDown {
 			}
 
 			public void treeExpanded(TreeExpansionEvent event) {
-				resizeShell(shell);
+				tree.setRedraw(false);
+				shell.getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						if (shell.isDisposed())
+							return;
+						
+						try {
+							resizeShell(shell);
+						} finally {
+							tree.setRedraw(true);
+						}
+					}
+				});
 			}
 		});
 
@@ -293,9 +315,6 @@ class BreadcrumbItemDropDown {
 		while (Display.getDefault().readAndDispatch()) {
 		}
 		
-		shell.open();
-		installCloser(shell);
-
 		int index= fParent.getViewer().getIndexOfItem(fParent);
 		if (index < fParent.getViewer().getItemCount() - 1) {
 			BreadcrumbItem childItem= fParent.getViewer().getItem(index + 1);
@@ -308,6 +327,9 @@ class BreadcrumbItemDropDown {
 				tree.setTopItem(selection[0]);
 			}
 		}
+
+		shell.open();
+		installCloser(shell);
 		
 		tree.setFocus();
 	}
@@ -389,7 +411,6 @@ class BreadcrumbItemDropDown {
 		
 		shell.setLocation(pt);
 		shell.setSize(width, height);
-		shell.layout(true, true);
 	}
 	
 	/**
@@ -422,29 +443,21 @@ class BreadcrumbItemDropDown {
 	 * @param shell the shell to resize
 	 */
 	private void resizeShell(final Shell shell) {
-		shell.getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				if (shell.isDisposed())
-					return;
+		Point size= shell.getSize();
+		int currentWidth= size.x;
+		int currentHeight= size.y;
 
-				Point size= shell.getSize();
-				int currentWidth= size.x;
-				int currentHeight= size.y;
+		if (currentHeight >= DROP_DOWN_HIGHT && currentWidth >= DROP_DOWN_WIDTH)
+			return;
 
-				if (currentHeight >= DROP_DOWN_HIGHT && currentWidth >= DROP_DOWN_WIDTH)
-					return;
+		Point preferedSize= shell.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
 
-				Point preferedSize= shell.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+		int newWidth= Math.min(Math.max(preferedSize.x, currentWidth), DROP_DOWN_WIDTH);
+		int newHeight= Math.min(Math.max(preferedSize.y, currentHeight), DROP_DOWN_HIGHT);
 
-				int newWidth= Math.min(Math.max(preferedSize.x, currentWidth), DROP_DOWN_WIDTH);
-				int newHeight= Math.min(Math.max(preferedSize.y, currentHeight), DROP_DOWN_HIGHT);
-
-				if (newHeight != currentHeight || newWidth != currentWidth) {
-					shell.setSize(newWidth, newHeight);
-					shell.layout(true, true);
-				}
-			}
-		});
+		if (newHeight != currentHeight || newWidth != currentWidth) {
+			shell.setSize(newWidth, newHeight);
+		}
 	}
 
 }
