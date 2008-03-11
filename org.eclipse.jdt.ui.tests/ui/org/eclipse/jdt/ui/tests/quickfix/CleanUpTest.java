@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -29,14 +30,23 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTRequestor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
+import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -1248,6 +1258,52 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES);
 		
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+	
+	public void testJava50Bug222257() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        ArrayList list= new ArrayList<String>();\n");
+		buf.append("        ArrayList list2= new ArrayList<String>();\n");
+		buf.append("        \n");
+		buf.append("        System.out.println(list);\n");
+		buf.append("        System.out.println(list2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		HashMap map= new HashMap();
+		map.put(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES, CleanUpOptions.TRUE);
+		Java50CleanUp cleanUp= new Java50CleanUp(map);
+
+		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		parser.setResolveBindings(true);
+		parser.setProject(fJProject1);
+
+		Map options= RefactoringASTParser.getCompilerOptions(fJProject1);
+		options.putAll(cleanUp.getRequirements().getCompilerOptions());
+		parser.setCompilerOptions(options);
+		
+		final CompilationUnit[] roots= new CompilationUnit[1];
+		parser.createASTs(new ICompilationUnit[] { cu1 }, new String[0], new ASTRequestor() {
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.core.dom.ASTRequestor#acceptAST(org.eclipse.jdt.core.ICompilationUnit, org.eclipse.jdt.core.dom.CompilationUnit)
+			 */
+			public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
+				roots[0]= ast;
+			}
+		}, null);
+
+		IProblem[] problems= roots[0].getProblems();
+		assertTrue(problems.length == 2);
+		for (int i= 0; i < problems.length; i++) {
+			ProblemLocation location= new ProblemLocation(problems[i]);
+			assertTrue(cleanUp.canFix(cu1, location));
+		}
 	}
 	
 	public void testCodeStyle01() throws Exception {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -139,7 +139,7 @@ public class Java50CleanUp extends AbstractMultiFix {
 	 * {@inheritDoc}
 	 */
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
-		if (problem.getProblemId() != IProblem.MissingOverrideAnnotation)
+		if (problem.getProblemId() == IProblem.MissingOverrideAnnotation)
 			return isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
 
 		if (Java50Fix.isMissingDeprecationProblem(problem))
