@@ -21,15 +21,11 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.ui.IWorkbenchPreferenceConstants;
+import org.eclipse.ui.PlatformUI;
 
 
 public class ColoredViewersManager implements IPropertyChangeListener {
-	
-	/**
-	 * XXX: will probably be moved to {@link PreferenceConstants}.
-	 */
-	public static final String PREF_COLORED_LABELS= "colored_labels_in_views"; //$NON-NLS-1$
 	
 	public static final String INHERITED_COLOR_NAME= "org.eclipse.jdt.ui.ColoredLabels.inherited"; //$NON-NLS-1$
 	
@@ -50,7 +46,7 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 		
 		if (fManagedLabelProviders.isEmpty()) {
 			// first lp installed
-			PreferenceConstants.getPreferenceStore().addPropertyChangeListener(this);
+			PlatformUI.getPreferenceStore().addPropertyChangeListener(this);
 			JFaceResources.getColorRegistry().addListener(this);
 		}
 		fManagedLabelProviders.add(labelProvider);
@@ -61,7 +57,7 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 			return; // not installed
 		
 		if (fManagedLabelProviders.isEmpty()) {
-			PreferenceConstants.getPreferenceStore().removePropertyChangeListener(this);
+			PlatformUI.getPreferenceStore().removePropertyChangeListener(this);
 			JFaceResources.getColorRegistry().removeListener(this);
 			// last viewer uninstalled
 		}
@@ -70,7 +66,7 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 	public void propertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
 		if (property.equals(JFacePreferences.QUALIFIER_COLOR) || property.equals(JFacePreferences.COUNTER_COLOR) || property.equals(JFacePreferences.DECORATIONS_COLOR)
-				|| property.equals(HIGHLIGHT_BG_COLOR_NAME) || property.equals(PREF_COLORED_LABELS) || property.equals(HIGHLIGHT_WRITE_BG_COLOR_NAME)) {
+				|| property.equals(HIGHLIGHT_BG_COLOR_NAME) || property.equals(IWorkbenchPreferenceConstants.USE_COLORED_LABELS) || property.equals(HIGHLIGHT_WRITE_BG_COLOR_NAME)) {
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
 					refreshAllViewers();
@@ -87,8 +83,7 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 	}
 		
 	public static boolean showColoredLabels() {
-		String preference= PreferenceConstants.getPreference(PREF_COLORED_LABELS, null);
-		return preference != null && Boolean.valueOf(preference).booleanValue();
+		return PlatformUI.getPreferenceStore().getBoolean(IWorkbenchPreferenceConstants.USE_COLORED_LABELS);
 	}
 	
 	public static void install(ColoringLabelProvider labelProvider) {

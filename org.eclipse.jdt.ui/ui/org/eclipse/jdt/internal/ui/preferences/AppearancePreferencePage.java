@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
@@ -52,7 +51,6 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	private static final String STACK_BROWSING_VIEWS_VERTICALLY= PreferenceConstants.BROWSING_STACK_VERTICALLY;
 	private static final String PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER;
 	private static final String PREF_CATEGORY= PreferenceConstants.APPEARANCE_CATEGORY;
-	private static final String PREF_COLORED_LABELS= ColoredViewersManager.PREF_COLORED_LABELS; 
 	
 	private SelectionButtonDialogField fShowMethodReturnType;
 	private SelectionButtonDialogField fShowCategory;
@@ -62,7 +60,6 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	private StringDialogField fPackageNamePattern;
 	private SelectionButtonDialogField fFoldPackagesInPackageExplorer;
 	private SelectionButtonDialogField fShowMethodTypeParameters;
-	private SelectionButtonDialogField fShowColoredLabels;
 	
 	public AppearancePreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
@@ -105,10 +102,6 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fPackageNamePattern= new StringDialogField();
 		fPackageNamePattern.setDialogFieldListener(listener);
 		fPackageNamePattern.setLabelText(PreferencesMessages.AppearancePreferencePage_pkgNamePattern_label); 
-		
-		fShowColoredLabels= new SelectionButtonDialogField(SWT.CHECK);
-		fShowColoredLabels.setDialogFieldListener(listener);
-		fShowColoredLabels.setLabelText(PreferencesMessages.AppearancePreferencePage_coloredlabels_label);
 	}	
 
 	private void initFields() {
@@ -122,8 +115,6 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fCompressPackageNames.setSelection(prefs.getBoolean(PREF_COMPRESS_PACKAGE_NAMES));
 		fPackageNamePattern.setEnabled(fCompressPackageNames.isSelected());
 		fFoldPackagesInPackageExplorer.setSelection(prefs.getBoolean(PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER));
-		
-		fShowColoredLabels.setSelection(prefs.getBoolean(PREF_COLORED_LABELS));
 	}
 	
 	/*
@@ -154,7 +145,6 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fShowMethodTypeParameters.doFillIntoGrid(result, nColumns);
 		fShowCategory.doFillIntoGrid(result, nColumns);
 		fShowMembersInPackageView.doFillIntoGrid(result, nColumns);	
-		fShowColoredLabels.doFillIntoGrid(result, nColumns);
 		fFoldPackagesInPackageExplorer.doFillIntoGrid(result, nColumns);
 
 		new Separator().doFillIntoGrid(result, nColumns);
@@ -218,7 +208,6 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		prefs.setValue(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW, fPackageNamePattern.getText());
 		prefs.setValue(PREF_COMPRESS_PACKAGE_NAMES, fCompressPackageNames.isSelected());
 		prefs.setValue(PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, fFoldPackagesInPackageExplorer.isSelected());
-		prefs.setValue(PREF_COLORED_LABELS, fShowColoredLabels.isSelected());
 		JavaPlugin.getDefault().savePluginPreferences();
 		return super.performOk();
 	}	
@@ -236,7 +225,6 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fPackageNamePattern.setText(prefs.getDefaultString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW));
 		fCompressPackageNames.setSelection(prefs.getDefaultBoolean(PREF_COMPRESS_PACKAGE_NAMES));
 		fFoldPackagesInPackageExplorer.setSelection(prefs.getDefaultBoolean(PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER));
-		fShowColoredLabels.setSelection(prefs.getDefaultBoolean(PREF_COLORED_LABELS));
 		super.performDefaults();
 	}
 }
