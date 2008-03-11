@@ -374,7 +374,6 @@ class BreadcrumbItemDropDown {
 					return;
 				
 				fMenuIsShown= false;
-				fParent.getViewer().setFocus();
 			}
 
 			public void shellDeactivated(ShellEvent e) {
