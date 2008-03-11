@@ -113,35 +113,45 @@ class BreadcrumbItemDetails {
 	public boolean hasFocus() {
 		return fHasFocus;
 	}
-
+	
 	/**
-	 * Set values to display to the given values
+	 * Set the tool tip to the given text.
 	 * 
-	 * @param text label text
-	 * @param image label image
-	 * @param toolTipText tool tip text
+	 * @param text the tool tip
 	 */
-	public void setContent(String text, Image image, String toolTipText) {
-		if (text != null) {
-			fElementText.setText(text);
-			fParent.setText(text);
-		} else {
-			fElementText.setText(""); //$NON-NLS-1$
-			fParent.setText(""); //$NON-NLS-1$
-		}
-		fElementImage.setImage(image);
-		fParent.setImage(image);
-
+	public void setToolTip(String text) {
 		if (isTextVisible()) {
-			fElementText.getParent().setToolTipText(toolTipText);
-			fElementText.setToolTipText(toolTipText);
+			fElementText.getParent().setToolTipText(text);
+			fElementText.setToolTipText(text);
 
-			fElementImage.setToolTipText(toolTipText);
+			fElementImage.setToolTipText(text);
 		} else {
 			fElementText.getParent().setToolTipText(null);
 			fElementText.setToolTipText(null);
 
-			fElementImage.setToolTipText(toolTipText);
+			fElementImage.setToolTipText(text);
+		}
+	}
+
+	/**
+	 * Set the image to the given image.
+	 * 
+	 * @param image the image to use
+	 */
+	public void setImage(Image image) {
+		fElementImage.setImage(image);
+	}
+
+	/**
+	 * Set the text to the given text.
+	 * 
+	 * @param text the text to use
+	 */
+	public void setText(String text) {
+		if (text != null) {
+			fElementText.setText(text);
+		} else {
+			fElementText.setText(""); //$NON-NLS-1$
 		}
 	}
 

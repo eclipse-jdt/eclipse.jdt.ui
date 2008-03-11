@@ -30,6 +30,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StyledStringBuilder;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.IEditorPart;
@@ -45,6 +46,7 @@ import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -168,7 +170,10 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.BreadcrumbViewer#createDropDownLabelProvider(java.lang.Object)
 		 */
 		public ILabelProvider createDropDownLabelProvider(Object root) {
-			return createLabelProvider();
+			final AppearanceAwareLabelProvider result= new AppearanceAwareLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.F_APP_TYPE_SIGNATURE
+					| JavaElementLabels.ALL_CATEGORY, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
+
+			return new DecoratingJavaLabelProvider(result);
 		}
 	}
 
@@ -326,6 +331,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		fViewer= new ProblemBreadcrumbViewer(composite, SWT.HORIZONTAL);
 
 		fViewer.setLabelProvider(createLabelProvider());
+		fViewer.setToolTipLabelProvider(createToolTipLabelProvider());
 
 		fViewer.setContentProvider(createContentProvider());
 		fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -350,12 +356,46 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	}
 
 	/**
-	 * Create a new instance of the lable provider to use for the Java editor breadcrumb
+	 * Create a new instance of the label provider to use for the Java editor breadcrumb
 	 * 
 	 * @return a new label provider
 	 */
 	private static ILabelProvider createLabelProvider() {
-		AppearanceAwareLabelProvider result= new AppearanceAwareLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.F_APP_TYPE_SIGNATURE
+		final AppearanceAwareLabelProvider result= new AppearanceAwareLabelProvider(JavaElementLabels.ROOT_VARIABLE | JavaElementLabels.T_TYPE_PARAMETERS | JavaElementLabels.M_PARAMETER_TYPES
+				| JavaElementLabels.M_APP_TYPE_PARAMETERS | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.F_APP_TYPE_SIGNATURE
+				| JavaElementLabels.ALL_CATEGORY, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
+
+		return new DecoratingJavaLabelProvider(result) {
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider#getText(java.lang.Object)
+			 */
+			public String getText(Object element) {
+				if (element instanceof IPackageFragmentRoot) {
+					IPackageFragmentRoot root= (IPackageFragmentRoot) element;
+					if (root.isArchive() && root.isExternal()) {
+						return root.getElementName();
+					}
+				}
+				
+				return result.getText(element);
+			}
+			
+			/* (non-Javadoc)
+			 * @see org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider#getStyledText(java.lang.Object)
+			 */
+			protected StyledStringBuilder getStyledText(Object element) {
+				return new StyledStringBuilder(getText(element));
+			}
+		};
+	}
+	
+	/**
+	 * Label provider to use for the tool tips.
+	 * 
+	 * @return a label provider for the tool tip
+	 */
+	private ILabelProvider createToolTipLabelProvider() {
+		final AppearanceAwareLabelProvider result= new AppearanceAwareLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.F_APP_TYPE_SIGNATURE
 				| JavaElementLabels.ALL_CATEGORY, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
 
 		return new DecoratingJavaLabelProvider(result);

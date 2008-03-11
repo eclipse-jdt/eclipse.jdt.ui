@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.javaeditor.breadcrumb;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -44,6 +45,7 @@ class BreadcrumbItem extends Item {
 	private BreadcrumbItemDetails fDetailsBlock;
 	private BreadcrumbItemDropDown fExpandBlock;
 	private Label fSpacer;
+	private ILabelProvider fToolTipLabelProvider;
 
 	/**
 	 * A new breadcrumb item which is shown inside the given viewer.
@@ -94,6 +96,13 @@ class BreadcrumbItem extends Item {
 	 */
 	public void setLabelProvider(ILabelProvider labelProvider) {
 		fLabelProvider= labelProvider;
+	}
+	
+	/**
+	 * @param toolTipLabelProvider the label provider for the tool tips
+	 */
+	public void setToolTipLabelProvider(ILabelProvider toolTipLabelProvider) {
+		fToolTipLabelProvider= toolTipLabelProvider;
 	}
 
 	/* (non-Javadoc)
@@ -168,17 +177,6 @@ class BreadcrumbItem extends Item {
 	boolean hasFocus() {
 		return fDetailsBlock.hasFocus();
 	}
-	
-	/**
-	 * Set the label and the image of this item
-	 * to the given values.
-	 * 
-	 * @param text the items label
-	 * @param image the items image
-	 */
-	void update(String text, Image image) {
-		fDetailsBlock.setContent(text, image, text);
-	}
 
 	/**
 	 * Redraw this item, retrieves new labels
@@ -187,8 +185,11 @@ class BreadcrumbItem extends Item {
 	void refresh() {
 		String text= fLabelProvider.getText(getData());
 		Image image= fLabelProvider.getImage(getData());
+		String toolTip= fToolTipLabelProvider.getText(getData());
 
-		fDetailsBlock.setContent(text, image, text);
+		fDetailsBlock.setText(text);
+		fDetailsBlock.setImage(image);
+		fDetailsBlock.setToolTip(toolTip);
 
 		if (fContentProvider.hasChildren(getData())) {
 			fExpandBlock.setEnabled(true);
@@ -221,6 +222,38 @@ class BreadcrumbItem extends Item {
 	 */
 	boolean isMenuShown() {
 		return fExpandBlock.isMenuShown();
+	}
+
+	/**
+	 * @return the bounds of this item
+	 */
+	public Rectangle getBounds() {
+		return fContainer.getBounds();
+	}
+
+	/**
+	 * Set the tool tip of the item to the given text.
+	 * 
+	 * @param text the tool tip for the item
+	 */
+	public void setToolTip(String text) {
+		fDetailsBlock.setToolTip(text);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.swt.widgets.Item#setText(java.lang.String)
+	 */
+	public void setText(String string) {
+		super.setText(string);
+		fDetailsBlock.setText(string);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.swt.widgets.Item#setImage(org.eclipse.swt.graphics.Image)
+	 */
+	public void setImage(Image image) {
+		super.setImage(image);
+		fDetailsBlock.setImage(image);
 	}
 
 }

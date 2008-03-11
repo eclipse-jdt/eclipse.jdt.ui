@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Widget;
 
+import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -43,7 +44,7 @@ import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
-import org.eclipse.jface.viewers.ViewerLabel;
+import org.eclipse.jface.viewers.ViewerCell;
 
 import org.eclipse.ui.forms.FormColors;
 
@@ -70,6 +71,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 
 	private Image fGradientBackground;
 	private BreadcrumbItem fSelectedItem;
+	private ILabelProvider fToolTipLabelProvider;
 
 	/**
 	 * Create a new <code>BreadcrumbViewer</code>.
@@ -154,7 +156,17 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	 * @param root the root element of the drop down menu
 	 * @return a new label provider
 	 */
-	public abstract ILabelProvider createDropDownLabelProvider(Object root);
+	public abstract ILabelProvider createDropDownLabelProvider(Object root);	
+
+	/**
+	 * The tool tip to use for the tool tip labels. <code>null</code>
+	 * if the viewers label provider should be used.
+	 * 
+	 * @param toolTipLabelProvider the label provider for the tool tips or <code>null</code>
+	 */
+	public void setToolTipLabelProvider(ILabelProvider toolTipLabelProvider) {
+		fToolTipLabelProvider= toolTipLabelProvider;
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.Viewer#getControl()
@@ -316,11 +328,17 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 				item.setData(element);
 				mapElement(element, item);
 			}
-	
-			ViewerLabel label= new ViewerLabel(item.getText(), item.getImage());
-			buildLabel(label, element);
 			
-			item.update(label.getText(), label.getImage());
+			BreadcrumbViewerRow row= new BreadcrumbViewerRow(this, item);
+			ViewerCell cell= row.getCell(0);
+
+			((CellLabelProvider) getLabelProvider()).update(cell);		
+
+			if (fToolTipLabelProvider != null) {
+				item.setToolTip(fToolTipLabelProvider.getText(item.getData()));
+			} else {
+				item.setToolTip(cell.getText());
+			}
 		}
 	}
 
@@ -544,6 +562,11 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		BreadcrumbItem result= new BreadcrumbItem(this, fContainer);
 	
 		result.setLabelProvider((ILabelProvider) getLabelProvider());
+		if (fToolTipLabelProvider != null) {
+			result.setToolTipLabelProvider(fToolTipLabelProvider);
+		} else {
+			result.setToolTipLabelProvider((ILabelProvider) getLabelProvider());
+		}
 		result.setContentProvider((ITreeContentProvider) getContentProvider());
 	
 		return result;
