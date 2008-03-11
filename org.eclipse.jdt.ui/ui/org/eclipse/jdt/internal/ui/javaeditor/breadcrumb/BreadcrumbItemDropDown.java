@@ -127,7 +127,7 @@ class BreadcrumbItemDropDown {
 		
 		final Shell shell= new Shell(fToolBar.getShell(), SWT.RESIZE | SWT.TOOL | SWT.BORDER);
 		GridLayout layout= new GridLayout(1, false);
-		layout.marginHeight= 5;
+		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		shell.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 		shell.setBackgroundMode(SWT.INHERIT_DEFAULT);
