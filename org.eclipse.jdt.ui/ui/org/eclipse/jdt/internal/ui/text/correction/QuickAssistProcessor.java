@@ -718,16 +718,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					if (binding == null)
 						return null;
 
-					if (binding.isPrimitive()) {
-						MethodInvocation valueOfInvocation= ast.newMethodInvocation();
-						valueOfInvocation.arguments().add(rewrite.createCopyTarget(operand));
-						valueOfInvocation.setExpression(ast.newSimpleName("String")); //$NON-NLS-1$
-						valueOfInvocation.setName(ast.newSimpleName("valueOf")); //$NON-NLS-1$
+					if (binding.isPrimitive())
+						return null;
 
-						argument= valueOfInvocation;
-					} else {
-						argument= rewrite.createCopyTarget(operand);
-					}
+					argument= rewrite.createCopyTarget(operand);
 				}
 				
 				formatArguments.add(argument);
