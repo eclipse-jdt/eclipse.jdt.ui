@@ -2221,6 +2221,7 @@
                definitionId="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"
                label="%OpenExternalJavadocAction.label"
                retarget="true"
+               allowLabelUpdate="true"
                menubarPath="navigate/open.ext"
                id="org.eclipse.jdt.ui.actions.OpenExternalJavaDoc">
          </action>

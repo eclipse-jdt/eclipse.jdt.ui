@@ -121,6 +121,8 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -716,6 +718,7 @@ public class JavadocView extends AbstractInfoView {
 		
 		fInputSelectionProvider= new SimpleSelectionProvider();
 		fOpenExternalBrowserAction= new OpenExternalBrowserAction(getSite());
+		fOpenExternalBrowserAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EXTERNAL_JAVADOC);
 		fOpenExternalBrowserAction.setSpecialSelectionProvider(fInputSelectionProvider);
 		fInputSelectionProvider.addSelectionChangedListener(fOpenExternalBrowserAction);
 		
@@ -733,11 +736,17 @@ public class JavadocView extends AbstractInfoView {
 	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#fillActionBars(org.eclipse.ui.IActionBars)
 	 * @since 3.4
 	 */
-	protected void fillActionBars(IActionBars actionBars) {
+	protected void fillActionBars(final IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 
 		actionBars.setGlobalActionHandler(ActionFactory.BACK.getId(), fBackAction);
 		actionBars.setGlobalActionHandler(ActionFactory.FORWARD.getId(), fForthAction);
+	
+		fInputSelectionProvider.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_EXTERNAL_JAVA_DOC, fOpenExternalBrowserAction);
+			}
+		});
 
 		IHandlerService handlerService= (IHandlerService) getSite().getService(IHandlerService.class);
 		handlerService.activateHandler(IWorkbenchCommandIds.LINK_WITH_EDITOR, new ActionHandler(fToggleLinkAction));
