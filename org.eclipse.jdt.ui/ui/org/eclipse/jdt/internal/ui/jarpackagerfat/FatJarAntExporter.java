@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 213638 [jar exporter] create ANT build file for current settings
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 220257 [jar application] ANT build file does not create Class-Path Entry in Manifest
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
@@ -232,6 +233,11 @@ public class FatJarAntExporter {
 		attribute= document.createElement("attribute"); //$NON-NLS-1$
 		attribute.setAttribute("name", "Main-Class"); //$NON-NLS-1$ //$NON-NLS-2$s 
 		attribute.setAttribute("value", mainClass); //$NON-NLS-1$ 
+		manifest.appendChild(attribute);
+
+		attribute= document.createElement("attribute"); //$NON-NLS-1$
+		attribute.setAttribute("name", "Class-Path"); //$NON-NLS-1$ //$NON-NLS-2$s 
+		attribute.setAttribute("value", "."); //$NON-NLS-1$ //$NON-NLS-2$ 
 		manifest.appendChild(attribute);
 
 		for (int i= 0; i < sourceInfos.length; i++) {

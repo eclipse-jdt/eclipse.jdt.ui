@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 220257 [jar application] ANT build file does not create Class-Path Entry in Manifest
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
@@ -45,7 +46,7 @@ public class JarWriter4 extends JarWriter3 {
 		else {
 			newEntry.setMethod(ZipEntry.STORED);
 			newEntry.setSize(zipEntry.getSize());
-			newEntry.setCompressedSize(zipEntry.getCrc());
+			newEntry.setCrc(zipEntry.getCrc());
 		}
 
 		long lastModified= System.currentTimeMillis();
