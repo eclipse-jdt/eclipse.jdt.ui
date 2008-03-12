@@ -850,6 +850,13 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			public boolean select(Viewer viewer, Object parent, Object element) {
 			    if (element instanceof IPackageFragmentRoot && ((IPackageFragmentRoot)element).isArchive())
 			        return false;
+			    try {
+					if (element instanceof IPackageFragment && !((IPackageFragment) element).hasChildren()) {
+						return false;
+					}
+				} catch (JavaModelException e) {
+					return false;
+				}
 				return super.select(viewer, parent, element);
 			}
 		};		

@@ -21,8 +21,10 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
@@ -72,18 +74,23 @@ public class JUnitPropertyTester extends PropertyTester {
 	}
 	
 	private boolean canLaunchAsJUnitTest(IJavaElement element) {
-		switch (element.getElementType()) {
-			case IJavaElement.JAVA_PROJECT:
-			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-			case IJavaElement.PACKAGE_FRAGMENT:
-				return true; // can run, let test runner detect if there are tests
-			case IJavaElement.COMPILATION_UNIT:
-			case IJavaElement.CLASS_FILE:
-			case IJavaElement.TYPE:
-			case IJavaElement.METHOD:
-				return isJUnitTest(element);
-			default:
-				return false;
+		try {
+			switch (element.getElementType()) {
+				case IJavaElement.JAVA_PROJECT:
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+					return true; // can run, let test runner detect if there are tests
+				case IJavaElement.PACKAGE_FRAGMENT:
+					return ((IPackageFragment) element).hasChildren(); 
+				case IJavaElement.COMPILATION_UNIT:
+				case IJavaElement.CLASS_FILE:
+				case IJavaElement.TYPE:
+				case IJavaElement.METHOD:
+					return isJUnitTest(element);
+				default:
+					return false;
+			}
+		} catch (JavaModelException e) {
+			return false;
 		}
 	}
 
