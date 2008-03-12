@@ -20,6 +20,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -59,6 +61,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
@@ -326,6 +329,9 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 	}
 	
 	private static SimpleType createRawTypeReferenceOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List operations) {
+		if (hasFatalError(compilationUnit))
+			return null;
+		
 		List/*<SimpleType>*/ result= new ArrayList();
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation problem= locations[i];
@@ -360,6 +366,42 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		SimpleType[] types= (SimpleType[])result.toArray(new SimpleType[result.size()]);
 		operations.add(new AddTypeParametersOperation(types));
 		return types[0];
+	}
+
+	private static boolean hasFatalError(CompilationUnit compilationUnit) {
+		try {
+			if (!((ICompilationUnit) compilationUnit.getJavaElement()).isStructureKnown())
+				return true;
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			return true;
+		}
+
+		IProblem[] problems= compilationUnit.getProblems();
+		for (int i= 0; i < problems.length; i++) {
+			if (problems[i].isError()) {
+				if (!(problems[i] instanceof CategorizedProblem))
+					return true;
+
+				CategorizedProblem categorizedProblem= (CategorizedProblem) problems[i];
+				int categoryID= categorizedProblem.getCategoryID();
+
+				if (categoryID == CategorizedProblem.CAT_BUILDPATH)
+					return true;
+				if (categoryID == CategorizedProblem.CAT_SYNTAX)
+					return true;
+				if (categoryID == CategorizedProblem.CAT_IMPORT)
+					return true;
+				if (categoryID == CategorizedProblem.CAT_TYPE)
+					return true;
+				if (categoryID == CategorizedProblem.CAT_MEMBER)
+					return true;
+				if (categoryID == CategorizedProblem.CAT_INTERNAL)
+					return true;
+			}
+		}
+
+		return false;
 	}
 
 	public static boolean isRawTypeReference(IProblemLocation problem) {
