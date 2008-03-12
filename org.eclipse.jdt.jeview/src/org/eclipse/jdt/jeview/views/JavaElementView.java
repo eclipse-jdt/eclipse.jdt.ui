@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -90,9 +91,11 @@ import org.eclipse.ui.views.properties.PropertySheetPage;
 
 import org.eclipse.ui.ide.IDE;
 
+import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
@@ -135,6 +138,8 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	private Action fCompareAction;
 	private Action fPropertiesAction;
 	Action fDoubleClickAction;
+	
+	private Action fLogDeltasAction;
 	
 	private PropertySheetPage fPropertySheetPage;
 
@@ -300,6 +305,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		manager.add(fElementAtAction);
 		manager.add(fCreateFromHandleAction);
 		manager.add(fResetAction);
+		manager.add(fLogDeltasAction);
 		manager.add(new Separator());
 		manager.add(fRefreshAction);
 	}
@@ -656,6 +662,28 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		};
 		fCompareAction.setText("C&ompare with Each Other...");
 
+		
+		fLogDeltasAction= new Action("Log Java element deltas", IAction.AS_CHECK_BOX) {
+			
+			private IElementChangedListener fListener= new IElementChangedListener() {
+				public void elementChanged(ElementChangedEvent event) {
+					JEViewPlugin.logMessage(event.getDelta().toString());
+				}
+			};
+			
+			@Override public void run() {
+				String message;
+				if (!isChecked()) {
+					JavaCore.removeElementChangedListener(fListener);
+					message= "Element listener removed";
+				} else {
+					JavaCore.addElementChangedListener(fListener);
+					message= "Element listener added. Deltas are now written to log.";
+				}
+				MessageDialog.openInformation(fViewer.getTree().getShell(), "Log Java Element Deltas", message);
+			}
+		};
+		
 	}
 
 	
