@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -439,7 +439,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		IType primary= (IType) fType.getPrimaryElement();
 		if (primary == null || !primary.exists()) {
-			String message= Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_does_not_exist, new String[] { JavaModelUtil.getFullyQualifiedName(fType), fType.getCompilationUnit().getElementName()});
+			String message= Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_does_not_exist, new String[] { fType.getFullyQualifiedName('.'), fType.getCompilationUnit().getElementName()});
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}
 		fType= primary;
@@ -769,7 +769,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		if (enclosedType == null)
 			return null;
 		String msg= Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_encloses,  
-																		new String[]{JavaModelUtil.getFullyQualifiedName(fType), getNewElementName()});
+																		new String[]{fType.getFullyQualifiedName('.'), getNewElementName()});
 		return RefactoringStatus.createErrorStatus(msg, JavaStatusContext.create(enclosedType));
 	}
 	
@@ -779,7 +779,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			return null;
 			
 		String msg= Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_enclosed,
-								new String[]{JavaModelUtil.getFullyQualifiedName(fType), getNewElementName()});
+								new String[]{fType.getFullyQualifiedName('.'), getNewElementName()});
 		return RefactoringStatus.createErrorStatus(msg, JavaStatusContext.create(enclosingType));
 	}
 	
@@ -839,7 +839,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			IType siblingType= fType.getDeclaringType().getType(getNewElementName());
 			if (siblingType.exists()){
 				String msg= Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_member_type_exists, 
-																		new String[]{getNewElementName(), JavaModelUtil.getFullyQualifiedName(fType.getDeclaringType())});
+																		new String[]{getNewElementName(), fType.getDeclaringType().getFullyQualifiedName('.')});
 				result.addError(msg, JavaStatusContext.create(siblingType));
 			}
 		}
@@ -896,7 +896,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			//could this be a problem (same package imports)?
 			if (JdtFlags.isPublic(types[i]) && types[i].getElementName().equals(getNewElementName())){
 				String msg= Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_name_conflict1, 
-																			new Object[]{JavaModelUtil.getFullyQualifiedName(types[i]), getFullPath(getCompilationUnit(imp))});
+																			new Object[]{types[i].getFullyQualifiedName('.'), getFullPath(getCompilationUnit(imp))});
 				result.addError(msg, JavaStatusContext.create(imp));
 			}
 		}

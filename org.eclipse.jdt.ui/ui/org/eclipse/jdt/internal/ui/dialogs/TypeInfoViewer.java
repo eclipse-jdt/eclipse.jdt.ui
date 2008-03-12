@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,7 +70,6 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.core.search.TypeNameMatchRequestor;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -158,7 +157,7 @@ public class TypeInfoViewer {
 	     	int result= compareName(leftInfo.getSimpleTypeName(), rightInfo.getSimpleTypeName());
 	     	if (result != 0)
 	     		return result;
-	     	result= compareTypeContainerName(JavaModelUtil.getTypeContainerName(leftInfo), JavaModelUtil.getTypeContainerName(rightInfo));
+	     	result= compareTypeContainerName(leftInfo.getTypeContainerName(), rightInfo.getTypeContainerName());
 	     	if (result != 0)
 	     		return result;
 	     	
@@ -279,7 +278,7 @@ public class TypeInfoViewer {
 		public String getQualifiedText(TypeNameMatch type) {
 			StringBuffer result= new StringBuffer();
 			result.append(type.getSimpleTypeName());
-			String containerName= JavaModelUtil.getTypeContainerName(type);
+			String containerName= type.getTypeContainerName();
 			result.append(JavaElementLabels.CONCAT_STRING);
 			if (containerName.length() > 0) {
 				result.append(containerName);
@@ -291,7 +290,7 @@ public class TypeInfoViewer {
 		public String getFullyQualifiedText(TypeNameMatch type) {
 			StringBuffer result= new StringBuffer();
 			result.append(type.getSimpleTypeName());
-			String containerName= JavaModelUtil.getTypeContainerName(type);
+			String containerName= type.getTypeContainerName();
 			if (containerName.length() > 0) {
 				result.append(JavaElementLabels.CONCAT_STRING);
 				result.append(containerName);
@@ -348,7 +347,7 @@ public class TypeInfoViewer {
 		}
 		public String getQualificationText(TypeNameMatch type) {
 			StringBuffer result= new StringBuffer();
-			String containerName= JavaModelUtil.getTypeContainerName(type);
+			String containerName= type.getTypeContainerName();
 			if (containerName.length() > 0) {
 				result.append(containerName);
 				result.append(JavaElementLabels.CONCAT_STRING);
@@ -374,7 +373,7 @@ public class TypeInfoViewer {
 		}
 		
 		private String getTypeContainerName(TypeNameMatch info) {
-			String result= JavaModelUtil.getTypeContainerName(info);
+			String result= info.getTypeContainerName();
 			if (result.length() > 0)
 				return result;
 			return JavaUIMessages.TypeInfoViewer_default_package;

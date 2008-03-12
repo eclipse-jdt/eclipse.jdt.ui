@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -220,7 +220,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	}
 	
 	public final String getCurrentElementQualifier(){
-		return JavaModelUtil.getFullyQualifiedName(fField.getDeclaringType());
+		return fField.getDeclaringType().getFullyQualifiedName('.');
 	}
 	
 	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
@@ -482,7 +482,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			return null;
 	
 		String message= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_already_exists, 
-				new String[]{JavaElementUtil.createMethodSignature(accessor), JavaModelUtil.getFullyQualifiedName(fField.getDeclaringType())});
+				new String[]{JavaElementUtil.createMethodSignature(accessor), fField.getDeclaringType().getFullyQualifiedName('.')});
 		result.addError(message, JavaStatusContext.create(accessor));
 		return result;
 	}
@@ -526,7 +526,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			if (otherField.exists()){
 				String msg= Messages.format(
 					RefactoringCoreMessages.RenameFieldRefactoring_hiding, 
-					new String[]{fField.getElementName(), getNewElementName(), JavaModelUtil.getFullyQualifiedName(nestedTypes[i])});
+					new String[]{fField.getElementName(), getNewElementName(), nestedTypes[i].getFullyQualifiedName('.')});
 				result.addWarning(msg, JavaStatusContext.create(otherField));
 			}									
 			result.merge(checkNestedHierarchy(nestedTypes[i]));	
@@ -543,7 +543,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			IField otherField= current.getField(getNewElementName());
 			if (otherField.exists()){
 				String msg= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_hiding2, 
-				 															new String[]{getNewElementName(), JavaModelUtil.getFullyQualifiedName(current), otherField.getElementName()});
+				 															new String[]{getNewElementName(), current.getFullyQualifiedName('.'), otherField.getElementName()});
 				result.addWarning(msg, JavaStatusContext.create(otherField));
 			}									
 			current= current.getDeclaringType();

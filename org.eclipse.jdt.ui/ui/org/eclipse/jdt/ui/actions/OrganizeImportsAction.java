@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,7 +53,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.History;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
 
@@ -344,7 +343,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				Object[] array= (Object[]) res[i];
 				if (array.length > 0) {
 					result[i]= (TypeNameMatch) array[0];
-					QualifiedTypeNameHistory.remember(JavaModelUtil.getFullyQualifiedName(result[i]));
+					QualifiedTypeNameHistory.remember(result[i].getFullyQualifiedName());
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,7 +98,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			public void addInfo(TypeNameMatch info) {
 				for (int i= this.foundInfos.size() - 1; i >= 0; i--) {
 					TypeNameMatch curr= (TypeNameMatch) this.foundInfos.get(i);
-					if (JavaModelUtil.getTypeContainerName(curr).equals(JavaModelUtil.getTypeContainerName(info))) {
+					if (curr.getTypeContainerName().equals(info.getTypeContainerName())) {
 						return; // not added. already contains type with same name
 					}
 				}
@@ -283,7 +283,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				return null;
 			} else if (nFound == 1) {
 				TypeNameMatch typeRef= (TypeNameMatch) typeRefsFound.get(0);
-				fImpStructure.addImport(JavaModelUtil.getFullyQualifiedName(typeRef));
+				fImpStructure.addImport(typeRef.getFullyQualifiedName());
 				return null;
 			} else {
 				String typeToImport= null;
@@ -292,8 +292,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				// multiple found, use old imports to find an entry
 				for (int i= 0; i < nFound; i++) {
 					TypeNameMatch typeRef= (TypeNameMatch) typeRefsFound.get(i);
-					String fullName= JavaModelUtil.getFullyQualifiedName(typeRef);
-					String containerName= JavaModelUtil.getTypeContainerName(typeRef);
+					String fullName= typeRef.getFullyQualifiedName();
+					String containerName= typeRef.getTypeContainerName();
 					if (fOldSingleImports.contains(fullName)) {
 						// was single-imported
 						fImpStructure.addImport(fullName);
@@ -456,7 +456,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}
 				for (int i= 0; i < chosen.length; i++) {
 					TypeNameMatch typeInfo= chosen[i];
-					importsRewrite.addImport(JavaModelUtil.getFullyQualifiedName(typeInfo));
+					importsRewrite.addImport(typeInfo.getFullyQualifiedName());
 				}
 			}
 

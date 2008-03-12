@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,8 +23,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public final class DebugUtils {
 
@@ -71,7 +69,7 @@ public final class DebugUtils {
 				System.out.println("DUMPING method: null"); //$NON-NLS-1$
 				return;
 			}
-			System.out.println("DUMPING method:" +  method.getElementName() + "\n " + method.getSignature() + "\n declared in " + JavaModelUtil.getFullyQualifiedName(method.getDeclaringType()) //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+			System.out.println("DUMPING method:" +  method.getElementName() + "\n " + method.getSignature() + "\n declared in " + method.getDeclaringType().getFullyQualifiedName('.') //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 			+ "\nreturnType:" + method.getReturnType() ); //$NON-NLS-1$
 			dumpArray("paramTypes:", method.getParameterTypes()); //$NON-NLS-1$
 			dumpArray("exceptions:", method.getExceptionTypes()); //$NON-NLS-1$

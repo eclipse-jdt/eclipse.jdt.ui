@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -99,7 +99,7 @@ public class Checks {
 		else
 			return RefactoringStatus.createWarningStatus(
 				Messages.format(RefactoringCoreMessages.Checks_constructor_name,  
-				new Object[] {JavaElementUtil.createMethodSignature(method), JavaModelUtil.getFullyQualifiedName(method.getDeclaringType()) } ));
+				new Object[] {JavaElementUtil.createMethodSignature(method), method.getDeclaringType().getFullyQualifiedName('.') } ));
 	}
 		
 	/**
@@ -282,12 +282,12 @@ public class Checks {
 		for (int i= 0; i < methods.length; i++) {
 			if (JdtFlags.isNative(methods[i])){
 				String msg= Messages.format(RefactoringCoreMessages.Checks_method_native,  
-								new String[]{JavaModelUtil.getFullyQualifiedName(methods[i].getDeclaringType()), methods[i].getElementName(), "UnsatisfiedLinkError"});//$NON-NLS-1$
+								new String[]{methods[i].getDeclaringType().getFullyQualifiedName('.'), methods[i].getElementName(), "UnsatisfiedLinkError"});//$NON-NLS-1$
 				result.addEntry(RefactoringStatus.ERROR, msg, JavaStatusContext.create(methods[i]), Corext.getPluginId(), RefactoringStatusCodes.NATIVE_METHOD); 
 			}
 			if (methods[i].isMainMethod()) {
 				String msg= Messages.format(RefactoringCoreMessages.Checks_has_main,
-						JavaModelUtil.getFullyQualifiedName(methods[i].getDeclaringType()));
+						methods[i].getDeclaringType().getFullyQualifiedName('.'));
 				result.addEntry(RefactoringStatus.WARNING, msg, JavaStatusContext.create(methods[i]), Corext.getPluginId(), RefactoringStatusCodes.MAIN_METHOD); 
 			}
 		}

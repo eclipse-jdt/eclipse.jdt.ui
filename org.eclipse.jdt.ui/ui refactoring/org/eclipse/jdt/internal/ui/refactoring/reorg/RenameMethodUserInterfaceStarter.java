@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,20 +13,19 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jdt.core.IMethod;
-
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
+import org.eclipse.jdt.core.IMethod;
+
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class RenameMethodUserInterfaceStarter extends RenameUserInterfaceStarter {
 	
@@ -46,13 +45,13 @@ public class RenameMethodUserInterfaceStarter extends RenameUserInterfaceStarter
 							RefactoringCoreMessages.MethodChecks_implements, 
 							new String[]{
 								JavaElementUtil.createMethodSignature(method), 
-								JavaModelUtil.getFullyQualifiedName(method.getDeclaringType())});
+								method.getDeclaringType().getFullyQualifiedName('.')});
 					} else {
 						message= Messages.format(
 							RefactoringCoreMessages.MethodChecks_overrides, 
 							new String[]{
 								JavaElementUtil.createMethodSignature(method), 
-								JavaModelUtil.getFullyQualifiedName(method.getDeclaringType())});
+								method.getDeclaringType().getFullyQualifiedName('.')});
 					}
 					message= Messages.format(
 						ReorgMessages.RenameMethodUserInterfaceStarter_message,  

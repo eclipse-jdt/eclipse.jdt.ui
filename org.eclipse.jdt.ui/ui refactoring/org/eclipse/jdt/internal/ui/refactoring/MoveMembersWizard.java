@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,7 +52,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -104,7 +103,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 			if (visible){
 				String message= Messages.format(RefactoringMessages.MoveMembersInputPage_descriptionKey, 
 					new String[]{new Integer(getMoveProcessor().getMembersToMove().length).toString(),
-								 JavaModelUtil.getFullyQualifiedName(getMoveProcessor().getDeclaringType())});
+								 getMoveProcessor().getDeclaringType().getFullyQualifiedName('.')});
 				setDescription(message);
 			}	
 			super.setVisible(visible);	
@@ -283,7 +282,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 			if (dialog.open() == Window.CANCEL)
 				return;
 			IType firstResult= (IType)dialog.getFirstResult();		
-			fDestinationField.setText(JavaModelUtil.getFullyQualifiedName(firstResult));	
+			fDestinationField.setText(firstResult.getFullyQualifiedName('.'));	
 		}
 
 		private String createInitialFilter() {

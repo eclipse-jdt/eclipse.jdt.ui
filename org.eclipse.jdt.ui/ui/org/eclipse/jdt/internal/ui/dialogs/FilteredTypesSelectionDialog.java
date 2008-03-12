@@ -85,7 +85,6 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.core.search.TypeNameMatchRequestor;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -452,7 +451,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 					TypeNameMatch typeInfo= (TypeNameMatch) newResult.get(i);
 					IPackageFragmentRoot root= typeInfo.getPackageFragmentRoot();
 					String containerName= JavaElementLabels.getElementLabel(root, JavaElementLabels.ROOT_QUALIFIED);
-					String message= Messages.format(JavaUIMessages.FilteredTypesSelectionDialog_dialogMessage, new String[] { JavaModelUtil.getFullyQualifiedName(typeInfo), containerName });
+					String message= Messages.format(JavaUIMessages.FilteredTypesSelectionDialog_dialogMessage, new String[] { typeInfo.getFullyQualifiedName(), containerName });
 					MessageDialog.openError(getShell(), fTitle, message);
 					getSelectionHistory().remove(typeInfo);
 				}
@@ -596,7 +595,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		if (fValidator != null) {
 			IType type= ((TypeNameMatch) item).getType();
 			if (!type.exists())
-				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, Messages.format(JavaUIMessages.FilteredTypesSelectionDialog_error_type_doesnot_exist, JavaModelUtil.getFullyQualifiedName(((TypeNameMatch) item))), null);
+				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, Messages.format(JavaUIMessages.FilteredTypesSelectionDialog_error_type_doesnot_exist, ((TypeNameMatch) item).getFullyQualifiedName()), null);
 			Object[] elements= { type };
 			return fValidator.validate(elements);
 		} else
@@ -954,7 +953,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		public String getQualifiedText(TypeNameMatch type) {
 			StringBuffer result= new StringBuffer();
 			result.append(type.getSimpleTypeName());
-			String containerName= JavaModelUtil.getTypeContainerName(type);
+			String containerName= type.getTypeContainerName();
 			result.append(JavaElementLabels.CONCAT_STRING);
 			if (containerName.length() > 0) {
 				result.append(containerName);
@@ -967,7 +966,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		public String getFullyQualifiedText(TypeNameMatch type) {
 			StringBuffer result= new StringBuffer();
 			result.append(type.getSimpleTypeName());
-			String containerName= JavaModelUtil.getTypeContainerName(type);
+			String containerName= type.getTypeContainerName();
 			if (containerName.length() > 0) {
 				result.append(JavaElementLabels.CONCAT_STRING);
 				result.append(containerName);
@@ -1026,7 +1025,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		public String getQualificationText(TypeNameMatch type) {
 			StringBuffer result= new StringBuffer();
-			String containerName= JavaModelUtil.getTypeContainerName(type);
+			String containerName= type.getTypeContainerName();
 			if (containerName.length() > 0) {
 				result.append(containerName);
 				result.append(JavaElementLabels.CONCAT_STRING);
@@ -1045,7 +1044,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		}
 
 		private String getTypeContainerName(TypeNameMatch info) {
-			String result= JavaModelUtil.getTypeContainerName(info);
+			String result= info.getTypeContainerName();
 			if (result.length() > 0)
 				return result;
 			return JavaUIMessages.FilteredTypesSelectionDialog_default_package;
@@ -1362,7 +1361,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			int result= compareName(leftInfo.getSimpleTypeName(), rightInfo.getSimpleTypeName());
 			if (result != 0)
 				return result;
-			result= compareTypeContainerName(JavaModelUtil.getTypeContainerName(leftInfo), JavaModelUtil.getTypeContainerName(rightInfo));
+			result= compareTypeContainerName(leftInfo.getTypeContainerName(), rightInfo.getTypeContainerName());
 			if (result != 0)
 				return result;
 

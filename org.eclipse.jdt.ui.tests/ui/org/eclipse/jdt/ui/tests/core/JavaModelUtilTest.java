@@ -289,7 +289,7 @@ public class JavaModelUtilTest extends TestCase {
 		IMethod meth= JavaModelUtil.findMethodInHierarchy(hierarchy, type, methName, sig, isConstructor);
 		assertElementName(methName, meth, IJavaElement.METHOD);
 		assertTrue("methName-nparam1", meth.getParameterTypes().length == paramTypeNames.length);
-		assertEquals("methName-decltype", declaringTypeName, JavaModelUtil.getFullyQualifiedName(meth.getDeclaringType()));
+		assertEquals("methName-decltype", declaringTypeName, meth.getDeclaringType().getFullyQualifiedName('.'));
 		
 		for (int i= 0; i < paramTypeNames.length; i++) {
 			// create as resolved
@@ -299,7 +299,7 @@ public class JavaModelUtilTest extends TestCase {
 		meth= JavaModelUtil.findMethodInHierarchy(hierarchy, type, methName, sig, isConstructor);
 		assertElementName(methName, meth, IJavaElement.METHOD);
 		assertTrue("methName-nparam2", meth.getParameterTypes().length == paramTypeNames.length);
-		assertEquals("methName-decltype", declaringTypeName, JavaModelUtil.getFullyQualifiedName(meth.getDeclaringType()));
+		assertEquals("methName-decltype", declaringTypeName, meth.getDeclaringType().getFullyQualifiedName('.'));
 	}
 
 	public void testFindMethodInHierarchy() throws Exception {

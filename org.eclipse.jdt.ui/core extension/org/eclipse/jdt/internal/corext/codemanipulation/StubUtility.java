@@ -101,7 +101,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.CodeStyleConfiguration;
@@ -1171,7 +1170,7 @@ public class StubUtility {
 	}
 		
 	public static String[] getArgumentNameSuggestions(IType type, String[] excluded) {
-		return getVariableNameSuggestions(PARAMETER, type.getJavaProject(), JavaModelUtil.getFullyQualifiedName(type), 0, new ExcludedCollection(excluded), true);
+		return getVariableNameSuggestions(PARAMETER, type.getJavaProject(), type.getFullyQualifiedName('.'), 0, new ExcludedCollection(excluded), true);
 	}
 	
 	public static String[] getArgumentNameSuggestions(IJavaProject project, Type type, String[] excluded) {
@@ -1196,7 +1195,7 @@ public class StubUtility {
 	}
 	
 	public static String[] getFieldNameSuggestions(IType type, int fieldModifiers, String[] excluded) {		
-		return getFieldNameSuggestions(type.getJavaProject(), JavaModelUtil.getFullyQualifiedName(type), 0, fieldModifiers, excluded);
+		return getFieldNameSuggestions(type.getJavaProject(), type.getFullyQualifiedName('.'), 0, fieldModifiers, excluded);
 	}
 		 
 	public static String[] getFieldNameSuggestions(IJavaProject project, String baseName, int dimensions, int modifiers, String[] excluded) {

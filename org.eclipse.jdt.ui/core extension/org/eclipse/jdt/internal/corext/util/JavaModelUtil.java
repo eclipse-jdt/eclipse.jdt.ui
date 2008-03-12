@@ -51,7 +51,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.corext.CorextMessages;
 import org.eclipse.jdt.internal.corext.ValidateEditException;
@@ -159,7 +158,7 @@ public final class JavaModelUtil {
 		IType[] types= cu.getAllTypes();
 		for (int i= 0; i < types.length; i++) {
 			IType type= types[i];
-			if (getFullyQualifiedName(type).equals(fullyQualifiedName))
+			if (type.getFullyQualifiedName('.').equals(fullyQualifiedName))
 				return type;
 		}
 		return null;
@@ -201,7 +200,7 @@ public final class JavaModelUtil {
 	public static IType findTypeInCompilationUnit(ICompilationUnit cu, String typeQualifiedName) throws JavaModelException {
 		IType[] types= cu.getAllTypes();
 		for (int i= 0; i < types.length; i++) {
-			String currName= getTypeQualifiedName(types[i]);
+			String currName= types[i].getTypeQualifiedName('.');
 			if (typeQualifiedName.equals(currName)) {
 				return types[i];
 			}
@@ -227,77 +226,6 @@ public final class JavaModelUtil {
 	}
 
 	/**
-	 * Returns the qualified type name of the given type using '.' as separators.
-	 * This is a replace for IType.getTypeQualifiedName()
-	 * which uses '$' as separators. As '$' is also a valid character in an id
-	 * this is ambiguous. JavaCore PR: 1GCFUNT
-	 * @param type the type
-	 * @return the type qualified name
-	 */
-	public static String getTypeQualifiedName(IType type) {
-		try {
-			if (type.isBinary() && !type.isAnonymous()) {
-				IType declaringType= type.getDeclaringType();
-				if (declaringType != null) {
-					return getTypeQualifiedName(declaringType) + '.' + type.getElementName();
-				}
-			}
-		} catch (JavaModelException e) {
-			// ignore
-		}
-		return type.getTypeQualifiedName('.');
-	}
-
-	/**
-	 * Returns the fully qualified name of the given type using '.' as separators.
-	 * This is a replace for IType.getFullyQualifiedTypeName
-	 * which uses '$' as separators. As '$' is also a valid character in an id
-	 * this is ambiguous. JavaCore PR: 1GCFUNT
-	 * @param type the type
-	 * @return the fully qualified name
-	 */
-	public static String getFullyQualifiedName(IType type) {
-		try {
-			if (type.isBinary() && !type.isAnonymous()) {
-				IType declaringType= type.getDeclaringType();
-				if (declaringType != null) {
-					return internalGetQualifiedName(declaringType) + '.' + type.getElementName();
-				}
-			}
-		} catch (JavaModelException e) {
-			// ignore
-		}
-		return type.getFullyQualifiedName('.');
-	}
-	
-	/**
-	 * Get the fully qualified type name of an non-anonymous type
-	 * @param type the type
-	 * @return the qualified name
-	 */
-	private static String internalGetQualifiedName(IType type) {
-		if (type.isBinary()) {
-			IType declaringType= type.getDeclaringType();
-			if (declaringType != null) {
-				return internalGetQualifiedName(declaringType) + '.' + type.getElementName();
-			}
-		}
-		return type.getFullyQualifiedName('.');
-	}
-	
-	
-	/**
-	 * Returns the fully qualified name of the given {@link TypeNameMatch}  using '.' as separators.
-	 * This is a replace for {@link TypeNameMatch#getFullyQualifiedName()}.
-	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=182179.
-	 * @param typeNameMatch the type
-	 * @return the fully qualified name
-	 */
-	public static String getFullyQualifiedName(TypeNameMatch typeNameMatch) {
-		return internalGetQualifiedName(typeNameMatch.getType()); // type name matches can never be anonymous
-	}
-
-	/**
 	 * Returns the fully qualified name of a type's container. (package name or enclosing type name)
 	 * @param type the type
 	 * @return the type container name
@@ -305,19 +233,10 @@ public final class JavaModelUtil {
 	public static String getTypeContainerName(IType type) {
 		IType outerType= type.getDeclaringType();
 		if (outerType != null) {
-			return internalGetQualifiedName(outerType);
+			return outerType.getFullyQualifiedName('.');
 		} else {
 			return type.getPackageFragment().getElementName();
 		}
-	}
-
-	/**
-	 * Returns the fully qualified name of a type's container. (package name or enclosing type name)
-	 * @param typeNameMatch the type
-	 * @return the type container name
-	 */
-	public static String getTypeContainerName(TypeNameMatch typeNameMatch) {
-		return getTypeContainerName(typeNameMatch.getType());
 	}
 
 	/**

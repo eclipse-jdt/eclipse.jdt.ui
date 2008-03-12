@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -211,7 +211,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 	}
 	
 	public static String getNameWithTypeParameters(IType type) {
-		String superName= JavaModelUtil.getFullyQualifiedName(type);
+		String superName= type.getFullyQualifiedName('.');
 		if (!JavaModelUtil.is50OrHigher(type.getJavaProject())) {
 			return superName;
 		}

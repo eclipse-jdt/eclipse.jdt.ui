@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,8 +77,6 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.launching.AbstractVMInstall;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
@@ -817,7 +815,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 					return;
 				}
 				// Simply grab the first main type found in the searched element
-				name= JavaModelUtil.getFullyQualifiedName(types[0]);
+				name= types[0].getFullyQualifiedName('.');
 				
 			}	
 		} catch (InterruptedException ie) {

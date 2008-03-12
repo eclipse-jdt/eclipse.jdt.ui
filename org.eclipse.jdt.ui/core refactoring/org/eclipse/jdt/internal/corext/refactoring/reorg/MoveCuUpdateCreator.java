@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -220,7 +220,7 @@ public class MoveCuUpdateCreator {
 		ImportRewrite importEdit= getImportRewrite(movedUnit);
 		IType[] destinationTypes= getDestinationPackageTypes();
 		for (int i= 0; i < destinationTypes.length; i++) {
-			importEdit.removeImport(JavaModelUtil.getFullyQualifiedName(destinationTypes[i]));
+			importEdit.removeImport(destinationTypes[i].getFullyQualifiedName('.'));
 		}
 	}
 	
@@ -250,7 +250,7 @@ public class MoveCuUpdateCreator {
 					continue;
 				if (cuList.contains(iType.getCompilationUnit()))
 					continue;
-				importEdit.addImport(JavaModelUtil.getFullyQualifiedName(iType));
+				importEdit.addImport(iType.getFullyQualifiedName('.'));
 		}
 	}
 	

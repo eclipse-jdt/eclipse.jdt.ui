@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -757,7 +757,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 
 	private Expression createAccessExpressionToEnclosingInstanceFieldText(ASTNode node, IBinding binding, AbstractTypeDeclaration declaration) {
 		if (Modifier.isStatic(binding.getModifiers()))
-			return node.getAST().newName(JavaModelUtil.getTypeQualifiedName(fType.getDeclaringType()));
+			return node.getAST().newName(fType.getDeclaringType().getTypeQualifiedName('.'));
 		else if ((isInAnonymousTypeInsideInputType(node, declaration) || isInLocalTypeInsideInputType(node, declaration) || isInNonStaticMemberTypeInsideInputType(node, declaration)))
 			return createQualifiedReadAccessExpressionForEnclosingInstance(node.getAST());
 		else
@@ -1026,7 +1026,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	private Type createEnclosingType(final AST ast) throws JavaModelException {
 		Assert.isNotNull(ast);
 		final ITypeParameter[] parameters= fType.getDeclaringType().getTypeParameters();
-		final Type type= ASTNodeFactory.newType(ast, JavaModelUtil.getTypeQualifiedName(fType.getDeclaringType()));
+		final Type type= ASTNodeFactory.newType(ast, fType.getDeclaringType().getTypeQualifiedName('.'));
 		if (parameters.length > 0) {
 			final ParameterizedType parameterized= ast.newParameterizedType(type);
 			for (int index= 0; index < parameters.length; index++)

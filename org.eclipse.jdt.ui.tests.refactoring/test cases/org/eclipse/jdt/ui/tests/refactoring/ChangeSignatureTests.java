@@ -516,7 +516,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	private void mangleExceptions(List list, String[] removeExceptions, String[] addExceptions, ICompilationUnit cu) throws Exception {
 		for (Iterator iter= list.iterator(); iter.hasNext(); ) {
 			ExceptionInfo info= (ExceptionInfo) iter.next();
-			String name= JavaModelUtil.getFullyQualifiedName(info.getType());
+			String name= info.getType().getFullyQualifiedName('.');
 			for (int i= 0; i < removeExceptions.length; i++) {
 				if (name.equals(removeExceptions[i]))
 					info.markAsDeleted();

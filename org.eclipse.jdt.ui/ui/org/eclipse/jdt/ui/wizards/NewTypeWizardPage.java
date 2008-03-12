@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -948,7 +948,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		} else if (field == fEnclosingTypeDialogField) {
 			IType type= chooseEnclosingType();
 			if (type != null) {
-				fEnclosingTypeDialogField.setText(JavaModelUtil.getFullyQualifiedName(type));
+				fEnclosingTypeDialogField.setText(type.getFullyQualifiedName('.'));
 			}
 		} else if (field == fSuperClassDialogField) {
 			IType type= chooseSuperClass();
@@ -1118,7 +1118,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	public void setEnclosingType(IType type, boolean canBeModified) {
 		fCurrEnclosingType= type;
 		fCanModifyEnclosingType= canBeModified;
-		String str= (type == null) ? "" : JavaModelUtil.getFullyQualifiedName(type); //$NON-NLS-1$
+		String str= (type == null) ? "" : type.getFullyQualifiedName('.'); //$NON-NLS-1$
 		fEnclosingTypeDialogField.setText(str);
 		updateEnableState();
 	}
@@ -2403,7 +2403,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			try {
 				StringBuffer typeName= new StringBuffer();
 				if (isEnclosingTypeSelected()) {
-					typeName.append(JavaModelUtil.getTypeQualifiedName(getEnclosingType())).append('.');
+					typeName.append(getEnclosingType().getTypeQualifiedName('.')).append('.');
 				}
 				typeName.append(getTypeNameWithoutParameters());
 				String[] typeParamNames= new String[0];

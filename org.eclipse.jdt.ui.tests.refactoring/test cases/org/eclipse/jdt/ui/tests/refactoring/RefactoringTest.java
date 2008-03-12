@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,7 +65,6 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
@@ -368,7 +367,7 @@ public abstract class RefactoringTest extends TestCase {
 	protected IType getType(ICompilationUnit cu, String name) throws JavaModelException {
 		IType[] types= cu.getAllTypes();
 		for (int i= 0; i < types.length; i++)
-			if (JavaModelUtil.getTypeQualifiedName(types[i]).equals(name) ||
+			if (types[i].getTypeQualifiedName('.').equals(name) ||
 			    types[i].getElementName().equals(name))
 				return types[i];
 		return null;
@@ -514,7 +513,7 @@ public abstract class RefactoringTest extends TestCase {
 		return JavaElementUtil.merge(a1, a2);
 	}
 		
-	public static IField[] getFields(IType type, String[] names) throws JavaModelException{
+	public static IField[] getFields(IType type, String[] names) {
 		if (names == null )
 			return new IField[0];
 		Set fields= new HashSet();
@@ -526,7 +525,7 @@ public abstract class RefactoringTest extends TestCase {
 		return (IField[]) fields.toArray(new IField[fields.size()]);	
 	}
 
-	public static IType[] getMemberTypes(IType type, String[] names) throws JavaModelException{
+	public static IType[] getMemberTypes(IType type, String[] names) {
 		if (names == null )
 			return new IType[0];
 		Set memberTypes= new HashSet();
@@ -546,7 +545,7 @@ public abstract class RefactoringTest extends TestCase {
 		return (IType[]) memberTypes.toArray(new IType[memberTypes.size()]);	
 	}
 	
-	public static IMethod[] getMethods(IType type, String[] names, String[][] signatures) throws JavaModelException{
+	public static IMethod[] getMethods(IType type, String[] names, String[][] signatures) {
 		if (names == null || signatures == null)
 			return new IMethod[0];
 		List methods= new ArrayList(names.length);

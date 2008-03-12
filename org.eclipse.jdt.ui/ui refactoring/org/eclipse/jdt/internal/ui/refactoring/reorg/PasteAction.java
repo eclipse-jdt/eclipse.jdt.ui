@@ -790,7 +790,7 @@ public class PasteAction extends SelectionDispatchAction{
 					} else { // kind == ASTParser.K_STATEMENTS
 						if (methodDecl == null || methodDecl.getBody() == null) {
 							methodDecl= ast.newMethodDeclaration();
-							String qualifiedtypeName= fDestinationType != null ? JavaModelUtil.getFullyQualifiedName(fDestinationType) : cu.getParent().getElementName() + '.' + typeName;
+							String qualifiedtypeName= fDestinationType != null ? fDestinationType.getFullyQualifiedName('.') : cu.getParent().getElementName() + '.' + typeName;
 							if (StubUtility.doAddComments(cu.getJavaProject())) {
 								String methodComment= CodeGeneration.getMethodComment(cu, qualifiedtypeName, methodDecl, null, delim);
 								methodDecl.setJavadoc((Javadoc) rewrite.createStringPlaceholder(methodComment, ASTNode.JAVADOC));

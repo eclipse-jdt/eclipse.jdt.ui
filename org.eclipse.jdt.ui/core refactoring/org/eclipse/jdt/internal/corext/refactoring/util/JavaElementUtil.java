@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,7 +55,7 @@ public class JavaElementUtil {
 	}
 	
 	public static String createFieldSignature(IField field){
-		return JavaModelUtil.getFullyQualifiedName(field.getDeclaringType()) + "." + field.getElementName(); //$NON-NLS-1$
+		return field.getDeclaringType().getFullyQualifiedName('.') + "." + field.getElementName(); //$NON-NLS-1$
 	}
 	
 	public static String createSignature(IMember member){
@@ -63,7 +63,7 @@ public class JavaElementUtil {
 			case IJavaElement.FIELD:
 				return createFieldSignature((IField)member);
 			case IJavaElement.TYPE:
-				return JavaModelUtil.getFullyQualifiedName(((IType)member));
+				return ((IType)member).getFullyQualifiedName('.');
 			case IJavaElement.INITIALIZER:
 				return RefactoringCoreMessages.JavaElementUtil_initializer; 
 			case IJavaElement.METHOD:

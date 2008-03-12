@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,7 +49,6 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.History;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
@@ -210,7 +209,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			if (containerName.length() != 0) {
 				for (int i= 0; i < nResults; i++) {
 					TypeNameMatch curr= results[i];
-					if (containerName.equals(JavaModelUtil.getTypeContainerName(curr))) {
+					if (containerName.equals(curr.getTypeContainerName())) {
 						return curr;
 					}
 				}
@@ -229,7 +228,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			if (dialog.open() == Window.OK) {
 				fIsShowing= false;
 				TypeNameMatch result= (TypeNameMatch) dialog.getFirstResult();
-				QualifiedTypeNameHistory.remember(JavaModelUtil.getFullyQualifiedName(result));
+				QualifiedTypeNameHistory.remember(result.getFullyQualifiedName());
 				return result;
 			}
 			fIsShowing= false;

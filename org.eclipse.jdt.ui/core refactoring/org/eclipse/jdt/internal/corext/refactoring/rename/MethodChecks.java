@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
@@ -69,7 +68,7 @@ public class MethodChecks {
 
 		RefactoringStatusContext context= JavaStatusContext.create(overrides);
 		String message= Messages.format(RefactoringCoreMessages.MethodChecks_overrides, 
-				new String[]{JavaElementUtil.createMethodSignature(overrides), JavaModelUtil.getFullyQualifiedName(overrides.getDeclaringType())});
+				new String[]{JavaElementUtil.createMethodSignature(overrides), overrides.getDeclaringType().getFullyQualifiedName('.')});
 		return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, Corext.getPluginId(), RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD, overrides);
 	}
 	
@@ -77,6 +76,11 @@ public class MethodChecks {
 	 * Checks if the given method is declared in an interface. If the method's declaring type
 	 * is an interface the method returns <code>false</code> if it is only declared in that
 	 * interface.
+	 * @param method the method to check
+	 * @param hierarchy the hierarchy
+	 * @param monitor progress monitor
+	 * @return the resulting status
+	 * @throws JavaModelException 
 	 */
 	public static RefactoringStatus checkIfComesFromInterface(IMethod method, ITypeHierarchy hierarchy, IProgressMonitor monitor) throws JavaModelException {
 		IMethod inInterface= MethodChecks.isDeclaredInInterface(method, hierarchy, monitor);
@@ -86,7 +90,7 @@ public class MethodChecks {
 
 		RefactoringStatusContext context= JavaStatusContext.create(inInterface);
 		String message= Messages.format(RefactoringCoreMessages.MethodChecks_implements, 
-				new String[]{JavaElementUtil.createMethodSignature(inInterface), JavaModelUtil.getFullyQualifiedName(inInterface.getDeclaringType())});
+				new String[]{JavaElementUtil.createMethodSignature(inInterface), inInterface.getDeclaringType().getFullyQualifiedName('.')});
 		return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, Corext.getPluginId(), RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE, inInterface);
 	}
 	
@@ -94,6 +98,11 @@ public class MethodChecks {
 	 * Checks if the given method is declared in an interface. If the method's declaring type
 	 * is an interface the method returns <code>false</code> if it is only declared in that
 	 * interface.
+	 * @param method the method to check
+	 * @param hierarchy the hierarchy
+	 * @param monitor progress monitor
+	 * @return the resulting status
+	 * @throws JavaModelException 
 	 */
 	public static IMethod isDeclaredInInterface(IMethod method, ITypeHierarchy hierarchy, IProgressMonitor monitor) throws JavaModelException {
 		Assert.isTrue(isVirtual(method));
@@ -168,7 +177,10 @@ public class MethodChecks {
 
 	/**
 	 * Finds all overridden methods of a certain method.
-	 * 
+	 * @param method the method
+	 * @param monitor progress monitor
+	 * @return all overridden methods
+	 * @throws CoreException 
 	 */
 	public static IMethod[] getOverriddenMethods(IMethod method, IProgressMonitor monitor) throws CoreException {
 

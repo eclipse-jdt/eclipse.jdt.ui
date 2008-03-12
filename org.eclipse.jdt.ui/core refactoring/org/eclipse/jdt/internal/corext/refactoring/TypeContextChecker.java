@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -303,7 +303,7 @@ public class TypeContextChecker {
 				return elementTypeName;
 			} else if (typeRefsFound.size() == 1){
 				TypeNameMatch typeInfo= (TypeNameMatch) typeRefsFound.get(0);
-				return JavaModelUtil.getFullyQualifiedName(typeInfo);
+				return typeInfo.getFullyQualifiedName();
 			} else {
 				Assert.isTrue(typeRefsFound.size() > 1);
 				String[] keys= {elementTypeName, String.valueOf(typeRefsFound.size())};

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,8 +57,6 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
@@ -313,14 +311,14 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 			break;
 			case IJavaElement.TYPE: {
 				containerHandleId= EMPTY_STRING;
-				mainTypeQualifiedName= JavaModelUtil.getFullyQualifiedName((IType) element); // don't replace, fix for binary inner types
+				mainTypeQualifiedName= ((IType) element).getFullyQualifiedName('.'); // don't replace, fix for binary inner types
 				testName= element.getElementName();
 			}
 			break;
 			case IJavaElement.METHOD: {
 				IMethod method= (IMethod) element;
 				containerHandleId= EMPTY_STRING;
-				mainTypeQualifiedName= JavaModelUtil.getFullyQualifiedName(method.getDeclaringType());
+				mainTypeQualifiedName= method.getDeclaringType().getFullyQualifiedName('.');
 				testName= method.getDeclaringType().getElementName() + '.' + method.getElementName();
 			}
 			break;

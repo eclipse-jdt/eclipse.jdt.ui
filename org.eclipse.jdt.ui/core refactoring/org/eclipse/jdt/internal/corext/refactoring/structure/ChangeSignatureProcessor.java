@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -140,7 +140,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -555,7 +554,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				for (int i= 0; i < notDeletedInfos.size(); i++) {
 					ParameterInfo info= (ParameterInfo) notDeletedInfos.get(i);
 					if (fOldVarargIndex != -1 && info.getOldIndex() == fOldVarargIndex && ! info.isNewVarargs()) {
-						String rippleMethodType= JavaModelUtil.getFullyQualifiedName(rippleMethod.getDeclaringType());
+						String rippleMethodType= rippleMethod.getDeclaringType().getFullyQualifiedName('.');
 						String message= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_ripple_cannot_convert_vararg, new Object[] {info.getNewName(), rippleMethodType}); 
 						return RefactoringStatus.createFatalErrorStatus(message, JavaStatusContext.create(rippleMethod));
 					}
@@ -728,12 +727,12 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				if (fTopMethod.getDeclaringType().isInterface()) {
 					RefactoringStatusContext context= JavaStatusContext.create(fTopMethod);
 					String message= Messages.format(RefactoringCoreMessages.MethodChecks_implements, 
-							new String[]{JavaElementUtil.createMethodSignature(fTopMethod), JavaModelUtil.getFullyQualifiedName(fTopMethod.getDeclaringType())});
+							new String[]{JavaElementUtil.createMethodSignature(fTopMethod), fTopMethod.getDeclaringType().getFullyQualifiedName('.')});
 					return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, Corext.getPluginId(), RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE, fTopMethod);
 				} else {
 					RefactoringStatusContext context= JavaStatusContext.create(fTopMethod);
 					String message= Messages.format(RefactoringCoreMessages.MethodChecks_overrides, 
-							new String[]{JavaElementUtil.createMethodSignature(fTopMethod), JavaModelUtil.getFullyQualifiedName(fTopMethod.getDeclaringType())});
+							new String[]{JavaElementUtil.createMethodSignature(fTopMethod), fTopMethod.getDeclaringType().getFullyQualifiedName('.')});
 					return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, Corext.getPluginId(), RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD, fTopMethod);
 				}
 			}
@@ -1150,7 +1149,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		for (int i= 0; i < fRippleMethods.length; i++) {
 			if (JdtFlags.isNative(fRippleMethods[i])){
 				String message= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_native, 
-					new String[]{JavaElementUtil.createMethodSignature(fRippleMethods[i]), JavaModelUtil.getFullyQualifiedName(fRippleMethods[i].getDeclaringType())});
+					new String[]{JavaElementUtil.createMethodSignature(fRippleMethods[i]), fRippleMethods[i].getDeclaringType().getFullyQualifiedName('.')});
 				result.addError(message, JavaStatusContext.create(fRippleMethods[i]));			
 			}								
 		}
@@ -1210,7 +1209,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			ExceptionInfo ei= (ExceptionInfo) exceptionInfos.get(i);
 			if (!ei.isDeleted()) {
 				int oldIndex= ei.isAdded() ? -1 : i;
-				String qualifiedTypeName= JavaModelUtil.getFullyQualifiedName(ei.getType());
+				String qualifiedTypeName= ei.getType().getFullyQualifiedName('.');
 				String newTypeSig= Signature.createTypeSignature(qualifiedTypeName, true);
 				exceptionList.add(new ThrownException(oldIndex, newTypeSig));
 			}
@@ -2114,7 +2113,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		}
 	
 		private void addExceptionToNodeList(ExceptionInfo exceptionInfo, ListRewrite exceptionListRewrite) {
-			String fullyQualified= JavaModelUtil.getFullyQualifiedName(exceptionInfo.getType());
+			String fullyQualified= exceptionInfo.getType().getFullyQualifiedName('.');
 			for (Iterator iter= exceptionListRewrite.getOriginalList().iterator(); iter.hasNext(); ) {
 				Name exName= (Name) iter.next();
 				//XXX: existing superclasses of the added exception are redundant and could be removed
@@ -2124,7 +2123,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				if (typeBinding.getQualifiedName().equals(fullyQualified))
 					return; // don't add it again
 			}
-			String importedType= getImportRewrite().addImport(JavaModelUtil.getFullyQualifiedName(exceptionInfo.getType()));
+			String importedType= getImportRewrite().addImport(exceptionInfo.getType().getFullyQualifiedName('.'));
 			getImportRemover().registerAddedImport(importedType);
 			ASTNode exNode= getASTRewrite().createStringPlaceholder(importedType, ASTNode.SIMPLE_NAME);
 			exceptionListRewrite.insertLast(exNode, fDescription);

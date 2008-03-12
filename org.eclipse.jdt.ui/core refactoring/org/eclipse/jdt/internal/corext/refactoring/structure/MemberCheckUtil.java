@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,13 +55,13 @@ class MemberCheckUtil {
 		if (found != null){
 			RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), found.getSourceRange());
 			String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_signature_exists, 
-					new String[]{method.getElementName(), JavaModelUtil.getFullyQualifiedName(destinationType)});
+					new String[]{method.getElementName(), destinationType.getFullyQualifiedName('.')});
 			result.addError(message, context);
 		} else {
 			IMethod similar= Checks.findMethod(method, destinationType);
 			if (similar != null){
 				String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_same_param_count,
-						 new String[]{method.getElementName(), JavaModelUtil.getFullyQualifiedName(destinationType)});
+						 new String[]{method.getElementName(), destinationType.getFullyQualifiedName('.')});
 				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), similar.getSourceRange());
 				result.addWarning(message, context);
 			}										
@@ -73,7 +73,7 @@ class MemberCheckUtil {
 		if (! destinationTypeField.exists())
 			return;
 		String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_field_exists, 
-				new String[]{field.getElementName(), JavaModelUtil.getFullyQualifiedName(destinationType)});
+				new String[]{field.getElementName(), destinationType.getFullyQualifiedName('.')});
 		RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationTypeField.getSourceRange());
 		result.addError(message, context);
 	}
@@ -83,20 +83,20 @@ class MemberCheckUtil {
 		IType destinationTypeType= destinationType.getType(typeName);
 		if (destinationTypeType.exists()){
 			String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict0,  
-					new String[]{typeName, JavaModelUtil.getFullyQualifiedName(destinationType)});
+					new String[]{typeName, destinationType.getFullyQualifiedName('.')});
 			RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationTypeType.getNameRange());
 			result.addError(message, context);
 		} else {
 			//need to check the hierarchy of enclosing and enclosed types
 			if (destinationType.getElementName().equals(typeName)){
 				String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict1,  
-						new String[]{JavaModelUtil.getFullyQualifiedName(type)});
+						new String[]{type.getFullyQualifiedName('.')});
 				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
 				result.addError(message, context);
 			}
 			if (typeNameExistsInEnclosingTypeChain(destinationType, typeName)){
 				String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict2,  
-						new String[]{JavaModelUtil.getFullyQualifiedName(type)});
+						new String[]{type.getFullyQualifiedName('.')});
 				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
 				result.addError(message, context);
 			}
@@ -110,13 +110,13 @@ class MemberCheckUtil {
 			IType enclosedType= enclosedTypes[i];
 			if (destinationType.getElementName().equals(enclosedType.getElementName())){
 				String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict3,  
-						new String[]{JavaModelUtil.getFullyQualifiedName(enclosedType), JavaModelUtil.getFullyQualifiedName(type)});
+						new String[]{enclosedType.getFullyQualifiedName('.'), type.getFullyQualifiedName('.')});
 				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
 				result.addError(message, context);
 			}
 			if (typeNameExistsInEnclosingTypeChain(destinationType, enclosedType.getElementName())){
 				String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict4,  
-						new String[]{JavaModelUtil.getFullyQualifiedName(enclosedType), JavaModelUtil.getFullyQualifiedName(type)});
+						new String[]{enclosedType.getFullyQualifiedName('.'), type.getFullyQualifiedName('.')});
 				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
 				result.addError(message, context);
 			}
@@ -147,7 +147,10 @@ class MemberCheckUtil {
 	/**
 	 * Finds a method in a list of methods. Compares methods by signature
 	 * (only SimpleNames of types), and not by the declaring type.
+	 * @param method the method to find
+	 * @param allMethods the methods to look at
 	 * @return The found method or <code>null</code>, if nothing found
+	 * @throws JavaModelException 
 	 */
 	public static IMethod findMethod(IMethod method, IMethod[] allMethods) throws JavaModelException {
 		String name= method.getElementName();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -683,7 +683,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	protected RefactoringStatus checkDeclaringType(final IProgressMonitor monitor) throws JavaModelException {
 		final RefactoringStatus status= super.checkDeclaringType(monitor);
-		if (JavaModelUtil.getFullyQualifiedName(getDeclaringType()).equals("java.lang.Object")) //$NON-NLS-1$
+		if (getDeclaringType().getFullyQualifiedName('.').equals("java.lang.Object")) //$NON-NLS-1$
 			status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.PullUpRefactoring_no_java_lang_Object));
 		status.merge(checkDeclaringSuperTypes(monitor));
 		return status;
@@ -1263,7 +1263,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			final IMethodBinding binding= oldMethod.resolveBinding();
 			if (binding != null) {
 				final ITypeBinding[] params= binding.getParameterTypes();
-				final String fullTypeName= JavaModelUtil.getFullyQualifiedName(getDestinationType());
+				final String fullTypeName= getDestinationType().getFullyQualifiedName('.');
 				final String[] fullParamNames= new String[params.length];
 				for (int i= 0; i < fullParamNames.length; i++) {
 					fullParamNames[i]= Bindings.getFullyQualifiedName(params[i]);

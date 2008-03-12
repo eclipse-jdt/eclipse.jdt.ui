@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,8 +18,6 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.search.TypeNameMatch;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -80,17 +78,17 @@ public class TypeNameMatchLabelProvider extends LabelProvider {
 		if (isSet(SHOW_TYPE_ONLY, flags)) {
 			buf.append(typeRef.getSimpleTypeName());
 		} else if (isSet(SHOW_TYPE_CONTAINER_ONLY, flags)) {
-			String containerName= JavaModelUtil.getTypeContainerName(typeRef);
+			String containerName= typeRef.getTypeContainerName();
 			buf.append(getPackageName(containerName));
 		} else if (isSet(SHOW_PACKAGE_ONLY, flags)) {
 			String packName= typeRef.getPackageName();
 			buf.append(getPackageName(packName));
 		} else {
 			if (isSet(SHOW_FULLYQUALIFIED, flags)) {
-				buf.append(JavaModelUtil.getFullyQualifiedName(typeRef));
+				buf.append(typeRef.getFullyQualifiedName());
 			} else if (isSet(SHOW_POST_QUALIFIED, flags)) {
 				buf.append(typeRef.getSimpleTypeName());
-				String containerName= JavaModelUtil.getTypeContainerName(typeRef);
+				String containerName= typeRef.getTypeContainerName();
 				if (containerName != null && containerName.length() > 0) {
 					buf.append(JavaElementLabels.CONCAT_STRING);
 					buf.append(containerName);
@@ -116,7 +114,7 @@ public class TypeNameMatchLabelProvider extends LabelProvider {
 	
 	public static ImageDescriptor getImageDescriptor(TypeNameMatch typeRef, int flags) {
 		if (isSet(SHOW_TYPE_CONTAINER_ONLY, flags)) {
-			if (typeRef.getPackageName().equals(JavaModelUtil.getTypeContainerName(typeRef)))
+			if (typeRef.getPackageName().equals(typeRef.getTypeContainerName()))
 				return JavaPluginImages.DESC_OBJS_PACKAGE;
 
 			// XXX cannot check outer type for interface efficiently (5887)
@@ -125,7 +123,7 @@ public class TypeNameMatchLabelProvider extends LabelProvider {
 		} else if (isSet(SHOW_PACKAGE_ONLY, flags)) {
 			return JavaPluginImages.DESC_OBJS_PACKAGE;
 		} else {
-			boolean isInner= JavaModelUtil.getTypeContainerName(typeRef).indexOf('.') != -1;
+			boolean isInner= typeRef.getTypeContainerName().indexOf('.') != -1;
 			int modifiers= typeRef.getModifiers();
 			
 			ImageDescriptor desc= JavaElementImageProvider.getTypeImageDescriptor(isInner, false, modifiers, false);

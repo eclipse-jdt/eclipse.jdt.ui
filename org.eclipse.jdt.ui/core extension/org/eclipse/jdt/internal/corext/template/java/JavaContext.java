@@ -455,7 +455,7 @@ public class JavaContext extends CompilationUnitContext {
 				TypeNameMatch[] matches= findAllTypes(type, searchScope, nameNode, null, cu);
 				if (matches.length != 1) // only add import if we have a single match
 					return type;
-				type= JavaModelUtil.getFullyQualifiedName(matches[0]);
+				type= matches[0].getFullyQualifiedName();
 			}
 			
 			CompilationUnit root= getASTRoot(cu);

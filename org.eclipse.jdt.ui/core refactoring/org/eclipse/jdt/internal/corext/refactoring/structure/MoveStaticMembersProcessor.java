@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -335,7 +335,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	private RefactoringStatus checkDeclaringType(){
 		IType declaringType= getDeclaringType();
 				
-		if (JavaModelUtil.getFullyQualifiedName(declaringType).equals("java.lang.Object")) //$NON-NLS-1$
+		if (declaringType.getFullyQualifiedName('.').equals("java.lang.Object")) //$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveMembersRefactoring_Object);	 
 
 		if (declaringType.isBinary())
@@ -455,8 +455,8 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			IType type= (IType) fMembersToMove[i];
 			if (fDestinationType.equals(type) || JavaElementUtil.isAncestorOf(type, fDestinationType)) {
 				String message= Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_inside, 
-						new String[] {JavaModelUtil.getFullyQualifiedName(type),
-								JavaModelUtil.getFullyQualifiedName(fDestinationType)});
+						new String[] {type.getFullyQualifiedName('.'),
+								fDestinationType.getFullyQualifiedName('.')});
 				RefactoringStatusContext context= JavaStatusContext.create(fDestinationType.getCompilationUnit(), fDestinationType.getNameRange());
 				result.addFatalError(message, context);
 				return result;
@@ -565,37 +565,37 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				if (moved)
 					message= Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_moved_field, 
 								new String[]{JavaElementUtil.createFieldSignature((IField)member), 
-									JavaModelUtil.getFullyQualifiedName(accessingType),
-									JavaModelUtil.getFullyQualifiedName(declaringType)});
+									accessingType.getFullyQualifiedName('.'),
+									declaringType.getFullyQualifiedName('.')});
 				else
 					message= Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_accessed_field, 
 								new String[]{JavaElementUtil.createFieldSignature((IField)member), 
-									JavaModelUtil.getFullyQualifiedName(accessingType)});
+									accessingType.getFullyQualifiedName('.')});
 				return message;
 			}			
 			case IJavaElement.METHOD: {
 				if (moved)
 					message= Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_moved_method, 
 								new String[]{JavaElementUtil.createMethodSignature((IMethod)member),
-									JavaModelUtil.getFullyQualifiedName(accessingType),
-									JavaModelUtil.getFullyQualifiedName(declaringType)});
+									accessingType.getFullyQualifiedName('.'),
+									declaringType.getFullyQualifiedName('.')});
 				else				 
 					message= Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_accessed_method, 
 								new String[]{JavaElementUtil.createMethodSignature((IMethod)member),
-									JavaModelUtil.getFullyQualifiedName(accessingType)});
+									accessingType.getFullyQualifiedName('.')});
 								 
 				return message;		
 			}			
 			case IJavaElement.TYPE:{
 				if (moved)
 					message= Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_moved_type, 
-								new String[]{JavaModelUtil.getFullyQualifiedName(((IType)member)), 
-									JavaModelUtil.getFullyQualifiedName(accessingType),
-									JavaModelUtil.getFullyQualifiedName(declaringType)});
+								new String[]{((IType)member).getFullyQualifiedName('.'), 
+									accessingType.getFullyQualifiedName('.'),
+									declaringType.getFullyQualifiedName('.')});
 				else
 					message= Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_accessed_type, 
-								new String[]{JavaModelUtil.getFullyQualifiedName(((IType)member)), 
-									JavaModelUtil.getFullyQualifiedName(accessingType)});
+								new String[]{((IType)member).getFullyQualifiedName('.'), 
+									accessingType.getFullyQualifiedName('.')});
 				return message;
 			}			
 			default:
