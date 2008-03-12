@@ -260,7 +260,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			layout.marginWidth= 0;
 			composite.setLayout(layout);
 
-			final Canvas canvas= new Canvas(composite, SWT.NONE);
+			final Canvas canvas= new Canvas(composite, SWT.NO_FOCUS);
 			GridData gridData= new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false);
 			gridData.widthHint= 17;
 			gridData.heightHint= 16;
