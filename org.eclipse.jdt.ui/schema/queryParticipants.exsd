@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.eclipse.jdt.ui">
+<schema targetNamespace="org.eclipse.jdt.ui" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
-      <appInfo>
+      <appinfo>
          <meta.schema plugin="org.eclipse.jdt.ui" id="queryParticipants" name="Java Query Participants"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          This extension point allows clients to contribute results to java searches
       </documentation>
@@ -34,9 +34,9 @@
                <documentation>
                   an optional name of the extension instance
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute translatable="true"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
       </complexType>
@@ -49,9 +49,9 @@
                <documentation>
                   the class that implements this query participant. The class must be public and implement &lt;code&gt;org.eclipse.jdt.ui.search.IQueryParticipant&lt;/code&gt; with a zero-argument constructor.
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute kind="java" basedOn="org.eclipse.jdt.ui.search.IQueryParticipant"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
          <attribute name="id" type="string" use="required">
@@ -66,6 +66,9 @@
                <documentation>
                   the project nature id this participant should be active for. If the participant should be active for multiple project natures, multiple participants must be defined.
                </documentation>
+               <appinfo>
+                  <meta.attribute kind="identifier" basedOn="org.eclipse.core.resources.natures/@id"/>
+               </appinfo>
             </annotation>
          </attribute>
          <attribute name="name" type="string" use="required">
@@ -73,27 +76,27 @@
                <documentation>
                   a user readeable name for the participant
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute translatable="true"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
       </complexType>
    </element>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="since"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          3.0
       </documentation>
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="examples"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          The following is an example of a query participant contribution:
 
@@ -114,27 +117,28 @@
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="apiInfo"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          The contributed class must implement &lt;code&gt;org.eclipse.jdt.ui.search.IQueryParticipant&lt;/code&gt;
       </documentation>
    </annotation>
 
+
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="implementation"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          none
       </documentation>
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="copyright"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          Copyright (c) 2001, 2005 IBM Corporation and others.&lt;br&gt;
 All rights reserved. This program and the accompanying materials are made available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at &lt;a href=&quot;http://www.eclipse.org/legal/epl-v10.html&quot;&gt;http://www.eclipse.org/legal/epl-v10.html&lt;/a&gt;
