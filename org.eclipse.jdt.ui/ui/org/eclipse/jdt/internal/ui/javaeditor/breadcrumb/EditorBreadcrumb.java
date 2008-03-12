@@ -38,6 +38,8 @@ import org.eclipse.jface.text.ITextViewer;
 
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 
@@ -114,15 +116,17 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	 * @return true if the element could be opened
 	 */
 	protected abstract boolean open(Object element);
-
-	/**
-	 * Fill the given menu manager with context menu actions for
-	 * the current viewers selection.
-	 * 
-	 * @param manager the manager to which to add menu entries too
-	 */
-	protected abstract void fillContextMenu(MenuManager manager);
 	
+	/**
+	 * Create an action group for the context menu shown for 
+	 * the selection of the given selection provider or <code>null</code>
+	 * if no context menu should be shown.
+	 * 
+	 * @param selectionProvider the provider of the context selection
+	 * @return action group to use to fill the context menu or <code>null</code>
+	 */
+	protected abstract ActionGroup createContextMenuActionGroup(ISelectionProvider selectionProvider);
+
 	/**
 	 * The breadcrumb has been activated. Implementors must retarget
 	 * the editor actions to the breadcrumb aware actions.
@@ -383,23 +387,37 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 			public void handleEvent(Event event) {
 				if (!isBreadcrumbEvent(event))
 					return;
+								
+				ISelectionProvider selectionProvider;
+				if (fBreadcrumbViewer.isDropDownOpen()) {
+					selectionProvider= fBreadcrumbViewer.getDropDownSelectionProvider();
+				} else {
+					selectionProvider= fBreadcrumbViewer;
+				}
 				
-				if (fBreadcrumbViewer.isDropDownOpen())
+				ActionGroup actionGroup= createContextMenuActionGroup(selectionProvider);
+				if (actionGroup == null)
 					return;
 
-				MenuManager manager= new MenuManager();
-				Menu menu= manager.createContextMenu(fBreadcrumbViewer.getControl());
+				try {
+					MenuManager manager= new MenuManager();
+					actionGroup.setContext(new ActionContext(selectionProvider.getSelection()));
+					actionGroup.fillContextMenu(manager);
 
-				fillContextMenu(manager);
+					getTextEditor().getEditorSite().registerContextMenu(manager, selectionProvider, false);
 
-				if (manager.isEmpty())
-					return;
+					if (manager.isEmpty())
+						return;
 
-				menu.setLocation(event.x + 10, event.y + 10);
-				menu.setVisible(true);
-				while (!menu.isDisposed() && menu.isVisible()) {
-					if (!Display.getDefault().readAndDispatch())
-						Display.getDefault().sleep();
+					Menu menu= manager.createContextMenu(fBreadcrumbViewer.getControl());
+					menu.setLocation(event.x + 10, event.y + 10);
+					menu.setVisible(true);
+					while (!menu.isDisposed() && menu.isVisible()) {
+						if (!menu.getDisplay().readAndDispatch())
+							menu.getDisplay().sleep();
+					}
+				} finally {
+					actionGroup.dispose();
 				}
 			}
 		};

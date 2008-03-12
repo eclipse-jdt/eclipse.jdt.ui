@@ -39,6 +39,7 @@ import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -234,7 +235,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	}
 	
 	/**
-	 * @return true if the any of the items in the viewer is expanded
+	 * @return true if any of the items in the viewer is expanded
 	 */
 	public boolean isDropDownOpen() {
 		for (int i= 0, size= fBreadcrumbItems.size(); i < size; i++) {
@@ -244,6 +245,24 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		}
 
 		return false;
+	}
+	
+	/**
+	 * Returns the selection provider which provides the selection of
+	 * the drop down currently opened or <code>null</code> if no
+	 * drop down is open at the moment.
+	 * 
+	 * @return the selection provider of the open drop down or <code>null</code>
+	 */
+	public ISelectionProvider getDropDownSelectionProvider() {
+		for (int i= 0, size= fBreadcrumbItems.size(); i < size; i++) {
+			BreadcrumbItem item= (BreadcrumbItem) fBreadcrumbItems.get(i);
+			if (item.isMenuShown()) {
+				return item.getDropDownSelectionProvider();
+			}
+		}
+
+		return null;
 	}
 
 	/* (non-Javadoc)

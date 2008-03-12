@@ -41,6 +41,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.OpenEvent;
@@ -69,6 +70,7 @@ class BreadcrumbItemDropDown {
 	private boolean fMenuIsShown;
 	private boolean fEnabled;
 	private ToolBar fToolBar;
+	private TreeViewer fDropDownViewer;
 
 	public BreadcrumbItemDropDown(BreadcrumbItem parent, Composite composite) {
 		fParent= parent;
@@ -115,6 +117,16 @@ class BreadcrumbItemDropDown {
 	public boolean isMenuShown() {
 		return fMenuIsShown;
 	}
+	
+	/**
+	 * @return the selection provider of the drop down if {@link #isMenuShown()}, <code>null</code> otherwise
+	 */
+	public ISelectionProvider getDropDownSelectionProvider() {
+		if (!fMenuIsShown)
+			return null;
+		
+		return fDropDownViewer;
+	}
 
 	/**
 	 * Opens the drop down menu.
@@ -140,21 +152,21 @@ class BreadcrumbItemDropDown {
 		gridLayout.marginWidth= 0;
 		composite.setLayout(gridLayout);
 		
-		final TreeViewer viewer= new TreeViewer(composite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL);
+		fDropDownViewer= new TreeViewer(composite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL);
 		
-		final Tree tree= (Tree) viewer.getControl();
+		final Tree tree= (Tree) fDropDownViewer.getControl();
 		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tree.setBackground(shell.getBackground());
 		
 		Object input= fParent.getData();
-		viewer.setContentProvider(fParent.getViewer().createDropDownContentProvider(input));
-		viewer.setLabelProvider(fParent.getViewer().createDropDownLabelProvider(input));
-		viewer.setComparator(new JavaElementComparator());
-		viewer.setInput(input);
+		fDropDownViewer.setContentProvider(fParent.getViewer().createDropDownContentProvider(input));
+		fDropDownViewer.setLabelProvider(fParent.getViewer().createDropDownLabelProvider(input));
+		fDropDownViewer.setComparator(new JavaElementComparator());
+		fDropDownViewer.setInput(input);
 
 		setShellBounds(shell);
 
-		viewer.addOpenListener(new IOpenListener() {
+		fDropDownViewer.addOpenListener(new IOpenListener() {
 			public void open(OpenEvent event) {
 				ISelection selection= event.getSelection();
 				if (!(selection instanceof IStructuredSelection))
@@ -168,12 +180,12 @@ class BreadcrumbItemDropDown {
 				if (shell.isDisposed())
 					return;
 
-				if (viewer.getExpandedState(element)) {
-					viewer.collapseToLevel(element, 1);
+				if (fDropDownViewer.getExpandedState(element)) {
+					fDropDownViewer.collapseToLevel(element, 1);
 				} else {
 					tree.setRedraw(false);
 					try {
-						viewer.expandToLevel(element, 1);
+						fDropDownViewer.expandToLevel(element, 1);
 						resizeShell(shell);
 					} finally {
 						tree.setRedraw(true);
@@ -199,12 +211,12 @@ class BreadcrumbItemDropDown {
 				if (shell.isDisposed())
 					return;
 
-				if (viewer.getExpandedState(data)) {
-					viewer.collapseToLevel(data, 1);
+				if (fDropDownViewer.getExpandedState(data)) {
+					fDropDownViewer.collapseToLevel(data, 1);
 				} else {
 					tree.setRedraw(false);
 					try {
-						viewer.expandToLevel(data, 1);
+						fDropDownViewer.expandToLevel(data, 1);
 						resizeShell(shell);
 					} finally {
 						tree.setRedraw(true);
@@ -241,7 +253,7 @@ class BreadcrumbItemDropDown {
 								tree.setSelection(new TreeItem[] { fLastItem });
 							} else {
 								Point p= tree.toDisplay(e.x, e.y);
-								Item item= viewer.scrollUp(p.x, p.y);
+								Item item= fDropDownViewer.scrollUp(p.x, p.y);
 								if (item instanceof TreeItem) {
 									fLastItem= (TreeItem) item;
 									tree.setSelection(new TreeItem[] { fLastItem });
@@ -258,7 +270,7 @@ class BreadcrumbItemDropDown {
 								tree.setSelection(new TreeItem[] { fLastItem });
 							} else {
 								Point p= tree.toDisplay(e.x, e.y);
-								Item item= viewer.scrollDown(p.x, p.y);
+								Item item= fDropDownViewer.scrollDown(p.x, p.y);
 								if (item instanceof TreeItem) {
 									fLastItem= (TreeItem) item;
 									tree.setSelection(new TreeItem[] { fLastItem });
@@ -289,7 +301,7 @@ class BreadcrumbItemDropDown {
 			}
 		});
 		
-		viewer.addTreeListener(new ITreeViewerListener() {
+		fDropDownViewer.addTreeListener(new ITreeViewerListener() {
 			public void treeCollapsed(TreeExpansionEvent event) {
 			}
 
@@ -320,7 +332,7 @@ class BreadcrumbItemDropDown {
 			BreadcrumbItem childItem= fParent.getViewer().getItem(index + 1);
 			Object child= childItem.getData();
 			
-			viewer.setSelection(new StructuredSelection(child), true);
+			fDropDownViewer.setSelection(new StructuredSelection(child), true);
 
 			TreeItem[] selection= tree.getSelection();
 			if (selection.length > 0) {
@@ -374,6 +386,7 @@ class BreadcrumbItemDropDown {
 					return;
 				
 				fMenuIsShown= false;
+				fDropDownViewer= null;
 			}
 
 			public void shellDeactivated(ShellEvent e) {

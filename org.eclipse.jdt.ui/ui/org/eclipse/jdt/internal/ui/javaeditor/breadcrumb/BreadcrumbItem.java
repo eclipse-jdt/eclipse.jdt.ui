@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
@@ -222,6 +223,13 @@ class BreadcrumbItem extends Item {
 	 */
 	boolean isMenuShown() {
 		return fExpandBlock.isMenuShown();
+	}
+	
+	/**
+	 * @return the selection provider of the drop down or <code>null</code>
+	 */
+	ISelectionProvider getDropDownSelectionProvider() {
+		return fExpandBlock.getDropDownSelectionProvider();
 	}
 
 	/**

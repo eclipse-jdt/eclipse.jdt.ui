@@ -33,6 +33,7 @@ import org.eclipse.jdt.ui.actions.NavigateActionGroup;
 import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.GenerateBuildPathActionGroup;
@@ -129,5 +130,14 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 				new ProjectActionGroup(javaEditor.getEditorSite(), selectionProvider),
 				new WorkingSetActionGroup(javaEditor.getEditorSite(), selectionProvider)
 		});
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.actions.CompositeActionGroup#fillContextMenu(org.eclipse.jface.action.IMenuManager)
+	 */
+	public void fillContextMenu(IMenuManager menu) {
+		JavaPlugin.createStandardGroups(menu);
+
+		super.fillContextMenu(menu);
 	}
 }

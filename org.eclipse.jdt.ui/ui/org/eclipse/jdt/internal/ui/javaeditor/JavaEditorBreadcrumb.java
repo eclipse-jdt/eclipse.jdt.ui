@@ -23,10 +23,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Widget;
 
-import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -413,18 +413,13 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		}
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#fillContextMenu(org.eclipse.jface.action.MenuManager)
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#createContextMenuActionGroup(org.eclipse.jface.viewers.ISelectionProvider)
 	 */
-	protected void fillContextMenu(MenuManager manager) {
-		JavaPlugin.createStandardGroups(manager);
-
-		fBreadcrumbActionGroup.setContext(new ActionContext(fViewer.getSelection()));
-		fBreadcrumbActionGroup.fillContextMenu(manager);
-
-		getJavaEditor().getEditorSite().registerContextMenu(manager, fViewer, false);
+	protected ActionGroup createContextMenuActionGroup(ISelectionProvider selectionProvider) {
+		return new JavaEditorBreadcrumbActionGroup(getJavaEditor(), selectionProvider);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#setInput(java.lang.Object)
 	 */
