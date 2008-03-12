@@ -5172,6 +5172,15 @@
             </or>
          </enablement>
       </statusContextViewer>
+      <statusContextViewer
+            class="org.eclipse.jdt.internal.ui.refactoring.ReferencesInBinaryStatusContextViewer"
+            id="org.eclipse.jdt.internal.ui.referencesInBinaryContextViewer">
+         <enablement>
+            <or>
+               <instanceof value="org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext"/>
+            </or>
+         </enablement>
+      </statusContextViewer>
    </extension>
    
    <extension point="org.eclipse.ltk.ui.refactoring.changePreviewViewers">

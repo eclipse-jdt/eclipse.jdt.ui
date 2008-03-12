@@ -832,6 +832,8 @@ public final class RefactoringMessages extends NLS {
 
 	public static String RefactoringStarter_unexpected_exception;
 
+	public static String ReferencesInBinaryStatusContextViewer_title;
+
 	public static String RenameAction_rename;
 
 	public static String RenameAction_text;

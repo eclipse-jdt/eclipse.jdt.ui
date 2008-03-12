@@ -96,6 +96,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
@@ -584,12 +585,17 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		
 		try {
 			SearchPattern pattern= SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext();
 			fReferences= RefactoringSearchEngine.search(
 					pattern,
-					RefactoringScopeFactory.create(fType),
-					new TypeOccurrenceCollector(fType),
+					RefactoringScopeFactory.create(fType, true, false),
+					new TypeOccurrenceCollector(fType, binaryRefs),
 					monitor,
 					fCachedRefactoringStatus);
+			if (binaryRefs.getMatches().size() != 0) {
+				fCachedRefactoringStatus.addError(RefactoringCoreMessages.RenameTypeProcessor_binaryRefsNotUpdated,
+						binaryRefs);
+			}
 			fReferences= Checks.excludeCompilationUnits(fReferences, fCachedRefactoringStatus);
 
 			fPreloadedElementToName= new LinkedHashMap();
@@ -622,7 +628,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 							if (match.getLocalElement() instanceof ILocalVariable) {
 								matches.add(match.getLocalElement());
 							}
-							// else don't update (e.g. match in type parameter, annotation, ...
+							// else don't update (e.g. match in type parameter, annotation, ...)
 						} else {
 							matches.add(match.getElement());
 						}
