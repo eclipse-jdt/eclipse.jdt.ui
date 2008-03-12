@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -100,6 +101,8 @@ public class JavaContext extends CompilationUnitContext {
 	private Map fVariables= new HashMap();
 	private ImportRewrite fImportRewrite;
 	
+	private Set fCompatibleContextTypeIds;
+	
 	/**
 	 * Creates a java template context.
 	 * 
@@ -125,6 +128,18 @@ public class JavaContext extends CompilationUnitContext {
 	public JavaContext(TemplateContextType type, IDocument document, Position completionPosition, ICompilationUnit compilationUnit) {
 		super(type, document, completionPosition, compilationUnit);
 	}
+	
+	/**
+	 * Adds a context type that is also compatible. That means the context can also process templates of that context type.
+	 * 
+	 * @param contextTypeId the context type to accept
+	 */
+	public void addCompatibleContextType(String contextTypeId) {
+		if (fCompatibleContextTypeIds == null)
+			fCompatibleContextTypeIds= new HashSet();
+		fCompatibleContextTypeIds.add(contextTypeId);
+	}
+	
 	
 	/**
 	 * Returns the indentation level at the position of code completion.
@@ -190,13 +205,31 @@ public class JavaContext extends CompilationUnitContext {
 	 * @see TemplateContext#canEvaluate(Template templates)
 	 */
 	public boolean canEvaluate(Template template) {
+		if (!hasCompatibleContextType(template))
+			return false;
+		
 		if (fForceEvaluation)
 			return true;
-
+		
 		String key= getKey();
-		return
-			template.matches(key, getContextType().getId()) &&
-			key.length() != 0 && template.getName().toLowerCase().startsWith(key.toLowerCase());
+		return key.length() != 0 && template.getName().toLowerCase().startsWith(key.toLowerCase());
+	}
+	
+	private boolean hasCompatibleContextType(Template template) {
+		String key= getKey();
+		if (template.matches(key, getContextType().getId()))
+			return true;
+		
+		if (fCompatibleContextTypeIds == null)
+			return false;
+
+		Iterator iter= fCompatibleContextTypeIds.iterator();
+		while (iter.hasNext()) {
+			if (template.matches(key, (String)iter.next()))
+				return true;
+		}
+		
+		return false;
 	}
 
 	/*
@@ -690,15 +723,15 @@ public class JavaContext extends CompilationUnitContext {
 	 */
 	public static String evaluateTemplate(Template template, ICompilationUnit compilationUnit, int position) throws CoreException, BadLocationException, TemplateException {
 
-		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(JavaContextType.ID);
-		if (contextType == null)
+		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(template.getContextTypeId());
+		if (!(contextType instanceof CompilationUnitContextType))
 			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, JavaTemplateMessages.JavaContext_error_message, null));
 
 		IDocument document= new Document();
 		if (compilationUnit != null && compilationUnit.exists())
 			document.set(compilationUnit.getSource());
 
-		JavaContext context= new JavaContext(contextType, document, position, 0, compilationUnit);
+		CompilationUnitContext context= ((CompilationUnitContextType) contextType).createContext(document, position, 0, compilationUnit);
 		context.setForceEvaluation(true);
 
 		TemplateBuffer buffer= context.evaluate(template);

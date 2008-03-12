@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,54 +10,42 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
-import java.util.Iterator;
-
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.templates.TemplateContextType;
-import org.eclipse.jface.text.templates.TemplateVariableResolver;
-
-import org.eclipse.jdt.core.ICompilationUnit;
 
 
 /**
  * The context type for templates inside SWT code.
- * 
+ * The same class is used for several context types:
+ * <dl>
+ * <li>templates for all Java code locations</li>
+ * <li>templates for member locations</li>
+ * <li>templates for statement locations</li>
+ * </dl>
  * @since 3.4
  */
-public class SWTContextType extends CompilationUnitContextType {
+public class SWTContextType extends AbstractJavaContextType {
+	
+	/**
+	 * The context type id for templates working on all Java code locations in SWT projects
+	 */
+	public static final String ID_ALL= "swt"; //$NON-NLS-1$
 
 	/**
-	 * The id under which this context type is registered.
+	 * The context type id for templates working on member locations in SWT projects
 	 */
-	public static final String ID= "swt"; //$NON-NLS-1$
-
-	public SWTContextType() {
-	}
+	public static final String ID_MEMBERS= "swt-members"; //$NON-NLS-1$
+	
+	/**
+	 * The context type id for templates working on statement locations in SWT projects
+	 */
+	public static final String ID_STATEMENTS= "swt-statements"; //$NON-NLS-1$
+	
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, int, int, org.eclipse.jdt.core.ICompilationUnit)
+	 * @see org.eclipse.jdt.internal.corext.template.java.AbstractJavaContextType#initializeContext(org.eclipse.jdt.internal.corext.template.java.JavaContext)
 	 */
-	public CompilationUnitContext createContext(IDocument document, int offset, int length, ICompilationUnit compilationUnit) {
-		return new JavaContext(this, document, offset, length, compilationUnit);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.Position, org.eclipse.jdt.core.ICompilationUnit)
-	 */
-	public CompilationUnitContext createContext(IDocument document, Position offset, ICompilationUnit compilationUnit) {
-		return new JavaContext(this, document, offset, compilationUnit);
-	}
-
-	/**
-	 * Inherit all resolvers from <code>otherContext</code>.
-	 * 
-	 * @param otherContext the context from which to retrieve the resolvers from
-	 */
-	public void inheritResolvers(TemplateContextType otherContext) {
-		for (Iterator iterator= otherContext.resolvers(); iterator.hasNext();) {
-			TemplateVariableResolver resolver= (TemplateVariableResolver) iterator.next();
-			addResolver(resolver);
+	protected void initializeContext(JavaContext context) {
+		if (!getId().equals(SWTContextType.ID_ALL)) { // a specific context must also allow the templates that work everywhere 
+			context.addCompatibleContextType(SWTContextType.ID_ALL); 
 		}
-	}
+	}	
 }

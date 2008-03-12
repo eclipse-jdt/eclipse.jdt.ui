@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateContext;
+import org.eclipse.jface.text.templates.TemplateContextType;
 
 import org.eclipse.ui.part.FileEditorInput;
 
@@ -45,7 +46,6 @@ import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
-import org.eclipse.jdt.internal.corext.template.java.SWTContextType;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -120,14 +120,15 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 			if (contentType.equals(IJavaPartitions.JAVA_DOC)) {
 				contextId= JavaDocContextType.ID;
 			} else {
-				contextId= JavaContextType.ID;
+				// TODO: Should compute location: member/statement
+				contextId= JavaContextType.ID_ALL;
 			}
 
 			// test if selection is either a full line or spans over multiple lines
 			int startLine= document.getLineOfOffset(offset);
 			int endLine= document.getLineOfOffset(offset + length);
 			
-			if (contextId.equals(JavaContextType.ID)) {
+			if (contextId.equals(JavaContextType.ID_ALL)) {
 				IRegion endLineRegion= document.getLineInformation(endLine);
 				//if end position is at start of line, set it back to the previous line's end
 				if (endLine > startLine && endLineRegion.getOffset() == offset + length) {
@@ -222,14 +223,12 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 		if (JavaDocContextType.ID.equals(contextId)) {
 			if (template.getPattern().indexOf($_LINE_SELECTION) == -1 && template.getPattern().indexOf($_WORD_SELECTION) == -1)
 				return false;
-			
-			return JavaDocContextType.ID.equals(template.getContextTypeId());
 		} else {
 			if (template.getPattern().indexOf($_LINE_SELECTION) == -1)
 				return false;
-			
-			return JavaContextType.ID.equals(template.getContextTypeId()) || SWTContextType.ID.equals(template.getContextTypeId());
 		}
+		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(template.getContextTypeId());
+		return contextType instanceof CompilationUnitContextType;
 	}
 
 }

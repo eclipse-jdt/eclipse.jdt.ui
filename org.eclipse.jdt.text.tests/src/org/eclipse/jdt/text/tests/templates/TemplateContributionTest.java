@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,10 +45,10 @@ public class TemplateContributionTest extends TestCase {
 
 	public void testJavaContribution() throws Exception {
 		ContextTypeRegistry registry= JavaPlugin.getDefault().getTemplateContextRegistry();
-		TemplateContextType javaContext= registry.getContextType(JavaContextType.ID);
+		TemplateContextType javaContext= registry.getContextType(JavaContextType.ID_ALL);
 	
 		TemplateStore templateStore= JavaPlugin.getDefault().getTemplateStore();
-		Template[] javaTemplates= templateStore.getTemplates(JavaContextType.ID);
+		Template[] javaTemplates= templateStore.getTemplates(JavaContextType.ID_ALL);
 		
 		for (int i= 0; i < javaTemplates.length; i++) {
 			Template template= javaTemplates[i];
@@ -87,10 +87,10 @@ public class TemplateContributionTest extends TestCase {
 	
 	public void testSWTContribution() throws Exception {
 		ContextTypeRegistry registry= JavaPlugin.getDefault().getTemplateContextRegistry();
-		TemplateContextType swtContext= registry.getContextType(SWTContextType.ID);
+		TemplateContextType swtContext= registry.getContextType(SWTContextType.ID_ALL);
 	
 		TemplateStore templateStore= JavaPlugin.getDefault().getTemplateStore();
-		Template[] javaTemplates= templateStore.getTemplates(SWTContextType.ID);
+		Template[] javaTemplates= templateStore.getTemplates(SWTContextType.ID_ALL);
 		
 		for (int i= 0; i < javaTemplates.length; i++) {
 			Template template= javaTemplates[i];

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.TemplateContextType;
 
+import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
@@ -118,6 +119,9 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 	 * Engine used to compute the proposals for this computer
 	 */
 	private final TemplateEngine fSWTTemplateEngine;
+	private final TemplateEngine fSWTMembersTemplateEngine;
+	private final TemplateEngine fSWTStatementsTemplateEngine;
+	
 	/**
 	 * The Java project of the compilation unit for which a template
 	 * engine has been computed last time if any
@@ -131,11 +135,17 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 	
 	public SWTTemplateCompletionProposalComputer() {
 		ContextTypeRegistry templateContextRegistry= JavaPlugin.getDefault().getTemplateContextRegistry();
-		TemplateContextType contextType= templateContextRegistry.getContextType(SWTContextType.ID);
-		Assert.isNotNull(contextType);
-		fSWTTemplateEngine= new TemplateEngine(contextType);
+		fSWTTemplateEngine= createTemplateEngine(templateContextRegistry, SWTContextType.ID_ALL);
+		fSWTMembersTemplateEngine= createTemplateEngine(templateContextRegistry, SWTContextType.ID_MEMBERS);
+		fSWTStatementsTemplateEngine= createTemplateEngine(templateContextRegistry, SWTContextType.ID_STATEMENTS);
 		
 		JavaCore.addElementChangedListener(new BuildPathChangeListener());
+	}
+	
+	private static TemplateEngine createTemplateEngine(ContextTypeRegistry templateContextRegistry, String contextTypeId) {
+		TemplateContextType contextType= templateContextRegistry.getContextType(contextTypeId);
+		Assert.isNotNull(contextType);
+		return new TemplateEngine(contextType);
 	}
 
 	/* (non-Javadoc)
@@ -150,8 +160,19 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 		if (javaProject == null)
 			return null;
 
-		if (isSWTOnClasspath(javaProject))
+		if (isSWTOnClasspath(javaProject)) {
+			CompletionContext coreContext= context.getCoreContext();
+			if (coreContext != null) {
+				int tokenLocation= coreContext.getTokenLocation();
+				if ((tokenLocation & CompletionContext.TL_MEMBER_START) != 0) {
+					return fSWTMembersTemplateEngine;
+				}
+				if ((tokenLocation & CompletionContext.TL_STATEMENT_START) != 0) {
+					return fSWTStatementsTemplateEngine;
+				}
+			}
 			return fSWTTemplateEngine;
+		}
 		
 		return null;
 	}

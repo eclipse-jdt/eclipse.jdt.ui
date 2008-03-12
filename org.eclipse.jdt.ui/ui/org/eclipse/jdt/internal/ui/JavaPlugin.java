@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui;
 
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 import org.eclipse.core.runtime.CoreException;
@@ -41,6 +42,8 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
+import org.eclipse.jface.text.templates.TemplateContextType;
+import org.eclipse.jface.text.templates.TemplateVariableResolver;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
 import org.eclipse.ui.IWorkbenchPage;
@@ -69,6 +72,7 @@ import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpRegistry;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.internal.corext.template.java.AbstractJavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
@@ -786,19 +790,44 @@ public class JavaPlugin extends AbstractUIPlugin {
 	public synchronized ContextTypeRegistry getTemplateContextRegistry() {
 		if (fContextTypeRegistry == null) {
 			ContributionContextTypeRegistry registry= new ContributionContextTypeRegistry();
-			registry.addContextType(JavaContextType.ID);
+			
+			registry.addContextType(JavaContextType.ID_ALL);
+			TemplateContextType all_contextType= registry.getContextType(JavaContextType.ID_ALL);
+			((AbstractJavaContextType) all_contextType).initializeContextTypeResolvers();
+			
+			registerJavaContext(registry, JavaContextType.ID_MEMBERS, all_contextType);
+			registerJavaContext(registry, JavaContextType.ID_STATEMENTS, all_contextType);
+			
+			registerJavaContext(registry, SWTContextType.ID_ALL, all_contextType);
+			all_contextType= registry.getContextType(SWTContextType.ID_ALL);
+			
+			registerJavaContext(registry, SWTContextType.ID_MEMBERS, all_contextType);
+			registerJavaContext(registry, SWTContextType.ID_STATEMENTS, all_contextType);
+			
 			registry.addContextType(JavaDocContextType.ID);
-			registry.addContextType(SWTContextType.ID);
-
-			SWTContextType swtContext= (SWTContextType) registry.getContextType(SWTContextType.ID);
-			swtContext.inheritResolvers(registry.getContextType(JavaContextType.ID));
 
 			fContextTypeRegistry= registry;
 		}
 
 		return fContextTypeRegistry;
 	}
-	
+
+	/**
+	 * Registers the given Java template context.
+	 * 
+	 * @param registry the template context type registry
+	 * @param id the context type id
+	 * @param parent the parent context type
+	 * @since 3.4
+	 */
+	private static void registerJavaContext(ContributionContextTypeRegistry registry, String id, TemplateContextType parent) {
+		registry.addContextType(id);
+		TemplateContextType contextType= registry.getContextType(id);
+		Iterator iter= parent.resolvers();
+		while (iter.hasNext())
+			contextType.addResolver((TemplateVariableResolver) iter.next());
+	}
+
 	/**
 	 * Returns the template store for the java editor templates.
 	 * 

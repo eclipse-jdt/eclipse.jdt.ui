@@ -5047,6 +5047,16 @@
             id="java">
       </contextType>
       <contextType
+            name="%templates.java.statements.contextType.name"
+            class="org.eclipse.jdt.internal.corext.template.java.JavaContextType"
+            id="java-statements">
+      </contextType>
+      <contextType
+            name="%templates.java.members.contextType.name"
+            class="org.eclipse.jdt.internal.corext.template.java.JavaContextType"
+            id="java-members">
+      </contextType>
+      <contextType
             name="%templates.javadoc.contextType.name"
             class="org.eclipse.jdt.internal.corext.template.java.JavaDocContextType"
             id="javadoc">
@@ -5056,6 +5066,16 @@
             class="org.eclipse.jdt.internal.corext.template.java.SWTContextType"
             id="swt">
       </contextType>
+      <contextType
+            name="%templates.swt.statements.contextType.name"
+            class="org.eclipse.jdt.internal.corext.template.java.SWTContextType"
+            id="swt-statements">
+      </contextType>
+      <contextType
+            name="%templates.swt.members.contextType.name"
+            class="org.eclipse.jdt.internal.corext.template.java.SWTContextType"
+            id="swt-members">
+      </contextType>      
       <include
       		file="templates/default-templates.xml"
       		translations="$nl$/templates/default-templates.properties">
