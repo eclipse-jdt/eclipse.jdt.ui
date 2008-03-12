@@ -197,6 +197,6 @@ public class NLSKeyHyperlink implements IHyperlink {
 	public String getHyperlinkText() {
 		String bundleName= fAccessorClassReference.getResourceBundleName();
 		String propertyFileName= bundleName.substring(bundleName.lastIndexOf('.') + 1, bundleName.length()) + NLSRefactoring.PROPERTY_FILE_EXT;
-		return Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_hyperlinkText, new Object[] { fKeyName, propertyFileName });
+		return Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_hyperlinkText, new Object[] { propertyFileName });
 	}
 }
