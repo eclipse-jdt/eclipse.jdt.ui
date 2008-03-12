@@ -484,7 +484,14 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		if (!(node instanceof SimpleType))
 			return false;
 			
-		ITypeBinding binding= ((SimpleType)node).resolveBinding().getTypeDeclaration();
+		ITypeBinding typeBinding= ((SimpleType) node).resolveBinding();
+		if (typeBinding == null)
+			return false;
+
+		ITypeBinding binding= typeBinding.getTypeDeclaration();
+		if (binding == null)
+			return false;
+			
 		ITypeBinding[] parameters= binding.getTypeParameters();
 		if (parameters.length == 0)
 			return false;
