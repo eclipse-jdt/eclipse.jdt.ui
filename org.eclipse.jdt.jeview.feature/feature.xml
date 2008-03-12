@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.jdt.jeview.feature"
       label="org.eclipse.jdt.jeview.feature"
-      version="1.0.5"
+      version="1.0.6"
       provider-name="Eclipse.org">
 
    <description>
