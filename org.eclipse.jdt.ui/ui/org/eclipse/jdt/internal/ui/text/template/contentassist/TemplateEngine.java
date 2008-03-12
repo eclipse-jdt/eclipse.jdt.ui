@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -124,10 +124,12 @@ public class TemplateEngine {
 		Template[] templates= JavaPlugin.getDefault().getTemplateStore().getTemplates();
 
 		if (selection.y == 0) {
-			for (int i= 0; i != templates.length; i++)
-				if (context.canEvaluate(templates[i]))
-					fProposals.add(new TemplateProposal(templates[i], context, region, getImage()));
-
+			for (int i= 0; i != templates.length; i++) {
+				Template template= templates[i];
+				if (context.canEvaluate(template)) {
+					fProposals.add(new TemplateProposal(template, context, region, getImage()));
+				}
+			}
 		} else {
 
 			if (context.getKey().length() == 0)
@@ -138,7 +140,6 @@ public class TemplateEngine {
 			for (int i= 0; i != templates.length; i++) {
 				Template template= templates[i];
 				if (context.canEvaluate(template) &&
-					template.getContextTypeId().equals(context.getContextType().getId()) &&
 					(!multipleLinesSelected && template.getPattern().indexOf($_WORD_SELECTION) != -1 || (multipleLinesSelected && template.getPattern().indexOf($_LINE_SELECTION) != -1)))
 				{
 					fProposals.add(new TemplateProposal(templates[i], context, region, getImage()));
@@ -148,7 +149,7 @@ public class TemplateEngine {
 	}
 
 	private Image getImage() {
-		if (SWTContextType.ID.equals(fContextType.getId()))
+		if (fContextType instanceof SWTContextType)
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SWT_TEMPLATE);
 		else
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,7 +51,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
-import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
@@ -249,7 +248,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		String newSelection= document.get(offset, length);
 		
 		//Create the new context
-		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(JavaContextType.ID);
+		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(fTemplate.getContextTypeId());
 		CompilationUnitContext context= contextType.createContext(document, offset, newSelection.length(), fCompilationUnit);
 		context.setVariable("selection", newSelection); //$NON-NLS-1$
 		context.setForceEvaluation(true);
