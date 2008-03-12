@@ -62,6 +62,10 @@ public class JEViewPlugin extends AbstractUIPlugin {
 		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, message, null));
 	}
 	
+	public static void logMessage(String message) {
+		log(new Status(IStatus.INFO, getPluginId(), IStatus.INFO, message, null));
+	}
+	
 	public static void logErrorStatus(String message, IStatus status) {
 		if (status == null) {
 			logErrorMessage(message);
@@ -73,10 +77,10 @@ public class JEViewPlugin extends AbstractUIPlugin {
 	}
 	
 	public static void log(String message, Throwable e) {
-		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, message, e)); //$NON-NLS-1$
+		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, message, e)); 
 	}
 	
 	public static void log(Throwable e) {
-		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, e.getLocalizedMessage(), e)); //$NON-NLS-1$
+		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, e.getLocalizedMessage(), e)); 
 	}
 }
