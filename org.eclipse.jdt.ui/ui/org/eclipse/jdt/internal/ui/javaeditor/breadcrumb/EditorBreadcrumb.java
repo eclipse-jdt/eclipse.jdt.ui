@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.action.MenuManager;
@@ -466,7 +467,8 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		if (!(item instanceof Control))
 			return false;
 		
-		if (fBreadcrumbViewer.isDropDownOpen())
+		Shell dropDownShell= fBreadcrumbViewer.getDropDownShell();
+		if (dropDownShell != null && isChild((Control) item, dropDownShell))
 			return true;
 
 		return isChild((Control) item, fBreadcrumbViewer.getControl());

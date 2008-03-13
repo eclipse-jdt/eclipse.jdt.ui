@@ -18,6 +18,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -225,6 +226,13 @@ class BreadcrumbItem extends Item {
 		return fExpandBlock.isMenuShown();
 	}
 	
+	/**
+	 * @return the shell of the drop down if shown, <code>null</code> otherwise
+	 */
+	Shell getDropDownShell() {
+		return fExpandBlock.getDropDownShell();
+	}
+
 	/**
 	 * @return the selection provider of the drop down or <code>null</code>
 	 */

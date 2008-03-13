@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
@@ -245,6 +246,22 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		}
 
 		return false;
+	}
+	
+	/**
+	 * The shell used for the shown drop down or <code>null</code>
+	 * if no drop down is shown at the moment.
+	 * 
+	 * @return the drop downs shell or <code>null</code>
+	 */
+	public Shell getDropDownShell() {
+		for (int i= 0, size= fBreadcrumbItems.size(); i < size; i++) {
+			BreadcrumbItem item= (BreadcrumbItem) fBreadcrumbItems.get(i);
+			if (item.isMenuShown())
+				return item.getDropDownShell();
+		}
+
+		return null;
 	}
 	
 	/**

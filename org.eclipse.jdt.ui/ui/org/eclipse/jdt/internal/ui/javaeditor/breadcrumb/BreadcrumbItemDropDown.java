@@ -71,6 +71,7 @@ class BreadcrumbItemDropDown {
 	private boolean fEnabled;
 	private ToolBar fToolBar;
 	private TreeViewer fDropDownViewer;
+	private Shell fShell;
 
 	public BreadcrumbItemDropDown(BreadcrumbItem parent, Composite composite) {
 		fParent= parent;
@@ -119,6 +120,18 @@ class BreadcrumbItemDropDown {
 	}
 	
 	/**
+	 * Get the shell used for the drop down menu if it is shown.
+	 * 
+	 * @return the drop down shell or <code>null</code>
+	 */
+	public Shell getDropDownShell() {
+		if (!isMenuShown())
+			return null;
+
+		return fShell;
+	}
+
+	/**
 	 * @return the selection provider of the drop down if {@link #isMenuShown()}, <code>null</code> otherwise
 	 */
 	public ISelectionProvider getDropDownSelectionProvider() {
@@ -137,15 +150,15 @@ class BreadcrumbItemDropDown {
 		
 		fMenuIsShown= true;
 		
-		final Shell shell= new Shell(fToolBar.getShell(), SWT.RESIZE | SWT.TOOL | SWT.BORDER);
+		fShell= new Shell(fToolBar.getShell(), SWT.RESIZE | SWT.TOOL | SWT.BORDER);
 		GridLayout layout= new GridLayout(1, false);
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
-		shell.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-		shell.setBackgroundMode(SWT.INHERIT_DEFAULT);
-		shell.setLayout(layout);
+		fShell.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+		fShell.setBackgroundMode(SWT.INHERIT_DEFAULT);
+		fShell.setLayout(layout);
 		
-		Composite composite= new Composite(shell, SWT.NONE);
+		Composite composite= new Composite(fShell, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		GridLayout gridLayout= new GridLayout(1, false);
 		gridLayout.marginHeight= 0;
@@ -156,7 +169,7 @@ class BreadcrumbItemDropDown {
 		
 		final Tree tree= (Tree) fDropDownViewer.getControl();
 		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		tree.setBackground(shell.getBackground());
+		tree.setBackground(fShell.getBackground());
 		
 		Object input= fParent.getData();
 		fDropDownViewer.setContentProvider(fParent.getViewer().createDropDownContentProvider(input));
@@ -164,7 +177,7 @@ class BreadcrumbItemDropDown {
 		fDropDownViewer.setComparator(new JavaElementComparator());
 		fDropDownViewer.setInput(input);
 
-		setShellBounds(shell);
+		setShellBounds(fShell);
 
 		fDropDownViewer.addOpenListener(new IOpenListener() {
 			public void open(OpenEvent event) {
@@ -177,7 +190,7 @@ class BreadcrumbItemDropDown {
 					return;
 				
 				fParent.getViewer().fireMenuSelection(element);
-				if (shell.isDisposed())
+				if (fShell.isDisposed())
 					return;
 
 				if (fDropDownViewer.getExpandedState(element)) {
@@ -186,7 +199,7 @@ class BreadcrumbItemDropDown {
 					tree.setRedraw(false);
 					try {
 						fDropDownViewer.expandToLevel(element, 1);
-						resizeShell(shell);
+						resizeShell(fShell);
 					} finally {
 						tree.setRedraw(true);
 					}
@@ -208,7 +221,7 @@ class BreadcrumbItemDropDown {
 					return;
 				
 				fParent.getViewer().fireMenuSelection(data);
-				if (shell.isDisposed())
+				if (fShell.isDisposed())
 					return;
 
 				if (fDropDownViewer.getExpandedState(data)) {
@@ -217,7 +230,7 @@ class BreadcrumbItemDropDown {
 					tree.setRedraw(false);
 					try {
 						fDropDownViewer.expandToLevel(data, 1);
-						resizeShell(shell);
+						resizeShell(fShell);
 					} finally {
 						tree.setRedraw(true);
 					}
@@ -293,7 +306,7 @@ class BreadcrumbItemDropDown {
 					if (selectionIndex != 0)
 						return;
 					
-					shell.close();
+					fShell.close();
 				}
 			}
 
@@ -307,13 +320,13 @@ class BreadcrumbItemDropDown {
 
 			public void treeExpanded(TreeExpansionEvent event) {
 				tree.setRedraw(false);
-				shell.getDisplay().asyncExec(new Runnable() {
+				fShell.getDisplay().asyncExec(new Runnable() {
 					public void run() {
-						if (shell.isDisposed())
+						if (fShell.isDisposed())
 							return;
 						
 						try {
-							resizeShell(shell);
+							resizeShell(fShell);
 						} finally {
 							tree.setRedraw(true);
 						}
@@ -340,8 +353,8 @@ class BreadcrumbItemDropDown {
 			}
 		}
 
-		shell.open();
-		installCloser(shell);
+		fShell.open();
+		installCloser(fShell);
 		
 		tree.setFocus();
 	}
