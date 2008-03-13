@@ -431,10 +431,7 @@ public class JavaElementLabels {
 			ClassPathContainer container= (ClassPathContainer) obj;
 			return getStyledContainerEntryLabel(container.getClasspathEntry().getPath(), container.getJavaProject());
 		} else if (obj instanceof IStorage) {
-			StorageLabelProvider storageLabelProvider= new StorageLabelProvider();
-			String label= storageLabelProvider.getText(obj);
-			storageLabelProvider.dispose();
-			return new StyledStringBuilder(label);
+			return new StyledStringBuilder(((IStorage)obj).getName());
 		} else if (obj instanceof IAdaptable) {
 			IWorkbenchAdapter wbadapter= (IWorkbenchAdapter) ((IAdaptable)obj).getAdapter(IWorkbenchAdapter.class);
 			if (wbadapter != null) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,10 @@ import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StorageLabelProvider;
@@ -29,8 +32,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.StorageLabelProvider;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
+ * <p>Since 3.4, this class also implements {@link DelegatingStyledCellLabelProvider.IStyledLabelProvider} for colored labels.</p>
  */
-public class JavaElementLabelProvider extends LabelProvider {
+public class JavaElementLabelProvider extends LabelProvider implements IStyledLabelProvider {
 	
 	/**
 	 * Flag (bit mask) indicating that methods labels include the method return type (appended).
@@ -245,23 +249,23 @@ public class JavaElementLabelProvider extends LabelProvider {
 	 * @see ILabelProvider#getText
 	 */
 	public String getText(Object element) {
-		String text= JavaElementLabels.getTextLabel(element, fTextFlags);
-		if (text.length() > 0) {
-			return text;
-		}
-
-		if (element instanceof IStorage)
-			return fStorageLabelProvider.getText(element);
-
-		return text;
+		return JavaElementLabels.getTextLabel(element, fTextFlags);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider#getStyledText(java.lang.Object)
+	 */
+	public StyledStringBuilder getStyledText(Object element) {
+		return JavaElementLabels.getStyledTextLabel(element, fTextFlags);
 	}
 
 	/* (non-Javadoc)
-	 * 
 	 * @see IBaseLabelProvider#dispose
 	 */
 	public void dispose() {
 		fStorageLabelProvider.dispose();
 		fImageLabelProvider.dispose();
 	}
+
+
 }
