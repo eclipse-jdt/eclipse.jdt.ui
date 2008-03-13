@@ -221,6 +221,12 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		 * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(java.lang.Object)
 		 */
 		public Object getParent(Object element) {
+			if (element instanceof IType && ((IType) element).isBinary()) {
+				IType declaringType= ((IType) element).getDeclaringType();
+				if (declaringType != null)
+					return declaringType;
+			}
+			
 			Object result= fParent.getParent(element);
 
 			if (result instanceof ITypeRoot) {
@@ -259,7 +265,8 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 				for (int i= 0; i < units.length; i++) {
 					IType[] types= units[i].getTypes();
 					for (int j= 0; j < types.length; j++) {
-						result.add(types[j]);
+						if (isValidType(types[j]))
+							result.add(types[j]);
 					}
 				}
 			} catch (JavaModelException e) {
@@ -269,7 +276,8 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			try {
 				IClassFile[] classFiles= pack.getClassFiles();
 				for (int i= 0; i < classFiles.length; i++) {
-					result.add(classFiles[i].getType());
+					if (isValidType(classFiles[i].getType()))
+						result.add(classFiles[i].getType());
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
@@ -278,6 +286,17 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			return (IType[]) result.toArray(new IType[result.size()]);
 		}
 
+		private boolean isValidType(IType type) {
+			if (type.getDeclaringType() != null)
+				return false;
+
+			try {
+				return !type.isAnonymous();
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+				return false;
+			}
+		}
 
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
@@ -424,8 +443,12 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#setInput(java.lang.Object)
 	 */
 	public void setInput(Object element) {
-		if (element == null)
-			return;
+		if (element == null) {
+			element= getCurrentInput();
+			if (element instanceof IType) {
+				element= ((IType) element).getDeclaringType();
+			}
+		}
 		
 		if (element instanceof IJavaElement) {
 			super.setInput(getInput((IJavaElement) element));
