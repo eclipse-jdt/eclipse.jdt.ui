@@ -742,7 +742,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		// Manifest creation
 		fJarPackage.setGenerateManifest(fGenerateManifestRadioButton.getSelection());
 		fJarPackage.setSaveManifest(fSaveManifestCheckbox.getSelection());
-		fJarPackage.setReuseManifest(fReuseManifestCheckbox.getSelection());
+		fJarPackage.setReuseManifest(fJarPackage.isManifestSaved() && fReuseManifestCheckbox.getSelection());
 		String path;
 		if (fJarPackage.isManifestGenerated())
 			path= fNewManifestFileText.getText();
