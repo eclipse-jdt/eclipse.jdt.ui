@@ -1707,6 +1707,18 @@
 			class="org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchResultPage">
 		</viewPage>
    </extension>
+   <extension
+    	id="ReferencesInBinaryResultPage"
+        point="org.eclipse.search.searchResultViewPages">
+		<viewPage
+			id="org.eclipse.jdt.internal.ui.refactoring.ReferencesInBinarySearchResult"
+			searchResultClass="org.eclipse.jdt.internal.ui.refactoring.ReferencesInBinaryStatusContextViewer$ReferencesInBinarySearchResult"
+			helpContextId="org.eclipse.jdt.ui.refactoring.references_in_binary"
+			class="org.eclipse.jdt.internal.ui.search.JavaSearchResultPage">
+		</viewPage>
+   </extension>   
+   
+   
   
 <!-- =========================================================================== -->
 <!-- Java Compare                                                                -->
@@ -6238,7 +6250,7 @@
             value="COLOR_LIST_SELECTION">
          </colorOverride>
          <colorOverride
-            id="org.eclipse.jdt.ui.autoboxHighlighting"
+            id="org.eclipse.jdt.ui.autoboxingHighlighting"
             value="COLOR_WIDGET_DARK_SHADOW">
          </colorOverride>
          <colorOverride

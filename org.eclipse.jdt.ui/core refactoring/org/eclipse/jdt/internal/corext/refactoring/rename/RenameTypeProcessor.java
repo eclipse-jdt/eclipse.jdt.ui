@@ -585,7 +585,9 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		
 		try {
 			SearchPattern pattern= SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
-			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext();
+			
+			String description= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_ref_in_binaries_description , fType.getElementName());
+			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(description);
 			fReferences= RefactoringSearchEngine.search(
 					pattern,
 					RefactoringScopeFactory.create(fType, true, false),

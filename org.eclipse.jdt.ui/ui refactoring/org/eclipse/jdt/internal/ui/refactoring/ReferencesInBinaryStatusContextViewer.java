@@ -19,19 +19,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.core.resources.IWorkspaceRoot;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.ViewForm;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+
+import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.ISearchResult;
+import org.eclipse.search.ui.NewSearchUI;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.ui.refactoring.IStatusContextViewer;
@@ -43,6 +59,10 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContex
 
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.search.AbstractJavaSearchResult;
+import org.eclipse.jdt.internal.ui.search.NewSearchResultCollector;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 
 public class ReferencesInBinaryStatusContextViewer implements IStatusContextViewer {
@@ -104,6 +124,8 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 	private ViewForm fForm;
 	private CLabel fLabel;
 	private TreeViewer fTreeViewer;
+	private ReferencesInBinaryContext fInput;
+	private Button fButton;
 
 	/*
 	 * @see org.eclipse.ltk.ui.refactoring.IStatusContextViewer#setInput(org.eclipse.ltk.core.refactoring.RefactoringStatusContext)
@@ -121,6 +143,9 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 		}
 		fTreeViewer.setContentProvider(contentProvider);
 		fTreeViewer.setInput(contentProvider);
+		
+		fInput= binariesContext;
+		fButton.setEnabled(!matches.isEmpty());
 	}
 	
 	
@@ -136,7 +161,15 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 		fLabel.setText(RefactoringMessages.ReferencesInBinaryStatusContextViewer_title);
 		fForm.setTopLeft(fLabel);
 
-		fTreeViewer= new TreeViewer(fForm, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		Composite composite= new Composite(fForm, SWT.NONE);
+		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridLayout layout= new GridLayout(1, false);
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
+		composite.setLayout(layout);
+		
+		
+		fTreeViewer= new TreeViewer(composite, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		final AppearanceAwareLabelProvider labelProvider= new AppearanceAwareLabelProvider();
 		fTreeViewer.setLabelProvider(new DelegatingStyledCellLabelProvider(labelProvider));
 		fTreeViewer.setComparator(new ViewerComparator() {
@@ -147,9 +180,28 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 				return fCollator.compare(l1, l2);
 			}
 		});
-		fForm.setContent(fTreeViewer.getControl());
+		fTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		fButton= new Button(composite, SWT.PUSH);
+		fButton.setText(RefactoringMessages.ReferencesInBinaryStatusContextViewer_show_as_search_button);
+		GridData layoutData= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
+		layoutData.widthHint= SWTUtil.getButtonWidthHint(fButton);
+		fButton.setLayoutData(layoutData);
+		fButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				fillInSearchView();
+			}
+		});
+		fButton.setEnabled(false);
+		
+		fForm.setContent(composite);
 		
 		Dialog.applyDialogFont(parent);
+	}
+
+	protected void fillInSearchView() {
+		NewSearchUI.runQueryInBackground(new ReferencesInBinarySearchQuery(fInput), null);
+		fButton.setEnabled(false);
 	}
 
 	/**
@@ -158,5 +210,78 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 	public Control getControl() {
 		return fForm;
 	}
+	
+
+	static class ReferencesInBinarySearchQuery implements ISearchQuery {
+		
+		private final ReferencesInBinaryContext fContext;
+		private ReferencesInBinarySearchResult fResult;
+
+		public ReferencesInBinarySearchQuery(ReferencesInBinaryContext context) {
+			fContext= context;
+			fResult= new ReferencesInBinarySearchResult(this);
+		}
+
+		public boolean canRerun() {
+			return false;
+		}
+
+		public boolean canRunInBackground() {
+			return true;
+		}
+
+		public String getLabel() {
+			return fContext.getDescription();
+		}
+
+		public ISearchResult getSearchResult() {
+			return fResult;
+		}
+
+		public IStatus run(IProgressMonitor monitor) throws OperationCanceledException {
+			fResult.removeAll();
+			List matches= fContext.getMatches();
+			
+			NewSearchResultCollector collector= new NewSearchResultCollector(fResult, false);
+			collector.beginReporting();
+			
+			for (Iterator iter= matches.iterator(); iter.hasNext();) {
+				try {
+					collector.acceptSearchMatch((SearchMatch) iter.next());
+				} catch (CoreException e) {
+					// ignore
+				}
+			}
+			collector.endReporting();
+			return Status.OK_STATUS;
+		}
+		
+	}
+	
+	public static class ReferencesInBinarySearchResult extends AbstractJavaSearchResult {
+				
+		private final ReferencesInBinarySearchQuery fQuery;
+
+		public ReferencesInBinarySearchResult(ReferencesInBinarySearchQuery query) {
+			fQuery= query;
+		}
+
+		public ImageDescriptor getImageDescriptor() {
+			return JavaPluginImages.DESC_OBJS_SEARCH_REF;
+		}
+
+		public String getLabel() {
+			return fQuery.getLabel();
+		}
+
+		public String getTooltip() {
+			return getLabel();
+		}
+		
+		public ISearchQuery getQuery() {
+			return fQuery;
+		}
+	}
+	
 	
 }

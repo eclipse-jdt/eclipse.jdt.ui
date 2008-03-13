@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,14 +18,16 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
+
 public class JavaSearchTableContentProvider extends JavaSearchContentProvider implements IStructuredContentProvider {
 	public JavaSearchTableContentProvider(JavaSearchResultPage page) {
 		super(page);
 	}
 	public Object[] getElements(Object inputElement) {
-		if (inputElement instanceof JavaSearchResult) {
+		if (inputElement instanceof AbstractTextSearchResult) {
 			Set filteredElements= new HashSet();
-			Object[] rawElements= ((JavaSearchResult)inputElement).getElements();
+			Object[] rawElements= ((AbstractTextSearchResult)inputElement).getElements();
 			int limit= getPage().getElementLimit().intValue();
 			for (int i= 0; i < rawElements.length; i++) {
 				if (getPage().getDisplayedMatchCount(rawElements[i]) > 0) {

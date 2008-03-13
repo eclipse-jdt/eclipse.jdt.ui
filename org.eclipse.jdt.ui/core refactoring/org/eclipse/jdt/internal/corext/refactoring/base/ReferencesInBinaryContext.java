@@ -20,6 +20,17 @@ import org.eclipse.jdt.core.search.SearchMatch;
 public class ReferencesInBinaryContext extends RefactoringStatusContext {
 
 	private List/*<SearchMatch>*/fMatches= new ArrayList();
+	
+	private final String fDescription;
+	
+	public ReferencesInBinaryContext(String description) {
+		fDescription= description;
+	}
+	
+	public String getDescription() {
+		return fDescription;
+	}
+	
 
 	public void add(SearchMatch match) {
 		fMatches.add(match);

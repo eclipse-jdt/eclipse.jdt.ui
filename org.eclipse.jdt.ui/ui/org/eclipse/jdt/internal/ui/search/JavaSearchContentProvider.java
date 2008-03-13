@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,10 +13,12 @@ package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
+
 public abstract class JavaSearchContentProvider implements IStructuredContentProvider {
 	protected final Object[] EMPTY_ARR= new Object[0];
 	
-	private JavaSearchResult fResult;
+	private AbstractTextSearchResult fResult;
 	private JavaSearchResultPage fPage;
 
 	JavaSearchContentProvider(JavaSearchResultPage page) {
@@ -24,11 +26,11 @@ public abstract class JavaSearchContentProvider implements IStructuredContentPro
 	}
 	
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		initialize((JavaSearchResult) newInput);
+		initialize((AbstractTextSearchResult) newInput);
 		
 	}
 	
-	protected void initialize(JavaSearchResult result) {
+	protected void initialize(AbstractTextSearchResult result) {
 		fResult= result;
 	}
 	
@@ -43,7 +45,7 @@ public abstract class JavaSearchContentProvider implements IStructuredContentPro
 		return fPage;
 	}
 	
-	JavaSearchResult getSearchResult() {
+	AbstractTextSearchResult getSearchResult() {
 		return fResult;
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,9 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.search.FieldReferenceMatch;
 import org.eclipse.jdt.core.search.LocalVariableReferenceMatch;
@@ -20,10 +23,10 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
 public class NewSearchResultCollector extends SearchRequestor {
-	private JavaSearchResult fSearch;
+	private AbstractTextSearchResult fSearch;
 	private boolean fIgnorePotentials;
 
-	public NewSearchResultCollector(JavaSearchResult search, boolean ignorePotentials) {
+	public NewSearchResultCollector(AbstractTextSearchResult search, boolean ignorePotentials) {
 		super();
 		fSearch= search;
 		fIgnorePotentials= ignorePotentials;

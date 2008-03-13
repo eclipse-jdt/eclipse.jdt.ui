@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,8 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -102,7 +104,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 		return getChildren(inputElement);
 	}
 
-	protected synchronized void initialize(JavaSearchResult result) {
+	protected synchronized void initialize(AbstractTextSearchResult result) {
 		super.initialize(result);
 		fChildrenMap= new HashMap();
 		if (result != null) {

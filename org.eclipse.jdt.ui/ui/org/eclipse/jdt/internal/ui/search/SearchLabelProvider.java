@@ -224,7 +224,11 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 
 
 	private ILabelProvider getLabelProvider(Object element) {
-		IMatchPresentation participant= ((JavaSearchResult) fPage.getInput()).getSearchParticpant(element);
+		AbstractTextSearchResult input= fPage.getInput();
+		if (!(input instanceof JavaSearchResult))
+			return null;
+		
+		IMatchPresentation participant= ((JavaSearchResult) input).getSearchParticpant(element);
 		if (participant == null)
 			return null;
 		
