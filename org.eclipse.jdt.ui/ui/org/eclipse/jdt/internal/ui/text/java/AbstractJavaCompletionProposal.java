@@ -997,6 +997,10 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		fDisplayString= new StyledStringBuilder(string);
 	}
 	
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension6#getStyledDisplayString()
+	 * @since 3.4
+	 */
 	public StyledStringBuilder getStyledDisplayString() {
 		return fDisplayString;
 	}

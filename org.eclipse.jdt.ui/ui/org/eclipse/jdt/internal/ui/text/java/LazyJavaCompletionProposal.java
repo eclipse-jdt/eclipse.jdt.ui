@@ -211,6 +211,10 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 		super.setContextInformation(contextInformation);
 	}
 	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#getStyledDisplayString()
+	 * @since 3.4
+	 */
 	public StyledStringBuilder getStyledDisplayString() {
 		if (!fDisplayStringComputed)
 			setStyledDisplayString(computeDisplayString());
