@@ -93,15 +93,15 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal i
 		StyledStringBuilder buf= new StyledStringBuilder();
 		if (isGetter) {
 			buf.append(GetterSetterUtil.getGetterName(field, null));
-			buf.append("()  "); //$NON-NLS-1$
-			buf.append(Signature.toString(field.getTypeSignature()), StyledStringBuilder.DECORATIONS_STYLER);
+			buf.append("() : "); //$NON-NLS-1$
+			buf.append(Signature.toString(field.getTypeSignature()));
 			buf.append(" - ", StyledStringBuilder.QUALIFIER_STYLER); //$NON-NLS-1$
 			buf.append(Messages.format(JavaTextMessages.GetterSetterCompletionProposal_getter_label, field.getElementName()), StyledStringBuilder.QUALIFIER_STYLER);
 		} else {
 			buf.append(GetterSetterUtil.getSetterName(field, null));
 			buf.append('(').append(Signature.toString(field.getTypeSignature())).append(')');
-			buf.append("  "); //$NON-NLS-1$
-			buf.append(Signature.toString(Signature.SIG_VOID), StyledStringBuilder.DECORATIONS_STYLER);
+			buf.append(" : "); //$NON-NLS-1$
+			buf.append(Signature.toString(Signature.SIG_VOID));
 			buf.append(" - ", StyledStringBuilder.QUALIFIER_STYLER); //$NON-NLS-1$
 			buf.append(Messages.format(JavaTextMessages.GetterSetterCompletionProposal_setter_label, field.getElementName()), StyledStringBuilder.QUALIFIER_STYLER);
 		}

@@ -40,6 +40,10 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  */
 public class CompletionProposalLabelProvider {
 
+	private static final String QUALIFIER_SEPARATOR= JavaElementLabels.CONCAT_STRING;
+	private static final String RETURN_TYPE_SEPARATOR= JavaElementLabels.DECL_STRING;
+	private static final String VAR_TYPE_SEPARATOR= JavaElementLabels.DECL_STRING;
+	
 	/**
 	 * The completion context.
 	 * 
@@ -262,12 +266,12 @@ public class CompletionProposalLabelProvider {
 		if (!methodProposal.isConstructor()) {
 			// TODO remove SignatureUtil.fix83600 call when bugs are fixed
 			char[] returnType= createTypeDisplayName(SignatureUtil.getUpperBound(Signature.getReturnType(SignatureUtil.fix83600(methodProposal.getSignature()))));
-			nameBuffer.append("  "); //$NON-NLS-1$
-			nameBuffer.append(new String(returnType), StyledStringBuilder.DECORATIONS_STYLER);
+			nameBuffer.append(RETURN_TYPE_SEPARATOR);
+			nameBuffer.append(new String(returnType));
 		}
 
 		// declaring type
-		nameBuffer.append(" - ", StyledStringBuilder.QUALIFIER_STYLER); //$NON-NLS-1$
+		nameBuffer.append(QUALIFIER_SEPARATOR, StyledStringBuilder.QUALIFIER_STYLER); 
 		String declaringType= extractDeclaringTypeFQN(methodProposal);
 		declaringType= Signature.getSimpleName(declaringType);
 		nameBuffer.append(declaringType, StyledStringBuilder.QUALIFIER_STYLER);
@@ -300,7 +304,7 @@ public class CompletionProposalLabelProvider {
 		nameBuffer.append(new String(methodProposal.getCompletion()));
 		
 		// declaring type
-		nameBuffer.append(" - ", StyledStringBuilder.QUALIFIER_STYLER); //$NON-NLS-1$
+		nameBuffer.append(QUALIFIER_SEPARATOR, StyledStringBuilder.QUALIFIER_STYLER); 
 		String declaringType= extractDeclaringTypeFQN(methodProposal);
 		declaringType= Signature.getSimpleName(declaringType);
 		nameBuffer.append(declaringType, StyledStringBuilder.QUALIFIER_STYLER);
@@ -317,15 +321,17 @@ public class CompletionProposalLabelProvider {
 		// parameters
 		nameBuffer.append('(');
 		appendUnboundedParameterList(nameBuffer, methodProposal);
-		nameBuffer.append(")  "); //$NON-NLS-1$
+		nameBuffer.append(')');
+		
+		nameBuffer.append(RETURN_TYPE_SEPARATOR);
 
 		// return type
 		// TODO remove SignatureUtil.fix83600 call when bugs are fixed
 		char[] returnType= createTypeDisplayName(SignatureUtil.getUpperBound(Signature.getReturnType(SignatureUtil.fix83600(methodProposal.getSignature()))));
-		nameBuffer.append(new String(returnType), StyledStringBuilder.DECORATIONS_STYLER);
+		nameBuffer.append(new String(returnType));
 
 		// declaring type
-		nameBuffer.append(" - ", StyledStringBuilder.QUALIFIER_STYLER); //$NON-NLS-1$
+		nameBuffer.append(QUALIFIER_SEPARATOR, StyledStringBuilder.QUALIFIER_STYLER); 
 
 		String declaringType= extractDeclaringTypeFQN(methodProposal);
 		declaringType= Signature.getSimpleName(declaringType);
@@ -433,8 +439,8 @@ public class CompletionProposalLabelProvider {
 		buf.append(new String(proposal.getCompletion()));
 		char[] typeName= Signature.getSignatureSimpleName(proposal.getSignature());
 		if (typeName.length > 0) {
-			buf.append("    "); //$NON-NLS-1$
-			buf.append(new String(typeName), StyledStringBuilder.DECORATIONS_STYLER);
+			buf.append(VAR_TYPE_SEPARATOR);
+			buf.append(new String(typeName));
 		}
 		return buf;
 	}
@@ -461,14 +467,14 @@ public class CompletionProposalLabelProvider {
 		buf.append(new String(name));
 		char[] typeName= Signature.getSignatureSimpleName(proposal.getSignature());
 		if (typeName.length > 0) {
-			buf.append("    "); //$NON-NLS-1$
-			buf.append(new String(typeName), StyledStringBuilder.DECORATIONS_STYLER);
+			buf.append(VAR_TYPE_SEPARATOR);
+			buf.append(new String(typeName));
 		}
 		char[] declaration= proposal.getDeclarationSignature();
 		if (declaration != null) {
 			declaration= Signature.getSignatureSimpleName(declaration);
 			if (declaration.length > 0) {
-				buf.append(" - ", StyledStringBuilder.QUALIFIER_STYLER); //$NON-NLS-1$
+				buf.append(QUALIFIER_SEPARATOR, StyledStringBuilder.QUALIFIER_STYLER); 
 				buf.append(new String(declaration), StyledStringBuilder.QUALIFIER_STYLER);
 			}
 		}

@@ -106,8 +106,8 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
 		buf.append('(');
 		buf.append(')');
 		if (returnTypeSig != null) {
-			buf.append("  "); //$NON-NLS-1$
-			buf.append(Signature.toString(returnTypeSig), StyledStringBuilder.DECORATIONS_STYLER);
+			buf.append(" : "); //$NON-NLS-1$
+			buf.append(Signature.toString(returnTypeSig));
 			buf.append(" - ", StyledStringBuilder.QUALIFIER_STYLER); //$NON-NLS-1$
 			buf.append(JavaTextMessages.MethodCompletionProposal_method_label, StyledStringBuilder.QUALIFIER_STYLER);
 		} else {
