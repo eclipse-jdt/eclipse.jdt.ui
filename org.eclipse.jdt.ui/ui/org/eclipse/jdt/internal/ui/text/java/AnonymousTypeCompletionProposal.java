@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.viewers.StyledStringBuilder;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -75,7 +76,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	private int fContextInformationPosition;
 
 
-	public AnonymousTypeCompletionProposal(IJavaProject jproject, ICompilationUnit cu, int start, int length, String constructorCompletion, String displayName, String declarationSignature, IType superType, int relevance) {
+	public AnonymousTypeCompletionProposal(IJavaProject jproject, ICompilationUnit cu, int start, int length, String constructorCompletion, StyledStringBuilder displayName, String declarationSignature, IType superType, int relevance) {
 		super(constructorCompletion, cu, start, length, null, displayName, relevance);
 		Assert.isNotNull(declarationSignature);
 		Assert.isNotNull(jproject);

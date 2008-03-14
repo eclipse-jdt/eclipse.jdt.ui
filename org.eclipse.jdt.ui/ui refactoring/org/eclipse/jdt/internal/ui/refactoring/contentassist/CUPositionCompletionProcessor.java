@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.jface.contentassist.IContentAssistSubjectControl;
 import org.eclipse.jface.contentassist.ISubjectControlContentAssistProcessor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.StyledStringBuilder;
 
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -178,7 +179,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 			 * has no dispose() lifecycle method. A workaround could be to pass in a WorkingCopyOwner
 			 * and dispose the owner's working copies from the caller's dispose().
 			 */
-			cu= fCompletionContextRequestor.getOriginalCu().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, null, new NullProgressMonitor());
+			cu= fCompletionContextRequestor.getOriginalCu().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, new NullProgressMonitor());
 			cu.getBuffer().setContents(cuString);
 			int cuPrefixLength= fCompletionContextRequestor.getBeforeString().length();
 			fCompletionRequestor.setOffsetReduction(cuPrefixLength);
@@ -244,7 +245,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 		protected final void addAdjustedCompletion(String name, String completion,
 				int start, int end, int relevance, ImageDescriptor descriptor) {
 			JavaCompletionProposal javaCompletionProposal= new JavaCompletionProposal(completion, start - fOffsetReduction, end - start,
-					getImage(descriptor), name, relevance);
+					getImage(descriptor), new StyledStringBuilder(name), relevance);
 			javaCompletionProposal.setTriggerCharacters(TRIGGER_CHARACTERS);
 			fProposals.add(javaCompletionProposal);
 		}
@@ -254,7 +255,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 			JavaTypeCompletionProposal javaCompletionProposal= new JavaTypeCompletionProposal(
 					fullyQualifiedName == null || completion.length() == 0 ? completion : fullyQualifiedName,
 					null, start - fOffsetReduction,
-					end - start, getImage(descriptor), name, relevance, completion);
+					end - start, getImage(descriptor), new StyledStringBuilder(name), relevance, completion);
 			javaCompletionProposal.setTriggerCharacters(TRIGGER_CHARACTERS);
 			fProposals.add(javaCompletionProposal);
 		}

@@ -37,6 +37,7 @@ import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.StyledStringBuilder;
 
 import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
 import org.eclipse.jface.text.BadLocationException;
@@ -58,6 +59,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
@@ -90,7 +92,7 @@ import org.osgi.framework.Bundle;
  * 
  * @since 3.2
  */
-public abstract class AbstractJavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension5 {
+public abstract class AbstractJavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension5, ICompletionProposalExtension6 {
 	
 	
 	/**
@@ -125,7 +127,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		 *
 		 * @param document the document on which to track the reference position.
 		 * @param offset the offset
-		 * @throws BadLocationException if the offset describes an invalid range in this document 
+		 * @throws BadLocationException if the offset describes an invalid range in this document
 		 *
 		 */
 		public void preReplace(IDocument document, int offset) throws BadLocationException {
@@ -204,7 +206,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	
 	}
 
-	private String fDisplayString;
+	private StyledStringBuilder fDisplayString;
 	private String fReplacementString;
 	private int fReplacementOffset;
 	private int fReplacementLength;
@@ -497,12 +499,14 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	public void setContextInformation(IContextInformation contextInformation) {
 		fContextInformation= contextInformation;
 	}
-	
+
 	/*
 	 * @see ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return fDisplayString;
+		if (fDisplayString != null)
+			return fDisplayString.toString();
+		return ""; //$NON-NLS-1$
 	}
 
 	/*
@@ -534,7 +538,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	/**
 	 * Returns the style information for displaying HTML (Javadoc) content.
 	 * 
-	 * @return the CSS styles 
+	 * @return the CSS styles
 	 * @since 3.3
 	 */
 	protected String getCSSStyles() {
@@ -735,7 +739,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * <code>offset</code>. Returns the empty string if <code>offset</code> is before the
 	 * replacement offset or if an exception occurs when accessing the document.
 	 * 
-	 * @param document the document 
+	 * @param document the document
 	 * @param offset the offset
 	 * @return the prefix
 	 * @since 3.2
@@ -757,7 +761,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * @param string  the string to look for the prefix
 	 * @return <code>true</code> if the string begins with the given prefix and
 	 *			<code>false</code> if <code>prefix</code> is longer than <code>string</code>
-	 *			or the string doesn't start with the given prefix 
+	 *			or the string doesn't start with the given prefix
 	 * @since 3.2
 	 */
 	protected boolean isPrefix(String prefix, String string) {
@@ -990,7 +994,15 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	}
 
 	protected void setDisplayString(String string) {
-		fDisplayString= string;
+		fDisplayString= new StyledStringBuilder(string);
+	}
+	
+	public StyledStringBuilder getStyledDisplayString() {
+		return fDisplayString;
+	}
+		
+	public void setStyledDisplayString(StyledStringBuilder text) {
+		fDisplayString= text;
 	}
 	
 	/*

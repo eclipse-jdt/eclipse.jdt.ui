@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.StyledStringBuilder;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
@@ -38,6 +39,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
@@ -69,11 +71,12 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.IndentUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 
 /**
  * A template proposal.
  */
-public class TemplateProposal implements IJavaCompletionProposal, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension4 {
+public class TemplateProposal implements IJavaCompletionProposal, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension4, ICompletionProposalExtension6 {
 
 	private final Template fTemplate;
 	private final TemplateContext fContext;
@@ -82,7 +85,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	private int fRelevance;
 
 	private IRegion fSelectedRegion; // initialized by apply()
-	private String fDisplayString;
+	private StyledStringBuilder fDisplayString;
 	private InclusivePositionUpdater fUpdater;
 
 	/**
@@ -434,14 +437,23 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	 * @see ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
+		return getStyledDisplayString().toString();
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension6#getStyledDisplayString()
+	 */
+	public StyledStringBuilder getStyledDisplayString() {
 		if (fDisplayString == null) {
 			String[] arguments= new String[] { fTemplate.getName(), fTemplate.getDescription() };
-			fDisplayString= Messages.format(TemplateContentAssistMessages.TemplateProposal_displayString, arguments);
+			String decorated= Messages.format(TemplateContentAssistMessages.TemplateProposal_displayString, arguments);
+			StyledStringBuilder string= new StyledStringBuilder(fTemplate.getName(), StyledStringBuilder.COUNTER_STYLER);
+			fDisplayString= ColoringLabelProvider.decorateStyledString(string, decorated, StyledStringBuilder.QUALIFIER_STYLER);
 		}
 		return fDisplayString;
 	}
-
-	public void setDisplayString(String displayString) {
+	
+	public void setDisplayString(StyledStringBuilder displayString) {
 		fDisplayString= displayString;
 	}
 

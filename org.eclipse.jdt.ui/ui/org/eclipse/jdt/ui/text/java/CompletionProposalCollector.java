@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.StyledStringBuilder;
 
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
@@ -631,7 +632,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 
 	private IJavaCompletionProposal createAnnotationAttributeReferenceProposal(CompletionProposal proposal) {
-		String displayString= fLabelProvider.createLabelWithTypeAndDeclaration(proposal);
+		StyledStringBuilder displayString= fLabelProvider.createLabelWithTypeAndDeclaration(proposal);
 		ImageDescriptor descriptor= fLabelProvider.createMethodImageDescriptor(proposal);
 		String completion= String.valueOf(proposal.getCompletion());
 		return new JavaCompletionProposal(completion, proposal.getReplaceStart(), getLength(proposal), getImage(descriptor), displayString, computeRelevance(proposal));
@@ -657,7 +658,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			int length= getLength(proposal);
 			int relevance= computeRelevance(proposal);
 
-			String label= fLabelProvider.createAnonymousTypeLabel(proposal);
+			StyledStringBuilder label= fLabelProvider.createAnonymousTypeLabel(proposal);
 
 			JavaCompletionProposal javaProposal= new AnonymousTypeCompletionProposal(fJavaProject, fCompilationUnit, start, length, completion, label, String.valueOf(proposal.getDeclarationSignature()), type, relevance);
 			javaProposal.setProposalInfo(new AnonymousTypeProposalInfo(fJavaProject, proposal));
@@ -671,7 +672,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		String completion= String.valueOf(proposal.getCompletion());
 		int start= proposal.getReplaceStart();
 		int length= getLength(proposal);
-		String label= fLabelProvider.createLabel(proposal);
+		StyledStringBuilder label= fLabelProvider.createStyledLabel(proposal);
 		Image image= getImage(fLabelProvider.createFieldImageDescriptor(proposal));
 		int relevance= computeRelevance(proposal);
 
@@ -697,7 +698,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		completion= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, completion, 0, "\n", fJavaProject); //$NON-NLS-1$
 		int start= proposal.getReplaceStart();
 		int length= getLength(proposal);
-		String label= fLabelProvider.createLabel(proposal);
+		StyledStringBuilder label= fLabelProvider.createStyledLabel(proposal);
 		Image image= getImage(fLabelProvider.createFieldImageDescriptor(proposal));
 		int relevance= computeRelevance(proposal);
 
@@ -741,7 +742,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		String completion= String.valueOf(proposal.getCompletion());
 		int start= proposal.getReplaceStart();
 		int length= getLength(proposal);
-		String label= fLabelProvider.createSimpleLabel(proposal);
+		StyledStringBuilder label= fLabelProvider.createSimpleLabel(proposal);
 		int relevance= computeRelevance(proposal);
 		return new JavaCompletionProposal(completion, start, length, null, label, relevance);
 	}
@@ -750,7 +751,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		String completion= String.valueOf(proposal.getCompletion());
 		int start= proposal.getReplaceStart();
 		int length= getLength(proposal);
-		String label= fLabelProvider.createSimpleLabel(proposal);
+		StyledStringBuilder label= fLabelProvider.createSimpleLabel(proposal);
 		int relevance= computeRelevance(proposal);
 
 		return new JavaCompletionProposal(completion, start, length, null, label, relevance);
@@ -761,7 +762,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		int start= proposal.getReplaceStart();
 		int length= getLength(proposal);
 		Image image= getImage(fLabelProvider.createLocalImageDescriptor(proposal));
-		String label= fLabelProvider.createSimpleLabelWithType(proposal);
+		StyledStringBuilder label= fLabelProvider.createSimpleLabelWithType(proposal);
 		int relevance= computeRelevance(proposal);
 
 		final JavaCompletionProposal javaProposal= new JavaCompletionProposal(completion, start, length, image, label, relevance);
@@ -780,7 +781,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		int start= proposal.getReplaceStart();
 		int length= getLength(proposal);
 
-		String label= fLabelProvider.createOverrideMethodProposalLabel(proposal);
+		StyledStringBuilder label= fLabelProvider.createOverrideMethodProposalLabel(proposal);
 
 		JavaCompletionProposal javaProposal= new OverrideCompletionProposal(fJavaProject, fCompilationUnit, name, paramTypes, start, length, label, String.valueOf(proposal.getCompletion()));
 		javaProposal.setImage(getImage(fLabelProvider.createMethodImageDescriptor(proposal)));
@@ -807,7 +808,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		String completion= String.valueOf(proposal.getCompletion());
 		int start= proposal.getReplaceStart();
 		int length= getLength(proposal);
-		String label= fLabelProvider.createSimpleLabel(proposal);
+		StyledStringBuilder label= fLabelProvider.createSimpleLabel(proposal);
 		Image image= getImage(fLabelProvider.createPackageImageDescriptor(proposal));
 		int relevance= computeRelevance(proposal);
 

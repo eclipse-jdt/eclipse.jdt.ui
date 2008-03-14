@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.text.java;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.viewers.StyledStringBuilder;
 
 import org.eclipse.jdt.core.CompletionProposal;
 
@@ -28,7 +30,7 @@ public class JavaFieldWithCastedReceiverCompletionProposal extends JavaCompletio
 
 	private CompletionProposal fProposal;
 
-	public JavaFieldWithCastedReceiverCompletionProposal(String completion, int start, int length, Image image, String label, int relevance, boolean inJavadoc, JavaContentAssistInvocationContext invocationContext, CompletionProposal proposal) {
+	public JavaFieldWithCastedReceiverCompletionProposal(String completion, int start, int length, Image image, StyledStringBuilder label, int relevance, boolean inJavadoc, JavaContentAssistInvocationContext invocationContext, CompletionProposal proposal) {
 		super(completion, start, length, image, label, relevance, inJavadoc, invocationContext);
 		Assert.isNotNull(proposal);
 		fProposal= proposal;

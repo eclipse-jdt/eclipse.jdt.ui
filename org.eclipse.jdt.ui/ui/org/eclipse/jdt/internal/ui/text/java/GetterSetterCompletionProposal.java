@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,8 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jface.viewers.StyledStringBuilder;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -87,23 +89,23 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal i
 		setProposalInfo(new ProposalInfo(field));
 	}
 
-	private static String getDisplayName(IField field, boolean isGetter) throws JavaModelException {
-		StringBuffer buf= new StringBuffer();
+	private static StyledStringBuilder getDisplayName(IField field, boolean isGetter) throws JavaModelException {
+		StyledStringBuilder buf= new StyledStringBuilder();
 		if (isGetter) {
 			buf.append(GetterSetterUtil.getGetterName(field, null));
 			buf.append("()  "); //$NON-NLS-1$
-			buf.append(Signature.toString(field.getTypeSignature()));
-			buf.append(" - "); //$NON-NLS-1$
-			buf.append(Messages.format(JavaTextMessages.GetterSetterCompletionProposal_getter_label, field.getElementName()));
+			buf.append(Signature.toString(field.getTypeSignature()), StyledStringBuilder.DECORATIONS_STYLER);
+			buf.append(" - ", StyledStringBuilder.QUALIFIER_STYLER); //$NON-NLS-1$
+			buf.append(Messages.format(JavaTextMessages.GetterSetterCompletionProposal_getter_label, field.getElementName()), StyledStringBuilder.QUALIFIER_STYLER);
 		} else {
 			buf.append(GetterSetterUtil.getSetterName(field, null));
 			buf.append('(').append(Signature.toString(field.getTypeSignature())).append(')');
 			buf.append("  "); //$NON-NLS-1$
-			buf.append(Signature.toString(Signature.SIG_VOID));
-			buf.append(" - "); //$NON-NLS-1$
-			buf.append(Messages.format(JavaTextMessages.GetterSetterCompletionProposal_setter_label, field.getElementName()));
+			buf.append(Signature.toString(Signature.SIG_VOID), StyledStringBuilder.DECORATIONS_STYLER);
+			buf.append(" - ", StyledStringBuilder.QUALIFIER_STYLER); //$NON-NLS-1$
+			buf.append(Messages.format(JavaTextMessages.GetterSetterCompletionProposal_setter_label, field.getElementName()), StyledStringBuilder.QUALIFIER_STYLER);
 		}
-		return buf.toString();
+		return buf;
 	}
 
 	/* (non-Javadoc)

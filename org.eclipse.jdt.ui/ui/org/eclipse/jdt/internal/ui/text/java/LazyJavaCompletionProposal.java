@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,8 @@ package org.eclipse.jdt.internal.ui.text.java;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.viewers.StyledStringBuilder;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -209,22 +211,30 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 		super.setContextInformation(contextInformation);
 	}
 	
-	/*
-	 * @see ICompletionProposal#getDisplayString()
-	 */
-	public final String getDisplayString() {
+	public StyledStringBuilder getStyledDisplayString() {
 		if (!fDisplayStringComputed)
-			setDisplayString(computeDisplayString());
+			setStyledDisplayString(computeDisplayString());
+		return super.getStyledDisplayString();
+	}
+	
+	public String getDisplayString() {
+		if (!fDisplayStringComputed)
+			setStyledDisplayString(computeDisplayString());
 		return super.getDisplayString();
 	}
-
+	
 	protected final void setDisplayString(String string) {
 		fDisplayStringComputed= true;
 		super.setDisplayString(string);
 	}
+	
+	public void setStyledDisplayString(StyledStringBuilder text) {
+		fDisplayStringComputed= true;
+		super.setStyledDisplayString(text);
+	}
 
-	protected String computeDisplayString() {
-		return fInvocationContext.getLabelProvider().createLabel(fProposal);
+	protected StyledStringBuilder computeDisplayString() {
+		return fInvocationContext.getLabelProvider().createStyledLabel(fProposal);
 	}
 
 	/*
