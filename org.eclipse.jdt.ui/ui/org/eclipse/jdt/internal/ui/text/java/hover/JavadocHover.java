@@ -11,12 +11,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.eclipse.core.runtime.Platform;
+
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -25,6 +31,7 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 import org.eclipse.jface.internal.text.html.BrowserInformationControlInput;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
+import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -74,6 +81,8 @@ import org.eclipse.jdt.internal.ui.infoviews.JavadocView;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 import org.eclipse.jdt.internal.ui.viewsupport.ImagesOnFileSystemRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
+
+import org.osgi.framework.Bundle;
 
 
 /**
@@ -334,6 +343,11 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		| JavaElementLabels.USE_RESOLVED;
 	private static final long LOCAL_VARIABLE_FLAGS= LABEL_FLAGS & ~JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.F_POST_QUALIFIED;
 
+	/**
+	 * The style sheet (css).
+	 * @since 3.4
+	 */
+	private static String fgStyleSheet;
 	
 	/**
 	 * The hover control creator.
@@ -544,7 +558,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			return null;
 
 		if (buffer.length() > 0) {
-			HTMLPrinter.insertPageProlog(buffer, 0, getStyleSheet());
+			HTMLPrinter.insertPageProlog(buffer, 0, JavadocHover.getStyleSheet());
 			if (base != null) {
 				//TODO: base URI only makes sense if URI is hierarchical
 //				int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
@@ -708,5 +722,56 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 */
 	private static String formatWithHexValue(Object constantValue, String hexValue) {
 		return Messages.format(JavaHoverMessages.JavadocHover_constantValue_hexValue, new String[] { constantValue.toString(), hexValue });
+	}
+
+	/**
+	 * Returns the Javadoc hover style sheet with the current Javadoc font from the preferences.
+	 * @return the updated style sheet
+	 * @since 3.4
+	 */
+	private static String getStyleSheet() {
+		if (fgStyleSheet == null)
+			fgStyleSheet= loadStyleSheet();
+		String css= fgStyleSheet;
+		if (css != null) {
+			FontData fontData= JFaceResources.getFontRegistry().getFontData(PreferenceConstants.APPEARANCE_JAVADOC_FONT)[0];
+			css= HTMLPrinter.convertTopLevelFont(css, fontData);
+		}
+	
+		return css;
+	}
+
+	/**
+	 * Loads and returns the Javadoc hover style sheet.
+	 * @return the style sheet, or <code>null</code> if unable to load
+	 * @since 3.4
+	 */
+	private static String loadStyleSheet() {
+		Bundle bundle= Platform.getBundle(JavaPlugin.getPluginId());
+		URL styleSheetURL= bundle.getEntry("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
+		if (styleSheetURL != null) {
+			BufferedReader reader= null;
+			try {
+				reader= new BufferedReader(new InputStreamReader(styleSheetURL.openStream()));
+				StringBuffer buffer= new StringBuffer(1500);
+				String line= reader.readLine();
+				while (line != null) {
+					buffer.append(line);
+					buffer.append('\n');
+					line= reader.readLine();
+				}
+				return buffer.toString();
+			} catch (IOException ex) {
+				JavaPlugin.log(ex);
+				return ""; //$NON-NLS-1$
+			} finally {
+				try {
+					if (reader != null)
+						reader.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+		return null;
 	}
 }

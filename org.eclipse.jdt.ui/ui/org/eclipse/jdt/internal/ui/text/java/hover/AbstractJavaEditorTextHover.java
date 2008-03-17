@@ -11,18 +11,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
 
-import org.eclipse.core.runtime.Platform;
 
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.internal.text.html.HTMLPrinter;
-import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IInformationControl;
@@ -43,7 +35,6 @@ import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -51,7 +42,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
-import org.osgi.framework.Bundle;
 
 
 /**
@@ -60,11 +50,6 @@ import org.osgi.framework.Bundle;
  * @since 2.1
  */
 public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHover, ITextHoverExtension, ITextHoverExtension2 {
-	/**
-	 * The style sheet (css).
-	 * @since 3.2
-	 */
-	private static String fgStyleSheet;
 	private IEditorPart fEditor;
 
 	/*
@@ -158,47 +143,6 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 				return new DefaultInformationControl(shell, true);
 			}
 		};
-	}
-	
-	protected static String getStyleSheet() {
-		if (fgStyleSheet == null)
-			fgStyleSheet= loadStyleSheet();
-		String css= fgStyleSheet;
-		if (css != null) {
-			FontData fontData= JFaceResources.getFontRegistry().getFontData(PreferenceConstants.APPEARANCE_JAVADOC_FONT)[0];
-			css= HTMLPrinter.convertTopLevelFont(css, fontData);
-		}
-
-		return css;
-	}
-	
-	private static String loadStyleSheet() {
-		Bundle bundle= Platform.getBundle(JavaPlugin.getPluginId());
-		URL styleSheetURL= bundle.getEntry("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
-		if (styleSheetURL != null) {
-			BufferedReader reader= null;
-			try {
-				reader= new BufferedReader(new InputStreamReader(styleSheetURL.openStream()));
-				StringBuffer buffer= new StringBuffer(1500);
-				String line= reader.readLine();
-				while (line != null) {
-					buffer.append(line);
-					buffer.append('\n');
-					line= reader.readLine();
-				}
-				return buffer.toString();
-			} catch (IOException ex) {
-				JavaPlugin.log(ex);
-				return ""; //$NON-NLS-1$
-			} finally {
-				try {
-					if (reader != null)
-						reader.close();
-				} catch (IOException e) {
-				}
-			}
-		}
-		return null;
 	}
 	
 	protected ITypeRoot getEditorInputJavaElement() {
