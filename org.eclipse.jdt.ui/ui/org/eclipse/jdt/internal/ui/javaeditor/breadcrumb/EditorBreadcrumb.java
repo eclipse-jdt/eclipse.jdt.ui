@@ -222,10 +222,6 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 						return;
 					
 					focusLost();
-					
-					if (hasTextFocus) {
-						fBreadcrumbViewer.setInput(getCurrentInput());
-					}
 				}
 			}
 		};

@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -33,22 +34,28 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StyledStringBuilder;
 import org.eclipse.jface.viewers.Viewer;
 
+import org.eclipse.jface.text.ITextSelection;
+
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 
+import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
@@ -315,8 +322,89 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		}
 	}
 
+	private class ElementChangeListener implements IElementChangedListener {
+		
+		private Runnable fRunnable;
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
+		 */
+		public void elementChanged(ElementChangedEvent event) {
+			Object input= fViewer.getInput();
+			if (!(input instanceof IJavaElement))
+				return;
+			
+			if (fRunnable != null)
+				return;
+
+			ITypeRoot root= (ITypeRoot) ((IJavaElement) input).getAncestor(IJavaElement.COMPILATION_UNIT);
+			if (root == null)
+				root= (ITypeRoot) ((IJavaElement) input).getAncestor(IJavaElement.CLASS_FILE);
+
+			if (!isParentElementChanged(root, event.getDelta()))
+				return;
+
+			fRunnable= new Runnable() {
+				public void run() {
+					if (fViewer.getControl().isDisposed())
+						return;
+					
+					Object newInput= getCurrentInput();
+					if (newInput instanceof IJavaElement)
+						newInput= getInput((IJavaElement) newInput);
+					
+					fViewer.setInput(newInput);
+					fRunnable= null;
+				}
+			};
+			fViewer.getControl().getDisplay().asyncExec(fRunnable);
+		}
+		
+		/**
+		 * Does the given delta describe a change to the given root element or any 
+		 * of its parents?
+		 * 
+		 * @param root the root to check for changes
+		 * @param delta the Java element delta to inspect
+		 * @return true if delta describes a change to parent of root
+		 */
+		private boolean isParentElementChanged(ITypeRoot root, IJavaElementDelta delta) {
+			if ((delta.getFlags() & IJavaElementDelta.F_CHILDREN) != 0) {
+				IJavaElementDelta[] children= delta.getAffectedChildren();
+				for (int i= 0; i < children.length; i++) {
+					if (isParentElementChanged(root, children[i]))
+						return true;
+				}
+				
+				return false;
+			} else {
+				return hasParent(root, delta.getElement());
+			}
+		}
+
+		/**
+		 * Does <code>element</code> has an element equals to <code>parent</code>
+		 * in its parent chain?
+		 * 
+		 * @param element the element to resolve the parent chain for
+		 * @param parent the potential parent
+		 * @return <code>true</code> if <code>parent</code> is a parent of <code>element</code>
+		 */
+		private boolean hasParent(IJavaElement element, IJavaElement parent) {
+			if (element == null)
+				return false;
+
+			if (element == parent || element.equals(parent))
+				return true;
+
+			return hasParent(element.getParent(), parent);
+		}
+	}
+
 	private ActionGroup fBreadcrumbActionGroup;
 	private BreadcrumbViewer fViewer;
+	private ISelection fEditorSelection;
+	private ElementChangeListener fElementChangeListener;
 
 	public JavaEditorBreadcrumb(JavaEditor javaEditor) {
 		super(javaEditor);
@@ -327,6 +415,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#activateBreadcrumb()
 	 */
 	protected void activateBreadcrumb() {
+		fEditorSelection= getJavaEditor().getSelectionProvider().getSelection();
 		IEditorSite editorSite= getJavaEditor().getEditorSite();
 		editorSite.getKeyBindingService().setScopes(new String[] { "org.eclipse.jdt.ui.breadcrumbEditorScope" }); //$NON-NLS-1$
 		getJavaEditor().setActionsActivated(false);
@@ -341,6 +430,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		editorSite.getKeyBindingService().setScopes(new String[] { "org.eclipse.jdt.ui.javaEditorScope" }); //$NON-NLS-1$
 		getJavaEditor().getActionGroup().fillActionBars(editorSite.getActionBars());
 		getJavaEditor().setActionsActivated(true);
+		fEditorSelection= null;
 	}
 
 	/*
@@ -360,6 +450,9 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		});
 
 		fBreadcrumbActionGroup= new JavaEditorBreadcrumbActionGroup(getJavaEditor(), fViewer);
+
+		fElementChangeListener= new ElementChangeListener();
+		JavaCore.addElementChangedListener(fElementChangeListener, ElementChangedEvent.POST_CHANGE);
 
 		return fViewer;
 	}
@@ -428,6 +521,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 		if (fViewer != null) {
 			fBreadcrumbActionGroup.dispose();
+			JavaCore.removeElementChangedListener(fElementChangeListener);
 			fViewer= null;
 		}
 	}
@@ -462,7 +556,14 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	 */
 	protected Object getCurrentInput() {
 		try {
-			return getInput(SelectionConverter.getElementAtOffset(getJavaEditor()));
+			ITypeRoot input= SelectionConverter.getInput(getJavaEditor());
+			ITextSelection selection;
+			if (fEditorSelection instanceof ITextSelection) {
+				selection= (ITextSelection) fEditorSelection;
+			} else {
+				selection= (ITextSelection) getJavaEditor().getSelectionProvider().getSelection();
+			}
+			return getInput(SelectionConverter.getElementAtOffset(input, selection));
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 			return null;

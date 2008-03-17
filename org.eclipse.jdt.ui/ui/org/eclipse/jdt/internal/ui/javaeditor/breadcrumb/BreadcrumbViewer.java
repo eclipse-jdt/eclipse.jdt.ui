@@ -576,10 +576,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 			item= createItem();
 			fBreadcrumbItems.add(item);
 		}
-	
-		if (item == fSelectedItem && element != item.getData()) {
-			selectItem(null);
-		}
+		
 		item.setData(element);
 		if (parent == null) {
 			//don't show the models root
