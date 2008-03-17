@@ -1002,20 +1002,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				return;
 			}
 		}
-	
-		Properties properties= getProperties(fNLSRefactoring.getPropertyFileHandle());
-		for (int i= 0; i < fSubstitutions.length; i++) {
-			NLSSubstitution substitution= fSubstitutions[i];
-			if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
-				if (properties.containsKey(substitution.getKey())) {
-					String value1= substitution.getValueNonEmpty();
-					String value2= properties.getProperty(substitution.getKey());
-					if (!value1.equals(value2)) {
-						status.addFatalError(NLSUIMessages.ExternalizeWizardPage_warning_conflicting);
-					}
-				}
-			}
-		}
 	}
 
 	private void checkMissingKeys(RefactoringStatus status) {
