@@ -343,6 +343,9 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	 * Focus has been transfered into the breadcrumb.
 	 */
 	private void focusGained() {
+		if (fHasFocus)
+			focusLost();
+		
 		fComposite.setBackground(JFaceResources.getColorRegistry().get(ACTIVE_TAB_BG_END));
 		fHasFocus= true;
 		
@@ -353,6 +356,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		getTextEditor().getEditorSite().getActionBars().updateActionBars();
 		
 		fOldTextSelection= getTextEditor().getSelectionProvider().getSelection();
+		
 		getTextEditor().getSelectionProvider().setSelection(new StructuredSelection(this));
 	}
 
@@ -498,6 +502,9 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 
 			public void partActivated(IWorkbenchPart part) {
 				if (part == fTextEditor && fHasFocus) {
+					//focus-in event comes before part activation and the
+					//workbench activates the editor -> reactivate the breadcrumb
+					//if it is the active part.
 					focusGained();
 				}
 			}
