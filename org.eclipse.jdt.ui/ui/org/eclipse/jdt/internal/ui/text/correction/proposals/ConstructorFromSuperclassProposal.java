@@ -70,9 +70,9 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
+	 * @see org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal#getName()
 	 */
-	public String getDisplayString() {
+	public String getName() {
 		StringBuffer buf= new StringBuffer();
 		buf.append(fTypeNode.getName().getIdentifier());
 		buf.append('(');

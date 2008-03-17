@@ -19,8 +19,11 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
+import org.eclipse.jface.viewers.StyledStringBuilder;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRewriteTarget;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.LinkedModeModel;
 
@@ -41,6 +44,7 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionCommandHandler;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 
 /**
  * Implementation of a Java completion proposal to be used for quick fix and quick assist
@@ -49,7 +53,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * 
  * @since 3.2
  */
-public class ChangeCorrectionProposal implements IJavaCompletionProposal, ICommandAccess {
+public class ChangeCorrectionProposal implements IJavaCompletionProposal, ICommandAccess, ICompletionProposalExtension6 {
 
 	private Change fChange;
 	private String fName;
@@ -186,6 +190,20 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 		return getName();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension6#getStyledDisplayString()
+	 */
+	public StyledStringBuilder getStyledDisplayString() {
+		StyledStringBuilder str= new StyledStringBuilder(getName());
+		
+		String shortCutString= CorrectionCommandHandler.getShortCutString(getCommandId());
+		if (shortCutString != null) {
+			String decorated= Messages.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[] { getName(), shortCutString });
+			return ColoringLabelProvider.decorateStyledString(str, decorated, StyledStringBuilder.QUALIFIER_STYLER); 
+		}
+		return str;
+	}
+	
 	/** 
 	 * Returns the name of the proposal.
 	 * 
@@ -286,5 +304,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	public void setCommandId(String commandId) {
 		fCommandId= commandId;
 	}
+
+
 
 }

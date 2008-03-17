@@ -18,12 +18,15 @@ import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
+import org.eclipse.jface.viewers.StyledStringBuilder;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
@@ -54,11 +57,12 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionCommandHandler;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 
 /**
  * A template proposal.
  */
-public class LinkedNamesAssistProposal implements IJavaCompletionProposal, ICompletionProposalExtension2, ICommandAccess {
+public class LinkedNamesAssistProposal implements IJavaCompletionProposal, ICompletionProposalExtension2, ICompletionProposalExtension6, ICommandAccess {
 
 	/**
 	 * An exit policy that skips Backspace and Delete at the beginning and at the end
@@ -240,6 +244,20 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			return Messages.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[] { fLabel, shortCutString });
 		}
 		return fLabel;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension6#getStyledDisplayString()
+	 */
+	public StyledStringBuilder getStyledDisplayString() {
+		StyledStringBuilder str= new StyledStringBuilder(fLabel);
+		
+		String shortCutString= CorrectionCommandHandler.getShortCutString(getCommandId());
+		if (shortCutString != null) {
+			String decorated= Messages.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[] { fLabel, shortCutString });
+			return ColoringLabelProvider.decorateStyledString(str, decorated, StyledStringBuilder.QUALIFIER_STYLER); 
+		}
+		return str;
 	}
 
 	/*

@@ -48,7 +48,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 		fExistingReturn= existingReturn;
 	}
 
-	public String getDisplayString() {
+	public String getName() {
 		if (fExistingReturn != null) {
 			return CorrectionMessages.MissingReturnTypeCorrectionProposal_changereturnstatement_description;
 		} else {

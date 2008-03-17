@@ -26,10 +26,10 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -72,10 +72,10 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 		root.addChild(new ReplaceEdit(fLocation.getOffset(), fLocation.getLength(), parentPack.getElementName()));
 	}
 
-	/*
-	 * @see ICompletionProposal#getDisplayString()
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal#getName()
 	 */
-	public String getDisplayString() {
+	public String getName() {
 		ICompilationUnit cu= getCompilationUnit();
 		IPackageFragment parentPack= (IPackageFragment) cu.getParent();
 		try {

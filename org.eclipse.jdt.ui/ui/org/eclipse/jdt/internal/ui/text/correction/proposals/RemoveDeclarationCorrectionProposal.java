@@ -106,7 +106,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		fName= name;
 	}
 
-	public String getDisplayString() {
+	public String getName() {
 		IBinding binding= fName.resolveBinding();
 		String name= fName.getIdentifier();
 		switch (binding.getKind()) {
