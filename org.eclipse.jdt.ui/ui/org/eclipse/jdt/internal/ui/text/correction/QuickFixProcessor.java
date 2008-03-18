@@ -195,6 +195,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnhandledWarningToken:
 			case IProblem.UnusedWarningToken:
 			case IProblem.RedundantSuperinterface:
+			case IProblem.JavadocInvalidMemberTypeQualification:
+			case IProblem.IncompatibleTypesInForeach:
 				return true;
 			default:
 				if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
@@ -295,6 +297,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.TypeMismatch:
 				TypeMismatchSubProcessor.addTypeMismatchProposals(context, problem, proposals);
+				break;
+			case IProblem.IncompatibleTypesInForeach:
+				TypeMismatchSubProcessor.addTypeMismatchInForEachProposals(context, problem, proposals);
 				break;
 			case IProblem.IncompatibleReturnType:
 				TypeMismatchSubProcessor.addIncompatibleReturnTypeProposals(context, problem, proposals);
@@ -469,6 +474,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.JavadocInvalidTag:
 				JavadocTagsSubProcessor.getRemoveJavadocTagProposals(context, problem, proposals);
 				break;
+			case IProblem.JavadocInvalidMemberTypeQualification:
+				JavadocTagsSubProcessor.getInvalidQualificationProposals(context, problem, proposals);
+				break;
+				
 			case IProblem.LocalVariableHidingLocalVariable:
 			case IProblem.LocalVariableHidingField:
 			case IProblem.FieldHidingLocalVariable:

@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -59,6 +60,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -659,5 +661,42 @@ public class JavadocTagsSubProcessor {
 		String label= CorrectionMessages.JavadocTagsSubProcessor_removetag_description;
 		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 		proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image)); 
+	}
+
+	public static void getInvalidQualificationProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		ASTNode node= problem.getCoveringNode(context.getASTRoot());
+		if (!(node instanceof Name)) {
+			return;
+		}
+		Name name= (Name) node;
+		IBinding binding= name.resolveBinding();
+		if (!(binding instanceof ITypeBinding)) {
+			return;
+		}
+		ITypeBinding typeBinding= (ITypeBinding)binding;
+		String typeQualifiedName= Bindings.getTypeQualifiedName(typeBinding);
+		if (typeQualifiedName.equals(name.getFullyQualifiedName())) {
+			return;
+		}
+		ITypeBinding outerClass= typeBinding;
+		while (outerClass.getDeclaringClass() != null) {
+			outerClass= outerClass.getDeclaringClass();
+		}
+		
+		AST ast= node.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		
+		String label= CorrectionMessages.JavadocTagsSubProcessor_qualifylinktoinner_description;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
+		
+		ImportRewrite importRewrite= proposal.createImportRewrite(context.getASTRoot());
+		String importedType= importRewrite.addImport(outerClass);
+		if (importedType.equals(outerClass.getName())) {
+			rewrite.replace(name, ast.newName(typeQualifiedName), null);
+		} else {
+			rewrite.replace(name, ast.newName(typeBinding.getQualifiedName()), null);
+		}
+		proposals.add(proposal); 
 	}
 }

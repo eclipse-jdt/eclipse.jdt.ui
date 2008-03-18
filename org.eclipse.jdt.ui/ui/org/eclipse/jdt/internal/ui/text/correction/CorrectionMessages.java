@@ -111,6 +111,7 @@ public final class CorrectionMessages extends NLS {
 	public static String TypeMismatchSubProcessor_changereturnofimplemented_description;
 	public static String TypeMismatchSubProcessor_removeexceptions_description;
 	public static String TypeMismatchSubProcessor_addexceptions_description;
+	public static String TypeMismatchSubProcessor_incompatible_for_each_type_description;
 	public static String RemoveDeclarationCorrectionProposal_removeunusedfield_description;
 	public static String RemoveDeclarationCorrectionProposal_removeunusedmethod_description;
 	public static String RemoveDeclarationCorrectionProposal_removeunusedconstructor_description;
@@ -206,6 +207,7 @@ public final class CorrectionMessages extends NLS {
 	public static String JavadocTagsSubProcessor_addjavadoc_returntag_description;
 	public static String JavadocTagsSubProcessor_addjavadoc_enumconst_description;
 	public static String JavadocTagsSubProcessor_addjavadoc_allmissing_description;
+	public static String JavadocTagsSubProcessor_qualifylinktoinner_description;
 	public static String JavadocTagsSubProcessor_removetag_description;
 	public static String NoCorrectionProposal_description;
 	public static String MarkerResolutionProposal_additionaldesc;

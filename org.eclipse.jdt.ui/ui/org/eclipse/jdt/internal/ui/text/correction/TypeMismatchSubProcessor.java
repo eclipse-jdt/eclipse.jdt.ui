@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -37,6 +38,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
@@ -382,6 +384,49 @@ public class TypeMismatchSubProcessor {
 			}
 		}
 		return false;
+	}
+
+	public static void addTypeMismatchInForEachProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTNode selectedNode= problem.getCoveringNode(astRoot);
+		if (selectedNode == null || selectedNode.getLocationInParent() != EnhancedForStatement.EXPRESSION_PROPERTY) {
+			return;
+		}
+		EnhancedForStatement forStatement= (EnhancedForStatement) selectedNode.getParent();
+
+		
+		ITypeBinding expressionBinding= forStatement.getExpression().resolveTypeBinding();
+		if (expressionBinding == null) {
+			return;
+		}
+		
+		ITypeBinding expectedBinding;
+		if (expressionBinding.isArray()) {
+			expectedBinding= expressionBinding.getComponentType();
+		} else {
+			IMethodBinding iteratorMethod= Bindings.findMethodInHierarchy(expressionBinding, "iterator", new String[0]); //$NON-NLS-1$
+			if (iteratorMethod == null) {
+				return;
+			}
+			ITypeBinding[] typeArguments= iteratorMethod.getReturnType().getTypeArguments();
+			if (typeArguments.length != 1) {
+				return;
+			}
+			expectedBinding= typeArguments[0];
+		}
+		
+		SingleVariableDeclaration parameter= forStatement.getParameter();
+
+		String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_incompatible_for_each_type_description, new String[] { parameter.getName().getIdentifier(), BindingLabelProvider.getBindingLabel(expectedBinding, BindingLabelProvider.DEFAULT_TEXTFLAGS) });
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
+
+		ImportRewrite importRewrite= proposal.createImportRewrite(astRoot);
+		Type newType= importRewrite.addImport(expectedBinding, astRoot.getAST());
+		rewrite.replace(parameter.getType(), newType, null);
+		
+		proposals.add(proposal);
 	}
 
 
