@@ -708,8 +708,6 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 
 		GC gc= new GC(result);
 
-		Color colorA= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_LIST_BACKGROUND, 50, display);
-		Color colorB= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_LIST_BACKGROUND, 45, display);
 		Color colorC= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_LIST_BACKGROUND, 35, display);
 		Color colorD= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_LIST_BACKGROUND, 45, display);
 		Color colorE= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_LIST_BACKGROUND, 80, display);
@@ -718,17 +716,15 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		Color colorH= createColor(SWT.COLOR_WIDGET_NORMAL_SHADOW, SWT.COLOR_LIST_BACKGROUND, 35, display);
 
 		try {
-			drawLine(width, 0, colorA, gc);
-			drawLine(width, 1, colorB, gc);
-			drawLine(width, 2, colorC, gc);
-			drawLine(width, 3, colorC, gc);
+			drawLine(width, 0, colorC, gc);
+			drawLine(width, 1, colorC, gc);
 
 			gc.setForeground(colorD);
 			gc.setBackground(colorE);
-			gc.fillGradientRectangle(0, 4, width, 4 + 8, true);
+			gc.fillGradientRectangle(0, 2, width, 2 + 8, true);
 
 			gc.setBackground(colorE);
-			gc.fillRectangle(0, 4 + 9, width, height - 4);
+			gc.fillRectangle(0, 2 + 9, width, height - 4);
 
 			drawLine(width, height - 3, colorF, gc);
 			drawLine(width, height - 2, colorG, gc);
@@ -737,8 +733,6 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		} finally {
 			gc.dispose();
 
-			colorA.dispose();
-			colorB.dispose();
 			colorC.dispose();
 			colorD.dispose();
 			colorE.dispose();
