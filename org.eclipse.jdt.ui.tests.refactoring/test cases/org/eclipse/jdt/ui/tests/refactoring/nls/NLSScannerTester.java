@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla (b.muskalla@gmx.net)
+ *      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102132 [nls tooling] Externalize Strings Wizard should not touch annotation arguments
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.nls;
 
@@ -14,6 +16,8 @@ package org.eclipse.jdt.ui.tests.refactoring.nls;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
@@ -209,6 +213,88 @@ public class NLSScannerTester extends TestCase {
 		assertEquals("1 has tag", true, el.hasTag()); //$NON-NLS-1$
 	}
 
+	// test for bug 102132
+	public void test15() throws Exception {
+		String text= "\nfoo\n@Annotation(\"bar\")\n\"baz\"";
+		NLSLine[] l= NLSScanner.scan(text);
+		
+		assertEquals(1, l.length);
+		NLSLine line= l[0];
+		assertEquals(1, line.size());
+		assertEquals(3, line.getLineNumber());
+		assertEquals("\"baz\"", line.get(0).getValue());
+	}
+
+	// test for bug 102132
+	public void test16() throws Exception {
+		String text = "\nfoo\n@Annotation(\n{\"bar\",\n\"baz\"})\n\"baz\"";
+		NLSLine[] l= NLSScanner.scan(text);
+		
+		assertEquals(1, l.length);
+		NLSLine line= l[0];
+		assertEquals(1, line.size());
+		assertEquals(5, line.getLineNumber());
+		assertEquals("\"baz\"", line.get(0).getValue());
+	}
+	
+	// test for bug 102132
+	public void test17() throws InvalidInputException {
+		String text= "\n@Annotation(a= @Nested(\"Hello\"), b= \"World\")\n@Annotation2(a= (1 + 2) * 3, b= \"xx\")";
+		NLSLine[] l= NLSScanner.scan(text);
+		assertEquals(0, l.length);
+	}
+				
+	// test for bug 102132
+	public void test18() throws InvalidInputException {
+		String text= "@interface Annotation { String a= \"translate me\"; }";
+		NLSLine[] l= NLSScanner.scan(text);
+		
+		assertEquals(1, l.length);
+		NLSLine line= l[0];
+		assertEquals(1, line.size());
+		assertEquals(0, line.getLineNumber());
+		assertEquals("\"translate me\"", line.get(0).getValue());
+	}
+	
+	// test for bug 102132
+	public void test19() throws InvalidInputException {
+		String text=
+				"@interface Annotation {\r\n" + 
+				"	String a() default \"a\" + \"b\";\r\n" + 
+				"	String b() default \"bee\";\r\n" +
+				"	String c() default true ? \"x\" : \"y\";\r\n" + 
+				"}\r\n";
+		NLSLine[] l= NLSScanner.scan(text);
+		assertEquals(0, l.length);
+	}
+	
+	// test for bug 102132
+	public void test20() throws InvalidInputException {
+		String text=
+			"class C {\r\n" + 
+			"    void m() {\r\n" + 
+			"        switch (42) {\r\n" + 
+			"            default: String s= \"x\";\r\n" + 
+			"        }\r\n" + 
+			"        switch (1) {\r\n" + 
+			"            default /*standard*/: String s= \"x\";\r\n" + 
+			"        }\r\n" + 
+			"    }\r\n" + 
+			"}";
+		NLSLine[] l= NLSScanner.scan(text);
+		
+		assertEquals(2, l.length);
+		
+		NLSLine line= l[0];
+		assertEquals(1, line.size());
+		assertEquals(3, line.getLineNumber());
+		assertEquals("\"x\"", line.get(0).getValue());
+		line= l[1];
+		assertEquals(1, line.size());
+		assertEquals(6, line.getLineNumber());
+		assertEquals("\"x\"", line.get(0).getValue());
+	}
+	
 	//regression test for bug 12600
 	public void test54() throws Exception{
 		String text= 
@@ -221,9 +307,8 @@ public class NLSScannerTester extends TestCase {
 		
 		NLSElement el= line.get(0);
 		assertEquals("0 has no tag", false, el.hasTag()); //$NON-NLS-1$
-		
 	}
-				
+
 }
 
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla (b.muskalla@gmx.net)
+ *      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102132 [nls tooling] Externalize Strings Wizard should not touch annotation arguments
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
@@ -32,14 +34,19 @@ public class NLSScanner {
 	}
 
 	/**
-	 * Returns a list of NLSLines found in the compilation unit
+	 * @param cu a compilation unit
+	 * @return a list of NLSLines found in the compilation unit
+	 * @throws JavaModelException 
+	 * @throws InvalidInputException 
 	 */
 	public static NLSLine[] scan(ICompilationUnit cu) throws JavaModelException, InvalidInputException {
 		return scan(cu.getBuffer().getCharacters());
 	}
 
 	/**
-	 * Returns a list of NLSLines found in the string
+	 * @param s a string
+	 * @return a list of NLSLines found in the string
+	 * @throws InvalidInputException 
 	 */	
 	public static NLSLine[] scan(String s) throws InvalidInputException {
 		return scan(s.toCharArray()); 
@@ -55,30 +62,79 @@ public class NLSScanner {
 		NLSLine currentLine= null;
 		int nlsElementIndex= 0;
 		
+		boolean insideAnnotation= false;
+		int defaultCounter= 0; // counting up tokens starting with 'default'
+		int parenthesisCount = 0;
+		
 		while (token != ITerminalSymbols.TokenNameEOF) {
 			switch (token) {
+				// don't NLS inside annotation arguments and after 'default'
+				case ITerminalSymbols.TokenNameAT:
+					insideAnnotation= true;
+					break;
+				case ITerminalSymbols.TokenNameinterface:
+					insideAnnotation= false; //e.g. @interface
+					break;
+				
+				case ITerminalSymbols.TokenNameLPAREN:
+					parenthesisCount++;
+					break;
+				case ITerminalSymbols.TokenNameRPAREN:
+					parenthesisCount--;
+					if (parenthesisCount == 0) {
+						insideAnnotation= false;
+					}
+					break;
+					
+				case ITerminalSymbols.TokenNamedefault:
+					defaultCounter= 1;
+					break;
+				case ITerminalSymbols.TokenNameCOLON:
+					if (defaultCounter == 1)
+						defaultCounter= 0; // reset in switch statement's "default :" ...
+					else if (defaultCounter > 0)
+						defaultCounter++; // ... but not in conditional in annotation member default value
+					break;
+				case ITerminalSymbols.TokenNameSEMICOLON:
+					defaultCounter= 0;
+					break;
+					
+					
 				case ITerminalSymbols.TokenNameStringLiteral:
 					currentLineNr= scanner.getLineNumber(scanner.getCurrentTokenStartPosition());
-					if (currentLineNr != previousLineNr) {
-						currentLine= new NLSLine(currentLineNr - 1);
-						lines.add(currentLine);
-						previousLineNr= currentLineNr;
-						nlsElementIndex= 0;
+					if (!insideAnnotation && defaultCounter == 0) {
+						if (currentLineNr != previousLineNr) {
+							currentLine= new NLSLine(currentLineNr - 1);
+							lines.add(currentLine);
+							previousLineNr= currentLineNr;
+							nlsElementIndex= 0;
+						}
+						String value= new String(scanner.getCurrentTokenSource());
+						currentLine.add(
+								new NLSElement(
+										value, 
+										scanner.getCurrentTokenStartPosition(), 
+										scanner.getCurrentTokenEndPosition() + 1 - scanner.getCurrentTokenStartPosition(),
+										nlsElementIndex++,
+										false));
 					}
-					String value= new String(scanner.getCurrentTokenSource());
-					currentLine.add(
-					        new NLSElement(
-					                value, 
-					                scanner.getCurrentTokenStartPosition(), 
-					                scanner.getCurrentTokenEndPosition() + 1 - scanner.getCurrentTokenStartPosition(),
-					                nlsElementIndex++,
-					                false));
 					break;
 				case ITerminalSymbols.TokenNameCOMMENT_LINE:
+					defaultCounter= 0;
 					if (currentLineNr != scanner.getLineNumber(scanner.getCurrentTokenStartPosition()))
 						break;
 						
 					parseTags(currentLine, scanner);
+					break;
+				
+				case ITerminalSymbols.TokenNameWHITESPACE:
+				case ITerminalSymbols.TokenNameCOMMENT_BLOCK:
+				case ITerminalSymbols.TokenNameCOMMENT_JAVADOC:
+					break;
+					
+				default:
+					if (defaultCounter > 0)
+						defaultCounter++;
 					break;
 			}
 			token= scanner.getNextToken();
