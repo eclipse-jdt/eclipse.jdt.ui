@@ -14,7 +14,6 @@ import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StyledStringBuilder;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
@@ -32,7 +31,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StorageLabelProvider;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * <p>Since 3.4, this class also implements {@link DelegatingStyledCellLabelProvider.IStyledLabelProvider} for colored labels.</p>
+ * <p>Since 3.4, this class also implements {@link org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider} for colored labels.</p>
  */
 public class JavaElementLabelProvider extends LabelProvider implements IStyledLabelProvider {
 	
