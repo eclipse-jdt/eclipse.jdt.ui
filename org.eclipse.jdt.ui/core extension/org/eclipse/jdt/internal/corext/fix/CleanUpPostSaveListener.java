@@ -420,7 +420,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		}
 	}
 
-	private boolean requiresAST(ICleanUp[] cleanUps) throws CoreException {
+	private boolean requiresAST(ICleanUp[] cleanUps) {
 		for (int i= 0; i < cleanUps.length; i++) {
 	        if (cleanUps[i].getRequirements().requiresAST())
 	        	return true;
