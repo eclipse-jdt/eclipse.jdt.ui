@@ -388,6 +388,9 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 			public void handleEvent(Event event) {
 				if (!isBreadcrumbEvent(event))
 					return;
+				
+				if (fBreadcrumbViewer.isDropDownOpen())
+					return;
 								
 				ISelectionProvider selectionProvider;
 				if (fBreadcrumbViewer.isDropDownOpen()) {
