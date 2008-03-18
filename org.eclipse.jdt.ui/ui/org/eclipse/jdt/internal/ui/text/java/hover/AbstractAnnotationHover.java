@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
 import java.util.Iterator;
@@ -70,6 +69,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IAnnotationModelExtension2;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorInput;
@@ -607,7 +607,13 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			return null;
 
 		try {
-			Iterator e= new JavaAnnotationIterator(model, true, fAllAnnotations);
+			Iterator parent;
+			if (model instanceof IAnnotationModelExtension2)
+				parent= ((IAnnotationModelExtension2)model).getAnnotationIterator(hoverRegion.getOffset(), hoverRegion.getLength(), true, true);
+			else
+				parent= model.getAnnotationIterator();
+			Iterator e= new JavaAnnotationIterator(parent, true, fAllAnnotations);
+			
 			int layer= -1;
 			Annotation annotation= null;
 			Position position= null;

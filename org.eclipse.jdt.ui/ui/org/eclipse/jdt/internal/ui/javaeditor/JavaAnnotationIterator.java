@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,11 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-import java.util.Collections;
 import java.util.Iterator;
 
 import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationModel;
 
 
 /**
@@ -28,24 +26,26 @@ public class JavaAnnotationIterator implements Iterator {
 	private boolean fReturnAllAnnotations;
 
 	/**
-	 * Equivalent to <code>JavaAnnotationIterator(model, skipIrrelevants, false)</code>.
+	 * Returns a new JavaAnnotationIterator.
+	 * 
+	 * Equivalent to <code>JavaAnnotationIterator(model, skipIrrelevants, false)</code>. 
+	 * 
+	 * @param parent the parent iterator to iterate over annotations
+	 * @param skipIrrelevants whether to skip irrelevant annotations
 	 */
-	public JavaAnnotationIterator(IAnnotationModel model, boolean skipIrrelevants) {
-		this(model, skipIrrelevants, false);
+	public JavaAnnotationIterator(Iterator parent, boolean skipIrrelevants) {
+		this(parent, skipIrrelevants, false);
 	}
 
 	/**
 	 * Returns a new JavaAnnotationIterator.
-	 * @param model the annotation model
+	 * @param parent the parent iterator to iterate over annotations
 	 * @param skipIrrelevants whether to skip irrelevant annotations
 	 * @param returnAllAnnotations Whether to return non IJavaAnnotations as well
 	 */
-	public JavaAnnotationIterator(IAnnotationModel model, boolean skipIrrelevants, boolean returnAllAnnotations) {
+	public JavaAnnotationIterator(Iterator parent, boolean skipIrrelevants, boolean returnAllAnnotations) {
 		fReturnAllAnnotations= returnAllAnnotations;
-		if (model != null)
-			fIterator= model.getAnnotationIterator();
-		else
-			fIterator= Collections.EMPTY_LIST.iterator();
+		fIterator= parent;
 		fSkipIrrelevants= skipIrrelevants;
 		skip();
 	}

@@ -99,6 +99,7 @@ import org.eclipse.jface.text.source.AnnotationRulerColumn;
 import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
+import org.eclipse.jface.text.source.IAnnotationModelExtension2;
 import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -3673,7 +3674,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		int distance= Integer.MAX_VALUE;
 
 		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
-		Iterator e= new JavaAnnotationIterator(model, true, true);
+		if (model == null)
+			return null;
+
+		Iterator e= new JavaAnnotationIterator(model.getAnnotationIterator(), true, true);
 		while (e.hasNext()) {
 			Annotation a= (Annotation) e.next();
 			if ((a instanceof IJavaAnnotation) && ((IJavaAnnotation)a).hasOverlay() || !isNavigationTarget(a))
@@ -3738,7 +3742,16 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	private Annotation getAnnotation(int offset, int length) {
 		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
-		Iterator e= new JavaAnnotationIterator(model, true, false);
+		if (model == null)
+			return null;
+		
+		Iterator parent;
+		if (model instanceof IAnnotationModelExtension2)
+			parent= ((IAnnotationModelExtension2)model).getAnnotationIterator(offset, length, true, true);
+		else
+			parent= model.getAnnotationIterator();
+
+		Iterator e= new JavaAnnotationIterator(parent, true, false);
 		while (e.hasNext()) {
 			Annotation a= (Annotation) e.next();
 			Position p= model.getPosition(a);
