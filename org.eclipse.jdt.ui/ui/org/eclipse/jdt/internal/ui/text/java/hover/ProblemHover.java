@@ -40,6 +40,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
+import org.eclipse.jdt.internal.ui.preferences.JavadocProblemsPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesPreferencePage;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
@@ -66,11 +67,13 @@ public class ProblemHover extends AbstractAnnotationHover {
 
 		private final IJavaProject fProject;
 		private final String fOptionId;
+		private final boolean fIsJavadocOption;
 
-		public ConfigureProblemSeverityAction(IJavaProject project, String optionId) {
+		public ConfigureProblemSeverityAction(IJavaProject project, String optionId, boolean isJavadocOption) {
 			super();
 			fProject= project;
 			fOptionId= optionId;
+			fIsJavadocOption= isJavadocOption;
 			setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_PROBLEM_SEVERITIES);
 			setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_PROBLEM_SEVERITIES);
 			setToolTipText(JavaHoverMessages.ProblemHover_action_configureProblemSeverity);
@@ -82,11 +85,19 @@ public class ProblemHover extends AbstractAnnotationHover {
 		public void run() {
 			Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 			
-			Map data= new HashMap();
-			data.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_KEY, fOptionId);
-			data.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_QUALIFIER, JavaCore.PLUGIN_ID);
+			if (fIsJavadocOption) {
+				Map data= new HashMap();
+				data.put(JavadocProblemsPreferencePage.DATA_SELECT_OPTION_KEY, fOptionId);
+				data.put(JavadocProblemsPreferencePage.DATA_SELECT_OPTION_QUALIFIER, JavaCore.PLUGIN_ID);
 			
-			PreferencesUtil.createPropertyDialogOn(shell, fProject, ProblemSeveritiesPreferencePage.PROP_ID, null, data).open();
+				PreferencesUtil.createPropertyDialogOn(shell, fProject, JavadocProblemsPreferencePage.PROP_ID, null, data).open();
+			} else {
+				Map data= new HashMap();
+				data.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_KEY, fOptionId);
+				data.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_QUALIFIER, JavaCore.PLUGIN_ID);
+
+				PreferencesUtil.createPropertyDialogOn(shell, fProject, ProblemSeveritiesPreferencePage.PROP_ID, null, data).open();
+			}
 		}
 	}
 
@@ -128,10 +139,13 @@ public class ProblemHover extends AbstractAnnotationHover {
 	protected void fillToolBar(ToolBarManager manager, Annotation annotation, Position position, IDocument document) {
 		super.fillToolBar(manager, annotation, position, document);
 
-		ProblemLocation location= new ProblemLocation(position.getOffset(), position.getLength(), (IJavaAnnotation) annotation);
-		String optionId= JavaCore.getOptionForConfigurableSeverity(location.getProblemId());
+		IJavaAnnotation javaAnnotation= (IJavaAnnotation) annotation;
+		
+		String optionId= JavaCore.getOptionForConfigurableSeverity(javaAnnotation.getId());
 		if (optionId != null) {
-			ConfigureProblemSeverityAction problemSeverityAction= new ConfigureProblemSeverityAction(((IJavaAnnotation) annotation).getCompilationUnit().getJavaProject(), optionId);
+			IJavaProject javaProject= javaAnnotation.getCompilationUnit().getJavaProject();
+			boolean isJavadocProblem= (javaAnnotation.getId() & IProblem.Javadoc) != 0;
+			ConfigureProblemSeverityAction problemSeverityAction= new ConfigureProblemSeverityAction(javaProject, optionId, isJavadocProblem);
 			manager.add(problemSeverityAction);
 		}
 	}

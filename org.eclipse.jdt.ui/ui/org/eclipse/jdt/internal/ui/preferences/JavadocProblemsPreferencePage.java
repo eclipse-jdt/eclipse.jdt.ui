@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
+
+import java.util.Map;
 
 import org.eclipse.core.runtime.IAdaptable;
 
@@ -30,6 +32,9 @@ public class JavadocProblemsPreferencePage extends PropertyAndPreferencePage {
 
 	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.JavadocProblemsPreferencePage"; //$NON-NLS-1$
 	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.JavadocProblemsPreferencePage"; //$NON-NLS-1$
+	
+	public static final String DATA_SELECT_OPTION_KEY= "select_option_key"; //$NON-NLS-1$
+	public static final String DATA_SELECT_OPTION_QUALIFIER= "select_option_qualifier"; //$NON-NLS-1$
 
 	private JavadocProblemsConfigurationBlock fConfigurationBlock;
 
@@ -133,6 +138,21 @@ public class JavadocProblemsPreferencePage extends PropertyAndPreferencePage {
 	public void setElement(IAdaptable element) {
 		super.setElement(element);
 		setDescription(null); // no description for property page
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
+	 */
+	public void applyData(Object data) {
+		super.applyData(data);
+		if (data instanceof Map && fConfigurationBlock != null) {
+			Map map= (Map) data;
+			Object key= map.get(DATA_SELECT_OPTION_KEY);
+			Object qualifier= map.get(DATA_SELECT_OPTION_QUALIFIER);
+			if (key instanceof String && qualifier instanceof String) {
+				fConfigurationBlock.selectOption((String) key, (String) qualifier);
+			}
+		}
 	}
 	
 }
