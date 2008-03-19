@@ -49,6 +49,7 @@ final class JavaHoverMessages extends NLS {
 	
 	public static String NLSStringHover_NLSStringHover_missingKeyWarning;
 	public static String NLSStringHover_NLSStringHover_PropertiesFileNotDetectedWarning;
+	public static String ProblemHover_action_configureProblemSeverity;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaHoverMessages.class);

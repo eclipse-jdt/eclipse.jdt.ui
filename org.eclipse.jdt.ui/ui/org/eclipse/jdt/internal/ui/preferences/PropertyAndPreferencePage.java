@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -105,7 +105,12 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 			
 			IDialogFieldListener listener= new IDialogFieldListener() {
 				public void dialogFieldChanged(DialogField field) {
-					enableProjectSpecificSettings(((SelectionButtonDialogField)field).isSelected());
+					boolean enabled= ((SelectionButtonDialogField) field).isSelected();
+					enableProjectSpecificSettings(enabled);
+
+					if (enabled && getData() != null) {
+						applyData(getData());
+					}
 				}
 			};
 			
@@ -192,7 +197,9 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	 * @param link the link
 	 */
 	final void doLinkActivated(Link link) {
-		Map data= new HashMap();
+		Map data= getData();
+		if (data == null)
+			data= new HashMap();
 		data.put(DATA_NO_LINK, Boolean.TRUE);
 		
 		if (isProjectPreferencePage()) {

@@ -339,6 +339,9 @@ public class JavaPluginImages {
     public static final ImageDescriptor DESC_DLCL_CONFIGURE_OUTPUT_FOLDER= createUnManaged(T_DLCL, "configure_output_folder.gif"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_CONFIGURE_OUTPUT_FOLDER= createUnManaged(T_ELCL, "configure_output_folder.gif"); //$NON-NLS-1$
     
+    public static final ImageDescriptor DESC_DLCL_CONFIGURE_PROBLEM_SEVERITIES= createUnManaged(T_DLCL, "configure_problem_severities.gif"); //$NON-NLS-1$
+    public static final ImageDescriptor DESC_ELCL_CONFIGURE_PROBLEM_SEVERITIES= createUnManaged(T_ELCL, "configure_problem_severities.gif"); //$NON-NLS-1$
+    
     public static final ImageDescriptor DESC_DLCL_EXCLUDE_FROM_BUILDPATH= createUnManaged(T_DLCL, "exclude_from_buildpath.gif");  //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_EXCLUDE_FROM_BUILDPATH= createUnManaged(T_ELCL, "exclude_from_buildpath.gif");  //$NON-NLS-1$
     
