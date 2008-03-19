@@ -49,6 +49,7 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
+import org.eclipse.jface.internal.text.html.BrowserInput;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -151,66 +152,7 @@ import org.osgi.framework.Bundle;
 public class JavadocView extends AbstractInfoView {
 
 	/**
-	 * A browser input contains an input element and
-	 * a previous and a next input, if available.
-	 * 
-	 * @since 3.4
-	 */
-	public static abstract class BrowserInput {
-
-		private final BrowserInput fPrevious;
-		private BrowserInput fNext;
-
-		/**
-		 * Create a new Browser input.
-		 * 
-		 * @param previous the input previous to this or <code>null</code> if this is the first
-		 */
-		public BrowserInput(BrowserInput previous) {
-			fPrevious= previous;
-
-			if (previous != null) {
-				previous.fNext= this;
-			}
-		}
-
-		/**
-		 * The previous input or <code>null</code> if this
-		 * is the first.
-		 * 
-		 * @return the previous input or <code>null</code>
-		 */
-		public BrowserInput getPrevious() {
-			return fPrevious;
-		}
-
-		/**
-		 * The next input or <code>null</code> if this
-		 * is the last.
-		 * 
-		 * @return the next input or <code>null</code>
-		 */
-		public BrowserInput getNext() {
-			return fNext;
-		}
-
-		/**
-		 * The element to use to set the browsers input.
-		 * 
-		 * @return the input element
-		 */
-		public abstract Object getInputElement();
-
-		/**
-		 * A human readable name for the input.
-		 * 
-		 * @return the input name
-		 */
-		public abstract String getInputName();
-	}
-
-	/**
-	 * Implementation of a {@link JavadocView.BrowserInput} using
+	 * Implementation of a {@link BrowserInput} using
 	 * a {@link IJavaElement} as input.
 	 *  
 	 * @since 3.4
@@ -241,7 +183,7 @@ public class JavadocView extends AbstractInfoView {
 	}
 	
 	/**
-	 * Implementation of a {@link JavadocView.BrowserInput} using an
+	 * Implementation of a {@link BrowserInput} using an
 	 * {@link URL} as input.
 	 *  
 	 * @since 3.4

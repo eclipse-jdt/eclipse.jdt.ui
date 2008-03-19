@@ -30,6 +30,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 import org.eclipse.jface.internal.text.html.BrowserInformationControlInput;
+import org.eclipse.jface.internal.text.html.BrowserInput;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.resource.JFaceResources;
 
@@ -92,10 +93,6 @@ import org.osgi.framework.Bundle;
  */
 public class JavadocHover extends AbstractJavaEditorTextHover {
 	
-	/* FIXME:
-	 * Links and button tooltips should include link target ('Back to ...')
-	 */
-	
 	/**
 	 * Action to go back to the previous input in the hover control.
 	 * 
@@ -110,12 +107,27 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			ISharedImages images= PlatformUI.getWorkbench().getSharedImages();
 			setImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_BACK));
 			setDisabledImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_BACK_DISABLED));
+			
+			update();
 		}
 		
 		public void run() {
-			BrowserInformationControlInput previous= fInfoControl.getInput().getPrevious();
+			BrowserInformationControlInput previous= (BrowserInformationControlInput) fInfoControl.getInput().getPrevious();
 			if (previous != null) {
 				fInfoControl.setInput(previous);
+			}
+		}
+
+		public void update() {
+			BrowserInformationControlInput current= fInfoControl.getInput();
+
+			if (current != null && current.getPrevious() != null) {
+				BrowserInput previous= current.getPrevious();
+				setToolTipText(Messages.format(JavaHoverMessages.JavadocHover_back_toElement_toolTip, previous.getInputName()));
+				setEnabled(true);
+			} else {
+				setToolTipText(JavaHoverMessages.JavadocHover_back);
+				setEnabled(false);
 			}
 		}
 	}
@@ -134,12 +146,26 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			ISharedImages images= PlatformUI.getWorkbench().getSharedImages();
 			setImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_FORWARD));
 			setDisabledImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_FORWARD_DISABLED));
+			
+			update();
 		}
 		
 		public void run() {
-			BrowserInformationControlInput next= fInfoControl.getInput().getNext();
+			BrowserInformationControlInput next= (BrowserInformationControlInput) fInfoControl.getInput().getNext();
 			if (next != null) {
 				fInfoControl.setInput(next);
+			}
+		}
+
+		public void update() {
+			BrowserInformationControlInput current= fInfoControl.getInput();
+
+			if (current != null && current.getNext() != null) {
+				setToolTipText(Messages.format(JavaHoverMessages.JavadocHover_forward_toElement_toolTip, current.getNext().getInputName()));
+				setEnabled(true);
+			} else {
+				setToolTipText(JavaHoverMessages.JavadocHover_forward_toolTip);
+				setEnabled(false);
 			}
 		}
 	}
@@ -162,12 +188,13 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
 		public void run() {
+			fInfoControl.getInput();
 			JavadocBrowserInformationControlInput infoInput= (JavadocBrowserInformationControlInput) fInfoControl.getInput(); //TODO: check cast
 			fInfoControl.notifyDelayedInputChange(null);
 			fInfoControl.dispose(); //FIXME: should have protocol to hide, rather than dispose
 			try {
 				JavadocView view= (JavadocView) JavaPlugin.getActivePage().showView(JavaUI.ID_JAVADOC_VIEW);
-				view.setInput(infoInput.getElement()); //TODO: should set infoInput to retain history
+				view.setInput(infoInput);
 			} catch (PartInitException e) {
 				JavaPlugin.log(e);
 			}
@@ -259,31 +286,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				forwardAction.setEnabled(false);
 				IInputChangedListener inputChangeListener= new IInputChangedListener() {
 					public void inputChanged(Object newInput) {
-						if (newInput == null) {
-							backAction.setEnabled(false);
-							forwardAction.setEnabled(false);
-							forwardAction.setToolTipText(JavaHoverMessages.JavadocHover_forward_toolTip);
-							backAction.setToolTipText(JavaHoverMessages.JavadocHover_back_toolTip);
-						} else {
-							JavadocBrowserInformationControlInput javaInput= (JavadocBrowserInformationControlInput) newInput;
-							if (javaInput.getPrevious() != null) {
-								backAction.setEnabled(true);
-								IJavaElement previous= ((JavadocBrowserInformationControlInput) javaInput.getPrevious()).getElement();
-								backAction.setToolTipText(Messages.format(JavaHoverMessages.JavadocHover_back_toElement_toolTip, previous.getElementName()));
-							} else {
-								backAction.setEnabled(false);
-								backAction.setToolTipText(JavaHoverMessages.JavadocHover_back_toolTip);
-							}
-							
-							if (javaInput.getNext() != null) {
-								forwardAction.setEnabled(true);
-								IJavaElement next= ((JavadocBrowserInformationControlInput) javaInput.getNext()).getElement();
-								forwardAction.setToolTipText(Messages.format(JavaHoverMessages.JavadocHover_forward_toElement_toolTip, next.getElementName()));
-							} else {
-								forwardAction.setEnabled(false);
-								forwardAction.setToolTipText(JavaHoverMessages.JavadocHover_forward_toolTip);
-							}
-						}
+						backAction.update();
+						forwardAction.update();
 					}
 				};
 				iControl.addInputChangeListener(inputChangeListener);

@@ -67,4 +67,18 @@ public class JavadocBrowserInformationControlInput extends BrowserInformationCon
 		return fHtml;
 	}
 
+	/*
+	 * @see org.eclipse.jdt.internal.ui.infoviews.BrowserInput#getInputElement()
+	 */
+	public Object getInputElement() {
+		return fElement;
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.infoviews.BrowserInput#getInputName()
+	 */
+	public String getInputName() {
+		return fElement.getElementName();
+	}
+
 }
