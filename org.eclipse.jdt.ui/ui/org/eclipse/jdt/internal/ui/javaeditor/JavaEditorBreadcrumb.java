@@ -330,6 +330,9 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
 		 */
 		public void elementChanged(ElementChangedEvent event) {
+			if (fViewer == null)
+				return;
+			
 			Object input= fViewer.getInput();
 			if (!(input instanceof IJavaElement))
 				return;
@@ -346,7 +349,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 			fRunnable= new Runnable() {
 				public void run() {
-					if (fViewer.getControl().isDisposed())
+					if (fViewer == null)
 						return;
 					
 					Object newInput= getCurrentInput();
