@@ -7,8 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Benjamin Muskalla (b.muskalla@gmx.net)
- *      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102132 [nls tooling] Externalize Strings Wizard should not touch annotation arguments
+ *     Benjamin Muskalla <b.muskalla@gmx.net> - [nls tooling] Externalize Strings Wizard should not touch annotation arguments - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102132
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.nls;
 
@@ -100,14 +99,14 @@ public class NLSScannerTester extends TestCase {
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
 		assertEquals("1 string", 1, line.size()); //$NON-NLS-1$
-	}	
+	}
 	
 	public void test6() throws Exception{
 		String text= "\n \"xx\" \"dff\""; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
 		assertEquals("2 string", 2, line.size()); //$NON-NLS-1$
-	}	
+	}
 	
 	public void test7() throws Exception{
 		String text= "\n \"xx\" \n\"dff\""; //$NON-NLS-1$
@@ -117,7 +116,7 @@ public class NLSScannerTester extends TestCase {
 		
 		line= l[1];
 		assertEquals("1 string B", 1, line.size()); //$NON-NLS-1$
-	}	
+	}
 
 
 	public void test8() throws Exception{
@@ -148,10 +147,10 @@ public class NLSScannerTester extends TestCase {
 	}
 	
 	public void test11() throws Exception{
-		String text= 
+		String text=
 				"\n\"x\" \"y\"" //$NON-NLS-1$
-				+ NLSElement.createTagText(2) 
-				+ NLSElement.createTagText(1) 
+				+ NLSElement.createTagText(2)
+				+ NLSElement.createTagText(1)
 				+ "\n"; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
@@ -165,10 +164,10 @@ public class NLSScannerTester extends TestCase {
 	}
 	
 	public void test12() throws Exception{
-		String text= 
+		String text=
 				"\n\"x\" \"y\"" //$NON-NLS-1$
-				+ NLSElement.createTagText(1) 
-				+ NLSElement.createTagText(2) 
+				+ NLSElement.createTagText(1)
+				+ NLSElement.createTagText(2)
 				+ "\n"; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
@@ -182,9 +181,9 @@ public class NLSScannerTester extends TestCase {
 	}
 	
 	public void test13() throws Exception{
-		String text= 
+		String text=
 				"\n\"x\" \"y\"" //$NON-NLS-1$
-				+ NLSElement.createTagText(1) 
+				+ NLSElement.createTagText(1)
 				+ "\n"; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
@@ -198,9 +197,9 @@ public class NLSScannerTester extends TestCase {
 	}
 	
 	public void test14() throws Exception{
-		String text= 
+		String text=
 				"\n\"x\" \"y\"" //$NON-NLS-1$
-				+ NLSElement.createTagText(2) 
+				+ NLSElement.createTagText(2)
 				+ "\n"; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
@@ -259,10 +258,10 @@ public class NLSScannerTester extends TestCase {
 	// test for bug 102132
 	public void test19() throws InvalidInputException {
 		String text=
-				"@interface Annotation {\r\n" + 
-				"	String a() default \"a\" + \"b\";\r\n" + 
+				"@interface Annotation {\r\n" +
+				"	String a() default \"a\" + \"b\";\r\n" +
 				"	String b() default \"bee\";\r\n" +
-				"	String c() default true ? \"x\" : \"y\";\r\n" + 
+				"	String c() default true ? \"x\" : \"y\";\r\n" +
 				"}\r\n";
 		NLSLine[] l= NLSScanner.scan(text);
 		assertEquals(0, l.length);
@@ -271,15 +270,15 @@ public class NLSScannerTester extends TestCase {
 	// test for bug 102132
 	public void test20() throws InvalidInputException {
 		String text=
-			"class C {\r\n" + 
-			"    void m() {\r\n" + 
-			"        switch (42) {\r\n" + 
-			"            default: String s= \"x\";\r\n" + 
-			"        }\r\n" + 
-			"        switch (1) {\r\n" + 
-			"            default /*standard*/: String s= \"x\";\r\n" + 
-			"        }\r\n" + 
-			"    }\r\n" + 
+			"class C {\r\n" +
+			"    void m() {\r\n" +
+			"        switch (42) {\r\n" +
+			"            default: String s= \"x\";\r\n" +
+			"        }\r\n" +
+			"        switch (1) {\r\n" +
+			"            default /*standard*/: String s= \"x\";\r\n" +
+			"        }\r\n" +
+			"    }\r\n" +
 			"}";
 		NLSLine[] l= NLSScanner.scan(text);
 		
@@ -297,9 +296,9 @@ public class NLSScannerTester extends TestCase {
 	
 	//regression test for bug 12600
 	public void test54() throws Exception{
-		String text= 
+		String text=
 				"\n\"x\"" //$NON-NLS-1$
-				+ NLSElement.TAG_PREFIX + 1 
+				+ NLSElement.TAG_PREFIX + 1
 				+ "\n"; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];

@@ -7,8 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Benjamin Muskalla (b.muskalla@gmx.net)
- *      - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102132 [nls tooling] Externalize Strings Wizard should not touch annotation arguments
+ *     Benjamin Muskalla <b.muskalla@gmx.net> - [nls tooling] Externalize Strings Wizard should not touch annotation arguments - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102132
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
@@ -27,17 +26,18 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
+
 public class NLSScanner {
 
-	//no instances	
+	//no instances
 	private NLSScanner() {
 	}
 
 	/**
 	 * @param cu a compilation unit
-	 * @return a list of NLSLines found in the compilation unit
-	 * @throws JavaModelException 
-	 * @throws InvalidInputException 
+	 * @return an array with NLSLines found in the compilation unit
+	 * @throws JavaModelException
+	 * @throws InvalidInputException
 	 */
 	public static NLSLine[] scan(ICompilationUnit cu) throws JavaModelException, InvalidInputException {
 		return scan(cu.getBuffer().getCharacters());
@@ -46,10 +46,10 @@ public class NLSScanner {
 	/**
 	 * @param s a string
 	 * @return a list of NLSLines found in the string
-	 * @throws InvalidInputException 
-	 */	
+	 * @throws InvalidInputException
+	 */
 	public static NLSLine[] scan(String s) throws InvalidInputException {
-		return scan(s.toCharArray()); 
+		return scan(s.toCharArray());
 	}
 	
 	private static NLSLine[] scan(char[] content) throws InvalidInputException {
@@ -112,8 +112,8 @@ public class NLSScanner {
 						String value= new String(scanner.getCurrentTokenSource());
 						currentLine.add(
 								new NLSElement(
-										value, 
-										scanner.getCurrentTokenStartPosition(), 
+										value,
+										scanner.getCurrentTokenStartPosition(),
 										scanner.getCurrentTokenEndPosition() + 1 - scanner.getCurrentTokenStartPosition(),
 										nlsElementIndex++,
 										false));
@@ -156,7 +156,7 @@ public class NLSScanner {
 		String s= new String(scanner.getCurrentTokenSource());
 		int pos= s.indexOf(NLSElement.TAG_PREFIX);
 		while (pos != -1) {
-			int start= pos + NLSElement.TAG_PREFIX_LENGTH; 
+			int start= pos + NLSElement.TAG_PREFIX_LENGTH;
 			int end= s.indexOf(NLSElement.TAG_POSTFIX, start);
 			if (end < 0)
 				return; //no error recovery
@@ -185,7 +185,7 @@ public class NLSScanner {
 		for (int i= 0; i < elements.length; i++) {
 			NLSElement element= elements[i];
 			if (!element.hasTag()) {
-				element.setTagPosition(computeInsertOffset(elements, i, defaultValue), 0);				
+				element.setTagPosition(computeInsertOffset(elements, i, defaultValue), 0);
 			}
 		}
 	}
@@ -197,7 +197,7 @@ public class NLSScanner {
 		NLSElement nextTagged= findNextTagged(index, elements);
 		if (nextTagged != null)
 			return nextTagged.getTagPosition().getOffset();
-		return defaultValue;	
+		return defaultValue;
 	}
 	
 	private static NLSElement findPreviousTagged(int startIndex, NLSElement[] elements){
@@ -218,6 +218,6 @@ public class NLSScanner {
 			i++;
 		}
 		return null;
-	}			
+	}
 }
 
