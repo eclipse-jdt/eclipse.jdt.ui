@@ -41,6 +41,7 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension3;
 import org.eclipse.jface.text.IInformationControlExtension5;
@@ -98,6 +99,11 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * @since 3.2
 	 */
 	private int fMaxHeight= SWT.DEFAULT;
+	/**
+	 * The orientation of the shell
+	 * @since 3.4
+	 */
+	private final int fOrientation;
 	
 	private Color fBackgroundColor;
 	private boolean fIsSystemBackgroundColor= true;
@@ -116,6 +122,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 */
 	public SourceViewerInformationControl(Shell parent, boolean isResizable, int orientation, String statusFieldText) {
 		Assert.isLegal(orientation == SWT.RIGHT_TO_LEFT || orientation == SWT.LEFT_TO_RIGHT || orientation == SWT.NONE);
+		fOrientation= orientation;
 		
 		GridLayout layout;
 		GridData gd;
@@ -451,11 +458,15 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.IInformationControlExtension5#allowMoveIntoControl()
+	 * @see org.eclipse.jface.text.IInformationControlExtension5#getInformationPresenterControlCreator()
 	 * @since 3.4
 	 */
-	public boolean allowMoveIntoControl() {
-		return true;
+	public IInformationControlCreator getInformationPresenterControlCreator() {
+		return new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell parent) {
+				return new SourceViewerInformationControl(parent, true, fOrientation, null);
+			}
+		};
 	}
 
 	/*

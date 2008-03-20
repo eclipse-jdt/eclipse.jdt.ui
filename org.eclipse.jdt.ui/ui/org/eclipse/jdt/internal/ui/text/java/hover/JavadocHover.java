@@ -318,13 +318,34 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 * @since 3.3
 	 */
 	private static final class HoverControlCreator extends AbstractReusableInformationControlCreator {
+		/**
+		 * The information presenter control creator.
+		 * @since 3.4
+		 */
+		private final IInformationControlCreator fInformationPresenterControlCreator;
+
+		/**
+		 * @param informationPresenterControlCreator control creator for enriched hover
+		 * @since 3.4
+		 */
+		public HoverControlCreator(IInformationControlCreator informationPresenterControlCreator) {
+			fInformationPresenterControlCreator= informationPresenterControlCreator;
+		}
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
 		public IInformationControl doCreateInformationControl(Shell parent) {
 			if (BrowserInformationControl.isAvailable(parent)) {
 				String font= PreferenceConstants.APPEARANCE_JAVADOC_FONT;
-				BrowserInformationControl iControl= new BrowserInformationControl(parent, font, EditorsUI.getTooltipAffordanceString());
+				BrowserInformationControl iControl= new BrowserInformationControl(parent, font, EditorsUI.getTooltipAffordanceString()) {
+					/*
+					 * @see org.eclipse.jface.text.IInformationControlExtension5#getInformationPresenterControlCreator()
+					 */
+					public IInformationControlCreator getInformationPresenterControlCreator() {
+						return fInformationPresenterControlCreator;
+					}
+				};
 				addLinkListener(iControl);
 				return iControl;
 			} else {
@@ -387,7 +408,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 */
 	public IInformationControlCreator getHoverControlCreator() {
 		if (fHoverControlCreator == null)
-			fHoverControlCreator= new HoverControlCreator();
+			fHoverControlCreator= new HoverControlCreator(getInformationPresenterControlCreator());
 		return fHoverControlCreator;
 	}
 

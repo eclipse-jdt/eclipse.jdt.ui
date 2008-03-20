@@ -59,6 +59,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IInformationControlExtension2;
+import org.eclipse.jface.text.IInformationControlExtension4;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextViewer;
@@ -101,7 +102,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	 * 
 	 * @since 3.4
 	 */
-	private static class AnnotationInfo {
+	protected static class AnnotationInfo {
 		public final Annotation annotation;
 		public final Position position;
 		public final ITextViewer viewer;
@@ -110,6 +111,26 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			this.annotation= annotation;
 			this.position= position;
 			this.viewer= textViewer;
+		}
+
+		/**
+		 * Create completion proposals which can resolve the given annotation at
+		 * the given position. Returns an empty array if no such proposals exist.
+		 * 
+		 * @return the proposals or an empty array
+		 */
+		public ICompletionProposal[] getCompletionProposals() {
+			return new ICompletionProposal[0];
+		}
+
+		/**
+		 * Adds actions to the given toolbar.
+		 * 
+		 * @param manager the toolbar manager to add actions to
+		 */
+		public void fillToolBar(ToolBarManager manager) {
+			ConfigureAnnotationsAction configureAnnotationsAction= new ConfigureAnnotationsAction(annotation);
+			manager.add(configureAnnotationsAction);
 		}
 	}
 
@@ -120,12 +141,10 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	 * 
 	 * @since 3.4
 	 */
-	private class AnnotationInformationControl extends AbstractInformationControl implements IInformationControlExtension2 {
+	private static class AnnotationInformationControl extends AbstractInformationControl implements IInformationControlExtension2 {
 
 		private final DefaultMarkerAnnotationAccess fMarkerAnnotationAccess;
 		private Control fFocusControl;
-		private Image fAnnotationImage;
-		private Image fScaledAnnotationImage;
 		private AnnotationInfo fInput;
 		private Composite fParent;
 
@@ -221,7 +240,8 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			if (toolBarManager == null)
 				return;
 
-			fillToolBar(toolBarManager, fInput.annotation, fInput.position, fInput.viewer.getDocument());
+			toolBarManager.removeAll();
+			fInput.fillToolBar(toolBarManager);
 			toolBarManager.update(true);
 		}
 
@@ -232,13 +252,18 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		 * @param parent the composite containing the content to create
 		 */
 		protected void deferredCreateContent(Composite parent) {
+			Control[] children= parent.getChildren();
+			for (int i= 0; i < children.length; i++) {
+				children[i].dispose();
+			}
 			createAnnotationInformation(parent, getAnnotationInfo().annotation);
 
-			ICompletionProposal[] proposals= getCompletionProposals(getAnnotationInfo().annotation, getAnnotationInfo().position);
+			ICompletionProposal[] proposals= getAnnotationInfo().getCompletionProposals();
 			if (proposals.length > 0)
 				createCompletionProposalsControl(parent, proposals);
 
 			setColorAndFont(parent, parent.getForeground(), parent.getBackground(), JFaceResources.getDialogFont());
+			parent.layout(true);
 		}
 
 		private void setColorAndFont(Control control, Color foreground, Color background, Font font) {
@@ -471,23 +496,6 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 					target.endCompoundChange();
 			}
 		}
-
-		/*
-		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractAnnotationHover.AbstractInformationControl#dispose()
-		 */
-		public void dispose() {
-			super.dispose();
-
-			if (fAnnotationImage != null) {
-				fAnnotationImage.dispose();
-				fAnnotationImage= null;
-			}
-
-			if (fScaledAnnotationImage != null) {
-				fScaledAnnotationImage.dispose();
-				fScaledAnnotationImage= null;
-			}
-		}
 	}
 
 	/**
@@ -495,7 +503,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	 *
 	 * @since 3.4
 	 */
-	private final class PresenterControlCreator extends AbstractReusableInformationControlCreator {
+	private static final class PresenterControlCreator extends AbstractReusableInformationControlCreator {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
@@ -510,12 +518,38 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	 *
 	 * @since 3.4
 	 */
-	private final class HoverControlCreator implements IInformationControlCreator {
+	private static final class HoverControlCreator extends AbstractReusableInformationControlCreator {
+		private final IInformationControlCreator fPresenterControlCreator;
+
+		public HoverControlCreator(IInformationControlCreator presenterControlCreator) {
+			fPresenterControlCreator= presenterControlCreator;
+		}
+		
 		/*
-		 * @see org.eclipse.jface.text.IInformationControlCreator#createInformationControl(org.eclipse.swt.widgets.Shell)
+		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
-		public IInformationControl createInformationControl(Shell parent) {
-			return new AnnotationInformationControl(parent, EditorsUI.getTooltipAffordanceString());
+		public IInformationControl doCreateInformationControl(Shell parent) {
+			return new AnnotationInformationControl(parent, EditorsUI.getTooltipAffordanceString()) {
+				/*
+				 * @see org.eclipse.jface.text.IInformationControlExtension5#getInformationPresenterControlCreator()
+				 */
+				public IInformationControlCreator getInformationPresenterControlCreator() {
+					return fPresenterControlCreator;
+				}
+			};
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#canReuse(org.eclipse.jface.text.IInformationControl)
+		 */
+		public boolean canReuse(IInformationControl control) {
+			if (!super.canReuse(control))
+				return false;
+
+			if (control instanceof IInformationControlExtension4)
+				((IInformationControlExtension4) control).setStatusText(EditorsUI.getTooltipAffordanceString());
+
+			return true;
 		}
 	}
 	
@@ -524,7 +558,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	 * 
 	 * @since 3.4
 	 */
-	private final class ConfigureAnnotationsAction extends Action {
+	private static final class ConfigureAnnotationsAction extends Action {
 
 		private final Annotation fAnnotation;
 
@@ -555,37 +589,24 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	private final DefaultMarkerAnnotationAccess fAnnotationAccess= new DefaultMarkerAnnotationAccess();
 	private final boolean fAllAnnotations;
 
+	/**
+	 * The hover control creator.
+	 * 
+	 * @since 3.4
+	 */
+	private IInformationControlCreator fHoverControlCreator;
+	/**
+	 * The presentation control creator.
+	 * 
+	 * @since 3.4
+	 */
+	private IInformationControlCreator fPresenterControlCreator;
+	
+	
 	public AbstractAnnotationHover(boolean allAnnotations) {
 		fAllAnnotations= allAnnotations;
 	}
-
-	/**
-	 * Create completion proposals which can resolve the given annotation at
-	 * the given position. Returns an empty array if no such proposals exist
-	 * 
-	 * @param annotation the annotation to resolve
-	 * @param position the position of the annotation
-	 * @return the proposals or an empty array
-	 * @since 3.4
-	 */
-	protected ICompletionProposal[] getCompletionProposals(Annotation annotation, Position position) {
-		return new ICompletionProposal[0];
-	}
 	
-	/**
-	 * Adds actions to the given toolbar. The actions can operate on the given annotation
-	 * which is located in the given document at the given position.
-	 * 
-	 * @param manager the toolbar manager to add actions to
-	 * @param annotation the annotation to operate on
-	 * @param position the position of the annotation
-	 * @param document the document containing the annotation
-	 */
-	protected void fillToolBar(ToolBarManager manager, Annotation annotation, Position position, IDocument document) {
-		ConfigureAnnotationsAction configureAnnotationsAction= new ConfigureAnnotationsAction(annotation);
-		manager.add(configureAnnotationsAction);
-	}
-
 	/*
 	 * @see org.eclipse.jface.text.ITextHover#getHoverInfo(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
 	 */
@@ -643,7 +664,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				}
 			}
 			if (layer > -1)
-				return new AnnotationInfo(annotation, position, textViewer);
+				return createAnnotationInfo(annotation, position, textViewer);
 
 		} finally {
 			try {
@@ -659,12 +680,18 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		return null;
 	}
 
+	protected AnnotationInfo createAnnotationInfo(Annotation annotation, Position position, ITextViewer textViewer) {
+		return new AnnotationInfo(annotation, position, textViewer);
+	}
+
 	/*
 	 * @see ITextHoverExtension#getHoverControlCreator()
 	 * @since 3.4
 	 */
 	public IInformationControlCreator getHoverControlCreator() {
-		return new HoverControlCreator();
+		if (fHoverControlCreator == null)
+			fHoverControlCreator= new HoverControlCreator(getInformationPresenterControlCreator());
+		return fHoverControlCreator;
 	}
 
 	/*
@@ -672,7 +699,9 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	 * @since 3.4
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {
-		return new PresenterControlCreator();
+		if (fPresenterControlCreator == null)
+			fPresenterControlCreator= new PresenterControlCreator();
+		return fPresenterControlCreator;
 	}
 
 	private IPath getEditorInputPath() {
@@ -723,7 +752,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	 * @param annotation the annotation
 	 * @return the annotation preference or <code>null</code> if none
 	 */
-	private AnnotationPreference getAnnotationPreference(Annotation annotation) {
+	private static AnnotationPreference getAnnotationPreference(Annotation annotation) {
 
 		if (annotation.isMarkedDeleted())
 			return null;

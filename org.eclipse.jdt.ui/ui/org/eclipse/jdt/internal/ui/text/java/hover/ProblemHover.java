@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 
-import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.Annotation;
@@ -51,13 +51,13 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
  * selected java annotation.
  *
  * XXX: Currently this problem hover only works for
- *		Java problems.
+ *		Java and spelling problems.
  *		see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=62081
  *
  * @since 3.0
  */
 public class ProblemHover extends AbstractAnnotationHover {
-
+	
 	/**
 	 * Action to configure the problem severity of a compiler option.
 	 * 
@@ -84,12 +84,12 @@ public class ProblemHover extends AbstractAnnotationHover {
 		 */
 		public void run() {
 			Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			
+
 			if (fIsJavadocOption) {
 				Map data= new HashMap();
 				data.put(JavadocProblemsPreferencePage.DATA_SELECT_OPTION_KEY, fOptionId);
 				data.put(JavadocProblemsPreferencePage.DATA_SELECT_OPTION_QUALIFIER, JavaCore.PLUGIN_ID);
-			
+
 				PreferencesUtil.createPropertyDialogOn(shell, fProject, JavadocProblemsPreferencePage.PROP_ID, null, data).open();
 			} else {
 				Map data= new HashMap();
@@ -100,54 +100,64 @@ public class ProblemHover extends AbstractAnnotationHover {
 			}
 		}
 	}
+	
+	protected static class ProblemInfo extends AnnotationInfo {
+
+		public ProblemInfo(Annotation annotation, Position position, ITextViewer textViewer) {
+			super(annotation, position, textViewer);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractAnnotationHover.AnnotationInfo#getCompletionProposals()
+		 */
+		public ICompletionProposal[] getCompletionProposals() {
+			ProblemLocation location= new ProblemLocation(position.getOffset(), position.getLength(), (IJavaAnnotation) annotation);
+			ICompilationUnit cu= ((IJavaAnnotation) annotation).getCompilationUnit();
+
+			IInvocationContext context= new AssistContext(cu, location.getOffset(), location.getLength());
+			if (!SpellingAnnotation.TYPE.equals(annotation.getType()) && !hasProblem(context.getASTRoot().getProblems(), location))
+				return new ICompletionProposal[0];
+
+			ArrayList proposals= new ArrayList();
+			JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
+			Collections.sort(proposals, new CompletionProposalComparator());
+
+			return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+		}
+
+		private static boolean hasProblem(IProblem[] problems, IProblemLocation location) {
+			for (int i= 0; i < problems.length; i++) {
+				IProblem problem= problems[i];
+				if (problem.getID() == location.getProblemId() && problem.getSourceStart() == location.getOffset())
+					return true;
+			}
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractAnnotationHover.AnnotationInfo#fillToolBar(org.eclipse.jface.action.ToolBarManager)
+		 */
+		public void fillToolBar(ToolBarManager manager) {
+			super.fillToolBar(manager);
+
+			IJavaAnnotation javaAnnotation= (IJavaAnnotation) annotation;
+
+			String optionId= JavaCore.getOptionForConfigurableSeverity(javaAnnotation.getId());
+			if (optionId != null) {
+				IJavaProject javaProject= javaAnnotation.getCompilationUnit().getJavaProject();
+				boolean isJavadocProblem= (javaAnnotation.getId() & IProblem.Javadoc) != 0;
+				ConfigureProblemSeverityAction problemSeverityAction= new ConfigureProblemSeverityAction(javaProject, optionId, isJavadocProblem);
+				manager.add(problemSeverityAction);
+			}
+		}
+
+	}
 
 	public ProblemHover() {
 		super(false);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractAnnotationHover#calculateProposals(org.eclipse.jface.text.source.Annotation, org.eclipse.jface.text.Position)
-	 * @since 3.4
-	 */
-	protected ICompletionProposal[] getCompletionProposals(Annotation annotation, Position position) {
-		ProblemLocation location= new ProblemLocation(position.getOffset(), position.getLength(), (IJavaAnnotation) annotation);
-		ICompilationUnit cu= ((IJavaAnnotation) annotation).getCompilationUnit();
-
-		IInvocationContext context= new AssistContext(cu, location.getOffset(), location.getLength());
-		if (!SpellingAnnotation.TYPE.equals(annotation.getType()) && !hasProblem(context.getASTRoot().getProblems(), location))
-			return new ICompletionProposal[0];
-
-		ArrayList proposals= new ArrayList();
-		JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
-		Collections.sort(proposals, new CompletionProposalComparator());
-
-		return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+	protected AnnotationInfo createAnnotationInfo(Annotation annotation, Position position, ITextViewer textViewer) {
+		return new ProblemInfo(annotation, position, textViewer);
 	}
-
-	private static boolean hasProblem(IProblem[] problems, IProblemLocation location) {
-		for (int i= 0; i < problems.length; i++) {
-			IProblem problem= problems[i];
-			if (problem.getID() == location.getProblemId() && problem.getSourceStart() == location.getOffset())
-				return true;
-		}
-		return false;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractAnnotationHover#fillToolBar(org.eclipse.jface.action.ToolBarManager, org.eclipse.jface.text.source.Annotation, org.eclipse.jface.text.Position, org.eclipse.jface.text.IDocument)
-	 */
-	protected void fillToolBar(ToolBarManager manager, Annotation annotation, Position position, IDocument document) {
-		super.fillToolBar(manager, annotation, position, document);
-
-		IJavaAnnotation javaAnnotation= (IJavaAnnotation) annotation;
-		
-		String optionId= JavaCore.getOptionForConfigurableSeverity(javaAnnotation.getId());
-		if (optionId != null) {
-			IJavaProject javaProject= javaAnnotation.getCompilationUnit().getJavaProject();
-			boolean isJavadocProblem= (javaAnnotation.getId() & IProblem.Javadoc) != 0;
-			ConfigureProblemSeverityAction problemSeverityAction= new ConfigureProblemSeverityAction(javaProject, optionId, isJavadocProblem);
-			manager.add(problemSeverityAction);
-		}
-	}
-
 }
