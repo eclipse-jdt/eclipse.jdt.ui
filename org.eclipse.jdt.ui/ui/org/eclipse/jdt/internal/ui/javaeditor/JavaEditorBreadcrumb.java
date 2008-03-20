@@ -217,6 +217,25 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 				} catch (CoreException e) {
 					JavaPlugin.log(e);
 				}
+			} else if (inputElement instanceof IPackageFragmentRoot) {
+				Object[] fragments= fParent.getChildren(inputElement);
+
+				ArrayList packages= new ArrayList();
+				for (int i= 0; i < fragments.length; i++) {
+					Object object= fragments[i];
+					if (object instanceof IPackageFragment) {
+						try {
+							if (((IPackageFragment) object).hasChildren())
+								packages.add(object);
+						} catch (JavaModelException e) {
+							JavaPlugin.log(e);
+							packages.add(object);
+						}
+					} else {
+						packages.add(object);
+					}
+				}
+				fElements= packages.toArray();
 			} else {
 				fElements= fParent.getChildren(inputElement);
 			}
