@@ -240,7 +240,9 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 				if (item == null)
 					return;
 				
-				item.openDropDownMenu();
+				int index= fBreadcrumbViewer.getIndexOfItem(item);
+				BreadcrumbItem parentItem= fBreadcrumbViewer.getItem(index - 1);
+				parentItem.openDropDownMenu();
 			}
 		});
 

@@ -322,13 +322,13 @@ class BreadcrumbItemDetails {
 						if (!fSelected) {
 							viewer.selectItem(fParent);
 						}
-						fParent.openDropDownMenu();
+						openDropDown();
 						break;
 					case SWT.KEYPAD_ADD:
 						if (!fSelected) {
 							viewer.selectItem(fParent);
 						}
-						fParent.openDropDownMenu();
+						openDropDown();
 						break;
 					case SWT.CR:
 						if (!fSelected) {
@@ -341,10 +341,19 @@ class BreadcrumbItemDetails {
 							if (!fSelected) {
 								viewer.selectItem(fParent);
 							}
-							fParent.openDropDownMenu();
+							openDropDown();
 						}
 						break;
 				}
+			}
+
+			private void openDropDown() {
+				BreadcrumbViewer viewer= fParent.getViewer();
+
+				int index= viewer.getIndexOfItem(fParent);
+				BreadcrumbItem parent= fParent.getViewer().getItem(index - 1);
+				
+				parent.openDropDownMenu();
 			}
 
 			public void keyReleased(KeyEvent e) {
