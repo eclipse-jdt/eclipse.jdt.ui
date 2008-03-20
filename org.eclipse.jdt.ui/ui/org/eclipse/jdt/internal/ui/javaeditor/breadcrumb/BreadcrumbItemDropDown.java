@@ -477,8 +477,18 @@ class BreadcrumbItemDropDown {
 
 		Point preferedSize= shell.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
 
-		int newWidth= Math.min(Math.max(preferedSize.x, currentWidth), DROP_DOWN_WIDTH);
-		int newHeight= Math.min(Math.max(preferedSize.y, currentHeight), DROP_DOWN_HIGHT);
+		int newWidth;
+		if (currentWidth >= DROP_DOWN_WIDTH) {
+			newWidth= currentWidth;
+		} else {
+			newWidth= Math.min(Math.max(preferedSize.x, currentWidth), DROP_DOWN_WIDTH);
+		}
+		int newHeight;
+		if (currentHeight >= DROP_DOWN_HIGHT) {
+			newHeight= currentHeight;
+		} else {
+			newHeight= Math.min(Math.max(preferedSize.y, currentHeight), DROP_DOWN_HIGHT);
+		}
 
 		if (newHeight != currentHeight || newWidth != currentWidth) {
 			shell.setSize(newWidth, newHeight);
