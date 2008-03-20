@@ -33,6 +33,7 @@ import org.eclipse.jface.internal.text.html.BrowserInformationControlInput;
 import org.eclipse.jface.internal.text.html.BrowserInput;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -43,6 +44,7 @@ import org.eclipse.jface.text.IInputChangedListener;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -78,6 +80,8 @@ import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
+import org.eclipse.jdt.internal.ui.actions.OpenExternalBrowserAction;
+import org.eclipse.jdt.internal.ui.actions.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.infoviews.JavadocView;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 import org.eclipse.jdt.internal.ui.viewsupport.ImagesOnFileSystemRegistry;
@@ -201,34 +205,6 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		}
 	}
 	
-
-//	/**
-//	 * Action that opens the external Javadoc for the current element.
-//	 *
-//	 * @since 3.4
-//	 */
-//	private static final class ShowExternalJavadocAction extends Action {
-//		private final BrowserInformationControl fInfoControl;
-//		private final Shell fParent;
-//
-//		public ShowExternalJavadocAction(BrowserInformationControl infoControl, Shell parent) {
-//			fInfoControl= infoControl;
-//			fParent= parent;
-//			setText("Show External Javadoc");
-//			setImageDescriptor(JavaPluginImages.DESC_OBJS_JAVADOC_LOCATION_ATTRIB); //TODO: better image
-//		}
-//
-//		/*
-//		 * @see org.eclipse.jface.action.Action#run()
-//		 */
-//		public void run() {
-//			JavadocBrowserInformationContolInput infoInput= (JavadocBrowserInformationContolInput) fInfoControl.getInput(); //TODO: check cast
-//			fInfoControl.notifyDelayedInputChange(null);
-//			fInfoControl.dispose(); //FIXME: should have protocol to hide, rather than dispose
-////			new OpenExternalJavadocAction(infoInput.getElement(), fShell) //TODO: split up reusable parts into non-api class
-//		}
-//	}
-	
 	/**
 	 * Action that opens the current hover input element.
 	 * 
@@ -269,6 +245,21 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 * @since 3.3
 	 */
 	private static final class PresenterControlCreator extends AbstractReusableInformationControlCreator {
+		
+		private final IEditorPart fEditor;
+
+		/**
+		 * Create a new presenter control creator which creates
+		 * an information control for a hover inside the given
+		 * editor.
+		 * 
+		 * @param editor the editor in which the hover will be shown
+		 * @since 3.4
+		 */
+		public PresenterControlCreator(IEditorPart editor) {
+			fEditor= editor;
+		}
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
@@ -284,17 +275,31 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				final ForwardAction forwardAction= new ForwardAction(iControl);
 				tbm.add(forwardAction);
 				forwardAction.setEnabled(false);
+				
+				tbm.add(new ShowInJavadocViewAction(iControl));
+				tbm.add(new OpenDeclarationAction(iControl));
+				
+				OpenExternalBrowserAction openExternalJavadocAction= new OpenExternalBrowserAction(fEditor.getSite());
+				final SimpleSelectionProvider selectionProvider= new SimpleSelectionProvider();
+				openExternalJavadocAction.setSpecialSelectionProvider(selectionProvider);
+				selectionProvider.addSelectionChangedListener(openExternalJavadocAction);
+				selectionProvider.setSelection(new StructuredSelection());
+				tbm.add(openExternalJavadocAction);
+				
 				IInputChangedListener inputChangeListener= new IInputChangedListener() {
 					public void inputChanged(Object newInput) {
 						backAction.update();
 						forwardAction.update();
+						if (newInput == null) {
+							selectionProvider.setSelection(new StructuredSelection());
+						} else {
+							BrowserInformationControlInput input= (BrowserInformationControlInput) newInput;
+							selectionProvider.setSelection(new StructuredSelection(input.getInputElement()));
+						}
 					}
 				};
 				iControl.addInputChangeListener(inputChangeListener);
 				
-				tbm.add(new ShowInJavadocViewAction(iControl));
-//				tbm.add(new ShowExternalJavadocAction(iControl, parent));
-				tbm.add(new OpenDeclarationAction(iControl));
 				tbm.update(true);
 				
 				addLinkListener(iControl);
@@ -372,7 +377,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		if (fPresenterControlCreator == null)
-			fPresenterControlCreator= new PresenterControlCreator();
+			fPresenterControlCreator= new PresenterControlCreator(getEditor());
 		return fPresenterControlCreator;
 	}
 
