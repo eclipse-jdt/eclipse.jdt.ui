@@ -212,7 +212,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 		ArrayList result= new ArrayList();
 		for (int i= 0; i < fields.length; i++) {
 			IField field= fields[i];
-			if (!Flags.isStatic(field.getFlags()))
+			if (!Flags.isStatic(field.getFlags()) && !field.isEnumConstant())
 				result.add(new Field(field.getElementName()));
 		}
 		return (Field[]) result.toArray(new Field[result.size()]);
