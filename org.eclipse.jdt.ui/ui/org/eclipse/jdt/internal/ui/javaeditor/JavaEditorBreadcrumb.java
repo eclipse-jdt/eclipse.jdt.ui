@@ -579,6 +579,9 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	protected Object getCurrentInput() {
 		try {
 			ITypeRoot input= SelectionConverter.getInput(getJavaEditor());
+			if (input == null)
+				return null;
+			
 			ITextSelection selection;
 			if (fEditorSelection instanceof ITextSelection) {
 				selection= (ITextSelection) fEditorSelection;
