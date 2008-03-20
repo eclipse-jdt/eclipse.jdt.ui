@@ -188,6 +188,8 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			fParent= parent;
 			GridLayout layout= new GridLayout(1, false);
 			layout.verticalSpacing= 0;
+			layout.marginWidth= 0;
+			layout.marginHeight= 0;
 			fParent.setLayout(layout);
 		}
 		
@@ -256,8 +258,9 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			Composite composite= new Composite(parent, SWT.NONE);
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 			GridLayout layout= new GridLayout(2, false);
-			layout.marginHeight= 0;
-			layout.marginWidth= 0;
+			layout.marginHeight= 2;
+			layout.marginWidth= 2;
+			layout.horizontalSpacing= 0;
 			composite.setLayout(layout);
 
 			final Canvas canvas= new Canvas(composite, SWT.NO_FOCUS);
@@ -281,8 +284,8 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			Composite composite= new Composite(parent, SWT.NONE);
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			GridLayout layout2= new GridLayout(1, false);
-			layout2.marginHeight= 2;
-			layout2.marginWidth= 2;
+			layout2.marginHeight= 0;
+			layout2.marginWidth= 0;
 			layout2.verticalSpacing= 2;
 			composite.setLayout(layout2);
 
@@ -291,7 +294,9 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			separator.setLayoutData(gridData);
 
 			Label quickFixLabel= new Label(composite, SWT.NONE);
-			quickFixLabel.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+			GridData layoutData= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
+			layoutData.horizontalIndent= 4;
+			quickFixLabel.setLayoutData(layoutData);
 			String text;
 			if (proposals.length == 1) {
 				text= JavaHoverMessages.AbstractAnnotationHover_message_singleQuickFix;
