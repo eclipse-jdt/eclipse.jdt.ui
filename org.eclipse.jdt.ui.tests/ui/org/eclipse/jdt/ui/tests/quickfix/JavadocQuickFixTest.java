@@ -11,29 +11,30 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-
 import org.eclipse.jdt.core.dom.CompilationUnit;
-
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class JavadocQuickFixTest extends QuickFixTest {
 	
@@ -1234,5 +1235,65 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 	}
+	
+	public void testInvalidQualification1() throws Exception {
+		Map original= fJProject1.getOptions(false);
+		HashMap newOptions= new HashMap(original);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
+		fJProject1.setOptions(newOptions);
+		
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package pack;\n");
+			buf.append("\n");
+			buf.append("public class A {\n");
+			buf.append("    public static class B {\n");
+			buf.append("        public static class C {\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+			
+			IPackageFragment pack2= fSourceFolder.createPackageFragment("pack2", false, null);
+			buf= new StringBuffer();
+			buf.append("package pack2;\n");
+			buf.append("\n");
+			buf.append("import pack.A.B.C;\n");
+			buf.append("\n");
+			buf.append("/**\n");
+			buf.append(" * {@link C} \n");
+			buf.append(" */\n");
+			buf.append("public class E {\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack2.createCompilationUnit("E.java", buf.toString(), false, null);
+
+			CompilationUnit astRoot= getASTRoot(cu);
+			ArrayList proposals= collectCorrections(cu, astRoot);
+
+			assertCorrectLabels(proposals);
+			assertNumberOfProposals(proposals, 1);
+
+			String[] expected= new String[1];
+			buf= new StringBuffer();
+			buf.append("package pack2;\n");
+			buf.append("\n");
+			buf.append("import pack.A;\n");
+			buf.append("import pack.A.B.C;\n");
+			buf.append("\n");
+			buf.append("/**\n");
+			buf.append(" * {@link A.B.C} \n");
+			buf.append(" */\n");
+			buf.append("public class E {\n");
+			buf.append("}\n");
+			expected[0]= buf.toString();
+
+			assertExpectedExistInProposals(proposals, expected);
+		} finally{
+			fJProject1.setOptions(original);
+		}
+	}
+	
 	
 }
