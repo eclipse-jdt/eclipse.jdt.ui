@@ -24,6 +24,7 @@ import org.eclipse.swt.graphics.RGB;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.ColorRegistry;
 
@@ -2887,6 +2888,8 @@ public class PreferenceConstants {
 	 * 
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @deprecated As of 3.4, replaced by {@link JFacePreferences#CONTENT_ASSIST_BACKGROUND_COLOR},
+	 * 				FIXME: need to write backwards compatibility code that maps this pref to the new value.
 	 */
 	public final static String CODEASSIST_PROPOSALS_BACKGROUND= "content_assist_proposals_background"; //$NON-NLS-1$
 
@@ -2899,6 +2902,8 @@ public class PreferenceConstants {
 	 * 
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @deprecated As of 3.4, replaced by {@link JFacePreferences#CONTENT_ASSIST_FOREGROUND_COLOR},
+	 * 				FIXME: need to write backwards compatibility code that maps this pref to the new value.
 	 */
 	public final static String CODEASSIST_PROPOSALS_FOREGROUND= "content_assist_proposals_foreground"; //$NON-NLS-1$
 	
@@ -3582,7 +3587,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.SHOW_CU_CHILDREN, true);
 		store.setDefault(PreferenceConstants.BROWSING_STACK_VERTICALLY, false);
 		store.setDefault(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
-		store.setDefault(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, true);	
+		store.setDefault(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, true);
 
 		// ImportOrganizePreferencePage
 		store.setDefault(PreferenceConstants.ORGIMPORTS_IMPORTORDER, "java;javax;org;com"); //$NON-NLS-1$
