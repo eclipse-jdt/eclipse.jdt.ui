@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.IPlaceholderFolderLayout;
 import org.eclipse.ui.progress.IProgressConstants;
+import org.eclipse.ui.texteditor.templates.TemplatesView;
 
 import org.eclipse.ui.console.IConsoleConstants;
 
@@ -66,6 +67,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(JavaUI.ID_MEMBERS_VIEW);
 		layout.addShowViewShortcut(JavaUI.ID_SOURCE_VIEW);
 		layout.addShowViewShortcut(JavaUI.ID_JAVADOC_VIEW);
+		layout.addShowViewShortcut(TemplatesView.ID);
 
 		// views - search
 		layout.addShowViewShortcut(NewSearchUI.SEARCH_VIEW_ID);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.IPlaceholderFolderLayout;
 import org.eclipse.ui.progress.IProgressConstants;
+import org.eclipse.ui.texteditor.templates.TemplatesView;
 
 import org.eclipse.ui.console.IConsoleConstants;
 
@@ -38,7 +39,7 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
  		String editorArea = layout.getEditorArea();
 		
 		IFolderLayout folder= layout.createFolder("left", IPageLayout.LEFT, (float)0.25, editorArea); //$NON-NLS-1$
-		folder.addView(JavaUI.ID_TYPE_HIERARCHY); 
+		folder.addView(JavaUI.ID_TYPE_HIERARCHY);
 		folder.addPlaceholder(IPageLayout.ID_OUTLINE);
 		folder.addPlaceholder(JavaUI.ID_PACKAGES);
 		folder.addPlaceholder(IPageLayout.ID_RES_NAV);
@@ -55,7 +56,7 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		
 		layout.addActionSet(IDebugUIConstants.LAUNCH_ACTION_SET);
 		layout.addActionSet(JavaUI.ID_ACTION_SET);
-		layout.addActionSet(JavaUI.ID_ELEMENT_CREATION_ACTION_SET);		
+		layout.addActionSet(JavaUI.ID_ELEMENT_CREATION_ACTION_SET);
 		
 		// views - java
 		layout.addShowViewShortcut(JavaUI.ID_PACKAGES);
@@ -73,6 +74,7 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(IPageLayout.ID_TASK_LIST);
 		layout.addShowViewShortcut(IProgressConstants.PROGRESS_VIEW_ID);
 		layout.addShowViewShortcut(JavaPerspectiveFactory.ID_PROJECT_EXPLORER);
+		layout.addShowViewShortcut(TemplatesView.ID);
 		
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.JavaProjectWizard"); //$NON-NLS-1$
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.NewPackageCreationWizard"); //$NON-NLS-1$
