@@ -97,6 +97,7 @@ import org.eclipse.ui.texteditor.KeyBindingSupportForAssistant;
 import org.eclipse.ui.texteditor.ResourceAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
+import org.eclipse.ui.texteditor.templates.ITemplatesPage;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -155,7 +156,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	}
 
 	class AdaptedSourceViewer extends JavaSourceViewer  {
-
+		
 		public AdaptedSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
 			super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles, store);
 		}
@@ -1012,6 +1013,12 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @since 3.4
 	 */
 	private KeyBindingSupportForAssistant fKeyBindingSupportForAssistant;
+	
+	/**
+	 * The templates page.
+	 * @since 3.4
+	 */
+	private JavaTemplatesPage fTemplatesPage;
 
 
 	/**
@@ -1717,7 +1724,23 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			}
 		}
 
+		if (ITemplatesPage.class.equals(required)) {
+			if (fTemplatesPage == null)
+				fTemplatesPage= createTemplatesPage();
+			return fTemplatesPage;
+		}
+
 		return super.getAdapter(required);
+	}
+
+	/**
+	 * Creates the templates page used with this editor.
+	 * 
+	 * @return the created Java templates page
+	 * @since 3.4
+	 */
+	protected JavaTemplatesPage createTemplatesPage() {
+		return new JavaTemplatesPage(this);
 	}
 
 	/**
