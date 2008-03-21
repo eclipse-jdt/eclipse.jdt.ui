@@ -42,6 +42,8 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPreferenceConstants;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -81,6 +83,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 		JavaCorrectionProcessor processor= new JavaCorrectionProcessor(this);
 
 		setQuickAssistProcessor(processor);
+		enableColoredLabels(PlatformUI.getPreferenceStore().getBoolean(IWorkbenchPreferenceConstants.USE_COLORED_LABELS));
 
 		setInformationControlCreator(getInformationControlCreator());
 
