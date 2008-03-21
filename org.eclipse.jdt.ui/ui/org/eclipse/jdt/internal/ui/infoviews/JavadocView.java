@@ -163,7 +163,7 @@ public class JavadocView extends AbstractInfoView {
 
 		public JavaElementBrowserInput(BrowserInput previous, IJavaElement inputElement) {
 			super(previous);
-
+			Assert.isNotNull(inputElement);
 			fInput= inputElement;
 		}
 
@@ -194,6 +194,7 @@ public class JavadocView extends AbstractInfoView {
 
 		public URLBrowserInput(BrowserInput previous, URL url) {
 			super(previous);
+			Assert.isNotNull(url);
 			fURL= url;
 		}
 

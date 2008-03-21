@@ -192,7 +192,6 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		 * @see org.eclipse.jface.action.Action#run()
 		 */
 		public void run() {
-			fInfoControl.getInput();
 			JavadocBrowserInformationControlInput infoInput= (JavadocBrowserInformationControlInput) fInfoControl.getInput(); //TODO: check cast
 			fInfoControl.notifyDelayedInputChange(null);
 			fInfoControl.dispose(); //FIXME: should have protocol to hide, rather than dispose
@@ -276,8 +275,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				tbm.add(forwardAction);
 				forwardAction.setEnabled(false);
 				
-				tbm.add(new ShowInJavadocViewAction(iControl));
-				tbm.add(new OpenDeclarationAction(iControl));
+				final ShowInJavadocViewAction showInJavadocViewAction= new ShowInJavadocViewAction(iControl);
+				tbm.add(showInJavadocViewAction);
+				final OpenDeclarationAction openDeclarationAction= new OpenDeclarationAction(iControl);
+				tbm.add(openDeclarationAction);
 				
 				OpenExternalBrowserAction openExternalJavadocAction= new OpenExternalBrowserAction(fEditor.getSite());
 				final SimpleSelectionProvider selectionProvider= new SimpleSelectionProvider();
@@ -292,9 +293,13 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 						forwardAction.update();
 						if (newInput == null) {
 							selectionProvider.setSelection(new StructuredSelection());
-						} else {
+						} else if (newInput instanceof BrowserInformationControlInput) {
 							BrowserInformationControlInput input= (BrowserInformationControlInput) newInput;
-							selectionProvider.setSelection(new StructuredSelection(input.getInputElement()));
+							Object inputElement= input.getInputElement();
+							selectionProvider.setSelection(new StructuredSelection(inputElement));
+							boolean isJavaElementInput= inputElement instanceof IJavaElement;
+							showInJavadocViewAction.setEnabled(isJavaElementInput);
+							openDeclarationAction.setEnabled(isJavaElementInput);
 						}
 					}
 				};

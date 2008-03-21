@@ -71,14 +71,14 @@ public class JavadocBrowserInformationControlInput extends BrowserInformationCon
 	 * @see org.eclipse.jdt.internal.ui.infoviews.BrowserInput#getInputElement()
 	 */
 	public Object getInputElement() {
-		return fElement;
+		return fElement == null ? (Object) fHtml : fElement;
 	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.infoviews.BrowserInput#getInputName()
 	 */
 	public String getInputName() {
-		return fElement.getElementName();
+		return fElement == null ? "" : fElement.getElementName(); //$NON-NLS-1$
 	}
 
 }
