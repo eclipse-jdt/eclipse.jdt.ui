@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,7 @@ import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
  * 
  * @since 3.0
  */
-class JavaSourcePreviewerUpdater {
+public class JavaSourcePreviewerUpdater {
 	
 	/**
 	 * Creates a Java source preview updater for the given viewer, configuration and preference store.
@@ -41,7 +41,7 @@ class JavaSourcePreviewerUpdater {
 	 * @param configuration the configuration
 	 * @param preferenceStore the preference store
 	 */
-	JavaSourcePreviewerUpdater(final SourceViewer viewer, final JavaSourceViewerConfiguration configuration, final IPreferenceStore preferenceStore) {
+	public JavaSourcePreviewerUpdater(final SourceViewer viewer, final JavaSourceViewerConfiguration configuration, final IPreferenceStore preferenceStore) {
 		Assert.isNotNull(viewer);
 		Assert.isNotNull(configuration);
 		Assert.isNotNull(preferenceStore);

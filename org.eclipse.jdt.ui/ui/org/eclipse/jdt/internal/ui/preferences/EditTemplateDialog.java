@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -100,7 +100,7 @@ import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariablePro
  * which we should try to eliminate (see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=208865).
  * </p>
  */
-class EditTemplateDialog extends StatusDialog {
+public class EditTemplateDialog extends StatusDialog {
 
 	private static class TextViewerAction extends Action implements IUpdate {
 	
