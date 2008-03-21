@@ -84,7 +84,6 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	public JavaTemplatesPage(JavaEditor javaEditor) {
 		super(javaEditor, javaEditor.getViewer());
 		fTemplateProcessor= new TemplateVariableProcessor();
-		updateContextTypes(getEditorContextTypeIds());
 	}
 
 	/* (non-Javadoc)
@@ -210,7 +209,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.texteditor.templates.AbstractTemplatesPage#getImageForTemplate(org.eclipse.jface.text.templates.Template)
 	 */
-	protected Image getImageForTemplate(Template template) {
+	protected Image getImage(Template template) {
 		String contextId= template.getContextTypeId();
 		if (SWTContextType.ID_ALL.equals(contextId) || SWTContextType.ID_STATEMENTS.equals(contextId) || SWTContextType.ID_MEMBERS.equals(contextId))
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SWT_TEMPLATE);
