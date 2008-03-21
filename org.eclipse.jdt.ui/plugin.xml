@@ -5167,7 +5167,17 @@
             type="exception_variable_name">
       </resolver>
    </extension>
-
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            name="%templatesViewName"
+            icon="$nl$/icons/full/eview16/templates.gif"
+            category="org.eclipse.ui"
+            class="org.eclipse.ui.texteditor.templates.TemplatesView"
+            id="org.eclipse.ui.texteditor.TemplatesView">
+      </view>
+   </extension>
+   
 <!-- =========================================================================== -->
 <!-- Refactoring                                                                 -->
 <!-- =========================================================================== -->
@@ -6122,12 +6132,6 @@
          value="0,0,0">
       </colorDefinition>
       <colorDefinition
-         id="org.eclipse.jdt.ui.methodDeclarationHighlighting"
-         isEditable="false"
-         label="%Dummy.label"
-         value="0,0,0">
-      </colorDefinition>
-      <colorDefinition
          id="org.eclipse.jdt.ui.numberHighlighting"
          isEditable="false"
          label="%Dummy.label"
@@ -6252,10 +6256,6 @@
          <colorOverride
             id="org.eclipse.jdt.ui.autoboxingHighlighting"
             value="COLOR_WIDGET_DARK_SHADOW">
-         </colorOverride>
-         <colorOverride
-            id="org.eclipse.jdt.ui.abstractMethodDeclarationNameHighlighting"
-            value="COLOR_LIST_FOREGROUND">
          </colorOverride>
          <colorOverride
             id="org.eclipse.jdt.ui.annotationElementReferenceHighlighting"
