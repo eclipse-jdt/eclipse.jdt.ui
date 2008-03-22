@@ -120,8 +120,6 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover {
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		if (ensureHoverCreated()) {
-			if (fHover instanceof ITextHoverExtension2)
-				return ((ITextHoverExtension2) fHover).getInformationPresenterControlCreator();
 			if (fHover instanceof IInformationProviderExtension2) // this is wrong, but left here for backwards compatibility
 				return ((IInformationProviderExtension2) fHover).getInformationPresenterControlCreator();
 		}
