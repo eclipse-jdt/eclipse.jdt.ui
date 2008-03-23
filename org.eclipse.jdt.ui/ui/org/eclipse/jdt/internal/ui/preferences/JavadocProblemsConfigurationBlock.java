@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -66,7 +66,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	private static final String PRIVATE= JavaCore.PRIVATE;
 	
 	private static final String NO_TAG= JavaCore.COMPILER_PB_MISSING_JAVADOC_TAG_DESCRIPTION_NO_TAG;
-	private static final String ALL_TAGS= JavaCore.COMPILER_PB_MISSING_JAVADOC_TAG_DESCRIPTION_ALL_TAGS;
+	private static final String ALL_STANDARD_TAGS= JavaCore.COMPILER_PB_MISSING_JAVADOC_TAG_DESCRIPTION_ALL_STANDARD_TAGS;
 	private static final String RETURN_TAGS= JavaCore.COMPILER_PB_MISSING_JAVADOC_TAG_DESCRIPTION_RETURN_TAG;
 	
 	private PixelConverter fPixelConverter;
@@ -127,11 +127,11 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 				PreferencesMessages.JavadocProblemsConfigurationBlock_private
 		};
 		
-		String[] missingTagValues= { NO_TAG, ALL_TAGS, RETURN_TAGS };
+		String[] missingTagValues= { ALL_STANDARD_TAGS, RETURN_TAGS, NO_TAG };
 		String[] missingTagLabels= new String[] {
-				PreferencesMessages.JavadocProblemsConfigurationBlock_ignore,
-				PreferencesMessages.JavadocProblemsConfigurationBlock_allTags,
-				PreferencesMessages.JavadocProblemsConfigurationBlock_returnTag
+				PreferencesMessages.JavadocProblemsConfigurationBlock_allStandardTags,
+				PreferencesMessages.JavadocProblemsConfigurationBlock_returnTag,
+				PreferencesMessages.JavadocProblemsConfigurationBlock_ignore
 		};
 		
 		int nColumns= 3;

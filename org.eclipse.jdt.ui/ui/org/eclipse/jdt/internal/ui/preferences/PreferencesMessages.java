@@ -443,7 +443,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_pb_type_parameter_hiding_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_unused_label_label;
 	public static String JavadocProblemsPreferencePage_title;
-	public static String JavadocProblemsConfigurationBlock_allTags;
+	public static String JavadocProblemsConfigurationBlock_allStandardTags;
 	public static String JavadocProblemsConfigurationBlock_public;
 	public static String JavadocProblemsConfigurationBlock_protected;
 	public static String JavadocProblemsConfigurationBlock_default;
