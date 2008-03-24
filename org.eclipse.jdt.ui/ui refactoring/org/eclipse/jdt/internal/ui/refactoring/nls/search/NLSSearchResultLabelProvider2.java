@@ -15,7 +15,7 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
@@ -35,7 +35,7 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements I
 		fLabelProvider= new AppearanceAwareLabelProvider(JavaElementLabels.ALL_POST_QUALIFIED, 0);
 	}
 	
-	public StyledStringBuilder getStyledText(Object element) {
+	public StyledString getStyledText(Object element) {
 		return getColoredLabelWithCounts(element, internalGetText(element));
 	}
 	
@@ -44,12 +44,12 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements I
 	 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
 	 */
 	public String getText(Object element) {
-		return getLabelWithCounts(element, internalGetText(element).toString()); 
+		return getLabelWithCounts(element, internalGetText(element).getString()); 
 	}
 		
-	private StyledStringBuilder internalGetText(Object element) {
+	private StyledString internalGetText(Object element) {
 		String description;
-		StyledStringBuilder elementLabel;
+		StyledString elementLabel;
 		
 		if (element instanceof FileEntry) {
 			FileEntry fileEntry= (FileEntry) element;
@@ -63,12 +63,12 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements I
 			description= NLSSearchMessages.NLSSearchResultLabelProvider2_undefinedKeys;
 			elementLabel= JavaElementLabels.getStyledTextLabel(element, (JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.COLORIZE));
 		}
-		return new StyledStringBuilder(description).append(' ').append(elementLabel);
+		return new StyledString(description).append(' ').append(elementLabel);
 	}
 	
-	private StyledStringBuilder getPropertiesName(IFile propertiesFile) {
+	private StyledString getPropertiesName(IFile propertiesFile) {
 		String path= propertiesFile.getFullPath().removeLastSegments(1).makeRelative().toString();
-		return new StyledStringBuilder(propertiesFile.getName()).append(" - " + path, StyledStringBuilder.QUALIFIER_STYLER); //$NON-NLS-1$
+		return new StyledString(propertiesFile.getName()).append(" - " + path, StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
 	}
 	
 	/*

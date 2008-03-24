@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -60,7 +60,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 	private String fMethodName;
 	private String[] fParamTypes;
 
-	public OverrideCompletionProposal(IJavaProject jproject, ICompilationUnit cu, String methodName, String[] paramTypes, int start, int length, StyledStringBuilder displayName, String completionProposal) {
+	public OverrideCompletionProposal(IJavaProject jproject, ICompilationUnit cu, String methodName, String[] paramTypes, int start, int length, StyledString displayName, String completionProposal) {
 		super(completionProposal, cu, start, length, null, displayName, 0);
 		Assert.isNotNull(jproject);
 		Assert.isNotNull(methodName);

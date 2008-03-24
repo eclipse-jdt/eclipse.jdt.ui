@@ -31,7 +31,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -517,8 +517,8 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			/* (non-Javadoc)
 			 * @see org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider#getStyledText(java.lang.Object)
 			 */
-			protected StyledStringBuilder getStyledText(Object element) {
-				return new StyledStringBuilder(getText(element));
+			protected StyledString getStyledText(Object element) {
+				return new StyledString(getText(element));
 			}
 		};
 	}

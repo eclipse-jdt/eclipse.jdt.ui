@@ -22,7 +22,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.ui.IWorkingSet;
 
@@ -62,10 +62,10 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
 	 */
-	public StyledStringBuilder getStyledText(Object element) {
+	public StyledString getStyledText(Object element) {
 		String text= getSpecificText(element);
 		if (text != null) {
-			return new StyledStringBuilder(decorateText(text, element));
+			return new StyledString(decorateText(text, element));
 		}
 		return super.getStyledText(element);
 	}

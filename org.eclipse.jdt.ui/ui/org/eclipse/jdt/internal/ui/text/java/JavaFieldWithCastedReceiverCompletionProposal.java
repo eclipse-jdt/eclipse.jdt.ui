@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jdt.core.CompletionProposal;
 
@@ -30,7 +30,7 @@ public class JavaFieldWithCastedReceiverCompletionProposal extends JavaCompletio
 
 	private CompletionProposal fProposal;
 
-	public JavaFieldWithCastedReceiverCompletionProposal(String completion, int start, int length, Image image, StyledStringBuilder label, int relevance, boolean inJavadoc, JavaContentAssistInvocationContext invocationContext, CompletionProposal proposal) {
+	public JavaFieldWithCastedReceiverCompletionProposal(String completion, int start, int length, Image image, StyledString label, int relevance, boolean inJavadoc, JavaContentAssistInvocationContext invocationContext, CompletionProposal proposal) {
 		super(completion, start, length, image, label, relevance, inJavadoc, invocationContext);
 		Assert.isNotNull(proposal);
 		fProposal= proposal;

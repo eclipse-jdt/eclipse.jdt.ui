@@ -21,7 +21,7 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -197,7 +197,7 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 		for (int i= 0; i < fgHTMLProposals.length; i++) {
 			String curr= fgHTMLProposals[i];
 			if (prefixMatches(htmlPrefix, curr)) {
-				fResult.add(createCompletion(curr, prefix, new StyledStringBuilder(curr), JavaPluginImages.get(JavaPluginImages.IMG_OBJS_HTMLTAG), 0));
+				fResult.add(createCompletion(curr, prefix, new StyledString(curr), JavaPluginImages.get(JavaPluginImages.IMG_OBJS_HTMLTAG), 0));
 			}
 		}
 	}
@@ -206,12 +206,12 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 		for (int i= 0; i < choices.length; i++) {
 			String curr= choices[i];
 			if (prefixMatches(prefix, curr)) {
-				fResult.add(createCompletion(curr, prefix, new StyledStringBuilder(curr), JavaPluginImages.get(imageName), 0));
+				fResult.add(createCompletion(curr, prefix, new StyledString(curr), JavaPluginImages.get(imageName), 0));
 			}
 		}
 	}
 
-	private JavaCompletionProposal createCompletion(String newText, String oldText, StyledStringBuilder labelText, Image image, int severity) {
+	private JavaCompletionProposal createCompletion(String newText, String oldText, StyledString labelText, Image image, int severity) {
 		int offset= fCurrentPos - oldText.length();
 		int length= fCurrentLength + oldText.length();
 		if (fCurrentLength == 0)

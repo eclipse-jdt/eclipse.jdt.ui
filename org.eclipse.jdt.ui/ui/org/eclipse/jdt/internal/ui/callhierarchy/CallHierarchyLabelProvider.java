@@ -16,7 +16,7 @@ import java.util.Collection;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.ILabelDecorator;
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
@@ -72,14 +72,14 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
      */
-    public StyledStringBuilder getStyledText(Object element) {
+    public StyledString getStyledText(Object element) {
         if (element instanceof MethodWrapper && ((MethodWrapper) element).getMember() != null) {
         	MethodWrapper wrapper= (MethodWrapper) element;
         	String decorated= getElementLabel(wrapper);
-        	StyledStringBuilder text= super.getStyledText(wrapper.getMember());
-        	return ColoringLabelProvider.decorateStyledString(text, decorated, StyledStringBuilder.COUNTER_STYLER);
+        	StyledString text= super.getStyledText(wrapper.getMember());
+        	return ColoringLabelProvider.decorateStyledString(text, decorated, StyledString.COUNTER_STYLER);
         }
-        return new StyledStringBuilder(getSpecialLabel(element));
+        return new StyledString(getSpecialLabel(element));
     }
     
     private String getSpecialLabel(Object element) {

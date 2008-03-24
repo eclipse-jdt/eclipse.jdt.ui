@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -215,7 +215,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#getStyledDisplayString()
 	 * @since 3.4
 	 */
-	public StyledStringBuilder getStyledDisplayString() {
+	public StyledString getStyledDisplayString() {
 		if (!fDisplayStringComputed)
 			setStyledDisplayString(computeDisplayString());
 		return super.getStyledDisplayString();
@@ -232,12 +232,12 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 		super.setDisplayString(string);
 	}
 	
-	public void setStyledDisplayString(StyledStringBuilder text) {
+	public void setStyledDisplayString(StyledString text) {
 		fDisplayStringComputed= true;
 		super.setStyledDisplayString(text);
 	}
 
-	protected StyledStringBuilder computeDisplayString() {
+	protected StyledString computeDisplayString() {
 		return fInvocationContext.getLabelProvider().createStyledLabel(fProposal);
 	}
 

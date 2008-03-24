@@ -13,9 +13,9 @@ package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
-import org.eclipse.jface.viewers.StyledStringBuilder.Styler;
+import org.eclipse.jface.viewers.StyledString.Styler;
 
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
@@ -47,15 +47,15 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 		return getLineNumberLabel(jel) + jel.getLineContents();
 	}
 	
-	private StyledStringBuilder internalGetRichText(Object element) {
+	private StyledString internalGetRichText(Object element) {
 		JavaElementLine jel= (JavaElementLine) element;
 
 		String lineNumberString= getLineNumberLabel(jel);
 
 		Styler highlightStyle= ColoringLabelProvider.HIGHLIGHT_STYLE;
 		
-		StyledStringBuilder res= new StyledStringBuilder();
-		res.append(lineNumberString, StyledStringBuilder.QUALIFIER_STYLER);
+		StyledString res= new StyledString();
+		res.append(lineNumberString, StyledString.QUALIFIER_STYLER);
 		res.append(jel.getLineContents());
 		Match[] matches= getPage().getInput().getMatches(jel);
 		for (int i= 0; i < matches.length; i++) {
@@ -93,7 +93,7 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider#getStyledText(java.lang.Object)
 	 */
-	public StyledStringBuilder getStyledText(Object element) {
+	public StyledString getStyledText(Object element) {
 		return getColoredLabelWithCounts(element, internalGetRichText(element));			
 	}
 }

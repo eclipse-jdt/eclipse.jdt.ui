@@ -26,7 +26,7 @@ import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -173,14 +173,14 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 		return decorateText(result, element);
 	}
 	
-	public StyledStringBuilder getStyledText(Object element) {
-		StyledStringBuilder string= JavaElementLabels.getStyledTextLabel(element, (evaluateTextFlags(element) | JavaElementLabels.COLORIZE));
+	public StyledString getStyledText(Object element) {
+		StyledString string= JavaElementLabels.getStyledTextLabel(element, (evaluateTextFlags(element) | JavaElementLabels.COLORIZE));
 		if (string.length() == 0 && (element instanceof IStorage)) {
-			string= new StyledStringBuilder(fStorageLabelProvider.getText(element));
+			string= new StyledString(fStorageLabelProvider.getText(element));
 		}
-		String decorated= decorateText(string.toString(), element);
+		String decorated= decorateText(string.getString(), element);
 		if (decorated != null) {
-			return ColoringLabelProvider.decorateStyledString(string, decorated, StyledStringBuilder.DECORATIONS_STYLER);
+			return ColoringLabelProvider.decorateStyledString(string, decorated, StyledString.DECORATIONS_STYLER);
 		}
 		return string;
 	}

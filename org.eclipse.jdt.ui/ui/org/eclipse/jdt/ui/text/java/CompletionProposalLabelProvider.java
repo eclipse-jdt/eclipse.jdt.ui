@@ -13,7 +13,7 @@ package org.eclipse.jdt.ui.text.java;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
@@ -78,11 +78,11 @@ public class CompletionProposalLabelProvider {
 		int kind= proposal.getKind();
 		switch (kind) {
 			case CompletionProposal.METHOD_REF:
-				return appendUnboundedParameterList(new StyledStringBuilder(), proposal).toString();
+				return appendUnboundedParameterList(new StyledString(), proposal).getString();
 			case CompletionProposal.TYPE_REF:
-				return appendTypeParameterList(new StyledStringBuilder(), proposal).toString();
+				return appendTypeParameterList(new StyledString(), proposal).getString();
 			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
-				return appendUnboundedParameterList(new StyledStringBuilder(), proposal).toString();
+				return appendUnboundedParameterList(new StyledString(), proposal).getString();
 			default:
 				Assert.isLegal(false);
 				return null; // dummy
@@ -96,7 +96,7 @@ public class CompletionProposalLabelProvider {
 	 * @param methodProposal the method proposal
 	 * @return the modified <code>buffer</code>
 	 */
-	private StyledStringBuilder appendUnboundedParameterList(StyledStringBuilder buffer, CompletionProposal methodProposal) {
+	private StyledString appendUnboundedParameterList(StyledString buffer, CompletionProposal methodProposal) {
 		// TODO remove once https://bugs.eclipse.org/bugs/show_bug.cgi?id=85293
 		// gets fixed.
 		char[] signature= SignatureUtil.fix83600(methodProposal.getSignature());
@@ -121,7 +121,7 @@ public class CompletionProposalLabelProvider {
 	 * @return the modified <code>buffer</code>
 	 * @since 3.2
 	 */
-	private StyledStringBuilder appendTypeParameterList(StyledStringBuilder buffer, CompletionProposal typeProposal) {
+	private StyledString appendTypeParameterList(StyledString buffer, CompletionProposal typeProposal) {
 		// TODO remove once https://bugs.eclipse.org/bugs/show_bug.cgi?id=85293
 		// gets fixed.
 		char[] signature= SignatureUtil.fix83600(typeProposal.getSignature());
@@ -214,7 +214,7 @@ public class CompletionProposalLabelProvider {
 	 * @param parameterNames the parameter names
 	 * @return the display string of the parameter list defined by the passed arguments
 	 */
-	private final StyledStringBuilder appendParameterSignature(StyledStringBuilder buffer, char[][] parameterTypes, char[][] parameterNames) {
+	private final StyledString appendParameterSignature(StyledString buffer, char[][] parameterTypes, char[][] parameterNames) {
 		if (parameterTypes != null) {
 			for (int i = 0; i < parameterTypes.length; i++) {
 				if (i > 0) {
@@ -251,8 +251,8 @@ public class CompletionProposalLabelProvider {
 	 * @param methodProposal the method proposal to display
 	 * @return the display label for the given method proposal
 	 */
-	StyledStringBuilder createMethodProposalLabel(CompletionProposal methodProposal) {
-		StyledStringBuilder nameBuffer= new StyledStringBuilder();
+	StyledString createMethodProposalLabel(CompletionProposal methodProposal) {
+		StyledString nameBuffer= new StyledString();
 
 		// method name
 		nameBuffer.append(new String(methodProposal.getName()));
@@ -271,10 +271,10 @@ public class CompletionProposalLabelProvider {
 		}
 
 		// declaring type
-		nameBuffer.append(QUALIFIER_SEPARATOR, StyledStringBuilder.QUALIFIER_STYLER); 
+		nameBuffer.append(QUALIFIER_SEPARATOR, StyledString.QUALIFIER_STYLER); 
 		String declaringType= extractDeclaringTypeFQN(methodProposal);
 		declaringType= Signature.getSimpleName(declaringType);
-		nameBuffer.append(declaringType, StyledStringBuilder.QUALIFIER_STYLER);
+		nameBuffer.append(declaringType, StyledString.QUALIFIER_STYLER);
 
 		return nameBuffer;
 	}
@@ -297,23 +297,23 @@ public class CompletionProposalLabelProvider {
 	 * @return the display label for the given method proposal
 	 * @since 3.2
 	 */
-	StyledStringBuilder createJavadocMethodProposalLabel(CompletionProposal methodProposal) {
-		StyledStringBuilder nameBuffer= new StyledStringBuilder();
+	StyledString createJavadocMethodProposalLabel(CompletionProposal methodProposal) {
+		StyledString nameBuffer= new StyledString();
 		
 		// method name
 		nameBuffer.append(new String(methodProposal.getCompletion()));
 		
 		// declaring type
-		nameBuffer.append(QUALIFIER_SEPARATOR, StyledStringBuilder.QUALIFIER_STYLER); 
+		nameBuffer.append(QUALIFIER_SEPARATOR, StyledString.QUALIFIER_STYLER); 
 		String declaringType= extractDeclaringTypeFQN(methodProposal);
 		declaringType= Signature.getSimpleName(declaringType);
-		nameBuffer.append(declaringType, StyledStringBuilder.QUALIFIER_STYLER);
+		nameBuffer.append(declaringType, StyledString.QUALIFIER_STYLER);
 		
 		return nameBuffer;
 	}
 	
-	StyledStringBuilder createOverrideMethodProposalLabel(CompletionProposal methodProposal) {
-		StyledStringBuilder nameBuffer= new StyledStringBuilder();
+	StyledString createOverrideMethodProposalLabel(CompletionProposal methodProposal) {
+		StyledString nameBuffer= new StyledString();
 
 		// method name
 		nameBuffer.append(new String(methodProposal.getName()));
@@ -331,11 +331,11 @@ public class CompletionProposalLabelProvider {
 		nameBuffer.append(new String(returnType));
 
 		// declaring type
-		nameBuffer.append(QUALIFIER_SEPARATOR, StyledStringBuilder.QUALIFIER_STYLER); 
+		nameBuffer.append(QUALIFIER_SEPARATOR, StyledString.QUALIFIER_STYLER); 
 
 		String declaringType= extractDeclaringTypeFQN(methodProposal);
 		declaringType= Signature.getSimpleName(declaringType);
-		nameBuffer.append(Messages.format(JavaTextMessages.ResultCollector_overridingmethod, new String(declaringType)), StyledStringBuilder.QUALIFIER_STYLER);
+		nameBuffer.append(Messages.format(JavaTextMessages.ResultCollector_overridingmethod, new String(declaringType)), StyledString.QUALIFIER_STYLER);
 
 		return nameBuffer;
 	}
@@ -372,7 +372,7 @@ public class CompletionProposalLabelProvider {
 	 * @param typeProposal the method proposal to display
 	 * @return the display label for the given type proposal
 	 */
-	StyledStringBuilder createTypeProposalLabel(CompletionProposal typeProposal) {
+	StyledString createTypeProposalLabel(CompletionProposal typeProposal) {
 		char[] signature;
 		if (fContext != null && fContext.isInJavadoc())
 			signature= Signature.getTypeErasure(typeProposal.getSignature());
@@ -382,41 +382,41 @@ public class CompletionProposalLabelProvider {
 		return createTypeProposalLabel(fullName);
 	}
 	
-	StyledStringBuilder createJavadocTypeProposalLabel(CompletionProposal typeProposal) {
+	StyledString createJavadocTypeProposalLabel(CompletionProposal typeProposal) {
 		char[] fullName= Signature.toCharArray(typeProposal.getSignature());
 		return createJavadocTypeProposalLabel(fullName);
 	}
 	
-	StyledStringBuilder createJavadocSimpleProposalLabel(CompletionProposal proposal) {
+	StyledString createJavadocSimpleProposalLabel(CompletionProposal proposal) {
 		// TODO get rid of this
 		return createSimpleLabel(proposal);
 	}
 	
-	StyledStringBuilder createTypeProposalLabel(char[] fullName) {
+	StyledString createTypeProposalLabel(char[] fullName) {
 		// only display innermost type name as type name, using any
 		// enclosing types as qualification
 		int qIndex= findSimpleNameStart(fullName);
 
-		StyledStringBuilder buf= new StyledStringBuilder();
+		StyledString buf= new StyledString();
 		buf.append(new String(fullName, qIndex, fullName.length - qIndex));
 		if (qIndex > 0) {
-			buf.append(JavaElementLabels.CONCAT_STRING, StyledStringBuilder.QUALIFIER_STYLER);
-			buf.append(new String(fullName, 0, qIndex - 1), StyledStringBuilder.QUALIFIER_STYLER);
+			buf.append(JavaElementLabels.CONCAT_STRING, StyledString.QUALIFIER_STYLER);
+			buf.append(new String(fullName, 0, qIndex - 1), StyledString.QUALIFIER_STYLER);
 		}
 		return buf;
 	}
 	
-	StyledStringBuilder createJavadocTypeProposalLabel(char[] fullName) {
+	StyledString createJavadocTypeProposalLabel(char[] fullName) {
 		// only display innermost type name as type name, using any
 		// enclosing types as qualification
 		int qIndex= findSimpleNameStart(fullName);
 		
-		StyledStringBuilder buf= new StyledStringBuilder("{@link "); //$NON-NLS-1$
+		StyledString buf= new StyledString("{@link "); //$NON-NLS-1$
 		buf.append(new String(fullName, qIndex, fullName.length - qIndex));
 		buf.append('}');
 		if (qIndex > 0) {
-			buf.append(JavaElementLabels.CONCAT_STRING, StyledStringBuilder.QUALIFIER_STYLER);
-			buf.append(new String(fullName, 0, qIndex - 1), StyledStringBuilder.QUALIFIER_STYLER);
+			buf.append(JavaElementLabels.CONCAT_STRING, StyledString.QUALIFIER_STYLER);
+			buf.append(new String(fullName, 0, qIndex - 1), StyledString.QUALIFIER_STYLER);
 		}
 		return buf;
 	}
@@ -434,8 +434,8 @@ public class CompletionProposalLabelProvider {
 		return lastDot;
 	}
 
-	StyledStringBuilder createSimpleLabelWithType(CompletionProposal proposal) {
-		StyledStringBuilder buf= new StyledStringBuilder();
+	StyledString createSimpleLabelWithType(CompletionProposal proposal) {
+		StyledString buf= new StyledString();
 		buf.append(new String(proposal.getCompletion()));
 		char[] typeName= Signature.getSignatureSimpleName(proposal.getSignature());
 		if (typeName.length > 0) {
@@ -458,12 +458,12 @@ public class CompletionProposalLabelProvider {
 		return string[0] == 't' && string[1] == 'h' && string[2] == 'i' && string[3] == 's' && string[4] == '.';
 	}
 
-	StyledStringBuilder createLabelWithTypeAndDeclaration(CompletionProposal proposal) {
+	StyledString createLabelWithTypeAndDeclaration(CompletionProposal proposal) {
 		char[] name= proposal.getCompletion();
 		if (!isThisPrefix(name))
 			name= proposal.getName();
 		
-		StyledStringBuilder buf= new StyledStringBuilder();
+		StyledString buf= new StyledString();
 		buf.append(new String(name));
 		char[] typeName= Signature.getSignatureSimpleName(proposal.getSignature());
 		if (typeName.length > 0) {
@@ -474,27 +474,27 @@ public class CompletionProposalLabelProvider {
 		if (declaration != null) {
 			declaration= Signature.getSignatureSimpleName(declaration);
 			if (declaration.length > 0) {
-				buf.append(QUALIFIER_SEPARATOR, StyledStringBuilder.QUALIFIER_STYLER); 
-				buf.append(new String(declaration), StyledStringBuilder.QUALIFIER_STYLER);
+				buf.append(QUALIFIER_SEPARATOR, StyledString.QUALIFIER_STYLER); 
+				buf.append(new String(declaration), StyledString.QUALIFIER_STYLER);
 			}
 		}
 
 		return buf;
 	}
 
-	StyledStringBuilder createPackageProposalLabel(CompletionProposal proposal) {
+	StyledString createPackageProposalLabel(CompletionProposal proposal) {
 		Assert.isTrue(proposal.getKind() == CompletionProposal.PACKAGE_REF);
-		return new StyledStringBuilder(String.valueOf(proposal.getDeclarationSignature()));
+		return new StyledString(String.valueOf(proposal.getDeclarationSignature()));
 	}
 
-	StyledStringBuilder createSimpleLabel(CompletionProposal proposal) {
-		return new StyledStringBuilder(String.valueOf(proposal.getCompletion()));
+	StyledString createSimpleLabel(CompletionProposal proposal) {
+		return new StyledString(String.valueOf(proposal.getCompletion()));
 	}
 
-	StyledStringBuilder createAnonymousTypeLabel(CompletionProposal proposal) {
+	StyledString createAnonymousTypeLabel(CompletionProposal proposal) {
 		char[] declaringTypeSignature= proposal.getDeclarationSignature();
 
-		StyledStringBuilder buffer= new StyledStringBuilder();
+		StyledString buffer= new StyledString();
 		buffer.append(new String(Signature.getSignatureSimpleName(declaringTypeSignature)));
 		buffer.append('(');
 		appendUnboundedParameterList(buffer, proposal);
@@ -512,7 +512,7 @@ public class CompletionProposalLabelProvider {
 	 * @return the display label for <code>proposal</code>
 	 */
 	public String createLabel(CompletionProposal proposal) {
-		return createStyledLabel(proposal).toString();
+		return createStyledLabel(proposal).getString();
 	}
 	
 	/**
@@ -523,7 +523,7 @@ public class CompletionProposalLabelProvider {
 	 * 
 	 * @since 3.4
 	 */
-	public StyledStringBuilder createStyledLabel(CompletionProposal proposal) {
+	public StyledString createStyledLabel(CompletionProposal proposal) {
 		switch (proposal.getKind()) {
 			case CompletionProposal.METHOD_NAME_REFERENCE:
 			case CompletionProposal.METHOD_REF:

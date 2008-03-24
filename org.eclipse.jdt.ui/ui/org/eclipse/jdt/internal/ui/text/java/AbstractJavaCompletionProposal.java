@@ -37,7 +37,7 @@ import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
 import org.eclipse.jface.text.BadLocationException;
@@ -206,7 +206,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	
 	}
 
-	private StyledStringBuilder fDisplayString;
+	private StyledString fDisplayString;
 	private String fReplacementString;
 	private int fReplacementOffset;
 	private int fReplacementLength;
@@ -505,7 +505,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 */
 	public String getDisplayString() {
 		if (fDisplayString != null)
-			return fDisplayString.toString();
+			return fDisplayString.getString();
 		return ""; //$NON-NLS-1$
 	}
 
@@ -994,18 +994,18 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	}
 
 	protected void setDisplayString(String string) {
-		fDisplayString= new StyledStringBuilder(string);
+		fDisplayString= new StyledString(string);
 	}
 	
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension6#getStyledDisplayString()
 	 * @since 3.4
 	 */
-	public StyledStringBuilder getStyledDisplayString() {
+	public StyledString getStyledDisplayString() {
 		return fDisplayString;
 	}
 		
-	public void setStyledDisplayString(StyledStringBuilder text) {
+	public void setStyledDisplayString(StyledString text) {
 		fDisplayString= text;
 	}
 	

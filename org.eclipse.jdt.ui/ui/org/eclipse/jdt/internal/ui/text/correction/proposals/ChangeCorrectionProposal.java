@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRewriteTarget;
@@ -193,13 +193,13 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension6#getStyledDisplayString()
 	 */
-	public StyledStringBuilder getStyledDisplayString() {
-		StyledStringBuilder str= new StyledStringBuilder(getName());
+	public StyledString getStyledDisplayString() {
+		StyledString str= new StyledString(getName());
 		
 		String shortCutString= CorrectionCommandHandler.getShortCutString(getCommandId());
 		if (shortCutString != null) {
 			String decorated= Messages.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[] { getName(), shortCutString });
-			return ColoringLabelProvider.decorateStyledString(str, decorated, StyledStringBuilder.QUALIFIER_STYLER); 
+			return ColoringLabelProvider.decorateStyledString(str, decorated, StyledString.QUALIFIER_STYLER); 
 		}
 		return str;
 	}

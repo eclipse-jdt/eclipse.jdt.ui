@@ -14,7 +14,7 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
@@ -66,19 +66,19 @@ public class SortingLabelProvider extends SearchLabelProvider {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
 	 */
-	public StyledStringBuilder getStyledText(Object element) {
+	public StyledString getStyledText(Object element) {
 		if (element instanceof IImportDeclaration)
 			element= ((IImportDeclaration)element).getParent().getParent();
 		
-		StyledStringBuilder text= super.getStyledText(element);
+		StyledString text= super.getStyledText(element);
 		if (text.length() > 0) {
-			StyledStringBuilder countLabel= getColoredLabelWithCounts(element, text);
+			StyledString countLabel= getColoredLabelWithCounts(element, text);
 			if (fCurrentOrder == SHOW_ELEMENT_CONTAINER) {
-				countLabel.append(getPostQualification(element), StyledStringBuilder.QUALIFIER_STYLER);
+				countLabel.append(getPostQualification(element), StyledString.QUALIFIER_STYLER);
 			}
 			return countLabel;
 		}
-		return new StyledStringBuilder(getParticipantText(element));	
+		return new StyledString(getParticipantText(element));	
 	}
 
 	private String getPostQualification(Object element) {

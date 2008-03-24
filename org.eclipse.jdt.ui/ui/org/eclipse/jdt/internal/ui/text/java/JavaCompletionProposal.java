@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.IDocument;
 
@@ -35,7 +35,7 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * @param relevance the relevance
 	 */
 	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, Image image, String displayString, int relevance) {
-		this(replacementString, replacementOffset, replacementLength, image, new StyledStringBuilder(displayString), relevance, false);
+		this(replacementString, replacementOffset, replacementLength, image, new StyledString(displayString), relevance, false);
 	}
 	
 	/**
@@ -49,7 +49,7 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * @param displayString the string to be displayed for the proposal If set to <code>null</code>, the replacement string will be taken as display string.
 	 * @param relevance the relevance
 	 */
-	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, Image image, StyledStringBuilder displayString, int relevance) {
+	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, Image image, StyledString displayString, int relevance) {
 		this(replacementString, replacementOffset, replacementLength, image, displayString, relevance, false);
 	}
 	
@@ -66,7 +66,7 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * @param relevance the relevance
 	 * @param inJavadoc <code>true</code> for a javadoc proposal
 	 */
-	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, Image image, StyledStringBuilder displayString, int relevance, boolean inJavadoc) {
+	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, Image image, StyledString displayString, int relevance, boolean inJavadoc) {
 		this(replacementString, replacementOffset, replacementLength, image, displayString, relevance, inJavadoc, null);
 	}
 	
@@ -84,7 +84,7 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * @param inJavadoc <code>true</code> for a javadoc proposal
 	 * @param invocationContext the invocation context of this completion proposal or <code>null</code> not available
 	 */
-	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, Image image, StyledStringBuilder displayString, int relevance, boolean inJavadoc, JavaContentAssistInvocationContext invocationContext) {
+	public JavaCompletionProposal(String replacementString, int replacementOffset, int replacementLength, Image image, StyledString displayString, int relevance, boolean inJavadoc, JavaContentAssistInvocationContext invocationContext) {
 		super(invocationContext);
 		Assert.isNotNull(replacementString);
 		Assert.isTrue(replacementOffset >= 0);
@@ -94,11 +94,11 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 		setReplacementOffset(replacementOffset);
 		setReplacementLength(replacementLength);
 		setImage(image);
-		setStyledDisplayString(displayString == null ? new StyledStringBuilder(replacementString) : displayString);
+		setStyledDisplayString(displayString == null ? new StyledString(replacementString) : displayString);
 		setRelevance(relevance);
 		setCursorPosition(replacementString.length());
 		setInJavadoc(inJavadoc);
-		setSortString(displayString == null ? replacementString : displayString.toString());
+		setSortString(displayString == null ? replacementString : displayString.getString());
 	}
 
 	/*

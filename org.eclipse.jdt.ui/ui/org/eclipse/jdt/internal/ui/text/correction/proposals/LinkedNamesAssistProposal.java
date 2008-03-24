@@ -18,7 +18,7 @@ import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
@@ -249,13 +249,13 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension6#getStyledDisplayString()
 	 */
-	public StyledStringBuilder getStyledDisplayString() {
-		StyledStringBuilder str= new StyledStringBuilder(fLabel);
+	public StyledString getStyledDisplayString() {
+		StyledString str= new StyledString(fLabel);
 		
 		String shortCutString= CorrectionCommandHandler.getShortCutString(getCommandId());
 		if (shortCutString != null) {
 			String decorated= Messages.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[] { fLabel, shortCutString });
-			return ColoringLabelProvider.decorateStyledString(str, decorated, StyledStringBuilder.QUALIFIER_STYLER); 
+			return ColoringLabelProvider.decorateStyledString(str, decorated, StyledString.QUALIFIER_STYLER); 
 		}
 		return str;
 	}

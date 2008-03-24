@@ -16,7 +16,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -89,21 +89,21 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal i
 		setProposalInfo(new ProposalInfo(field));
 	}
 
-	private static StyledStringBuilder getDisplayName(IField field, boolean isGetter) throws JavaModelException {
-		StyledStringBuilder buf= new StyledStringBuilder();
+	private static StyledString getDisplayName(IField field, boolean isGetter) throws JavaModelException {
+		StyledString buf= new StyledString();
 		if (isGetter) {
 			buf.append(GetterSetterUtil.getGetterName(field, null));
 			buf.append("() : "); //$NON-NLS-1$
 			buf.append(Signature.toString(field.getTypeSignature()));
-			buf.append(" - ", StyledStringBuilder.QUALIFIER_STYLER); //$NON-NLS-1$
-			buf.append(Messages.format(JavaTextMessages.GetterSetterCompletionProposal_getter_label, field.getElementName()), StyledStringBuilder.QUALIFIER_STYLER);
+			buf.append(" - ", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
+			buf.append(Messages.format(JavaTextMessages.GetterSetterCompletionProposal_getter_label, field.getElementName()), StyledString.QUALIFIER_STYLER);
 		} else {
 			buf.append(GetterSetterUtil.getSetterName(field, null));
 			buf.append('(').append(Signature.toString(field.getTypeSignature())).append(')');
 			buf.append(" : "); //$NON-NLS-1$
 			buf.append(Signature.toString(Signature.SIG_VOID));
-			buf.append(" - ", StyledStringBuilder.QUALIFIER_STYLER); //$NON-NLS-1$
-			buf.append(Messages.format(JavaTextMessages.GetterSetterCompletionProposal_setter_label, field.getElementName()), StyledStringBuilder.QUALIFIER_STYLER);
+			buf.append(" - ", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
+			buf.append(Messages.format(JavaTextMessages.GetterSetterCompletionProposal_setter_label, field.getElementName()), StyledString.QUALIFIER_STYLER);
 		}
 		return buf;
 	}

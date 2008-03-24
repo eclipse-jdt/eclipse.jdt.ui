@@ -26,7 +26,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
@@ -122,11 +122,11 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 		return res;
 	}
 		
-	protected final StyledStringBuilder getColoredLabelWithCounts(Object element, StyledStringBuilder coloredName) {
-		String name= coloredName.toString();
+	protected final StyledString getColoredLabelWithCounts(Object element, StyledString coloredName) {
+		String name= coloredName.getString();
 		String decorated= getLabelWithCounts(element, name);
 		if (decorated.length() > name.length()) {
-			ColoringLabelProvider.decorateStyledString(coloredName, decorated, StyledStringBuilder.COUNTER_STYLER);
+			ColoringLabelProvider.decorateStyledString(coloredName, decorated, StyledString.COUNTER_STYLER);
 		}
 		return coloredName;
 	}

@@ -23,7 +23,7 @@ import org.eclipse.jface.contentassist.IContentAssistSubjectControl;
 import org.eclipse.jface.contentassist.ISubjectControlContentAssistProcessor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -245,7 +245,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 		protected final void addAdjustedCompletion(String name, String completion,
 				int start, int end, int relevance, ImageDescriptor descriptor) {
 			JavaCompletionProposal javaCompletionProposal= new JavaCompletionProposal(completion, start - fOffsetReduction, end - start,
-					getImage(descriptor), new StyledStringBuilder(name), relevance);
+					getImage(descriptor), new StyledString(name), relevance);
 			javaCompletionProposal.setTriggerCharacters(TRIGGER_CHARACTERS);
 			fProposals.add(javaCompletionProposal);
 		}
@@ -255,7 +255,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 			JavaTypeCompletionProposal javaCompletionProposal= new JavaTypeCompletionProposal(
 					fullyQualifiedName == null || completion.length() == 0 ? completion : fullyQualifiedName,
 					null, start - fOffsetReduction,
-					end - start, getImage(descriptor), new StyledStringBuilder(name), relevance, completion);
+					end - start, getImage(descriptor), new StyledString(name), relevance, completion);
 			javaCompletionProposal.setTriggerCharacters(TRIGGER_CHARACTERS);
 			fProposals.add(javaCompletionProposal);
 		}

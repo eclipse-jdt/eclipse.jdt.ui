@@ -18,8 +18,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.StyledStringBuilder;
-import org.eclipse.jface.viewers.StyledStringBuilder.Styler;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.StyledString.Styler;
 
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
@@ -280,7 +280,7 @@ public class JavaElementLabels {
 	
 	
 	/**
-	 * Specified to apply color styles to labels. This flag only applies to method taking or returning a {@link StyledStringBuilder}.
+	 * Specified to apply color styles to labels. This flag only applies to method taking or returning a {@link StyledString}.
 	 * 
 	 * @since 3.4
 	 */
@@ -364,9 +364,9 @@ public class JavaElementLabels {
 	
 	private final static long QUALIFIER_FLAGS= P_COMPRESSED | USE_RESOLVED;
 	
-	private static final Styler QUALIFIER_STYLE= StyledStringBuilder.QUALIFIER_STYLER; 
-	private static final Styler COUNTER_STYLE= StyledStringBuilder.COUNTER_STYLER; 
-	private static final Styler DECORATIONS_STYLE= StyledStringBuilder.DECORATIONS_STYLER;
+	private static final Styler QUALIFIER_STYLE= StyledString.QUALIFIER_STYLER; 
+	private static final Styler COUNTER_STYLE= StyledString.COUNTER_STYLER; 
+	private static final Styler DECORATIONS_STYLE= StyledString.DECORATIONS_STYLER;
 	
 	/*
 	 * Package name compression
@@ -422,23 +422,23 @@ public class JavaElementLabels {
 	 * 
 	 * @since 3.4
 	 */
-	public static StyledStringBuilder getStyledTextLabel(Object obj, long flags) {
+	public static StyledString getStyledTextLabel(Object obj, long flags) {
 		if (obj instanceof IJavaElement) {
 			return getStyledElementLabel((IJavaElement) obj, flags);
 		} else if (obj instanceof IResource) {
-			return new StyledStringBuilder(((IResource) obj).getName());
+			return new StyledString(((IResource) obj).getName());
 		} else if (obj instanceof ClassPathContainer) {
 			ClassPathContainer container= (ClassPathContainer) obj;
 			return getStyledContainerEntryLabel(container.getClasspathEntry().getPath(), container.getJavaProject());
 		} else if (obj instanceof IStorage) {
-			return new StyledStringBuilder(((IStorage)obj).getName());
+			return new StyledString(((IStorage)obj).getName());
 		} else if (obj instanceof IAdaptable) {
 			IWorkbenchAdapter wbadapter= (IWorkbenchAdapter) ((IAdaptable)obj).getAdapter(IWorkbenchAdapter.class);
 			if (wbadapter != null) {
-				return new StyledStringBuilder(wbadapter.getLabel(obj));
+				return new StyledString(wbadapter.getLabel(obj));
 			}
 		}
-		return new StyledStringBuilder();
+		return new StyledString();
 	}
 				
 				
@@ -450,9 +450,9 @@ public class JavaElementLabels {
 	 * @return the label of the Java element
 	 */
 	public static String getElementLabel(IJavaElement element, long flags) {
-		StyledStringBuilder buf= new StyledStringBuilder();
+		StyledString buf= new StyledString();
 		getElementLabel(element, flags, buf);
-		return buf.toString();
+		return buf.getString();
 	}
 	
 	/**
@@ -464,8 +464,8 @@ public class JavaElementLabels {
 	 * 
 	 * @since 3.4
 	 */
-	public static StyledStringBuilder getStyledElementLabel(IJavaElement element, long flags) {
-		StyledStringBuilder result= new StyledStringBuilder();
+	public static StyledString getStyledElementLabel(IJavaElement element, long flags) {
+		StyledString result= new StyledString();
 		getElementLabel(element, flags, result);
 		return result;
 	}
@@ -478,9 +478,9 @@ public class JavaElementLabels {
 	 * @param buf The buffer to append the resulting label to.
 	 */
 	public static void getElementLabel(IJavaElement element, long flags, StringBuffer buf) {
-		StyledStringBuilder builder= new StyledStringBuilder();
+		StyledString builder= new StyledString();
 		getElementLabel(element, flags, builder);
-		buf.append(builder.toString());
+		buf.append(builder.getString());
 	}
 	
 	/**
@@ -492,7 +492,7 @@ public class JavaElementLabels {
 	 * 
 	 * @since 3.4
 	 */
-	public static void getElementLabel(IJavaElement element, long flags, StyledStringBuilder result) {
+	public static void getElementLabel(IJavaElement element, long flags, StyledString result) {
 		int type= element.getElementType();
 		IPackageFragmentRoot root= null;
 		
@@ -565,21 +565,21 @@ public class JavaElementLabels {
 	 * @param buf The buffer to append the resulting label to.
 	 */		
 	public static void getMethodLabel(IMethod method, long flags, StringBuffer buf) {
-		StyledStringBuilder builder= new StyledStringBuilder();
+		StyledString builder= new StyledString();
 		getMethodLabel(method, flags, builder);
-		buf.append(builder.toString());
+		buf.append(builder.getString());
 	}
 
 	
 	/**
-	 * Appends the label for a method to a {@link StyledStringBuilder}. Considers the M_* flags.
+	 * Appends the label for a method to a {@link StyledString}. Considers the M_* flags.
 	 * 	@param method The element to render.
 	 * @param flags The rendering flags. Flags with names starting with 'M_' are considered.
 	 * @param result The buffer to append the resulting label to.
 	 * 
 	 * @since 3.4
 	 */		
-	public static void getMethodLabel(IMethod method, long flags, StyledStringBuilder result) {
+	public static void getMethodLabel(IMethod method, long flags, StyledString result) {
 		try {
 			BindingKey resolvedKey= getFlag(flags, USE_RESOLVED) && method.isResolved() ? new BindingKey(method.getKey()) : null;
 			String resolvedSig= (resolvedKey != null) ? resolvedKey.toSignature() : null;
@@ -767,7 +767,7 @@ public class JavaElementLabels {
 		}
 	}
 	
-	private static void getCategoryLabel(IMember member, long flags, StyledStringBuilder result) throws JavaModelException {
+	private static void getCategoryLabel(IMember member, long flags, StyledString result) throws JavaModelException {
 		String[] categories= member.getCategories();
 		if (categories.length > 0) {
 			int offset= result.length();
@@ -792,7 +792,7 @@ public class JavaElementLabels {
 	 * @param flags flags with render options
 	 * @param result the resulting string buffer
 	 */
-	private static void getTypeParametersLabel(ITypeParameter[] typeParameters, long flags, StyledStringBuilder result) {
+	private static void getTypeParametersLabel(ITypeParameter[] typeParameters, long flags, StyledString result) {
 		if (typeParameters.length > 0) {
 			result.append('<');
 			for (int i = 0; i < typeParameters.length; i++) {
@@ -813,13 +813,13 @@ public class JavaElementLabels {
 	 * @param buf The buffer to append the resulting label to.
 	 */	
 	public static void getFieldLabel(IField field, long flags, StringBuffer buf) {
-		StyledStringBuilder builder= new StyledStringBuilder();
+		StyledString builder= new StyledString();
 		getFieldLabel(field, flags, builder);
-		buf.append(builder.toString());
+		buf.append(builder.getString());
 	}
 	
 	/**
-	 * Appends the style label for a field to a {@link StyledStringBuilder}. Considers the F_* flags.
+	 * Appends the style label for a field to a {@link StyledString}. Considers the F_* flags.
 	 * 
 	 * 	@param field The element to render.
 	 * @param flags The rendering flags. Flags with names starting with 'F_' are considered.
@@ -827,7 +827,7 @@ public class JavaElementLabels {
 	 * 
 	 * @since 3.4
 	 */	
-	public static void getFieldLabel(IField field, long flags, StyledStringBuilder result) {
+	public static void getFieldLabel(IField field, long flags, StyledString result) {
 		try {
 			
 			if (getFlag(flags, F_PRE_TYPE_SIGNATURE) && field.exists() && !Flags.isEnum(field.getFlags())) {
@@ -886,13 +886,13 @@ public class JavaElementLabels {
 	 * @param buf The buffer to append the resulting label to.
 	 */	
 	public static void getLocalVariableLabel(ILocalVariable localVariable, long flags, StringBuffer buf) {
-		StyledStringBuilder builder= new StyledStringBuilder();
+		StyledString builder= new StyledString();
 		getLocalVariableLabel(localVariable, flags, builder);
-		buf.append(builder.toString());
+		buf.append(builder.getString());
 	}
 	
 	/**
-	 * Appends the styled label for a local variable to a {@link StyledStringBuilder}.
+	 * Appends the styled label for a local variable to a {@link StyledString}.
 	 * 
 	 * 	@param localVariable The element to render.
 	 * @param flags The rendering flags. Flags with names starting with 'F_' are considered.
@@ -900,7 +900,7 @@ public class JavaElementLabels {
 	 * 
 	 * @since 3.4
 	 */	
-	public static void getLocalVariableLabel(ILocalVariable localVariable, long flags, StyledStringBuilder result) {
+	public static void getLocalVariableLabel(ILocalVariable localVariable, long flags, StyledString result) {
 		if (getFlag(flags, F_PRE_TYPE_SIGNATURE)) {
 			getTypeSignatureLabel(localVariable.getTypeSignature(), flags, result);
 			result.append(' ');
@@ -938,13 +938,13 @@ public class JavaElementLabels {
 	 * @param buf The buffer to append the resulting label to.
 	 */	
 	public static void getInitializerLabel(IInitializer initializer, long flags, StringBuffer buf) {
-		StyledStringBuilder builder= new StyledStringBuilder();
+		StyledString builder= new StyledString();
 		getInitializerLabel(initializer, flags, builder);
-		buf.append(builder.toString());
+		buf.append(builder.getString());
 	}
 	
 	/**
-	 * Appends the label for a initializer to a {@link StyledStringBuilder}. Considers the I_* flags.
+	 * Appends the label for a initializer to a {@link StyledString}. Considers the I_* flags.
 	 * 
 	 * 	@param initializer The element to render.
 	 * @param flags The rendering flags. Flags with names starting with 'I_' are considered.
@@ -952,7 +952,7 @@ public class JavaElementLabels {
 	 * 
 	 * @since 3.4
 	 */	
-	public static void getInitializerLabel(IInitializer initializer, long flags, StyledStringBuilder result) {
+	public static void getInitializerLabel(IInitializer initializer, long flags, StyledString result) {
 		// qualification
 		if (getFlag(flags, I_FULLY_QUALIFIED)) {
 			getTypeLabel(initializer.getDeclaringType(), T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS), result);
@@ -971,7 +971,7 @@ public class JavaElementLabels {
 		}
 	}	
 	
-	private static void getTypeSignatureLabel(String typeSig, long flags, StyledStringBuilder result) {
+	private static void getTypeSignatureLabel(String typeSig, long flags, StyledString result) {
 		int sigKind= Signature.getTypeSignatureKind(typeSig);
 		switch (sigKind) {
 			case Signature.BASE_TYPE_SIGNATURE:
@@ -1015,7 +1015,7 @@ public class JavaElementLabels {
 		}
 	}
 	
-	private static void getTypeArgumentSignaturesLabel(String[] typeArgsSig, long flags, StyledStringBuilder result) {
+	private static void getTypeArgumentSignaturesLabel(String[] typeArgsSig, long flags, StyledString result) {
 		if (typeArgsSig.length > 0) {
 			result.append('<');
 			for (int i = 0; i < typeArgsSig.length; i++) {
@@ -1035,7 +1035,7 @@ public class JavaElementLabels {
 	 * @param flags flags with render options
 	 * @param result the resulting string buffer
 	 */
-	private static void getTypeParameterSignaturesLabel(String[] typeParamSigs, long flags, StyledStringBuilder result) {
+	private static void getTypeParameterSignaturesLabel(String[] typeParamSigs, long flags, StyledString result) {
 		if (typeParamSigs.length > 0) {
 			result.append('<');
 			for (int i = 0; i < typeParamSigs.length; i++) {
@@ -1056,13 +1056,13 @@ public class JavaElementLabels {
 	 * @param buf The buffer to append the resulting label to.
 	 */		
 	public static void getTypeLabel(IType type, long flags, StringBuffer buf) {
-		StyledStringBuilder builder= new StyledStringBuilder();
+		StyledString builder= new StyledString();
 		getTypeLabel(type, flags, builder);
-		buf.append(builder.toString());
+		buf.append(builder.getString());
 	}
 
 	/**
-	 * Appends the label for a type to a {@link StyledStringBuilder}. Considers the T_* flags.
+	 * Appends the label for a type to a {@link StyledString}. Considers the T_* flags.
 	 * 
 	 * 	@param type The element to render.
 	 * @param flags The rendering flags. Flags with names starting with 'T_' are considered.
@@ -1070,7 +1070,7 @@ public class JavaElementLabels {
 	 * 
 	 * @since 3.4
 	 */		
-	public static void getTypeLabel(IType type, long flags, StyledStringBuilder result) {
+	public static void getTypeLabel(IType type, long flags, StyledString result) {
 		
 		if (getFlag(flags, T_FULLY_QUALIFIED)) {
 			IPackageFragment pack= type.getPackageFragment();
@@ -1171,13 +1171,13 @@ public class JavaElementLabels {
 	 * @param buf The buffer to append the resulting label to.
 	 */	
 	public static void getDeclarationLabel(IJavaElement declaration, long flags, StringBuffer buf) {
-		StyledStringBuilder builder= new StyledStringBuilder();
+		StyledString builder= new StyledString();
 		getDeclarationLabel(declaration, flags, builder);
-		buf.append(builder.toString());
+		buf.append(builder.getString());
 	}
 	
 	/**
-	 * Appends the label for a import container, import or package declaration to a {@link StyledStringBuilder}. Considers the D_* flags.
+	 * Appends the label for a import container, import or package declaration to a {@link StyledString}. Considers the D_* flags.
 	 * 
 	 * 	@param declaration The element to render.
 	 * @param flags The rendering flags. Flags with names starting with 'D_' are considered.
@@ -1185,7 +1185,7 @@ public class JavaElementLabels {
 	 * 
 	 * @since 3.4
 	 */	
-	public static void getDeclarationLabel(IJavaElement declaration, long flags, StyledStringBuilder result) {
+	public static void getDeclarationLabel(IJavaElement declaration, long flags, StyledString result) {
 		if (getFlag(flags, D_QUALIFIED)) {
 			IJavaElement openable= (IJavaElement) declaration.getOpenable();
 			if (openable != null) {
@@ -1220,13 +1220,13 @@ public class JavaElementLabels {
 	 * @param buf The buffer to append the resulting label to.
 	 */	
 	public static void getClassFileLabel(IClassFile classFile, long flags, StringBuffer buf) {
-		StyledStringBuilder builder= new StyledStringBuilder();
+		StyledString builder= new StyledString();
 		getClassFileLabel(classFile, flags, builder);
-		buf.append(builder.toString());
+		buf.append(builder.getString());
 	}
 	
 	/**
-	 * Appends the label for a class file to a {@link StyledStringBuilder}. Considers the CF_* flags.
+	 * Appends the label for a class file to a {@link StyledString}. Considers the CF_* flags.
 	 * 
 	 * 	@param classFile The element to render.
 	 * @param flags The rendering flags. Flags with names starting with 'CF_' are considered.
@@ -1234,7 +1234,7 @@ public class JavaElementLabels {
 	 * 
 	 * @since 3.4
 	 */	
-	public static void getClassFileLabel(IClassFile classFile, long flags, StyledStringBuilder result) {
+	public static void getClassFileLabel(IClassFile classFile, long flags, StyledString result) {
 		if (getFlag(flags, CF_QUALIFIED)) {
 			IPackageFragment pack= (IPackageFragment) classFile.getParent();
 			if (!pack.isDefaultPackage()) {
@@ -1262,13 +1262,13 @@ public class JavaElementLabels {
 	 * @param buf The buffer to append the resulting label to.
 	 */
 	public static void getCompilationUnitLabel(ICompilationUnit cu, long flags, StringBuffer buf) {
-		StyledStringBuilder builder= new StyledStringBuilder();
+		StyledString builder= new StyledString();
 		getCompilationUnitLabel(cu, flags, builder);
-		buf.append(builder.toString());		
+		buf.append(builder.getString());		
 	}
 	
 	/**
-	 * Appends the label for a compilation unit to a {@link StyledStringBuilder}. Considers the CU_* flags.
+	 * Appends the label for a compilation unit to a {@link StyledString}. Considers the CU_* flags.
 	 * 
 	 * 	@param cu The element to render.
 	 * @param flags The rendering flags. Flags with names starting with 'CU_' are considered.
@@ -1276,7 +1276,7 @@ public class JavaElementLabels {
 	 * 
 	 * @since 3.4
 	 */
-	public static void getCompilationUnitLabel(ICompilationUnit cu, long flags, StyledStringBuilder result) {
+	public static void getCompilationUnitLabel(ICompilationUnit cu, long flags, StyledString result) {
 		if (getFlag(flags, CU_QUALIFIED)) {
 			IPackageFragment pack= (IPackageFragment) cu.getParent();
 			if (!pack.isDefaultPackage()) {
@@ -1304,13 +1304,13 @@ public class JavaElementLabels {
 	 * @param buf The buffer to append the resulting label to.
 	 */	
 	public static void getPackageFragmentLabel(IPackageFragment pack, long flags, StringBuffer buf) {
-		StyledStringBuilder builder= new StyledStringBuilder();
+		StyledString builder= new StyledString();
 		getPackageFragmentLabel(pack, flags, builder);
-		buf.append(builder.toString());		
+		buf.append(builder.getString());		
 	}
 	
 	/**
-	 * Appends the label for a package fragment to a {@link StyledStringBuilder}. Considers the P_* flags.
+	 * Appends the label for a package fragment to a {@link StyledString}. Considers the P_* flags.
 	 * 
 	 * 	@param pack The element to render.
 	 * @param flags The rendering flags. Flags with names starting with P_' are considered.
@@ -1318,7 +1318,7 @@ public class JavaElementLabels {
 	 * 
 	 * @since 3.4
 	 */	
-	public static void getPackageFragmentLabel(IPackageFragment pack, long flags, StyledStringBuilder result) {
+	public static void getPackageFragmentLabel(IPackageFragment pack, long flags, StyledString result) {
 		if (getFlag(flags, P_QUALIFIED)) {
 			getPackageFragmentRootLabel((IPackageFragmentRoot) pack.getParent(), ROOT_QUALIFIED, result);
 			result.append('/');
@@ -1340,7 +1340,7 @@ public class JavaElementLabels {
 		}
 	}
 	
-	private static void getCompressedPackageFragment(IPackageFragment pack, StyledStringBuilder result) {
+	private static void getCompressedPackageFragment(IPackageFragment pack, StyledString result) {
 		refreshPackageNamePattern();
 		if (fgPkgNameLength == 0) {
 			result.append(pack.getElementName());
@@ -1372,13 +1372,13 @@ public class JavaElementLabels {
 	 * @param buf The buffer to append the resulting label to.
 	 */	
 	public static void getPackageFragmentRootLabel(IPackageFragmentRoot root, long flags, StringBuffer buf) {
-		StyledStringBuilder builder= new StyledStringBuilder();
+		StyledString builder= new StyledString();
 		getPackageFragmentRootLabel(root, flags, builder);
-		buf.append(builder.toString());	
+		buf.append(builder.getString());	
 	}
 	
 	/**
-	 * Appends the label for a package fragment root to a {@link StyledStringBuilder}. Considers the ROOT_* flags.
+	 * Appends the label for a package fragment root to a {@link StyledString}. Considers the ROOT_* flags.
 	 * 
 	 * 	@param root The element to render.
 	 * @param flags The rendering flags. Flags with names starting with ROOT_' are considered.
@@ -1386,7 +1386,7 @@ public class JavaElementLabels {
 	 * 
 	 * @since 3.4
 	 */	
-	public static void getPackageFragmentRootLabel(IPackageFragmentRoot root, long flags, StyledStringBuilder result) {
+	public static void getPackageFragmentRootLabel(IPackageFragmentRoot root, long flags, StyledString result) {
 		// Handle variables different	
 		if (getFlag(flags, ROOT_VARIABLE) && getVariableLabel(root, flags, result))
 			return;
@@ -1396,7 +1396,7 @@ public class JavaElementLabels {
 			getFolderLabel(root, flags, result);
 	}
 	
-	private static void getArchiveLabel(IPackageFragmentRoot root, long flags, StyledStringBuilder result) {
+	private static void getArchiveLabel(IPackageFragmentRoot root, long flags, StyledString result) {
 		boolean external= root.isExternal();
 		if (external)
 			getExternalArchiveLabel(root, flags, result);
@@ -1404,7 +1404,7 @@ public class JavaElementLabels {
 			getInternalArchiveLabel(root, flags, result);
 	}
 	
-	private static boolean getVariableLabel(IPackageFragmentRoot root, long flags, StyledStringBuilder result) {
+	private static boolean getVariableLabel(IPackageFragmentRoot root, long flags, StyledString result) {
 		try {
 			IClasspathEntry rawEntry= root.getRawClasspathEntry();
 			if (rawEntry != null && rawEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
@@ -1447,7 +1447,7 @@ public class JavaElementLabels {
 		return false;
 	}
 
-	private static void getExternalArchiveLabel(IPackageFragmentRoot root, long flags, StyledStringBuilder result) {
+	private static void getExternalArchiveLabel(IPackageFragmentRoot root, long flags, StyledString result) {
 		IPath path= root.getPath();
 		if (getFlag(flags, REFERENCED_ROOT_POST_QUALIFIED)) {
 			int segements= path.segmentCount();
@@ -1469,7 +1469,7 @@ public class JavaElementLabels {
 		}
 	}
 
-	private static void getInternalArchiveLabel(IPackageFragmentRoot root, long flags, StyledStringBuilder result) {
+	private static void getInternalArchiveLabel(IPackageFragmentRoot root, long flags, StyledString result) {
 		IResource resource= root.getResource();
 		boolean rootQualified= getFlag(flags, ROOT_QUALIFIED);
 		boolean referencedQualified= getFlag(flags, REFERENCED_ROOT_POST_QUALIFIED) && isReferenced(root);
@@ -1493,7 +1493,7 @@ public class JavaElementLabels {
 		}
 	}
 
-	private static void getFolderLabel(IPackageFragmentRoot root, long flags, StyledStringBuilder result) {
+	private static void getFolderLabel(IPackageFragmentRoot root, long flags, StyledString result) {
 		IResource resource= root.getResource();
 		if (resource == null) {
 			getExternalArchiveLabel(root, flags, result);
@@ -1614,7 +1614,7 @@ public class JavaElementLabels {
 	 * 
 	 * @since 3.4
 	 */
-	public static StyledStringBuilder getStyledContainerEntryLabel(IPath containerPath, IJavaProject project) {
+	public static StyledString getStyledContainerEntryLabel(IPath containerPath, IJavaProject project) {
 		try {
 			IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, project);
 			String description= null;
@@ -1628,7 +1628,7 @@ public class JavaElementLabels {
 				}
 			}
 			if (description != null) {
-				StyledStringBuilder str= new StyledStringBuilder(description);
+				StyledString str= new StyledString(description);
 				if (containerPath.segmentCount() > 0 && JavaRuntime.JRE_CONTAINER.equals(containerPath.segment(0))) {
 					int index= description.indexOf('[');
 					if (index != -1) {
@@ -1640,7 +1640,7 @@ public class JavaElementLabels {
 		} catch (JavaModelException e) {
 			// ignore
 		}
-		return new StyledStringBuilder(containerPath.toString());
+		return new StyledString(containerPath.toString());
 	}
 	
 	

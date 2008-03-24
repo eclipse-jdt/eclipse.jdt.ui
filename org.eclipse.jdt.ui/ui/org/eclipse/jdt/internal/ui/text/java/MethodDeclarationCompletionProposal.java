@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -100,19 +100,19 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
 		}
 	}
 
-	private static StyledStringBuilder getDisplayName(String methodName, String returnTypeSig) {
-		StyledStringBuilder buf= new StyledStringBuilder();
+	private static StyledString getDisplayName(String methodName, String returnTypeSig) {
+		StyledString buf= new StyledString();
 		buf.append(methodName);
 		buf.append('(');
 		buf.append(')');
 		if (returnTypeSig != null) {
 			buf.append(" : "); //$NON-NLS-1$
 			buf.append(Signature.toString(returnTypeSig));
-			buf.append(" - ", StyledStringBuilder.QUALIFIER_STYLER); //$NON-NLS-1$
-			buf.append(JavaTextMessages.MethodCompletionProposal_method_label, StyledStringBuilder.QUALIFIER_STYLER);
+			buf.append(" - ", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
+			buf.append(JavaTextMessages.MethodCompletionProposal_method_label, StyledString.QUALIFIER_STYLER);
 		} else {
-			buf.append(" - ", StyledStringBuilder.QUALIFIER_STYLER); //$NON-NLS-1$
-			buf.append(JavaTextMessages.MethodCompletionProposal_constructor_label, StyledStringBuilder.QUALIFIER_STYLER);
+			buf.append(" - ", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
+			buf.append(JavaTextMessages.MethodCompletionProposal_constructor_label, StyledString.QUALIFIER_STYLER);
 		}
 		return buf;
 	}

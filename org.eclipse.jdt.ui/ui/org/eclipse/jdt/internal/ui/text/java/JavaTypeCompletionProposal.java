@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -47,11 +47,11 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 	/** The fully qualified type name. */
 	private final String fFullyQualifiedTypeName;
 
-	public JavaTypeCompletionProposal(String replacementString, ICompilationUnit cu, int replacementOffset, int replacementLength, Image image, StyledStringBuilder displayString, int relevance) {
+	public JavaTypeCompletionProposal(String replacementString, ICompilationUnit cu, int replacementOffset, int replacementLength, Image image, StyledString displayString, int relevance) {
 		this(replacementString, cu, replacementOffset, replacementLength, image, displayString, relevance, null);
 	}
 
-	public JavaTypeCompletionProposal(String replacementString, ICompilationUnit cu, int replacementOffset, int replacementLength, Image image, StyledStringBuilder displayString, int relevance,
+	public JavaTypeCompletionProposal(String replacementString, ICompilationUnit cu, int replacementOffset, int replacementLength, Image image, StyledString displayString, int relevance,
 		String fullyQualifiedTypeName)
 	{
 		super(replacementString, replacementOffset, replacementLength, image, displayString, relevance);

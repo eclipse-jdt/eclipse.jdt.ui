@@ -24,7 +24,7 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -203,7 +203,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 					TemplateProposal proposal= new SurroundWithTemplateProposal(cu, currentTemplate, context, region, image, selectedStatements);
 					String[] arg= new String[] { currentTemplate.getName(), currentTemplate.getDescription() };
 					String decorated= Messages.format(CorrectionMessages.QuickTemplateProcessor_surround_label, arg);
-					proposal.setDisplayString(ColoringLabelProvider.decorateStyledString(new StyledStringBuilder(currentTemplate.getName()), decorated, StyledStringBuilder.QUALIFIER_STYLER));
+					proposal.setDisplayString(ColoringLabelProvider.decorateStyledString(new StyledString(currentTemplate.getName()), decorated, StyledString.QUALIFIER_STYLER));
 					result.add(proposal);
 				} else {
 					TemplateProposal proposal= new TemplateProposal(currentTemplate, context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)) {
@@ -216,7 +216,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 					};
 					String[] arg= new String[] { currentTemplate.getName(), currentTemplate.getDescription() };
 					String decorated= Messages.format(CorrectionMessages.QuickTemplateProcessor_surround_label, arg);
-					proposal.setDisplayString(ColoringLabelProvider.decorateStyledString(new StyledStringBuilder(currentTemplate.getName()), decorated, StyledStringBuilder.QUALIFIER_STYLER));
+					proposal.setDisplayString(ColoringLabelProvider.decorateStyledString(new StyledString(currentTemplate.getName()), decorated, StyledString.QUALIFIER_STYLER));
 					result.add(proposal);
 				}
 			}

@@ -11,7 +11,7 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 
@@ -31,11 +31,11 @@ public abstract class TextSearchLabelProvider extends LabelProvider {
 		return fPage;
 	}
 			
-	protected final StyledStringBuilder getColoredLabelWithCounts(Object element, StyledStringBuilder coloredName) {
-		String name= coloredName.toString();
+	protected final StyledString getColoredLabelWithCounts(Object element, StyledString coloredName) {
+		String name= coloredName.getString();
 		String decorated= getLabelWithCounts(element, name);
 		if (decorated.length() > name.length()) {
-			ColoringLabelProvider.decorateStyledString(coloredName, decorated, StyledStringBuilder.COUNTER_STYLER);
+			ColoringLabelProvider.decorateStyledString(coloredName, decorated, StyledString.COUNTER_STYLER);
 		}
 		return coloredName;
 	}

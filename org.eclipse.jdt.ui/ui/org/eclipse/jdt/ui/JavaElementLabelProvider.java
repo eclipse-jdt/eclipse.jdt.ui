@@ -15,7 +15,7 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -254,7 +254,7 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider#getStyledText(java.lang.Object)
 	 */
-	public StyledStringBuilder getStyledText(Object element) {
+	public StyledString getStyledText(Object element) {
 		return JavaElementLabels.getStyledTextLabel(element, fTextFlags);
 	}
 

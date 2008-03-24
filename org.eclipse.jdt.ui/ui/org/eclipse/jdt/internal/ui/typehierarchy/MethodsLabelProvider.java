@@ -16,7 +16,7 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -104,11 +104,11 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
 	 */
-	public StyledStringBuilder getStyledText(Object element) {
-		StyledStringBuilder text= super.getStyledText(element);
+	public StyledString getStyledText(Object element) {
+		StyledString text= super.getStyledText(element);
 		String qualifier= getQualifier(element);
 		if (qualifier != null) {
-			StyledStringBuilder styledString= new StyledStringBuilder(qualifier);
+			StyledString styledString= new StyledString(qualifier);
 			styledString.append(text);
 			return styledString;
 		}

@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -89,9 +89,9 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
 	 */
-	public StyledStringBuilder getStyledText(Object element) {
-		StyledStringBuilder styledString= getColoredLabelWithCounts(element, super.getStyledText(element));
-		styledString.append(getQualification(element), StyledStringBuilder.QUALIFIER_STYLER);
+	public StyledString getStyledText(Object element) {
+		StyledString styledString= getColoredLabelWithCounts(element, super.getStyledText(element));
+		styledString.append(getQualification(element), StyledString.QUALIFIER_STYLER);
 		return styledString;
 	}
 

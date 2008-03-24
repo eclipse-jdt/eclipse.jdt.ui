@@ -21,7 +21,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
@@ -85,7 +85,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	private int fRelevance;
 
 	private IRegion fSelectedRegion; // initialized by apply()
-	private StyledStringBuilder fDisplayString;
+	private StyledString fDisplayString;
 	private InclusivePositionUpdater fUpdater;
 
 	/**
@@ -437,24 +437,24 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	 * @see ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return getStyledDisplayString().toString();
+		return getStyledDisplayString().getString();
 	}
 	
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension6#getStyledDisplayString()
 	 * @since 3.4
 	 */
-	public StyledStringBuilder getStyledDisplayString() {
+	public StyledString getStyledDisplayString() {
 		if (fDisplayString == null) {
 			String[] arguments= new String[] { fTemplate.getName(), fTemplate.getDescription() };
 			String decorated= Messages.format(TemplateContentAssistMessages.TemplateProposal_displayString, arguments);
-			StyledStringBuilder string= new StyledStringBuilder(fTemplate.getName(), StyledStringBuilder.COUNTER_STYLER);
-			fDisplayString= ColoringLabelProvider.decorateStyledString(string, decorated, StyledStringBuilder.QUALIFIER_STYLER);
+			StyledString string= new StyledString(fTemplate.getName(), StyledString.COUNTER_STYLER);
+			fDisplayString= ColoringLabelProvider.decorateStyledString(string, decorated, StyledString.QUALIFIER_STYLER);
 		}
 		return fDisplayString;
 	}
 	
-	public void setDisplayString(StyledStringBuilder displayString) {
+	public void setDisplayString(StyledString displayString) {
 		fDisplayString= displayString;
 	}
 

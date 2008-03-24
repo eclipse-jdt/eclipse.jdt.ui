@@ -18,7 +18,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
@@ -119,9 +119,9 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getRichTextLabel(java.lang.Object)
 	 */
-	public StyledStringBuilder getStyledText(Object element) {
+	public StyledString getStyledText(Object element) {
 		if (element instanceof IPackageFragment || element instanceof LogicalPackage)
-			return new StyledStringBuilder(getText(element));
+			return new StyledString(getText(element));
 		return super.getStyledText(element);
 	}
 	

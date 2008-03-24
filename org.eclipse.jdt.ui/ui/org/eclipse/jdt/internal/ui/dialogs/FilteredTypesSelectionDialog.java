@@ -56,7 +56,7 @@ import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -831,12 +831,12 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider#getStyledText(java.lang.Object)
 		 */
-		public StyledStringBuilder getStyledText(Object element) {
+		public StyledString getStyledText(Object element) {
 			String text= getText(element);
-			StyledStringBuilder string= new StyledStringBuilder(text);			
+			StyledString string= new StyledString(text);			
 			int index= text.indexOf(JavaElementLabels.CONCAT_STRING);
 			if (index != -1) {
-				string.setStyle(index, text.length() - index, StyledStringBuilder.QUALIFIER_STYLER);
+				string.setStyle(index, text.length() - index, StyledString.QUALIFIER_STYLER);
 			}
 			return string;
 		}

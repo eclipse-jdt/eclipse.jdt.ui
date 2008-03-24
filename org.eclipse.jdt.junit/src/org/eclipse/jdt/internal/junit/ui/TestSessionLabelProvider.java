@@ -19,7 +19,7 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
-import org.eclipse.jface.viewers.StyledStringBuilder;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
 import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
@@ -54,12 +54,12 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 		timeFormat.setMinimumIntegerDigits(1);
 	}
 	
-	public StyledStringBuilder getStyledText(Object element) {
+	public StyledString getStyledText(Object element) {
 		String label= getSimpleLabel(element);
 		if (label == null) {
-			return new StyledStringBuilder(element.toString());
+			return new StyledString(element.toString());
 		}
-		StyledStringBuilder text= new StyledStringBuilder(label);
+		StyledString text= new StyledString(label);
 		
 		ITestElement testElement= (ITestElement) element;
 		if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
@@ -67,7 +67,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 				String testKindDisplayName= fTestRunnerPart.getTestKindDisplayName();
 				if (testKindDisplayName != null) {
 					String decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testName_JUnitVersion, new Object[] { label, testKindDisplayName });
-					text= ColoringLabelProvider.decorateStyledString(text, decorated, StyledStringBuilder.QUALIFIER_STYLER);
+					text= ColoringLabelProvider.decorateStyledString(text, decorated, StyledString.QUALIFIER_STYLER);
 				}
 			}
 			
@@ -75,16 +75,16 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 			if (element instanceof ITestCaseElement) {
 				String className= ((ITestCaseElement) element).getTestClassName();
 				String decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, className });
-				text= ColoringLabelProvider.decorateStyledString(text, decorated, StyledStringBuilder.QUALIFIER_STYLER);
+				text= ColoringLabelProvider.decorateStyledString(text, decorated, StyledString.QUALIFIER_STYLER);
 			}
 		}
 		return addElapsedTime(text, testElement.getElapsedTimeInSeconds());
 	}
 	
-	private StyledStringBuilder addElapsedTime(StyledStringBuilder styledString, double time) {
-		String string= styledString.toString();
+	private StyledString addElapsedTime(StyledString styledString, double time) {
+		String string= styledString.getString();
 		String decorated= addElapsedTime(string, time);
-		return ColoringLabelProvider.decorateStyledString(styledString, decorated, StyledStringBuilder.COUNTER_STYLER);
+		return ColoringLabelProvider.decorateStyledString(styledString, decorated, StyledString.COUNTER_STYLER);
 	}
 
 	private String addElapsedTime(String string, double time) {
