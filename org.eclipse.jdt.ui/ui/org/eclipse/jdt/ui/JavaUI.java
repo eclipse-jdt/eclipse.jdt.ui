@@ -212,7 +212,7 @@ public final class JavaUI {
 	 * 
 	 * @since 2.0
 	 */
-	public static final String ID_BROWSING_PERSPECTIVE= "org.eclipse.jdt.ui.JavaBrowsingPerspective"; //$NON-NLS-1$
+	public static String ID_BROWSING_PERSPECTIVE= "org.eclipse.jdt.ui.JavaBrowsingPerspective"; //$NON-NLS-1$
 
 	/**
 	 * The view part id of the Java Browsing Projects view
@@ -220,7 +220,7 @@ public final class JavaUI {
 	 * 
 	 * @since 2.0
 	 */
-	public static final String ID_PROJECTS_VIEW= "org.eclipse.jdt.ui.ProjectsView"; //$NON-NLS-1$
+	public static String ID_PROJECTS_VIEW= "org.eclipse.jdt.ui.ProjectsView"; //$NON-NLS-1$
 
 	/**
 	 * The view part id of the Java Browsing Packages view
@@ -228,7 +228,7 @@ public final class JavaUI {
 	 * 
 	 * @since 2.0
 	 */
-	public static final String ID_PACKAGES_VIEW= "org.eclipse.jdt.ui.PackagesView"; //$NON-NLS-1$
+	public static String ID_PACKAGES_VIEW= "org.eclipse.jdt.ui.PackagesView"; //$NON-NLS-1$
 
 	/**
 	 * The view part id of the Java Browsing Types view
@@ -236,7 +236,7 @@ public final class JavaUI {
 	 * 
 	 * @since 2.0
 	 */
-	public static final String ID_TYPES_VIEW= "org.eclipse.jdt.ui.TypesView"; //$NON-NLS-1$
+	public static String ID_TYPES_VIEW= "org.eclipse.jdt.ui.TypesView"; //$NON-NLS-1$
 
 	/**
 	 * The view part id of the Java Browsing Members view
@@ -244,7 +244,7 @@ public final class JavaUI {
 	 * 
 	 * @since 2.0
 	 */
-	public static final String ID_MEMBERS_VIEW= "org.eclipse.jdt.ui.MembersView"; //$NON-NLS-1$
+	public static String ID_MEMBERS_VIEW= "org.eclipse.jdt.ui.MembersView"; //$NON-NLS-1$
 	
 	
 	/**
