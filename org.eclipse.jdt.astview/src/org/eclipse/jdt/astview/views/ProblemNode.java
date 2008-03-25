@@ -15,6 +15,7 @@ import java.util.ArrayList;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.IProblem;
 
@@ -47,6 +48,7 @@ public class ProblemNode extends ASTAttribute {
 		
 		children.add(new GeneralAttribute(this, "CONSTANT NAME", getConstantName()));
 		children.add(new GeneralAttribute(this, "ID", getErrorLabel()));
+		children.add(new GeneralAttribute(this, "OPTION FOR CONFIGURABLE SEVERITY", JavaCore.getOptionForConfigurableSeverity(fProblem.getID())));
 		if (fProblem instanceof CategorizedProblem) {
 			children.add(new GeneralAttribute(this, "CATEGORY ID", getCategoryCode()));
 			children.add(new GeneralAttribute(this, "MARKER TYPE", ((CategorizedProblem) fProblem).getMarkerType()));
