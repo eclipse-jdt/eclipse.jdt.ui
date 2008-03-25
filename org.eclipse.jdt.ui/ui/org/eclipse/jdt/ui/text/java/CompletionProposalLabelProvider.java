@@ -221,10 +221,10 @@ public class CompletionProposalLabelProvider {
 					buffer.append(',');
 					buffer.append(' ');
 				}
-				buffer.append(new String(parameterTypes[i]));
+				buffer.append(parameterTypes[i]);
 				if (parameterNames != null && parameterNames[i] != null) {
 					buffer.append(' ');
-					buffer.append(new String(parameterNames[i]));
+					buffer.append(parameterNames[i]);
 				}
 			}
 		}
@@ -255,7 +255,7 @@ public class CompletionProposalLabelProvider {
 		StyledString nameBuffer= new StyledString();
 
 		// method name
-		nameBuffer.append(new String(methodProposal.getName()));
+		nameBuffer.append(methodProposal.getName());
 
 		// parameters
 		nameBuffer.append('(');
@@ -267,11 +267,11 @@ public class CompletionProposalLabelProvider {
 			// TODO remove SignatureUtil.fix83600 call when bugs are fixed
 			char[] returnType= createTypeDisplayName(SignatureUtil.getUpperBound(Signature.getReturnType(SignatureUtil.fix83600(methodProposal.getSignature()))));
 			nameBuffer.append(RETURN_TYPE_SEPARATOR);
-			nameBuffer.append(new String(returnType));
+			nameBuffer.append(returnType);
 		}
 
 		// declaring type
-		nameBuffer.append(QUALIFIER_SEPARATOR, StyledString.QUALIFIER_STYLER); 
+		nameBuffer.append(QUALIFIER_SEPARATOR, StyledString.QUALIFIER_STYLER);
 		String declaringType= extractDeclaringTypeFQN(methodProposal);
 		declaringType= Signature.getSimpleName(declaringType);
 		nameBuffer.append(declaringType, StyledString.QUALIFIER_STYLER);
@@ -301,10 +301,10 @@ public class CompletionProposalLabelProvider {
 		StyledString nameBuffer= new StyledString();
 		
 		// method name
-		nameBuffer.append(new String(methodProposal.getCompletion()));
+		nameBuffer.append(methodProposal.getCompletion());
 		
 		// declaring type
-		nameBuffer.append(QUALIFIER_SEPARATOR, StyledString.QUALIFIER_STYLER); 
+		nameBuffer.append(QUALIFIER_SEPARATOR, StyledString.QUALIFIER_STYLER);
 		String declaringType= extractDeclaringTypeFQN(methodProposal);
 		declaringType= Signature.getSimpleName(declaringType);
 		nameBuffer.append(declaringType, StyledString.QUALIFIER_STYLER);
@@ -316,7 +316,7 @@ public class CompletionProposalLabelProvider {
 		StyledString nameBuffer= new StyledString();
 
 		// method name
-		nameBuffer.append(new String(methodProposal.getName()));
+		nameBuffer.append(methodProposal.getName());
 
 		// parameters
 		nameBuffer.append('(');
@@ -328,10 +328,10 @@ public class CompletionProposalLabelProvider {
 		// return type
 		// TODO remove SignatureUtil.fix83600 call when bugs are fixed
 		char[] returnType= createTypeDisplayName(SignatureUtil.getUpperBound(Signature.getReturnType(SignatureUtil.fix83600(methodProposal.getSignature()))));
-		nameBuffer.append(new String(returnType));
+		nameBuffer.append(returnType);
 
 		// declaring type
-		nameBuffer.append(QUALIFIER_SEPARATOR, StyledString.QUALIFIER_STYLER); 
+		nameBuffer.append(QUALIFIER_SEPARATOR, StyledString.QUALIFIER_STYLER);
 
 		String declaringType= extractDeclaringTypeFQN(methodProposal);
 		declaringType= Signature.getSimpleName(declaringType);
@@ -436,11 +436,11 @@ public class CompletionProposalLabelProvider {
 
 	StyledString createSimpleLabelWithType(CompletionProposal proposal) {
 		StyledString buf= new StyledString();
-		buf.append(new String(proposal.getCompletion()));
+		buf.append(proposal.getCompletion());
 		char[] typeName= Signature.getSignatureSimpleName(proposal.getSignature());
 		if (typeName.length > 0) {
 			buf.append(VAR_TYPE_SEPARATOR);
-			buf.append(new String(typeName));
+			buf.append(typeName);
 		}
 		return buf;
 	}
@@ -464,18 +464,18 @@ public class CompletionProposalLabelProvider {
 			name= proposal.getName();
 		
 		StyledString buf= new StyledString();
-		buf.append(new String(name));
+		buf.append(name);
 		char[] typeName= Signature.getSignatureSimpleName(proposal.getSignature());
 		if (typeName.length > 0) {
 			buf.append(VAR_TYPE_SEPARATOR);
-			buf.append(new String(typeName));
+			buf.append(typeName);
 		}
 		char[] declaration= proposal.getDeclarationSignature();
 		if (declaration != null) {
 			declaration= Signature.getSignatureSimpleName(declaration);
 			if (declaration.length > 0) {
-				buf.append(QUALIFIER_SEPARATOR, StyledString.QUALIFIER_STYLER); 
-				buf.append(new String(declaration), StyledString.QUALIFIER_STYLER);
+				buf.append(QUALIFIER_SEPARATOR, StyledString.QUALIFIER_STYLER);
+				buf.append(declaration, StyledString.QUALIFIER_STYLER);
 			}
 		}
 
@@ -495,7 +495,7 @@ public class CompletionProposalLabelProvider {
 		char[] declaringTypeSignature= proposal.getDeclarationSignature();
 
 		StyledString buffer= new StyledString();
-		buffer.append(new String(Signature.getSignatureSimpleName(declaringTypeSignature)));
+		buffer.append(Signature.getSignatureSimpleName(declaringTypeSignature));
 		buffer.append('(');
 		appendUnboundedParameterList(buffer, proposal);
 		buffer.append(')');
