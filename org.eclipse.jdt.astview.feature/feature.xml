@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.jdt.astview.feature"
       label="org.eclipse.jdt.astview.feature"
-      version="1.1.5"
+      version="1.1.6"
       provider-name="Eclipse.org">
    <install-handler/>
 
