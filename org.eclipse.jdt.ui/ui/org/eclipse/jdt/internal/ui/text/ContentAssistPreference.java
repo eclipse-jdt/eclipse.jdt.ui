@@ -21,6 +21,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 
+import org.eclipse.ui.IWorkbenchPreferenceConstants;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
@@ -62,6 +64,11 @@ public class ContentAssistPreference {
 	private static final String FILL_METHOD_ARGUMENTS= PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES;
 	/** Preference key for prefix completion. */
 	private static final String PREFIX_COMPLETION= PreferenceConstants.CODEASSIST_PREFIX_COMPLETION;
+	/**
+	 * Preference key for colored labels.
+	 * @since 3.4
+	 */
+	private static final String USE_COLORED_LABELS= IWorkbenchPreferenceConstants.USE_COLORED_LABELS;
 
 
 	private static Color getColor(IPreferenceStore store, String key, IColorManager manager) {
@@ -154,6 +161,10 @@ public class ContentAssistPreference {
 
 		enabled= store.getBoolean(PREFIX_COMPLETION);
 		assistant.enablePrefixCompletion(enabled);
+		
+		enabled= store.getBoolean(USE_COLORED_LABELS);
+		assistant.enableColoredLabels(enabled);
+		
 
 		configureJavaProcessor(assistant, store);
 		configureJavaDocProcessor(assistant, store);
@@ -231,6 +242,9 @@ public class ContentAssistPreference {
 		} else if (PREFIX_COMPLETION.equals(p)) {
 			boolean enabled= store.getBoolean(PREFIX_COMPLETION);
 			assistant.enablePrefixCompletion(enabled);
+		} else if (USE_COLORED_LABELS.equals(p)) {
+			boolean enabled= store.getBoolean(USE_COLORED_LABELS);
+			assistant.enableColoredLabels(enabled);
 		}
 
 		changeJavaProcessor(assistant, store, p);
