@@ -154,8 +154,6 @@ class BreadcrumbItemDropDown {
 		GridLayout layout= new GridLayout(1, false);
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
-		fShell.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-		fShell.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		fShell.setLayout(layout);
 		
 		Composite composite= new Composite(fShell, SWT.NONE);
@@ -169,7 +167,6 @@ class BreadcrumbItemDropDown {
 		
 		final Tree tree= (Tree) fDropDownViewer.getControl();
 		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		tree.setBackground(fShell.getBackground());
 		
 		Object input= fParent.getData();
 		fDropDownViewer.setContentProvider(fParent.getViewer().createDropDownContentProvider(input));
@@ -421,7 +418,7 @@ class BreadcrumbItemDropDown {
 	private void setShellBounds(Shell shell) {
 		Rectangle rect= fParentComposite.getBounds();
 		Rectangle toolbarBounds= fToolBar.getBounds();
-		Point pt= new Point(toolbarBounds.x + toolbarBounds.width - 2, rect.y + rect.height + 2);
+		Point pt= new Point(toolbarBounds.x + toolbarBounds.width - 2, rect.y + rect.height);
 		pt= fParentComposite.toDisplay(pt);
 
 		shell.pack();
