@@ -57,8 +57,6 @@ import org.eclipse.ui.progress.WorkbenchJob;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
 /**
  * A simple control that provides a text widget and a table viewer. The contents
  * of the text widget are used to drive a PatternFilter that is on the viewer.
@@ -275,7 +273,7 @@ public class FilteredTable extends Composite {
 			};
 
 			goLeft.setToolTipText(BreadcrumbMessages.FilteredTable_go_left_action_tooltip);
-			goLeft.setImageDescriptor(JavaPluginImages.DESC_ETOOL_BREADCRUMB_GO_LEFT);
+//			goLeft.setImageDescriptor(JavaPluginImages.DESC_ETOOL_BREADCRUMB_GO_LEFT);
 
 			fLeftToolBar.add(goLeft);
 			fLeftToolBar.update(true);
@@ -308,7 +306,7 @@ public class FilteredTable extends Composite {
 			};
 
 			goRight.setToolTipText(BreadcrumbMessages.FilteredTable_go_right_action_tooltip);
-			goRight.setImageDescriptor(JavaPluginImages.DESC_ETOOL_BREADCRUMB_GO_RIGHT);
+//			goRight.setImageDescriptor(JavaPluginImages.DESC_ETOOL_BREADCRUMB_GO_RIGHT);
 
 			fRightToolBar.add(goRight);
 			fRightToolBar.update(true);
