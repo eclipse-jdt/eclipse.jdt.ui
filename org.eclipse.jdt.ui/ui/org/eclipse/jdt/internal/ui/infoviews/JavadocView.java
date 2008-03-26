@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Genady Beryozkin <eclipse@genady.org> - [misc] Display values for constant fields in the Javadoc view - https://bugs.eclipse.org/bugs/show_bug.cgi?id=204914
  *     Brock Janiczak <brockj@tpg.com.au> - [implementation] Streams not being closed in Javadoc views - https://bugs.eclipse.org/bugs/show_bug.cgi?id=214854
+ *     Benjamin Muskalla <bmuskalla@innoopract.com> - [javadoc view] NPE on enumerations - https://bugs.eclipse.org/bugs/show_bug.cgi?id=223586
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.infoviews;
 
@@ -1206,6 +1207,9 @@ public class JavadocView extends AbstractInfoView {
 		CompilationUnit ast= SharedASTProvider.getAST(constantField.getTypeRoot(), SharedASTProvider.WAIT_NO, monitor);
 		if (ast != null) {
 			try {
+				if (constantField.isEnumConstant())
+					return null;
+
 				VariableDeclarationFragment fieldDecl= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(constantField, ast);
 				return fieldDecl.getInitializer().resolveConstantExpressionValue();
 			} catch (JavaModelException e) {
