@@ -127,9 +127,10 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		 * Adds actions to the given toolbar.
 		 * 
 		 * @param manager the toolbar manager to add actions to
+		 * @param infoControl the information control
 		 */
-		public void fillToolBar(ToolBarManager manager) {
-			ConfigureAnnotationsAction configureAnnotationsAction= new ConfigureAnnotationsAction(annotation);
+		public void fillToolBar(ToolBarManager manager, IInformationControl infoControl) {
+			ConfigureAnnotationsAction configureAnnotationsAction= new ConfigureAnnotationsAction(annotation, infoControl);
 			manager.add(configureAnnotationsAction);
 		}
 	}
@@ -241,7 +242,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				return;
 
 			toolBarManager.removeAll();
-			fInput.fillToolBar(toolBarManager);
+			fInput.fillToolBar(toolBarManager, this);
 			toolBarManager.update(true);
 		}
 
@@ -561,10 +562,12 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 	private static final class ConfigureAnnotationsAction extends Action {
 
 		private final Annotation fAnnotation;
+		private final IInformationControl fInfoControl;
 
-		public ConfigureAnnotationsAction(Annotation annotation) {
+		public ConfigureAnnotationsAction(Annotation annotation, IInformationControl infoControl) {
 			super();
 			fAnnotation= annotation;
+			fInfoControl= infoControl;
 			setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_ANNOTATIONS);
 			setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_ANNOTATIONS);
 			setToolTipText(JavaHoverMessages.AbstractAnnotationHover_action_configureAnnotationPreferences);
@@ -581,6 +584,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			if (preference != null)
 				data= preference.getPreferenceLabel();
 			
+			fInfoControl.dispose(); //FIXME: should have protocol to hide, rather than dispose
 			PreferencesUtil.createPreferenceDialogOn(shell, "org.eclipse.ui.editors.preferencePages.Annotations", null, data).open(); //$NON-NLS-1$
 		}
 	}
