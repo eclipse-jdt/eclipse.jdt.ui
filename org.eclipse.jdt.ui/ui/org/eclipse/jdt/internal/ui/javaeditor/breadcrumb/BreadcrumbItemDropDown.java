@@ -145,7 +145,7 @@ class BreadcrumbItemDropDown {
 	 * Opens the drop down menu.
 	 */
 	public void showMenu() {
-		if (!fEnabled)
+		if (!fEnabled || fMenuIsShown)
 			return;
 		
 		fMenuIsShown= true;
@@ -337,7 +337,7 @@ class BreadcrumbItemDropDown {
 
 		//process any pending focus events: 
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=217800
-		while (Display.getDefault().readAndDispatch()) {
+		while (tree.getDisplay().readAndDispatch()) {
 		}
 		
 		int index= fParent.getViewer().getIndexOfItem(fParent);
