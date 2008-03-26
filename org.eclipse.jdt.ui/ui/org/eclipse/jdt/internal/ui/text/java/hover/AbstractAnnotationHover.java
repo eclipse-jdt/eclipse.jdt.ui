@@ -258,12 +258,12 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				children[i].dispose();
 			}
 			createAnnotationInformation(parent, getAnnotationInfo().annotation);
+			setColorAndFont(parent, parent.getForeground(), parent.getBackground(), JFaceResources.getDialogFont());
 
 			ICompletionProposal[] proposals= getAnnotationInfo().getCompletionProposals();
 			if (proposals.length > 0)
 				createCompletionProposalsControl(parent, proposals);
 
-			setColorAndFont(parent, parent.getForeground(), parent.getBackground(), JFaceResources.getDialogFont());
 			parent.layout(true);
 		}
 
@@ -331,6 +331,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			}
 			quickFixLabel.setText(text);
 
+			setColorAndFont(composite, parent.getForeground(), parent.getBackground(), JFaceResources.getDialogFont());
 			createCompletionProposalsList(composite, proposals);
 		}
 
@@ -358,8 +359,11 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			}
 
 			scrolledComposite.setContent(composite);
+			setColorAndFont(scrolledComposite, parent.getForeground(), parent.getBackground(), JFaceResources.getDialogFont());
+			
 			Point contentSize= composite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 			composite.setSize(contentSize);
+			
 			Point constraints= getSizeConstraints();
 			if (constraints != null && contentSize.x < constraints.x) {
 				ScrollBar horizontalBar= scrolledComposite.getHorizontalBar();
