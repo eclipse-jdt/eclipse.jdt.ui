@@ -731,6 +731,8 @@ public class PasteAction extends SelectionDispatchAction{
 							fileComment= CodeGeneration.getFileComment(cu, delim);
 						}
 						String cuContent= CodeGeneration.getCompilationUnitContent(cu, fileComment, null, "", delim); //$NON-NLS-1$
+						if (cuContent == null)
+							cuContent= ""; //$NON-NLS-1$
 						IDocument document= new Document(cuContent);
 
 						ASTParser parser= ASTParser.newParser(AST.JLS3);
@@ -766,7 +768,8 @@ public class PasteAction extends SelectionDispatchAction{
 						typeDecl.getName().setIdentifier(typeName);
 						if (StubUtility.doAddComments(cu.getJavaProject())) {
 							String typeComment= CodeGeneration.getTypeComment(cu, typeName, delim);
-							typeDecl.setJavadoc((Javadoc) rewrite.createStringPlaceholder(typeComment, ASTNode.JAVADOC));
+							if (typeComment != null)
+								typeDecl.setJavadoc((Javadoc) rewrite.createStringPlaceholder(typeComment, ASTNode.JAVADOC));
 						}
 						typeDecl.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 						
@@ -793,7 +796,8 @@ public class PasteAction extends SelectionDispatchAction{
 							String qualifiedtypeName= fDestinationType != null ? fDestinationType.getFullyQualifiedName('.') : cu.getParent().getElementName() + '.' + typeName;
 							if (StubUtility.doAddComments(cu.getJavaProject())) {
 								String methodComment= CodeGeneration.getMethodComment(cu, qualifiedtypeName, methodDecl, null, delim);
-								methodDecl.setJavadoc((Javadoc) rewrite.createStringPlaceholder(methodComment, ASTNode.JAVADOC));
+								if (methodComment != null)
+									methodDecl.setJavadoc((Javadoc) rewrite.createStringPlaceholder(methodComment, ASTNode.JAVADOC));
 							}
 							methodDecl.modifiers().addAll(ast.newModifiers(Modifier.PUBLIC | Modifier.STATIC));
 							String methodName= "main"; //$NON-NLS-1$
