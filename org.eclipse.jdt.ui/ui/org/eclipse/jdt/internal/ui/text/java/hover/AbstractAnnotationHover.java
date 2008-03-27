@@ -22,6 +22,7 @@ import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyEvent;
@@ -46,7 +47,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
@@ -300,7 +300,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				}
 			});
 			
-			Text text= new Text(composite, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY);
+			StyledText text= new StyledText(composite, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY);
 			GridData data= new GridData(SWT.FILL, SWT.FILL, true, true);
 			text.setLayoutData(data);
 			text.setText(annotation.getText());
