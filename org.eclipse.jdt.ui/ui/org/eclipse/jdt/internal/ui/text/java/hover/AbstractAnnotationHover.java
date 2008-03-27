@@ -296,10 +296,11 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			canvas.setLayoutData(gridData);
 			canvas.addPaintListener(new PaintListener() {
 				public void paintControl(PaintEvent e) {
+					e.gc.setFont(null);
 					fMarkerAnnotationAccess.paint(annotation, e.gc, canvas, new Rectangle(0, 0, 16, 16));
 				}
 			});
-			
+
 			StyledText text= new StyledText(composite, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY);
 			GridData data= new GridData(SWT.FILL, SWT.FILL, true, true);
 			text.setLayoutData(data);
