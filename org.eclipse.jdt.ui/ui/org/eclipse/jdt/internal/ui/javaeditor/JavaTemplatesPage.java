@@ -75,6 +75,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	private static final ContextTypeRegistry TEMPLATE_CONTEXT_REGISTRY= JavaPlugin.getDefault().getTemplateContextRegistry();
 	
 	private TemplateVariableProcessor fTemplateProcessor;
+	private JavaEditor fJavaEditor;
 
 	/**
 	 * Create a new AbstractTemplatesPage for the JavaEditor
@@ -83,18 +84,19 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	 */
 	public JavaTemplatesPage(JavaEditor javaEditor) {
 		super(javaEditor, javaEditor.getViewer());
+		fJavaEditor= javaEditor;
 		fTemplateProcessor= new TemplateVariableProcessor();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.texteditor.templates.AbstractTemplatesPage#insertTemplate(org.eclipse.jface.text.templates.Template, org.eclipse.swt.graphics.Point)
+	/*
+	 * @see org.eclipse.ui.texteditor.templates.AbstractTemplatesPage#insertTemplate(org.eclipse.jface.text.templates.Template, org.eclipse.jface.text.IDocument)
 	 */
-	protected void insertTemplate(Template template) {
-		if (!getJavaEditor().validateEditorInputState())
+	protected void insertTemplate(Template template, IDocument document) {
+		if (!fJavaEditor.validateEditorInputState())
 			return;
-		ISourceViewer contextViewer= getJavaEditor().getViewer();
+		
+		ISourceViewer contextViewer= fJavaEditor.getViewer();
 		ITextSelection textSelection= (ITextSelection) contextViewer.getSelectionProvider().getSelection();
-		IDocument document= getJavaEditor().getDocumentProvider().getDocument(getJavaEditor().getEditorInput());
 		if (!isValidTemplate(document, template, textSelection.getOffset(), textSelection.getLength()))
 			return;
 		beginCompoundChange(contextViewer);
@@ -126,7 +128,7 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 		Position position= new Position(textSelection.getOffset() + 1, 0);
 		Region region= new Region(textSelection.getOffset() + 1, 0);
 		contextViewer.getSelectionProvider().setSelection(new TextSelection(textSelection.getOffset(), 1));
-		ICompilationUnit compilationUnit= (ICompilationUnit) EditorUtility.getEditorInputJavaElement(getJavaEditor(), true);
+		ICompilationUnit compilationUnit= (ICompilationUnit) EditorUtility.getEditorInputJavaElement(fJavaEditor, true);
 	
 		TemplateContextType type= getContextTypeRegistry().getContextType(template.getContextTypeId());
 		DocumentTemplateContext context= ((CompilationUnitContextType) type).createContext(document, position, compilationUnit);
@@ -140,8 +142,8 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 			}
 		}
 		TemplateProposal proposal= new TemplateProposal(template, context, region, null);
-		getJavaEditor().getSite().getPage().activate(getJavaEditor());
-		proposal.apply(getJavaEditor().getViewer(), ' ', 0, region.getOffset());
+		fJavaEditor.getSite().getPage().activate(fJavaEditor);
+		proposal.apply(fJavaEditor.getViewer(), ' ', 0, region.getOffset());
 		endCompoundChange(contextViewer);
 	}
 
@@ -166,8 +168,8 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 		return TEMPLATE_STORE;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.texteditor.templates.TextEditorTemplatesPage#isValidTemplate(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.templates.Template, int, int)
+	/*
+	 * @see org.eclipse.ui.texteditor.templates.TextEditorTemplatesPage#isValidTemplate(org.eclipse.jface.text.templates.Template, int, int)
 	 */
 	protected boolean isValidTemplate(IDocument document, Template template, int offset, int length) {
 		String[] contextIds= getContextTypeIds(document, offset);
@@ -257,15 +259,6 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 	protected String getPreferencePageId() {
 		return PREFERENCE_PAGE_ID;
 	}
-
-	/**
-	 * Helper function to return the JavaEditor
-	 * 
-	 * @return the editor
-	 */
-	private JavaEditor getJavaEditor() {
-		return (JavaEditor)getEditor() ;
-	}
 	
 	/**
 	 * Undomanager - end compound change
@@ -329,10 +322,10 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 		DocumentTemplateContext context;
 		if (template.getContextTypeId().equals(JavaDocContextType.ID)) {
 			context= new JavaDocContext(getContextTypeRegistry().getContextType(template.getContextTypeId()), document, new Position(offset, length), (ICompilationUnit) EditorUtility
-					.getEditorInputJavaElement(getJavaEditor(), true));
+					.getEditorInputJavaElement(fJavaEditor, true));
 		} else {
 			context= new JavaContext(getContextTypeRegistry().getContextType(template.getContextTypeId()), document, new Position(offset, length), (ICompilationUnit) EditorUtility.getEditorInputJavaElement(
-					getJavaEditor(), true));
+					fJavaEditor, true));
 		}
 		return context;
 	}
