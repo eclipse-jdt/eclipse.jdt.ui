@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -419,13 +419,13 @@ public class SemanticHighlightings {
 		private boolean isAutoUnBoxing(Expression node) {
 			if (isAutoUnBoxingExpression(node))
 				return true;
-			// special cases: the autoboxing conversions happens at a 
+			// special cases: the autoboxing conversions happens at a
 			// location that is not mapped directly to a simple name
 			// or a literal, but can still be mapped somehow
 			// A) expressions
 			StructuralPropertyDescriptor desc= node.getLocationInParent();
-			if (desc == ArrayAccess.ARRAY_PROPERTY 
-					|| desc == InfixExpression.LEFT_OPERAND_PROPERTY 
+			if (desc == ArrayAccess.ARRAY_PROPERTY
+					|| desc == InfixExpression.LEFT_OPERAND_PROPERTY
 					|| desc == InfixExpression.RIGHT_OPERAND_PROPERTY
 					|| desc == ConditionalExpression.THEN_EXPRESSION_PROPERTY
 					|| desc == PrefixExpression.OPERAND_PROPERTY
@@ -1287,7 +1287,7 @@ public class SemanticHighlightings {
 			SimpleName name= token.getNode();
 			ASTNode node= name.getParent();
 			int nodeType= node.getNodeType();
-			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.THIS_EXPRESSION && nodeType != ASTNode.QUALIFIED_TYPE  && nodeType != ASTNode.QUALIFIED_NAME && nodeType != ASTNode.TYPE_DECLARATION)
+			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.THIS_EXPRESSION && nodeType != ASTNode.QUALIFIED_TYPE  && nodeType != ASTNode.QUALIFIED_NAME && nodeType != ASTNode.TYPE_DECLARATION && nodeType != ASTNode.METHOD_INVOCATION)
 				return false;
 			while (nodeType == ASTNode.QUALIFIED_NAME) {
 				node= node.getParent();
@@ -1503,7 +1503,7 @@ public class SemanticHighlightings {
 			SimpleName name= token.getNode();
 			ASTNode node= name.getParent();
 			int nodeType= node.getNodeType();
-			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE  && nodeType != ASTNode.QUALIFIED_NAME && nodeType != ASTNode.ANNOTATION_TYPE_DECLARATION 
+			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE  && nodeType != ASTNode.QUALIFIED_NAME && nodeType != ASTNode.ANNOTATION_TYPE_DECLARATION
 					&& nodeType != ASTNode.MARKER_ANNOTATION && nodeType != ASTNode.NORMAL_ANNOTATION && nodeType != ASTNode.SINGLE_MEMBER_ANNOTATION)
 				return false;
 			while (nodeType == ASTNode.QUALIFIED_NAME) {
