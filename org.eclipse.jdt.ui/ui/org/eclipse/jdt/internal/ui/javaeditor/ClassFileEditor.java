@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -131,7 +131,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		/**
 		 * Returns the package fragment root of this file.
 		 * 
-		 * @param file the class file 
+		 * @param file the class file
 		 * @return the package fragment root of the given class file
 		 */
 		private IPackageFragmentRoot getPackageFragmentRoot(IClassFile file) {
@@ -146,7 +146,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		/**
 		 * Creates the control of the source attachment form.
 		 * 
-		 * @param parent the parent composite 
+		 * @param parent the parent composite
 		 * @return the creates source attachment form
 		 */
 		public Control createControl(Composite parent) {
@@ -234,17 +234,17 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerPath.segment(0));
 				IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
 				if (initializer == null || container == null) {
-					createLabel(composite, Messages.format(JavaEditorMessages.ClassFileEditor_SourceAttachmentForm_cannotconfigure, containerPath.toString())); 
+					createLabel(composite, Messages.format(JavaEditorMessages.ClassFileEditor_SourceAttachmentForm_cannotconfigure, containerPath.toString()));
 					return;
 				}
 				String containerName= container.getDescription();
 				IStatus status= initializer.getSourceAttachmentStatus(containerPath, jproject);
 				if (status.getCode() == ClasspathContainerInitializer.ATTRIBUTE_NOT_SUPPORTED) {
-					createLabel(composite, Messages.format(JavaEditorMessages.ClassFileEditor_SourceAttachmentForm_notsupported, containerName));  
+					createLabel(composite, Messages.format(JavaEditorMessages.ClassFileEditor_SourceAttachmentForm_notsupported, containerName));
 					return;
 				}
 				if (status.getCode() == ClasspathContainerInitializer.ATTRIBUTE_READ_ONLY) {
-					createLabel(composite, Messages.format(JavaEditorMessages.ClassFileEditor_SourceAttachmentForm_readonly, containerName));  
+					createLabel(composite, Messages.format(JavaEditorMessages.ClassFileEditor_SourceAttachmentForm_readonly, containerName));
 					return;
 				}
 				entry= JavaModelUtil.findEntryInContainer(container, root.getPath());
@@ -634,11 +634,14 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		uninstallOccurrencesFinder();
 
 		input= transformEditorInput(input);
-		if (!(input instanceof IClassFileEditorInput))
+		if (!(input instanceof IClassFileEditorInput)) {
+			String inputClassName= input != null ? input.getClass().getName() : "null"; //$NON-NLS-1$
+			String message= Messages.format(JavaEditorMessages.ClassFileEditor_error_invalid_input_message, inputClassName);
 			throw new CoreException(JavaUIStatus.createError(
 					IJavaModelStatusConstants.INVALID_RESOURCE_TYPE,
-					JavaEditorMessages.ClassFileEditor_error_invalid_input_message,
-					null)); 
+					message,
+					null));
+		}
 
 		JavaModelException e= probeInputForSource(input);
 		if (e != null) {
@@ -649,7 +652,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				throw new CoreException(JavaUIStatus.createError(
 						IJavaModelStatusConstants.INVALID_RESOURCE,
 						JavaEditorMessages.ClassFileEditor_error_classfile_not_on_classpath,
-						null)); 
+						null));
 			} else {
 				throw e;
 			}
@@ -739,8 +742,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	/**
 	 * Checks if the class file input has no source attached. If so, a source attachment form is shown.
 	 * 
-	 * @param input the editor input 
-	 * @throws JavaModelException if an exception occurs while accessing its corresponding resource 
+	 * @param input the editor input
+	 * @throws JavaModelException if an exception occurs while accessing its corresponding resource
 	 */
 	private void verifyInput(IEditorInput input) throws JavaModelException {
 
