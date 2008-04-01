@@ -89,6 +89,7 @@ import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.handlers.IHandlerActivation;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.EditorActionBarContributor;
+import org.eclipse.ui.part.PageSwitcher;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
@@ -1529,6 +1530,7 @@ action enablement
 		IActionBars actionBars= getViewSite().getActionBars();
 		fCopyAction = new JUnitCopyAction(fFailureTrace, fClipboard);
 		actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), fCopyAction);
+		initPageSwitcher();
 		
 		fOriginalViewImage= getTitleImage();
 		fProgressImages= new ProgressImages();
@@ -1547,6 +1549,30 @@ action enablement
 		JUnitPlugin.getModel().addTestRunSessionListener(fTestRunSessionListener);
 	}
 
+	private void initPageSwitcher() {
+		new PageSwitcher(this) {
+			public Object[] getPages() {
+				return fViewHistory.getHistoryEntries().toArray();
+			}
+		
+			public String getName(Object page) {
+				return fViewHistory.getText(page);
+			}
+		
+			public ImageDescriptor getImageDescriptor(Object page) {
+				return fViewHistory.getImageDescriptor(page);
+			}
+		
+			public void activatePage(Object page) {
+				fViewHistory.setActiveEntry(page);
+			}
+			
+			public int getCurrentPageIndex() {
+				return fViewHistory.getHistoryEntries().indexOf(fViewHistory.getCurrentEntry());
+			}
+		};
+	}
+	
 	private void addResizeListener(Composite parent) {
 		parent.addControlListener(new ControlListener() {
 			public void controlMoved(ControlEvent e) {
