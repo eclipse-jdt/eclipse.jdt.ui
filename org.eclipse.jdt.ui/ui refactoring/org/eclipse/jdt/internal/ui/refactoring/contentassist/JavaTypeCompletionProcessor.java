@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,9 +20,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.compiler.CharOperation;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -160,11 +163,13 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 						return; // this is the dummy class, whose $ have been converted to dots
 					char[] typeQualifier= Signature.getQualifier(fullName);
 					if (typeQualifier.length > 0) {
-						buf.append(" - "); //$NON-NLS-1$
+						buf.append(JavaElementLabels.CONCAT_STRING);
 						buf.append(typeQualifier);
 					}
 					String name= buf.toString();
 					
+					// Only fully qualify if it's a top level type:
+					boolean fullyQualify= fFullyQualify && CharOperation.equals(proposal.getDeclarationSignature(), typeQualifier);
 					addAdjustedTypeCompletion(
 							name,
 							new String(proposal.getCompletion()),
@@ -172,7 +177,7 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 							proposal.getReplaceEnd(),
 							proposal.getRelevance(),
 							JavaElementImageProvider.getTypeImageDescriptor(false, false, proposal.getFlags(), false),
-							fFullyQualify ? new String(fullName) : null);
+							fullyQualify ? new String(fullName) : null);
 					return;
 					
 				case CompletionProposal.KEYWORD:

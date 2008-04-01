@@ -33,7 +33,6 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
 import org.eclipse.jdt.core.CompletionRequestor;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -91,8 +90,6 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 				return fStubTypeContext;
 			}
 		};
-		if (cuHandle != null)
-			fCompletionRequestor.setJavaProject(cuHandle.getJavaProject());
 	}
 	
 	public void setCompletionContextRequestor(CompletionContextRequestor completionContextRequestor) {
@@ -183,6 +180,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 			cu.getBuffer().setContents(cuString);
 			int cuPrefixLength= fCompletionContextRequestor.getBeforeString().length();
 			fCompletionRequestor.setOffsetReduction(cuPrefixLength);
+			
 			cu.codeComplete(cuPrefixLength + documentOffset, fCompletionRequestor);
 			
 			JavaCompletionProposal[] proposals= fCompletionRequestor.getResults();
@@ -212,19 +210,10 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 		public static final char[] TRIGGER_CHARACTERS= new char[] { '.' };
 		
 		private int fOffsetReduction;
-		private IJavaProject fJavaProject;
 		
 		private List fProposals;
 		private String fErrorMessage2;
 
-		public IJavaProject getJavaProject() {
-			return fJavaProject;
-		}
-		
-		private void setJavaProject(IJavaProject javaProject) {
-			fJavaProject= javaProject;
-		}
-		
 		private void setOffsetReduction(int offsetReduction) {
 			fOffsetReduction= offsetReduction;
 			fProposals= new ArrayList();
@@ -252,10 +241,18 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 		
 		protected final void addAdjustedTypeCompletion(String name, String completion,
 				int start, int end, int relevance, ImageDescriptor descriptor, String fullyQualifiedName) {
+			String replacementString= fullyQualifiedName == null || completion.length() == 0 ? completion : fullyQualifiedName;
+			int replacementOffset= start - fOffsetReduction;
+			int replacementLength= end - start;
 			JavaTypeCompletionProposal javaCompletionProposal= new JavaTypeCompletionProposal(
-					fullyQualifiedName == null || completion.length() == 0 ? completion : fullyQualifiedName,
-					null, start - fOffsetReduction,
-					end - start, getImage(descriptor), new StyledString(name), relevance, completion);
+					replacementString,
+					null,
+					replacementOffset,
+					replacementLength,
+					getImage(descriptor),
+					new StyledString(name),
+					relevance,
+					fullyQualifiedName);
 			javaCompletionProposal.setTriggerCharacters(TRIGGER_CHARACTERS);
 			fProposals.add(javaCompletionProposal);
 		}
