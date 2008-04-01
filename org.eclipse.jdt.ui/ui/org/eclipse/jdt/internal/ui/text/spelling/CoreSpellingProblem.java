@@ -25,7 +25,7 @@ public class CoreSpellingProblem extends CategorizedProblem {
 
 	// spelling 'marker type' name. Only virtual as spelling problems are never persisted in markers.
 	// marker type is used in the quickFixProcessor extension point
-	public static final String MARKER_TYPE= "org.eclipse.jdt.internal.spelling"; //$NON-NLS-1$
+	public static final String MARKER_TYPE= "org.eclipse.jdt.ui.internal.spelling"; //$NON-NLS-1$
 	
 	/** The end offset of the problem */
 	private int fSourceEnd= 0;

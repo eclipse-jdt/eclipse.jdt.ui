@@ -142,7 +142,13 @@
             class="org.eclipse.jdt.internal.ui.wizards.buildpaths.NativeLibAttributeConfiguration">
       </classpathAttributeConfiguration>      
    </extension>
-   
+
+	<!-- Not used to create markers but to allow registering a    -->
+	<!-- quick fix processor for the reported spelling problems . -->
+   	<extension point="org.eclipse.core.resources.markers" id="internal.spelling" name="%spellingMarker">
+		<super type="org.eclipse.core.resources.textmarker"/>
+	</extension>
+
    <extension
          point="org.eclipse.jdt.ui.quickFixProcessors">
       <quickFixProcessor
@@ -155,7 +161,7 @@
             class="org.eclipse.jdt.internal.ui.text.spelling.WordQuickFixProcessor"
             id= "org.eclipse.jdt.ui.text.correction.spelling.QuickFixProcessor">
             <handledMarkerTypes>
-                <markerType id="org.eclipse.jdt.internal.spelling"/>
+                <markerType id="org.eclipse.jdt.ui.internal.spelling"/>
 	        </handledMarkerTypes>
       </quickFixProcessor>
    </extension>
