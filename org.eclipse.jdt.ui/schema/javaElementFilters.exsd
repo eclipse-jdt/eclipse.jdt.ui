@@ -81,7 +81,7 @@
                <documentation>
                   the id of the target where this filter is contributed.  If this attribute is missing, then the filter will
 be contributed to all views which use the &lt;code&gt;org.eclipse.jdt.ui.actions.customFiltersActionGroup&lt;/code&gt;. This
-replaces the deprecated attributed &quot;viewId&quot;.
+replaces the deprecated attribute &quot;viewId&quot;.
                </documentation>
             </annotation>
          </attribute>
@@ -160,7 +160,7 @@ then the pattern attribute must not provided.
          <meta.section type="copyright"/>
       </appInfo>
       <documentation>
-         Copyright (c) 2001, 2004 IBM Corporation and others.&lt;br&gt;
+         Copyright (c) 2001, 2008 IBM Corporation and others.&lt;br&gt;
 All rights reserved. This program and the accompanying materials are made available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at &lt;a href=&quot;http://www.eclipse.org/legal/epl-v10.html&quot;&gt;http://www.eclipse.org/legal/epl-v10.html&lt;/a&gt;
       </documentation>
    </annotation>
