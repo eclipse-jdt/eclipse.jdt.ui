@@ -11,13 +11,11 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 
@@ -35,6 +33,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class ImagesOnFileSystemRegistry {
 	
+	private static final String IMAGE_DIR= "jdt-images"; //$NON-NLS-1$
+	
 	private HashMap fURLMap;
 	private final File fTempDir;
 	private final JavaElementImageProvider fImageProvider;
@@ -49,17 +49,35 @@ public class ImagesOnFileSystemRegistry {
 	
 	private File getTempDir() {
 		try {
-	        File tempFile = File.createTempFile("jdt-images", "", null);  //$NON-NLS-1$//$NON-NLS-2$
-	        if (!tempFile.delete())
-	            return null;
-	        if (!tempFile.mkdir())
-	        	return null;
-	        return tempFile;
-		} catch (IOException e) {
+			File imageDir= JavaPlugin.getDefault().getStateLocation().append(IMAGE_DIR).toFile();
+			if (imageDir.exists()) {
+				// has not been deleted on previous shutdown
+				delete(imageDir);
+			}
+			if (!imageDir.exists()) {
+				imageDir.mkdir();
+			}
+			if (!imageDir.isDirectory()) {
+				JavaPlugin.logErrorMessage("Failed to create image directory " + imageDir.toString()); //$NON-NLS-1$
+				return null;
+			}
+			return imageDir;
+		} catch (IllegalStateException e) {
+			// no state location
+			return null;
 		}
-		return null;
 	}
 	
+	private void delete(File file) {
+		if (file.isDirectory()) {
+			File[] listFiles= file.listFiles();
+			for (int i= 0; i < listFiles.length; i++) {
+				delete(listFiles[i]);
+			}
+		}
+		file.delete();
+	}
+
 	public URL getImageURL(IJavaElement element) {
 		ImageDescriptor descriptor= fImageProvider.getJavaImageDescriptor(element, JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.SMALL_ICONS);
 		if (descriptor == null)
@@ -74,16 +92,19 @@ public class ImagesOnFileSystemRegistry {
 		URL url= (URL) fURLMap.get(descriptor);
 		if (url != null)
 			return url;
-		
-		File file= new File(fTempDir, String.valueOf(fImageCount++) + ".png"); //$NON-NLS-1$
-		
-		Image image= JavaPlugin.getImageDescriptorRegistry().get(descriptor);
+
+		File imageFile= getNewFile();
+		ImageData imageData= descriptor.getImageData();
+		if (imageData == null) {
+			return null;
+		}
+
 		ImageLoader loader= new ImageLoader();
-		loader.data= new ImageData[] { image.getImageData() };
-		loader.save(file.getAbsolutePath(), SWT.IMAGE_PNG);
+		loader.data= new ImageData[] { imageData };
+		loader.save(imageFile.getAbsolutePath(), SWT.IMAGE_PNG);
 		
 		try {
-			url= file.toURI().toURL();
+			url= imageFile.toURI().toURL();
 			fURLMap.put(descriptor, url);
 			return url;
 		} catch (MalformedURLException e) {
@@ -92,13 +113,17 @@ public class ImagesOnFileSystemRegistry {
 		return null;
 	}
 	
+	private File getNewFile() {
+		File file;
+		do {
+			file= new File(fTempDir, String.valueOf(fImageCount++) + ".png"); //$NON-NLS-1$
+		} while (file.exists());
+		return file;
+	}
+	
 	public void dispose() {
 		if (fTempDir != null) {
-			File[] listFiles= fTempDir.listFiles();
-			for (int i= 0; i < listFiles.length; i++) {
-				listFiles[i].delete();
-			}
-			fTempDir.delete();
+			delete(fTempDir);
 		}
 		fURLMap= null;
 	}

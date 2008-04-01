@@ -136,7 +136,6 @@ import org.eclipse.jdt.internal.ui.actions.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
-import org.eclipse.jdt.internal.ui.viewsupport.ImagesOnFileSystemRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 import org.osgi.framework.Bundle;
@@ -1026,42 +1025,23 @@ public class JavadocView extends AbstractInfoView {
 	 * @param allowImage true if the java element image should be shown
 	 * @return a string containing the member's label
 	 */
-	private static String getInfoText(IJavaElement member, String constantValue, boolean allowImage) {
+	private String getInfoText(IJavaElement member, String constantValue, boolean allowImage) {
 		StringBuffer label= new StringBuffer(JavaElementLabels.getElementLabel(member, LABEL_FLAGS));
 		if (member.getElementType() == IJavaElement.FIELD && constantValue != null) {
 			label.append(constantValue);
 		}
-
-		StringBuffer buf= new StringBuffer();
-		String divStyleAddition= ""; //$NON-NLS-1$
-
+		
+		String imageName= null;
 		if (allowImage) {
-			ImagesOnFileSystemRegistry store= JavaPlugin.getDefault().getImagesOnFSRegistry();
-			URL imageUrl= store.getImageURL(member);
-
+			URL imageUrl= JavaPlugin.getDefault().getImagesOnFSRegistry().getImageURL(member);
 			if (imageUrl != null) {
-				// the image, with absolute placement
-				buf.append("<img style='width: 16px; height: 16px; position: absolute; top: 5px; left: 8px;' src='").append(imageUrl.toExternalForm()).append("'/>"); //$NON-NLS-1$ //$NON-NLS-2$
-				// add margin top the rest
-				divStyleAddition= "margin-left: 22px; margin-top: 0px;"; //$NON-NLS-1$
+				imageName= imageUrl.toExternalForm();
 			}
 		}
-
-		buf.append("<div style='word-wrap:break-word;"); // qualified names can become quite long -> allow wrapping inside word (CSS3) //$NON-NLS-1$
-		buf.append(divStyleAddition).append("'>"); //$NON-NLS-1$
-
-		for (int i= 0; i < label.length(); i++) {
-			char ch= label.charAt(i);
-			if (ch == '<') {
-				buf.append("&lt;"); //$NON-NLS-1$
-			} else if (ch == '>') {
-				buf.append("&gt;"); //$NON-NLS-1$
-			} else {
-				buf.append(ch);
-			}
-		}
-		buf.append("</div>"); //$NON-NLS-1$
-		return buf.toString();
+		
+		StringBuffer buf= new StringBuffer();
+		JavadocHover.addImageAndLabel(buf, imageName, 16, 16, 8, 5, label.toString(), 22, 0);
+		return buf.toString();		
 	}
 
 	/*
