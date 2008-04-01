@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,8 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
-
-import java.util.Map;
 
 import junit.framework.Test;
 
@@ -75,16 +73,6 @@ public class RefactoringTestSetup extends AbstractRefactoringTestSetup {
 		fgJRELibrary= JavaProjectHelper.addRTJar(fgJavaTestProject);
 		fgRoot= JavaProjectHelper.addSourceContainer(fgJavaTestProject, CONTAINER);
 		fgPackageP= fgRoot.createPackageFragment("p", true, null);
-		
-		//set compiler options on project
-		Map options= fgJavaTestProject.getOptions(false);
-		JavaProjectHelper.set15CompilerOptions(options);
-		fgJavaTestProject.setOptions(options);
-		
-		// Global options: configured globally in super.setUp():
-		//JavaCore.setOptions(TestOptions.getFormatterOptions());
-		//TestOptions.initializeCodeGenerationOptions();
-		//JavaPlugin.getDefault().getCodeTemplateStore().load();
 	}
 	
 	protected void tearDown() throws Exception {
