@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,6 +58,8 @@ import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
+import org.osgi.framework.Bundle;
 
 /**
  * Helper methods to set up a IJavaProject.
@@ -727,25 +729,26 @@ public class JavaProjectHelper {
 	}
 	
 	/**
-	 * Imports resources from <code>bundleSourcePath</code> to <code>importTarget</code>.
+	 * Imports resources from <code>bundleSourcePath</code> inside <code>bundle</code> into <code>importTarget</code>.
 	 * 
 	 * @param importTarget the parent container
+	 * @param bundle the bundle
 	 * @param bundleSourcePath the path to a folder containing resources
 	 * 
 	 * @throws CoreException import failed
 	 * @throws IOException import failed
 	 */
-	public static void importResources(IContainer importTarget, String bundleSourcePath) throws CoreException, IOException {
-		Enumeration entryPaths= JavaTestPlugin.getDefault().getBundle().getEntryPaths(bundleSourcePath);
+	public static void importResources(IContainer importTarget, Bundle bundle, String bundleSourcePath) throws CoreException, IOException {
+		Enumeration entryPaths= bundle.getEntryPaths(bundleSourcePath);
 		while (entryPaths.hasMoreElements()) {
 			String path= (String) entryPaths.nextElement();
 			IPath name= new Path(path.substring(bundleSourcePath.length()));
 			if (path.endsWith("/")) {
 				IFolder folder= importTarget.getFolder(name);
 				folder.create(false, true, null);
-				importResources(folder, path);
+				importResources(folder, bundle, path);
 			} else {
-				URL url= JavaTestPlugin.getDefault().getBundle().getEntry(path);
+				URL url= bundle.getEntry(path);
 				IFile file= importTarget.getFile(name);
 				file.create(url.openStream(), true, null);
 			}

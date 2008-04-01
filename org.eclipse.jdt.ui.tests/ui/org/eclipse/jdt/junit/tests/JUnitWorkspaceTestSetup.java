@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.junit.buildpath.JUnitContainerInitializer;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 public class JUnitWorkspaceTestSetup extends TestSetup {
 
@@ -69,7 +70,7 @@ public class JUnitWorkspaceTestSetup extends TestSetup {
 			JavaProjectHelper.addToClasspath(fgProject, cpe);
 		}
 		fgRoot= JavaProjectHelper.addSourceContainer(fgProject, SRC_NAME);
-		JavaProjectHelper.importResources((IFolder) fgRoot.getResource(), getProjectPath() + SRC_NAME);
+		JavaProjectHelper.importResources((IFolder) fgRoot.getResource(), JavaTestPlugin.getDefault().getBundle(), getProjectPath() + SRC_NAME);
 	}
 	
 	protected void tearDown() throws Exception {
