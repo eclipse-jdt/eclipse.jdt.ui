@@ -1027,10 +1027,12 @@
          name="org.eclipse.jdt.ui.occurrences.write"
          super="org.eclipse.jdt.ui.occurrences">
       </type>
-      
-      <type
-         name="org.eclipse.jdt.ui.overrideIndicator">
-      </type>
+      <type name="org.eclipse.jdt.ui.overrideIndicator"/>
+      <type name="org.eclipse.jdt.ui.link.master"/>
+      <type name="org.eclipse.jdt.ui.link.slave"/>
+      <type name="org.eclipse.jdt.ui.link.target"/>
+      <type name="org.eclipse.jdt.ui.link.exit"/>
+
    </extension>
    <extension
          point="org.eclipse.ui.editors.markerAnnotationSpecification">
