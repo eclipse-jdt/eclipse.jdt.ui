@@ -29,16 +29,16 @@ import org.eclipse.jdt.core.search.TypeReferenceMatch;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 
-public class BinaryReferencesTest extends TestCase {
+public class BinaryReferencesTests extends TestCase {
 
 	private static BinaryReferencesTestSetup fgTestSetup;
 	
-	public BinaryReferencesTest(String name) {
+	public BinaryReferencesTests(String name) {
 		super(name);
 	}
 	
 	public static Test suite() {
-		fgTestSetup= new BinaryReferencesTestSetup(new TestSuite(BinaryReferencesTest.class));
+		fgTestSetup= new BinaryReferencesTestSetup(new TestSuite(BinaryReferencesTests.class));
 		return fgTestSetup;
 	}
 	
