@@ -331,7 +331,7 @@ public class JavadocView extends AbstractInfoView {
 	/** The information presenter. */
 	private DefaultInformationControl.IInformationPresenter fPresenter;
 	/** The text presentation. */
-	private TextPresentation fPresentation= new TextPresentation();
+	private final TextPresentation fPresentation= new TextPresentation();
 	/** The select all action */
 	private SelectAllAction fSelectAllAction;
 	/** The style sheet (css) */
@@ -401,9 +401,9 @@ public class JavadocView extends AbstractInfoView {
 	private class SelectAllAction extends Action {
 
 		/** The control. */
-		private Control fControl;
+		private final Control fControl;
 		/** The selection provider. */
-		private SelectionProvider fSelectionProvider;
+		private final SelectionProvider fSelectionProvider;
 
 		/**
 		 * Creates the action.
@@ -450,9 +450,9 @@ public class JavadocView extends AbstractInfoView {
 	private static class SelectionProvider implements ISelectionProvider {
 
 		/** The selection changed listeners. */
-		private ListenerList fListeners= new ListenerList(ListenerList.IDENTITY);
+		private final ListenerList fListeners= new ListenerList(ListenerList.IDENTITY);
 		/** The widget. */
-		private Control fControl;
+		private final Control fControl;
 
 		/**
 		 * Creates a new selection provider.
@@ -906,11 +906,14 @@ public class JavadocView extends AbstractInfoView {
 	 * @see AbstractInfoView#setInput(Object)
 	 */
 	protected void doSetInput(Object input) {
-		String javadocHtml= (String)input;
+		String javadocHtml= (String)input; // FIXME: undocumented hard cast
 		fOriginalInput= javadocHtml;
 		
-		if (fInputSelectionProvider != null)
-			fInputSelectionProvider.setSelection(new StructuredSelection(getInput()));
+		if (fInputSelectionProvider != null) {
+			IJavaElement inputElement= getInput();
+			StructuredSelection selection= inputElement == null ? StructuredSelection.EMPTY : new StructuredSelection(inputElement);
+			fInputSelectionProvider.setSelection(selection);
+		}
 
 		if (fIsUsingBrowserWidget) {
 			if (javadocHtml != null && javadocHtml.length() > 0) {
