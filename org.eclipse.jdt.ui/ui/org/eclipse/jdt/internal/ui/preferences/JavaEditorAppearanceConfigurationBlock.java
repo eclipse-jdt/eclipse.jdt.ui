@@ -51,12 +51,10 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
 class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock {
 
 	private final String[][] fAppearanceColorListModel= new String[][] {
-			{PreferencesMessages.JavaEditorPreferencePage_matchingBracketsHighlightColor2, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, null}, 
-			{PreferencesMessages.JavaEditorPreferencePage_backgroundForCompletionProposals, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, null }, 
-			{PreferencesMessages.JavaEditorPreferencePage_foregroundForCompletionProposals, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, null }, 
-			{PreferencesMessages.JavaEditorPreferencePage_backgroundForMethodParameters, PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND, null }, 
-			{PreferencesMessages.JavaEditorPreferencePage_foregroundForMethodParameters, PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND, null }, 
-			{PreferencesMessages.JavaEditorPreferencePage_backgroundForCompletionReplacement, PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND, null }, 
+			{PreferencesMessages.JavaEditorPreferencePage_matchingBracketsHighlightColor2, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, null},
+			{PreferencesMessages.JavaEditorPreferencePage_backgroundForMethodParameters, PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND, null },
+			{PreferencesMessages.JavaEditorPreferencePage_foregroundForMethodParameters, PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND, null },
+			{PreferencesMessages.JavaEditorPreferencePage_backgroundForCompletionReplacement, PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND, null },
 			{PreferencesMessages.JavaEditorPreferencePage_foregroundForCompletionReplacement, PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND, null },
 			{PreferencesMessages.JavaEditorPreferencePage_sourceHoverBackgroundColor, PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR, PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT},
 			
@@ -84,8 +82,6 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SHOW_SEGMENTS));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND));
@@ -130,7 +126,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 
 	private void createHeader(Composite contents) {
 		final Shell shell= contents.getShell();
-		String text= PreferencesMessages.JavaEditorPreferencePage_link; 
+		String text= PreferencesMessages.JavaEditorPreferencePage_link;
 		Link link= new Link(contents, SWT.NONE);
 		link.setText(text);
 		link.addSelectionListener(new SelectionAdapter() {
@@ -140,7 +136,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		});
 		// TODO replace by link-specific tooltips when
 		// bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=88866 gets fixed
-		link.setToolTipText(PreferencesMessages.JavaEditorPreferencePage_link_tooltip); 
+		link.setToolTipText(PreferencesMessages.JavaEditorPreferencePage_link_tooltip);
 		
 		
 		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
@@ -213,13 +209,13 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 
 		String label;
 		
-		label= PreferencesMessages.JavaEditorPreferencePage_subWordNavigation; 
+		label= PreferencesMessages.JavaEditorPreferencePage_subWordNavigation;
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION, 0);
 
-		label= PreferencesMessages.JavaEditorPreferencePage_analyseAnnotationsWhileTyping; 
+		label= PreferencesMessages.JavaEditorPreferencePage_analyseAnnotationsWhileTyping;
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, 0);
 		
-		String text= PreferencesMessages.SmartTypingConfigurationBlock_annotationReporting_link; 
+		String text= PreferencesMessages.SmartTypingConfigurationBlock_annotationReporting_link;
 		addLink(appearanceComposite, text, INDENT);
 		
 		Label spacer= new Label(appearanceComposite, SWT.LEFT );
@@ -228,13 +224,13 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
 		spacer.setLayoutData(gd);
 		
-		label= PreferencesMessages.JavaEditorPreferencePage_highlightMatchingBrackets; 
+		label= PreferencesMessages.JavaEditorPreferencePage_highlightMatchingBrackets;
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_MATCHING_BRACKETS, 0);
 
-		label= PreferencesMessages.JavaEditorPreferencePage_quickassist_lightbulb; 
+		label= PreferencesMessages.JavaEditorPreferencePage_quickassist_lightbulb;
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB, 0);
 		
-		label= PreferencesMessages.JavaEditorPreferencePage_showJavaElementOnly; 
+		label= PreferencesMessages.JavaEditorPreferencePage_showJavaElementOnly;
 		addCheckBox(appearanceComposite, label, PreferenceConstants.EDITOR_SHOW_SEGMENTS, 0);
 
 		Label l= new Label(appearanceComposite, SWT.LEFT );
@@ -244,7 +240,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		l.setLayoutData(gd);
 		
 		l= new Label(appearanceComposite, SWT.LEFT);
-		l.setText(PreferencesMessages.JavaEditorPreferencePage_appearanceOptions); 
+		l.setText(PreferencesMessages.JavaEditorPreferencePage_appearanceOptions);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		l.setLayoutData(gd);
@@ -257,7 +253,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		editorComposite.setLayout(layout);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);
 		gd.horizontalSpan= 2;
-		editorComposite.setLayoutData(gd);		
+		editorComposite.setLayoutData(gd);
 
 		fAppearanceColorList= new List(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
 		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
@@ -273,7 +269,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		l= new Label(stylesComposite, SWT.LEFT);
-		l.setText(PreferencesMessages.JavaEditorPreferencePage_color); 
+		l.setText(PreferencesMessages.JavaEditorPreferencePage_color);
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.BEGINNING;
 		l.setLayoutData(gd);
@@ -301,7 +297,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		};
 		
 		fAppearanceColorDefault= new Button(stylesComposite, SWT.CHECK);
-		fAppearanceColorDefault.setText(PreferencesMessages.JavaEditorPreferencePage_systemDefault); 
+		fAppearanceColorDefault.setText(PreferencesMessages.JavaEditorPreferencePage_systemDefault);
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
 		gd.horizontalSpan= 2;
@@ -345,18 +341,18 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		link.setLayoutData(gd);
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, null); 
+				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, null);
 			}
 		});
 	}
     
-    private void handleAppearanceColorListSelection() {	
+    private void handleAppearanceColorListSelection() {
 		int i= fAppearanceColorList.getSelectionIndex();
 		if (i == -1)
 			return;
 		String key= fAppearanceColorListModel[i][1];
 		RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), key);
-		fAppearanceColorEditor.setColorValue(rgb);		
+		fAppearanceColorEditor.setColorValue(rgb);
 		updateAppearanceColorWidgets(fAppearanceColorListModel[i][2]);
 	}
 

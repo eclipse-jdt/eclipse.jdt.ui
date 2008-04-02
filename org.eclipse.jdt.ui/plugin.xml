@@ -5942,18 +5942,6 @@
          value="63,95,191">
       </colorDefinition>
       <colorDefinition
-         id="org.eclipse.jdt.ui.content_assist_proposals_background"
-         isEditable="false"
-         label="%Dummy.label"
-         value="255,255,255">
-      </colorDefinition>
-      <colorDefinition
-         id="org.eclipse.jdt.ui.content_assist_proposals_foreground"
-         isEditable="false"
-         label="%Dummy.label"
-         value="0,0,0">
-      </colorDefinition>
-      <colorDefinition
          id="org.eclipse.jdt.ui.content_assist_parameters_background"
          isEditable="false"
          label="%Dummy.label"
@@ -6204,14 +6192,6 @@
          <colorOverride
             id="org.eclipse.jdt.ui.java_doc_default"
             value="COLOR_LIST_SELECTION">
-         </colorOverride>
-         <colorOverride
-            id="org.eclipse.jdt.ui.content_assist_proposals_background"
-            value="COLOR_LIST_BACKGROUND">
-         </colorOverride>
-         <colorOverride
-            id="org.eclipse.jdt.ui.content_assist_proposals_foreground"
-            value="COLOR_LIST_FOREGROUND">
          </colorOverride>
          <colorOverride
             id="org.eclipse.jdt.ui.content_assist_parameters_background"

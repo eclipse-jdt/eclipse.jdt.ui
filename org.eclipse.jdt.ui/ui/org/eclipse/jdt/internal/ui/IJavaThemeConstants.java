@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -92,16 +92,6 @@ public interface IJavaThemeConstants {
 	 * A theme constant that holds the color used to render javadoc default text.
 	 */
 	public final String EDITOR_JAVADOC_DEFAULT_COLOR= ID_PREFIX + PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR;
-
-	/**
-	 * A theme constant that holds the background color used in the code assist selection dialog.
-	 */
-	public final String CODEASSIST_PROPOSALS_BACKGROUND= ID_PREFIX + PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND;
-
-	/**
-	 * A theme constant that holds the foreground color used in the code assist selection dialog.
-	 */
-	public final String CODEASSIST_PROPOSALS_FOREGROUND= ID_PREFIX + PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND;
 
 	/**
 	 * A theme constant that holds the background color used for parameter hints.

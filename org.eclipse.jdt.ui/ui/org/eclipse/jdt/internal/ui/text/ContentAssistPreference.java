@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,10 +39,6 @@ public class ContentAssistPreference {
 	private final static String AUTOACTIVATION=  PreferenceConstants.CODEASSIST_AUTOACTIVATION;
 	/** Preference key for content assist auto activation delay */
 	private final static String AUTOACTIVATION_DELAY=  PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY;
-	/** Preference key for content assist proposal color */
-	private final static String PROPOSALS_FOREGROUND=  PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND;
-	/** Preference key for content assist proposal color */
-	private final static String PROPOSALS_BACKGROUND=  PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND;
 	/** Preference key for content assist parameters color */
 	private final static String PARAMETERS_FOREGROUND=  PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND;
 	/** Preference key for content assist parameters color */
@@ -142,13 +138,7 @@ public class ContentAssistPreference {
 		int delay= store.getInt(AUTOACTIVATION_DELAY);
 		assistant.setAutoActivationDelay(delay);
 
-		Color c= getColor(store, PROPOSALS_FOREGROUND, manager);
-		assistant.setProposalSelectorForeground(c);
-
-		c= getColor(store, PROPOSALS_BACKGROUND, manager);
-		assistant.setProposalSelectorBackground(c);
-
-		c= getColor(store, PARAMETERS_FOREGROUND, manager);
+		Color c= getColor(store, PARAMETERS_FOREGROUND, manager);
 		assistant.setContextInformationPopupForeground(c);
 		assistant.setContextSelectorForeground(c);
 
@@ -222,12 +212,6 @@ public class ContentAssistPreference {
 		} else if (AUTOACTIVATION_DELAY.equals(p)) {
 			int delay= store.getInt(AUTOACTIVATION_DELAY);
 			assistant.setAutoActivationDelay(delay);
-		} else if (PROPOSALS_FOREGROUND.equals(p)) {
-			Color c= getColor(store, PROPOSALS_FOREGROUND);
-			assistant.setProposalSelectorForeground(c);
-		} else if (PROPOSALS_BACKGROUND.equals(p)) {
-			Color c= getColor(store, PROPOSALS_BACKGROUND);
-			assistant.setProposalSelectorBackground(c);
 		} else if (PARAMETERS_FOREGROUND.equals(p)) {
 			Color c= getColor(store, PARAMETERS_FOREGROUND);
 			assistant.setContextInformationPopupForeground(c);

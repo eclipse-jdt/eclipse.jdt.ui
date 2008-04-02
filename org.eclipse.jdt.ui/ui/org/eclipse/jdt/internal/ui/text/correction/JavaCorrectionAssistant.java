@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
@@ -16,13 +15,8 @@ import java.util.Iterator;
 
 import org.eclipse.core.runtime.Assert;
 
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -51,10 +45,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.SharedASTProvider;
-import org.eclipse.jdt.ui.text.IColorManager;
-import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -87,17 +78,6 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 
 		setInformationControlCreator(getInformationControlCreator());
 
-		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		IColorManager manager= textTools.getColorManager();
-
-		IPreferenceStore store=  JavaPlugin.getDefault().getPreferenceStore();
-
-		Color c= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, manager);
-		setProposalSelectorForeground(c);
-
-		c= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, manager);
-		setProposalSelectorBackground(c);
-		
 		addCompletionListener(new ICompletionListener() {
 			public void assistSessionEnded(ContentAssistEvent event) {
 				fIsCompletionActive= false;
@@ -123,11 +103,6 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 				return new DefaultInformationControl(parent, false);
 			}
 		};
-	}
-
-	private static Color getColor(IPreferenceStore store, String key, IColorManager manager) {
-		RGB rgb= PreferenceConverter.getColor(store, key);
-		return manager.getColor(rgb);
 	}
 
 	/* (non-Javadoc)

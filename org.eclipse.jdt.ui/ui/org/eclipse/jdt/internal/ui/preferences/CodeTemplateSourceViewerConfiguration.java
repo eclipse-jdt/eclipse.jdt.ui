@@ -133,16 +133,14 @@ public class CodeTemplateSourceViewerConfiguration extends SimpleJavaSourceViewe
 			}
 		});
 
-		Color background= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, manager);
+		Color background= getColor(store, PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND, manager);
 		assistant.setContextInformationPopupBackground(background);
 		assistant.setContextSelectorBackground(background);
-		assistant.setProposalSelectorBackground(background);
 
-		Color foreground= getColor(store, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, manager);
+		Color foreground= getColor(store, PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND, manager);
 		assistant.setContextInformationPopupForeground(foreground);
 		assistant.setContextSelectorForeground(foreground);
-		assistant.setProposalSelectorForeground(foreground);
-		
+
 		return assistant;
 	}
 
