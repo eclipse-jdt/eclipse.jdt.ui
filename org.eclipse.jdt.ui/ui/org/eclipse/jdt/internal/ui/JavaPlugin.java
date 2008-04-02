@@ -371,7 +371,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 			fThemeListener= new IPropertyChangeListener() {
 				public void propertyChange(PropertyChangeEvent event) {
 					if (IThemeManager.CHANGE_CURRENT_THEME.equals(event.getProperty()))
-						new JavaUIPreferenceInitializer().initializeDefaultPreferences();
+						JavaUIPreferenceInitializer.setThemeBasedPreferences(PreferenceConstants.getPreferenceStore(), true);
 				}
 			};
 			PlatformUI.getWorkbench().getThemeManager().addPropertyChangeListener(fThemeListener);
