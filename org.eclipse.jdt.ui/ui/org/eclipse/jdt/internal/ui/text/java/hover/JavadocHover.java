@@ -799,16 +799,16 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			imageStyle.append("top: ").append(imageTop).append("px; "); //$NON-NLS-1$ //$NON-NLS-2$
 			imageStyle.append("left: ").append(imageLeft).append("px; "); //$NON-NLS-1$ //$NON-NLS-2$
 						
-			//buf.append("<!--[if lte IE 6]><![if gte IE 5.5]>\n"); //$NON-NLS-1$
-			//buf.append("<span style=\"").append(imageStyle).append("filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='").append(imageName).append("')\"></span>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			//buf.append("<![endif]><![endif]-->\n"); //$NON-NLS-1$
+			buf.append("<!--[if lte IE 6]><![if gte IE 5.5]>\n"); //$NON-NLS-1$
+			buf.append("<span style=\"").append(imageStyle).append("filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='").append(imageName).append("')\"></span>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			buf.append("<![endif]><![endif]-->\n"); //$NON-NLS-1$
 	
-			//buf.append("<!--[if !IE]>-->\n"); //$NON-NLS-1$
-			//buf.append("<img style='").append(imageStyle).append("' src='").append(imageName).append("'/>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			//buf.append("<!--<![endif]-->\n"); //$NON-NLS-1$
-			//buf.append("<!--[if gte IE 7]>\n"); //$NON-NLS-1$
+			buf.append("<!--[if !IE]>-->\n"); //$NON-NLS-1$
 			buf.append("<img style='").append(imageStyle).append("' src='").append(imageName).append("'/>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			//buf.append("<![endif]-->\n"); //$NON-NLS-1$
+			buf.append("<!--<![endif]-->\n"); //$NON-NLS-1$
+			buf.append("<!--[if gte IE 7]>\n"); //$NON-NLS-1$
+			buf.append("<img style='").append(imageStyle).append("' src='").append(imageName).append("'/>\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			buf.append("<![endif]-->\n"); //$NON-NLS-1$
 		}
 		
 		buf.append("<div style='word-wrap:break-word;"); //$NON-NLS-1$
