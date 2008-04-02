@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,9 +20,20 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
  
 /**
@@ -33,6 +44,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * </p>
  * @deprecated use the StandardJavaElementContentProvider instead
  * @see StandardJavaElementContentProvider
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class JavaElementContentProvider extends StandardJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
 	

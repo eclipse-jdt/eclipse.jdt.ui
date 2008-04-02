@@ -60,6 +60,9 @@ import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
  * </p>
  * 
  * @since 2.0
+ * 
+ * @noinstantiate This class is not intended to be instantiated by clients.
+ * @noextend This class is not intended to be subclassed by clients.
   */
 public class PreferenceConstants {
 

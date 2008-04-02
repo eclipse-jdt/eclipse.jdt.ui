@@ -32,6 +32,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.StorageLabelProvider;
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  * <p>Since 3.4, this class also implements {@link org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider} for colored labels.</p>
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class JavaElementLabelProvider extends LabelProvider implements IStyledLabelProvider {
 	

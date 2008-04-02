@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
  * </p>
  * 
  * @since 2.0
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightweightLabelDecorator {
 
@@ -76,6 +78,8 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param registry The registry to use.
+	 * 
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public OverrideIndicatorLabelDecorator(ImageDescriptorRegistry registry) {
 		fRegistry= registry;
@@ -114,6 +118,8 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 * @param element The element to decorate
 	 * @return Resulting decorations (combination of JavaElementImageDescriptor.IMPLEMENTS
 	 * and JavaElementImageDescriptor.OVERRIDES)
+	 * 
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public int computeAdornmentFlags(Object element) {
 		if (element instanceof IMethod) {
@@ -145,6 +151,8 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 * @return Resulting decorations (combination of JavaElementImageDescriptor.IMPLEMENTS
 	 * and JavaElementImageDescriptor.OVERRIDES)
 	 * @throws JavaModelException
+	 * 
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	protected int getOverrideIndicators(IMethod method) throws JavaModelException {
 		CompilationUnit astRoot= SharedASTProvider.getAST(method.getTypeRoot(), SharedASTProvider.WAIT_ACTIVE_ONLY, null);
@@ -197,6 +205,8 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 * @return The resulting decoration.
 	 * @throws JavaModelException
 	 * @deprecated Not used anymore. This method is not accurate for methods in generic types.
+	 * 
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	protected int findInHierarchy(IType type, ITypeHierarchy hierarchy, String name, String[] paramTypes) throws JavaModelException {
 		IType superClass= hierarchy.getSuperclass(type);

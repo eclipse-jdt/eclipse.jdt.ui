@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,8 +79,6 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		private boolean fMarkerChange;
 
 		/**
-		 * Note: This constructor is for internal use only. Clients should not call this constructor.
-		 * 
 		 * @param eventSource the base label provider
 		 * @param changedResource the changed resources
 		 * @param isMarkerChange <code>true</code> if the change is a marker change; otherwise
@@ -127,6 +125,8 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 	 * 
 	 * @param registry The registry to use or <code>null</code> to use the Java plugin's
 	 *  image registry
+	 *  
+	 *  @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public ProblemsLabelDecorator(ImageDescriptorRegistry registry) {
 		fRegistry= registry;
@@ -162,7 +162,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 	}
 
 	/**
-	 * Note: This method is for internal use only. Clients should not call this method.
+	 * Computes the adornment flags for the given element.
 	 * 
 	 * @param obj the element to compute the flags for
 	 * 

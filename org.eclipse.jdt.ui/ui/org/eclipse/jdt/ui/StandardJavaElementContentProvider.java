@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,7 +78,9 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	}
 	
 	/**
-	 *@deprecated Use {@link #StandardJavaElementContentProvider(boolean)} instead.
+	 * @param provideMembers if <code>true</code> members below compilation units 
+	 * @param provideWorkingCopy if <code>true</code> working copies are provided 
+	 * @deprecated Use {@link #StandardJavaElementContentProvider(boolean)} instead.
 	 * Since 3.0 compilation unit children are always provided as working copies. The Java Model
 	 * does not support the 'original' mode anymore.
 	 */
@@ -123,6 +125,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	}
 	
 	/**
+	 * @return returns <code>true</code> if working copies are provided
 	 * @deprecated Since 3.0 compilation unit children are always provided as working copies. The Java model
 	 * does not support the 'original' mode anymore. 
 	 */
@@ -131,6 +134,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	}
 
 	/**
+	 * @param b specifies if working copies should be provided
 	 * @deprecated Since 3.0 compilation unit children are always provided from the working copy. The Java model
 	 * offers a unified world and does not support the 'original' mode anymore. 
 	 */
@@ -301,7 +305,11 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	}
 
 	/**
-	 * Note: This method is for internal use only. Clients should not call this method.
+	 * Evaluates all Java projects of a given {@link IJavaModel}. Clients can override this method.
+	 * 
+	 * @param jm the Java model
+	 * @return the projects
+	 * @throws JavaModelException thrown if accessing the model failed
 	 */
 	protected Object[] getJavaProjects(IJavaModel jm) throws JavaModelException {
 		return jm.getJavaProjects();
@@ -357,7 +365,10 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	}
 	
 	/**
-	 * Note: This method is for internal use only. Clients should not call this method.
+	 * Tests if the a Java element delta contains a class path change
+	 * 
+	 * @param delta the Java element delta
+	 * @return returns <code>true</code> if the delta contains a class path change
 	 */
 	protected boolean isClassPathChange(IJavaElementDelta delta) {
 		
@@ -374,6 +385,11 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
+	 * 
+	 * @param root the package fragment root
+	 * @return returns the element representing the root.
+	 * 
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	protected Object skipProjectPackageFragmentRoot(IPackageFragmentRoot root) {
 		if (isProjectPackageFragmentRoot(root))
@@ -382,7 +398,11 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	}
 	
 	/**
-	 * Note: This method is for internal use only. Clients should not call this method.
+	 * Tests if the given element is a empty package fragment.
+	 * 
+	 * @param element the element to test
+	 * @return returns <code>true</code> if the package fragment is empty
+	 * @throws JavaModelException thrown if accessing the element failed
 	 */
 	protected boolean isPackageFragmentEmpty(IJavaElement element) throws JavaModelException {
 		if (element instanceof IPackageFragment) {
@@ -394,7 +414,10 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	}
 
 	/**
-	 * Note: This method is for internal use only. Clients should not call this method.
+	 * Tests if the package fragment root is located on the project.
+	 * 
+	 * @param root the package fragment root 
+	 * @return returns <code>true</code> if the package fragment root is the located on the project
 	 */
 	protected boolean isProjectPackageFragmentRoot(IPackageFragmentRoot root) {
 		IJavaProject javaProject= root.getJavaProject();
@@ -403,6 +426,11 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
+	 * 
+	 * @param element the element to test
+	 * @return returns <code>true</code> if the element exists
+	 * 
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	protected boolean exists(Object element) {
 		if (element == null) {
@@ -419,6 +447,11 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
+	 * 
+	 * @param element the element
+	 * @return the parent of the element
+	 * 
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	protected Object internalGetParent(Object element) {
 
@@ -445,7 +478,11 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	}
 		
 	/**
-	 * Note: This method is for internal use only. Clients should not call this method.
+	 * Utility method to concatenate two arrays.
+	 * 
+	 * @param a1 the first array
+	 * @param a2 the second array
+	 * @return the concatenated array
 	 */
 	protected static Object[] concatenate(Object[] a1, Object[] a2) {
 		int a1Len= a1.length;
