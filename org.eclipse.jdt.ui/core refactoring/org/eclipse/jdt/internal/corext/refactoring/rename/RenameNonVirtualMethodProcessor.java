@@ -129,7 +129,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	}
 	
 	/*
-	 * The code below is needed to due bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=39700.
+	 * The code below is needed to due bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=39700 .
 	 * Declaration in hierarchy doesn't take visibility into account. 
 	 */
 
@@ -141,20 +141,25 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 		SearchPattern pattern= createReferenceSearchPattern();
 		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, createRefactoringScope(),
 			new MethodOccurenceCollector(getMethod().getElementName()), new SubProgressMonitor(pm, 1), status);
+		
 		//Workaround bug 39700. Manually add declaration match:
+		IResource declaringResource= getDeclaringCU().getResource();
+		int start= getMethod().getNameRange().getOffset();
+		int length= getMethod().getNameRange().getLength();
+		MethodDeclarationMatch declarationMatch= new MethodDeclarationMatch(getMethod(), SearchMatch.A_ACCURATE, start, length, SearchEngine.getDefaultSearchParticipant(), declaringResource);
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
-			ICompilationUnit cu= group.getCompilationUnit();
-			if (cu.equals(getDeclaringCU())) {
-				IResource resource= group.getResource();
-				int start= getMethod().getNameRange().getOffset();
-				int length= getMethod().getNameRange().getLength();
-				MethodDeclarationMatch declarationMatch= new MethodDeclarationMatch(getMethod(), SearchMatch.A_ACCURATE, start, length, SearchEngine.getDefaultSearchParticipant(), resource);
+			IResource resource= group.getResource();
+			if (resource.equals(declaringResource)) {
 				group.add(declarationMatch);
-				break;//no need to go further
+				return groups; //no need to go further
 			}	
 		}
-		return groups;	
+		SearchResultGroup declarationGroup= new SearchResultGroup(declaringResource, new SearchMatch[] { declarationMatch });
+		SearchResultGroup[] result= new SearchResultGroup[groups.length + 1];
+		System.arraycopy(groups, 0, result, 0, groups.length);
+		result[groups.length]= declarationGroup;
+		return result;
 	}
 		
 	/*
@@ -165,22 +170,12 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 		// declaration update must be registered first
 		addDeclarationUpdate(manager);
 		if (getUpdateReferences())
-			addReferenceUpdates(manager, pm, status);
+			addReferenceUpdates(manager, pm);
 		pm.worked(1);
 	}
 	
 	private ICompilationUnit getDeclaringCU() {
 		return getMethod().getCompilationUnit();
-	}
-
-	/*
-	 * @see RenameMethodProcessor#createOccurrenceSearchPattern(org.eclipse.core.runtime.IProgressMonitor)
-	 */
-	SearchPattern createOccurrenceSearchPattern(IProgressMonitor pm) {
-		pm.beginTask("", 1); //$NON-NLS-1$
-		SearchPattern pattern= SearchPattern.createPattern(getMethod(), IJavaSearchConstants.ALL_OCCURRENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
-		pm.done();
-		return pattern;
 	}
 
 	private SearchPattern createReferenceSearchPattern() {
@@ -215,28 +210,23 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 		addTextEdit(manager.get(getDeclaringCU()), editName, replaceEdit);
 	}
 	
-	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
-		SearchResultGroup[] grouped= getReferences(pm, status);
+	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm) {
+		SearchResultGroup[] grouped= getOccurrences();
 		for (int i= 0; i < grouped.length; i++) {
 			SearchResultGroup group= grouped[i];
 			SearchMatch[] results= group.getSearchResults();
 			ICompilationUnit cu= group.getCompilationUnit();
 			TextChange change= manager.get(cu);
 			for (int j= 0; j < results.length; j++){
-				String editName= RefactoringCoreMessages.RenamePrivateMethodRefactoring_update; 
-				ReplaceEdit replaceEdit= createReplaceEdit(results[j], cu);
-				addTextEdit(change, editName, replaceEdit);
-				
+				SearchMatch match= results[j];
+				if (!(match instanceof MethodDeclarationMatch)) {
+					ReplaceEdit replaceEdit= createReplaceEdit(match, cu);
+					String editName= RefactoringCoreMessages.RenamePrivateMethodRefactoring_update;
+					addTextEdit(change, editName, replaceEdit);
+				}				
 			}
 		}	
-	}
-
-	private SearchResultGroup[] getReferences(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
-		//TODO: should not do the search again!
-		pm.beginTask("", 2);	 //$NON-NLS-1$
-		SearchPattern pattern= createReferenceSearchPattern();
-		return RefactoringSearchEngine.search(pattern, createRefactoringScope(),
-			new MethodOccurenceCollector(getMethod().getElementName()), new SubProgressMonitor(pm, 1), status);	
+		pm.done();
 	}
 
 	public String getDelegateUpdatingTitle(boolean plural) {
