@@ -46,10 +46,6 @@ org.eclipse.perfmsr.core/*
 org.eclipse.pde.source/*
 org.eclipse.ui.examples.recipeeditor/doc/article.html
 org.eclipse.ui.examples.recipeeditor/templates/templates.xml
-com.ibm.icu/*
-org.apache.ant/*
-org.apache.lucene/*
-org.apache.lucene.analysis/*
 org.eclipse.ant.core/*
 org.eclipse.core.commands/*
 org.eclipse.core.contenttype/*
@@ -62,6 +58,7 @@ org.eclipse.core.runtime/*
 org.eclipse.core.runtime.compatibility/*
 org.eclipse.core.runtime.compatibility.registry/*
 org.eclipse.core.variables/*
+org.eclipse.core.tests.harness/*
 org.eclipse.debug.core/*
 org.eclipse.debug.ui/*
 org.eclipse.equinox.common/*
@@ -91,6 +88,7 @@ org.eclipse.ui.forms/*
 org.eclipse.ui.intro/*
 org.eclipse.ui.navigator/*
 org.eclipse.ui.navigator.resources/*
+ORG.ECLIPSE.ui.tests/*
 org.eclipse.ui.views/*
 org.eclipse.ui.views.properties.tabbed/*
 org.eclipse.ui.workbench/*
@@ -99,6 +97,14 @@ org.eclipse.update.configurator/*
 org.eclipse.update.core/*
 org.eclipse.update.core.linux/*
 org.eclipse.update.ui/*
+
+com.ibm.icu/*
+javax.servlet.jsp/*
+org.apache.ant/*
+org.apache.commons.el/*
+org.apache.jasper/*
+org.apache.lucene/*
+org.apache.lucene.analysis/*
 
 www*eclipse.org-development/*
 www*platform-search/*
