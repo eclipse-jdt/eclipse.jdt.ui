@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -88,9 +88,10 @@ import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
 /**
  * The class <code>NewTestCaseWizardPageOne</code> contains controls and validation routines 
  * for the first page of the  'New JUnit TestCase Wizard'.
- * 
+ * <p>
  * Clients can use the page as-is and add it to their own wizard, or extend it to modify
  * validation or add and remove controls.
+ * </p>
  * 
  * @since 3.1
  */

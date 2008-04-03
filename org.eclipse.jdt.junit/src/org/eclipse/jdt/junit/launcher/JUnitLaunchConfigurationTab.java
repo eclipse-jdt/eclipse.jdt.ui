@@ -110,6 +110,8 @@ import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
  * This class may be instantiated but is not intended to be subclassed.
  * </p>
  * @since 3.3
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
 	

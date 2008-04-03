@@ -23,6 +23,8 @@ package org.eclipse.jdt.junit.model;
  * 
  * 
  * @since 3.3
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface ITestElement {
 	
@@ -179,6 +181,8 @@ public interface ITestElement {
 	 * 
 	 * @return total execution time for the test element in seconds, or {@link Double#NaN}</code>
 	 * if the state of the element is not {@link ITestElement.ProgressState#COMPLETED}
+	 * 
+	 * @since 3.4
 	 */
 	public double getElapsedTimeInSeconds();
 	
