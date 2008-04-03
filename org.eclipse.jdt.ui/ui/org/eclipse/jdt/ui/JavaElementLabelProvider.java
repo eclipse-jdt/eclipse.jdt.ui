@@ -253,8 +253,15 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 		return JavaElementLabels.getTextLabel(element, fTextFlags);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider#getStyledText(java.lang.Object)
+	/**
+	 * Returns the styled text label for the given element
+	 * 
+	 * @param element
+	 *            the element to evaluate the styled string for
+	 * 
+	 * @return the styled string.
+	 * 
+	 * @since 3.4
 	 */
 	public StyledString getStyledText(Object element) {
 		return JavaElementLabels.getStyledTextLabel(element, fTextFlags);
