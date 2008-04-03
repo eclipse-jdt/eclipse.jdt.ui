@@ -18,7 +18,7 @@ package org.eclipse.jdt.internal.ui.actions;
  * XXX: Remove this interface once Platform/UI manages to provide this API.
  * 
  * @see org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds
- * @sicen 3.4
+ * @since 3.4
  */
 public interface IWorkbenchCommandIds {
 	
