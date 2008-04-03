@@ -72,6 +72,8 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
  * </p>
  * 
  * @since 2.0
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class RefactorActionGroup extends ActionGroup {
 	

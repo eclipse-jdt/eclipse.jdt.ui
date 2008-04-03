@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,20 +15,21 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddJavaDocStubOperation;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -59,6 +60,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * </p>
  * 
  * @since 2.0
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class AddJavaDocStubAction extends SelectionDispatchAction {
 
@@ -82,6 +85,8 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the compilation unit editor
+	 * 
+	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public AddJavaDocStubAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
@@ -171,6 +176,8 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	 * 
 	 * @param cu the compilation unit
 	 * @param members an array of members
+	 * 
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void run(ICompilationUnit cu, IMember[] members) {
 		try {

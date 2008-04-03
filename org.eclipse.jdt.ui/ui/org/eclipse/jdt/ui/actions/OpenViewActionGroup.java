@@ -46,6 +46,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * </p>
  * 
  * @since 2.0
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class OpenViewActionGroup extends ActionGroup {
 
@@ -138,6 +140,8 @@ public class OpenViewActionGroup extends ActionGroup {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param part the editor part
+	 * 
+	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public OpenViewActionGroup(JavaEditor part) {
 		fEditorIsOwner= true;

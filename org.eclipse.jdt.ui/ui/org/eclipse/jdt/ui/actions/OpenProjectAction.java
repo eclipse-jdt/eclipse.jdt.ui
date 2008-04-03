@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,6 +58,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * </p>
  * 
  * @since 2.0
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class OpenProjectAction extends SelectionDispatchAction implements IResourceChangeListener {
 	
@@ -75,7 +77,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 	 */
 	public OpenProjectAction(IWorkbenchSite site) {
 		super(site);
-		fWorkbenchAction= new OpenResourceAction(site.getShell());
+		fWorkbenchAction= new OpenResourceAction(site);
 		setText(fWorkbenchAction.getText());
 		setToolTipText(fWorkbenchAction.getToolTipText());
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_PROJECT_ACTION);

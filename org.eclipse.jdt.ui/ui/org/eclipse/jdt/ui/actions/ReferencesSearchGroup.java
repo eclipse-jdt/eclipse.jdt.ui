@@ -44,6 +44,8 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;
  * </p>
  * 
  * @since 2.0
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class ReferencesSearchGroup extends ActionGroup  {
 
@@ -110,6 +112,8 @@ public class ReferencesSearchGroup extends ActionGroup  {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
+	 * 
+	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public ReferencesSearchGroup(JavaEditor editor) {
 		Assert.isNotNull(editor);

@@ -39,6 +39,8 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  * @since 2.0
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class ShowInPackageViewAction extends SelectionDispatchAction {
 	
@@ -62,6 +64,8 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
+	 * 
+	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public ShowInPackageViewAction(JavaEditor editor) {
 		this(editor.getEditorSite());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,8 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  * @since 2.0
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class ShowActionGroup extends ActionGroup {
 
@@ -68,6 +70,8 @@ public class ShowActionGroup extends ActionGroup {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param part the Java editor
+	 * 
+	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public ShowActionGroup(JavaEditor part) {
 		fShowInPackagesViewAction= new ShowInPackageViewAction(part);

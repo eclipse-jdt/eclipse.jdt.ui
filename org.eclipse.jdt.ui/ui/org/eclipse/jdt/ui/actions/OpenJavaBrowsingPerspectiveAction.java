@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,23 +10,24 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.jface.action.Action;
+import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IAdaptable;
+
+import org.eclipse.jface.action.Action;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.WorkbenchException;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.ui.JavaUI;
 
 /**
  * Action to programmatically open a Java perspective.
@@ -36,6 +37,8 @@ import org.eclipse.jdt.ui.JavaUI;
  * </p>
  * 
  * @since 2.0
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class OpenJavaBrowsingPerspectiveAction extends Action {
 

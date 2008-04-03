@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,6 +67,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
  * </p> 
  * 
  * @since 2.0
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class OpenAction extends SelectionDispatchAction {
 	
@@ -90,6 +92,8 @@ public class OpenAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
+	 * 
+	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public OpenAction(JavaEditor editor) {
 		this(editor.getEditorSite());
@@ -207,6 +211,8 @@ public class OpenAction extends SelectionDispatchAction {
 	 * Note: this method is for internal use only. Clients should not call this method.
 	 * 
 	 * @param elements the elements to process
+	 * 
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void run(Object[] elements) {
 		if (elements == null)
@@ -243,6 +249,8 @@ public class OpenAction extends SelectionDispatchAction {
 	 * @param object the element to open
 	 * @return the real element to open
 	 * @throws JavaModelException if an error occurs while accessing the Java model
+	 * 
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public Object getElementToOpen(Object object) throws JavaModelException {
 		return object;

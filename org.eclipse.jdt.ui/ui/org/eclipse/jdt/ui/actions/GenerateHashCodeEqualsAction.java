@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -97,6 +97,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * </p>
  * 
  * @since 3.2
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction {
 
@@ -128,6 +130,8 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 	 * this constructor.
 	 * 
 	 * @param editor the compilation unit editor
+	 * 
+	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public GenerateHashCodeEqualsAction(final CompilationUnitEditor editor) {
 		this(editor.getEditorSite());

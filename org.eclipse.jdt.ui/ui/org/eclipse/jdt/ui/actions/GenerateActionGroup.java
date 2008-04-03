@@ -59,6 +59,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
  * </p>
  * 
  * @since 2.0
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class GenerateActionGroup extends ActionGroup {
 	
@@ -161,6 +163,8 @@ public class GenerateActionGroup extends ActionGroup {
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the compilation unit editor
 	 * @param groupName the group name to add the action to
+	 * 
+	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public GenerateActionGroup(CompilationUnitEditor editor, String groupName) {
 		fSite= editor.getSite();
@@ -283,7 +287,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddJavaDocStub= new AddJavaDocStubAction(site);
 		fAddJavaDocStub.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_JAVADOC_COMMENT);
 		
-		fAddBookmark= new AddBookmarkAction(site.getShell());
+		fAddBookmark= new AddBookmarkAction(site, true);
 		fAddBookmark.setActionDefinitionId(IWorkbenchActionDefinitionIds.ADD_BOOKMARK);
 		
 		// context-menu only -> no action definition ids
@@ -383,6 +387,8 @@ public class GenerateActionGroup extends ActionGroup {
 	 */
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
+	 * 
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void editorStateChanged() {
 		Assert.isTrue(isEditorOwner());

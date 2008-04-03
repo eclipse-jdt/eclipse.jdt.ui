@@ -31,6 +31,8 @@ import org.eclipse.ui.actions.ActionGroup;
  * </p>
  * 
  * @since 2.0
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class NavigateActionGroup extends ActionGroup {
 

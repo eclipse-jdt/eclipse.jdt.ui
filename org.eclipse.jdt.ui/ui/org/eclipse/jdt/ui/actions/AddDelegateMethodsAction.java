@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -107,6 +107,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  * </p>
  * 
  * @since 2.1
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
@@ -320,6 +322,8 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	 * constructor.
 	 * 
 	 * @param editor the compilation unit editor
+	 * 
+	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public AddDelegateMethodsAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());

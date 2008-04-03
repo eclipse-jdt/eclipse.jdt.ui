@@ -84,6 +84,8 @@ import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
  * </p>
  * 
  * @since 2.0
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class OrganizeImportsAction extends SelectionDispatchAction {
 
@@ -156,6 +158,8 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
+	 * 
+	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public OrganizeImportsAction(JavaEditor editor) {
 		super(editor.getEditorSite());
@@ -232,7 +236,8 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	}
 
 	/**
-	 * Note: This method is for internal use only. Clients should not call this method.
+	 * Runs the organize import action on a single compilation unit
+	 * 
 	 * @param cu The compilation unit to process
 	 */
 	public void run(ICompilationUnit cu) {

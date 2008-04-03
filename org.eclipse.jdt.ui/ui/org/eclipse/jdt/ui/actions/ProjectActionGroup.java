@@ -20,8 +20,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -54,6 +52,8 @@ import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
  * </p>
  * 
  * @since 2.0
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class ProjectActionGroup extends ActionGroup {
 
@@ -90,13 +90,12 @@ public class ProjectActionGroup extends ActionGroup {
 	 */
 	public ProjectActionGroup(IWorkbenchSite site, ISelectionProvider selectionProvider) {
 		fSelectionProvider= selectionProvider;
-		Shell shell= site.getShell();
 		ISelection selection= selectionProvider.getSelection();
 		
-		fCloseAction= new CloseResourceAction(shell);
+		fCloseAction= new CloseResourceAction(site);
 		fCloseAction.setActionDefinitionId(IWorkbenchCommandIds.CLOSE_PROJECT);
 		
-		fCloseUnrelatedAction= new CloseUnrelatedProjectsAction(shell);
+		fCloseUnrelatedAction= new CloseUnrelatedProjectsAction(site);
 		fCloseUnrelatedAction.setActionDefinitionId(IWorkbenchCommandIds.CLOSE_UNRELATED_PROJECTS);
 		
 		fOpenAction= new OpenProjectAction(site);

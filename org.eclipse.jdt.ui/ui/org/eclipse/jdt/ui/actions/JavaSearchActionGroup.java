@@ -41,6 +41,8 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
  * </p>
  * 
  * @since 2.0
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class JavaSearchActionGroup extends ActionGroup {
 
@@ -79,6 +81,8 @@ public class JavaSearchActionGroup extends ActionGroup {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
+	 * 
+	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public JavaSearchActionGroup(JavaEditor editor) {
 		Assert.isNotNull(editor);

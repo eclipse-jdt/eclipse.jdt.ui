@@ -41,6 +41,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * </p>
  * 
  * @since 3.4
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class ExtractClassAction extends SelectionDispatchAction {
 	private JavaEditor fEditor;
@@ -48,6 +50,8 @@ public class ExtractClassAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the java editor
+	 * 
+	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public ExtractClassAction(JavaEditor editor) {
 		this(editor.getEditorSite());
@@ -104,8 +108,11 @@ public class ExtractClassAction extends SelectionDispatchAction {
 		setEnabled(true);
 	}
 
-	/*
+	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
+	 * @param selection the changed selection 
+	 * 
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {

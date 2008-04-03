@@ -44,6 +44,8 @@ import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
  * </p>
  * 
  * @since 2.0
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class BuildActionGroup extends ActionGroup {
 
@@ -80,7 +82,7 @@ public class BuildActionGroup extends ActionGroup {
 		fSite= site;
 		fSelectionProvider= specialSelectionProvider != null ? specialSelectionProvider : site.getSelectionProvider();
 		
-		fBuildAction= new BuildAction(fSite.getShell(), IncrementalProjectBuilder.INCREMENTAL_BUILD);
+		fBuildAction= new BuildAction(fSite, IncrementalProjectBuilder.INCREMENTAL_BUILD);
 		fBuildAction.setText(ActionMessages.BuildAction_label);
 		fBuildAction.setActionDefinitionId(IWorkbenchCommandIds.BUILD_PROJECT);
 		

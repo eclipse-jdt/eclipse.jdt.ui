@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,6 +47,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * </p>
  * 
  * @since 2.1
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class ConvertNestedToTopAction extends SelectionDispatchAction {
 
@@ -56,6 +58,8 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 	 * Note: This constructor is for internal use only. Clients should not call
 	 * this constructor.
 	 * @param editor the java editor
+	 * 
+	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public ConvertNestedToTopAction(JavaEditor editor) {
 		this(editor.getEditorSite());
@@ -138,6 +142,8 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param selection the Java text selection (internal type)
+	 * 
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public void selectionChanged(JavaTextSelection selection) {
 		try {

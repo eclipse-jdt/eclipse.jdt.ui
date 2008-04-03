@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,6 +57,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * </p>
  * 
  * @since 2.0
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class OpenExternalJavadocAction extends SelectionDispatchAction {
 		
@@ -100,6 +102,8 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
+	 * 
+	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public OpenExternalJavadocAction(JavaEditor editor) {
 		this(editor.getEditorSite());
@@ -218,6 +222,8 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	 * Note: this method is for internal use only. Clients should not call this method.
 	 * 
 	 * @return the dialog default title
+	 * 
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	protected String getDialogTitle() {
 		return getTitle();

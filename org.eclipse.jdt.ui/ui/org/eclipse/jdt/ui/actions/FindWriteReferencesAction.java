@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,10 +17,10 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 /**
  * Finds field write accesses of the selected element in the workspace.
@@ -31,6 +31,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * </p>
  * 
  * @since 2.0
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class FindWriteReferencesAction extends FindReferencesAction {
 
@@ -48,6 +50,8 @@ public class FindWriteReferencesAction extends FindReferencesAction {
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 * @param editor the Java editor
+	 * 
+	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public FindWriteReferencesAction(JavaEditor editor) {
 		super(editor);
