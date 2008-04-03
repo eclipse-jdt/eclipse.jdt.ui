@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,7 +77,7 @@ public class BuildPathSupport {
 	}
 	
 	public static final JUnitPluginDescription JUNIT3_PLUGIN= new JUnitPluginDescription("org.junit", new VersionRange("[3.8.2,3.9)"), true);  //$NON-NLS-1$//$NON-NLS-2$
-	public static final JUnitPluginDescription JUNIT4_PLUGIN= new JUnitPluginDescription("org.junit4", new VersionRange("[4.3.1,4.4.0)"), false); //$NON-NLS-1$ //$NON-NLS-2$
+	public static final JUnitPluginDescription JUNIT4_PLUGIN= new JUnitPluginDescription("org.junit4", new VersionRange("[4.3.1,4.4.0)"), true); //$NON-NLS-1$ //$NON-NLS-2$
 	
 	public static IPath getBundleLocation(JUnitPluginDescription pluginDesc) {
 		Bundle bundle= pluginDesc.getBundle();
@@ -106,10 +106,11 @@ public class BuildPathSupport {
 
 		Bundle sourceBundle= null;
 		if (pluginDesc.isOrbitBundle()) {
-			 Bundle[] bundles= JUnitPlugin.getDefault().getBundles(pluginDesc.getBundleId() + ".source", version); //$NON-NLS-1$
-			 if (bundles != null && bundles.length > 0) {
+			String bundleName= pluginDesc.getBundleId() + ".source";  //$NON-NLS-1$
+			Bundle[] bundles= JUnitPlugin.getDefault().getBundles(bundleName, version);
+			if (bundles != null && bundles.length > 0) {
 				sourceBundle= bundles[0];
-			 }
+			}
 		} else {
 			sourceBundle= JUnitPlugin.getDefault().getBundle("org.eclipse.jdt.source"); //$NON-NLS-1$
 		}
@@ -122,9 +123,15 @@ public class BuildPathSupport {
 		} catch (IOException e) {
 			return null;
 		}
-		String fullPath= new File(local.getPath()).getAbsolutePath() 
-			+ File.separator + "src" + File.separator + pluginDesc.getBundleId() + "_" + version;   //$NON-NLS-1$ //$NON-NLS-2$
-		return Path.fromOSString(fullPath);
+		File bundleLoc= new File(local.getPath());
+		if (bundleLoc.isDirectory()) {
+			String fullPath= bundleLoc.getAbsolutePath() + File.separator + "src" + File.separator + pluginDesc.getBundleId() + "_" + version;   //$NON-NLS-1$ //$NON-NLS-2$
+			return Path.fromOSString(fullPath);
+		} else if (bundleLoc.isFile()) {
+			return Path.fromOSString(bundleLoc.getAbsolutePath()); 
+		}
+			
+		return null;
 	}
 	
 	public static IClasspathEntry getJUnit3ClasspathEntry() {
