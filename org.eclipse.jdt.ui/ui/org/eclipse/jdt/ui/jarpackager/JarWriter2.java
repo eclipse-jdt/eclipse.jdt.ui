@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,7 +36,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.widgets.Shell;
 
-
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -52,7 +51,7 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
  * @see org.eclipse.jdt.ui.jarpackager.JarPackageData
  * @since 3.1
  * 
- * @deprecated Use JarWriter3 instead which leverages new {@link org.eclipse.core.filesystem.EFS EFS} support
+ * @deprecated Use {@link JarWriter3} instead which leverages new {@link org.eclipse.core.filesystem.EFS EFS} support
  */
 public class JarWriter2 {
 	

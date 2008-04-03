@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,11 +22,9 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.swt.widgets.Shell;
 
-
-
 /**
- * A jar builder can be used to add elements to a
- * jar file which is about to be build.
+ * A JAR builder can be used to add elements to a
+ * JAR file which is about to be build.
  * <p>
  * The protocol defined by this interface is:
  * <ul>
@@ -40,27 +38,27 @@ import org.eclipse.swt.widgets.Shell;
  * Implementors must be prepared that an instance if the implementation
  * is reused multiple times.<p>
  * 
- * <strong>EXPERIMENTAL</strong> This class or interface has been added as part
- * of a work in progress. This API may change at any given time. Please do not
- * use this API without consulting with the JDT/UI team. See bug 83258 for discussions.
- * 
  * @see org.eclipse.jdt.ui.jarpackager.JarPackageData
  * @since 3.4
  */
 public interface IJarBuilder {
 
 	/**
+	 * Returns the unique id of this builder
+	 * 
 	 * @return the unique id of this builder
 	 */
 	public String getId();
 
 	/**
+	 * Returns the manifest provider to build the manifest
+	 * 
 	 * @return the manifest provider to build the manifest
 	 */
 	public IManifestProvider getManifestProvider();
 
 	/**
-	 * Called when building of the jar starts
+	 * Called when building of the JAR starts
 	 * 
 	 * @param jarPackage
 	 *        the package to build
@@ -68,7 +66,7 @@ public interface IJarBuilder {
 	 *        shell to show dialogs, <b>null</b> if no dialog must be shown
 	 * @param status
 	 *        a status to use to report status to the user
-	 * @throws CoreException
+	 * @throws CoreException thrown when the JAR could not be opened
 	 */
 	public void open(JarPackageData jarPackage, Shell shell, MultiStatus status) throws CoreException;
 
@@ -79,7 +77,8 @@ public interface IJarBuilder {
 	 *        the file to be written
 	 * @param destinationPath
 	 *        the path for the file inside the archive
-	 * @throws CoreException 
+	 * @throws CoreException
+	 *        thrown when the file could not be written
 	 */
 	public void writeFile(IFile resource, IPath destinationPath) throws CoreException;
 
@@ -94,9 +93,10 @@ public interface IJarBuilder {
 	public void writeArchive(ZipFile archive, IProgressMonitor monitor);
 
 	/**
-	 * Called when building of the jar finished.
+	 * Called when building of the JAR finished.
 	 * 
 	 * @throws CoreException
+	 *        thrown when the JAR could not be closed
 	 */
 	public void close() throws CoreException;
 
