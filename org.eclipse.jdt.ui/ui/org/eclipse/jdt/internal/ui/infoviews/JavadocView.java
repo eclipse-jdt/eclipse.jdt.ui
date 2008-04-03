@@ -154,7 +154,7 @@ public class JavadocView extends AbstractInfoView {
 	/**
 	 * Implementation of a {@link BrowserInput} using
 	 * a {@link IJavaElement} as input.
-	 *  
+	 * 
 	 * @since 3.4
 	 */
 	private static final class JavaElementBrowserInput extends BrowserInput {
@@ -185,7 +185,7 @@ public class JavadocView extends AbstractInfoView {
 	/**
 	 * Implementation of a {@link BrowserInput} using an
 	 * {@link URL} as input.
-	 *  
+	 * 
 	 * @since 3.4
 	 */
 	private static class URLBrowserInput extends BrowserInput {
@@ -771,7 +771,7 @@ public class JavadocView extends AbstractInfoView {
 		IJavaElement input= getInput();
 		if (input == null) {
 			StringBuffer buffer= new StringBuffer(""); //$NON-NLS-1$
-			HTMLPrinter.insertPageProlog(buffer, 0, fBackgroundColorRGB, fgStyleSheet);
+			HTMLPrinter.insertPageProlog(buffer, 0, null, fBackgroundColorRGB, fgStyleSheet);
 			doSetInput(buffer.toString());
 		} else {
 			doSetInput(computeInput(input));
@@ -1012,7 +1012,7 @@ public class JavadocView extends AbstractInfoView {
 
 		boolean flushContent= true;
 		if (buffer.length() > 0 || flushContent) {
-			HTMLPrinter.insertPageProlog(buffer, 0, fBackgroundColorRGB, fgStyleSheet);
+			HTMLPrinter.insertPageProlog(buffer, 0, null, fBackgroundColorRGB, fgStyleSheet);
 			HTMLPrinter.addPageEpilog(buffer);
 			return buffer.toString();
 		}
@@ -1044,7 +1044,7 @@ public class JavadocView extends AbstractInfoView {
 		
 		StringBuffer buf= new StringBuffer();
 		JavadocHover.addImageAndLabel(buf, imageName, 16, 16, 8, 5, label.toString(), 22, 0);
-		return buf.toString();		
+		return buf.toString();
 	}
 
 	/*
