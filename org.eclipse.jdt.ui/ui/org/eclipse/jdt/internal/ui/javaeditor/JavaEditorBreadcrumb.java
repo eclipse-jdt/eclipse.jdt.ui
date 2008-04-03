@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IPackageDeclaration;
@@ -383,7 +384,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		}
 		
 		/**
-		 * Does the given delta describe a change to the given root element or any 
+		 * Does the given delta describe a change to the given root element or any
 		 * of its parents?
 		 * 
 		 * @param root the root to check for changes
@@ -592,7 +593,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 			return null;
-		}		
+		}
 	}
 
 	/**
@@ -637,9 +638,14 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#open(java.lang.Object)
 	 */
 	protected boolean open(Object element) {
-		if (element instanceof IFile) {
+		if (element instanceof IFile)
 			return openInNewEditor(element);
-		}
+		
+		if (element instanceof IJarEntryResource)
+			return openInNewEditor(element);
+		
+		if (element instanceof IFile)
+			return openInNewEditor(element);
 		
 		if (!(element instanceof IJavaElement))
 			return false;
