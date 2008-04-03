@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -158,7 +158,7 @@ public class DeleteTest extends RefactoringTest{
 		}	
 	}
 	
-	private DeleteRefactoring createRefactoring(Object[] elements) throws CoreException {
+	private DeleteRefactoring createRefactoring(Object[] elements) {
 		JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
 		DeleteRefactoring result= new DeleteRefactoring(processor);
 		processor.setQueries(createReorgQueries());
@@ -723,6 +723,48 @@ public class DeleteTest extends RefactoringTest{
 		};
 		String[] handles= ParticipantTesting.createHandles(elems);
 		
+		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
+	}
+	
+	public void testDeleteWithinCu24() throws Exception{
+		ParticipantTesting.reset();
+		loadFileSetup();
+		
+		int indexOf= fCuA.getSource().indexOf("Thread");
+		IType type= (IType) fCuA.getElementAt(indexOf);
+		IJavaElement[] elems= new IJavaElement[] { type };
+				
+		String[] handles= ParticipantTesting.createHandles(elems);
+			
+		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
+	}
+	
+	public void testDeleteWithinCu25() throws Exception{
+		ParticipantTesting.reset();
+		loadFileSetup();
+		
+		int indexOf= fCuA.getSource().indexOf("Thread");
+		IType type= (IType) fCuA.getElementAt(indexOf);
+		IJavaElement[] elems= new IJavaElement[] { type };
+				
+		String[] handles= ParticipantTesting.createHandles(elems);
+			
+		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
+	}
+	
+	public void testDeleteWithinCu26() throws Exception{
+		ParticipantTesting.reset();
+		loadFileSetup();
+		
+		int indexOf= fCuA.getSource().indexOf("Y");
+		IType type= (IType) fCuA.getElementAt(indexOf);
+		IJavaElement[] elems= new IJavaElement[] { type };
+				
+		String[] handles= ParticipantTesting.createHandles(elems);
+			
 		checkDelete(elems, false);
 		ParticipantTesting.testDelete(handles);
 	}

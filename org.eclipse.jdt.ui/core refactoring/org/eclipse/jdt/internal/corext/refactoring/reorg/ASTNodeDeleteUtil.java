@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,12 +20,13 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -48,14 +49,21 @@ public class ASTNodeDeleteUtil {
 			IType type= (IType) element;
 			if (type.isAnonymous()) {
 				if (type.getParent().getElementType() == IJavaElement.FIELD) {
-					final ISourceRange range= type.getSourceRange();
-					if (range != null) {
-						final ASTNode node= ASTNodeSearchUtil.getAstNode(cuNode, range.getOffset(), range.getLength());
-						if (node instanceof AnonymousClassDeclaration)
-							return new ASTNode[] { node};
+					EnumConstantDeclaration enumDecl= ASTNodeSearchUtil.getEnumConstantDeclaration((IField) element.getParent(), cuNode);
+					if (enumDecl != null && enumDecl.getAnonymousClassDeclaration() != null)  {
+						return new ASTNode[] { enumDecl.getAnonymousClassDeclaration() };
 					}
 				}
-				return new ASTNode[] { ASTNodeSearchUtil.getClassInstanceCreationNode(type, cuNode)};
+				ClassInstanceCreation creation= ASTNodeSearchUtil.getClassInstanceCreationNode(type, cuNode);
+				if (creation != null) {
+					if (creation.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+						return new ASTNode[] { creation.getParent() };
+					} else if (creation.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+						return new ASTNode[] { creation};
+					}
+					return new ASTNode[] { creation.getAnonymousClassDeclaration() };
+				}
+				return new ASTNode[0];
 			} else {
 				ASTNode[] nodes= ASTNodeSearchUtil.getDeclarationNodes(element, cuNode);
 				// we have to delete the TypeDeclarationStatement
