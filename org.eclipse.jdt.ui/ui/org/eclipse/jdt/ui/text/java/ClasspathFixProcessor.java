@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,9 +32,6 @@ import org.eclipse.jdt.internal.ui.text.correction.ClasspathFixProcessorDescript
 /**
  * Class to be implemented by contributors to the extension point
  * <code>org.eclipse.jdt.ui.classpathFixProcessors</code>.
- * 
-  * <strong>EXPERIMENTAL</strong> This class or interface has been added as part
- * of a work in progress. We are interested in feedback (bug 196141) . This API may still change. 
  * 
  * @since 3.4
  */

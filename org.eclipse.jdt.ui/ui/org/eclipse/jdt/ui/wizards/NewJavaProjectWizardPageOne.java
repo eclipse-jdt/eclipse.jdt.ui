@@ -105,11 +105,7 @@ import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
  * <p>
  * Clients may instantiate or subclass.
  * </p>
- * <p>
- * <strong>EXPERIMENTAL</strong> This class or interface has been added as part
- * of a work in progress. This API is under review and may still change when finalized. Please send your 
- * comments to bug 160985.
- * </p>
+ * 
  * @since 3.4
  */
 public class NewJavaProjectWizardPageOne extends WizardPage {

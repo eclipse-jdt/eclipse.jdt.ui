@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,8 @@ package org.eclipse.jdt.ui.text;
  *
  * @see org.eclipse.jdt.ui.text.IColorManager
  * @see org.eclipse.jdt.ui.text.IColorManagerExtension
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IJavaColorConstants {
 
@@ -29,6 +31,8 @@ public interface IJavaColorConstants {
 	 * Note: This constant is for internal use only. Clients should not use this constant.
 	 * The prefix all color constants start with
 	 * (value <code>"java_"</code>).
+	 * 
+	 * @noreference This field is not intended to be referenced by clients.
 	 */
 	String PREFIX= "java_"; //$NON-NLS-1$
 

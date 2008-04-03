@@ -73,6 +73,9 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentDialog;
  * This class is not intended to be instantiated or subclassed by clients.
  * </p>
  * @since 3.0
+ * 
+ * @noinstantiate This class is not intended to be instantiated by clients.
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public final class BuildPathDialogAccess {
 
