@@ -119,7 +119,6 @@ public class MoveAction extends SelectionDispatchAction{
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#setSpecialSelectionProvider(org.eclipse.jface.viewers.ISelectionProvider)
-	 * @since 3.4
 	 */
 	public void setSpecialSelectionProvider(ISelectionProvider provider) {
 		super.setSpecialSelectionProvider(provider);
