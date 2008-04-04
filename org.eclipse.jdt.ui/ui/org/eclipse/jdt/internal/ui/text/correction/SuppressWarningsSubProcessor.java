@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.ui.ISharedImages;
 
 import org.eclipse.jdt.core.CorrectionEngine;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -76,6 +77,10 @@ public class SuppressWarningsSubProcessor {
 		if (problem.isError()) {
 			return;
 		}
+		if (JavaCore.DISABLED.equals(context.getCompilationUnit().getJavaProject().getOption(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, true))) {
+			return;
+		}
+		
 		String warningToken= CorrectionEngine.getWarningToken(problem.getProblemId());
 		if (warningToken == null) {
 			return;
