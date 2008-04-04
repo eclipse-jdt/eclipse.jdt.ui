@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -594,7 +594,7 @@ public class LocalCorrectionsSubProcessor {
 		JavadocTagsSubProcessor.getUnusedAndUndocumentedParameterOrExceptionProposals(context, problem, proposals);
 	}
 
-	public static void addUnqualifiedFieldAccessProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void addUnqualifiedFieldAccessProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		IProposableFix fix= CodeStyleFix.createAddFieldQualifierFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -1058,4 +1058,76 @@ public class LocalCorrectionsSubProcessor {
 		}
 		return (String[]) resolveMap.get(fieldName);
 	}
+
+	public static void getMissingEnumConstantCaseProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode instanceof Name && selectedNode.getParent() instanceof SwitchStatement) {
+			SwitchStatement statement= (SwitchStatement) selectedNode.getParent();
+			ITypeBinding binding= statement.getExpression().resolveTypeBinding();
+			if (binding == null || !binding.isEnum()) {
+				return;
+			}
+			
+			String[] missingEnumCases= evaluateMissingEnumConstantCases(binding, statement.statements());
+			if (missingEnumCases.length == 0)
+				return;
+			
+			proposals.add(createMissingEnumConstantCaseProposals(context, statement, missingEnumCases));
+		}
+	}
+	
+	public static String[] evaluateMissingEnumConstantCases(ITypeBinding enumBindings, List switchStatements) {
+		ArrayList enumConstNames= new ArrayList();
+		IVariableBinding[] fields= enumBindings.getDeclaredFields();
+		for (int i= 0; i < fields.length; i++) {
+			if (fields[i].isEnumConstant()) {
+				enumConstNames.add(fields[i].getName());
+			}
+		}
+		
+		List statements= switchStatements;
+		for (int i= 0; i < statements.size(); i++) {
+			Object curr= statements.get(i);
+			if (curr instanceof SwitchCase) {
+				Expression expression= ((SwitchCase) curr).getExpression();
+				if (expression instanceof SimpleName) {
+					enumConstNames.remove(((SimpleName) expression).getFullyQualifiedName());
+				}
+			}
+		}
+		return (String[]) enumConstNames.toArray(new String[enumConstNames.size()]);
+		
+	}
+	
+	public static ASTRewriteCorrectionProposal createMissingEnumConstantCaseProposals(IInvocationContext context, SwitchStatement switchStatement, String[] enumConstNames) {
+		List statements= switchStatement.statements();
+		int defaultIndex= statements.size();
+		for (int i= 0; i < statements.size(); i++) {
+			Object curr= statements.get(i);
+			if (curr instanceof SwitchCase && ((SwitchCase) curr).getExpression() == null) {
+				defaultIndex= i;
+				break;
+			}
+		}
+		AST ast= switchStatement.getAST();
+		ASTRewrite astRewrite= ASTRewrite.create(ast);
+		
+		boolean hasDefault= defaultIndex < statements.size();
+		
+		ListRewrite listRewrite= astRewrite.getListRewrite(switchStatement, SwitchStatement.STATEMENTS_PROPERTY);
+		for (int i= 0; i < enumConstNames.length; i++) {
+			SwitchCase newSwitchCase= ast.newSwitchCase();
+			newSwitchCase.setExpression(ast.newName(enumConstNames[i]));
+			listRewrite.insertAt(newSwitchCase, defaultIndex, null);
+			defaultIndex++;
+			if (!hasDefault) {
+				listRewrite.insertAt(ast.newBreakStatement(), defaultIndex, null);
+				defaultIndex++;
+			}
+		}
+		String label= CorrectionMessages.LocalCorrectionsSubProcessor_add_missing_cases_description;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		return new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), astRewrite, 10, image);
+	}
+
 }

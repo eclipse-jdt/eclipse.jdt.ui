@@ -73,6 +73,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
@@ -177,6 +178,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getConvertIterableLoopProposal(context, coveringNode, null)
 				|| getRemoveBlockProposals(context, coveringNode, null)
 				|| getMakeVariableDeclarationFinalProposals(context, null)
+				|| getMissingCaseStatementProposals(context, coveringNode, null)				
 				|| getConvertStringConcatenationProposals(context, null);
 		}
 		return false;
@@ -213,6 +215,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getRemoveBlockProposals(context, coveringNode, resultingCollections);
 				getMakeVariableDeclarationFinalProposals(context, resultingCollections);
 				getConvertStringConcatenationProposals(context, resultingCollections);
+				getMissingCaseStatementProposals(context, coveringNode, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -1646,6 +1649,30 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		return true;
 	}
+	
+	private static boolean getMissingCaseStatementProposals(IInvocationContext context, ASTNode node, Collection proposals) {
+		if (!(node instanceof SwitchStatement))
+			return false;
+		
+		SwitchStatement switchStatement= (SwitchStatement) node;
+		if (context.getSelectionOffset() + context.getSelectionLength() >= switchStatement.getExpression().getStartPosition())
+			return false;
+		
+		ITypeBinding expressionBinding= switchStatement.getExpression().resolveTypeBinding();
+		if (expressionBinding == null || !expressionBinding.isEnum())
+			return false;
+		
+		String[] missingEnumCases= LocalCorrectionsSubProcessor.evaluateMissingEnumConstantCases(expressionBinding, switchStatement.statements());
+		if (missingEnumCases.length == 0)
+			return false;
+		
+		if (proposals == null)
+			return true;
+		
+		proposals.add(LocalCorrectionsSubProcessor.createMissingEnumConstantCaseProposals(context, switchStatement, missingEnumCases));
+		return true;
+	}
+	
 	
 	private static boolean getConvertLocalToFieldProposal(IInvocationContext context, final ASTNode node, Collection proposals) throws CoreException {
 		if (!(node instanceof SimpleName))

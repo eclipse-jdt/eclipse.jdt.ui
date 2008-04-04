@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -197,6 +197,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.RedundantSuperinterface:
 			case IProblem.JavadocInvalidMemberTypeQualification:
 			case IProblem.IncompatibleTypesInForeach:
+			case IProblem.MissingEnumConstantCase:
 				return true;
 			default:
 				if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
@@ -565,7 +566,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnusedWarningToken:
 				SuppressWarningsSubProcessor.addRemoveUnusedSuppressWarningProposals(context, problem, proposals);
 				break;
-
+			case IProblem.MissingEnumConstantCase:
+				LocalCorrectionsSubProcessor.getMissingEnumConstantCaseProposals(context, problem, proposals);
+				break;
 			default:
 		}
 		if (JavaModelUtil.is50OrHigher(context.getCompilationUnit().getJavaProject())) {
