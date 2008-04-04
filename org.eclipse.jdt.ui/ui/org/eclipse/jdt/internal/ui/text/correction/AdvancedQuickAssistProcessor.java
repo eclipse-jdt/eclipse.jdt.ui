@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -2065,8 +2065,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					condition.setRightOperand(switchCaseCondition);
 					currentCondition= condition;
 				}
-			} else if (statement instanceof BreakStatement) {
-				currentBlock= null;
 			} else {
 				// ensure that current block exists as 'then' statement of 'if'
 				if (currentBlock == null) {
@@ -2094,8 +2092,11 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 						// delay adding of default block
 					}
 				}
-				// add current statement in current block
-				{
+				if (statement instanceof BreakStatement) {
+					currentBlock= null;
+				} else {
+					// add current statement in current block
+
 					hasStopAsLastExecutableStatement= hasStopAsLastExecutableStatement(statement);
 					Statement copyStatement= copyStatementExceptBreak(ast, rewrite, statement);
 
