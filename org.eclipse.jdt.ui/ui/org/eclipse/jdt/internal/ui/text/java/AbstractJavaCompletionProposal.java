@@ -35,7 +35,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.StyledString;
@@ -526,9 +525,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			String info= getProposalInfo().getInfo(monitor);
 			if (info != null && info.length() > 0) {
 				StringBuffer buffer= new StringBuffer();
-				RGB fg= JFaceResources.getColorRegistry().getRGB(JFacePreferences.CONTENT_ASSIST_INFO_FOREGROUND_COLOR);
-				RGB bg= JFaceResources.getColorRegistry().getRGB(JFacePreferences.CONTENT_ASSIST_INFO_BACKGROUND_COLOR);
-				HTMLPrinter.insertPageProlog(buffer, 0, fg, bg, getCSSStyles());
+				HTMLPrinter.insertPageProlog(buffer, 0, getCSSStyles());
 				buffer.append(info);
 				HTMLPrinter.addPageEpilog(buffer);
 				info= buffer.toString();
