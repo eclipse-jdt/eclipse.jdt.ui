@@ -128,7 +128,7 @@
       <classpathContainerPage
             name="%defaultClasspathContainerPage"
             class="org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathContainerDefaultPage"
-            id="*">
+            id="">
       </classpathContainerPage>
    </extension>
    <extension
@@ -3749,16 +3749,22 @@
       </command>
       <command
             categoryId="org.eclipse.jdt.ui.category.refactoring"
-            description="%ActionDefinition.apply.description"
+            description="%ActionDefinition.applyRefactoringScript.description"
             id="org.eclipse.ltk.ui.refactor.apply.refactoring.script"
-            name="%ActionDefinition.apply.name">
+            name="%ActionDefinition.applyRefactoringScript.name">
       </command>
       <command
             categoryId="org.eclipse.jdt.ui.category.refactoring"
-            description="%ActionDefinition.create.description"
+            description="%ActionDefinition.createRefactoringScript.description"
             id="org.eclipse.ltk.ui.refactor.create.refactoring.script"
-            name="%ActionDefinition.create.name">
+            name="%ActionDefinition.createRefactoringScript.name">
        </command>
+      <command
+            categoryId="org.eclipse.jdt.ui.category.refactoring"
+            description="%ActionDefinition.openRefactoringHistory.description"
+            id="org.eclipse.ltk.ui.refactor.show.refactoring.history"
+            name="%ActionDefinition.openRefactoringHistory.name">
+       </command>      
       <command
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             description="%ActionDefinition.migrate.description"
