@@ -644,9 +644,6 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		if (element instanceof IJarEntryResource)
 			return openInNewEditor(element);
 		
-		if (element instanceof IFile)
-			return openInNewEditor(element);
-		
 		if (!(element instanceof IJavaElement))
 			return false;
 		
