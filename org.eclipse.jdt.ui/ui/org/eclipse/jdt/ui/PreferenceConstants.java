@@ -28,8 +28,6 @@ import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 
-import org.eclipse.ui.IWorkbenchPreferenceConstants;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
@@ -3868,8 +3866,6 @@ public class PreferenceConstants {
 
 		// Colors that are set by the current theme
 		JavaUIPreferenceInitializer.setThemeBasedPreferences(store, false);
-
-		PlatformUI.getPreferenceStore().setDefault(IWorkbenchPreferenceConstants.USE_COLORED_LABELS, true);
 	}
 
 	/**
