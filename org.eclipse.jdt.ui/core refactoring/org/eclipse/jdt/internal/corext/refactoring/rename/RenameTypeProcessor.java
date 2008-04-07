@@ -586,18 +586,17 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		try {
 			SearchPattern pattern= SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 			
-			String description= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_ref_in_binaries_description , fType.getElementName());
-			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(description);
+			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , fType.getElementName());
+			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
+			
 			fReferences= RefactoringSearchEngine.search(
 					pattern,
 					RefactoringScopeFactory.create(fType, true, false),
 					new TypeOccurrenceCollector(fType, binaryRefs),
 					monitor,
 					fCachedRefactoringStatus);
-			if (binaryRefs.getMatches().size() != 0) {
-				fCachedRefactoringStatus.addError(RefactoringCoreMessages.RenameTypeProcessor_binaryRefsNotUpdated,
-						binaryRefs);
-			}
+			
+			binaryRefs.addErrorIfNecessary(fCachedRefactoringStatus);
 			fReferences= Checks.excludeCompilationUnits(fReferences, fCachedRefactoringStatus);
 
 			fPreloadedElementToName= new LinkedHashMap();
@@ -1324,7 +1323,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 					if (handledTopLevelMethods.contains(currentMethod))
 						continue;
 					handledTopLevelMethods.add(currentMethod);
-					final IMethod[] ripples= MethodChecks.getOverriddenMethods(currentMethod, new NullProgressMonitor());
+					final IMethod[] ripples= RippleMethodFinder2.getRelatedMethods(currentMethod, new NullProgressMonitor(), null);
 
 					if (checkForWarnings(warnings, newName, ripples))
 						continue;

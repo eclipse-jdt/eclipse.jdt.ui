@@ -67,6 +67,7 @@ public class BinaryReferencesTestSetup extends AbstractRefactoringTestSetup {
 		IFolder binary= fBinaryReference.getProject().getFolder("binary");
 		binary.create(false, true, null);
 		JavaProjectHelper.importResources(binary, bundle, "resources/BinaryReferencesWorkspace/Reference/bin");
+		// attach source to get search results ( https://bugs.eclipse.org/bugs/show_bug.cgi?id=127442 ):
 		IFolder srcAtt= fBinaryReference.getProject().getFolder("srcAtt");
 		srcAtt.create(false, true, null);
 		JavaProjectHelper.importResources(srcAtt, bundle, "resources/BinaryReferencesWorkspace/Reference/src");

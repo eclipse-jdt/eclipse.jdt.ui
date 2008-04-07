@@ -70,6 +70,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateCreator;
@@ -225,9 +226,11 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return fMethod;
 	}
 	
-	private void initializeMethodsToRename(IProgressMonitor pm) throws CoreException {
-		if (fMethodsToRename == null)
-			fMethodsToRename= new HashSet(Arrays.asList(MethodChecks.getOverriddenMethods(getMethod(), pm)));
+	private void initializeMethodsToRename(IProgressMonitor pm, ReferencesInBinaryContext binaryRefs) throws CoreException {
+		if (fMethodsToRename == null) {
+			IMethod[] rippleMethods= RippleMethodFinder2.getRelatedMethods(getMethod(), binaryRefs, pm, null);
+			fMethodsToRename= new HashSet(Arrays.asList(rippleMethods));
+		}
 	}
 	
 	protected void setMethodsToRename(IMethod[] methods) {
@@ -350,9 +353,14 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				}
 			}
 			
-			initializeMethodsToRename(new SubProgressMonitor(pm, 1));
+			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , getCurrentElementName());
+			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
+			
+			initializeMethodsToRename(new SubProgressMonitor(pm, 1), binaryRefs);
 			pm.setTaskName(RefactoringCoreMessages.RenameMethodRefactoring_taskName_searchingForReferences); 
-			fOccurrences= getOccurrences(new SubProgressMonitor(pm, 3), result);	
+			fOccurrences= getOccurrences(new SubProgressMonitor(pm, 3), result, binaryRefs);
+			binaryRefs.addErrorIfNecessary(result);
+
 			pm.setTaskName(RefactoringCoreMessages.RenameMethodRefactoring_taskName_checkingPreconditions); 
 			
 			if (fUpdateReferences)
@@ -435,10 +443,10 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 	//TODO: shouldn't scope take all ripple methods into account?
 	protected static final IJavaSearchScope createRefactoringScope(IMethod method) throws CoreException {
-		return RefactoringScopeFactory.create(method);
+		return RefactoringScopeFactory.create(method, true, false);
 	}
 	
-	SearchPattern createOccurrenceSearchPattern() {
+	private SearchPattern createOccurrenceSearchPattern() {
 		HashSet methods= new HashSet(fMethodsToRename);
 		methods.add(fMethod);
 		IMethod[] ms= (IMethod[]) methods.toArray(new IMethod[methods.size()]);
@@ -452,10 +460,10 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	/*
 	 * XXX made protected to allow overriding and working around bug 39700
 	 */
-	protected SearchResultGroup[] getOccurrences(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
+	protected SearchResultGroup[] getOccurrences(IProgressMonitor pm, RefactoringStatus status, ReferencesInBinaryContext binaryRefs) throws CoreException {
 		SearchPattern pattern= createOccurrenceSearchPattern();
 		return RefactoringSearchEngine.search(pattern, createRefactoringScope(),
-			new MethodOccurenceCollector(getMethod().getElementName()), pm, status);	
+			new MethodOccurenceCollector(getMethod().getElementName(), binaryRefs), pm, status);	
 	}
 
 	private RefactoringStatus checkRelatedMethods() throws CoreException { 

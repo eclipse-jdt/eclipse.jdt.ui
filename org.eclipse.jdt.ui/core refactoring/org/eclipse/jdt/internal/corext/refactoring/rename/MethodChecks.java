@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -173,18 +172,5 @@ public class MethodChecks {
 				topmostMethod= overrides;
 		}
 		return topmostMethod;
-	}
-
-	/**
-	 * Finds all overridden methods of a certain method.
-	 * @param method the method
-	 * @param monitor progress monitor
-	 * @return all overridden methods
-	 * @throws CoreException 
-	 */
-	public static IMethod[] getOverriddenMethods(IMethod method, IProgressMonitor monitor) throws CoreException {
-
-		Assert.isNotNull(method);
-		return RippleMethodFinder2.getRelatedMethods(method, monitor, null);
 	}
 }

@@ -25,6 +25,8 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 /**
  * Collects the results returned by a <code>SearchEngine</code>.
  * Only collects matches in CUs ands offers a scanner to trim match ranges.
+ * If a {@link ReferencesInBinaryContext} is passed, matches that are
+ * not inside a CU are added to the context.
  */
 public abstract class CuCollectingSearchRequestor extends CollectingSearchRequestor {
 
@@ -61,6 +63,9 @@ public abstract class CuCollectingSearchRequestor extends CollectingSearchReques
 	 * @deprecated
 	 */
 	public final void acceptSearchMatch(SearchMatch match) throws CoreException {
+		if (filterMatch(match))
+			return;
+		
 		ICompilationUnit unit= SearchUtils.getCompilationUnit(match);
 		if (unit == null) {
 			if (fBinaryRefs != null) {
@@ -73,6 +78,14 @@ public abstract class CuCollectingSearchRequestor extends CollectingSearchReques
 	
 	public void collectMatch(SearchMatch match) throws CoreException {
 		super.acceptSearchMatch(match);
+	}
+	
+	/**
+	 * @param match match
+	 * @return <code>true</code> iff the given match should not be passed to {@link #acceptSearchMatch(ICompilationUnit, SearchMatch)}
+	 */
+	public boolean filterMatch(SearchMatch match) {
+		return false;
 	}
 	
 	protected abstract void acceptSearchMatch(ICompilationUnit unit, SearchMatch match) throws CoreException;

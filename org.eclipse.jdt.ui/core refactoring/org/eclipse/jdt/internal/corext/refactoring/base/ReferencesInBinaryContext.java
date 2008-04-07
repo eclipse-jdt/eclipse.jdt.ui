@@ -13,9 +13,12 @@ package org.eclipse.jdt.internal.corext.refactoring.base;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 import org.eclipse.jdt.core.search.SearchMatch;
+
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 public class ReferencesInBinaryContext extends RefactoringStatusContext {
 
@@ -45,6 +48,16 @@ public class ReferencesInBinaryContext extends RefactoringStatusContext {
 	 */
 	public Object getCorrespondingElement() {
 		return null;
+	}
+
+	public void addErrorIfNecessary(RefactoringStatus status) {
+		if (getMatches().size() != 0) {
+			status.addError(RefactoringCoreMessages.ReferencesInBinaryContext_binaryRefsNotUpdated, this);
+		}
+	}
+	
+	public String toString() {
+		return fDescription + " (" + fMatches.size() + " matches)"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 }

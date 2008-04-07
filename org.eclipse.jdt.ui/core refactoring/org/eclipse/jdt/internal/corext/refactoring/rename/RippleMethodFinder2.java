@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,7 +26,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IRegion;
@@ -36,12 +36,16 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
+import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 public class RippleMethodFinder2 {
 	
@@ -53,7 +57,10 @@ public class RippleMethodFinder2 {
 	private MultiMap/*IType, IType*/ fRootReps;
 	private Map/*IType, ITypeHierarchy*/ fRootHierarchies;
 	private UnionFind fUnionFind;
-	private boolean fExcludeBinaries;
+	
+	private final boolean fExcludeBinaries;
+	private final ReferencesInBinaryContext fBinaryRefs;
+	private Map/*<IMethod, SearchMatch>*/ fDeclarationToMatch;
 
 	private static class MultiMap {
 		HashMap/*<IType, Collection>*/ fImplementation= new HashMap();
@@ -122,6 +129,14 @@ public class RippleMethodFinder2 {
 	private RippleMethodFinder2(IMethod method, boolean excludeBinaries){
 		fMethod= method;
 		fExcludeBinaries= excludeBinaries;
+		fBinaryRefs= null;
+	}
+	
+	private RippleMethodFinder2(IMethod method, ReferencesInBinaryContext binaryRefs) {
+		fMethod= method;
+		fExcludeBinaries= true;
+		fDeclarationToMatch= new HashMap();
+		fBinaryRefs= binaryRefs;
 	}
 	
 	public static IMethod[] getRelatedMethods(IMethod method, boolean excludeBinaries, IProgressMonitor pm, WorkingCopyOwner owner) throws CoreException {
@@ -138,11 +153,39 @@ public class RippleMethodFinder2 {
 		return getRelatedMethods(method, true, pm, owner);	
 	}
 	
+	public static IMethod[] getRelatedMethods(IMethod method, ReferencesInBinaryContext binaryRefs, IProgressMonitor pm, WorkingCopyOwner owner) throws CoreException {
+		try {
+			if (! MethodChecks.isVirtual(method))
+				return new IMethod[]{ method };
+			
+			return new RippleMethodFinder2(method, binaryRefs).getAllRippleMethods(pm, owner);
+		} finally{
+			pm.done();
+		}
+	}
+
 	private IMethod[] getAllRippleMethods(IProgressMonitor pm, WorkingCopyOwner owner) throws CoreException {
+		IMethod[] rippleMethods= findAllRippleMethods(pm, owner);
+		if (fDeclarationToMatch == null)
+			return rippleMethods;
+		
+		List rippleMethodsList= new ArrayList(Arrays.asList(rippleMethods));
+		for (Iterator iter= rippleMethodsList.iterator(); iter.hasNext(); ) {
+			Object match= fDeclarationToMatch.get(iter.next());
+			if (match != null) {
+				iter.remove();
+				fBinaryRefs.add((SearchMatch) match);
+			}
+		}
+		fDeclarationToMatch= null;
+		return (IMethod[]) rippleMethodsList.toArray(new IMethod[rippleMethodsList.size()]);
+	}
+	
+	private IMethod[] findAllRippleMethods(IProgressMonitor pm, WorkingCopyOwner owner) throws CoreException {
 		pm.beginTask("", 4); //$NON-NLS-1$
 		
 		findAllDeclarations(new SubProgressMonitor(pm, 1), owner);
-		//TODO: report binary methods to an error status
+		
 		//TODO: report assertion as error status and fall back to only return fMethod
 		//check for bug 81058: 
 		Assert.isTrue(fDeclarations.contains(fMethod), "Search for method declaration did not find original element"); //$NON-NLS-1$
@@ -286,20 +329,29 @@ public class RippleMethodFinder2 {
 
 	private void findAllDeclarations(IProgressMonitor monitor, WorkingCopyOwner owner) throws CoreException {
 		fDeclarations= new ArrayList();
-		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(fMethod, IJavaSearchConstants.DECLARATIONS | IJavaSearchConstants.IGNORE_DECLARING_TYPE | IJavaSearchConstants.IGNORE_RETURN_TYPE, SearchPattern.R_ERASURE_MATCH | SearchPattern.R_CASE_SENSITIVE));
-		if (owner != null)
-			engine.setOwner(owner);
-		engine.setScope(RefactoringScopeFactory.createRelatedProjectsScope(fMethod.getJavaProject(), IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SYSTEM_LIBRARIES));
-		engine.setFiltering(false, fExcludeBinaries);
-		engine.setGrouping(false);
-		engine.searchPattern(new SubProgressMonitor(monitor, 1));
-		final SearchMatch[] matches= (SearchMatch[]) engine.getResults();
-		IMethod method= null;
-		for (int index= 0; index < matches.length; index++) {
-			method= (IMethod) matches[index].getElement();
-			if (method != null)
-				fDeclarations.add(method);
+		
+		class MethodRequestor extends SearchRequestor {
+			public void acceptSearchMatch(SearchMatch match) throws CoreException {
+				IMethod method= (IMethod) match.getElement();
+				boolean isBinary= method.isBinary();
+				if (fBinaryRefs != null || ! (fExcludeBinaries && isBinary)) {
+					fDeclarations.add(method);
+				}
+				if (isBinary && fBinaryRefs != null) {
+					fDeclarationToMatch.put(method, match);
+				}
+			}
 		}
+		
+		int limitTo = IJavaSearchConstants.DECLARATIONS | IJavaSearchConstants.IGNORE_DECLARING_TYPE | IJavaSearchConstants.IGNORE_RETURN_TYPE;
+		int matchRule= SearchPattern.R_ERASURE_MATCH | SearchPattern.R_CASE_SENSITIVE;
+		SearchPattern pattern= SearchPattern.createPattern(fMethod, limitTo, matchRule);
+		SearchParticipant[] participants= SearchUtils.getDefaultSearchParticipants();
+		IJavaSearchScope scope= RefactoringScopeFactory.createRelatedProjectsScope(fMethod.getJavaProject(), IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SYSTEM_LIBRARIES);
+		MethodRequestor requestor= new MethodRequestor();
+		SearchEngine searchEngine= owner != null ? new SearchEngine(owner) : new SearchEngine();
+		
+		searchEngine.search(pattern, participants, scope, requestor, monitor);
 	}
 
 	private void createHierarchyOfDeclarations(IProgressMonitor pm, WorkingCopyOwner owner) throws JavaModelException {

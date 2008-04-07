@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
@@ -136,11 +137,11 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	/*
 	 * XXX working around bug 39700
 	 */
-	protected SearchResultGroup[] getOccurrences(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
+	protected SearchResultGroup[] getOccurrences(IProgressMonitor pm, ReferencesInBinaryContext binaryRefs, RefactoringStatus status) throws CoreException {
 		pm.beginTask("", 2);	 //$NON-NLS-1$
 		SearchPattern pattern= createReferenceSearchPattern();
 		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, createRefactoringScope(),
-			new MethodOccurenceCollector(getMethod().getElementName()), new SubProgressMonitor(pm, 1), status);
+			new MethodOccurenceCollector(getMethod().getElementName(), binaryRefs), new SubProgressMonitor(pm, 1), status);
 		
 		//Workaround bug 39700. Manually add declaration match:
 		IResource declaringResource= getDeclaringCU().getResource();

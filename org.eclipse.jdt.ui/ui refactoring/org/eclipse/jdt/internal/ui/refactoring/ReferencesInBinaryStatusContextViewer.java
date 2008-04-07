@@ -144,6 +144,8 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 		fTreeViewer.setContentProvider(contentProvider);
 		fTreeViewer.setInput(contentProvider);
 		
+		fLabel.setText(binariesContext.getDescription());
+		
 		fInput= binariesContext;
 		fButton.setEnabled(!matches.isEmpty());
 	}
