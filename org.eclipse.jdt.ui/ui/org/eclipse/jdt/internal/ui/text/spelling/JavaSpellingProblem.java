@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.text.spelling;
 
 import java.util.ArrayList;
@@ -34,7 +33,6 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
-import org.eclipse.jdt.internal.ui.text.javadoc.IJavaDocTagConstants;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent;
