@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,6 +50,12 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 /**
  * Helper class to use the search engine in refactorings.
+ * 
+ * TODO:
+ * - is inefficient: uses sets instead of lists, creates useless intermediate collections
+ * - destroys locality by doing multiple passes over result sets instead of processing results in a pipeline
+ * - does not allow users to modify search matches
+ * - generates boilerplate error messages and has no way to configure them
  * 
  * @since 3.1
  */
