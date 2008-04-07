@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,11 +15,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.mapping.RemoteResourceMappingContext;
-import org.eclipse.core.resources.mapping.ResourceMapping;
-import org.eclipse.core.resources.mapping.ResourceMappingContext;
-import org.eclipse.core.resources.mapping.ResourceTraversal;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,6 +25,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.resources.mapping.RemoteResourceMappingContext;
+import org.eclipse.core.resources.mapping.ResourceMapping;
+import org.eclipse.core.resources.mapping.ResourceMappingContext;
+import org.eclipse.core.resources.mapping.ResourceTraversal;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -40,7 +39,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
@@ -169,7 +167,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 	
 	private static final class LocalPackageFragementTraversal extends ResourceTraversal {
 		private final IPackageFragment fPack;
-		public LocalPackageFragementTraversal(IPackageFragment pack) throws CoreException {
+		public LocalPackageFragementTraversal(IPackageFragment pack) {
 			super(new IResource[] {pack.getResource()}, IResource.DEPTH_ONE, 0);
 			fPack= pack;
 		}
@@ -356,7 +354,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 	public static ResourceMapping create(final IPackageFragment pack) {
 		// test if in an archive
 		IPackageFragmentRoot root= (IPackageFragmentRoot)pack.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-		if (!root.isArchive()) {
+		if (!root.isArchive() && !root.isExternal()) {
 			return new PackageFragmentResourceMapping(pack);
 		}
 		return null;
@@ -371,7 +369,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 	public static ResourceMapping create(IClassFile classFile) {
 		// test if in a archive
 		IPackageFragmentRoot root= (IPackageFragmentRoot)classFile.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-		if (!root.isArchive()) {
+		if (!root.isArchive() && !root.isExternal()) {
 			return new ClassFileResourceMapping(classFile);
 		}
 		return null;
@@ -392,7 +390,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		for (int i= 0; i < fragments.length; i++) {
 			// only add if not part of an archive
 			IPackageFragmentRoot root= (IPackageFragmentRoot)fragments[i].getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-			if (!root.isArchive()) {
+			if (!root.isArchive() && !root.isExternal()) {
 				toProcess.add(fragments[i]);
 			}
 		}
