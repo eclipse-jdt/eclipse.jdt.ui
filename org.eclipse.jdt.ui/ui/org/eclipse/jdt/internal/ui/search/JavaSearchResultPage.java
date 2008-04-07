@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
@@ -66,6 +67,7 @@ import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -96,7 +98,20 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			fLabelProvider= labelProvider;
 		}
 		
+		public int category(Object element) {
+			if (element instanceof IJavaElement || element instanceof IResource)
+				return 1;
+			return 2;
+		}
+		
+		
 	    public int compare(Viewer viewer, Object e1, Object e2) {
+	        int cat1 = category(e1);
+	        int cat2 = category(e2);
+
+	        if (cat1 != cat2) {
+				return cat1 - cat2;
+			}	    	
 	        String name1= fLabelProvider.getText(e1);
 	        String name2= fLabelProvider.getText(e2);
 	        if (name1 == null)

@@ -71,6 +71,13 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 			return text;
 		return getParticipantText(element);
 	}
+	
+	private StyledString internalGetStyledText(Object element) {
+		StyledString text= super.getStyledText(element);
+		if (text != null && text.length() > 0)
+			return text;
+		return new StyledString(getParticipantText(element));
+	}
 
 	private boolean isSameInformation(Object realParent, Object lastElement) {
 		if (lastElement instanceof IType) {
@@ -90,7 +97,7 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
 	 */
 	public StyledString getStyledText(Object element) {
-		StyledString styledString= getColoredLabelWithCounts(element, super.getStyledText(element));
+		StyledString styledString= getColoredLabelWithCounts(element, internalGetStyledText(element));
 		styledString.append(getQualification(element), StyledString.QUALIFIER_STYLER);
 		return styledString;
 	}

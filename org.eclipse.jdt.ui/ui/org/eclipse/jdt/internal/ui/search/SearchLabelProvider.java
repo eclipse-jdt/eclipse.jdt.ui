@@ -18,7 +18,9 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -38,6 +40,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 import org.eclipse.jdt.ui.search.IMatchPresentation;
@@ -45,6 +48,8 @@ import org.eclipse.jdt.ui.search.IMatchPresentation;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 	
@@ -64,6 +69,8 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 
 	private ScopedPreferenceStore fSearchPreferences;
 	private IPropertyChangeListener fSearchPropertyListener;
+	
+	private Map fImages;
 
 	public SearchLabelProvider(JavaSearchResultPage page) {
 		super(DEFAULT_SEARCH_TEXTFLAGS, DEFAULT_SEARCH_IMAGEFLAGS);
@@ -79,6 +86,8 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 			}
 		};
 		fSearchPreferences.addPropertyChangeListener(fSearchPropertyListener);
+		
+		fImages= null;
 	}
 	
 	final void doSearchPropertyChange(PropertyChangeEvent event) {
@@ -178,6 +187,14 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 			ILabelProvider labelProvider = (ILabelProvider) labelProviders.next();
 			labelProvider.dispose();
 		}
+		if (fImages != null) {
+			for (Iterator iterator= fImages.values().iterator(); iterator.hasNext();) {
+				Image image= (Image) iterator.next();
+				image.dispose();
+			}
+			fImages= null;
+		}
+		
 		fSearchPreferences= null;
 		fSearchPropertyListener= null;
 		fLabelProviderMap.clear();
@@ -219,9 +236,35 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 		ILabelProvider lp= getLabelProvider(element);
 		if (lp == null)
 			return null;
-		return lp.getImage(element);
+		Image image= lp.getImage(element);
+		if (image == null || true) {
+			return image;
+		}
+		Rectangle bounds= image.getBounds();
+		Point expectedWidth= JavaElementImageProvider.BIG_SIZE;
+		if (bounds.height == expectedWidth.y && bounds.width == expectedWidth.x) {
+			return image;
+		}
+		if (bounds.height > expectedWidth.y || bounds.width > expectedWidth.x) {
+			return null; // too big
+		}
+		return getSizeCorrectedImage(image, expectedWidth);
 	}
 
+	private Image getSizeCorrectedImage(Image image, Point expectedWidth) {
+		if (fImages != null) {
+			Image newImage= (Image) fImages.get(image);
+			if (newImage != null) {
+				return newImage;
+			}
+		} else {
+			fImages= new HashMap();
+		}
+		ImageImageDescriptor desc= new ImageImageDescriptor(image);
+		Image newImage= (new JavaElementImageDescriptor(desc, 0, expectedWidth)).createImage();
+		fImages.put(image, newImage);
+		return newImage;
+	}
 
 	private ILabelProvider getLabelProvider(Object element) {
 		AbstractTextSearchResult input= fPage.getInput();
