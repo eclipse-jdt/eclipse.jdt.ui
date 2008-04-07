@@ -6653,7 +6653,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("                break;\n");
 		buf.append("            case X3 :\n");
 		buf.append("                break;\n");
-		buf.append("        \n");
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
