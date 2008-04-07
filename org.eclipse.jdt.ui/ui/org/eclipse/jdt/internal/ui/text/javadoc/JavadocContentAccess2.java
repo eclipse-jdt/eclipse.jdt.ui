@@ -134,7 +134,7 @@ public class JavadocContentAccess2 {
 		parser.setSource(source.toCharArray());
 		CompilationUnit root= (CompilationUnit) parser.createAST(null);
 		if (root == null)
-			return getParsingErrorMessage(member);
+			return null;
 		List types= root.types();
 		if (types.size() != 1)
 			return null;
@@ -174,12 +174,6 @@ public class JavadocContentAccess2 {
 		return buf.toString();
 	}
 	
-	private static String getParsingErrorMessage(IMember member){
-		StringBuffer buf= new StringBuffer();
-		JavaElementLabels.getElementLabel(member, JavaElementLabels.ALL_DEFAULT, buf);
-		return "An error occurred while parsing the Javadoc for " + buf;
-	}
-
 	private static boolean containsOnlyInheritDoc(String javadoc) {
 		//FIXME: improve {@inheritDoc} support
 		return javadoc != null && javadoc.trim().equals("{@inheritDoc}"); //$NON-NLS-1$
@@ -443,7 +437,7 @@ public class JavadocContentAccess2 {
 		int size= fragments.size();
 		if (size > 0) {
 			handleLink(fragments.subList(0, 1));
-			fBuf.append(" - "); //TODO: Javadoc does it like @param, we make param bold. Unify?
+			fBuf.append(JavaElementLabels.CONCAT_STRING);
 			handleContentElements(fragments.subList(1, size));
 		}
 	}
@@ -537,6 +531,13 @@ public class JavadocContentAccess2 {
 					//TODO:
 					// - Set fLiteralContent for label? Check spec.
 					// - Javadoc of java.util.regex.Pattern has a space in front of link in <pre>
+//					if (fs == 2 && fragments.get(1) instanceof TextElement) {
+//						String text= removeLeadingWhitespace(((TextElement) fragments.get(1)).getText());
+//						if (text.length() != 0)
+//							handleText(text);
+//						else
+//							//TODO: default from below
+//					}
 					handleContentElements(fragments.subList(1, fs));
 				} else {
 					fBuf.append(refTypeName);
@@ -570,4 +571,16 @@ public class JavadocContentAccess2 {
 		
 	}
 
+//	private String removeLeadingWhitespace(String text) {
+//		int length= text.length();
+//		for (int i= 0; i < length; i++) {
+//			if (!Character.isWhitespace(text.charAt(i))) {
+//				if (i != 0) {
+//					return text.substring(i);
+//				}
+//				return text;
+//			}
+//		}
+//		return ""; //$NON-NLS-1$
+//	}
 }
