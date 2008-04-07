@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -289,7 +289,8 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 							case IJavaElement.TYPE:
 								if (elem.getParent().getElementType() == IJavaElement.COMPILATION_UNIT) {
 									ICompilationUnit unit= (ICompilationUnit)elem.getParent();
-									if (!result.containsKey(unit.getTypes()[0])) {
+									IType[] types= unit.getTypes();
+									if (types.length > 0 && !result.containsKey(types[0])) {
 										SearchPatternData data= tryIfPropertyCuSelected(unit);
 										if (data != null)
 											result.put(data.fAccessorType, data);
@@ -298,7 +299,8 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 								break;
 							case IJavaElement.COMPILATION_UNIT:
 								ICompilationUnit unit= (ICompilationUnit)elem;
-								if (!result.containsKey(unit.getTypes()[0])) {
+								IType[] types= unit.getTypes();
+								if (types.length > 0 && !result.containsKey(types[0])) {
 									SearchPatternData data= tryIfPropertyCuSelected(unit);
 									if (data != null)
 										result.put(data.fAccessorType, data);
@@ -355,7 +357,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 			return null;
 		
 		IType[] types= compilationUnit.getTypes();
-		if (types.length > 1)
+		if (types.length != 1)
 			return null;
 		
 		if (!isPotentialNLSAccessor(compilationUnit))
