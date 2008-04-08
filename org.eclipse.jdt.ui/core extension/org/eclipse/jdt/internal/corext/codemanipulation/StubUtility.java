@@ -1326,7 +1326,10 @@ public class StubUtility {
 			try {
 				IMethod method= (IMethod) binding.getMethodDeclaration().getJavaElement();
 				if (method != null) {
-					return suggestArgumentNamesWithProposals(project, method.getParameterNames());
+					String[] parameterNames= method.getParameterNames();
+					if (parameterNames.length == nParams) {
+						return suggestArgumentNamesWithProposals(project, parameterNames);
+					}
 				}
 			} catch (JavaModelException e) {
 				// ignore
@@ -1348,21 +1351,23 @@ public class StubUtility {
 				IMethod method= (IMethod) binding.getMethodDeclaration().getJavaElement();
 				if (method != null) {
 					String[] paramNames= method.getParameterNames();
-					String[] namesArray= new String[0];
-					ArrayList newNames= new ArrayList(paramNames.length);
-					// Ensure that the code generation preferences are respected
-					for (int i= 0; i < paramNames.length; i++) {
-						String curr= paramNames[i];
-						String baseName= NamingConventions.removePrefixAndSuffixForArgumentName(project, curr);
-						if (!curr.equals(baseName)) {
-							// make the existing name the favourite
-							newNames.add(curr);
-						} else {
-							newNames.add(suggestArgumentName(project, curr, namesArray));
+					if (paramNames.length == nParams) {
+						String[] namesArray= new String[0];
+						ArrayList newNames= new ArrayList(paramNames.length);
+						// Ensure that the code generation preferences are respected
+						for (int i= 0; i < paramNames.length; i++) {
+							String curr= paramNames[i];
+							String baseName= NamingConventions.removePrefixAndSuffixForArgumentName(project, curr);
+							if (!curr.equals(baseName)) {
+								// make the existing name the favourite
+								newNames.add(curr);
+							} else {
+								newNames.add(suggestArgumentName(project, curr, namesArray));
+							}
+							namesArray= (String[]) newNames.toArray(new String[newNames.size()]);
 						}
-						namesArray= (String[]) newNames.toArray(new String[newNames.size()]);
+						return namesArray;
 					}
-					return namesArray;
 				}
 			} catch (JavaModelException e) {
 				// ignore
