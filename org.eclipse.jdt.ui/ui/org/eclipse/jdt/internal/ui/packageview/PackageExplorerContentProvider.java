@@ -532,28 +532,43 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				return false;	
 		}
 		
-		if (!fIsFlatLayout && elementType == IJavaElement.PACKAGE_FRAGMENT) {
-			if (kind == IJavaElementDelta.REMOVED) {
-				final Object parent = getHierarchicalPackageParent((IPackageFragment) element);
-				if (parent instanceof IPackageFragmentRoot) {
-					postRemove(element,  runnables);
-					return false;
-				} else {
-					postRefresh(internalGetParent(parent), GRANT_PARENT, element, runnables);
-					return true;
+		if (elementType == IJavaElement.PACKAGE_FRAGMENT) {
+			if ((flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_CHILDREN)) == IJavaElementDelta.F_CONTENT) {
+				if (!fIsFlatLayout) {
+					Object parent = getHierarchicalPackageParent((IPackageFragment) element);
+					if (!(parent instanceof IPackageFragmentRoot)) {
+						postRefresh(internalGetParent(parent), GRANT_PARENT, element, runnables);
+						return true;
+					}
 				}
-			} else if (kind == IJavaElementDelta.ADDED) {
-				final Object parent = getHierarchicalPackageParent((IPackageFragment) element);
-				if (parent instanceof IPackageFragmentRoot) {
-					postAdd(parent, element,  runnables);
-					return false;
-				} else {
-					postRefresh(internalGetParent(parent), GRANT_PARENT, element, runnables);
-					return true;
-				}
+				// content change, without children info (for example resource added/removed to class folder package)
+				postRefresh(internalGetParent(element), PARENT, element, runnables);
+				return true;
 			}
-			handleAffectedChildren(delta, element, runnables);
-			return false;
+			
+			if (!fIsFlatLayout) {
+				if (kind == IJavaElementDelta.REMOVED) {
+					final Object parent = getHierarchicalPackageParent((IPackageFragment) element);
+					if (parent instanceof IPackageFragmentRoot) {
+						postRemove(element,  runnables);
+						return false;
+					} else {
+						postRefresh(internalGetParent(parent), GRANT_PARENT, element, runnables);
+						return true;
+					}
+				} else if (kind == IJavaElementDelta.ADDED) {
+					final Object parent = getHierarchicalPackageParent((IPackageFragment) element);
+					if (parent instanceof IPackageFragmentRoot) {
+						postAdd(parent, element,  runnables);
+						return false;
+					} else {
+						postRefresh(internalGetParent(parent), GRANT_PARENT, element, runnables);
+						return true;
+					}
+				}
+				handleAffectedChildren(delta, element, runnables);
+				return false;
+			}
 		}
 		
 		if (elementType == IJavaElement.COMPILATION_UNIT) {
@@ -652,11 +667,17 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		}
 		
 		if (elementType == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
-			// the contents of an external JAR has changed
+			// the contents of an external JAR or class folder has changed
 			if ((flags & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0) {
 				postRefresh(element, ORIGINAL, element, runnables);
 				return false;
 			}
+			if ((flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_CHILDREN)) == IJavaElementDelta.F_CONTENT) {
+				// content change, without children info (for example resource added/removed to class folder package)
+				postRefresh(internalGetParent(element), PARENT, element, runnables);
+				return true;
+			}
+			
 			// the source attachment of a JAR has changed
 			if ((flags & (IJavaElementDelta.F_SOURCEATTACHED | IJavaElementDelta.F_SOURCEDETACHED)) != 0)
 				postUpdateIcon(element, runnables);
@@ -666,7 +687,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				postRefresh(element.getJavaProject(), PROJECT, element, runnables);
 				return true;
 			}
-		}	
+		}
+		
 		handleAffectedChildren(delta, element, runnables);
 		return false;
 	}
