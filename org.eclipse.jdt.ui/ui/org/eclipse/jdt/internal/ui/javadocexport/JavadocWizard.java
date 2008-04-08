@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -162,7 +162,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		if (fStore.isFromStandard()) {
 			try {
 
-				URL newURL= fDestination.toFile().toURL();
+				URL newURL= fDestination.toFile().toURI().toURL();
 				List projs= new ArrayList();
 				//get javadoc locations for all projects
 				for (int i= 0; i < checkedProjects.length; i++) {
@@ -418,7 +418,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		if (fOpenInBrowser) {
 			try {
 				IPath indexFile= fDestination.append("index.html"); //$NON-NLS-1$
-				URL url= indexFile.toFile().toURL();
+				URL url= indexFile.toFile().toURI().toURL();
 				OpenBrowserUtil.open(url, display, getWindowTitle());
 			} catch (MalformedURLException e) {
 				JavaPlugin.log(e);
