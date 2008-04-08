@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,6 +60,7 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -671,7 +672,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		BodyDeclaration decl= fAnalyzer.getEnclosingBodyDeclaration();
 		ASTNode current= getNextParent(decl);
 		result.add(current);
-		if (decl instanceof MethodDeclaration) {
+		if (decl instanceof MethodDeclaration || decl instanceof Initializer) {
 			ITypeBinding binding= ASTNodes.getEnclosingType(current);
 			ASTNode next= getNextParent(current);
 			while (next != null && binding != null && binding.isNested() && !Modifier.isStatic(binding.getDeclaredModifiers())) {
