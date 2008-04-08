@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,8 +57,6 @@ public class RenameTypeTests extends RefactoringTest {
 	
 	private static final Class clazz= RenameTypeTests.class;
 	private static final String REFACTORING_PATH= "RenameType/";
-	
-	private static final boolean BUG_83012_core_annotation_search= true;
 	
 	public RenameTypeTests(String name) {
 		super(name);
@@ -1247,9 +1245,6 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void testAnnotation2() throws Exception {
-		if (BUG_83012_core_annotation_search)
-			return;
-		
 		helper2("A", "B");
 	}
 	
@@ -1669,10 +1664,6 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void testSimilarElements34() throws Exception {
-		if (true) {
-			printTestDisabledMessage("https://bugs.eclipse.org/bugs/show_bug.cgi?id=209778");
-			return;
-		}
 		// Test references in annotations and type parameters
 		helper3("Try", "Bla", true, false, true);
 	}	
