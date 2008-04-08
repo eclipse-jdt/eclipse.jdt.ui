@@ -34,6 +34,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
+import org.eclipse.jdt.internal.ui.viewsupport.IRefreshable;
 
 /**
  * Contributes all build related actions to the context menu and installs handlers for the
@@ -49,8 +50,24 @@ import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
  */
 public class BuildActionGroup extends ActionGroup {
 
-	private final IWorkbenchSite fSite;
-	private final ISelectionProvider fSelectionProvider;
+	private static class RefreshableViewRefreshAction extends RefreshAction {
+		private final IViewPart fPart;
+		public RefreshableViewRefreshAction(IViewPart part) {
+			super(part.getSite());
+			fPart= part;
+		}
+		
+		public void run(IStructuredSelection selection) {
+			super.run(selection);
+			if (fPart instanceof IRefreshable) {
+				((IRefreshable) fPart).refresh(selection);
+			}
+		}
+	}
+	
+	
+	private IWorkbenchSite fSite;
+	private ISelectionProvider fSelectionProvider;
 	
 	private BuildAction fBuildAction;
  	private RefreshAction fRefreshAction;
@@ -63,8 +80,8 @@ public class BuildActionGroup extends ActionGroup {
 	 * 
 	 * @param part the view part that owns this action group
 	 */
-	public BuildActionGroup(IViewPart part) {
-		this(part.getSite(), null);
+	public BuildActionGroup(final IViewPart part) {
+		this(part.getSite(), null, new RefreshableViewRefreshAction(part));
 	}
 
 	/**
@@ -79,14 +96,18 @@ public class BuildActionGroup extends ActionGroup {
 	 * @since 3.4
 	 */
 	public BuildActionGroup(IWorkbenchSite site, ISelectionProvider specialSelectionProvider) {
+		this(site, specialSelectionProvider, new RefreshAction(site));
+	}
+	
+	private BuildActionGroup(IWorkbenchSite site, ISelectionProvider specialSelectionProvider, RefreshAction refreshAction) {
 		fSite= site;
 		fSelectionProvider= specialSelectionProvider != null ? specialSelectionProvider : site.getSelectionProvider();
 		
 		fBuildAction= new BuildAction(fSite, IncrementalProjectBuilder.INCREMENTAL_BUILD);
 		fBuildAction.setText(ActionMessages.BuildAction_label);
 		fBuildAction.setActionDefinitionId(IWorkbenchCommandIds.BUILD_PROJECT);
-		
-		fRefreshAction= new RefreshAction(fSite);
+				
+		fRefreshAction= refreshAction;
 		fRefreshAction.setActionDefinitionId(IWorkbenchCommandIds.REFRESH);
 		
 		if (specialSelectionProvider != null) {
@@ -96,6 +117,7 @@ public class BuildActionGroup extends ActionGroup {
 		fSelectionProvider.addSelectionChangedListener(fBuildAction);
 		fSelectionProvider.addSelectionChangedListener(fRefreshAction);
 	}
+	
 	
 	/**
 	 * Returns the refresh action managed by this group.
