@@ -11,17 +11,18 @@
 package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
-import org.eclipse.core.filesystem.EFS;
-import org.eclipse.core.filesystem.IFileStore;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
@@ -30,8 +31,8 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.IShellProvider;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
@@ -39,15 +40,17 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.Resources;
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -68,6 +71,41 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */
 public class RefreshAction extends SelectionDispatchAction {
 
+	/**
+	 * As the JDT  RefreshAction is already API, we have to wrap the workbench action.
+	 */
+	private static class WrappedWorkbenchRefreshAction extends org.eclipse.ui.actions.RefreshAction {
+
+		public WrappedWorkbenchRefreshAction(IShellProvider provider) {
+			super(provider);
+		}
+		
+		protected List getSelectedResources() {
+			List selectedResources= super.getSelectedResources();
+			if (selectedResources.size() == 1 && selectedResources.get(0) instanceof IWorkspaceRoot) {
+				return Collections.EMPTY_LIST;
+			}
+			return selectedResources;
+		} 
+		
+		public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+			try {
+				final IStatus[] errorStatus= new IStatus[] { Status.OK_STATUS };
+				createOperation(errorStatus).run(monitor);
+				if (errorStatus[0].matches(IStatus.ERROR)) {
+					throw new CoreException(errorStatus[0]);
+				}				
+			} catch (InvocationTargetException e) {
+				Throwable targetException= e.getTargetException();
+				if (targetException instanceof CoreException)
+					throw (CoreException) targetException;
+				throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, ActionMessages.RefreshAction_error_workbenchaction_message, targetException));
+			} catch (InterruptedException e) {
+				throw new OperationCanceledException();
+			}
+		}
+	}
+	
 	/**
 	 * Creates a new <code>RefreshAction</code>. The action requires
 	 * that the selection provided by the site's selection provider is of type <code>
@@ -97,13 +135,21 @@ public class RefreshAction extends SelectionDispatchAction {
 			Object element= iter.next();
 			if (element instanceof IWorkingSet) {
 				// don't inspect working sets any deeper.
-			} else if (element instanceof IAdaptable) {
+			} else if (element instanceof IPackageFragmentRoot) {
+				IPackageFragmentRoot root= (IPackageFragmentRoot) element;
+				if (!root.isExternal() || !root.isArchive()) {
+					return false;
+				}
+			} else if (element instanceof PackageFragmentRootContainer) {
+				// too expensive to look at children. disable for now
+				return false;
+			} else if (element instanceof IAdaptable) { // test for IAdaptable last (types before are IAdaptable as well)
 				IResource resource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
 				if (resource == null)
 					return false;
 				if (resource.getType() == IResource.PROJECT && !((IProject)resource).isOpen())
 					return false;
-			} else {
+			} else {				
 				return false;
 			}
 		}
@@ -113,32 +159,10 @@ public class RefreshAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared in SelectionDispatchAction
 	 */
-	public void run(IStructuredSelection selection) {
-		final IResource[] resources= getResources(selection);
+	public void run(final IStructuredSelection selection) {
 		IWorkspaceRunnable operation= new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
-				monitor.beginTask(ActionMessages.RefreshAction_progressMessage, resources.length * 2); 
-				monitor.subTask(""); //$NON-NLS-1$
-				List javaElements= new ArrayList(5);
-				for (int r= 0; r < resources.length; r++) {
-					IResource resource= resources[r];
-					if (resource.getType() == IResource.PROJECT) {
-						checkLocationDeleted((IProject) resource);
-					} else if (resource.getType() == IResource.ROOT) {
-						IProject[] projects = ((IWorkspaceRoot)resource).getProjects();
-						for (int p = 0; p < projects.length; p++) {
-							checkLocationDeleted(projects[p]);
-						}
-					}
-					resource.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 1));
-					IJavaElement jElement= JavaCore.create(resource);
-					if (jElement != null && jElement.exists())
-						javaElements.add(jElement);
-				}
-				IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
-				model.refreshExternalArchives(
-					(IJavaElement[]) javaElements.toArray(new IJavaElement[javaElements.size()]),
-					new SubProgressMonitor(monitor, resources.length));
+				performRefresh(selection, monitor);
 			}
 		};
 		
@@ -153,75 +177,34 @@ public class RefreshAction extends SelectionDispatchAction {
 		}
 	}
 	
-	private IResource[] getResources(IStructuredSelection selection) {
-		if (selection.isEmpty()) {
-			return new IResource[] {ResourcesPlugin.getWorkspace().getRoot()};
-		}
+	private void performRefresh(IStructuredSelection selection, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+		monitor.beginTask(ActionMessages.RefreshAction_progressMessage, 2);
 		
-		List result= new ArrayList(selection.size());
-		getResources(result, selection.toArray());
-		
-		for (Iterator iter= result.iterator(); iter.hasNext();) {
-			IResource resource= (IResource) iter.next();
-			if (isDescendent(result, resource))
-				iter.remove();			
-		}
-		
-		return (IResource[]) result.toArray(new IResource[result.size()]);
+		WrappedWorkbenchRefreshAction workbenchAction= new WrappedWorkbenchRefreshAction(getSite());
+		workbenchAction.selectionChanged(selection);
+		workbenchAction.run(new SubProgressMonitor(monitor, 1));
+		refreshJavaElements(selection, new SubProgressMonitor(monitor, 1));
 	}
 	
-	private void getResources(List result, Object[] elements) {
-		for (int i= 0; i < elements.length; i++) {
-			Object element= elements[i];
-			// Must check working set before IAdaptable since WorkingSet
-			// implements IAdaptable
-			if (element instanceof IWorkingSet) {
-				getResources(result, ((IWorkingSet)element).getElements());
-			} else if (element instanceof IAdaptable) {
-				IResource resource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
-				if (resource == null)
-					continue;
-				if (resource.getType() != IResource.PROJECT  || 
-						(resource.getType() == IResource.PROJECT && ((IProject)resource).isOpen())) {
-					result.add(resource);
+	private void refreshJavaElements(IStructuredSelection selection, IProgressMonitor monitor) throws JavaModelException {
+		Object[] selectedElements= selection.toArray();
+		ArrayList javaElements= new ArrayList();
+		for (int i= 0; i < selectedElements.length; i++) {
+			Object curr= selectedElements[i];
+			if (curr instanceof IJavaElement) {
+				javaElements.add(curr);
+			} else if (curr instanceof PackageFragmentRootContainer) {
+				javaElements.addAll(Arrays.asList(((PackageFragmentRootContainer) curr).getPackageFragmentRoots()));
+			} else if (curr instanceof IAdaptable) {
+				Object adapted= ((IAdaptable) curr).getAdapter(IJavaElement.class);
+				if (adapted != null) {
+					javaElements.add(adapted);
 				}
 			}
+ 		}
+		if (!javaElements.isEmpty()) {
+			IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+			model.refreshExternalArchives((IJavaElement[]) javaElements.toArray(new IJavaElement[javaElements.size()]), monitor);
 		}
 	}
-	
-	private boolean isDescendent(List candidates, IResource element) {
-		IResource parent= element.getParent();
-		while (parent != null) {
-			if (candidates.contains(parent))
-				return true;
-			parent= parent.getParent();
-		}
-		return false;
-	}
-	
-	private void checkLocationDeleted(IProject project) throws CoreException {
-		if (!project.exists())
-			return;
-		URI location= project.getLocationURI();
-		if (location == null)
-			return;
-		IFileStore store= EFS.getStore(location);
-		if (!store.fetchInfo().exists()) {
-			final String message = Messages.format(
-				ActionMessages.RefreshAction_locationDeleted_message, 
-				new Object[] { project.getName(), Resources.getLocationString(project) });
-			final boolean[] result= new boolean[1];
-			// Must prompt user in UI thread (we're in the operation thread here).
-			getShell().getDisplay().syncExec(new Runnable() {
-				public void run() {
-					result[0]= MessageDialog.openQuestion(getShell(), 
-						ActionMessages.RefreshAction_locationDeleted_title, 
-						message);
-				}
-			});
-			if (result[0]) { 
-				project.delete(true, true, null);
-			}
-		}
-	}	
 }

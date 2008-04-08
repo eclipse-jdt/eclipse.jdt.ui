@@ -332,6 +332,7 @@ public final class ActionMessages extends NLS {
 	public static String RefreshAction_progressMessage;
 	public static String RefreshAction_error_title;
 	public static String RefreshAction_error_message;
+	public static String RefreshAction_error_workbenchaction_message;
 	public static String RefreshAction_locationDeleted_title;
 	public static String RefreshAction_locationDeleted_message;
 	public static String ModifyParameterAction_problem_title;
