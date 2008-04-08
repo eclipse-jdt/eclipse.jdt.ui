@@ -453,14 +453,11 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return RefactoringSearchEngine.createOrPattern(ms, IJavaSearchConstants.ALL_OCCURRENCES);
 	}
 
-	SearchResultGroup[] getOccurrences(){
+	protected SearchResultGroup[] getOccurrences(){
 		return fOccurrences;	
 	}
 	
-	/*
-	 * XXX made protected to allow overriding and working around bug 39700
-	 */
-	protected SearchResultGroup[] getOccurrences(IProgressMonitor pm, RefactoringStatus status, ReferencesInBinaryContext binaryRefs) throws CoreException {
+	private SearchResultGroup[] getOccurrences(IProgressMonitor pm, RefactoringStatus status, ReferencesInBinaryContext binaryRefs) throws CoreException {
 		SearchPattern pattern= createOccurrenceSearchPattern();
 		return RefactoringSearchEngine.search(pattern, createRefactoringScope(),
 			new MethodOccurenceCollector(getMethod().getElementName(), binaryRefs), pm, status);	
@@ -746,7 +743,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	 * @param status the status
 	 * @throws CoreException 
 	 */
-	void addOccurrences(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException/*thrown in subtype*/{
+	protected void addOccurrences(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException/*thrown in subtype*/{
 		pm.beginTask("", fOccurrences.length);				 //$NON-NLS-1$
 		for (int i= 0; i < fOccurrences.length; i++){
 			ICompilationUnit cu= fOccurrences[i].getCompilationUnit();

@@ -16,8 +16,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -29,27 +27,21 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.MethodDeclarationMatch;
-import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
-import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 
@@ -130,43 +122,9 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	}
 	
 	/*
-	 * The code below is needed to due bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=39700 .
-	 * Declaration in hierarchy doesn't take visibility into account. 
-	 */
-
-	/*
-	 * XXX working around bug 39700
-	 */
-	protected SearchResultGroup[] getOccurrences(IProgressMonitor pm, ReferencesInBinaryContext binaryRefs, RefactoringStatus status) throws CoreException {
-		pm.beginTask("", 2);	 //$NON-NLS-1$
-		SearchPattern pattern= createReferenceSearchPattern();
-		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, createRefactoringScope(),
-			new MethodOccurenceCollector(getMethod().getElementName(), binaryRefs), new SubProgressMonitor(pm, 1), status);
-		
-		//Workaround bug 39700. Manually add declaration match:
-		IResource declaringResource= getDeclaringCU().getResource();
-		int start= getMethod().getNameRange().getOffset();
-		int length= getMethod().getNameRange().getLength();
-		MethodDeclarationMatch declarationMatch= new MethodDeclarationMatch(getMethod(), SearchMatch.A_ACCURATE, start, length, SearchEngine.getDefaultSearchParticipant(), declaringResource);
-		for (int i= 0; i < groups.length; i++) {
-			SearchResultGroup group= groups[i];
-			IResource resource= group.getResource();
-			if (resource.equals(declaringResource)) {
-				group.add(declarationMatch);
-				return groups; //no need to go further
-			}	
-		}
-		SearchResultGroup declarationGroup= new SearchResultGroup(declaringResource, new SearchMatch[] { declarationMatch });
-		SearchResultGroup[] result= new SearchResultGroup[groups.length + 1];
-		System.arraycopy(groups, 0, result, 0, groups.length);
-		result[groups.length]= declarationGroup;
-		return result;
-	}
-		
-	/*
 	 * @see RenameMethodProcessor#addOccurrences(org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager, org.eclipse.core.runtime.IProgressMonitor, RefactoringStatus)
 	 */
-	void addOccurrences(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
+	protected void addOccurrences(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		// declaration update must be registered first
 		addDeclarationUpdate(manager);
@@ -179,11 +137,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 		return getMethod().getCompilationUnit();
 	}
 
-	private SearchPattern createReferenceSearchPattern() {
-		return SearchPattern.createPattern(getMethod(), IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
-	}
-	
-	final void addDeclarationUpdate(TextChangeManager manager) throws CoreException {
+	private void addDeclarationUpdate(TextChangeManager manager) throws CoreException {
 
 		if (getDelegateUpdating()) {
 			// create the delegate
