@@ -40,6 +40,14 @@ public class MethodChecks {
 	private MethodChecks(){
 	}
 	
+	/**
+	 * Returns <code>true</code> iff the method could be a virtual method,
+	 * i.e. if it is not a constructor, is private, or is static.
+	 * 
+	 * @param method a method
+	 * @return <code>true</code> iff the method could a virtual method
+	 * @throws JavaModelException
+	 */
 	public static boolean isVirtual(IMethod method) throws JavaModelException {
 		if (method.isConstructor())
 			return false;
@@ -50,12 +58,19 @@ public class MethodChecks {
 		return true;	
 	}	
 	
+	/**
+	 * Returns <code>true</code> iff the method could be a virtual method,
+	 * i.e. if it is not a constructor, is private, or is static.
+	 * 
+	 * @param methodBinding a method
+	 * @return <code>true</code> iff the method could a virtual method
+	 */
 	public static boolean isVirtual(IMethodBinding methodBinding){
 		if (methodBinding.isConstructor())
 			return false;
-		if (Modifier.isPrivate(methodBinding.getModifiers()))	//TODO is this enough?
+		if (Modifier.isPrivate(methodBinding.getModifiers()))
 			return false;
-		if (Modifier.isStatic(methodBinding.getModifiers()))	//TODO is this enough?
+		if (Modifier.isStatic(methodBinding.getModifiers()))
 			return false;
 		return true;	
 	}
@@ -71,16 +86,6 @@ public class MethodChecks {
 		return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, Corext.getPluginId(), RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD, overrides);
 	}
 	
-	/**
-	 * Checks if the given method is declared in an interface. If the method's declaring type
-	 * is an interface the method returns <code>false</code> if it is only declared in that
-	 * interface.
-	 * @param method the method to check
-	 * @param hierarchy the hierarchy
-	 * @param monitor progress monitor
-	 * @return the resulting status
-	 * @throws JavaModelException 
-	 */
 	public static RefactoringStatus checkIfComesFromInterface(IMethod method, ITypeHierarchy hierarchy, IProgressMonitor monitor) throws JavaModelException {
 		IMethod inInterface= MethodChecks.isDeclaredInInterface(method, hierarchy, monitor);
 			
@@ -93,16 +98,6 @@ public class MethodChecks {
 		return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, Corext.getPluginId(), RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE, inInterface);
 	}
 	
-	/**
-	 * Checks if the given method is declared in an interface. If the method's declaring type
-	 * is an interface the method returns <code>false</code> if it is only declared in that
-	 * interface.
-	 * @param method the method to check
-	 * @param hierarchy the hierarchy
-	 * @param monitor progress monitor
-	 * @return the resulting status
-	 * @throws JavaModelException 
-	 */
 	public static IMethod isDeclaredInInterface(IMethod method, ITypeHierarchy hierarchy, IProgressMonitor monitor) throws JavaModelException {
 		Assert.isTrue(isVirtual(method));
 		IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
