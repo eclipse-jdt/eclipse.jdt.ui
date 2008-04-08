@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,6 +71,7 @@ public final class RenameSourceFolderChange extends AbstractJavaElementRenameCha
 		this(sourceFolder.getPath(), sourceFolder.getElementName(), newName, IResource.NULL_STAMP);
 		Assert.isTrue(!sourceFolder.isReadOnly(), "should not be read only"); //$NON-NLS-1$
 		Assert.isTrue(!sourceFolder.isArchive(), "should not be an archive"); //$NON-NLS-1$
+		Assert.isTrue(!sourceFolder.isExternal(), "should not be an external folder"); //$NON-NLS-1$
 		setValidationMethod(VALIDATE_NOT_DIRTY);
 	}
 

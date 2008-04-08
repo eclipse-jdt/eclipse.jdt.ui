@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -186,7 +186,7 @@ public class ClasspathModifier {
 		return result;
 	}
 	
-    public static IStatus checkAddExternalJarsPrecondition(IPath[] absolutePaths, CPJavaProject cpProject) throws CoreException {
+    public static IStatus checkAddExternalJarsPrecondition(IPath[] absolutePaths, CPJavaProject cpProject) {
     	IStatus result= StatusInfo.OK_STATUS;
     	
     	IJavaProject javaProject= cpProject.getJavaProject();
@@ -236,7 +236,7 @@ public class ClasspathModifier {
 		return result;
     }
     
-    public static BuildpathDelta addExternalJars(IPath[] absolutePaths, CPJavaProject cpProject) throws CoreException {
+    public static BuildpathDelta addExternalJars(IPath[] absolutePaths, CPJavaProject cpProject) {
     	BuildpathDelta result= new BuildpathDelta(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddJarCP_tooltip);
     	
     	IJavaProject javaProject= cpProject.getJavaProject();
@@ -409,6 +409,7 @@ public class ClasspathModifier {
 	 * 
 	 * @param path the path to find a build path entry for
 	 * @param project the Java project
+	 * @param entryKind 
 	 * @return the <code>IClasspathEntry</code> corresponding
 	 * to the <code>path</code> or <code>null</code> if there
 	 * is no such entry
@@ -593,6 +594,7 @@ public class ClasspathModifier {
 	 * @param project the project to test
 	 * @return <code>true</code> if <code>project</code> is a source folder
 	 * <code>false</code> otherwise.
+	 * @throws JavaModelException 
 	 */
 	public static boolean isSourceFolder(IJavaProject project) throws JavaModelException {
 		return ClasspathModifier.getClasspathEntryFor(project.getPath(), project, IClasspathEntry.CPE_SOURCE) != null;
@@ -607,12 +609,15 @@ public class ClasspathModifier {
 	 * <code>false</code> otherwise.
 	 */
 	public static boolean isDefaultFragment(IPackageFragment fragment) {
-		return fragment.getElementName().length() == 0;
+		return fragment.isDefaultPackage();
 	}
 
 	/**
 	 * Determines whether the inclusion filter of the element's source folder is empty
 	 * or not
+	 * @param resource 
+	 * @param project 
+	 * @param monitor 
 	 * @return <code>true</code> if the inclusion filter is empty,
 	 * <code>false</code> otherwise.
 	 * @throws JavaModelException 
@@ -642,6 +647,7 @@ public class ClasspathModifier {
 	 * @param root the fragment root to be inspected
 	 * @return <code>true</code> inclusion or exclusion filter set,
 	 * <code>false</code> otherwise.
+	 * @throws JavaModelException 
 	 */
 	public static boolean filtersSet(IPackageFragmentRoot root) throws JavaModelException {
 		if (root == null)
@@ -660,6 +666,8 @@ public class ClasspathModifier {
 	 * Add a resource to the build path.
 	 * 
 	 * @param resource the resource to be added to the build path
+	 * @param existingEntries 
+	 * @param newEntries 
 	 * @param project the Java project
 	 * @param monitor progress monitor, can be <code>null</code> 
 	 * @return returns the new element of type <code>IPackageFragmentRoot</code> that has been added to the build path
@@ -700,6 +708,8 @@ public class ClasspathModifier {
 	 * Add a Java element to the build path.
 	 * 
 	 * @param javaElement element to be added to the build path
+	 * @param existingEntries 
+	 * @param newEntries 
 	 * @param project the Java project
 	 * @param monitor progress monitor, can be <code>null</code> 
 	 * @return returns the new element of type <code>IPackageFragmentRoot</code> that has been added to the build path
@@ -842,6 +852,7 @@ public class ClasspathModifier {
 	 * @param newEntries a list of new build path entries
 	 * @param project the Java project
 	 * @param monitor progress monitor, can be <code>null</code>
+	 * @throws JavaModelException 
 	 */
 	public static void exclude(IPath path, List existingEntries, List newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
@@ -1287,7 +1298,7 @@ public class ClasspathModifier {
 		IStatus validate= workspaceRoot.getWorkspace().validatePath(path.toString(), IResource.FOLDER);
 		StatusInfo rootStatus= new StatusInfo();
 		rootStatus.setOK();
-		boolean isExternal= isExternalArchiveOrLibrary(entry, project);
+		boolean isExternal= isExternalArchiveOrLibrary(entry);
 		if (!isExternal && validate.matches(IStatus.ERROR) && !project.getPath().equals(path)) {
 			rootStatus.setError(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_error_InvalidRootName, validate.getMessage())); 
 			throw new CoreException(rootStatus);
@@ -1302,7 +1313,7 @@ public class ClasspathModifier {
 				} else {
 					URI projLocation= project.getProject().getLocationURI();
 					if (projLocation != null) {
-						IFileStore store= EFS.getStore(projLocation).getChild(path);
+						IFileStore store= EFS.getStore(projLocation).getFileStore(path);
 						if (store.fetchInfo().exists()) {
 							rootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExistingDifferentCase); 
 							throw new CoreException(rootStatus);
@@ -1386,7 +1397,7 @@ public class ClasspathModifier {
 		}
 	}
 
-	private static boolean isExternalArchiveOrLibrary(CPListElement entry, IJavaProject project) {
+	private static boolean isExternalArchiveOrLibrary(CPListElement entry) {
 		if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY || entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 			if (entry.getResource() instanceof IFolder) {
 				return false;
@@ -1396,6 +1407,11 @@ public class ClasspathModifier {
 		return false;
 	}
 
+	public static boolean isInExternalOrArchive(IJavaElement element) {
+		IPackageFragmentRoot root= (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+		return root != null && (root.isArchive() || root.isExternal());
+	}
+	
 	/**
 	 * Test if the provided kind is of type
 	 * <code>IClasspathEntry.CPE_SOURCE</code>

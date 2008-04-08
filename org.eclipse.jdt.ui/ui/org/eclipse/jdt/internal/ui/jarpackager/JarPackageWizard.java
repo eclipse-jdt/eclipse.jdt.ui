@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -107,18 +107,23 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		else if (je.getElementType() == IJavaElement.JAVA_PROJECT)
 			selectedElements.add(je);
 		else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
-			if (!JavaModelUtil.getPackageFragmentRoot(je).isArchive())
+			if (!isInArchiveOrExternal(je))
 				selectedElements.add(je);
 		} else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
-			if (!((IPackageFragmentRoot) je).isArchive())
+			if (!isInArchiveOrExternal(je))
 				selectedElements.add(je);
 		} else {
 			IOpenable openable= je.getOpenable();
 			if (openable instanceof ICompilationUnit)
 				selectedElements.add(((ICompilationUnit) openable).getPrimary());
-			else if (openable instanceof IClassFile && !JavaModelUtil.getPackageFragmentRoot(je).isArchive())
+			else if (openable instanceof IClassFile && !isInArchiveOrExternal(je))
 				selectedElements.add(openable);
 		}
+	}
+	
+	private static boolean isInArchiveOrExternal(IJavaElement element) {
+		IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
+		return root != null && (root.isArchive() || root.isExternal()); 
 	}
 
 	/**
@@ -153,6 +158,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	/**
 	 * Exports the JAR package.
 	 * 
+	 * @param op the op
 	 * @return a boolean indicating success or failure
 	 */
 	protected boolean executeExportOperation(IJarExportRunnable op) {

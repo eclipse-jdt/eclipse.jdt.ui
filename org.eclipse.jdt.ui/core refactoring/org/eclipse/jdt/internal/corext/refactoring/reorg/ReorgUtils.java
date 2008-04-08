@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,11 +59,11 @@ public class ReorgUtils {
 	private ReorgUtils() {
 	}
 
-	public static boolean isArchiveMember(IJavaElement[] elements) {
+	public static boolean isArchiveOrExternalMember(IJavaElement[] elements) {
 		for (int i= 0; i < elements.length; i++) {
 			IJavaElement element= elements[i];
 			IPackageFragmentRoot root= (IPackageFragmentRoot)element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-			if (root != null && root.isArchive())
+			if (root != null && (root.isArchive() || root.isExternal()))
 				return true;
 		}
 		return false;
@@ -116,7 +116,7 @@ public class ReorgUtils {
 		}
 		return result;
 	}
-		
+	
 	public static IResource getResource(IJavaElement element){
 		if (element instanceof ICompilationUnit)
 			return ((ICompilationUnit)element).getPrimary().getResource();

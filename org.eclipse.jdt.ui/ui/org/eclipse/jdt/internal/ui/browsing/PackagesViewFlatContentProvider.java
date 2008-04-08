@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -84,7 +84,7 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 	}
 
 	/*
-	 * Weeds out packageFragments from external jars
+	 * Weeds out packageFragments from external jars and folders
 	 */
 	private IPackageFragment[] getPackageFragments(IPackageFragment[] iPackageFragments) {
 		List list= new ArrayList();
@@ -93,7 +93,7 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 			IJavaElement el= fragment.getParent();
 			if (el instanceof IPackageFragmentRoot) {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) el;
-				if(root.isArchive() && root.isExternal())
+				if (root.isExternal())
 					continue;
 			}
 			list.add(fragment);

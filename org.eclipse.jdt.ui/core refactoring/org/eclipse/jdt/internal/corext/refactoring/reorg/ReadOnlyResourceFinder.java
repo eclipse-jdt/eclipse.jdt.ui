@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,6 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -67,11 +66,10 @@ class ReadOnlyResourceFinder{
 	private static boolean hasReadOnlyResourcesAndSubResources(IJavaElement javaElement) throws CoreException {
 		switch(javaElement.getElementType()){
 			case IJavaElement.CLASS_FILE:
-				//if this assert fails, it means that a precondition is missing
-				Assert.isTrue(((IClassFile)javaElement).getResource() instanceof IFile);
-				//fall thru
 			case IJavaElement.COMPILATION_UNIT:
 				IResource resource= ReorgUtils.getResource(javaElement);
+				//if this assert fails, it means that a precondition is missing
+				Assert.isTrue(resource instanceof IFile);
 				return (resource != null && Resources.isReadOnly(resource));
 			case IJavaElement.PACKAGE_FRAGMENT:
 				IResource packResource= ReorgUtils.getResource(javaElement);
@@ -89,7 +87,7 @@ class ReadOnlyResourceFinder{
 				return hasReadOnlyResourcesAndSubResources(pack.getChildren());
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 				IPackageFragmentRoot root= (IPackageFragmentRoot) javaElement;
-				if (root.isArchive())
+				if (root.isArchive() || root.isExternal())
 					return false;
 				IResource pfrResource= ReorgUtils.getResource(javaElement);
 				if (pfrResource == null)

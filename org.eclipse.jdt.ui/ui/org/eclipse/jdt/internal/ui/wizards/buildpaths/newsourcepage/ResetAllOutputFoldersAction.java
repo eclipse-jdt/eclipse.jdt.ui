@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -101,9 +101,10 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
 			List entries= new ArrayList();
 			for (int i= 0; i < roots.length; i++) {
 				monitor.worked(1);
-				if (roots[i].isArchive())
+				IPackageFragmentRoot root= roots[i];
+				if (root.isArchive() || root.isExternal())
 					continue;
-				IClasspathEntry entry= roots[i].getRawClasspathEntry();
+				IClasspathEntry entry= root.getRawClasspathEntry();
 				CPListElement element= CPListElement.createFromExisting(entry, project);
 				CPListElementAttribute outputFolder= new CPListElementAttribute(element, CPListElement.OUTPUT, element.getAttribute(CPListElement.OUTPUT), true);
 				entries.add(outputFolder);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -774,7 +774,8 @@ public final class ReorgPolicyFactory {
 				case IJavaElement.JAVA_PROJECT:
 					return true;
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-					return !((IPackageFragmentRoot) javaElement).isArchive();
+					IPackageFragmentRoot root= (IPackageFragmentRoot) javaElement;
+					return !root.isArchive() && !root.isExternal();
 				default:
 					return false;
 			}
@@ -1601,7 +1602,8 @@ public final class ReorgPolicyFactory {
 				return false;
 			IPackageFragmentRoot[] roots= getPackageFragmentRoots();
 			for (int i= 0; i < roots.length; i++) {
-				if (roots[i].isReadOnly() && !roots[i].isArchive()) {
+				IPackageFragmentRoot root= roots[i];
+				if (root.isReadOnly() && !root.isArchive() && !root.isExternal()) {
 					final ResourceAttributes attributes= roots[i].getResource().getResourceAttributes();
 					if (attributes == null || attributes.isReadOnly())
 						return false;
@@ -2726,7 +2728,8 @@ public final class ReorgPolicyFactory {
 			if (!super.canEnable())
 				return false;
 			for (int i= 0; i < fPackageFragmentRoots.length; i++) {
-				if (!(ReorgUtils.isSourceFolder(fPackageFragmentRoots[i]) || fPackageFragmentRoots[i].isArchive() && !fPackageFragmentRoots[i].isExternal()))
+				IPackageFragmentRoot root= fPackageFragmentRoots[i];
+				if (!(ReorgUtils.isSourceFolder(root) || root.isArchive() && !root.isExternal()))
 					return false;
 			}
 			if (ReorgUtils.containsLinkedResources(fPackageFragmentRoots))
@@ -3987,7 +3990,7 @@ public final class ReorgPolicyFactory {
 		if (containsNull(javaElements))
 			return NO;
 		
-		if (ReorgUtils.isArchiveMember(javaElements) && ReorgUtils.getElementsOfType(javaElements, IJavaElement.PACKAGE_FRAGMENT_ROOT).size() != javaElements.length)
+		if (ReorgUtils.isArchiveOrExternalMember(javaElements) && ReorgUtils.getElementsOfType(javaElements, IJavaElement.PACKAGE_FRAGMENT_ROOT).size() != javaElements.length)
 			return NO;
 		
 		if (ReorgUtils.hasElementsOfType(javaElements, IJavaElement.JAVA_PROJECT))

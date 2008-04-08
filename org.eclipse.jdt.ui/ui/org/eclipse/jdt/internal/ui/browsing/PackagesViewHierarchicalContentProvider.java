@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -111,7 +111,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 							fMapToLogicalPackage.clear();
 							fMapToPackageFragments.clear();
 							IResource resource= root.getUnderlyingResource();
-							if (root.isArchive()) {
+							if (root.isArchive() || root.isExternal()) {
 								IPackageFragment[] fragments= new IPackageFragment[0];
 								IJavaElement[] els= root.getChildren();
 								fragments= getTopLevelChildrenByElementName(els);
@@ -197,7 +197,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		addFragmentsToMap((IPackageFragment[])packageFragments.toArray(new IPackageFragment[packageFragments.size()]));
 	}
 
-	private List getFoldersAndElements(IResource[] resources) throws CoreException {
+	private List getFoldersAndElements(IResource[] resources) {
 		List list= new ArrayList();
 		for (int i= 0; i < resources.length; i++) {
 			IResource resource= resources[i];
@@ -216,7 +216,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		return list;
 	}
 	
-	private List getFolders(IResource[] resources) throws CoreException {
+	private List getFolders(IResource[] resources) {
 		List list= new ArrayList();
 		for (int i= 0; i < resources.length; i++) {
 			IResource resource= resources[i];
@@ -277,58 +277,53 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 	 */
 	public Object getParent(Object element) {
 
-		try {
-			if (element instanceof IPackageFragment) {
-				IPackageFragment fragment= (IPackageFragment) element;
-				if(!fragment.exists())
-					return null;
-				Object parent= getHierarchicalParent(fragment);
-				if(parent instanceof IPackageFragment) {
-					IPackageFragment pkgFragment= (IPackageFragment)parent;
-					LogicalPackage logicalPkg= findLogicalPackage(pkgFragment);
-					if (logicalPkg != null)
-						return logicalPkg;
-					else {
-						LogicalPackage lp= createLogicalPackage(pkgFragment);
-						if(lp == null)
-							return pkgFragment;
-						else return lp;
-					}
-				}
-				return parent;
-
-			} else if(element instanceof LogicalPackage){
-				LogicalPackage el= (LogicalPackage) element;
-				IPackageFragment fragment= el.getFragments()[0];
-				Object parent= getHierarchicalParent(fragment);
-
-				if(parent instanceof IPackageFragment){
-					IPackageFragment pkgFragment= (IPackageFragment) parent;
-					LogicalPackage logicalPkg= findLogicalPackage(pkgFragment);
-					if (logicalPkg != null)
-						return logicalPkg;
-					else {
-						LogicalPackage lp= createLogicalPackage(pkgFragment);
-						if(lp == null)
-							return pkgFragment;
-						else return lp;
-					}
-				} else
-					return fragment.getJavaProject();
-			} else if (element instanceof IFolder) {
-				IFolder folder = (IFolder) element;
-				IResource res = folder.getParent();
-
-				IJavaElement el = JavaCore.create(res);
-				if (el != null) {
-					return el;
-				} else {
-					return res;
+		if (element instanceof IPackageFragment) {
+			IPackageFragment fragment= (IPackageFragment) element;
+			if(!fragment.exists())
+				return null;
+			Object parent= getHierarchicalParent(fragment);
+			if(parent instanceof IPackageFragment) {
+				IPackageFragment pkgFragment= (IPackageFragment)parent;
+				LogicalPackage logicalPkg= findLogicalPackage(pkgFragment);
+				if (logicalPkg != null)
+					return logicalPkg;
+				else {
+					LogicalPackage lp= createLogicalPackage(pkgFragment);
+					if(lp == null)
+						return pkgFragment;
+					else return lp;
 				}
 			}
+			return parent;
 
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+		} else if(element instanceof LogicalPackage){
+			LogicalPackage el= (LogicalPackage) element;
+			IPackageFragment fragment= el.getFragments()[0];
+			Object parent= getHierarchicalParent(fragment);
+
+			if(parent instanceof IPackageFragment){
+				IPackageFragment pkgFragment= (IPackageFragment) parent;
+				LogicalPackage logicalPkg= findLogicalPackage(pkgFragment);
+				if (logicalPkg != null)
+					return logicalPkg;
+				else {
+					LogicalPackage lp= createLogicalPackage(pkgFragment);
+					if(lp == null)
+						return pkgFragment;
+					else return lp;
+				}
+			} else
+				return fragment.getJavaProject();
+		} else if (element instanceof IFolder) {
+			IFolder folder = (IFolder) element;
+			IResource res = folder.getParent();
+
+			IJavaElement el = JavaCore.create(res);
+			if (el != null) {
+				return el;
+			} else {
+				return res;
+			}
 		}
 		return null;
 	}
@@ -373,15 +368,15 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		return null;
 	}
 
-	private Object getHierarchicalParent(IPackageFragment fragment) throws JavaModelException {
+	private Object getHierarchicalParent(IPackageFragment fragment) {
 		IJavaElement parent= fragment.getParent();
 
 		if ((parent instanceof IPackageFragmentRoot) && parent.exists()) {
 			IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
-			if (root.isArchive() || !fragment.exists()) {
+			if (root.isArchive() || root.isExternal() || !fragment.exists()) {
 				return findNextLevelParentByElementName(fragment);
 			} else {
-				IResource resource= fragment.getUnderlyingResource();
+				IResource resource= fragment.getResource();
 				if ((resource != null) && (resource instanceof IFolder)) {
 					IFolder folder= (IFolder) resource;
 					IResource res= folder.getParent();

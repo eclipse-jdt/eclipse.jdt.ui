@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -88,7 +88,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 					type != IJavaElement.COMPILATION_UNIT && type != IJavaElement.TYPE)
 					return false;
 				IPackageFragmentRoot root= (IPackageFragmentRoot)jElement.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-				if (root != null && root.isArchive())
+				if (root != null && (root.isArchive() || root.isExternal()))
 					return false;
 			} else if (element instanceof IProject) {
 				return false;
