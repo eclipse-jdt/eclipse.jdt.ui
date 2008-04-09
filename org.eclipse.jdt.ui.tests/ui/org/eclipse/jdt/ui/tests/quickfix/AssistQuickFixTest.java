@@ -674,6 +674,132 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
 	}
 	
+	public void testAssignToLocal11() throws Exception {
+		// assign to statement in if body with no brackets
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i) {\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.getProperties();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+				
+		int offset= buf.toString().indexOf("System.getProperties()");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Properties;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i) {\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            Properties properties = System.getProperties();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Properties;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    private Properties properties;\n");
+		buf.append("\n");
+		buf.append("    public void foo(int i) {\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            properties = System.getProperties();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
+	}
+	
+	public void testAssignToLocal12() throws Exception {
+		// assign to recovered statement in if body with no brackets
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i) {\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("           i++\n");
+		buf.append("        else\n");
+		buf.append("            System.getProperties()\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+				
+		int offset= buf.toString().indexOf("System.getProperties()");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Properties;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int i) {\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("           i++\n");
+		buf.append("        else {\n");
+		buf.append("            Properties properties = System.getProperties();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Properties;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    private Properties properties;\n");
+		buf.append("\n");
+		buf.append("    public void foo(int i) {\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("           i++\n");
+		buf.append("        else\n");
+		buf.append("            properties = System.getProperties();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });	
+	}	
+	
 	public void testAssignParamToField() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

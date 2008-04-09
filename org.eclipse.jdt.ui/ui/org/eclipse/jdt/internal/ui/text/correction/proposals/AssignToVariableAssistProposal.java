@@ -141,6 +141,12 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 		Type type= evaluateType(ast);
 		
+		if (ASTNodes.isControlStatementBody(fNodeToAssign.getLocationInParent())) {
+			Block block= ast.newBlock();
+			block.statements().add(rewrite.createMoveTarget(fNodeToAssign));
+			rewrite.replace(fNodeToAssign, block, null);
+		}
+		
 		if (needsSemicolon(expression)) {
 			VariableDeclarationStatement varStatement= ast.newVariableDeclarationStatement(newDeclFrag);
 			varStatement.setType(type);
