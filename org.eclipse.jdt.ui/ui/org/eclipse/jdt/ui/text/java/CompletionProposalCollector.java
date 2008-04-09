@@ -609,25 +609,24 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 
 	private void acceptPotentialMethodDeclaration(CompletionProposal proposal) {
-		if (fCompilationUnit == null)
+		IJavaElement enclosingElement= getContext().getEnclosingElement();
+		if (enclosingElement == null) {
 			return;
+		}
 
-		String prefix= String.valueOf(proposal.getName());
-		int completionStart= proposal.getReplaceStart();
-		int completionEnd= proposal.getReplaceEnd();
-		int relevance= computeRelevance(proposal);
-
-		try {
-			IJavaElement element= fCompilationUnit.getElementAt(proposal.getCompletionLocation() + 1);
-			if (element != null) {
-				IType type= (IType) element.getAncestor(IJavaElement.TYPE);
-				if (type != null) {
-					GetterSetterCompletionProposal.evaluateProposals(type, prefix, completionStart, completionEnd - completionStart, relevance + 1, fSuggestedMethodNames, fJavaProposals);
-					MethodDeclarationCompletionProposal.evaluateProposals(type, prefix, completionStart, completionEnd - completionStart, relevance, fSuggestedMethodNames, fJavaProposals);
-				}
+		IType type= (IType) enclosingElement.getAncestor(IJavaElement.TYPE);
+		if (type != null) {
+			String prefix= String.valueOf(proposal.getName());
+			int completionStart= proposal.getReplaceStart();
+			int completionEnd= proposal.getReplaceEnd();
+			int relevance= computeRelevance(proposal);
+			
+			try {
+				GetterSetterCompletionProposal.evaluateProposals(type, prefix, completionStart, completionEnd - completionStart, relevance + 1, fSuggestedMethodNames, fJavaProposals);
+				MethodDeclarationCompletionProposal.evaluateProposals(type, prefix, completionStart, completionEnd - completionStart, relevance, fSuggestedMethodNames, fJavaProposals);
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
 			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
 		}
 	}
 

@@ -181,6 +181,9 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		
 		// Set the favorite list to propose static members - since 3.3 
 		collector.setFavoriteReferences(getFavoriteStaticMembers());
+		
+		// used for getter-setter and constructor proposals - since 3.4
+		collector.setRequireExtendedContext(true); 
 
 		try {
 			Point selection= viewer.getSelectedRange();
