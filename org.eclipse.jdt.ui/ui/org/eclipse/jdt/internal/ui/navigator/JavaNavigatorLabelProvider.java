@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,8 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.navigator.ICommonContentExtensionSite;
@@ -43,7 +45,7 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerLabelProvider;
  * 
  * @since 3.2
  */
-public class JavaNavigatorLabelProvider implements ICommonLabelProvider {
+public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyledLabelProvider {
 
 	private final long LABEL_FLAGS = JavaElementLabels.DEFAULT_QUALIFIED
 			| JavaElementLabels.ROOT_POST_QUALIFIED
@@ -147,6 +149,10 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider {
 
 	public String getText(Object element) {
 		return delegeteLabelProvider.getText(element);
+	}
+	
+	public StyledString getStyledText(Object element) {
+		return delegeteLabelProvider.getStyledText(element);
 	}
 
 	public void setIsFlatLayout(boolean state) {
