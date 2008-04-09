@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,7 +41,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
-
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IType;
@@ -374,9 +373,10 @@ public final class ContentAssistHistory {
 			if (hierarchy.contains(lhs)) {
 				// TODO remember for every member of the LHS hierarchy or not? Yes for now.
 				IType[] allLHSides= hierarchy.getAllSupertypes(lhs);
+				String rhsQualifiedName= rhs.getFullyQualifiedName();
 				for (int i= 0; i < allLHSides.length; i++)
-					rememberInternal(allLHSides[i], rhs);
-				rememberInternal(lhs, rhs);
+					rememberInternal(allLHSides[i], rhsQualifiedName);
+				rememberInternal(lhs, rhsQualifiedName);
 			}
 		} catch (JavaModelException x) {
 			JavaPlugin.log(x);
@@ -422,13 +422,14 @@ public final class ContentAssistHistory {
 		return Collections.unmodifiableMap(map);
 	}
 	
-	private void rememberInternal(IType lhs, IType rhs) throws JavaModelException {
-		if (isCacheableLHS(lhs))
-			getCache(lhs.getFullyQualifiedName()).add(rhs.getFullyQualifiedName());
+	private void rememberInternal(IType lhs, String rhsQualifiedName) throws JavaModelException {
+		String lhsQualifiedName= lhs.getFullyQualifiedName();
+		if (isCacheableLHS(lhs, lhsQualifiedName))
+			getCache(lhsQualifiedName).add(rhsQualifiedName);
 	}
 
-	private boolean isCacheableLHS(IType type) throws JavaModelException {
-		return !Flags.isFinal(type.getFlags()) && !UNCACHEABLE.contains(type.getFullyQualifiedName());
+	private boolean isCacheableLHS(IType type, String qualifiedName) throws JavaModelException {
+		return !Flags.isFinal(type.getFlags()) && !UNCACHEABLE.contains(qualifiedName);
 	}
 	
 	private boolean isCacheableRHS(IType type) throws JavaModelException {
