@@ -177,8 +177,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			Assert.isLegal(input instanceof AnnotationInfo);
 			fInput= (AnnotationInfo)input;
 			
-			deferredCreateToolbar(getToolBarManager());
-			deferredCreateContent(fParent);
+			deferredCreateContent();
 		}
 		
 		/*
@@ -199,6 +198,25 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			super.setFocus();
 			if (fFocusControl != null)
 				fFocusControl.setFocus();
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.AbstractInformationControl#setVisible(boolean)
+		 */
+		public final void setVisible(boolean visible) {
+			if (!visible)
+				disposeDeferredCreatedContent();
+			super.setVisible(visible);
+		}
+		
+		protected void disposeDeferredCreatedContent() {
+			Control[] children= fParent.getChildren();
+			for (int i= 0; i < children.length; i++) {
+				children[i].dispose();
+			}
+			ToolBarManager toolBarManager= getToolBarManager();
+			if (toolBarManager != null)
+				toolBarManager.removeAll();
 		}
 
 		/*
@@ -232,16 +250,13 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		}
 
 		/**
-		 * Creates the toolbar actions, if a toolbar if available. This
+		 * Fills the toolbar actions, if a toolbar is available. This
 		 * is called after the input has been set.
-		 * 
-		 * @param toolBarManager the tool bar manager or <code>null</code>
 		 */
-		private void deferredCreateToolbar(ToolBarManager toolBarManager) {
+		protected void fillToolbar() {
+			ToolBarManager toolBarManager= getToolBarManager();
 			if (toolBarManager == null)
 				return;
-
-			toolBarManager.removeAll();
 			fInput.fillToolBar(toolBarManager, this);
 			toolBarManager.update(true);
 		}
@@ -249,22 +264,18 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		/**
 		 * Create content of the hover. This is called after
 		 * the input has been set.
-		 * 
-		 * @param parent the composite containing the content to create
 		 */
-		protected void deferredCreateContent(Composite parent) {
-			Control[] children= parent.getChildren();
-			for (int i= 0; i < children.length; i++) {
-				children[i].dispose();
-			}
-			createAnnotationInformation(parent, getAnnotationInfo().annotation);
-			setColorAndFont(parent, parent.getForeground(), parent.getBackground(), JFaceResources.getDialogFont());
+		protected void deferredCreateContent() {
+			fillToolbar();
+			
+			createAnnotationInformation(fParent, getAnnotationInfo().annotation);
+			setColorAndFont(fParent, fParent.getForeground(), fParent.getBackground(), JFaceResources.getDialogFont());
 
 			ICompletionProposal[] proposals= getAnnotationInfo().getCompletionProposals();
 			if (proposals.length > 0)
-				createCompletionProposalsControl(parent, proposals);
+				createCompletionProposalsControl(fParent, proposals);
 
-			parent.layout(true);
+			fParent.layout(true);
 		}
 
 		private void setColorAndFont(Control control, Color foreground, Color background, Font font) {
