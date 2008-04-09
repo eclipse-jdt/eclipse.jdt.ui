@@ -39,12 +39,12 @@ public class OpenExternalBrowserAction extends SelectionDispatchAction {
 	/**
 	 * Create a new ShowExternalJavadocAction
 	 * 
-	 * @param site the site this action is working on 
+	 * @param site the site this action is working on
 	 */
 	public OpenExternalBrowserAction(IWorkbenchSite site) {
 		super(site);
 
-		setText(ActionMessages.OpenExternalBrowserAction_javadoc_label); 
+		setText(ActionMessages.OpenExternalBrowserAction_javadoc_label);
 		setToolTipText(ActionMessages.OpenExternalBrowserAction_javadoc_toolTip);
 		
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_EXTERNAL_BROWSER);
@@ -98,7 +98,7 @@ public class OpenExternalBrowserAction extends SelectionDispatchAction {
 	 * True if this action can operate on the given selection
 	 * 
 	 * @param selection the selection to inspect
-	 * @return true if this action can operate on the selection
+	 * @return <code>true</code> if this action can operate on the selection
 	 */
 	private boolean canEnable(IStructuredSelection selection) {
 		if (selection.size() != 1)
@@ -117,9 +117,7 @@ public class OpenExternalBrowserAction extends SelectionDispatchAction {
 			URL url= JavaUI.getJavadocLocation(input, true);
 			if (url == null)
 				return false;
-
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
 			return false;
 		}
 
