@@ -68,7 +68,7 @@ public abstract class CuCollectingSearchRequestor extends CollectingSearchReques
 		
 		ICompilationUnit unit= SearchUtils.getCompilationUnit(match);
 		if (unit == null) {
-			if (fBinaryRefs != null) {
+			if (fBinaryRefs != null && match.getAccuracy() == SearchMatch.A_ACCURATE) {
 				fBinaryRefs.add(match);
 			}
 			return;
@@ -88,6 +88,14 @@ public abstract class CuCollectingSearchRequestor extends CollectingSearchReques
 		return false;
 	}
 	
+	/**
+	 * Handles the given match in the given compilation unit.
+	 * Implementors should call {@link #collectMatch(SearchMatch)} to collect matches.
+	 *  
+	 * @param unit the enclosing CU of the match, never <code>null</code>
+	 * @param match the match
+	 * @throws CoreException if something bad happens
+	 */
 	protected abstract void acceptSearchMatch(ICompilationUnit unit, SearchMatch match) throws CoreException;
 
 	public void endReporting() {
