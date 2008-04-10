@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.text.java;
-
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -62,6 +61,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavadocInlineTagCompletionPropos
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocLinkTypeCompletionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 
+
 /**
  * Java UI implementation of <code>CompletionRequestor</code>. Produces
  * {@link IJavaCompletionProposal}s from the proposal descriptors received via
@@ -81,7 +81,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
  * &#x2f;&#x2f; display &#x2f; process proposals
  * </pre>
  * Note that after a code completion operation, the collector will store any
- * received proposals, which may require a considerable amount of memory, so the 
+ * received proposals, which may require a considerable amount of memory, so the
  * collector should not be kept as a reference after a completion operation.
  * </p>
  * <p>
@@ -711,7 +711,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 
 	private IJavaCompletionProposal createJavadocSimpleProposal(CompletionProposal javadocProposal) {
-		// TODO do better with javadoc proposals 
+		// TODO do better with javadoc proposals
 //		String completion= String.valueOf(proposal.getCompletion());
 //		int start= proposal.getReplaceStart();
 //		int length= getLength(proposal);
