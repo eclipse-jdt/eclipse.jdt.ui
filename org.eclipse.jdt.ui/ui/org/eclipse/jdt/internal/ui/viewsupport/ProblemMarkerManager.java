@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,13 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 
 import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
@@ -32,7 +36,10 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
 import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
 
+import org.eclipse.ui.progress.UIJob;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitAnnotationModelEvent;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
@@ -98,9 +105,15 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 
 	private ListenerList fListeners;
 	
+	private Set fResourcesWithMarkerChanges;
+	private Set fResourcesWithAnnotationChanges;
+
+	private UIJob fNotifierJob;
 	
 	public ProblemMarkerManager() {
 		fListeners= new ListenerList();
+		fResourcesWithMarkerChanges= new HashSet();
+		fResourcesWithAnnotationChanges= new HashSet();
 	}
 
 	/*
@@ -118,8 +131,16 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 		}
 
 		if (!changedElements.isEmpty()) {
-			IResource[] changes= (IResource[]) changedElements.toArray(new IResource[changedElements.size()]);
-			fireChanges(changes, true);
+			synchronized (this) {
+				if (fResourcesWithMarkerChanges.isEmpty()) {
+					fResourcesWithMarkerChanges= changedElements;
+				} else {
+					if (!fResourcesWithMarkerChanges.addAll(changedElements)) {
+						return; // no changes
+					}
+				}
+				fireChanges();
+			}
 		}
 	}
 	
@@ -137,8 +158,12 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 		if (event instanceof CompilationUnitAnnotationModelEvent) {
 			CompilationUnitAnnotationModelEvent cuEvent= (CompilationUnitAnnotationModelEvent) event;
 			if (cuEvent.includesProblemMarkerAnnotationChanges()) {
-				IResource[] changes= new IResource[] { cuEvent.getUnderlyingResource() };
-				fireChanges(changes, false);
+				synchronized (this) {
+					IResource changedResource= cuEvent.getUnderlyingResource();
+					if (fResourcesWithAnnotationChanges.add(changedResource)) {
+						fireChanges();
+					}
+				}
 			}
 		}
 	}	
@@ -168,19 +193,52 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 		}
 	}
 	
-	private void fireChanges(final IResource[] changes, final boolean isMarkerChange) {
+	private void fireChanges() {
 		Display display= SWTUtil.getStandardDisplay();
 		if (display != null && !display.isDisposed()) {
-			display.asyncExec(new Runnable() {
-				public void run() {		
-					Object[] listeners= fListeners.getListeners();
-					for (int i= 0; i < listeners.length; i++) {
-						IProblemChangedListener curr= (IProblemChangedListener) listeners[i];
-						curr.problemsChanged(changes, isMarkerChange);
-					}	
-				}
-			});
+			postAsyncUpdate(display);
 		}	
+	}
+	
+	private void postAsyncUpdate(final Display display) {
+		if (fNotifierJob == null) {
+			fNotifierJob= new UIJob(display, JavaUIMessages.ProblemMarkerManager_problem_marker_update_job_description) {
+				public IStatus runInUIThread(IProgressMonitor monitor) {
+					runPendingUpdates();
+					return Status.OK_STATUS;
+				}
+			};
+			fNotifierJob.setSystem(true);
+		}
+		fNotifierJob.schedule();
+	}
+	
+	/**
+	 * Notify all IProblemChangedListener. Must be called in the display thread.
+	 */
+	private void runPendingUpdates() {
+		IResource[] markerResources= null;
+		IResource[] annotationResources= null;
+		synchronized (this) {
+			if (!fResourcesWithMarkerChanges.isEmpty()) {
+				markerResources= (IResource[]) fResourcesWithMarkerChanges.toArray(new IResource[fResourcesWithMarkerChanges.size()]);
+				fResourcesWithMarkerChanges.clear();
+			}
+			if (!fResourcesWithAnnotationChanges.isEmpty()) {
+				annotationResources= (IResource[]) fResourcesWithAnnotationChanges.toArray(new IResource[fResourcesWithAnnotationChanges.size()]);
+				fResourcesWithAnnotationChanges.clear();
+			}
+		}
+		Object[] listeners= fListeners.getListeners();
+		for (int i= 0; i < listeners.length; i++) {
+			IProblemChangedListener curr= (IProblemChangedListener) listeners[i];
+			if (markerResources != null) {
+				curr.problemsChanged(markerResources, true);
+			}
+			if (annotationResources != null) {
+				curr.problemsChanged(annotationResources, false);
+			}
+		}
 	}
 
 }

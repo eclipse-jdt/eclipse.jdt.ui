@@ -63,6 +63,7 @@ public final class JavaUIMessages extends NLS {
 	public static String PackageSelectionDialog_error3Message;
 	public static String PackageSelectionDialog_nopackages_title;
 	public static String PackageSelectionDialog_nopackages_message;
+	public static String ProblemMarkerManager_problem_marker_update_job_description;
 	
 	public static String BuildPathDialog_title;
 	

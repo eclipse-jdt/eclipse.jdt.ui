@@ -86,6 +86,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	private boolean fFoldPackages;
 	
 	private Collection fPendingUpdates;
+	
+	private UIJob fUpdateJob;
 		
 	/**
 	 * Creates a new content provider for Java elements.
@@ -98,6 +100,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		fFoldPackages= arePackagesFoldedInHierarchicalLayout();
 		fPendingUpdates= null;
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
+		
+		fUpdateJob= null;
 	}
 	
 	private boolean arePackagesFoldedInHierarchicalLayout(){
@@ -148,19 +152,21 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		}
 	}
 	private void postAsyncUpdate(final Display display) {
-		UIJob updateJob= new UIJob(display, PackagesMessages.PackageExplorerContentProvider_update_job_description) {
-			public IStatus runInUIThread(IProgressMonitor monitor) {
-				TreeViewer viewer= fViewer;
-				if (viewer != null && viewer.isBusy()) {
-					schedule(100); // reschedule when viewer is busy: bug 184991
-				} else {
-					runPendingUpdates();
+		if (fUpdateJob == null) {
+			fUpdateJob= new UIJob(display, PackagesMessages.PackageExplorerContentProvider_update_job_description) {
+				public IStatus runInUIThread(IProgressMonitor monitor) {
+					TreeViewer viewer= fViewer;
+					if (viewer != null && viewer.isBusy()) {
+						schedule(100); // reschedule when viewer is busy: bug 184991
+					} else {
+						runPendingUpdates();
+					}
+					return Status.OK_STATUS;
 				}
-				return Status.OK_STATUS;
-			}
-		};
-		updateJob.setSystem(true);
-		updateJob.schedule();
+			};
+			fUpdateJob.setSystem(true);
+		}
+		fUpdateJob.schedule();
 	}
 	
 	/**
