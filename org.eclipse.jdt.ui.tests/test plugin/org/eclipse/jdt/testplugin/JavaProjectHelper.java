@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -40,6 +41,9 @@ import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Synchronizer;
 
 import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.wizards.datatransfer.ImportOperation;
@@ -164,7 +168,7 @@ public class JavaProjectHelper {
 	 * @since 3.1
 	 */	
 	public static IJavaProject createJavaProjectWithJUnitSource(String projectName, String srcContainerName, String outputFolderName) throws CoreException, IOException, InvocationTargetException {
-		IJavaProject project= createJavaProject(projectName, outputFolderName); //$NON-NLS-2$
+		IJavaProject project= createJavaProject(projectName, outputFolderName); 
 		
 		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(project, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
 		Assert.assertNotNull(jdk);
@@ -276,11 +280,10 @@ public class JavaProjectHelper {
 	 * Removes all files in the project and sets the given classpath
 	 * @param jproject The project to clear
 	 * @param entries The default class path to set
-	 * @throws CoreException Clearing the project failed
+	 * @throws Exception Clearing the project failed
 	 */			
-	public static void clear(final IJavaProject jproject, final IClasspathEntry[] entries) throws CoreException {
+	public static void clear(final IJavaProject jproject, final IClasspathEntry[] entries) throws Exception {
 		performDummySearch();
-		
 		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
 				jproject.setRawClasspath(entries, null);
@@ -294,6 +297,8 @@ public class JavaProjectHelper {
 			}
 		};
 		ResourcesPlugin.getWorkspace().run(runnable, null);
+		
+		JavaProjectHelper.emptyDisplayLoop();
 	}
 	
 
@@ -762,6 +767,21 @@ public class JavaProjectHelper {
 	}		
 	
 	private static class Requestor extends TypeNameRequestor{
+	}
+	
+	public static void emptyDisplayLoop() throws Exception {
+		boolean showDebugInfo= false;
+		
+		Display display= Display.getCurrent();
+		if (display != null) {
+			if (showDebugInfo) {
+				Synchronizer synchronizer= display.getSynchronizer();
+				Field field= Synchronizer.class.getDeclaredField("messageCount");
+				field.setAccessible(true);
+				System.out.println("Processing " + field.getInt(synchronizer) + " messages in queue");
+			}
+			while (display.readAndDispatch()) { /*loop*/ }
+		}
 	}
 }
 
