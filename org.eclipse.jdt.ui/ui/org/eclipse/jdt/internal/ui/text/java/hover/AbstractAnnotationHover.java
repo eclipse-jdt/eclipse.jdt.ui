@@ -176,7 +176,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		public void setInput(Object input) {
 			Assert.isLegal(input instanceof AnnotationInfo);
 			fInput= (AnnotationInfo)input;
-			
+			disposeDeferredCreatedContent();
 			deferredCreateContent();
 		}
 		
