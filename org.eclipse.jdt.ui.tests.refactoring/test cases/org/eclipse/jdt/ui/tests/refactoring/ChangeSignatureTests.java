@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,7 +98,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		return createCU(pack, getSimpleTestFileName(canRename, input), getFileContents(getTestFileName(canRename, input)));
 	}
 
-	private static ParameterInfo[] createNewParamInfos(String[] newTypes, String[] newNames, String[] newDefaultValues) {
+	static ParameterInfo[] createNewParamInfos(String[] newTypes, String[] newNames, String[] newDefaultValues) {
 		if (newTypes == null)
 			return new ParameterInfo[0];
 		ParameterInfo[] result= new ParameterInfo[newTypes.length];
@@ -108,7 +108,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		return result;
 	}
 
-	private static void addInfos(List list, ParameterInfo[] newParamInfos, int[] newIndices) {
+	static void addInfos(List list, ParameterInfo[] newParamInfos, int[] newIndices) {
 		if (newParamInfos == null || newIndices == null)
 			return;
 		for (int i= newIndices.length - 1; i >= 0; i--) {
