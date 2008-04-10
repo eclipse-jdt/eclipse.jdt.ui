@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,10 +29,12 @@ import org.eclipse.jdt.core.ITypeHierarchyChangedListener;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 
 public class TypeHierarchyTest extends TestCase {
 	
@@ -56,7 +58,7 @@ public class TypeHierarchyTest extends TestCase {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new TypeHierarchyTest("testHierarchyWithWorkingCopy3"));
 			return new ProjectTestSetup(suite);
-		}	
+		}
 	}
 	
 	public static Test setUpTest(Test test) {
@@ -70,7 +72,7 @@ public class TypeHierarchyTest extends TestCase {
 
 	protected void tearDown () throws Exception {
 		JavaProjectHelper.clear(fJavaProject1, ProjectTestSetup.getDefaultClasspath());
-		JavaProjectHelper.delete(fJavaProject2);		
+		JavaProjectHelper.delete(fJavaProject2);
 	}
 					
 	public void test1() throws Exception {
@@ -142,6 +144,7 @@ public class TypeHierarchyTest extends TestCase {
 			assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
 			
 			part.doSave(null);
+			SharedASTProvider.getAST(cu2, SharedASTProvider.WAIT_YES, null);
 			hierarchy.refresh(null);
 			
 			allTypes= hierarchy.getAllTypes();
@@ -210,6 +213,7 @@ public class TypeHierarchyTest extends TestCase {
 			assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
 			
 			part.doSave(null);
+			SharedASTProvider.getAST(cu2, SharedASTProvider.WAIT_YES, null);
 			hierarchy.refresh(null);
 			
 			allTypes= hierarchy.getAllTypes();
@@ -227,7 +231,7 @@ public class TypeHierarchyTest extends TestCase {
 		
 		// update after save
 		assertTrue("Update count should be 1, is: " + updateCount[0], updateCount[0] == 1);
-		assertTrue("Should contain 2 types, contains: " + allTypes.length, allTypes.length == 2);	
+		assertTrue("Should contain 2 types, contains: " + allTypes.length, allTypes.length == 2);
 
 	}
 	
@@ -262,7 +266,7 @@ public class TypeHierarchyTest extends TestCase {
 		assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
 		assertTrue("Update count should be 0, is: " + updateCount[0], updateCount[0] == 0);
 		
-		try {			
+		try {
 			IDocument document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 			String superType= "pack1.A";
 			
