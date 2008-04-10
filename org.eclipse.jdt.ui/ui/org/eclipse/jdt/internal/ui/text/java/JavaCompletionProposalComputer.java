@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -181,9 +181,6 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 		
 		// Set the favorite list to propose static members - since 3.3 
 		collector.setFavoriteReferences(getFavoriteStaticMembers());
-		
-		// used for getter-setter and constructor proposals - since 3.4
-		collector.setRequireExtendedContext(true); 
 
 		try {
 			Point selection= viewer.getSelectedRange();
