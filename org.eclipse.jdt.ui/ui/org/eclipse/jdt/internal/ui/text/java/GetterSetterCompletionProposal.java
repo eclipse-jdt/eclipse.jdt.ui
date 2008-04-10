@@ -56,12 +56,12 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal i
 			IField curr= fields[i];
 			if (!JdtFlags.isEnum(curr)) {
 				String getterName= GetterSetterUtil.getGetterName(curr, null);
-				if (getterName.startsWith(prefix) && !hasMethod(methods, getterName) && suggestedMethods.add(getterName)) {
+				if (Strings.startsWithIgnoreCase(getterName, prefix) && !hasMethod(methods, getterName) && suggestedMethods.add(getterName)) {
 					result.add(new GetterSetterCompletionProposal(curr, offset, length, true, relevance));
 				}
 
 				String setterName= GetterSetterUtil.getSetterName(curr, null);
-				if (setterName.startsWith(prefix) && !hasMethod(methods, setterName) && suggestedMethods.add(setterName)) {
+				if (Strings.startsWithIgnoreCase(setterName, prefix) && !hasMethod(methods, setterName) && suggestedMethods.add(setterName)) {
 					result.add(new GetterSetterCompletionProposal(curr, offset, length, false, relevance));
 				}
 			}
