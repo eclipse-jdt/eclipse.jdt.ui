@@ -139,6 +139,9 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 		if (declaringType != null) {
 			ASTRewrite rewrite= ASTRewrite.create(unit.getAST());
 			IMethodBinding methodToOverride= Bindings.findMethodInHierarchy(declaringType, fMethodName, fParamTypes);
+			if (methodToOverride == null && declaringType.isInterface()) {
+				methodToOverride= Bindings.findMethodInType(node.getAST().resolveWellKnownType("java.lang.Object"), fMethodName, fParamTypes); //$NON-NLS-1$
+			}
 			if (methodToOverride != null) {
 				CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject);
 				MethodDeclaration stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, importRewrite, context, methodToOverride, declaringType.getName(), settings, declaringType.isInterface());
