@@ -131,14 +131,16 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 		}
 
 		if (!changedElements.isEmpty()) {
+			boolean hasChanges= false;
 			synchronized (this) {
 				if (fResourcesWithMarkerChanges.isEmpty()) {
 					fResourcesWithMarkerChanges= changedElements;
+					hasChanges= true;
 				} else {
-					if (!fResourcesWithMarkerChanges.addAll(changedElements)) {
-						return; // no changes
-					}
+					hasChanges= fResourcesWithMarkerChanges.addAll(changedElements);
 				}
+			}
+			if (hasChanges) {
 				fireChanges();
 			}
 		}
@@ -158,11 +160,13 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 		if (event instanceof CompilationUnitAnnotationModelEvent) {
 			CompilationUnitAnnotationModelEvent cuEvent= (CompilationUnitAnnotationModelEvent) event;
 			if (cuEvent.includesProblemMarkerAnnotationChanges()) {
+				boolean hasChanges= false;
 				synchronized (this) {
 					IResource changedResource= cuEvent.getUnderlyingResource();
-					if (fResourcesWithAnnotationChanges.add(changedResource)) {
-						fireChanges();
-					}
+					hasChanges= fResourcesWithAnnotationChanges.add(changedResource);
+				}
+				if (hasChanges) {
+					fireChanges();
 				}
 			}
 		}
