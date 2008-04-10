@@ -61,7 +61,6 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavadocInlineTagCompletionPropos
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocLinkTypeCompletionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 
-
 /**
  * Java UI implementation of <code>CompletionRequestor</code>. Produces
  * {@link IJavaCompletionProposal}s from the proposal descriptors received via
@@ -167,6 +166,8 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		fCompilationUnit= cu;
 
 		fUserReplacementLength= -1;
+		
+		setRequireExtendedContext(true);
 	}
 
 	/**
@@ -609,24 +610,28 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 
 	private void acceptPotentialMethodDeclaration(CompletionProposal proposal) {
-		IJavaElement enclosingElement= getContext().getEnclosingElement();
-		if (enclosingElement == null) {
-			return;
-		}
+		try {
+			IJavaElement enclosingElement= null;
+			if (getContext().isExtended()) {
+				enclosingElement= getContext().getEnclosingElement();
+			} else if (fCompilationUnit != null) {
+				// kept for backward compatibility: CU is not reconciled at this moment, information is missing (bug 70005)
+				enclosingElement= fCompilationUnit.getElementAt(proposal.getCompletionLocation() + 1);
+			}
+			if (enclosingElement == null)
+				return;
+			IType type= (IType) enclosingElement.getAncestor(IJavaElement.TYPE);
+			if (type != null) {
+				String prefix= String.valueOf(proposal.getName());
+				int completionStart= proposal.getReplaceStart();
+				int completionEnd= proposal.getReplaceEnd();
+				int relevance= computeRelevance(proposal);
 
-		IType type= (IType) enclosingElement.getAncestor(IJavaElement.TYPE);
-		if (type != null) {
-			String prefix= String.valueOf(proposal.getName());
-			int completionStart= proposal.getReplaceStart();
-			int completionEnd= proposal.getReplaceEnd();
-			int relevance= computeRelevance(proposal);
-			
-			try {
 				GetterSetterCompletionProposal.evaluateProposals(type, prefix, completionStart, completionEnd - completionStart, relevance + 1, fSuggestedMethodNames, fJavaProposals);
 				MethodDeclarationCompletionProposal.evaluateProposals(type, prefix, completionStart, completionEnd - completionStart, relevance, fSuggestedMethodNames, fJavaProposals);
-			} catch (CoreException e) {
-				JavaPlugin.log(e);
 			}
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
 		}
 	}
 
