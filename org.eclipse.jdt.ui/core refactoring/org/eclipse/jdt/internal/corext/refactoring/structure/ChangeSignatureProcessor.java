@@ -97,6 +97,8 @@ import org.eclipse.jdt.core.refactoring.participants.ChangeMethodSignatureArgume
 import org.eclipse.jdt.core.refactoring.participants.ChangeMethodSignatureArguments.ThrownException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.MethodReferenceMatch;
+import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Corext;
@@ -110,6 +112,7 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.CuCollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.ExceptionInfo;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -126,6 +129,7 @@ import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
+import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
@@ -803,12 +807,16 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			if (fDelegateUpdating && isSignatureClashWithInitial()) 
 				result.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.ChangeSignatureRefactoring_old_and_new_signatures_not_sufficiently_different ));
 
-			fRippleMethods= RippleMethodFinder2.getRelatedMethods(fMethod, new SubProgressMonitor(pm, 1), null);
+			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , getMethodName());
+			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
+			
+			fRippleMethods= RippleMethodFinder2.getRelatedMethods(fMethod, binaryRefs, new SubProgressMonitor(pm, 1), null);
 			result.merge(checkVarargs());
 			if (result.hasFatalError())
 				return result;
 			
-			fOccurrences= findOccurrences(new SubProgressMonitor(pm, 1), result);
+			fOccurrences= findOccurrences(new SubProgressMonitor(pm, 1), binaryRefs, result);
+			binaryRefs.addErrorIfNecessary(result);
 			
 			result.merge(checkVisibilityChanges());
 			result.merge(checkTypeVariables());
@@ -1551,17 +1559,39 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	}
 	
 	private IJavaSearchScope createRefactoringScope()  throws JavaModelException{
-		return RefactoringScopeFactory.create(fMethod);
+		return RefactoringScopeFactory.create(fMethod, true, false);
 	}
 	
-	private SearchResultGroup[] findOccurrences(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException{
-		if (fMethod.isConstructor()){
-			// workaround for bug 27236:
+	private SearchResultGroup[] findOccurrences(IProgressMonitor pm, ReferencesInBinaryContext binaryRefs, RefactoringStatus status) throws JavaModelException{
+		final boolean isConstructor= fMethod.isConstructor();
+		CuCollectingSearchRequestor requestor= new CuCollectingSearchRequestor(binaryRefs) {
+			protected void acceptSearchMatch(ICompilationUnit unit, SearchMatch match) throws CoreException {
+				// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=27236 :
+				if (isConstructor && match instanceof MethodReferenceMatch) {
+					MethodReferenceMatch mrm= (MethodReferenceMatch) match;
+					if (mrm.isSynthetic()) {
+						return;
+					}
+				}
+				collectMatch(match);
+			}
+		};
+		
+		SearchPattern pattern;
+		if (isConstructor) {
+			
+			// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=226151 : don't find binary refs for constructors for now
 			return ConstructorReferenceFinder.getConstructorOccurrences(fMethod, pm, status);
-		}else{	
-			SearchPattern pattern= RefactoringSearchEngine.createOrPattern(fRippleMethods, IJavaSearchConstants.ALL_OCCURRENCES);
-			return RefactoringSearchEngine.search(pattern, createRefactoringScope(), pm, status);
+			
+//			SearchPattern occPattern= SearchPattern.createPattern(fMethod, IJavaSearchConstants.ALL_OCCURRENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+//			SearchPattern declPattern= SearchPattern.createPattern(fMethod, IJavaSearchConstants.DECLARATIONS, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+//			SearchPattern refPattern= SearchPattern.createPattern(fMethod, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+//			pattern= SearchPattern.createOrPattern(declPattern, refPattern);
+//			pattern= occPattern;
+		} else {	
+			pattern= RefactoringSearchEngine.createOrPattern(fRippleMethods, IJavaSearchConstants.ALL_OCCURRENCES);
 		}
+		return RefactoringSearchEngine.search(pattern, createRefactoringScope(), requestor, pm, status);
 	}
 	
 	private static String createDeclarationString(ParameterInfo info) {
