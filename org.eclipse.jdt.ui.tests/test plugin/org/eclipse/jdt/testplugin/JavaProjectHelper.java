@@ -273,7 +273,7 @@ public class JavaProjectHelper {
 			}
 		};
 		ResourcesPlugin.getWorkspace().run(runnable, null);	
-		
+		emptyDisplayLoop();
 	}
 
 	/**
@@ -769,16 +769,21 @@ public class JavaProjectHelper {
 	private static class Requestor extends TypeNameRequestor{
 	}
 	
-	public static void emptyDisplayLoop() throws Exception {
+	public static void emptyDisplayLoop() {
 		boolean showDebugInfo= false;
 		
 		Display display= Display.getCurrent();
 		if (display != null) {
 			if (showDebugInfo) {
-				Synchronizer synchronizer= display.getSynchronizer();
-				Field field= Synchronizer.class.getDeclaredField("messageCount");
-				field.setAccessible(true);
-				System.out.println("Processing " + field.getInt(synchronizer) + " messages in queue");
+				try {
+					Synchronizer synchronizer= display.getSynchronizer();
+					Field field= Synchronizer.class.getDeclaredField("messageCount");
+					field.setAccessible(true);
+					System.out.println("Processing " + field.getInt(synchronizer) + " messages in queue");
+				} catch (Exception e) {
+					// ignore
+					System.out.println(e);
+				}
 			}
 			while (display.readAndDispatch()) { /*loop*/ }
 		}
