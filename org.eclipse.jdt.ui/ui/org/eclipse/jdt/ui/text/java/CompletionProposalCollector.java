@@ -166,8 +166,9 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		fCompilationUnit= cu;
 
 		fUserReplacementLength= -1;
-		
-		setRequireExtendedContext(true);
+		if (!ignoreAll) {
+			setRequireExtendedContext(true);
+		}
 	}
 
 	/**
@@ -183,6 +184,16 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 */
 	public CompletionProposalCollector(ICompilationUnit cu, boolean ignoreAll) {
 		this(cu.getJavaProject(), cu, ignoreAll);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.CompletionRequestor#setIgnored(int, boolean)
+	 */
+	public void setIgnored(int completionProposalKind, boolean ignore) {
+		super.setIgnored(completionProposalKind, ignore);
+		if (completionProposalKind == CompletionProposal.METHOD_DECLARATION && !ignore) {
+			setRequireExtendedContext(true);
+		}
 	}
 
 	/**
