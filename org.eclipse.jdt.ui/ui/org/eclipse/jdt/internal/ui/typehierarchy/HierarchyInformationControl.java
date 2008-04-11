@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -252,7 +252,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 					break;
 				default :
 					JavaPlugin.logErrorMessage("Element unsupported by the hierarchy: " + elem.getClass()); //$NON-NLS-1$
-					input= null;
+					// input is null;
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
@@ -367,7 +367,10 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		if (selectedElement instanceof IType && fFocus != null) {
 			IType type= (IType) selectedElement;
 			try {
-				return findMethod(fFocus, type);
+				IMethod method= findMethod(fFocus, type);
+				if (method != null) {
+					return method;
+				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 			}
