@@ -3480,6 +3480,12 @@
             id="org.eclipse.jdt.ui.correction.extractLocal.assist">
       </command>
       <command
+            name="%ActionDefinition.corrections.extractLocalNotReplaceOccurrences.name"
+            description="%ActionDefinition.corrections.extractLocalNotReplaceOccurrences.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.extractLocalNotReplaceOccurrences.assist">
+      </command>
+      <command
             name="%ActionDefinition.corrections.extractConstant.name"
             description="%ActionDefinition.corrections.extractConstant.description"
             categoryId="org.eclipse.jdt.ui.category.source"
