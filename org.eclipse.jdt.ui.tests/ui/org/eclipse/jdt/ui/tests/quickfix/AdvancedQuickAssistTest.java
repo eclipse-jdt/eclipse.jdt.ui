@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,8 @@
  * Contributors:
  *   Konstantin Scheglov (scheglov_ke@nlmk.ru) - initial API and implementation 
  *          (reports 71244 & 74746: New Quick Assist's [quick assist])
+ *   Benjamin Muskalla (buskalla@innoopract.com) - 104021: [quick fix] Introduce
+ *   		new local with casted type applied more than once
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -1100,6 +1102,42 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("        while (b instanceof String) {\n");
 		buf.append("            String string = (String) b;\n");
 		buf.append("            return;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+
+	}
+
+	public void testAssignAndCastBug_104021() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a, Object b) {\n");
+		buf.append("        if (b instanceof String) {\n");
+		buf.append("            String string = \"\";\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("instanceof");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(int a, Object b) {\n");
+		buf.append("        if (b instanceof String) {\n");
+		buf.append("            String string2 = (String) b;\n");
+		buf.append("            String string = \"\";\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");

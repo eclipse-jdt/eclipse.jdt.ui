@@ -13,6 +13,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -1326,7 +1327,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 7, image);
 		// prepare possible variable names
-		String[] varNames= suggestLocalVariableNames(cu, originalType.resolveBinding());
+		List excludedNames= Arrays.asList(ASTResolving.getUsedVariableNames(body));
+		String[] varNames= suggestLocalVariableNames(cu, originalType.resolveBinding(), excludedNames);
 		for (int i= 0; i < varNames.length; i++) {
 			proposal.addLinkedPositionProposal(KEY_NAME, varNames[i], null);
 		}
@@ -1383,8 +1385,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static String[] suggestLocalVariableNames(ICompilationUnit cu, ITypeBinding binding) {
-		return StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, cu.getJavaProject(), binding, null, null);
+	private static String[] suggestLocalVariableNames(ICompilationUnit cu, ITypeBinding binding, List excluded) {
+		return StubUtility.getVariableNameSuggestions(StubUtility.LOCAL, cu.getJavaProject(), binding, null, excluded);
 	}
 
 	private static boolean getPickOutStringProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
