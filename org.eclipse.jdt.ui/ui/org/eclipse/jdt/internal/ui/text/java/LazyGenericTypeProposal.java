@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -404,7 +404,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 			}
 			
 			// no or upper bound - use the type parameter of the inserted type, as it may be more
-			// restrictive (eg. List<?> list= new SerializableList<Serializable>()) 
+			// restrictive (eg. List<?> list= new SerializableList<Serializable>())
 			return computeTypeProposal(parameter);
 		}
 
@@ -592,6 +592,7 @@ public final class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposa
 		final ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setProject(fCompilationUnit.getJavaProject());
 		parser.setResolveBindings(true);
+		parser.setStatementsRecovery(true);
 
 		final Map bindings= new HashMap();
 		ASTRequestor requestor= new ASTRequestor() {
