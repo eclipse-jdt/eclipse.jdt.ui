@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Renaud Waldura &lt;renaud+eclipse@waldura.com&gt; - Access to static proposal
+ *     Benjamin Muskalla <bmuskalla@innoopract.com> - [quick fix] Shouldn't offer "Add throws declaration" quickfix for overriding signature if result would conflict with overridden signature
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -224,7 +225,14 @@ public class LocalCorrectionsSubProcessor {
 		if (decl instanceof MethodDeclaration) {
 			MethodDeclaration methodDecl= (MethodDeclaration) decl;
 			IMethodBinding binding= methodDecl.resolveBinding();
-			if (binding != null) {
+			boolean isApplicable= (binding != null);
+			if (isApplicable) {
+				IMethodBinding overriddenMethod= Bindings.findOverriddenMethod(binding, true);
+				if (overriddenMethod != null ) {
+					isApplicable= overriddenMethod.getDeclaringClass().isFromSource();
+				}
+			}
+			if (isApplicable) {
 				ITypeBinding[] methodExceptions= binding.getExceptionTypes();
 				ArrayList unhandledExceptions= new ArrayList(uncaughtExceptions.length);
 				for (int i= 0; i < uncaughtExceptions.length; i++) {
