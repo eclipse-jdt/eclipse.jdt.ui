@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,6 +70,8 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
+import org.eclipse.jdt.internal.corext.refactoring.CuCollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
@@ -79,6 +81,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenamePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
@@ -688,9 +691,15 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 			pm.beginTask("", 16); //$NON-NLS-1$
 			if (fProcessor.getUpdateReferences()){
 				pm.setTaskName(RefactoringCoreMessages.RenamePackageRefactoring_searching);	 
-				fOccurrences= getReferences(new SubProgressMonitor(pm, 4), result);	
+				
+				String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , fPackage.getElementName());
+				ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
+
+				fOccurrences= getReferences(new SubProgressMonitor(pm, 4), binaryRefs, result);	
 				fReferencesToTypesInNamesakes= getReferencesToTypesInNamesakes(new SubProgressMonitor(pm, 4), result);
-				fReferencesToTypesInPackage= getReferencesToTypesInPackage(new SubProgressMonitor(pm, 4), result);
+				fReferencesToTypesInPackage= getReferencesToTypesInPackage(new SubProgressMonitor(pm, 4), binaryRefs, result);
+				binaryRefs.addErrorIfNecessary(result);
+				
 				pm.setTaskName(RefactoringCoreMessages.RenamePackageRefactoring_checking); 
 				result.merge(analyzeAffectedCompilationUnits());
 				pm.worked(1);
@@ -710,10 +719,11 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 			pm.done();
 		}
 	
-		private SearchResultGroup[] getReferences(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
-			IJavaSearchScope scope= RefactoringScopeFactory.create(fPackage);
+		private SearchResultGroup[] getReferences(IProgressMonitor pm, ReferencesInBinaryContext binaryRefs, RefactoringStatus status) throws CoreException {
+			IJavaSearchScope scope= RefactoringScopeFactory.create(fPackage, true, false);
 			SearchPattern pattern= SearchPattern.createPattern(fPackage, IJavaSearchConstants.REFERENCES);
-			return RefactoringSearchEngine.search(pattern, scope, pm, status);
+			CollectingSearchRequestor requestor= new CuCollectingSearchRequestor(binaryRefs);
+			return RefactoringSearchEngine.search(pattern, scope, requestor, pm, status);
 		}
 		
 		private void addReferenceUpdates(IProgressMonitor pm) throws CoreException {
@@ -846,9 +856,9 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 			return new ArrayList(Arrays.asList(results));
 		}
 	
-		private List getReferencesToTypesInPackage(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
+		private List getReferencesToTypesInPackage(IProgressMonitor pm, ReferencesInBinaryContext binaryRefs, RefactoringStatus status) throws CoreException {
 			pm.beginTask("", 2); //$NON-NLS-1$
-			IJavaSearchScope referencedFromNamesakesScope= RefactoringScopeFactory.create(fPackage);
+			IJavaSearchScope referencedFromNamesakesScope= RefactoringScopeFactory.create(fPackage, true, false);
 			IPackageFragment[] namesakePackages= getNamesakePackages(referencedFromNamesakesScope, new SubProgressMonitor(pm, 1));
 			if (namesakePackages.length == 0) {
 				pm.done();
@@ -862,7 +872,8 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 				return new ArrayList(0);
 			}
 			SearchPattern pattern= RefactoringSearchEngine.createOrPattern(typesToSearch, IJavaSearchConstants.REFERENCES);
-			SearchResultGroup[] results= RefactoringSearchEngine.search(pattern, scope, new SubProgressMonitor(pm, 1), status);
+			CollectingSearchRequestor requestor= new CuCollectingSearchRequestor(binaryRefs);
+			SearchResultGroup[] results= RefactoringSearchEngine.search(pattern, scope, requestor, new SubProgressMonitor(pm, 1), status);
 			pm.done();
 			return new ArrayList(Arrays.asList(results));
 		}

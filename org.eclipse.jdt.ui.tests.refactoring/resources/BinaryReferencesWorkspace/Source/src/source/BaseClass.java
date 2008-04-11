@@ -1,5 +1,7 @@
 package source;
 
+import source.sub.InSubPack;
+
 public class BaseClass {
 	protected int fProtected;
 	public int fPublic;
@@ -8,7 +10,7 @@ public class BaseClass {
 	}
 	
 	protected void baseMethod() {
-		
+		new InSubPack();
 	}
 	
 	protected int compareTo(BaseClass other) {

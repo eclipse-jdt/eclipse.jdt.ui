@@ -13,5 +13,6 @@ public class ReferenceClass {
 		BaseClass baseClass = new BaseClass(1);
 		baseClass.paintColor(true ? Color.RED : GREEN);
 		System.out.println(baseClass.fPublic);
+		new source.sub.InSubPack();
 	}
 }

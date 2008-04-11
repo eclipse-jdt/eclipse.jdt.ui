@@ -40,11 +40,11 @@ public class BinaryReferencesTestSetup extends AbstractRefactoringTestSetup {
 	private IJavaProject fSource;
 	private IJavaProject fBinaryReference;
 	
-	public IJavaProject getSourceProject() throws Exception {
+	public IJavaProject getSourceProject() {
 		return fSource;
 	}
 	
-	public IJavaProject getBinaryReferenceProject() throws Exception {
+	public IJavaProject getBinaryReferenceProject() {
 		return fBinaryReference;
 	}
 	

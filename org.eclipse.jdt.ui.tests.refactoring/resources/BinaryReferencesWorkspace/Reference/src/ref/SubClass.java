@@ -2,6 +2,7 @@ package ref;
 
 import source.BaseClass;
 import source.Color;
+import source.sub.InSubPack;
 
 public class SubClass extends BaseClass {
 	public SubClass(int count) {
@@ -12,6 +13,7 @@ public class SubClass extends BaseClass {
 	protected void baseMethod() {
 		super.baseMethod();
 		referencedVirtualMethod();
+		new InSubPack();
 	}
 	
 	protected int compareTo(BaseClass other) {
