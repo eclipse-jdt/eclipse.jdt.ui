@@ -6,6 +6,7 @@ import source.Color;
 public class SubClass extends BaseClass {
 	public SubClass(int count) {
 		super(count + 1);
+		fProtected= 42;
 	}
 
 	protected void baseMethod() {

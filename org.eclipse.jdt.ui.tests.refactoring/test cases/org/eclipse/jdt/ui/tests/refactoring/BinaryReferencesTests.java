@@ -25,6 +25,7 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -202,6 +203,58 @@ public class BinaryReferencesTests extends TestCase {
 	
 	public void testRenameNonVirtualMethod02() throws Exception {
 		List matches= doRenameMethod("source.BaseClass", "referencedStaticMethod");
+		assertContainsMatches(matches, new String[] {
+				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass~main~\\[Ljava.lang.String;"
+		});
+	}
+	
+	private List doRenameField(String typeName, String fieldName) throws JavaModelException, Exception, CoreException {
+		RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_FIELD);
+		IField field= findType(typeName).getField(fieldName);
+		descriptor.setJavaElement(field);
+		descriptor.setNewName("newName");
+		descriptor.setUpdateReferences(true);
+		
+		RefactoringStatus status= new RefactoringStatus();
+		Refactoring refactoring= descriptor.createRefactoring(status);
+		assertTrue(status.isOK());
+		
+		CheckConditionsOperation op= new CheckConditionsOperation(refactoring, CheckConditionsOperation.ALL_CONDITIONS);
+		op.run(null);
+		RefactoringStatus validationStatus= op.getStatus();
+		assertTrue(!validationStatus.hasFatalError());
+		assertTrue(validationStatus.hasError());
+		assertEquals(1, validationStatus.getEntries().length);
+		
+		ReferencesInBinaryContext context= (ReferencesInBinaryContext) validationStatus.getEntryAt(0).getContext();
+		return context.getMatches();
+	}
+
+	public void testRenameField01() throws Exception {
+		List matches= doRenameField("source.BaseClass", "fProtected");
+		assertContainsMatches(matches, new String[] {
+				"=BinaryReference/binary<ref(SubClass.class[SubClass~SubClass~I"
+		});
+	}
+	
+	public void testRenameField02() throws Exception {
+		List matches= doRenameField("source.BaseClass", "fPublic");
+		assertContainsMatches(matches, new String[] {
+				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass~main~\\[Ljava.lang.String;"
+		});
+	}
+	
+	public void testRenameField03() throws Exception {
+		List matches= doRenameField("source.Color", "RED");
+		assertContainsMatches(matches, new String[] {
+				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass~main~\\[Ljava.lang.String;"
+		});
+	}
+	
+	public void testRenameField04() throws Exception {
+		if (true) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=226660
+			return;
+		List matches= doRenameField("source.Color", "GREEN");
 		assertContainsMatches(matches, new String[] {
 				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass~main~\\[Ljava.lang.String;"
 		});

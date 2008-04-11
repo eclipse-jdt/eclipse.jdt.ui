@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
+import org.eclipse.jdt.internal.corext.refactoring.CuCollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
@@ -68,6 +69,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
@@ -570,11 +572,18 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	}
 	
 	private IJavaSearchScope createRefactoringScope() throws CoreException{
-		return RefactoringScopeFactory.create(fField);
+		return RefactoringScopeFactory.create(fField, true, false);
 	}
 	
 	private SearchResultGroup[] getReferences(IProgressMonitor pm, RefactoringStatus status) throws CoreException{
-		return RefactoringSearchEngine.search(createSearchPattern(), createRefactoringScope(), pm, status);
+		String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , getCurrentElementName());
+		ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
+
+		SearchResultGroup[] result= RefactoringSearchEngine.search(createSearchPattern(), createRefactoringScope(),
+				new CuCollectingSearchRequestor(binaryRefs), pm, status);
+		binaryRefs.addErrorIfNecessary(status);
+		
+		return result;
 	}
 
 	public Change createChange(IProgressMonitor monitor) throws CoreException {

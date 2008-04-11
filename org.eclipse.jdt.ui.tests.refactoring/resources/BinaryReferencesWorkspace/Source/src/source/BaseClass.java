@@ -1,6 +1,8 @@
 package source;
 
 public class BaseClass {
+	protected int fProtected;
+	public int fPublic;
 	public BaseClass(int count) {
 		
 	}

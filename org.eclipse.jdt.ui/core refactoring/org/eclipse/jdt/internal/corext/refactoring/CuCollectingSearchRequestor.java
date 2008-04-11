@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
  * If a {@link ReferencesInBinaryContext} is passed, matches that are
  * not inside a CU are added to the context.
  */
-public abstract class CuCollectingSearchRequestor extends CollectingSearchRequestor {
+public class CuCollectingSearchRequestor extends CollectingSearchRequestor {
 
 	private final ReferencesInBinaryContext fBinaryRefs;
 	
@@ -90,13 +90,16 @@ public abstract class CuCollectingSearchRequestor extends CollectingSearchReques
 	
 	/**
 	 * Handles the given match in the given compilation unit.
-	 * Implementors should call {@link #collectMatch(SearchMatch)} to collect matches.
+	 * The default implementations accepts all matches.
+	 * Subclasses can override and call {@link #collectMatch(SearchMatch)} to collect matches.
 	 *  
 	 * @param unit the enclosing CU of the match, never <code>null</code>
 	 * @param match the match
 	 * @throws CoreException if something bad happens
 	 */
-	protected abstract void acceptSearchMatch(ICompilationUnit unit, SearchMatch match) throws CoreException;
+	protected void acceptSearchMatch(ICompilationUnit unit, SearchMatch match) throws CoreException {
+		collectMatch(match);
+	}
 
 	public void endReporting() {
 		fCuCache= null;
