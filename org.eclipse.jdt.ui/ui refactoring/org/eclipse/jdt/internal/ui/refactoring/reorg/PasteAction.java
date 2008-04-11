@@ -344,9 +344,15 @@ public class PasteAction extends SelectionDispatchAction{
 			private final String fTypeName;
 			private final String fPackageName;
 
-			public static List/*<ParsedCu>*/ parseCus(IJavaProject javaProject, String text) {
+			public static List/*<ParsedCu>*/ parseCus(IJavaProject javaProject, String compilerCompliance, String text) {
 				ASTParser parser= ASTParser.newParser(AST.JLS3);
-				parser.setProject(javaProject);
+				if (javaProject != null) {
+					parser.setProject(javaProject);
+				} else if (compilerCompliance != null) {
+					Map options= JavaCore.getOptions();
+					JavaModelUtil.setCompilanceOptions(options, compilerCompliance);
+					parser.setCompilerOptions(options);
+				}
 				parser.setSource(text.toCharArray());
 				parser.setStatementsRecovery(true);
 				CompilationUnit unit= (CompilationUnit) parser.createAST(null);
@@ -461,6 +467,8 @@ public class PasteAction extends SelectionDispatchAction{
 		private int fPackageDeclCount;
 		private ParsedCu[] fParsedCus;
 		private TransferData[] fAvailableTypes;
+		private IPath fVMPath;
+		private String fCompilerCompliance;
 		
 		protected TextPaster(Shell shell, Clipboard clipboard) {
 			super(shell, clipboard);
@@ -486,6 +494,7 @@ public class PasteAction extends SelectionDispatchAction{
 				destination= javaElements[0];
 				javaProject= destination.getJavaProject();
 			}
+			computeLatestVM();
 			parseCUs(javaProject, text);
 			
 			if (fParsedCus.length == 0)
@@ -586,9 +595,6 @@ public class PasteAction extends SelectionDispatchAction{
 			final IEditorPart[] editorPart= new IEditorPart[1];
 			
 			IRunnableWithProgress op= new IRunnableWithProgress() {
-				private IPath fVMPath;
-				private String fCompilerCompliance;
-
 				public void run(IProgressMonitor monitor) throws InvocationTargetException {
 					
 					final ArrayList cus= new ArrayList();
@@ -863,7 +869,6 @@ public class PasteAction extends SelectionDispatchAction{
 						srcFolder= project;
 					}
 					
-					computeLatestVM();
 					if (fCompilerCompliance != null) {
 						Map options= javaProject.getOptions(false);
 						JavaModelUtil.setCompilanceOptions(options, fCompilerCompliance);
@@ -876,58 +881,6 @@ public class PasteAction extends SelectionDispatchAction{
 					IClasspathEntry[] cpes= new IClasspathEntry[] { srcEntry, jreEntry };
 					javaProject.setRawClasspath(cpes, outputLocation, new SubProgressMonitor(pm, 1));
 					return javaProject.getPackageFragmentRoot(srcFolder);
-				}
-
-				private void computeLatestVM() {
-					IVMInstall bestVM= JavaRuntime.getDefaultVMInstall();
-					String bestVersion= getVMVersion(bestVM);
-					
-					IExecutionEnvironmentsManager eeManager= JavaRuntime.getExecutionEnvironmentsManager();
-					IExecutionEnvironment bestEE= null;
-					
-					IExecutionEnvironment[] ees= eeManager.getExecutionEnvironments();
-					for (int j= 0; j < ees.length; j++) {
-						IExecutionEnvironment ee= ees[j];
-						IVMInstall vm= ee.getDefaultVM();
-						String ver= getVMVersion(vm);
-						if (ver != null && (bestVersion == null || JavaModelUtil.isVersionLessThan(bestVersion, ver))) {
-							bestVersion= ver;
-							bestEE= ee;
-						}
-					}
-					
-					IVMInstallType[] vmTypes= JavaRuntime.getVMInstallTypes();
-					for (int i= 0; i < vmTypes.length; i++) {
-						IVMInstall[] vms= vmTypes[i].getVMInstalls();
-						for (int j= 0; j < vms.length; j++) {
-							IVMInstall vm= vms[j];
-							String ver= getVMVersion(vm);
-							if (ver != null && (bestVersion == null || JavaModelUtil.isVersionLessThan(bestVersion, ver))) {
-								bestVersion= ver;
-								bestVM= vm;
-								bestEE= null;
-							}
-						}
-					}
-					
-					if (bestEE != null) {
-						fVMPath= JavaRuntime.newJREContainerPath(bestEE);
-						fCompilerCompliance= bestVersion;
-					} else if (bestVM != null) {
-						fVMPath= JavaRuntime.newJREContainerPath(bestVM);
-						fCompilerCompliance= bestVersion;
-					} else {
-						fVMPath= JavaRuntime.newDefaultJREContainerPath();
-					}
-				}
-
-				private String getVMVersion(IVMInstall vm) {
-					if (vm instanceof IVMInstall2) {
-						IVMInstall2 vm2= (IVMInstall2) vm;
-						return JavaModelUtil.getCompilerCompliance(vm2, null);
-					} else {
-						return null;
-					}
 				}
 
 				private void removePackageDeclaration(final ICompilationUnit cu) throws JavaModelException, CoreException {
@@ -992,14 +945,14 @@ public class PasteAction extends SelectionDispatchAction{
 					fPackageDeclCount++;
 					if (tokensScanned) {
 						int packageStart= scanner.getCurrentTokenStartPosition();
-						List parsed= ParsedCu.parseCus(javaProject, text.substring(start, packageStart));
+						List parsed= ParsedCu.parseCus(javaProject, fCompilerCompliance, text.substring(start, packageStart));
 						if (parsed.size() > 0) {
 							cus.addAll(parsed);
 							start= packageStart;
 						}
 					}
 				} else if (tok == ITerminalSymbols.TokenNameEOF) {
-					List parsed= ParsedCu.parseCus(javaProject, text.substring(start, text.length()));
+					List parsed= ParsedCu.parseCus(javaProject, fCompilerCompliance, text.substring(start, text.length()));
 					if (parsed.size() > 0) {
 						cus.addAll(parsed);
 					}
@@ -1008,6 +961,58 @@ public class PasteAction extends SelectionDispatchAction{
 				tokensScanned= true;
 			}
 			fParsedCus= (ParsedCu[]) cus.toArray(new ParsedCu[cus.size()]);
+		}
+
+		private void computeLatestVM() {
+			IVMInstall bestVM= JavaRuntime.getDefaultVMInstall();
+			String bestVersion= getVMVersion(bestVM);
+			
+			IExecutionEnvironmentsManager eeManager= JavaRuntime.getExecutionEnvironmentsManager();
+			IExecutionEnvironment bestEE= null;
+			
+			IExecutionEnvironment[] ees= eeManager.getExecutionEnvironments();
+			for (int j= 0; j < ees.length; j++) {
+				IExecutionEnvironment ee= ees[j];
+				IVMInstall vm= ee.getDefaultVM();
+				String ver= getVMVersion(vm);
+				if (ver != null && (bestVersion == null || JavaModelUtil.isVersionLessThan(bestVersion, ver))) {
+					bestVersion= ver;
+					bestEE= ee;
+				}
+			}
+			
+			IVMInstallType[] vmTypes= JavaRuntime.getVMInstallTypes();
+			for (int i= 0; i < vmTypes.length; i++) {
+				IVMInstall[] vms= vmTypes[i].getVMInstalls();
+				for (int j= 0; j < vms.length; j++) {
+					IVMInstall vm= vms[j];
+					String ver= getVMVersion(vm);
+					if (ver != null && (bestVersion == null || JavaModelUtil.isVersionLessThan(bestVersion, ver))) {
+						bestVersion= ver;
+						bestVM= vm;
+						bestEE= null;
+					}
+				}
+			}
+			
+			if (bestEE != null) {
+				fVMPath= JavaRuntime.newJREContainerPath(bestEE);
+				fCompilerCompliance= bestVersion;
+			} else if (bestVM != null) {
+				fVMPath= JavaRuntime.newJREContainerPath(bestVM);
+				fCompilerCompliance= bestVersion;
+			} else {
+				fVMPath= JavaRuntime.newDefaultJREContainerPath();
+			}
+		}
+
+		private String getVMVersion(IVMInstall vm) {
+			if (vm instanceof IVMInstall2) {
+				IVMInstall2 vm2= (IVMInstall2) vm;
+				return JavaModelUtil.getCompilerCompliance(vm2, null);
+			} else {
+				return null;
+			}
 		}
     }
     
