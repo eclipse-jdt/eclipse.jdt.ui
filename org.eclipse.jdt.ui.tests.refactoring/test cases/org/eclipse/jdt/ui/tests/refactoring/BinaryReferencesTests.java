@@ -254,9 +254,6 @@ public class BinaryReferencesTests extends TestCase {
 	}
 	
 	public void testChangeConstructorSignature01() throws Exception {
-		if (true)
-			return; //https://bugs.eclipse.org/bugs/show_bug.cgi?id=226151
-		
 		List matches= doChangeSignature("source.BaseClass", "BaseClass");
 		assertContainsMatches(matches, new String[] {
 				"=BinaryReference/binary<ref(SubClass.class[SubClass~SubClass~I",

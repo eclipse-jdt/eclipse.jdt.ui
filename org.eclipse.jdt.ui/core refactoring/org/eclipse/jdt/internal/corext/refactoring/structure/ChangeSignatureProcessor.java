@@ -98,6 +98,7 @@ import org.eclipse.jdt.core.refactoring.participants.ChangeMethodSignatureArgume
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.MethodReferenceMatch;
+import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
@@ -146,6 +147,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -1580,14 +1582,25 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		SearchPattern pattern;
 		if (isConstructor) {
 			
-			// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=226151 : don't find binary refs for constructors for now
-			return ConstructorReferenceFinder.getConstructorOccurrences(fMethod, pm, status);
+//			// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=226151 : don't find binary refs for constructors for now
+//			return ConstructorReferenceFinder.getConstructorOccurrences(fMethod, pm, status);
 			
 //			SearchPattern occPattern= SearchPattern.createPattern(fMethod, IJavaSearchConstants.ALL_OCCURRENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
-//			SearchPattern declPattern= SearchPattern.createPattern(fMethod, IJavaSearchConstants.DECLARATIONS, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
-//			SearchPattern refPattern= SearchPattern.createPattern(fMethod, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+			SearchPattern declPattern= SearchPattern.createPattern(fMethod, IJavaSearchConstants.DECLARATIONS, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+			SearchPattern refPattern= SearchPattern.createPattern(fMethod, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 //			pattern= SearchPattern.createOrPattern(declPattern, refPattern);
 //			pattern= occPattern;
+			
+			// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=226151 : do two searches
+			try {
+				SearchEngine engine= new SearchEngine();
+				engine.search(declPattern, SearchUtils.getDefaultSearchParticipants(), createRefactoringScope(), requestor, new NullProgressMonitor());
+				engine.search(refPattern, SearchUtils.getDefaultSearchParticipants(), createRefactoringScope(), requestor, pm);
+			} catch (CoreException e) {
+				throw new JavaModelException(e);
+			}
+			return RefactoringSearchEngine.groupByCu(requestor.getResults(), status);
+			
 		} else {	
 			pattern= RefactoringSearchEngine.createOrPattern(fRippleMethods, IJavaSearchConstants.ALL_OCCURRENCES);
 		}
