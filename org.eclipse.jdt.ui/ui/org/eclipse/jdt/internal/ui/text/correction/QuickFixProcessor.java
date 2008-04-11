@@ -151,6 +151,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalModifierForField:
 			case IProblem.IllegalModifierForMethod:
 			case IProblem.IllegalModifierForVariable:
+			case IProblem.IllegalModifierForEnum:
+			case IProblem.IllegalModifierForEnumConstant:
+			case IProblem.IllegalModifierForEnumConstructor:
+			case IProblem.IllegalModifierForMemberEnum:
 			case IProblem.UnexpectedStaticModifierForField:
 			case IProblem.IllegalModifierCombinationFinalVolatileForField:
 			case IProblem.IllegalVisibilityModifierForInterfaceMemberType:
@@ -381,6 +385,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalModifierForField:
 			case IProblem.IllegalModifierForMethod:
 			case IProblem.IllegalModifierForVariable:
+			case IProblem.IllegalModifierForEnum:
+			case IProblem.IllegalModifierForEnumConstant:
+			case IProblem.IllegalModifierForEnumConstructor:
+			case IProblem.IllegalModifierForMemberEnum:				
 			case IProblem.IllegalVisibilityModifierForInterfaceMemberType:
 			case IProblem.UnexpectedStaticModifierForMethod:
 				ModifierCorrectionSubProcessor.addRemoveInvalidModfiersProposal(context, problem, proposals, 5);

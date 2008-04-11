@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla <bmuskalla@innoopract.com> - [quick fix] 'Remove invalid modifiers' does not appear for enums and annotations - https://bugs.eclipse.org/bugs/show_bug.cgi?id=110589
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -3157,4 +3158,147 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	public void testInvalidEnumModifier() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package r;\n");
+		buf.append("\n");
+		buf.append("private final strictfp enum E {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+		
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package r;\n");
+		buf.append("\n");
+		buf.append("strictfp enum E {\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testInvalidEnumModifier2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package r;\n");
+		buf.append("\n");
+		buf.append("public abstract enum E {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+		
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package r;\n");
+		buf.append("\n");
+		buf.append("public enum E {\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testInvalidEnumConstantModifier() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package r;\n");
+		buf.append("\n");
+		buf.append("enum E {\n");
+		buf.append("	private final WHITE;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+		
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package r;\n");
+		buf.append("\n");
+		buf.append("enum E {\n");
+		buf.append("	WHITE;\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testInvalidEnumConstructorModifier() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package r;\n");
+		buf.append("\n");
+		buf.append("enum E {\n");
+		buf.append("	WHITE(1);\n");
+		buf.append("\n");
+		buf.append("	public final E(int foo) {\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+		
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package r;\n");
+		buf.append("\n");
+		buf.append("enum E {\n");
+		buf.append("	WHITE(1);\n");
+		buf.append("\n");
+		buf.append("	E(int foo) {\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testInvalidMemberEnumModifier() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package r;\n");
+		buf.append("\n");
+		buf.append("class E {\n");
+		buf.append("	final enum A {\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+		
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package r;\n");
+		buf.append("\n");
+		buf.append("class E {\n");
+		buf.append("	enum A {\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
 }
