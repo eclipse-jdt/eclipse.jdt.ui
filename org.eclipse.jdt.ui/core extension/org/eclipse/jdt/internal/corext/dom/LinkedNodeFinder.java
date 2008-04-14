@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,26 +15,21 @@ import java.util.ArrayList;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ContinueStatement;
-import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.LabeledStatement;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 
 /**
  * Find all nodes connected to a given binding or node. e.g. Declaration of a field and all references.
  * For types this includes also the constructor declaration, for methods also overridden methods
- * or methods overriding (if existing in the same AST)  
+ * or methods overriding (if existing in the same AST), for constructors also the type and all other constructors.
   */
 
 public class LinkedNodeFinder  {
@@ -220,52 +215,17 @@ public class LinkedNodeFinder  {
 			fResult= result;
 		}
 		
-		public boolean visit(MethodDeclaration node) {
-			if (node.isConstructor() && fBinding.getKind() == IBinding.TYPE) {
-				ASTNode typeNode= node.getParent();
-				if (typeNode instanceof AbstractTypeDeclaration) {
-					if (fBinding == ((AbstractTypeDeclaration) typeNode).resolveBinding()) {
-						fResult.add(node.getName());
-					}
-				}
-			}
-			return true;
-		}
-		
-		public boolean visit(TypeDeclaration node) {
-			if (fBinding.getKind() == IBinding.METHOD) {
-				IMethodBinding binding= (IMethodBinding) fBinding;
-				if (binding.isConstructor() && binding.getDeclaringClass() == node.resolveBinding()) {
-					fResult.add(node.getName());
-				}
-			}
-			return true;
-		}		
-
-		public boolean visit(EnumDeclaration node) {
-			if (fBinding.getKind() == IBinding.METHOD) {
-				IMethodBinding binding= (IMethodBinding) fBinding;
-				if (binding.isConstructor() && binding.getDeclaringClass() == node.resolveBinding()) {
-					fResult.add(node.getName());
-				}
-			}
-			return true;
-		}		
-
-		public boolean visit(AnnotationTypeDeclaration node) {
-			// annotation types can not have a constructor
-			return true;
-		}		
-
 		public boolean visit(SimpleName node) {
 			IBinding binding= node.resolveBinding();
-			if (binding == null || binding.getKind() != fBinding.getKind()) {
+			if (binding == null) {
 				return false;
 			}
 			binding= getDeclaration(binding);
 			
 			if (fBinding == binding) {
 				fResult.add(node);
+			} else if (binding.getKind() != fBinding.getKind()) {
+				return false;
 			} else if (binding.getKind() == IBinding.METHOD) {
 				IMethodBinding curr= (IMethodBinding) binding;
 				IMethodBinding methodBinding= (IMethodBinding) fBinding;
@@ -280,7 +240,12 @@ public class LinkedNodeFinder  {
 			if (binding instanceof ITypeBinding) {
 				return ((ITypeBinding) binding).getTypeDeclaration();
 			} else if (binding instanceof IMethodBinding) {
-				return ((IMethodBinding) binding).getMethodDeclaration();
+				IMethodBinding methodBinding= (IMethodBinding) binding;
+				if (methodBinding.isConstructor()) { // link all constructors with their type
+					return methodBinding.getDeclaringClass().getTypeDeclaration();
+				} else {
+					return methodBinding.getMethodDeclaration();
+				}
 			} else if (binding instanceof IVariableBinding) {
 				return ((IVariableBinding) binding).getVariableDeclaration();
 			}
