@@ -35,14 +35,13 @@ class MethodOccurenceCollector extends CuCollectingSearchRequestor {
 		fName= methodName;
 	}
 
-	public boolean filterMatch(SearchMatch match) {
-		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=156491
-		return match instanceof MethodReferenceMatch
-				&& ((MethodReferenceMatch) match).isSuperInvocation()
-				&& match.getAccuracy() == SearchMatch.A_INACCURATE;
-	}
-	
 	public void acceptSearchMatch(ICompilationUnit unit, SearchMatch match) throws CoreException {
+		if (match instanceof MethodReferenceMatch
+				&& ((MethodReferenceMatch) match).isSuperInvocation()
+				&& match.getAccuracy() == SearchMatch.A_INACCURATE) {
+			return; // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=156491
+		}
+		
 		if (match.isImplicit()) { // see bug 94062
 			collectMatch(match);
 			return;

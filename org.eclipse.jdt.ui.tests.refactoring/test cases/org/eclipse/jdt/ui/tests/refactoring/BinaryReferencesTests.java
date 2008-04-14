@@ -25,19 +25,28 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 import org.eclipse.jdt.core.search.SearchMatch;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
+import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 public class BinaryReferencesTests extends TestCase {
 
@@ -96,10 +105,10 @@ public class BinaryReferencesTests extends TestCase {
 		Refactoring refactoring= descriptor.createRefactoring(status);
 		assertTrue(status.isOK());
 		
-		return doRefactoring(refactoring);
+		return doCheckConditions(refactoring);
 	}
 
-	private static List doRefactoring(Refactoring refactoring) throws CoreException {
+	private static List doCheckConditions(Refactoring refactoring) throws CoreException {
 		CheckConditionsOperation op= new CheckConditionsOperation(refactoring, CheckConditionsOperation.ALL_CONDITIONS);
 		op.run(null);
 		RefactoringStatus validationStatus= op.getStatus();
@@ -313,7 +322,7 @@ public class BinaryReferencesTests extends TestCase {
 		
 		Refactoring refactoring= new ProcessorBasedRefactoring(processor);
 		
-		return doRefactoring(refactoring);
+		return doCheckConditions(refactoring);
 	}
 
 	public void testChangeSignature01() throws Exception {
@@ -345,4 +354,37 @@ public class BinaryReferencesTests extends TestCase {
 				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass~main~\\[Ljava.lang.String;"
 		});
 	}
+	
+	private static List doInlineMethod(String typeName, String methodName) throws JavaModelException, Exception, CoreException {
+		IMethod method= findMethod(findType(typeName), methodName);
+		ICompilationUnit cu= method.getCompilationUnit();
+		CompilationUnit node= new RefactoringASTParser(AST.JLS3).parse(cu, true);
+		ISourceRange nameRange= method.getNameRange();
+		Refactoring refactoring= InlineMethodRefactoring.create(cu, node, nameRange.getOffset(), nameRange.getLength());
+		return doCheckConditions(refactoring);
+	}
+
+	public void testInlineMethod01() throws Exception {
+		List matches= doInlineMethod("source.BaseClass", "referencedMethod");
+		assertContainsMatches(matches, new String[] {
+				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass~main~\\[Ljava.lang.String;"
+		});
+	}
+	
+	public void testInlineMethod02() throws Exception {
+		// no error if inlining only selected reference from source
+		IMethod baseMethod= findMethod(findType("source.BaseClass"), "baseMethod");
+		ICompilationUnit cu= baseMethod.getCompilationUnit();
+		
+		CompilationUnit node= new RefactoringASTParser(AST.JLS3).parse(cu, true);
+		MethodDeclaration baseDecl= ASTNodeSearchUtil.getMethodDeclarationNode(baseMethod, node);
+		ExpressionStatement methodStmt= (ExpressionStatement) baseDecl.getBody().statements().get(0);
+		
+		Refactoring refactoring= InlineMethodRefactoring.create(cu, node, methodStmt.getStartPosition(), methodStmt.getLength());
+		CheckConditionsOperation op= new CheckConditionsOperation(refactoring, CheckConditionsOperation.ALL_CONDITIONS);
+		op.run(null);
+		RefactoringStatus validationStatus= op.getStatus();
+		assertTrue(!validationStatus.hasError());
+	}
+	
 }

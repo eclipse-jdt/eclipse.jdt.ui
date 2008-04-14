@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,19 +15,20 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -50,16 +51,18 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.refactoring.IRefactoringSearchRequestor;
+import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
@@ -68,19 +71,9 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
  */
 abstract class TargetProvider {
 
-	public static final boolean BUG_CORE_130317= true; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=130317
-	
-	protected SourceProvider fSourceProvider;
-
-	//TODO: not used...
-	public void setSourceProvider(SourceProvider sourceProvider) {
-		Assert.isNotNull(sourceProvider);
-		fSourceProvider= sourceProvider;
-	}
-
 	public abstract void initialize();
 
-	public abstract ICompilationUnit[] getAffectedCompilationUnits(RefactoringStatus status, IProgressMonitor pm)  throws JavaModelException;
+	public abstract ICompilationUnit[] getAffectedCompilationUnits(RefactoringStatus status, ReferencesInBinaryContext binaryRefs, IProgressMonitor pm)  throws CoreException;
 	
 	public abstract BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm);
 	
@@ -146,7 +139,7 @@ abstract class TargetProvider {
 		}
 		public void initialize() {
 		}
-		public ICompilationUnit[] getAffectedCompilationUnits(RefactoringStatus status, IProgressMonitor pm) throws JavaModelException {
+		public ICompilationUnit[] getAffectedCompilationUnits(RefactoringStatus status, ReferencesInBinaryContext binaryRefs, IProgressMonitor pm) throws JavaModelException {
 			return null;
 		}
 		public BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm) {
@@ -174,7 +167,7 @@ abstract class TargetProvider {
 		public void initialize() {
 			fIterated= false;
 		}
-		public ICompilationUnit[] getAffectedCompilationUnits(RefactoringStatus status, IProgressMonitor pm) {
+		public ICompilationUnit[] getAffectedCompilationUnits(RefactoringStatus status, ReferencesInBinaryContext binaryRefs, IProgressMonitor pm) {
 			return new ICompilationUnit[] { fCUnit };
 		}
 		public BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm) {
@@ -324,10 +317,7 @@ abstract class TargetProvider {
 		private boolean matches(IBinding binding) {
 			if (!(binding instanceof IMethodBinding))
 				return false;
-			if (BUG_CORE_130317)
-				return fBinding.getKey().equals(((IMethodBinding)binding).getMethodDeclaration().getKey());
-			else
-				return fBinding.isEqualTo(((IMethodBinding)binding).getMethodDeclaration());
+			return fBinding.isEqualTo(((IMethodBinding)binding).getMethodDeclaration());
 		}
 	}
 	
@@ -347,7 +337,7 @@ abstract class TargetProvider {
 			type.accept(finder);
 			fBodies= finder.result;
 		}
-		public ICompilationUnit[] getAffectedCompilationUnits(RefactoringStatus status, IProgressMonitor pm) {
+		public ICompilationUnit[] getAffectedCompilationUnits(RefactoringStatus status, ReferencesInBinaryContext binaryRefs, IProgressMonitor pm) {
 			fastDone(pm);
 			return new ICompilationUnit[] { fCUnit };
 		}
@@ -386,37 +376,39 @@ abstract class TargetProvider {
 			// do nothing.
 		}
 
-		public ICompilationUnit[] getAffectedCompilationUnits(final RefactoringStatus status, IProgressMonitor pm) throws JavaModelException {
+		public ICompilationUnit[] getAffectedCompilationUnits(final RefactoringStatus status, ReferencesInBinaryContext binaryRefs, IProgressMonitor pm) throws CoreException {
 			IMethod method= (IMethod)fMethodBinding.getJavaElement();
 			Assert.isTrue(method != null);
-			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
-			engine.setGranularity(RefactoringSearchEngine2.GRANULARITY_COMPILATION_UNIT);
-			engine.setFiltering(true, true);
-			engine.setScope(RefactoringScopeFactory.create(method));
-			engine.setRequestor(new IRefactoringSearchRequestor() {
-				public SearchMatch acceptSearchMatch(SearchMatch match) {
+			
+			SearchPattern pattern= SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+			IJavaSearchScope scope= RefactoringScopeFactory.create(method, true, false);
+			final HashSet affectedCompilationUnits= new HashSet();
+			CollectingSearchRequestor requestor= new CollectingSearchRequestor(binaryRefs) {
+				private ICompilationUnit fLastCU;
+				public void acceptSearchMatch(SearchMatch match) throws CoreException {
+					if (filterMatch(match))
+						return;
 					if (match.isInsideDocComment())
-						return null;
+						return; // TODO: should warn user (with something like a ReferencesInBinaryContext)
+					
+					ICompilationUnit unit= SearchUtils.getCompilationUnit(match);
 					if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
-						Object element= match.getElement();
-						if (element instanceof IJavaElement) {
-							IJavaElement jElement= (IJavaElement)element;
-							ICompilationUnit unit= (ICompilationUnit)jElement.getAncestor(IJavaElement.COMPILATION_UNIT);
-							if (unit != null) {
-								status.addError(RefactoringCoreMessages.TargetProvider_inaccurate_match,
-									JavaStatusContext.create(unit, new SourceRange(match.getOffset(), match.getLength())));
-								return null;
-							}
+						if (unit != null) {
+							status.addError(RefactoringCoreMessages.TargetProvider_inaccurate_match,
+								JavaStatusContext.create(unit, new SourceRange(match.getOffset(), match.getLength())));
+						} else {
+							status.addError(RefactoringCoreMessages.TargetProvider_inaccurate_match);
 						}
-						status.addError(RefactoringCoreMessages.TargetProvider_inaccurate_match);
-						return null;
-					} else {
-						return match;
+					} else if (unit != null) {
+						if (! unit.equals(fLastCU)) {
+							fLastCU= unit;
+							affectedCompilationUnits.add(unit);
+						}
 					}
 				}
-			});
-			engine.searchPattern(new SubProgressMonitor(pm, 1));
-			return engine.getAffectedCompilationUnits();
+			};
+			new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), scope, requestor, new SubProgressMonitor(pm, 1));
+			return (ICompilationUnit[]) affectedCompilationUnits.toArray(new ICompilationUnit[affectedCompilationUnits.size()]);
 		}
 
 		public BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm) {

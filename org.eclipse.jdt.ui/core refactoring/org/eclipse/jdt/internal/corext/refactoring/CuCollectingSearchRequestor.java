@@ -26,13 +26,11 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
  * Collects the results returned by a <code>SearchEngine</code>.
  * Only collects matches in CUs ands offers a scanner to trim match ranges.
  * If a {@link ReferencesInBinaryContext} is passed, matches that are
- * not inside a CU are added to the context.
+ * inside a binary element are not collected (but added to the context if they are accurate).
  */
 public class CuCollectingSearchRequestor extends CollectingSearchRequestor {
 
-	private final ReferencesInBinaryContext fBinaryRefs;
-	
-	private ICompilationUnit fCuCache;
+	private IJavaProject fProjectCache;
 	private IScanner fScannerCache;
 	
 	public CuCollectingSearchRequestor() {
@@ -40,15 +38,15 @@ public class CuCollectingSearchRequestor extends CollectingSearchRequestor {
 	}
 
 	public CuCollectingSearchRequestor(ReferencesInBinaryContext binaryRefs) {
-		fBinaryRefs= binaryRefs;
+		super(binaryRefs);
 	}
 
 	protected IScanner getScanner(ICompilationUnit unit) {
-		if (unit.equals(fCuCache))
+		IJavaProject project= unit.getJavaProject();
+		if (project.equals(fProjectCache))
 			return fScannerCache;
 		
-		fCuCache= unit;
-		IJavaProject project= unit.getJavaProject();
+		fProjectCache= project;
 		String sourceLevel= project.getOption(JavaCore.COMPILER_SOURCE, true);
 		String complianceLevel= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
 		fScannerCache= ToolFactory.createScanner(false, false, false, sourceLevel, complianceLevel);
@@ -67,30 +65,14 @@ public class CuCollectingSearchRequestor extends CollectingSearchRequestor {
 			return;
 		
 		ICompilationUnit unit= SearchUtils.getCompilationUnit(match);
-		if (unit == null) {
-			if (fBinaryRefs != null && match.getAccuracy() == SearchMatch.A_ACCURATE) {
-				fBinaryRefs.add(match);
-			}
-			return;
+		if (unit != null) {
+			acceptSearchMatch(unit, match);
 		}
-		acceptSearchMatch(unit, match);
-	}
-	
-	public void collectMatch(SearchMatch match) throws CoreException {
-		super.acceptSearchMatch(match);
-	}
-	
-	/**
-	 * @param match match
-	 * @return <code>true</code> iff the given match should not be passed to {@link #acceptSearchMatch(ICompilationUnit, SearchMatch)}
-	 */
-	public boolean filterMatch(SearchMatch match) {
-		return false;
 	}
 	
 	/**
 	 * Handles the given match in the given compilation unit.
-	 * The default implementations accepts all matches.
+	 * The default implementation accepts all matches.
 	 * Subclasses can override and call {@link #collectMatch(SearchMatch)} to collect matches.
 	 *  
 	 * @param unit the enclosing CU of the match, never <code>null</code>
@@ -102,7 +84,7 @@ public class CuCollectingSearchRequestor extends CollectingSearchRequestor {
 	}
 
 	public void endReporting() {
-		fCuCache= null;
+		fProjectCache= null;
 		fScannerCache= null;
 	}
 }

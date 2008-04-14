@@ -10,6 +10,7 @@ public class BaseClass {
 	}
 	
 	protected void baseMethod() {
+		referencedMethod(); // keep as first
 		new InSubPack();
 	}
 	
@@ -18,7 +19,7 @@ public class BaseClass {
 	}
 	
 	public final void referencedMethod() { }
-	public static void referencedStaticMethod() { }
+	public static int referencedStaticMethod() { return 0; }
 	public void referencedVirtualMethod() { }
 	
 	public void paintColor(Color color) {
