@@ -103,35 +103,57 @@ public class BuildPathSupport {
 		if (version == null) {
 			return null;
 		}
-
-		Bundle sourceBundle= null;
+		
+		String bundlePath= null;
 		if (pluginDesc.isOrbitBundle()) {
 			String bundleName= pluginDesc.getBundleId() + ".source";  //$NON-NLS-1$
 			Bundle[] bundles= JUnitPlugin.getDefault().getBundles(bundleName, version);
-			if (bundles != null && bundles.length > 0) {
-				sourceBundle= bundles[0];
+			if (bundles != null && bundles.length > 0 && bundles[0] != null) {
+				bundlePath= getURL(bundles[0]);
+			} else {
+				// workaround for bug 225594: look in the plugin-dir
+				String binBundlePath= getURL(pluginDesc.getBundle());
+				if (binBundlePath != null) {
+					File[] files= new File(binBundlePath).getParentFile().listFiles();
+					for (int i= 0; i < files.length; i++) {
+						if (files[i].getName().startsWith(bundleName)) {
+							bundlePath= files[i].getAbsolutePath();
+							break;
+						}
+					}
+				}
 			}
 		} else {
-			sourceBundle= JUnitPlugin.getDefault().getBundle("org.eclipse.jdt.source"); //$NON-NLS-1$
+			Bundle sourceBundle= JUnitPlugin.getDefault().getBundle("org.eclipse.jdt.source");  //$NON-NLS-1$
+			if (sourceBundle != null) {
+				bundlePath= getURL(sourceBundle);
+			}
 		}
-		if (sourceBundle == null) {
+		if (bundlePath == null) {
 			return null;
 		}
-		URL local= null;
-		try {
-			local= FileLocator.toFileURL(sourceBundle.getEntry("/")); //$NON-NLS-1$
-		} catch (IOException e) {
-			return null;
-		}
-		File bundleLoc= new File(local.getPath());
+		
+		File bundleLoc= new File(bundlePath);
 		if (bundleLoc.isDirectory()) {
-			String fullPath= bundleLoc.getAbsolutePath() + File.separator + "src" + File.separator + pluginDesc.getBundleId() + "_" + version;   //$NON-NLS-1$ //$NON-NLS-2$
+			String fullPath= bundleLoc.getAbsolutePath() + File.separator + "src" + File.separator + pluginDesc.getBundleId() + '_' + version; //$NON-NLS-1$
 			return Path.fromOSString(fullPath);
 		} else if (bundleLoc.isFile()) {
 			return Path.fromOSString(bundleLoc.getAbsolutePath()); 
 		}
 			
 		return null;
+	}
+	
+	private static String getURL(Bundle bundle) {
+		try {
+			URL fileURL= FileLocator.toFileURL(bundle.getEntry("/")); //$NON-NLS-1$
+			if (fileURL != null) {
+				return fileURL.getFile();
+			}
+			return null;
+		} catch (IOException e) {
+			return null;
+		}
 	}
 	
 	public static IClasspathEntry getJUnit3ClasspathEntry() {
@@ -165,8 +187,7 @@ public class BuildPathSupport {
 		if (bundleBase != null) {
 			IPath jarLocation= bundleBase.append("junit.jar"); //$NON-NLS-1$
 			
-			IPath sourceBase= getSourceLocation(JUNIT4_PLUGIN);
-			IPath srcLocation= sourceBase != null ? sourceBase.append("junitsrc.zip") : null; //$NON-NLS-1$
+			IPath srcLocation= getSourceLocation(JUNIT4_PLUGIN);
 			
 			IAccessRule[] accessRules= { };
 			
