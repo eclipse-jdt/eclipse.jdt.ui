@@ -465,6 +465,10 @@ public class JavaProjectHelper {
 	public static IPackageFragmentRoot addLibrary(IJavaProject jproject, IPath path, IPath sourceAttachPath, IPath sourceAttachRoot) throws JavaModelException {
 		IClasspathEntry cpe= JavaCore.newLibraryEntry(path, sourceAttachPath, sourceAttachRoot);
 		addToClasspath(jproject, cpe);
+		IResource workspaceResource= ResourcesPlugin.getWorkspace().getRoot().findMember(path);
+		if (workspaceResource != null) {
+			return jproject.getPackageFragmentRoot(workspaceResource);
+		}
 		return jproject.getPackageFragmentRoot(path.toString());
 	}
 	
