@@ -3538,70 +3538,6 @@
             categoryId="org.eclipse.ui.category.perspectives"
             id="org.eclipse.jdt.ui.JavaHierarchyPerspective" />
             
-<!-- views -->
-      <command
-            name="%ViewCommand.typeHierarchy.name"
-            description="%ViewCommand.typeHierarchy.description"
-            categoryId="org.eclipse.ui.category.views"
-            id="org.eclipse.jdt.ui.TypeHierarchy">
-      </command>
-      
-      <command
-            name="%ViewCommand.packageExplorer.name"
-            description="%ViewCommand.packageExplorer.description"
-            categoryId="org.eclipse.ui.category.views"
-            id="org.eclipse.jdt.ui.PackageExplorer">
-      </command>
-      
-      <command
-            name="%ViewCommand.projectsView.name"
-            description="%ViewCommand.projectsView.description"
-            categoryId="org.eclipse.ui.category.views"
-            id="org.eclipse.jdt.ui.ProjectsView">
-      </command>
-      
-      <command
-            name="%ViewCommand.packagesView.name"
-            description="%ViewCommand.packagesView.description"
-            categoryId="org.eclipse.ui.category.views"
-            id="org.eclipse.jdt.ui.PackagesView">
-      </command>
-      
-      <command
-            name="%ViewCommand.typesView.name"
-            description="%ViewCommand.typesView.description"
-            categoryId="org.eclipse.ui.category.views"
-            id="org.eclipse.jdt.ui.TypesView">
-      </command>
-
-      <command
-            name="%ViewCommand.membersView.name"
-            description="%ViewCommand.membersView.description"
-            categoryId="org.eclipse.ui.category.views"
-            id="org.eclipse.jdt.ui.MembersView">
-      </command>
-      
-      <command
-            name="%ViewCommand.sourceView.name"
-            description="%ViewCommand.sourceView.description"
-            categoryId="org.eclipse.ui.category.views"
-            id="org.eclipse.jdt.ui.SourceView">
-      </command>
-      
-      <command
-            name="%ViewCommand.javadocView.name"
-            description="%ViewCommand.javadocView.description"
-            categoryId="org.eclipse.ui.category.views"
-            id="org.eclipse.jdt.ui.JavadocView">
-      </command>
-      
-      <command
-            name="%ViewCommand.callHierarchy.name"
-            description="%ViewCommand.callHierarchy.description"
-            categoryId="org.eclipse.ui.category.views"
-            id="org.eclipse.jdt.callhierarchy.view">
-      </command>
-
 <!-- refactoring -->
       <command
             name="%ActionDefinition.refactorQuickMenu.name"
@@ -4538,64 +4474,103 @@
 <!-- perspectives -->
 
 <!-- views -->
-      <key
-            sequence="M2+M3+Q T"
-            commandId="org.eclipse.jdt.ui.TypeHierarchy"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            platform="carbon"
-            sequence="M2+M3+Q T"
-            commandId=""
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            platform="carbon"
-            sequence="COMMAND+ALT+Q T"
-            commandId="org.eclipse.jdt.ui.TypeHierarchy"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            sequence="M2+M3+Q P"
-            commandId="org.eclipse.jdt.ui.PackageExplorer"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            platform="carbon"
-            sequence="M2+M3+Q P"
-            commandId=""
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            platform="carbon"
-            sequence="COMMAND+ALT+Q P"
-            commandId="org.eclipse.jdt.ui.PackageExplorer"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            sequence="M2+M3+Q D"
-            commandId="org.eclipse.jdt.ui.SourceView"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            platform="carbon"
-            sequence="M2+M3+Q D"
-            commandId=""
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            platform="carbon"
-            sequence="COMMAND+ALT+Q D"
-            commandId="org.eclipse.jdt.ui.SourceView"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            sequence="M2+M3+Q J"
-            commandId="org.eclipse.jdt.ui.JavadocView"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            platform="carbon"
-            sequence="M2+M3+Q J"
-            commandId=""
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-      <key
-            platform="carbon"
-            sequence="COMMAND+ALT+Q J"
-            commandId="org.eclipse.jdt.ui.JavadocView"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
-
-   </extension>
+	<key
+		commandId="org.eclipse.ui.views.showView"
+		schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+		sequence="M2+M3+Q T">
+		<parameter
+			id="org.eclipse.ui.views.showView.viewId"
+			value="org.eclipse.jdt.ui.TypeHierarchy">
+		</parameter>
+	</key>
+	<key
+		platform="carbon"
+		sequence="M2+M3+Q T"
+		commandId=""
+		schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+	<key
+		commandId="org.eclipse.ui.views.showView"
+		platform="carbon"
+		schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+		sequence="COMMAND+ALT+Q T">
+		<parameter
+			id="org.eclipse.ui.views.showView.viewId"
+			value="org.eclipse.jdt.ui.TypeHierarchy">
+		</parameter>
+	</key>
+	<key
+		commandId="org.eclipse.ui.views.showView"
+		schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+		sequence="M2+M3+Q P">
+		<parameter
+			id="org.eclipse.ui.views.showView.viewId"
+			value="org.eclipse.jdt.ui.PackageExplorer">
+		</parameter>
+	</key>
+	<key
+		platform="carbon"
+		sequence="M2+M3+Q P"
+		commandId=""
+		schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+	<key
+		commandId="org.eclipse.ui.views.showView"
+		platform="carbon"
+		schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+		sequence="COMMAND+ALT+Q P">
+		<parameter
+			id="org.eclipse.ui.views.showView.viewId"
+			value="org.eclipse.jdt.ui.PackageExplorer">
+		</parameter>
+	</key>
+	<key
+		commandId="org.eclipse.ui.views.showView"
+		schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+		sequence="M2+M3+Q D">
+	<parameter
+		id="org.eclipse.ui.views.showView.viewId"
+		value="org.eclipse.jdt.ui.SourceView">
+	</parameter>
+	</key>
+	<key
+		platform="carbon"
+		sequence="M2+M3+Q D"
+		commandId=""
+		schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+	<key
+		commandId="org.eclipse.ui.views.showView"
+		platform="carbon"
+		schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+		sequence="COMMAND+ALT+Q D">
+		<parameter
+			id="org.eclipse.ui.views.showView.viewId"
+			value="org.eclipse.jdt.ui.SourceView">
+		</parameter>
+	</key>
+	<key
+		commandId="org.eclipse.ui.views.showView"
+		schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+		sequence="M2+M3+Q J">
+		<parameter
+			id="org.eclipse.ui.views.showView.viewId"
+			value="org.eclipse.jdt.ui.JavadocView">
+		</parameter>
+	</key>
+	<key
+		platform="carbon"
+		sequence="M2+M3+Q J"
+		commandId=""
+		schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+	<key
+		commandId="org.eclipse.ui.views.showView"
+		platform="carbon"
+		schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+		sequence="COMMAND+ALT+Q J">
+		<parameter
+			id="org.eclipse.ui.views.showView.viewId"
+			value="org.eclipse.jdt.ui.JavadocView">
+		</parameter>
+	</key>
+	</extension>
    
    
    <extension
