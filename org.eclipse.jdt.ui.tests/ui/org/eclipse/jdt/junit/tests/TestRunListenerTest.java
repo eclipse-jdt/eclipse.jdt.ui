@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -220,6 +220,52 @@ public class TestRunListenerTest extends AbstractTestRunListenerTest {
 			TestRunListeners.testCaseAsString("testSucceed", "pack.ATestCase", ProgressState.RUNNING, Result.UNDEFINED, null, 2),
 		};
 		String[] actual= runTreeTest(aTestCase, 4);
+		assertEqualLog(expectedTree, actual);
+	}
+
+	public void testTreeUnrootedEnded() throws Exception {
+		// regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=153807
+		new TestRunListeners();
+		String source=
+				"package pack;\n" + 
+				"\n" + 
+				"import junit.framework.TestCase;\n" + 
+				"import junit.framework.TestResult;\n" + 
+				"import junit.framework.TestSuite;\n" + 
+				"\n" + 
+				"public class ATestCase extends TestCase {\n" + 
+				"    public static class RealTest extends TestCase {\n" + 
+				"        public RealTest(String name) {\n" + 
+				"            super(name);\n" + 
+				"        }\n" + 
+				"\n" + 
+				"        public void myTest1() throws Exception { }\n" + 
+				"\n" + 
+				"        public void myTest2() throws Exception {\n" + 
+				"            fail();\n" + 
+				"        }\n" + 
+				"    }\n" + 
+				"\n" + 
+				"    public void testAllTests() { }\n" + 
+				"\n" + 
+				"    public void run(TestResult result) {\n" + 
+				"        TestSuite suite = new TestSuite(\"MySuite\");\n" + 
+				"        suite.addTest(new RealTest(\"myTest1\"));\n" + 
+				"        suite.addTest(new RealTest(\"myTest2\"));\n" + 
+				"        suite.run(result);\n" + 
+				"    }\n" + 
+				"}";
+		IType aTestCase= createType(source, "pack", "ATestCase.java");
+		
+		String[] expectedTree= new String[] {
+			TestRunListeners.sessionAsString("ATestCase", ProgressState.COMPLETED, Result.FAILURE, 0),
+			TestRunListeners.suiteAsString("pack.ATestCase", ProgressState.NOT_STARTED, Result.UNDEFINED, null, 1),
+			TestRunListeners.testCaseAsString("testAllTests", "pack.ATestCase", ProgressState.NOT_STARTED, Result.UNDEFINED, null, 2),
+			TestRunListeners.suiteAsString("Unrooted Tests", ProgressState.COMPLETED, Result.FAILURE, null, 1),
+			TestRunListeners.testCaseAsString("myTest1", "pack.ATestCase.RealTest", ProgressState.COMPLETED, Result.OK, null, 2),
+			TestRunListeners.testCaseAsString("myTest2", "pack.ATestCase.RealTest", ProgressState.COMPLETED, Result.FAILURE, new FailureTrace("junit.framework.AssertionFailedError", null, null), 2),
+		};
+		String[] actual= runTreeTest(aTestCase, 6);
 		assertEqualLog(expectedTree, actual);
 	}	
 }
