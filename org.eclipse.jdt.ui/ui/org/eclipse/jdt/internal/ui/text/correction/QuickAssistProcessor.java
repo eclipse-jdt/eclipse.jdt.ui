@@ -1379,7 +1379,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		MethodInvocation method= (MethodInvocation) parent;
-		if (!"equals".equals(method.getName().getIdentifier())) { //$NON-NLS-1$
+		String identifier= method.getName().getIdentifier();
+		if (!"equals".equals(identifier) && !"equalsIgnoreCase".equals(identifier)) { //$NON-NLS-1$ //$NON-NLS-2$
 			return false;
 		}
 		List arguments= method.arguments();
