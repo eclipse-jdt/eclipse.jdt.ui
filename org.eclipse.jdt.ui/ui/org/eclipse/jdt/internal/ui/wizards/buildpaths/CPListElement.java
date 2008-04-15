@@ -601,9 +601,7 @@ public class CPListElement {
 			}
 		}
 		
-		if (project != null && project.exists()) {
-			elem.setIsMissing(isMissing);
-		}
+		elem.setIsMissing(isMissing);
 		return elem;
 	}
 
