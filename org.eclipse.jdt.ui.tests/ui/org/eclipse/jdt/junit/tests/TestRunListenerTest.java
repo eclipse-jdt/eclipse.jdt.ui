@@ -13,6 +13,7 @@ package org.eclipse.jdt.junit.tests;
 
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.junit.TestRunListener;
 import org.eclipse.jdt.junit.model.ITestElement.FailureTrace;
@@ -261,7 +262,7 @@ public class TestRunListenerTest extends AbstractTestRunListenerTest {
 			TestRunListeners.sessionAsString("ATestCase", ProgressState.COMPLETED, Result.FAILURE, 0),
 			TestRunListeners.suiteAsString("pack.ATestCase", ProgressState.NOT_STARTED, Result.UNDEFINED, null, 1),
 			TestRunListeners.testCaseAsString("testAllTests", "pack.ATestCase", ProgressState.NOT_STARTED, Result.UNDEFINED, null, 2),
-			TestRunListeners.suiteAsString("Unrooted Tests", ProgressState.COMPLETED, Result.FAILURE, null, 1),
+			TestRunListeners.suiteAsString(JUnitMessages.TestRunSession_unrootedTests, ProgressState.COMPLETED, Result.FAILURE, null, 1),
 			TestRunListeners.testCaseAsString("myTest1", "pack.ATestCase.RealTest", ProgressState.COMPLETED, Result.OK, null, 2),
 			TestRunListeners.testCaseAsString("myTest2", "pack.ATestCase.RealTest", ProgressState.COMPLETED, Result.FAILURE, new FailureTrace("junit.framework.AssertionFailedError", null, null), 2),
 		};
