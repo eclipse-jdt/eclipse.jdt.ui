@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -93,7 +93,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_CODEASSIST_DISCOURAGED_REFERENCE_CHECK,
 				PREF_CODEASSIST_DEPRECATION_CHECK,
 				PREF_CODEASSIST_CAMEL_CASE_MATCH,
-		};	
+		};
 	}
 	
 	private static final String[] trueFalse= new String[] { IPreferenceStore.TRUE, IPreferenceStore.FALSE };
@@ -119,13 +119,13 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 
 		Composite composite;
 
-		composite= createSubsection(control, PreferencesMessages.CodeAssistConfigurationBlock_insertionSection_title); 
+		composite= createSubsection(control, PreferencesMessages.CodeAssistConfigurationBlock_insertionSection_title);
 		addInsertionSection(composite);
 		
-		composite= createSubsection(control, PreferencesMessages.CodeAssistConfigurationBlock_sortingSection_title); 
+		composite= createSubsection(control, PreferencesMessages.CodeAssistConfigurationBlock_sortingSection_title);
 		addSortingSection(composite);
 		
-		composite= createSubsection(control, PreferencesMessages.CodeAssistConfigurationBlock_autoactivationSection_title); 
+		composite= createSubsection(control, PreferencesMessages.CodeAssistConfigurationBlock_autoactivationSection_title);
 		addAutoActivationSection(composite);
 		
 		initialize();
@@ -151,25 +151,25 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	private void addInsertionSection(Composite composite) {
 		addCompletionRadioButtons(composite);
 		
-		String label;		
+		String label;
 		label= PreferencesMessages.JavaEditorPreferencePage_insertSingleProposalsAutomatically;
 		addCheckBox(composite, label, PREF_CODEASSIST_AUTOINSERT, trueFalse, 0);
 		
-		label= PreferencesMessages.JavaEditorPreferencePage_completePrefixes; 
+		label= PreferencesMessages.JavaEditorPreferencePage_completePrefixes;
 		addCheckBox(composite, label, PREF_CODEASSIST_PREFIX_COMPLETION, trueFalse, 0);
 		
-		label= PreferencesMessages.JavaEditorPreferencePage_automaticallyAddImportInsteadOfQualifiedName; 
+		label= PreferencesMessages.JavaEditorPreferencePage_automaticallyAddImportInsteadOfQualifiedName;
 		Button master= addCheckBox(composite, label, PREF_CODEASSIST_ADDIMPORT, trueFalse, 0);
 		
-		label= PreferencesMessages.JavaEditorPreferencePage_suggestStaticImports; 
+		label= PreferencesMessages.JavaEditorPreferencePage_suggestStaticImports;
 		Button slave= addCheckBox(composite, label, PREF_CODEASSIST_SUGGEST_STATIC_IMPORTS, enabledDisabled, 20);
 		createSelectionDependency(master, slave);
 		
 		
-		label= PreferencesMessages.JavaEditorPreferencePage_fillArgumentNamesOnMethodCompletion; 
+		label= PreferencesMessages.JavaEditorPreferencePage_fillArgumentNamesOnMethodCompletion;
 		master= addCheckBox(composite, label, PREF_CODEASSIST_FILL_ARGUMENT_NAMES, trueFalse, 0);
 		
-		label= PreferencesMessages.JavaEditorPreferencePage_guessArgumentNamesOnMethodCompletion; 
+		label= PreferencesMessages.JavaEditorPreferencePage_guessArgumentNamesOnMethodCompletion;
 		slave= addCheckBox(composite, label, PREF_CODEASSIST_GUESS_METHOD_ARGUMENTS, trueFalse, 20);
 		createSelectionDependency(master, slave);
 	}
@@ -217,7 +217,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		
 		addComboBox(composite, label, PREF_CODEASSIST_SORTER, values, labels, 0);
 		
-		label= PreferencesMessages.JavaEditorPreferencePage_showOnlyProposalsVisibleInTheInvocationContext; 
+		label= PreferencesMessages.JavaEditorPreferencePage_showOnlyProposalsVisibleInTheInvocationContext;
 		addCheckBox(composite, label, PREF_CODEASSIST_SHOW_VISIBLE_PROPOSALS, trueFalse, 0);
 		
 		label= PreferencesMessages.CodeAssistConfigurationBlock_matchCamelCase_label;
@@ -245,32 +245,37 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		link.setText(label);
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, targetInfo); 
+				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, targetInfo);
 			}
 		});
 	}
 	
 	private void addAutoActivationSection(Composite composite) {
 		String label;
-		label= PreferencesMessages.JavaEditorPreferencePage_enableAutoActivation; 
+		label= PreferencesMessages.JavaEditorPreferencePage_enableAutoActivation;
 		final Button autoactivation= addCheckBox(composite, label, PREF_CODEASSIST_AUTOACTIVATION, trueFalse, 0);
 		autoactivation.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				updateAutoactivationControls();
 			}
-		});		
+		});
 		
-		label= PreferencesMessages.JavaEditorPreferencePage_autoActivationDelay; 
+		label= PreferencesMessages.JavaEditorPreferencePage_autoActivationDelay;
 		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_DELAY, 4, 0);
 		
-		label= PreferencesMessages.JavaEditorPreferencePage_autoActivationTriggersForJava; 
-		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, 4, 0);
+		label= PreferencesMessages.JavaEditorPreferencePage_autoActivationTriggersForJava;
+		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, 100, 4, 0);
 		
-		label= PreferencesMessages.JavaEditorPreferencePage_autoActivationTriggersForJavaDoc; 
-		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, 4, 0);
+		label= PreferencesMessages.JavaEditorPreferencePage_autoActivationTriggersForJavaDoc;
+		addLabelledTextField(composite, label, PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, 100, 4, 0);
 	}
 	
-	protected Text addLabelledTextField(Composite parent, String label, Key key, int textlimit, int indent) {	
+	
+	protected Text addLabelledTextField(Composite parent, String label, Key key, int textlimit, int indent) {
+		return addLabelledTextField(parent, label, key, textlimit, textlimit, indent);
+	}
+	
+	protected Text addLabelledTextField(Composite parent, String label, Key key, int modelTextLimit, int fieldTextLimit, int indent) {
 		PixelConverter pixelConverter= new PixelConverter(parent);
 		
 		Label labelControl= new Label(parent, SWT.WRAP);
@@ -283,17 +288,19 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		
 		fLabels.put(textBox, labelControl);
 		
-		String currValue= getValue(key);	
+		String currValue= getValue(key);
 		if (currValue != null) {
 			textBox.setText(currValue);
 		}
 		textBox.addModifyListener(getTextModifyListener());
 
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		if (textlimit != 0) {
-			textBox.setTextLimit(textlimit);
-			data.widthHint= pixelConverter.convertWidthInCharsToPixels(textlimit + 1);
-		}
+		if (modelTextLimit != 0)
+			textBox.setTextLimit(modelTextLimit);
+			
+		if (fieldTextLimit != 0)
+			data.widthHint= pixelConverter.convertWidthInCharsToPixels(fieldTextLimit + 1);
+			
 		data.horizontalIndent= indent;
 		data.horizontalSpan= 2;
 		textBox.setLayoutData(data);
@@ -313,19 +320,19 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		completionComposite.setLayout(ccgl);
 		
 		SelectionListener completionSelectionListener= new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {				
+			public void widgetSelected(SelectionEvent e) {
 				boolean insert= fCompletionInsertsRadioButton.getSelection();
 				setValue(PREF_CODEASSIST_INSERT_COMPLETION, insert);
 			}
 		};
 		
 		fCompletionInsertsRadioButton= new Button(completionComposite, SWT.RADIO | SWT.LEFT);
-		fCompletionInsertsRadioButton.setText(PreferencesMessages.JavaEditorPreferencePage_completionInserts); 
+		fCompletionInsertsRadioButton.setText(PreferencesMessages.JavaEditorPreferencePage_completionInserts);
 		fCompletionInsertsRadioButton.setLayoutData(new GridData());
 		fCompletionInsertsRadioButton.addSelectionListener(completionSelectionListener);
 		
 		fCompletionOverwritesRadioButton= new Button(completionComposite, SWT.RADIO | SWT.LEFT);
-		fCompletionOverwritesRadioButton.setText(PreferencesMessages.JavaEditorPreferencePage_completionOverwrites); 
+		fCompletionOverwritesRadioButton.setText(PreferencesMessages.JavaEditorPreferencePage_completionOverwrites);
 		fCompletionOverwritesRadioButton.setLayoutData(new GridData());
 		fCompletionOverwritesRadioButton.addSelectionListener(completionSelectionListener);
 		
@@ -378,15 +385,15 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 
 		final StatusInfo status= new StatusInfo();
 		if (number.length() == 0) {
-			status.setError(PreferencesMessages.SpellingPreferencePage_empty_threshold); 
+			status.setError(PreferencesMessages.SpellingPreferencePage_empty_threshold);
 		} else {
 			try {
 				final int value= Integer.parseInt(number);
 				if (value < 0) {
-					status.setError(Messages.format(PreferencesMessages.SpellingPreferencePage_invalid_threshold, number)); 
+					status.setError(Messages.format(PreferencesMessages.SpellingPreferencePage_invalid_threshold, number));
 				}
 			} catch (NumberFormatException exception) {
-				status.setError(Messages.format(PreferencesMessages.SpellingPreferencePage_invalid_threshold, number)); 
+				status.setError(Messages.format(PreferencesMessages.SpellingPreferencePage_invalid_threshold, number));
 			}
 		}
 		return status;
@@ -427,6 +434,6 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 				return curr;
 			}
 		}
-		return null;		
+		return null;
 	}
 }
