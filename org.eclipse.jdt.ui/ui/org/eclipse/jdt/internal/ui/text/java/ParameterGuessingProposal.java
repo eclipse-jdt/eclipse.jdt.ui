@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,13 +37,13 @@ import org.eclipse.jface.text.link.ProposalPosition;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
+import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
-import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
@@ -57,7 +57,32 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * that represent the best guess completion for each parameter of a method.
  */
 public final class ParameterGuessingProposal extends JavaMethodCompletionProposal {
-
+	
+	/**
+	 * Creates a {@link ParameterGuessingProposal} or <code>null</code> if the core context isn't available or extended.
+	 *  
+	 * @param proposal the original completion proposal
+	 * @param context the currrent context
+	 * 
+	 * @return a proposal or <code>null</code>
+	 */
+	public static ParameterGuessingProposal createProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
+		CompletionContext coreContext= context.getCoreContext();
+ 		if (coreContext != null && coreContext.isExtended()) {
+			char[] signature= SignatureUtil.fix83600(proposal.getSignature());
+			char[][] types= Signature.getParameterTypes(signature);
+			
+			IJavaElement[][] assignableElements= new IJavaElement[types.length][];
+			for (int i= 0; i < types.length; i++) {
+				assignableElements[i]= coreContext.getVisibleElements(new String(types[i]));
+			}
+			return new ParameterGuessingProposal(proposal, context, assignableElements, coreContext.getEnclosingElement());
+ 		}
+ 		return null;
+	}
+	
+	
+	
 	/** Tells whether this class is in debug mode. */
 	private static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ResultCollector"));  //$NON-NLS-1$//$NON-NLS-2$
 	
@@ -67,8 +92,14 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 	private IRegion fSelectedRegion; // initialized by apply()
 	private IPositionUpdater fUpdater;
 
- 	public ParameterGuessingProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
+	private final IJavaElement[][] fAssignableElements;
+	private final IJavaElement fEnclosingElement;
+
+ 	private ParameterGuessingProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context, IJavaElement[][] assignableElements, IJavaElement enclosingElement) {
  		super(proposal, context);
+ 		
+ 		fAssignableElements= assignableElements;
+ 		fEnclosingElement= enclosingElement;
  	}
 
 	/*
@@ -241,17 +272,14 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 		fPositions= new Position[count];
 		fChoices= new ICompletionProposal[count][];
 
-		IDocument document= fInvocationContext.getDocument();
-		ICompilationUnit cu= fInvocationContext.getCompilationUnit();
-		JavaModelUtil.reconcile(cu);
-		String[][] parameterTypes= getParameterSignatures();
-		ParameterGuesser guesser= new ParameterGuesser(fProposal.getCompletionLocation() + 1, cu);
+		String[] parameterTypes= getParameterTypes();
+		ParameterGuesser guesser= new ParameterGuesser(fEnclosingElement);
 		
 		for (int i= count - 1; i >= 0; i--) {
 			String paramName= new String(parameterNames[i]);
 			Position position= new Position(0,0);
 			
-			ICompletionProposal[] argumentProposals= guesser.parameterProposals(parameterTypes[i][0], parameterTypes[i][1], paramName, position, document);
+			ICompletionProposal[] argumentProposals= guesser.parameterProposals(parameterTypes[i], paramName, position, fAssignableElements[i]);
 			if (argumentProposals.length == 0)
 				argumentProposals= new ICompletionProposal[] {new JavaCompletionProposal(paramName, 0, paramName.length(), null, paramName, 0)};
 			
@@ -262,15 +290,13 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 		return fChoices;
 	}
 
-	private String[][] getParameterSignatures() {
+	private String[] getParameterTypes() {
 		char[] signature= SignatureUtil.fix83600(fProposal.getSignature());
 		char[][] types= Signature.getParameterTypes(signature);
-		String[][] ret= new String[types.length][2];
-
+		
+		String[] ret= new String[types.length];
 		for (int i= 0; i < types.length; i++) {
-			char[] type= SignatureUtil.getLowerBound(types[i]);
-			ret[i][0]= String.valueOf(Signature.getSignatureQualifier(type));
-			ret[i][1]= String.valueOf(Signature.getSignatureSimpleName(type));
+			ret[i]= new String(Signature.toCharArray(types[i]));
 		}
 		return ret;
 	}

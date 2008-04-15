@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
@@ -69,12 +71,13 @@ public final class FillArgumentNamesCompletionProposalCollector extends Completi
 		if ((completion.length() == 0) || ((completion.length() == 1) && completion.charAt(0) == ')') || Signature.getParameterCount(methodProposal.getSignature()) == 0 || getContext().isInJavadoc())
 			return super.createJavaCompletionProposal(methodProposal);
 
-		LazyJavaCompletionProposal proposal;
-		ICompilationUnit compilationUnit= getCompilationUnit();
-		if (compilationUnit != null && fIsGuessArguments)
-			proposal= new ParameterGuessingProposal(methodProposal, getInvocationContext());
-		else
+		LazyJavaCompletionProposal proposal= null;
+		if (fIsGuessArguments) {
+			proposal= ParameterGuessingProposal.createProposal(methodProposal, getInvocationContext());
+		}
+		if (proposal == null) {
 			proposal= new FilledArgumentNamesMethodProposal(methodProposal, getInvocationContext());
+		}
 		return proposal;
 	}
 
@@ -116,6 +119,6 @@ public final class FillArgumentNamesCompletionProposalCollector extends Completi
 		else
 			sourceVersion= JavaCore.getOption(JavaCore.COMPILER_SOURCE);
 
-		return sourceVersion != null && JavaCore.VERSION_1_5.compareTo(sourceVersion) <= 0;
+		return JavaModelUtil.is50OrHigher(sourceVersion);
 	}
 }
