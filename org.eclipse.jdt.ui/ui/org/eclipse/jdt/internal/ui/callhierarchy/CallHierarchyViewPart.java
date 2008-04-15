@@ -75,6 +75,7 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.PageBook;
@@ -903,10 +904,13 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
     private void fillActionBars() {
         IActionBars actionBars = getActionBars();
+		actionBars.setGlobalActionHandler(ActionFactory.REFRESH.getId(), fRefreshAction);
+        
         IToolBarManager toolBar = actionBars.getToolBarManager();
 
         fActionGroups.fillActionBars(actionBars);
         
+        toolBar.add(fRefreshAction);
         toolBar.add(fCancelSearchAction);
         for (int i = 0; i < fToggleCallModeActions.length; i++) {
             toolBar.add(fToggleCallModeActions[i]);
