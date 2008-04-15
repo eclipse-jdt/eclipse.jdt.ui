@@ -940,4 +940,11 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		button.setLayoutData(gridData);
 		LayoutUtil.setButtonDimensionHint(button);
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.debug.ui.AbstractLaunchConfigurationTab#getId()
+	 */
+	public String getId() {
+		return "org.eclipse.jdt.junit.JUnitLaunchConfigurationTab"; //$NON-NLS-1$
+	}
 }
