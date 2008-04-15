@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,8 @@
  *             (report 60714: Call Hierarchy: display search scope in view title)
  *   Stephan Herrmann (stephan@cs.tu-berlin.de):
  *          - bug 75800: [call hierarchy] should allow searches for fields
+ *   Stephan Herrmann (stephan@cs.tu-berlin.de):
+ *          - bug 206949: [call hierarchy] filter field accesses (only write or only read)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
@@ -85,6 +87,7 @@ import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
@@ -143,6 +146,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	
     private static final String DIALOGSTORE_VIEWORIENTATION = "CallHierarchyViewPart.orientation"; //$NON-NLS-1$
     private static final String DIALOGSTORE_CALL_MODE = "CallHierarchyViewPart.call_mode"; //$NON-NLS-1$
+    private static final String DIALOGSTORE_FIELD_MODE = "CallHierarchyViewPart.field_mode"; //$NON-NLS-1$
 	/**
 	 * The key to be used is <code>DIALOGSTORE_RATIO + fCurrentOrientation</code>.
 	 */
@@ -156,6 +160,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     static final int CALL_MODE_CALLEES = 1;
     static final String GROUP_SEARCH_SCOPE = "MENU_SEARCH_SCOPE"; //$NON-NLS-1$
 	static final String ID_CALL_HIERARCHY = "org.eclipse.jdt.callhierarchy.view"; //$NON-NLS-1$
+
 	private static final String GROUP_FOCUS = "group.focus"; //$NON-NLS-1$
     private static final int PAGE_EMPTY = 0;
     private static final int PAGE_VIEWER = 1;
@@ -165,6 +170,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private int fCurrentOrientation;
     int fOrientation= VIEW_ORIENTATION_AUTOMATIC;
     private int fCurrentCallMode;
+    private int fCurrentFieldMode;
     private MethodWrapper[] fCalleeRoots;
     private MethodWrapper[] fCallerRoots;
     private IMemento fMemento;
@@ -177,6 +183,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private SearchScopeActionGroup fSearchScopeActions;
     private ToggleOrientationAction[] fToggleOrientationActions;
     private ToggleCallModeAction[] fToggleCallModeActions;
+    private SelectFieldModeAction[] fToggleFieldModeActions;
     private CallHierarchyFiltersActionGroup fFiltersActionGroup;
     private HistoryDropDownAction fHistoryDropDownAction;
     private RefreshAction fRefreshAction;
@@ -312,6 +319,23 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         }
     }
 
+    /**
+     * called from SelectFieldModeAction.
+     * @param mode IJavaSearchConstants.{REFERENCES,WRITE_ACCESS,READ_ACCESS} 
+     */
+    void setFieldMode(int mode) {
+        if (fCurrentFieldMode != mode) {
+            for (int i = 0; i < fToggleFieldModeActions.length; i++) {
+                fToggleFieldModeActions[i].setChecked(mode == fToggleFieldModeActions[i].getMode());
+            }
+
+            fCurrentFieldMode = mode;
+            fDialogSettings.put(DIALOGSTORE_FIELD_MODE, mode);
+
+            updateView();
+        }
+    }
+
     public IJavaSearchScope getSearchScope() {
         return fSearchScopeActions.getSearchScope();
     }
@@ -409,6 +433,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
         initOrientation();
         initCallMode();
+        initFieldMode();
 
         if (fMemento != null) {
             restoreState(fMemento);
@@ -524,6 +549,31 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         setCallMode(mode);
     }
 
+    private void initFieldMode() {
+        int mode;
+
+        try {
+            mode = fDialogSettings.getInt(DIALOGSTORE_FIELD_MODE);
+
+            switch (mode) {
+            	case IJavaSearchConstants.REFERENCES:
+            	case IJavaSearchConstants.READ_ACCESSES:
+            	case IJavaSearchConstants.WRITE_ACCESSES:
+            		break; // OK
+            default:
+            	mode = IJavaSearchConstants.REFERENCES;
+            }
+        } catch (NumberFormatException e) {
+            mode = IJavaSearchConstants.REFERENCES;
+        }
+
+        // force the update
+        fCurrentFieldMode = -1;
+
+        // will fill the main tool bar
+        setFieldMode(mode);
+    }
+
     private void initOrientation() {
 
         try {
@@ -557,6 +607,14 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         	layoutSubMenu.add(fToggleOrientationActions[i]);
         }
         viewMenu.add(layoutSubMenu);
+        
+		viewMenu.add(new Separator(IContextMenuConstants.GROUP_SEARCH));
+		
+        MenuManager fieldSubMenu= new MenuManager(CallHierarchyMessages.CallHierarchyViewPart_field_menu);
+        for (int i = 0; i < fToggleFieldModeActions.length; i++) {
+        	fieldSubMenu.add(fToggleFieldModeActions[i]);
+        }
+        viewMenu.add(fieldSubMenu);
     }
 
     /**
@@ -763,8 +821,17 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     }
 
     private MethodWrapper[] getCallerRoots() {
+    	if (fCallerRoots != null && fCallerRoots.length > 0) {
+    		// all caller roots have the same field mode, just check the first:
+    		if (fCallerRoots[0].getFieldSearchMode() != fCurrentFieldMode) {
+    			fCallerRoots= null; // field mode changed, re-initialize below
+    		}
+    	}
         if (fCallerRoots == null) {
             fCallerRoots = CallHierarchy.getDefault().getCallerRoots(fInputElements);
+        	for (int i= 0; i < fCallerRoots.length; i++) {
+        		fCallerRoots[i].setFieldSearchMode(fCurrentFieldMode);					
+			}
         }
 
         return fCallerRoots;
@@ -891,6 +958,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
                 new ToggleCallModeAction(this, CALL_MODE_CALLERS),
                 new ToggleCallModeAction(this, CALL_MODE_CALLEES)
             };
+        fToggleFieldModeActions = new SelectFieldModeAction[] {
+                new SelectFieldModeAction(this, IJavaSearchConstants.REFERENCES),
+                new SelectFieldModeAction(this, IJavaSearchConstants.READ_ACCESSES),
+                new SelectFieldModeAction(this, IJavaSearchConstants.WRITE_ACCESSES)
+            };
         fActionGroups = new CompositeActionGroup(new ActionGroup[] {
                     new OpenEditorActionGroup(this), 
                     new OpenViewActionGroup(this),
@@ -965,7 +1037,14 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 					case IJavaElement.TYPE:
 						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToConstructors, args);
 					case IJavaElement.FIELD:
-						return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToField, args);
+						switch (this.fCurrentFieldMode) {
+				            case IJavaSearchConstants.READ_ACCESSES:
+								return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToFieldRead, args);
+				            case IJavaSearchConstants.WRITE_ACCESSES:
+								return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToFieldWrite, args);
+							default: // all references
+								return Messages.format(CallHierarchyMessages.CallHierarchyViewPart_callsToField, args);
+						}
 					case IJavaElement.METHOD:
 					case IJavaElement.INITIALIZER:
 					default:

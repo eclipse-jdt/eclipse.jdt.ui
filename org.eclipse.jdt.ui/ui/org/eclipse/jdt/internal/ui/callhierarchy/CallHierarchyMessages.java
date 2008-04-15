@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann (stephan@cs.tu-berlin.de):
+ *          - bug 206949: [call hierarchy] filter field accesses (only write or only read)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
@@ -28,6 +30,12 @@ public final class CallHierarchyMessages extends NLS {
 	public static String ToggleCallModeAction_callees_label;
 	public static String ToggleCallModeAction_callees_tooltip;
 	public static String ToggleCallModeAction_callees_description;
+	public static String SelectFieldModeAction_all_references_label;
+	public static String SelectFieldModeAction_all_references_description;
+	public static String SelectFieldModeAction_read_accesses_label;
+	public static String SelectFieldModeAction_read_accesses_description;
+	public static String SelectFieldModeAction_write_accesses_label;
+	public static String SelectFieldModeAction_write_accesses_description;
 	public static String HistoryDropDownAction_tooltip;
 	public static String HistoryAction_description;
 	public static String HistoryAction_inputElements_2;
@@ -66,6 +74,8 @@ public final class CallHierarchyMessages extends NLS {
 	public static String CallHierarchyViewPart_empty;
 	public static String CallHierarchyViewPart_callsToConstructors;
 	public static String CallHierarchyViewPart_callsToField;
+	public static String CallHierarchyViewPart_callsToFieldRead;
+	public static String CallHierarchyViewPart_callsToFieldWrite;
 	public static String CallHierarchyViewPart_callsToMembers_2;
 	public static String CallHierarchyViewPart_callsToMembers_3;
 	public static String CallHierarchyViewPart_callsToMembers_more;
@@ -124,4 +134,5 @@ public final class CallHierarchyMessages extends NLS {
 	}
 
 	public static String CallHierarchyViewPart_layout_menu;
+	public static String CallHierarchyViewPart_field_menu;
 }

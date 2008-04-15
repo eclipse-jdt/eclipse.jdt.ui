@@ -8,6 +8,8 @@
  * Contributors:
  *   Jesper Kamstrup Linnet (eclipse@kamstrup-linnet.dk) - initial API and implementation 
  *          (report 36180: Callers/Callees view)
+ *   Stephan Herrmann (stephan@cs.tu-berlin.de):
+ *          - bug 206949: [call hierarchy] filter field accesses (only write or only read)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.callhierarchy;
 
@@ -63,7 +65,9 @@ class CallerMethodWrapper extends MethodWrapper {
 	 */
 	public boolean canHaveChildren() {
 		IMember member= getMember();
-		return member instanceof IMethod || member instanceof IType || member instanceof IField;
+		if (member instanceof IField)
+			return getLevel() == 1;
+		return member instanceof IMethod || member instanceof IType;
 	}
 	
 	/**
@@ -105,7 +109,10 @@ class CallerMethodWrapper extends MethodWrapper {
 				}
 			}
 			if (pattern == null) {
-				pattern= SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+				int limitTo= IJavaSearchConstants.REFERENCES;
+				if (member.getElementType() == IJavaElement.FIELD)
+					limitTo= getFieldSearchMode();
+				pattern= SearchPattern.createPattern(member, limitTo, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 			}
 			if (pattern == null) { // e.g. for initializers
 				return new HashMap(0);
