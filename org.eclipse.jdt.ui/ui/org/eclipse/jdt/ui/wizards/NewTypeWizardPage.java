@@ -181,7 +181,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 		private ImportRewrite fImportsRewrite;
 				
-		/* package */ ImportsManager(CompilationUnit astRoot) throws CoreException {
+		/* package */ ImportsManager(CompilationUnit astRoot) {
 			fImportsRewrite= CodeStyleConfiguration.createImportRewrite(astRoot, true);
 		}
 
