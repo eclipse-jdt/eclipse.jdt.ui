@@ -27,6 +27,7 @@ public final class FilterMessages extends NLS {
 	public static String CustomFiltersDialog_description_label;
 	public static String CustomFiltersDialog_SelectAllButton_label;
 	public static String CustomFiltersDialog_DeselectAllButton_label;
+	public static String CustomFiltersDialog_name_filter_pattern_description;
 	public static String OpenCustomFiltersDialogAction_text;
 	public static String FilterDescriptor_filterDescriptionCreationError_message;
 	public static String FilterDescriptor_filterCreationError_title;
