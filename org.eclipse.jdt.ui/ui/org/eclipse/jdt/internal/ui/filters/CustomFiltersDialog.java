@@ -52,7 +52,6 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.SimpleAccessibleListener;
 
 public class CustomFiltersDialog extends SelectionDialog {
 
@@ -140,7 +139,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		fUserDefinedPatterns.setLayoutData(data);
 		String patterns= convertToString(fPatterns, SEPARATOR);
 		fUserDefinedPatterns.setText(patterns);
-		fUserDefinedPatterns.getAccessible().addAccessibleListener(new SimpleAccessibleListener(FilterMessages.CustomFiltersDialog_name_filter_pattern_description));
+		SWTUtil.setAccessibilityText(fUserDefinedPatterns, FilterMessages.CustomFiltersDialog_name_filter_pattern_description);
 
 		// Info text
 		final Label info= new Label(group, SWT.LEFT);

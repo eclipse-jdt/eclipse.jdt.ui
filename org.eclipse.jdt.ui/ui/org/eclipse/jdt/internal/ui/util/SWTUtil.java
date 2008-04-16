@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,8 @@ package org.eclipse.jdt.internal.ui.util;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.accessibility.AccessibleAdapter;
+import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.dnd.DragSource;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.layout.GridData;
@@ -105,6 +107,20 @@ public class SWTUtil {
 		if (table.getLinesVisible())
 			result+= table.getGridLineWidth() * (rows - 1);
 		return result;		
+	}
+	
+	/**
+	 * Adds an accessibility listener returning the given fixed name.
+	 * 
+	 * @param control the control to add the accessibility support to
+	 * @param text the name
+	 */
+	public static void setAccessibilityText(Control control, final String text) {
+		control.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			public void getName(AccessibleEvent e) {
+				e.result= text;
+			}
+		});
 	}
 	
 

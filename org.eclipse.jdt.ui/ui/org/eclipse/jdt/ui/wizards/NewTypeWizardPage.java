@@ -137,7 +137,6 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssis
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaPackageCompletionProcessor;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.SimpleAccessibleListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.SuperInterfaceSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -702,7 +701,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fEnclosingTypeSelection.doFillIntoGrid(tabGroup, 1);
 
 		Text text= fEnclosingTypeDialogField.getTextControl(composite);
-		text.getAccessible().addAccessibleListener(new SimpleAccessibleListener(NewWizardMessages.NewTypeWizardPage_enclosing_field_description));
+		SWTUtil.setAccessibilityText(text, NewWizardMessages.NewTypeWizardPage_enclosing_field_description);
+
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.widthHint= getMaxFieldWidth();
 		gd.horizontalSpan= 2;

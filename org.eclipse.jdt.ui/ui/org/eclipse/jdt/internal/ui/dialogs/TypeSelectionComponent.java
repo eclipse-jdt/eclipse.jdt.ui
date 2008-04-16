@@ -74,7 +74,6 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.SimpleAccessibleListener;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 /**
@@ -216,7 +215,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 				}
 			}
 		});
-		fFilter.getAccessible().addAccessibleListener(new SimpleAccessibleListener(Strings.removeMnemonicIndicator(message)));
+		SWTUtil.setAccessibilityText(fFilter, Strings.removeMnemonicIndicator(message));
 		TextFieldNavigationHandler.install(fFilter);
 		
 		Label label= new Label(this, SWT.NONE);
