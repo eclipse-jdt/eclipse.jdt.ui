@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -141,6 +141,8 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 
 		fTitleButton= createButton(composite, SWT.CHECK, JavadocExportMessages.JavadocStandardWizardPage_titlebutton_label, createGridData(1)); 
 		fTitleText= createText(composite, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 3, 0));
+		SWTUtil.setAccessibilityText(fTitleText, JavadocExportMessages.JavadocStandardWizardPage_titlebutton_description);
+		
 		String text= fStore.getTitle();
 		if (!text.equals("")) { //$NON-NLS-1$
 			fTitleText.setText(text);
@@ -190,6 +192,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 
 		fStyleSheetButton= createButton(c, SWT.CHECK, JavadocExportMessages.JavadocStandardWizardPage_stylesheettext_label, createGridData(1)); 
 		fStyleSheetText= createText(c, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
+		SWTUtil.setAccessibilityText(fStyleSheetText, JavadocExportMessages.JavadocStandardWizardPage_stylesheettext_description);
 		//there really aught to be a way to specify this
 		 ((GridData) fStyleSheetText.getLayoutData()).widthHint= 200;
 		fStyleSheetBrowseButton= createButton(c, SWT.PUSH, JavadocExportMessages.JavadocStandardWizardPage_stylesheetbrowsebutton_label, createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0)); 

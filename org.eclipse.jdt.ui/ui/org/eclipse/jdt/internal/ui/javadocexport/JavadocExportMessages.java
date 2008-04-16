@@ -23,6 +23,7 @@ public final class JavadocExportMessages extends NLS {
 	public static String ContributedJavadocWizardPage_error_create_page;
 	public static String JavadocSpecificsWizardPage_description;
 	public static String JavadocSpecificsWizardPage_stylesheetbrowsedialog_title;
+	public static String JavadocSpecificsWizardPage_overviewbutton_description;
 	public static String JavadocSpecificsWizardPage_overviewbutton_label;
 	public static String JavadocSpecificsWizardPage_overviewbrowse_label;
 	public static String JavadocSpecificsWizardPage_extraoptionsfield_label;
@@ -84,6 +85,7 @@ public final class JavadocExportMessages extends NLS {
 	public static String JavadocOptionsManager_antfileincorrectSAXE_warning;
 	public static String JavadocOptionsManager_createXM_error;
 	public static String JavadocStandardWizardPage_description;
+	public static String JavadocStandardWizardPage_titlebutton_description;
 	public static String JavadocStandardWizardPage_titlebutton_label;
 	public static String JavadocStandardWizardPage_basicgroup_label;
 	public static String JavadocStandardWizardPage_usebutton_label;
@@ -97,6 +99,7 @@ public final class JavadocExportMessages extends NLS {
 	public static String JavadocStandardWizardPage_versionbutton_label;
 	public static String JavadocStandardWizardPage_deprecatedbutton_label;
 	public static String JavadocStandardWizardPage_deprecatedlistbutton_label;
+	public static String JavadocStandardWizardPage_stylesheettext_description;
 	public static String JavadocStandardWizardPage_stylesheettext_label;
 	public static String JavadocStandardWizardPage_selectallbutton_label;
 	public static String JavadocStandardWizardPage_clearallbutton_label;

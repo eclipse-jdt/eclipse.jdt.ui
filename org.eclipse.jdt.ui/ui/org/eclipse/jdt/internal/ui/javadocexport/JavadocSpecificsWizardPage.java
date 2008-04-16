@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -104,6 +104,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 		fOverViewButton= createButton(c, SWT.CHECK, JavadocExportMessages.JavadocSpecificsWizardPage_overviewbutton_label, createGridData(1)); 
 		fOverViewText= createText(c, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
+		SWTUtil.setAccessibilityText(fOverViewText, JavadocExportMessages.JavadocSpecificsWizardPage_overviewbutton_description);
 		//there really aught to be a way to specify this
 		 ((GridData) fOverViewText.getLayoutData()).widthHint= 200;
 		fOverViewBrowseButton= createButton(c, SWT.PUSH, JavadocExportMessages.JavadocSpecificsWizardPage_overviewbrowse_label, createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0)); 
