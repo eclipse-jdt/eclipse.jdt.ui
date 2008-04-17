@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
@@ -56,6 +57,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
+import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -299,8 +301,16 @@ public class MoveCuUpdateCreator {
 
 	private static SearchResultGroup[] getReferences(ICompilationUnit unit, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		final SearchPattern pattern= RefactoringSearchEngine.createOrPattern(unit.getTypes(), IJavaSearchConstants.REFERENCES);
-		if (pattern != null)
-			return RefactoringSearchEngine.search(pattern, RefactoringScopeFactory.create(unit), new Collector(((IPackageFragment) unit.getParent())), new SubProgressMonitor(pm, 1), status);
+		if (pattern != null) {
+			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , unit.getElementName());
+			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
+			Collector requestor= new Collector(((IPackageFragment) unit.getParent()), binaryRefs);
+			IJavaSearchScope scope= RefactoringScopeFactory.create(unit, true, false);
+			
+			SearchResultGroup[] result= RefactoringSearchEngine.search(pattern, scope, requestor, new SubProgressMonitor(pm, 1), status);
+			binaryRefs.addErrorIfNecessary(status);
+			return result;
+		}
 		return new SearchResultGroup[] {};
 	}
 
@@ -308,7 +318,8 @@ public class MoveCuUpdateCreator {
 		private IPackageFragment fSource;
 		private IScanner fScanner;
 		
-		public Collector(IPackageFragment source) {
+		public Collector(IPackageFragment source, ReferencesInBinaryContext binaryRefs) {
+			super(binaryRefs);
 			fSource= source;
 			fScanner= ToolFactory.createScanner(false, false, false, false);
 		}
@@ -317,6 +328,9 @@ public class MoveCuUpdateCreator {
 		 * @see org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor#acceptSearchMatch(SearchMatch)
 		 */
 		public void acceptSearchMatch(SearchMatch match) throws CoreException {
+			if (filterMatch(match))
+				return;
+
 			/*
 			 * Processing is done in collector to reuse the buffer which was
 			 * already required by the search engine to locate the matches.
@@ -329,21 +343,21 @@ public class MoveCuUpdateCreator {
 			boolean insideDocComment= match.isInsideDocComment();
 			IResource res= match.getResource();
 			if (element.getAncestor(IJavaElement.IMPORT_DECLARATION) != null) {
-				super.acceptSearchMatch(TypeReference.createImportReference(element, accuracy, start, length, insideDocComment, res));
+				collectMatch(TypeReference.createImportReference(element, accuracy, start, length, insideDocComment, res));
 			} else {
 				ICompilationUnit unit= (ICompilationUnit) element.getAncestor(IJavaElement.COMPILATION_UNIT);
 				if (unit != null) {
 					IBuffer buffer= unit.getBuffer();
 					String matchText= buffer.getText(start, length);
 					if (fSource.isDefaultPackage()) {
-						super.acceptSearchMatch(TypeReference.createSimpleReference(element, accuracy, start, length, insideDocComment, res, matchText));
+						collectMatch(TypeReference.createSimpleReference(element, accuracy, start, length, insideDocComment, res, matchText));
 					} else {
 						// assert: matchText doesn't start nor end with comment
 						int simpleNameStart= getLastSimpleNameStart(matchText);
 						if (simpleNameStart != 0) {
-							super.acceptSearchMatch(TypeReference.createQualifiedReference(element, accuracy, start, length, insideDocComment, res, start + simpleNameStart));
+							collectMatch(TypeReference.createQualifiedReference(element, accuracy, start, length, insideDocComment, res, start + simpleNameStart));
 						} else {
-							super.acceptSearchMatch(TypeReference.createSimpleReference(element, accuracy, start, length, insideDocComment, res, matchText));
+							collectMatch(TypeReference.createSimpleReference(element, accuracy, start, length, insideDocComment, res, matchText));
 						}
 					}
 				}

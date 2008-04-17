@@ -84,6 +84,7 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.MoveStaticMembersDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
@@ -92,15 +93,18 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateFieldCreator;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
@@ -690,37 +694,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	
 	private void createChange(List modifiedCus, RefactoringStatus status, IProgressMonitor monitor) throws CoreException {
 		monitor.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, 5);
-		final IMember[] members= getMembersToMove();
-		String project= null;
-		final IJavaProject javaProject= getDeclaringType().getJavaProject();
-		if (javaProject != null)
-			project= javaProject.getElementName();
-		String header= null;
-		if (members.length == 1)
-			header= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_single, new String[] { JavaElementLabels.getElementLabel(members[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED) });
-		else
-			header= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_multi, new String[] { String.valueOf(members.length), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED) });
-		int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
-		final IType declaring= members[0].getDeclaringType();
-		try {
-			if (declaring.isLocal() || declaring.isAnonymous())
-				flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-		} catch (JavaModelException exception) {
-			JavaPlugin.log(exception);
-		}
-		final String description= members.length == 1 ? Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_description_descriptor_short_multi, members[0].getElementName()) : RefactoringCoreMessages.MoveMembersRefactoring_move_members;
-		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
-		comment.addSetting(Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_target_element_pattern, JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
-		final MoveStaticMembersDescriptor descriptor= new MoveStaticMembersDescriptor();
-		descriptor.setProject(project);
-		descriptor.setDescription(description);
-		descriptor.setComment(comment.asString());
-		descriptor.setFlags(flags);
-		descriptor.setDestinationType(fDestinationType);
-		descriptor.setKeepOriginal(fDelegateUpdating);
-		descriptor.setDeprecateDelegate(fDelegateDeprecation);
-		descriptor.setMembers(members);
-		fChange= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.MoveMembersRefactoring_move_members);
+		fChange= new DynamicValidationRefactoringChange(createDescriptor(), RefactoringCoreMessages.MoveMembersRefactoring_move_members);
 		fTarget= getCuRewrite(fDestinationType.getCompilationUnit());
 		ITypeBinding targetBinding= getDestinationBinding();
 		if (targetBinding == null) {
@@ -774,14 +748,29 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			if (status.hasFatalError())
 				return;
 
-			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2();
-			engine.setPattern(fMembersToMove, IJavaSearchConstants.ALL_OCCURRENCES);
-			engine.setGranularity(RefactoringSearchEngine2.GRANULARITY_COMPILATION_UNIT);
-			engine.setFiltering(true, true);
-			engine.setScope(RefactoringScopeFactory.create(fMembersToMove));
-			engine.setStatus(status);
-			engine.searchPattern(new NullProgressMonitor());
-			ICompilationUnit[] units= engine.getAffectedCompilationUnits();
+			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description_plural);
+			IJavaSearchScope scope= RefactoringScopeFactory.create(fMembersToMove, false);
+			SearchPattern pattern= RefactoringSearchEngine.createOrPattern(fMembersToMove, IJavaSearchConstants.ALL_OCCURRENCES);
+			final HashSet affectedCompilationUnits= new HashSet();
+			
+			CollectingSearchRequestor requestor= new CollectingSearchRequestor(binaryRefs) {
+				private ICompilationUnit fLastCU;
+				public void acceptSearchMatch(SearchMatch match) throws CoreException {
+					if (filterMatch(match))
+						return;
+					if (match.getAccuracy() == SearchMatch.A_INACCURATE)
+						return;
+					ICompilationUnit unit= SearchUtils.getCompilationUnit(match);
+					if (unit != null && ! unit.equals(fLastCU)) {
+						fLastCU= unit;
+						affectedCompilationUnits.add(unit);
+					}
+				}
+			};
+			RefactoringSearchEngine.search(pattern, scope, requestor, new NullProgressMonitor(), status);
+			binaryRefs.addErrorIfNecessary(status);
+			ICompilationUnit[] units= (ICompilationUnit[]) affectedCompilationUnits.toArray(new ICompilationUnit[affectedCompilationUnits.size()]);
+			
 			modifiedCus.addAll(Arrays.asList(units));
 			final MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fDestinationType, fDestinationType);
 			sub= new SubProgressMonitor(monitor, 1);
@@ -813,6 +802,40 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		} catch (BadLocationException exception) {
 			JavaPlugin.log(exception);
 		}
+	}
+
+	private MoveStaticMembersDescriptor createDescriptor() {
+		final IMember[] members= getMembersToMove();
+		String project= null;
+		final IJavaProject javaProject= getDeclaringType().getJavaProject();
+		if (javaProject != null)
+			project= javaProject.getElementName();
+		String header= null;
+		if (members.length == 1)
+			header= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_single, new String[] { JavaElementLabels.getElementLabel(members[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED) });
+		else
+			header= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_multi, new String[] { String.valueOf(members.length), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED) });
+		int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
+		final IType declaring= members[0].getDeclaringType();
+		try {
+			if (declaring.isLocal() || declaring.isAnonymous())
+				flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
+		} catch (JavaModelException exception) {
+			JavaPlugin.log(exception);
+		}
+		final String description= members.length == 1 ? Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_description_descriptor_short_multi, members[0].getElementName()) : RefactoringCoreMessages.MoveMembersRefactoring_move_members;
+		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
+		comment.addSetting(Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_target_element_pattern, JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+		final MoveStaticMembersDescriptor descriptor= new MoveStaticMembersDescriptor();
+		descriptor.setProject(project);
+		descriptor.setDescription(description);
+		descriptor.setComment(comment.asString());
+		descriptor.setFlags(flags);
+		descriptor.setDestinationType(fDestinationType);
+		descriptor.setKeepOriginal(fDelegateUpdating);
+		descriptor.setDeprecateDelegate(fDelegateDeprecation);
+		descriptor.setMembers(members);
+		return descriptor;
 	}
 	
 	private CompilationUnitRewrite getCuRewrite(ICompilationUnit unit) {

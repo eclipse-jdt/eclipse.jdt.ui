@@ -19,17 +19,25 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 
 import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -38,6 +46,9 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
+import org.eclipse.jdt.core.refactoring.descriptors.MoveDescriptor;
+import org.eclipse.jdt.core.refactoring.descriptors.MoveStaticMembersDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 import org.eclipse.jdt.core.search.SearchMatch;
 
@@ -46,7 +57,11 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContex
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class BinaryReferencesTests extends TestCase {
 
@@ -100,7 +115,7 @@ public class BinaryReferencesTests extends TestCase {
 		return method;
 	}
 
-	private static List doRefactoring(RenameJavaElementDescriptor descriptor) throws CoreException {
+	private static List doRefactoring(JavaRefactoringDescriptor descriptor) throws CoreException {
 		RefactoringStatus status= new RefactoringStatus();
 		Refactoring refactoring= descriptor.createRefactoring(status);
 		assertTrue(status.isOK());
@@ -387,4 +402,65 @@ public class BinaryReferencesTests extends TestCase {
 		assertTrue(!validationStatus.hasError());
 	}
 	
+	private static List doMoveType(String typeName, String newPackageName) throws CoreException {
+		IType type= findType(typeName);
+		IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(type);
+		
+		MoveDescriptor descriptor= (MoveDescriptor) RefactoringCore.getRefactoringContribution(IJavaRefactorings.MOVE).createDescriptor();
+		descriptor.setMoveResources(new IFile[0], new IFolder[0], new ICompilationUnit[] { type.getCompilationUnit() });
+		descriptor.setDestination(root.getPackageFragment(newPackageName));
+		descriptor.setUpdateReferences(true);
+		
+		return doRefactoring(descriptor);
+	}
+
+	public void testMoveType01() throws Exception {
+		List matches= doMoveType("source.BaseClass", "source.sub");
+		assertContainsMatches(matches, new String[] {
+				"=BinaryReference/binary<ref(SubClass.class[SubClass",
+				"=BinaryReference/binary<ref(SubClass.class[SubClass",
+				"=BinaryReference/binary<ref(SubClass.class[SubClass~compareTo~Lsource.BaseClass;",
+				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass",
+				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass~main~\\[Ljava.lang.String;",
+				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass~main~\\[Ljava.lang.String;", // + more of these...
+		});
+	}
+	
+	private static List doMoveStaticMembers(IMember[] members, String targetTypeName) throws CoreException {
+		IType targetType= findType(targetTypeName);
+		
+		MoveStaticMembersDescriptor descriptor= (MoveStaticMembersDescriptor) RefactoringCore.getRefactoringContribution(IJavaRefactorings.MOVE_STATIC_MEMBERS).createDescriptor();
+		descriptor.setDestinationType(targetType);
+		descriptor.setMembers(members);
+		
+		return doRefactoring(descriptor);
+	}
+	
+	public void testMoveStaticMember01() throws Exception {
+		IType type= findType("source.BaseClass");
+		IMethod method= findMethod(type, "referencedStaticMethod");
+		IField field= type.getField("CONST");
+		List matches= doMoveStaticMembers(new IMember[] { method, field }, "source.sub.InSubPack");
+		assertContainsMatches(matches, new String[] {
+				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass~main~\\[Ljava.lang.String;",
+				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass~main~\\[Ljava.lang.String;"
+		});
+	}
+	
+	public void testMoveMethod01() throws Exception {
+		IType type= findType("source.BaseClass");
+		IMethod method= findMethod(type, "referencedMethod");
+		
+		MoveInstanceMethodProcessor processor= new MoveInstanceMethodProcessor(method, JavaPreferencesSettings.getCodeGenerationSettings(method.getJavaProject()));
+		Refactoring ref= new MoveRefactoring(processor);
+		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
+		assertTrue("activation was supposed to be successful", preconditionResult.isOK());
+
+		MoveInstanceMethodTests.chooseNewTarget(processor, MoveInstanceMethodTests.PARAMETER, "c");
+		List matches= doCheckConditions(ref);
+		
+		assertContainsMatches(matches, new String[] {
+				"=BinaryReference/binary<ref(ReferenceClass.class[ReferenceClass~main~\\[Ljava.lang.String;"
+		});
+	}
 }

@@ -1970,6 +1970,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ReferencesInBinaryContext_ref_in_binaries_description;
 
+	public static String ReferencesInBinaryContext_ref_in_binaries_description_plural;
+
 	public static String RenameTypeProcessor_renamed_method_is_overridden;
 
 	public static String RenameTypeRefactoring_another_type;

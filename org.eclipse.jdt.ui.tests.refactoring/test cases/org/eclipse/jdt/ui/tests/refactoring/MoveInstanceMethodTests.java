@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,13 +37,13 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 
 	private static final Class clazz= MoveInstanceMethodTests.class;
 
-	private static final int FIELD= 1;
+	public static final int FIELD= 1;
 
-	private static final int PARAMETER= 0;
+	public static final int PARAMETER= 0;
 
 	private static final String REFACTORING_PATH= "MoveInstanceMethod/";
 
-	private static void chooseNewTarget(MoveInstanceMethodProcessor processor, int newTargetType, String newTargetName) {
+	public static void chooseNewTarget(MoveInstanceMethodProcessor processor, int newTargetType, String newTargetName) {
 		IVariableBinding target= null;
 		IVariableBinding[] targets= processor.getPossibleTargets();
 		for (int i= 0; i < targets.length; i++) {

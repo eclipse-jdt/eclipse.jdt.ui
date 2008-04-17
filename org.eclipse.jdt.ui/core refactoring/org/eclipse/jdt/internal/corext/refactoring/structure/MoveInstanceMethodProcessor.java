@@ -107,6 +107,7 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.MoveMethodDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
@@ -120,13 +121,16 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IVisibilityAdjustment;
@@ -1453,10 +1457,16 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking);
-			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(fMethod, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
-			engine.setStatus(status);
-			engine.searchPattern(new SubProgressMonitor(monitor, 1));
-			return (SearchResultGroup[]) engine.getResults();
+			SearchPattern pattern= SearchPattern.createPattern(fMethod, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+			IJavaSearchScope scope= RefactoringScopeFactory.create(fMethod, true, false);
+			
+			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , fMethod.getElementName());
+			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
+			CollectingSearchRequestor requestor= new CollectingSearchRequestor(binaryRefs);
+			SearchResultGroup[] result= RefactoringSearchEngine.search(pattern, scope, requestor, new SubProgressMonitor(monitor, 1), status);
+			binaryRefs.addErrorIfNecessary(status);
+			
+			return result;
 		} finally {
 			monitor.done();
 		}
@@ -1743,7 +1753,10 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				createMethodImports(targetRewrite, declaration, new SubProgressMonitor(monitor, 1), status);
 			boolean removable= false;
 			if (fInline) {
-				removable= createMethodDelegator(rewrites, declaration, references, adjustor.getAdjustments(), target, status, new SubProgressMonitor(monitor, 1));
+				String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , getMethod().getElementName());
+				ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
+				removable= createMethodDelegator(rewrites, declaration, references, adjustor.getAdjustments(), target, binaryRefs, status, new SubProgressMonitor(monitor, 1));
+				binaryRefs.addErrorIfNecessary(status);
 				if (fRemove && removable) {
 					fSourceRewrite.getASTRewrite().remove(declaration, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.MoveInstanceMethodProcessor_remove_original_method));
 					if (!fSourceRewrite.getCu().equals(fTargetType.getCompilationUnit()))
@@ -2241,6 +2254,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 * @param target
 	 *            <code>true</code> if a target node must be inserted as first
 	 *            argument, <code>false</code> otherwise
+	 * @param binaryRefs
+	 *            the binary references context
 	 * @param status
 	 *            the refactoring status
 	 * @param monitor
@@ -2249,7 +2264,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *         method declaration could be inlined, <code>false</code>
 	 *         otherwise
 	 */
-	protected boolean createMethodDelegator(final Map rewrites, final MethodDeclaration declaration, final SearchResultGroup[] groups, final Map adjustments, final boolean target, final RefactoringStatus status, final IProgressMonitor monitor) {
+	protected boolean createMethodDelegator(final Map rewrites, final MethodDeclaration declaration, final SearchResultGroup[] groups, final Map adjustments, final boolean target, ReferencesInBinaryContext binaryRefs, final RefactoringStatus status, final IProgressMonitor monitor) {
 		Assert.isNotNull(rewrites);
 		Assert.isNotNull(declaration);
 		Assert.isNotNull(groups);
@@ -2305,11 +2320,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 								} else if (!createInlinedMethodInvocation(rewrite, declaration, match, adjustments, target, status))
 									result= false;
 							}
-						} else if (element != null) {
-							status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_binary_project, element.getJavaProject().getElementName())));
-							result= false;
 						} else {
-							status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_binary_resource, group.getResource().getName())));
 							result= false;
 						}
 					}
@@ -2433,10 +2444,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 							} else
 								createMethodJavadocReference(rewrite, declaration, match, target, status);
 						}
-					} else if (element != null) {
-						status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_javadoc_binary_project, element.getJavaProject().getElementName())));
-					} else {
-						status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_javadoc_binary_resource, group.getResource().getName())));
 					}
 					monitor.worked(1);
 				}

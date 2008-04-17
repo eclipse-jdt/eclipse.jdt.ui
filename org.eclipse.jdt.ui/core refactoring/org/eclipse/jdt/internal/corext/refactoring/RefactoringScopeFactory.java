@@ -151,6 +151,18 @@ public class RefactoringScopeFactory {
 	 * @throws JavaModelException if an error occurs
 	 */
 	public static IJavaSearchScope create(IMember[] members) throws JavaModelException {
+		return create(members, true);
+	}
+	
+	/**
+	 * Creates a new search scope comprising <code>members</code>.
+	 * 
+	 * @param members the members
+	 * @param sourceReferencesOnly consider references in source only (no references in binary)
+	 * @return the search scope
+	 * @throws JavaModelException if an error occurs
+	 */
+	public static IJavaSearchScope create(IMember[] members, boolean sourceReferencesOnly) throws JavaModelException {
 		Assert.isTrue(members != null && members.length > 0);
 		IMember candidate= members[0];
 		int visibility= getVisibility(candidate);
@@ -161,7 +173,7 @@ public class RefactoringScopeFactory {
 				candidate= members[i];
 			}
 		}
-		return create(candidate);
+		return create(candidate, true, sourceReferencesOnly);
 	}
 
 	/**
