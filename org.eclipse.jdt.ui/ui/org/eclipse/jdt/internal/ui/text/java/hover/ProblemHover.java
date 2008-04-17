@@ -115,8 +115,11 @@ public class ProblemHover extends AbstractAnnotationHover {
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractAnnotationHover.AnnotationInfo#getCompletionProposals()
 		 */
 		public ICompletionProposal[] getCompletionProposals() {
+			if (!(annotation instanceof IJavaAnnotation))
+				return new ICompletionProposal[0];
+				
 			ProblemLocation location= new ProblemLocation(position.getOffset(), position.getLength(), (IJavaAnnotation) annotation);
-			ICompilationUnit cu= ((IJavaAnnotation) annotation).getCompilationUnit();
+			ICompilationUnit cu= ((IJavaAnnotation)annotation).getCompilationUnit();
 
 			IInvocationContext context= new AssistContext(cu, location.getOffset(), location.getLength());
 			if (!SpellingAnnotation.TYPE.equals(annotation.getType()) && !hasProblem(context.getASTRoot().getProblems(), location))
@@ -137,14 +140,16 @@ public class ProblemHover extends AbstractAnnotationHover {
 			}
 			return false;
 		}
-		
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractAnnotationHover.AnnotationInfo#fillToolBar(org.eclipse.jface.action.ToolBarManager)
 		 */
 		public void fillToolBar(ToolBarManager manager, IInformationControl infoControl) {
 			super.fillToolBar(manager, infoControl);
-
-			IJavaAnnotation javaAnnotation= (IJavaAnnotation) annotation;
+			
+			if (!(annotation instanceof IJavaAnnotation))
+				return;
+			IJavaAnnotation javaAnnotation= (IJavaAnnotation)annotation;
 
 			String optionId= JavaCore.getOptionForConfigurableSeverity(javaAnnotation.getId());
 			if (optionId != null) {
