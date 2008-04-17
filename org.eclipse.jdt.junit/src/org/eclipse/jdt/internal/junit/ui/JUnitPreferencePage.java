@@ -66,6 +66,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.progress.IProgressService;
 
+import org.eclipse.osgi.util.TextProcessor;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -174,12 +176,12 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 				name2= ""; //$NON-NLS-1$
 
 			if (name1.length() > 0 && name2.length() > 0) {
-				char char1= name1.charAt(name1.length() - 1);
-				char char2= name2.charAt(name2.length() - 1);
-				if (char1 == '*' && char1 != char2)
+				boolean isPackage1= name1.indexOf('*') != -1;
+				boolean isPackage2= name2.indexOf('*') != -1;
+				if (isPackage1 && !isPackage2)
 					return -1;
 
-				if (char2 == '*' && char2 != char1)
+				if (isPackage2 && !isPackage1)
 					return 1;
 			}
 			return getComparator().compare(name1, name2);
@@ -192,16 +194,16 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	private static class FilterLabelProvider extends LabelProvider implements ITableLabelProvider {
 
 		public String getColumnText(Object object, int column) {
-			return (column == 0) ? ((Filter) object).getName() : ""; //$NON-NLS-1$
+			return (column == 0) ? getText(object) : ""; //$NON-NLS-1$
 		}
 
 		public String getText(Object element) {
-			return ((Filter) element).getName();
+			return TextProcessor.process(((Filter) element).getName());
 		}
 
 		public Image getColumnImage(Object object, int column) {
 			String name= ((Filter) object).getName();
-			if (name.endsWith(".*") || name.equals(JUnitMessages.JUnitMainTab_label_defaultpackage)) {  //$NON-NLS-1$
+			if (name.indexOf(".*") != - 1 || name.equals(JUnitMessages.JUnitMainTab_label_defaultpackage)) {  //$NON-NLS-1$
 				//package
 				return IMG_PKG;
 			} else if ("".equals(name)) { //$NON-NLS-1$
