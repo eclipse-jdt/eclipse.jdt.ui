@@ -15,6 +15,8 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
 
+import org.eclipse.osgi.util.TextProcessor;
+
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.Flags;
@@ -26,6 +28,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
@@ -43,6 +46,7 @@ public class CompletionProposalLabelProvider {
 	private static final String QUALIFIER_SEPARATOR= JavaElementLabels.CONCAT_STRING;
 	private static final String RETURN_TYPE_SEPARATOR= JavaElementLabels.DECL_STRING;
 	private static final String VAR_TYPE_SEPARATOR= JavaElementLabels.DECL_STRING;
+	
 	
 	/**
 	 * The completion context.
@@ -276,9 +280,12 @@ public class CompletionProposalLabelProvider {
 		declaringType= Signature.getSimpleName(declaringType);
 		nameBuffer.append(declaringType, StyledString.QUALIFIER_STYLER);
 
-		return nameBuffer;
+		if (!JavaPlugin.USE_TEXT_PROCESSOR)
+			return nameBuffer;
+
+		return process(nameBuffer);
 	}
-	
+
 	/**
 	 * Creates a display label for the given method proposal. The display label consists of:
 	 * <ul>
@@ -442,7 +449,11 @@ public class CompletionProposalLabelProvider {
 			buf.append(VAR_TYPE_SEPARATOR);
 			buf.append(typeName);
 		}
-		return buf;
+		
+		if (!JavaPlugin.USE_TEXT_PROCESSOR)
+			return buf;
+
+		return process(buf);
 	}
 
 	/**
@@ -702,6 +713,21 @@ public class CompletionProposalLabelProvider {
 	 */
 	void setContext(CompletionContext context) {
 		fContext= context;
+	}
+
+	/**
+	 * Processes the given styled string to be usable in a BIDI environment.
+	 * <p>
+	 * XXX: Styles are currently erased by this method, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=227559
+	 * </p>
+	 * 
+	 * @param styledString the styled string
+	 * @return the processed styled string
+	 * @since 3.4
+	 */
+	private static StyledString process(StyledString styledString) {
+		String string= TextProcessor.process(styledString.getString());
+		return new StyledString(string);
 	}
 
 }
