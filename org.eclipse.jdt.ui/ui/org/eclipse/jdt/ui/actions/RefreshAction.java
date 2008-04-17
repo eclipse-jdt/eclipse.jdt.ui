@@ -82,7 +82,7 @@ public class RefreshAction extends SelectionDispatchAction {
 		
 		protected List getSelectedResources() {
 			List selectedResources= super.getSelectedResources();
-			if (selectedResources.size() == 1 && selectedResources.get(0) instanceof IWorkspaceRoot) {
+			if (!getStructuredSelection().isEmpty() && selectedResources.size() == 1 && selectedResources.get(0) instanceof IWorkspaceRoot) {
 				return Collections.EMPTY_LIST;
 			}
 			return selectedResources;
@@ -202,8 +202,11 @@ public class RefreshAction extends SelectionDispatchAction {
 				}
 			}
  		}
+		IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+		if (selection.isEmpty()) {
+			javaElements.add(model);
+		}
 		if (!javaElements.isEmpty()) {
-			IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 			model.refreshExternalArchives((IJavaElement[]) javaElements.toArray(new IJavaElement[javaElements.size()]), monitor);
 		}
 	}
