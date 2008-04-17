@@ -55,7 +55,6 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
-import org.eclipse.jdt.internal.ui.viewsupport.StorageLabelProvider;
 
 /**
  * <code>JavaElementLabels</code> provides helper methods to render names of Java elements.
@@ -400,22 +399,7 @@ public class JavaElementLabels {
 	 * @return Returns the label or the empty string if the object type is not supported.
 	 */
 	public static String getTextLabel(Object obj, long flags) {
-		if (obj instanceof IJavaElement) {
-			return getElementLabel((IJavaElement) obj, flags);
-		} else if (obj instanceof IResource) {
-			return ((IResource) obj).getName();
-		} else if (obj instanceof IStorage) {
-			StorageLabelProvider storageLabelProvider= new StorageLabelProvider();
-			String label= storageLabelProvider.getText(obj);
-			storageLabelProvider.dispose();
-			return label;
-		} else if (obj instanceof IAdaptable) {
-			IWorkbenchAdapter wbadapter= (IWorkbenchAdapter) ((IAdaptable)obj).getAdapter(IWorkbenchAdapter.class);
-			if (wbadapter != null) {
-				return wbadapter.getLabel(obj);
-			}
-		}
-		return ""; //$NON-NLS-1$
+		return getStyledTextLabel(obj, flags).getString();
 	}
 	
 	/**
@@ -432,12 +416,12 @@ public class JavaElementLabels {
 		if (obj instanceof IJavaElement) {
 			return getStyledElementLabel((IJavaElement) obj, flags);
 		} else if (obj instanceof IResource) {
-			return new StyledString(((IResource) obj).getName());
+			return getStyledResourceLabel((IResource) obj);
 		} else if (obj instanceof ClassPathContainer) {
 			ClassPathContainer container= (ClassPathContainer) obj;
 			return getStyledContainerEntryLabel(container.getClasspathEntry().getPath(), container.getJavaProject());
 		} else if (obj instanceof IStorage) {
-			return new StyledString(((IStorage)obj).getName());
+			return getStyledStorageLabel((IStorage) obj);
 		} else if (obj instanceof IAdaptable) {
 			IWorkbenchAdapter wbadapter= (IWorkbenchAdapter) ((IAdaptable)obj).getAdapter(IWorkbenchAdapter.class);
 			if (wbadapter != null) {
@@ -445,6 +429,40 @@ public class JavaElementLabels {
 			}
 		}
 		return new StyledString();
+	}
+	
+	/**
+	 * Returns the styled string for the given resource.
+	 * 
+	 * @param resource the resource
+	 * @return the styled string
+	 * @since 3.4
+	 */
+	private static StyledString getStyledResourceLabel(IResource resource) {
+		StyledString result= new StyledString(resource.getName());
+		
+		if (!JavaPlugin.USE_TEXT_PROCESSOR)
+			return result;
+
+		return process(result);
+		
+	}
+	
+	/**
+	 * Returns the styled string for the given storage.
+	 * 
+	 * @param storage the storage
+	 * @return the styled string
+	 * @since 3.4
+	 */
+	private static StyledString getStyledStorageLabel(IStorage storage) {
+		StyledString result= new StyledString(storage.getName());
+		
+		if (!JavaPlugin.USE_TEXT_PROCESSOR)
+			return result;
+		
+		return process(result);
+		
 	}
 				
 				
