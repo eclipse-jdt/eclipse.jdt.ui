@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ProjectScope;
 
@@ -3507,8 +3508,25 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		setStatusLineMessage(null);
 		if (annotation != null) {
 			updateMarkerViews(annotation);
-			if (annotation instanceof IJavaAnnotation && ((IJavaAnnotation) annotation).isProblem())
+			if (annotation instanceof IJavaAnnotation && ((IJavaAnnotation) annotation).isProblem() || isProblemMarkerAnnotation(annotation))
 				setStatusLineMessage(annotation.getText());
+		}
+	}
+
+	/**
+	 * Tells whether the given annotation stands for a problem marker.
+	 * 
+	 * @param annotation the annotation
+	 * @return <code>true</code> if it is a problem marker
+	 * @since 3.4
+	 */
+	private static boolean isProblemMarkerAnnotation(Annotation annotation) {
+		if (!(annotation instanceof MarkerAnnotation))
+			return false;
+		try {
+			return(((MarkerAnnotation)annotation).getMarker().isSubtypeOf(IMarker.PROBLEM));
+		} catch (CoreException e) {
+			return false;
 		}
 	}
 
@@ -3678,7 +3696,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (model == null)
 			return null;
 
-		Iterator e= new JavaAnnotationIterator(model.getAnnotationIterator(), true, true);
+		Iterator e= new JavaAnnotationIterator(model.getAnnotationIterator(), true);
 		while (e.hasNext()) {
 			Annotation a= (Annotation) e.next();
 			if ((a instanceof IJavaAnnotation) && ((IJavaAnnotation)a).hasOverlay() || !isNavigationTarget(a))
@@ -3752,7 +3770,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		else
 			parent= model.getAnnotationIterator();
 
-		Iterator e= new JavaAnnotationIterator(parent, true, false);
+		Iterator e= new JavaAnnotationIterator(parent, false);
 		while (e.hasNext()) {
 			Annotation a= (Annotation) e.next();
 			Position p= model.getPosition(a);

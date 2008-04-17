@@ -12,7 +12,13 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.Iterator;
 
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IMarker;
+
 import org.eclipse.jface.text.source.Annotation;
+
+import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 
 /**
@@ -22,53 +28,43 @@ public class JavaAnnotationIterator implements Iterator {
 
 	private Iterator fIterator;
 	private Annotation fNext;
-	private boolean fSkipIrrelevants;
 	private boolean fReturnAllAnnotations;
 
-	/**
-	 * Returns a new JavaAnnotationIterator.
-	 * 
-	 * Equivalent to <code>JavaAnnotationIterator(model, skipIrrelevants, false)</code>. 
-	 * 
-	 * @param parent the parent iterator to iterate over annotations
-	 * @param skipIrrelevants whether to skip irrelevant annotations
-	 */
-	public JavaAnnotationIterator(Iterator parent, boolean skipIrrelevants) {
-		this(parent, skipIrrelevants, false);
-	}
 
 	/**
 	 * Returns a new JavaAnnotationIterator.
 	 * @param parent the parent iterator to iterate over annotations
-	 * @param skipIrrelevants whether to skip irrelevant annotations
-	 * @param returnAllAnnotations Whether to return non IJavaAnnotations as well
+	 * @param returnAllAnnotations whether to return all annotations or just problem annotations
 	 */
-	public JavaAnnotationIterator(Iterator parent, boolean skipIrrelevants, boolean returnAllAnnotations) {
+	public JavaAnnotationIterator(Iterator parent, boolean returnAllAnnotations) {
 		fReturnAllAnnotations= returnAllAnnotations;
 		fIterator= parent;
-		fSkipIrrelevants= skipIrrelevants;
 		skip();
 	}
 
 	private void skip() {
 		while (fIterator.hasNext()) {
 			Annotation next= (Annotation) fIterator.next();
-			if (next instanceof IJavaAnnotation) {
-				if (fSkipIrrelevants) {
-					if (!next.isMarkedDeleted()) {
-						fNext= next;
-						return;
-					}
-				} else {
-					fNext= next;
-					return;
-				}
-			} else if (fReturnAllAnnotations) {
+			
+			if (next.isMarkedDeleted())
+				continue;
+
+			if (fReturnAllAnnotations || next instanceof IJavaAnnotation || isProblemMarkerAnnotation(next)) {
 				fNext= next;
 				return;
 			}
 		}
 		fNext= null;
+	}
+
+	private static boolean isProblemMarkerAnnotation(Annotation annotation) {
+		if (!(annotation instanceof MarkerAnnotation))
+			return false;
+		try {
+			return(((MarkerAnnotation)annotation).getMarker().isSubtypeOf(IMarker.PROBLEM));
+		} catch (CoreException e) {
+			return false;
+		}
 	}
 
 	/*

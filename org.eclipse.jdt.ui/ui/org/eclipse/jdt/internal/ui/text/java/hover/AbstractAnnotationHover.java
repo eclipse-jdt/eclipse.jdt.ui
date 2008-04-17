@@ -658,7 +658,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 				parent= ((IAnnotationModelExtension2)model).getAnnotationIterator(hoverRegion.getOffset(), hoverRegion.getLength(), true, true);
 			else
 				parent= model.getAnnotationIterator();
-			Iterator e= new JavaAnnotationIterator(parent, true, fAllAnnotations);
+			Iterator e= new JavaAnnotationIterator(parent, fAllAnnotations);
 			
 			int layer= -1;
 			Annotation annotation= null;
