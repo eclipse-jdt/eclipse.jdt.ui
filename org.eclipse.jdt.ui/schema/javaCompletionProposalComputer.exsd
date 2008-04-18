@@ -67,7 +67,7 @@ class must be public and implement
 and must have a public 0-argument constructor.
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java"/>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer"/>
                </appInfo>
             </annotation>
          </attribute>
