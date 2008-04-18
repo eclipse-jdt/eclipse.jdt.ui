@@ -440,10 +440,6 @@ public class JavaElementLabels {
 	 */
 	private static StyledString getStyledResourceLabel(IResource resource) {
 		StyledString result= new StyledString(resource.getName());
-		
-		if (!JavaPlugin.USE_TEXT_PROCESSOR)
-			return result;
-
 		return process(result);
 		
 	}
@@ -457,10 +453,6 @@ public class JavaElementLabels {
 	 */
 	private static StyledString getStyledStorageLabel(IStorage storage) {
 		StyledString result= new StyledString(storage.getName());
-		
-		if (!JavaPlugin.USE_TEXT_PROCESSOR)
-			return result;
-		
 		return process(result);
 		
 	}
@@ -489,10 +481,6 @@ public class JavaElementLabels {
 	public static StyledString getStyledElementLabel(IJavaElement element, long flags) {
 		StyledString result= new StyledString();
 		getElementLabel(element, flags, result);
-		
-		if (!JavaPlugin.USE_TEXT_PROCESSOR)
-			return result;
-
 		return process(result);
 	}
 
@@ -507,6 +495,9 @@ public class JavaElementLabels {
 	 * @since 3.4
 	 */
 	private static StyledString process(StyledString styledString) {
+		if (!JavaPlugin.USE_TEXT_PROCESSOR)
+			return styledString;
+		
 		String string= TextProcessor.process(styledString.getString());
 		return new StyledString(string);
 	}
@@ -1675,9 +1666,6 @@ public class JavaElementLabels {
 						str.setStyle(index, description.length() - index, DECORATIONS_STYLE);
 					}
 				}
-				if (!JavaPlugin.USE_TEXT_PROCESSOR)
-					return str;
-
 				return process(str);
 			}
 		} catch (JavaModelException e) {
