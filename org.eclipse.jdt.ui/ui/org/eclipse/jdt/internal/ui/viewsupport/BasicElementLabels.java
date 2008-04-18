@@ -28,6 +28,10 @@ public class BasicElementLabels {
 	}
 	
 	public static String getFilePattern(String name) {
-		return Strings.markLTR(name);
+		return Strings.markLTR(name, "*.?"); //$NON-NLS-1$
 	}
+		
+	public static String getFileName(String name) {
+		return Strings.markLTR(name);
+	}	
 }

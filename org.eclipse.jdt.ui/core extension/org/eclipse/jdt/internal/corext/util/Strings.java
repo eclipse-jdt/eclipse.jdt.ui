@@ -79,9 +79,26 @@ public class Strings {
 		
 		return TextProcessor.process(string);
 	}
+	
+	/**
+	 * Adds special marks so that that the given string is readable in a BIDI environment.
+	 * 
+	 * @param string the string
+	 * @param additionalDelimiters the additional delimiters
+	 * @return the processed styled string
+	 * @since 3.4
+	 */
+	public static String markLTR(String string, String additionalDelimiters) {
+		if (!USE_TEXT_PROCESSOR)
+			return string;
+		
+		return TextProcessor.process(string, TextProcessor.getDefaultDelimiters() + additionalDelimiters);
+	}
 
 	/**
 	 * Tests if a char is lower case. Fix for 26529.
+	 * @param ch the char
+	 * @return return true if char is lower case
 	 */
 	public static boolean isLowerCase(char ch) {
 		return Character.toLowerCase(ch) == ch;
@@ -163,6 +180,8 @@ public class Strings {
 	 * Removes leading tabs and spaces from the given string. If the string
 	 * doesn't contain any leading tabs or spaces then the string itself is
 	 * returned.
+	 * @param line the line
+	 * @return the trimmed line
 	 */
 	public static String trimLeadingTabsAndSpaces(String line) {
 		int size= line.length();
@@ -208,6 +227,7 @@ public class Strings {
 	 * @param line the text line
 	 * @param project the java project from which to get the formatter
 	 *        preferences, or <code>null</code> for global preferences
+	 * @return the number of indent units
 	 * @since 3.1
 	 */
 	public static int computeIndentUnits(String line, IJavaProject project) {
@@ -221,6 +241,8 @@ public class Strings {
 	 * @param line the text line
 	 * @param tabWidth the width of the '\t' character in space equivalents
 	 * @param indentWidth the width of one indentation unit in space equivalents
+	 * @return the indent of the given string in indentation units
+	 * 
 	 * @since 3.1
 	 */
 	public static int computeIndentUnits(String line, int tabWidth, int indentWidth) {
@@ -245,9 +267,13 @@ public class Strings {
 	 * Removes the given number of indents from the line. Asserts that the given line
 	 * has the requested number of indents. If <code>indentsToRemove <= 0</code>
 	 * the line is returned.
+	 * @param line the line
+	 * @param indentsToRemove the indents to remove
 	 * 
 	 * @param project the java project from which to get the formatter
 	 *        preferences, or <code>null</code> for global preferences
+	 * @return the trimmed line
+	 * 
 	 * @since 3.1
 	 */
 	public static String trimIndent(String line, int indentsToRemove, IJavaProject project) {
@@ -258,6 +284,11 @@ public class Strings {
 	 * Removes the given number of indents from the line. Asserts that the given line
 	 * has the requested number of indents. If <code>indentsToRemove <= 0</code>
 	 * the line is returned.
+	 * @param line the line
+	 * @param indentsToRemove the indents to remove
+	 * @param tabWidth the tab width
+	 * @param indentWidth  the indent width
+	 * @return the trimmed line
 	 * 
 	 * @since 3.1
 	 */
@@ -268,6 +299,7 @@ public class Strings {
 	/**
 	 * Removes the common number of indents from all lines. If a line
 	 * only consists out of white space it is ignored.
+	 * @param lines the lines
 
 	 * @param project the java project from which to get the formatter
 	 *        preferences, or <code>null</code> for global preferences
@@ -279,6 +311,9 @@ public class Strings {
 	/**
 	 * Removes the common number of indents from all lines. If a line
 	 * only consists out of white space it is ignored.
+	 * @param lines the lines
+	 * @param tabWidth 
+	 * @param indentWidth 
 	 * 
 	 * @since 3.1
 	 */
@@ -290,9 +325,11 @@ public class Strings {
 	 * Removes the common number of indents from all lines. If a line
 	 * only consists out of white space it is ignored. If <code>
 	 * considerFirstLine</code> is false the first line will be ignored.
+	 * @param lines the lines
 	 * 
 	 * @param project the java project from which to get the formatter
 	 *        preferences, or <code>null</code> for global preferences
+	 * @param considerFirstLine  If <code>considerFirstLine</code> is false the first line will be ignored.
 	 * @since 3.1
 	 */
 	public static void trimIndentation(String[] lines, IJavaProject project, boolean considerFirstLine) {
@@ -303,6 +340,10 @@ public class Strings {
 	 * Removes the common number of indents from all lines. If a line
 	 * only consists out of white space it is ignored. If <code>
 	 * considerFirstLine</code> is false the first line will be ignored.
+	 * @param lines the lines
+	 * @param tabWidth 
+	 * @param indentWidth 
+	 * @param considerFirstLine If <code> considerFirstLine</code> is false the first line will be ignored.
 	 * @since 3.1
 	 */
 	public static void trimIndentation(String[] lines, int tabWidth, int indentWidth, boolean considerFirstLine) {
@@ -387,9 +428,14 @@ public class Strings {
 	 * Change the indent of, possible muti-line, code range. The current indent is removed, a new indent added.
 	 * The first line of the code will not be changed. (It is considered to have no indent as it might start in
 	 * the middle of a line)
+	 * @param code the code
+	 * @param codeIndentLevel
 	 * 
 	 * @param project the java project from which to get the formatter
 	 *        preferences, or <code>null</code> for global preferences
+	 * @param newIndent 
+	 * @param lineDelim 
+	 * @return the changed code
 	 * @since 3.1
 	 */
 	public static String changeIndent(String code, int codeIndentLevel, IJavaProject project, String newIndent, String lineDelim) {
@@ -400,6 +446,13 @@ public class Strings {
 	 * Change the indent of, possible muti-line, code range. The current indent is removed, a new indent added.
 	 * The first line of the code will not be changed. (It is considered to have no indent as it might start in
 	 * the middle of a line)
+	 * @param code the code
+	 * @param codeIndentLevel 
+	 * @param tabWidth 
+	 * @param indentWidth 
+	 * @param newIndent 
+	 * @param lineDelim 
+	 * @return the changed code
 	 * @since 3.1
 	 */
 	public static String changeIndent(String code, int codeIndentLevel, int tabWidth, int indentWidth, String newIndent, String lineDelim) {
@@ -442,6 +495,9 @@ public class Strings {
 	/**
 	 * Concatenate the given strings into one strings using the passed line delimiter as a
 	 * delimiter. No delimiter is added to the last line.
+	 * @param lines the lines
+	 * @param delimiter 
+	 * @return the concatenated lines
 	 */
 	public static String concatenate(String[] lines, String delimiter) {
 		StringBuffer buffer= new StringBuffer();
