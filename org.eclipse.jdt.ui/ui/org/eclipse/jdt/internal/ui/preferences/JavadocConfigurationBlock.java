@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,6 +68,7 @@ import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.viewsupport.FilteredElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
@@ -78,8 +79,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 public class JavadocConfigurationBlock {
-	private static final String FILE_IMPORT_MASK= "*.jar;*.zip"; //$NON-NLS-1$
-	private static final String ERROR_DIALOG_TITLE= "Error Dialog"; //$NON-NLS-1$
 
 	private StringDialogField fURLField;
 	private StringDialogField fArchiveField;
@@ -576,12 +575,12 @@ public class JavadocConfigurationBlock {
 		}
 		
 		IPath currPath= new Path(fArchiveField.getText());
-		if (ArchiveFileFilter.isArchivePath(currPath)) {
+		if (ArchiveFileFilter.isArchivePath(currPath, true)) {
 			currPath= currPath.removeLastSegments(1);
 		}
 		
 		FileDialog dialog= new FileDialog(fShell, SWT.OPEN);
-		dialog.setFilterExtensions(new String[] { FILE_IMPORT_MASK });
+		dialog.setFilterExtensions(ArchiveFileFilter.JAR_ZIP_FILTER_EXTENSIONS);
 		dialog.setText(PreferencesMessages.JavadocConfigurationBlock_zipImportSource_title);
 		dialog.setFilterPath(currPath.toOSString());
 
@@ -602,8 +601,8 @@ public class JavadocConfigurationBlock {
 			initSel= root.findMember(new Path(initSelection));
 		}
 
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(fShell, lp, cp);
-		dialog.addFilter(new ArchiveFileFilter((List) null, true));
+		FilteredElementTreeSelectionDialog dialog= new FilteredElementTreeSelectionDialog(fShell, lp, cp);
+		dialog.setInitialFilter(ArchiveFileFilter.JARZIP_FILTER_STRING);
 		dialog.setAllowMultiple(false);
 		dialog.setValidator(validator);
 		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
@@ -625,7 +624,7 @@ public class JavadocConfigurationBlock {
 	 * @param message the error message
 	 */
 	protected void displayErrorDialog(String message) {
-		MessageDialog.openError(fShell, ERROR_DIALOG_TITLE, message); 
+		MessageDialog.openError(fShell, PreferencesMessages.JavadocConfigurationBlock_error_dialog_title, message); 
 	}
 		
 	private String chooseJavaDocFolder() {

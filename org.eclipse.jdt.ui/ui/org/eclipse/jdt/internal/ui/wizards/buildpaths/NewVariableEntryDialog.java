@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -299,7 +299,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 	private IPath[] chooseExtensions(CPVariableElement elem) {
 		File file= elem.getPath().toFile();
 
-		JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), true, true);
+		JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), true, true, true);
 		dialog.setTitle(NewWizardMessages.NewVariableEntryDialog_ExtensionDialog_title); 
 		dialog.setMessage(Messages.format(NewWizardMessages.NewVariableEntryDialog_ExtensionDialog_description, elem.getName())); 
 		dialog.setInput(file);

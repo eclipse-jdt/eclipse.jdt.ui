@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ import org.eclipse.ui.dialogs.WizardExportResourcesPage;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 
 /**
  * A wizard page containing a destination block for a jar file. Including
@@ -112,7 +113,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 	 */
 	protected void handleDestinationBrowseButtonPressed() {
 		FileDialog dialog= new FileDialog(getContainer().getShell(), SWT.SAVE);
-		dialog.setFilterExtensions(new String[] { "*.jar", "*.zip" }); //$NON-NLS-1$ //$NON-NLS-2$
+		dialog.setFilterExtensions(ArchiveFileFilter.JAR_ZIP_FILTER_EXTENSIONS);
 
 		String currentSourceString= getDestinationValue();
 		int lastSeparatorIndex= currentSourceString.lastIndexOf(File.separator);

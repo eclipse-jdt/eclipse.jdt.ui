@@ -32,7 +32,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
@@ -45,6 +44,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IUIConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.FilteredElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
@@ -315,11 +315,11 @@ public final class BuildPathDialogAccess {
 		
 		IResource existing= root.findMember(initialEntry);
 		
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(shell, new WorkbenchLabelProvider(), new WorkbenchContentProvider());
+		FilteredElementTreeSelectionDialog dialog= new FilteredElementTreeSelectionDialog(shell, new WorkbenchLabelProvider(), new WorkbenchContentProvider());
 		dialog.setValidator(validator);
 		dialog.setTitle(NewWizardMessages.BuildPathDialogAccess_JARArchiveDialog_edit_title); 
 		dialog.setMessage(NewWizardMessages.BuildPathDialogAccess_JARArchiveDialog_edit_description); 
-		dialog.addFilter(new ArchiveFileFilter(usedJars, true));
+		dialog.setInitialFilter(ArchiveFileFilter.JARZIP_FILTER_STRING);
 		dialog.setInput(root);
 		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
 		dialog.setInitialSelection(existing);
@@ -360,12 +360,12 @@ public final class BuildPathDialogAccess {
 		}
 		IResource focus= initialSelection != null ? root.findMember(initialSelection) : null;
 		
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(shell, new WorkbenchLabelProvider(), new WorkbenchContentProvider());
+		FilteredElementTreeSelectionDialog dialog= new FilteredElementTreeSelectionDialog(shell, new WorkbenchLabelProvider(), new WorkbenchContentProvider());
 		dialog.setHelpAvailable(false);
 		dialog.setValidator(validator);
 		dialog.setTitle(NewWizardMessages.BuildPathDialogAccess_JARArchiveDialog_new_title); 
 		dialog.setMessage(NewWizardMessages.BuildPathDialogAccess_JARArchiveDialog_new_description); 
-		dialog.addFilter(new ArchiveFileFilter(usedJars, true));
+		dialog.setInitialFilter(ArchiveFileFilter.JARZIP_FILTER_STRING);
 		dialog.setInput(root);
 		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
 		dialog.setInitialSelection(focus);
@@ -401,7 +401,7 @@ public final class BuildPathDialogAccess {
 		
 		FileDialog dialog= new FileDialog(shell, SWT.SINGLE);
 		dialog.setText(NewWizardMessages.BuildPathDialogAccess_ExtJARArchiveDialog_edit_title); 
-		dialog.setFilterExtensions(ArchiveFileFilter.FILTER_EXTENSIONS);
+		dialog.setFilterExtensions(ArchiveFileFilter.JAR_ZIP_FILTER_EXTENSIONS);
 		dialog.setFilterPath(lastUsedPath);
 		dialog.setFileName(initialEntry.lastSegment());
 		
@@ -430,7 +430,7 @@ public final class BuildPathDialogAccess {
 		}
 		FileDialog dialog= new FileDialog(shell, SWT.MULTI);
 		dialog.setText(NewWizardMessages.BuildPathDialogAccess_ExtJARArchiveDialog_new_title); 
-		dialog.setFilterExtensions(ArchiveFileFilter.FILTER_EXTENSIONS);
+		dialog.setFilterExtensions(ArchiveFileFilter.ALL_ARCHIVES_FILTER_EXTENSIONS);
 		dialog.setFilterPath(lastUsedPath);
 		
 		String res= dialog.open();

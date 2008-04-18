@@ -444,7 +444,7 @@ public class SourceAttachmentBlock {
 		File initialSelection= resolvedPath != null ? resolvedPath.toFile() : null;
 			
 		String currVariable= currPath.segment(0);
-		JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), false, true);
+		JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), false, true, false);
 		dialog.setTitle(NewWizardMessages.SourceAttachmentBlock_extvardialog_title); 
 		dialog.setMessage(NewWizardMessages.SourceAttachmentBlock_extvardialog_description); 
 		dialog.setInput(fFileVariablePath.toFile());
@@ -466,13 +466,13 @@ public class SourceAttachmentBlock {
 			currPath= fEntry.getPath();
 		}		
 			
-		if (ArchiveFileFilter.isArchivePath(currPath)) {
+		if (ArchiveFileFilter.isArchivePath(currPath, true)) {
 			currPath= currPath.removeLastSegments(1);
 		}
 	
 		FileDialog dialog= new FileDialog(getShell());
 		dialog.setText(NewWizardMessages.SourceAttachmentBlock_extjardialog_text); 
-		dialog.setFilterExtensions(new String[] {"*.jar;*.zip"}); //$NON-NLS-1$
+		dialog.setFilterExtensions(ArchiveFileFilter.JAR_ZIP_FILTER_EXTENSIONS);
 		dialog.setFilterPath(currPath.toOSString());
 		String res= dialog.open();
 		if (res != null) {
@@ -486,7 +486,7 @@ public class SourceAttachmentBlock {
 		if (currPath.segmentCount() == 0) {
 			currPath= fEntry.getPath();
 		}
-		if (ArchiveFileFilter.isArchivePath(currPath)) {
+		if (ArchiveFileFilter.isArchivePath(currPath, true)) {
 			currPath= currPath.removeLastSegments(1);
 		}
 	

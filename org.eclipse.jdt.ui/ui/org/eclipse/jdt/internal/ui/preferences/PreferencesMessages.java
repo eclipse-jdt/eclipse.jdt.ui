@@ -293,6 +293,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavadocConfigurationBlock_error_notafile;
 	public static String JavadocConfigurationBlock_error_invalidarchivepath;
 	public static String JavadocConfigurationBlock_error_archivepathnotabsolute;
+	public static String JavadocConfigurationBlock_error_dialog_title;
 	public static String JavadocConfigurationBlock_browse_archive_button;
 	public static String JavadocConfigurationBlock_browse_archive_path_button;
 	public static String ProblemSeveritiesConfigurationBlock_ignore_documented_unused_exceptions;

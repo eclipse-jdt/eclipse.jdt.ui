@@ -102,7 +102,7 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 
 	private static IFile getCandidate(IAdaptable element) throws JavaModelException {
 		IResource resource= (IResource)element.getAdapter(IResource.class);
-		if (! (resource instanceof IFile) || ! ArchiveFileFilter.isArchivePath(resource.getFullPath()))
+		if (! (resource instanceof IFile) || ! ArchiveFileFilter.isArchivePath(resource.getFullPath(), true))
 			return null;
 		
 		IJavaProject project= JavaCore.create(resource.getProject());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,12 +13,13 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -32,7 +33,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class ArchiveFileFilter extends ViewerFilter {
 
-	public static final String[] FILTER_EXTENSIONS= new String[] {"*.jar;*.zip"}; //$NON-NLS-1$
+	public static final String JARZIP_FILTER_STRING= "*.jar,*.zip"; //$NON-NLS-1$
+	
+	public static final String[] JAR_ZIP_FILTER_EXTENSIONS= new String[] {"*.jar;*.zip"}; //$NON-NLS-1$
+	
+	public static final String[] ALL_ARCHIVES_FILTER_EXTENSIONS= new String[] {"*.jar;*.zip", "*.*"}; //$NON-NLS-1$ //$NON-NLS-2$
 
 	private static final String[] fgArchiveExtensions= { "jar", "zip" }; //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -67,7 +72,7 @@ public class ArchiveFileFilter extends ViewerFilter {
 			if (fExcludes != null && fExcludes.contains(element)) {
 				return false;
 			}
-			return isArchivePath(((IFile)element).getFullPath());
+			return isArchivePath(((IFile)element).getFullPath(), false);
 		} else if (element instanceof IContainer) { // IProject, IFolder
 			if (!fRecursive) {
 				return true;
@@ -90,8 +95,11 @@ public class ArchiveFileFilter extends ViewerFilter {
 		return false;
 	}
 	
-	public static boolean isArchivePath(IPath path) {
+	public static boolean isArchivePath(IPath path, boolean allowAllAchives) {
 		String ext= path.getFileExtension();
+		if (allowAllAchives) {
+			return ext != null;
+		}
 		if (ext != null && ext.length() != 0) {
 			return isArchiveFileExtension(ext);
 		}

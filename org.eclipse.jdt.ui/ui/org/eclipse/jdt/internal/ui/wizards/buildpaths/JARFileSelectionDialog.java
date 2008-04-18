@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,19 +25,19 @@ import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.viewsupport.FilteredElementTreeSelectionDialog;
 
 /**
  * Selection dialog to select a JAR on the file system.
  * Set input to a java.io.File that point to folder.
  */
-public class JARFileSelectionDialog extends ElementTreeSelectionDialog {
-	
+public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
+
 	/**
 	 * Constructor for JARFileSelectionDialog.
 	 * @param parent parent shell
@@ -45,18 +45,29 @@ public class JARFileSelectionDialog extends ElementTreeSelectionDialog {
 	 * @param acceptFolders specifies if folders can be selected as well
 	 */
 	public JARFileSelectionDialog(Shell parent, boolean multiSelect, boolean acceptFolders) {
+		this(parent, multiSelect, acceptFolders, false);
+	}
+	
+	/**
+	 * Constructor for JARFileSelectionDialog.
+	 * @param parent parent shell
+	 * @param multiSelect specifies if selecting multiple elements is allowed
+	 * @param acceptFolders specifies if folders can be selected as well
+	 * @param acceptAllArchives specifies if all archives (not just jar and zip) can be selected
+	 */
+	public JARFileSelectionDialog(Shell parent, boolean multiSelect, boolean acceptFolders, boolean acceptAllArchives) {
 		super(parent, new FileLabelProvider(), new FileContentProvider());
 		setComparator(new FileViewerComparator());
-		addFilter(new FileArchiveFileFilter(acceptFolders));
+		if (!acceptAllArchives) {
+			addFilter(new JARZipFileFilter(acceptFolders));
+		} else {
+			setInitialFilter(ArchiveFileFilter.JARZIP_FILTER_STRING);
+		}
 		setValidator(new FileSelectionValidator(multiSelect, acceptFolders));
 		setHelpAvailable(false);
 	}
 	
-	private static boolean isArchive(File file) {
-		String name= file.getName();
-		int detIndex= name.lastIndexOf('.');
-		return (detIndex != -1 && ArchiveFileFilter.isArchiveFileExtension(name.substring(detIndex + 1)));
-	}		
+	
 
 	private static class FileLabelProvider extends LabelProvider {
 		private final Image IMG_FOLDER= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
@@ -119,10 +130,10 @@ public class JARFileSelectionDialog extends ElementTreeSelectionDialog {
 	
 	}
 	
-	private static class FileArchiveFileFilter extends ViewerFilter {
+	private static class JARZipFileFilter extends ViewerFilter {
 		private final boolean fAcceptFolders;
 
-		public FileArchiveFileFilter(boolean acceptFolders) {
+		public JARZipFileFilter(boolean acceptFolders) {
 			fAcceptFolders= acceptFolders;
 		}
 
@@ -145,7 +156,13 @@ public class JARFileSelectionDialog extends ElementTreeSelectionDialog {
 				}
 			}
 			return false;
-		}		
+		}
+		
+		private static boolean isArchive(File file) {
+			String name= file.getName();
+			int detIndex= name.lastIndexOf('.');
+			return (detIndex != -1 && ArchiveFileFilter.isArchiveFileExtension(name.substring(detIndex + 1)));
+		}	
 	}
 	
 	private static class FileViewerComparator extends ViewerComparator {

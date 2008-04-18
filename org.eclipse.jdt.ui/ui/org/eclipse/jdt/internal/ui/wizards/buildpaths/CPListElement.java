@@ -553,7 +553,7 @@ public class CPListElement {
 			case IClasspathEntry.CPE_LIBRARY:
 				res= root.findMember(path);
 				if (res == null) {
-					if (!ArchiveFileFilter.isArchivePath(path)) {
+					if (!ArchiveFileFilter.isArchivePath(path, true)) {
 						if (root.getWorkspace().validatePath(path.toString(), IResource.FOLDER).isOK()
 								&& root.getProject(path.segment(0)).exists()) {
 							res= root.getFolder(path);

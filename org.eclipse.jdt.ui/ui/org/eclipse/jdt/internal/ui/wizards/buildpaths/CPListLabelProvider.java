@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,6 +43,7 @@ import org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttri
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -226,11 +227,11 @@ public class CPListLabelProvider extends LabelProvider {
 			case IClasspathEntry.CPE_LIBRARY: {
 				IResource resource= cpentry.getResource();
 				if (resource instanceof IContainer) {
-					StringBuffer buf= new StringBuffer(path.makeRelative().toString());
+					StringBuffer buf= new StringBuffer(BasicElementLabels.getPathLabel(path, false));
 					IPath linkTarget= cpentry.getLinkTarget();
 					if (linkTarget != null) {
 						buf.append(JavaElementLabels.CONCAT_STRING);
-						buf.append(linkTarget.toOSString());
+						buf.append(BasicElementLabels.getPathLabel(linkTarget, true));
 					}
 					buf.append(' ');
 					buf.append(fClassLabel);
@@ -295,20 +296,21 @@ public class CPListLabelProvider extends LabelProvider {
 	}
 	
 	private String getPathString(IPath path, boolean isExternal) {
-		if (ArchiveFileFilter.isArchivePath(path)) {
+		if (ArchiveFileFilter.isArchivePath(path, true)) {
 			IPath appendedPath= path.removeLastSegments(1);
 			String appended= isExternal ? appendedPath.toOSString() : appendedPath.makeRelative().toString();
-			return Messages.format(NewWizardMessages.CPListLabelProvider_twopart, new String[] { path.lastSegment(), appended }); 
+			String lastSegment= BasicElementLabels.getFileName(path.lastSegment());
+			return Messages.format(NewWizardMessages.CPListLabelProvider_twopart, new String[] { lastSegment, appended }); 
 		} else {
-			return isExternal ? path.toOSString() : path.makeRelative().toString();
+			return BasicElementLabels.getPathLabel(path, isExternal);
 		}
 	}
 	
 	private String getVariableString(IPath path) {
-		String name= path.makeRelative().toString();
+		String name= BasicElementLabels.getPathLabel(path, false);
 		IPath entryPath= JavaCore.getClasspathVariable(path.segment(0));
 		if (entryPath != null) {
-			String appended= entryPath.append(path.removeFirstSegments(1)).toOSString();
+			String appended= BasicElementLabels.getPathLabel(entryPath.append(path.removeFirstSegments(1)), true);
 			return Messages.format(NewWizardMessages.CPListLabelProvider_twopart, new String[] { name, appended }); 
 		} else {
 			return name;
@@ -327,7 +329,7 @@ public class CPListLabelProvider extends LabelProvider {
 				IResource res= cpentry.getResource();
 				IPath path= (IPath) cpentry.getAttribute(CPListElement.SOURCEATTACHMENT);
 				if (res == null) {
-					if (ArchiveFileFilter.isArchivePath(cpentry.getPath())) {
+					if (ArchiveFileFilter.isArchivePath(cpentry.getPath(), true)) {
 						if (path == null || path.isEmpty()) {
 							return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_EXTERNAL_ARCHIVE);
 						} else {

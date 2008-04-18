@@ -697,7 +697,7 @@ public class ClasspathModifier {
 	 * @throws JavaModelException
 	 */
 	public static boolean isArchive(IFile file, IJavaProject project) throws JavaModelException {
-		if (!ArchiveFileFilter.isArchivePath(file.getFullPath()))
+		if (!ArchiveFileFilter.isArchivePath(file.getFullPath(), true))
 			return false;
 		if (project != null && project.exists() && (project.findPackageFragmentRoot(file.getFullPath()) == null))
 			return true;

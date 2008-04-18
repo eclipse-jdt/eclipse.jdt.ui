@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -142,7 +142,6 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 		}
 		fConfigurationBlock= new NativeLibrariesConfigurationBlock(this, getShell(), nativeLibPath, fEntry);
 		Control control= fConfigurationBlock.createContents(parent);
-		control.setVisible(elem != null);
 
 		Dialog.applyDialogFont(control);
 		return control;
@@ -220,7 +219,7 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 			IResource resource= (IResource) adaptable.getAdapter(IResource.class);
 			//special case when the .jar is a file
 			try {
-				if (resource instanceof IFile && ArchiveFileFilter.isArchivePath(resource.getFullPath())) {
+				if (resource instanceof IFile && ArchiveFileFilter.isArchivePath(resource.getFullPath(), false)) {
 					IProject proj= resource.getProject();
 					if (proj.hasNature(JavaCore.NATURE_ID)) {
 						IJavaProject jproject= JavaCore.create(proj);

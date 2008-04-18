@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,6 +72,7 @@ import org.eclipse.jdt.internal.ui.filters.EmptyPackageFilter;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 import org.eclipse.jdt.internal.ui.refactoring.binary.BinaryRefactoringHistoryWizard;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 
 /**
  * Jar import wizard page.
@@ -311,8 +312,8 @@ public final class JarImportWizardPage extends WizardPage {
 	protected void handleBrowseButtonSelected() {
 		final FileDialog file= new FileDialog(getShell(), SWT.OPEN);
 		file.setText(JarImportMessages.JarImportWizardPage_browse_caption);
-		file.setFilterNames(new String[] { "*.jar", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
-		file.setFilterExtensions(new String[] { "*.jar", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		file.setFilterNames(ArchiveFileFilter.ALL_ARCHIVES_FILTER_EXTENSIONS);
+		file.setFilterExtensions(ArchiveFileFilter.ALL_ARCHIVES_FILTER_EXTENSIONS);
 		final String path= file.open();
 		if (path != null) {
 			fLocationControl.setText(path);
