@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,11 +13,14 @@ package org.eclipse.jdt.internal.corext.util;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.action.LegacyActionTools;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
+
+import org.eclipse.osgi.util.TextProcessor;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
@@ -29,13 +32,60 @@ import org.eclipse.jdt.core.formatter.IndentManipulation;
 public class Strings {
 	
 	private Strings(){}
+
 	
 	/**
-	 * tests if a char is lower case. Fix for 26529 
+	 * Tells whether we have to use the {@link TextProcessor}
+	 * <p>
+	 * XXX: This is a performance optimization needed due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=227713
+	 * </p>
+	 * @since 3.4
+	 */
+	private static final boolean USE_TEXT_PROCESSOR;
+	static {
+		String testString= "args : String[]"; //$NON-NLS-1$
+		USE_TEXT_PROCESSOR= testString != TextProcessor.process(testString);
+	}
+
+	
+	/**
+	 * Adds special marks so that that the given styled string is readable in a BIDI environment.
+	 * <p>
+	 * XXX: Styles are currently erased by this method, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=227559
+	 * </p>
+	 * 
+	 * @param styledString the styled string
+	 * @return the processed styled string
+	 * @since 3.4
+	 */
+	public static StyledString markLTR(StyledString styledString) {
+		if (!USE_TEXT_PROCESSOR)
+			return styledString;
+		
+		String string= TextProcessor.process(styledString.getString());
+		return new StyledString(string);
+	}
+	
+	/**
+	 * Adds special marks so that that the given string is readable in a BIDI environment.
+	 * 
+	 * @param string the string
+	 * @return the processed styled string
+	 * @since 3.4
+	 */
+	public static String markLTR(String string) {
+		if (!USE_TEXT_PROCESSOR)
+			return string;
+		
+		return TextProcessor.process(string);
+	}
+
+	/**
+	 * Tests if a char is lower case. Fix for 26529.
 	 */
 	public static boolean isLowerCase(char ch) {
 		return Character.toLowerCase(ch) == ch;
-	}	
+	}
 	
 	public static boolean startsWithIgnoreCase(String text, String prefix) {
 		int textLength= text.length();
@@ -65,9 +115,10 @@ public class Strings {
 	}
 
 	/**
-	 * Converts the given string into an array of lines. The lines 
+	 * Converts the given string into an array of lines. The lines
 	 * don't contain any line delimiter characters.
 	 *
+	 * @param input the string
 	 * @return the string converted into an array of strings. Returns <code>
 	 * 	null</code> if the input string can't be converted in an array of lines.
 	 */
@@ -93,6 +144,7 @@ public class Strings {
 	 * white spaces according to Java. If the string is empty, <code>true
 	 * </code> is returned.
 	 * 
+	 * @param s the string to test
 	 * @return <code>true</code> if the string only consists of white
 	 * 	spaces; otherwise <code>false</code> is returned
 	 * 
@@ -109,7 +161,7 @@ public class Strings {
 	
 	/**
 	 * Removes leading tabs and spaces from the given string. If the string
-	 * doesn't contain any leading tabs or spaces then the string itself is 
+	 * doesn't contain any leading tabs or spaces then the string itself is
 	 * returned.
 	 */
 	public static String trimLeadingTabsAndSpaces(String line) {
@@ -190,7 +242,7 @@ public class Strings {
 	}
 
 	/**
-	 * Removes the given number of indents from the line. Asserts that the given line 
+	 * Removes the given number of indents from the line. Asserts that the given line
 	 * has the requested number of indents. If <code>indentsToRemove <= 0</code>
 	 * the line is returned.
 	 * 
@@ -203,7 +255,7 @@ public class Strings {
 	}
 	
 	/**
-	 * Removes the given number of indents from the line. Asserts that the given line 
+	 * Removes the given number of indents from the line. Asserts that the given line
 	 * has the requested number of indents. If <code>indentsToRemove <= 0</code>
 	 * the line is returned.
 	 * 

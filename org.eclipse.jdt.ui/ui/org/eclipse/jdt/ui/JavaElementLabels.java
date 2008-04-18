@@ -23,8 +23,6 @@ import org.eclipse.jface.viewers.StyledString.Styler;
 
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
-import org.eclipse.osgi.util.TextProcessor;
-
 import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.Flags;
@@ -49,6 +47,7 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.launching.JavaRuntime;
 
@@ -440,7 +439,7 @@ public class JavaElementLabels {
 	 */
 	private static StyledString getStyledResourceLabel(IResource resource) {
 		StyledString result= new StyledString(resource.getName());
-		return process(result);
+		return Strings.markLTR(result);
 		
 	}
 	
@@ -453,7 +452,7 @@ public class JavaElementLabels {
 	 */
 	private static StyledString getStyledStorageLabel(IStorage storage) {
 		StyledString result= new StyledString(storage.getName());
-		return process(result);
+		return Strings.markLTR(result);
 		
 	}
 				
@@ -481,25 +480,7 @@ public class JavaElementLabels {
 	public static StyledString getStyledElementLabel(IJavaElement element, long flags) {
 		StyledString result= new StyledString();
 		getElementLabel(element, flags, result);
-		return process(result);
-	}
-
-	/**
-	 * Processes the given styled string to be usable in a BIDI environment.
-	 * <p>
-	 * XXX: Styles are currently erased by this method, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=227559
-	 * </p>
-	 * 
-	 * @param styledString the styled string
-	 * @return the processed styled string
-	 * @since 3.4
-	 */
-	private static StyledString process(StyledString styledString) {
-		if (!JavaPlugin.USE_TEXT_PROCESSOR)
-			return styledString;
-		
-		String string= TextProcessor.process(styledString.getString());
-		return new StyledString(string);
+		return Strings.markLTR(result);
 	}
 
 	/**
@@ -1666,7 +1647,7 @@ public class JavaElementLabels {
 						str.setStyle(index, description.length() - index, DECORATIONS_STYLE);
 					}
 				}
-				return process(str);
+				return Strings.markLTR(str);
 			}
 		} catch (JavaModelException e) {
 			// ignore

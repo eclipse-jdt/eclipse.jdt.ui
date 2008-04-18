@@ -15,8 +15,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
 
-import org.eclipse.osgi.util.TextProcessor;
-
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.Flags;
@@ -24,11 +22,11 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
@@ -279,11 +277,7 @@ public class CompletionProposalLabelProvider {
 		String declaringType= extractDeclaringTypeFQN(methodProposal);
 		declaringType= Signature.getSimpleName(declaringType);
 		nameBuffer.append(declaringType, StyledString.QUALIFIER_STYLER);
-
-		if (!JavaPlugin.USE_TEXT_PROCESSOR)
-			return nameBuffer;
-
-		return process(nameBuffer);
+		return Strings.markLTR(nameBuffer);
 	}
 
 	/**
@@ -449,11 +443,7 @@ public class CompletionProposalLabelProvider {
 			buf.append(VAR_TYPE_SEPARATOR);
 			buf.append(typeName);
 		}
-		
-		if (!JavaPlugin.USE_TEXT_PROCESSOR)
-			return buf;
-
-		return process(buf);
+		return Strings.markLTR(buf);
 	}
 
 	/**
@@ -713,21 +703,6 @@ public class CompletionProposalLabelProvider {
 	 */
 	void setContext(CompletionContext context) {
 		fContext= context;
-	}
-
-	/**
-	 * Processes the given styled string to be usable in a BIDI environment.
-	 * <p>
-	 * XXX: Styles are currently erased by this method, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=227559
-	 * </p>
-	 * 
-	 * @param styledString the styled string
-	 * @return the processed styled string
-	 * @since 3.4
-	 */
-	private static StyledString process(StyledString styledString) {
-		String string= TextProcessor.process(styledString.getString());
-		return new StyledString(string);
 	}
 
 }

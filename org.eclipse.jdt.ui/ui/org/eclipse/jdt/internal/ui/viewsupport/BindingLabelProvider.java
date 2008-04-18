@@ -16,8 +16,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
 
-import org.eclipse.osgi.util.TextProcessor;
-
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
@@ -26,6 +24,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -229,7 +228,7 @@ public class BindingLabelProvider extends LabelProvider {
 				if (typeArguments.length > 0) {
 					buffer.append(' ');
 					getTypeArgumentsLabel(typeArguments, (flags & JavaElementLabels.T_TYPE_PARAMETERS), buffer);
-				}				
+				}
 			}
 		}
 		
@@ -241,7 +240,7 @@ public class BindingLabelProvider extends LabelProvider {
 			if (parameters != null) {
 				for (int index= 0; index < parameters.length; index++) {
 					if (index > 0) {
-						buffer.append(JavaElementLabels.COMMA_STRING); 
+						buffer.append(JavaElementLabels.COMMA_STRING);
 					}
 					ITypeBinding paramType= parameters[index];
 					if (binding.isVarargs() && (index == parameters.length - 1)) {
@@ -456,11 +455,7 @@ public class BindingLabelProvider extends LabelProvider {
 			else
 				getLocalVariableLabel(variable, flags, buffer);
 		}
-		String label= buffer.toString();
-		if (JavaPlugin.USE_TEXT_PROCESSOR) {
-			return TextProcessor.process(label);
-		}
-		return label;
+		return Strings.markLTR(buffer.toString());
 	}
 	
 	/**

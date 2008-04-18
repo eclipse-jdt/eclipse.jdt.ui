@@ -64,8 +64,6 @@ import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
 import org.eclipse.ui.forms.FormColors;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
-import org.eclipse.osgi.util.TextProcessor;
-
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
@@ -262,17 +260,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 	public static JavaPlugin getDefault() {
 		return fgJavaPlugin;
 	}
-	
-	/**
-	 * Tells whether we have to use the {@link TextProcessor}
-	 * @since 3.4
-	 */
-	public static final boolean USE_TEXT_PROCESSOR;
-	static {
-		String testString= "args : String[]"; //$NON-NLS-1$
-		USE_TEXT_PROCESSOR= testString != TextProcessor.process(testString);
-	}
-
 	
 	public static IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
