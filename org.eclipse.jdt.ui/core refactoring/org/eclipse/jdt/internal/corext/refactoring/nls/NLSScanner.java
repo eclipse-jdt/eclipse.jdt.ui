@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -62,27 +63,55 @@ public class NLSScanner {
 		NLSLine currentLine= null;
 		int nlsElementIndex= 0;
 		
-		boolean insideAnnotation= false;
+		/*
+		 * Stack of int[1] containing either
+		 * a) >=0: parenthesis counter per nested annotation level, or
+		 * b)  -1: read a '@' or '.' in annotation type, waiting for identifier to complete annotation.
+		 */
+		LinkedList insideAnnotation= new LinkedList();
 		int defaultCounter= 0; // counting up tokens starting with 'default'
-		int parenthesisCount = 0;
 		
 		while (token != ITerminalSymbols.TokenNameEOF) {
 			switch (token) {
 				// don't NLS inside annotation arguments and after 'default'
 				case ITerminalSymbols.TokenNameAT:
-					insideAnnotation= true;
+					insideAnnotation.add(new int[] { -1 });
 					break;
 				case ITerminalSymbols.TokenNameinterface:
-					insideAnnotation= false; //e.g. @interface
+					insideAnnotation.clear(); //e.g. @interface
 					break;
 				
+				case ITerminalSymbols.TokenNameIdentifier:
+					if (! insideAnnotation.isEmpty()) {
+						int[] parenCounter= (int[]) insideAnnotation.getLast();
+						if (parenCounter[0] == -1)
+							parenCounter[0]= 0;
+						else if (parenCounter[0] == 0)
+							insideAnnotation.removeLast(); // identifier after annotation name -> was a simple annotation
+					}
+					break;
+				
+				case ITerminalSymbols.TokenNameDOT:
+					if (! insideAnnotation.isEmpty()) {
+						int[] parenCounter= (int[]) insideAnnotation.getLast();
+						if (parenCounter[0] == 0)
+							parenCounter[0]= -1;
+						else if (parenCounter[0] == -1)
+							insideAnnotation.removeLast(); // '@' '.' -> something's wrong, back out...
+					}
+					break;
+					
 				case ITerminalSymbols.TokenNameLPAREN:
-					parenthesisCount++;
+					if (! insideAnnotation.isEmpty())
+						++((int[]) insideAnnotation.getLast())[0];
 					break;
 				case ITerminalSymbols.TokenNameRPAREN:
-					parenthesisCount--;
-					if (parenthesisCount == 0) {
-						insideAnnotation= false;
+					if (! insideAnnotation.isEmpty()) {
+						int parenCount= --((int[]) insideAnnotation.getLast())[0];
+						if (parenCount <= 0) {
+							insideAnnotation.removeLast();
+						}
+						
 					}
 					break;
 					
@@ -102,7 +131,7 @@ public class NLSScanner {
 					
 				case ITerminalSymbols.TokenNameStringLiteral:
 					currentLineNr= scanner.getLineNumber(scanner.getCurrentTokenStartPosition());
-					if (!insideAnnotation && defaultCounter == 0) {
+					if (insideAnnotation.isEmpty() && defaultCounter == 0) {
 						if (currentLineNr != previousLineNr) {
 							currentLine= new NLSLine(currentLineNr - 1);
 							lines.add(currentLine);

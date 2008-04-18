@@ -294,6 +294,89 @@ public class NLSScannerTester extends TestCase {
 		assertEquals("\"x\"", line.get(0).getValue());
 	}
 	
+	// test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=227482
+	public void test21() throws InvalidInputException {
+		String text=
+			"class C {\r\n" +
+			"    void m() {\r\n" + 
+			"        System.out.println(new Object() {\r\n" + 
+			"            @Override\r\n" + 
+			"            public String toString() {\r\n" + 
+			"                return \"me\";\r\n" + 
+			"            };\r\n" + 
+			"        });\r\n" + 
+			"    }\r\n" + 
+			"}";
+		NLSLine[] l= NLSScanner.scan(text);
+		
+		assertEquals(1, l.length);
+		
+		NLSLine line= l[0];
+		assertEquals(1, line.size());
+		assertEquals(5, line.getLineNumber());
+		assertEquals("\"me\"", line.get(0).getValue());
+	}
+	
+	// test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=227482
+	public void test22() throws InvalidInputException {
+		String text=
+			"class C {\r\n" +
+			"    void m() {\r\n" +
+			"        Object var= ((((new Object() {\r\n" + 
+			"            @Override\r\n" + 
+			"            public String toString() {\r\n" + 
+			"                return \"me\";\r\n" + 
+			"            };\r\n" + 
+			"        }))));\r\n" + 
+			"    }\r\n" + 
+			"}";
+		NLSLine[] l= NLSScanner.scan(text);
+		
+		assertEquals(1, l.length);
+		
+		NLSLine line= l[0];
+		assertEquals(1, line.size());
+		assertEquals(5, line.getLineNumber());
+		assertEquals("\"me\"", line.get(0).getValue());
+	}
+	
+	// test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=227482
+	public void test23() throws InvalidInputException {
+		String text=
+			"class C {\r\n" +
+			"    Object field= (new Object() {\r\n" + 
+			"        @java.lang.Override\r\n" + 
+			"        public String toString() {\r\n" + 
+			"            return \"me\";\r\n" + 
+			"        };\r\n" + 
+			"    });\r\n" + 
+			"}";
+		NLSLine[] l= NLSScanner.scan(text);
+		
+		assertEquals(1, l.length);
+		
+		NLSLine line= l[0];
+		assertEquals(1, line.size());
+		assertEquals(4, line.getLineNumber());
+		assertEquals("\"me\"", line.get(0).getValue());
+	}
+	
+	// test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=227482
+	public void test24() throws InvalidInputException {
+		String text=
+			"class C {\r\n" +
+			"    @java.lang.Deprecated int field2= (\"me\").length();\r\n" + 
+			"}";
+		NLSLine[] l= NLSScanner.scan(text);
+		
+		assertEquals(1, l.length);
+		
+		NLSLine line= l[0];
+		assertEquals(1, line.size());
+		assertEquals(1, line.getLineNumber());
+		assertEquals("\"me\"", line.get(0).getValue());
+	}
+	
 	//regression test for bug 12600
 	public void test54() throws Exception{
 		String text=
