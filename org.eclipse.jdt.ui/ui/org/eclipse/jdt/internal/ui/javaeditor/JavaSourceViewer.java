@@ -495,12 +495,15 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		BreakIterator bi= BreakIterator.getWordInstance();
 		bi.setText(event.lineText);
 		int i= bi.first();
-		int index= 0;
+		int index= 1;
+		int lastSegment= 0;
 		while (i != BreakIterator.DONE) {
 			int next= bi.next();
 			if (next - i > 1) {
-				segments[index++]= i;
+				if (i > lastSegment)
+					segments[index++]= i;
 				segments[index++]= next;
+				lastSegment= next;
 			}
 			i= next;
 		}
@@ -508,9 +511,8 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		if (index == 0)
 			return null;
 
-		int shift= segments[0] == 0 ? 0 : 1;
-		int[] result= new int[index + shift];
-		System.arraycopy(segments, 0, result, shift, index);
+		int[] result= new int[index];
+		System.arraycopy(segments, 0, result, 0, index);
 		return result;
 	}
 
