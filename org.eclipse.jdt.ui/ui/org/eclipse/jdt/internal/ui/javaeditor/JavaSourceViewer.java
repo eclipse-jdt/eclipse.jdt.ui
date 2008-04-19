@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import com.ibm.icu.text.BreakIterator;
@@ -129,6 +128,13 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 * @since 3.1
 	 */
 	private boolean fIsSetVisibleDocumentDelayed= false;
+
+	/**
+	 * Word iterator. Only used in BIDI mode.
+	 * @since 3.4
+	 */
+	private BreakIterator fWordIterator;
+
 
 	public JavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
 		super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles);
@@ -442,7 +448,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 			fBackspaceManager.uninstall();
 			fBackspaceManager= null;
 		}
-
+		fWordIterator= null;
 		super.handleDispose();
 	}
 
@@ -487,18 +493,20 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	}
 
 
-	protected static int[] getBidiLineSegments(BidiSegmentEvent event) {
+	protected int[] getBidiLineSegments(BidiSegmentEvent event) {
 		if (event.lineText.length() <= 1)
 			return null;
 
+		if (fWordIterator == null)
+			fWordIterator= BreakIterator.getWordInstance();
+		fWordIterator.setText(event.lineText);
+		
 		int[] segments= new int[event.lineText.length()];
-		BreakIterator bi= BreakIterator.getWordInstance();
-		bi.setText(event.lineText);
-		int i= bi.first();
+		int i= fWordIterator.first();
 		int index= 1;
 		int lastSegment= 0;
 		while (i != BreakIterator.DONE) {
-			int next= bi.next();
+			int next= fWordIterator.next();
 			if (next - i > 1) {
 				if (i > lastSegment)
 					segments[index++]= i;
