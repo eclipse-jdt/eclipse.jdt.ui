@@ -101,7 +101,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		
 		fFormatCodeButton= new Button(fCleanUpOptionsComposite, SWT.CHECK);
 		fFormatCodeButton.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_FormatSource_Checkbox);
-		fFormatCodeButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		fFormatCodeButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		fFormatCodeButton.addSelectionListener(new SelectionAdapter() {
 			/**
 			 * {@inheritDoc}
@@ -151,14 +151,14 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		
 		fFormatConfigLink= new Link(fCleanUpOptionsComposite, SWT.NONE);
 		fFormatConfigLink.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_ConfigureFormatter_Link);
-		GridData gridData2= new GridData(SWT.LEFT, SWT.TOP, false, true);
+		GridData gridData2= new GridData(SWT.LEFT, SWT.TOP, false, false);
 		gridData2.horizontalIndent= 20;
 		gridData2.minimumHeight= heightOneHalf;
 		fFormatConfigLink.setLayoutData(gridData2);
 		
 		fOrganizeImportsButton= new Button(fCleanUpOptionsComposite, SWT.CHECK);
 		fOrganizeImportsButton.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_OrganizeImports_Checkbox);
-		fOrganizeImportsButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		fOrganizeImportsButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		fOrganizeImportsButton.addSelectionListener(new SelectionAdapter() {
 			/**
 			 * {@inheritDoc}
@@ -170,7 +170,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		
 		fOrganizeImportsConfigLink= new Link(fCleanUpOptionsComposite, SWT.NONE);
 		fOrganizeImportsConfigLink.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_ConfigureImports_Link);
-		GridData gridData3= new GridData(SWT.LEFT, SWT.TOP, false, true);
+		GridData gridData3= new GridData(SWT.LEFT, SWT.TOP, false, false);
 		gridData3.horizontalIndent= 20;
 		gridData3.minimumHeight= heightOneHalf;
 		fOrganizeImportsConfigLink.setLayoutData(gridData3);
@@ -191,7 +191,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	
 	private Composite createAdvancedComposite(final Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
-		GridData gridData= new GridData(SWT.FILL, SWT.TOP, true, false);
+		GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.horizontalIndent= INDENT;
 		composite.setLayoutData(gridData);
 		GridLayout layout= new GridLayout(2, false);
@@ -200,7 +200,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		composite.setLayout(layout);
 		
 		fSelectedActionsText= new BulletListBlock(composite, SWT.NONE);
-		gridData= new GridData(SWT.FILL, SWT.TOP, true, false);
+		gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.heightHint= new PixelConverter(composite).convertHeightInCharsToPixels(8);
 		fSelectedActionsText.setLayoutData(gridData);
 		
