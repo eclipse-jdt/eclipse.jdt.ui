@@ -274,7 +274,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 
 		// ant script name entry field
 		fAntScriptLabel= new Label(composite, SWT.NONE);
-		GridData gridData= new GridData(SWT.BEGINNING, SWT.LEFT, false, false);
+		GridData gridData= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
 		gridData.horizontalIndent= 15;
 		fAntScriptLabel.setLayoutData(gridData);
 		fAntScriptLabel.setText(FatJarPackagerMessages.FatJarPackageWizardPage_antScriptLocation_text); 
