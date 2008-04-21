@@ -109,8 +109,8 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 				return super.createQuery(element); // in workspace
 		}
 		SearchUtil.updateLRUWorkingSets(workingSets);
-		IJavaSearchScope scope= factory.createJavaSearchScope(workingSets, true);
-		String description= factory.getWorkingSetScopeDescription(workingSets, true);
+		IJavaSearchScope scope= factory.createJavaSearchScope(workingSets, JavaSearchScopeFactory.NO_PROJ);
+		String description= factory.getWorkingSetScopeDescription(workingSets, JavaSearchScopeFactory.NO_PROJ);
 		return new ElementQuerySpecification(element, getLimitTo(), scope, description);
 	}
 }
