@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,8 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSMessages;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -81,7 +83,7 @@ public class NlsRefactoringCheckFinalConditionsTest extends TestCase {
 		assertEquals("one info", 1, res.getEntries().length);
 		RefactoringStatusEntry help= res.getEntryAt(0);
 		assertEquals("info", RefactoringStatus.INFO, help.getSeverity());
-		assertEquals(Messages.format(NLSMessages.NLSRefactoring_will_be_created, propertyFile.getFullPath().toString()), help.getMessage());
+		assertEquals(Messages.format(NLSMessages.NLSRefactoring_will_be_created, BasicElementLabels.getPathLabel(propertyFile.getFullPath(), false)), help.getMessage());
 	}
 
 	/*
