@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -137,7 +137,8 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 			}
 
 			final ArrayList candidateList= (ArrayList)candidates;
-			for (int offset= 0; offset < candidateList.size(); offset++) {
+			int candidateSize= Math.min(500, candidateList.size()); // see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=195357
+			for (int offset= 0; offset < candidateSize; offset++) {
 
 				String candidate= (String)candidateList.get(offset);
 				distance= fDistanceAlgorithm.getDistance(word, candidate);
