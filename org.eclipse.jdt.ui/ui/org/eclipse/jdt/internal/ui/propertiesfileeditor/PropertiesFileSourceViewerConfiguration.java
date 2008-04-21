@@ -304,8 +304,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 			}
 		};
 		
-		MonoReconciler reconciler= new MonoReconciler(strategy, false);
-		reconciler.setIsIncrementalReconciler(false);
+		MonoReconciler reconciler= new MonoReconciler(strategy, true);
 		reconciler.setDelay(500);
 		return reconciler;
 	}
