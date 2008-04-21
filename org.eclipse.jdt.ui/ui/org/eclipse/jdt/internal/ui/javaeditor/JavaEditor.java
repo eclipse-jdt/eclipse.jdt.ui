@@ -1214,7 +1214,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		public void windowActivated(IWorkbenchWindow window) {
 			if (window == getEditorSite().getWorkbenchWindow() && fMarkOccurrenceAnnotations && isActivePart()) {
 				fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();
-				updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProvider.getAST(getInputJavaElement(), SharedASTProvider.WAIT_NO, getProgressMonitor()));
+				ITypeRoot inputJavaElement= getInputJavaElement();
+				if (inputJavaElement != null)
+					updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProvider.getAST(inputJavaElement, SharedASTProvider.WAIT_NO, getProgressMonitor()));
 			}
 		}
 
@@ -2367,7 +2369,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (!(textSelection instanceof ITextSelection))
 			return;
 		
-		CompilationUnit ast= SharedASTProvider.getAST(getInputJavaElement(), SharedASTProvider.WAIT_NO /* DO NOT USE WAIT_ACTIVE_ONLY */ , getProgressMonitor());
+		ITypeRoot inputJavaElement= getInputJavaElement();
+		if (inputJavaElement == null)
+			return;
+		
+		CompilationUnit ast= SharedASTProvider.getAST(inputJavaElement, SharedASTProvider.WAIT_NO /* DO NOT USE WAIT_ACTIVE_ONLY */ , getProgressMonitor());
 		if (ast != null) {
 			fForcedMarkOccurrencesSelection= textSelection;
 			updateOccurrenceAnnotations((ITextSelection)textSelection, ast);
@@ -3290,7 +3296,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		SelectionListenerWithASTManager.getDefault().addListener(this, fPostSelectionListenerWithAST);
 		if (forceUpdate && getSelectionProvider() != null) {
 			fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();
-			updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProvider.getAST(getInputJavaElement(), SharedASTProvider.WAIT_NO, getProgressMonitor()));
+			ITypeRoot inputJavaElement= getInputJavaElement();
+			if (inputJavaElement != null)
+				updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProvider.getAST(inputJavaElement, SharedASTProvider.WAIT_NO, getProgressMonitor()));
 		}
 
 		if (fOccurrencesFinderJobCanceler == null) {
