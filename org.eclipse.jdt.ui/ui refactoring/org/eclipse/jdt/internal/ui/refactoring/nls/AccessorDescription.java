@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,8 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 
 /**
  *
@@ -37,9 +39,6 @@ public class AccessorDescription {
 	private final IPackageFragment fAccessorClassPackage;
 	private final String fResourceBundleName;
 
-	/**
-	 * 
-	 */
 	public AccessorDescription(String accessorClassName, IPackageFragment accessorClassPackage, String propertyFileName, IPackageFragment propertyFilePackage) {
 		super();
 		fAccessorClassName= accessorClassName;
@@ -54,10 +53,10 @@ public class AccessorDescription {
 		if (buf.length() > 0) {
 			buf.append('.');
 		}
-		buf.append(getAccessorClassName());
+		buf.append(BasicElementLabels.getFileName(getAccessorClassName()));
 		buf.append(JavaElementLabels.CONCAT_STRING);
 		IPath propertyFilePath= getResourceBundlePackage().getPath().append(getResourceBundleName());
-		buf.append(propertyFilePath.makeRelative().toString());
+		buf.append(BasicElementLabels.getPathLabel(propertyFilePath, false));
 		return buf.toString();
 	}
 	

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -101,6 +101,7 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
@@ -994,7 +995,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 					Messages.format(RefactoringCoreMessages.IntroduceFactory_noASTNodeForConstructorSearchHit, 
 							new Object[] { Integer.toString(start), Integer.toString(start + length),
 								unitHandle.getSource().substring(start, start + length),
-								unitHandle.getElementName() }),
+								BasicElementLabels.getFileName(unitHandle) }),
 					null));
 
 		if (node instanceof ClassInstanceCreation) {

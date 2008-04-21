@@ -42,13 +42,14 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 
 public class ReorgUtils {
@@ -158,49 +159,8 @@ public class ReorgUtils {
 
 	public static String getName(IJavaElement element) throws JavaModelException {
 		String pattern= createNamePattern(element);
-		String[] args= createNameArguments(element);
-		return Messages.format(pattern, args);
-	}
-
-	private static String[] createNameArguments(IJavaElement element) throws JavaModelException {
-		switch(element.getElementType()){
-			case IJavaElement.CLASS_FILE:
-				return new String[]{element.getElementName()};
-			case IJavaElement.COMPILATION_UNIT:
-				return new String[]{element.getElementName()};
-			case IJavaElement.FIELD:
-				return new String[]{element.getElementName()};
-			case IJavaElement.IMPORT_CONTAINER:
-				return new String[0];
-			case IJavaElement.IMPORT_DECLARATION:
-				return new String[]{element.getElementName()};
-			case IJavaElement.INITIALIZER:
-				return new String[0];
-			case IJavaElement.JAVA_PROJECT:
-				return new String[]{element.getElementName()};
-			case IJavaElement.METHOD:
-				return new String[]{element.getElementName()};
-			case IJavaElement.PACKAGE_DECLARATION:
-				if (JavaElementUtil.isDefaultPackage(element))
-					return new String[0];
-				else
-					return new String[]{element.getElementName()};
-			case IJavaElement.PACKAGE_FRAGMENT:
-				return new String[]{element.getElementName()};
-			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-				return new String[]{element.getElementName()};
-			case IJavaElement.TYPE:
-				IType type= (IType)element;
-				String name= type.getElementName();
-				if (name.length() == 0 && type.isAnonymous()) {
-					String superclassName= Signature.getSimpleName(type.getSuperclassName());
-					return new String[]{Messages.format(RefactoringCoreMessages.ReorgUtils_19, superclassName)}; 
-				}
-				return new String[]{element.getElementName()};
-			default:
-				Assert.isTrue(false);
-				return null;
-		}
+		String arg= JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT);
+		return Messages.format(pattern, arg);
 	}
 
 	private static String createNamePattern(IJavaElement element) throws JavaModelException {

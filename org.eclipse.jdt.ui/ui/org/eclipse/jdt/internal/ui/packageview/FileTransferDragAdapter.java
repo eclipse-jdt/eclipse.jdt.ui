@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Drag support class to allow dragging of files and folder from
@@ -138,7 +139,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 					while(iter.hasNext()) {
 						IResource resource= (IResource)iter.next();
 						try {
-							monitor.subTask(resource.getFullPath().toOSString());
+							monitor.subTask(BasicElementLabels.getPathLabel(resource.getFullPath(), true));
 							resource.delete(true, null);
 							
 						} catch (CoreException e) {

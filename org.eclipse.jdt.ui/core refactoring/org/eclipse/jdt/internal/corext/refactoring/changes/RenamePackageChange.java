@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,8 @@ import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChan
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 
@@ -189,7 +191,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 		ICompilationUnit[] units= pack.getCompilationUnits();
 		pm.beginTask("", units.length); //$NON-NLS-1$
 		for (int i= 0; i < units.length; i++) {
-			pm.subTask(Messages.format(RefactoringCoreMessages.RenamePackageChange_checking_change, pack.getElementName()));
+			pm.subTask(Messages.format(RefactoringCoreMessages.RenamePackageChange_checking_change, JavaElementLabels.getElementLabel(pack, JavaElementLabels.ALL_DEFAULT)));
 			checkIfModifiable(result, units[i].getResource(), VALIDATE_NOT_READ_ONLY | VALIDATE_NOT_DIRTY);
 			pm.worked(1);
 		}

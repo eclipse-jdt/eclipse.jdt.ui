@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.ui.JarEntryEditorInputFactory;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * An EditorInput for a JarEntryFile.
@@ -92,16 +93,13 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 			IJarEntryResource jarEntry= (IJarEntryResource)fJarEntryFile;
 			IPackageFragmentRoot root= jarEntry.getPackageFragmentRoot();
 			IPath fullPath= root.getPath().append(fJarEntryFile.getFullPath());
-			if (root.isExternal())
-				return fullPath.toOSString();
-			return fullPath.toString();
-			
+			return BasicElementLabels.getPathLabel(fullPath, root.isExternal());		
 		}
 		
 		IPath fullPath= fJarEntryFile.getFullPath();
 		if (fullPath == null)
 			return null;
-		return fullPath.toString();
+		return BasicElementLabels.getPathLabel(fullPath, false);
 	}
 
 	/*

@@ -123,6 +123,7 @@ import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public final class MoveStaticMembersProcessor extends MoveProcessor implements IDelegateUpdating {
 
@@ -319,7 +320,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			if (fSourceBinding == null || hasUnresolvedMemberBinding()) {
 				result.addFatalError(Messages.format(
 					RefactoringCoreMessages.MoveMembersRefactoring_compile_errors, 
-					fSource.getCu().getElementName()));
+					BasicElementLabels.getFileName(fSource.getCu())));
 			}
 			fMemberDeclarations= getASTMembers(result);
 			return result;
@@ -698,7 +699,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		fTarget= getCuRewrite(fDestinationType.getCompilationUnit());
 		ITypeBinding targetBinding= getDestinationBinding();
 		if (targetBinding == null) {
-			status.addFatalError(Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_compile_errors, fTarget.getCu().getElementName()));
+			status.addFatalError(Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_compile_errors, BasicElementLabels.getFileName(fTarget.getCu())));
 			monitor.done();
 			return;
 		}

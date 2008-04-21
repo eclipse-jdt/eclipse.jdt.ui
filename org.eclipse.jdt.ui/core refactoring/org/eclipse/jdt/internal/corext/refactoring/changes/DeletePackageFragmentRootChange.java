@@ -54,7 +54,10 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootMan
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 	
@@ -80,8 +83,8 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 	}
 
 	public String getName() {
-		String[] keys= {getRoot().getElementName()};
-		return Messages.format(RefactoringCoreMessages.DeletePackageFragmentRootChange_delete, keys); 
+		String rootName= JavaElementLabels.getElementLabel(getRoot(), JavaElementLabels.ALL_DEFAULT);
+		return Messages.format(RefactoringCoreMessages.DeletePackageFragmentRootChange_delete, rootName); 
 	}
 
 	public Object getModifiedElement() {
@@ -129,7 +132,7 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 			IFile file= (IFile) entry.getKey();
 			String contents= (String) entry.getValue();
 			//Restore time stamps? This should probably be some sort of UndoTextFileChange.
-			TextFileChange classpathUndo= new TextFileChange(Messages.format(RefactoringCoreMessages.DeletePackageFragmentRootChange_restore_file, file.getFullPath().toOSString()), file);
+			TextFileChange classpathUndo= new TextFileChange(Messages.format(RefactoringCoreMessages.DeletePackageFragmentRootChange_restore_file, BasicElementLabels.getPathLabel(file.getFullPath(), true)), file);
 			classpathUndo.setEdit(new ReplaceEdit(0, getFileLength(file), contents));
 			result.add(classpathUndo);
 		}

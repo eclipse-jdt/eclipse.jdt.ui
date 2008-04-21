@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.SharedASTProvider;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 
 public class NLSRefactoring extends Refactoring {
@@ -134,13 +136,13 @@ public class NLSRefactoring extends Refactoring {
 	}
 
 	public String getName() {
-		return Messages.format(NLSMessages.NLSRefactoring_compilation_unit, fCu.getElementName());
+		return Messages.format(NLSMessages.NLSRefactoring_compilation_unit, BasicElementLabels.getFileName(fCu));
 	}
 
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 
 		if (fSubstitutions.length == 0) {
-			String message= Messages.format(NLSMessages.NLSRefactoring_no_strings, fCu.getElementName());
+			String message= Messages.format(NLSMessages.NLSRefactoring_no_strings, BasicElementLabels.getFileName(fCu));
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}
 		return new RefactoringStatus();
@@ -181,7 +183,7 @@ public class NLSRefactoring extends Refactoring {
 				throw new OperationCanceledException();
 
 			if (!propertyFileExists() && willModifyPropertyFile()) {
-				String msg= Messages.format(NLSMessages.NLSRefactoring_will_be_created, getPropertyFilePath().toString()); 
+				String msg= Messages.format(NLSMessages.NLSRefactoring_will_be_created, BasicElementLabels.getPathLabel(getPropertyFilePath(), false)); 
 				result.addInfo(msg);
 			}
 			pm.worked(1);

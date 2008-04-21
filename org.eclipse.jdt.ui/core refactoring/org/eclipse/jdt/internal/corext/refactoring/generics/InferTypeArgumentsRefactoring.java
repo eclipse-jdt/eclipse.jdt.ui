@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -91,6 +91,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class InferTypeArgumentsRefactoring extends Refactoring {
 
@@ -187,7 +188,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 					parser.setResolveBindings(true);
 					parser.createASTs(batchCus, new String[0], new ASTRequestor() {
 						public void acceptAST(final ICompilationUnit source, final CompilationUnit ast) {
-							batchMonitor.subTask(source.getElementName());
+							batchMonitor.subTask(BasicElementLabels.getFileName(source));
 	
 							SafeRunner.run(new ISafeRunnable() {
 								public void run() throws Exception {
@@ -300,7 +301,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			Map.Entry entry= (Map.Entry) iter.next();
 			ICompilationUnit cu= (ICompilationUnit) entry.getKey();
 			pm.worked(1);
-			pm.subTask(cu.getElementName());
+			pm.subTask(BasicElementLabels.getFileName(cu));
 
 			CompilationUnitRewrite rewrite= new CompilationUnitRewrite(cu);
 			rewrite.setResolveBindings(false);

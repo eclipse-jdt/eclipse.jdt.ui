@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /*
  * http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
@@ -168,7 +169,7 @@ public class ActionUtil {
 				MessageDialogWithToggle toggleDialog= MessageDialogWithToggle.openYesNoQuestion(
 						shell,
 						ActionMessages.ActionUtil_warning_derived_title,
-						Messages.format(ActionMessages.ActionUtil_warning_derived_message, resource.getFullPath().toString()),
+						Messages.format(ActionMessages.ActionUtil_warning_derived_message, BasicElementLabels.getPathLabel(resource.getFullPath(), false)),
 						ActionMessages.ActionUtil_warning_derived_dontShowAgain,
 						false,
 						null,

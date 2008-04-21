@@ -83,6 +83,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /*
@@ -269,7 +270,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		sub.beginTask("", units.length * 3); //$NON-NLS-1$
 		for (int c= 0; c < units.length; c++) {
 			ICompilationUnit unit= units[c];
-			sub.subTask(Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_processing,  unit.getElementName())); 
+			sub.subTask(Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_processing,  BasicElementLabels.getFileName(unit))); 
 			CallInliner inliner= null;
 			try {
 				boolean added= false;
@@ -514,7 +515,7 @@ public class InlineMethodRefactoring extends Refactoring {
 			IMethod[] overridden= types[i].findMethods(method);
 			if (overridden != null && overridden.length > 0) {
 				result.addError(
-					Messages.format(key, types[i].getElementName()), 
+					Messages.format(key, JavaElementLabels.getElementLabel(types[i], JavaElementLabels.ALL_DEFAULT)), 
 					JavaStatusContext.create(overridden[0]));
 			}
 		}

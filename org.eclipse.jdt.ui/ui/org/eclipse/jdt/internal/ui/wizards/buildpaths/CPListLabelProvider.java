@@ -88,7 +88,7 @@ public class CPListLabelProvider extends LabelProvider {
 			return getCPUserLibraryText((CPUserLibraryElement) element);
 		} else if (element instanceof IAccessRule) {
 			IAccessRule rule= (IAccessRule) element;
-			return Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_label, new String[] { AccessRulesLabelProvider.getResolutionLabel(rule.getKind()), rule.getPattern().toString()}); 
+			return Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_label, new String[] { AccessRulesLabelProvider.getResolutionLabel(rule.getKind()), BasicElementLabels.getPathLabel(rule.getPattern(), false)}); 
 		}
 		return super.getText(element);
 	}
@@ -121,7 +121,7 @@ public class CPListLabelProvider extends LabelProvider {
 			String arg= null;
 			IPath path= (IPath) attrib.getValue();
 			if (path != null) {
-				arg= path.makeRelative().toString();
+				arg= BasicElementLabels.getPathLabel(path, false);
 			} else {
 				arg= NewWizardMessages.CPListLabelProvider_default_output_folder_label; 
 			}
@@ -133,8 +133,8 @@ public class CPListLabelProvider extends LabelProvider {
 				int patternsCount= 0;
 				StringBuffer buf= new StringBuffer();
 				for (int i= 0; i < patterns.length; i++) {
-					String pattern= patterns[i].toString();
-					if (pattern.length() > 0) {
+					if (patterns[i].segmentCount() > 0) {
+						String pattern= BasicElementLabels.getPathLabel(patterns[i], false);
 						if (patternsCount > 0) {
 							buf.append(NewWizardMessages.CPListLabelProvider_exclusion_filter_separator); 
 						}
@@ -158,8 +158,8 @@ public class CPListLabelProvider extends LabelProvider {
 				int patternsCount= 0;
 				StringBuffer buf= new StringBuffer();
 				for (int i= 0; i < patterns.length; i++) {
-					String pattern= patterns[i].toString();
-					if (pattern.length() > 0) {
+					if (patterns[i].segmentCount() > 0) {
+						String pattern= BasicElementLabels.getPathLabel(patterns[i], false);
 						if (patternsCount > 0) {
 							buf.append(NewWizardMessages.CPListLabelProvider_inclusion_filter_separator);
 						}
@@ -210,7 +210,7 @@ public class CPListLabelProvider extends LabelProvider {
 			if (config != null) {
 				ClasspathAttributeAccess access= attrib.getClasspathAttributeAccess();
 				String nameLabel= config.getNameLabel(access);
-				String valueLabel= config.getValueLabel(access);
+				String valueLabel= config.getValueLabel(access); // should be LTR marked
 				return Messages.format(NewWizardMessages.CPListLabelProvider_attribute_label, new String[] { nameLabel, valueLabel }); 
 			}
 			String arg= (String) attrib.getValue();
@@ -267,13 +267,14 @@ public class CPListLabelProvider extends LabelProvider {
 				} catch (JavaModelException e) {
 	
 				}
-				return path.toString();
+				return BasicElementLabels.getPathLabel(path, false);
 			case IClasspathEntry.CPE_SOURCE: {
-				StringBuffer buf= new StringBuffer(path.makeRelative().toString());
+				String pathLabel= BasicElementLabels.getPathLabel(path, false);
+				StringBuffer buf= new StringBuffer(pathLabel);
 				IPath linkTarget= cpentry.getLinkTarget();
 				if (linkTarget != null) {
 					buf.append(JavaElementLabels.CONCAT_STRING);
-					buf.append(linkTarget.toOSString());
+					buf.append(BasicElementLabels.getPathLabel(linkTarget, true));
 				}
 				IResource resource= cpentry.getResource();
 				if (resource != null && !resource.exists()) {
@@ -297,8 +298,7 @@ public class CPListLabelProvider extends LabelProvider {
 	
 	private String getPathString(IPath path, boolean isExternal) {
 		if (ArchiveFileFilter.isArchivePath(path, true)) {
-			IPath appendedPath= path.removeLastSegments(1);
-			String appended= isExternal ? appendedPath.toOSString() : appendedPath.makeRelative().toString();
+			String appended= BasicElementLabels.getPathLabel(path.removeLastSegments(1), isExternal);
 			String lastSegment= BasicElementLabels.getFileName(path.lastSegment());
 			return Messages.format(NewWizardMessages.CPListLabelProvider_twopart, new String[] { lastSegment, appended }); 
 		} else {

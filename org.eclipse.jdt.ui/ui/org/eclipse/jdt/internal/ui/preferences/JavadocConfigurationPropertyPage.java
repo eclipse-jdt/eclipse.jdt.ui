@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
@@ -121,7 +122,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 		ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerPath.segment(0));
 		IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
 		if (initializer == null || container == null) {
-			setDescription(Messages.format(PreferencesMessages.JavadocConfigurationPropertyPage_invalid_container, containerPath.toString()));
+			setDescription(Messages.format(PreferencesMessages.JavadocConfigurationPropertyPage_invalid_container, BasicElementLabels.getPathLabel(containerPath, false)));
 			return null;
 		}
 		String containerName= container.getDescription();

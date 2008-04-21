@@ -137,6 +137,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.FilterUpdater;
 import org.eclipse.jdt.internal.ui.viewsupport.IRefreshable;
@@ -794,7 +795,7 @@ public class PackageExplorerPart extends ViewPart
 			if (path.isRoot()) {
 				result= PackagesMessages.PackageExplorer_title;
 			} else {
-				result= path.makeRelative().toString();
+				result= BasicElementLabels.getPathLabel(path, false);
 			}
 		}
 

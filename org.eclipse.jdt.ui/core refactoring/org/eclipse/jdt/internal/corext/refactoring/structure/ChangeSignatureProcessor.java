@@ -152,6 +152,7 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class ChangeSignatureProcessor extends RefactoringProcessor implements IDelegateUpdating {
 	
@@ -715,7 +716,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			if (result.hasFatalError())
 				return result;
 			if (fMethod == null || !fMethod.exists()) {
-				String message= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_method_deleted, getCu().getElementName());
+				String message= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_method_deleted, BasicElementLabels.getFileName(getCu()));
 				return RefactoringStatus.createFatalErrorStatus(message);
 			}
 			if (fMethod.getDeclaringType().isInterface()) {

@@ -82,9 +82,9 @@ public class JarWriter2 {
 		try {
 			if (fJarPackage.usesManifest() && fJarPackage.areGeneratedFilesExported()) {
 				Manifest manifest=  fJarPackage.getManifestProvider().create(fJarPackage);
-				fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getAbsoluteJarLocation().toOSString()), manifest);
+				fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getAbsoluteJarLocation().toFile()), manifest);
 			} else
-				fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getAbsoluteJarLocation().toOSString()));
+				fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getAbsoluteJarLocation().toFile()));
 			String comment= jarPackage.getComment();
 			if (comment != null)
 				fJarOutputStream.setComment(comment);
@@ -124,7 +124,7 @@ public class JarWriter2 {
 			IPath fileLocation= resource.getLocation();
 			File file= null;
 			if (fileLocation != null) {
-				file= new File(fileLocation.toOSString());
+				file= fileLocation.toFile();
 			}
 			if (fJarPackage.areDirectoryEntriesIncluded())
 				addDirectories(destinationPath, file);
@@ -271,7 +271,7 @@ public class JarWriter2 {
 				return false;
 			if (fJarPackage.allowOverwrite())
 				return true;
-			return parent != null && JarPackagerUtil.askForOverwritePermission(parent, fJarPackage.getAbsoluteJarLocation().toOSString());
+			return parent != null && JarPackagerUtil.askForOverwritePermission(parent, fJarPackage.getAbsoluteJarLocation(), true);
 		}
 					
 		// Test if directory exists

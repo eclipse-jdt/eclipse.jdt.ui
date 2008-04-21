@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,6 +59,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class AccessorClassModifier {
 
@@ -142,7 +143,7 @@ public class AccessorClassModifier {
 
 		AccessorClassModifier sourceModification= new AccessorClassModifier(cu);
 
-		String message= Messages.format(NLSMessages.NLSSourceModifier_change_description, cu.getElementName()); 
+		String message= Messages.format(NLSMessages.NLSSourceModifier_change_description, BasicElementLabels.getFileName(cu)); 
 
 		TextChange change= new CompilationUnitChange(message, cu);
 		MultiTextEdit multiTextEdit= new MultiTextEdit();
@@ -175,7 +176,7 @@ public class AccessorClassModifier {
 		return change;
 	}
 	
-	private void removeKey(NLSSubstitution sub, TextChange change) throws CoreException {
+	private void removeKey(NLSSubstitution sub, TextChange change) {
 		ASTNode node= findField(fRoot, sub.getKey());
 		if (node == null)
 			return;
@@ -187,7 +188,7 @@ public class AccessorClassModifier {
 		fFields.remove(node);
 	}
 	
-	private void renameKey(NLSSubstitution sub, TextChange change) throws CoreException {
+	private void renameKey(NLSSubstitution sub, TextChange change) {
 		ASTNode node= findField(fRoot, sub.getInitialKey());
 		if (node == null)
 			return;
@@ -228,14 +229,14 @@ public class AccessorClassModifier {
 		return result[0];
 	}
 	
-	private void addKey(NLSSubstitution sub, TextChange change) throws CoreException {		
+	private void addKey(NLSSubstitution sub, TextChange change) {		
 		String name= Messages.format(NLSMessages.AccessorClassModifier_add_entry, sub.getKey()); 
 		TextEditGroup editGroup= new TextEditGroup(name);
 		change.addTextEditGroup(editGroup);
 		addKey(sub, editGroup);
 	}
 		
-	private void addKey(NLSSubstitution sub, TextEditGroup editGroup) throws CoreException {	
+	private void addKey(NLSSubstitution sub, TextEditGroup editGroup) {	
 		
 		if (fListRewrite == null)
 			return;

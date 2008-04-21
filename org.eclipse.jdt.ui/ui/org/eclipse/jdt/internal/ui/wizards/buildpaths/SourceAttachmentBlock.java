@@ -57,6 +57,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -332,7 +333,7 @@ public class SourceAttachmentBlock {
 	private String getResolvedLabelString() {
 		IPath resolvedPath= getResolvedPath(getFilePath());
 		if (resolvedPath != null) {
-			return resolvedPath.toOSString();
+			return BasicElementLabels.getPathLabel(resolvedPath, true);
 		}
 		return ""; //$NON-NLS-1$
 	}	
@@ -388,12 +389,12 @@ public class SourceAttachmentBlock {
 				}
 				File file= resolvedPath.toFile();
 				if (!file.exists()) {				
-					String message= Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_filenotexists, resolvedPath.toOSString()); 
+					String message= Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_filenotexists, BasicElementLabels.getPathLabel(resolvedPath, true)); 
 					status.setWarning(message);
 					return status;
 				}
 				if (!resolvedPath.isAbsolute()) {
-					String message=  Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_notabsolute, filePath.toString()); 
+					String message=  Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_notabsolute, BasicElementLabels.getPathLabel(filePath, false)); 
 					status.setError(message);
 					return status;
 				}
@@ -413,13 +414,13 @@ public class SourceAttachmentBlock {
 					file= res.getLocation().toFile();
 				}
 				if (!file.exists()) {
-					String message=  Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_filenotexists, filePath.toString()); 
+					String message=  Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_filenotexists, BasicElementLabels.getPathLabel(filePath, false)); 
 					status.setError(message);
 					return status;
 				}
 				if (res == null) {
 					if (!filePath.isAbsolute()) {
-						String message=  Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_notabsolute, filePath.toString()); 
+						String message=  Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_notabsolute, BasicElementLabels.getPathLabel(filePath, false)); 
 						status.setError(message);
 						return status;
 					}

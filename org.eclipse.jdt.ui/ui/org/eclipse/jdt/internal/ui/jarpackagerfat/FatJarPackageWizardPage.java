@@ -849,7 +849,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 			if (fJarPackage.allowOverwrite())
 				return true;
 
-			return parent != null && JarPackagerUtil.askForOverwritePermission(parent, fAntScriptLocation.toOSString());
+			return parent != null && JarPackagerUtil.askForOverwritePermission(parent, fAntScriptLocation, true);
 		}
 
 		// Test if directory exists

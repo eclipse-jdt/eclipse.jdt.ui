@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.corext.CorextMessages;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class Resources {
 
@@ -144,7 +145,7 @@ public class Resources {
 	private static IStatus addModified(IStatus status, IFile file) {
 		IStatus entry= JavaUIStatus.createError(
 			IJavaStatusConstants.VALIDATE_EDIT_CHANGED_CONTENT, 
-			Messages.format(CorextMessages.Resources_fileModified, file.getFullPath().toString()), 
+			Messages.format(CorextMessages.Resources_fileModified, BasicElementLabels.getPathLabel(file.getFullPath(), false)), 
 			null);
 		if (status == null) {
 			return entry;
@@ -166,7 +167,7 @@ public class Resources {
 			IStatus.ERROR,
 			ResourcesPlugin.PI_RESOURCES,
 			IResourceStatus.OUT_OF_SYNC_LOCAL,
-			Messages.format(CorextMessages.Resources_outOfSync, resource.getFullPath().toString()), 
+			Messages.format(CorextMessages.Resources_outOfSync, BasicElementLabels.getPathLabel(resource.getFullPath(), false)), 
 			null);
 		if (status == null) {
 			return entry;

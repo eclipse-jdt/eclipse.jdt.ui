@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Representation of class path containers in Java UI.
@@ -161,7 +162,7 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 			String description= initializer.getDescription(path, getJavaProject());
 			return Messages.format(PackagesMessages.ClassPathContainer_unbound_label, description); 
 		}
-		return Messages.format(PackagesMessages.ClassPathContainer_unknown_label, path.toString()); 
+		return Messages.format(PackagesMessages.ClassPathContainer_unknown_label, BasicElementLabels.getPathLabel(path, false)); 
 	}
 	
 	public IClasspathEntry getClasspathEntry() {

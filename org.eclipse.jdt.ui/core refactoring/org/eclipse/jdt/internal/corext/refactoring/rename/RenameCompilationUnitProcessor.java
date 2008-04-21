@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IResourceMapper;
 import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
@@ -56,10 +57,12 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public final class RenameCompilationUnitProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating, ISimilarDeclarationUpdating, IResourceMapper, IJavaElementMapper {
 	
@@ -316,9 +319,9 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 				RefactoringStatus result2= new RefactoringStatus();
 				result2.merge(Checks.checkCompilationUnitNewName(fCu, getNewElementName()));
 				if (result2.hasFatalError())
-					result1.addError(Messages.format(RefactoringCoreMessages.RenameCompilationUnitRefactoring_not_parsed_1, fCu.getElementName())); 
+					result1.addError(Messages.format(RefactoringCoreMessages.RenameCompilationUnitRefactoring_not_parsed_1, BasicElementLabels.getFileName(fCu))); 
 				else 
-					result1.addError(Messages.format(RefactoringCoreMessages.RenameCompilationUnitRefactoring_not_parsed, fCu.getElementName())); 
+					result1.addError(Messages.format(RefactoringCoreMessages.RenameCompilationUnitRefactoring_not_parsed, BasicElementLabels.getFileName(fCu))); 
 				result1.merge(result2);			
 			}	
 		
@@ -386,11 +389,12 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 		if (resource != null && resource.isLinked()) {
 			final IProject project= resource.getProject();
 			final String name= project.getName();
-			final String description= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description_short, resource.getName());
-			final String header= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { resource.getFullPath().toString(), newName});
+			final String description= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description_short, BasicElementLabels.getFileName(resource.getName()));
+			final String header= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { BasicElementLabels.getPathLabel(resource.getFullPath(), false), newName});
 			final String comment= new JDTRefactoringDescriptorComment(name, this, header).asString();
 			final int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;
-			final RenameResourceDescriptor descriptor= new RenameResourceDescriptor();
+			
+			final RenameResourceDescriptor descriptor= (RenameResourceDescriptor) RefactoringCore.getRefactoringContribution(RenameResourceDescriptor.ID).createDescriptor();
 			descriptor.setProject(name);
 			descriptor.setDescription(description);
 			descriptor.setComment(comment);
@@ -402,14 +406,11 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 			resourceChange.setDescriptor(new RefactoringChangeDescriptor(descriptor));
 			return new DynamicValidationStateChange(resourceChange);
 		}
-		String label= null;
-		final IPackageFragment fragment= (IPackageFragment) fCu.getParent();
-		if (!fragment.isDefaultPackage())
-			label= fragment.getElementName() + "." + fCu.getElementName(); //$NON-NLS-1$
-		else
-			label= fCu.getElementName();
+
+		String label= JavaElementLabels.getTextLabel(fCu, JavaElementLabels.ALL_FULLY_QUALIFIED);
+		
 		final String name= fCu.getJavaProject().getElementName();
-		final String description= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description_short, fCu.getElementName());
+		final String description= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description_short, BasicElementLabels.getFileName(fCu));
 		final String header= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { label, newName});
 		final String comment= new JDTRefactoringDescriptorComment(name, this, header).asString();
 		final int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;

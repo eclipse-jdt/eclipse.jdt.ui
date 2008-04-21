@@ -85,6 +85,7 @@ import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Operation for exporting a resource and its children to a new  JAR file.
@@ -402,7 +403,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		} else if (resource instanceof IFile) {
 			try {
 				IPath destinationPath= resource.getFullPath().removeFirstSegments(leadingSegmentsToRemove);
-				progressMonitor.subTask(Messages.format(JarPackagerMessages.JarFileExportOperation_exporting, destinationPath.toString()));
+				progressMonitor.subTask(Messages.format(JarPackagerMessages.JarFileExportOperation_exporting, BasicElementLabels.getPathLabel(destinationPath, false)));
 				fJarBuilder.writeFile((IFile)resource, destinationPath);
 			} catch (CoreException ex) {
 				Throwable realEx= ex.getStatus().getException();
@@ -499,7 +500,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				while (iter.hasNext()) {
 					IFile file= (IFile)iter.next();
 					IPath classFilePath= baseDestinationPath.append(file.getName());
-					progressMonitor.subTask(Messages.format(JarPackagerMessages.JarFileExportOperation_exporting, classFilePath.toString()));
+					progressMonitor.subTask(Messages.format(JarPackagerMessages.JarFileExportOperation_exporting, BasicElementLabels.getPathLabel(classFilePath, false)));
 					fJarBuilder.writeFile(file, classFilePath);
 				}
 			} catch (CoreException ex) {
@@ -676,7 +677,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			fJavaNameToClassFilesMap= buildJavaToClassMap(classContainer, progressMonitor);
 			if (fJavaNameToClassFilesMap == null) {
 				// Could not fully build map. fallback is to export whole directory
-				String containerName= classContainer.getFullPath().toString();
+				String containerName= BasicElementLabels.getPathLabel(classContainer.getFullPath(), false);
 				String msg= Messages.format(JarPackagerMessages.JarFileExportOperation_missingSourceFileAttributeExportedAll, containerName);
 				addInfo(msg, null);
 				fExportedClassContainers.add(classContainer);
@@ -1004,7 +1005,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			writer.write(fJarPackage);
 			fileInput= new ByteArrayInputStream(objectStreamOutput.toByteArray());
 			if (descriptionFile.isAccessible()) {
-				if (fJarPackage.allowOverwrite() || JarPackagerUtil.askForOverwritePermission(fParentShell, descriptionFile.getFullPath().toString()))
+				if (fJarPackage.allowOverwrite() || JarPackagerUtil.askForOverwritePermission(fParentShell, descriptionFile.getFullPath(), false))
 					descriptionFile.setContents(fileInput, true, true, null);
 			} else
 				descriptionFile.create(fileInput, true, null);
@@ -1023,7 +1024,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		ByteArrayInputStream fileInput= new ByteArrayInputStream(manifestOutput.toByteArray());
 		IFile manifestFile= fJarPackage.getManifestFile();
 		if (manifestFile.isAccessible()) {
-			if (fJarPackage.allowOverwrite() || JarPackagerUtil.askForOverwritePermission(fParentShell, manifestFile.getFullPath().toString()))
+			if (fJarPackage.allowOverwrite() || JarPackagerUtil.askForOverwritePermission(fParentShell, manifestFile.getFullPath(), false))
 				manifestFile.setContents(fileInput, true, true, null);
 		} else
 			manifestFile.create(fileInput, true, null);

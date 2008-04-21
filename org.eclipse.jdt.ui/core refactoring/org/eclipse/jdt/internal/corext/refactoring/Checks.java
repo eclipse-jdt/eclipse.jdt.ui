@@ -68,6 +68,10 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 /**
  * This class defines a set of reusable static checks methods.
  */
@@ -281,8 +285,10 @@ public class Checks {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < methods.length; i++) {
 			if (JdtFlags.isNative(methods[i])){
+				String typeName= JavaElementLabels.getElementLabel(methods[i].getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED);
+				String methodName= JavaElementLabels.getElementLabel(methods[i], JavaElementLabels.ALL_DEFAULT);
 				String msg= Messages.format(RefactoringCoreMessages.Checks_method_native,  
-								new String[]{methods[i].getDeclaringType().getFullyQualifiedName('.'), methods[i].getElementName(), "UnsatisfiedLinkError"});//$NON-NLS-1$
+								new String[]{typeName, methodName, "UnsatisfiedLinkError"});//$NON-NLS-1$
 				result.addEntry(RefactoringStatus.ERROR, msg, JavaStatusContext.create(methods[i]), Corext.getPluginId(), RefactoringStatusCodes.NATIVE_METHOD); 
 			}
 			if (methods[i].isMainMethod()) {
@@ -570,8 +576,7 @@ public class Checks {
 			//XXX this is a workaround 	for a jcore feature that shows errors in cus only when you get the original element
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(resource);
 			if (! cu.isStructureKnown()){
-				String path= Checks.getFullPath(cu);
-				status.addError(Messages.format(RefactoringCoreMessages.Checks_cannot_be_parsed, path)); 
+				status.addError(Messages.format(RefactoringCoreMessages.Checks_cannot_be_parsed, BasicElementLabels.getPathLabel(cu.getPath(), false))); 
 				continue; //removed, go to the next one
 			}
 			result.add(grouped[i]);	
@@ -582,12 +587,6 @@ public class Checks {
 		
 		return (SearchResultGroup[])result.toArray(new SearchResultGroup[result.size()]);
 	}
-	
-	private static final String getFullPath(ICompilationUnit cu) {
-		Assert.isTrue(cu.exists());
-		return cu.getResource().getFullPath().toString();
-	}
-	
 	
 	public static RefactoringStatus checkCompileErrorsInAffectedFiles(SearchResultGroup[] grouped) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
@@ -742,14 +741,18 @@ public class Checks {
 	public static RefactoringStatus checkAvailability(IJavaElement javaElement) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		if (! javaElement.exists())
-			result.addFatalError(Messages.format(RefactoringCoreMessages.Refactoring_not_in_model, javaElement.getElementName())); 
+			result.addFatalError(Messages.format(RefactoringCoreMessages.Refactoring_not_in_model, getJavaElementName(javaElement))); 
 		if (javaElement.isReadOnly())
-			result.addFatalError(Messages.format(RefactoringCoreMessages.Refactoring_read_only, javaElement.getElementName()));	 
+			result.addFatalError(Messages.format(RefactoringCoreMessages.Refactoring_read_only, getJavaElementName(javaElement)));	 
 		if (javaElement.exists() && !javaElement.isStructureKnown())
-			result.addFatalError(Messages.format(RefactoringCoreMessages.Refactoring_unknown_structure, javaElement.getElementName()));	 
+			result.addFatalError(Messages.format(RefactoringCoreMessages.Refactoring_unknown_structure, getJavaElementName(javaElement)));	 
 		if (javaElement instanceof IMember && ((IMember)javaElement).isBinary())
-			result.addFatalError(Messages.format(RefactoringCoreMessages.Refactoring_binary, javaElement.getElementName())); 
+			result.addFatalError(Messages.format(RefactoringCoreMessages.Refactoring_binary, getJavaElementName(javaElement))); 
 		return result;
+	}
+	
+	private static String getJavaElementName(IJavaElement element) {
+		return JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT);
 	}
 	
 	public static boolean isAvailable(IJavaElement javaElement) throws JavaModelException {

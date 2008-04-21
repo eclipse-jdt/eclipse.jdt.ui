@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,6 +55,7 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
@@ -331,7 +332,7 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 			if (resType == IResource.PROJECT || resType == IResource.FOLDER) {
 				IProject proj= res.getProject();
 				if (!proj.isOpen()) {
-					status.setError(Messages.format(NewWizardMessages.NewContainerWizardPage_error_ProjectClosed, proj.getFullPath().toString())); 
+					status.setError(Messages.format(NewWizardMessages.NewContainerWizardPage_error_ProjectClosed, BasicElementLabels.getPathLabel(proj.getFullPath(), false))); 
 					return status;
 				}				
 				IJavaProject jproject= JavaCore.create(proj);
@@ -347,13 +348,13 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 							return status;
 						}
 						if (fCurrRoot.isArchive()) {
-							status.setError(Messages.format(NewWizardMessages.NewContainerWizardPage_error_ContainerIsBinary, str)); 
+							status.setError(Messages.format(NewWizardMessages.NewContainerWizardPage_error_ContainerIsBinary, BasicElementLabels.getPathLabel(path, false))); 
 							return status;
 						}
 						if (fCurrRoot.getKind() == IPackageFragmentRoot.K_BINARY) {
-							status.setWarning(Messages.format(NewWizardMessages.NewContainerWizardPage_warning_inside_classfolder, str)); 
+							status.setWarning(Messages.format(NewWizardMessages.NewContainerWizardPage_warning_inside_classfolder, BasicElementLabels.getPathLabel(path, false))); 
 						} else if (!jproject.isOnClasspath(fCurrRoot)) {
-							status.setWarning(Messages.format(NewWizardMessages.NewContainerWizardPage_warning_NotOnClassPath, str)); 
+							status.setWarning(Messages.format(NewWizardMessages.NewContainerWizardPage_warning_NotOnClassPath, BasicElementLabels.getPathLabel(path, false))); 
 						}		
 					} catch (CoreException e) {
 						status.setWarning(NewWizardMessages.NewContainerWizardPage_warning_NotAJavaProject); 
@@ -361,11 +362,11 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 				}
 				return status;
 			} else {
-				status.setError(Messages.format(NewWizardMessages.NewContainerWizardPage_error_NotAFolder, str)); 
+				status.setError(Messages.format(NewWizardMessages.NewContainerWizardPage_error_NotAFolder, BasicElementLabels.getPathLabel(path, false))); 
 				return status;
 			}
 		} else {
-			status.setError(Messages.format(NewWizardMessages.NewContainerWizardPage_error_ContainerDoesNotExist, str)); 
+			status.setError(Messages.format(NewWizardMessages.NewContainerWizardPage_error_ContainerDoesNotExist, BasicElementLabels.getPathLabel(path, false))); 
 			return status;
 		}
 	}

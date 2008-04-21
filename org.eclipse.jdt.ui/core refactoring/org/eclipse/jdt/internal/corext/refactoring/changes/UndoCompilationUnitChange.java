@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,16 +20,17 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ContentStamp;
+import org.eclipse.ltk.core.refactoring.UndoTextFileChange;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.ContentStamp;
-import org.eclipse.ltk.core.refactoring.UndoTextFileChange;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /* package */ class UndoCompilationUnitChange extends UndoTextFileChange {
 
@@ -43,7 +44,7 @@ import org.eclipse.ltk.core.refactoring.UndoTextFileChange;
 	private static IFile getFile(ICompilationUnit cunit) throws CoreException {
 		IFile file= (IFile)cunit.getResource();
 		if (file == null)
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), Messages.format(	RefactoringCoreMessages.UndoCompilationUnitChange_no_resource, cunit.getElementName())));
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), Messages.format(	RefactoringCoreMessages.UndoCompilationUnitChange_no_resource, BasicElementLabels.getFileName(cunit))));
 		return file;
 	}
 

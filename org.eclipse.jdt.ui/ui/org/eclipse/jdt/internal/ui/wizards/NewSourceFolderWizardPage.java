@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,6 +74,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -304,7 +305,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		IPath projPath= fCurrJProject.getProject().getFullPath();
 		String str= fRootDialogField.getText();
 		if (str.length() == 0) {
-			fRootStatus.setError(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_error_EnterRootName, fCurrJProject.getProject().getFullPath().toString())); 
+			fRootStatus.setError(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_error_EnterRootName, BasicElementLabels.getPathLabel(fCurrJProject.getPath(), false))); 
 		} else {
 			IPath path= projPath.append(str);
 			IStatus validate= fWorkspaceRoot.getWorkspace().validatePath(path.toString(), IResource.FOLDER);
@@ -377,9 +378,9 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 						IStatus status2= JavaConventions.validateClasspath(fCurrJProject, fNewEntries, fNewOutputLocation);
 						if (status2.isOK()) {
 							if (fIsProjectAsSourceFolder) {
-								fRootStatus.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceSFandOL, fNewOutputLocation.makeRelative().toString())); 
+								fRootStatus.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceSFandOL, BasicElementLabels.getPathLabel(fNewOutputLocation, false))); 
 							} else {
-								fRootStatus.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceOL, fNewOutputLocation.makeRelative().toString())); 
+								fRootStatus.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceOL, BasicElementLabels.getPathLabel(fNewOutputLocation, false))); 
 							}
 							return;
 						}

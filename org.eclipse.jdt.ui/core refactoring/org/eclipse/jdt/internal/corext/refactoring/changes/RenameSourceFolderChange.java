@@ -26,6 +26,8 @@ import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChan
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 public final class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 
 	private static RefactoringStatus checkIfModifiable(IPackageFragmentRoot root) throws CoreException {
@@ -35,7 +37,7 @@ public final class RenameSourceFolderChange extends AbstractJavaElementRenameCha
 			return result;
 		}
 		if (!root.exists()) {
-			result.addFatalError(Messages.format(RefactoringCoreMessages.Change_does_not_exist, root.getElementName()));
+			result.addFatalError(Messages.format(RefactoringCoreMessages.Change_does_not_exist, getRootLabel(root)));
 			return result;
 		}
 		
@@ -44,27 +46,31 @@ public final class RenameSourceFolderChange extends AbstractJavaElementRenameCha
 			return result;
 
 		if (root.isArchive()) {
-			result.addFatalError(Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_rename_archive, root.getElementName()));
+			result.addFatalError(Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_rename_archive, getRootLabel(root)));
 			return result;
 		}
 
 		if (root.isExternal()) {
-			result.addFatalError(Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_rename_external, root.getElementName()));
+			result.addFatalError(Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_rename_external, getRootLabel(root)));
 			return result;
 		}
 
 		IResource correspondingResource= root.getCorrespondingResource();
 		if (correspondingResource == null || !correspondingResource.exists()) {
-			result.addFatalError(Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_error_underlying_resource_not_existing, root.getElementName()));
+			result.addFatalError(Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_error_underlying_resource_not_existing, getRootLabel(root)));
 			return result;
 		}
 
 		if (correspondingResource.isLinked()) {
-			result.addFatalError(Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_rename_linked, root.getElementName()));
+			result.addFatalError(Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_rename_linked, getRootLabel(root)));
 			return result;
 		}
 
 		return result;
+	}
+
+	private static String getRootLabel(IPackageFragmentRoot root) {
+		return JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT);
 	}
 
 	public RenameSourceFolderChange(IPackageFragmentRoot sourceFolder, String newName) {

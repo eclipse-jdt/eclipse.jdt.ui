@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -156,7 +156,7 @@ public abstract class History {
 
 	public synchronized void load() {
 		IPath stateLocation= JavaPlugin.getDefault().getStateLocation().append(fFileName);
-		File file= new File(stateLocation.toOSString());
+		File file= stateLocation.toFile();
 		if (file.exists()) {
 			InputStreamReader reader= null;
 	        try {
@@ -179,7 +179,7 @@ public abstract class History {
 	
 	public synchronized void save() {
 		IPath stateLocation= JavaPlugin.getDefault().getStateLocation().append(fFileName);
-		File file= new File(stateLocation.toOSString());
+		File file= stateLocation.toFile();
 		OutputStream out= null;
 		try {
 			out= new FileOutputStream(file); 
@@ -223,6 +223,7 @@ public abstract class History {
 	 * Return a new instance of an Object given <code>element</code>
 	 * 
 	 * @param element The element containing required information to create the Object
+	 * @return return a new instance of an Object given <code>element</code>
 	 */
 	protected abstract Object createFromElement(Element element);
 	

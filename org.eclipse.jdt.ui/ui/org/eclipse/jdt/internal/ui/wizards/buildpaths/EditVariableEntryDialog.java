@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -292,7 +293,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 	private String getResolvedLabelString() {
 		IPath resolvedPath= getResolvedPath(getPath());
 		if (resolvedPath != null) {
-			return resolvedPath.toOSString();
+			return BasicElementLabels.getPathLabel(resolvedPath, true);
 		}
 		return ""; //$NON-NLS-1$
 	}	

@@ -66,6 +66,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class MoveCuUpdateCreator {
 	
@@ -128,7 +129,7 @@ public class MoveCuUpdateCreator {
 	private void addUpdates(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm, RefactoringStatus status) throws CoreException{
 		try{
 			pm.beginTask("", 3);  //$NON-NLS-1$
-		  	pm.subTask(Messages.format(RefactoringCoreMessages.MoveCuUpdateCreator_searching, movedUnit.getElementName())); 
+		  	pm.subTask(Messages.format(RefactoringCoreMessages.MoveCuUpdateCreator_searching, BasicElementLabels.getFileName(movedUnit))); 
 		  	
 			if (isInAnotherFragmentOfSamePackage(movedUnit, fDestination)){
 				pm.worked(3);
@@ -302,7 +303,7 @@ public class MoveCuUpdateCreator {
 	private static SearchResultGroup[] getReferences(ICompilationUnit unit, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		final SearchPattern pattern= RefactoringSearchEngine.createOrPattern(unit.getTypes(), IJavaSearchConstants.REFERENCES);
 		if (pattern != null) {
-			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , unit.getElementName());
+			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getFileName(unit));
 			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 			Collector requestor= new Collector(((IPackageFragment) unit.getParent()), binaryRefs);
 			IJavaSearchScope scope= RefactoringScopeFactory.create(unit, true, false);

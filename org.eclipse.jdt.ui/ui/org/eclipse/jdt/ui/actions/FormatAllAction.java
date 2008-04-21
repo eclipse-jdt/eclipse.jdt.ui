@@ -84,6 +84,7 @@ import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetUpdater;
 
 /**
@@ -406,7 +407,7 @@ public class FormatAllAction extends SelectionDispatchAction {
 					throw new OperationCanceledException();
 				}
 				if (cu.getResource().getResourceAttributes().isReadOnly()) {
-					String message= Messages.format(ActionMessages.FormatAllAction_read_only_skipped, path.toString());
+					String message= Messages.format(ActionMessages.FormatAllAction_read_only_skipped, BasicElementLabels.getPathLabel(path, false));
 					status.add(new Status(IStatus.WARNING, JavaUI.ID_PLUGIN, IStatus.WARNING, message, null));
 					continue;
 				}

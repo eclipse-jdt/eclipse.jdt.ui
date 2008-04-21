@@ -80,6 +80,7 @@ import org.eclipse.jdt.internal.ui.fix.ICleanUp.CleanUpContext;
 import org.eclipse.jdt.internal.ui.fix.IMultiFix.MultiFixContext;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.refactoring.IScheduledRefactoring;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class CleanUpRefactoring extends Refactoring implements IScheduledRefactoring {
 	
@@ -203,7 +204,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		}
 		
 		public String getSubTaskMessage(ICompilationUnit source) {
-			String typeName= source.getElementName();
+			String typeName= BasicElementLabels.getFileName(source);
 			return Messages.format(FixMessages.CleanUpRefactoring_ProcessingCompilationUnit_message, new Object[] {new Integer(getIndex()), new Integer(fSize), typeName});
 		}
 	}

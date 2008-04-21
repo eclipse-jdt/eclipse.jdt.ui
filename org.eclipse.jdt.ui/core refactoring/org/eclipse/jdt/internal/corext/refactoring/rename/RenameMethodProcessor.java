@@ -93,6 +93,7 @@ import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating, IDelegateUpdating {
 
@@ -207,15 +208,18 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		RefactoringStatus status= Checks.checkName(newName, JavaConventionsUtil.validateMethodName(newName, fMethod));
 		if (status.isOK() && Checks.startsWithUpperCase(newName))
 			status= RefactoringStatus.createWarningStatus(fIsComposite 
-					? Messages.format(RefactoringCoreMessages.Checks_method_names_lowercase2, new String[] { newName, fMethod.getDeclaringType().getElementName()})
+					? Messages.format(RefactoringCoreMessages.Checks_method_names_lowercase2, new String[] { newName, getDeclaringTypeLabel()})
 					: RefactoringCoreMessages.Checks_method_names_lowercase);
 		
 		if (Checks.isAlreadyNamed(fMethod, newName))
 			status.addFatalError(fIsComposite 
-					? Messages.format(RefactoringCoreMessages.RenameMethodRefactoring_same_name2, new String[] { newName, fMethod.getDeclaringType().getElementName() } ) 
+					? Messages.format(RefactoringCoreMessages.RenameMethodRefactoring_same_name2, new String[] { newName, getDeclaringTypeLabel() } ) 
 					: RefactoringCoreMessages.RenameMethodRefactoring_same_name,
 					JavaStatusContext.create(fMethod)); 
 		return status;
+	}
+	private String getDeclaringTypeLabel() {
+		return JavaElementLabels.getElementLabel(fMethod.getDeclaringType(), JavaElementLabels.ALL_DEFAULT);
 	}
 	
 	public Object getNewElement() {
@@ -282,7 +286,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		if (! fMethod.exists()){
 			String message= Messages.format(RefactoringCoreMessages.RenameMethodRefactoring_deleted, 
-								fMethod.getCompilationUnit().getElementName());
+								BasicElementLabels.getFileName(fMethod.getCompilationUnit()));
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}	
 		

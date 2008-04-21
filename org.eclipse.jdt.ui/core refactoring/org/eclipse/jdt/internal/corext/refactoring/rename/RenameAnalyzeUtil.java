@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,6 +68,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 class RenameAnalyzeUtil {
 	
@@ -190,7 +192,7 @@ class RenameAnalyzeUtil {
 	
 	static ICompilationUnit createNewWorkingCopy(ICompilationUnit cu, TextChangeManager manager,
 			WorkingCopyOwner owner, SubProgressMonitor pm) throws CoreException {
-		ICompilationUnit newWc= cu.getWorkingCopy(owner, null, null);
+		ICompilationUnit newWc= cu.getWorkingCopy(owner, null);
 		String previewContent= manager.get(cu).getPreviewContent(new NullProgressMonitor());
 		newWc.getBuffer().setContents(previewContent);
 		newWc.reconcile(ICompilationUnit.NO_AST, false, owner, pm);
@@ -311,7 +313,12 @@ class RenameAnalyzeUtil {
 		}
 	}
 	
-	/** @return Map &lt;Integer updatedOffset, SearchMatch oldMatch&gt; */
+	/** 
+	 * 
+	 * @param change 
+	 * @param oldMatches 
+	 * @return Map &lt;Integer updatedOffset, SearchMatch oldMatch&gt; 
+	 */
 	private static Map getUpdatedChangeOffsets(TextChange change, SearchMatch[] oldMatches) {
 		Map/*<Integer updatedOffset, SearchMatch oldMatch>*/ updatedOffsets= new HashMap();
 		Map oldToUpdatedOffsets= getEditChangeOffsetUpdates(change);
@@ -325,7 +332,11 @@ class RenameAnalyzeUtil {
 		return updatedOffsets;
 	}
 
-	/** @return Map &lt;Integer oldOffset, Integer updatedOffset&gt; */
+	/** 
+	 * 
+	 * @param change 
+	 * @return Map &lt;Integer oldOffset, Integer updatedOffset&gt;
+	 */
 	private static Map getEditChangeOffsetUpdates(TextChange change) {
 		TextEditChangeGroup[] editChanges= change.getTextEditChangeGroups();
 		Map/*<oldOffset, newOffset>*/ offsetUpdates= new HashMap(editChanges.length);
@@ -355,7 +366,7 @@ class RenameAnalyzeUtil {
 		RefactoringStatusContext context= JavaStatusContext.create(cu, range);
 		String message= Messages.format(
 				RefactoringCoreMessages.RenameAnalyzeUtil_reference_shadowed, 
-				new String[] {cu.getElementName(), newElementName});
+				new String[] {BasicElementLabels.getFileName(cu), newElementName});
 		result.addError(message, context);
 	}
 
@@ -382,7 +393,7 @@ class RenameAnalyzeUtil {
 			return;
 		ISourceRange range= new SourceRange(oldMatch.getOffset(), oldMatch.getLength());
 		RefactoringStatusContext context= JavaStatusContext.create(cu, range);
-		String message= Messages.format(RefactoringCoreMessages.RenameAnalyzeUtil_shadows, cu.getElementName()); 
+		String message= Messages.format(RefactoringCoreMessages.RenameAnalyzeUtil_shadows, BasicElementLabels.getFileName(cu)); 
 		result.addError(message, context);
 	}
 

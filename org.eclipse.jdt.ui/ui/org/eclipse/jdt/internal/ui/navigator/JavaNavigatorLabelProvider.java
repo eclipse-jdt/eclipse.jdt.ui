@@ -35,6 +35,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.navigator.IExtensionStateConstants.Values;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Provides the labels for the Project Explorer.
@@ -177,10 +178,10 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyled
 	private String formatResourceMessage(IResource element) {
 		IContainer parent = element.getParent();
 		if (parent != null && parent.getType() != IResource.ROOT)
-			return element.getName() + JavaElementLabels.CONCAT_STRING
-					+ parent.getFullPath().makeRelative().toString();
+			return BasicElementLabels.getFileName(element.getName()) + JavaElementLabels.CONCAT_STRING
+					+ BasicElementLabels.getPathLabel(parent.getFullPath(), false);
 		else
-			return element.getName();
+			return BasicElementLabels.getFileName(element.getName());
 	}
 	
 	public void restoreState(IMemento memento) { 

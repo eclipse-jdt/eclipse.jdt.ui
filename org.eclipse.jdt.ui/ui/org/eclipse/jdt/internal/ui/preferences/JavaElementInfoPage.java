@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,10 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.Resources;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 
 /**
@@ -82,14 +85,14 @@ public class JavaElementInfoPage extends PropertyPage {
 
 			// path value label
 			Label pathValueLabel= new Label(composite, SWT.NONE);
-			pathValueLabel.setText(resource.getFullPath().toString());
+			pathValueLabel.setText(BasicElementLabels.getPathLabel(resource.getFullPath(), false));
 		}
 		if (element instanceof ICompilationUnit) {
 			ICompilationUnit unit= (ICompilationUnit)element;
 			Label packageLabel= new Label(composite, SWT.NONE);
 			packageLabel.setText(PreferencesMessages.JavaElementInfoPage_package); 
 			Label packageName= new Label(composite, SWT.NONE);
-			packageName.setText(unit.getParent().getElementName());
+			packageName.setText(JavaElementLabels.getTextLabel(unit.getParent(), JavaElementLabels.ALL_DEFAULT));
 			
 		} else if (element instanceof IPackageFragment) {
 			IPackageFragment packageFragment= (IPackageFragment)element;
@@ -123,7 +126,7 @@ public class JavaElementInfoPage extends PropertyPage {
 							Label varPath= new Label(composite, SWT.NONE);
 							varPath.setText(PreferencesMessages.JavaElementInfoPage_variable_path); 
 							Label varPathVar= new Label(composite, SWT.NONE);
-							varPathVar.setText(entry.getPath().makeRelative().toString());							
+							varPathVar.setText(BasicElementLabels.getPathLabel(entry.getPath(), false));							
 							break;
 					}
 				} else {
@@ -138,7 +141,7 @@ public class JavaElementInfoPage extends PropertyPage {
 			String location= Resources.getLocationString(((IJavaProject)element).getProject());
 			if (location != null) {
 				Label packageName= new Label(composite, SWT.NONE);
-				packageName.setText(location);				
+				packageName.setText(BasicElementLabels.getURLPart(location));				
 			}
 		}
 		Dialog.applyDialogFont(composite);		

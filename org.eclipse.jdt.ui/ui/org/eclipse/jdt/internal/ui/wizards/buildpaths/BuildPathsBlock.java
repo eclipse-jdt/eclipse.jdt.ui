@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,6 +82,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -599,7 +600,7 @@ public class BuildPathsBlock {
 				
 		if (nEntriesMissing > 0) {
 			if (nEntriesMissing == 1) {
-				fClassPathStatus.setWarning(Messages.format(NewWizardMessages.BuildPathsBlock_warning_EntryMissing, entryMissing.getPath().toString())); 
+				fClassPathStatus.setWarning(Messages.format(NewWizardMessages.BuildPathsBlock_warning_EntryMissing, BasicElementLabels.getPathLabel(entryMissing.getPath(), false))); 
 			} else {
 				fClassPathStatus.setWarning(Messages.format(NewWizardMessages.BuildPathsBlock_warning_EntriesMissing, String.valueOf(nEntriesMissing))); 
 			}
@@ -912,10 +913,11 @@ public class BuildPathsBlock {
 						Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
 						String title= NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_title; 
 						String message;
+						String pathLabel= BasicElementLabels.getPathLabel(oldOutputLocation, false);
 						if (removeFolder) {
-							message= Messages.format(NewWizardMessages.BuildPathsBlock_RemoveOldOutputFolder_description, oldOutputLocation.makeRelative().toOSString());
+							message= Messages.format(NewWizardMessages.BuildPathsBlock_RemoveOldOutputFolder_description, pathLabel);
 						} else {
-							message= Messages.format(NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_description, oldOutputLocation.makeRelative().toOSString());
+							message= Messages.format(NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_description, pathLabel);
 						}
 						MessageDialog dialog= new MessageDialog(sh, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 0);
 						res[0]= dialog.open();

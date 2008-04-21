@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,6 +55,7 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Utility methods for JAR Import/Export.
@@ -134,10 +135,10 @@ public final class JarPackagerUtil {
 		return selectedResources;
 	}
 
-	public static boolean askForOverwritePermission(final Shell parent, String filePath) {
+	public static boolean askForOverwritePermission(final Shell parent, IPath filePath, boolean isOSPath) {
 		if (parent == null)
 			return false;
-		return queryDialog(parent, JarPackagerMessages.JarPackage_confirmReplace_title, Messages.format(JarPackagerMessages.JarPackage_confirmReplace_message, filePath)); 
+		return queryDialog(parent, JarPackagerMessages.JarPackage_confirmReplace_title, Messages.format(JarPackagerMessages.JarPackage_confirmReplace_message, BasicElementLabels.getPathLabel(filePath, isOSPath))); 
 	}
 
 	/**

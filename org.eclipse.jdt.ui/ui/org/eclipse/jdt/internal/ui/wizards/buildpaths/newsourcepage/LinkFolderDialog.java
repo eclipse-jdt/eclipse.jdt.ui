@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -398,7 +399,7 @@ public class LinkFolderDialog extends StatusDialog {
         
         Label label= new Label(composite, SWT.NONE);
         label.setFont(composite.getFont());
-        label.setText(Messages.format(NewWizardMessages.LinkFolderDialog_createIn, fContainer.getFullPath().makeRelative().toString())); 
+        label.setText(Messages.format(NewWizardMessages.LinkFolderDialog_createIn, BasicElementLabels.getPathLabel(fContainer.getFullPath(), false))); 
 		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, numOfColumns, 1));
         
         fDependenciesGroup= new LinkFields(composite, numOfColumns);

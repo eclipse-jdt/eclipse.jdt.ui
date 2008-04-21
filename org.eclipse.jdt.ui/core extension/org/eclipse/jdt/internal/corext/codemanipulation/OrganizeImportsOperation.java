@@ -68,6 +68,7 @@ import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.SimilarElementsRequestor;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	public static interface IChooseImportQuery {
@@ -392,7 +393,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			monitor= new NullProgressMonitor();
 		}
 		try {
-			monitor.beginTask(Messages.format(CodeGenerationMessages.OrganizeImportsOperation_description, fCompilationUnit.getElementName()), 10);
+			monitor.beginTask(Messages.format(CodeGenerationMessages.OrganizeImportsOperation_description, BasicElementLabels.getFileName(fCompilationUnit)), 10);
 
     		TextEdit edit= createTextEdit(new SubProgressMonitor(monitor, 9));
     		if (edit == null)
@@ -412,7 +413,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			fNumberOfImportsAdded= 0;
 			fNumberOfImportsRemoved= 0;
 
-			monitor.beginTask(Messages.format(CodeGenerationMessages.OrganizeImportsOperation_description, fCompilationUnit.getElementName()), 9);
+			monitor.beginTask(Messages.format(CodeGenerationMessages.OrganizeImportsOperation_description, BasicElementLabels.getFileName(fCompilationUnit)), 9);
 
 			CompilationUnit astRoot= fASTRoot;
 			if (astRoot == null) {

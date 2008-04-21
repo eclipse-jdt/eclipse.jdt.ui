@@ -122,6 +122,7 @@ import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpdating, IReferenceUpdating, IQualifiedNameUpdating, ISimilarDeclarationUpdating, IResourceMapper, IJavaElementMapper {
 
@@ -440,7 +441,8 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		IType primary= (IType) fType.getPrimaryElement();
 		if (primary == null || !primary.exists()) {
-			String message= Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_does_not_exist, new String[] { fType.getFullyQualifiedName('.'), fType.getCompilationUnit().getElementName()});
+			String qualifiedTypeName= JavaElementLabels.getElementLabel(fType, JavaElementLabels.F_FULLY_QUALIFIED);
+			String message= Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_does_not_exist, new String[] { qualifiedTypeName, BasicElementLabels.getFileName(fType.getCompilationUnit())});
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}
 		fType= primary;
@@ -903,7 +905,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			//could this be a problem (same package imports)?
 			if (JdtFlags.isPublic(types[i]) && types[i].getElementName().equals(getNewElementName())){
 				String msg= Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_name_conflict1, 
-																			new Object[]{types[i].getFullyQualifiedName('.'), getFullPath(getCompilationUnit(imp))});
+																			new Object[]{ JavaElementLabels.getElementLabel(types[i], JavaElementLabels.ALL_FULLY_QUALIFIED), BasicElementLabels.getPathLabel(getCompilationUnit(imp).getPath(), false)});
 				result.addError(msg, JavaStatusContext.create(imp));
 			}
 		}
@@ -966,7 +968,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		for (int i= 0; i < intersection.length; i++) {
 			RefactoringStatusContext context= JavaStatusContext.create(intersection[i]);
 			String message= Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_another_type, 
-				new String[]{getNewElementName(), intersection[i].getElementName()});
+				new String[]{getNewElementName(), BasicElementLabels.getFileName(intersection[i])});
 			result.addError(message, context);
 		}	
 		return result;
@@ -987,11 +989,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				cus.add(cu);
 		}
 		return (ICompilationUnit[]) cus.toArray(new ICompilationUnit[cus.size()]);
-	}
-	
-	private static String getFullPath(ICompilationUnit cu) {
-		Assert.isTrue(cu.exists());
-		return cu.getResource().getFullPath().toString();
 	}
 
 	public Change createChange(IProgressMonitor monitor) throws CoreException {

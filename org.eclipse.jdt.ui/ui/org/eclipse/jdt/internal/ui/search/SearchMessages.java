@@ -171,6 +171,7 @@ public final class SearchMessages extends NLS {
 	public static String JavaElementAction_operationUnavailable_generic;
 	public static String JavaElementAction_operationUnavailable_field;
 	public static String JavaElementAction_operationUnavailable_interface;
+	public static String JavaElementLine_error_nobuffer;
 	public static String WorkspaceScope;
 	public static String WorkspaceScopeNoJRE;
 	public static String SingleWorkingSetScope;

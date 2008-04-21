@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertyKeyHyperlinkDetector;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 
 /**
@@ -181,7 +182,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 	}
 
 	private void handleOpenPropertiesFileFailed(IStorage propertiesFile) {
-		showErrorInStatusLine(fEditor, Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_error_openEditor_dialogMessage, propertiesFile.getFullPath().toOSString()));
+		showErrorInStatusLine(fEditor, Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_error_openEditor_dialogMessage, BasicElementLabels.getPathLabel(propertiesFile.getFullPath(), true)));
 	}
 
 	/*

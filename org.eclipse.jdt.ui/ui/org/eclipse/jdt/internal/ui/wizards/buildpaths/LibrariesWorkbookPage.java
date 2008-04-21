@@ -68,6 +68,7 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.jarimport.JarImportWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -554,7 +555,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		case IClasspathEntry.CPE_LIBRARY:
 			IResource resource= elem.getResource();
 			if (resource == null) {
-				File file= new File(elem.getPath().toOSString());
+				File file= elem.getPath().toFile();
 				if (file.isDirectory()) {
 					res= openExternalClassFolderDialog(elem);
 				} else {
@@ -672,7 +673,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		
 		NewContainerDialog dialog= new NewContainerDialog(getShell(), title, currProject, getUsedContainers(existing), existing);
 		IPath projpath= currProject.getFullPath();
-		dialog.setMessage(Messages.format(NewWizardMessages.LibrariesWorkbookPage_NewClassFolderDialog_description, projpath.toString())); 
+		dialog.setMessage(Messages.format(NewWizardMessages.LibrariesWorkbookPage_NewClassFolderDialog_description, BasicElementLabels.getPathLabel(projpath, false))); 
 		if (dialog.open() == Window.OK) {
 			IFolder folder= dialog.getFolder();
 			return new CPListElement[] { newCPLibraryElement(folder) };

@@ -81,6 +81,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PatternConstructor;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 
 /**
@@ -149,7 +150,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 					IDocument document= buffer.getDocument();
 					if (document != null) {
 						int line= document.getLineOfOffset(offset) + 1;
-						Object[] args= new Object[] { new Integer(line), storage.getFullPath() };
+						Object[] args= new Object[] { new Integer(line), BasicElementLabels.getPathLabel(storage.getFullPath(), false) };
 						return Messages.format(PropertiesFileEditorMessages.OpenAction_SelectionDialog_elementLabel, args);
 					}
 				} finally {
@@ -161,7 +162,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 				JavaPlugin.log(e);
 			}
 
-			return storage.getFullPath().toString();
+			return BasicElementLabels.getPathLabel(storage.getFullPath(), false);
 		}
 		/*
 		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getParent(java.lang.Object)

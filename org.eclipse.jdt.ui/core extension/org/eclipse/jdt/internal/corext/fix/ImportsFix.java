@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class ImportsFix extends TextEditFix {
 	
@@ -62,7 +63,7 @@ public class ImportsFix extends TextEditFix {
     }
 
 	private static String getLocationString(final CompilationUnit cu) {
-		return cu.getJavaElement().getPath().makeRelative().toString();
+		return BasicElementLabels.getPathLabel(cu.getJavaElement().getPath(), false);
 	}
 
 	public ImportsFix(TextEdit edit, ICompilationUnit unit, String description) {

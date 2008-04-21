@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.SortMembersFix;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class SortMembersCleanUp extends AbstractCleanUp {
 	
@@ -84,7 +86,7 @@ public class SortMembersCleanUp extends AbstractCleanUp {
     			for (Iterator iterator= fTouchedFiles.iterator(); iterator.hasNext();) {
     	            IFile file= (IFile)iterator.next();
     	            if (containsRelevantMarkers(file)) {
-    	            	String fileLocation= file.getProjectRelativePath().toOSString();
+    	            	String fileLocation= BasicElementLabels.getPathLabel(file.getProjectRelativePath(), false);
     	            	String projectName= file.getProject().getName();
 						result.addWarning(MessageFormat.format(MultiFixMessages.SortMembersCleanUp_RemoveMarkersWarning0, new Object[] {fileLocation, projectName}));
     	            }

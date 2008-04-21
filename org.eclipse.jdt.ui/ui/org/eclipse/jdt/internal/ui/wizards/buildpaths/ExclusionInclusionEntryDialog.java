@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
@@ -77,14 +78,14 @@ public class ExclusionInclusionEntryDialog extends StatusDialog {
 			} else {
 				title= NewWizardMessages.ExclusionInclusionEntryDialog_exclude_edit_title; 
 			}
-			message= Messages.format(NewWizardMessages.ExclusionInclusionEntryDialog_exclude_pattern_label, entryToEdit.getPath().makeRelative().toString());  
+			message= Messages.format(NewWizardMessages.ExclusionInclusionEntryDialog_exclude_pattern_label, BasicElementLabels.getPathLabel(entryToEdit.getPath(), false));  
 		} else {
 			if (patternToEdit == null) {
 				title= NewWizardMessages.ExclusionInclusionEntryDialog_include_add_title; 
 			} else {
 				title= NewWizardMessages.ExclusionInclusionEntryDialog_include_edit_title; 
 			}
-			message= Messages.format(NewWizardMessages.ExclusionInclusionEntryDialog_include_pattern_label, entryToEdit.getPath().makeRelative().toString());  
+			message= Messages.format(NewWizardMessages.ExclusionInclusionEntryDialog_include_pattern_label, BasicElementLabels.getPathLabel(entryToEdit.getPath(), false));  
 		}
 		setTitle(title);
 		if (patternToEdit != null) {

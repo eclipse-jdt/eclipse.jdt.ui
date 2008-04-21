@@ -54,6 +54,7 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * <code>JavaElementLabels</code> provides helper methods to render names of Java elements.
@@ -1615,7 +1616,7 @@ public class JavaElementLabels {
 		if (initializer != null) {
 			return initializer.getDescription(containerPath, project);
 		}
-		return containerPath.toString();
+		return BasicElementLabels.getPathLabel(containerPath, false);
 	}
 	
 	/**

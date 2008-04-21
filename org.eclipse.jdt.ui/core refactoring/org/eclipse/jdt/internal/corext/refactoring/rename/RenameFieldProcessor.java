@@ -95,6 +95,7 @@ import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class RenameFieldProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IDelegateUpdating {
 
@@ -231,21 +232,25 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 		if (isInstanceField(fField) && (!Checks.startsWithLowerCase(newName)))
 			result.addWarning(fIsComposite
-					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_should_start_lowercase2, new String[] { newName, fField.getDeclaringType().getElementName() })
+					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_should_start_lowercase2, new String[] { newName, getDeclaringTypeLabel() })
 					: RefactoringCoreMessages.RenameFieldRefactoring_should_start_lowercase);
 
 		if (Checks.isAlreadyNamed(fField, newName))
 			result.addError(fIsComposite
-					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_another_name2, new String[] { newName, fField.getDeclaringType().getElementName() })
+					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_another_name2, new String[] { newName, getDeclaringTypeLabel() })
 					: RefactoringCoreMessages.RenameFieldRefactoring_another_name,
 					JavaStatusContext.create(fField));
 		
 		if (fField.getDeclaringType().getField(newName).exists())
 			result.addError(fIsComposite 
-					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_field_already_defined2, new String[] { newName, fField.getDeclaringType().getElementName() }) 
+					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_field_already_defined2, new String[] { newName, getDeclaringTypeLabel() }) 
 					: RefactoringCoreMessages.RenameFieldRefactoring_field_already_defined,
 					JavaStatusContext.create(fField.getDeclaringType().getField(newName)));
 		return result;
+	}
+
+	private String getDeclaringTypeLabel() {
+		return JavaElementLabels.getElementLabel(fField.getDeclaringType(), JavaElementLabels.ALL_DEFAULT);
 	}
 	
 	public Object getNewElement() {
@@ -408,7 +413,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		IField primary= (IField) fField.getPrimaryElement();
 		if (primary == null || !primary.exists()) {
-			String message= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_deleted, fField.getCompilationUnit().getElementName());
+			String message= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_deleted, BasicElementLabels.getFileName(fField.getCompilationUnit()));
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}
 		fField= primary;

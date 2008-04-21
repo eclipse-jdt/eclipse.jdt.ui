@@ -80,6 +80,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.actions.ListDialog;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Externalizes the strings of a compilation unit or find all strings
@@ -331,7 +332,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 
 			List l= new ArrayList(cus.length);
 			for (int i= 0; i < cus.length; i++){
-				pm.subTask(cus[i].getElementName());
+				pm.subTask(BasicElementLabels.getFileName(cus[i]));
 				NonNLSElement element= analyze(cus[i]);
 				if (element != null)
 					l.add(element);
@@ -418,7 +419,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			return result;
 		} catch (InvalidInputException e) {
 			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
-					Messages.format(ActionMessages.FindStringsToExternalizeAction_error_cannotBeParsed, cu.getElementName()), e));
+					Messages.format(ActionMessages.FindStringsToExternalizeAction_error_cannotBeParsed, BasicElementLabels.getFileName(cu)), e));
 		}	
 	}
 
@@ -511,7 +512,7 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			return new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT){ 
 				public String getText(Object element) {
 					NonNLSElement nlsel= (NonNLSElement)element;
-					String elementName= nlsel.cu.getResource().getFullPath().toString();
+					String elementName= BasicElementLabels.getPathLabel(nlsel.cu.getResource().getFullPath(), false);
 					return Messages.format(
 							ActionMessages.FindStringsToExternalizeAction_foundStrings, 
 							new Object[] {new Integer(nlsel.count), elementName} );

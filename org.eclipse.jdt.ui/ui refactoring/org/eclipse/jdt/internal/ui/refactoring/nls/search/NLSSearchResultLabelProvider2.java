@@ -24,6 +24,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.search.TextSearchLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 
 class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements IStyledLabelProvider {
@@ -67,8 +68,9 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements I
 	}
 	
 	private StyledString getPropertiesName(IFile propertiesFile) {
-		String path= propertiesFile.getFullPath().removeLastSegments(1).makeRelative().toString();
-		return new StyledString(propertiesFile.getName()).append(" - " + path, StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
+		String path= BasicElementLabels.getPathLabel(propertiesFile.getFullPath().removeLastSegments(1), false);
+		String propertiesName= BasicElementLabels.getFileName(propertiesFile.getName());
+		return new StyledString(propertiesName).append(JavaElementLabels.CONCAT_STRING + path, StyledString.QUALIFIER_STYLER); 
 	}
 	
 	/*

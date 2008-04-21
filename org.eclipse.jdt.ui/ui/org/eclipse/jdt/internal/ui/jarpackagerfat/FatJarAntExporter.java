@@ -46,6 +46,7 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -110,14 +111,14 @@ public class FatJarAntExporter {
 			throw new CoreException(
 					new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, 
 							Messages.format(FatJarPackagerMessages.FatJarPackageWizard_antScript_error_readingOutputFile, new Object[] {
-									fAntScriptLocation.toOSString(), e.getLocalizedMessage() })
+									BasicElementLabels.getPathLabel(fAntScriptLocation, true), e.getLocalizedMessage() })
 							)
 					);
 		} catch (IOException e) {
 			throw new CoreException(
 					new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, 
 							Messages.format(FatJarPackagerMessages.FatJarPackageWizard_antScript_error_writingOutputFile, new Object[] {
-									fAntScriptLocation.toOSString(), e.getLocalizedMessage() })
+									BasicElementLabels.getPathLabel(fAntScriptLocation, true), e.getLocalizedMessage() })
 							)
 					);
 		}

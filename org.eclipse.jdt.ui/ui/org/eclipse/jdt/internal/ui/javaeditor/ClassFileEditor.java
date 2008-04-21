@@ -89,6 +89,7 @@ import org.eclipse.jdt.core.util.ClassFormatException;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
@@ -97,6 +98,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
 
 /**
@@ -224,7 +226,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			IPath containerPath= null;
 
 			if (entry == null || root.getKind() != IPackageFragmentRoot.K_BINARY) {
-				createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_noSource, fFile.getElementName()));
+				createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_noSource, BasicElementLabels.getFileName( fFile)));
 				return;
 			}
 
@@ -234,7 +236,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerPath.segment(0));
 				IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
 				if (initializer == null || container == null) {
-					createLabel(composite, Messages.format(JavaEditorMessages.ClassFileEditor_SourceAttachmentForm_cannotconfigure, containerPath.toString()));
+					createLabel(composite, Messages.format(JavaEditorMessages.ClassFileEditor_SourceAttachmentForm_cannotconfigure, BasicElementLabels.getPathLabel(containerPath, false)));
 					return;
 				}
 				String containerName= container.getDescription();
@@ -256,14 +258,15 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 			IPath path= entry.getSourceAttachmentPath();
 			if (path == null || path.isEmpty()) {
-				createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_noSourceAttachment, root.getElementName()));
+				String rootLabel= JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT);
+				createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_noSourceAttachment, rootLabel));
 				createLabel(composite, JavaEditorMessages.SourceAttachmentForm_message_pressButtonToAttach);
 				createLabel(composite, null);
 
 				button= createButton(composite, JavaEditorMessages.SourceAttachmentForm_button_attachSource);
 
 			} else {
-				createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_noSourceInAttachment, fFile.getElementName()));
+				createLabel(composite, Messages.format(JavaEditorMessages.SourceAttachmentForm_message_noSourceInAttachment, BasicElementLabels.getFileName(fFile)));
 				createLabel(composite, JavaEditorMessages.SourceAttachmentForm_message_pressButtonToChange);
 				createLabel(composite, null);
 

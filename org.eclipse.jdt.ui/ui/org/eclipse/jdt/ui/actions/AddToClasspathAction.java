@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 
 /**
@@ -122,7 +123,7 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 				public void run(IProgressMonitor monitor) throws CoreException {
 					monitor.beginTask(ActionMessages.AddToClasspathAction_progressMessage, files.length); 
 					for (int i= 0; i < files.length; i++) {
-						monitor.subTask(files[i].getFullPath().toString());
+						monitor.subTask(BasicElementLabels.getPathLabel(files[i].getFullPath(), false));
 						IJavaProject project= JavaCore.create(files[i].getProject());
 						addToClassPath(project, files[i].getFullPath(), new SubProgressMonitor(monitor, 1));
 					}

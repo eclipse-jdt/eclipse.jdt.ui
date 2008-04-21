@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,8 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 public class CopyPackageChange extends PackageReorgChange {
 	
 	public CopyPackageChange(IPackageFragment pack, IPackageFragmentRoot dest, INewNameQuery nameQuery){
@@ -35,7 +37,8 @@ public class CopyPackageChange extends PackageReorgChange {
 	}
 	
 	public String getName() {
-		return Messages.format(RefactoringCoreMessages.CopyPackageChange_copy, 
-			new String[]{ getPackage().getElementName(), getDestination().getElementName()});
+		String packageName= JavaElementLabels.getElementLabel(getPackage(), JavaElementLabels.ALL_DEFAULT);
+		String destinationName= JavaElementLabels.getElementLabel(getDestination(), JavaElementLabels.ALL_DEFAULT);
+		return Messages.format(RefactoringCoreMessages.CopyPackageChange_copy, new String[]{ packageName, destinationName});
 	}
 }

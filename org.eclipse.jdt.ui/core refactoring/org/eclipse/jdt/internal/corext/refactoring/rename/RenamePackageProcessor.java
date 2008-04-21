@@ -101,8 +101,11 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class RenamePackageProcessor extends JavaRenameProcessor implements
 		IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating, IResourceMapper, IJavaElementMapper {
@@ -394,10 +397,10 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 			pm.worked(2);
 			
 			if (fPackage.isReadOnly()){
-				String message= Messages.format(RefactoringCoreMessages.RenamePackageRefactoring_Packagered_only, fPackage.getElementName()); 
+				String message= Messages.format(RefactoringCoreMessages.RenamePackageRefactoring_Packagered_only, getElementLabel(fPackage)); 
 				result.addFatalError(message);
 			} else if (Resources.isReadOnly(fPackage.getResource())) {
-				String message= Messages.format(RefactoringCoreMessages.RenamePackageRefactoring_resource_read_only, fPackage.getElementName());
+				String message= Messages.format(RefactoringCoreMessages.RenamePackageRefactoring_resource_read_only, getElementLabel(fPackage));
 				result.addError(message);
 			}				
 				
@@ -526,10 +529,13 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 		IPackageFragmentRoot[] roots= fPackage.getJavaProject().getPackageFragmentRoots();
 		Set topLevelTypeNames= getTopLevelTypeNames();
 		for (int i= 0; i < roots.length; i++) {
-			if (! isPackageNameOkInRoot(newName, roots[i])){
-				String message= Messages.format(RefactoringCoreMessages.RenamePackageRefactoring_aleady_exists, new Object[]{getNewElementName(), roots[i].getElementName()});
+			IPackageFragmentRoot root= roots[i];
+			if (! isPackageNameOkInRoot(newName, root)) {
+				String rootLabel = JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT);
+				String newPackageName= BasicElementLabels.getJavaElementName(getNewElementName());
+				String message= Messages.format(RefactoringCoreMessages.RenamePackageRefactoring_aleady_exists, new Object[]{ newPackageName, rootLabel});
 				status.merge(RefactoringStatus.createWarningStatus(message));
-				status.merge(checkTypeNameConflicts(roots[i], newName, topLevelTypeNames)); 
+				status.merge(checkTypeNameConflicts(root, newName, topLevelTypeNames)); 
 			}
 		}
 		return status;
@@ -568,11 +574,11 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 	private RefactoringStatus checkTypeNameConflicts(ICompilationUnit iCompilationUnit, Set topLevelTypeNames) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		IType[] types= iCompilationUnit.getTypes();
-		String packageName= iCompilationUnit.getParent().getElementName();
+		
 		for (int i= 0; i < types.length; i++) {
 			String name= types[i].getElementName();
 			if (topLevelTypeNames.contains(name)){
-				String[] keys= {packageName, name};
+				String[] keys= {getElementLabel(iCompilationUnit.getParent()), getElementLabel(types[i])};
 				String msg= Messages.format(RefactoringCoreMessages.RenamePackageRefactoring_contains_type, keys); 
 				RefactoringStatusContext context= JavaStatusContext.create(types[i]);
 				result.addError(msg, context);
@@ -604,8 +610,8 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 		if (javaProject != null)
 			project= javaProject.getElementName();
 		final int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
-		final String description= Messages.format(RefactoringCoreMessages.RenamePackageProcessor_descriptor_description_short, fPackage.getElementName());
-		final String header= Messages.format(RefactoringCoreMessages.RenamePackageProcessor_descriptor_description, new String[] { fPackage.getElementName(), getNewElementName()});
+		final String description= Messages.format(RefactoringCoreMessages.RenamePackageProcessor_descriptor_description_short, getElementLabel(fPackage));
+		final String header= Messages.format(RefactoringCoreMessages.RenamePackageProcessor_descriptor_description, new String[] { getElementLabel(fPackage), getNewElementName()});
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 		if (fRenameSubpackages)
 			comment.addSetting(RefactoringCoreMessages.RenamePackageProcessor_rename_subpackages);
@@ -623,6 +629,10 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 			descriptor.setFileNamePatterns(fFilePatterns);
 		descriptor.setUpdateHierarchy(fRenameSubpackages);
 		return descriptor;
+	}
+	
+	private static String getElementLabel(IJavaElement javaElement) {
+		return JavaElementLabels.getElementLabel(javaElement, JavaElementLabels.ALL_DEFAULT);
 	}
 
 	public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
@@ -692,7 +702,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 			if (fProcessor.getUpdateReferences()){
 				pm.setTaskName(RefactoringCoreMessages.RenamePackageRefactoring_searching);	 
 				
-				String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , fPackage.getElementName());
+				String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , getElementLabel(fPackage));
 				ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 
 				fOccurrences= getReferences(new SubProgressMonitor(pm, 4), binaryRefs, result);	

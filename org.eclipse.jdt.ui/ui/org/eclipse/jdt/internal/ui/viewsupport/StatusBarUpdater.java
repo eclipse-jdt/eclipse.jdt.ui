@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,14 +78,14 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 					return container.getLabel() + JavaElementLabels.CONCAT_STRING + container.getJavaProject().getElementName();
 				} else if (elem instanceof IJarEntryResource) {
 					IJarEntryResource jarEntryResource= (IJarEntryResource) elem;
-					StringBuffer buf= new StringBuffer(jarEntryResource.getName());
+					StringBuffer buf= new StringBuffer(BasicElementLabels.getFileName(jarEntryResource.getName()));
 					buf.append(JavaElementLabels.CONCAT_STRING);
 					IPath fullPath= jarEntryResource.getFullPath();
 					if (fullPath.segmentCount() > 1) {
-						buf.append(fullPath.removeLastSegments(1).makeRelative());
+						buf.append(BasicElementLabels.getPathLabel(fullPath.removeLastSegments(1), false));
 						buf.append(JavaElementLabels.CONCAT_STRING);
 					}
-					JavaElementLabels.getPackageFragmentRootLabel(jarEntryResource.getPackageFragmentRoot(), JavaElementLabels.ROOT_POST_QUALIFIED, buf);
+					buf.append(JavaElementLabels.getElementLabel(jarEntryResource.getPackageFragmentRoot(), JavaElementLabels.ROOT_POST_QUALIFIED));
 					return buf.toString();
 				} else if (elem instanceof IAdaptable) {
 					IWorkbenchAdapter wbadapter= (IWorkbenchAdapter) ((IAdaptable)elem).getAdapter(IWorkbenchAdapter.class);
@@ -105,9 +105,9 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 	private String formatResourceMessage(IResource element) {
 		IContainer parent= element.getParent();
 		if (parent != null && parent.getType() != IResource.ROOT)
-			return element.getName() + JavaElementLabels.CONCAT_STRING + parent.getFullPath().makeRelative().toString();
+			return BasicElementLabels.getFileName(element.getName()) + JavaElementLabels.CONCAT_STRING + BasicElementLabels.getPathLabel(parent.getFullPath(), false);
 		else
-			return element.getName();
+			return BasicElementLabels.getFileName(element.getName());
 	}	
 
 }

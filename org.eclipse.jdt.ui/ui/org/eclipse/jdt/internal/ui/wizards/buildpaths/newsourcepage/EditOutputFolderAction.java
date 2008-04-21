@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
@@ -139,7 +140,7 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
         	IFolder oldOutputFolder= getOldOutputFolder(delta);
         	final IFolder folderToDelete;
         	if (oldOutputFolder != null) {
-        		String message= Messages.format(NewWizardMessages.EditOutputFolderAction_DeleteOldOutputFolderQuestion, oldOutputFolder.getLocation().toString());
+        		String message= Messages.format(NewWizardMessages.EditOutputFolderAction_DeleteOldOutputFolderQuestion, BasicElementLabels.getPathLabel(oldOutputFolder.getFullPath(), false));
     	    	if (MessageDialog.openQuestion(getShell(), NewWizardMessages.OutputLocationDialog_title, message)) {
     	    		folderToDelete= oldOutputFolder;
     	    	} else {

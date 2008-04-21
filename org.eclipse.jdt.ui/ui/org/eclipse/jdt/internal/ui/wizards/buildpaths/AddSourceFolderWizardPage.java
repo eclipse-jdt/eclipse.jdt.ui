@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,6 +73,7 @@ import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
@@ -258,7 +259,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			if (linkedMode) {
 				setDescription(Messages.format(NewWizardMessages.NewFolderDialog_createIn, newElement.getJavaProject().getElementName()));
 			} else {
-				setDescription(Messages.format(NewWizardMessages.AddSourceFolderWizardPage_description, fParent.getFullPath().toString()));
+				setDescription(Messages.format(NewWizardMessages.AddSourceFolderWizardPage_description, BasicElementLabels.getPathLabel(fParent.getFullPath(), false)));
 			}
 		} else {
 			setDescription(NewWizardMessages.NewSourceFolderWizardPage_edit_description);
@@ -447,7 +448,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		}
 		
 		if (folder.exists() && !folder.getFullPath().equals(fOrginalPath))
-			return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewFolderDialog_folderNameEmpty_alreadyExists, folder.getFullPath().toString()));
+			return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewFolderDialog_folderNameEmpty_alreadyExists, BasicElementLabels.getPathLabel(folder.getFullPath(), false)));
 
 		boolean isProjectASourceFolder= projectEntryIndex != -1;
 		
@@ -497,9 +498,9 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 				IStatus status2= JavaConventions.validateClasspath(javaProject, CPListElement.convertToClasspathEntries(fExistingEntries), fNewOutputLocation);
 				if (status2.isOK()) {
 					if (isProjectSourceFolderReplaced) {
-						result.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceSFandOL, fNewOutputLocation.makeRelative().toString())); 
+						result.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceSFandOL, BasicElementLabels.getPathLabel(fNewOutputLocation, false))); 
 					} else {
-						result.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceOL, fNewOutputLocation.makeRelative().toString())); 
+						result.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceOL, BasicElementLabels.getPathLabel(fNewOutputLocation, false))); 
 					}
 					return result;
 				}
@@ -655,7 +656,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		IPath parentPath= parent.getFullPath();
 		
 		if (str.length() == 0) {
-			result.setError(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_error_EnterRootName, parentPath.toString()));
+			result.setError(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_error_EnterRootName, BasicElementLabels.getPathLabel(parentPath, false)));
 			return result;
 		}
 		

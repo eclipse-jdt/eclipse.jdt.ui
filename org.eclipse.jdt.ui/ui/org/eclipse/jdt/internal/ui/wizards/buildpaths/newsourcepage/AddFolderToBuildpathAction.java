@@ -55,6 +55,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
@@ -144,7 +145,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 
 					if (BuildPathsBlock.hasClassfiles(project.getProject()) && outputLocation.equals(projPath)) {
 						String title= NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_title; 
-						String message= Messages.format(NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_description, projPath.toString()); 
+						String message= Messages.format(NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_description, BasicElementLabels.getPathLabel(projPath, false)); 
 						MessageDialog dialog= new MessageDialog(shell, title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 0);
 						int answer= dialog.open();
 						if (answer == 0) {

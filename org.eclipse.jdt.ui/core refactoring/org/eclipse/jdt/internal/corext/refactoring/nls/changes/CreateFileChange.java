@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,8 @@ import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class CreateFileChange extends ResourceChange {
 
@@ -87,7 +89,7 @@ public class CreateFileChange extends ResourceChange {
 
 	public String getName() {
 		if (fChangeName == null)
-			return Messages.format(NLSChangesMessages.createFile_Create_file, fPath.toOSString());
+			return Messages.format(NLSChangesMessages.createFile_Create_file, BasicElementLabels.getPathLabel(fPath, true));
 		else
 			return fChangeName;
 	}
@@ -124,7 +126,7 @@ public class CreateFileChange extends ResourceChange {
 		if (location == null) {
 			result.addFatalError(Messages.format(
 				NLSChangesMessages.CreateFileChange_error_unknownLocation, 
-				file.getFullPath().toString()));
+				BasicElementLabels.getPathLabel(file.getFullPath(), false)));
 			return result;
 		}
 		
@@ -132,7 +134,7 @@ public class CreateFileChange extends ResourceChange {
 		if (jFile.exists()) {
 			result.addFatalError(Messages.format(
 				NLSChangesMessages.CreateFileChange_error_exists, 
-				file.getFullPath().toString()));
+				BasicElementLabels.getPathLabel(file.getFullPath(), false)));
 			return result;
 		}
 		return result;

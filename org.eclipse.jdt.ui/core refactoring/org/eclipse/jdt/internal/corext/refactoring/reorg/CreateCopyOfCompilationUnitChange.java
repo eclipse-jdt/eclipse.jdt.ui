@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 
@@ -142,7 +143,9 @@ public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChang
 	}
 
 	public String getName() {
-		return Messages.format(RefactoringCoreMessages.CreateCopyOfCompilationUnitChange_create_copy, new String[] { fOldCu.getElementName(), getPathLabel(fOldCu.getResource())});
+		String cuName= BasicElementLabels.getFileName(fOldCu.getElementName());
+		String cuContainerName= BasicElementLabels.getPathLabel(fOldCu.getParent().getPath(), false);
+		return Messages.format(RefactoringCoreMessages.CreateCopyOfCompilationUnitChange_create_copy, new String[] { cuName, cuContainerName});
 	}
 
 	protected IFile getOldFile(IProgressMonitor monitor) throws OperationCanceledException {
@@ -164,16 +167,6 @@ public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChang
 		} finally {
 			monitor.done();
 		}
-	}
-
-	private String getPathLabel(IResource resource) {
-		final StringBuffer buffer= new StringBuffer(resource.getProject().getName());
-		final String path= resource.getParent().getProjectRelativePath().toString();
-		if (path.length() > 0) {
-			buffer.append('/');
-			buffer.append(path);
-		}
-		return buffer.toString();
 	}
 
 	private void markAsExecuted(ICompilationUnit unit, ResourceMapping mapping) {
