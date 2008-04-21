@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,9 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.Performance;
+
 import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
 
 public class PackageExplorerColdPerfTest extends JdtPerformanceTestCase {
@@ -37,9 +40,11 @@ public class PackageExplorerColdPerfTest extends JdtPerformanceTestCase {
 	public PackageExplorerColdPerfTest(String name) {
 		super(name);
 	}
-
+	
 	public final void finishMeasurements() {
-		super.finishMeasurements();
+		stopMeasuring();
+		commitMeasurements();
+		Performance.getDefault().assertPerformanceInAbsoluteBand(fPerformanceMeter, Dimension.ELAPSED_PROCESS, 0, 80);
 	}
 
 	public final void startMeasuring() {
