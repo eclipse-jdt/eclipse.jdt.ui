@@ -120,6 +120,9 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_EXTJAR= NAME_PREFIX + "jar_l_obj.gif"; 			//$NON-NLS-1$
 	public static final String IMG_OBJS_JAR_WSRC= NAME_PREFIX + "jar_src_obj.gif"; 		//$NON-NLS-1$
 	public static final String IMG_OBJS_EXTJAR_WSRC= NAME_PREFIX + "jar_lsrc_obj.gif";	//$NON-NLS-1$
+	public static final String IMG_OBJS_CLASSFOLDER= NAME_PREFIX + "cf_obj.gif"; 			//$NON-NLS-1$
+	public static final String IMG_OBJS_CLASSFOLDER_WSRC= NAME_PREFIX + "cf_src_obj.gif"; 		//$NON-NLS-1$
+	
 	public static final String IMG_OBJS_ENV_VAR= NAME_PREFIX + "envvar_obj.gif"; 			//$NON-NLS-1$
 	public static final String IMG_OBJS_JAVA_MODEL= NAME_PREFIX + "java_model_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_UNKNOWN= NAME_PREFIX + "unknown_obj.gif"; //$NON-NLS-1$
@@ -253,6 +256,10 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_EXTJAR= createManagedFromKey(T_OBJ, IMG_OBJS_EXTJAR);
 	public static final ImageDescriptor DESC_OBJS_JAR_WSRC= createManagedFromKey(T_OBJ, IMG_OBJS_JAR_WSRC);
 	public static final ImageDescriptor DESC_OBJS_EXTJAR_WSRC= createManagedFromKey(T_OBJ, IMG_OBJS_EXTJAR_WSRC);
+	
+	public static final ImageDescriptor DESC_OBJS_CLASSFOLDER= createManagedFromKey(T_OBJ, IMG_OBJS_CLASSFOLDER);
+	public static final ImageDescriptor DESC_OBJS_CLASSFOLDER_WSRC= createManagedFromKey(T_OBJ, IMG_OBJS_CLASSFOLDER_WSRC);
+	
 	public static final ImageDescriptor DESC_OBJS_ENV_VAR= createManagedFromKey(T_OBJ, IMG_OBJS_ENV_VAR);
 	
 	public static final ImageDescriptor DESC_OBJS_LIBRARY= createManagedFromKey(T_OBJ, IMG_OBJS_LIBRARY);

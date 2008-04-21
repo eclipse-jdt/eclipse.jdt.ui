@@ -336,7 +336,11 @@ public class CPListLabelProvider extends LabelProvider {
 							return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_EXTERNAL_ARCHIVE_WITH_SOURCE);
 						}
 					} else {
-						return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_PACKFRAG_ROOT);
+						if (path == null || path.isEmpty()) {
+							return JavaPluginImages.DESC_OBJS_CLASSFOLDER;
+						} else {
+							return JavaPluginImages.DESC_OBJS_CLASSFOLDER_WSRC;
+						}
 					}
 				} else if (res instanceof IFile) {
 					if (path == null || path.isEmpty()) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -238,21 +238,29 @@ public class JavaElementImageProvider {
 
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT: {
 					IPackageFragmentRoot root= (IPackageFragmentRoot) element;
-					if (root.isArchive()) {
-						IPath attach= root.getSourceAttachmentPath();
-						if (root.isExternal()) {
-							if (attach == null) {
-								return JavaPluginImages.DESC_OBJS_EXTJAR;
+					IPath attach= root.getSourceAttachmentPath();
+					if (root.getElementType() == IPackageFragmentRoot.K_BINARY) {
+						if (root.isArchive()) {
+							if (root.isExternal()) {
+								if (attach == null) {
+									return JavaPluginImages.DESC_OBJS_EXTJAR;
+								} else {
+									return JavaPluginImages.DESC_OBJS_EXTJAR_WSRC;
+								}
 							} else {
-								return JavaPluginImages.DESC_OBJS_EXTJAR_WSRC;
+								if (attach == null) {
+									return JavaPluginImages.DESC_OBJS_JAR;
+								} else {
+									return JavaPluginImages.DESC_OBJS_JAR_WSRC;
+								}
 							}
 						} else {
 							if (attach == null) {
-								return JavaPluginImages.DESC_OBJS_JAR;
+								return JavaPluginImages.DESC_OBJS_CLASSFOLDER;
 							} else {
-								return JavaPluginImages.DESC_OBJS_JAR_WSRC;
+								return JavaPluginImages.DESC_OBJS_CLASSFOLDER_WSRC;
 							}
-						}							
+						}
 					} else {
 						return JavaPluginImages.DESC_OBJS_PACKFRAG_ROOT;
 					}
