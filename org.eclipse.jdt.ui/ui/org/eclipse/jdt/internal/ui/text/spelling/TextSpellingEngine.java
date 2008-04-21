@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,17 +32,12 @@ public class TextSpellingEngine extends SpellingEngine {
 	 */
 	protected void check(IDocument document, IRegion[] regions, ISpellChecker checker, ISpellingProblemCollector collector, IProgressMonitor monitor) {
 		SpellEventListener listener= new SpellEventListener(collector, document);
-		try {
-			checker.addListener(listener);
-			for (int i= 0; i < regions.length; i++) {
-				if (monitor != null && monitor.isCanceled())
-					return;
-				if (listener.isProblemsThresholdReached())
-					return;
-				checker.execute(new SpellCheckIterator(document, regions[i], checker.getLocale()));
-			}
-		} finally {
-			checker.removeListener(listener);
+		for (int i= 0; i < regions.length; i++) {
+			if (monitor != null && monitor.isCanceled())
+				return;
+			if (listener.isProblemsThresholdReached())
+				return;
+			checker.execute(listener, new SpellCheckIterator(document, regions[i], checker.getLocale()));
 		}
 	}
 }

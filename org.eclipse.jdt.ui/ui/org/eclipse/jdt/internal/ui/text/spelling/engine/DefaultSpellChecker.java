@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -132,12 +132,6 @@ public class DefaultSpellChecker implements ISpellChecker {
 	private final Set fIgnored= Collections.synchronizedSet(new HashSet());
 
 	/**
-	 * The spell event listeners. Synchronized to avoid concurrent
-	 * modifications.
-	 */
-	private final Set fListeners= Collections.synchronizedSet(new HashSet());
-
-	/**
 	 * The preference store. Assumes the <code>IPreferenceStore</code>
 	 * implementation is thread safe.
 	 */
@@ -169,14 +163,6 @@ public class DefaultSpellChecker implements ISpellChecker {
 	public final void addDictionary(final ISpellDictionary dictionary) {
 		// synchronizing is necessary as this is a write access
 		fDictionaries.add(dictionary);
-	}
-
-	/*
-	 * @see org.eclipse.spelling.done.ISpellChecker#addListener(org.eclipse.spelling.done.ISpellEventListener)
-	 */
-	public final void addListener(final ISpellEventListener listener) {
-		// synchronizing is necessary as this is a write access
-		fListeners.add(listener);
 	}
 
 	/*
@@ -231,7 +217,7 @@ public class DefaultSpellChecker implements ISpellChecker {
 	/*
 	 * @see org.eclipse.spelling.done.ISpellChecker#execute(org.eclipse.spelling.ISpellCheckTokenizer)
 	 */
-	public void execute(final ISpellCheckIterator iterator) {
+	public void execute(final ISpellEventListener listener, final ISpellCheckIterator iterator) {
 
 		final boolean ignoreDigits= fPreferences.getBoolean(PreferenceConstants.SPELLING_IGNORE_DIGITS);
 		final boolean ignoreMixed= fPreferences.getBoolean(PreferenceConstants.SPELLING_IGNORE_MIXED);
@@ -269,36 +255,19 @@ public class DefaultSpellChecker implements ISpellChecker {
 					    boolean isURL= isUrl(word);
 
 					    if ( !ignoreMixed && isMixed || !ignoreUpper && isUpper || !ignoreDigits && isDigits || !ignoreURLS && isURL || !(isMixed || isUpper || isDigits || isURL)) {
-					        fireEvent(new SpellEvent(this, word, iterator.getBegin(), iterator.getEnd(), starts, false));
+					        listener.handle(new SpellEvent(this, word, iterator.getBegin(), iterator.getEnd(), starts, false));
 					        problemCount++;
 					    }
 
 					} else {
 
 						if (!ignoreSentence && starts && Character.isLowerCase(word.charAt(0))) {
-							fireEvent(new SpellEvent(this, word, iterator.getBegin(), iterator.getEnd(), true, true));
+							listener.handle(new SpellEvent(this, word, iterator.getBegin(), iterator.getEnd(), true, true));
 							problemCount++;
 						}
 					}
 				}
 			}
-		}
-	}
-
-	/**
-	 * Fires the specified event.
-	 *
-	 * @param event
-	 *                   Event to fire
-	 */
-	protected final void fireEvent(final ISpellEvent event) {
-		// synchronizing is necessary as this is called from execute
-		Set copy;
-		synchronized (fListeners) {
-			copy= new HashSet(fListeners);
-		}
-		for (final Iterator iterator= copy.iterator(); iterator.hasNext();) {
-			((ISpellEventListener)iterator.next()).handle(event);
 		}
 	}
 
@@ -363,14 +332,6 @@ public class DefaultSpellChecker implements ISpellChecker {
 	public final void removeDictionary(final ISpellDictionary dictionary) {
 		// synchronizing is necessary as this is a write access
 		fDictionaries.remove(dictionary);
-	}
-
-	/*
-	 * @see org.eclipse.spelling.done.ISpellChecker#removeListener(org.eclipse.spelling.done.ISpellEventListener)
-	 */
-	public final void removeListener(final ISpellEventListener listener) {
-		// synchronizing is necessary as this is a write access
-		fListeners.remove(listener);
 	}
 
 	/*

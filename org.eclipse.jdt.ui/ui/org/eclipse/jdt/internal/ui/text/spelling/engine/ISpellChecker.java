@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,14 +30,6 @@ public interface ISpellChecker {
 	void addDictionary(ISpellDictionary dictionary);
 
 	/**
-	 * Adds a spell event listener to the active listeners.
-	 *
-	 * @param listener
-	 *                   The listener to add
-	 */
-	void addListener(ISpellEventListener listener);
-
-	/**
 	 * Returns whether this spell checker accepts word additions.
 	 *
 	 * @return <code>true</code> if word additions are accepted, <code>false</code> otherwise
@@ -63,11 +55,11 @@ public interface ISpellChecker {
 	/**
 	 * Checks the spelling with the spell check iterator. Implementations must
 	 * be thread safe as this may be called inside a reconciler thread.
-	 *
-	 * @param iterator
-	 *                   The iterator to use for spell checking
+	 * 
+	 * @param listener the spell event listener
+	 * @param iterator the iterator to use for spell checking
 	 */
-	void execute(ISpellCheckIterator iterator);
+	void execute(ISpellEventListener listener, ISpellCheckIterator iterator);
 
 	/**
 	 * Returns the ranked proposals for a word.
@@ -107,14 +99,6 @@ public interface ISpellChecker {
 	 *                   The dictionary to remove
 	 */
 	void removeDictionary(ISpellDictionary dictionary);
-
-	/**
-	 * Removes a spell event listener from the active listeners.
-	 *
-	 * @param listener
-	 *                   The listener to remove
-	 */
-	void removeListener(ISpellEventListener listener);
 	
 	/**
 	 * Returns the current locale of the spell check engine.

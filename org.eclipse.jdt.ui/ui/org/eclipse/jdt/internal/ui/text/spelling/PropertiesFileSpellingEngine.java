@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,7 +47,6 @@ public class PropertiesFileSpellingEngine extends SpellingEngine {
 		SpellEventListener listener= new SpellEventListener(collector, document);
 		boolean isIgnoringAmpersand= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SPELLING_IGNORE_AMPERSAND_IN_PROPERTIES);
 		try {
-			checker.addListener(listener);
 			List partitionList= new ArrayList();
 			for (int i= 0; i < regions.length; i++)
 				partitionList.addAll(Arrays.asList(TextUtilities.computePartitioning(document, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, regions[i].getOffset(), regions[i].getLength(), false)));
@@ -74,16 +73,14 @@ public class PropertiesFileSpellingEngine extends SpellingEngine {
 				String partitionType= partition.getType();
 				if (IPropertiesFilePartitions.COMMENT.equals(partitionType) || (!isIgnoringAmpersand && IPropertiesFilePartitions.PROPERTY_VALUE.equals(partitionType))) {
 					Locale locale= checker.getLocale();
-					checker.execute(new SpellCheckIterator(document, partition, locale));
+					checker.execute(listener, new SpellCheckIterator(document, partition, locale));
 				} else if (isIgnoringAmpersand && IPropertiesFilePartitions.PROPERTY_VALUE.equals(partitionType)) {
 					Locale locale= checker.getLocale();
-					checker.execute(new PropertiesFileSpellCheckIterator(document, partition, locale));
+					checker.execute(listener, new PropertiesFileSpellCheckIterator(document, partition, locale));
 				}
 			}
 		} catch (BadLocationException x) {
 			JavaPlugin.log(x);
-		} finally {
-			checker.removeListener(listener);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,33 +42,28 @@ public class JavaSpellingEngine extends SpellingEngine {
 		SpellEventListener listener= new SpellEventListener(collector, document);
 		boolean isIgnoringJavaStrings= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SPELLING_IGNORE_JAVA_STRINGS);
 		try {
-			checker.addListener(listener);
-			try {
-				for (int i= 0; i < regions.length; i++) {
-					IRegion region= regions[i];
-					ITypedRegion[] partitions= TextUtilities.computePartitioning(document, IJavaPartitions.JAVA_PARTITIONING, region.getOffset(), region.getLength(), false);
-					for (int index= 0; index < partitions.length; index++) {
-						if (monitor != null && monitor.isCanceled())
-							return;
+			for (int i= 0; i < regions.length; i++) {
+				IRegion region= regions[i];
+				ITypedRegion[] partitions= TextUtilities.computePartitioning(document, IJavaPartitions.JAVA_PARTITIONING, region.getOffset(), region.getLength(), false);
+				for (int index= 0; index < partitions.length; index++) {
+					if (monitor != null && monitor.isCanceled())
+						return;
 
-						if (listener.isProblemsThresholdReached())
-							return;
+					if (listener.isProblemsThresholdReached())
+						return;
 
-						ITypedRegion partition= partitions[index];
-						final String type= partition.getType();
-						
-						if (isIgnoringJavaStrings && type.equals(IJavaPartitions.JAVA_STRING))
-							continue;
-						
-						if (!type.equals(IDocument.DEFAULT_CONTENT_TYPE) && !type.equals(IJavaPartitions.JAVA_CHARACTER))
-							checker.execute(new SpellCheckIterator(document, partition, checker.getLocale()));
-					}
+					ITypedRegion partition= partitions[index];
+					final String type= partition.getType();
+
+					if (isIgnoringJavaStrings && type.equals(IJavaPartitions.JAVA_STRING))
+						continue;
+
+					if (!type.equals(IDocument.DEFAULT_CONTENT_TYPE) && !type.equals(IJavaPartitions.JAVA_CHARACTER))
+						checker.execute(listener, new SpellCheckIterator(document, partition, checker.getLocale()));
 				}
-			} catch (BadLocationException x) {
-				JavaPlugin.log(x);
 			}
-		} finally {
-			checker.removeListener(listener);
+		} catch (BadLocationException x) {
+			JavaPlugin.log(x);
 		}
 	}
 }
