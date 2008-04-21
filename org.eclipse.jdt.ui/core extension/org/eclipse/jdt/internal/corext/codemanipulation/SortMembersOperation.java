@@ -120,6 +120,12 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 		public int compare(Object e1, Object e2) {
 			BodyDeclaration bodyDeclaration1= (BodyDeclaration) e1;
 			BodyDeclaration bodyDeclaration2= (BodyDeclaration) e2;
+			
+			if (fDoNotSortFields && bodyDeclaration1.getNodeType() == bodyDeclaration2.getNodeType()) {
+				if (bodyDeclaration1.getNodeType() == ASTNode.FIELD_DECLARATION || bodyDeclaration2.getNodeType() == ASTNode.ENUM_CONSTANT_DECLARATION)
+					return preserveRelativeOrder(bodyDeclaration1, bodyDeclaration2);
+			}
+			
 			int cat1= category(bodyDeclaration1);
 			int cat2= category(bodyDeclaration2);
 
@@ -128,10 +134,6 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 			}
 			
 			if (fMemberOrderCache.isSortByVisibility()) {
-				if (fDoNotSortFields && (bodyDeclaration1.getNodeType() == ASTNode.FIELD_DECLARATION || bodyDeclaration2.getNodeType() == ASTNode.ENUM_CONSTANT_DECLARATION)) {
-					return preserveRelativeOrder(bodyDeclaration1, bodyDeclaration2);
-				}
-				
 				int flags1= JdtFlags.getVisibilityCode(bodyDeclaration1);
 				int flags2= JdtFlags.getVisibilityCode(bodyDeclaration2);
 				int vis= fMemberOrderCache.getVisibilityIndex(flags1) - fMemberOrderCache.getVisibilityIndex(flags2);

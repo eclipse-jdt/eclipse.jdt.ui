@@ -6513,6 +6513,33 @@ public class CleanUpTest extends CleanUpTestCase {
 		}
 	}
 	
+	public void testSortMembersBug223997() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class SM02 {\n");
+		buf.append("    public String s2;\n");
+		buf.append("    public static String s1;\n");
+		buf.append("   void d() {};\n");
+		buf.append("   void c() {};\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("SM02.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.SORT_MEMBERS);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class SM02 {\n");
+		buf.append("    public String s2;\n");
+		buf.append("    public static String s1;\n");
+		buf.append("   void c() {};\n");
+		buf.append("   void d() {};\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+	
 	public void testOrganizeImports01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
