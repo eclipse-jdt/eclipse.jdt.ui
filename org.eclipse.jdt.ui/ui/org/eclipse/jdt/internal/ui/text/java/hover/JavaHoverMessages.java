@@ -51,6 +51,13 @@ final class JavaHoverMessages extends NLS {
 	public static String NLSStringHover_NLSStringHover_PropertiesFileNotDetectedWarning;
 	public static String ProblemHover_action_configureProblemSeverity;
 
+	public static String ProblemHover_chooseSettingsTypeDialog_button_cancel;
+	public static String ProblemHover_chooseSettingsTypeDialog_button_project;
+	public static String ProblemHover_chooseSettingsTypeDialog_button_workspace;
+	public static String ProblemHover_chooseSettingsTypeDialog_checkBox_dontShowAgain;
+	public static String ProblemHover_chooseSettingsTypeDialog_message;
+	public static String ProblemHover_chooseSettingsTypeDialog_title;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaHoverMessages.class);
 	}

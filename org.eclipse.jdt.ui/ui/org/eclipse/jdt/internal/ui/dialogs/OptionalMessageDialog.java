@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,24 +42,35 @@ public class OptionalMessageDialog extends MessageDialog {
 
 	public static final int NOT_SHOWN= IDialogConstants.CLIENT_ID + 1;
 	
+	private final String fId;
+	private final String fCheckBoxText;
+
 	private Button fHideDialogCheckBox;
-	private String fId;
 
 	/**
 	 * Opens the dialog but only if the user hasn't choosen to hide it.
 	 * Returns <code>NOT_SHOWN</code> if the dialog was not shown.
 	 */
 	public static int open(String id, Shell parent, String title, Image titleImage, String message, int dialogType, String[] buttonLabels, int defaultButtonIndex) {
+		return open(id, parent, title, titleImage, message, dialogType, buttonLabels, defaultButtonIndex, CHECKBOX_TEXT);
+	}
+
+	public static int open(String id, Shell parent, String title, Image titleImage, String message, int dialogType, String[] buttonLabels, int defaultButtonIndex, String checkboxText) {
 		if (!isDialogEnabled(id))
 			return OptionalMessageDialog.NOT_SHOWN;
 		
-		MessageDialog dialog= new OptionalMessageDialog(id, parent, title, titleImage, message, dialogType, buttonLabels, defaultButtonIndex);
+		MessageDialog dialog= new OptionalMessageDialog(id, parent, title, titleImage, message, dialogType, buttonLabels, defaultButtonIndex, checkboxText);
 		return dialog.open();
 	}
 
 	protected OptionalMessageDialog(String id, Shell parent, String title, Image titleImage, String message, int dialogType, String[] buttonLabels, int defaultButtonIndex) {
+		this(id, parent, title, titleImage, message, dialogType, buttonLabels, defaultButtonIndex, CHECKBOX_TEXT);
+	}
+
+	protected OptionalMessageDialog(String id, Shell parent, String title, Image titleImage, String message, int dialogType, String[] buttonLabels, int defaultButtonIndex, String checkBoxText) {
 		super(parent, title, titleImage, message, dialogType, buttonLabels, defaultButtonIndex);
 		fId= id;
+		fCheckBoxText= checkBoxText;
 	}
 
 	protected Control createCustomArea(Composite parent) {
@@ -72,7 +83,7 @@ public class OptionalMessageDialog extends MessageDialog {
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		fHideDialogCheckBox= new Button(composite, SWT.CHECK | SWT.LEFT);
-		fHideDialogCheckBox.setText(CHECKBOX_TEXT);
+		fHideDialogCheckBox.setText(fCheckBoxText);
 		fHideDialogCheckBox.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				setDialogEnabled(fId, !((Button)e.widget).getSelection());

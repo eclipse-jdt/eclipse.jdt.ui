@@ -35,6 +35,11 @@ public class JavadocProblemsPreferencePage extends PropertyAndPreferencePage {
 	
 	public static final String DATA_SELECT_OPTION_KEY= "select_option_key"; //$NON-NLS-1$
 	public static final String DATA_SELECT_OPTION_QUALIFIER= "select_option_qualifier"; //$NON-NLS-1$
+	
+	/**
+	 * Key for a Boolean value defining if 'use project specific settings' should be enabled or not. 
+	 */
+	public static final String DATA_USE_PROJECT_SPECIFIC_OPTIONS= "use_project_specific_key"; //$NON-NLS-1$
 
 	private JavadocProblemsConfigurationBlock fConfigurationBlock;
 
@@ -42,7 +47,7 @@ public class JavadocProblemsPreferencePage extends PropertyAndPreferencePage {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		//setDescription(PreferencesMessages.getString("JavadocProblemsPreferencePage.description")); //$NON-NLS-1$
 		
-		// only used when page is shown programatically
+		// only used when page is shown programmatically
 		setTitle(PreferencesMessages.JavadocProblemsPreferencePage_title);		 
 	}
 
@@ -147,6 +152,11 @@ public class JavadocProblemsPreferencePage extends PropertyAndPreferencePage {
 		super.applyData(data);
 		if (data instanceof Map && fConfigurationBlock != null) {
 			Map map= (Map) data;
+			Boolean useProjectSpecific= (Boolean) map.get(DATA_USE_PROJECT_SPECIFIC_OPTIONS);
+			if (useProjectSpecific != null) {
+				enableProjectSpecificSettings(useProjectSpecific.booleanValue());
+			}
+			
 			Object key= map.get(DATA_SELECT_OPTION_KEY);
 			Object qualifier= map.get(DATA_SELECT_OPTION_QUALIFIER);
 			if (key instanceof String && qualifier instanceof String) {
