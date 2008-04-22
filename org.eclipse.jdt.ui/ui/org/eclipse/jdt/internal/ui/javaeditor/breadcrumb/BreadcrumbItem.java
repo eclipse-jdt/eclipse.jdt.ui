@@ -17,14 +17,11 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Item;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-
-import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 
 /**
@@ -46,7 +43,6 @@ class BreadcrumbItem extends Item {
 
 	private BreadcrumbItemDetails fDetailsBlock;
 	private BreadcrumbItemDropDown fExpandBlock;
-	private Label fSpacer;
 	private ILabelProvider fToolTipLabelProvider;
 
 	/**
@@ -62,7 +58,7 @@ class BreadcrumbItem extends Item {
 
 		fContainer= new Composite(parent, SWT.NONE);
 		fContainer.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
-		GridLayout layout= new GridLayout(3, false);
+		GridLayout layout= new GridLayout(2, false);
 		layout.marginBottom= 1;
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
@@ -72,11 +68,6 @@ class BreadcrumbItem extends Item {
 		fDetailsBlock= new BreadcrumbItemDetails(this, fContainer);
 
 		fExpandBlock= new BreadcrumbItemDropDown(this, fContainer);
-
-		fSpacer= new Label(fContainer, SWT.VERTICAL | SWT.SEPARATOR);
-		GridData data= new GridData(SWT.BEGINNING, SWT.TOP, false, false);
-		data.heightHint= new PixelConverter(parent).convertHeightInCharsToPixels(1) + 9;
-		fSpacer.setLayoutData(data);
 	}
 
 	/**
@@ -151,7 +142,7 @@ class BreadcrumbItem extends Item {
 	 * @return the width of this item 
 	 */
 	int getWidth() {
-		return fSpacer.computeSize(SWT.DEFAULT, SWT.DEFAULT).x + fDetailsBlock.getWidth() + 15; //5 + 2 * 5 (arrowWidth + 2 * horizontalSpacing)
+		return fDetailsBlock.getWidth() + 16; //5 + 2 * 5 (arrowWidth + 2 * horizontalSpacing)
 	}
 
 	/**
@@ -195,10 +186,8 @@ class BreadcrumbItem extends Item {
 
 		if (fContentProvider.hasChildren(getData())) {
 			fExpandBlock.setEnabled(true);
-			fSpacer.setVisible(true);
 		} else {
 			fExpandBlock.setEnabled(false);
-			fSpacer.setVisible(false);
 		}
 	}
 	
