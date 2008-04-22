@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,17 +13,18 @@ package org.eclipse.jdt.internal.ui.util;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * The default exception handler shows an error dialog when one of its handle methods
@@ -39,6 +40,8 @@ public class ExceptionHandler {
 	/**
 	 * Logs the given exception using the platform's logging mechanism. The exception is
 	 * logged as an error with the error code <code>JavaStatusConstants.INTERNAL_ERROR</code>.
+	 * @param t the throwable to log
+	 * @param message the message
 	 */
 	public static void log(Throwable t, String message) {
 		JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 
@@ -101,7 +104,7 @@ public class ExceptionHandler {
 		if (status != null) {
 			ErrorDialog.openError(shell, title, message, status);
 		} else {
-			displayMessageDialog(e, e.getMessage(), shell, title, message);
+			displayMessageDialog(e.getMessage(), shell, title, message);
 		}
 	}
 
@@ -112,16 +115,16 @@ public class ExceptionHandler {
 		} else {
 			JavaPlugin.log(e);
 			if (e.getMessage() != null && e.getMessage().length() > 0) {
-				displayMessageDialog(e, e.getMessage(), shell, title, message);
+				displayMessageDialog(e.getMessage(), shell, title, message);
 			} else {
-				displayMessageDialog(e, target.getMessage(), shell, title, message);
+				displayMessageDialog(target.getMessage(), shell, title, message);
 			}
 		}
 	}
 
 	//---- Helper methods -----------------------------------------------------------------------
 	
-	private void displayMessageDialog(Throwable t, String exceptionMessage, Shell shell, String title, String message) {
+	private void displayMessageDialog(String exceptionMessage, Shell shell, String title, String message) {
 		StringWriter msg= new StringWriter();
 		if (message != null) {
 			msg.write(message);
