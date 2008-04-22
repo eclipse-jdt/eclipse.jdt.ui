@@ -875,8 +875,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		IJavaElement input= null; //determineInputElement();
 		if (fMemento != null) {
 			restoreState(fMemento, input);
-		} else if (input != null) {
-			setInputElement(input);
+		//} else if (input != null) {
+		//	setInputElement(input);
 		} else {
 			setViewerVisibility(false);
 		}
