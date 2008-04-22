@@ -337,6 +337,8 @@ public final class ActionMessages extends NLS {
 	public static String RefreshAction_locationDeleted_message;
 	public static String ModifyParameterAction_problem_title;
 	public static String ModifyParameterAction_problem_message;
+	public static String MultiSortMembersAction_noElementsToSortDialog_message;
+	public static String MultiSortMembersAction_noElementsToSortDialog_title;
 	public static String ActionUtil_notOnBuildPath_title;
 	public static String ActionUtil_notOnBuildPath_message;
 	public static String ActionUtil_notOnBuildPath_resource_message;

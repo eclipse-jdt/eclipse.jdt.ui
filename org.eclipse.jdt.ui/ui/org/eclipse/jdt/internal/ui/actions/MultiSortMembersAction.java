@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.ui.actions;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbenchSite;
@@ -61,8 +62,10 @@ public class MultiSortMembersAction extends CleanUpAction {
 	 */
 	protected ICleanUp[] createCleanUps(ICompilationUnit[] units) {
 		try {
-	        if (!hasMembersToSort(units))
+	        if (!hasMembersToSort(units)) {
+				MessageDialog.openInformation(getShell(), ActionMessages.MultiSortMembersAction_noElementsToSortDialog_title, ActionMessages.MultiSortMembersAction_noElementsToSortDialog_message);
 	        	return null;
+	        }
         } catch (JavaModelException e) {
         	JavaPlugin.log(e);
 	        return null;
