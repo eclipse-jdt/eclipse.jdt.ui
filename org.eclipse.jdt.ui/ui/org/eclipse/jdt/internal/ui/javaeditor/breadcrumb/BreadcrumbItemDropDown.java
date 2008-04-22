@@ -416,7 +416,7 @@ class BreadcrumbItemDropDown {
 	private void setShellBounds(Shell shell) {
 		Rectangle rect= fParentComposite.getBounds();
 		Rectangle toolbarBounds= fToolBar.getBounds();
-		Point pt= new Point(toolbarBounds.x + toolbarBounds.width - 2, rect.y + rect.height);
+		Point pt= new Point(toolbarBounds.x - 7, rect.y + rect.height);
 		pt= fParentComposite.toDisplay(pt);
 
 		shell.pack();
