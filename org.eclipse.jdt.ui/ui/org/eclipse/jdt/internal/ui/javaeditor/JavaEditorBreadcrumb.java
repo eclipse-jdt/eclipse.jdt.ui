@@ -32,7 +32,9 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jface.text.ITextSelection;
 
@@ -51,6 +53,7 @@ import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -60,6 +63,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
+import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
@@ -167,17 +171,28 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			return contentProvider instanceof IWorkingCopyProvider && !((IWorkingCopyProvider) contentProvider).providesWorkingCopies();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.BreadcrumbViewer#createDropDownContentProvider(java.lang.Object)
+		/* 
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.BreadcrumbViewer#configureDropDownViewer(org.eclipse.jface.viewers.TreeViewer, java.lang.Object)
 		 */
-		public ITreeContentProvider createDropDownContentProvider(Object root) {
-			return createContentProvider();
+		public void configureDropDownViewer(TreeViewer viewer, Object input) {
+			viewer.setContentProvider(createContentProvider());
+			viewer.setLabelProvider(createDropDownLabelProvider());
+			viewer.setComparator(new JavaElementComparator());
+			viewer.addFilter(new ViewerFilter() {
+				public boolean select(Viewer viewer1, Object parentElement, Object element) {
+					if (element instanceof IMember) {
+						if (((IMember) element).getElementName().startsWith("<")) { //$NON-NLS-1$
+							// filter out <clinit>
+							return false;
+						}
+					}
+
+					return true;
+				}
+			});
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.BreadcrumbViewer#createDropDownLabelProvider(java.lang.Object)
-		 */
-		public ILabelProvider createDropDownLabelProvider(Object root) {
+		private ILabelProvider createDropDownLabelProvider() {
 			final AppearanceAwareLabelProvider result= new AppearanceAwareLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.F_APP_TYPE_SIGNATURE
 					| JavaElementLabels.ALL_CATEGORY, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
 

@@ -46,6 +46,7 @@ import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerCell;
 
 import org.eclipse.ui.forms.FormColors;
@@ -143,22 +144,14 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	}
 	
 	/**
-	 * Return a new tree content provider which will be used for the drop
-	 * down menu for the given root element.
+	 * Configure the given drop down viewer. The given input is used for the viewers
+	 * input. Clients must at least set the label and the content provider
+	 * for the viewer.
 	 * 
-	 * @param root the root element of the drop down menu
-	 * @return a new tree content provider
+	 * @param viewer the viewer to configure
+	 * @param input the input for the viewer.
 	 */
-	public abstract ITreeContentProvider createDropDownContentProvider(Object root);
-
-	/**
-	 * Return a new label provider which will be used for the drop
-	 * down menu for the given root element.
-	 * 
-	 * @param root the root element of the drop down menu
-	 * @return a new label provider
-	 */
-	public abstract ILabelProvider createDropDownLabelProvider(Object root);	
+	protected abstract void configureDropDownViewer(TreeViewer viewer, Object input);
 
 	/**
 	 * The tool tip to use for the tool tip labels. <code>null</code>

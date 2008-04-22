@@ -49,8 +49,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 
-import org.eclipse.jdt.ui.JavaElementComparator;
-
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
@@ -171,9 +169,7 @@ class BreadcrumbItemDropDown {
 		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Object input= fParent.getData();
-		fDropDownViewer.setContentProvider(fParent.getViewer().createDropDownContentProvider(input));
-		fDropDownViewer.setLabelProvider(fParent.getViewer().createDropDownLabelProvider(input));
-		fDropDownViewer.setComparator(new JavaElementComparator());
+		fParent.getViewer().configureDropDownViewer(fDropDownViewer, input);
 		fDropDownViewer.setInput(input);
 
 		setShellBounds(fShell);
