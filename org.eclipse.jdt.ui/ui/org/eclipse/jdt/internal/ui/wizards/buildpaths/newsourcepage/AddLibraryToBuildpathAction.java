@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,15 +26,12 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -56,15 +53,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathContainerWizard;
 public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 
 	public AddLibraryToBuildpathAction(IWorkbenchSite site) {
-		this(site, null, PlatformUI.getWorkbench().getProgressService());
-	}
-	
-	public AddLibraryToBuildpathAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
-		this(null, selectionTarget, context);
-    }
-
-	private AddLibraryToBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
-		super(site, selectionTarget, BuildpathModifierAction.ADD_LIB_TO_BP);
+		super(site, null, BuildpathModifierAction.ADD_LIB_TO_BP);
 
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_label);
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_LIBRARY);
