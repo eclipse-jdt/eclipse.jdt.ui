@@ -398,11 +398,14 @@ class BreadcrumbItemDetails {
 	private void addElementListener(Control control) {
 		control.addMouseListener(new MouseListener() {
 			public void mouseDoubleClick(MouseEvent e) {
-				fParent.getViewer().fireDoubleClick();
 			}
 
 			public void mouseDown(MouseEvent e) {
-				fParent.getViewer().selectItem(fParent);
+				BreadcrumbViewer viewer= fParent.getViewer();
+				viewer.selectItem(fParent);
+				if (e.button == 1) {
+					viewer.fireDoubleClick();
+				}
 			}
 
 			public void mouseUp(MouseEvent e) {
