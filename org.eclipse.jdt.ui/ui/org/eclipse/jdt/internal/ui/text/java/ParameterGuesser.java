@@ -61,9 +61,10 @@ public class ParameterGuesser {
 		 */
 		public static final int LOCAL= 0;
 		public static final int FIELD= 1;
-		public static final int METHOD= 1;
 		public static final int INHERITED_FIELD= 2;
-		public static final int INHERITED_METHOD= 3;
+		public static final int METHOD= 3;
+		public static final int INHERITED_METHOD= 4;
+		public static final int LITERALS= 5;
 
 		public final String qualifiedTypeName;
 		public final String name;
@@ -142,24 +143,24 @@ public class ParameterGuesser {
 			String fullyQualifiedName= currentType.getFullyQualifiedName('.');
 			if (fullyQualifiedName.equals(expectedType)) {
 				ImageDescriptor desc= new JavaElementImageDescriptor(JavaPluginImages.DESC_FIELD_PUBLIC, JavaElementImageDescriptor.FINAL | JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);
-				res.add(new Variable(fullyQualifiedName, "this", Variable.FIELD, false, res.size(), new char[] {'.'}, desc));  //$NON-NLS-1$
+				res.add(new Variable(fullyQualifiedName, "this", Variable.LITERALS, false, res.size(), new char[] {'.'}, desc));  //$NON-NLS-1$
 			}
 		}
 		
 		Code primitiveTypeCode= getPrimitiveTypeCode(expectedType);
 		if (primitiveTypeCode == null) {
 			// add 'null'
-			res.add(new Variable(expectedType, "null", Variable.FIELD, false, res.size(), NO_TRIGGERS, null));  //$NON-NLS-1$
+			res.add(new Variable(expectedType, "null", Variable.LITERALS, false, res.size(), NO_TRIGGERS, null));  //$NON-NLS-1$
 		} else {
 			String typeName= primitiveTypeCode.toString();
 			boolean isAutoboxing= !typeName.equals(expectedType);
 			if (primitiveTypeCode == PrimitiveType.BOOLEAN) {
 				// add 'true', 'false'
-				res.add(new Variable(typeName, "true", Variable.FIELD, isAutoboxing, res.size(), NO_TRIGGERS, null)); //$NON-NLS-1$
-				res.add(new Variable(typeName, "false", Variable.FIELD, isAutoboxing, res.size(), NO_TRIGGERS, null)); //$NON-NLS-1$
+				res.add(new Variable(typeName, "true", Variable.LITERALS, isAutoboxing, res.size(), NO_TRIGGERS, null)); //$NON-NLS-1$
+				res.add(new Variable(typeName, "false", Variable.LITERALS, isAutoboxing, res.size(), NO_TRIGGERS, null)); //$NON-NLS-1$
 			} else {
 				// add 0
-				res.add(new Variable(typeName, "0", Variable.FIELD, isAutoboxing, res.size(), NO_TRIGGERS, null));   //$NON-NLS-1$
+				res.add(new Variable(typeName, "0", Variable.LITERALS, isAutoboxing, res.size(), NO_TRIGGERS, null));   //$NON-NLS-1$
 			}
 		}
 		return res;

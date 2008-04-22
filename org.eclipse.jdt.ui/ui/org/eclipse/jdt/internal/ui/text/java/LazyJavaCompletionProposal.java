@@ -113,6 +113,10 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 		Assert.isNotNull(context.getCoreContext());
 		fProposal= proposal;
 	}
+	
+	protected CompletionProposal getProposal() {
+		return fProposal;
+	}
 
 	/*
 	 * @see ICompletionProposalExtension#getTriggerCharacters()

@@ -63,20 +63,14 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 	 *  
 	 * @param proposal the original completion proposal
 	 * @param context the currrent context
+	 * @param fillBestGuess if set, the best guess will be filled in
 	 * 
 	 * @return a proposal or <code>null</code>
 	 */
-	public static ParameterGuessingProposal createProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
+	public static ParameterGuessingProposal createProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context, boolean fillBestGuess) {
 		CompletionContext coreContext= context.getCoreContext();
  		if (coreContext != null && coreContext.isExtended()) {
-			char[] signature= SignatureUtil.fix83600(proposal.getSignature());
-			char[][] types= Signature.getParameterTypes(signature);
-			
-			IJavaElement[][] assignableElements= new IJavaElement[types.length][];
-			for (int i= 0; i < types.length; i++) {
-				assignableElements[i]= coreContext.getVisibleElements(new String(types[i]));
-			}
-			return new ParameterGuessingProposal(proposal, context, assignableElements, coreContext.getEnclosingElement());
+			return new ParameterGuessingProposal(proposal, context, coreContext, fillBestGuess);
  		}
  		return null;
 	}
@@ -92,15 +86,30 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 	private IRegion fSelectedRegion; // initialized by apply()
 	private IPositionUpdater fUpdater;
 
-	private final IJavaElement[][] fAssignableElements;
-	private final IJavaElement fEnclosingElement;
+	private final boolean fFillBestGuess;
 
- 	private ParameterGuessingProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context, IJavaElement[][] assignableElements, IJavaElement enclosingElement) {
+	private final CompletionContext fCoreContext;
+
+ 	private ParameterGuessingProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context, CompletionContext coreContext, boolean fillBestGuess) {
  		super(proposal, context);
- 		
- 		fAssignableElements= assignableElements;
- 		fEnclosingElement= enclosingElement;
+		fCoreContext= coreContext;
+		fFillBestGuess= fillBestGuess;
  	}
+
+	private IJavaElement getEnclosingElement() {
+		return fCoreContext.getEnclosingElement();
+	}
+
+	private IJavaElement[][] getAssignableElements() {
+		char[] signature= SignatureUtil.fix83600(getProposal().getSignature());
+		char[][] types= Signature.getParameterTypes(signature);
+		
+		IJavaElement[][] assignableElements= new IJavaElement[types.length][];
+		for (int i= 0; i < types.length; i++) {
+			assignableElements[i]= fCoreContext.getVisibleElements(new String(types[i]));
+		}
+		return assignableElements;
+	}
 
 	/*
 	 * @see ICompletionProposalExtension#apply(IDocument, char)
@@ -210,7 +219,9 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 		if (prefs.afterOpeningParen)
 			buffer.append(SPACE);
 		
-		fChoices= guessParameters();
+		char[][] parameterNames= fProposal.findParameterNames(null);
+		
+		fChoices= guessParameters(parameterNames);
 		int count= fChoices.length;
 		int replacementOffset= getReplacementOffset();
 		
@@ -224,10 +235,12 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 			}
 
 			ICompletionProposal proposal= fChoices[i][0];
-			String argument= proposal.getDisplayString();
+			String argument= fFillBestGuess ? proposal.getDisplayString() : new String(parameterNames[i]);
+			
 			Position position= fPositions[i];
 			position.setOffset(replacementOffset + buffer.length());
 			position.setLength(argument.length());
+			
 			if (proposal instanceof JavaCompletionProposal) // handle the "unknown" case where we only insert a proposal.
 				((JavaCompletionProposal) proposal).setReplacementOffset(replacementOffset + buffer.length());
 			buffer.append(argument);
@@ -255,7 +268,7 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 			return null;
 	}
 
-	private ICompletionProposal[][] guessParameters() throws JavaModelException {
+	private ICompletionProposal[][] guessParameters(char[][] parameterNames) throws JavaModelException {
 		// find matches in reverse order.  Do this because people tend to declare the variable meant for the last
 		// parameter last.  That is, local variables for the last parameter in the method completion are more
 		// likely to be closer to the point of code completion. As an example consider a "delegation" completion:
@@ -267,19 +280,19 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 		// The other consideration is giving preference to variables that have not previously been used in this
 		// code completion (which avoids "someOtherObject.yourMethod(param1, param1, param1)";
 		
-		char[][] parameterNames= fProposal.findParameterNames(null);
 		int count= parameterNames.length;
 		fPositions= new Position[count];
 		fChoices= new ICompletionProposal[count][];
 
 		String[] parameterTypes= getParameterTypes();
-		ParameterGuesser guesser= new ParameterGuesser(fEnclosingElement);
+		ParameterGuesser guesser= new ParameterGuesser(getEnclosingElement());
+		IJavaElement[][] assignableElements= getAssignableElements();
 		
 		for (int i= count - 1; i >= 0; i--) {
 			String paramName= new String(parameterNames[i]);
 			Position position= new Position(0,0);
 			
-			ICompletionProposal[] argumentProposals= guesser.parameterProposals(parameterTypes[i], paramName, position, fAssignableElements[i]);
+			ICompletionProposal[] argumentProposals= guesser.parameterProposals(parameterTypes[i], paramName, position, assignableElements[i]);
 			if (argumentProposals.length == 0)
 				argumentProposals= new ICompletionProposal[] {new JavaCompletionProposal(paramName, 0, paramName.length(), null, paramName, 0)};
 			

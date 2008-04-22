@@ -72,9 +72,7 @@ public final class FillArgumentNamesCompletionProposalCollector extends Completi
 			return super.createJavaCompletionProposal(methodProposal);
 
 		LazyJavaCompletionProposal proposal= null;
-		if (fIsGuessArguments) {
-			proposal= ParameterGuessingProposal.createProposal(methodProposal, getInvocationContext());
-		}
+		proposal= ParameterGuessingProposal.createProposal(methodProposal, getInvocationContext(), fIsGuessArguments);
 		if (proposal == null) {
 			proposal= new FilledArgumentNamesMethodProposal(methodProposal, getInvocationContext());
 		}
