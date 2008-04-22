@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -222,13 +222,16 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			data.horizontalSpan= 2;
 			label.setLayoutData(data);
 
-			fLeaveDelegateCheckBox= DelegateUIHelper.generateLeaveDelegateCheckbox(control, getRefactoring(), false);
+			Composite delegateComposite= new Composite(control, SWT.NONE);
+			delegateComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+			delegateComposite.setLayout(SWTUtil.newLayoutNoMargins(1));
+			
+			fLeaveDelegateCheckBox= DelegateUIHelper.generateLeaveDelegateCheckbox(delegateComposite, getRefactoring(), false);
 			if (fLeaveDelegateCheckBox != null) {
-				fDeprecateDelegateCheckBox= new Button(control, SWT.CHECK);
+				fDeprecateDelegateCheckBox= new Button(delegateComposite, SWT.CHECK);
 				data= new GridData();
 				data.horizontalAlignment= GridData.FILL;
 				data.horizontalIndent= (layout.marginWidth + fDeprecateDelegateCheckBox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
-				data.horizontalSpan= 2;
 				fDeprecateDelegateCheckBox.setLayoutData(data);
 				fDeprecateDelegateCheckBox.setText(DelegateUIHelper.getDeprecateDelegateCheckBoxTitle());
 				fDeprecateDelegateCheckBox.setSelection(DelegateUIHelper.loadDeprecateDelegateSetting(fProcessor));
