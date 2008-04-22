@@ -98,6 +98,7 @@ import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -529,9 +530,11 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					} else
 						fRewrite.replace(node, ast.newThisExpression(), null);
 					return false;
+				} else {
+					expression.accept(this);
+					return false;
 				}
-			}
-			if (expression instanceof FieldAccess) {
+			} else if (expression instanceof FieldAccess) {
 				final FieldAccess access= (FieldAccess) expression;
 				final IBinding binding= access.getName().resolveBinding();
 				if (access.getExpression() instanceof ThisExpression && Bindings.equals(fTarget, binding)) {
@@ -540,11 +543,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					return false;
 				}
 			} else if (expression != null) {
-				final IMethodBinding method= fDeclaration.resolveBinding();
-				if (variable != null && method != null && !JdtFlags.isStatic(variable) && Bindings.equals(method.getDeclaringClass(), variable.getDeclaringClass())) {
-					fRewrite.replace(expression, ast.newSimpleName(fTargetName), null);
-					return false;
-				}
+				expression.accept(this);
+				return false;
 			}
 			return true;
 		}
@@ -598,11 +598,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			if (binding instanceof ITypeBinding) {
 				final ITypeBinding type= (ITypeBinding) binding;
 				if (type.isClass() && type.getDeclaringClass() != null) {
-					final String name= fTargetRewrite.getImportRewrite().addImport(type);
-					if (name != null && name.length() > 0) {
-						fRewrite.replace(node, ASTNodeFactory.newName(node.getAST(), name), null);
-						return false;
-					}
+					final Type newType= fTargetRewrite.getImportRewrite().addImport(type, node.getAST());
+					fRewrite.replace(node, newType, null);
+					return false;
 				}
 			}
 			binding= node.getQualifier().resolveBinding();
@@ -610,7 +608,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				fRewrite.replace(node, getFieldReference(node.getName(), fRewrite), null);
 				return false;
 			}
-			return true;
+			node.getQualifier().accept(this);
+			return false;
 		}
 
 		public final boolean visit(final SimpleName node) {

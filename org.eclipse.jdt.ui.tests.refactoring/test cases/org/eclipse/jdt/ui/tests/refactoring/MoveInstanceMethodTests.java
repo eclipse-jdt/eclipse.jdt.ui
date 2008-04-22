@@ -420,9 +420,19 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		helper1(new String[] { "p.A", "p.B" }, "p.A", 4, 17, 4, 42, FIELD, "destination", true, true);
 	}
 	
-	// Test problem with parameter order (bug 165697 )
+	// Test problem with parameter order (bug 165697)
 	public void test38() throws Exception {
 		helper1(new String[] { "p.A", "p.B" }, "p.A", 4, 17, 4, 35, FIELD, "target", true, true);
+	}
+	
+	// Test problem with qualified accesses (bug 149316)
+	public void test39() throws Exception {
+		helper1(new String[] { "p.A", "p.B" }, "p.A", 4, 13, 4, 25, PARAMETER, "p", true, true);
+	}
+	
+	// Test problem with qualified accesses (bug 149316)
+	public void test40() throws Exception {
+		helper1(new String[] { "p.A", "p.B" }, "p.A", 4, 13, 4, 25, PARAMETER, "p", true, true);
 	}
 
 	// Move mA1 to field fB, do not inline delegator
