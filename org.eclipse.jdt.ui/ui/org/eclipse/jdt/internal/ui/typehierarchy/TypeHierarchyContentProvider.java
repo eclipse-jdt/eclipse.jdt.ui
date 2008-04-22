@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,6 +70,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	 * When member filtering is enabled, the hierarchy contains only types that contain
 	 * an implementation of one of the filter members and the members themself.
 	 * The hierarchy can be empty as well.
+	 * @param memberFilter the new member filter
 	 */
 	public final void setMemberFilter(IMember[] memberFilter) {
 		fMemberFilter= memberFilter;
@@ -120,6 +121,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 
 	/**
 	 * The members to filter or <code>null</code> if member filtering is disabled.
+	 * @return the member filter
 	 */
 	public IMember[] getMemberFilter() {
 		return fMemberFilter;
@@ -127,6 +129,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	
 	/**
 	 * Sets a filter representing a working set or <code>null</code> if working sets are disabled.
+	 * @param filter the filter
 	 */
 	public void setWorkingSetFilter(ViewerFilter filter) {
 		fWorkingSetFilter= filter;
@@ -179,11 +182,15 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	
 	/**
 	 * Hook to overwrite. Filter will be applied on the returned types
+	 * @param type the type
+	 * @param res all types in the hierarchy of the given type
 	 */	
 	protected abstract void getTypesInHierarchy(IType type, List res);
 	
 	/**
 	 * Hook to overwrite. Return null if parent is ambiguous.
+	 * @param type the type
+	 * @return the parent type
 	 */	
 	protected abstract IType getParentType(IType type);	
 	

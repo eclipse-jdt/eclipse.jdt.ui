@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -129,6 +129,7 @@ public class ElementValidator {
 	 * check fails
 	 * @param title a dialog's title used to present a dialog to the user if the
 	 * check fails
+	 * @param editor specifies if we are in the editor
 	 * @return boolean <code>true</code> if the element passed the checks.
 	 * Otherwise <code>false</code> is returned
 	 * 
@@ -152,6 +153,7 @@ public class ElementValidator {
 	 * check fails
 	 * @param title a dialog's title used to present a dialog to the user if the
 	 * check fails
+	 * @param editor specifies if we are in the editor
 	 * @return boolean <code>true</code> if all elements pass the checks.
 	 * Otherwise <code>false</code> is returned
 	 * 

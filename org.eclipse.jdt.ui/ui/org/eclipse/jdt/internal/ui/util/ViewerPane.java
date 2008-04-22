@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ public class ViewerPane extends ViewForm {
 	
 	/**
 	 * Sets the receiver's title text.
+	 * @param label the label
 	 */
 	public void setText(String label) {
 		CLabel cl= (CLabel) getTopLeft();
@@ -57,6 +58,7 @@ public class ViewerPane extends ViewForm {
 	
 	/**
 	 * Sets the receiver's title image.
+	 * @param image the image
 	 */
 	public void setImage(Image image) {
 		CLabel cl= (CLabel) getTopLeft();

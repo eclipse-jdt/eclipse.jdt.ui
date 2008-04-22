@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.util;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -134,6 +133,8 @@ public class OpenTypeHierarchyUtil {
 
 	/**
 	 * Converts the input to a possible input candidates
+	 * @param input input
+	 * @return the possible candidates
 	 */	
 	public static IJavaElement[] getCandidates(Object input) {
 		if (!(input instanceof IJavaElement)) {

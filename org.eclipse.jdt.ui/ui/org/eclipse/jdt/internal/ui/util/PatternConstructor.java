@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,6 +71,8 @@ public class PatternConstructor {
 	/**
 	 * Translates a StringMatcher pattern (using '*' and '?') to a regex pattern string
 	 * @param stringMatcherPattern a pattern using '*' and '?'
+	 * @param out string buffer
+	 * @return string buffer
 	 */
 	private static StringBuffer asRegEx(String stringMatcherPattern, StringBuffer out) {	
 		boolean escaped= false;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,9 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -29,15 +32,12 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class MainMethodSearchEngine{
 	
@@ -90,6 +90,11 @@ public class MainMethodSearchEngine{
 	 * Searches for all main methods in the given scope.
 	 * Valid styles are IJavaElementSearchConstants.CONSIDER_BINARIES and
 	 * IJavaElementSearchConstants.CONSIDER_EXTERNAL_JARS
+	 * @param pm progress monitor
+	 * @param scope the search scope
+	 * @param style search style constants (see {@link IJavaElementSearchConstants})
+	 * @return the types found
+	 * @throws CoreException 
 	 */	
 	public IType[] searchMainMethods(IProgressMonitor pm, IJavaSearchScope scope, int style) throws CoreException {
 		List typesFound= new ArrayList(200);
@@ -108,6 +113,12 @@ public class MainMethodSearchEngine{
 	 * Searches for all main methods in the given scope.
 	 * Valid styles are IJavaElementSearchConstants.CONSIDER_BINARIES and
 	 * IJavaElementSearchConstants.CONSIDER_EXTERNAL_JARS
+	 * @param context runnable context
+	 * @param scope the search scope
+	 * @param style style search style constants (see {@link IJavaElementSearchConstants})
+	 * @return the types found
+	 * @throws InvocationTargetException 
+	 * @throws InterruptedException 
 	 */
 	public IType[] searchMainMethods(IRunnableContext context, final IJavaSearchScope scope, final int style) throws InvocationTargetException, InterruptedException  {
 		int allFlags=  IJavaElementSearchConstants.CONSIDER_EXTERNAL_JARS | IJavaElementSearchConstants.CONSIDER_BINARIES;
