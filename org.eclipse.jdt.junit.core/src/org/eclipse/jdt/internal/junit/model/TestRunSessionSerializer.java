@@ -15,7 +15,9 @@ package org.eclipse.jdt.internal.junit.model;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -47,7 +49,7 @@ public class TestRunSessionSerializer implements XMLReader {
 	private ContentHandler fHandler;
 	private ErrorHandler fErrorHandler;
 	
-	private final NumberFormat timeFormat= new DecimalFormat("0.0##"); //$NON-NLS-1$ // not localized, parseable by Double.parseDouble(..)
+	private final NumberFormat timeFormat= new DecimalFormat("0.0##", new DecimalFormatSymbols(Locale.US)); //$NON-NLS-1$ // not localized, parseable by Double.parseDouble(..)
 	
 	/**
 	 * @param testRunSession the test run session to serialize
