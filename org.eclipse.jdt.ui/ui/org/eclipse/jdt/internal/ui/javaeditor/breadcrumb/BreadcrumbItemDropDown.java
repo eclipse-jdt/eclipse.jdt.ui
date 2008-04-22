@@ -52,6 +52,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jdt.ui.JavaElementComparator;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 
 /**
@@ -81,6 +82,7 @@ class BreadcrumbItemDropDown {
 		
 		fToolBar= new ToolBar(composite, SWT.FLAT);
 		fToolBar.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
+		SWTUtil.setAccessibilityText(fToolBar, BreadcrumbMessages.BreadcrumbItemDropDown_showDropDownMenu_action_toolTip);
 		ToolBarManager manager= new ToolBarManager(fToolBar);
 
 		Action showDropDownMenuAction= new Action(null, SWT.NONE) {

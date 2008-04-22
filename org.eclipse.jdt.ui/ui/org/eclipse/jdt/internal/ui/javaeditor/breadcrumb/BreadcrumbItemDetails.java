@@ -30,6 +30,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
 
 /**
  * The label and icon part of the breadcrumb item.
@@ -150,6 +152,8 @@ class BreadcrumbItemDetails {
 	public void setText(String text) {
 		if (text != null) {
 			fElementText.setText(text);
+			SWTUtil.setAccessibilityText(fTextComposite, text);
+			SWTUtil.setAccessibilityText(fImageComposite, text);
 		} else {
 			fElementText.setText(""); //$NON-NLS-1$
 		}
