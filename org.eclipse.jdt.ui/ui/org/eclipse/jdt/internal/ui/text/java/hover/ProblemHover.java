@@ -15,6 +15,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
@@ -25,21 +29,28 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.ISourceViewer;
 
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.spelling.SpellingAnnotation;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.preferences.JavadocProblemsPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesPreferencePage;
@@ -58,7 +69,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
  * @since 3.0
  */
 public class ProblemHover extends AbstractAnnotationHover {
-	
+
 	/**
 	 * Action to configure the problem severity of a compiler option.
 	 * 
@@ -97,15 +108,17 @@ public class ProblemHover extends AbstractAnnotationHover {
 				data.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_KEY, fOptionId);
 				data.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_QUALIFIER, JavaCore.PLUGIN_ID);
 			}
-			
+
 			fInfoControl.dispose(); //FIXME: should have protocol to hide, rather than dispose
-			
+
 			Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 			PreferencesUtil.createPropertyDialogOn(shell, fProject, propertyPageId, null, data).open();
 		}
 	}
-	
+
 	protected static class ProblemInfo extends AnnotationInfo {
+
+		private static final ICompletionProposal[] NO_PROPOSALS= new ICompletionProposal[0];
 
 		public ProblemInfo(Annotation annotation, Position position, ITextViewer textViewer) {
 			super(annotation, position, textViewer);
@@ -115,15 +128,22 @@ public class ProblemHover extends AbstractAnnotationHover {
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractAnnotationHover.AnnotationInfo#getCompletionProposals()
 		 */
 		public ICompletionProposal[] getCompletionProposals() {
-			if (!(annotation instanceof IJavaAnnotation))
-				return new ICompletionProposal[0];
-				
-			ProblemLocation location= new ProblemLocation(position.getOffset(), position.getLength(), (IJavaAnnotation) annotation);
-			ICompilationUnit cu= ((IJavaAnnotation)annotation).getCompilationUnit();
+			if (annotation instanceof IJavaAnnotation) {
+				return getJavaAnnotationFixes((IJavaAnnotation) annotation);
+			} else if (annotation instanceof MarkerAnnotation) {
+				return getMarkerAnnotationFixes((MarkerAnnotation) annotation);
+			}
+
+			return NO_PROPOSALS;
+		}
+
+		private ICompletionProposal[] getJavaAnnotationFixes(IJavaAnnotation javaAnnotation) {
+			ProblemLocation location= new ProblemLocation(position.getOffset(), position.getLength(), javaAnnotation);
+			ICompilationUnit cu= javaAnnotation.getCompilationUnit();
 
 			IInvocationContext context= new AssistContext(cu, location.getOffset(), location.getLength());
-			if (!SpellingAnnotation.TYPE.equals(annotation.getType()) && !hasProblem(context.getASTRoot().getProblems(), location))
-				return new ICompletionProposal[0];
+			if (!SpellingAnnotation.TYPE.equals(javaAnnotation.getType()) && !hasProblem(context.getASTRoot().getProblems(), location))
+				return NO_PROPOSALS;
 
 			ArrayList proposals= new ArrayList();
 			JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
@@ -141,15 +161,55 @@ public class ProblemHover extends AbstractAnnotationHover {
 			return false;
 		}
 
+		private ICompletionProposal[] getMarkerAnnotationFixes(MarkerAnnotation markerAnnotation) {
+			if (markerAnnotation.isQuickFixableStateSet() && !markerAnnotation.isQuickFixable())
+				return NO_PROPOSALS;
+
+			IMarker marker= markerAnnotation.getMarker();
+
+			ICompilationUnit cu= getCompilationUnit(marker);
+			if (cu == null)
+				return NO_PROPOSALS;
+
+			IEditorInput input= EditorUtility.getEditorInput(cu);
+			if (input == null)
+				return NO_PROPOSALS;
+
+			IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(input);
+			if (model == null)
+				return NO_PROPOSALS;
+			
+			ISourceViewer sourceViewer= null;
+			if (viewer instanceof ISourceViewer)
+				sourceViewer= (ISourceViewer) viewer;
+
+			AssistContext context= new AssistContext(cu, sourceViewer, position.getOffset(), position.getLength());
+
+			ArrayList proposals= new ArrayList();
+			JavaCorrectionProcessor.collectProposals(context, model, new Annotation[] { markerAnnotation }, true, false, proposals);
+
+			return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+		}
+
+		private static ICompilationUnit getCompilationUnit(IMarker marker) {
+			IResource res= marker.getResource();
+			if (res instanceof IFile && res.isAccessible()) {
+				IJavaElement element= JavaCore.create((IFile) res);
+				if (element instanceof ICompilationUnit)
+					return (ICompilationUnit) element;
+			}
+			return null;
+		}
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractAnnotationHover.AnnotationInfo#fillToolBar(org.eclipse.jface.action.ToolBarManager)
 		 */
 		public void fillToolBar(ToolBarManager manager, IInformationControl infoControl) {
 			super.fillToolBar(manager, infoControl);
-			
 			if (!(annotation instanceof IJavaAnnotation))
 				return;
-			IJavaAnnotation javaAnnotation= (IJavaAnnotation)annotation;
+			
+			IJavaAnnotation javaAnnotation= (IJavaAnnotation) annotation;
 
 			String optionId= JavaCore.getOptionForConfigurableSeverity(javaAnnotation.getId());
 			if (optionId != null) {
