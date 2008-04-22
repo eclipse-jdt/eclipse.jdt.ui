@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -755,6 +755,89 @@ public class NLSSourceModifierTest extends TestCase {
         
         assertEquals(expected, accessorDoc.get());
     }
+    
+    //https://bugs.eclipse.org/bugs/show_bug.cgi?id=223865
+	public void testReplacementOfKeysBug223865() throws Exception {
+
+		String klazz= 
+			"package test;\n" + 
+			"public class Test {\n" + 
+			"	private String str=Accessor.key_0;\n" + 
+			"	private String str=Accessor.key_1;\n" + 
+			"}\n";
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import org.eclipse.osgi.util.NLS;\n");
+		buf.append("public class Accessor extends NLS {\n");
+		buf.append("    private static final String BUNDLE_NAME = \"test.test\"; //$NON-NLS-1$\n");
+		buf.append("\n");
+		buf.append("    private Accessor() {\n");
+		buf.append("    }\n");
+		buf.append("    static {\n");
+		buf.append("        // initialize resource bundle\n");
+		buf.append("        NLS.initializeMessages(BUNDLE_NAME, Accessor.class);\n");
+		buf.append("    }\n");
+		buf.append("    public static String key_0;\n");
+		buf.append("    public static String key_1;\n");
+		buf.append("}\n");
+		String accessorKlazz= buf.toString();
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		ICompilationUnit accessorCu= pack.createCompilationUnit("Accessor.java", accessorKlazz, false, null);
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
+
+		IPackageFragment nlspack= fSourceFolder.createPackageFragment("org.eclipse.osgi.util", false, null);
+		nlspack.createCompilationUnit("NLS.java", "public class NLS {}", false, null);
+
+		CompilationUnit astRoot= createAST(cu);
+		NLSSubstitution[] nlsSubstitutions= getSubstitutions(cu, astRoot);
+		nlsSubstitutions[0].setValue("whatever");
+		nlsSubstitutions[0].setInitialValue("whatever");
+		nlsSubstitutions[0].setState(NLSSubstitution.EXTERNALIZED);
+		nlsSubstitutions[0].setPrefix("key_");
+		nlsSubstitutions[0].setKey("key_0");
+		nlsSubstitutions[1].setValue("whatever");
+		nlsSubstitutions[1].setInitialValue("whatever");
+		nlsSubstitutions[1].setState(NLSSubstitution.EXTERNALIZED);
+		nlsSubstitutions[1].setPrefix("key_");
+		nlsSubstitutions[1].setKey("key_0");
+
+		String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
+		TextChange change= (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor", true);
+
+		Document doc= new Document(klazz);
+		change.getEdit().apply(doc);
+
+		assertEquals(
+				"package test;\n" + 
+				"public class Test {\n" + 
+				"	private String str=Accessor.key_0;\n" + 
+				"	private String str=Accessor.key_0;\n" + 
+				"}\n", doc.get());
+
+		TextChange accessorChange= (TextChange) AccessorClassModifier.create(accessorCu, nlsSubstitutions);
+		Document accessorDoc= new Document(accessorKlazz);
+		accessorChange.getEdit().apply(accessorDoc);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import org.eclipse.osgi.util.NLS;\n");
+		buf.append("public class Accessor extends NLS {\n");
+		buf.append("    private static final String BUNDLE_NAME = \"test.test\"; //$NON-NLS-1$\n");
+		buf.append("\n");
+		buf.append("    private Accessor() {\n");
+		buf.append("    }\n");
+		buf.append("    static {\n");
+		buf.append("        // initialize resource bundle\n");
+		buf.append("        NLS.initializeMessages(BUNDLE_NAME, Accessor.class);\n");
+		buf.append("    }\n");
+		buf.append("    public static String key_0;\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertEquals(expected, accessorDoc.get());
+	}
     
     public void testBug95708_1() throws Exception {        
         String klazz =

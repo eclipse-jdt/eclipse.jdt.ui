@@ -177,7 +177,7 @@ public class AccessorClassModifier {
 	}
 	
 	private void removeKey(NLSSubstitution sub, TextChange change) {
-		ASTNode node= findField(fRoot, sub.getKey());
+		ASTNode node= findField(fRoot, sub.getInitialKey());
 		if (node == null)
 			return;
 		
