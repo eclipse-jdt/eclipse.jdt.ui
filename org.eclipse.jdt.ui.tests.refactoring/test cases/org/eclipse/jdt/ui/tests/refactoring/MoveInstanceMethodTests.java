@@ -419,6 +419,11 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	public void test37() throws Exception {
 		helper1(new String[] { "p.A", "p.B" }, "p.A", 4, 17, 4, 42, FIELD, "destination", true, true);
 	}
+	
+	// Test problem with parameter order (bug 165697 )
+	public void test38() throws Exception {
+		helper1(new String[] { "p.A", "p.B" }, "p.A", 4, 17, 4, 35, FIELD, "target", true, true);
+	}
 
 	// Move mA1 to field fB, do not inline delegator
 	public void test3() throws Exception {

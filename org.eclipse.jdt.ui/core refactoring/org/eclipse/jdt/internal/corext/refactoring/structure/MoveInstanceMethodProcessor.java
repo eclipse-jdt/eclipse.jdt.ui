@@ -1863,7 +1863,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					if (access == null || !(access instanceof FieldAccess))
 						list.insertFirst(rewrite.getAST().newThisExpression(), null);
 					else
-						list.insertLast(rewrite.createCopyTarget(invocation.getExpression()), null);
+						list.insertFirst(rewrite.createCopyTarget(invocation.getExpression()), null);
 				}
 			} else {
 				final IVariableBinding[] bindings= getArgumentBindings(declaration);
