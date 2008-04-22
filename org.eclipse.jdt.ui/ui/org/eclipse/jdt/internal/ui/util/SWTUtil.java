@@ -19,6 +19,7 @@ import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.dnd.DragSource;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Caret;
 import org.eclipse.swt.widgets.Control;
@@ -41,6 +42,7 @@ public class SWTUtil {
 	 * Returns the standard display to be used. The method first checks, if
 	 * the thread calling this method has an associated disaply. If so, this
 	 * display is returned. Otherwise the method returns the default display.
+	 * @return returns the standard display to be used
 	 */
 	public static Display getStandardDisplay() {
 		Display display;
@@ -53,6 +55,7 @@ public class SWTUtil {
 	/**
 	 * Returns the shell for the given widget. If the widget doesn't represent
 	 * a SWT object that manage a shell, <code>null</code> is returned.
+	 * @param widget the widget
 	 * 
 	 * @return the shell for the given widget
 	 */
@@ -76,6 +79,8 @@ public class SWTUtil {
 
 	/**
 	 * Returns a width hint for a button control.
+	 * @param button the button
+	 * @return the width hint
 	 */
 	public static int getButtonWidthHint(Button button) {
 		button.setFont(JFaceResources.getDialogFont());
@@ -121,6 +126,13 @@ public class SWTUtil {
 				e.result= text;
 			}
 		});
+	}
+	
+	public static GridLayout newLayoutNoMargins(int columns) {
+		GridLayout layout= new GridLayout(columns, false);
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
+		return layout;
 	}
 	
 
