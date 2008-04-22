@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.javaeditor.breadcrumb;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.accessibility.AccessibleAdapter;
+import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyEvent;
@@ -29,8 +31,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 
 /**
@@ -106,6 +106,17 @@ class BreadcrumbItemDetails {
 		fElementText.setLayoutData(layoutData);
 		addElementListener(fElementText);
 		
+		fTextComposite.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			public void getName(AccessibleEvent e) {
+				e.result= fElementText.getText();
+			}
+		});
+		fImageComposite.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			public void getName(AccessibleEvent e) {
+				e.result= fElementText.getText();
+			}
+		});
+		
 		fDetailComposite.setTabList(new Control[] { fTextComposite });
 	}
 	
@@ -152,8 +163,6 @@ class BreadcrumbItemDetails {
 	public void setText(String text) {
 		if (text != null) {
 			fElementText.setText(text);
-			SWTUtil.setAccessibilityText(fTextComposite, text);
-			SWTUtil.setAccessibilityText(fImageComposite, text);
 		} else {
 			fElementText.setText(""); //$NON-NLS-1$
 		}
