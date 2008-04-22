@@ -414,6 +414,11 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	public void test36() throws Exception {
 		helper1(new String[] { "p.A", "p.B" }, "p.A", 9, 17, 9, 27, FIELD, "fB", false, false);
 	}
+	
+	// Test name conflicts in the moved method between fields and parameters (bug 227876)
+	public void test37() throws Exception {
+		helper1(new String[] { "p.A", "p.B" }, "p.A", 4, 17, 4, 42, FIELD, "destination", true, true);
+	}
 
 	// Move mA1 to field fB, do not inline delegator
 	public void test3() throws Exception {

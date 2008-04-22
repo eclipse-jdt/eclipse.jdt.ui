@@ -466,7 +466,19 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			fStaticImports.clear();
 			ImportRewriteUtil.collectImports(fMethod.getJavaProject(), sourceDeclaration, new HashSet(), fStaticImports, false);
 		}
-
+		
+		private boolean isParameterName(String name) {
+			List parameters= fDeclaration.parameters();
+			for (Iterator iterator= parameters.iterator(); iterator.hasNext();) {
+				SingleVariableDeclaration decl= (SingleVariableDeclaration) iterator.next();
+				if (name.equals(decl.getName().getIdentifier())) {
+					return true;
+				}
+			}
+			return false;
+			
+		}
+		
 		public final void endVisit(final AnonymousClassDeclaration node) {
 			Assert.isNotNull(node);
 			if (fAnonymousClass > 0)
@@ -491,6 +503,18 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			return super.visit(node);
 		}
 
+		private ASTNode getFieldReference(SimpleName oldNameNode, ASTRewrite rewrite) {
+			String name= oldNameNode.getIdentifier();
+			AST ast= rewrite.getAST();
+			if (isParameterName(name) || StubUtility.useThisForFieldAccess(fTargetRewrite.getCu().getJavaProject())) {
+				FieldAccess fieldAccess= ast.newFieldAccess();
+				fieldAccess.setExpression(ast.newThisExpression());
+				fieldAccess.setName((SimpleName) rewrite.createMoveTarget(oldNameNode));
+				return fieldAccess;
+			}
+			return rewrite.createMoveTarget(oldNameNode);
+		}
+		
 		public final boolean visit(final FieldAccess node) {
 			Assert.isNotNull(node);
 			final Expression expression= node.getExpression();
@@ -511,7 +535,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				final FieldAccess access= (FieldAccess) expression;
 				final IBinding binding= access.getName().resolveBinding();
 				if (access.getExpression() instanceof ThisExpression && Bindings.equals(fTarget, binding)) {
-					fRewrite.replace(node, ast.newSimpleName(node.getName().getIdentifier()), null);
+					ASTNode newFieldAccess= getFieldReference(node.getName(), fRewrite);
+					fRewrite.replace(node, newFieldAccess, null);
 					return false;
 				}
 			} else if (expression != null) {
@@ -582,7 +607,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			}
 			binding= node.getQualifier().resolveBinding();
 			if (Bindings.equals(binding, fTarget)) {
-				fRewrite.replace(node, fRewrite.createCopyTarget(node.getName()), null);
+				fRewrite.replace(node, getFieldReference(node.getName(), fRewrite), null);
 				return false;
 			}
 			return true;
