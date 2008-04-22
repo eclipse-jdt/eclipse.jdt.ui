@@ -239,7 +239,7 @@ public class JavaElementImageProvider {
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT: {
 					IPackageFragmentRoot root= (IPackageFragmentRoot) element;
 					IPath attach= root.getSourceAttachmentPath();
-					if (root.getElementType() == IPackageFragmentRoot.K_BINARY) {
+					if (root.getKind() == IPackageFragmentRoot.K_BINARY) {
 						if (root.isArchive()) {
 							if (root.isExternal()) {
 								if (attach == null) {
