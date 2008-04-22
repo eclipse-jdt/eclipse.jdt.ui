@@ -62,13 +62,17 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 			
 			IJavaElement[] elements= null;
 			elements= ((ICodeAssist) input).codeSelect(wordRegion.getOffset(), wordRegion.getLength());
-			if (elements != null && elements.length > 0)
-				return new IHyperlink[] { new JavaElementHyperlink(wordRegion, (SelectionDispatchAction)openAction, elements) };
+			if (elements == null || elements.length == 0)
+				return null;
+
+			IHyperlink[] result= new IHyperlink[elements.length];
+			for (int i= 0; i < elements.length; i++) {
+				result[i]= new JavaElementHyperlink(wordRegion, (SelectionDispatchAction) openAction, elements[i], elements.length > 1);
+			}
+			return result;
 		} catch (JavaModelException e) {
 			return null;
 		}
-
-		return null;
 	}
 
 }

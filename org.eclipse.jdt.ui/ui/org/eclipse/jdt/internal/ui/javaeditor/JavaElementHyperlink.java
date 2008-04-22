@@ -19,6 +19,9 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 
@@ -31,22 +34,26 @@ public class JavaElementHyperlink implements IHyperlink {
 
 	private final IRegion fRegion;
 	private final SelectionDispatchAction fOpenAction;
-	private final IJavaElement[] fElements;
+	private final IJavaElement fElement;
+	private final boolean fQualify;
 
 
 	/**
 	 * Creates a new Java element hyperlink.
 	 * @param region the region of the link
 	 * @param openAction the action to use to open the java elements
-	 * @param elements the java elements to open
+	 * @param element the java element to open
+	 * @param qualify <code>true</code> if the hyperlink text should show a qualified name for element.
 	 */
-	public JavaElementHyperlink(IRegion region, SelectionDispatchAction openAction, IJavaElement[] elements) {
+	public JavaElementHyperlink(IRegion region, SelectionDispatchAction openAction, IJavaElement element, boolean qualify) {
 		Assert.isNotNull(openAction);
 		Assert.isNotNull(region);
+		Assert.isNotNull(element);
 
 		fRegion= region;
 		fOpenAction= openAction;
-		fElements= elements;
+		fElement= element;
+		fQualify= qualify;
 	}
 
 	/*
@@ -62,7 +69,7 @@ public class JavaElementHyperlink implements IHyperlink {
 	 * @since 3.1
 	 */
 	public void open() {
-		fOpenAction.run(new StructuredSelection(fElements));
+		fOpenAction.run(new StructuredSelection(fElement));
 	}
 
 	/*
@@ -78,6 +85,11 @@ public class JavaElementHyperlink implements IHyperlink {
 	 * @since 3.1
 	 */
 	public String getHyperlinkText() {
-		return JavaEditorMessages.JavaElementHyperlink_hyperlinkText;
+		if (fQualify) {
+			String elementLabel= JavaElementLabels.getElementLabel(fElement, JavaElementLabels.ALL_POST_QUALIFIED);
+			return Messages.format(JavaEditorMessages.JavaElementHyperlink_hyperlinkText_qualified, new Object[] { elementLabel });
+		} else {
+			return JavaEditorMessages.JavaElementHyperlink_hyperlinkText;
+		}	
 	}
 }
