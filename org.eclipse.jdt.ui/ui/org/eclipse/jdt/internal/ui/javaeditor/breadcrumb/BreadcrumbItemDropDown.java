@@ -20,7 +20,12 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.events.ShellListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -39,6 +44,7 @@ import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -49,7 +55,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.ui.forms.FormColors;
+
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 
@@ -59,6 +66,72 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
  * @since 3.4
  */
 class BreadcrumbItemDropDown {
+
+	/**
+	 * An arrow right image descriptor. The images color is related to the list
+	 * fore- and background color. This makes the arrow visible even in high contrast
+	 * mode. 
+	 */
+	private final class AccessibelArrowRightImage extends CompositeImageDescriptor {
+		/* 
+		 * @see org.eclipse.jface.resource.CompositeImageDescriptor#drawCompositeImage(int, int)
+		 */
+		protected void drawCompositeImage(int width, int height) {
+			Display display= fParentComposite.getDisplay();
+
+			int arrowSize= 5;
+
+			Image image= new Image(display, arrowSize, arrowSize * 2);
+
+			GC gc= new GC(image);
+
+			Color triangle= createColor(SWT.COLOR_LIST_FOREGROUND, SWT.COLOR_LIST_BACKGROUND, 20, display);
+			Color aliasing= createColor(SWT.COLOR_LIST_FOREGROUND, SWT.COLOR_LIST_BACKGROUND, 30, display);
+			gc.setBackground(triangle);
+
+			gc.fillPolygon(new int[] { 0, 0, arrowSize, arrowSize, 0, arrowSize * 2 });
+
+			gc.setForeground(aliasing);
+			gc.drawLine(0, 1, arrowSize - 1, arrowSize);
+			gc.drawLine(arrowSize - 1, arrowSize, 0, arrowSize * 2 - 1);
+
+			gc.dispose();
+			triangle.dispose();
+			aliasing.dispose();
+
+			ImageData imageData= image.getImageData();
+			for (int y= 0; y < arrowSize; y++) {
+				for (int x= 0; x <= y; x++) {
+					imageData.setAlpha(x, y, 255);
+				}
+			}
+			for (int y= 0; y < arrowSize; y++) {
+				for (int x= 0; x <= y; x++) {
+					imageData.setAlpha(x, arrowSize * 2 - y - 1, 255);
+				}
+			}
+
+			drawImage(imageData, (width / 2) - (arrowSize / 2), (height / 2) - arrowSize);
+
+			image.dispose();
+		}
+
+		/* 
+		 * @see org.eclipse.jface.resource.CompositeImageDescriptor#getSize()
+		 */
+		protected Point getSize() {
+			return new Point(10, 16);
+		}
+
+		private Color createColor(int color1, int color2, int ratio, Display display) {
+			RGB rgb1= display.getSystemColor(color1).getRGB();
+			RGB rgb2= display.getSystemColor(color2).getRGB();
+
+			RGB blend= FormColors.blend(rgb2, rgb1, ratio);
+
+			return new Color(display, blend);
+		}
+	}
 
 	private static final int DROP_DOWN_HIGHT= 300;
 	private static final int DROP_DOWN_WIDTH= 500;
@@ -92,7 +165,7 @@ class BreadcrumbItemDropDown {
 			}
 		};
 
-		showDropDownMenuAction.setImageDescriptor(JavaPluginImages.DESC_ETOOL_ARROW_RIGHT);
+		showDropDownMenuAction.setImageDescriptor(new AccessibelArrowRightImage());
 		showDropDownMenuAction.setToolTipText(BreadcrumbMessages.BreadcrumbItemDropDown_showDropDownMenu_action_toolTip);
 		manager.add(showDropDownMenuAction);
 
@@ -425,7 +498,7 @@ class BreadcrumbItemDropDown {
 	private void setShellBounds(Shell shell) {
 		Rectangle rect= fParentComposite.getBounds();
 		Rectangle toolbarBounds= fToolBar.getBounds();
-		Point pt= new Point(toolbarBounds.x - 7, rect.y + rect.height);
+		Point pt= new Point(toolbarBounds.x - 6, rect.y + rect.height);
 		pt= fParentComposite.toDisplay(pt);
 
 		shell.pack();

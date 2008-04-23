@@ -168,8 +168,6 @@ public class JavaPluginImages {
 	/*
 	 * Set of predefined Image Descriptors.
 	 */
-	public static final ImageDescriptor DESC_ETOOL_ARROW_RIGHT= createUnManaged(T_ETOOL, "breadcrumb_arrow_right.gif"); //$NON-NLS-1$
-	
 	public static final ImageDescriptor DESC_VIEW_ERRORWARNING_TAB= createUnManaged(T_EVIEW, "errorwarning_tab.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_VIEW_CLASSFILEGENERATION_TAB= createUnManaged(T_EVIEW, "classfilegeneration_tab.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_VIEW_JDKCOMPLIANCE_TAB= createUnManaged(T_EVIEW, "jdkcompliance_tab.gif"); //$NON-NLS-1$
