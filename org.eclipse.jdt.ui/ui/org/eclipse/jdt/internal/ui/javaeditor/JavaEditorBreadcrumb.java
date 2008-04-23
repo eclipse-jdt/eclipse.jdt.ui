@@ -226,7 +226,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 			fLastInputElement= inputElement;
 			if (inputElement instanceof IPackageFragment) {
-				fElements= getTypes((IPackageFragment) inputElement);
+				fElements= getPackageContent((IPackageFragment) inputElement);
 			} else if (inputElement instanceof IProject) {
 				try {
 					fElements= ((IProject) inputElement).members();
@@ -300,7 +300,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			}
 		}
 
-		private IType[] getTypes(IPackageFragment pack) {
+		private Object[] getPackageContent(IPackageFragment pack) {
 			ArrayList result= new ArrayList();
 			try {
 				ICompilationUnit[] units= pack.getCompilationUnits();
@@ -311,21 +311,22 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 							result.add(types[j]);
 					}
 				}
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-			}
-
-			try {
+				
 				IClassFile[] classFiles= pack.getClassFiles();
 				for (int i= 0; i < classFiles.length; i++) {
 					if (isValidType(classFiles[i].getType()))
 						result.add(classFiles[i].getType());
 				}
+				
+				Object[] nonJavaResources= pack.getNonJavaResources();
+				for (int i= 0; i < nonJavaResources.length; i++) {
+					result.add(nonJavaResources[i]);
+				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 			}
 
-			return (IType[]) result.toArray(new IType[result.size()]);
+			return result.toArray();
 		}
 
 		private boolean isValidType(IType type) {
