@@ -288,13 +288,15 @@ public class ParameterGuesser {
 	 * @param paramName - the name of the parameter (used to find similarly named matches)
 	 * @param pos
 	 * @param suggestions the suggestions or <code>null</code>
+	 * @param fillBestGuess 
 	 * @return returns the name of the best match, or <code>null</code> if no match found
 	 * @throws JavaModelException if it fails
 	 */
-	public ICompletionProposal[] parameterProposals(String expectedType, String paramName, Position pos, IJavaElement[] suggestions) throws JavaModelException {
+	public ICompletionProposal[] parameterProposals(String expectedType, String paramName, Position pos, IJavaElement[] suggestions, boolean fillBestGuess) throws JavaModelException {
 		List typeMatches= evaluateVisibleMatches(expectedType, suggestions);
 		orderMatches(typeMatches, paramName);
 
+		boolean hasVarWithParamName= false;
 		ICompletionProposal[] ret= new ICompletionProposal[typeMatches.size()];
 		int i= 0; int replacementLength= 0;
 		for (Iterator it= typeMatches.iterator(); it.hasNext();) {
@@ -304,18 +306,22 @@ public class ParameterGuesser {
 				replacementLength= v.name.length();
 			}
 
+			String displayString= v.name;
+			hasVarWithParamName |= displayString.equals(paramName);
+			
 			final char[] triggers= new char[v.triggerChars.length + 1];
 			System.arraycopy(v.triggerChars, 0, triggers, 0, v.triggerChars.length);
-			String displayString= v.name;
 			triggers[triggers.length - 1]= ';';
-			ICompletionProposal proposal= new PositionBasedCompletionProposal(v.name, pos, replacementLength, getImage(v.descriptor), displayString, null, null) {
-				public char[] getTriggerCharacters() {
-					return triggers;
-				}
-			};
-			ret[i++]= proposal;
+				
+			ret[i++]= new PositionBasedCompletionProposal(v.name, pos, replacementLength, getImage(v.descriptor), displayString, null, null, triggers);
 		}
-
+		if (!fillBestGuess && !hasVarWithParamName) {
+			// insert a proposal with the argument name
+			ICompletionProposal[] extended= new ICompletionProposal[ret.length + 1];
+			System.arraycopy(ret, 0, extended, 1, ret.length);
+			extended[0]= new PositionBasedCompletionProposal(paramName, pos, replacementLength, null, paramName, null, null, NO_TRIGGERS);
+			return extended;
+		}
 		return ret;
 	}
 

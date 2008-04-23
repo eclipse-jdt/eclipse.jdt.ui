@@ -130,8 +130,7 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 					int positionOffset= fPositions[i].getOffset();
 					int positionLength= fPositions[i].getLength();
 				
-					int minProposals= fFillBestGuess ? 2 : 1;
-					if (fChoices[i].length < minProposals) {
+					if (fChoices[i].length < 2) {
 						group.addPosition(new LinkedPosition(document, positionOffset, positionLength, LinkedPositionGroup.NO_STOP));
 					} else {
 						ensurePositionCategoryInstalled(document, model);
@@ -236,7 +235,7 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 			}
 
 			ICompletionProposal proposal= fChoices[i][0];
-			String argument= fFillBestGuess ? proposal.getDisplayString() : new String(parameterNames[i]);
+			String argument= proposal.getDisplayString();
 			
 			Position position= fPositions[i];
 			position.setOffset(replacementOffset + buffer.length());
@@ -293,7 +292,7 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 			String paramName= new String(parameterNames[i]);
 			Position position= new Position(0,0);
 			
-			ICompletionProposal[] argumentProposals= guesser.parameterProposals(parameterTypes[i], paramName, position, assignableElements[i]);
+			ICompletionProposal[] argumentProposals= guesser.parameterProposals(parameterTypes[i], paramName, position, assignableElements[i], fFillBestGuess);
 			if (argumentProposals.length == 0)
 				argumentProposals= new ICompletionProposal[] {new JavaCompletionProposal(paramName, 0, paramName.length(), null, paramName, 0)};
 			

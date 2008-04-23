@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,6 +48,8 @@ public class PositionBasedCompletionProposal implements ICompletionProposal, ICo
 	private IContextInformation fContextInformation;
 	/** The additional info of this proposal */
 	private String fAdditionalProposalInfo;
+	/** The trigger characters */
+	private char[] fTriggerCharacters;
 
 	/**
 	 * Creates a new completion proposal based on the provided information.  The replacement string is
@@ -58,7 +60,7 @@ public class PositionBasedCompletionProposal implements ICompletionProposal, ICo
 	 * @param cursorPosition the position of the cursor following the insert relative to replacementOffset
 	 */
 	public PositionBasedCompletionProposal(String replacementString, Position replacementPosition, int cursorPosition) {
-		this(replacementString, replacementPosition, cursorPosition, null, null, null, null);
+		this(replacementString, replacementPosition, cursorPosition, null, null, null, null, null);
 	}
 
 	/**
@@ -71,8 +73,9 @@ public class PositionBasedCompletionProposal implements ICompletionProposal, ICo
 	 * @param displayString the string to be displayed for the proposal
 	 * @param contextInformation the context information associated with this proposal
 	 * @param additionalProposalInfo the additional information associated with this proposal
+	 * @param triggers the trigger characters
 	 */
-	public PositionBasedCompletionProposal(String replacementString, Position replacementPosition, int cursorPosition, Image image, String displayString, IContextInformation contextInformation, String additionalProposalInfo) {
+	public PositionBasedCompletionProposal(String replacementString, Position replacementPosition, int cursorPosition, Image image, String displayString, IContextInformation contextInformation, String additionalProposalInfo, char[] triggers) {
 		Assert.isNotNull(replacementString);
 		Assert.isTrue(replacementPosition != null);
 
@@ -83,6 +86,7 @@ public class PositionBasedCompletionProposal implements ICompletionProposal, ICo
 		fDisplayString= displayString;
 		fContextInformation= contextInformation;
 		fAdditionalProposalInfo= additionalProposalInfo;
+		fTriggerCharacters= triggers;
 	}
 
 	/*
@@ -185,7 +189,7 @@ public class PositionBasedCompletionProposal implements ICompletionProposal, ICo
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#getTriggerCharacters()
 	 */
 	public char[] getTriggerCharacters() {
-		return null;
+		return fTriggerCharacters;
 	}
 
 	/*
