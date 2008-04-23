@@ -79,6 +79,7 @@ class BreadcrumbItemDetails {
 			}
 		});
 		installFocusComposite(fImageComposite);
+		addElementListener(fImageComposite);
 
 		fElementImage= new Label(fImageComposite, SWT.NONE);
 		GridData layoutData= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
@@ -100,6 +101,7 @@ class BreadcrumbItemDetails {
 			}
 		});
 		installFocusComposite(fTextComposite);
+		addElementListener(fTextComposite);
 
 		fElementText= new Label(fTextComposite, SWT.NONE);
 		layoutData= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
