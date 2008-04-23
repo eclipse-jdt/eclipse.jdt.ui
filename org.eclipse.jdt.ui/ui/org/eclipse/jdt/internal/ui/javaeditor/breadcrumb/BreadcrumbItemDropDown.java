@@ -98,6 +98,15 @@ class BreadcrumbItemDropDown {
 
 		manager.update(true);
 	}
+	
+	/**
+	 * Return the width of this element.
+	 * 
+	 * @return the width of this element
+	 */
+	public int getWidth() {
+		return fToolBar.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+	}
 
 	/**
 	 * Set whether the drop down menu is available.

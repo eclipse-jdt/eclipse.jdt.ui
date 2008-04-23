@@ -142,7 +142,7 @@ class BreadcrumbItem extends Item {
 	 * @return the width of this item 
 	 */
 	int getWidth() {
-		return fDetailsBlock.getWidth() + 16; //5 + 2 * 5 (arrowWidth + 2 * horizontalSpacing)
+		return fDetailsBlock.getWidth() + fExpandBlock.getWidth() + 2;
 	}
 
 	/**
