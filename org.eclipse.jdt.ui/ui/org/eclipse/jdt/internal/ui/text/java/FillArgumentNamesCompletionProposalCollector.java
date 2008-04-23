@@ -44,7 +44,7 @@ public final class FillArgumentNamesCompletionProposalCollector extends Completi
 		setInvocationContext(context);
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		fIsGuessArguments= preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS);
-		if (fIsGuessArguments) {
+		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES)) {
 			setRequireExtendedContext(true);
 		}
 	}
@@ -106,7 +106,7 @@ public final class FillArgumentNamesCompletionProposalCollector extends Completi
 	 * may be referenced that uses generics, it is still possible that the
 	 * current source does not allow generics.
 	 * 
-	 * @param project the Java project 
+	 * @param project the Java project
 	 * @return <code>true</code> if the generic proposals should be allowed,
 	 *         <code>false</code> if not
 	 */
