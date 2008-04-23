@@ -33,7 +33,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -99,12 +98,8 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
-		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= getPreviewContent(proposal);
-		
+				
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -115,9 +110,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(1);
-		String preview2= getWizardPreviewContent(newCUWizard);
-
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -125,10 +117,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-
-		newCUWizard= (NewCUUsingWizardProposal) proposals.get(2);
-		String preview3= getWizardPreviewContent(newCUWizard);
-		
+	
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -136,10 +125,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-		
-		newCUWizard= (NewCUUsingWizardProposal) proposals.get(3);
-		String preview4= getWizardPreviewContent(newCUWizard);
-		
+				
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -148,9 +134,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected4= buf.toString();
 		
-		proposal= (CUCorrectionProposal) proposals.get(4);
-		String preview5= getPreviewContent(proposal);
-		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E<Vector1> {\n");
@@ -158,7 +141,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected5= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5 }, new String[] { expected1, expected2, expected3, expected4, expected5 });
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5 });
 
 	}
 
@@ -174,11 +157,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 6);
-		assertCorrectLabels(proposals);
-		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= getPreviewContent(proposal);
+		assertCorrectLabels(proposals);	
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -191,9 +170,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(1);
-		String preview2= getWizardPreviewContent(newCUWizard);
-		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -201,9 +177,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-
-		newCUWizard= (NewCUUsingWizardProposal) proposals.get(2);
-		String preview3= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -212,10 +185,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-		
-		newCUWizard= (NewCUUsingWizardProposal) proposals.get(3);
-		String preview4= getWizardPreviewContent(newCUWizard);
-		
+	
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -223,9 +193,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("}\n");
 		String expected4= buf.toString();
-		
-		proposal= (CUCorrectionProposal) proposals.get(4);
-		String preview5= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -235,9 +202,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected5= buf.toString();
 		
-		proposal= (CUCorrectionProposal) proposals.get(5);
-		String preview6= getPreviewContent(proposal);
-		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -246,7 +210,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected6= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5, preview6}, new String[] { expected1, expected2, expected3, expected4, expected5, expected6 });
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6 });
 	}
 	
 	public void testTypeInMethodReturnType() throws Exception {
@@ -262,11 +226,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 6);
 		assertCorrectLabels(proposals);
-		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -280,9 +240,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(1);
-		String preview2= getWizardPreviewContent(newCUWizard);
-		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -290,10 +247,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-
-		newCUWizard= (NewCUUsingWizardProposal) proposals.get(2);
-		String preview3= getWizardPreviewContent(newCUWizard);
-		
+	
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -301,9 +255,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-	
-		newCUWizard= (NewCUUsingWizardProposal) proposals.get(3);
-		String preview4= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -313,9 +264,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected4= buf.toString();
 		
-		proposal= (CUCorrectionProposal) proposals.get(4);
-		String preview5= getPreviewContent(proposal);
-		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E<Vect1or> {\n");
@@ -324,10 +272,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected5= buf.toString();
-		
-		proposal= (CUCorrectionProposal) proposals.get(5);
-		String preview6= getPreviewContent(proposal);
-		
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -337,7 +282,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected6= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5, preview6 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6 });
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6 });
 	}
 
 	public void testTypeInExceptionType() throws Exception {
@@ -352,11 +297,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
-		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -369,9 +310,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(1);
-		String preview2= getWizardPreviewContent(newCUWizard);
-		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -380,7 +318,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
 	
 	
@@ -472,11 +410,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
-		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -488,9 +422,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(1);
-		String preview2= getWizardPreviewContent(newCUWizard);
-		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -501,7 +432,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}	
 		
 
@@ -519,11 +450,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
-
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -534,9 +461,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
-		proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview2= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -549,9 +473,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 		
-		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(2);
-		String preview3= getWizardPreviewContent(newCUWizard);
-		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -561,9 +482,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
-
-		newCUWizard= (NewCUUsingWizardProposal) proposals.get(3);
-		String preview4= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -575,9 +493,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected4= buf.toString();
 		
-		newCUWizard= (NewCUUsingWizardProposal) proposals.get(4);
-		String preview5= getWizardPreviewContent(newCUWizard);
-		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -587,9 +502,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("}\n");
 		String expected5= buf.toString();
-		
-		proposal= (CUCorrectionProposal) proposals.get(5);
-		String preview6= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -601,9 +513,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected6= buf.toString();
 		
-		proposal= (CUCorrectionProposal) proposals.get(6);
-		String preview7= getPreviewContent(proposal);
-		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.io.*;\n");		
@@ -614,7 +523,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected7= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5, preview6, preview7 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7});		
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7});		
 	}
 	
 	public void testQualifiedType() throws Exception {
@@ -630,11 +539,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		
-		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(0);
-		String preview1= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test2;\n");
@@ -643,9 +548,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");		
 		buf.append("}\n");
 		String expected1= buf.toString();
-
-		newCUWizard= (NewCUUsingWizardProposal) proposals.get(1);
-		String preview2= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test2;\n");
@@ -655,9 +557,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 		
-		newCUWizard= (NewCUUsingWizardProposal) proposals.get(2);
-		String preview3= getWizardPreviewContent(newCUWizard);
-		
 		buf= new StringBuffer();
 		buf.append("package test2;\n");
 		buf.append("\n");		
@@ -666,7 +565,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });	
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3 });	
 	}
 	
 	public void testInnerType() throws Exception {
@@ -689,11 +588,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
-		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -704,9 +599,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
-		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(1);
-		String preview2= getWizardPreviewContent(newCUWizard);
 				
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -717,9 +609,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");		
 		buf.append("}\n");
 		String expected2= buf.toString();
-
-		newCUWizard= (NewCUUsingWizardProposal) proposals.get(2);
-		String preview3= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -731,7 +620,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });		
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3 });		
 	}
 
 	public void testTypeInCatchBlock() throws Exception {
@@ -749,11 +638,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
-		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
-		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(0);
-		String preview1= getWizardPreviewContent(newCUWizard);
 				
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -763,7 +648,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 	
 	public void testTypeInSuperType() throws Exception {
@@ -776,11 +661,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
-		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
-		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(0);
-		String preview1= getWizardPreviewContent(newCUWizard);
 				
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -790,7 +671,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 	
 	public void testTypeInSuperInterface() throws Exception {
@@ -803,11 +684,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
-		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
-		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(0);
-		String preview1= getWizardPreviewContent(newCUWizard);
 				
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -817,7 +694,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });		
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });		
 	}
 	
 	public void testTypeInAnnotation() throws Exception {
@@ -831,11 +708,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
-		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
-		
-		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(0);
-		String preview1= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -845,7 +718,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 	
-		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });		
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });		
 	}
 	
 	public void testTypeInAnnotation_bug153881() throws Exception {
@@ -861,7 +734,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -887,11 +759,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
-		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -900,18 +768,12 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
-		proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview2= getPreviewContent(proposal);
-		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    Float vec= 1.0;\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
-		
-		proposal= (CUCorrectionProposal) proposals.get(2);
-		String preview3= getPreviewContent(proposal);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -920,9 +782,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 		
-		NewCUUsingWizardProposal newCUWizard= (NewCUUsingWizardProposal) proposals.get(3);
-		String preview4= getWizardPreviewContent(newCUWizard);
-		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -930,9 +789,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("}\n");
 		String expected4= buf.toString();
-
-		newCUWizard= (NewCUUsingWizardProposal) proposals.get(4);
-		String preview5= getWizardPreviewContent(newCUWizard);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -942,9 +798,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected5= buf.toString();
 		
-		newCUWizard= (NewCUUsingWizardProposal) proposals.get(5);
-		String preview6= getWizardPreviewContent(newCUWizard);
-		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");		
@@ -953,9 +806,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected6= buf.toString();
 		
-		proposal= (CUCorrectionProposal) proposals.get(6);
-		String preview7= getPreviewContent(proposal);
-		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E<floot> {\n");
@@ -963,7 +813,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected7= buf.toString();
 		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5, preview6, preview7 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7});		
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7});		
 	}
 
 	public void testTypeInTypeArguments1() throws Exception {
@@ -981,8 +831,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertCorrectLabels(proposals);
-		
-		assertNumberOfProposals(proposals, 6);
 
 		String[] expected= new String[6];
 		buf= new StringBuffer();
@@ -1059,7 +907,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 6);
 
 		String[] expected= new String[6];
 		buf= new StringBuffer();
@@ -1144,7 +991,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
 		buf= new StringBuffer();
@@ -1183,7 +1029,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
 
 		String[] expected= new String[3];
 		buf= new StringBuffer();
