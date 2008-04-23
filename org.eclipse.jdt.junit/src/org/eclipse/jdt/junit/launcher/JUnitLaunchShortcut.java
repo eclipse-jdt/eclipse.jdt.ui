@@ -417,8 +417,10 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		return candidateConfigs;
 	}	
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.ILaunchShortcut2#getLaunchConfigurations(org.eclipse.jface.viewers.ISelection)
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @since 3.4
 	 */
 	public ILaunchConfiguration[] getLaunchConfigurations(ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
@@ -430,8 +432,10 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.ILaunchShortcut2#getLaunchConfigurations(org.eclipse.ui.IEditorPart)
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @since 3.4
 	 */
 	public ILaunchConfiguration[] getLaunchConfigurations(final IEditorPart editor) {
 		final ITypeRoot element= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
@@ -493,8 +497,10 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.ILaunchShortcut2#getLaunchableResource(org.eclipse.jface.viewers.ISelection)
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @since 3.4
 	 */
 	public IResource getLaunchableResource(ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
@@ -512,8 +518,10 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.ILaunchShortcut2#getLaunchableResource(org.eclipse.ui.IEditorPart)
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @since 3.4
 	 */
 	public IResource getLaunchableResource(IEditorPart editor) {
 		ITypeRoot element= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
