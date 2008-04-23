@@ -169,8 +169,7 @@ public class BuildPathSupport {
 		if (bundleBase != null) {
 			IPath jarLocation= bundleBase.append("junit.jar"); //$NON-NLS-1$
 			
-			IPath sourceBase= getSourceLocation(JUNIT3_PLUGIN);
-			IPath srcLocation= sourceBase != null ? sourceBase.append("junitsrc.zip") : null; //$NON-NLS-1$
+			IPath srcLocation= getSourceLocation(JUNIT3_PLUGIN);
 			
 			IAccessRule[] accessRules= { };
 			

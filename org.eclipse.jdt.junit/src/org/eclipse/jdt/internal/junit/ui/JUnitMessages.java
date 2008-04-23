@@ -83,6 +83,8 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitContainerWizardPage_error_version_not_available;
 
+	public static String JUnitContainerWizardPage_lib_not_found;
+
 	public static String JUnitContainerWizardPage_option_junit3;
 
 	public static String JUnitContainerWizardPage_option_junit4;
@@ -90,6 +92,10 @@ public final class JUnitMessages extends NLS {
 	public static String JUnitClasspathFixProcessor_progress_desc;
 
 	public static String JUnitContainerWizardPage_resolved_label;
+
+	public static String JUnitContainerWizardPage_source_location_label;
+
+	public static String JUnitContainerWizardPage_source_not_found;
 
 	public static String JUnitContainerWizardPage_warning_java5_required;
 

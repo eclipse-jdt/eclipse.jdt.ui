@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,11 +31,13 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension;
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
@@ -49,6 +51,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 	private IClasspathEntry fContainerEntryResult;
 	private Combo fVersionCombo;
 	private Label fResolvedPath;
+	private Label fResolvedSourcePath;
 
 	public JUnitContainerWizardPage() {
 		super("JUnitContainerPage"); //$NON-NLS-1$
@@ -137,6 +140,17 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		fResolvedPath.setFont(composite.getFont());
 		fResolvedPath.setLayoutData(data);
 		
+		label= new Label(composite, SWT.NONE);
+		label.setFont(composite.getFont());
+		label.setText(JUnitMessages.JUnitContainerWizardPage_source_location_label);
+		label.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false, 1, 1));
+		
+		fResolvedSourcePath= new Label(composite, SWT.WRAP);
+		data= new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1);
+		data.widthHint= converter.convertWidthInCharsToPixels(60);
+		fResolvedSourcePath.setFont(composite.getFont());
+		fResolvedSourcePath.setLayoutData(data);
+		
 		doSelectionChanged();
 		
 		setControl(composite);
@@ -166,12 +180,27 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		
 		if (fResolvedPath != null && !fResolvedPath.isDisposed()) {
 			if (libEntry != null) {
-				fResolvedPath.setText(libEntry.getPath().toOSString());
+				fResolvedPath.setText(getPathLabel(libEntry.getPath()));
 			} else {
-				fResolvedPath.setText(new String());
+				fResolvedPath.setText(JUnitMessages.JUnitContainerWizardPage_lib_not_found);
 			}
 		}
+		if (fResolvedSourcePath != null && !fResolvedSourcePath.isDisposed()) {
+			if (libEntry != null && libEntry.getSourceAttachmentPath() != null) {
+				fResolvedSourcePath.setText(getPathLabel(libEntry.getSourceAttachmentPath()));
+			} else {
+				fResolvedSourcePath.setText(JUnitMessages.JUnitContainerWizardPage_source_not_found);
+			}
+		}
+		
 		updateStatus(status);
+	}
+	
+	private String getPathLabel(IPath path) {
+		StringBuffer buf= new StringBuffer(BasicElementLabels.getFileName(path.lastSegment()));
+		buf.append(JavaElementLabels.CONCAT_STRING);
+		buf.append(BasicElementLabels.getPathLabel(path.removeLastSegments(1), true));
+		return buf.toString();
 	}
 
 	/* (non-Javadoc)
