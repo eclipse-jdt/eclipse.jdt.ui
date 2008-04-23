@@ -527,6 +527,14 @@ public final class NewWizardMessages extends NLS {
 	public static String ClasspathContainerWizard_new_title;
 	public static String ClasspathContainerWizard_edit_title;
 	
+	public static String ClasspathFixSelectionDialog_apply_proposal_error_message;
+	public static String ClasspathFixSelectionDialog_apply_proposal_error_title;
+	public static String ClasspathFixSelectionDialog_dialog_title;
+	public static String ClasspathFixSelectionDialog_eval_proposals_error_message;
+	public static String ClasspathFixSelectionDialog_no_proposals_message;
+	public static String ClasspathFixSelectionDialog_open_buld_path_dialog_message;
+	public static String ClasspathFixSelectionDialog_process_fix_description;
+	public static String ClasspathFixSelectionDialog_proposals_message;
 	public static String FolderSelectionDialog_button;
 	public static String MultipleFolderSelectionDialog_button;
 	

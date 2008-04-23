@@ -341,6 +341,8 @@ public final class CorrectionMessages extends NLS {
 	public static String SuppressWarningsSubProcessor_suppress_warnings_initializer_label;
 	public static String SuppressWarningsSubProcessor_suppress_warnings_label;
 	public static String ReorgCorrectionsSubProcessor_accessrules_description;
+	public static String ReorgCorrectionsSubProcessor_project_seup_fix_description;
+	public static String ReorgCorrectionsSubProcessor_project_seup_fix_info;
 	public static String UnresolvedElementsSubProcessor_change_full_type_description;
 	public static String LocalCorrectionsSubProcessor_remove_nls_tag_description;
 	public static String LocalCorrectionsSubProcessor_remove_redundant_superinterface;

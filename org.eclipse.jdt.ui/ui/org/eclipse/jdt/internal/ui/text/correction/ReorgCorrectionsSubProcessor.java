@@ -34,6 +34,7 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableContext;
 
 import org.eclipse.jface.text.IDocument;
 
@@ -45,7 +46,6 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.IProgressService;
 
-import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
@@ -88,7 +88,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.actions.OrganizeImportsAction;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
-import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -101,9 +100,11 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionPro
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectMainTypeNameProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectPackageDeclarationProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathFixSelectionDialog;
 
 public class ReorgCorrectionsSubProcessor {
 
@@ -225,21 +226,32 @@ public class ReorgCorrectionsSubProcessor {
 	
 	private static class ClasspathFixCorrectionProposal extends ChangeCorrectionProposal {
 
-		private final ClasspathFixProposal fClasspathFixProposal;
-
-		public ClasspathFixCorrectionProposal(ClasspathFixProposal cpfix) {
-			super(cpfix.getDisplayString(), null, cpfix.getRelevance(), cpfix.getImage());
-			fClasspathFixProposal= cpfix;
+		private final IJavaProject fProject;
+		private final String fMissingType;
+		
+		public ClasspathFixCorrectionProposal(IJavaProject project, String missingType) {
+			super(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_description, null, -10, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
+			fProject= project;
+			fMissingType= missingType;
 		}
 		
-		protected Change createChange() throws CoreException {
-			return fClasspathFixProposal.createChange(null);
+		public void apply(IDocument document) {
+			IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
+			if (context == null) {
+				context= new BusyIndicatorRunnableContext();
+			}
+			ClasspathFixSelectionDialog.openClasspathFixSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), fProject, fMissingType, context);
 		}
 		
 		public String getAdditionalProposalInfo() {
-			return fClasspathFixProposal.getAdditionalProposalInfo();
+			return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_info, BasicElementLabels.getJavaElementName(fMissingType));
 		}
 	}
+	
+	public static void addProjectSetupFixProposal(IInvocationContext context, String missingType, Collection proposals) {
+		proposals.add(new ClasspathFixCorrectionProposal(context.getCompilationUnit().getJavaProject(), missingType));
+	}
+	
 	
 	public static void importNotFoundProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -261,11 +273,7 @@ public class ReorgCorrectionsSubProcessor {
 		if (importDeclaration.isOnDemand()) {
 			name= JavaModelUtil.concatenateName(name, "*"); //$NON-NLS-1$
 		}
-		
-		ClasspathFixProposal[] classPathFixProposals= ClasspathFixProcessorDescriptor.getProposals(cu.getJavaProject(), name, null);
-		for (int i= 0; i < classPathFixProposals.length; i++) {
-			proposals.add(new ClasspathFixCorrectionProposal(classPathFixProposals[i]));
-		}
+		addProjectSetupFixProposal(context, name, proposals);
 	}
 			
 	private static final class OpenBuildPathCorrectionProposal extends ChangeCorrectionProposal {

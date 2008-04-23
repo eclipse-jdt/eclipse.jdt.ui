@@ -233,6 +233,8 @@ public class UnresolvedElementsSubProcessor {
 
 			typeKind &= ~SimilarElementsRequestor.ANNOTATIONS;
 			addNewTypeProposals(cu, node, typeKind, relevance, proposals);
+			
+			ReorgCorrectionsSubProcessor.addProjectSetupFixProposal(context, node.getFullyQualifiedName(), proposals);
 		}
 
 		if (!suggestVariableProposals) {
@@ -566,6 +568,8 @@ public class UnresolvedElementsSubProcessor {
 			kind &= ~SimilarElementsRequestor.ANNOTATIONS; // only propose annotations when there are no other suggestions
 		}
 		addNewTypeProposals(cu, node, kind, 0, proposals);
+		
+		ReorgCorrectionsSubProcessor.addProjectSetupFixProposal(context, node.getFullyQualifiedName(), proposals);
 	}
 
 	private static void addSimilarTypeProposals(int kind, ICompilationUnit cu, Name node, int relevance, Collection proposals) throws CoreException {
