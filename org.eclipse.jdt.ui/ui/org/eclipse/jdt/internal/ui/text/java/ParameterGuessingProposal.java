@@ -130,7 +130,8 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 					int positionOffset= fPositions[i].getOffset();
 					int positionLength= fPositions[i].getLength();
 				
-					if (fChoices[i].length < 2) {
+					int minProposals= fFillBestGuess ? 2 : 1;
+					if (fChoices[i].length < minProposals) {
 						group.addPosition(new LinkedPosition(document, positionOffset, positionLength, LinkedPositionGroup.NO_STOP));
 					} else {
 						ensurePositionCategoryInstalled(document, model);
