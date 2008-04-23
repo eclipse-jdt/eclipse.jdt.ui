@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -147,9 +147,9 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 		private int fRemovedAssignmentsCount;
 		private int fAlteredAssignmentsCount;
 		
-		public RemoveUnusedMemberOperation(SimpleName[] unusedNames, boolean forceRemoveInitializer) {
+		public RemoveUnusedMemberOperation(SimpleName[] unusedNames, boolean removeAllAsignements) {
 			fUnusedNames= unusedNames;
-			fForceRemove=forceRemoveInitializer;
+			fForceRemove= removeAllAsignements;
 		}
 
 		/**
@@ -479,7 +479,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 		return id == IProblem.UnusedImport || id == IProblem.DuplicateImport || id == IProblem.ConflictingImport || id == IProblem.CannotImportPackage || id == IProblem.ImportNotFound;
 	}
 	
-	public static UnusedCodeFix createUnusedMemberFix(CompilationUnit compilationUnit, IProblemLocation problem, boolean forceInitializerRemoval) {
+	public static UnusedCodeFix createUnusedMemberFix(CompilationUnit compilationUnit, IProblemLocation problem, boolean removeAllAssignements) {
 		if (isUnusedMember(problem)) {
 			SimpleName name= getUnusedName(compilationUnit, problem);
 			if (name != null) {
@@ -488,9 +488,9 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 					if (isFormalParameterInEnhancedForStatement(name))
 						return null;
 						
-					String label= getDisplayString(name, binding, forceInitializerRemoval);
-					RemoveUnusedMemberOperation operation= new RemoveUnusedMemberOperation(new SimpleName[] {name}, forceInitializerRemoval);
-					return new UnusedCodeFix(label, compilationUnit, new CompilationUnitRewriteOperation[] {operation}, getCleanUpOptions(binding));
+					String label= getDisplayString(name, binding, removeAllAssignements);
+					RemoveUnusedMemberOperation operation= new RemoveUnusedMemberOperation(new SimpleName[] { name }, removeAllAssignements);
+					return new UnusedCodeFix(label, compilationUnit, new CompilationUnitRewriteOperation[] { operation }, getCleanUpOptions(binding, removeAllAssignements));
 				}
 			}
 		}
@@ -684,7 +684,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 		return null;
 	}
 	
-	private static String getDisplayString(SimpleName simpleName, IBinding binding, boolean forceRemoveInitializer) {
+	private static String getDisplayString(SimpleName simpleName, IBinding binding, boolean removeAllAssignements) {
 		String name= simpleName.getIdentifier();
 		switch (binding.getKind()) {
 			case IBinding.TYPE:
@@ -696,7 +696,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 					return Messages.format(FixMessages.UnusedCodeFix_RemoveMethod_description, name);
 				}
 			case IBinding.VARIABLE:
-				if (forceRemoveInitializer) {
+				if (removeAllAssignements) {
 					return Messages.format(FixMessages.UnusedCodeFix_RemoveFieldOrLocalWithInitializer_description, name);
 				} else {
 					return Messages.format(FixMessages.UnusedCodeFix_RemoveFieldOrLocal_description, name);
@@ -706,7 +706,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 	
-	private static Map getCleanUpOptions(IBinding binding) {
+	private static Map getCleanUpOptions(IBinding binding, boolean removeAll) {
 		Map result= new Hashtable();
 		
 		result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS, CleanUpOptions.TRUE);		
@@ -722,6 +722,9 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 				}
 				break;
 			case IBinding.VARIABLE:
+				if (removeAll)
+					return null;
+
 				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS, CleanUpOptions.TRUE);
 				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES, CleanUpOptions.TRUE);
 				break;
@@ -749,14 +752,13 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 	
 	private UnusedCodeFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewriteOperations, Map options) {
 		super(name, compilationUnit, fixRewriteOperations);
-		if (options == null) {
-			fCleanUpOptions= new Hashtable();			
-		} else {
-			fCleanUpOptions= options;
-		}
+		fCleanUpOptions= options;
 	}
 
 	public UnusedCodeCleanUp getCleanUp() {
+		if (fCleanUpOptions == null)
+			return null;
+		
 		return new UnusedCodeCleanUp(fCleanUpOptions);
 	}
 
