@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,10 +17,15 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -35,18 +40,18 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.internal.corext.refactoring.changes.ClasspathChange;
-
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.internal.ui.text.correction.ClasspathFixProcessorDescriptor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectMainTypeNameProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectPackageDeclarationProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -931,25 +936,13 @@ public class ReorgQuickFixTest extends QuickFixTest {
 			buf.append("}\n");
 			otherPack.createCompilationUnit("Foo.java", buf.toString(), false, null);
 
-			CompilationUnit astRoot= getASTRoot(cu);
-			ArrayList proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 7);
-			assertCorrectLabels(proposals);
-
-			int nCreateCU= 0;
-			for (int i= 0; i < proposals.size(); i++) {
-				ChangeCorrectionProposal curr=  (ChangeCorrectionProposal) proposals.get(i);
-				if (curr.getChange() instanceof ClasspathChange) {
-					curr.apply(null);
-
-					IClasspathEntry[] newClasspath= cu.getJavaProject().getRawClasspath();
-					assertEquals(prevClasspath.length + 1, newClasspath.length);
-					assertEquals(otherProject.getPath(), newClasspath[prevClasspath.length].getPath());
-				} else if (curr instanceof NewCUUsingWizardProposal) {
-					nCreateCU++;
-				}
-			}
-			assertEquals(4, nCreateCU);
+			MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, "", null);			
+			ClasspathFixProposal[] proposals= ClasspathFixProcessorDescriptor.getProposals(cu.getJavaProject(), "mylib.Foo", status);
+			assertEquals(1, proposals.length);
+			assertTrue(status.isOK());
+			
+			assertAddedClassPathEntry(proposals[0], otherProject.getPath(), cu, prevClasspath);
+			
 		} finally {
 			JavaProjectHelper.delete(otherProject);
 		}
@@ -971,28 +964,25 @@ public class ReorgQuickFixTest extends QuickFixTest {
 			assertTrue("lib does not exist",  lib != null && lib.exists());
 			IPackageFragmentRoot otherRoot= JavaProjectHelper.addLibraryWithImport(otherProject, Path.fromOSString(lib.getPath()), null, null);
 
-			CompilationUnit astRoot= getASTRoot(cu);
-			ArrayList proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 7);
-			assertCorrectLabels(proposals);
+			MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, "", null);			
+			ClasspathFixProposal[] proposals= ClasspathFixProcessorDescriptor.getProposals(cu.getJavaProject(), "mylib.Foo", status);
+			assertEquals(1, proposals.length);
+			assertTrue(status.isOK());
 
-			int nCreateCU= 0;
-			for (int i= 0; i < proposals.size(); i++) {
-				ChangeCorrectionProposal curr=  (ChangeCorrectionProposal) proposals.get(i);
-				if (curr.getChange() instanceof ClasspathChange) {
-					curr.apply(null);
-					IClasspathEntry[] newClasspath= cu.getJavaProject().getRawClasspath();
-					assertEquals(prevClasspath.length + 1, newClasspath.length);
-					assertEquals(otherRoot.getPath(), newClasspath[prevClasspath.length].getPath());
-				} else if (curr instanceof NewCUUsingWizardProposal) {
-					nCreateCU++;
-				}
-			}
-			assertEquals(4, nCreateCU);
+			assertAddedClassPathEntry(proposals[0], otherRoot.getPath(), cu, prevClasspath);
 		} finally {
 			JavaProjectHelper.delete(otherProject);
 		}
 	}
+	
+	private void assertAddedClassPathEntry(ClasspathFixProposal curr, IPath addedPath, ICompilationUnit cu, IClasspathEntry[] prevClasspath) throws CoreException {
+		new PerformChangeOperation(curr.createChange(null)).run(null);
+		
+		IClasspathEntry[] newClasspath= cu.getJavaProject().getRawClasspath();
+		assertEquals(prevClasspath.length + 1, newClasspath.length);
+		assertEquals(addedPath, newClasspath[prevClasspath.length].getPath());
+	}
+	
 
 	public void testAddToClasspathExportedExtJAR() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1002,6 +992,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		IClasspathEntry[] prevClasspath= cu.getJavaProject().getRawClasspath();
 
 		IJavaProject otherProject= JavaProjectHelper.createJavaProject("other", "bin");
 		try {
@@ -1013,11 +1004,15 @@ public class ReorgQuickFixTest extends QuickFixTest {
 			// exported external JAR
 			IClasspathEntry entry= JavaCore.newLibraryEntry(path, null, null, true);
 			JavaProjectHelper.addToClasspath(otherProject, entry);
-
-			CompilationUnit astRoot= getASTRoot(cu);
-			ArrayList proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 8);
-			assertCorrectLabels(proposals);
+			
+			MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, "", null);			
+			ClasspathFixProposal[] proposals= ClasspathFixProcessorDescriptor.getProposals(cu.getJavaProject(), "mylib.Foo", status);
+			assertEquals(2, proposals.length);
+			assertTrue(status.isOK());
+			
+			assertAddedClassPathEntry(proposals[0], otherProject.getPath(), cu, prevClasspath);
+			assertAddedClassPathEntry(proposals[1], path, cu, prevClasspath);
+			
 		} finally {
 			JavaProjectHelper.delete(otherProject);
 		}
@@ -1064,25 +1059,13 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 			IClasspathEntry entry= JavaCore.newContainerEntry(containerPath);
 			JavaProjectHelper.addToClasspath(otherProject, entry);
-
-			CompilationUnit astRoot= getASTRoot(cu);
-			ArrayList proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 7);
-			assertCorrectLabels(proposals);
-
-			int nCreateCU= 0;
-			for (int i= 0; i < proposals.size(); i++) {
-				ChangeCorrectionProposal curr=  (ChangeCorrectionProposal) proposals.get(i);
-				if (curr.getChange() instanceof ClasspathChange) {
-					curr.apply(null);
-					IClasspathEntry[] newClasspath= cu.getJavaProject().getRawClasspath();
-					assertEquals(prevClasspath.length + 1, newClasspath.length);
-					assertEquals(containerPath, newClasspath[prevClasspath.length].getPath());
-				} else if (curr instanceof NewCUUsingWizardProposal) {
-					nCreateCU++;
-				}
-			}
-			assertEquals(4, nCreateCU);
+			
+			MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, "", null);			
+			ClasspathFixProposal[] proposals= ClasspathFixProcessorDescriptor.getProposals(cu.getJavaProject(), "mylib.Foo", status);
+			assertEquals(1, proposals.length);
+			assertTrue(status.isOK());
+			
+			assertAddedClassPathEntry(proposals[0], containerPath, cu, prevClasspath);
 		} finally {
 			JavaProjectHelper.delete(otherProject);
 		}
