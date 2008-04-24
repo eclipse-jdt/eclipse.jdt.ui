@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -80,7 +81,9 @@ public class PropertiesFileSpellingEngine extends SpellingEngine {
 				}
 			}
 		} catch (BadLocationException x) {
-			JavaPlugin.log(x);
+			// Ignore: the document has been changed in another thread and will be checked again
+		} catch (AssertionFailedException x) {
+			// Ignore: the document has been changed in another thread and will be checked again
 		}
 	}
 
