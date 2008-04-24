@@ -101,6 +101,8 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 
 	private Button fCompletionInsertsRadioButton;
 	private Button fCompletionOverwritesRadioButton;
+	private Button fInsertParameterNamesRadioButton;
+	private Button fInsertBestGuessRadioButton;
 
 	public CodeAssistConfigurationBlock(IStatusChangeListener statusListener, IWorkbenchPreferenceContainer workbenchcontainer) {
 		super(statusListener, null, getAllKeys(), workbenchcontainer);
@@ -166,12 +168,40 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		createSelectionDependency(master, slave);
 		
 		
-		label= PreferencesMessages.JavaEditorPreferencePage_fillArgumentNamesOnMethodCompletion;
+		label= PreferencesMessages.JavaEditorPreferencePage_fillArgumentsOnMethodCompletion;
 		master= addCheckBox(composite, label, PREF_CODEASSIST_FILL_ARGUMENT_NAMES, trueFalse, 0);
 		
-		label= PreferencesMessages.JavaEditorPreferencePage_guessArgumentNamesOnMethodCompletion;
-		slave= addCheckBox(composite, label, PREF_CODEASSIST_GUESS_METHOD_ARGUMENTS, trueFalse, 20);
-		createSelectionDependency(master, slave);
+		Composite fillComposite= new Composite(composite, SWT.NONE);
+		GridData gd= new GridData();
+		gd.horizontalSpan= 2;
+		gd.horizontalIndent= 20;
+		fillComposite.setLayoutData(gd);
+		GridLayout layout= new GridLayout();
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
+		layout.numColumns= 2;
+		fillComposite.setLayout(layout);
+
+		
+		SelectionListener completionSelectionListener= new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				boolean state= fInsertBestGuessRadioButton.getSelection();
+				setValue(PREF_CODEASSIST_GUESS_METHOD_ARGUMENTS, state);
+			}
+		};
+
+		fInsertParameterNamesRadioButton= new Button(fillComposite, SWT.RADIO | SWT.LEFT);
+		fInsertParameterNamesRadioButton.setText(PreferencesMessages.JavaEditorPreferencePage_fillParameterNamesOnMethodCompletion);
+		fInsertParameterNamesRadioButton.setLayoutData(new GridData());
+		fInsertParameterNamesRadioButton.addSelectionListener(completionSelectionListener);
+
+		fInsertBestGuessRadioButton= new Button(fillComposite, SWT.RADIO | SWT.LEFT);
+		fInsertBestGuessRadioButton.setText(PreferencesMessages.JavaEditorPreferencePage_fillBestGuessedArgumentsOnMethodCompletion);
+		fInsertBestGuessRadioButton.setLayoutData(new GridData());
+		fInsertBestGuessRadioButton.addSelectionListener(completionSelectionListener);
+
+		createSelectionDependency(master, fInsertParameterNamesRadioButton);
+		createSelectionDependency(master, fInsertBestGuessRadioButton);
 	}
 
 	/**
@@ -349,9 +379,16 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	private void initializeFields() {
-		boolean completionInserts= getBooleanValue(PREF_CODEASSIST_INSERT_COMPLETION);
-		fCompletionInsertsRadioButton.setSelection(completionInserts);
-		fCompletionOverwritesRadioButton.setSelection(!completionInserts);
+		boolean value= getBooleanValue(PREF_CODEASSIST_INSERT_COMPLETION);
+		fCompletionInsertsRadioButton.setSelection(value);
+		fCompletionOverwritesRadioButton.setSelection(!value);
+		value= getBooleanValue(PREF_CODEASSIST_GUESS_METHOD_ARGUMENTS);
+		fInsertBestGuessRadioButton.setSelection(value);
+		fInsertParameterNamesRadioButton.setSelection(!value);
+		
+		value= getBooleanValue(PREF_CODEASSIST_FILL_ARGUMENT_NAMES);
+		fInsertParameterNamesRadioButton.setEnabled(value);
+		fInsertBestGuessRadioButton.setEnabled(value);
 		
 		updateAutoactivationControls();
  	}
@@ -361,7 +398,6 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
         setControlEnabled(PREF_CODEASSIST_AUTOACTIVATION_DELAY, autoactivation);
         setControlEnabled(PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, autoactivation);
         setControlEnabled(PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, autoactivation);
-        setControlEnabled(PREF_CODEASSIST_GUESS_METHOD_ARGUMENTS, getBooleanValue(PREF_CODEASSIST_FILL_ARGUMENT_NAMES));
     }
 
     
