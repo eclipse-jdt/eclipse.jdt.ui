@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,6 +53,7 @@ import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension2;
+import org.eclipse.jface.text.IInformationControlExtension5;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.IViewportListener;
 import org.eclipse.jface.text.Position;
@@ -80,7 +81,7 @@ import org.eclipse.jface.text.source.VerticalRulerEvent;
  *
  * @since 3.2
  */
-public class AnnotationExpansionControl implements IInformationControl, IInformationControlExtension, IInformationControlExtension2 {
+public class AnnotationExpansionControl implements IInformationControl, IInformationControlExtension, IInformationControlExtension2, IInformationControlExtension5 {
 
 
 	public interface ICallback {
@@ -844,6 +845,44 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 
 	private Color getSelectionColor(Display disp) {
 		return disp.getSystemColor(SWT.COLOR_GRAY);
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.IInformationControlExtension5#computeSizeConstraints(int, int)
+	 * @since 3.4
+	 */
+	public Point computeSizeConstraints(int widthInChars, int heightInChars) {
+		return null;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.IInformationControlExtension5#containsControl(org.eclipse.swt.widgets.Control)
+	 * @since 3.4
+	 */
+	public boolean containsControl(Control control) {
+		do {
+			if (control == fShell)
+				return true;
+			if (control instanceof Shell)
+				return false;
+			control= control.getParent();
+		} while (control != null);
+		return false;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.IInformationControlExtension5#getInformationPresenterControlCreator()
+	 * @since 3.4
+	 */
+	public IInformationControlCreator getInformationPresenterControlCreator() {
+		return null;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.IInformationControlExtension5#isVisible()
+	 */
+	public boolean isVisible() {
+		return fShell != null && !fShell.isDisposed() && fShell.isVisible();
 	}
 
 }
