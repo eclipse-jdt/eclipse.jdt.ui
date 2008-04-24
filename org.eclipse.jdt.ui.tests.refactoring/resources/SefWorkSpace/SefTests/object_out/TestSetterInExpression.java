@@ -10,7 +10,8 @@ public class TestSetterInExpression {
 	}
 
 	String setField(String field) {
-		return this.field = field;
+		this.field = field;
+		return field;
 	}
 
 	String getField() {

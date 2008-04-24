@@ -61,7 +61,6 @@ import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -103,6 +102,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -625,21 +625,30 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		result.parameters().add(param);
 		param.setName(ast.newSimpleName(fArgName));
 		param.setType((Type)rewriter.createCopyTarget(type));
+		param.setExtraDimensions(fFieldDeclaration.getExtraDimensions());
 		
 		Block block= ast.newBlock();
 		result.setBody(block);
-		Assignment ass= ast.newAssignment();
-		ass.setLeftHandSide(createFieldAccess(ast));
-		ass.setRightHandSide(ast.newSimpleName(fArgName));
-		if (fSetterMustReturnValue) {
-			ReturnStatement rs= ast.newReturnStatement();
-			rs.setExpression(ass);
-			block.statements().add(rs);
+
+		AbstractTypeDeclaration typeDecl = (AbstractTypeDeclaration) field.getParent();
+
+		String fieldAccess= createFieldAccess();
+		String body= CodeGeneration.getSetterMethodBodyContent(fField.getCompilationUnit(), typeDecl.getName().getFullyQualifiedName(), fSetterName, fieldAccess, fArgName, lineDelimiter);
+		if (body != null) {
+			ASTNode setterNode= rewriter.createStringPlaceholder(body, ASTNode.BLOCK);
+			block.statements().add(setterNode);
 		} else {
-			block.statements().add(ast.newExpressionStatement(ass));
+			Assignment ass= ast.newAssignment();
+			ass.setLeftHandSide((Expression) rewriter.createStringPlaceholder(fieldAccess, ASTNode.QUALIFIED_NAME));
+			ass.setRightHandSide(ast.newSimpleName(fArgName));
+			block.statements().add(ass);
 		}
-		
-		if (fGenerateJavadoc) {
+        if (fSetterMustReturnValue) {
+        	ReturnStatement rs= ast.newReturnStatement();
+        	rs.setExpression(ast.newSimpleName(fArgName));
+        	block.statements().add(rs);
+        }
+        if (fGenerateJavadoc) {
 			String string= CodeGeneration.getSetterComment(
 				fField.getCompilationUnit() , getTypeName(field.getParent()), fSetterName, 
 				fField.getElementName(), ASTNodes.asString(type), fArgName, 
@@ -659,14 +668,26 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		MethodDeclaration result= ast.newMethodDeclaration();
 		result.setName(ast.newSimpleName(fGetterName));
 		result.modifiers().addAll(ASTNodeFactory.newModifiers(ast, createModifiers()));
-		result.setReturnType2((Type)rewriter.createCopyTarget(type));
+		Type returnType= (Type)rewriter.createCopyTarget(type);
+		if (fFieldDeclaration.getExtraDimensions() > 0) {
+			returnType= ast.newArrayType(returnType, fFieldDeclaration.getExtraDimensions());
+		}
+		result.setReturnType2(returnType);
 		
 		Block block= ast.newBlock();
 		result.setBody(block);
-		ReturnStatement rs= ast.newReturnStatement();
-		rs.setExpression(ast.newSimpleName(fField.getElementName()));
-		block.statements().add(rs);
-		if (fGenerateJavadoc) {
+
+        AbstractTypeDeclaration typeDecl = (AbstractTypeDeclaration) field.getParent();	
+		String body= CodeGeneration.getGetterMethodBodyContent(fField.getCompilationUnit(), typeDecl.getName().getIdentifier(), fGetterName, fField.getElementName(), lineDelimiter);
+		if (body != null) {
+			ASTNode getterNode= rewriter.createStringPlaceholder(body, ASTNode.BLOCK);
+	    	block.statements().add(getterNode);
+		} else {
+			ReturnStatement rs= ast.newReturnStatement();
+			rs.setExpression(ast.newSimpleName(fField.getElementName()));
+			block.statements().add(rs);
+		}
+	    if (fGenerateJavadoc) {
 			String string= CodeGeneration.getGetterComment(
 				fField.getCompilationUnit() , getTypeName(field.getParent()), fGetterName,
 				fField.getElementName(), ASTNodes.asString(type), 
@@ -693,22 +714,20 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private Expression createFieldAccess(AST ast) throws JavaModelException {
+	private String createFieldAccess() throws JavaModelException {
 		String fieldName= fField.getElementName();
-		if (fArgName.equals(fieldName)) {
-			if (JdtFlags.isStatic(fField)) {
-				return ast.newQualifiedName(
-					ast.newSimpleName(fField.getDeclaringType().getElementName()), 
-					ast.newSimpleName(fieldName));
-			} else {
-				FieldAccess result= ast.newFieldAccess();
-				result.setExpression(ast.newThisExpression());
-				result.setName(ast.newSimpleName(fieldName));
-				return result;
+		boolean nameConflict= fArgName.equals(fieldName);
+		
+		if (JdtFlags.isStatic(fField)) {
+			if (nameConflict) {
+				return JavaModelUtil.concatenateName(fField.getDeclaringType().getElementName(), fieldName);
 			}
 		} else {
-			return ast.newSimpleName(fieldName);
+			if (nameConflict || StubUtility.useThisForFieldAccess(fField.getJavaProject())) {
+				return "this." + fieldName; //$NON-NLS-1$
+			}
 		}
+		return fieldName;
 	}
 	
 	private void checkArgName() {

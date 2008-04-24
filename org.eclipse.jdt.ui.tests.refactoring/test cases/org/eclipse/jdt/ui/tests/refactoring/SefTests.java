@@ -203,6 +203,11 @@ public class SefTests extends AbstractSelectionTestCase {
 		objectTest("field");
 	}
 	
+    public void testCStyleArrayRead() throws Exception {
+      objectTest("field");
+    }
+
+	
 	public void testSetterInAssignment() throws Exception {
 		objectTest("field");
 	}
