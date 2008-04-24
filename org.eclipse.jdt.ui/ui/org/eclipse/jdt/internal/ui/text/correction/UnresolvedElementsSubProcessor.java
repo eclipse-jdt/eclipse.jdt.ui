@@ -585,20 +585,22 @@ public class UnresolvedElementsSubProcessor {
 			}
 			simpleBinding= simpleBinding.getTypeDeclaration();
 
-			resolvedTypeName= simpleBinding.getQualifiedName();
-			CUCorrectionProposal proposal= createTypeRefChangeProposal(cu, resolvedTypeName, node, relevance + 2, elements.length);
-			proposals.add(proposal);
-			if (proposal instanceof AddImportCorrectionProposal)
-				proposal.setRelevance(relevance + elements.length + 2);
-
-			if (binding.isParameterizedType() && node.getParent() instanceof SimpleType && !(node.getParent().getParent() instanceof Type)) {
-				proposals.add(createTypeRefChangeFullProposal(cu, binding, node, relevance + 2));
-			}
+			if (!simpleBinding.isRecovered()) {
+				resolvedTypeName= simpleBinding.getQualifiedName();
+				CUCorrectionProposal proposal= createTypeRefChangeProposal(cu, resolvedTypeName, node, relevance + 2, elements.length);
+				proposals.add(proposal);
+				if (proposal instanceof AddImportCorrectionProposal)
+					proposal.setRelevance(relevance + elements.length + 2);
+	
+				if (binding.isParameterizedType() && node.getParent() instanceof SimpleType && !(node.getParent().getParent() instanceof Type)) {
+					proposals.add(createTypeRefChangeFullProposal(cu, binding, node, relevance + 2));
+				}
+			}	
 		} else {
 			ASTNode normalizedNode= ASTNodes.getNormalizedNode(node);
 			if (!(normalizedNode.getParent() instanceof Type) && node.getParent() != normalizedNode) {
 				ITypeBinding normBinding= ASTResolving.guessBindingForTypeReference(normalizedNode);
-				if (normBinding != null) {
+				if (normBinding != null && !normBinding.isRecovered()) {
 					proposals.add(createTypeRefChangeFullProposal(cu, normBinding, normalizedNode, relevance + 2));
 				}
 			}
