@@ -172,6 +172,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getInvertEqualsProposal(context, coveringNode, null)
 				|| getConvertForLoopProposal(context, coveringNode, null)
 				|| getExtractLocalProposal(context, null)
+				|| getExtractMethodProposal(context, coveringNode, null)				
 				|| getInlineLocalProposal(context, coveringNode, null)
 				|| getConvertLocalToFieldProposal(context, coveringNode, null)
 				|| getConvertAnonymousToNestedProposal(context, coveringNode, null)
@@ -207,6 +208,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getArrayInitializerToArrayCreation(context, coveringNode, resultingCollections);
 				getCreateInSuperClassProposals(context, coveringNode, resultingCollections);
 				getExtractLocalProposal(context, resultingCollections);
+				getExtractMethodProposal(context, coveringNode, resultingCollections);
 				getInlineLocalProposal(context, coveringNode, resultingCollections);
 				getConvertLocalToFieldProposal(context, coveringNode, resultingCollections);				
 				getConvertAnonymousToNestedProposal(context, coveringNode, resultingCollections);
@@ -232,6 +234,56 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		return true;
 	}
+	
+	private static int getIndex(int offset, List statements) {
+		for (int i= 0; i < statements.size(); i++) {
+			Statement s= (Statement) statements.get(i);
+			if (offset < s.getStartPosition()) {
+				return i;
+			}
+			if (offset < s.getStartPosition() + s.getLength()) {
+				return -1;
+			}
+		}
+		return statements.size();
+	}
+	
+	private static boolean getExtractMethodProposal(IInvocationContext context, ASTNode coveringNode, Collection proposals) throws CoreException {
+		if (!(coveringNode instanceof Expression) && !(coveringNode instanceof Statement) && !(coveringNode instanceof Block)) {
+			return false;
+		}
+		if (coveringNode instanceof Block) {
+			List statements= ((Block) coveringNode).statements();
+			int startIndex= getIndex(context.getSelectionOffset(), statements);
+			if (startIndex == -1)
+				return false;
+			int endIndex= getIndex(context.getSelectionOffset() + context.getSelectionLength(), statements);
+			if (endIndex == -1 || endIndex <= startIndex)
+				return false;
+		}
+
+		if (proposals == null) {
+			return true;
+		}
+		
+		final ICompilationUnit cu= context.getCompilationUnit();
+		final ExtractMethodRefactoring extractMethodRefactoring= new ExtractMethodRefactoring(context.getASTRoot(), context.getSelectionOffset(), context.getSelectionLength());
+		extractMethodRefactoring.setMethodName("extracted"); //$NON-NLS-1$
+		if (extractMethodRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
+			String label= CorrectionMessages.QuickAssistProcessor_extractmethod_description;
+			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
+			extractMethodRefactoring.setLinkedProposalModel(linkedProposalModel);
+			
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractMethodRefactoring, 4, image);
+			proposal.setCommandId(EXTRACT_CONSTANT_ID);
+			proposal.setLinkedProposalModel(linkedProposalModel);
+			proposals.add(proposal);
+		}
+		return true;
+	}
+	
+	
 	
 	private static boolean getExtractLocalProposal(IInvocationContext context, Collection proposals) throws CoreException {
 		ASTNode node= context.getCoveredNode();
@@ -303,20 +355,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					etr.setConstantName(etr.guessConstantName()); // expensive
 				}
 			};
-			proposal.setCommandId(EXTRACT_CONSTANT_ID);
-			proposal.setLinkedProposalModel(linkedProposalModel);
-			proposals.add(proposal);
-		}
-		
-		final ExtractMethodRefactoring extractMethodRefactoring= new ExtractMethodRefactoring(context.getASTRoot(), expression.getStartPosition(), expression.getLength());
-		extractMethodRefactoring.setMethodName("extracted"); //$NON-NLS-1$
-		if (extractMethodRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
-			String label= CorrectionMessages.QuickAssistProcessor_extractmethod_description;
-			LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
-			extractMethodRefactoring.setLinkedProposalModel(linkedProposalModel);
-			
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
-			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractMethodRefactoring, 4, image);
 			proposal.setCommandId(EXTRACT_CONSTANT_ID);
 			proposal.setLinkedProposalModel(linkedProposalModel);
 			proposals.add(proposal);
@@ -899,11 +937,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getAddElseProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
-		Statement statement= ASTResolving.findParentStatement(node);
-		if (!(statement instanceof IfStatement)) {
+		if (!(node instanceof IfStatement)) {
 			return false;
 		}
-		IfStatement ifStatement= (IfStatement) statement;
+		IfStatement ifStatement= (IfStatement) node;
 		if (ifStatement.getElseStatement() != null) {
 			return false;
 		}
@@ -912,7 +949,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 		}
 
-		AST ast= statement.getAST();
+		AST ast= node.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		Block body= ast.newBlock();
 
@@ -1223,10 +1260,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
-		if (!isControlStatementWithBlock(statement)) {
-			if (!isControlStatementWithBlock(statement.getParent())) {
-				return false;
-			}
+		if (!isControlStatementWithBlock(node)) {
 			int statementStart= statement.getStartPosition();
 			int statementEnd= statementStart + statement.getLength();
 
