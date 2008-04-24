@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -495,6 +495,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
 
+		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
 		enable(CleanUpConstants.FORMAT_CORRECT_INDENTATION);
 
@@ -529,6 +530,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
 
+		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
 		enable(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL);
@@ -549,6 +551,48 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		buf.append("\n");
 		buf.append("    public int field;\n");
 		buf.append("\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertEquals(expected1, cu1.getBuffer().getContents());
+	}
+	
+	public void testBug228659() throws Exception {
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package a;\n");
+		buf.append("public class Test {\n");
+		buf.append("    /**\n");
+		buf.append("     */\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String s1 = \"\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
+		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
+
+		buf= new StringBuffer();
+		buf.append("package a;\n");
+		buf.append("public class Test {\n");
+		buf.append("    /**\n");
+		buf.append("     */\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String s1  = \"\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		editCUInEditor(cu1, buf.toString());
+
+		buf= new StringBuffer();
+		buf.append("package a;\n");
+		buf.append("public class Test {\n");
+		buf.append("    /**\n");
+		buf.append("     */\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String s1 = \"\";\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
 

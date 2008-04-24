@@ -216,9 +216,11 @@ public class CodeFormatFix implements IFix {
 			
 			int typedRegionIndex= getNextCommentRegion(typedRegions, 0);
 			
-			for (int i= 0; i < changedRegions.length; i++) {
+			int i= 0;
+			while (i < changedRegions.length) {
 				if (typedRegionIndex == -1) {
 					result.add(changedRegions[i]);
+					i++;
 				} else {
 					ITypedRegion commentRegion= typedRegions[typedRegionIndex];
 
@@ -241,6 +243,7 @@ public class CodeFormatFix implements IFix {
 						
 						int regionEnd= Math.max(changedRegions[i].getOffset() + changedRegions[i].getLength(), commentRegionEnd);
 						result.add(new Region(regionStart, regionEnd - regionStart));
+						i++;
 					}
 
 					typedRegionIndex= getNextCommentRegion(typedRegions, typedRegionIndex + 1);
