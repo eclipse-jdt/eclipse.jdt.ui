@@ -16,6 +16,7 @@ import java.io.File;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -120,11 +121,15 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 		if (lastSeparatorIndex != -1) {
 			dialog.setFilterPath(currentSourceString.substring(0, lastSeparatorIndex));
 			dialog.setFileName(currentSourceString.substring(lastSeparatorIndex + 1, currentSourceString.length()));
-		} else
-			dialog.setFileName(currentSourceString);
+		}
 		String selectedFileName= dialog.open();
-		if (selectedFileName != null)
+		if (selectedFileName != null) {
+			IContainer[] findContainersForLocation= ResourcesPlugin.getWorkspace().getRoot().findContainersForLocation(new Path(selectedFileName));
+			if (findContainersForLocation.length > 0) {
+				selectedFileName= findContainersForLocation[0].getFullPath().makeRelative().toString();
+			}
 			fDestinationNamesCombo.setText(selectedFileName);
+		}
 	}
 
 
