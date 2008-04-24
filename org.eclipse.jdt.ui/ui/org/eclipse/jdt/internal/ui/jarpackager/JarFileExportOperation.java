@@ -204,12 +204,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			IResource resource= null;
 			if (element instanceof IJavaElement) {
 				IJavaElement je= (IJavaElement)element;
-				try {
-					resource= je.getUnderlyingResource();
-				} catch (JavaModelException ex) {
-					continue;
-				}
-				
+				resource= je.getResource();			
 				if (resource == null) {
 					if (element instanceof IPackageFragmentRoot) {
 						IPackageFragmentRoot root= (IPackageFragmentRoot) element;
@@ -225,9 +220,9 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 					}
 					continue;
 				}
+			} else if (element instanceof IResource) {
+				resource= (IResource) element;
 			}
-			else
-				resource= (IResource)element;
 			if (resource != null) {
 				if (resource.getType() == IResource.FILE)
 					count++;
@@ -300,8 +295,11 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			jProject= typeRootElement.getJavaProject();
 			pkgRoot= JavaModelUtil.getPackageFragmentRoot(je);
 			resource= typeRootElement.getResource();
-		} else
-			resource= (IResource)element;
+		} else if (element instanceof IResource) {
+			resource= (IResource) element;
+		} else {
+			return;
+		}
 
 		if (!resource.isAccessible()) {
 			addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_resourceNotFound, resource.getFullPath()), null);

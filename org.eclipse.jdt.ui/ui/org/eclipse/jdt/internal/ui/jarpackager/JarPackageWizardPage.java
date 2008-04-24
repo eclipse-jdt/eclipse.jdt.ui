@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,6 +49,8 @@ import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.PlatformUI;
@@ -77,7 +79,6 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
 
 /**
  *	Page 1 of the JAR Package wizard
@@ -369,7 +370,15 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		fInputGroup.setTreeComparator(new JavaElementComparator());
 		fInputGroup.setListComparator(new JavaElementComparator());
 		fInputGroup.addTreeFilter(new ContainerFilter(ContainerFilter.FILTER_NON_CONTAINERS));
-		fInputGroup.addTreeFilter(new LibraryFilter());
+		fInputGroup.addTreeFilter(new ViewerFilter() {
+			public boolean select(Viewer viewer, Object p, Object element) {
+				if (element instanceof IPackageFragmentRoot) {
+					IPackageFragmentRoot root= (IPackageFragmentRoot) element;
+					return !root.isArchive() && !root.isExternal();
+				}
+				return true;
+			}
+		});
 		fInputGroup.addListFilter(new ContainerFilter(ContainerFilter.FILTER_CONTAINERS));
 		fInputGroup.getTree().addListener(SWT.MouseUp, this);
 		fInputGroup.getTable().addListener(SWT.MouseUp, this);
