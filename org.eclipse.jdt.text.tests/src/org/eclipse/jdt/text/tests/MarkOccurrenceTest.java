@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,20 +17,19 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.RGB;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
-import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
-import org.eclipse.jdt.text.tests.performance.DisplayHelper;
-import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
-import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IDocument;
@@ -40,15 +39,26 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.swt.custom.StyleRange;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.graphics.RGB;
+
+import org.eclipse.ui.editors.text.EditorsUI;
+
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.texteditor.AnnotationPreference;
+
+import org.eclipse.jdt.core.dom.CompilationUnit;
+
+import org.eclipse.jdt.text.tests.performance.DisplayHelper;
+import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
+import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 
 
 /**
@@ -168,7 +178,7 @@ public class MarkOccurrenceTest extends TestCase {
 	}
 	
 	public void testMarkOccurrencesAfterEditorReuse() {
-		IPreferenceStore store= PlatformUI.getWorkbench().getPreferenceStore();
+		IPreferenceStore store= getPlatformUIStore();
 		store.setValue("REUSE_OPEN_EDITORS_BOOLEAN", true);
 		
 		int reuseOpenEditors= store.getInt("REUSE_OPEN_EDITORS");
@@ -200,6 +210,18 @@ public class MarkOccurrenceTest extends TestCase {
 			store.setValue("REUSE_OPEN_EDITORS_BOOLEAN", false);
 			store.setValue("REUSE_OPEN_EDITORS", reuseOpenEditors);
 		}
+	}
+
+	/**
+	 * Returns the preference store from Platform UI.
+	 *
+	 * @return the preference store
+	 * @since 3.4
+	 * @deprecated to get rid of deprecation warning in this file
+	 */
+	private IPreferenceStore getPlatformUIStore() {
+		IPreferenceStore store= PlatformUI.getWorkbench().getPreferenceStore();
+		return store;
 	}
 	
 	public void testMarkMethodOccurrences() {
