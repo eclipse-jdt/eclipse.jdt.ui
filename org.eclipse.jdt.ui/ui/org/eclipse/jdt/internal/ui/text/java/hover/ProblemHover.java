@@ -120,9 +120,9 @@ public class ProblemHover extends AbstractAnnotationHover {
 						JavaHoverMessages.ProblemHover_chooseSettingsTypeDialog_message,
 						new Object[] { JavaElementLabels.getElementLabel(fProject, JavaElementLabels.ALL_DEFAULT) });
 
-				String[] buttons= new String[] { 
-						JavaHoverMessages.ProblemHover_chooseSettingsTypeDialog_button_project, 
-						JavaHoverMessages.ProblemHover_chooseSettingsTypeDialog_button_workspace, 
+				String[] buttons= new String[] {
+						JavaHoverMessages.ProblemHover_chooseSettingsTypeDialog_button_project,
+						JavaHoverMessages.ProblemHover_chooseSettingsTypeDialog_button_workspace,
 						JavaHoverMessages.ProblemHover_chooseSettingsTypeDialog_button_cancel };
 				
 				int result= OptionalMessageDialog.open(
@@ -199,7 +199,11 @@ public class ProblemHover extends AbstractAnnotationHover {
 			ProblemLocation location= new ProblemLocation(position.getOffset(), position.getLength(), javaAnnotation);
 			ICompilationUnit cu= javaAnnotation.getCompilationUnit();
 
-			IInvocationContext context= new AssistContext(cu, location.getOffset(), location.getLength());
+			ISourceViewer sourceViewer= null;
+			if (viewer instanceof ISourceViewer)
+				sourceViewer= (ISourceViewer) viewer;
+
+			IInvocationContext context= new AssistContext(cu, sourceViewer, location.getOffset(), location.getLength());
 			if (!SpellingAnnotation.TYPE.equals(javaAnnotation.getType()) && !hasProblem(context.getASTRoot().getProblems(), location))
 				return NO_PROPOSALS;
 
