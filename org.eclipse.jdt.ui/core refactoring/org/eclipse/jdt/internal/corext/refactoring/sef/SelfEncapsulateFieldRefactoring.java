@@ -629,11 +629,9 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		
 		Block block= ast.newBlock();
 		result.setBody(block);
-
-		AbstractTypeDeclaration typeDecl = (AbstractTypeDeclaration) field.getParent();
-
+		
 		String fieldAccess= createFieldAccess();
-		String body= CodeGeneration.getSetterMethodBodyContent(fField.getCompilationUnit(), typeDecl.getName().getFullyQualifiedName(), fSetterName, fieldAccess, fArgName, lineDelimiter);
+		String body= CodeGeneration.getSetterMethodBodyContent(fField.getCompilationUnit(), getTypeName(field.getParent()), fSetterName, fieldAccess, fArgName, lineDelimiter);
 		if (body != null) {
 			ASTNode setterNode= rewriter.createStringPlaceholder(body, ASTNode.BLOCK);
 			block.statements().add(setterNode);
@@ -677,8 +675,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		Block block= ast.newBlock();
 		result.setBody(block);
 
-        AbstractTypeDeclaration typeDecl = (AbstractTypeDeclaration) field.getParent();	
-		String body= CodeGeneration.getGetterMethodBodyContent(fField.getCompilationUnit(), typeDecl.getName().getIdentifier(), fGetterName, fField.getElementName(), lineDelimiter);
+		String body= CodeGeneration.getGetterMethodBodyContent(fField.getCompilationUnit(), getTypeName(field.getParent()), fGetterName, fField.getElementName(), lineDelimiter);
 		if (body != null) {
 			ASTNode getterNode= rewriter.createStringPlaceholder(body, ASTNode.BLOCK);
 	    	block.statements().add(getterNode);
