@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,17 +23,14 @@ import org.eclipse.jdt.core.JavaModelException;
  */
 public class EmptyPackageFilter extends ViewerFilter {
 
-	/**
-	 * Returns the result of this filter, when applied to the
-	 * given inputs.
-	 *
-	 * @return Returns true if element should be included in filtered set
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
 	public boolean select(Viewer viewer, Object parent, Object element) {
 		if (element instanceof IPackageFragment) {
 			IPackageFragment pkg= (IPackageFragment)element;
 			try {
-				return pkg.hasChildren();
+				return pkg.hasChildren() || pkg.getNonJavaResources().length > 0;
 			} catch (JavaModelException e) {
 				return false;
 			}
