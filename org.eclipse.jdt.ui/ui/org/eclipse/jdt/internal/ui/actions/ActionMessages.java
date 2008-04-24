@@ -375,15 +375,6 @@ public final class ActionMessages extends NLS {
 	public static String FindImplementOccurrencesAction_toolTip;
 	public static String FindMethodExitOccurrencesAction_label;
 	public static String FindMethodExitOccurrencesAction_tooltip;
-	public static String FormatAllAction_0;
-	public static String FormatAllAction_1;
-	public static String FormatAllAction_2;
-	public static String FormatAllAction_3;
-	public static String FormatAllAction_4;
-	public static String FormatAllAction_5;
-	public static String FormatAllAction_6;
-	public static String FormatAllAction_7;
-	public static String FormatAllAction_8;
 
 	public static String CategoryFilterActionGroup_JavaCategoryFilter_title;
 	public static String CategoryFilterActionGroup_SelectAllCategories;
