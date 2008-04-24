@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,6 @@ import java.util.jar.Manifest;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-
 
 import org.eclipse.jdt.core.IPackageFragment;
 
@@ -37,6 +36,8 @@ public class ManifestProvider implements IManifestProvider {
 	 * Creates a manifest as defined by the <code>JarPackage</code>.
 	 * 
 	 * @param	jarPackage	the JAR package specification
+	 * @return the manifest
+	 * @throws CoreException 
 	 */	
 	public Manifest create(JarPackageData jarPackage) throws CoreException {
 		Assert.isNotNull(jarPackage);
@@ -54,6 +55,7 @@ public class ManifestProvider implements IManifestProvider {
 	 * Creates a default manifest.
 	 * 
 	 * @param manifestVersion	the version of the manifest
+	 * @return the manifest
 	 */	
 	public Manifest createDefault(String manifestVersion) {
 		Manifest manifest= new Manifest();

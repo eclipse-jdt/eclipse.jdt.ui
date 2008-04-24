@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackager;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -37,8 +38,8 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 
-import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.SaveAsDialog;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -46,7 +47,6 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
@@ -91,6 +91,7 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 
 	/**
 	 *	Create an instance of this class
+	 * @param jarPackage 
 	 */
 	public JarOptionsPage(JarPackageData jarPackage) {
 		super(PAGE_NAME);
@@ -391,6 +392,7 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 	 *
 	 * @param parent the parent control
 	 * @param text the label text
+	 * @param bold bold or not
 	 * @return the new label control
 	 */
 	protected Label createLabel(Composite parent, String text, boolean bold) {

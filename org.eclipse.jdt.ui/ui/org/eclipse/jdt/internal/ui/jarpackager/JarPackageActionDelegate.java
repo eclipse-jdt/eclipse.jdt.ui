@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ abstract class JarPackageActionDelegate implements IObjectActionDelegate {
 
 	/**
 	 * Returns the active shell.
+	 * @return the active shell.
 	 */
 	protected Shell getShell() {
 		if (fShell != null)
@@ -69,6 +70,8 @@ abstract class JarPackageActionDelegate implements IObjectActionDelegate {
 	 * Returns the description file for the first description file in
 	 * the selection. Use this method if this action is only active if
 	 * one single file is selected.
+	 * @param selection the current selection
+	 * @return description file
 	 */
 	protected IFile getDescriptionFile(IStructuredSelection selection) {
 		return (IFile)selection.getFirstElement();
@@ -78,6 +81,8 @@ abstract class JarPackageActionDelegate implements IObjectActionDelegate {
 	 * Returns a description file for each description file in
 	 * the selection. Use this method if this action allows multiple
 	 * selection.
+	 * @param selection the current selection
+	 * @return description files
 	 */
 	protected IFile[] getDescriptionFiles(IStructuredSelection selection) {
 		IFile[] files= new IFile[selection.size()];
