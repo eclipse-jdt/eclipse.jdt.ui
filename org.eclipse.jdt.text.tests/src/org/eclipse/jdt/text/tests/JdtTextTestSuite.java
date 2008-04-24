@@ -12,7 +12,6 @@ package org.eclipse.jdt.text.tests;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.eclipse.jdt.text.tests.comments.CommentsTestSuite;
 import org.eclipse.jdt.text.tests.contentassist.ContentAssistTestSuite;
 import org.eclipse.jdt.text.tests.spelling.SpellingTestSuite;
 import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
@@ -43,7 +42,6 @@ public class JdtTextTestSuite {
 		suite.addTest(PluginsNotLoadedTest.suite());
 		suite.addTest(BracketInserterTest.suite());
 		suite.addTest(SpellingTestSuite.suite());
-		suite.addTest(CommentsTestSuite.suite());
 		suite.addTest(SemanticHighlightingTest.suite());
 		suite.addTest(AutoboxingSemanticHighlightingTest.suite());
 		suite.addTest(NewForLoopJavaContextTest.suite());

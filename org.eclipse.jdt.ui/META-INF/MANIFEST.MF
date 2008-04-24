@@ -78,7 +78,6 @@ Export-Package: org.eclipse.jdt.internal.corext;x-friends:="org.eclipse.jdt.juni
  org.eclipse.jdt.internal.ui.refactoring.sef;x-internal:=true,
  org.eclipse.jdt.internal.ui.search;x-internal:=true,
  org.eclipse.jdt.internal.ui.text;x-internal:=true,
- org.eclipse.jdt.internal.ui.text.comment;x-internal:=true,
  org.eclipse.jdt.internal.ui.text.correction;x-internal:=true,
  org.eclipse.jdt.internal.ui.text.correction.proposals;x-internal:=true,
  org.eclipse.jdt.internal.ui.text.folding;x-internal:=true,

@@ -26,7 +26,7 @@ import org.eclipse.jface.text.formatter.IFormattingContext;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
+import org.eclipse.jdt.internal.ui.text.java.JavaFormattingContext;
 
 
 public class CompilationUnitPreview extends JavaPreview {
@@ -50,7 +50,7 @@ public class CompilationUnitPreview extends JavaPreview {
         fPreviewDocument.set(fPreviewText);
 		
 		fSourceViewer.setRedraw(false);
-		final IFormattingContext context = new CommentFormattingContext();
+		final IFormattingContext context = new JavaFormattingContext();
 		try {
 			final IContentFormatter formatter =	fViewerConfiguration.getContentFormatter(fSourceViewer);
 			if (formatter instanceof IContentFormatterExtension) {

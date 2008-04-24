@@ -55,7 +55,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
-import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
+import org.eclipse.jdt.internal.ui.text.java.JavaFormattingContext;
 
 
 
@@ -149,7 +149,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 
 		// it's ok to use instance preferences here as subclasses replace
 		// with project dependent versions (see CompilationUnitEditor.AdaptedSourceViewer)
-		IFormattingContext context= new CommentFormattingContext();
+		IFormattingContext context= new JavaFormattingContext();
 		Map map= new HashMap(JavaCore.getOptions());
 		context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, map);
 

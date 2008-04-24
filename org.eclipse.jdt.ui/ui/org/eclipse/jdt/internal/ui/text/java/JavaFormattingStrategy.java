@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -61,7 +62,7 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 			Map partitioners= null;
 			try {
 
-				final TextEdit edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT, document.get(), partition.getOffset(), partition.getLength(), 0, TextUtilities.getDefaultLineDelimiter(document), getPreferences());
+				final TextEdit edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS, document.get(), partition.getOffset(), partition.getLength(), 0, TextUtilities.getDefaultLineDelimiter(document), getPreferences());
 				if (edit != null) {
 					if (edit.getChildrenSize() > 20)
 						partitioners= TextUtilities.removeDocumentPartitioners(document);

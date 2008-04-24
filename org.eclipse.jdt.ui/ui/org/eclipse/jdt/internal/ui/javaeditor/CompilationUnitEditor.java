@@ -132,9 +132,9 @@ import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
 import org.eclipse.jdt.internal.ui.text.Symbols;
-import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionCommandInstaller;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
+import org.eclipse.jdt.internal.ui.text.java.JavaFormattingContext;
 
 
 /**
@@ -218,7 +218,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		 * @since 3.0
 		 */
 		public IFormattingContext createFormattingContext() {
-			IFormattingContext context= new CommentFormattingContext();
+			IFormattingContext context= new JavaFormattingContext();
 
 			Map preferences;
 			IJavaElement inputJavaElement= getInputJavaElement();

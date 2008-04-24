@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.ui.text.comment;
+package org.eclipse.jdt.internal.ui.text.java;
 
 import org.eclipse.jface.text.formatter.FormattingContext;
 
@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
  *
  * @since 3.0
  */
-public class CommentFormattingContext extends FormattingContext {
+public class JavaFormattingContext extends FormattingContext {
 
 	/*
 	 * @see org.eclipse.jface.text.formatter.IFormattingContext#getPreferenceKeys()

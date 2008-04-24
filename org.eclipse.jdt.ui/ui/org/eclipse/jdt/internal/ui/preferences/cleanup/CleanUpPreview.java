@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.ui.actions.IndentAction;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
-import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
+import org.eclipse.jdt.internal.ui.text.java.JavaFormattingContext;
 
 
 public class CleanUpPreview extends JavaPreview {
@@ -96,7 +96,7 @@ public class CleanUpPreview extends JavaPreview {
         }
         
 		fSourceViewer.setRedraw(false);
-		final IFormattingContext context = new CommentFormattingContext();
+		final IFormattingContext context = new JavaFormattingContext();
 		try {
 			final IContentFormatter formatter =	fViewerConfiguration.getContentFormatter(fSourceViewer);
 			if (formatter instanceof IContentFormatterExtension) {

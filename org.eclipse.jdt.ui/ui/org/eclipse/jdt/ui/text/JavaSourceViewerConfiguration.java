@@ -84,7 +84,6 @@ import org.eclipse.jdt.internal.ui.text.JavaPresentationReconciler;
 import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
-import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
@@ -689,12 +688,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 */
 	public IContentFormatter getContentFormatter(ISourceViewer sourceViewer) {
 		final MultiPassContentFormatter formatter= new MultiPassContentFormatter(getConfiguredDocumentPartitioning(sourceViewer), IDocument.DEFAULT_CONTENT_TYPE);
-
 		formatter.setMasterStrategy(new JavaFormattingStrategy());
-		formatter.setSlaveStrategy(new CommentFormattingStrategy(), IJavaPartitions.JAVA_DOC);
-		formatter.setSlaveStrategy(new CommentFormattingStrategy(), IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
-		formatter.setSlaveStrategy(new CommentFormattingStrategy(), IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
-
 		return formatter;
 	}
 
