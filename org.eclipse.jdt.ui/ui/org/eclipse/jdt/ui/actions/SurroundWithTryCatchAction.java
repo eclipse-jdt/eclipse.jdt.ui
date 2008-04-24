@@ -16,13 +16,9 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.PlatformUI;
@@ -37,7 +33,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.surround.ISurroundWithTryCatchQuery;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -49,6 +44,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.LinkedProposalModelPresenter;
 
 /**
  * Action to surround a set of statements with a try/catch block.
@@ -64,30 +60,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
-
-	private static class Query implements ISurroundWithTryCatchQuery {
-		private Shell fParent;
-		public Query(Shell shell) {
-			fParent= shell;
-		}
-		public boolean catchRuntimeException() {
-			MessageDialog dialog = new MessageDialog(
-				fParent, getDialogTitle(),  null,	// accept the default window icon
-				RefactoringMessages.SurroundWithTryCatchAction_no_exceptions, 
-				MessageDialog.QUESTION, 
-				new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 
-				1) {
-					// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=18303
-					protected void createButtonsForButtonBar(Composite parent) {
-						super.createButtonsForButtonBar(parent);
-						Button button= getButton(1);
-						if (button != null)
-							button.setFocus();
-					}
-			};
-			return dialog.open() == 0; // yes selected
-		}
-	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
@@ -109,7 +81,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		ICompilationUnit cu= SelectionConverter.getInputAsCompilationUnit(fEditor);
 		if (cu == null || !ElementValidator.checkValidateEdit(cu, getShell(), getDialogTitle()))
 			return;
-		SurroundWithTryCatchRefactoring refactoring= SurroundWithTryCatchRefactoring.create(cu, selection, new Query(getShell()));
+		SurroundWithTryCatchRefactoring refactoring= SurroundWithTryCatchRefactoring.create(cu, selection);
 		
 		if (refactoring == null)
 			return;
@@ -134,12 +106,17 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 			WorkbenchRunnableAdapter adapter= new WorkbenchRunnableAdapter(op);
 			PlatformUI.getWorkbench().getProgressService().runInUI(
 				new BusyIndicatorRunnableContext(), adapter, adapter.getSchedulingRule());
+			
+			new LinkedProposalModelPresenter().enterLinkedMode(fEditor.getViewer(), fEditor, refactoring.getLinkedProposalModel());
+			
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.SurroundWithTryCatchAction_exception); 
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.SurroundWithTryCatchAction_exception); 
 		} catch (InterruptedException e) {
 			// not cancelable
+		} catch (BadLocationException e) {
+			// ignore
 		}
 	}
 

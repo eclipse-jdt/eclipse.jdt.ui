@@ -164,7 +164,7 @@ public class LocalCorrectionsSubProcessor {
 			length= selectionEnd - offset;
 		}
 
-		SurroundWithTryCatchRefactoring refactoring= SurroundWithTryCatchRefactoring.create(cu, offset, length, null);
+		SurroundWithTryCatchRefactoring refactoring= SurroundWithTryCatchRefactoring.create(cu, offset, length);
 		if (refactoring == null)
 			return;
 
@@ -173,6 +173,7 @@ public class LocalCorrectionsSubProcessor {
 			String label= CorrectionMessages.LocalCorrectionsSubProcessor_surroundwith_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, (CompilationUnitChange) refactoring.createChange(null), 6, image);
+			proposal.setLinkedProposalModel(refactoring.getLinkedProposalModel());
 			proposals.add(proposal);
 		}
 

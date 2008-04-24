@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,6 +57,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -78,9 +79,11 @@ import org.eclipse.jdt.internal.corext.util.Strings;
  * selected nodes (e.g. the declaration) into the try block.
  */
 public class SurroundWithTryCatchRefactoring extends Refactoring {
+	
+	public static final String GROUP_EXC_TYPE= "exc_type"; //$NON-NLS-1$
+	public static final String GROUP_EXC_NAME= "exc_name"; //$NON-NLS-1$
 
 	private Selection fSelection;
-	private ISurroundWithTryCatchQuery fQuery;
 	private SurroundWithTryCatchAnalyzer fAnalyzer;
 	private boolean fLeaveDirty;
 
@@ -90,20 +93,25 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	private ImportRewrite fImportRewrite;
 	private CodeScopeBuilder.Scope fScope;
 	private ASTNode[] fSelectedNodes;
+	
+	private LinkedProposalModel fLinkedProposalModel;
 
-	private SurroundWithTryCatchRefactoring(ICompilationUnit cu, Selection selection, ISurroundWithTryCatchQuery query) {
+	private SurroundWithTryCatchRefactoring(ICompilationUnit cu, Selection selection) {
 		fCUnit= cu;
 		fSelection= selection;
-		fQuery= query;
 		fLeaveDirty= false;
 	}
 
-	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, ITextSelection selection, ISurroundWithTryCatchQuery query) {
-		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(selection.getOffset(), selection.getLength()), query);
+	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, ITextSelection selection) {
+		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(selection.getOffset(), selection.getLength()));
 	}
 		
-	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, int offset, int length, ISurroundWithTryCatchQuery query) {
-		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(offset, length), query);
+	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, int offset, int length) {
+		return new SurroundWithTryCatchRefactoring(cu, Selection.createFromStartLength(offset, length));
+	}
+	
+	public LinkedProposalModel getLinkedProposalModel() {
+		return fLinkedProposalModel;
 	}
 
 	public void setLeaveDirty(boolean leaveDirty) {
@@ -128,7 +136,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		fRootNode= rootNode;
 			
-		fAnalyzer= new SurroundWithTryCatchAnalyzer(fCUnit, fSelection, fQuery);
+		fAnalyzer= new SurroundWithTryCatchAnalyzer(fCUnit, fSelection);
 		fRootNode.accept(fAnalyzer);
 		result.merge(fAnalyzer.getStatus());
 		return result;
@@ -169,6 +177,8 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			fRewriter.setTargetSourceRangeComputer(new SelectionAwareSourceRangeComputer(
 				fAnalyzer.getSelectedNodes(), fCUnit.getBuffer(), fSelection.getOffset(), fSelection.getLength()));
 			fImportRewrite= StubUtility.createImportRewrite(fRootNode, true);
+
+			fLinkedProposalModel= new LinkedProposalModel();
 			
 			fScope= CodeScopeBuilder.perform(fAnalyzer.getEnclosingBodyDeclaration(), fSelection).
 				findScope(fSelection.getOffset(), fSelection.getLength());
@@ -216,6 +226,8 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			if (st != null) {
 				catchClause.getBody().statements().add(st);
 			}
+			fLinkedProposalModel.getPositionGroup(GROUP_EXC_TYPE + i, true).addPosition(fRewriter.track(decl.getType()), i == 0);
+			fLinkedProposalModel.getPositionGroup(GROUP_EXC_NAME + i, true).addPosition(fRewriter.track(decl.getName()), false);
 		}
 		List variableDeclarations= getSpecialVariableDeclarationStatements();
 		ListRewrite statements= fRewriter.getListRewrite(tryStatement.getBody(), Block.STATEMENTS_PROPERTY);

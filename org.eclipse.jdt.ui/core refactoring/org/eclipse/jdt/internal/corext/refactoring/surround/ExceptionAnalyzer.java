@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -97,34 +96,34 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 	public boolean visit(MethodInvocation node) {
 		if (!isSelected(node))
 			return false;
-		return handleExceptions(node.resolveMethodBinding(), node.getAST());
+		return handleExceptions(node.resolveMethodBinding());
 	}
 	
 	public boolean visit(SuperMethodInvocation node) {
 		if (!isSelected(node))
 			return false;
-		return handleExceptions(node.resolveMethodBinding(), node.getAST());
+		return handleExceptions(node.resolveMethodBinding());
 	}
 	
 	public boolean visit(ClassInstanceCreation node) {
 		if (!isSelected(node))
 			return false;
-		return handleExceptions(node.resolveConstructorBinding(), node.getAST());
+		return handleExceptions(node.resolveConstructorBinding());
 	}
 	
 	public boolean visit(ConstructorInvocation node) {
 		if (!isSelected(node))
 			return false;
-		return handleExceptions(node.resolveConstructorBinding(), node.getAST());
+		return handleExceptions(node.resolveConstructorBinding());
 	}
 	
 	public boolean visit(SuperConstructorInvocation node) {
 		if (!isSelected(node))
 			return false;
-		return handleExceptions(node.resolveConstructorBinding(), node.getAST());
+		return handleExceptions(node.resolveConstructorBinding());
 	}	
 
-	private boolean handleExceptions(IMethodBinding binding, AST ast) {
+	private boolean handleExceptions(IMethodBinding binding) {
 		if (binding == null)
 			return true;
 		ITypeBinding[] exceptions= binding.getExceptionTypes();
