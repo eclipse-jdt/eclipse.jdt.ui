@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.spelling;
 
+import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -23,7 +24,6 @@ import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 
 
@@ -63,7 +63,9 @@ public class JavaSpellingEngine extends SpellingEngine {
 				}
 			}
 		} catch (BadLocationException x) {
-			JavaPlugin.log(x);
+			// Ignore: the document has been changed in another thread and will be checked again
+		} catch (AssertionFailedException x) {
+			// Ignore: the document has been changed in another thread and will be checked again
 		}
 	}
 }
