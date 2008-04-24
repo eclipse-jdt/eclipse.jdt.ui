@@ -150,6 +150,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	
 	/**
 	 *	Create an instance of this class
+	 * @param jarPackage 
 	 */
 	public JarManifestWizardPage(JarPackageData jarPackage) {
 		super(PAGE_NAME);
@@ -495,7 +496,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	}
 
 	protected void handleSealPackagesDetailsButtonPressed() {
-		SelectionDialog dialog= createPackageDialog(getPackagesForSelectedResources(fJarPackage));
+		SelectionDialog dialog= createPackageDialog(getPackagesForSelectedResources());
 		dialog.setTitle(JarPackagerMessages.JarManifestWizardPage_sealedPackagesSelectionDialog_title); 
 		dialog.setMessage(JarPackagerMessages.JarManifestWizardPage_sealedPackagesSelectionDialog_message); 
 		dialog.setInitialSelections(fJarPackage.getPackagesToSeal());
@@ -505,7 +506,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	}
 
 	protected void handleUnSealPackagesDetailsButtonPressed() {
-		SelectionDialog dialog= createPackageDialog(getPackagesForSelectedResources(fJarPackage));
+		SelectionDialog dialog= createPackageDialog(getPackagesForSelectedResources());
 		dialog.setTitle(JarPackagerMessages.JarManifestWizardPage_unsealedPackagesSelectionDialog_title); 
 		dialog.setMessage(JarPackagerMessages.JarManifestWizardPage_unsealedPackagesSelectionDialog_message); 
 		dialog.setInitialSelections(fJarPackage.getPackagesToUnseal());
@@ -619,7 +620,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 				return false;
 			}
 		}
-		Set selectedPackages= getPackagesForSelectedResources(fJarPackage);
+		Set selectedPackages= getPackagesForSelectedResources();
 		if (fJarPackage.isJarSealed()
 				&& !selectedPackages.containsAll(Arrays.asList(fJarPackage.getPackagesToUnseal()))) {
 			setErrorMessage(JarPackagerMessages.JarManifestWizardPage_error_unsealedPackagesNotInSelection); 
@@ -787,6 +788,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	 *
 	 * @param parent the parent control
 	 * @param text the label text
+	 * @param bold bold or not
 	 * @return the new label control
 	 */
 	protected Label createLabel(Composite parent, String text, boolean bold) {
@@ -926,6 +928,8 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	/**
 	 * Converts selection dialog results into an array of IPackageFragments.
 	 * An empty array is returned in case of errors.
+	 * @param dialog the dialog
+	 * @return the selected IPackageFragments
 	 * @throws ClassCastException if results are not IPackageFragments
 	 */
 	protected IPackageFragment[] getPackagesFromDialog(SelectionDialog dialog) {
@@ -936,6 +940,9 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	}
 	/**
 	 * Creates and returns a dialog to choose an existing workspace file.
+	 * @param title the title
+	 * @param message the dialog message
+	 * @return the dialog
 	 */	
 	protected ElementTreeSelectionDialog createWorkspaceFileSelectionDialog(String title, String message) {
 		int labelFlags= JavaElementLabelProvider.SHOW_BASICS
@@ -969,7 +976,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	 * Returns the minimal set of packages which contain all the selected Java resources.
 	 * @return	the Set of IPackageFragments which contain all the selected resources
 	 */
-	private Set getPackagesForSelectedResources(JarPackageData jarPackage) {
+	private Set getPackagesForSelectedResources() {
 		Set packages= new HashSet();
 		int n= fJarPackage.getElements().length;
 		for (int i= 0; i < n; i++) {
