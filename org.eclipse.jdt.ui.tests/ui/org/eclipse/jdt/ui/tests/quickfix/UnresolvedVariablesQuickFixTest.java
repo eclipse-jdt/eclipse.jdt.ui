@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,7 +33,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameNodeCorrectionProposal;
 
@@ -843,7 +842,6 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
 		buf= new StringBuffer();
@@ -1541,7 +1539,6 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
-		assertNumberOfProposals(proposals, 8);
 		assertCorrectLabels(proposals);
 
 		int i= 0;
@@ -1627,16 +1624,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[i++]= buf.toString();	
 		
-		String[] previews= new String[proposals.size()];
-		for (i= 0; i < previews.length; i++) {
-			Object curr= proposals.get(i);
-			if (curr instanceof NewCUUsingWizardProposal) {
-				previews[i]= getWizardPreviewContent((NewCUUsingWizardProposal) curr);
-			} else {
-				previews[i]= getPreviewContent((CUCorrectionProposal) curr);
-			}
-		}
-		assertEqualStringsIgnoreOrder(previews, expected);	
+		assertExpectedExistInProposals(proposals, expected);	
 	}
 	
 	public void testVarWithGenericType() throws Exception {
