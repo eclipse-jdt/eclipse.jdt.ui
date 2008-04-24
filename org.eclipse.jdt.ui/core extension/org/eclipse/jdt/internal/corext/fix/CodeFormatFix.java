@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
@@ -33,7 +35,10 @@ import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextEditUtil;
@@ -63,12 +68,18 @@ public class CodeFormatFix implements IFix {
 						
 			TextEdit edit;
 			if (regions == null) {
-				edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT, content, 0, lineDelemiter, formatterSettings);
+				edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS, content, 0, lineDelemiter, formatterSettings);
 			} else {
 				if (regions.length == 0)
 					return null;
   
-				edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT, content, regions, 0, lineDelemiter, formatterSettings);
+				IRegion[] adaptedRegions;
+				if (isCommentFormattingEnabled(cu.getJavaProject())) {
+					adaptedRegions= adaptRegions(regions, cu);
+				} else {
+					adaptedRegions= regions;
+				}
+				edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS, content, adaptedRegions, 0, lineDelemiter, formatterSettings);
 			}
 			if (edit != null && (!(edit instanceof MultiTextEdit) || edit.hasChildren())) {
 				formatEdit.addChild(edit);
@@ -186,6 +197,93 @@ public class CodeFormatFix implements IFix {
 		}
 
 		return new CodeFormatFix(change);
+	}
+
+	/**
+	 * Adapt regions: If a change is within a comment then the complete comment region needs to be formatted.
+	 * 
+	 * @param changedRegions the change regions
+	 * @param unit the compilation unit containing the regions
+	 * @return changed regions adapted to the comment regions size
+	 * @throws JavaModelException
+	 */
+	private static IRegion[] adaptRegions(IRegion[] changedRegions, ICompilationUnit unit) throws JavaModelException {
+		Document document= new Document(unit.getBuffer().getContents());
+		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
+		try {
+			ArrayList result= new ArrayList();
+			ITypedRegion[] typedRegions= TextUtilities.computePartitioning(document, IJavaPartitions.JAVA_PARTITIONING, 0, document.getLength(), false);
+			
+			int typedRegionIndex= getNextCommentRegion(typedRegions, 0);
+			
+			for (int i= 0; i < changedRegions.length; i++) {
+				if (typedRegionIndex == -1) {
+					result.add(changedRegions[i]);
+				} else {
+					ITypedRegion commentRegion= typedRegions[typedRegionIndex];
+
+					while (changedRegions[i].getOffset() + changedRegions[i].getLength() < commentRegion.getOffset()) {
+						result.add(changedRegions[i]);
+						i++;
+						if (i >= changedRegions.length)
+							return (IRegion[]) result.toArray(new IRegion[result.size()]);
+					}
+					
+					int commentRegionEnd= commentRegion.getOffset() + commentRegion.getLength();
+					if (changedRegions[i].getOffset() < commentRegionEnd) {
+						int regionStart= Math.min(changedRegions[i].getOffset(), commentRegion.getOffset());
+
+						i++;
+						while (i < changedRegions.length && changedRegions[i].getOffset() < commentRegionEnd) {
+							i++;
+						}
+						i--;
+						
+						int regionEnd= Math.max(changedRegions[i].getOffset() + changedRegions[i].getLength(), commentRegionEnd);
+						result.add(new Region(regionStart, regionEnd - regionStart));
+					}
+
+					typedRegionIndex= getNextCommentRegion(typedRegions, typedRegionIndex + 1);
+				}
+			}
+
+			return (IRegion[]) result.toArray(new IRegion[result.size()]);
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+			return changedRegions;
+		}
+	}
+
+	private static int getNextCommentRegion(ITypedRegion[] typedRegions, int index) {
+		while (index < typedRegions.length) {
+			ITypedRegion region= typedRegions[index];
+			String type= region.getType();
+
+			if (IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(type)) {
+				return index;
+			} else if (IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type)) {
+				return index;
+			} else if (IJavaPartitions.JAVA_DOC.equals(type)) {
+				return index;
+			}
+			index++;
+		}
+		return -1;
+	}
+
+	private static boolean isCommentFormattingEnabled(IJavaProject javaProject) {
+		HashMap preferences= new HashMap(javaProject.getOptions(true));
+
+		if (DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT)))
+			return true;
+
+		if (DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT)))
+			return true;
+
+		if (DefaultCodeFormatterConstants.TRUE.equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT)))
+			return true;
+
+		return false;
 	}
 
 	/**

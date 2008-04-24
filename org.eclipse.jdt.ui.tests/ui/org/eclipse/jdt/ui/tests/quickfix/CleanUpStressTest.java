@@ -121,8 +121,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("        final String[] patterns = new String[]{\"junit.framework.TestCase\", //$NON-NLS-1$\n");
         buf.append("                \"junit.framework.TestResult\", //$NON-NLS-1$\n");
         buf.append("                \"junit.framework.TestSuite\", //$NON-NLS-1$\n");
-        buf.append("                \"junit.framework.Assert.\", // don't filter AssertionFailure\n");
-        buf.append("                // //$NON-NLS-1$\n");
+        buf.append("                \"junit.framework.Assert.\", // don't filter AssertionFailure //$NON-NLS-1$\n");
         buf.append("                \"junit.swingui.TestRunner\", //$NON-NLS-1$\n");
         buf.append("                \"junit.awtui.TestRunner\", //$NON-NLS-1$\n");
         buf.append("                \"junit.textui.TestRunner\", //$NON-NLS-1$\n");
@@ -216,7 +215,6 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    }\n");
         buf.append("\n");
         buf.append("    // TestRunListener implementation\n");
-        buf.append("\n");
         buf.append("    private static void readPreferences() {\n");
         buf.append("        InputStream is = null;\n");
         buf.append("        try {\n");
@@ -348,7 +346,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("        }\n");
         buf.append("        Test test = null;\n");
         buf.append("        try {\n");
-        buf.append("            test = (Test) suiteMethod.invoke(null, new Class[0]); // static method\n");
+        buf.append("            test = (Test) suiteMethod.invoke(null, new Class[0]); // static\n");
+		buf.append("                                                                  // method\n");
         buf.append("            if (test == null) {\n");
         buf.append("                return test;\n");
         buf.append("            }\n");
@@ -706,8 +705,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("    /*\n");
         buf.append("     * In the tests that follow, we can't use standard formatting for exception\n");
-        buf.append("     * tests: try { somethingThatShouldThrow(); fail(); catch\n");
-        buf.append("     * (AssertionFailedError e) { } because fail() would never be reported.\n");
+        buf.append("     * tests: try { somethingThatShouldThrow(); fail(); catch (\n");
+        buf.append("     * AssertionFailedError e) { } because fail() would never be reported.\n");
         buf.append("     */\n");
         buf.append("    public void testFail() {\n");
         buf.append("        // Also, we are testing fail, so we can't rely on fail() working.\n");
@@ -1578,8 +1577,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append(" * \"excluded.properties\" that is located in the same place as the\n");
         buf.append(" * TestCaseClassLoader class.\n");
         buf.append(" * <p>\n");
-        buf.append(" * <b>Known limitation:</b> the TestCaseClassLoader cannot load classes from\n");
-        buf.append(" * jar files.\n");
+        buf.append(" * <b>Known limitation:</b> the TestCaseClassLoader cannot load classes from jar\n");
+        buf.append(" * files.\n");
         buf.append(" */\n");
         buf.append("\n");
         buf.append("public class TestCaseClassLoader extends ClassLoader {\n");
@@ -1847,8 +1846,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("        /*\n");
         buf.append("         * the type safe way\n");
         buf.append("         * \n");
-        buf.append("         * TestSuite suite= new TestSuite(); suite.addTest( new\n");
-        buf.append("         * SimpleTest(\"add\") { protected void runTest() { testAdd(); } } );\n");
+        buf.append("         * TestSuite suite= new TestSuite(); suite.addTest( new SimpleTest(\"add\"\n");
+        buf.append("         * ) { protected void runTest() { testAdd(); } } );\n");
         buf.append("         * \n");
         buf.append("         * suite.addTest( new SimpleTest(\"testDivideByZero\") { protected void\n");
         buf.append("         * runTest() { testDivideByZero(); } } ); return suite;\n");
@@ -1938,11 +1937,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("    public void testInvokeNonStaticSuite() {\n");
         buf.append("        final BaseTestRunner runner = new MockRunner();\n");
-        buf.append("        runner.getTest(\"junit.tests.runner.BaseTestRunnerTest$NonStatic\"); // Used\n");
-        buf.append("                                                                            // to\n");
-        buf.append("                                                                            // throw\n");
-        buf.append("                                                                            // NullPointerException\n");
-        buf.append("                                                                            // //$NON-NLS-1$\n");
+        buf.append("        runner.getTest(\"junit.tests.runner.BaseTestRunnerTest$NonStatic\"); // Used to throw NullPointerException //$NON-NLS-1$\n");
         buf.append("    }\n");
         buf.append("}\n");
         buf.append("");
@@ -2091,7 +2086,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("        this.fName = theClass.getName();\n");
         buf.append("        try {\n");
         buf.append("            TestSuite.getTestConstructor(theClass); // Avoid generating multiple\n");
-        buf.append("            // error messages\n");
+        buf.append("                                                    // error messages\n");
         buf.append("        } catch (final NoSuchMethodException e) {\n");
         buf.append("            this\n");
         buf.append("                    .addTest(TestSuite\n");
@@ -2221,7 +2216,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("     * Sets the name of the suite.\n");
         buf.append("     * \n");
         buf.append("     * @param name\n");
-        buf.append("     *            The name to set\n");
+        buf.append("     *      The name to set\n");
         buf.append("     */\n");
         buf.append("    public void setName(final String name) {\n");
         buf.append("        this.fName = name;\n");
@@ -3593,10 +3588,10 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    }\n");
         buf.append("\n");
         buf.append("    public void printDefect(final TestFailure booBoo, final int count) { // only\n");
-        buf.append("        // public\n");
-        buf.append("        // for\n");
-        buf.append("        // testing\n");
-        buf.append("        // purposes\n");
+        buf.append("                                                                         // public\n");
+		buf.append("                                                                         // for\n");
+		buf.append("                                                                         // testing\n");
+		buf.append("                                                                         // purposes\n");
         buf.append("        this.printDefectHeader(booBoo, count);\n");
         buf.append("        this.printDefectTrace(booBoo);\n");
         buf.append("    }\n");
@@ -3766,11 +3761,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("     * Constructs a comparison failure.\n");
         buf.append("     * \n");
         buf.append("     * @param message\n");
-        buf.append("     *            the identifying message or null\n");
+        buf.append("     *      the identifying message or null\n");
         buf.append("     * @param expected\n");
-        buf.append("     *            the expected string value\n");
+        buf.append("     *      the expected string value\n");
         buf.append("     * @param actual\n");
-        buf.append("     *            the actual string value\n");
+        buf.append("     *      the actual string value\n");
         buf.append("     */\n");
         buf.append("    public ComparisonFailure(final String message, final String expected,\n");
         buf.append("            final String actual) {\n");
@@ -4368,8 +4363,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    public static Test suite() {\n");
         buf.append("        final TestSuite suite = new TestSuite(\"Framework Tests\"); //$NON-NLS-1$\n");
         buf.append("        suite.addTestSuite(TestCaseTest.class);\n");
-        buf.append("        suite.addTest(SuiteTest.suite()); // Tests suite building, so can't\n");
-        buf.append("        // use automatic test extraction\n");
+        buf.append("        suite.addTest(SuiteTest.suite()); // Tests suite building, so can't use\n");
+		buf.append("                                          // automatic test extraction\n");
         buf.append("        suite.addTestSuite(TestListenerTest.class);\n");
         buf.append("        suite.addTestSuite(AssertTest.class);\n");
         buf.append("        suite.addTestSuite(TestImplementorTest.class);\n");
@@ -4469,7 +4464,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    }\n");
         buf.append("\n");
         buf.append("    public static Test suite() { // Collect tests manually because we have to\n");
-        buf.append("                                    // test class collection code\n");
+        buf.append("                                 // test class collection code\n");
         buf.append("        final TestSuite suite = new TestSuite(\"Framework Tests\"); //$NON-NLS-1$\n");
         buf.append("        suite.addTestSuite(StackFilterTest.class);\n");
         buf.append("        suite.addTestSuite(SorterTest.class);\n");
@@ -4681,7 +4676,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("import java.lang.reflect.Modifier;\n");
         buf.append("\n");
         buf.append("/**\n");
-        buf.append(" * A test case defines the fixture to run multiple tests. To define a test case<br>\n");
+        buf.append(" * A test case defines the fixture to run multiple tests. To define a test case\n");
+        buf.append(" * <br>\n");
         buf.append(" * 1) implement a subclass of TestCase<br>\n");
         buf.append(" * 2) define instance variables that store the state of the fixture<br>\n");
         buf.append(" * 3) initialize the fixture state by overriding <code>setUp</code><br>\n");
@@ -4815,7 +4811,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("     * Runs the bare test sequence.\n");
         buf.append("     * \n");
         buf.append("     * @exception Throwable\n");
-        buf.append("     *                if any exception is thrown\n");
+        buf.append("     *      if any exception is thrown\n");
         buf.append("     */\n");
         buf.append("    public void runBare() throws Throwable {\n");
         buf.append("        this.setUp();\n");
@@ -4829,7 +4825,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("     * Override to run the test and assert its state.\n");
         buf.append("     * \n");
         buf.append("     * @exception Throwable\n");
-        buf.append("     *                if any exception is thrown\n");
+        buf.append("     *      if any exception is thrown\n");
         buf.append("     */\n");
         buf.append("    protected void runTest() throws Throwable {\n");
         buf.append("        Assert.assertNotNull(this.fName);\n");
@@ -4861,7 +4857,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("     * Sets the name of a TestCase\n");
         buf.append("     * \n");
         buf.append("     * @param name\n");
-        buf.append("     *            The name to set\n");
+        buf.append("     *      The name to set\n");
         buf.append("     */\n");
         buf.append("    public void setName(final String name) {\n");
         buf.append("        this.fName = name;\n");
@@ -5062,7 +5058,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    }\n");
         buf.append("\n");
         buf.append("    public static Test suite() { // Collect tests manually because we have to\n");
-        buf.append("                                    // test class collection code\n");
+        buf.append("                                 // test class collection code\n");
         buf.append("        final TestSuite suite = new TestSuite(\"Framework Tests\"); //$NON-NLS-1$\n");
         buf.append("        suite.addTestSuite(ExtensionTest.class);\n");
         buf.append("        suite.addTestSuite(ExceptionTestCaseTest.class);\n");

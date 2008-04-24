@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,14 +62,16 @@ public class RefactoringExecutionHelper {
 		public Change fChange;
 		public PerformChangeOperation fPerformChangeOperation;
 		private final boolean fForked;
+		private final boolean fForkChangeExecution;
 		
-		public Operation(boolean forked) {
+		public Operation(boolean forked, boolean forkChangeExecution) {
 			fForked= forked;
+			fForkChangeExecution= forkChangeExecution;
         }
 		
 		public void run(IProgressMonitor pm) throws CoreException {
 			try {
-				pm.beginTask("", fForked ? 7 : 11); //$NON-NLS-1$
+				pm.beginTask("", fForked && !fForkChangeExecution ? 7 : 11); //$NON-NLS-1$
 				pm.subTask(""); //$NON-NLS-1$
 				
 				final RefactoringStatus status= fRefactoring.checkAllConditions(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
@@ -92,12 +94,12 @@ public class RefactoringExecutionHelper {
 				fChange= fRefactoring.createChange(new SubProgressMonitor(pm, 2, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 				fChange.initializeValidationData(new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 				
-				fPerformChangeOperation= RefactoringUI.createUIAwareChangeOperation(fChange);
+				fPerformChangeOperation= new PerformChangeOperation(fChange);//RefactoringUI.createUIAwareChangeOperation(fChange);
 				fPerformChangeOperation.setUndoManager(RefactoringCore.getUndoManager(), fRefactoring.getName());
 				if (fRefactoring instanceof IScheduledRefactoring)
 					fPerformChangeOperation.setSchedulingRule(((IScheduledRefactoring)fRefactoring).getSchedulingRule());
 				
-				if (! fForked)
+				if (!fForked || fForkChangeExecution)
 					fPerformChangeOperation.run(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 			} finally {
 				pm.done();
@@ -136,11 +138,25 @@ public class RefactoringExecutionHelper {
 	/**
 	 * Must be called in the UI thread.
 	 * @param fork if set, the operation will be forked
-	 * @param cancelable  if set, the operation will be cancellable
+	 * @param cancelable  if set, the operation will be cancelable
 	 * @throws InterruptedException thrown when the operation is cancelled
 	 * @throws InvocationTargetException thrown when the operation failed to execute
 	 */
 	public void perform(boolean fork, boolean cancelable) throws InterruptedException, InvocationTargetException {
+		perform(fork, false, cancelable);
+	}
+
+	/**
+	 * Must be called in the UI thread.<br>
+	 * <strong>Use {@link #perform(boolean, boolean)} unless you know exactly what you are doing!</strong>
+	 * 
+	 * @param fork if set, the operation will be forked
+	 * @param forkChangeExecution if the change should not be executed in the UI thread: This may not work in any case 
+	 * @param cancelable  if set, the operation will be cancelable
+	 * @throws InterruptedException thrown when the operation is cancelled
+	 * @throws InvocationTargetException thrown when the operation failed to execute
+	 */
+	public void perform(boolean fork, boolean forkChangeExecution, boolean cancelable) throws InterruptedException, InvocationTargetException {
 		Assert.isTrue(Display.getCurrent() != null);
 		final IJobManager manager=  Job.getJobManager();
 		final ISchedulingRule rule;
@@ -172,11 +188,11 @@ public class RefactoringExecutionHelper {
 			RefactoringSaveHelper saveHelper= new RefactoringSaveHelper(fSaveMode);
 			if (!saveHelper.saveEditors(fParent))
 				throw new InterruptedException();
-			final Operation op= new Operation(fork);
+			final Operation op= new Operation(fork, forkChangeExecution);
 			fRefactoring.setValidationContext(fParent);
 			try{
 				fExecContext.run(fork, cancelable, new OperationRunner(op, rule));
-				if (fork && op.fPerformChangeOperation != null)
+				if (fork && !forkChangeExecution && op.fPerformChangeOperation != null)
 					fExecContext.run(false, false, new OperationRunner(op.fPerformChangeOperation, rule));
 
 				if (op.fPerformChangeOperation != null) {

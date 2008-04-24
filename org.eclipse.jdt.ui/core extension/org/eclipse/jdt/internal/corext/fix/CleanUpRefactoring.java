@@ -33,6 +33,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -130,6 +132,32 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		public UndoEdit getUndoEdit() {
         	return fUndoEdit;
         }	
+		
+		/* 
+		 * @see org.eclipse.ltk.core.refactoring.TextChange#perform(org.eclipse.core.runtime.IProgressMonitor)
+		 */
+		public Change perform(final IProgressMonitor pm) throws CoreException {
+			if (Display.getCurrent() == null) {
+				final Change[] result= new Change[1];
+				final CoreException[] exs= new CoreException[1];
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						try {
+							result[0]= CleanUpChange.super.perform(pm);
+						} catch (CoreException e) {
+							exs[0]= e;
+						}
+					}
+				});
+
+				if (exs[0] != null)
+					throw exs[0];
+
+				return result[0];
+			} else {
+				return super.perform(pm);
+			}
+		}
 	}
 	
 	private static class FixCalculationException extends RuntimeException {
