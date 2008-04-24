@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,27 +13,21 @@ package org.eclipse.jdt.internal.ui.filters;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 
 /**
  * Filters out all compilation units and class files elements.
  */
-public class JavaFileFilter  extends ViewerFilter {
+public class JavaFileFilter extends ViewerFilter {
 	
-	/**
-	 * Returns the result of this filter, when applied to the
-	 * given inputs.
-	 *
-	 * @return Returns true if element should be included in filtered set
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
 	public boolean select(Viewer viewer, Object parent, Object element) {
-		if (element instanceof ICompilationUnit)
-			return false;
-		if (element instanceof IClassFile)
+		if (element instanceof ITypeRoot)
 			return false;
 			
 		if (element instanceof IPackageFragment)

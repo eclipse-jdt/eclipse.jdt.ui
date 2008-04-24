@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,6 +72,7 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 
 	/**
 	 * Returns all contributed Java element filters.
+	 * @return all contributed Java element filters
 	 */
 	public static FilterDescriptor[] getFilterDescriptors() {
 		if (fgFilterDescriptors == null) {
@@ -84,6 +85,8 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 	/**
 	 * Returns all Java element filters which
 	 * are contributed to the given view.
+	 * @param targetId the target id
+	 * @return all contributed Java element filters for the given view
 	 */
 	public static FilterDescriptor[] getFilterDescriptors(String targetId) {
 		FilterDescriptor[] filterDescs= FilterDescriptor.getFilterDescriptors();
@@ -100,6 +103,7 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 	
 	/**
 	 * Creates a new filter descriptor for the given configuration element.
+	 * @param element configuration element
 	 */
 	private FilterDescriptor(IConfigurationElement element) {
 		fElement= element;
@@ -112,6 +116,7 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 	/**
 	 * Creates a new <code>ViewerFilter</code>.
 	 * This method is only valid for viewer filters.
+	 * @return a new <code>ViewerFilter</code>
 	 */
 	public ViewerFilter createViewerFilter() {
 		if (!isCustomFilter())
@@ -141,6 +146,7 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 	 * The ID for pattern filters is
 	 * PATTERN_FILTER_ID_PREFIX plus the pattern itself.
 	 * </p>
+	 * @return the filter id
 	 */
 	public String getId() {
 		if (isPatternFilter()) {
@@ -159,6 +165,7 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 	 * If the name of a pattern filter is missing
 	 * then the pattern is used as its name.
 	 * </p>
+	 * @return the filter's name
 	 */
 	public String getName() {
 		String name= fElement.getAttribute(NAME_ATTRIBUTE);
@@ -224,6 +231,7 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 	 * is initially enabled.
 	 * 
 	 * This attribute is optional and defaults to <code>true</code>.
+	 * @return returns <code>true</code> if the filter is initially enabled
 	 */
 	public boolean isEnabled() {
 		String strVal= fElement.getAttribute(ENABLED_ATTRIBUTE);
@@ -247,6 +255,8 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 	
 	/**
 	 * Creates the filter descriptors.
+	 * @param elements the configuration elements
+	 * @return new filter descriptors
 	 */
 	private static FilterDescriptor[] createFilterDescriptors(IConfigurationElement[] elements) {
 		List result= new ArrayList(5);
