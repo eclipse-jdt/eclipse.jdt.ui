@@ -80,8 +80,6 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
-import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
-
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
@@ -591,25 +589,7 @@ public class EditTemplateDialog extends StatusDialog {
 	 * @since 3.3.1
 	 */
 	private boolean isValidTemplateName(String name) {
-		int nameLength= name.length();
-		if (nameLength == 0)
-			return true;
-
-		char firstChar= name.charAt(0);
-		boolean isJavadocTemplate= JavaDocContextType.ID.equals(getContextId());
-		if (!Character.isUnicodeIdentifierStart(firstChar) && !(isJavadocTemplate && (firstChar == '<' || firstChar == '@')))
-			return false;
-
-		if (nameLength == 1)
-			return true;
-		
-		for (int i= 1; i < nameLength - 1; i++) {
-			if (!Character.isUnicodeIdentifierPart(name.charAt(i)))
-				return false;
-		}
-
-		char lastChar= name.charAt(nameLength - 1);
-		return Character.isUnicodeIdentifierPart(lastChar) || isJavadocTemplate && lastChar == '>';
+		return name.length() == 0 || name.trim().length() != 0;
 	}
 
 	/*
