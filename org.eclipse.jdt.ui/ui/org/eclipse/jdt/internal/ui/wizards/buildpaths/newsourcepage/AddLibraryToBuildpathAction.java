@@ -132,7 +132,7 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 
 						List addedEntries= new ArrayList();
 						for (int i= 0; i < selected.length; i++) {
-							addedEntries.add(new CPListElement(project, IClasspathEntry.CPE_CONTAINER, selected[i].getPath(), null));
+							addedEntries.add(CPListElement.createFromExisting(selected[i], project));
 						}
 
 						pm.worked(1);

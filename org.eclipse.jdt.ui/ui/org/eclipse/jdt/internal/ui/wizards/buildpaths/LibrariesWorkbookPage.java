@@ -862,7 +862,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			if (created != null) {
 				CPListElement[] res= new CPListElement[created.length];
 				for (int i= 0; i < res.length; i++) {
-					res[i]= new CPListElement(fCurrJProject, IClasspathEntry.CPE_CONTAINER, created[i].getPath(), null);
+					res[i]= CPListElement.createFromExisting(created[i], fCurrJProject);
 				}
 				return res;
 			}
