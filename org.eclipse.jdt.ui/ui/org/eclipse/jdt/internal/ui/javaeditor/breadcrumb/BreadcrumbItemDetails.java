@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 
 
 /**
@@ -368,7 +369,12 @@ class BreadcrumbItemDetails {
 				int index= viewer.getIndexOfItem(fParent);
 				BreadcrumbItem parent= fParent.getViewer().getItem(index - 1);
 				
-				parent.openDropDownMenu();
+				Shell shell= parent.getDropDownShell();
+				if (shell == null) {
+					parent.openDropDownMenu();
+					shell= parent.getDropDownShell();
+				}
+				shell.setFocus();
 			}
 
 			public void keyReleased(KeyEvent e) {
@@ -406,7 +412,7 @@ class BreadcrumbItemDetails {
 				BreadcrumbViewer viewer= fParent.getViewer();
 				viewer.selectItem(fParent);
 				if (e.button == 1) {
-					viewer.fireDoubleClick();
+					fParent.getViewer().fireDoubleClick();
 				}
 			}
 

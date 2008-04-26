@@ -162,6 +162,7 @@ class BreadcrumbItemDropDown {
 			 */
 			public void run() {
 				showMenu();
+				fShell.setFocus();
 			}
 		};
 
@@ -430,10 +431,8 @@ class BreadcrumbItemDropDown {
 			}
 		}
 
-		fShell.open();
+		fShell.setVisible(true);
 		installCloser(fShell);
-		
-		tree.setFocus();
 	}
 
 	/**
