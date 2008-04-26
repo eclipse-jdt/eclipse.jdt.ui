@@ -319,9 +319,6 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			// not some instantiation thereof.
 			fCtorBinding= fCtorBinding.getMethodDeclaration();
 
-			if (fNewMethodName == null)
-				fNewMethodName= "create" + fCtorBinding.getName();//$NON-NLS-1$
-	
 			pm.worked(1);
 	
 			// We don't handle constructors of nested types at the moment
@@ -349,7 +346,10 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	
 			pm.worked(1);
 	
-			return new RefactoringStatus();
+			if (fNewMethodName == null)
+				return setNewMethodName("create" + fCtorBinding.getName());//$NON-NLS-1$
+			else
+				return new RefactoringStatus();
 		} finally {
 			pm.done();
 		}

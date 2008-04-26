@@ -182,6 +182,9 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 		}
 		factoryTypeName.setText(getUseFactoryRefactoring().getFactoryClassName());
 
+		fMethodNameStatus = getUseFactoryRefactoring().setNewMethodName(getUseFactoryRefactoring().getNewMethodName());
+		validateInput(true);
+
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INTRODUCE_FACTORY_WIZARD_PAGE);		
 	}
 
