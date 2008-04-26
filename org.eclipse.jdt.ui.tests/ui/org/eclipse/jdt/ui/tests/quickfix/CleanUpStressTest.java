@@ -705,8 +705,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("    /*\n");
         buf.append("     * In the tests that follow, we can't use standard formatting for exception\n");
-        buf.append("     * tests: try { somethingThatShouldThrow(); fail(); catch (\n");
-        buf.append("     * AssertionFailedError e) { } because fail() would never be reported.\n");
+        buf.append("     * tests: try { somethingThatShouldThrow(); fail(); catch\n");
+        buf.append("     * (AssertionFailedError e) { } because fail() would never be reported.\n");
         buf.append("     */\n");
         buf.append("    public void testFail() {\n");
         buf.append("        // Also, we are testing fail, so we can't rely on fail() working.\n");
@@ -1846,8 +1846,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("        /*\n");
         buf.append("         * the type safe way\n");
         buf.append("         * \n");
-        buf.append("         * TestSuite suite= new TestSuite(); suite.addTest( new SimpleTest(\"add\"\n");
-        buf.append("         * ) { protected void runTest() { testAdd(); } } );\n");
+        buf.append("         * TestSuite suite= new TestSuite(); suite.addTest( new\n");
+        buf.append("         * SimpleTest(\"add\") { protected void runTest() { testAdd(); } } );\n");
         buf.append("         * \n");
         buf.append("         * suite.addTest( new SimpleTest(\"testDivideByZero\") { protected void\n");
         buf.append("         * runTest() { testDivideByZero(); } } ); return suite;\n");
@@ -5217,10 +5217,6 @@ public class CleanUpStressTest extends CleanUpTestCase {
     }
 	
 	public void testAllCleanUps() throws Exception {
-		
-		if (true) // FIXME
-			return;
-		
 		List cus= new ArrayList();
 		addAllCUs(fJProject1.getChildren(), cus);
 		
