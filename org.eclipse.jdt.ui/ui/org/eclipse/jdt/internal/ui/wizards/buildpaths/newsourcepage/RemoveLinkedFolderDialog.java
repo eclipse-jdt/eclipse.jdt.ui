@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IRemoveLinkedFolderQuery;
 
@@ -54,7 +55,7 @@ class RemoveLinkedFolderDialog extends MessageDialog {
 	 * @param folder the linked folder to remove
 	 */
 	RemoveLinkedFolderDialog(final Shell shell, final IFolder folder) {
-		super(shell, NewWizardMessages.ClasspathModifierQueries_confirm_remove_linked_folder_label, null, Messages.format(NewWizardMessages.ClasspathModifierQueries_confirm_remove_linked_folder_message, new Object[] { folder.getFullPath()}), MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0); // yes is the default
+		super(shell, NewWizardMessages.ClasspathModifierQueries_confirm_remove_linked_folder_label, null, Messages.format(NewWizardMessages.ClasspathModifierQueries_confirm_remove_linked_folder_message, new Object[] { BasicElementLabels.getPathLabel(folder.getFullPath(), false)}), MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0); // yes is the default
 		Assert.isTrue(folder.isLinked());
 	}
 

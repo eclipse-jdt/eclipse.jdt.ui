@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,6 +49,7 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
 
@@ -293,7 +294,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		fJRE50InfoText= new Link(composite, SWT.WRAP);
 		fJRE50InfoText.setFont(composite.getFont());
 		// set a text: not the real one, just for layouting
-		fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project, new String[] { VERSION_1_3, VERSION_1_3 }));
+		fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project, new String[] { getVersionLabel(VERSION_1_3), getVersionLabel(VERSION_1_3) }));
 		fJRE50InfoText.setVisible(false);
 		fJRE50InfoText.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -419,12 +420,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	private String getVersionLabel(String version) {
-		if (JavaModelUtil.isVersionLessThan(version, VERSION_1_5)) {
-			return version; // for version <= 1.4, we can use the version as is
-		}
-		if (VERSION_1_5.equals(version))
-			return PreferencesMessages.ComplianceConfigurationBlock_version15;
-		return PreferencesMessages.ComplianceConfigurationBlock_version16;
+		return BasicElementLabels.getVersionName(version);
 	}
 
 	

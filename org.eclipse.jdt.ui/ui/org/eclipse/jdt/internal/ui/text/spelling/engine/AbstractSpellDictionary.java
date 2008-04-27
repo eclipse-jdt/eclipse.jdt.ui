@@ -41,6 +41,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Partial implementation of a spell dictionary.
@@ -504,7 +505,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 							word= reader.readLine();
 							decoder.onMalformedInput(CodingErrorAction.REPORT);
 							
-							String message= Messages.format(JavaUIMessages.AbstractSpellingDictionary_encodingError, new String[] { word, decoder.replacement(), url.toString() });
+							String message= Messages.format(JavaUIMessages.AbstractSpellingDictionary_encodingError, new String[] { word, decoder.replacement(), BasicElementLabels.getURLPart(url.toString()) });
 							IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, ex);
 							JavaPlugin.log(status);
 							
@@ -530,7 +531,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 					}
 			} catch (IOException exception) {
 				if (line > 0) {
-					String message= Messages.format(JavaUIMessages.AbstractSpellingDictionary_encodingError, new Object[] { new Integer(line), url.toString() });
+					String message= Messages.format(JavaUIMessages.AbstractSpellingDictionary_encodingError, new Object[] { new Integer(line), BasicElementLabels.getURLPart(url.toString()) });
 					IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, exception);
 					JavaPlugin.log(status);
 				} else

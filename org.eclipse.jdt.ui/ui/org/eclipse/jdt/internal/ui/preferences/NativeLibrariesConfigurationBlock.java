@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
@@ -117,7 +118,7 @@ public class NativeLibrariesConfigurationBlock {
 
 		Label desc= new Label(inner, SWT.WRAP);
 		desc.setFont(inner.getFont());
-		desc.setText(Messages.format(NewWizardMessages.NativeLibrariesDialog_description, new String[] { fEntry.getPath().lastSegment() }));
+		desc.setText(Messages.format(NewWizardMessages.NativeLibrariesDialog_description, new String[] { BasicElementLabels.getFileName(fEntry.getPath().lastSegment()) }));
 		GridData gridData= new GridData(GridData.FILL, GridData.CENTER, false, false, 3, 1);
 		gridData.widthHint= converter.convertWidthInCharsToPixels(80);
 		desc.setLayoutData(gridData);

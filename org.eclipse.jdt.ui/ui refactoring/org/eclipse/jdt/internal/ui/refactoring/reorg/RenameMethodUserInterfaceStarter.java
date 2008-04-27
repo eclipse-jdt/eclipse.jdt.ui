@@ -27,6 +27,8 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodPro
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 public class RenameMethodUserInterfaceStarter extends RenameUserInterfaceStarter {
 	
 	/* (non-Javadoc)
@@ -45,13 +47,13 @@ public class RenameMethodUserInterfaceStarter extends RenameUserInterfaceStarter
 							RefactoringCoreMessages.MethodChecks_implements, 
 							new String[]{
 								JavaElementUtil.createMethodSignature(method), 
-								method.getDeclaringType().getFullyQualifiedName('.')});
+								JavaElementLabels.getElementLabel(method.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
 					} else {
 						message= Messages.format(
 							RefactoringCoreMessages.MethodChecks_overrides, 
 							new String[]{
 								JavaElementUtil.createMethodSignature(method), 
-								method.getDeclaringType().getFullyQualifiedName('.')});
+								JavaElementLabels.getElementLabel(method.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
 					}
 					message= Messages.format(
 						ReorgMessages.RenameMethodUserInterfaceStarter_message,  

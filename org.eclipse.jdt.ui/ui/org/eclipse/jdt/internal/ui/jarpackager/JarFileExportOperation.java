@@ -75,6 +75,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.jarpackager.IJarBuilder;
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionWriter;
@@ -367,14 +368,14 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				jarFile= JarPackagerUtil.getArchiveFile(root.getPath());
 				fJarBuilder.writeArchive(jarFile, progressMonitor);
 			} catch (CoreException e) {
-				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_OpenZipFileError_message, new Object[] { root.getElementName(), e.getLocalizedMessage() }), e);
+				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_OpenZipFileError_message, new Object[] { JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT), e.getLocalizedMessage() }), e);
 			} finally {
 				try {
 					if (jarFile != null) {
 						jarFile.close();
 					}
 				} catch (IOException e) {
-					addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_CloseZipFileError_message, new Object[] { root.getElementName(), e.getLocalizedMessage() }), e);
+					addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_CloseZipFileError_message, new Object[] { JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT), e.getLocalizedMessage() }), e);
 				}
 			}
 			return;

@@ -108,6 +108,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatu
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.InsertDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.RemoveDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.SwapDescription;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
@@ -634,7 +635,7 @@ public class UnresolvedElementsSubProcessor {
 		ASTRewriteCorrectionProposal proposal;
 		if (importRewrite != null && node.isSimpleName() && simpleName.equals(((SimpleName) node).getIdentifier())) { // import only
 			// import only
-			String[] arg= { simpleName, packName };
+			String[] arg= { BasicElementLabels.getJavaElementName(simpleName), BasicElementLabels.getJavaElementName(packName) };
 			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_importtype_description, arg);
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL);
 			int boost= QualifiedTypeNameHistory.getBoost(fullName, 0, maxProposals);
@@ -643,9 +644,9 @@ public class UnresolvedElementsSubProcessor {
 		} else {
 			String label;
 			if (packName.length() == 0) {
-				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changetype_nopack_description, simpleName);
+				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changetype_nopack_description, BasicElementLabels.getJavaElementName(simpleName));
 			} else {
-				String[] arg= { simpleName, packName };
+				String[] arg= { BasicElementLabels.getJavaElementName(simpleName), BasicElementLabels.getJavaElementName(packName) };
 				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changetype_description, arg);
 			}
 			ASTRewrite rewrite= ASTRewrite.create(node.getAST());
@@ -889,7 +890,7 @@ public class UnresolvedElementsSubProcessor {
 							label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_description, sig);
 							image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PRIVATE);
 						} else {
-							label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, new Object[] { sig, senderDeclBinding.getName() } );
+							label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, new Object[] { sig, BasicElementLabels.getJavaElementName(senderDeclBinding.getName()) } );
 							image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 						}
 						proposals.add(new NewMethodCorrectionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, 5, image));
@@ -1113,7 +1114,7 @@ public class UnresolvedElementsSubProcessor {
 			}
 			buf.append(ASTResolving.getTypeSignature(types[i]));
 		}
-		return buf.toString();
+		return BasicElementLabels.getJavaElementName(buf.toString());
 	}
 
 	private static String getArgumentName(List arguments, int index) {
@@ -1129,7 +1130,7 @@ public class UnresolvedElementsSubProcessor {
 				return def;
 			}
 		}
-		return '\'' + ASTNodes.asString(expr) + '\'';
+		return '\'' + BasicElementLabels.getJavaElementName(ASTNodes.asString(expr)) + '\'';
 	}
 
 	private static void doMoreArguments(IInvocationContext context, ASTNode invocationNode, List arguments, ITypeBinding[] argTypes, IMethodBinding methodRef, Collection proposals) throws CoreException {

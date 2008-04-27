@@ -62,6 +62,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -246,7 +247,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		try{
 			IJavaElement[] children= sourceFolder.getChildren();
 			pm.beginTask("", children.length); //$NON-NLS-1$
-			pm.setTaskName(sourceFolder.getElementName());
+			pm.setTaskName(JavaElementLabels.getElementLabel(sourceFolder, JavaElementLabels.ALL_DEFAULT));
 			List result= new ArrayList();
 			for (int i= 0; i < children.length; i++) {
 				IJavaElement iJavaElement= children[i];

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class ImplementInterfaceProposal extends LinkedCorrectionProposal {
 
@@ -47,7 +48,7 @@ public class ImplementInterfaceProposal extends LinkedCorrectionProposal {
 		fAstRoot= astRoot;
 		fNewInterface= newInterface;
 
-		String[] args= { binding.getName(), Bindings.getRawName(newInterface) };
+		String[] args= { BasicElementLabels.getJavaElementName(binding.getName()), BasicElementLabels.getJavaElementName(Bindings.getRawName(newInterface)) };
 		setDisplayName(Messages.format(CorrectionMessages.ImplementInterfaceProposal_name, args));
 	}
 

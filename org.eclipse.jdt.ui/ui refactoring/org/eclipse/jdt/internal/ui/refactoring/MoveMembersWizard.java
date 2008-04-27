@@ -103,7 +103,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 			if (visible){
 				String message= Messages.format(RefactoringMessages.MoveMembersInputPage_descriptionKey, 
 					new String[]{new Integer(getMoveProcessor().getMembersToMove().length).toString(),
-								 getMoveProcessor().getDeclaringType().getFullyQualifiedName('.')});
+								    JavaElementLabels.getElementLabel(getMoveProcessor().getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
 				setDescription(message);
 			}	
 			super.setVisible(visible);	

@@ -103,7 +103,7 @@ public class Checks {
 		else
 			return RefactoringStatus.createWarningStatus(
 				Messages.format(RefactoringCoreMessages.Checks_constructor_name,  
-				new Object[] {JavaElementUtil.createMethodSignature(method), method.getDeclaringType().getFullyQualifiedName('.') } ));
+				new Object[] {JavaElementUtil.createMethodSignature(method), JavaElementLabels.getElementLabel(method.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED) } ));
 	}
 		
 	/**

@@ -91,6 +91,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectio
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ModifierChangeCorrectionProposal;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
   */
@@ -151,17 +152,17 @@ public class ModifierCorrectionSubProcessor {
 			IMethodBinding methodDecl= (IMethodBinding) binding;
 			bindingDecl= methodDecl.getMethodDeclaration();
 			typeBinding= methodDecl.getDeclaringClass();
-			name= methodDecl.getName() + "()"; //$NON-NLS-1$
+			name= BasicElementLabels.getJavaElementName(methodDecl.getName() + "()"); //$NON-NLS-1$
 		} else if (binding instanceof IVariableBinding) {
 			IVariableBinding varDecl= (IVariableBinding) binding;
 			typeBinding= varDecl.getDeclaringClass();
-			name= binding.getName();
+			name= BasicElementLabels.getJavaElementName(binding.getName());
 			isLocalVar= !varDecl.isField();
 			bindingDecl= varDecl.getVariableDeclaration();
 		} else if (binding instanceof ITypeBinding) {
 			typeBinding= (ITypeBinding) binding;
 			bindingDecl= typeBinding.getTypeDeclaration();
-			name= binding.getName();
+			name= BasicElementLabels.getJavaElementName(binding.getName());
 		} else {
 			return;
 		}
@@ -237,7 +238,7 @@ public class ModifierCorrectionSubProcessor {
 			IMethodBinding overriddenDecl= overriddenInClass.getMethodDeclaration();
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), overriddenDecl.getDeclaringClass());
 			if (targetCU != null) {
-				String methodName= curr.getName() + '.' + overriddenInClass.getName();
+				String methodName= BasicElementLabels.getJavaElementName(curr.getName() + '.' + overriddenInClass.getName());
 				String label;
 				int excludedModifiers;
 				int includedModifiers;

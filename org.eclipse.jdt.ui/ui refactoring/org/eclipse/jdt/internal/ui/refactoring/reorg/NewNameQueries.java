@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,8 +42,11 @@ import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class NewNameQueries implements INewNameQueries {
 
@@ -84,20 +87,20 @@ public class NewNameQueries implements INewNameQueries {
 
 
 	public INewNameQuery createNewResourceNameQuery(IResource res, String initialSuggestedName) {
-		String[] keys= {res.getName()};
+		String[] keys= { BasicElementLabels.getResourceName(res)};
 		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys); 
 		return createStaticQuery(createResourceNameValidator(res), message, initialSuggestedName, getShell());
 	}
 
 
 	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack, String initialSuggestedName) {
-		String[] keys= {pack.getElementName()};
+		String[] keys= {JavaElementLabels.getElementLabel(pack, JavaElementLabels.ALL_DEFAULT)};
 		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys); 
 		return createStaticQuery(createPackageNameValidator(pack), message, initialSuggestedName, getShell());
 	}
 
 	public INewNameQuery createNewPackageFragmentRootNameQuery(IPackageFragmentRoot root, String initialSuggestedName) {
-		String[] keys= {root.getElementName()};
+		String[] keys= {JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT)};
 		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys); 
 		return createStaticQuery(createPackageFragmentRootNameValidator(root), message, initialSuggestedName, getShell());
 	}

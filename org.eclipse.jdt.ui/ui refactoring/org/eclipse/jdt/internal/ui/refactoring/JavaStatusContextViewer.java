@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,13 +13,6 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFile;
-
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -37,20 +30,28 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.ui.refactoring.TextStatusContextViewer;
+
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
-
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.ltk.ui.refactoring.TextStatusContextViewer;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 
 
 public class JavaStatusContextViewer extends TextStatusContextViewer {
@@ -90,7 +91,7 @@ public class JavaStatusContextViewer extends TextStatusContextViewer {
 				IEditorInput editorInput= new InternalClassFileEditorInput(file);
 				document= getDocument(JavaPlugin.getDefault().getClassFileDocumentProvider(), editorInput);
 				if (document.getLength() == 0)
-					document= new Document(Messages.format(RefactoringMessages.JavaStatusContextViewer_no_source_found0, getPackageFragmentRoot(file).getElementName()));
+					document= new Document(Messages.format(RefactoringMessages.JavaStatusContextViewer_no_source_found0, JavaElementLabels.getElementLabel(getPackageFragmentRoot(file), JavaElementLabels.ALL_DEFAULT)));
 				updateTitle(file);
 			} else {
 				ICompilationUnit cunit= jsc.getCompilationUnit();

@@ -64,6 +64,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
 
 /**
  * @deprecated use {@link FilteredTypesSelectionDialog}
@@ -269,7 +270,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 				String title= JavaUIMessages.TypeSelectionDialog_errorTitle; 
 				IPackageFragmentRoot root= typeInfo.getPackageFragmentRoot();
 				String containerName= JavaElementLabels.getElementLabel(root, JavaElementLabels.ROOT_QUALIFIED);
-				String message= Messages.format(JavaUIMessages.TypeSelectionDialog_dialogMessage, new String[] { typeInfo.getFullyQualifiedName(), containerName }); 
+				String message= Messages.format(JavaUIMessages.TypeSelectionDialog_dialogMessage, new String[] { TypeNameMatchLabelProvider.getText(typeInfo, TypeNameMatchLabelProvider.SHOW_FULLYQUALIFIED), containerName }); 
 				MessageDialog.openError(getShell(), title, message);
 				history.remove(typeInfo);
 				setResult(null);

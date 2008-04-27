@@ -52,6 +52,10 @@ public class BasicElementLabels {
 	}
 	
 	public static String getJavaElementName(String name) {
-		return Strings.markLTR(name);
+		return Strings.markLTR(name, "<>()?,");
+	}
+	
+	public static String getVersionName(String name) {
+		return Strings.markLTR(name); 
 	}
 }

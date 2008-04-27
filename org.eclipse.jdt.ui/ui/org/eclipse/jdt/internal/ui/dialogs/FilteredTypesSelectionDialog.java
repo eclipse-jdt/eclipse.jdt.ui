@@ -451,7 +451,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 					TypeNameMatch typeInfo= (TypeNameMatch) newResult.get(i);
 					IPackageFragmentRoot root= typeInfo.getPackageFragmentRoot();
 					String containerName= JavaElementLabels.getElementLabel(root, JavaElementLabels.ROOT_QUALIFIED);
-					String message= Messages.format(JavaUIMessages.FilteredTypesSelectionDialog_dialogMessage, new String[] { typeInfo.getFullyQualifiedName(), containerName });
+					String message= Messages.format(JavaUIMessages.FilteredTypesSelectionDialog_dialogMessage, new String[] { TypeNameMatchLabelProvider.getText(typeInfo, TypeNameMatchLabelProvider.SHOW_FULLYQUALIFIED), containerName });
 					MessageDialog.openError(getShell(), fTitle, message);
 					getSelectionHistory().remove(typeInfo);
 				}
@@ -594,8 +594,10 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		if (fValidator != null) {
 			IType type= ((TypeNameMatch) item).getType();
-			if (!type.exists())
-				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, Messages.format(JavaUIMessages.FilteredTypesSelectionDialog_error_type_doesnot_exist, ((TypeNameMatch) item).getFullyQualifiedName()), null);
+			if (!type.exists()) {
+				String qualifiedName= TypeNameMatchLabelProvider.getText((TypeNameMatch) item, TypeNameMatchLabelProvider.SHOW_FULLYQUALIFIED);
+				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, Messages.format(JavaUIMessages.FilteredTypesSelectionDialog_error_type_doesnot_exist, qualifiedName), null);
+			}
 			Object[] elements= { type };
 			return fValidator.validate(elements);
 		} else

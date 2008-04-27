@@ -85,6 +85,7 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.preferences.CompliancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ComboDialogField;
@@ -867,7 +868,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 					fHintText.setVisible(false);
 					fIcon.setVisible(false);
 				} else {
-					fHintText.setText(Messages.format(NewWizardMessages.NewJavaProjectWizardPageOne_DetectGroup_differendWorkspaceCC_message, new String[] {defaultCompliance, selectedCompliance}));
+					fHintText.setText(Messages.format(NewWizardMessages.NewJavaProjectWizardPageOne_DetectGroup_differendWorkspaceCC_message, new String[] {  BasicElementLabels.getVersionName(defaultCompliance), BasicElementLabels.getVersionName(selectedCompliance)}));
 					fHintText.setVisible(true);
 					fIcon.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_INFO));
 					fIcon.setVisible(true);
@@ -890,7 +891,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				else if (selectedCompliance.equals(JavaCore.VERSION_1_6))
 					selectedCompliance= "6.0"; //$NON-NLS-1$
 
-				fHintText.setText(Messages.format(NewWizardMessages.NewJavaProjectWizardPageOne_DetectGroup_jre_message, new String[] {selectedCompliance, jvmCompliance}));
+				fHintText.setText(Messages.format(NewWizardMessages.NewJavaProjectWizardPageOne_DetectGroup_jre_message, new String[] {BasicElementLabels.getVersionName(selectedCompliance), BasicElementLabels.getVersionName(jvmCompliance)}));
 				fHintText.setVisible(true);
 				fIcon.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
 				fIcon.setVisible(true);

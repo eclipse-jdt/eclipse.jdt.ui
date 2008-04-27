@@ -518,8 +518,8 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			//Added exclusion patterns to solve problem
 			if (modified.size() == 1) {
 				CPListElement elem= (CPListElement)modified.toArray()[0];
-				IPath changed= elem.getPath().makeRelative();
-				IPath excl= fNewElement.getPath().makeRelative();
+				String changed= BasicElementLabels.getPathLabel(elem.getPath(), false);
+				String excl= BasicElementLabels.getPathLabel(fNewElement.getPath(), false);
 				result.setInfo(Messages.format(NewWizardMessages.AddSourceFolderWizardPage_addSinglePattern, new Object[] {excl, changed}));
 			} else {
 				result.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_AddedExclusions, String.valueOf(modified.size())));

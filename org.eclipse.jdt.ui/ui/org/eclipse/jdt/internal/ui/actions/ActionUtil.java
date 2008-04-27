@@ -113,7 +113,7 @@ public class ActionUtil {
 			if (! isOnBuildPath(elements[i])) {
 				MessageDialog.openInformation(shell, 
 						ActionMessages.ActionUtil_notOnBuildPath_title,  
-						Messages.format(ActionMessages.ActionUtil_notOnBuildPath_resource_message, new Object[] {elements[i].getPath()}));
+						Messages.format(ActionMessages.ActionUtil_notOnBuildPath_resource_message, new Object[] {BasicElementLabels.getPathLabel(elements[i].getPath(), false)}));
 				return false;
 			}
 		}

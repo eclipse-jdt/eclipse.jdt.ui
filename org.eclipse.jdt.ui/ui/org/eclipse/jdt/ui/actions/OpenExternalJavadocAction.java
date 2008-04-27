@@ -184,11 +184,11 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 				IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
 				if (root != null && root.getKind() == IPackageFragmentRoot.K_BINARY) {
 					String message= ActionMessages.OpenExternalJavadocAction_libraries_no_location;	 
-					showMessage(shell, Messages.format(message, new String[] { labelName, root.getElementName() }), false);
+					showMessage(shell, Messages.format(message, new String[] { labelName, JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT) }), false);
 				} else {
 					IJavaElement annotatedElement= element.getJavaProject();
 					String message= ActionMessages.OpenExternalJavadocAction_source_no_location;	 
-					showMessage(shell, Messages.format(message, new String[] { labelName, annotatedElement.getElementName() }), false);
+					showMessage(shell, Messages.format(message, new String[] { labelName, JavaElementLabels.getElementLabel(annotatedElement, JavaElementLabels.ALL_DEFAULT) }), false);
 				}
 				return;
 			}		

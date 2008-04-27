@@ -63,6 +63,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -79,6 +80,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
  * Adds method implementations for
@@ -433,7 +435,7 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 			concreteHCEWarning= ActionMessages.GenerateHashCodeEqualsAction_hashCode;
 
 		if (!info.foundEquals && !info.foundHashCode)
-			status.addWarning(Messages.format(concreteMethWarning, new String[] { Messages.format(concreteTypeWarning, someType.getQualifiedName()),
+			status.addWarning(Messages.format(concreteMethWarning, new String[] { Messages.format(concreteTypeWarning, BindingLabelProvider.getBindingLabel(someType, JavaElementLabels.ALL_FULLY_QUALIFIED)),
 					concreteHCEWarning }), createRefactoringStatusContext(someType.getJavaElement()));
 
 		if (superClass && (info.foundFinalEquals || info.foundFinalHashCode)) {

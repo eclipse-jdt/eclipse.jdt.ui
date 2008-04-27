@@ -153,6 +153,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
 
@@ -656,7 +657,7 @@ public class PasteAction extends SelectionDispatchAction{
 							ICompilationUnit cu= destinationPack.getCompilationUnit(cuName);
 							boolean alreadyExists= cu.exists();
 							if (alreadyExists) {
-								String msg= Messages.format(ReorgMessages.PasteAction_TextPaster_exists, new Object[] {cuName});
+								String msg= Messages.format(ReorgMessages.PasteAction_TextPaster_exists, new Object[] { BasicElementLabels.getFileName(cuName)});
 								boolean overwrite= confirmQuery.confirm(msg);
 								if (! overwrite)
 									return null;

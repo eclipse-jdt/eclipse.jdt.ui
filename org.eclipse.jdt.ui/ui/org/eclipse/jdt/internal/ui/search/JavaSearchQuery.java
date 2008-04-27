@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,6 +48,7 @@ import org.eclipse.jdt.ui.search.QuerySpecification;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class JavaSearchQuery implements ISearchQuery {
 
@@ -238,7 +239,7 @@ public class JavaSearchQuery implements ISearchQuery {
 			return JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT
 					| JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.USE_RESOLVED);
 		} 
-		return ((PatternQuerySpecification) fPatternData).getPattern();
+		return BasicElementLabels.getFilePattern(((PatternQuerySpecification) fPatternData).getPattern());
 	}
 
 	private int getMaskedLimitTo() {

@@ -40,6 +40,8 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 public class JavaElementUtil {
 	
 	//no instances
@@ -48,14 +50,14 @@ public class JavaElementUtil {
 	
 	public static String createMethodSignature(IMethod method){
 		try {
-			return Signature.toString(method.getSignature(), method.getElementName(), method.getParameterNames(), false, ! method.isConstructor());
+			return BasicElementLabels.getJavaElementName(Signature.toString(method.getSignature(), method.getElementName(), method.getParameterNames(), false, ! method.isConstructor()));
 		} catch(JavaModelException e) {
-			return method.getElementName(); //fallback
+			return BasicElementLabels.getJavaElementName(method.getElementName()); //fallback
 		}
 	}
 	
 	public static String createFieldSignature(IField field){
-		return field.getDeclaringType().getFullyQualifiedName('.') + "." + field.getElementName(); //$NON-NLS-1$
+		return BasicElementLabels.getJavaElementName(field.getDeclaringType().getFullyQualifiedName('.') + "." + field.getElementName()); //$NON-NLS-1$
 	}
 	
 	public static String createSignature(IMember member){
@@ -63,7 +65,7 @@ public class JavaElementUtil {
 			case IJavaElement.FIELD:
 				return createFieldSignature((IField)member);
 			case IJavaElement.TYPE:
-				return ((IType)member).getFullyQualifiedName('.');
+				return BasicElementLabels.getJavaElementName(((IType)member).getFullyQualifiedName('.'));
 			case IJavaElement.INITIALIZER:
 				return RefactoringCoreMessages.JavaElementUtil_initializer; 
 			case IJavaElement.METHOD:

@@ -20,6 +20,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class InlineTempWizard extends RefactoringWizard {
 
@@ -52,7 +53,7 @@ public class InlineTempWizard extends RefactoringWizard {
 		protected String getMessageString() {
 			InlineTempRefactoring refactoring= (InlineTempRefactoring) getRefactoring();
 			int occurrences= refactoring.getReferences().length;
-			final String identifier= refactoring.getVariableDeclaration().getName().getIdentifier();
+			final String identifier= BasicElementLabels.getJavaElementName(refactoring.getVariableDeclaration().getName().getIdentifier());
 			switch (occurrences) {
 				case 0:
 					return Messages.format(

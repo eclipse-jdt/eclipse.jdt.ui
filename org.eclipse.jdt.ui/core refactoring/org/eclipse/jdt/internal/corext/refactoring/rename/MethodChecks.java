@@ -34,6 +34,8 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 public class MethodChecks {
 
 	//no instances
@@ -82,7 +84,7 @@ public class MethodChecks {
 
 		RefactoringStatusContext context= JavaStatusContext.create(overrides);
 		String message= Messages.format(RefactoringCoreMessages.MethodChecks_overrides, 
-				new String[]{JavaElementUtil.createMethodSignature(overrides), overrides.getDeclaringType().getFullyQualifiedName('.')});
+				new String[]{JavaElementUtil.createMethodSignature(overrides), JavaElementLabels.getElementLabel(overrides.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
 		return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, Corext.getPluginId(), RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD, overrides);
 	}
 	
@@ -94,7 +96,7 @@ public class MethodChecks {
 
 		RefactoringStatusContext context= JavaStatusContext.create(inInterface);
 		String message= Messages.format(RefactoringCoreMessages.MethodChecks_implements, 
-				new String[]{JavaElementUtil.createMethodSignature(inInterface), inInterface.getDeclaringType().getFullyQualifiedName('.')});
+				new String[]{JavaElementUtil.createMethodSignature(inInterface), JavaElementLabels.getElementLabel(inInterface.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
 		return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, Corext.getPluginId(), RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE, inInterface);
 	}
 	

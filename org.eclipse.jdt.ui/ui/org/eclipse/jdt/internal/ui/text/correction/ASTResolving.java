@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -91,6 +91,7 @@ import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class ASTResolving {
@@ -1093,10 +1094,6 @@ public class ASTResolving {
 	}
 
 	public static String getMethodSignature(IMethodBinding binding, boolean inOtherCU) {
-		StringBuffer buf= new StringBuffer();
-		if (inOtherCU && !binding.isConstructor()) {
-			buf.append(binding.getDeclaringClass().getTypeDeclaration().getName()).append('.'); // simple type name
-		}
 		return BindingLabelProvider.getBindingLabel(binding, BindingLabelProvider.DEFAULT_TEXTFLAGS);
 	}
 
@@ -1115,7 +1112,7 @@ public class ASTResolving {
 			}
 		}
 		buf.append(')');
-		return buf.toString();
+		return BasicElementLabels.getJavaElementName(buf.toString());
 	}
 
 	public static CompilationUnit createQuickFixAST(ICompilationUnit compilationUnit, IProgressMonitor monitor) {

@@ -524,7 +524,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 				if (element instanceof IPackageFragmentRoot) {
 					IPackageFragmentRoot root= (IPackageFragmentRoot) element;
 					if (root.isArchive() && root.isExternal()) {
-						return root.getElementName();
+						return JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT);
 					}
 				}
 				

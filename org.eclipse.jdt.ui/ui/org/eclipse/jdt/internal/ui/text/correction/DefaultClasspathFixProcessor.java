@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Default contribution to org.eclipse.jdt.ui.classpathFixProcessors
@@ -153,19 +154,19 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 		switch (entry.getEntryKind()) {
 			case IClasspathEntry.CPE_LIBRARY:
 				if (root.isArchive()) {
-					String[] args= { JavaElementLabels.getElementLabel(root, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED), project.getElementName() };
+					String[] args= { JavaElementLabels.getElementLabel(root, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED), BasicElementLabels.getJavaElementName(project.getElementName()) };
 					return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_archive_description, args);
 				} else {
-					String[] args= { JavaElementLabels.getElementLabel(root, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED), project.getElementName() };
+					String[] args= { JavaElementLabels.getElementLabel(root, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED), BasicElementLabels.getJavaElementName(project.getElementName()) };
 					return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_classfolder_description, args);
 				}
 			case IClasspathEntry.CPE_VARIABLE: {
-				String[] args= { JavaElementLabels.getElementLabel(root, 0), project.getElementName() };
+				String[] args= { JavaElementLabels.getElementLabel(root, 0), BasicElementLabels.getJavaElementName(project.getElementName()) };
 				return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_variable_description, args);
 			}
 			case IClasspathEntry.CPE_CONTAINER:
 				try {
-					String[] args= { JavaElementLabels.getContainerEntryLabel(entry.getPath(), root.getJavaProject()), project.getElementName() };
+					String[] args= { JavaElementLabels.getContainerEntryLabel(entry.getPath(), root.getJavaProject()), BasicElementLabels.getJavaElementName(project.getElementName()) };
 					return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_library_description, args);
 				} catch (JavaModelException e) {
 					// ignore

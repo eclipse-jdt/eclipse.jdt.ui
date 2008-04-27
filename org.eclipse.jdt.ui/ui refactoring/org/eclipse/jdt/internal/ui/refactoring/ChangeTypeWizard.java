@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 
@@ -321,7 +322,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 				} else {
 					ChangeTypeInputPage.this.setMessage(Messages.format(
 						RefactoringMessages.ChangeTypeWizard_grayed_types,  
-						new Object[] {type.getName(), getGeneralizeTypeRefactoring().getOriginalType().getName()}));
+						new Object[] {BasicElementLabels.getJavaElementName(type.getName()), BasicElementLabels.getJavaElementName(getGeneralizeTypeRefactoring().getOriginalType().getName())}));
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -27,6 +28,7 @@ import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 
@@ -38,7 +40,7 @@ public class JavadocLinkDialogLabelProvider extends LabelProvider {
 			URL url= ref.getURL();
 			String text= ref.getFullPath().lastSegment();
 			if (url != null) {
-				Object[] args= new Object[] { text, url.toExternalForm() };
+				Object[] args= new Object[] { text, BasicElementLabels.getURLPart(url.toExternalForm()) };
 				return Messages.format(JavadocExportMessages.JavadocLinkDialogLabelProvider_configuredentry, args); 
 			} else {
 				return Messages.format(JavadocExportMessages.JavadocLinkDialogLabelProvider_notconfiguredentry, text); 

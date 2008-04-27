@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ import org.eclipse.jdt.ui.jarpackager.IManifestProvider;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.jarpackager.JarBuilder;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class FatJarBuilder extends JarBuilder {
 
@@ -115,7 +116,7 @@ public class FatJarBuilder extends JarBuilder {
 					addWarning(ex.getMessage(), ex);
 				}
 			} else
-				addWarning(Messages.format(FatJarPackagerMessages.FatJarBuilder_error_readingArchiveFile, new Object[] { zipFile.getName(), ex.getLocalizedMessage() }), ex);
+				addWarning(Messages.format(FatJarPackagerMessages.FatJarBuilder_error_readingArchiveFile, new Object[] { BasicElementLabels.getFileName(zipFile.getName()), ex.getLocalizedMessage() }), ex);
 		}
 	}
 

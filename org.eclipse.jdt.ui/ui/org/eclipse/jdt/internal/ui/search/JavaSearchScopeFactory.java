@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -233,7 +234,7 @@ public class JavaSearchScopeFactory {
 	}
 	
 	public String getHierarchyScopeDescription(IType type) {
-		return Messages.format(SearchMessages.HierarchyScope, new String[] { type.getElementName() }); 
+		return Messages.format(SearchMessages.HierarchyScope, new String[] { JavaElementLabels.getElementLabel(type, JavaElementLabels.ALL_DEFAULT) }); 
 	}
 
 	public String getSelectionScopeDescription(IJavaElement[] javaElements, int includeMask) {
@@ -248,13 +249,13 @@ public class JavaSearchScopeFactory {
 		String scopeDescription;
 		if (javaElements.length == 1) {
 			String label= includeJRE ? SearchMessages.SingleSelectionScope : SearchMessages.SingleSelectionScopeNoJRE;
-			scopeDescription= Messages.format(label, javaElements[0].getElementName());
-		} else if (javaElements.length == 1) {
+			scopeDescription= Messages.format(label, JavaElementLabels.getElementLabel(javaElements[0], JavaElementLabels.ALL_DEFAULT));
+		} else if (javaElements.length == 2) {
 			String label= includeJRE ? SearchMessages.DoubleSelectionScope : SearchMessages.DoubleSelectionScopeNoJRE;
-			scopeDescription= Messages.format(label, new String[] { javaElements[0].getElementName(), javaElements[1].getElementName()});
+			scopeDescription= Messages.format(label, new String[] { JavaElementLabels.getElementLabel(javaElements[0], JavaElementLabels.ALL_DEFAULT), JavaElementLabels.getElementLabel(javaElements[1], JavaElementLabels.ALL_DEFAULT)});
 		}  else {
 			String label= includeJRE ? SearchMessages.SelectionScope : SearchMessages.SelectionScopeNoJRE;
-			scopeDescription= Messages.format(label, new String[] { javaElements[0].getElementName(), javaElements[1].getElementName()});
+			scopeDescription= Messages.format(label, new String[] { JavaElementLabels.getElementLabel(javaElements[0], JavaElementLabels.ALL_DEFAULT), JavaElementLabels.getElementLabel(javaElements[1], JavaElementLabels.ALL_DEFAULT)});
 		}
 		return scopeDescription;
 	}

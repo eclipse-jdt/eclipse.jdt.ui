@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,6 +64,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectio
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.ChangeDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.InsertDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.RemoveDescription;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 
@@ -370,7 +371,7 @@ public class TypeMismatchSubProcessor {
 				changes[i + definedExceptions.length]= new InsertDescription((ITypeBinding) undeclaredExceptions.get(i), ""); //$NON-NLS-1$
 			}
 			IMethodBinding overriddenDecl= overridden.getMethodDeclaration();
-			String[] args= {  declaringType.getName(), overridden.getName() };
+			String[] args= {  BasicElementLabels.getJavaElementName(declaringType.getName()), BasicElementLabels.getJavaElementName(overridden.getName()) };
 			String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_addexceptions_description, args);
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
 			proposals.add(new ChangeMethodSignatureProposal(label, targetCu, astRoot, overriddenDecl, null, changes, 7, image));

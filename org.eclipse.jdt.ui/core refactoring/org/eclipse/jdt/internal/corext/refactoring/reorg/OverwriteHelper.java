@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,10 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 class OverwriteHelper {
 	private Object fDestination;
@@ -107,7 +111,7 @@ class OverwriteHelper {
 			IPackageFragmentRoot root= fRoots[i];
 			if (canOverwrite(root)) {
 				if (root.getResource() instanceof IContainer) {
-					if (!skip(root.getElementName(), skipQuery))
+					if (!skip(JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT), skipQuery))
 						toNotOverwrite.add(root);
 				} else {
 					if (!overwrite(root.getResource(), overwriteQuery))
@@ -134,7 +138,7 @@ class OverwriteHelper {
 		List foldersToNotOverwrite= new ArrayList(1);
 		for (int i= 0; i < fFolders.length; i++) {
 			IFolder folder= fFolders[i];
-			if (willOverwrite(folder) && ! skip(folder.getName(), overwriteQuery))
+			if (willOverwrite(folder) && ! skip(BasicElementLabels.getResourceName(folder), overwriteQuery))
 				foldersToNotOverwrite.add(folder);				
 		}
 		IFolder[] folders= (IFolder[]) foldersToNotOverwrite.toArray(new IFolder[foldersToNotOverwrite.size()]);
@@ -148,7 +152,7 @@ class OverwriteHelper {
 			if (willOverwrite(file)) {
 				IContainer destination= (IContainer) ResourceUtil.getResource(fDestination);
 				if (ParentChecker.isDescendantOf(file, destination.findMember(file.getName()))) {
-					if (!skip(file.getName(), skipQuery)) {
+					if (!skip(BasicElementLabels.getResourceName(file), skipQuery)) {
 						filesToNotOverwrite.add(file);
 					}
 				} else if (!overwrite(file, overwriteQuery)) {
@@ -226,11 +230,11 @@ class OverwriteHelper {
 	}
 
 	private static boolean overwrite(IResource resource, IConfirmQuery overwriteQuery){
-		return overwrite(resource.getName(), overwriteQuery);
+		return overwrite(BasicElementLabels.getResourceName(resource), overwriteQuery);
 	}
 
 	private static boolean overwrite(IJavaElement element, IConfirmQuery overwriteQuery){
-		return overwrite(element.getElementName(), overwriteQuery);
+		return overwrite(JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT), overwriteQuery);
 	}
 
 	private static boolean overwrite(String name, IConfirmQuery overwriteQuery){

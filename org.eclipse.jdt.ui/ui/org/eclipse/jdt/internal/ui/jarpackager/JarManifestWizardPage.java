@@ -71,6 +71,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
@@ -890,7 +891,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 				kind= fragment.getKind();
 				containsJavaElements= fragment.getChildren().length > 0;
 			} catch (JavaModelException ex) {
-				ExceptionHandler.handle(ex, getContainer().getShell(), JarPackagerMessages.JarManifestWizardPage_error_jarPackageWizardError_title, Messages.format(JarPackagerMessages.JarManifestWizardPage_error_jarPackageWizardError_message, fragment.getElementName())); 
+				ExceptionHandler.handle(ex, getContainer().getShell(), JarPackagerMessages.JarManifestWizardPage_error_jarPackageWizardError_title, Messages.format(JarPackagerMessages.JarManifestWizardPage_error_jarPackageWizardError_message, JavaElementLabels.getElementLabel(fragment, JavaElementLabels.ALL_DEFAULT))); 
 				continue;
 			}
 			if (kind != IPackageFragmentRoot.K_BINARY && containsJavaElements)
