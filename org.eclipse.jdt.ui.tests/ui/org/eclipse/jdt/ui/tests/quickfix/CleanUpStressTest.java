@@ -215,6 +215,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    }\n");
         buf.append("\n");
         buf.append("    // TestRunListener implementation\n");
+        buf.append("\n");
         buf.append("    private static void readPreferences() {\n");
         buf.append("        InputStream is = null;\n");
         buf.append("        try {\n");
