@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.text.tests.performance;
 
 import junit.framework.Test;
@@ -22,6 +21,7 @@ import org.eclipse.test.performance.PerformanceMeter;
 import org.eclipse.jface.action.IAction;
 
 import org.eclipse.ui.texteditor.AbstractTextEditor;
+
 
 /**
  * Measures the time to format a large compilation unit.
@@ -65,7 +65,6 @@ public class JavaFormatterTest extends TextPerformanceTestCase {
 	public void test() throws Exception {
 		measure(getNullPerformanceMeter(), getWarmUpRuns());
 		PerformanceMeter performanceMeter= createPerformanceMeterForSummary("Java Editor: format", Dimension.ELAPSED_PROCESS);
-		explainDegradation("Test is slower because the workspace uses more memory and hence slower diff alog is used.", performanceMeter);
 		measure(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
