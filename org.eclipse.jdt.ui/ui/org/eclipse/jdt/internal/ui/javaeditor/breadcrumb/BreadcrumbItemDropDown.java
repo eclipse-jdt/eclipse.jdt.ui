@@ -68,20 +68,28 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 class BreadcrumbItemDropDown {
 
 	/**
-	 * An arrow right image descriptor. The images color is related to the list
+	 * An arrow image descriptor. The images color is related to the list
 	 * fore- and background color. This makes the arrow visible even in high contrast
-	 * mode. 
+	 * mode. If <code>ltr</code> is true the arrow points to the right, otherwise it
+	 * points to the left.
 	 */
-	private final class AccessibelArrowRightImage extends CompositeImageDescriptor {
+	private final class AccessibelArrowImage extends CompositeImageDescriptor {
+		
+		private final static int ARROW_SIZE= 5;
+		
+		private final boolean fLTR;
+
+		public AccessibelArrowImage(boolean ltr) {
+			fLTR= ltr;
+		}
+		
 		/* 
 		 * @see org.eclipse.jface.resource.CompositeImageDescriptor#drawCompositeImage(int, int)
 		 */
 		protected void drawCompositeImage(int width, int height) {
 			Display display= fParentComposite.getDisplay();
 
-			int arrowSize= 5;
-
-			Image image= new Image(display, arrowSize, arrowSize * 2);
+			Image image= new Image(display, ARROW_SIZE, ARROW_SIZE * 2);
 
 			GC gc= new GC(image);
 
@@ -89,31 +97,43 @@ class BreadcrumbItemDropDown {
 			Color aliasing= createColor(SWT.COLOR_LIST_FOREGROUND, SWT.COLOR_LIST_BACKGROUND, 30, display);
 			gc.setBackground(triangle);
 
-			gc.fillPolygon(new int[] { 0, 0, arrowSize, arrowSize, 0, arrowSize * 2 });
+			if (fLTR) {
+				gc.fillPolygon(new int[] { mirror(0), 0, mirror(ARROW_SIZE), ARROW_SIZE, mirror(0), ARROW_SIZE * 2 });
+			} else {
+				gc.fillPolygon(new int[] { ARROW_SIZE, 0, 0, ARROW_SIZE, ARROW_SIZE, ARROW_SIZE * 2 });
+			}
 
 			gc.setForeground(aliasing);
-			gc.drawLine(0, 1, arrowSize - 1, arrowSize);
-			gc.drawLine(arrowSize - 1, arrowSize, 0, arrowSize * 2 - 1);
+			gc.drawLine(mirror(0), 1, mirror(ARROW_SIZE - 1), ARROW_SIZE);
+			gc.drawLine(mirror(ARROW_SIZE - 1), ARROW_SIZE, mirror(0), ARROW_SIZE * 2 - 1);
 
 			gc.dispose();
 			triangle.dispose();
 			aliasing.dispose();
 
 			ImageData imageData= image.getImageData();
-			for (int y= 0; y < arrowSize; y++) {
-				for (int x= 0; x <= y; x++) {
-					imageData.setAlpha(x, y, 255);
+			for (int y= 1; y < ARROW_SIZE; y++) {
+				for (int x= 0; x < y; x++) {
+					imageData.setAlpha(mirror(x), y, 255);
 				}
 			}
-			for (int y= 0; y < arrowSize; y++) {
+			for (int y= 0; y < ARROW_SIZE; y++) {
 				for (int x= 0; x <= y; x++) {
-					imageData.setAlpha(x, arrowSize * 2 - y - 1, 255);
+					imageData.setAlpha(mirror(x), ARROW_SIZE * 2 - y - 1, 255);
 				}
 			}
 
-			drawImage(imageData, (width / 2) - (arrowSize / 2), (height / 2) - arrowSize);
+			int offset= fLTR ? 0 : -1;
+			drawImage(imageData, (width / 2) - (ARROW_SIZE / 2) + offset, (height / 2) - ARROW_SIZE - 1);
 
 			image.dispose();
+		}
+
+		private int mirror(int x) {
+			if (fLTR)
+				return x;
+
+			return ARROW_SIZE - x - 1;
 		}
 
 		/* 
@@ -166,13 +186,13 @@ class BreadcrumbItemDropDown {
 			}
 		};
 
-		showDropDownMenuAction.setImageDescriptor(new AccessibelArrowRightImage());
+		showDropDownMenuAction.setImageDescriptor(new AccessibelArrowImage(isLTR()));
 		showDropDownMenuAction.setToolTipText(BreadcrumbMessages.BreadcrumbItemDropDown_showDropDownMenu_action_toolTip);
 		manager.add(showDropDownMenuAction);
 
 		manager.update(true);
 	}
-	
+
 	/**
 	 * Return the width of this element.
 	 * 
@@ -497,18 +517,27 @@ class BreadcrumbItemDropDown {
 	private void setShellBounds(Shell shell) {
 		Rectangle rect= fParentComposite.getBounds();
 		Rectangle toolbarBounds= fToolBar.getBounds();
-		Point pt= new Point(toolbarBounds.x - 6, rect.y + rect.height);
-		pt= fParentComposite.toDisplay(pt);
 
 		shell.pack();
 		Point size= shell.getSize();
 		int height= Math.min(size.y, DROP_DOWN_HIGHT);
 		int width= Math.max(Math.min(size.x, DROP_DOWN_WIDTH), 250);
 
+		int x;
+		if (isLTR()) {
+			x= toolbarBounds.x - 6;
+		} else {
+			x= toolbarBounds.x + width - 6;
+		}
+		Point pt= new Point(x, rect.y + rect.height);
+		pt= fParentComposite.toDisplay(pt);
+		
 		Rectangle monitor= getMonitor(shell.getDisplay(), pt).getClientArea();
 		int overlap= (pt.x + width) - (monitor.x + monitor.width);
 		if (overlap > 0)
 			pt.x-= overlap;
+		if (pt.x < 0)
+			pt.x= 0;
 		
 		shell.setLocation(pt);
 		shell.setSize(width, height);
@@ -567,8 +596,26 @@ class BreadcrumbItemDropDown {
 		}
 
 		if (newHeight != currentHeight || newWidth != currentWidth) {
-			shell.setSize(newWidth, newHeight);
+			shell.setRedraw(false);
+			try {
+				shell.setSize(newWidth, newHeight);
+				if (!isLTR()) {
+					Point location= shell.getLocation();
+					shell.setLocation(location.x - (newWidth - currentWidth), location.y);
+				}
+			} finally {
+				shell.setRedraw(true);
+			}
 		}
 	}
 
+	/**
+	 * <code>true</code> if the breadcrumb is in left-to-right mode, <code>false</code> if it is in right-to-left mode.
+	 * 
+	 * @return <code>true</code> if the breadcrumb in left-to-right mode, <code>false</code> otherwise
+	 */
+	private boolean isLTR() {
+		return (fParentComposite.getStyle() & SWT.RIGHT_TO_LEFT) == 0;
+	}
 }
+

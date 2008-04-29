@@ -190,7 +190,9 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		if (fComposite != null)
 			new IllegalArgumentException("Content must only be created once."); //$NON-NLS-1$
 		
-		fComposite= new Composite(parent, SWT.NONE);
+		boolean rtl= (getTextEditor().getSite().getShell().getStyle() & SWT.RIGHT_TO_LEFT) != 0;
+
+		fComposite= new Composite(parent, rtl ? SWT.RIGHT_TO_LEFT : SWT.NONE);
 		GridData data= new GridData(SWT.FILL, SWT.TOP, true, false);
 		fComposite.setLayoutData(data);
 		GridLayout gridLayout= new GridLayout(1, false);
