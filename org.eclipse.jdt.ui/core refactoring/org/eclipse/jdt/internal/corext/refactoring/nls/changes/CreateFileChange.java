@@ -89,7 +89,7 @@ public class CreateFileChange extends ResourceChange {
 
 	public String getName() {
 		if (fChangeName == null)
-			return Messages.format(NLSChangesMessages.createFile_Create_file, BasicElementLabels.getPathLabel(fPath, true));
+			return Messages.format(NLSChangesMessages.createFile_Create_file, BasicElementLabels.getPathLabel(fPath, false));
 		else
 			return fChangeName;
 	}
