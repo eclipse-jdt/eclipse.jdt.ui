@@ -56,6 +56,8 @@ public class WorkingSetFindAction extends FindAction {
 	 * @param editor the Java editor (internal type)
 	 * @param action the action
 	 * @param workingSetName the working set name 
+	 * 
+	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public WorkingSetFindAction(JavaEditor editor, FindAction action, String workingSetName) {
 		super(editor);

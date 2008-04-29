@@ -237,6 +237,8 @@ public class RefactorActionGroup extends ActionGroup {
 	 * @param editor the java editor
 	 * @param groupName the group name to add the actions to
 	 * @param binary <code>true</code> if the action group is used in a binary environment, <code>false</code> otherwise
+	 * 
+	 * @noreference This constructor is not intended to be referenced by clients.
 	 */
 	public RefactorActionGroup(JavaEditor editor, String groupName, boolean binary) {
 
