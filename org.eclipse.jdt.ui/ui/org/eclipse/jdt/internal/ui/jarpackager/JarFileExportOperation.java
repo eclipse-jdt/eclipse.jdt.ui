@@ -379,6 +379,9 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				}
 			}
 			return;
+		} else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT && ((IPackageFragmentRoot) je).isExternal()) {
+			//External class folder
+			return;
 		}
 
 		Object[] children= fJavaElementContentProvider.getChildren(je);

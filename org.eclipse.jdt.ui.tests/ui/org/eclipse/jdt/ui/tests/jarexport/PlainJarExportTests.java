@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.jarexport;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,6 +26,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -45,6 +47,7 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
@@ -129,6 +132,27 @@ public class PlainJarExportTests extends TestCase {
 		assertEquals(expected.toString(), entries.toString());
 	}
 	
+	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=229052
+	public void testExternalClassFolder() throws Exception {
+		JarPackageData data= createJarPackageData();
+
+		File classFolder= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/externalClassFolder/"));//$NON-NLS-1$
+		assertTrue("class folder not found", classFolder != null && classFolder.exists());//$NON-NLS-1$
+
+		IPackageFragmentRoot externalRoot= JavaProjectHelper.addLibrary(fProject, Path.fromOSString(classFolder.getPath()), null, null); //$NON-NLS-1$
+
+		data.setElements(new Object[] { fCU.getResource(), externalRoot });
+		data.setExportClassFiles(true);
+
+		ZipFile jar= createArchive(data);
+		ArrayList entries= getSortedEntries(jar);
+		List expected= Arrays.asList(new String[] { 
+				"META-INF/MANIFEST.MF\n", 
+				"org/eclipse/jdt/ui/test/Main$1.class\n", 
+				"org/eclipse/jdt/ui/test/Main$MainInner.class\n",
+				"org/eclipse/jdt/ui/test/Main.class\n", });
+		assertEquals(expected.toString(), entries.toString());
+	}
 	
 	private JarPackageData createJarPackageData() {
 		JarPackageData data= new JarPackageData();
