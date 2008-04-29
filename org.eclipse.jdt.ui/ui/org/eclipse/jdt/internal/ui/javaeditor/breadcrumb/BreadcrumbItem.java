@@ -102,11 +102,10 @@ class BreadcrumbItem extends Item {
 	 * @see org.eclipse.swt.widgets.Widget#setData(java.lang.Object)
 	 */
 	public void setData(Object data) {
-		if (data == getData())
+		if ((data == getData()) || (data != null && data.equals(getData()))) {
+			fExpandBlock.setEnabled(fContentProvider.hasChildren(data));
 			return;
-
-		if (data != null && data.equals(getData()))
-			return;
+		}
 
 		super.setData(data);
 		refresh();
@@ -184,11 +183,7 @@ class BreadcrumbItem extends Item {
 		fDetailsBlock.setImage(image);
 		fDetailsBlock.setToolTip(toolTip);
 
-		if (fContentProvider.hasChildren(getData())) {
-			fExpandBlock.setEnabled(true);
-		} else {
-			fExpandBlock.setEnabled(false);
-		}
+		fExpandBlock.setEnabled(fContentProvider.hasChildren(getData()));
 	}
 	
 	/**
