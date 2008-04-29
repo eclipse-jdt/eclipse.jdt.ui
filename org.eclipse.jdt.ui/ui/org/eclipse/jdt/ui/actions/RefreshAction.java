@@ -51,7 +51,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Action for refreshing the workspace from the local file system for
@@ -165,16 +164,7 @@ public class RefreshAction extends SelectionDispatchAction {
 				performRefresh(selection, monitor);
 			}
 		};
-		
-		try {
-			PlatformUI.getWorkbench().getProgressService().run(true, true, new WorkbenchRunnableAdapter(operation));
-		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), 
-				ActionMessages.RefreshAction_error_title,  
-				ActionMessages.RefreshAction_error_message); 
-		} catch (InterruptedException e) {
-			// canceled
-		}
+		new WorkbenchRunnableAdapter(operation).runAsUserJob(ActionMessages.RefreshAction_refresh_operation_label, null);
 	}
 	
 	private void performRefresh(IStructuredSelection selection, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
