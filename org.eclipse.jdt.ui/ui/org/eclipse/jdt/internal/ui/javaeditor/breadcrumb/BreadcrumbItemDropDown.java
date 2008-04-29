@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.javaeditor.breadcrumb;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyEvent;
@@ -480,10 +482,26 @@ class BreadcrumbItemDropDown {
 			}
 		};
 		Display.getDefault().addFilter(SWT.FocusIn, focusListener);
+		
+		final ControlListener controlListener= new ControlListener() {
+			public void controlMoved(ControlEvent e) {
+				shell.close();
+			}
+
+			public void controlResized(ControlEvent e) {
+				shell.close();
+			}
+		};
+		fToolBar.getShell().addControlListener(controlListener);
 
 		shell.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
 				Display.getDefault().removeFilter(SWT.FocusIn, focusListener);
+	
+				Shell parent= fToolBar.getShell();
+				if (!parent.isDisposed()) {
+					parent.removeControlListener(controlListener);
+				}
 			}
 		});
 		shell.addShellListener(new ShellListener() {
