@@ -43,6 +43,7 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 	
 	/**
 	 * Runs a workspace runnable with the workspace lock.
+	 * @param runnable the runnable
 	 */
 	public WorkbenchRunnableAdapter(IWorkspaceRunnable runnable) {
 		this(runnable, ResourcesPlugin.getWorkspace().getRoot());
@@ -50,6 +51,8 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 	
 	/**
 	 * Runs a workspace runnable with the given lock or <code>null</code> to run with no lock at all.
+	 * @param runnable the runnable
+	 * @param rule the scheduling rule
 	 */
 	public WorkbenchRunnableAdapter(IWorkspaceRunnable runnable, ISchedulingRule rule) {
 		fWorkspaceRunnable= runnable;
@@ -58,6 +61,8 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 	
 	/**
 	 * Runs a workspace runnable with the given lock or <code>null</code> to run with no lock at all.
+	 * @param runnable the runnable
+	 * @param rule the scheduling rule
 	 * @param transfer <code>true</code> if the rule is to be transfered 
 	 *  to the model context thread. Otherwise <code>false</code>
 	 */
@@ -93,7 +98,7 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 	}
 	
 	public void runAsUserJob(String name, final Object jobFamiliy) {
-		Job buildJob = new Job(name){ 
+		Job job = new Job(name){ 
 			/* (non-Javadoc)
 			 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
 			 */
@@ -118,9 +123,9 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress, IThreadL
 				return jobFamiliy == family;
 			}
 		};
-		buildJob.setRule(fRule);
-		buildJob.setUser(true); 
-		buildJob.schedule();
+		job.setRule(fRule);
+		job.setUser(true); 
+		job.schedule();
 		
 		// TODO: should block until user pressed 'to background'
 	}
