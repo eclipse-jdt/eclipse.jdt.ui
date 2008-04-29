@@ -72,7 +72,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
  */
 public class ClasspathFixSelectionDialog extends StatusDialog {
 	
-	public static void openClasspathFixSelectionDialog(Shell parent, final IJavaProject project, final String missingType, IRunnableContext context) {
+	public static boolean openClasspathFixSelectionDialog(Shell parent, final IJavaProject project, final String missingType, IRunnableContext context) {
 		final ClasspathFixProposal[][] classPathFixProposals= { null };
 		try {
 			context.run(true, true, new IRunnableWithProgress() {
@@ -111,12 +111,14 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 						}
 					}
 				});
+				return true;
 			} catch (InvocationTargetException e) {
 				ExceptionHandler.handle(e, NewWizardMessages.ClasspathFixSelectionDialog_apply_proposal_error_title , NewWizardMessages.ClasspathFixSelectionDialog_apply_proposal_error_message);
 			} catch (InterruptedException e) {
 				// user pressed cancel
 			}
 		}
+		return false;
 	}
 
 	private static final String BUILD_PATH_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage"; //$NON-NLS-1$
@@ -190,6 +192,8 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 			
 			Link link= createLink(composite, listener);
 			link.setText(Messages.format(NewWizardMessages.ClasspathFixSelectionDialog_open_buld_path_dialog_message, BasicElementLabels.getJavaElementName(fProject.getElementName())));
+			
+			performSelectionChanged();
 		}
 		
 		return composite;
