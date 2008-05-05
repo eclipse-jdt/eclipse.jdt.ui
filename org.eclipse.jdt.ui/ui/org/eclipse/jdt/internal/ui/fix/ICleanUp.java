@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
  * </p>
  * <p>
  * A context containing the information requested by the 
- * requirements are passed to {@link #createFix(CleanUpContext)}.
+ * requirements are passed to {@link #createFix(ICleanUp.CleanUpContext)}.
  * A fix capable of fixing the problems is returned by this function
  * if {@link #checkPreConditions(IJavaProject, ICompilationUnit[], IProgressMonitor)}
  * has returned a non fatal error status.
@@ -231,7 +231,7 @@ public interface ICleanUp {
 	public abstract String getPreview();
 	
 	/**
-	 * @return the requirements for used for {@link #createFix(CleanUpContext)} to work
+	 * @return the requirements used for {@link #createFix(ICleanUp.CleanUpContext)} to work
 	 */
 	public CleanUpRequirements getRequirements();
 	
