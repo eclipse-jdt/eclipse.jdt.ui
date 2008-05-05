@@ -383,8 +383,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				if (parseList.size() > 0) {
 					ASTBatchParser parser= new ASTBatchParser() {
 						protected ASTParser createParser(IJavaProject project) {
-							ASTParser result= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
-							result.setResolveBindings(true);
+							ASTParser result= createCleanUpASTParser();
 							result.setProject(project);
 
 							Map options= RefactoringASTParser.getCompilerOptions(project);
@@ -859,4 +858,15 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		
 		return result;
 	}
+	
+	public static ASTParser createCleanUpASTParser() {
+		ASTParser result= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+
+		result.setResolveBindings(true);
+		result.setStatementsRecovery(ASTProvider.SHARED_AST_STATEMENT_RECOVERY);
+		result.setBindingsRecovery(ASTProvider.SHARED_BINDING_RECOVERY);
+
+		return result;
+	}
+
 }

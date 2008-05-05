@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -86,7 +86,6 @@ import org.eclipse.jdt.internal.ui.fix.ICleanUp.CleanUpContext;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp.CleanUpRequirements;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp.SaveActionRequirements;
 import org.eclipse.jdt.internal.ui.fix.IMultiLineCleanUp.MultiLineCleanUpContext;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
 
 public class CleanUpPostSaveListener implements IPostSaveListener {
@@ -447,10 +446,9 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 				return ast;
 		}
 		
-		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
-		parser.setResolveBindings(true);
-		parser.setProject(project);
+		ASTParser parser= CleanUpRefactoring.createCleanUpASTParser();
 		parser.setSource(unit);
+		
 		Map compilerOptions= RefactoringASTParser.getCompilerOptions(unit.getJavaProject());
 		compilerOptions.putAll(cleanUpOptions);
 		parser.setCompilerOptions(compilerOptions);

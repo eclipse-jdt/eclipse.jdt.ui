@@ -6630,6 +6630,33 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 	
+	public void testOrganizeImportsBug229570() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface E1 {\n");
+		buf.append("  List<IEntity> getChildEntities();\n");
+		buf.append("  ArrayList<String> test;\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.ORGANIZE_IMPORTS);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("public interface E1 {\n");
+		buf.append("  List<IEntity> getChildEntities();\n");
+		buf.append("  ArrayList<String> test;\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+	
 	public void testCorrectIndetation01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
