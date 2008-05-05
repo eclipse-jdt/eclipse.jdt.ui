@@ -1156,34 +1156,26 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				try {
 					viewer.setRedraw(false);
 
-					final String type= TextUtilities.getContentType(viewer.getDocument(), IJavaPartitions.JAVA_PARTITIONING, selection.x, true);
-					if (type.equals(IDocument.DEFAULT_CONTENT_TYPE) && selection.y == 0) {
-
+					final IJavaElement element= selection.y == 0 ? getElementAt(selection.x, true) : null;
+					if (element != null && element.exists()) {
 						try {
-							final IJavaElement element= getElementAt(selection.x, true);
-							if (element != null && element.exists()) {
+							final int kind= element.getElementType();
+							if (kind == IJavaElement.TYPE || kind == IJavaElement.METHOD || kind == IJavaElement.INITIALIZER) {
 
-								final int kind= element.getElementType();
-								if (kind == IJavaElement.TYPE || kind == IJavaElement.METHOD || kind == IJavaElement.INITIALIZER) {
+								final ISourceReference reference= (ISourceReference) element;
+								final ISourceRange range= reference.getSourceRange();
 
-									final ISourceReference reference= (ISourceReference)element;
-									final ISourceRange range= reference.getSourceRange();
-
-									if (range != null) {
-										viewer.setSelectedRange(range.getOffset(), range.getLength());
-										viewer.doOperation(ISourceViewer.FORMAT);
-									}
+								if (range != null) {
+									viewer.setSelectedRange(range.getOffset(), range.getLength());
+									viewer.doOperation(ISourceViewer.FORMAT);
 								}
 							}
 						} catch (JavaModelException exception) {
 							// Should not happen
 						}
 					} else {
-						viewer.setSelectedRange(selection.x, 1);
 						viewer.doOperation(ISourceViewer.FORMAT);
 					}
-				} catch (BadLocationException exception) {
-					// Can not happen
 				} finally {
 
 					viewer.setRedraw(true);
