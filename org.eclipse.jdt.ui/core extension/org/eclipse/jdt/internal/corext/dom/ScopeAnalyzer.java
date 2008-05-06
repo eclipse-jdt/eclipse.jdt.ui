@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -545,6 +545,8 @@ public class ScopeAnalyzer {
 		if (declaring == null) {
 			return false;
 		}
+		
+		declaring= declaring.getTypeDeclaration(); 
 	
 		int modifiers= binding.getModifiers();
 		if (Modifier.isPublic(modifiers) || declaring.isInterface()) {
@@ -560,14 +562,38 @@ public class ScopeAnalyzer {
 	}
 	
 	private static boolean isTypeInScope(ITypeBinding declaring, ITypeBinding context, boolean includeHierarchy) {
-		ITypeBinding curr= context;
+		ITypeBinding curr= context.getTypeDeclaration();
 		while (curr != null && curr != declaring) {
-			if (includeHierarchy && Bindings.isSuperType(declaring, curr)) {
+			if (includeHierarchy && isInSuperTypeHierarchy(declaring, curr)) {
 				return true;
 			}
 			curr= curr.getDeclaringClass();
 		}
 		return curr == declaring;
+	}
+	
+	/*
+	 * This method is different from Binding.isSuperType as type declarations are compared
+	 */
+	private static boolean isInSuperTypeHierarchy(ITypeBinding possibleSuperTypeDecl, ITypeBinding type) {
+		if (type == possibleSuperTypeDecl) {
+			return true;
+		}
+		ITypeBinding superClass= type.getSuperclass();
+		if (superClass != null) {
+			if (isInSuperTypeHierarchy(possibleSuperTypeDecl, superClass.getTypeDeclaration())) {
+				return true;
+			}
+		}
+		if (possibleSuperTypeDecl.isInterface()) {
+			ITypeBinding[] superInterfaces= type.getInterfaces();
+			for (int i= 0; i < superInterfaces.length; i++) {
+				if (isInSuperTypeHierarchy(possibleSuperTypeDecl, superInterfaces[i].getTypeDeclaration())) {
+					return true;
+				}			
+			}
+		}
+		return false;
 	}
 	
 

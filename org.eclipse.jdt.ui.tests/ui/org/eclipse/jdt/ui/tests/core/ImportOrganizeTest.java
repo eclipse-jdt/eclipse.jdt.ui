@@ -2246,6 +2246,45 @@ public class ImportOrganizeTest extends CoreTests {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
+	public void testStaticImports_bug230067() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("a", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package a;\n");
+		buf.append("\n");
+		buf.append("class Test<T> {\n");
+		buf.append("    private static String TEST = \"constant\";\n");
+		buf.append("\n");
+		buf.append("    static class Inner extends Test<String> {\n");
+		buf.append("        public void test() {\n");
+		buf.append("            TEST.concat(\"access\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("Test", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package a;\n");
+		buf.append("\n");                            // no static import for 'TEST'
+		buf.append("class Test<T> {\n");
+		buf.append("    private static String TEST = \"constant\";\n");
+		buf.append("\n");
+		buf.append("    static class Inner extends Test<String> {\n");
+		buf.append("        public void test() {\n");
+		buf.append("            TEST.concat(\"access\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
 	public void testImportCountAddNew() throws Exception {
 	    IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
