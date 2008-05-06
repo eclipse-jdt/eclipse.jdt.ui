@@ -37,7 +37,6 @@ import org.eclipse.jdt.internal.corext.refactoring.ExceptionInfo;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 /**
@@ -78,7 +77,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		String fileName = "A_" + getName();
 		if (canReorder)
 			fileName += input ? "_in": "_out";
-		return fileName + ".java"; 
+		return fileName + ".java";
 	}
 	
 	private String getTestFileName(boolean canReorder, boolean input){
@@ -92,7 +91,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		return fileName;
 	}
 		
-	//---helpers 
+	//---helpers
 	
 	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean canRename, boolean input) throws Exception {
 		return createCU(pack, getSimpleTestFileName(canRename, input), getFileContents(getTestFileName(canRename, input)));
@@ -182,14 +181,14 @@ public class ChangeSignatureTests extends RefactoringTest {
 		assertParticipant(classA);
 	}
 
-	private void helperDoAll(String typeName, 
-								String methodName, 
-							  	String[] signature, 
-							  	ParameterInfo[] newParamInfos, 
-							  	int[] newIndices, 
-							  	String[] oldParamNames, 
-							  	String[] newParamNames, 
-							  	String[] newParameterTypeNames, 
+	private void helperDoAll(String typeName,
+								String methodName,
+							  	String[] signature,
+							  	ParameterInfo[] newParamInfos,
+							  	int[] newIndices,
+							  	String[] oldParamNames,
+							  	String[] newParamNames,
+							  	String[] newParameterTypeNames,
 							  	int[] permutation,
 							  	int newVisibility,
 							  	int[] deleted, String returnTypeName, boolean createDelegate)  throws Exception{
@@ -307,7 +306,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 					infoI1.setNewTypeName(newParamTypeNames[oldNameList.indexOf(infoI1.getOldName())]);
 
 				swap(infos, i, permutation[i]);
-			}	
+			}
 		}
 	}
 
@@ -335,7 +334,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 					ParameterInfo infoI1= (ParameterInfo)infos.get(permutation[i]);
 					infoI1.setNewName((String)newNameList.get(oldNameList.indexOf(infoI1.getOldName())));
 					swap(infos, i, permutation[i]);
-				}				
+				}
 			}
 		}
 	}
@@ -379,7 +378,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 			JavaRefactoringDescriptor descriptor= processor.createDescriptor();
 			result= performRefactoring(descriptor, true);
 		}
-		assertNotNull("precondition was supposed to fail", result);		
+		assertNotNull("precondition was supposed to fail", result);
 		assertEquals("Severity:", expectedSeverity, result.getSeverity());
 	}
 
@@ -401,13 +400,13 @@ public class ChangeSignatureTests extends RefactoringTest {
 		assertEquals("Severity:" + result.getMessageMatchingSeverity(result.getSeverity()), expectedSeverity, result.getSeverity());
 	}
 	
-	private void helperDoAllFail(String methodName, 
-								String[] signature, 
-							  	ParameterInfo[] newParamInfos, 
-							  	int[] newIndices, 
-							  	String[] oldParamNames, 
-							  	String[] newParamNames, 
-							  	String[] newParameterTypeNames, 
+	private void helperDoAllFail(String methodName,
+								String[] signature,
+							  	ParameterInfo[] newParamInfos,
+							  	int[] newIndices,
+							  	String[] oldParamNames,
+							  	String[] newParamNames,
+							  	String[] newParameterTypeNames,
 							  	int[] permutation,
 							  	int newVisibility,
 							  	int[] deleted, int expectedSeverity)  throws Exception{
@@ -429,18 +428,18 @@ public class ChangeSignatureTests extends RefactoringTest {
 			JavaRefactoringDescriptor descriptor= processor.createDescriptor();
 			result= performRefactoring(descriptor);
 		}
-		assertNotNull("precondition was supposed to fail", result);	
-		assertEquals("Severity:" + result.getMessageMatchingSeverity(result.getSeverity()), expectedSeverity, result.getSeverity());		
+		assertNotNull("precondition was supposed to fail", result);
+		assertEquals("Severity:" + result.getMessageMatchingSeverity(result.getSeverity()), expectedSeverity, result.getSeverity());
 	}
 	
-	private void helperDoAllWithExceptions(String typeName, 
-			String methodName, 
-		  	String[] signature, 
-		  	ParameterInfo[] newParamInfos, 
-		  	int[] newIndices, 
-		  	String[] oldParamNames, 
-		  	String[] newParamNames, 
-		  	String[] newParameterTypeNames, 
+	private void helperDoAllWithExceptions(String typeName,
+			String methodName,
+		  	String[] signature,
+		  	ParameterInfo[] newParamInfos,
+		  	int[] newIndices,
+		  	String[] oldParamNames,
+		  	String[] newParamNames,
+		  	String[] newParameterTypeNames,
 		  	int[] permutation,
 		  	int newVisibility,
 		  	int[] deleted,
@@ -523,12 +522,12 @@ public class ChangeSignatureTests extends RefactoringTest {
 			}
 		}
 		for (int i= 0; i < addExceptions.length; i++) {
-			IType type= JavaModelUtil.findType(cu.getJavaProject(), addExceptions[i]);
+			IType type= cu.getJavaProject().findType(addExceptions[i]);
 			list.add(ExceptionInfo.createInfoForAddedException(type));
 		}
 	}
 
-	//------- tests 
+	//------- tests
 	
 	public void testFail0() throws Exception{
 		helperFail(new String[]{"j", "i"}, new String[]{"I", "I"}, RefactoringStatus.ERROR);
@@ -583,7 +582,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.NONE;
 		int expectedSeverity= RefactoringStatus.ERROR;
 		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, expectedSeverity);
-	}	
+	}
 	
 	public void testFailDoAll6()throws Exception{
 		String[] signature= {"I"};
@@ -600,7 +599,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.NONE;
 		int expectedSeverity= RefactoringStatus.ERROR;
 		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, expectedSeverity);
-	}	
+	}
 
 	public void testFailDoAll7()throws Exception{
 		String[] signature= {"I"};
@@ -617,7 +616,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.NONE;
 		int expectedSeverity= RefactoringStatus.ERROR;
 		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, expectedSeverity);
-	}	
+	}
 	
 	public void testFailDoAll8()throws Exception{
 		String[] signature= {"I"};
@@ -899,7 +898,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 //		if (true){
 //			printTestDisabledMessage("Bug 24230");
 //			return;
-//		}	
+//		}
 		String[] signature= {"I", "I"};
 		ParameterInfo[] newParamInfo= null;
 		int[] newIndices= null;
@@ -1048,7 +1047,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= JdtFlags.VISIBILITY_CODE_INVALID;//retain
 		String newReturnTypeName= null;
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName, true);
-	}	
+	}
 
 	public void testAll35()throws Exception{
 		String[] signature= {"I", "Z"};
@@ -1065,7 +1064,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.PUBLIC;
 		String newReturnTypeName= null;
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
-	}	
+	}
 
 	public void testAll36()throws Exception{
 		String[] signature= {"I", "Z"};
@@ -1082,7 +1081,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.PRIVATE;
 		String newReturnTypeName= null;
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
-	}	
+	}
 
 	public void testAll37()throws Exception{
 		String[] signature= {"I", "Z"};
@@ -1099,7 +1098,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.PROTECTED;
 		String newReturnTypeName= null;
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
-	}	
+	}
 
 	public void testAll38()throws Exception{
 		String[] signature= {"I", "Z"};
@@ -1116,7 +1115,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.PROTECTED;
 		String newReturnTypeName= null;
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
-	}	
+	}
 
 	public void testAll39()throws Exception{
 		String[] signature= {"I", "Z"};
@@ -1133,7 +1132,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.PUBLIC;
 		String newReturnTypeName= null;
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
-	}	
+	}
 
 	public void testAll40()throws Exception{
 		String[] signature= {"I", "Z"};
@@ -1150,7 +1149,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.PUBLIC;
 		String newReturnTypeName= null;
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
-	}	
+	}
 
 	public void testAll41()throws Exception{
 		String[] signature= {"I"};
@@ -1167,7 +1166,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.NONE;
 		String newReturnTypeName= null;
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName, true);
-	}	
+	}
 
 	public void testAll42()throws Exception{
 		String[] signature= {"I"};
@@ -1184,7 +1183,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.NONE;
 		String newReturnTypeName= null;
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
-	}	
+	}
 
 	public void testAll43()throws Exception{
 		String[] signature= {"I", "I"};
@@ -1201,7 +1200,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.NONE;
 		String newReturnTypeName= null;
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName, true);
-	}	
+	}
 
 	public void testAll44()throws Exception{
 		if (true){
@@ -1222,7 +1221,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.NONE;
 		String newReturnTypeName= "boolean";
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
-	}	
+	}
 
 	public void testAll45()throws Exception{
 		if (true){
@@ -1245,7 +1244,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.NONE;
 		String newReturnTypeName= null;
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
-	}	
+	}
 	
 	public void testAll46()throws Exception{
 		if (! RUN_CONSTRUCTOR_TEST){
@@ -1559,9 +1558,9 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.NONE;
 		String newReturnTypeName= "Object";
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
-	}	
+	}
 
-	public void testAll62()throws Exception{ //bug 
+	public void testAll62()throws Exception{ //bug
 		String[] signature= {"QBigInteger;", "QBigInteger;", "QBigInteger;"};
 		ParameterInfo[] newParamInfo= null;
 		int[] newIndices= null;
@@ -1573,9 +1572,9 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.NONE;
 		String newReturnTypeName= "void";
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
-	}	
+	}
 	
-	public void testAll63()throws Exception{ //bug 
+	public void testAll63()throws Exception{ //bug
 		String[] signature= {};
 		ParameterInfo[] newParamInfo= null;
 		int[] newIndices= null;
@@ -1587,7 +1586,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.PROTECTED;
 		String newReturnTypeName= "void";
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
-	}	
+	}
 	
 	public void testAll64() throws Exception{ // https://bugs.eclipse.org/bugs/show_bug.cgi?id=158008 and https://bugs.eclipse.org/bugs/show_bug.cgi?id=201929
 		ParameterInfo[] newParamInfo= { ParameterInfo.createInfoForAddedParameter("java.util.List<Local>", "list", "null") };
@@ -1605,7 +1604,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IMethod method= (IMethod) cu.getElementAt(lastNasty);
 		assertTrue(method.exists());
 		helperDoAll(method, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName, false);
-	}	
+	}
 	
 	public void testAddSyntaxError01()throws Exception{ // https://bugs.eclipse.org/bugs/show_bug.cgi?id=191349
 		String refNameIn= "A_testAddSyntaxError01_Ref_in.java";
@@ -1622,7 +1621,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		
 		String expectedRefContents= getFileContents(getTestFolderPath(true) + refNameOut);
 		assertEqualLines(expectedRefContents, refCu.getSource());
-	}	
+	}
 	
 	public void testAddRecursive1()throws Exception{ //bug 42100
 		String[] signature= {"I"};
@@ -2178,7 +2177,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		String newReturnTypeName= null;
 		helperDoAll("I", "test", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation,
 				newVisibility, deletedIndices, newReturnTypeName);
-	}	
+	}
 		
 	public void testDelegate01() throws Exception {
 		// simple reordering with delegate
@@ -2216,7 +2215,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] deletedIndices= {0};
 		int newVisibility= Modifier.PRIVATE;
 		String newReturnTypeName= null;
-		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName, true);	
+		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName, true);
 	}
 	
 	public void testDelegate05() throws Exception {

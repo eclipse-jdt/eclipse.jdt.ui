@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.refactoring.descriptors.UseSupertypeDescriptor;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class UseSupertypeWherePossibleTests extends RefactoringTest {
 
@@ -48,10 +47,10 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		StubUtility.setCodeTemplate(CodeTemplateContextType.NEWTYPE_ID, 
-				"${package_declaration}" + 
+		StubUtility.setCodeTemplate(CodeTemplateContextType.NEWTYPE_ID,
+				"${package_declaration}" +
 					System.getProperty("line.separator", "\n") +
-				"${"+ CodeTemplateContextType.TYPE_COMMENT+"}" + 
+				"${"+ CodeTemplateContextType.TYPE_COMMENT+"}" +
 				System.getProperty("line.separator", "\n") +
 				"${type_declaration}", null);
 
@@ -66,9 +65,9 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 		final IType subType= getClassFromTestFile(getPackageP(), className);
 		final ICompilationUnit[] units= new ICompilationUnit[cuNames.length];
 		for (int i= 0; i < cuNames.length; i++) {
-			units[i]= createCUfromTestFile(subType.getPackageFragment(), cuNames[i]);			
+			units[i]= createCUfromTestFile(subType.getPackageFragment(), cuNames[i]);
 		}
-		final IType superType= JavaModelUtil.findType(subType.getJavaProject(), superTypeFullName);
+		final IType superType= subType.getJavaProject().findType(superTypeFullName);
 		final UseSupertypeDescriptor descriptor= new UseSupertypeDescriptor();
 		descriptor.setSubtype(subType);
 		descriptor.setSupertype(superType);

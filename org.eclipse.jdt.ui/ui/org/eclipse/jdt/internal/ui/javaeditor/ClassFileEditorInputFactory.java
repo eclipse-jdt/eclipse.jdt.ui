@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,8 +22,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * The factory which is capable of recreating class file editor
@@ -56,7 +54,7 @@ public class ClassFileEditorInputFactory implements IElementFactory {
 				IType type= cf.getType(); // this will work, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=154667
 				IJavaProject project= element.getJavaProject();
 				if (project != null) {
-					type= JavaModelUtil.findType(project, type.getFullyQualifiedName());
+					type= project.findType(type.getFullyQualifiedName());
 					if (type == null)
 						return null;
 					element= type.getParent();

@@ -65,7 +65,7 @@ public class JavaModelUtilTest extends TestCase {
 			TestSuite suite= new TestSuite();
 			suite.addTest(new JavaModelUtilTest("testFindType"));
 			return new ProjectTestSetup(suite);
-		}	
+		}
 	}
 
 
@@ -124,32 +124,32 @@ public class JavaModelUtilTest extends TestCase {
 	}
 
 	public void testFindType() throws Exception {
-		IType type= JavaModelUtil.findType(fJProject1, "junit.extensions.ExceptionTestCase");
+		IType type= fJProject1.findType("junit.extensions.ExceptionTestCase");
 		assertElementName("ExceptionTestCase", type, IJavaElement.TYPE);
 
-		type= JavaModelUtil.findType(fJProject1, "junit.samples.money.IMoney");
-		assertElementName("IMoney", type, IJavaElement.TYPE);	
+		type= fJProject1.findType("junit.samples.money.IMoney");
+		assertElementName("IMoney", type, IJavaElement.TYPE);
 
-		type= JavaModelUtil.findType(fJProject1, "junit.tests.framework.TestCaseTest.TornDown");
+		type= fJProject1.findType("junit.tests.framework.TestCaseTest.TornDown");
 		assertElementName("TornDown", type, IJavaElement.TYPE);
 		
-		type= JavaModelUtil.findType(fJProject1, "mylib.Foo");
+		type= fJProject1.findType("mylib.Foo");
 		assertElementName("Foo", type, IJavaElement.TYPE);
 		
-		type= JavaModelUtil.findType(fJProject1, "mylib.Foo.FooInner");
+		type= fJProject1.findType("mylib.Foo.FooInner");
 		assertElementName("FooInner", type, IJavaElement.TYPE);
 		
-		type= JavaModelUtil.findType(fJProject1, "mylib.Foo.FooInner.FooInnerInner");
+		type= fJProject1.findType("mylib.Foo.FooInner.FooInnerInner");
 		assertElementName("FooInnerInner", type, IJavaElement.TYPE);
 		
-		type= JavaModelUtil.findType(fJProject1, "pack1.ReqProjType");
+		type= fJProject1.findType("pack1.ReqProjType");
 		assertElementName("ReqProjType", type, IJavaElement.TYPE);
 		
-		type= JavaModelUtil.findType(fJProject1, "pack1.ReqProjType.Inner");
-		assertElementName("Inner", type, IJavaElement.TYPE);	
+		type= fJProject1.findType("pack1.ReqProjType.Inner");
+		assertElementName("Inner", type, IJavaElement.TYPE);
 
-		type= JavaModelUtil.findType(fJProject1, "pack1.ReqProjType.Inner.InnerInner");
-		assertElementName("InnerInner", type, IJavaElement.TYPE);	
+		type= fJProject1.findType("pack1.ReqProjType.Inner.InnerInner");
+		assertElementName("InnerInner", type, IJavaElement.TYPE);
 	}
 		
 	public void testFindTypeContainer() throws Exception {
@@ -172,10 +172,10 @@ public class JavaModelUtilTest extends TestCase {
 		assertElementName("pack1", elem, IJavaElement.PACKAGE_FRAGMENT);
 		
 		elem= JavaModelUtil.findTypeContainer(fJProject1, "pack1.ReqProjType");
-		assertElementName("ReqProjType", elem, IJavaElement.TYPE);	
+		assertElementName("ReqProjType", elem, IJavaElement.TYPE);
 
 		elem= JavaModelUtil.findTypeContainer(fJProject1, "pack1.ReqProjType.Inner");
-		assertElementName("Inner", elem, IJavaElement.TYPE);				
+		assertElementName("Inner", elem, IJavaElement.TYPE);
 	}
 	
 	public void testFindTypeInCompilationUnit() throws Exception {
@@ -198,7 +198,7 @@ public class JavaModelUtilTest extends TestCase {
 		assertElementName("Inner", type, IJavaElement.TYPE);
 		
 		type= JavaModelUtil.findTypeInCompilationUnit(cu, "ReqProjType.Inner.InnerInner");
-		assertElementName("InnerInner", type, IJavaElement.TYPE);		
+		assertElementName("InnerInner", type, IJavaElement.TYPE);
 	}
 		
 	private void assertClasspathEntry(String name, IJavaElement elem, IPath path, int type) throws Exception {
@@ -211,25 +211,25 @@ public class JavaModelUtilTest extends TestCase {
 	}
 	
 	public void testGetRawClasspathEntry() throws Exception {
-		IType type= JavaModelUtil.findType(fJProject1, "junit.extensions.ExceptionTestCase");
+		IType type= fJProject1.findType("junit.extensions.ExceptionTestCase");
 		assertElementName("ExceptionTestCase", type, IJavaElement.TYPE);
 		IPath path= fJProject1.getProject().getFullPath().append("src");
 		assertClasspathEntry("ExceptionTestCase", type, path, IClasspathEntry.CPE_SOURCE);
 		
-		type= JavaModelUtil.findType(fJProject1, "mylib.Foo");
+		type= fJProject1.findType("mylib.Foo");
 		assertElementName("Foo", type, IJavaElement.TYPE);
 		path= fJProject1.getProject().getFullPath().append(LIB.lastSegment());
 		assertClasspathEntry("Foo", type, path, IClasspathEntry.CPE_LIBRARY);
 		
-		type= JavaModelUtil.findType(fJProject1, "java.lang.Object");
+		type= fJProject1.findType("java.lang.Object");
 		assertElementName("Object", type, IJavaElement.TYPE);
 		path= new Path("JRE_LIB_TEST");
 		assertClasspathEntry("Object", type, path, IClasspathEntry.CPE_VARIABLE);
 	
-		type= JavaModelUtil.findType(fJProject1, "pack1.ReqProjType");
+		type= fJProject1.findType("pack1.ReqProjType");
 		assertElementName("ReqProjType", type, IJavaElement.TYPE);
 		path= fJProject2.getProject().getFullPath().append("src");
-		assertClasspathEntry("ReqProjType", type, path, IClasspathEntry.CPE_SOURCE);		
+		assertClasspathEntry("ReqProjType", type, path, IClasspathEntry.CPE_SOURCE);
 	}
 	
 	private void assertFindMethod(String methName, String[] paramTypeNames, boolean isConstructor, IType type) throws Exception {
@@ -248,14 +248,14 @@ public class JavaModelUtilTest extends TestCase {
 			// create as resolved
 			sig[i]= Signature.createTypeSignature(paramTypeNames[i], true);
 			assertNotNull(methName + "-ts2" + i, sig[i]);
-		}		
+		}
 		meth= JavaModelUtil.findMethod(methName, sig, isConstructor, type);
 		assertElementName(methName, meth, IJavaElement.METHOD);
 		assertTrue("methName-nparam2", meth.getParameterTypes().length == paramTypeNames.length);
 	}
 	
 	public void testFindMethod() throws Exception {
-		IType type= JavaModelUtil.findType(fJProject1, "junit.framework.Assert");
+		IType type= fJProject1.findType("junit.framework.Assert");
 		assertElementName("Assert", type, IJavaElement.TYPE);
 		
 		assertFindMethod("assertNotNull", new String[] { "java.lang.Object" }, false, type);
@@ -264,13 +264,13 @@ public class JavaModelUtilTest extends TestCase {
 		assertFindMethod("assertEquals", new String[] { "java.lang.String", "long", "long" }, false, type);
 		assertFindMethod("Assert", new String[0], true, type);
 
-		type= JavaModelUtil.findType(fJProject1, "junit.samples.money.MoneyTest");
+		type= fJProject1.findType("junit.samples.money.MoneyTest");
 		assertElementName("MoneyTest", type, IJavaElement.TYPE);
 
 		assertFindMethod("main", new String[] { "java.lang.String[]" }, false, type);
 		assertFindMethod("setUp", new String[0] , false, type);
 		
-		type= JavaModelUtil.findType(fJProject1, "junit.samples.money.MoneyBag");
+		type= fJProject1.findType("junit.samples.money.MoneyBag");
 		assertElementName("MoneyBag", type, IJavaElement.TYPE);
 
 		assertFindMethod("addMoneyBag", new String[] { "junit.samples.money.MoneyBag" }, false, type);
@@ -295,7 +295,7 @@ public class JavaModelUtilTest extends TestCase {
 			// create as resolved
 			sig[i]= Signature.createTypeSignature(paramTypeNames[i], true);
 			assertNotNull(methName + "-ts2" + i, sig[i]);
-		}		
+		}
 		meth= JavaModelUtil.findMethodInHierarchy(hierarchy, type, methName, sig, isConstructor);
 		assertElementName(methName, meth, IJavaElement.METHOD);
 		assertTrue("methName-nparam2", meth.getParameterTypes().length == paramTypeNames.length);
@@ -303,25 +303,25 @@ public class JavaModelUtilTest extends TestCase {
 	}
 
 	public void testFindMethodInHierarchy() throws Exception {
-		IType type= JavaModelUtil.findType(fJProject1, "junit.extensions.TestSetup");
-		assertElementName("TestSetup", type, IJavaElement.TYPE);		
+		IType type= fJProject1.findType("junit.extensions.TestSetup");
+		assertElementName("TestSetup", type, IJavaElement.TYPE);
 		
 		assertFindMethodInHierarchy("run", new String[] { "junit.framework.TestResult" }, false, type, "junit.extensions.TestSetup");
 		assertFindMethodInHierarchy("toString", new String[] {} , false, type, "junit.extensions.TestDecorator");
 	}
 	
 	public void testHasMainMethod() throws Exception {
-		IType type= JavaModelUtil.findType(fJProject1, "junit.samples.money.MoneyTest");
+		IType type= fJProject1.findType("junit.samples.money.MoneyTest");
 		assertElementName("MoneyTest", type, IJavaElement.TYPE);
 		
 		assertTrue("MoneyTest-nomain", JavaModelUtil.hasMainMethod(type));
 		
-		type= JavaModelUtil.findType(fJProject1, "junit.framework.TestResult");
+		type= fJProject1.findType("junit.framework.TestResult");
 		assertElementName("TestResult", type, IJavaElement.TYPE);
 		
 		assertTrue("TestResult-hasmain", !JavaModelUtil.hasMainMethod(type));
 		
-		type= JavaModelUtil.findType(fJProject1, "junit.samples.VectorTest");
+		type= fJProject1.findType("junit.samples.VectorTest");
 		assertElementName("VectorTest", type, IJavaElement.TYPE);
 		
 		assertTrue("VectorTest-nomain", JavaModelUtil.hasMainMethod(type));
