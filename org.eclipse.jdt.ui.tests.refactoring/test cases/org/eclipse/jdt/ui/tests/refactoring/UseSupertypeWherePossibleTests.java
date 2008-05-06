@@ -13,6 +13,8 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -67,7 +69,7 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 		for (int i= 0; i < cuNames.length; i++) {
 			units[i]= createCUfromTestFile(subType.getPackageFragment(), cuNames[i]);
 		}
-		final IType superType= subType.getJavaProject().findType(superTypeFullName);
+		final IType superType= subType.getJavaProject().findType(superTypeFullName, (IProgressMonitor) null);
 		final UseSupertypeDescriptor descriptor= new UseSupertypeDescriptor();
 		descriptor.setSubtype(subType);
 		descriptor.setSupertype(superType);
