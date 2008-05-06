@@ -3767,7 +3767,45 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String expected3= buf.toString();
 		
 		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2, expected3});
+	}  
+	
+	public void testRemoveIfBlock04() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public int foo() {\n");
+		buf.append("        if (true)\n");
+		buf.append("            return 1; /* comment*/\n");
+		buf.append("        else\n");
+		buf.append("            return 2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		String str= "/* comment*/";
+		int indexOf= buf.toString().indexOf(str) + str.length();
+		AssistContext context= getCorrectionContext(cu, indexOf, 0);
+		List proposals= collectAssists(context, false);
+		
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public int foo() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("            return 1; /* comment*/\n");
+		buf.append("        } else\n");
+		buf.append("            return 2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+			
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}   
+	
 	
 	public void testRemoveIfBlockBug128843() throws Exception {
 		

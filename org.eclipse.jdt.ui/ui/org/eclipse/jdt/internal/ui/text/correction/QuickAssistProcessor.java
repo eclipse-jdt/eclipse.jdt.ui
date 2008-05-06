@@ -1262,7 +1262,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		
 		/*
-		 * only show the quicka ssist when the selection is of the control statement keywords (if, else, while,...)
+		 * only show the quick assist when the selection is of the control statement keywords (if, else, while,...)
 		 * but not inside the statement or the if expression.
 		 */
 		if (!isControlStatementWithBlock(node) && isControlStatementWithBlock(node.getParent())) {
