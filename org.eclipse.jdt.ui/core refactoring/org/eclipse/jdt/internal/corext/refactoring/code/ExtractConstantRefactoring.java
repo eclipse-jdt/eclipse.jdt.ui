@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -92,13 +92,11 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.CodeGeneration;
-import org.eclipse.jdt.ui.JavaElementLabels;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
-import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class ExtractConstantRefactoring extends Refactoring {
 
@@ -413,7 +411,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkConstantNameOnChange() throws JavaModelException {
 		if (Arrays.asList(getExcludedVariableNames()).contains(fConstantName))
-			return RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_another_variable, getConstantName())); 
+			return RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_another_variable, BasicElementLabels.getJavaElementName(getConstantName()))); 
 		return Checks.checkConstantName(fConstantName, fCu);
 	}
 	
@@ -561,18 +559,13 @@ public class ExtractConstantRefactoring extends Refactoring {
 		int flags= JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 		if (JdtFlags.getVisibilityCode(fVisibility) != Modifier.PRIVATE)
 			flags|= RefactoringDescriptor.STRUCTURAL_CHANGE;
-		String pattern= ""; //$NON-NLS-1$
-		try {
-			pattern= BindingLabelProvider.getBindingLabel(getContainingTypeBinding(), JavaElementLabels.ALL_FULLY_QUALIFIED) + "."; //$NON-NLS-1$
-		} catch (JavaModelException exception) {
-			JavaPlugin.log(exception);
-		}
+
 		final String expression= ASTNodes.asString(fSelectedExpression.getAssociatedExpression());
-		final String description= Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_descriptor_description_short, fConstantName);
-		final String header= Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_descriptor_description, new String[] { pattern + fConstantName, expression});
+		final String description= Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(fConstantName));
+		final String header= Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_descriptor_description, new String[] { BasicElementLabels.getJavaElementName(fConstantName), BasicElementLabels.getJavaCodeString(expression)});
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
-		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_constant_name_pattern, fConstantName));
-		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_constant_expression_pattern, expression));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_constant_name_pattern, BasicElementLabels.getJavaElementName(fConstantName)));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_constant_expression_pattern, BasicElementLabels.getJavaCodeString(expression)));
 		String visibility= fVisibility;
 		if ("".equals(visibility)) //$NON-NLS-1$
 			visibility= RefactoringCoreMessages.ExtractConstantRefactoring_default_visibility;

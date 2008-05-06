@@ -124,6 +124,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -810,10 +811,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			return result;
 
 		IWorkingSet ws= fWorkingSetFilterActionGroup.getWorkingSet();
-		String wsstr= Messages.format(JavaBrowsingMessages.JavaBrowsingPart_toolTip, new String[] { ws.getLabel() });
+		String wsstr= Messages.format(JavaBrowsingMessages.JavaBrowsingPart_toolTip, new String[] { BasicElementLabels.getWorkingSetLabel(ws) });
 		if (result.length() == 0)
 			return wsstr;
-		return Messages.format(JavaBrowsingMessages.JavaBrowsingPart_toolTip2, new String[] { result, ws.getLabel() });
+		return Messages.format(JavaBrowsingMessages.JavaBrowsingPart_toolTip2, new String[] { result, BasicElementLabels.getWorkingSetLabel(ws) });
 	}
 
 	/* (non-Javadoc)

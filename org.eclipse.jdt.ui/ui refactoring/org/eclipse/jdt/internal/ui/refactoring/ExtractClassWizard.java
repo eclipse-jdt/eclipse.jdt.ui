@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,6 +67,8 @@ import org.eclipse.jdt.core.refactoring.descriptors.ExtractClassDescriptor.Field
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractClassRefactoring.ExtractClassDescriptorVerification;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
@@ -153,7 +155,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 			});
 
 			Button nestedRadio= new Button(composite, SWT.RADIO);
-			nestedRadio.setText(Messages.format(RefactoringMessages.ExtractClassWizard_radio_nested, fDescriptor.getType().getElementName()));
+			nestedRadio.setText(Messages.format(RefactoringMessages.ExtractClassWizard_radio_nested, JavaElementLabels.getElementLabel(fDescriptor.getType(), JavaElementLabels.ALL_DEFAULT)));
 
 			boolean createAsTopLevel= getBooleanSetting(CREATE_TOP_LEVEL_SETTING, fDescriptor.isCreateTopLevel());
 			fDescriptor.setCreateTopLevel(createAsTopLevel);

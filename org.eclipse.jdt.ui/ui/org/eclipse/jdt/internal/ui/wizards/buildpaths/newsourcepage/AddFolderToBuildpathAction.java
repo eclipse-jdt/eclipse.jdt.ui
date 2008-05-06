@@ -52,6 +52,8 @@ import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -96,12 +98,13 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 			return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath;
 		
 		Object obj= getSelectedElements().get(0);
+		String elementLabel= JavaElementLabels.getTextLabel(obj, JavaElementLabels.ALL_DEFAULT);
 		if (obj instanceof IJavaProject) {
-			return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ProjectToBuildpath, ((IJavaProject)obj).getElementName());
+			return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ProjectToBuildpath, elementLabel);
 		} else if (obj instanceof IPackageFragment) {
-			return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_PackageToBuildpath, ((IPackageFragment)obj).getElementName());
+			return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_PackageToBuildpath, elementLabel);
 		} else if (obj instanceof IResource) {
-			return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_FolderToBuildpath, ((IResource)obj).getName());
+			return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_FolderToBuildpath, elementLabel);
 		}
 		
 		return null;

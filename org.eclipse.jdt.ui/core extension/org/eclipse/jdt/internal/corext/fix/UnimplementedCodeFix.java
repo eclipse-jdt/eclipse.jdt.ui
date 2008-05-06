@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,6 +50,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 
@@ -165,7 +166,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 		TypeDeclaration typeDeclaration= (TypeDeclaration) typeNode;
 		MakeTypeAbstractOperation operation= new MakeTypeAbstractOperation(typeDeclaration);
 
-		String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_addabstract_description, typeDeclaration.getName().getIdentifier());
+		String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_addabstract_description, BasicElementLabels.getJavaElementName(typeDeclaration.getName().getIdentifier()));
 		return new UnimplementedCodeFix(label, root, new CompilationUnitRewriteOperation[] { operation });
 	}
 

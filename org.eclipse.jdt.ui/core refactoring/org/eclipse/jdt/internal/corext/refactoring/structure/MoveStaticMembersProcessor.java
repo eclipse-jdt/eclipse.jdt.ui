@@ -413,7 +413,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 	private RefactoringStatus checkDestinationType() throws JavaModelException {			
 		if (fDestinationType == null){
-			String message= Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_not_found, fDestinationTypeName);
+			String message= Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_not_found, BasicElementLabels.getJavaElementName(fDestinationTypeName));
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}	
 		
@@ -460,8 +460,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			IType type= (IType) fMembersToMove[i];
 			if (fDestinationType.equals(type) || JavaElementUtil.isAncestorOf(type, fDestinationType)) {
 				String message= Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_inside, 
-						new String[] {type.getFullyQualifiedName('.'),
-								fDestinationType.getFullyQualifiedName('.')});
+						new String[] { getQualifiedTypeLabel(type), getQualifiedTypeLabel(fDestinationType)});
 				RefactoringStatusContext context= JavaStatusContext.create(fDestinationType.getCompilationUnit(), fDestinationType.getNameRange());
 				result.addFatalError(message, context);
 				return result;
@@ -570,43 +569,46 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				if (moved)
 					message= Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_moved_field, 
 								new String[]{JavaElementUtil.createFieldSignature((IField)member), 
-									accessingType.getFullyQualifiedName('.'),
-									declaringType.getFullyQualifiedName('.')});
+							getQualifiedTypeLabel(accessingType),
+							getQualifiedTypeLabel(declaringType)});
 				else
 					message= Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_accessed_field, 
 								new String[]{JavaElementUtil.createFieldSignature((IField)member), 
-									accessingType.getFullyQualifiedName('.')});
+							getQualifiedTypeLabel(accessingType)});
 				return message;
 			}			
 			case IJavaElement.METHOD: {
 				if (moved)
 					message= Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_moved_method, 
 								new String[]{JavaElementUtil.createMethodSignature((IMethod)member),
-									accessingType.getFullyQualifiedName('.'),
-									declaringType.getFullyQualifiedName('.')});
+							getQualifiedTypeLabel(accessingType),
+							getQualifiedTypeLabel(declaringType)});
 				else				 
 					message= Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_accessed_method, 
 								new String[]{JavaElementUtil.createMethodSignature((IMethod)member),
-									accessingType.getFullyQualifiedName('.')});
+							getQualifiedTypeLabel(accessingType)});
 								 
 				return message;		
 			}			
 			case IJavaElement.TYPE:{
 				if (moved)
 					message= Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_moved_type, 
-								new String[]{((IType)member).getFullyQualifiedName('.'), 
-									accessingType.getFullyQualifiedName('.'),
-									declaringType.getFullyQualifiedName('.')});
+								new String[]{getQualifiedTypeLabel((IType)member), 
+							getQualifiedTypeLabel(accessingType),
+							getQualifiedTypeLabel(declaringType)});
 				else
 					message= Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_accessed_type, 
-								new String[]{((IType)member).getFullyQualifiedName('.'), 
-									accessingType.getFullyQualifiedName('.')});
+								new String[]{ getQualifiedTypeLabel((IType)member), getQualifiedTypeLabel(accessingType)});
 				return message;
 			}			
 			default:
 				Assert.isTrue(false);
 				return null;
 		}
+	}
+
+	private String getQualifiedTypeLabel(IType accessingType) {
+		return BasicElementLabels.getJavaCodeString(accessingType.getFullyQualifiedName('.'));
 	}
 
 	private static SearchResultGroup[] getReferences(IMember member, IProgressMonitor monitor, RefactoringStatus status) throws JavaModelException {
@@ -813,9 +815,9 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			project= javaProject.getElementName();
 		String header= null;
 		if (members.length == 1)
-			header= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_single, new String[] { JavaElementLabels.getElementLabel(members[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED) });
+			header= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_single, new String[] { JavaElementLabels.getElementLabel(members[0], JavaElementLabels.ALL_FULLY_QUALIFIED), getQualifiedTypeLabel(fDestinationType) });
 		else
-			header= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_multi, new String[] { String.valueOf(members.length), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED) });
+			header= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_multi, new String[] { String.valueOf(members.length), getQualifiedTypeLabel(fDestinationType) });
 		int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 		final IType declaring= members[0].getDeclaringType();
 		try {
@@ -824,9 +826,9 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 		}
-		final String description= members.length == 1 ? Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_description_descriptor_short_multi, members[0].getElementName()) : RefactoringCoreMessages.MoveMembersRefactoring_move_members;
+		final String description= members.length == 1 ? Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_description_descriptor_short_multi, BasicElementLabels.getJavaElementName(members[0].getElementName())) : RefactoringCoreMessages.MoveMembersRefactoring_move_members;
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
-		comment.addSetting(Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_target_element_pattern, JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_target_element_pattern, getQualifiedTypeLabel(fDestinationType)));
 		final MoveStaticMembersDescriptor descriptor= new MoveStaticMembersDescriptor();
 		descriptor.setProject(project);
 		descriptor.setDescription(description);
@@ -985,10 +987,10 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 					
 					if (!Modifier.isFinal(declaration.getModifiers())) {
 						// Don't create a delegate for non-final fields
-						result.addInfo(Messages.format(RefactoringCoreMessages.DelegateCreator_cannot_create_field_delegate_not_final, frag.getName()), null);
+						result.addInfo(Messages.format(RefactoringCoreMessages.DelegateCreator_cannot_create_field_delegate_not_final, BasicElementLabels.getJavaElementName(frag.getName().getIdentifier())), null);
 					} else if (frag.getInitializer() == null) {
 						// Don't create a delegate without an initializer.
-						result.addInfo(Messages.format(RefactoringCoreMessages.DelegateCreator_cannot_create_field_delegate_no_initializer, frag.getName()), null);
+						result.addInfo(Messages.format(RefactoringCoreMessages.DelegateCreator_cannot_create_field_delegate_no_initializer, BasicElementLabels.getJavaElementName(frag.getName().getIdentifier())), null);
 					} else {
 						DelegateFieldCreator creator= new DelegateFieldCreator();
 						creator.setDeclaration(declaration);
@@ -1004,7 +1006,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 					}
 				}
 				if (declaration instanceof AbstractTypeDeclaration) {
-					result.addInfo(Messages.format(RefactoringCoreMessages.DelegateCreator_cannot_create_delegate_for_type, ((AbstractTypeDeclaration) declaration).getName().getIdentifier()),
+					result.addInfo(Messages.format(RefactoringCoreMessages.DelegateCreator_cannot_create_delegate_for_type, BasicElementLabels.getJavaElementName(((AbstractTypeDeclaration) declaration).getName().getIdentifier())),
 							null);
 				}
 			} 

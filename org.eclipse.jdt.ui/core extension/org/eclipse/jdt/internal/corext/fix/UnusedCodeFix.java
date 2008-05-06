@@ -73,6 +73,7 @@ import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Fix which removes unused code.
@@ -685,7 +686,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 	}
 	
 	private static String getDisplayString(SimpleName simpleName, IBinding binding, boolean removeAllAssignements) {
-		String name= simpleName.getIdentifier();
+		String name= BasicElementLabels.getJavaElementName(simpleName.getIdentifier());
 		switch (binding.getKind()) {
 			case IBinding.TYPE:
 				return Messages.format(FixMessages.UnusedCodeFix_RemoveType_description, name);

@@ -42,6 +42,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 
 	private static IPath createPath(String packageName) {
@@ -141,7 +143,8 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 
 	public String getName() {
 		String msg= fRenameSubpackages ? RefactoringCoreMessages.RenamePackageChange_name_with_subpackages : RefactoringCoreMessages.RenamePackageChange_name;
-		return Messages.format(msg, new String[] { getOldName(), getNewName()});
+		String[] keys= { BasicElementLabels.getJavaElementName(getOldName()), BasicElementLabels.getJavaElementName(getNewName())};
+		return Messages.format(msg, keys);
 	}
 
 	private String getNewName(IPackageFragment subpackage) {

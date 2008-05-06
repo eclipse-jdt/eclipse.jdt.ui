@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.search.LRUWorkingSetsList;
 import org.eclipse.jdt.internal.ui.search.WorkingSetComparator;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class SearchUtil {
 	
@@ -126,7 +127,7 @@ public class SearchUtil {
 		if (workingSets != null && workingSets.length > 0) {
 			boolean firstFound= false;
 			for (int i= 0; i < workingSets.length; i++) {
-				String workingSetName= workingSets[i].getLabel();
+				String workingSetName= BasicElementLabels.getWorkingSetLabel(workingSets[i]);
 				if (firstFound)
 					result= Messages.format(CallHierarchyMessages.SearchUtil_workingSetConcatenation, new String[] {result, workingSetName}); 
 				else {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -94,6 +94,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class PromoteTempToFieldRefactoring extends Refactoring {
@@ -471,7 +472,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 				method.accept(nameCollector);
 				List names= nameCollector.getNames();
 				if (names.contains(fFieldName)) {
-					String[] keys= { fFieldName, BindingLabelProvider.getBindingLabel(method.resolveBinding(), JavaElementLabels.ALL_FULLY_QUALIFIED)};
+					String[] keys= { BasicElementLabels.getJavaElementName(fFieldName), BindingLabelProvider.getBindingLabel(method.resolveBinding(), JavaElementLabels.ALL_FULLY_QUALIFIED)};
 					String msg= Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_Name_conflict, keys); 
 					return RefactoringStatus.createFatalErrorStatus(msg);
 				}
@@ -674,11 +675,11 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		if (javaProject != null)
 			project= javaProject.getElementName();
 		final IVariableBinding binding= fTempDeclarationNode.resolveBinding();
-		final String description= Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_descriptor_description_short, binding.getName());
+		final String description= Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(binding.getName()));
 		final String header= Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_original_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
-		comment.addSetting(Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_field_pattern, fFieldName));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_field_pattern, BasicElementLabels.getJavaElementName(fFieldName)));
 		switch (fInitializeIn) {
 			case INITIALIZE_IN_CONSTRUCTOR:
 				comment.addSetting(RefactoringCoreMessages.PromoteTempToFieldRefactoring_initialize_constructor);

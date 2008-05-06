@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,8 +11,6 @@
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jdt.core.IMethod;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -26,6 +24,12 @@ import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+
+import org.eclipse.jdt.core.IMethod;
+
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -33,10 +37,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class RenameFieldWizard extends RenameRefactoringWizard {
 
@@ -149,8 +150,8 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 				IMethod	getter= getRenameFieldProcessor().getGetter();
 				if (getter == null || ! getter.exists())
 					return defaultLabel;
-				String oldGetterName= getter.getElementName();
-				String newGetterName= createNewGetterName();
+				String oldGetterName= BasicElementLabels.getJavaElementName(getter.getElementName());
+				String newGetterName= BasicElementLabels.getJavaElementName(createNewGetterName());
 				return Messages.format(RefactoringMessages.RenameFieldInputWizardPage_rename_getter_to, new String[]{oldGetterName, newGetterName}); 
 			} catch(CoreException e) {
 				JavaPlugin.log(e)	;
@@ -166,8 +167,8 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 				IMethod	setter= getRenameFieldProcessor().getSetter();
 				if (setter == null || ! setter.exists())
 					return defaultLabel;
-				String oldSetterName= setter.getElementName();
-				String newSetterName= createNewSetterName();
+				String oldSetterName= BasicElementLabels.getJavaElementName(setter.getElementName());
+				String newSetterName= BasicElementLabels.getJavaElementName(createNewSetterName());
 				return Messages.format(RefactoringMessages.RenameFieldInputWizardPage_rename_setter_to, new String[]{oldSetterName, newSetterName});
 			} catch(CoreException e) {
 				JavaPlugin.log(e);

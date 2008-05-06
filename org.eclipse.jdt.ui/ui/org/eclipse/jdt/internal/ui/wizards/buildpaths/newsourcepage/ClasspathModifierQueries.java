@@ -36,6 +36,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ExclusionInclusionDialog;
@@ -418,7 +419,7 @@ public class ClasspathModifierQueries {
 							String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
 							IPath newOutputFolder= fDesiredOutputLocation.append(outputFolderName);
 							newOutputFolder= getValidPath(newOutputFolder, validator);
-							String message= Messages.format(NewWizardMessages.ClasspathModifier_ChangeOutputLocationDialog_project_outputLocation, newOutputFolder); 
+							String message= Messages.format(NewWizardMessages.ClasspathModifier_ChangeOutputLocationDialog_project_outputLocation, BasicElementLabels.getPathLabel(newOutputFolder, false)); 
 							fRemoveProject= true;
 							if (MessageDialog.openConfirm(sh, title, message)) {
 								fOutputLocation= newOutputFolder;

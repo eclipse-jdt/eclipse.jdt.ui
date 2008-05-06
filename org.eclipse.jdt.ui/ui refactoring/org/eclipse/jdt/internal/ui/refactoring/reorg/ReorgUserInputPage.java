@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,6 +43,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 
 abstract class ReorgUserInputPage extends UserInputWizardPage{
@@ -89,7 +90,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		} else if (resources == 1 && javaElements == 0) {
 			text= Messages.format(
 					ReorgMessages.ReorgUserInputPage_choose_destination_single, 
-					getResources()[0].getName());
+					BasicElementLabels.getResourceName(getResources()[0]));
 		} else {
 			text= Messages.format(
 					ReorgMessages.ReorgUserInputPage_choose_destination_multi, 
@@ -113,7 +114,12 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 	
 	protected abstract Object getInitiallySelectedElement();
 	
-	/** Set and verify destination */
+	/** 
+	 * Set and verify destination 
+	 * @param selected 
+	 * @return the resulting status
+	 * @throws JavaModelException
+	 */
 	protected abstract RefactoringStatus verifyDestination(Object selected) throws JavaModelException;
 	
 	protected abstract IResource[] getResources();

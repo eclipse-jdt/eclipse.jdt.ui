@@ -109,6 +109,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -225,7 +226,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				NLSSubstitution substitution= (NLSSubstitution) element;
 				if (columnIndex == KEY_PROP) {
 					if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
-						columnText= substitution.getKey();
+						columnText=  BasicElementLabels.getJavaElementName(substitution.getKey());
 					}
 				} else
 					if ((columnIndex == VAL_PROP) && (substitution.getValue() != null)) {

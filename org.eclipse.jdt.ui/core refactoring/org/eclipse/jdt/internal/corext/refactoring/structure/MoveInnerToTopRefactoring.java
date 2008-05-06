@@ -133,6 +133,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public final class MoveInnerToTopRefactoring extends Refactoring {
@@ -695,7 +696,8 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			for (Iterator iter= constructor.parameters().iterator(); iter.hasNext();) {
 				SingleVariableDeclaration param= (SingleVariableDeclaration) iter.next();
 				if (fEnclosingInstanceFieldName.equals(param.getName().getIdentifier())) {
-					String msg= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_name_used, new String[] { param.getName().getIdentifier(), fType.getElementName()}); 
+					String[] keys= new String[] { BasicElementLabels.getJavaElementName(param.getName().getIdentifier()), BasicElementLabels.getJavaElementName(fType.getElementName())};
+					String msg= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_name_used, keys); 
 					result.addError(msg, JavaStatusContext.create(fType.getCompilationUnit(), param));
 				}
 			}
@@ -711,7 +713,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			result.addWarning(RefactoringCoreMessages.MoveInnerToTopRefactoring_names_start_lowercase); 
 
 		if (fType.getField(name).exists()) {
-			Object[] keys= new String[] { name, fType.getElementName()};
+			Object[] keys= new String[] { BasicElementLabels.getJavaElementName(name), BasicElementLabels.getJavaElementName(fType.getElementName())};
 			String msg= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_already_declared, keys); 
 			result.addError(msg, JavaStatusContext.create(fType.getField(name)));
 		}
@@ -728,7 +730,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 
 			String newCUName= JavaModelUtil.getRenamedCUName(fType.getCompilationUnit(), fType.getElementName());
 			if (fType.getPackageFragment().getCompilationUnit(newCUName).exists()) {
-				String message= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_compilation_Unit_exists, new String[] { (newCUName), fType.getPackageFragment().getElementName()});
+				String message= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_compilation_Unit_exists, new String[] { BasicElementLabels.getResourceName(newCUName), JavaElementLabels.getElementLabel(fType.getPackageFragment(), JavaElementLabels.ALL_DEFAULT)});
 				result.addFatalError(message);
 			}
 			result.merge(checkEnclosingInstanceName(fEnclosingInstanceFieldName));
@@ -751,7 +753,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		IType type= Checks.findTypeInPackage(fType.getPackageFragment(), fType.getElementName());
 		if (type == null || !type.exists())
 			return null;
-		String message= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_type_exists, new String[] { fType.getElementName(), fType.getPackageFragment().getElementName()}); 
+		String message= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_type_exists, new String[] { BasicElementLabels.getJavaElementName(fType.getElementName()), JavaElementLabels.getElementLabel(fType.getPackageFragment(), JavaElementLabels.ALL_DEFAULT)}); 
 		return RefactoringStatus.createErrorStatus(message);
 	}
 
@@ -771,15 +773,15 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		IJavaProject javaProject= fType.getJavaProject();
 		if (javaProject != null)
 			project= javaProject.getElementName();
-		final String description= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_descriptor_description_short, fType.getElementName());
+		final String description= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(fType.getElementName()));
 		final String header= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fType.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_original_pattern, JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 		final boolean enclosing= fEnclosingInstanceFieldName != null && !"".equals(fEnclosingInstanceFieldName); //$NON-NLS-1$
 		if (enclosing)
-			comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_field_pattern, fEnclosingInstanceFieldName));
+			comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_field_pattern, BasicElementLabels.getJavaElementName(fEnclosingInstanceFieldName)));
 		if (fNameForEnclosingInstanceConstructorParameter != null && !"".equals(fNameForEnclosingInstanceConstructorParameter)) //$NON-NLS-1$
-			comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_parameter_pattern, fNameForEnclosingInstanceConstructorParameter));
+			comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_parameter_pattern, BasicElementLabels.getJavaElementName(fNameForEnclosingInstanceConstructorParameter)));
 		if (enclosing && fMarkInstanceFieldAsFinal)
 			comment.addSetting(RefactoringCoreMessages.MoveInnerToTopRefactoring_declare_final);
 		final ConvertMemberTypeDescriptor descriptor= new ConvertMemberTypeDescriptor(project, description, comment.asString(), arguments, RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT);

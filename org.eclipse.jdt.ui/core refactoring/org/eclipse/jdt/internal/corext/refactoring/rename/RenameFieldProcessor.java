@@ -232,18 +232,18 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 		if (isInstanceField(fField) && (!Checks.startsWithLowerCase(newName)))
 			result.addWarning(fIsComposite
-					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_should_start_lowercase2, new String[] { newName, getDeclaringTypeLabel() })
+					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_should_start_lowercase2, new String[] { BasicElementLabels.getJavaElementName(newName), getDeclaringTypeLabel() })
 					: RefactoringCoreMessages.RenameFieldRefactoring_should_start_lowercase);
 
 		if (Checks.isAlreadyNamed(fField, newName))
 			result.addError(fIsComposite
-					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_another_name2, new String[] { newName, getDeclaringTypeLabel() })
+					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_another_name2, new String[] { BasicElementLabels.getJavaElementName(newName), getDeclaringTypeLabel() })
 					: RefactoringCoreMessages.RenameFieldRefactoring_another_name,
 					JavaStatusContext.create(fField));
 		
 		if (fField.getDeclaringType().getField(newName).exists())
 			result.addError(fIsComposite 
-					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_field_already_defined2, new String[] { newName, getDeclaringTypeLabel() }) 
+					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_field_already_defined2, new String[] { BasicElementLabels.getJavaElementName(newName), getDeclaringTypeLabel() }) 
 					: RefactoringCoreMessages.RenameFieldRefactoring_field_already_defined,
 					JavaStatusContext.create(fField.getDeclaringType().getField(newName)));
 		return result;
@@ -489,7 +489,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			return null;
 	
 		String message= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_already_exists, 
-				new String[]{JavaElementUtil.createMethodSignature(accessor), fField.getDeclaringType().getFullyQualifiedName('.')});
+				new String[]{JavaElementUtil.createMethodSignature(accessor), BasicElementLabels.getJavaElementName(fField.getDeclaringType().getFullyQualifiedName('.'))});
 		result.addError(message, JavaStatusContext.create(accessor));
 		return result;
 	}
@@ -533,7 +533,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			if (otherField.exists()){
 				String msg= Messages.format(
 					RefactoringCoreMessages.RenameFieldRefactoring_hiding, 
-					new String[]{fField.getElementName(), getNewElementName(), nestedTypes[i].getFullyQualifiedName('.')});
+					new String[]{ BasicElementLabels.getJavaElementName(fField.getElementName()), BasicElementLabels.getJavaElementName(getNewElementName()), BasicElementLabels.getJavaElementName(nestedTypes[i].getFullyQualifiedName('.'))});
 				result.addWarning(msg, JavaStatusContext.create(otherField));
 			}									
 			result.merge(checkNestedHierarchy(nestedTypes[i]));	
@@ -550,7 +550,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			IField otherField= current.getField(getNewElementName());
 			if (otherField.exists()){
 				String msg= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_hiding2, 
-				 															new String[]{getNewElementName(), current.getFullyQualifiedName('.'), otherField.getElementName()});
+				 	new String[]{ BasicElementLabels.getJavaElementName(getNewElementName()), BasicElementLabels.getJavaElementName(current.getFullyQualifiedName('.')), BasicElementLabels.getJavaElementName(otherField.getElementName())});
 				result.addWarning(msg, JavaStatusContext.create(otherField));
 			}									
 			current= current.getDeclaringType();
@@ -581,7 +581,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	}
 	
 	private SearchResultGroup[] getReferences(IProgressMonitor pm, RefactoringStatus status) throws CoreException{
-		String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , getCurrentElementName());
+		String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(getCurrentElementName()));
 		ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 
 		SearchResultGroup[] result= RefactoringSearchEngine.search(createSearchPattern(), createRefactoringScope(),
@@ -625,8 +625,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 		}
-		final String description= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_descriptor_description_short, fField.getElementName());
-		final String header= Messages.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { fField.getElementName(), JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()});
+		final String description= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(fField.getElementName()));
+		final String header= Messages.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { BasicElementLabels.getJavaElementName(fField.getElementName()), JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()});
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 		if (fRenameGetter)
 			comment.addSetting(RefactoringCoreMessages.RenameFieldRefactoring_setting_rename_getter);
@@ -709,11 +709,11 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		if (RefactoringAvailabilityTester.isDelegateCreationAvailable(fField)) {
 			FieldDeclaration fieldDeclaration= ASTNodeSearchUtil.getFieldDeclarationNode(fField, rewrite.getRoot());
 			if (fieldDeclaration.fragments().size() > 1) {
-				status.addWarning(Messages.format(RefactoringCoreMessages.DelegateCreator_cannot_create_field_delegate_more_than_one_fragment, fField
-						.getElementName()), JavaStatusContext.create(fField));
+				status.addWarning(Messages.format(RefactoringCoreMessages.DelegateCreator_cannot_create_field_delegate_more_than_one_fragment, BasicElementLabels.getJavaElementName(fField.getElementName())),
+						JavaStatusContext.create(fField));
 			} else if (((VariableDeclarationFragment) fieldDeclaration.fragments().get(0)).getInitializer() == null) {
-				status.addWarning(Messages.format(RefactoringCoreMessages.DelegateCreator_cannot_create_field_delegate_no_initializer, fField
-						.getElementName()), JavaStatusContext.create(fField));
+				status.addWarning(Messages.format(RefactoringCoreMessages.DelegateCreator_cannot_create_field_delegate_no_initializer, BasicElementLabels.getJavaElementName(fField.getElementName())),
+						JavaStatusContext.create(fField));
 			} else {
 				DelegateFieldCreator creator= new DelegateFieldCreator();
 				creator.setDeclareDeprecated(fDelegateDeprecation);

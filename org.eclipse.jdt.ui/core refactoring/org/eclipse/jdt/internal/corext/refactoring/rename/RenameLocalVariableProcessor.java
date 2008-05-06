@@ -67,6 +67,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class RenameLocalVariableProcessor extends JavaRenameProcessor implements IReferenceUpdating {
 
@@ -286,7 +287,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 			if (fIsComposite) {
 				final String nameOfParent= JavaElementLabels.getElementLabel(fLocalVariable.getParent(), JavaElementLabels.ALL_DEFAULT);
 				final String nameOfType= JavaElementLabels.getElementLabel(fLocalVariable.getAncestor(IJavaElement.TYPE), JavaElementLabels.ALL_DEFAULT);
-				result.addWarning(Messages.format(RefactoringCoreMessages.RenameTempRefactoring_lowercase2, new String[] { newName, nameOfParent, nameOfType }));
+				result.addWarning(Messages.format(RefactoringCoreMessages.RenameTempRefactoring_lowercase2, new String[] { BasicElementLabels.getJavaElementName(newName), nameOfParent, nameOfType }));
 			} else {
 				result.addWarning(RefactoringCoreMessages.RenameTempRefactoring_lowercase);
 			}
@@ -363,8 +364,8 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		IJavaProject javaProject= fCu.getJavaProject();
 		if (javaProject != null)
 			project= javaProject.getElementName();
-		final String header= Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, JavaElementLabels.getElementLabel(fLocalVariable.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), fNewName});
-		final String description= Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description_short, fCurrentName);
+		final String header= Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { BasicElementLabels.getJavaElementName(fCurrentName), JavaElementLabels.getElementLabel(fLocalVariable.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), BasicElementLabels.getJavaElementName(fNewName)});
+		final String description= Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description_short, BasicElementLabels.getJavaElementName(fCurrentName));
 		final String comment= new JDTRefactoringDescriptorComment(project, this, header).asString();
 		final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_LOCAL_VARIABLE);
 		descriptor.setProject(project);

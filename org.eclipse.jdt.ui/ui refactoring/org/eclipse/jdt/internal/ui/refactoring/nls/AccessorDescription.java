@@ -53,7 +53,7 @@ public class AccessorDescription {
 		if (buf.length() > 0) {
 			buf.append('.');
 		}
-		buf.append(BasicElementLabels.getFileName(getAccessorClassName()));
+		buf.append(BasicElementLabels.getResourceName(getAccessorClassName()));
 		buf.append(JavaElementLabels.CONCAT_STRING);
 		IPath propertyFilePath= getResourceBundlePackage().getPath().append(getResourceBundleName());
 		buf.append(BasicElementLabels.getPathLabel(propertyFilePath, false));

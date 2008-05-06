@@ -994,7 +994,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR,
 					Messages.format(RefactoringCoreMessages.IntroduceFactory_noASTNodeForConstructorSearchHit, 
 							new Object[] { Integer.toString(start), Integer.toString(start + length),
-								unitHandle.getSource().substring(start, start + length),
+							    BasicElementLabels.getJavaCodeString(unitHandle.getSource().substring(start, start + length)),
 								BasicElementLabels.getFileName(unitHandle) }),
 					null));
 
@@ -1008,12 +1008,12 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			} else if (init != null)
 				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR,
 						Messages.format(RefactoringCoreMessages.IntroduceFactory_unexpectedInitializerNodeType, 
-								new Object[] { init.toString(), unitHandle.getElementName() }),
+								new Object[] { BasicElementLabels.getJavaCodeString(init.toString()), BasicElementLabels.getFileName(unitHandle) }),
 						null));
 			else
 				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR,
 						Messages.format(RefactoringCoreMessages.IntroduceFactory_noConstructorCallNodeInsideFoundVarbleDecl, 
-								new Object[] { node.toString() }),
+								BasicElementLabels.getJavaCodeString(node.toString())),
 						null));
 		} else if (node instanceof ConstructorInvocation) {
 			// This is a call we can bypass; it's from one constructor flavor
@@ -1032,7 +1032,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			else
 				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR,
 						Messages.format(RefactoringCoreMessages.IntroduceFactory_unexpectedASTNodeTypeForConstructorSearchHit, 
-								new Object[] { expr.toString(), unitHandle.getElementName() }),
+								new Object[] { BasicElementLabels.getJavaCodeString(expr.toString()), BasicElementLabels.getFileName(unitHandle) }),
 						null));
 		} else if (node instanceof SimpleName && (node.getParent() instanceof MethodDeclaration || node.getParent() instanceof AbstractTypeDeclaration)) {
 			// We seem to have been given a hit for an implicit call to the base-class constructor.
@@ -1045,7 +1045,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		} else
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR,
 					Messages.format(RefactoringCoreMessages.IntroduceFactory_unexpectedASTNodeTypeForConstructorSearchHit, 
-							new Object[] { node.getClass().getName() + "('" + node.toString() + "')", unitHandle.getElementName() }), //$NON-NLS-1$ //$NON-NLS-2$
+							new Object[] { BasicElementLabels.getJavaElementName(node.getClass().getName() + "('" + node.toString() + "')"), BasicElementLabels.getFileName(unitHandle) }), //$NON-NLS-1$ //$NON-NLS-2$
 					null));
 	}
 
@@ -1088,11 +1088,11 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			if (binding.isNested() && !binding.isMember())
 				flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-			final String description= Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_descriptor_description_short, fCtorOwningClass.getName());
-			final String header= Messages.format(RefactoringCoreMessages.IntroduceFactory_descriptor_description, new String[] { fNewMethodName, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fCtorBinding, JavaElementLabels.ALL_FULLY_QUALIFIED)});
+			final String description= Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(fCtorOwningClass.getName().getIdentifier()));
+			final String header= Messages.format(RefactoringCoreMessages.IntroduceFactory_descriptor_description, new String[] { BasicElementLabels.getJavaElementName(fNewMethodName), BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fCtorBinding, JavaElementLabels.ALL_FULLY_QUALIFIED)});
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_original_pattern, BindingLabelProvider.getBindingLabel(fCtorBinding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
-			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_factory_pattern, fNewMethodName));
+			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_factory_pattern, BasicElementLabels.getJavaElementName(fNewMethodName)));
 			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceFactoryRefactoring_owner_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 			if (fProtectConstructor)
 				comment.addSetting(RefactoringCoreMessages.IntroduceFactoryRefactoring_declare_private);
@@ -1182,7 +1182,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	private RefactoringStatus isUniqueMethodName(String methodName) {
 		ITypeBinding declaringClass= fCtorBinding.getDeclaringClass();
 		if (Bindings.findMethodInType(declaringClass, methodName, fCtorBinding.getParameterTypes()) != null) {
-			String format= Messages.format(RefactoringCoreMessages.IntroduceFactory_duplicateMethodName, methodName);
+			String format= Messages.format(RefactoringCoreMessages.IntroduceFactory_duplicateMethodName, BasicElementLabels.getJavaElementName(methodName));
 			return RefactoringStatus.createErrorStatus(format);
 		}
  		return new RefactoringStatus(); 
@@ -1224,7 +1224,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		try {
 			factoryType= findFactoryClass(fullyQualifiedTypeName);
 			if (factoryType == null)
-				return RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.IntroduceFactory_noSuchClass, fullyQualifiedTypeName)); 
+				return RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.IntroduceFactory_noSuchClass, BasicElementLabels.getJavaElementName(fullyQualifiedTypeName))); 
 
 			if (factoryType.isAnnotation())
 				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.IntroduceFactory_cantPutFactoryMethodOnAnnotation); 

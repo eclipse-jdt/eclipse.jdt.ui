@@ -534,7 +534,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		}
 		
 		if (info.getDefaultValue().trim().equals("")){ //$NON-NLS-1$
-			String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_default_value, new String[]{info.getNewName()}); 
+			String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_default_value, BasicElementLabels.getJavaElementName(info.getNewName())); 
 			result.addFatalError(msg);
 			return;
 		}	
@@ -562,7 +562,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 					ParameterInfo info= (ParameterInfo) notDeletedInfos.get(i);
 					if (fOldVarargIndex != -1 && info.getOldIndex() == fOldVarargIndex && ! info.isNewVarargs()) {
 						String rippleMethodType= rippleMethod.getDeclaringType().getFullyQualifiedName('.');
-						String message= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_ripple_cannot_convert_vararg, new Object[] {info.getNewName(), rippleMethodType}); 
+						String message= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_ripple_cannot_convert_vararg, new Object[] { BasicElementLabels.getJavaElementName(info.getNewName()), BasicElementLabels.getJavaElementName(rippleMethodType)}); 
 						return RefactoringStatus.createFatalErrorStatus(message, JavaStatusContext.create(rippleMethod));
 					}
 				}
@@ -579,11 +579,11 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		for (int i= 0; i < notDeletedInfos.size(); i++) {
 			ParameterInfo info= (ParameterInfo) notDeletedInfos.get(i);
 			if (info.isOldVarargs() && ! info.isNewVarargs())
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_cannot_convert_vararg, info.getNewName())); 
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_cannot_convert_vararg, BasicElementLabels.getJavaElementName(info.getNewName()))); 
 			if (i != notDeletedInfos.size() - 1) {
 				// not the last parameter
 				if (info.isNewVarargs())
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_vararg_must_be_last, info.getNewName())); 
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_vararg_must_be_last, BasicElementLabels.getJavaElementName(info.getNewName()))); 
 			}
 		}
 		return null;
@@ -599,7 +599,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			collectTypeVariables(fReturnTypeInfo.getNewTypeBinding(), typeVariablesCollector);
 			if (typeVariablesCollector.size() != 0) {
 				ITypeBinding first= (ITypeBinding) typeVariablesCollector.iterator().next();
-				String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_return_type_contains_type_variable, new String[] {fReturnTypeInfo.getNewTypeName(), first.getName()}); 
+				String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_return_type_contains_type_variable, new String[] {BasicElementLabels.getJavaElementName(fReturnTypeInfo.getNewTypeName()), BasicElementLabels.getJavaElementName(first.getName())}); 
 				result.addError(msg);
 			}
 		}
@@ -611,7 +611,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				collectTypeVariables(info.getNewTypeBinding(), typeVariablesCollector);
 				if (typeVariablesCollector.size() != 0) {
 					ITypeBinding first= (ITypeBinding) typeVariablesCollector.iterator().next();
-					String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_parameter_type_contains_type_variable, new String[] {info.getNewTypeName(), info.getNewName(), first.getName()}); 
+					String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_parameter_type_contains_type_variable, new String[] {BasicElementLabels.getJavaElementName(info.getNewTypeName()), BasicElementLabels.getJavaElementName(info.getNewName()), BasicElementLabels.getJavaElementName(first.getName())}); 
 					result.addError(msg);
 				}
 			}
@@ -734,12 +734,12 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				if (fTopMethod.getDeclaringType().isInterface()) {
 					RefactoringStatusContext context= JavaStatusContext.create(fTopMethod);
 					String message= Messages.format(RefactoringCoreMessages.MethodChecks_implements, 
-							new String[]{JavaElementUtil.createMethodSignature(fTopMethod), fTopMethod.getDeclaringType().getFullyQualifiedName('.')});
+							new String[]{JavaElementUtil.createMethodSignature(fTopMethod), BasicElementLabels.getJavaElementName(fTopMethod.getDeclaringType().getFullyQualifiedName('.'))});
 					return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, Corext.getPluginId(), RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE, fTopMethod);
 				} else {
 					RefactoringStatusContext context= JavaStatusContext.create(fTopMethod);
 					String message= Messages.format(RefactoringCoreMessages.MethodChecks_overrides, 
-							new String[]{JavaElementUtil.createMethodSignature(fTopMethod), fTopMethod.getDeclaringType().getFullyQualifiedName('.')});
+							new String[]{JavaElementUtil.createMethodSignature(fTopMethod), BasicElementLabels.getJavaElementName(fTopMethod.getDeclaringType().getFullyQualifiedName('.'))});
 					return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, Corext.getPluginId(), RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD, fTopMethod);
 				}
 			}
@@ -810,7 +810,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			if (fDelegateUpdating && isSignatureClashWithInitial()) 
 				result.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.ChangeSignatureRefactoring_old_and_new_signatures_not_sufficiently_different ));
 
-			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , getMethodName());
+			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(getMethodName()));
 			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 			
 			fRippleMethods= RippleMethodFinder2.getRelatedMethods(fMethod, binaryRefs, new SubProgressMonitor(pm, 1), null);
@@ -896,7 +896,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		
 		buff.append(getOldMethodThrows());
 		
-		return buff.toString();
+		return BasicElementLabels.getJavaCodeString(buff.toString());
 	}
 
 	public String getNewMethodSignature() throws JavaModelException{
@@ -916,7 +916,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		
 		buff.append(getMethodThrows());
 		
-		return buff.toString();
+		return BasicElementLabels.getJavaCodeString(buff.toString());
 	}
 
 	private String getVisibilityString(int visibility) {
@@ -965,7 +965,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			ParameterInfo info= (ParameterInfo)iter.next();
 			String newName= info.getNewName();
 			if (found.contains(newName) && !doubled.contains(newName)){
-				result.addFatalError(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_duplicate_name, newName));
+				result.addFatalError(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_duplicate_name, BasicElementLabels.getJavaElementName(newName)));
 				doubled.add(newName);
 			} else {
 				found.add(newName);
@@ -1119,7 +1119,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			String[] paramNames= fRippleMethods[i].getParameterNames();
 			for (int j= 0; j < paramNames.length; j++) {
 				if (newParameterNames.contains(paramNames[j])){
-					String[] args= new String[]{JavaElementUtil.createMethodSignature(fRippleMethods[i]), paramNames[j]};
+					String[] args= new String[]{ JavaElementUtil.createMethodSignature(fRippleMethods[i]), BasicElementLabels.getJavaElementName(paramNames[j])};
 					String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_already_has, args); 
 					RefactoringStatusContext context= JavaStatusContext.create(fRippleMethods[i].getCompilationUnit(), fRippleMethods[i].getNameRange());
 					result.addError(msg, context);
@@ -1160,7 +1160,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		for (int i= 0; i < fRippleMethods.length; i++) {
 			if (JdtFlags.isNative(fRippleMethods[i])){
 				String message= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_native, 
-					new String[]{JavaElementUtil.createMethodSignature(fRippleMethods[i]), fRippleMethods[i].getDeclaringType().getFullyQualifiedName('.')});
+					new String[]{JavaElementUtil.createMethodSignature(fRippleMethods[i]), BasicElementLabels.getJavaElementName(fRippleMethods[i].getDeclaringType().getFullyQualifiedName('.'))});
 				result.addError(message, JavaStatusContext.create(fRippleMethods[i]));			
 			}								
 		}
@@ -1248,7 +1248,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			project= javaProject.getElementName();
 		ChangeMethodSignatureDescriptor descriptor= null;
 		try {
-			final String description= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description_short, fMethod.getElementName());
+			final String description= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(fMethod.getElementName()));
 			final String header= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()});
 			final JDTRefactoringDescriptorComment comment= createComment(project, header);
 			descriptor= new ChangeMethodSignatureDescriptor(project, description, comment.asString(), arguments, getDescriptorFlags());
@@ -1328,7 +1328,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	private JDTRefactoringDescriptorComment createComment(String project, final String header) throws JavaModelException {
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 		if (!fMethod.getElementName().equals(fMethodName))
-			comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_new_name_pattern, fMethodName));
+			comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_new_name_pattern, BasicElementLabels.getJavaElementName(fMethodName)));
 		if (!isVisibilitySameAsInitial()) {
 			String visibility= JdtFlags.getVisibilityString(fVisibility);
 			if ("".equals(visibility)) //$NON-NLS-1$
@@ -1336,18 +1336,18 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_new_visibility_pattern, visibility));
 		}
 		if (fReturnTypeInfo.isTypeNameChanged())
-			comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_new_return_type_pattern, fReturnTypeInfo.getNewTypeName()));
+			comment.addSetting(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_new_return_type_pattern, BasicElementLabels.getJavaElementName(fReturnTypeInfo.getNewTypeName())));
 		List deleted= new ArrayList();
 		List added= new ArrayList();
 		List changed= new ArrayList();
 		for (final Iterator iterator= fParameterInfos.iterator(); iterator.hasNext();) {
 			final ParameterInfo info= (ParameterInfo) iterator.next();
 			if (info.isDeleted())
-				deleted.add(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_deleted_parameter_pattern, new String[] { info.getOldTypeName(), info.getOldName()}));
+				deleted.add(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_deleted_parameter_pattern, new String[] { BasicElementLabels.getJavaElementName(info.getOldTypeName()), BasicElementLabels.getJavaElementName(info.getOldName())}));
 			else if (info.isAdded())
-				added.add(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_added_parameter_pattern, new String[] { info.getNewTypeName(), info.getNewName()}));
+				added.add(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_added_parameter_pattern, new String[] { BasicElementLabels.getJavaElementName(info.getNewTypeName()), BasicElementLabels.getJavaElementName(info.getNewName())}));
 			else if (info.isRenamed() || info.isTypeNameChanged() || info.isVarargChanged())
-				changed.add(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_changed_parameter_pattern, new String[] { info.getOldTypeName(), info.getOldName()}));
+				changed.add(Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_changed_parameter_pattern, new String[] { BasicElementLabels.getJavaElementName(info.getOldTypeName()), BasicElementLabels.getJavaElementName(info.getOldName())}));
 		}
 		if (!added.isEmpty())
 			comment.addSetting(JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ChangeSignatureRefactoring_added_parameters, (String[]) added.toArray(new String[added.size()])));
@@ -2449,9 +2449,9 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				if (paramRefs.length > 0){
 					RefactoringStatusContext context= JavaStatusContext.create(fCuRewrite.getCu(), paramRefs[0]);
 					String typeName= getFullTypeName(fMethDecl);
-					Object[] keys= new String[]{paramDecl.getName().getIdentifier(),
-												fMethDecl.getName().getIdentifier(),
-												typeName};
+					Object[] keys= new String[]{ BasicElementLabels.getJavaElementName(paramDecl.getName().getIdentifier()),
+							BasicElementLabels.getJavaElementName(fMethDecl.getName().getIdentifier()),
+							BasicElementLabels.getJavaElementName(typeName)};
 					String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_parameter_used, keys); 
 					fResult.addError(msg, context);
 				}
@@ -2466,10 +2466,10 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 					return ((AbstractTypeDeclaration) node).getName().getIdentifier();
 				} else if (node instanceof ClassInstanceCreation) {
 					ClassInstanceCreation cic= (ClassInstanceCreation) node;
-					return Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_anonymous_subclass, new String[]{ASTNodes.asString(cic.getType())}); 
+					return Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_anonymous_subclass, BasicElementLabels.getJavaElementName(ASTNodes.asString(cic.getType()))); 
 				} else if (node instanceof EnumConstantDeclaration) {
 					EnumDeclaration ed= (EnumDeclaration) node.getParent();
-					return Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_anonymous_subclass, new String[]{ASTNodes.asString(ed.getName())}); 
+					return Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_anonymous_subclass, BasicElementLabels.getJavaElementName(ASTNodes.asString(ed.getName()))); 
 				}
 			}
 		}

@@ -51,6 +51,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 
 public class ReorgUtils {
 
@@ -134,27 +136,18 @@ public class ReorgUtils {
 	}
 	
 	public static String getName(IResource resource) {
-		String pattern= createNamePattern(resource);
-		String[] args= createNameArguments(resource);
-		return Messages.format(pattern, args);
-	}
-	
-	private static String createNamePattern(IResource resource) {
-		switch(resource.getType()){
+		String resourceLabel= BasicElementLabels.getResourceName(resource);
+		switch (resource.getType()){
 			case IResource.FILE:
-				return RefactoringCoreMessages.ReorgUtils_0; 
+				return Messages.format(RefactoringCoreMessages.ReorgUtils_0, resourceLabel);
 			case IResource.FOLDER:
-				return RefactoringCoreMessages.ReorgUtils_1; 
+				return Messages.format(RefactoringCoreMessages.ReorgUtils_1, resourceLabel);
 			case IResource.PROJECT:
-				return RefactoringCoreMessages.ReorgUtils_2; 
+				return Messages.format(RefactoringCoreMessages.ReorgUtils_2, resourceLabel);
 			default:
 				Assert.isTrue(false);
 				return null;
 		}
-	}
-
-	private static String[] createNameArguments(IResource resource) {
-		return new String[]{resource.getName()};
 	}
 
 	public static String getName(IJavaElement element) throws JavaModelException {

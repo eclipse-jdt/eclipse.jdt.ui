@@ -648,7 +648,7 @@ public class BuildPathsBlock {
 		}
 		
 		if (pathStr.charAt(0) == '.' && pathStr.length() > 1) {
-			fOutputFolderStatus.setWarning(Messages.format(NewWizardMessages.OutputLocation_DotAsLocation, pathStr));
+			fOutputFolderStatus.setWarning(Messages.format(NewWizardMessages.OutputLocation_DotAsLocation, BasicElementLabels.getResourceName(pathStr)));
 		}
 		
 		updateBuildPathStatus();

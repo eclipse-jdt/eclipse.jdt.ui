@@ -157,7 +157,7 @@ public class ReorgCorrectionsSubProcessor {
 				RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);
 
 				// rename CU
-				String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renamecu_description, newCUName);
+				String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renamecu_description, BasicElementLabels.getResourceName(newCUName));
 				proposals.add(new ChangeCorrectionProposal(label, change, 6, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME)));
 			}
 		}
@@ -310,7 +310,7 @@ public class ReorgCorrectionsSubProcessor {
 			PreferencesUtil.createPropertyDialogOn(JavaPlugin.getActiveWorkbenchShell(), fProject, BuildPathsPropertyPage.PROP_ID, null, data).open();
 		}
 		public String getAdditionalProposalInfo() {
-			return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_configure_buildpath_description, fProject.getName());
+			return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_configure_buildpath_description, BasicElementLabels.getResourceName(fProject));
 		}
 	}
 

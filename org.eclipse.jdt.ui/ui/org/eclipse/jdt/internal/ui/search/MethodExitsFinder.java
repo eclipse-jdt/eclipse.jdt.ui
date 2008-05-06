@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,6 +49,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InOutFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 
 public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder {
 
@@ -96,7 +98,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 			return SearchMessages.MethodExitsFinder_no_return_type_selected; 
 		fMethodDeclaration= (MethodDeclaration)type.getParent();
 
-		fExitDescription= Messages.format(SearchMessages.MethodExitsFinder_occurrence_exit_description, fMethodDeclaration.getName().toString());
+		fExitDescription= Messages.format(SearchMessages.MethodExitsFinder_occurrence_exit_description, BasicElementLabels.getJavaElementName(fMethodDeclaration.getName().toString()));
 		return null;
 	}
 
@@ -106,7 +108,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		if (!fResult.isEmpty()) {
 			Type returnType= fMethodDeclaration.getReturnType2();
 			if (returnType != null) {
-				String desc= Messages.format(SearchMessages.MethodExitsFinder_occurrence_return_description, fMethodDeclaration.getName().toString());
+				String desc= Messages.format(SearchMessages.MethodExitsFinder_occurrence_return_description, BasicElementLabels.getJavaElementName(fMethodDeclaration.getName().toString()));
 				fResult.add(new OccurrenceLocation(returnType.getStartPosition(), returnType.getLength(), 0, desc));
 			}
 		}

@@ -67,6 +67,25 @@ public class Strings {
 	}
 	
 	/**
+	 * Adds special marks so that that the given styled string is readable in a BIDI environment.
+	 * <p>
+	 * XXX: Styles are currently erased by this method, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=227559
+	 * </p>
+	 * 
+	 * @param styledString the styled string
+	 * @param additionalDelimiters the additional delimiters
+	 * @return the processed styled string
+	 * @since 3.4
+	 */
+	public static StyledString markLTR(StyledString styledString, String additionalDelimiters) {
+		if (!USE_TEXT_PROCESSOR)
+			return styledString;
+		
+		String string= TextProcessor.process(styledString.getString(), TextProcessor.getDefaultDelimiters() + additionalDelimiters);
+		return new StyledString(string);
+	}
+	
+	/**
 	 * Adds special marks so that that the given string is readable in a BIDI environment.
 	 * 
 	 * @param string the string

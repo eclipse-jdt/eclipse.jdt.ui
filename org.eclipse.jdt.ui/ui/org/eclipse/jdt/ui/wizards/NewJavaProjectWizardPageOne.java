@@ -1011,7 +1011,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 				String existingName= projectLocation.lastSegment();
 				if (!existingName.equals(fNameGroup.getName())) {
-					setErrorMessage(Messages.format(NewWizardMessages.NewJavaProjectWizardPageOne_Message_invalidProjectNameForWorkspaceRoot, existingName));
+					setErrorMessage(Messages.format(NewWizardMessages.NewJavaProjectWizardPageOne_Message_invalidProjectNameForWorkspaceRoot, BasicElementLabels.getResourceName(existingName)));
 					setPageComplete(false);
 					return;
 				}

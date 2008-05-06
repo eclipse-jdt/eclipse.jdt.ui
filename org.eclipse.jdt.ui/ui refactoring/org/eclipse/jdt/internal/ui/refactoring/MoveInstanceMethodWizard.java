@@ -57,6 +57,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
@@ -163,7 +164,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 							}
 						}
 						if (!success)
-							fTargetTypeStatus= RefactoringStatus.createWarningStatus(Messages.format(RefactoringMessages.MoveInstanceMethodPage_invalid_target, target.getName())); 
+							fTargetTypeStatus= RefactoringStatus.createWarningStatus(Messages.format(RefactoringMessages.MoveInstanceMethodPage_invalid_target, BasicElementLabels.getJavaElementName(target.getName()))); 
 						else
 							fTargetTypeStatus= new RefactoringStatus();
 						handleStatusChanged();

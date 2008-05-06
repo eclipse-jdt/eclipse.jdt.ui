@@ -70,6 +70,7 @@ import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.SimilarElementsRequestor;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Add imports to a compilation unit.
@@ -231,7 +232,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 					}
 					if (Modifier.isStatic(binding.getModifiers())) {
 						if (Modifier.isPrivate(declaringClass.getModifiers())) {
-							fStatus= JavaUIStatus.createError(IStatus.ERROR, Messages.format(CodeGenerationMessages.AddImportsOperation_error_not_visible_class, declaringClass.getName()), null);
+							fStatus= JavaUIStatus.createError(IStatus.ERROR, Messages.format(CodeGenerationMessages.AddImportsOperation_error_not_visible_class, BasicElementLabels.getJavaElementName(declaringClass.getName())), null);
 							return null;
 						}
 						
@@ -291,7 +292,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		
 		TypeNameMatch[] types= findAllTypes(simpleName, searchScope, nameNode, new SubProgressMonitor(monitor, 1));
 		if (types.length == 0) {
-			fStatus= JavaUIStatus.createError(IStatus.ERROR, Messages.format(CodeGenerationMessages.AddImportsOperation_error_notresolved_message, simpleName), null); 
+			fStatus= JavaUIStatus.createError(IStatus.ERROR, Messages.format(CodeGenerationMessages.AddImportsOperation_error_notresolved_message, BasicElementLabels.getJavaElementName(simpleName)), null); 
 			return null;
 		}
 		

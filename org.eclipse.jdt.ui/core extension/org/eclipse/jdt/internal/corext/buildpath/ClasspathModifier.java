@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
@@ -135,7 +136,7 @@ public class ClasspathModifier {
 			String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
 			cpProject.setDefaultOutputLocation(cpProject.getDefaultOutputLocation().append(outputFolderName));
 			ClasspathModifier.removeFromClasspath(javaProject, cpProject.getCPListElements(), null);
-			result= new StatusInfo(IStatus.INFO, Messages.format(NewWizardMessages.OutputLocationDialog_removeProjectFromBP, cpProject.getDefaultOutputLocation()));
+			result= new StatusInfo(IStatus.INFO, Messages.format(NewWizardMessages.OutputLocationDialog_removeProjectFromBP, BasicElementLabels.getPathLabel(cpProject.getDefaultOutputLocation(), false)));
 		}
 		
 		exclude(outputPath, cpProject.getCPListElements(), new ArrayList(), cpProject.getJavaProject(), null);
@@ -174,7 +175,7 @@ public class ClasspathModifier {
 		}
 		
 		if (lastSegment.length() > 1 && lastSegment.charAt(0) == '.') {
-			StatusInfo statusInfo= new StatusInfo(IStatus.WARNING, Messages.format(NewWizardMessages.OutputLocation_DotAsLocation, outputPath.toString()));
+			StatusInfo statusInfo= new StatusInfo(IStatus.WARNING, Messages.format(NewWizardMessages.OutputLocation_DotAsLocation, BasicElementLabels.getPathLabel(outputPath, false)));
 			if (result.isOK()) {
 				return statusInfo;
 			} else {
@@ -209,11 +210,11 @@ public class ClasspathModifier {
 				StringBuffer buf= new StringBuffer();
 				for (Iterator iterator= duplicateEntries.iterator(); iterator.hasNext();) {
 	                CPListElement dup= (CPListElement)iterator.next();
-	                buf.append('\n').append(dup.getPath().lastSegment());
+	                buf.append('\n').append(BasicElementLabels.getResourceName(dup.getPath().lastSegment()));
                 }
 				message= Messages.format(NewWizardMessages.AddArchiveToBuildpathAction_DuplicateArchivesInfo_message, buf.toString());
 			} else {
-				message= Messages.format(NewWizardMessages.AddArchiveToBuildpathAction_DuplicateArchiveInfo_message, ((CPListElement)duplicateEntries.get(0)).getPath().lastSegment());
+				message= Messages.format(NewWizardMessages.AddArchiveToBuildpathAction_DuplicateArchiveInfo_message, BasicElementLabels.getResourceName(((CPListElement)duplicateEntries.get(0)).getPath().lastSegment()));
 			}
 			result= new StatusInfo(IStatus.INFO, message);
 		}
@@ -1346,9 +1347,9 @@ public class ClasspathModifier {
 					IStatus status2= JavaConventions.validateClasspath(project, entries, outputLocation);
 					if (status2.isOK()) {
 						if (project.isOnClasspath(project)) {
-							rootStatus.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceSFandOL, outputLocation.makeRelative().toString())); 
+							rootStatus.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceSFandOL, BasicElementLabels.getPathLabel(outputLocation, false))); 
 						} else {
-							rootStatus.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceOL, outputLocation.makeRelative().toString())); 
+							rootStatus.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceOL, BasicElementLabels.getPathLabel(outputLocation, false))); 
 						}
 						return;
 					}

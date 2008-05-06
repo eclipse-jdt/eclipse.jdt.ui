@@ -40,10 +40,10 @@ public class JavadocLinkDialogLabelProvider extends LabelProvider {
 			URL url= ref.getURL();
 			String text= ref.getFullPath().lastSegment();
 			if (url != null) {
-				Object[] args= new Object[] { text, BasicElementLabels.getURLPart(url.toExternalForm()) };
+				Object[] args= new Object[] { BasicElementLabels.getResourceName(text), BasicElementLabels.getURLPart(url.toExternalForm()) };
 				return Messages.format(JavadocExportMessages.JavadocLinkDialogLabelProvider_configuredentry, args); 
 			} else {
-				return Messages.format(JavadocExportMessages.JavadocLinkDialogLabelProvider_notconfiguredentry, text); 
+				return Messages.format(JavadocExportMessages.JavadocLinkDialogLabelProvider_notconfiguredentry, BasicElementLabels.getResourceName(text)); 
 			}
 		}
 		return super.getText(element);

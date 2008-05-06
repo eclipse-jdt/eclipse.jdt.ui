@@ -124,7 +124,7 @@ public class NLSSourceModifier {
 		if (accessorClassRef != null) {
 			Region region= accessorClassRef.getRegion();
 			int len= accessorClassRef.getName().length();
-			String[] args= {accessorClassRef.getName(), substitution.getUpdatedAccessor()};
+			String[] args= {BasicElementLabels.getJavaElementName(accessorClassRef.getName()), BasicElementLabels.getJavaElementName(substitution.getUpdatedAccessor())};
 			TextChangeCompatibility.addTextEdit(change, Messages.format(NLSMessages.NLSSourceModifier_replace_accessor, args), 
 					new ReplaceEdit(region.getOffset(), len, substitution.getUpdatedAccessor())); // 
 		}
@@ -133,7 +133,7 @@ public class NLSSourceModifier {
 
 	private void replaceKey(NLSSubstitution substitution, TextChange change) {
 		Region region= substitution.getNLSElement().getPosition();
-		String[] args= {substitution.getInitialKey(), substitution.getKey()};
+		String[] args= {substitution.getInitialKey(), BasicElementLabels.getJavaElementName(substitution.getKey())};
 		
 		ReplaceEdit replaceEdit;
 		if (fIsEclipseNLS)
@@ -155,7 +155,7 @@ public class NLSSourceModifier {
 		AccessorClassReference accessorClassRef= substitution.getAccessorClassReference();
 		if (accessorClassRef != null) {
 			Region region= accessorClassRef.getRegion();
-			String[] args= {substitution.getValueNonEmpty(), substitution.getKey()};
+			String[] args= {substitution.getValueNonEmpty(), BasicElementLabels.getJavaElementName(substitution.getKey())};
 			String label= Messages.format(NLSMessages.NLSSourceModifier_remove_accessor, args);
 			String replaceString= '\"' + unwindEscapeChars(substitution.getValueNonEmpty()) + '\"';
 			TextChangeCompatibility.addTextEdit(change, label, new ReplaceEdit(region.getOffset(), region.getLength(), replaceString));			
@@ -296,7 +296,7 @@ public class NLSSourceModifier {
 		if (sub.getState() == NLSSubstitution.EXTERNALIZED) {
 			NLSElement element= sub.getNLSElement();
 			Region position= element.getPosition();
-			String[] args= {sub.getValueNonEmpty(), sub.getKey()};
+			String[] args= {sub.getValueNonEmpty(), BasicElementLabels.getJavaElementName(sub.getKey())};
 			String text= Messages.format(NLSMessages.NLSSourceModifier_externalize, args); 
 
 			String resourceGetter= createResourceGetter(sub.getKey(), accessorName);

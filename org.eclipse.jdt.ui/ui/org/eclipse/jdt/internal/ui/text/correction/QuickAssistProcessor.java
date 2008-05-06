@@ -383,7 +383,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		final ICompilationUnit cu= context.getCompilationUnit();
 		final ConvertAnonymousToNestedRefactoring refactoring= new ConvertAnonymousToNestedRefactoring(anonymTypeDecl);
-		String extTypeName= ASTNodes.getSimpleNameIdentifier((Name) node);
+		String extTypeName= BasicElementLabels.getJavaElementName(ASTNodes.getSimpleNameIdentifier((Name) node));
 		if (anonymTypeDecl.resolveBinding().getInterfaces().length == 0) {
 			refactoring.setClassName(Messages.format(CorrectionMessages.QuickAssistProcessor_name_extension_from_interface, extTypeName));
 		} else {
@@ -639,7 +639,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
-		String label= Messages.format(CorrectionMessages.QuickAssistProcessor_convert_to_string_buffer_description, bufferOrBuilderName);
+		String label= Messages.format(CorrectionMessages.QuickAssistProcessor_convert_to_string_buffer_description, BasicElementLabels.getJavaElementName(bufferOrBuilderName));
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 1, image);
 		proposal.setCommandId(CONVERT_TO_STRING_BUFFER_ID);
@@ -1554,7 +1554,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					ITypeBinding typeDecl= curr.getTypeDeclaration();
 					ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, typeDecl);
 					if (targetCU != null) {
-						String label= Messages.format(CorrectionMessages.QuickAssistProcessor_createmethodinsuper_description, new String[] { curr.getName(), BasicElementLabels.getJavaElementName(binding.getName()) });
+						String label= Messages.format(CorrectionMessages.QuickAssistProcessor_createmethodinsuper_description, new String[] { BasicElementLabels.getJavaElementName(curr.getName()), BasicElementLabels.getJavaElementName(binding.getName()) });
 						resultingCollections.add(new NewDefiningMethodProposal(label, targetCU, astRoot, typeDecl, binding, paramNames, 6));
 					}
 				}

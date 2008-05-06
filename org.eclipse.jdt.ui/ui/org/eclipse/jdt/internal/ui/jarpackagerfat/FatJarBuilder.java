@@ -116,7 +116,7 @@ public class FatJarBuilder extends JarBuilder {
 					addWarning(ex.getMessage(), ex);
 				}
 			} else
-				addWarning(Messages.format(FatJarPackagerMessages.FatJarBuilder_error_readingArchiveFile, new Object[] { BasicElementLabels.getFileName(zipFile.getName()), ex.getLocalizedMessage() }), ex);
+				addWarning(Messages.format(FatJarPackagerMessages.FatJarBuilder_error_readingArchiveFile, new Object[] { BasicElementLabels.getResourceName(zipFile.getName()), ex.getLocalizedMessage() }), ex);
 		}
 	}
 

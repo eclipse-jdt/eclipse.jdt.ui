@@ -110,6 +110,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * 
@@ -305,7 +306,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 					IMethod method= toCheck[i];
 					if (method.getElementName().equals(fIntermediaryMethodName))
 						return RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_duplicate_method_name_in_declaring_class_error,
-								fIntermediaryMethodName));
+								BasicElementLabels.getJavaElementName(fIntermediaryMethodName)));
 				}
 			}
 		} catch (JavaModelException e) {
@@ -332,7 +333,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			// find type (now including secondaries)
 			target= getProject().findType(fullyQualifiedTypeName, new NullProgressMonitor());
 			if (target == null || !target.exists())
-				return RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_class_does_not_exist_error, fullyQualifiedTypeName));
+				return RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_class_does_not_exist_error, BasicElementLabels.getJavaElementName(fullyQualifiedTypeName)));
 			if (target.isAnnotation())
 				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_cannot_create_in_annotation);
 			if (target.isInterface())
@@ -718,8 +719,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		if (foundBinding != null) {
 			fIntermediaryFirstParameterType= foundBinding;
 		} else {
-			String type1= fIntermediaryFirstParameterType.getQualifiedName();
-			String type2= current.getQualifiedName();
+			String type1= BasicElementLabels.getJavaElementName(fIntermediaryFirstParameterType.getQualifiedName());
+			String type2= BasicElementLabels.getJavaElementName(current.getQualifiedName());
 			status.addFatalError(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_open_hierarchy_error, new String[] { type1, type2 }));
 		}
 
@@ -742,11 +743,11 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 		}
-		final String description= Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_descriptor_description_short, fTargetMethod.getElementName());
+		final String description= Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(fTargetMethod.getElementName()));
 		final String header= Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fTargetMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)});
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_original_pattern, JavaElementLabels.getTextLabel(fTargetMethod, JavaElementLabels.ALL_FULLY_QUALIFIED)));
-		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_method_pattern, fIntermediaryMethodName));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_method_pattern, BasicElementLabels.getJavaElementName(fIntermediaryMethodName)));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_declaring_pattern, JavaElementLabels.getTextLabel(fIntermediaryClass, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 		if (fUpdateReferences)
 			comment.addSetting(RefactoringCoreMessages.JavaRefactoringDescriptor_update_references);

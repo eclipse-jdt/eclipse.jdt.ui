@@ -42,6 +42,8 @@ import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -82,7 +84,7 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 			return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Exclude;
 			
 		IJavaElement elem= (IJavaElement) getSelectedElements().get(0);
-        String name= ClasspathModifier.escapeSpecialChars(elem.getElementName());
+        String name= ClasspathModifier.escapeSpecialChars(JavaElementLabels.getElementLabel(elem, JavaElementLabels.ALL_DEFAULT));
         if (elem instanceof IPackageFragment) {
         	return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ExcludePackage, name);
         } else if (elem instanceof ICompilationUnit) {

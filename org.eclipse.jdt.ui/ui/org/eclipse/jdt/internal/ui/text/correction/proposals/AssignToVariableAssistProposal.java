@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,6 +58,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Proposals for 'Assign to variable' quick assist
@@ -109,7 +110,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		if (existingFragment == null) {
 			setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assignparamtofield_description);
 		} else {
-			setDisplayName(Messages.format(CorrectionMessages.AssignToVariableAssistProposal_assigntoexistingfield_description, existingFragment.getName().getIdentifier()));
+			setDisplayName(Messages.format(CorrectionMessages.AssignToVariableAssistProposal_assigntoexistingfield_description, BasicElementLabels.getJavaElementName(existingFragment.getName().getIdentifier())));
 		}
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
 	}

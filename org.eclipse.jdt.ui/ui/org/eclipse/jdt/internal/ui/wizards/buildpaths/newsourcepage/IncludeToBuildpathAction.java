@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
@@ -81,7 +82,7 @@ public class IncludeToBuildpathAction extends BuildpathModifierAction {
 			return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_Unexclude;
 		
 		IResource resource= (IResource) getSelectedElements().get(0);
-        String name= ClasspathModifier.escapeSpecialChars(resource.getName());
+        String name= ClasspathModifier.escapeSpecialChars(BasicElementLabels.getResourceName(resource));
 		
         if (resource instanceof IContainer) {
         	return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_UnexcludeFolder, name);

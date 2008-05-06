@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 
 public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
@@ -160,7 +162,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 				if (classesDeclareOverridingNativeMethod(hierarchy.getAllSubtypes(declaring))) {
 					result.addError(Messages.format(
 						RefactoringCoreMessages.RenameVirtualMethodRefactoring_requieres_renaming_native,  
-						new String[]{method.getElementName(), "UnsatisfiedLinkError"})); //$NON-NLS-1$
+						new String[]{ BasicElementLabels.getJavaElementName(method.getElementName()), "UnsatisfiedLinkError"})); //$NON-NLS-1$
 				}
 	
 				IMethod[] hierarchyMethods= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), hierarchy, method, name);
@@ -170,11 +172,11 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 					if (Checks.compareParamTypes(method.getParameterTypes(), hierarchyMethod.getParameterTypes())) {
 						result.addError(Messages.format(
 							RefactoringCoreMessages.RenameVirtualMethodRefactoring_hierarchy_declares2, 
-							name), context); 
+							BasicElementLabels.getJavaElementName(name)), context); 
 					} else {
 						result.addWarning(Messages.format(
 							RefactoringCoreMessages.RenameVirtualMethodRefactoring_hierarchy_declares1, 
-							name), context); 
+							BasicElementLabels.getJavaElementName(name)), context); 
 					}					
 				}
 			}

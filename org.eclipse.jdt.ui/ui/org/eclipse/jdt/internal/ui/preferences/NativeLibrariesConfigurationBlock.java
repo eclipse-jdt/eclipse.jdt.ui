@@ -118,7 +118,7 @@ public class NativeLibrariesConfigurationBlock {
 
 		Label desc= new Label(inner, SWT.WRAP);
 		desc.setFont(inner.getFont());
-		desc.setText(Messages.format(NewWizardMessages.NativeLibrariesDialog_description, new String[] { BasicElementLabels.getFileName(fEntry.getPath().lastSegment()) }));
+		desc.setText(Messages.format(NewWizardMessages.NativeLibrariesDialog_description, new String[] { BasicElementLabels.getResourceName(fEntry.getPath().lastSegment()) }));
 		GridData gridData= new GridData(GridData.FILL, GridData.CENTER, false, false, 3, 1);
 		gridData.widthHint= converter.convertWidthInCharsToPixels(80);
 		desc.setLayoutData(gridData);

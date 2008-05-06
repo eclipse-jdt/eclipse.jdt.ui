@@ -126,7 +126,7 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 						IClasspathEntry newEntry= JavaCore.newProjectEntry(other.getPath());
 						Change change= ClasspathFixProposal.newAddClasspathChange(project, newEntry);
 						if (change != null) {
-							String[] args= { other.getElementName(), project.getElementName() };
+							String[] args= { BasicElementLabels.getResourceName(other.getElementName()), BasicElementLabels.getResourceName(project.getElementName()) };
 							String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_project_description, args);
 							String desc= label;
 							DefaultClasspathFixProposal proposal= new DefaultClasspathFixProposal(label, change, desc, 8);

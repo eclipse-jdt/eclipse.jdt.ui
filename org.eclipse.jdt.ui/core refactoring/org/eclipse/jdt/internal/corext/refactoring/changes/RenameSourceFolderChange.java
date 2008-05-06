@@ -28,6 +28,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 public final class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 
 	private static RefactoringStatus checkIfModifiable(IPackageFragmentRoot root) throws CoreException {
@@ -111,7 +113,8 @@ public final class RenameSourceFolderChange extends AbstractJavaElementRenameCha
 	}
 
 	public String getName() {
-		return Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_rename, new String[] { getOldName(), getNewName()});
+		String[] keys= { BasicElementLabels.getJavaElementName(getOldName()), BasicElementLabels.getJavaElementName(getNewName())};
+		return Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_rename, keys);
 	}
 
 	private IPath getNewPath() {

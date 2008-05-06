@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,11 +22,12 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.progress.IProgressService;
 
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -44,20 +45,17 @@ class GotoPackageAction extends Action {
 	}
  
 	public void run() { 
-		try {
-			Shell shell= JavaPlugin.getActiveWorkbenchShell();
-			SelectionDialog dialog= createAllPackagesDialog(shell);
-			dialog.setTitle(getDialogTitle());
-			dialog.setMessage(PackagesMessages.GotoPackage_dialog_message); 
-			dialog.open();		
-			Object[] res= dialog.getResult();
-			if (res != null && res.length == 1) 
-				gotoPackage((IPackageFragment)res[0]); 
-		} catch (JavaModelException e) {
-		}
+		Shell shell= JavaPlugin.getActiveWorkbenchShell();
+		SelectionDialog dialog= createAllPackagesDialog(shell);
+		dialog.setTitle(getDialogTitle());
+		dialog.setMessage(PackagesMessages.GotoPackage_dialog_message); 
+		dialog.open();		
+		Object[] res= dialog.getResult();
+		if (res != null && res.length == 1) 
+			gotoPackage((IPackageFragment)res[0]);
 	}
 	
-	private SelectionDialog createAllPackagesDialog(Shell shell) throws JavaModelException{
+	private SelectionDialog createAllPackagesDialog(Shell shell) {
 		IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
 		int flag= PackageSelectionDialog.F_HIDE_EMPTY_INNER;
@@ -73,7 +71,7 @@ class GotoPackageAction extends Action {
 		if (!p.equals(getSelectedElement())) {
 			MessageDialog.openInformation(fPackageExplorer.getSite().getShell(), 
 				getDialogTitle(), 
-				Messages.format(PackagesMessages.PackageExplorer_element_not_present, p.getElementName())); 
+				Messages.format(PackagesMessages.PackageExplorer_element_not_present, JavaElementLabels.getElementLabel(p, JavaElementLabels.ALL_DEFAULT))); 
 		}
 	}
 	

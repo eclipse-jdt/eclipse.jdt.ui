@@ -276,6 +276,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 		
 		/**
 		 * Tree-viewer that shows the allowable types in a tree view.
+		 * @param parent the parent
 		 */
 		private void addTreeComponent(Composite parent) {
 			fTreeViewer= new TreeViewer(parent, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
@@ -317,7 +318,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			} else {
 				if (getGeneralizeTypeRefactoring().getOriginalType().equals(type)) {
 					ChangeTypeInputPage.this.setMessage(Messages.format(
-						RefactoringMessages.ChangeTypeWizard_with_itself, type.getName())); 
+						RefactoringMessages.ChangeTypeWizard_with_itself, BasicElementLabels.getJavaElementName(type.getName()))); 
 					
 				} else {
 					ChangeTypeInputPage.this.setMessage(Messages.format(

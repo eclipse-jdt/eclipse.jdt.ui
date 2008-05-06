@@ -520,7 +520,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			clearInput();
 		} else {
 			fInputElement= inputElement;
-			fNoHierarchyShownLabel.setText(Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_createinput, inputElement.getElementName())); 
+			fNoHierarchyShownLabel.setText(Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_createinput, JavaElementLabels.getElementLabel(inputElement, JavaElementLabels.ALL_DEFAULT))); 
 			try {
 				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(inputElement, JavaPlugin.getActiveWorkbenchWindow());
 				// fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(inputElement, getSite().getWorkbenchWindow());
@@ -1108,7 +1108,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					setViewerVisibility(true);
 				}	
 			} else {							
-				fEmptyTypesViewer.setText(Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_nodecl, fInputElement.getElementName()));				 
+				fEmptyTypesViewer.setText(Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_nodecl, JavaElementLabels.getElementLabel(fInputElement, JavaElementLabels.ALL_DEFAULT)));				 
 				setViewerVisibility(false);
 			}
 		}
@@ -1501,7 +1501,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			final IJavaElement hierarchyInput= input;
 			
 			synchronized (this) {
-				String label= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_restoreinput, hierarchyInput.getElementName()); 
+				String label= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_restoreinput, JavaElementLabels.getElementLabel(hierarchyInput, JavaElementLabels.ALL_DEFAULT)); 
 				fNoHierarchyShownLabel.setText(label); 
 
 				fRestoreStateJob= new Job(label) {

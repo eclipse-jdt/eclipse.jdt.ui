@@ -253,7 +253,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			for (Iterator iter= parameterInfos.iterator(); iter.hasNext();) {
 				ParameterInfo pi= (ParameterInfo) iter.next();
 				if (names.contains(pi.getNewName())) {
-					setErrorMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_parametername_check_notunique, pi.getNewName()));
+					setErrorMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_parametername_check_notunique, BasicElementLabels.getJavaElementName(pi.getNewName())));
 					setPageComplete(false);
 					return;
 				}
@@ -284,16 +284,15 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			try {
 				IType type= project.findType(fProcessor.getNewTypeName());
 				if (type != null) {
-					StringBuffer packageName= new StringBuffer();
-					JavaElementLabels.getPackageFragmentLabel(type.getPackageFragment(), JavaElementLabels.ALL_DEFAULT, packageName);
+					String packageLabel= JavaElementLabels.getElementLabel(type.getPackageFragment(), JavaElementLabels.ALL_DEFAULT);
 					if (fProcessor.isCreateAsTopLevel()) {
-						setErrorMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_type_already_exists_in_package_info, new Object[] { fProcessor.getClassName(),
-								packageName.toString() }));
+						setErrorMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_type_already_exists_in_package_info,
+								new Object[] { BasicElementLabels.getJavaElementName(fProcessor.getClassName()), packageLabel }));
 						setPageComplete(false);
 						return;
 					} else {
-						setErrorMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_parametername_check_alreadyexists, new Object[] { fProcessor.getClassName(),
-								BasicElementLabels.getFileName(type.getCompilationUnit()) }));
+						setErrorMessage(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_parametername_check_alreadyexists,
+								new Object[] { BasicElementLabels.getJavaElementName(fProcessor.getClassName()), BasicElementLabels.getFileName(type.getCompilationUnit()) }));
 						setPageComplete(false);
 						return;
 					}
@@ -427,7 +426,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			});
 
 			Button nestedRadio= new Button(composite, SWT.RADIO);
-			nestedRadio.setText(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_createasnestedclass_radio, fProcessor.getContainingClass().getName()));
+			nestedRadio.setText(Messages.format(RefactoringMessages.IntroduceParameterObjectWizard_createasnestedclass_radio, BasicElementLabels.getJavaElementName(fProcessor.getContainingClass().getName())));
 			boolean createAsTopLevel= getBooleanSetting(CREATE_TOP_LEVEL_SETTING, fProcessor.isCreateAsTopLevel());
 			fProcessor.setCreateAsTopLevel(createAsTopLevel);
 			topLvlRadio.setSelection(createAsTopLevel);

@@ -268,14 +268,14 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			return false;
 		result.addFatalError(Messages.format(
 			RefactoringCoreMessages.SelfEncapsulateField_compiler_errors_field,  
-			new String[] { fField.getElementName(), messages[0].getMessage()}));
+			new String[] { BasicElementLabels.getJavaElementName(fField.getElementName()), messages[0].getMessage()}));
 		return true;
 	}
 
 	private String getMappingErrorMessage() {
 		return Messages.format(
 			RefactoringCoreMessages.SelfEncapsulateField_cannot_analyze_selected_field, 
-			new String[] {fField.getElementName()});
+			BasicElementLabels.getJavaElementName(fField.getElementName()));
 	}
 
 	//---- Input checking ----------------------------------------------------------
@@ -308,13 +308,13 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			String selector= method.getName();
 			if (selector.equals(name)) {
 				if (!reUseExistingField) {
-					status.addFatalError(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_method_exists, new String[] { BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED), type.getElementName() }));
+					status.addFatalError(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_method_exists, new String[] { BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED), BasicElementLabels.getJavaElementName(type.getElementName()) }));
 				} else {
 					boolean methodIsStatic= Modifier.isStatic(method.getModifiers());
 					if (methodIsStatic && !isStatic)
-						status.addWarning(Messages.format(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_static_method_but_nonstatic_field, new String[] { method.getName(), field.getElementName() }));
+						status.addWarning(Messages.format(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_static_method_but_nonstatic_field, new String[] { BasicElementLabels.getJavaElementName(method.getName()), BasicElementLabels.getJavaElementName(field.getElementName()) }));
 					if (!methodIsStatic && isStatic)
-						status.addFatalError(Messages.format(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_nonstatic_method_but_static_field, new String[] { method.getName(), field.getElementName() }));
+						status.addFatalError(Messages.format(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_nonstatic_method_but_static_field, new String[] { BasicElementLabels.getJavaElementName(method.getName()), BasicElementLabels.getJavaElementName(field.getElementName()) }));
 					return;
 				}
 
@@ -323,7 +323,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		if (reUseExistingField)
 			status.addFatalError(Messages.format(
 				RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_methoddoesnotexist_status_fatalError, 
-				new String[] {name, type.getElementName()}));
+				new String[] { BasicElementLabels.getJavaElementName(name), BasicElementLabels.getJavaElementName(type.getElementName())}));
 	}	
 
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
@@ -431,12 +431,12 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 		}
-		final String description= Messages.format(RefactoringCoreMessages.SelfEncapsulateField_descriptor_description_short, fField.getElementName());
+		final String description= Messages.format(RefactoringCoreMessages.SelfEncapsulateField_descriptor_description_short, BasicElementLabels.getJavaElementName(fField.getElementName()));
 		final String header= Messages.format(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)});
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_original_pattern, JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED)));
-		comment.addSetting(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_getter_pattern, fGetterName));
-		comment.addSetting(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_setter_pattern, fSetterName));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_getter_pattern, BasicElementLabels.getJavaElementName(fGetterName)));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.SelfEncapsulateField_setter_pattern, BasicElementLabels.getJavaElementName(fSetterName)));
 		String visibility= JdtFlags.getVisibilityString(fVisibility);
 		if ("".equals(visibility)) //$NON-NLS-1$
 			visibility= RefactoringCoreMessages.SelfEncapsulateField_default_visibility;
@@ -514,18 +514,18 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			ITypeBinding dc= method.getDeclaringClass();
 			if (returnTypeClash) {
 				result.addError(Messages.format(RefactoringCoreMessages.Checks_methodName_returnTypeClash, 
-					new Object[] {methodName, dc.getName()}),
+					new Object[] { BasicElementLabels.getJavaElementName(methodName), BasicElementLabels.getJavaElementName(dc.getName())}),
 					JavaStatusContext.create(method));
 			} else {
 				if (!reUseMethod)
 					result.addError(Messages.format(RefactoringCoreMessages.Checks_methodName_overrides, 
-						new Object[] {methodName, dc.getName()}),
+							new Object[] { BasicElementLabels.getJavaElementName(methodName), BasicElementLabels.getJavaElementName(dc.getName())}),
 						JavaStatusContext.create(method));
 			}
 		} else {
 			if (reUseMethod){
 				result.addError(Messages.format(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_nosuchmethod_status_fatalError, 
-						new Object[] {methodName}),
+						BasicElementLabels.getJavaElementName(methodName)),
 						JavaStatusContext.create(method));
 			}
 		}

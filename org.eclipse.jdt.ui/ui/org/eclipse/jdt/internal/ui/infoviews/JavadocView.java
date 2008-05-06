@@ -136,6 +136,7 @@ import org.eclipse.jdt.internal.ui.actions.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 import org.osgi.framework.Bundle;
@@ -232,7 +233,7 @@ public class JavadocView extends AbstractInfoView {
 		public void update() {
 			if (fCurrent != null && fCurrent.getNext() != null) {
 				BrowserInput element= fCurrent.getNext();
-				setToolTipText(Messages.format(InfoViewMessages.JavadocView_action_forward_enabledTooltip, element.getInputName()));
+				setToolTipText(Messages.format(InfoViewMessages.JavadocView_action_forward_enabledTooltip, BasicElementLabels.getJavaElementName(element.getInputName())));
 				setEnabled(true);
 			} else {
 				setToolTipText(InfoViewMessages.JavadocView_action_forward_disabledTooltip);
@@ -268,7 +269,7 @@ public class JavadocView extends AbstractInfoView {
 		private void update() {
 			if (fCurrent != null && fCurrent.getPrevious() != null) {
 				BrowserInput element= fCurrent.getPrevious();
-				setToolTipText(Messages.format(InfoViewMessages.JavadocView_action_back_enabledTooltip, element.getInputName()));
+				setToolTipText(Messages.format(InfoViewMessages.JavadocView_action_back_enabledTooltip, BasicElementLabels.getJavaElementName(element.getInputName())));
 				setEnabled(true);
 			} else {
 				setToolTipText(InfoViewMessages.JavadocView_action_back_disabledTooltip);

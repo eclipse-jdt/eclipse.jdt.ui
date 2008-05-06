@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 import org.osgi.framework.Bundle;
 
@@ -155,7 +156,7 @@ public class CoreUtility {
 			}
 			try {
 				if (fProject != null) {
-					monitor.beginTask(Messages.format(JavaUIMessages.CoreUtility_buildproject_taskname, fProject.getName()), 2); 
+					monitor.beginTask(Messages.format(JavaUIMessages.CoreUtility_buildproject_taskname, BasicElementLabels.getResourceName(fProject)), 2); 
 					fProject.build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor,1));
 					JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor,1));
 				} else {

@@ -111,6 +111,7 @@ import org.eclipse.jdt.internal.ui.preferences.TypeFilterPreferencePage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 /**
@@ -579,7 +580,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	 */
 	public String getElementName(Object item) {
 		TypeNameMatch type= (TypeNameMatch) item;
-		return fTypeInfoUtil.getText(type);
+		return type.getSimpleTypeName();
 	}
 
 	/*
@@ -790,16 +791,16 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			if (!(element instanceof TypeNameMatch)) {
 				return super.getText(element);
 			}
-
+			TypeNameMatch typeMatch= (TypeNameMatch) element;
 			if (fContainerInfo && isDuplicateElement(element)) {
-				return fTypeInfoUtil.getFullyQualifiedText((TypeNameMatch) element);
+				return BasicElementLabels.getJavaElementName(fTypeInfoUtil.getFullyQualifiedText(typeMatch));
 			}
 
 			if (!fContainerInfo && isDuplicateElement(element)) {
-				return fTypeInfoUtil.getQualifiedText((TypeNameMatch) element);
+				return BasicElementLabels.getJavaElementName(fTypeInfoUtil.getQualifiedText(typeMatch));
 			}
 
-			return fTypeInfoUtil.getText(element);
+			return BasicElementLabels.getJavaElementName(typeMatch.getSimpleTypeName());
 		}
 
 		/*
@@ -876,7 +877,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		 */
 		public String getText(Object element) {
 			if (element instanceof TypeNameMatch) {
-				return fTypeInfoUtil.getQualificationText((TypeNameMatch) element);
+				return BasicElementLabels.getJavaElementName(fTypeInfoUtil.getQualificationText((TypeNameMatch) element));
 			}
 
 			return super.getText(element);
@@ -948,9 +949,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			return Messages.format(JavaUIMessages.FilteredTypesSelectionDialog_library_name_format, name);
 		}
 
-		public String getText(Object element) {
-			return ((TypeNameMatch) element).getSimpleTypeName();
-		}
+
 
 		public String getQualifiedText(TypeNameMatch type) {
 			StringBuffer result= new StringBuffer();

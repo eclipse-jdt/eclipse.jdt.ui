@@ -181,7 +181,7 @@ public class AccessorClassModifier {
 		if (node == null)
 			return;
 		
-		String name= Messages.format(NLSMessages.AccessorClassModifier_remove_entry, sub.getKey()); 
+		String name= Messages.format(NLSMessages.AccessorClassModifier_remove_entry, BasicElementLabels.getJavaElementName(sub.getKey())); 
 		TextEditGroup editGroup= new TextEditGroup(name);
 		fListRewrite.remove(node, editGroup);
 		change.addTextEditGroup(editGroup);
@@ -193,7 +193,7 @@ public class AccessorClassModifier {
 		if (node == null)
 			return;
 		
-		String name= Messages.format(NLSMessages.AccessorClassModifier_replace_entry, sub.getKey()); 
+		String name= Messages.format(NLSMessages.AccessorClassModifier_replace_entry, BasicElementLabels.getJavaElementName(sub.getKey())); 
 		TextEditGroup editGroup= new TextEditGroup(name);
 		fListRewrite.remove(node, editGroup);
 		fFields.remove(node);
@@ -230,7 +230,7 @@ public class AccessorClassModifier {
 	}
 	
 	private void addKey(NLSSubstitution sub, TextChange change) {		
-		String name= Messages.format(NLSMessages.AccessorClassModifier_add_entry, sub.getKey()); 
+		String name= Messages.format(NLSMessages.AccessorClassModifier_add_entry, BasicElementLabels.getJavaElementName(sub.getKey())); 
 		TextEditGroup editGroup= new TextEditGroup(name);
 		change.addTextEditGroup(editGroup);
 		addKey(sub, editGroup);

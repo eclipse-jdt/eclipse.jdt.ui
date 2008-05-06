@@ -44,6 +44,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IUIConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.FilteredElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
@@ -162,7 +163,7 @@ public final class BuildPathDialogAccess {
 		}
 		
 		URL location= JavaUI.getLibraryJavadocLocation(initialEntry);
-		JavadocLocationDialog dialog=  new JavadocLocationDialog(shell, initialEntry.getPath().toString(), location);
+		JavadocLocationDialog dialog=  new JavadocLocationDialog(shell, BasicElementLabels.getPathLabel(initialEntry.getPath(), false), location);
 		if (dialog.open() == Window.OK) {
 			CPListElement element= CPListElement.createFromExisting(initialEntry, null);
 			URL res= dialog.getResult();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,8 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethod
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 /**
  * Refactoring contribution for the rename method refactoring.
  * 
@@ -49,7 +51,7 @@ public final class RenameMethodRefactoringContribution extends JavaRefactoringCo
 		String input= arguments.getAttribute(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT);
 		IMethod method= (IMethod) JavaRefactoringDescriptorUtil.handleToElement(arguments.getProject(), input);
 		if (method == null) {
-			status.addFatalError(Messages.format(RefactoringCoreMessages.RenameMethodRefactoringContribution_could_not_create, new Object[] { arguments.getProject(), input }));
+			status.addFatalError(Messages.format(RefactoringCoreMessages.RenameMethodRefactoringContribution_could_not_create, new Object[] { BasicElementLabels.getResourceName(arguments.getProject()), input }));
 			return null;
 		}
 		

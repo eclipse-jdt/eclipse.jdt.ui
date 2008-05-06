@@ -238,11 +238,11 @@ class OverwriteHelper {
 	}
 
 	private static boolean overwrite(String name, IConfirmQuery overwriteQuery){
-		String question= Messages.format(RefactoringCoreMessages.OverwriteHelper_1, name); 
+		String question= Messages.format(RefactoringCoreMessages.OverwriteHelper_1, BasicElementLabels.getJavaElementName(name)); 
 		return overwriteQuery.confirm(question);
 	}
 	private static boolean skip(String name, IConfirmQuery overwriteQuery){
-		String question= Messages.format(RefactoringCoreMessages.OverwriteHelper_3, name); 
+		String question= Messages.format(RefactoringCoreMessages.OverwriteHelper_3, BasicElementLabels.getJavaElementName(name)); 
 		return overwriteQuery.confirm(question);
 	}	
 }

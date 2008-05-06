@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,6 +71,7 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public final class ConfigureWorkingSetAssignementAction extends SelectionDispatchAction {
 	
@@ -230,9 +231,9 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			GrayedCheckedModelElement modelElement= (GrayedCheckedModelElement)object;
 			IWorkingSet workingSet= modelElement.getWorkingSet();
 			if (!modelElement.isGrayed()) {
-				return workingSet.getName();
+				return BasicElementLabels.getWorkingSetLabel(workingSet);
 			} else {
-				return Messages.format(WorkingSetMessages.ConfigureWorkingSetAssignementAction_XofY_label, new Object[] {workingSet.getName(), new Integer(modelElement.getCheckCount()), new Integer(modelElement.getElementCount())});
+				return Messages.format(WorkingSetMessages.ConfigureWorkingSetAssignementAction_XofY_label, new Object[] { BasicElementLabels.getWorkingSetLabel(workingSet), new Integer(modelElement.getCheckCount()), new Integer(modelElement.getElementCount())});
 			}
 			
 		}
@@ -607,7 +608,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			IAdaptable element= elements[0];
 			String elementName;
 			if (element instanceof IResource) {
-				elementName= ((IResource)element).getName();
+				elementName= BasicElementLabels.getResourceName((IResource) element);
 			} else {
 				elementName= JavaElementLabels.getElementLabel((IJavaElement)element, JavaElementLabels.ALL_DEFAULT);
 			}

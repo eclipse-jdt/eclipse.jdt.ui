@@ -347,7 +347,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 		
 		pm.setTaskName(RefactoringCoreMessages.InlineMethodRefactoring_searching);
 		RefactoringStatus searchStatus= new RefactoringStatus();
-		String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , fSourceProvider.getMethodName());
+		String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(fSourceProvider.getMethodName()));
 		ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 		ICompilationUnit[] units= fTargetProvider.getAffectedCompilationUnits(searchStatus, binaryRefs, new SubProgressMonitor(pm, 1));
 		binaryRefs.addErrorIfNecessary(searchStatus);
@@ -438,7 +438,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 		int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 		if (!Modifier.isPrivate(binding.getModifiers()))
 			flags|= RefactoringDescriptor.MULTI_CHANGE;
-		final String description= Messages.format(RefactoringCoreMessages.ReplaceInvocationsRefactoring_descriptor_description_short, binding.getName());
+		final String description= Messages.format(RefactoringCoreMessages.ReplaceInvocationsRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(binding.getName()));
 		final String header= Messages.format(RefactoringCoreMessages.ReplaceInvocationsRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringClass(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.ReplaceInvocationsRefactoring_original_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
@@ -514,7 +514,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 			IMethod[] overridden= types[i].findMethods(method);
 			if (overridden != null && overridden.length > 0) {
 				result.addError(
-					Messages.format(key, types[i].getElementName()), 
+					Messages.format(key, BasicElementLabels.getJavaElementName(types[i].getElementName())), 
 					JavaStatusContext.create(overridden[0]));
 			}
 		}

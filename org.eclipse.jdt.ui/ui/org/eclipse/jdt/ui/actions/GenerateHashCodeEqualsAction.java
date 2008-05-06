@@ -80,6 +80,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
@@ -284,7 +285,7 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 
 		boolean regenerate= false;
 		if (hasHashCodeOrEquals(fTypeBinding)) {
-			regenerate= MessageDialog.openQuestion(getShell(), ActionMessages.GenerateHashCodeEqualsAction_error_caption, Messages.format(ActionMessages.GenerateHashCodeEqualsAction_already_has_hashCode_equals_error, fTypeBinding.getQualifiedName()));
+			regenerate= MessageDialog.openQuestion(getShell(), ActionMessages.GenerateHashCodeEqualsAction_error_caption, Messages.format(ActionMessages.GenerateHashCodeEqualsAction_already_has_hashCode_equals_error, BasicElementLabels.getJavaElementName(fTypeBinding.getQualifiedName())));
 			if (!regenerate) {
 				notifyResult(false);
 				return;
@@ -340,8 +341,8 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 					alreadyChecked.add(fieldsType);
 				}
 				if (Modifier.isTransient(selectedBindings[i].getModifiers()))
-					status.addWarning(Messages.format(ActionMessages.GenerateHashCodeEqualsAction_transient_field_included_error, selectedBindings[i]
-							.getName()), createRefactoringStatusContext(selectedBindings[i].getJavaElement()));
+					status.addWarning(Messages.format(ActionMessages.GenerateHashCodeEqualsAction_transient_field_included_error, BasicElementLabels.getJavaElementName(selectedBindings[i].getName())),
+							createRefactoringStatusContext(selectedBindings[i].getJavaElement()));
 			}
 
 			if (status.hasEntries()) {
@@ -440,7 +441,7 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 
 		if (superClass && (info.foundFinalEquals || info.foundFinalHashCode)) {
 			status.addError(Messages.format(ActionMessages.GenerateHashCodeEqualsAction_final_hashCode_equals_in_superclass_error, Messages.format(
-					concreteTypeWarning, someType.getQualifiedName())), createRefactoringStatusContext(someType.getJavaElement()));
+					concreteTypeWarning, BasicElementLabels.getJavaElementName(someType.getQualifiedName()))), createRefactoringStatusContext(someType.getJavaElement()));
 		}
 
 		return status;

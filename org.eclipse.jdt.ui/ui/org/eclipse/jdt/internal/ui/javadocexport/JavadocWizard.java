@@ -242,7 +242,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 		for (int j= 0; j < projects.length; j++) {
 			IJavaProject iJavaProject= projects[j];
-			String message= Messages.format(JavadocExportMessages.JavadocWizard_updatejavadoclocation_message, new String[] { iJavaProject.getElementName(), BasicElementLabels.getPathLabel(fDestination, true) });
+			String message= Messages.format(JavadocExportMessages.JavadocWizard_updatejavadoclocation_message, new String[] { BasicElementLabels.getJavaElementName(iJavaProject.getElementName()), BasicElementLabels.getPathLabel(fDestination, true) });
 			MessageDialog dialog= new MessageDialog(shell, JavadocExportMessages.JavadocWizard_updatejavadocdialog_label, null, message, MessageDialog.QUESTION, buttonlabels, 1);
 
 			switch (dialog.open()) {

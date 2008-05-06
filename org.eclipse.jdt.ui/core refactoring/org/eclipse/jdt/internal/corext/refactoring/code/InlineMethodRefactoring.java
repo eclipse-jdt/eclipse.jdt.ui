@@ -251,7 +251,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		
 		pm.setTaskName(RefactoringCoreMessages.InlineMethodRefactoring_searching);
 		RefactoringStatus searchStatus= new RefactoringStatus();
-		String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , fSourceProvider.getMethodName());
+		String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(fSourceProvider.getMethodName()));
 		ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 		ICompilationUnit[] units= fTargetProvider.getAffectedCompilationUnits(searchStatus, binaryRefs, new SubProgressMonitor(pm, 1));
 		binaryRefs.addErrorIfNecessary(searchStatus);
@@ -365,7 +365,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		final ITypeBinding declaring= binding.getDeclaringClass();
 		if (!Modifier.isPrivate(binding.getModifiers()))
 			flags|= RefactoringDescriptor.MULTI_CHANGE;
-		final String description= Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_descriptor_description_short, binding.getName());
+		final String description= Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(binding.getName()));
 		final String header= Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)});
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_original_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));

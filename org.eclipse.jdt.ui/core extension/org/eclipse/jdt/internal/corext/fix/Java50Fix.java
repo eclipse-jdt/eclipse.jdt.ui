@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,6 +63,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Fix which introduce new language constructs to pre Java50 code.
@@ -94,7 +95,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 			ListRewrite listRewrite= cuRewrite.getASTRewrite().getListRewrite(fBodyDeclaration, fBodyDeclaration.getModifiersProperty());
 			Annotation newAnnotation= ast.newMarkerAnnotation();
 			newAnnotation.setTypeName(ast.newSimpleName(fAnnotation));
-			TextEditGroup group= createTextEditGroup(Messages.format(FixMessages.Java50Fix_AddMissingAnnotation_description, fAnnotation), cuRewrite);
+			TextEditGroup group= createTextEditGroup(Messages.format(FixMessages.Java50Fix_AddMissingAnnotation_description, BasicElementLabels.getJavaElementName(fAnnotation)), cuRewrite);
 			listRewrite.insertFirst(newAnnotation, group);
 		}
 	}
@@ -206,7 +207,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		if (operations.size() == 0)
 			return null;
 		
-		return new Java50Fix(Messages.format(FixMessages.Java50Fix_AddTypeParameters_description, node.getName()), compilationUnit, (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
+		return new Java50Fix(Messages.format(FixMessages.Java50Fix_AddTypeParameters_description,  BasicElementLabels.getJavaElementName(node.getName().getFullyQualifiedName())), compilationUnit, (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
 	}
 		
 	public static IFix createCleanUp(CompilationUnit compilationUnit, 

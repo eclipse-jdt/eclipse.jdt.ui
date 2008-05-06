@@ -30,6 +30,7 @@ import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.FilteredElementTreeSelectionDialog;
 
 /**
@@ -87,7 +88,7 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 	
 		public String getText(Object element) {
 			if (element instanceof File) {
-				return ((File) element).getName();
+				return BasicElementLabels.getResourceName(((File) element).getName());
 			}
 			return super.getText(element);
 		}

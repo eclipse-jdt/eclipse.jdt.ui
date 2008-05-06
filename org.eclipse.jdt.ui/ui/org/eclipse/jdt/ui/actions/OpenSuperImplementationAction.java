@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * The action opens a Java editor on the selected method's super implementation.
@@ -155,7 +156,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 		
 		if (!checkMethod(method)) {
 			MessageDialog.openInformation(getShell(), getDialogTitle(), 
-				Messages.format(ActionMessages.OpenSuperImplementationAction_no_super_implementation, method.getElementName())); 
+				Messages.format(ActionMessages.OpenSuperImplementationAction_no_super_implementation, BasicElementLabels.getJavaElementName(method.getElementName()))); 
 			return;
 		}		
 

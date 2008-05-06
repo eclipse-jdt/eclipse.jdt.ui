@@ -312,7 +312,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 						count++;
 				}
 				if (count > 1) {
-					Object[] args= new Object[] { BasicElementLabels.getFileName(name), new Integer(count) };
+					Object[] args= new Object[] { BasicElementLabels.getResourceName(name), new Integer(count) };
 					name= Messages.format(PropertiesFileEditorMessages.OpenAction_SelectionDialog_elementLabelWithMatchCount, args);
 				}
 

@@ -69,7 +69,7 @@ public class ExclusionInclusionDialog extends StatusDialog {
 		}
 
 		public String getText(Object element) {
-			return (String) element;
+			return BasicElementLabels.getFilePattern((String) element);
 		}
 
 	}

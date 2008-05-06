@@ -68,6 +68,7 @@ import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.FilteredElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
@@ -904,9 +905,9 @@ public class JavadocConfigurationBlock {
 	
 		public String getText(Object element) {
 			if (element == fProvider.getRoot()) {
-				return fProvider.getZipFile().getName();
+				return BasicElementLabels.getResourceName(fProvider.getZipFile().getName());
 			}
-			return fProvider.getLabel(element);
+			return BasicElementLabels.getResourceName(fProvider.getLabel(element));
 		}
 	}
 	

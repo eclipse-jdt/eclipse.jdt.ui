@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -92,6 +92,7 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class InlineTempRefactoring extends Refactoring {
@@ -229,7 +230,7 @@ public class InlineTempRefactoring extends Refactoring {
 		}
 		
 		if (decl.getInitializer() == null) {
-			String message= Messages.format(RefactoringCoreMessages.InlineTempRefactoring_not_initialized, decl.getName().getIdentifier());
+			String message= Messages.format(RefactoringCoreMessages.InlineTempRefactoring_not_initialized, BasicElementLabels.getJavaElementName(decl.getName().getIdentifier()));
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}	
 				
@@ -246,7 +247,7 @@ public class InlineTempRefactoring extends Refactoring {
 		int length= firstAssignment.getLength();
 		ISourceRange range= new SourceRange(start, length);
 		RefactoringStatusContext context= JavaStatusContext.create(fCu, range);	
-		String message= Messages.format(RefactoringCoreMessages.InlineTempRefactoring_assigned_more_once, decl.getName().getIdentifier());
+		String message= Messages.format(RefactoringCoreMessages.InlineTempRefactoring_assigned_more_once, BasicElementLabels.getJavaElementName(decl.getName().getIdentifier()));
 		return RefactoringStatus.createFatalErrorStatus(message, context);
 	}
 	
@@ -279,8 +280,8 @@ public class InlineTempRefactoring extends Refactoring {
 			if (method != null)
 				text= BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED);
 			else
-				text= '{' + JavaElementLabels.ELLIPSIS_STRING + '}';
-			final String description= Messages.format(RefactoringCoreMessages.InlineTempRefactoring_descriptor_description_short, binding.getName());
+				text= BasicElementLabels.getJavaElementName('{' + JavaElementLabels.ELLIPSIS_STRING + '}');
+			final String description= Messages.format(RefactoringCoreMessages.InlineTempRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(binding.getName()));
 			final String header= Messages.format(RefactoringCoreMessages.InlineTempRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), text});
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			comment.addSetting(Messages.format(RefactoringCoreMessages.InlineTempRefactoring_original_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));

@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * A type selection dialog providing means to open interface(s).
@@ -155,9 +156,9 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 				String message;
 
 				if (fTypeWizardPage.addSuperInterface(qualifiedName)) {
-					message= Messages.format(NewWizardMessages.SuperInterfaceSelectionDialog_interfaceadded_info, qualifiedName);
+					message= Messages.format(NewWizardMessages.SuperInterfaceSelectionDialog_interfaceadded_info, BasicElementLabels.getJavaElementName(qualifiedName));
 				} else {
-					message= Messages.format(NewWizardMessages.SuperInterfaceSelectionDialog_interfacealreadyadded_info, qualifiedName);
+					message= Messages.format(NewWizardMessages.SuperInterfaceSelectionDialog_interfacealreadyadded_info, BasicElementLabels.getJavaElementName(qualifiedName));
 				}
 				updateStatus(new StatusInfo(IStatus.INFO, message));
 			}

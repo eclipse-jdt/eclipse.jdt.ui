@@ -692,7 +692,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		
 		SubProgressMonitor subMonitor= new SubProgressMonitor(monitor, 2 * targets.length * cleanUps.length);
 		subMonitor.beginTask("", targets.length); //$NON-NLS-1$
-		subMonitor.subTask(Messages.format(FixMessages.CleanUpRefactoring_Parser_Startup_message, project.getElementName()));
+		subMonitor.subTask(Messages.format(FixMessages.CleanUpRefactoring_Parser_Startup_message, BasicElementLabels.getResourceName(project.getProject())));
 		try {
 			while (iter.hasNext()) {
 				iter.next(subMonitor);
@@ -708,7 +708,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 	private RefactoringStatus setProjectOptions(IJavaProject javaProject, ICleanUp[] cleanUps) {
 		Map options= CleanUpPreferenceUtil.loadOptions(new ProjectScope(javaProject.getProject()));
 		if (options == null) {
-			return RefactoringStatus.createFatalErrorStatus(Messages.format(FixMessages.CleanUpRefactoring_could_not_retrive_profile, javaProject.getElementName()));
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(FixMessages.CleanUpRefactoring_could_not_retrive_profile, BasicElementLabels.getResourceName(javaProject.getProject())));
 		}
 		
 		CleanUpOptions cleanUpOptions= new MapCleanUpOptions(options);
@@ -729,7 +729,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		
 		ICleanUp[] cleanUps= getCleanUps();
 		monitor.beginTask("", compilationUnits.length * cleanUps.length); //$NON-NLS-1$
-		monitor.subTask(Messages.format(FixMessages.CleanUpRefactoring_Initialize_message, javaProject.getElementName()));
+		monitor.subTask(Messages.format(FixMessages.CleanUpRefactoring_Initialize_message, BasicElementLabels.getResourceName(javaProject.getProject())));
 		try {
 			for (int j= 0; j < cleanUps.length; j++) {
 				result.merge(cleanUps[j].checkPreConditions(javaProject, compilationUnits, new SubProgressMonitor(monitor, compilationUnits.length)));

@@ -84,6 +84,7 @@ import org.eclipse.jdt.internal.ui.actions.OpenExternalBrowserAction;
 import org.eclipse.jdt.internal.ui.actions.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.infoviews.JavadocView;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 import org.osgi.framework.Bundle;
@@ -126,7 +127,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 			if (current != null && current.getPrevious() != null) {
 				BrowserInput previous= current.getPrevious();
-				setToolTipText(Messages.format(JavaHoverMessages.JavadocHover_back_toElement_toolTip, previous.getInputName()));
+				setToolTipText(Messages.format(JavaHoverMessages.JavadocHover_back_toElement_toolTip, BasicElementLabels.getJavaElementName(previous.getInputName())));
 				setEnabled(true);
 			} else {
 				setToolTipText(JavaHoverMessages.JavadocHover_back);
@@ -164,7 +165,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			BrowserInformationControlInput current= fInfoControl.getInput();
 
 			if (current != null && current.getNext() != null) {
-				setToolTipText(Messages.format(JavaHoverMessages.JavadocHover_forward_toElement_toolTip, current.getNext().getInputName()));
+				setToolTipText(Messages.format(JavaHoverMessages.JavadocHover_forward_toElement_toolTip, BasicElementLabels.getJavaElementName(current.getNext().getInputName())));
 				setEnabled(true);
 			} else {
 				setToolTipText(JavaHoverMessages.JavadocHover_forward_toolTip);

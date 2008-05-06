@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -52,7 +53,6 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 
 
 /**
@@ -229,10 +229,10 @@ public class OpenAction extends SelectionDispatchAction {
 				if (part != null && element instanceof IJavaElement)
 					JavaUI.revealInEditor(part, (IJavaElement)element);
 			} catch (PartInitException e) {
-				String message= Messages.format(ActionMessages.OpenAction_error_problem_opening_editor, new String[] { new JavaUILabelProvider().getText(element), e.getStatus().getMessage() });
+				String message= Messages.format(ActionMessages.OpenAction_error_problem_opening_editor, new String[] { JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_DEFAULT), e.getStatus().getMessage() });
 				status.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
 			} catch (CoreException e) {
-				String message= Messages.format(ActionMessages.OpenAction_error_problem_opening_editor, new String[] { new JavaUILabelProvider().getText(element), e.getStatus().getMessage() });
+				String message= Messages.format(ActionMessages.OpenAction_error_problem_opening_editor, new String[] { JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_DEFAULT), e.getStatus().getMessage() });
 				status.add(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
 				JavaPlugin.log(e);
 			}

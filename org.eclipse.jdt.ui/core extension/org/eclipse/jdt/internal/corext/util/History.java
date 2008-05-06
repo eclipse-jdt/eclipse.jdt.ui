@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.corext.CorextMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIException;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -252,11 +253,11 @@ public abstract class History {
 			DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			root = parser.parse(inputSource).getDocumentElement();
 		} catch (SAXException e) {
-			throw createException(e, Messages.format(CorextMessages.History_error_read, fFileName));  
+			throw createException(e, Messages.format(CorextMessages.History_error_read, BasicElementLabels.getResourceName(fFileName)));  
 		} catch (ParserConfigurationException e) {
-			throw createException(e, Messages.format(CorextMessages.History_error_read, fFileName)); 
+			throw createException(e, Messages.format(CorextMessages.History_error_read, BasicElementLabels.getResourceName(fFileName))); 
 		} catch (IOException e) {
-			throw createException(e, Messages.format(CorextMessages.History_error_read, fFileName)); 
+			throw createException(e, Messages.format(CorextMessages.History_error_read, BasicElementLabels.getResourceName(fFileName)));
 		}
 		
 		if (root == null) return;
@@ -306,9 +307,9 @@ public abstract class History {
 
 			transformer.transform(source, result);
 		} catch (TransformerException e) {
-			throw createException(e, Messages.format(CorextMessages.History_error_serialize, fFileName));
+			throw createException(e, Messages.format(CorextMessages.History_error_serialize, BasicElementLabels.getResourceName(fFileName)));
 		} catch (ParserConfigurationException e) {
-			throw createException(e, Messages.format(CorextMessages.History_error_serialize, fFileName));
+			throw createException(e, Messages.format(CorextMessages.History_error_serialize, BasicElementLabels.getResourceName(fFileName)));
 		}
 	}
 

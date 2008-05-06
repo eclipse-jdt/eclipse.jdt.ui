@@ -131,6 +131,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Refactoring processor for the pull up refactoring.
@@ -794,20 +795,22 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 					member= pullables[index];
 					final String[] unmapped= TypeVariableUtil.getUnmappedVariables(mapping, declaring, member);
 					length= unmapped.length;
+					
+					String superClassLabel= BasicElementLabels.getJavaElementName(declaring.getSuperclassName());
 					switch (length) {
 						case 0:
 							break;
 						case 1:
-							status.addError(Messages.format(RefactoringCoreMessages.PullUpRefactoring_Type_variable_not_available, new String[] { unmapped[0], declaring.getSuperclassName()}), JavaStatusContext.create(member));
+							status.addError(Messages.format(RefactoringCoreMessages.PullUpRefactoring_Type_variable_not_available, new String[] { unmapped[0], superClassLabel}), JavaStatusContext.create(member));
 							break;
 						case 2:
-							status.addError(Messages.format(RefactoringCoreMessages.PullUpRefactoring_Type_variable2_not_available, new String[] { unmapped[0], unmapped[1], declaring.getSuperclassName()}), JavaStatusContext.create(member));
+							status.addError(Messages.format(RefactoringCoreMessages.PullUpRefactoring_Type_variable2_not_available, new String[] { unmapped[0], unmapped[1], superClassLabel}), JavaStatusContext.create(member));
 							break;
 						case 3:
-							status.addError(Messages.format(RefactoringCoreMessages.PullUpRefactoring_Type_variable3_not_available, new String[] { unmapped[0], unmapped[1], unmapped[2], declaring.getSuperclassName()}), JavaStatusContext.create(member));
+							status.addError(Messages.format(RefactoringCoreMessages.PullUpRefactoring_Type_variable3_not_available, new String[] { unmapped[0], unmapped[1], unmapped[2], superClassLabel}), JavaStatusContext.create(member));
 							break;
 						default:
-							status.addError(Messages.format(RefactoringCoreMessages.PullUpRefactoring_Type_variables_not_available, new String[] { declaring.getSuperclassName()}), JavaStatusContext.create(member));
+							status.addError(Messages.format(RefactoringCoreMessages.PullUpRefactoring_Type_variables_not_available, new String[] { superClassLabel}), JavaStatusContext.create(member));
 					}
 					monitor.worked(1);
 					if (monitor.isCanceled())
@@ -1031,7 +1034,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			} catch (JavaModelException exception) {
 				JavaPlugin.log(exception);
 			}
-			final String description= fMembersToMove.length == 1 ? Messages.format(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_short, new String[] { fMembersToMove[0].getElementName(), fDestinationType.getElementName()}) : Messages.format(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_short_multiple, fDestinationType.getElementName());
+			final String description= fMembersToMove.length == 1 ? Messages.format(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_short, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_DEFAULT), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_DEFAULT)}) : Messages.format(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_short_multiple, BasicElementLabels.getJavaElementName(fDestinationType.getElementName()));
 			final String header= fMembersToMove.length == 1 ? Messages.format(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}) : Messages.format(RefactoringCoreMessages.PullUpRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)});
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			comment.addSetting(Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_target_element_pattern, JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)));

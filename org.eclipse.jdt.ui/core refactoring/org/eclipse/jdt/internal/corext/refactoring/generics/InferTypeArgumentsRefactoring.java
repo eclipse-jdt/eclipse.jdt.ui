@@ -276,10 +276,10 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			IJavaProject javaProject= fElements[i].getJavaProject();
 			if (! checkedProjects.contains(javaProject)) {
 				if (! JavaModelUtil.is50OrHigher(javaProject)) {
-					String message= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_not50, javaProject.getElementName()); 
+					String message= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_not50, BasicElementLabels.getJavaElementName(javaProject.getElementName())); 
 					result.addFatalError(message);
 				} else if (! JavaModelUtil.is50OrHigherJRE(javaProject)) {
-					String message= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_not50Library, javaProject.getElementName());
+					String message= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_not50Library, BasicElementLabels.getJavaElementName(javaProject.getElementName()));
 					result.addFatalError(message);
 				}
 				checkedProjects.add(javaProject);
@@ -547,7 +547,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 					final Map arguments= new HashMap();
 					final IJavaProject project= getSingleProject();
 					final String description= RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description;
-					final String header= project != null ? Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description_project, project.getElementName()) : RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description;
+					final String header= project != null ? Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description_project, BasicElementLabels.getJavaElementName(project.getElementName())) : RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description;
 					final String name= project != null ? project.getElementName() : null;
 					final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(name, this, header);
 					final String[] settings= new String[fElements.length];

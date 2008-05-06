@@ -208,7 +208,7 @@ public class SourceAttachmentBlock {
 			Label message= new Label(composite, SWT.WRAP);
 			GridData gd= new GridData(GridData.FILL, GridData.BEGINNING, false, false, 4, 1);
 			message.setLayoutData(gd);
-			message.setText(Messages.format(NewWizardMessages.SourceAttachmentBlock_message, fEntry.getPath().lastSegment())); 
+			message.setText(Messages.format(NewWizardMessages.SourceAttachmentBlock_message, BasicElementLabels.getResourceName(fEntry.getPath().lastSegment()))); 
 			
 			//DialogField.createEmptySpace(composite, 1);
 
@@ -238,7 +238,7 @@ public class SourceAttachmentBlock {
 
 			Label message= new Label(composite, SWT.LEFT + SWT.WRAP);
 			message.setLayoutData(gd);
-			message.setText(Messages.format(NewWizardMessages.SourceAttachmentBlock_message, fEntry.getPath().lastSegment())); 
+			message.setText(Messages.format(NewWizardMessages.SourceAttachmentBlock_message, BasicElementLabels.getResourceName(fEntry.getPath().lastSegment()))); 
 			
 			fWorkspaceButton.doFillIntoGrid(composite, 1);
 			((GridData) fWorkspaceButton.getSelectionButton(null).getLayoutData()).verticalAlignment= SWT.END;

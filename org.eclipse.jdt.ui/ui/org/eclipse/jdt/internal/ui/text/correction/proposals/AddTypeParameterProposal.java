@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class AddTypeParameterProposal extends LinkedCorrectionProposal {
 
@@ -62,10 +63,10 @@ public class AddTypeParameterProposal extends LinkedCorrectionProposal {
 
 		if (binding instanceof IMethodBinding) {
 			boolean isSameCU= fAstRoot.findDeclaringNode(binding) != null;
-			String[] args= { fTypeParamName, ASTResolving.getMethodSignature((IMethodBinding) binding, isSameCU) };
+			String[] args= { BasicElementLabels.getJavaElementName(fTypeParamName), ASTResolving.getMethodSignature((IMethodBinding) binding, isSameCU) };
 			setDisplayName(Messages.format(CorrectionMessages.AddTypeParameterProposal_method_label, args));
 		} else {
-			String[] args= { fTypeParamName, ASTResolving.getTypeSignature((ITypeBinding) binding) };
+			String[] args= { BasicElementLabels.getJavaElementName(fTypeParamName), ASTResolving.getTypeSignature((ITypeBinding) binding) };
 			setDisplayName(Messages.format(CorrectionMessages.AddTypeParameterProposal_type_label, args));
 		}
 	}

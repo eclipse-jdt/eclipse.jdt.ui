@@ -274,10 +274,6 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		} catch (OperationCanceledException e) {
 			fWasCanceled= true;
 			throw e;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 		}
@@ -495,7 +491,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 
 		if (frag.getResource().isLinked()) {
 			final IConfirmQuery query= fDeleteQueries.createYesNoQuery(RefactoringCoreMessages.JavaDeleteProcessor_confirm_linked_folder_delete, false, IReorgQueries.CONFIRM_DELETE_LINKED_PARENT);
-			if (!query.confirm(Messages.format(RefactoringCoreMessages.JavaDeleteProcessor_delete_linked_folder_question, new String[] { frag.getResource().getName() })))
+			if (!query.confirm(Messages.format(RefactoringCoreMessages.JavaDeleteProcessor_delete_linked_folder_question, BasicElementLabels.getResourceName(frag.getResource()))))
 					return;
 		}
 		
@@ -574,7 +570,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			if (resource instanceof IFolder){
 				IFolder folder= (IFolder)resource;
 				if (containsSourceFolder(folder)){
-					String question= Messages.format(RefactoringCoreMessages.DeleteRefactoring_5, folder.getName()); 
+					String question= Messages.format(RefactoringCoreMessages.DeleteRefactoring_5, BasicElementLabels.getResourceName(folder)); 
 					if (! query.confirm(question))
 						foldersToSkip.add(folder);
 				}
@@ -619,7 +615,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			final String description= fElements.length == 1 ? RefactoringCoreMessages.JavaDeleteProcessor_description_singular : RefactoringCoreMessages.JavaDeleteProcessor_description_plural;
 			final IProject resource= getSingleProject();
 			final String project= resource != null ? resource.getName() : null;
-			final String source= project != null ? Messages.format(RefactoringCoreMessages.JavaDeleteProcessor_project_pattern, project) : RefactoringCoreMessages.JavaDeleteProcessor_workspace;
+			final String source= project != null ? Messages.format(RefactoringCoreMessages.JavaDeleteProcessor_project_pattern, BasicElementLabels.getJavaElementName(project)) : RefactoringCoreMessages.JavaDeleteProcessor_workspace;
 			final String header= Messages.format(RefactoringCoreMessages.JavaDeleteProcessor_header, new String[] { String.valueOf(fElements.length), source});
 			int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);

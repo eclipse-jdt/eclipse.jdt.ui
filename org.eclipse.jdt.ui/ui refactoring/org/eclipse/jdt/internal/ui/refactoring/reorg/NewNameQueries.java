@@ -80,7 +80,7 @@ public class NewNameQueries implements INewNameQueries {
 	}
 
 	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu, String initialSuggestedName) {
-		String[] keys= {JavaCore.removeJavaLikeExtension(cu.getElementName())};
+		String[] keys= { BasicElementLabels.getJavaElementName(JavaCore.removeJavaLikeExtension(cu.getElementName()))};
 		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys); 
 		return createStaticQuery(createCompilationUnitNameValidator(cu), message, initialSuggestedName, getShell());
 	}

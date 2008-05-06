@@ -188,7 +188,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 						jElements.add(type);
 					} else {
 			    		status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
-			    			Messages.format(JavaUIMessages.TypeSelectionDialog_error_type_doesnot_exist, selection[i].getFullyQualifiedName()),
+			    			Messages.format(JavaUIMessages.TypeSelectionDialog_error_type_doesnot_exist, TypeNameMatchLabelProvider.getText(selection[i], TypeNameMatchLabelProvider.SHOW_FULLYQUALIFIED)),
 			    			null);
 			    		break;
 					}

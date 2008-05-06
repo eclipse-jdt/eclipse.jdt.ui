@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,6 +64,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.SerialVersionHashOperation;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 
 public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOperationsFix {
@@ -120,12 +121,12 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 							if (id != null) {
 								setSerialVersionId(typeBinding, id);
 							} else {
-							   	result.addWarning(Messages.format(FixMessages.PotentialProgrammingProblemsFix_calculatingUIDFailed_unknown, typeBinding.getName()));
+							   	result.addWarning(Messages.format(FixMessages.PotentialProgrammingProblemsFix_calculatingUIDFailed_unknown, BasicElementLabels.getJavaElementName(typeBinding.getName())));
 							}
 						} catch (IOException e) {
-						   	result.addWarning(Messages.format(FixMessages.PotentialProgrammingProblemsFix_calculatingUIDFailed_exception, new String[] { typeBinding.getName(), e.getLocalizedMessage()}), JavaStatusContext.create(types[i]));
+						   	result.addWarning(Messages.format(FixMessages.PotentialProgrammingProblemsFix_calculatingUIDFailed_exception, new String[] { BasicElementLabels.getJavaElementName(typeBinding.getName()), e.getLocalizedMessage()}), JavaStatusContext.create(types[i]));
 				        } catch (CoreException e) {
-						   	result.addWarning(Messages.format(FixMessages.PotentialProgrammingProblemsFix_calculatingUIDFailed_exception, new String[] { typeBinding.getName(), e.getLocalizedMessage()}), JavaStatusContext.create(types[i]));
+						   	result.addWarning(Messages.format(FixMessages.PotentialProgrammingProblemsFix_calculatingUIDFailed_exception, new String[] { BasicElementLabels.getJavaElementName(typeBinding.getName()), e.getLocalizedMessage()}), JavaStatusContext.create(types[i]));
 				        }
 					}
 				}
@@ -260,7 +261,7 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 
 	private static ISerialVersionFixContext fCurrentContext;
 
-	public static IProposableFix[] createMissingSerialVersionFixes(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
+	public static IProposableFix[] createMissingSerialVersionFixes(CompilationUnit compilationUnit, IProblemLocation problem) {
 		if (problem.getProblemId() != IProblem.MissingSerialVersion)
 			return null;
 		
@@ -320,7 +321,7 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 		}
     }
 	
-	public static RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
+	public static RefactoringStatus checkPostConditions(IProgressMonitor monitor) {
 		if (monitor != null)
 			monitor.done();
 		

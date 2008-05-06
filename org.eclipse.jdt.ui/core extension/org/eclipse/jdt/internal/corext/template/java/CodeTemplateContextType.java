@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,8 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
   */
@@ -284,14 +286,14 @@ public class CodeTemplateContextType extends TemplateContextType {
 			required.add(TYPE_DECLARATION);
 		}
 		for (int i= 0; i < variables.length; i++) {
-			String type= variables[i].getType();
+			String type= BasicElementLabels.getJavaElementName(variables[i].getType());
 			if (getResolver(type) == null) {
 				throw new TemplateException(Messages.format(JavaTemplateMessages.CodeTemplateContextType_validate_unknownvariable, type)); 
 			}
 			required.remove(type);
 		}
 		if (!required.isEmpty()) {
-			String missing= (String) required.get(0);
+			String missing= BasicElementLabels.getJavaElementName((String) required.get(0));
 			throw new TemplateException(Messages.format(JavaTemplateMessages.CodeTemplateContextType_validate_missingvariable, missing)); 
 		}
 		super.validateVariables(variables);

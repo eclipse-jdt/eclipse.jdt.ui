@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,6 +36,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Class used to find the target for a break or continue statement according 
@@ -85,7 +87,7 @@ public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrence
 			fSelected= controlNode;
 			fIsBreak= fSelected instanceof BreakStatement;
 			fLabel= getLabel();
-			fDescription= Messages.format(SearchMessages.BreakContinueTargetFinder_occurrence_description, ASTNodes.asString(fSelected));
+			fDescription= Messages.format(SearchMessages.BreakContinueTargetFinder_occurrence_description, BasicElementLabels.getJavaElementName(ASTNodes.asString(fSelected)));
 			return null;
 		} else {
 			return SearchMessages.BreakContinueTargetFinder_no_break_or_continue_selected;

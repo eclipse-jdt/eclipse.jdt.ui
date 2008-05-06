@@ -43,6 +43,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 
 	/**
@@ -106,12 +108,12 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 				if (Checks.compareParamTypes(method.getParameterTypes(), hierarchyMethod.getParameterTypes())) {
 					String message= Messages.format(
 						RefactoringCoreMessages.RenamePrivateMethodRefactoring_hierarchy_defines, 
-						new String[]{declaring.getFullyQualifiedName('.'), name});
+						new String[]{BasicElementLabels.getJavaElementName(declaring.getFullyQualifiedName('.')), BasicElementLabels.getJavaElementName(name)});
 					result.addError(message, context);				
 				}else {
 					String message= Messages.format(
 						RefactoringCoreMessages.RenamePrivateMethodRefactoring_hierarchy_defines2, 
-						new String[]{declaring.getFullyQualifiedName('.'), name});
+						new String[]{BasicElementLabels.getJavaElementName(declaring.getFullyQualifiedName('.')), BasicElementLabels.getJavaElementName(name)});
 					result.addWarning(message, context);				
 				}
 			}

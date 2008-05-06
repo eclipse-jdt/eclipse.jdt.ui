@@ -238,7 +238,7 @@ public class ModifierCorrectionSubProcessor {
 			IMethodBinding overriddenDecl= overriddenInClass.getMethodDeclaration();
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), overriddenDecl.getDeclaringClass());
 			if (targetCU != null) {
-				String methodName= BasicElementLabels.getJavaElementName(curr.getName() + '.' + overriddenInClass.getName());
+				String methodLabel= BasicElementLabels.getJavaElementName(curr.getName() + '.' + overriddenInClass.getName());
 				String label;
 				int excludedModifiers;
 				int includedModifiers;
@@ -246,15 +246,15 @@ public class ModifierCorrectionSubProcessor {
 					case TO_VISIBLE:
 						excludedModifiers= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
 						includedModifiers= JdtFlags.getVisibilityCode(method);
-						label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changeoverriddenvisibility_description, new String[] { methodName, getVisibilityString(includedModifiers) });
+						label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changeoverriddenvisibility_description, new String[] { methodLabel, getVisibilityString(includedModifiers) });
 						break;
 					case TO_NON_FINAL:
-						label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemethodtononfinal_description, methodName);
+						label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemethodtononfinal_description, methodLabel);
 						excludedModifiers= Modifier.FINAL;
 						includedModifiers= 0;
 						break;
 					case TO_NON_STATIC:
-						label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemethodtononstatic_description, methodName);
+						label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemethodtononstatic_description, methodLabel);
 						excludedModifiers= Modifier.STATIC;
 						includedModifiers= 0;
 						break;
@@ -280,7 +280,7 @@ public class ModifierCorrectionSubProcessor {
 		if (binding instanceof IVariableBinding) {
 			binding= ((IVariableBinding) binding).getVariableDeclaration();
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertofinal_description, binding.getName());
+			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertofinal_description, BasicElementLabels.getJavaElementName(binding.getName()));
 			proposals.add(new ModifierChangeCorrectionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 5, image));
 		}
 	}
@@ -301,7 +301,7 @@ public class ModifierCorrectionSubProcessor {
 
 		IBinding binding= ((SimpleName) selectedNode).resolveBinding();
 		if (binding != null) {
-			String methodName= binding.getName();
+			String methodName= BasicElementLabels.getJavaElementName(binding.getName());
 			String label= null;
 			int problemId= problem.getProblemId();
 
@@ -505,7 +505,7 @@ public class ModifierCorrectionSubProcessor {
 		if (id == IProblem.AbstractMethodInAbstractClass && parentTypeDecl != null) {
 			MakeTypeAbstractOperation operation= new UnimplementedCodeFix.MakeTypeAbstractOperation(parentTypeDecl);
 
-			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_addabstract_description, parentTypeDecl.getName().getIdentifier());
+			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_addabstract_description, BasicElementLabels.getJavaElementName(parentTypeDecl.getName().getIdentifier()));
 			UnimplementedCodeFix fix= new UnimplementedCodeFix(label, astRoot, new CompilationUnitRewriteOperation[] { operation });
 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -636,7 +636,7 @@ public class ModifierCorrectionSubProcessor {
 		if (binding instanceof IVariableBinding) {
 			binding= ((IVariableBinding) binding).getVariableDeclaration();
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertofinal_description, binding.getName());
+			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertofinal_description, BasicElementLabels.getJavaElementName(binding.getName()));
 			proposals.add(new ModifierChangeCorrectionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 5, image));
 		}
 	}

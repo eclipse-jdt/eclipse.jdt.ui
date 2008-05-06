@@ -110,6 +110,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
@@ -382,14 +383,14 @@ public class ExtractMethodRefactoring extends Refactoring {
 				if (parameter != other && other.getNewName().equals(parameter.getNewName())) {
 					result.addError(Messages.format(
 						RefactoringCoreMessages.ExtractMethodRefactoring_error_sameParameter, 
-						other.getNewName()));
+						BasicElementLabels.getJavaElementName(other.getNewName())));
 					return result;
 				}
 			}
 			if (parameter.isRenamed() && fUsedNames.contains(parameter.getNewName())) {
 				result.addError(Messages.format(
 					RefactoringCoreMessages.ExtractMethodRefactoring_error_nameInUse, 
-					parameter.getNewName()));
+					BasicElementLabels.getJavaElementName(parameter.getNewName())));
 				return result;
 			}
 		}
@@ -406,7 +407,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			if (info.isOldVarargs() && iter.hasNext()) {
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(
 					 RefactoringCoreMessages.ExtractMethodRefactoring_error_vararg_ordering,
-					 info.getOldName()));
+					 BasicElementLabels.getJavaElementName(info.getOldName())));
 			}
 		}
 		return new RefactoringStatus();
@@ -466,7 +467,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			ASTNode[] selectedNodes= fAnalyzer.getSelectedNodes();
 			fRewriter.setTargetSourceRangeComputer(new SelectionAwareSourceRangeComputer(selectedNodes, fCUnit.getBuffer(), fSelectionStart, fSelectionLength));
 			
-			TextEditGroup substituteDesc= new TextEditGroup(Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_substitute_with_call, fMethodName)); 
+			TextEditGroup substituteDesc= new TextEditGroup(Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_substitute_with_call, BasicElementLabels.getJavaElementName(fMethodName))); 
 			result.addTextEditGroup(substituteDesc);
 			
 			MethodDeclaration mm= createNewMethod(selectedNodes, fCUnit.findRecommendedLineSeparator(), substituteDesc);
@@ -489,7 +490,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 				ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(fLinkedProposalModel, fRewriter, mm.modifiers(), false);
 			}
 			
-			TextEditGroup insertDesc= new TextEditGroup(Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_add_method, fMethodName)); 
+			TextEditGroup insertDesc= new TextEditGroup(Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_add_method, BasicElementLabels.getJavaElementName(fMethodName))); 
 			result.addTextEditGroup(insertDesc);
 			
 			if (fDestination == fDestinations[0]) {
@@ -540,11 +541,11 @@ public class ExtractMethodRefactoring extends Refactoring {
 			method= node.resolveBinding();
 		}
 		final int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.JAR_REFACTORING | JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
-		final String description= Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_descriptor_description_short, fMethodName);
+		final String description= Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_descriptor_description_short, BasicElementLabels.getJavaElementName(fMethodName));
 		final String label= method != null ? BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED) : '{' + JavaElementLabels.ELLIPSIS_STRING + '}';
-		final String header= Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_descriptor_description, new String[] { getSignature(), label, BindingLabelProvider.getBindingLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED)});
+		final String header= Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_descriptor_description, new String[] { BasicElementLabels.getJavaElementName(getSignature()), label, BindingLabelProvider.getBindingLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED)});
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
-		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_name_pattern, fMethodName));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_name_pattern, BasicElementLabels.getJavaElementName(fMethodName)));
 		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_destination_pattern, BindingLabelProvider.getBindingLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 		String visibility= JdtFlags.getVisibilityString(fVisibility);
 		if ("".equals(visibility)) //$NON-NLS-1$
@@ -785,9 +786,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 			return;
 		String label= null;
 		if (numberOf == 1)
-			label= Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_duplicates_single, fMethodName); 
+			label= Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_duplicates_single, BasicElementLabels.getJavaElementName(fMethodName)); 
 		else
-			label= Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_duplicates_multi, fMethodName); 
+			label= Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_duplicates_multi, BasicElementLabels.getJavaElementName(fMethodName)); 
 		
 		TextEditGroup description= new TextEditGroup(label);
 		result.addTextEditGroup(description);

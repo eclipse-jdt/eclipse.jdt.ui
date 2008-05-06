@@ -208,7 +208,7 @@ public class Checks {
 		String newCUName= JavaModelUtil.getRenamedCUName(cu, newName);
 		IPath renamedResourcePath= cu.getParent().getPath().append(newCUName);
 		if (resourceExists(renamedResourcePath))
-			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.Checks_cu_name_used, newName));
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.Checks_cu_name_used, BasicElementLabels.getResourceName(newCUName)));
 		else
 			return new RefactoringStatus();
 	}
@@ -293,7 +293,7 @@ public class Checks {
 			}
 			if (methods[i].isMainMethod()) {
 				String msg= Messages.format(RefactoringCoreMessages.Checks_has_main,
-						methods[i].getDeclaringType().getFullyQualifiedName('.'));
+						JavaElementLabels.getElementLabel(methods[i].getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED));
 				result.addEntry(RefactoringStatus.WARNING, msg, JavaStatusContext.create(methods[i]), Corext.getPluginId(), RefactoringStatusCodes.MAIN_METHOD); 
 			}
 		}
@@ -316,7 +316,7 @@ public class Checks {
 		IMethodBinding method= org.eclipse.jdt.internal.corext.dom.Bindings.findMethodInType(type, methodName, parameters);
 		if (method != null) 
 			result.addError(Messages.format(RefactoringCoreMessages.Checks_methodName_exists,  
-				new Object[] {methodName, type.getName()}),
+				new Object[] {BasicElementLabels.getJavaElementName(methodName), BasicElementLabels.getJavaElementName(type.getName())}),
 				JavaStatusContext.create(method));
 		return result;
 	}
@@ -352,11 +352,11 @@ public class Checks {
 			ITypeBinding dc= method.getDeclaringClass();
 			if (returnTypeClash) {
 				result.addError(Messages.format(RefactoringCoreMessages.Checks_methodName_returnTypeClash, 
-					new Object[] {methodName, dc.getName()}),
+					new Object[] {BasicElementLabels.getJavaElementName(methodName), BasicElementLabels.getJavaElementName(dc.getName())}),
 					JavaStatusContext.create(method));
 			} else {
 				result.addError(Messages.format(RefactoringCoreMessages.Checks_methodName_overrides, 
-					new Object[] {methodName, dc.getName()}),
+					new Object[] {BasicElementLabels.getJavaElementName(methodName), BasicElementLabels.getJavaElementName(dc.getName())}),
 					JavaStatusContext.create(method));
 			}
 		}
@@ -597,7 +597,7 @@ public class Checks {
 	
 	public static void checkCompileErrorsInAffectedFile(RefactoringStatus result, IResource resource) throws JavaModelException {
 		if (hasCompileErrors(resource))
-			result.addWarning(Messages.format(RefactoringCoreMessages.Checks_cu_has_compile_errors, resource.getFullPath().makeRelative())); 
+			result.addWarning(Messages.format(RefactoringCoreMessages.Checks_cu_has_compile_errors, BasicElementLabels.getPathLabel(resource.getFullPath(), false))); 
 	}
 	
 	public static RefactoringStatus checkCompileErrorsInAffectedFiles(SearchResultGroup[] references, IResource declaring) throws JavaModelException {

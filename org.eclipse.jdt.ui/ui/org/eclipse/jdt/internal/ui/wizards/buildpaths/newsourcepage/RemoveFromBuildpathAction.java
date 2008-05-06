@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,6 +45,8 @@ import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.CPJavaProject;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -93,10 +95,10 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 		Object elem= getSelectedElements().get(0);
         
         if (elem instanceof IJavaProject) {
-            String name= ClasspathModifier.escapeSpecialChars(((IJavaElement)elem).getElementName());
+            String name= ClasspathModifier.escapeSpecialChars(JavaElementLabels.getElementLabel(((IJavaElement)elem), JavaElementLabels.ALL_DEFAULT));
         	return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_ProjectFromBuildpath, name);
         } else if (elem instanceof IPackageFragmentRoot) {
-            String name= ClasspathModifier.escapeSpecialChars(((IJavaElement)elem).getElementName());
+            String name= ClasspathModifier.escapeSpecialChars(JavaElementLabels.getElementLabel(((IJavaElement)elem), JavaElementLabels.ALL_DEFAULT));
         	return Messages.format(NewWizardMessages.PackageExplorerActionGroup_FormText_fromBuildpath, name);
         } else if (elem instanceof ClassPathContainer) {
         	return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_FromBuildpath;

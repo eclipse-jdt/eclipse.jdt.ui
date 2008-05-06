@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal implements ICompletionProposalExtension4 {
 
@@ -91,19 +92,16 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal i
 
 	private static StyledString getDisplayName(IField field, boolean isGetter) throws JavaModelException {
 		StyledString buf= new StyledString();
+		String fieldTypeName= Signature.toString(field.getTypeSignature());
+		String fieldNameLabel= BasicElementLabels.getJavaElementName(field.getElementName());
 		if (isGetter) {
-			buf.append(GetterSetterUtil.getGetterName(field, null));
-			buf.append("() : "); //$NON-NLS-1$
-			buf.append(Signature.toString(field.getTypeSignature()));
+			buf.append(BasicElementLabels.getJavaElementName(GetterSetterUtil.getGetterName(field, null) + "() : " + fieldTypeName)); //$NON-NLS-1$
 			buf.append(" - ", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
-			buf.append(Messages.format(JavaTextMessages.GetterSetterCompletionProposal_getter_label, field.getElementName()), StyledString.QUALIFIER_STYLER);
+			buf.append(Messages.format(JavaTextMessages.GetterSetterCompletionProposal_getter_label, fieldNameLabel), StyledString.QUALIFIER_STYLER);
 		} else {
-			buf.append(GetterSetterUtil.getSetterName(field, null));
-			buf.append('(').append(Signature.toString(field.getTypeSignature())).append(')');
-			buf.append(" : "); //$NON-NLS-1$
-			buf.append(Signature.toString(Signature.SIG_VOID));
+			buf.append(BasicElementLabels.getJavaElementName(GetterSetterUtil.getSetterName(field, null) + '(' + fieldTypeName + ") : void"  )); //$NON-NLS-1$
 			buf.append(" - ", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
-			buf.append(Messages.format(JavaTextMessages.GetterSetterCompletionProposal_setter_label, field.getElementName()), StyledString.QUALIFIER_STYLER);
+			buf.append(Messages.format(JavaTextMessages.GetterSetterCompletionProposal_setter_label, fieldNameLabel), StyledString.QUALIFIER_STYLER);
 		}
 		return buf;
 	}

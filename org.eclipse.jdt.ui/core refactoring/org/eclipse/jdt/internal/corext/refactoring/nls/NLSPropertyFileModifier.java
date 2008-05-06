@@ -170,7 +170,7 @@ public class NLSPropertyFileModifier {
 				KeyValuePair newPair= new KeyValuePair(key, value);
 				TextEdit edit= model.replace(initialPair, newPair);
 				if (edit != null) {
-					TextChangeCompatibility.addTextEdit(textChange, Messages.format(NLSMessages.NLSPropertyFileModifier_replace_entry, substitution.getKey()), edit); 
+					TextChangeCompatibility.addTextEdit(textChange, Messages.format(NLSMessages.NLSPropertyFileModifier_replace_entry, BasicElementLabels.getJavaElementName(substitution.getKey())), edit); 
 				}
 			}
 		}
@@ -232,7 +232,7 @@ public class NLSPropertyFileModifier {
 			if (doRemove(substitution, newKeyToSubstMap, oldKeyToSubstMap)) {
 				TextEdit edit= model.remove(substitution.getInitialKey());
 				if (edit != null) {
-					TextChangeCompatibility.addTextEdit(textChange, Messages.format(NLSMessages.NLSPropertyFileModifier_remove_entry, substitution.getInitialKey()), edit); 
+					TextChangeCompatibility.addTextEdit(textChange, Messages.format(NLSMessages.NLSPropertyFileModifier_remove_entry, BasicElementLabels.getJavaElementName(substitution.getInitialKey())), edit); 
 				}
 			}
 		}

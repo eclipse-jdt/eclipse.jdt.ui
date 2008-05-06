@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 class FocusOnSelectionAction extends Action {
 	private CallHierarchyViewPart fPart;
@@ -44,7 +45,7 @@ class FocusOnSelectionAction extends Action {
 		
 		if (members != null) {
 			if (members.length == 1) {
-				setText(Messages.format(CallHierarchyMessages.FocusOnSelectionAction_focusOn_text, members[0].getElementName()));
+				setText(Messages.format(CallHierarchyMessages.FocusOnSelectionAction_focusOn_text, BasicElementLabels.getJavaElementName(members[0].getElementName())));
 			} else {
 				setText(CallHierarchyMessages.FocusOnSelectionAction_focusOn_selected);
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,6 +68,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariableProcessor;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ProjectTemplateStore;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -532,14 +533,14 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 
 		if (file.isHidden()) {
 			String title= PreferencesMessages.CodeTemplateBlock_export_error_title; 
-			String message= Messages.format(PreferencesMessages.CodeTemplateBlock_export_error_hidden, file.getAbsolutePath()); 
+			String message= Messages.format(PreferencesMessages.CodeTemplateBlock_export_error_hidden, BasicElementLabels.getPathLabel(file)); 
 			MessageDialog.openError(getShell(), title, message);
 			return;
 		}
 		
 		if (file.exists() && !file.canWrite()) {
 			String title= PreferencesMessages.CodeTemplateBlock_export_error_title; 
-			String message= Messages.format(PreferencesMessages.CodeTemplateBlock_export_error_canNotWrite, file.getAbsolutePath()); 
+			String message= Messages.format(PreferencesMessages.CodeTemplateBlock_export_error_canNotWrite, BasicElementLabels.getPathLabel(file)); 
 			MessageDialog.openError(getShell(), title, message);
 			return;
 		}
@@ -568,7 +569,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	private boolean confirmOverwrite(File file) {
 		return MessageDialog.openQuestion(getShell(),
 			PreferencesMessages.CodeTemplateBlock_export_exists_title, 
-			Messages.format(PreferencesMessages.CodeTemplateBlock_export_exists_message, file.getAbsolutePath())); 
+			Messages.format(PreferencesMessages.CodeTemplateBlock_export_exists_message, BasicElementLabels.getPathLabel(file)));
 	}
 
 	public void performDefaults() {

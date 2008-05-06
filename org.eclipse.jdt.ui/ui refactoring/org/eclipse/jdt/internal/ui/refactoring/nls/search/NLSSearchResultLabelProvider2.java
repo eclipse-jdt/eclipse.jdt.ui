@@ -69,7 +69,7 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements I
 	
 	private StyledString getPropertiesName(IFile propertiesFile) {
 		String path= BasicElementLabels.getPathLabel(propertiesFile.getFullPath().removeLastSegments(1), false);
-		String propertiesName= BasicElementLabels.getFileName(propertiesFile.getName());
+		String propertiesName= BasicElementLabels.getResourceName(propertiesFile.getName());
 		return new StyledString(propertiesName).append(JavaElementLabels.CONCAT_STRING + path, StyledString.QUALIFIER_STYLER); 
 	}
 	

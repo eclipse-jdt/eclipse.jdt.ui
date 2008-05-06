@@ -208,12 +208,12 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		RefactoringStatus status= Checks.checkName(newName, JavaConventionsUtil.validateMethodName(newName, fMethod));
 		if (status.isOK() && Checks.startsWithUpperCase(newName))
 			status= RefactoringStatus.createWarningStatus(fIsComposite 
-					? Messages.format(RefactoringCoreMessages.Checks_method_names_lowercase2, new String[] { newName, getDeclaringTypeLabel()})
+					? Messages.format(RefactoringCoreMessages.Checks_method_names_lowercase2, new String[] { BasicElementLabels.getJavaElementName(newName), getDeclaringTypeLabel()})
 					: RefactoringCoreMessages.Checks_method_names_lowercase);
 		
 		if (Checks.isAlreadyNamed(fMethod, newName))
 			status.addFatalError(fIsComposite 
-					? Messages.format(RefactoringCoreMessages.RenameMethodRefactoring_same_name2, new String[] { newName, getDeclaringTypeLabel() } ) 
+					? Messages.format(RefactoringCoreMessages.RenameMethodRefactoring_same_name2, new String[] { BasicElementLabels.getJavaElementName(newName), getDeclaringTypeLabel() } ) 
 					: RefactoringCoreMessages.RenameMethodRefactoring_same_name,
 					JavaStatusContext.create(fMethod)); 
 		return status;
@@ -357,7 +357,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				}
 			}
 			
-			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , getCurrentElementName());
+			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(getCurrentElementName()));
 			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 			
 			initializeMethodsToRename(new SubProgressMonitor(pm, 1), binaryRefs);
@@ -474,7 +474,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			
 			result.merge(Checks.checkIfConstructorName(method, getNewElementName(), method.getDeclaringType().getElementName()));
 			
-			String[] msgData= new String[]{method.getElementName(), method.getDeclaringType().getFullyQualifiedName('.')};
+			String[] msgData= new String[]{BasicElementLabels.getJavaElementName(method.getElementName()), BasicElementLabels.getJavaElementName(method.getDeclaringType().getFullyQualifiedName('.'))};
 			if (! method.exists()){
 				result.addFatalError(Messages.format(RefactoringCoreMessages.RenameMethodRefactoring_not_in_model, msgData)); 
 				continue;
@@ -713,8 +713,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			} catch (JavaModelException exception) {
 				JavaPlugin.log(exception);
 			}
-			final String description= Messages.format(RefactoringCoreMessages.RenameMethodProcessor_descriptor_description_short, fMethod.getElementName());
-			final String header= Messages.format(RefactoringCoreMessages.RenameMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()});
+			final String description= Messages.format(RefactoringCoreMessages.RenameMethodProcessor_descriptor_description_short, BasicElementLabels.getJavaElementName(fMethod.getElementName()));
+			final String header= Messages.format(RefactoringCoreMessages.RenameMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), BasicElementLabels.getJavaElementName(getNewElementName())});
 			final String comment= new JDTRefactoringDescriptorComment(project, this, header).asString();
 			final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
 			descriptor.setProject(project);

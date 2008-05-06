@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -105,6 +105,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class ConvertAnonymousToNestedRefactoring extends Refactoring {
@@ -523,7 +524,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		final String header= Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_descriptor_description, labels);
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(projectName, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_original_pattern, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)));
-		comment.addSetting(Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_class_name_pattern, fClassName));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_class_name_pattern, BasicElementLabels.getJavaElementName(fClassName)));
 		String visibility= JdtFlags.getVisibilityString(fVisibility);
 		if (visibility.length() == 0)
 			visibility= RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_default_visibility;
@@ -756,7 +757,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		}
 	}
 
-    private void createFieldsForAccessedLocals(CompilationUnitRewrite rewrite, IVariableBinding[] varBindings, String[] fieldNames, List newBodyDeclarations) throws JavaModelException {
+    private void createFieldsForAccessedLocals(CompilationUnitRewrite rewrite, IVariableBinding[] varBindings, String[] fieldNames, List newBodyDeclarations) throws CoreException {
 		final ImportRewrite importRewrite= rewrite.getImportRewrite();
 		final ASTRewrite astRewrite= rewrite.getASTRewrite();
 		final AST ast= astRewrite.getAST();
@@ -771,14 +772,10 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			field.setType(importRewrite.addImport(varType, ast));
 			field.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.PRIVATE | Modifier.FINAL));
 			if (doAddComments()) {
-				try {
-					String string= CodeGeneration.getFieldComment(rewrite.getCu(), varType.getName(), fieldNames[i], StubUtility.getLineDelimiterUsed(fCu));
-					if (string != null) {
-						Javadoc javadoc= (Javadoc) astRewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
-						field.setJavadoc(javadoc);
-					}
-				} catch (CoreException exception) {
-					throw new JavaModelException(exception);
+				String string= CodeGeneration.getFieldComment(rewrite.getCu(), varType.getName(), fieldNames[i], StubUtility.getLineDelimiterUsed(fCu));
+				if (string != null) {
+					Javadoc javadoc= (Javadoc) astRewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
+					field.setJavadoc(javadoc);
 				}
 			}
 			

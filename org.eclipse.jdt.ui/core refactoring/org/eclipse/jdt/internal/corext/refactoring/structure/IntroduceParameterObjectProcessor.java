@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,6 +82,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor {
 
@@ -471,7 +472,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 	}
 
 	private String getMappingErrorMessage() {
-		return Messages.format(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_cannotalanyzemethod_mappingerror, new String[] {});
+		return RefactoringCoreMessages.IntroduceParameterObjectRefactoring_cannotalanyzemethod_mappingerror;
 	}
 
 	public String getFieldName(ParameterInfo element) {
@@ -544,11 +545,11 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 	private JDTRefactoringDescriptorComment createComment(String project) throws JavaModelException {
 		String header= Messages.format(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_descriptor_description, getOldMethodSignature());
 		JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
-		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_descriptor_object_class, fParameterObjectFactory.getClassName()));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_descriptor_object_class, BasicElementLabels.getJavaElementName(fParameterObjectFactory.getClassName())));
 		if (fCreateAsTopLevel) {
-			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_descriptor_package, fParameterObjectFactory.getPackage()));
+			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_descriptor_package, BasicElementLabels.getJavaElementName(fParameterObjectFactory.getPackage())));
 		} else {
-			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_descriptor_enclosing_type, fParameterObjectFactory.getEnclosingType()));
+			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_descriptor_enclosing_type, BasicElementLabels.getJavaElementName(fParameterObjectFactory.getEnclosingType())));
 		}
 		List infos= getParameterInfos();
 		List kept= new ArrayList();

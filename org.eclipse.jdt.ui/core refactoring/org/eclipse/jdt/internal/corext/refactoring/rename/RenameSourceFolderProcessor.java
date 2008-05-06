@@ -176,7 +176,7 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 			final String project= resource.getProject().getName();
 			final String newName= getNewElementName();
 			final String description= Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_descriptor_description_short, JavaElementLabels.getElementLabel(fSourceFolder, JavaElementLabels.ALL_DEFAULT));
-			final String header= Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_descriptor_description, new String[] { BasicElementLabels.getPathLabel(resource.getFullPath(), false), newName});
+			final String header= Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_descriptor_description, new String[] { BasicElementLabels.getPathLabel(resource.getFullPath(), false), BasicElementLabels.getJavaElementName(newName)});
 			final String comment= new JDTRefactoringDescriptorComment(project, this, header).asString();
 			final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_SOURCE_FOLDER);
 			descriptor.setProject(project);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -872,7 +872,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			} catch (JavaModelException exception) {
 				JavaPlugin.log(exception);
 			}
-			final String description= Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_descriptor_description_short, fField.getElementName());
+			final String description= Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_descriptor_description_short, JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_DEFAULT));
 			final String header= Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED)});
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			comment.addSetting(Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_original_pattern, JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED)));

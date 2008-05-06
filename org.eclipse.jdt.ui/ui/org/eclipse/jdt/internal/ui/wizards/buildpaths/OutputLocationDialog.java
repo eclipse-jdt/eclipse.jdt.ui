@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,6 +53,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
@@ -85,10 +86,10 @@ public class OutputLocationDialog extends StatusDialog {
 		OutputLocationAdapter adapter= new OutputLocationAdapter();
 
 		fUseDefault= new SelectionButtonDialogField(SWT.RADIO);
-		fUseDefault.setLabelText(Messages.format(NewWizardMessages.OutputLocationDialog_usedefault_label, defaultOutputFolder.makeRelative().toString())); 
+		fUseDefault.setLabelText(Messages.format(NewWizardMessages.OutputLocationDialog_usedefault_label, BasicElementLabels.getPathLabel(defaultOutputFolder, false))); 
 		fUseDefault.setDialogFieldListener(adapter);		
 
-		String label= Messages.format(NewWizardMessages.OutputLocationDialog_usespecific_label, entryToEdit.getPath().segment(0)); 
+		String label= Messages.format(NewWizardMessages.OutputLocationDialog_usespecific_label, BasicElementLabels.getResourceName(entryToEdit.getPath().segment(0))); 
 		fUseSpecific= new SelectionButtonDialogField(SWT.RADIO);
 		fUseSpecific.setLabelText(label);
 		fUseSpecific.setDialogFieldListener(adapter);		

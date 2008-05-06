@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -100,6 +100,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class ExtractClassRefactoring extends Refactoring {
 
@@ -122,7 +123,7 @@ public class ExtractClassRefactoring extends Refactoring {
 			IType type= fDescriptor.getType();
 			if (!fDescriptor.isCreateTopLevel()) {
 				if (type.getType(fDescriptor.getClassName()).exists()) {
-					status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_errror_nested_name_clash, new Object[] { fDescriptor.getClassName(), type.getElementName() }));
+					status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_errror_nested_name_clash, new Object[] { BasicElementLabels.getJavaElementName(fDescriptor.getClassName()), BasicElementLabels.getJavaElementName(type.getElementName()) }));
 				}
 			} else {
 				status.merge(checkPackageClass());
@@ -136,7 +137,7 @@ public class ExtractClassRefactoring extends Refactoring {
 			IPackageFragmentRoot ancestor= (IPackageFragmentRoot) type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 			IPackageFragment packageFragment= ancestor.getPackageFragment(fDescriptor.getPackage());
 			if (packageFragment.getCompilationUnit(fDescriptor.getClassName() + JavaModelUtil.DEFAULT_CU_SUFFIX).exists())
-				status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_toplevel_name_clash, new Object[] { fDescriptor.getClassName(), fDescriptor.getPackage() }));
+				status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_toplevel_name_clash, new Object[] { BasicElementLabels.getJavaElementName(fDescriptor.getClassName()), BasicElementLabels.getJavaElementName(fDescriptor.getPackage()) }));
 			return status;
 		}
 
@@ -160,7 +161,7 @@ public class ExtractClassRefactoring extends Refactoring {
 					Field field= fields[i];
 					if (parameterName.equals(field.getFieldName())){
 						if (!field.isCreateField())
-							status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_field_already_exists, parameterName));
+							status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_field_already_exists, BasicElementLabels.getJavaElementName(parameterName)));
 					}
 				}
 			}
@@ -174,7 +175,7 @@ public class ExtractClassRefactoring extends Refactoring {
 				Field field= fields[i];
 				if (field.isCreateField()) {
 					if (names.contains(field.getNewFieldName())) {
-						status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_duplicate_field_name, field.getNewFieldName()));
+						status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_duplicate_field_name, BasicElementLabels.getJavaElementName(field.getNewFieldName())));
 					}
 					names.add(field.getNewFieldName());
 					status.merge(Checks.checkFieldName(field.getNewFieldName(), fDescriptor.getType()));
@@ -338,14 +339,14 @@ public class ExtractClassRefactoring extends Refactoring {
 					IField field= fi.ifield;
 					int flags= field.getFlags();
 					if (Flags.isStatic(flags)) {
-						result.addFatalError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_field_is_static, field.getElementName()), JavaStatusContext.create(field));
+						result.addFatalError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_field_is_static, BasicElementLabels.getJavaElementName(field.getElementName())), JavaStatusContext.create(field));
 						return result;
 					}
 					if (Flags.isTransient(flags)) {
-						result.addWarning(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_warning_field_is_transient, field.getElementName()), JavaStatusContext.create(field));
+						result.addWarning(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_warning_field_is_transient, BasicElementLabels.getJavaElementName(field.getElementName())), JavaStatusContext.create(field));
 					}
 					if (Flags.isVolatile(flags)) {
-						result.addWarning(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_warning_field_is_volatile, field.getElementName()), JavaStatusContext.create(field));
+						result.addWarning(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_warning_field_is_volatile, BasicElementLabels.getJavaElementName(field.getElementName())), JavaStatusContext.create(field));
 					}
 				}
 			}
@@ -391,19 +392,20 @@ public class ExtractClassRefactoring extends Refactoring {
 	}
 
 	private String createComment() {
-		String header= Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_change_comment_header, new Object[] { fDescriptor.getClassName(), fDescriptor.getType().getElementName() });
+		Object[] keys= new Object[] { BasicElementLabels.getJavaElementName(fDescriptor.getClassName()), BasicElementLabels.getJavaElementName(fDescriptor.getType().getElementName()) };
+		String header= Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_change_comment_header, keys);
 		JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(fDescriptor.getType().getJavaProject().getElementName(), this, header);
-		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_extracted_class, fDescriptor.getClassName()));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_extracted_class, BasicElementLabels.getJavaElementName(fDescriptor.getClassName())));
 
 		if (fDescriptor.isCreateTopLevel())
-			comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_package, fDescriptor.getPackage()));
+			comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_package, BasicElementLabels.getJavaElementName(fDescriptor.getPackage())));
 
 		Field[] fields= fDescriptor.getFields();
 		ArrayList strings= new ArrayList();
 		for (int i= 0; i < fields.length; i++) {
 			Field field= fields[i];
 			if (field.isCreateField()) {
-				strings.add(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_field_renamed, new Object[] { field.getFieldName(), field.getNewFieldName() }));
+				strings.add(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_field_renamed, new Object[] { BasicElementLabels.getJavaElementName(field.getFieldName()), BasicElementLabels.getJavaElementName(field.getNewFieldName()) }));
 			}
 		}
 		String fieldString= JDTRefactoringDescriptorComment.createCompositeSetting(RefactoringCoreMessages.ExtractClassRefactoring_comment_move_field, (String[]) strings.toArray(new String[strings
@@ -413,7 +415,7 @@ public class ExtractClassRefactoring extends Refactoring {
 		if (fDescriptor.isCreateGetterSetter())
 			comment.addSetting(RefactoringCoreMessages.ExtractClassRefactoring_comment_getters);
 
-		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_fieldname, fDescriptor.getFieldName()));
+		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_fieldname, BasicElementLabels.getJavaElementName(fDescriptor.getFieldName())));
 		return comment.asString();
 	}
 
@@ -724,17 +726,17 @@ public class ExtractClassRefactoring extends Refactoring {
 					IVariableBinding binding= vdf.resolveBinding();
 					ITypeRoot typeRoot= fBaseCURewrite.getCu();
 					if (binding == null || binding.getType() == null){
-						status.addFatalError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_fatal_error_cannot_resolve_binding, pi.name), JavaStatusContext.create(typeRoot, vdf));
+						status.addFatalError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_fatal_error_cannot_resolve_binding, BasicElementLabels.getJavaElementName(pi.name)), JavaStatusContext.create(typeRoot, vdf));
 					} else {
 						ITypeBinding typeBinding= binding.getType();
 						if (Modifier.isPrivate(typeBinding.getDeclaredModifiers())){
-							status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_referencing_private_class, typeBinding.getName()), JavaStatusContext.create(typeRoot, vdf));
+							status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_referencing_private_class, BasicElementLabels.getJavaElementName(typeBinding.getName())), JavaStatusContext.create(typeRoot, vdf));
 						} else if (Modifier.isProtected(typeBinding.getDeclaredModifiers())){
 							ITypeBinding declaringClass= typeBinding.getDeclaringClass();
 							if (declaringClass != null) {
 								IPackageBinding package1= declaringClass.getPackage();
 								if (package1 != null && !fDescriptor.getPackage().equals(package1.getName())){
-									status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_referencing_protected_class, new String[] {typeBinding.getName(),fDescriptor.getPackage()}), JavaStatusContext.create(typeRoot, vdf));
+									status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_referencing_protected_class, new String[] {BasicElementLabels.getJavaElementName(typeBinding.getName()), BasicElementLabels.getJavaElementName(fDescriptor.getPackage())}), JavaStatusContext.create(typeRoot, vdf));
 								}
 							} 
 						}

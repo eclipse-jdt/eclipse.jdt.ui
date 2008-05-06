@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,6 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
@@ -82,9 +81,8 @@ public final class SerialVersionSubProcessor {
 	 *        the problem location
 	 * @param proposals
 	 *        the proposal collection to extend
-	 * @throws CoreException 
 	 */
-	public static final void getSerialVersionProposals(final IInvocationContext context, final IProblemLocation location, final Collection proposals) throws CoreException {
+	public static final void getSerialVersionProposals(final IInvocationContext context, final IProblemLocation location, final Collection proposals) {
 
 		Assert.isNotNull(context);
 		Assert.isNotNull(location);

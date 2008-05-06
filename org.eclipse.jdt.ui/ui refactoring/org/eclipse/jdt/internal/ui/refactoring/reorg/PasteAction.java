@@ -657,7 +657,7 @@ public class PasteAction extends SelectionDispatchAction{
 							ICompilationUnit cu= destinationPack.getCompilationUnit(cuName);
 							boolean alreadyExists= cu.exists();
 							if (alreadyExists) {
-								String msg= Messages.format(ReorgMessages.PasteAction_TextPaster_exists, new Object[] { BasicElementLabels.getFileName(cuName)});
+								String msg= Messages.format(ReorgMessages.PasteAction_TextPaster_exists, new Object[] { BasicElementLabels.getResourceName(cuName)});
 								boolean overwrite= confirmQuery.confirm(msg);
 								if (! overwrite)
 									return null;

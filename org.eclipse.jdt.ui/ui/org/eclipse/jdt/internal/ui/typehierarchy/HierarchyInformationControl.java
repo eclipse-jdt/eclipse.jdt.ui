@@ -329,7 +329,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	
 	private String getHeaderLabel(IJavaElement input) {
 		if (input instanceof IMethod) {
-			String[] args= { input.getParent().getElementName(), JavaElementLabels.getElementLabel(input, JavaElementLabels.ALL_DEFAULT) };
+			String[] args= { JavaElementLabels.getElementLabel(input.getParent(), JavaElementLabels.ALL_DEFAULT), JavaElementLabels.getElementLabel(input, JavaElementLabels.ALL_DEFAULT) };
 			return Messages.format(TypeHierarchyMessages.HierarchyInformationControl_methodhierarchy_label, args); 
 		} else if (input != null) {
 			String arg= JavaElementLabels.getElementLabel(input, JavaElementLabels.DEFAULT_QUALIFIED);

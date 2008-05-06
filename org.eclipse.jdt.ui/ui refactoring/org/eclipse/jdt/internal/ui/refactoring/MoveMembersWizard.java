@@ -64,6 +64,7 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssis
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class MoveMembersWizard extends RefactoringWizard {
 
@@ -294,7 +295,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 	
 		private static IStatus validateDestinationType(IType type, String typeName){
 			if (type == null || ! type.exists())
-				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, Messages.format(RefactoringMessages.MoveMembersInputPage_not_found, typeName), null); 
+				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, Messages.format(RefactoringMessages.MoveMembersInputPage_not_found, BasicElementLabels.getJavaElementName(typeName)), null); 
 			if (type.isBinary())
 				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, RefactoringMessages.MoveMembersInputPage_no_binary, null); 
 			return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$

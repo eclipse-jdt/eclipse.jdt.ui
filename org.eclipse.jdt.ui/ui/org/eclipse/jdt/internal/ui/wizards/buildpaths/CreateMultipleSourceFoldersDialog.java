@@ -55,6 +55,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.AbstractOpenWizardAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 
@@ -240,7 +241,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 		if (outputFolder.segmentCount() == 1) {
 			String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
 			newOutputFolder= outputFolder.append(outputFolderName);
-			message= Messages.format(NewWizardMessages.SourceContainerWorkbookPage_ChangeOutputLocationDialog_project_and_output_message, newOutputFolder); 
+			message= Messages.format(NewWizardMessages.SourceContainerWorkbookPage_ChangeOutputLocationDialog_project_and_output_message, BasicElementLabels.getPathLabel(newOutputFolder, false)); 
 		} else {
 			message= NewWizardMessages.SourceContainerWorkbookPage_ChangeOutputLocationDialog_project_message; 
 		}

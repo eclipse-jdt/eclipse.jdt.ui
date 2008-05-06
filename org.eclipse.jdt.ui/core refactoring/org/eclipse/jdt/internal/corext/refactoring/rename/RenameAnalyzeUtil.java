@@ -366,7 +366,7 @@ class RenameAnalyzeUtil {
 		RefactoringStatusContext context= JavaStatusContext.create(cu, range);
 		String message= Messages.format(
 				RefactoringCoreMessages.RenameAnalyzeUtil_reference_shadowed, 
-				new String[] {BasicElementLabels.getFileName(cu), newElementName});
+				new String[] {BasicElementLabels.getFileName(cu), BasicElementLabels.getJavaElementName(newElementName)});
 		result.addError(message, context);
 	}
 

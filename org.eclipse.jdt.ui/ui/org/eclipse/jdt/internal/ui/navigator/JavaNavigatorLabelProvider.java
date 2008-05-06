@@ -178,10 +178,10 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyled
 	private String formatResourceMessage(IResource element) {
 		IContainer parent = element.getParent();
 		if (parent != null && parent.getType() != IResource.ROOT)
-			return BasicElementLabels.getFileName(element.getName()) + JavaElementLabels.CONCAT_STRING
+			return BasicElementLabels.getResourceName(element.getName()) + JavaElementLabels.CONCAT_STRING
 					+ BasicElementLabels.getPathLabel(parent.getFullPath(), false);
 		else
-			return BasicElementLabels.getFileName(element.getName());
+			return BasicElementLabels.getResourceName(element.getName());
 	}
 	
 	public void restoreState(IMemento memento) { 

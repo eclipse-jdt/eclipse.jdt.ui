@@ -306,7 +306,7 @@ public class LinkFolderDialog extends StatusDialog {
             
             IPath path = new Path(name);
             if (fContainer.findMember(path) != null) {
-            	return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewFolderDialog_folderNameEmpty_alreadyExists, name)); 
+            	return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewFolderDialog_folderNameEmpty_alreadyExists, BasicElementLabels.getResourceName(name))); 
             }
             return nameStatus;
         }

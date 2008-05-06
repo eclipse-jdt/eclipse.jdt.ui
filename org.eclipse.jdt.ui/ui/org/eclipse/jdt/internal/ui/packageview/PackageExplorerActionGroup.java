@@ -81,6 +81,7 @@ import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.IWorkbenchCommandIds;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.GenerateBuildPathActionGroup;
 import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
 
@@ -411,7 +412,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 			
 			String workingSetLabel= null;
 			if (workingSet != null)
-				workingSetLabel= workingSet.getLabel();
+				workingSetLabel= BasicElementLabels.getWorkingSetLabel(workingSet);
 			fPart.setWorkingSetLabel(workingSetLabel);
 			fPart.updateTitle();
 	

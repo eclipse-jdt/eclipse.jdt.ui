@@ -21,6 +21,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 /**
  * Utility methods for Runnable JAR Import/Export.
  */
@@ -36,7 +38,7 @@ public final class FatJarPackagerUtil {
 		if (parent == null)
 			return false;
 		
-		return queryDialog(parent, FatJarPackagerMessages.FatJarPackage_confirmCreate_title, Messages.format(FatJarPackagerMessages.FatJarPackageAntScript_confirmCreate_message, directory.toString()));
+		return queryDialog(parent, FatJarPackagerMessages.FatJarPackage_confirmCreate_title, Messages.format(FatJarPackagerMessages.FatJarPackageAntScript_confirmCreate_message, BasicElementLabels.getPathLabel(directory)));
 	}
 
 	private static boolean queryDialog(final Shell parent, final String title, final String message) {

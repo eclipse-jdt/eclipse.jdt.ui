@@ -481,7 +481,7 @@ public class JavaElementLabels {
 	public static StyledString getStyledElementLabel(IJavaElement element, long flags) {
 		StyledString result= new StyledString();
 		getElementLabel(element, flags, result);
-		return Strings.markLTR(result);
+		return Strings.markLTR(result, "<>(),?:{}"); //$NON-NLS-1$
 	}
 
 	/**

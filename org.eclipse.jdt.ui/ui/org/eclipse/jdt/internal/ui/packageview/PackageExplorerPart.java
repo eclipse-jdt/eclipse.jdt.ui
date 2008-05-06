@@ -822,7 +822,7 @@ public class PackageExplorerPart extends ViewPart
 					index--;
 				}
 				if (ws != null) {
-					return Messages.format(PackagesMessages.PackageExplorer_toolTip3, new String[] {ws.getLabel() , result});
+					return Messages.format(PackagesMessages.PackageExplorer_toolTip3, new String[] { BasicElementLabels.getWorkingSetLabel(ws) , result});
 				} else {
 					return result;
 				}
@@ -1415,9 +1415,9 @@ public class PackageExplorerPart extends ViewPart
 		    	String message;
 		    	if (element instanceof IJavaElement) {
 		    		String elementLabel= JavaElementLabels.getElementLabel((IJavaElement)element, JavaElementLabels.ALL_DEFAULT);
-		    		message= Messages.format(PackagesMessages.PackageExplorerPart_notFoundSepcific, new String[] {elementLabel, workingSet.getLabel()});
+		    		message= Messages.format(PackagesMessages.PackageExplorerPart_notFoundSepcific, new String[] {elementLabel, BasicElementLabels.getWorkingSetLabel(workingSet)});
 		    	} else {
-		    		message= Messages.format(PackagesMessages.PackageExplorer_notFound, workingSet.getLabel());
+		    		message= Messages.format(PackagesMessages.PackageExplorer_notFound, BasicElementLabels.getWorkingSetLabel(workingSet));
 		    	}
 		        if (MessageDialog.openQuestion(getSite().getShell(), PackagesMessages.PackageExplorer_filteredDialog_title, message)) {
 		            workingSetGroup.setWorkingSet(null, true);

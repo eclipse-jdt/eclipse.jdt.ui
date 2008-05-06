@@ -78,7 +78,7 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 					return container.getLabel() + JavaElementLabels.CONCAT_STRING + container.getJavaProject().getElementName();
 				} else if (elem instanceof IJarEntryResource) {
 					IJarEntryResource jarEntryResource= (IJarEntryResource) elem;
-					StringBuffer buf= new StringBuffer(BasicElementLabels.getFileName(jarEntryResource.getName()));
+					StringBuffer buf= new StringBuffer(BasicElementLabels.getResourceName(jarEntryResource.getName()));
 					buf.append(JavaElementLabels.CONCAT_STRING);
 					IPath fullPath= jarEntryResource.getFullPath();
 					if (fullPath.segmentCount() > 1) {
@@ -105,9 +105,9 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 	private String formatResourceMessage(IResource element) {
 		IContainer parent= element.getParent();
 		if (parent != null && parent.getType() != IResource.ROOT)
-			return BasicElementLabels.getFileName(element.getName()) + JavaElementLabels.CONCAT_STRING + BasicElementLabels.getPathLabel(parent.getFullPath(), false);
+			return BasicElementLabels.getResourceName(element.getName()) + JavaElementLabels.CONCAT_STRING + BasicElementLabels.getPathLabel(parent.getFullPath(), false);
 		else
-			return BasicElementLabels.getFileName(element.getName());
+			return BasicElementLabels.getResourceName(element.getName());
 	}	
 
 }

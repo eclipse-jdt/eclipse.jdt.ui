@@ -28,6 +28,7 @@ import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 
@@ -336,7 +337,7 @@ public class CompletionProposalLabelProvider {
 
 		String declaringType= extractDeclaringTypeFQN(methodProposal);
 		declaringType= Signature.getSimpleName(declaringType);
-		nameBuffer.append(Messages.format(JavaTextMessages.ResultCollector_overridingmethod, new String(declaringType)), StyledString.QUALIFIER_STYLER);
+		nameBuffer.append(Messages.format(JavaTextMessages.ResultCollector_overridingmethod, BasicElementLabels.getJavaElementName(declaringType)), StyledString.QUALIFIER_STYLER);
 
 		return nameBuffer;
 	}

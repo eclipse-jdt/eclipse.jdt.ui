@@ -143,7 +143,7 @@ public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChang
 	}
 
 	public String getName() {
-		String cuName= BasicElementLabels.getFileName(fOldCu.getElementName());
+		String cuName= BasicElementLabels.getResourceName(fOldCu.getElementName());
 		String cuContainerName= BasicElementLabels.getPathLabel(fOldCu.getParent().getPath(), false);
 		return Messages.format(RefactoringCoreMessages.CreateCopyOfCompilationUnitChange_create_copy, new String[] { cuName, cuContainerName});
 	}

@@ -299,7 +299,7 @@ public class CPListLabelProvider extends LabelProvider {
 	private String getPathString(IPath path, boolean isExternal) {
 		if (ArchiveFileFilter.isArchivePath(path, true)) {
 			String appended= BasicElementLabels.getPathLabel(path.removeLastSegments(1), isExternal);
-			String lastSegment= BasicElementLabels.getFileName(path.lastSegment());
+			String lastSegment= BasicElementLabels.getResourceName(path.lastSegment());
 			return Messages.format(NewWizardMessages.CPListLabelProvider_twopart, new String[] { lastSegment, appended }); 
 		} else {
 			return BasicElementLabels.getPathLabel(path, isExternal);

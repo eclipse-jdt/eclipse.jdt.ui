@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,11 +29,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 
@@ -81,14 +83,14 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 		try {
 			IPackageDeclaration[] decls= cu.getPackageDeclarations();
 			if (parentPack.isDefaultPackage() && decls.length > 0) {
-				return Messages.format(CorrectionMessages.CorrectPackageDeclarationProposal_remove_description, decls[0].getElementName());
+				return Messages.format(CorrectionMessages.CorrectPackageDeclarationProposal_remove_description, BasicElementLabels.getJavaElementName(decls[0].getElementName()));
 			}
 			if (!parentPack.isDefaultPackage() && decls.length == 0) {
-				return (Messages.format(CorrectionMessages.CorrectPackageDeclarationProposal_add_description,  parentPack.getElementName()));
+				return (Messages.format(CorrectionMessages.CorrectPackageDeclarationProposal_add_description,  JavaElementLabels.getElementLabel(parentPack, JavaElementLabels.ALL_DEFAULT)));
 			}
 		} catch(JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-		return (Messages.format(CorrectionMessages.CorrectPackageDeclarationProposal_change_description, parentPack.getElementName()));
+		return (Messages.format(CorrectionMessages.CorrectPackageDeclarationProposal_change_description, JavaElementLabels.getElementLabel(parentPack, JavaElementLabels.ALL_DEFAULT)));
 	}
 }

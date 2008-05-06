@@ -149,6 +149,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
@@ -1188,11 +1189,11 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			for (int index= 0; index < methods.length; index++) {
 				method= methods[index];
 				if (method.getElementName().equals(fMethodName) && method.getParameterTypes().length == fMethod.getParameterTypes().length - 1)
-					status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_method_already_exists, new String[] { fMethodName, fTargetType.getElementName() }), JavaStatusContext.create(method)));
+					status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_method_already_exists, new String[] { BasicElementLabels.getJavaElementName(fMethodName), BasicElementLabels.getJavaElementName(fTargetType.getElementName()) }), JavaStatusContext.create(method)));
 				monitor.worked(1);
 			}
 			if (fMethodName.equals(fTargetType.getElementName()))
-				status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_method_type_clash, fMethodName), JavaStatusContext.create(fTargetType)));
+				status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_method_type_clash, BasicElementLabels.getJavaElementName(fMethodName)), JavaStatusContext.create(fTargetType)));
 		} finally {
 			monitor.done();
 		}
@@ -1484,7 +1485,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			SearchPattern pattern= SearchPattern.createPattern(fMethod, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 			IJavaSearchScope scope= RefactoringScopeFactory.create(fMethod, true, false);
 			
-			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , fMethod.getElementName());
+			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(fMethod.getElementName()));
 			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 			CollectingSearchRequestor requestor= new CollectingSearchRequestor(binaryRefs);
 			SearchResultGroup[] result= RefactoringSearchEngine.search(pattern, scope, requestor, new SubProgressMonitor(monitor, 1), status);
@@ -1710,14 +1711,14 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			} catch (JavaModelException exception) {
 				JavaPlugin.log(exception);
 			}
-			final String description= Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_descriptor_description_short, fMethod.getElementName());
+			final String description= Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_descriptor_description_short, BasicElementLabels.getJavaElementName(fMethod.getElementName()));
 			final String header= Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fTarget, JavaElementLabels.ALL_FULLY_QUALIFIED) });
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_moved_element_pattern, RefactoringCoreMessages.JavaRefactoringDescriptor_not_available));
 			comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_target_element_pattern, BindingLabelProvider.getBindingLabel(fTarget, JavaElementLabels.ALL_FULLY_QUALIFIED)));
-			comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_method_name_pattern, getMethodName()));
+			comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_method_name_pattern, BasicElementLabels.getJavaElementName(getMethodName())));
 			if (needsTargetNode())
-				comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_parameter_name_pattern, getTargetName()));
+				comment.addSetting(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_parameter_name_pattern, BasicElementLabels.getJavaElementName(getTargetName())));
 			final MoveMethodDescriptor descriptor= new MoveMethodDescriptor( project, description, comment.asString(), arguments, flags);
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fMethod));
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fMethodName);
@@ -1777,7 +1778,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				createMethodImports(targetRewrite, declaration, new SubProgressMonitor(monitor, 1), status);
 			boolean removable= false;
 			if (fInline) {
-				String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , getMethod().getElementName());
+				String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(getMethod().getElementName()));
 				ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 				removable= createMethodDelegator(rewrites, declaration, references, adjustor.getAdjustments(), target, binaryRefs, status, new SubProgressMonitor(monitor, 1));
 				binaryRefs.addErrorIfNecessary(status);
@@ -2339,7 +2340,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 							for (int offset= 0; offset < matches.length; offset++) {
 								match= matches[offset];
 								if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
-									status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_inaccurate, unit.getCorrespondingResource().getName()), JavaStatusContext.create(unit, new SourceRange(match.getOffset(), match.getLength()))));
+									status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_inaccurate, BasicElementLabels.getFileName(unit)), JavaStatusContext.create(unit, new SourceRange(match.getOffset(), match.getLength()))));
 									result= false;
 								} else if (!createInlinedMethodInvocation(rewrite, declaration, match, adjustments, target, status))
 									result= false;
@@ -2446,33 +2447,29 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		try {
 			monitor.beginTask("", groups.length); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_creating);
-			try {
-				SearchMatch[] matches= null;
-				IJavaElement element= null;
-				ICompilationUnit unit= null;
-				CompilationUnitRewrite rewrite= null;
-				SearchResultGroup group= null;
-				for (int index= 0; index < groups.length; index++) {
-					group= groups[index];
-					element= JavaCore.create(group.getResource());
-					unit= group.getCompilationUnit();
-					if (element instanceof ICompilationUnit) {
-						matches= group.getSearchResults();
-						unit= (ICompilationUnit) element;
-						rewrite= getCompilationUnitRewrite(rewrites, unit);
-						SearchMatch match= null;
-						for (int offset= 0; offset < matches.length; offset++) {
-							match= matches[offset];
-							if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
-								status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_inaccurate, unit.getCorrespondingResource().getName()), JavaStatusContext.create(unit, new SourceRange(match.getOffset(), match.getLength()))));
-							} else
-								createMethodJavadocReference(rewrite, declaration, match, target, status);
-						}
+			SearchMatch[] matches= null;
+			IJavaElement element= null;
+			ICompilationUnit unit= null;
+			CompilationUnitRewrite rewrite= null;
+			SearchResultGroup group= null;
+			for (int index= 0; index < groups.length; index++) {
+				group= groups[index];
+				element= JavaCore.create(group.getResource());
+				unit= group.getCompilationUnit();
+				if (element instanceof ICompilationUnit) {
+					matches= group.getSearchResults();
+					unit= (ICompilationUnit) element;
+					rewrite= getCompilationUnitRewrite(rewrites, unit);
+					SearchMatch match= null;
+					for (int offset= 0; offset < matches.length; offset++) {
+						match= matches[offset];
+						if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
+							status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_inaccurate, BasicElementLabels.getFileName(unit)), JavaStatusContext.create(unit, new SourceRange(match.getOffset(), match.getLength()))));
+						} else
+							createMethodJavadocReference(rewrite, declaration, match, target, status);
 					}
-					monitor.worked(1);
 				}
-			} catch (CoreException exception) {
-				status.merge(RefactoringStatus.create(exception.getStatus()));
+				monitor.worked(1);
 			}
 		} finally {
 			monitor.done();
@@ -2575,7 +2572,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 							for (int offset= 0; offset < parameters.length; offset++) {
 								if (parameters[offset].getName().equals(bindings[index].getName())) {
 									rewriter.remove((ASTNode) rewriter.getOriginalList().get(offset), null);
-									status.addWarning(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_present_type_parameter_warning, new Object[] { parameters[offset].getName(), BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED) }), JavaStatusContext.create(fMethod));
+									status.addWarning(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_present_type_parameter_warning, new Object[] { BasicElementLabels.getJavaElementName(parameters[offset].getName()), BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED) }), JavaStatusContext.create(fMethod));
 								}
 							}
 						}

@@ -126,7 +126,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 		public final boolean visit(final AnnotationTypeDeclaration node) {
 			final String name= node.getName().getIdentifier();
 			if (name.equals(getNewElementName())) {
-				fStatus.addError(Messages.format(RefactoringCoreMessages.RenameTypeParameterRefactoring_type_parameter_inner_class_clash, new String[] { name}), JavaStatusContext.create(fTypeParameter.getDeclaringMember().getCompilationUnit(), new SourceRange(node)));
+				fStatus.addError(Messages.format(RefactoringCoreMessages.RenameTypeParameterRefactoring_type_parameter_inner_class_clash, BasicElementLabels.getJavaElementName(name)), JavaStatusContext.create(fTypeParameter.getDeclaringMember().getCompilationUnit(), new SourceRange(node)));
 				return false;
 			}
 			return true;
@@ -135,7 +135,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 		public final boolean visit(final EnumDeclaration node) {
 			final String name= node.getName().getIdentifier();
 			if (name.equals(getNewElementName())) {
-				fStatus.addError(Messages.format(RefactoringCoreMessages.RenameTypeParameterRefactoring_type_parameter_inner_class_clash, new String[] { name}), JavaStatusContext.create(fTypeParameter.getDeclaringMember().getCompilationUnit(), new SourceRange(node)));
+				fStatus.addError(Messages.format(RefactoringCoreMessages.RenameTypeParameterRefactoring_type_parameter_inner_class_clash, BasicElementLabels.getJavaElementName(name)), JavaStatusContext.create(fTypeParameter.getDeclaringMember().getCompilationUnit(), new SourceRange(node)));
 				return false;
 			}
 			return true;
@@ -277,8 +277,8 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 				IJavaProject javaProject= fTypeParameter.getJavaProject();
 				if (javaProject != null)
 					project= javaProject.getElementName();
-				final String description= Messages.format(RefactoringCoreMessages.RenameTypeParameterProcessor_descriptor_description_short, fTypeParameter.getElementName());
-				final String header= Messages.format(RefactoringCoreMessages.RenameTypeParameterProcessor_descriptor_description, new String[] { fTypeParameter.getElementName(), JavaElementLabels.getElementLabel(fTypeParameter.getDeclaringMember(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()});
+				final String description= Messages.format(RefactoringCoreMessages.RenameTypeParameterProcessor_descriptor_description_short, BasicElementLabels.getJavaElementName(fTypeParameter.getElementName()));
+				final String header= Messages.format(RefactoringCoreMessages.RenameTypeParameterProcessor_descriptor_description, new String[] { BasicElementLabels.getJavaElementName(fTypeParameter.getElementName()), JavaElementLabels.getElementLabel(fTypeParameter.getDeclaringMember(), JavaElementLabels.ALL_FULLY_QUALIFIED), BasicElementLabels.getJavaElementName(getNewElementName())});
 				final String comment= new JDTRefactoringDescriptorComment(project, this, header).asString();
 				final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_TYPE_PARAMETER);
 				descriptor.setProject(project);

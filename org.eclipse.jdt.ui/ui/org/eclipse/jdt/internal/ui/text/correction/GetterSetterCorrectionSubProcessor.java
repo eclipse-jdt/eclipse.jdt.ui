@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,7 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
@@ -74,6 +75,7 @@ import org.eclipse.jdt.internal.ui.refactoring.sef.SelfEncapsulateFieldWizard;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class GetterSetterCorrectionSubProcessor {
 
@@ -138,7 +140,7 @@ public class GetterSetterCorrectionSubProcessor {
 		
 		
 		private static String getDescription(IField field) {
-			return Messages.format(CorrectionMessages.GetterSetterCorrectionSubProcessor_creategetterunsingencapsulatefield_description, field.getElementName());
+			return Messages.format(CorrectionMessages.GetterSetterCorrectionSubProcessor_creategetterunsingencapsulatefield_description, BasicElementLabels.getJavaElementName(field.getElementName()));
 		}
 		
 		public String getAdditionalProposalInfo() {
@@ -267,7 +269,7 @@ public class GetterSetterCorrectionSubProcessor {
 			Expression mi= createMethodInvocation(context, method, null);
 			context.astRewrite.replace(context.accessNode, mi, null);
 
-			String label= Messages.format(CorrectionMessages.GetterSetterCorrectionSubProcessor_replacewithgetter_description, context.accessNode);
+			String label= Messages.format(CorrectionMessages.GetterSetterCorrectionSubProcessor_replacewithgetter_description, BasicElementLabels.getJavaCodeString(ASTNodes.asString(context.accessNode)));
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.compilationUnit, context.astRewrite, relevance, image);
 			return proposal;
@@ -336,7 +338,7 @@ public class GetterSetterCorrectionSubProcessor {
 			Expression mi= createMethodInvocation(context, method, assignedValue);
 			context.astRewrite.replace(context.accessNode.getParent(), mi, null);
 
-			String label= Messages.format(CorrectionMessages.GetterSetterCorrectionSubProcessor_replacewithsetter_description, context.accessNode);
+			String label= Messages.format(CorrectionMessages.GetterSetterCorrectionSubProcessor_replacewithsetter_description, BasicElementLabels.getJavaCodeString(ASTNodes.asString(context.accessNode)));
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.compilationUnit, context.astRewrite, relevance, image);
 			return proposal;

@@ -498,7 +498,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 				IPackageFragment pack = packsToRename[i];
 				String newPack= newName + pack.getElementName().substring(currentName.length());
 				if (! isAncestorPackage(currentName, newPack) && ! isPackageNameOkInRoot(newPack, getPackageFragmentRoot())) {
-					String msg= Messages.format(RefactoringCoreMessages.RenamePackageProcessor_subpackage_collides, newPack);
+					String msg= Messages.format(RefactoringCoreMessages.RenamePackageProcessor_subpackage_collides, BasicElementLabels.getJavaElementName(newPack));
 					return RefactoringStatus.createFatalErrorStatus(msg);
 				}
 			}

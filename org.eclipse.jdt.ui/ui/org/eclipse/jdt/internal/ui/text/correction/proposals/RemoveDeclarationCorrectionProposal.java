@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,6 +53,7 @@ import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionProposal {
 
@@ -108,7 +109,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 
 	public String getName() {
 		IBinding binding= fName.resolveBinding();
-		String name= fName.getIdentifier();
+		String name= BasicElementLabels.getJavaElementName(fName.getIdentifier());
 		switch (binding.getKind()) {
 			case IBinding.TYPE:
 				return Messages.format(CorrectionMessages.RemoveDeclarationCorrectionProposal_removeunusedtype_description, name);

@@ -389,8 +389,8 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 		if (resource != null && resource.isLinked()) {
 			final IProject project= resource.getProject();
 			final String name= project.getName();
-			final String description= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description_short, BasicElementLabels.getFileName(resource.getName()));
-			final String header= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { BasicElementLabels.getPathLabel(resource.getFullPath(), false), newName});
+			final String description= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description_short, BasicElementLabels.getResourceName(resource.getName()));
+			final String header= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { BasicElementLabels.getPathLabel(resource.getFullPath(), false), BasicElementLabels.getResourceName(resource.getName())});
 			final String comment= new JDTRefactoringDescriptorComment(name, this, header).asString();
 			final int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;
 			
@@ -411,7 +411,7 @@ public final class RenameCompilationUnitProcessor extends JavaRenameProcessor im
 		
 		final String name= fCu.getJavaProject().getElementName();
 		final String description= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description_short, BasicElementLabels.getFileName(fCu));
-		final String header= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { label, newName});
+		final String header= Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { label, BasicElementLabels.getResourceName(newName)});
 		final String comment= new JDTRefactoringDescriptorComment(name, this, header).asString();
 		final int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;
 		final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_COMPILATION_UNIT);

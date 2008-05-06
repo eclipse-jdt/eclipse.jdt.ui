@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Helper class to generate a refactoring descriptor comment.
@@ -141,7 +142,7 @@ public final class JDTRefactoringDescriptorComment {
 		buffer.append(fHeader);
 		if (fProject != null && !"".equals(fProject)) { //$NON-NLS-1$
 			buffer.append(LINE_DELIMITER);
-			buffer.append(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptorComment_original_project, fProject));
+			buffer.append(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptorComment_original_project, BasicElementLabels.getResourceName(fProject)));
 		}
 		for (final Iterator iterator= fSettings.iterator(); iterator.hasNext();) {
 			final String setting= (String) iterator.next();
@@ -175,12 +176,8 @@ public final class JDTRefactoringDescriptorComment {
 				if (element != null)
 					fSettings.add(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_renamed_element_pattern, JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 				else {
-					final String oldLabel= JavaElementLabels.getTextLabel(updating.getElements()[0], JavaElementLabels.ALL_FULLY_QUALIFIED);
-					final String newName= updating.getCurrentElementName();
-					if (newName.length() < oldLabel.length()) {
-						final String newLabel= oldLabel.substring(0, oldLabel.length() - newName.length());
-						fSettings.add(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_renamed_element_pattern, newLabel + updating.getNewElementName()));
-					}
+					final String newLabel= BasicElementLabels.getJavaElementName(updating.getCurrentElementName());
+					fSettings.add(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_renamed_element_pattern, newLabel));
 				}
 			} catch (CoreException exception) {
 				JavaPlugin.log(exception);
@@ -270,7 +267,7 @@ public final class JDTRefactoringDescriptorComment {
 			if (updating.canEnableQualifiedNameUpdating() && updating.getUpdateQualifiedNames()) {
 				final String patterns= updating.getFilePatterns();
 				if (patterns != null && !"".equals(patterns)) //$NON-NLS-1$
-					fSettings.add(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_qualified_names_pattern, patterns.trim()));
+					fSettings.add(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_qualified_names_pattern, BasicElementLabels.getFilePattern(patterns.trim())));
 				else
 					fSettings.add(RefactoringCoreMessages.JavaRefactoringDescriptor_qualified_names);
 			}

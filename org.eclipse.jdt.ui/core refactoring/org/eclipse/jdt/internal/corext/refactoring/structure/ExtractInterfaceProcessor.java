@@ -125,6 +125,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * Refactoring processor to extract interfaces.
@@ -287,10 +288,10 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		final IType type= Checks.findTypeInPackage(fragment, fSuperName);
 		if (type != null && type.exists()) {
 			if (fragment.isDefaultPackage())
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_existing_default_type, new String[] { fSuperName }));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_existing_default_type, BasicElementLabels.getJavaElementName(fSuperName)));
 			else {
 				String packageLabel= JavaElementLabels.getElementLabel(fragment, JavaElementLabels.ALL_DEFAULT);
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_existing_type, new String[] { fSuperName, packageLabel }));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_existing_type, new String[] { BasicElementLabels.getJavaElementName(fSuperName), packageLabel }));
 			}
 		}
 		return new RefactoringStatus();
@@ -315,7 +316,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				return result;
 			final IPackageFragment fragment= fSubType.getPackageFragment();
 			if (fragment.getCompilationUnit(unitName).exists()) {
-				result.addFatalError(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_existing_compilation_unit, new String[] { unitName, fragment.getElementName() }));
+				result.addFatalError(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_existing_compilation_unit, new String[] { BasicElementLabels.getResourceName(unitName), JavaElementLabels.getElementLabel(fragment, JavaElementLabels.ALL_DEFAULT) }));
 				return result;
 			}
 			result.merge(checkSuperType());
@@ -348,7 +349,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			final IPackageFragment fragment= fSubType.getPackageFragment();
 			final ICompilationUnit cu= fragment.getCompilationUnit(JavaModelUtil.getRenamedCUName(fSubType.getCompilationUnit(), fSuperName));
 			final IType type= cu.getType(fSuperName);
-			final String description= Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_description_descriptor_short, fSuperName);
+			final String description= Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_description_descriptor_short, BasicElementLabels.getJavaElementName(fSuperName));
 			final String header= Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED) });
 			final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 			comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_refactored_element_pattern, JavaElementLabels.getElementLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED)));

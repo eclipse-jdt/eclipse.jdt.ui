@@ -136,7 +136,7 @@ public class JarWriter2 {
 			if (ex.getLocalizedMessage() != null)
 				message= Messages.format(JarPackagerMessages.JarWriter_writeProblemWithMessage, new Object[] {BasicElementLabels.getPathLabel(resource.getFullPath(), false), ex.getLocalizedMessage()}); 
 			else
-				message= Messages.format(JarPackagerMessages.JarWriter_writeProblem, resource.getFullPath()); 
+				message= Messages.format(JarPackagerMessages.JarWriter_writeProblem, BasicElementLabels.getPathLabel(resource.getFullPath(), false)); 
 			throw JarPackagerUtil.createCoreException(message, ex);
 		}					
 	}

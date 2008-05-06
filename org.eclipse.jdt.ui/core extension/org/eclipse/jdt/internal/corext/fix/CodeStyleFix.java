@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * A fix which fixes code style issues.
@@ -361,7 +362,10 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		}
 		
 		public String getDescription() {
-			return Messages.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {fName.getIdentifier(), fQualifier});
+			String nameLabel= BasicElementLabels.getJavaElementName(fName.getIdentifier());
+			String qualifierLabel= BasicElementLabels.getJavaElementName(fQualifier);
+			
+			return Messages.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {nameLabel, qualifierLabel});
 		}
 
 		/**

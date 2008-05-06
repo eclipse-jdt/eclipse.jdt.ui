@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,6 +60,7 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * A special control to add and remove thrown exceptions.
@@ -101,7 +102,7 @@ public class ChangeExceptionsControl extends Composite {
 		}
 		public String getColumnText(Object element, int columnIndex) {
 			ExceptionInfo info= (ExceptionInfo) element;
-			return info.getType().getFullyQualifiedName();
+			return BasicElementLabels.getJavaElementName(info.getType().getFullyQualifiedName('.'));
 		}
 	}
 

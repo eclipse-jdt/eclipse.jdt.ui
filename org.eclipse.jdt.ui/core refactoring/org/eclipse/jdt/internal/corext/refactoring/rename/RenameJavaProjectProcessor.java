@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public final class RenameJavaProjectProcessor extends JavaRenameProcessor implements IReferenceUpdating {
 
@@ -160,7 +161,7 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 		try{
 			if (isReadOnly()){
 				String message= Messages.format(RefactoringCoreMessages.RenameJavaProjectRefactoring_read_only, 
-									fProject.getElementName());
+						BasicElementLabels.getJavaElementName(fProject.getElementName()));
 				return RefactoringStatus.createErrorStatus(message);
 			}
 			return new RefactoringStatus();
@@ -190,8 +191,8 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			final String description= Messages.format(RefactoringCoreMessages.RenameJavaProjectProcessor_descriptor_description_short, fProject.getElementName());
-			final String header= Messages.format(RefactoringCoreMessages.RenameJavaProjectChange_descriptor_description, new String[] { fProject.getElementName(), getNewElementName()});
+			final String description= Messages.format(RefactoringCoreMessages.RenameJavaProjectProcessor_descriptor_description_short, BasicElementLabels.getJavaElementName(fProject.getElementName()));
+			final String header= Messages.format(RefactoringCoreMessages.RenameJavaProjectChange_descriptor_description, new String[] { BasicElementLabels.getJavaElementName(fProject.getElementName()), BasicElementLabels.getJavaElementName(getNewElementName())});
 			final String comment= new JDTRefactoringDescriptorComment(null, this, header).asString();
 			final int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE;
 			final RenameJavaElementDescriptor descriptor= new RenameJavaElementDescriptor(IJavaRefactorings.RENAME_JAVA_PROJECT);

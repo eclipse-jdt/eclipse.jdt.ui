@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,8 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 public class RefactoringAnalyzeUtil {
 	
 	private RefactoringAnalyzeUtil() {
@@ -56,7 +58,7 @@ public class RefactoringAnalyzeUtil {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < problemNodes.length; i++) {
 			RefactoringStatusContext context= new JavaStringStatusContext(modifiedWorkingCopySource, new SourceRange(problemNodes[i]));
-			result.addError(Messages.format(RefactoringCoreMessages.RefactoringAnalyzeUtil_name_collision, problemNodes[i].getIdentifier()), context); 
+			result.addError(Messages.format(RefactoringCoreMessages.RefactoringAnalyzeUtil_name_collision, BasicElementLabels.getJavaElementName(problemNodes[i].getIdentifier())), context); 
 		}
 		return result;
 	}

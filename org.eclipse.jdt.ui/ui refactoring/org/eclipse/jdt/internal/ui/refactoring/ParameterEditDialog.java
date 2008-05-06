@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class ParameterEditDialog extends StatusDialog {
 	
@@ -88,7 +89,7 @@ public class ParameterEditDialog extends StatusDialog {
 		if (newName.length() == 0)
 			label.setText(RefactoringMessages.ParameterEditDialog_message_new); 
 		else
-			label.setText(Messages.format(RefactoringMessages.ParameterEditDialog_message, newName)); 
+			label.setText(Messages.format(RefactoringMessages.ParameterEditDialog_message, BasicElementLabels.getJavaElementName(newName))); 
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= 2;
 		label.setLayoutData(gd);

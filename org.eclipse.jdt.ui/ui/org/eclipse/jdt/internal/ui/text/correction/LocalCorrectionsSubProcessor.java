@@ -129,6 +129,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionPr
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.ChangeDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.InsertDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.RemoveDescription;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
   */
@@ -634,23 +635,23 @@ public class LocalCorrectionsSubProcessor {
 		switch (problem.getProblemId()) {
 			case IProblem.LocalVariableHidingLocalVariable:
 			case IProblem.LocalVariableHidingField:
-				name= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_hiding_local_label, nameNode.getIdentifier());
+				name= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_hiding_local_label, BasicElementLabels.getJavaElementName(nameNode.getIdentifier()));
 				break;
 			case IProblem.FieldHidingLocalVariable:
 			case IProblem.FieldHidingField:
 			case IProblem.DuplicateField:
-				name= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_hiding_field_label, nameNode.getIdentifier());
+				name= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_hiding_field_label, BasicElementLabels.getJavaElementName(nameNode.getIdentifier()));
 				break;
 			case IProblem.ArgumentHidingLocalVariable:
 			case IProblem.ArgumentHidingField:
-				name= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_hiding_argument_label, nameNode.getIdentifier());
+				name= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_hiding_argument_label, BasicElementLabels.getJavaElementName(nameNode.getIdentifier()));
 				break;
 			case IProblem.DuplicateMethod:
-				name= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_renaming_duplicate_method, nameNode.getIdentifier());
+				name= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_renaming_duplicate_method, BasicElementLabels.getJavaElementName(nameNode.getIdentifier()));
 				break;
 				
 			default:
-				name= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_rename_var_label, nameNode.getIdentifier());
+				name= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_rename_var_label, BasicElementLabels.getJavaElementName(nameNode.getIdentifier()));
 		}
 
 		if (problem.getProblemId() == IProblem.UseEnumAsAnIdentifier) {
@@ -854,7 +855,7 @@ public class LocalCorrectionsSubProcessor {
 			rewrite.set(typeDecl, TypeDeclaration.INTERFACE_PROPERTY, Boolean.TRUE, null);
 
 			String typeName= typeDecl.getName().getIdentifier();
-			String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_classtointerface_description, typeName);
+			String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_classtointerface_description, BasicElementLabels.getJavaElementName(typeName));
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 3, image); 
 			proposals.add(proposal);
@@ -919,7 +920,7 @@ public class LocalCorrectionsSubProcessor {
 		
 		if (binding == fieldBinding && ASTResolving.findParentBodyDeclaration(selectedNode) instanceof MethodDeclaration) {
 			SimpleName simpleName= (SimpleName) ((assignedNode instanceof SimpleName) ? assignedNode : assignExpression);
-			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createparameter_description, simpleName.getIdentifier());
+			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createparameter_description, BasicElementLabels.getJavaElementName(simpleName.getIdentifier()));
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 			proposals.add(new NewVariableCorrectionProposal(label, context.getCompilationUnit(), NewVariableCorrectionProposal.PARAM, simpleName, null, 5, image));
 		}
@@ -1046,7 +1047,7 @@ public class LocalCorrectionsSubProcessor {
 						method.setName(ast.newSimpleName(methodName[1]));
 						astRewrite.replace(selectedNode, method, null);
 
-						String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_replacefieldaccesswithmethod_description, method);
+						String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_replacefieldaccesswithmethod_description, BasicElementLabels.getJavaElementName(ASTNodes.asString(method)));
 						Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 						ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), astRewrite, 10, image);
 						proposal.setImportRewrite(importRewrite);

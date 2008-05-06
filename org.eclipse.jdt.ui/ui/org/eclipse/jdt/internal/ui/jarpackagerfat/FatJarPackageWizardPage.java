@@ -83,6 +83,7 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
  * First page for the runnable jar export wizard
@@ -590,7 +591,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 			IPath entry= classpathEntries[i];
 			IPackageFragmentRoot[] elements= findRootsForClasspath(entry, searchOrder);
 			if (elements == null) {
-				status.add(new Status(IStatus.WARNING, JavaUI.ID_PLUGIN, Messages.format(FatJarPackagerMessages.FatJarPackageWizardPage_error_missingClassFile, entry)));
+				status.add(new Status(IStatus.WARNING, JavaUI.ID_PLUGIN, Messages.format(FatJarPackagerMessages.FatJarPackageWizardPage_error_missingClassFile, BasicElementLabels.getPathLabel(entry, false))));
 			} else {
 				for (int j= 0; j < elements.length; j++) {
 					result.add(elements[j]);

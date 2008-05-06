@@ -37,6 +37,7 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class CreateJarActionDelegate extends JarPackageActionDelegate {
 
@@ -123,7 +124,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 			jarPackage.setSaveManifest(false);
 			jarPackage.setSaveDescription(false);
 		} catch (CoreException ex) {
-				String message= Messages.format(JarPackagerMessages.JarFileExportOperation_errorReadingFile, new Object[] {description.getFullPath(), ex.getStatus().getMessage()}); 
+				String message= Messages.format(JarPackagerMessages.JarFileExportOperation_errorReadingFile, new Object[] {BasicElementLabels.getPathLabel(description.getFullPath(), false), ex.getStatus().getMessage()}); 
 				addToStatus(readStatus, message, ex);
 				return null;
 		} finally {
@@ -135,7 +136,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 					reader.close();
 			}
 			catch (CoreException ex) {
-				String message= Messages.format(JarPackagerMessages.JarFileExportOperation_errorClosingJarPackageDescriptionReader, description.getFullPath()); 
+				String message= Messages.format(JarPackagerMessages.JarFileExportOperation_errorClosingJarPackageDescriptionReader, BasicElementLabels.getPathLabel(description.getFullPath(), false)); 
 				addToStatus(readStatus, message, ex);
 			}
 		}

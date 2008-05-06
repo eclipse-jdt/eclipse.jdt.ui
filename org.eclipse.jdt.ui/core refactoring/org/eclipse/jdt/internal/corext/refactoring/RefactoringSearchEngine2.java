@@ -48,6 +48,8 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
 /**
  * Helper class to use the search engine in refactorings.
  * 
@@ -88,7 +90,7 @@ public final class RefactoringSearchEngine2 {
 						fCollectedUnits.add(element);
 				}
 				if (fInaccurate && accepted.getAccuracy() == SearchMatch.A_INACCURATE && !fInaccurateMatches.contains(accepted)) {
-					fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_inaccurate_match, accepted.getResource().getName()), null, null, RefactoringStatusEntry.NO_CODE); 
+					fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_inaccurate_match, BasicElementLabels.getResourceName(accepted.getResource())), null, null, RefactoringStatusEntry.NO_CODE); 
 					fInaccurateMatches.add(accepted);
 				}
 			}
@@ -151,14 +153,14 @@ public final class RefactoringSearchEngine2 {
 						if (!(element instanceof ICompilationUnit)) {
 							final IProject project= resource.getProject();
 							if (!fGrouping)
-								fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_binary_match_ungrouped, project.getName()), null, null, RefactoringStatusEntry.NO_CODE); 
+								fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_binary_match_ungrouped, BasicElementLabels.getResourceName(project)), null, null, RefactoringStatusEntry.NO_CODE); 
 							else if (!fBinaryResources.contains(resource))
-								fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_binary_match_grouped, project.getName()), null, null, RefactoringStatusEntry.NO_CODE); 
+								fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_binary_match_grouped, BasicElementLabels.getResourceName(project)), null, null, RefactoringStatusEntry.NO_CODE); 
 							fBinaryResources.add(resource);
 						}
 					}
 					if (fInaccurate && accepted.getAccuracy() == SearchMatch.A_INACCURATE && !fInaccurateMatches.contains(accepted)) {
-						fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_inaccurate_match, resource.getName()), null, null, RefactoringStatusEntry.NO_CODE); 
+						fStatus.addEntry(fSeverity, Messages.format(RefactoringCoreMessages.RefactoringSearchEngine_inaccurate_match, BasicElementLabels.getResourceName(resource)), null, null, RefactoringStatusEntry.NO_CODE); 
 						fInaccurateMatches.add(accepted);
 					}
 				}

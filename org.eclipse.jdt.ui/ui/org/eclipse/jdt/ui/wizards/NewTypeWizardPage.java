@@ -137,6 +137,7 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssis
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaPackageCompletionProcessor;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.SuperInterfaceSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -305,7 +306,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 		
 		public String getText(Object element) {
-			return ((InterfaceWrapper) element).interfaceName;
+			return BasicElementLabels.getJavaElementName(((InterfaceWrapper) element).interfaceName);
 		}
 		
 		public Image getImage(Object element) {
@@ -1361,7 +1362,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		if ((fTypeKind == ANNOTATION_TYPE || fTypeKind == ENUM_TYPE) && !status.matches(IStatus.ERROR)) {
 	    	if (root != null && !JavaModelUtil.is50OrHigher(root.getJavaProject())) {
 	    		// error as createType will fail otherwise (bug 96928)
-				return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewTypeWizardPage_warning_NotJDKCompliant, root.getJavaProject().getElementName()));  
+				return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewTypeWizardPage_warning_NotJDKCompliant, BasicElementLabels.getJavaElementName(root.getJavaProject().getElementName())));  
 	    	}
 	    	if (fTypeKind == ENUM_TYPE) {
 		    	try {
@@ -1610,7 +1611,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 					} catch (CoreException e) {
 						status.setError(Messages.format(
 							NewWizardMessages.NewTypeWizardPage_error_uri_location_unkown, 
-							Resources.getLocationString(resource)));
+							BasicElementLabels.getURLPart(Resources.getLocationString(resource))));
 					}
 				}
 			}
@@ -1717,11 +1718,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				String intfname= ((InterfaceWrapper) elements.get(i)).interfaceName;
 				Type type= TypeContextChecker.parseSuperInterface(intfname);
 				if (type == null) {
-					status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidSuperInterfaceName, intfname)); 
+					status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidSuperInterfaceName, BasicElementLabels.getJavaElementName(intfname))); 
 					return status;
 				}
 				if (type instanceof ParameterizedType && ! JavaModelUtil.is50OrHigher(root.getJavaProject())) {
-					status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_SuperInterfaceNotParameterized, intfname)); 
+					status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_SuperInterfaceNotParameterized, BasicElementLabels.getJavaElementName(intfname))); 
 					return status;
 				}
 			}				

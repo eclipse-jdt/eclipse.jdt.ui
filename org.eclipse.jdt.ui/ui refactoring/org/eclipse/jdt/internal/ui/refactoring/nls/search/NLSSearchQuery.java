@@ -45,6 +45,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 
 public class NLSSearchQuery implements ISearchQuery {
@@ -76,9 +77,9 @@ public class NLSSearchQuery implements ISearchQuery {
 				IJavaElement wrapperClass= fWrapperClass[i];
 				IFile propertieFile= fPropertiesFile[i];
 				if (! wrapperClass.exists())
-					return JavaUIStatus.createError(0, Messages.format(NLSSearchMessages.NLSSearchQuery_wrapperNotExists, wrapperClass.getElementName()), null); 
+					return JavaUIStatus.createError(0, Messages.format(NLSSearchMessages.NLSSearchQuery_wrapperNotExists, JavaElementLabels.getElementLabel(wrapperClass, JavaElementLabels.ALL_DEFAULT)), null); 
 				if (! wrapperClass.exists())
-					return JavaUIStatus.createError(0, Messages.format(NLSSearchMessages.NLSSearchQuery_propertiesNotExists, propertieFile.getName()), null); 
+					return JavaUIStatus.createError(0, Messages.format(NLSSearchMessages.NLSSearchQuery_propertiesNotExists, BasicElementLabels.getResourceName(propertieFile)), null); 
 				
 				SearchPattern pattern= SearchPattern.createPattern(wrapperClass, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 				SearchParticipant[] participants= new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()};

@@ -154,7 +154,7 @@ public class TypeMismatchSubProcessor {
 
 				ASTRewrite rewrite= ASTRewrite.create(ast);
 
-				String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturntype_description, currBinding.getName());
+				String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturntype_description, BasicElementLabels.getJavaElementName(currBinding.getName()));
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 6, image);
 
@@ -314,9 +314,9 @@ public class TypeMismatchSubProcessor {
 		if (targetCu != null && ASTResolving.isUseableTypeInContext(returnType, overriddenDecl, false)) {
 			TypeChangeCorrectionProposal proposal= new TypeChangeCorrectionProposal(targetCu, overriddenDecl, astRoot, returnType, false, 7);
 			if (overridenDeclType.isInterface()) {
-				proposal.setDisplayName(Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturnofimplemented_description, overriddenDecl.getName()));
+				proposal.setDisplayName(Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturnofimplemented_description, BasicElementLabels.getJavaElementName(overriddenDecl.getName())));
 			} else {
-				proposal.setDisplayName(Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturnofoverridden_description, overriddenDecl.getName()));
+				proposal.setDisplayName(Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturnofoverridden_description, BasicElementLabels.getJavaElementName(overriddenDecl.getName())));
 			}
 			proposals.add(proposal);
 		}
@@ -354,7 +354,7 @@ public class TypeMismatchSubProcessor {
 					undeclaredExceptions.add(methodExceptions[i]);
 				}
 			}
-			String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_removeexceptions_description, methodDeclBinding.getName());
+			String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_removeexceptions_description, BasicElementLabels.getJavaElementName(methodDeclBinding.getName()));
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
 			proposals.add(new ChangeMethodSignatureProposal(label, cu, astRoot, methodDeclBinding, null, changes, 8, image));
 		}
@@ -418,7 +418,7 @@ public class TypeMismatchSubProcessor {
 		
 		SingleVariableDeclaration parameter= forStatement.getParameter();
 
-		String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_incompatible_for_each_type_description, new String[] { parameter.getName().getIdentifier(), BindingLabelProvider.getBindingLabel(expectedBinding, BindingLabelProvider.DEFAULT_TEXTFLAGS) });
+		String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_incompatible_for_each_type_description, new String[] { BasicElementLabels.getJavaElementName(parameter.getName().getIdentifier()), BindingLabelProvider.getBindingLabel(expectedBinding, BindingLabelProvider.DEFAULT_TEXTFLAGS) });
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
