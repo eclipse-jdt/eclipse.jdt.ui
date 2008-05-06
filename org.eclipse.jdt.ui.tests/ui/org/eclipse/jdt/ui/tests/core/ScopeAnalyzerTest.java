@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,22 +15,21 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
-
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
 
 /**
   */
@@ -436,6 +435,36 @@ public class ScopeAnalyzerTest extends CoreTests {
 		}		
 		
 	}
+	
+	public void testVariableDeclarations7() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1.ae;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void goo() {\n");
+		buf.append("        try {\n");
+		buf.append("        } catch (Exception x) {\n");		 
+		buf.append("        }\n");
+		buf.append("        return;\n");
+		buf.append("    }\n");			
+		buf.append("}\n");
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
+		
+		CompilationUnit astRoot= createAST(compilationUnit);
+		assertNoProblems(astRoot);
+		
+		{
+			String str= "return;";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.VARIABLES;
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
+			
+			assertVariables(res, new String[] {});
+		}
+	}
+
 	
 	public void testSwitchOnEnum() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
