@@ -37,8 +37,8 @@ import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension;
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
+import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
@@ -197,7 +197,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 	}
 	
 	private String getPathLabel(IPath path) {
-		StringBuffer buf= new StringBuffer(BasicElementLabels.getFileName(path.lastSegment()));
+		StringBuffer buf= new StringBuffer(BasicElementLabels.getResourceName(path.lastSegment()));
 		buf.append(JavaElementLabels.CONCAT_STRING);
 		buf.append(BasicElementLabels.getPathLabel(path.removeLastSegments(1), true));
 		return buf.toString();
