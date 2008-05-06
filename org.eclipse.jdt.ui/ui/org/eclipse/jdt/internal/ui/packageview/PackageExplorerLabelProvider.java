@@ -120,6 +120,9 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 	public Image getImage(Object element) {
 		if (element instanceof IWorkingSet) {
 			ImageDescriptor image= ((IWorkingSet)element).getImageDescriptor();
+			if (image == null) {
+				return null;
+			}
 			if (fWorkingSetImages == null) {
 				fWorkingSetImages= new HashMap();
 			}
