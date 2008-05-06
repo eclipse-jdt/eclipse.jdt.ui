@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
@@ -137,7 +138,7 @@ public class Resources {
 	}
 	
 	private static IStatus addModified(IStatus status, IFile file) {
-		IStatus entry= JUnitStatus.createError(Messages.format(JUnitMessages.Resources_fileModified, file.getFullPath().toString())); 
+		IStatus entry= JUnitStatus.createError(Messages.format(JUnitMessages.Resources_fileModified, BasicElementLabels.getPathLabel(file.getFullPath(), false))); 
 		if (status == null) {
 			return entry;
 		} else if (status.isMultiStatus()) {
@@ -158,7 +159,7 @@ public class Resources {
 			IStatus.ERROR,
 			ResourcesPlugin.PI_RESOURCES,
 			IResourceStatus.OUT_OF_SYNC_LOCAL,
-		Messages.format(JUnitMessages.Resources_outOfSync, resource.getFullPath().toString()), 
+		Messages.format(JUnitMessages.Resources_outOfSync, BasicElementLabels.getPathLabel(resource.getFullPath(), false)), 
 			null);
 		if (status == null) {
 			return entry;

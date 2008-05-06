@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 import org.eclipse.jdt.junit.wizards.NewTestSuiteWizardPage;
 
+import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
@@ -74,7 +75,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 					MessageDialog.openQuestion(fPage.getShell(), 
 						WizardMessages.NewTestSuiteWiz_unsavedchangesDialog_title, 
 						Messages.format(WizardMessages.NewTestSuiteWiz_unsavedchangesDialog_message, 
-						filename));  
+						BasicElementLabels.getResourceName(filename)));
 				if (saveUnsavedChanges) {
 					try {
 						getContainer().run(false, false, getRunnableSave(cu_ep));

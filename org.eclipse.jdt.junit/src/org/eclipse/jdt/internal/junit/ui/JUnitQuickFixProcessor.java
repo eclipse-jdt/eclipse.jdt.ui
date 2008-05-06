@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,6 +67,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
 import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
 
+import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
@@ -313,7 +314,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 		 */
 		public String getAdditionalProposalInfo() {
-			return Messages.format(JUnitMessages.JUnitQuickFixProcessor_add_assert_info, fMethodName);
+			return Messages.format(JUnitMessages.JUnitQuickFixProcessor_add_assert_info, BasicElementLabels.getJavaElementName("org.junit.Assert." + fMethodName)); //$NON-NLS-1$
 		}
 
 		/* (non-Javadoc)
@@ -327,7 +328,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
 		 */
 		public String getDisplayString() {
-			return Messages.format(JUnitMessages.JUnitQuickFixProcessor_add_assert_description, fMethodName);
+			return Messages.format(JUnitMessages.JUnitQuickFixProcessor_add_assert_description, BasicElementLabels.getJavaElementName("org.junit.Assert." + fMethodName)); //$NON-NLS-1$
 		}
 
 		/* (non-Javadoc)

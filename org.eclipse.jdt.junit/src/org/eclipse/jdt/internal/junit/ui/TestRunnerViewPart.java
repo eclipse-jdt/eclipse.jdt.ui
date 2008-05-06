@@ -111,6 +111,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ViewHistory;
 
 import org.eclipse.jdt.junit.model.ITestElement.Result;
 
+import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
@@ -378,11 +379,12 @@ public class TestRunnerViewPart extends ViewPart {
 
 		public String getText(Object element) {
 			TestRunSession session= (TestRunSession) element;
+			String testRunLabel= BasicElementLabels.getJavaElementName(session.getTestRunName());
 			if (session.getStartTime() == 0) {
-				return session.getTestRunName();
+				return testRunLabel;
 			} else {
 				String startTime= DateFormat.getDateTimeInstance().format(new Date(session.getStartTime()));
-				return Messages.format(JUnitMessages.TestRunnerViewPart_testName_startTime, new Object[] { session.getTestRunName(), startTime });
+				return Messages.format(JUnitMessages.TestRunnerViewPart_testName_startTime, new Object[] { testRunLabel, startTime });
 			}
 		}
 		
@@ -482,12 +484,12 @@ public class TestRunnerViewPart extends ViewPart {
 				TestRunSession deactivatedSession= setActiveTestRunSession(testRunSession);
 				if (deactivatedSession != null)
 					deactivatedSession.swapOut();
-				String testRunName= fTestRunSession.getTestRunName();
+				String testRunLabel= BasicElementLabels.getJavaElementName(fTestRunSession.getTestRunName());
 				String msg;
 				if (testRunSession.getLaunch() != null) {
-					msg= Messages.format(JUnitMessages.TestRunnerViewPart_Launching, new Object[]{ testRunName });
+					msg= Messages.format(JUnitMessages.TestRunnerViewPart_Launching, new Object[]{ testRunLabel });
 				} else {
-					msg= testRunName;
+					msg= testRunLabel;
 				}
 				setContentDescription(msg);
 			}
@@ -568,8 +570,8 @@ public class TestRunnerViewPart extends ViewPart {
 			fTestViewer.registerAutoScrollTarget(testCaseElement);
 			fTestViewer.registerViewerUpdate(testCaseElement);
 
-			String className= testCaseElement.getClassName();
-			String method= testCaseElement.getTestMethodName();		
+			String className= BasicElementLabels.getJavaElementName(testCaseElement.getClassName());
+			String method= BasicElementLabels.getJavaElementName(testCaseElement.getTestMethodName());
 			String status= Messages.format(JUnitMessages.TestRunnerViewPart_message_started, new String[] { className, method }); 
 			registerInfoMessage(status); 
 		}
@@ -1288,7 +1290,7 @@ action enablement
 						
 			clearStatus();
 			fFailureTrace.clear();
-			registerInfoMessage(fTestRunSession.getTestRunName());
+			registerInfoMessage(BasicElementLabels.getJavaElementName(fTestRunSession.getTestRunName()));
 			
 			updateRerunFailedFirstAction();
 			fRerunLastTestAction.setEnabled(fTestRunSession.getLaunch() != null);
@@ -1334,10 +1336,11 @@ action enablement
 	private void setTitleToolTip() {
 		String testKindDisplayStr= getTestKindDisplayName();
 		
+		String testRunLabel= BasicElementLabels.getJavaElementName(fTestRunSession.getTestRunName());
 		if (testKindDisplayStr != null)
-			setTitleToolTip(MessageFormat.format(JUnitMessages.TestRunnerViewPart_titleToolTip, new String[] {fTestRunSession.getTestRunName(), testKindDisplayStr}));
+			setTitleToolTip(MessageFormat.format(JUnitMessages.TestRunnerViewPart_titleToolTip, new String[] {testRunLabel, testKindDisplayStr}));
 		else
-			setTitleToolTip(fTestRunSession.getTestRunName());
+			setTitleToolTip(testRunLabel);
 	}
 	
 	public synchronized void dispose(){

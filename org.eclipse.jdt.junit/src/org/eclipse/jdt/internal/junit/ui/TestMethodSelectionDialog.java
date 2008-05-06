@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,17 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.window.Window;
+
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -33,19 +44,10 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.window.Window;
-
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.Messages;
 
 /**
@@ -102,7 +104,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 		}
 		
 		if (elements.length == 0) {
-			String msg= Messages.format(JUnitMessages.TestMethodSelectionDialog_notfound_message, fElement.getElementName()); 
+			String msg= Messages.format(JUnitMessages.TestMethodSelectionDialog_notfound_message, JavaElementLabels.getElementLabel(fElement, JavaElementLabels.ALL_DEFAULT)); 
 			MessageDialog.openInformation(getParentShell(), JUnitMessages.TestMethodSelectionDialog_no_tests_title, msg); 
 			return CANCEL;
 		}
@@ -127,7 +129,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 			return null;
 		}
 		if (result.size() == 0) {
-			String msg= Messages.format(JUnitMessages.TestMethodSelectionDialog_test_not_found, JUnitPlugin.TEST_INTERFACE_NAME); 
+			String msg= Messages.format(JUnitMessages.TestMethodSelectionDialog_test_not_found, BasicElementLabels.getJavaElementName(JUnitPlugin.TEST_INTERFACE_NAME)); 
 			MessageDialog.openError(getParentShell(), JUnitMessages.TestMethodSelectionDialog_select_dialog_title, msg); 
 			return null;
 		}
@@ -141,7 +143,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_ROOT);
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getParentShell(), labelProvider);
 		dialog.setTitle(JUnitMessages.TestMethodSelectionDialog_dialog_title);  
-		String msg= Messages.format(JUnitMessages.TestMethodSelectionDialog_testproject, "junit.framework.Test"); //$NON-NLS-1$
+		String msg= Messages.format(JUnitMessages.TestMethodSelectionDialog_testproject, BasicElementLabels.getJavaElementName("junit.framework.Test")); //$NON-NLS-1$
 		dialog.setMessage(msg);
 		IJavaProject[] projects= new IJavaProject[result.size()];
 		IType[] testTypes= (IType[]) result.toArray(new IType[result.size()]);

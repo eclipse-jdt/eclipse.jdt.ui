@@ -29,6 +29,7 @@ import org.eclipse.jdt.junit.model.ITestElement;
 import org.eclipse.jdt.junit.model.ITestRunSession;
 import org.eclipse.jdt.junit.model.ITestSuiteElement;
 
+import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
@@ -73,7 +74,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 			
 		} else {
 			if (element instanceof ITestCaseElement) {
-				String className= ((ITestCaseElement) element).getTestClassName();
+				String className= BasicElementLabels.getJavaElementName(((ITestCaseElement) element).getTestClassName());
 				String decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, className });
 				text= ColoringLabelProvider.decorateStyledString(text, decorated, StyledString.QUALIFIER_STYLER);
 			}
@@ -97,9 +98,9 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 	
 	private String getSimpleLabel(Object element) {
 		if (element instanceof ITestCaseElement) {
-			return ((ITestCaseElement) element).getTestMethodName();
+			return BasicElementLabels.getJavaElementName(((ITestCaseElement) element).getTestMethodName());
 		} else if (element instanceof ITestSuiteElement) {
-			return ((ITestSuiteElement) element).getSuiteTypeName();
+			return BasicElementLabels.getJavaElementName(((ITestSuiteElement) element).getSuiteTypeName());
 		}
 		return null;
 	}
@@ -119,7 +120,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 			}
 		} else {
 			if (element instanceof ITestCaseElement) {
-				String className= ((ITestCaseElement) element).getTestClassName();
+				String className=  BasicElementLabels.getJavaElementName(((ITestCaseElement) element).getTestClassName());
 				label= Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, className });
 			}
 		}

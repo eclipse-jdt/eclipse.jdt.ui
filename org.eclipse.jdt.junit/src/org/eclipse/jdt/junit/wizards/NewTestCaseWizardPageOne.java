@@ -73,6 +73,7 @@ import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 
+import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
 import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
@@ -648,11 +649,11 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				return status;
 			}
 			if (type.isInterface()) {
-				status.setWarning(Messages.format(WizardMessages.NewTestCaseWizardPageOne_warning_class_to_test_is_interface, classToTestName)); 
+				status.setWarning(Messages.format(WizardMessages.NewTestCaseWizardPageOne_warning_class_to_test_is_interface, BasicElementLabels.getJavaElementName(classToTestName))); 
 			}
 			
 			if (pack != null && !JUnitStubUtility.isVisible(type, pack)) {
-				status.setWarning(Messages.format(WizardMessages.NewTestCaseWizardPageOne_warning_class_to_test_not_visible, classToTestName)); 
+				status.setWarning(Messages.format(WizardMessages.NewTestCaseWizardPageOne_warning_class_to_test_not_visible, BasicElementLabels.getJavaElementName(classToTestName)));
 			}
 			fClassUnderTest= type;
 			fPage2.setClassUnderTest(fClassUnderTest);
@@ -1100,7 +1101,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 					return status;
 				}
 				if (!TestSearchEngine.isTestImplementor(type)) { // TODO: expensive!
-					status.setError(Messages.format(WizardMessages.NewTestCaseWizardPageOne_error_superclass_not_implementing_test_interface, JUnitPlugin.TEST_INTERFACE_NAME)); 
+					status.setError(Messages.format(WizardMessages.NewTestCaseWizardPageOne_error_superclass_not_implementing_test_interface, BasicElementLabels.getJavaElementName(JUnitPlugin.TEST_INTERFACE_NAME))); 
 					return status;
 				}
 			} catch (JavaModelException e) {

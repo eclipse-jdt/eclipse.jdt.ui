@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
+import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 
@@ -51,7 +52,7 @@ public abstract class LaunchConfigChange extends Change {
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus refactoringStatus= new RefactoringStatus();
 		if (!fConfig.getConfiguration().exists() && fShouldFlagWarning)
-			refactoringStatus.addError(Messages.format(JUnitMessages.LaunchConfigChange_configDeleted, fConfig.getName()));
+			refactoringStatus.addError(Messages.format(JUnitMessages.LaunchConfigChange_configDeleted,  BasicElementLabels.getJavaElementName(fConfig.getName())));
 		return refactoringStatus;
 	}
 
