@@ -105,6 +105,7 @@ org.apache.commons.el/*
 org.apache.jasper/*
 org.apache.lucene/*
 org.apache.lucene.analysis/*
+org.objectweb.asm/*
 
 www*eclipse.org-development/*
 www*platform-search/*
