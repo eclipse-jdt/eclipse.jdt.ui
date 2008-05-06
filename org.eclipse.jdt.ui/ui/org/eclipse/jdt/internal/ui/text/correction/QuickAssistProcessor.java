@@ -95,6 +95,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
+import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.ConvertLoopFix;
@@ -1256,14 +1257,17 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getAddBlockProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
-		Statement statement= ASTResolving.findParentStatement(node);
-		if (statement == null) {
+		if (!(node instanceof Statement)) {
 			return false;
 		}
-
-		if (!isControlStatementWithBlock(node)) {
-			int statementStart= statement.getStartPosition();
-			int statementEnd= statementStart + statement.getLength();
+		
+		/*
+		 * only show the quicka ssist when the selection is of the control statement keywords (if, else, while,...)
+		 * but not inside the statement or the if expression.
+		 */
+		if (!isControlStatementWithBlock(node) && isControlStatementWithBlock(node.getParent())) {
+			int statementStart= node.getStartPosition();
+			int statementEnd= statementStart + node.getLength();
 
 			int offset= context.getSelectionOffset();
 			int length= context.getSelectionLength();
@@ -1276,45 +1280,61 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					return false;
 				}
 			}
-			statement= (Statement) statement.getParent();
+			node= node.getParent();
 		}
-
+		
 		StructuralPropertyDescriptor childProperty= null;
 		ASTNode child= null;
-		switch (statement.getNodeType()) {
+		switch (node.getNodeType()) {
 			case ASTNode.IF_STATEMENT:
-				int selectionStart= context.getSelectionOffset();
+				ASTNode then= ((IfStatement) node).getThenStatement();
+				ASTNode elseStatement= ((IfStatement) node).getElseStatement();
+				if ((then instanceof Block) && (elseStatement instanceof Block || elseStatement == null)) {
+					break;
+				}
+				int thenEnd= then.getStartPosition() + then.getLength();
 				int selectionEnd= context.getSelectionOffset() + context.getSelectionLength();
-				ASTNode then= ((IfStatement) statement).getThenStatement();
-				if (selectionEnd <= then.getStartPosition() + then.getLength()) {
-					if (!(then instanceof Block)) {
+				if (!(then instanceof Block)) {
+					if (selectionEnd <= thenEnd) {
 						childProperty= IfStatement.THEN_STATEMENT_PROPERTY;
 						child= then;
+						break;
+					} else if (elseStatement != null && selectionEnd < elseStatement.getStartPosition()) {
+						// find out if we are before or after the 'else' keyword
+						try {
+							TokenScanner scanner= new TokenScanner(context.getCompilationUnit());
+							int elseTokenStart= scanner.getNextStartOffset(thenEnd, true);
+							if (selectionEnd < elseTokenStart) {
+								childProperty= IfStatement.THEN_STATEMENT_PROPERTY;
+								child= then;
+								break;
+							}
+						} catch (CoreException e) {
+							// ignore
+						}
 					}
-				} else if (selectionStart >=  then.getStartPosition() + then.getLength()) {
-					ASTNode elseStatement= ((IfStatement) statement).getElseStatement();
-					if (!(elseStatement instanceof Block)) {
-						childProperty= IfStatement.ELSE_STATEMENT_PROPERTY;
-						child= elseStatement;
-					}
+				}
+				if (elseStatement != null && !(elseStatement instanceof Block) && context.getSelectionOffset() >= thenEnd) {
+					childProperty= IfStatement.ELSE_STATEMENT_PROPERTY;
+					child= elseStatement;
 				}
 				break;
 			case ASTNode.WHILE_STATEMENT:
-				ASTNode whileBody= ((WhileStatement) statement).getBody();
+				ASTNode whileBody= ((WhileStatement) node).getBody();
 				if (!(whileBody instanceof Block)) {
 					childProperty= WhileStatement.BODY_PROPERTY;
 					child= whileBody;
 				}
 				break;
 			case ASTNode.FOR_STATEMENT:
-				ASTNode forBody= ((ForStatement) statement).getBody();
+				ASTNode forBody= ((ForStatement) node).getBody();
 				if (!(forBody instanceof Block)) {
 					childProperty= ForStatement.BODY_PROPERTY;
 					child= forBody;
 				}
 				break;
 			case ASTNode.DO_STATEMENT:
-				ASTNode doBody= ((DoStatement) statement).getBody();
+				ASTNode doBody= ((DoStatement) node).getBody();
 				if (!(doBody instanceof Block)) {
 					childProperty= DoStatement.BODY_PROPERTY;
 					child= doBody;
@@ -1329,14 +1349,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (resultingCollections == null) {
 			return true;
 		}
-		AST ast= statement.getAST();
+		AST ast= node.getAST();
 		{
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 
 			ASTNode childPlaceholder= rewrite.createMoveTarget(child);
 			Block replacingBody= ast.newBlock();
 			replacingBody.statements().add(childPlaceholder);
-			rewrite.set(statement, childProperty, replacingBody, null);
+			rewrite.set(node, childProperty, replacingBody, null);
 
 			String label;
 			if (childProperty == IfStatement.THEN_STATEMENT_PROPERTY) {
@@ -1354,11 +1374,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			resultingCollections.add(proposal);
 		}
 
-		if (statement.getNodeType() == ASTNode.IF_STATEMENT) {
+		if (node.getNodeType() == ASTNode.IF_STATEMENT) {
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 			
-			while (statement.getLocationInParent() == IfStatement.ELSE_STATEMENT_PROPERTY) {
-				statement= (Statement) statement.getParent();
+			while (node.getLocationInParent() == IfStatement.ELSE_STATEMENT_PROPERTY) {
+				node= node.getParent();
 			}
 			
 			boolean missingBlockFound= false;
@@ -1368,7 +1388,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			Statement thenStatment;
 			Statement elseStatment;
 			do {
-				ifStatement= (IfStatement) statement;
+				ifStatement= (IfStatement) node;
 				thenStatment= ifStatement.getThenStatement();
 				elseStatment= ifStatement.getElseStatement();
 
@@ -1384,7 +1404,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				if (elseStatment != null) {
 					foundElse= true;
 				}
-				statement= elseStatment;
+				node= elseStatment;
 			} while (elseStatment instanceof IfStatement);
 			
 			if (elseStatment != null && !(elseStatment instanceof Block)) {
