@@ -13,11 +13,14 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.IShellProvider;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
@@ -65,13 +68,30 @@ public class BuildActionGroup extends ActionGroup {
 		}
 	}
 	
-	
-	private IWorkbenchSite fSite;
-	private ISelectionProvider fSelectionProvider;
-	
-	private BuildAction fBuildAction;
- 	private RefreshAction fRefreshAction;
+	/**
+	 * Adapts a shell the a shell provider.
+	 * 
+	 * @since 3.4
+	 */
+	private static class ShellProviderAdapter implements IShellProvider {
 
+		private final Shell fShell;
+
+		public ShellProviderAdapter(Shell shell) {
+			fShell= shell;
+		}
+
+		/* 
+		 * @see org.eclipse.jface.window.IShellProvider#getShell()
+		 */
+		public Shell getShell() {
+			return fShell;
+		}
+	}
+	
+	private final ISelectionProvider fSelectionProvider;
+	private final BuildAction fBuildAction;
+	private final RefreshAction fRefreshAction;
 
 	/**
 	 * Creates a new <code>BuildActionGroup</code>. The group requires that
@@ -100,10 +120,9 @@ public class BuildActionGroup extends ActionGroup {
 	}
 	
 	private BuildActionGroup(IWorkbenchSite site, ISelectionProvider specialSelectionProvider, RefreshAction refreshAction) {
-		fSite= site;
 		fSelectionProvider= specialSelectionProvider != null ? specialSelectionProvider : site.getSelectionProvider();
 		
-		fBuildAction= new BuildAction(fSite, IncrementalProjectBuilder.INCREMENTAL_BUILD);
+		fBuildAction= new BuildAction(new ShellProviderAdapter(site.getShell()), IncrementalProjectBuilder.INCREMENTAL_BUILD);
 		fBuildAction.setText(ActionMessages.BuildAction_label);
 		fBuildAction.setActionDefinitionId(IWorkbenchCommandIds.BUILD_PROJECT);
 				
