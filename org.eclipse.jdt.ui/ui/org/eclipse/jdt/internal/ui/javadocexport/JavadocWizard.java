@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ISelection;
@@ -115,7 +116,12 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	public static void openJavadocWizard(JavadocWizard wizard, Shell shell, IStructuredSelection selection ) {
 		wizard.init(PlatformUI.getWorkbench(), selection);
 
-		WizardDialog dialog= new WizardDialog(shell, wizard);
+		WizardDialog dialog= new WizardDialog(shell, wizard) {
+			protected IDialogSettings getDialogBoundsSettings() {
+				// added so that the wizard can remember the last used size
+				return JavaPlugin.getDefault().getDialogSettingsSection("JavadocWizardDialog"); //$NON-NLS-1$
+			}
+		};
 		PixelConverter converter= new PixelConverter(JFaceResources.getDialogFont());
 		dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(100), converter.convertHeightInCharsToPixels(20));
 		dialog.open();
