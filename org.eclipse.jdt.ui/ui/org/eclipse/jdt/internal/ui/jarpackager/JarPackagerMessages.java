@@ -17,6 +17,8 @@ public final class JarPackagerMessages extends NLS {
 
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.jarpackager.JarPackagerMessages";//$NON-NLS-1$
 
+	public static String AbstractJarDestinationWizardPage_destinationCombo_AccessibilityText;
+
 	public static String CreateJarActionDelegate_jarExport_title;
 
 	public static String CreateJarActionDelegate_jarExportError_message;

@@ -95,6 +95,9 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 		data.widthHint= SIZING_TEXT_FIELD_WIDTH;
 		data.horizontalSpan= label == null ? 2 : 1;
 		fDestinationNamesCombo.setLayoutData(data);
+		if (label == null) {
+			SWTUtil.setAccessibilityText(fDestinationNamesCombo, JarPackagerMessages.AbstractJarDestinationWizardPage_destinationCombo_AccessibilityText);
+		}
 
 		// destination browse button
 		fDestinationBrowseButton= new Button(destinationSelectionGroup, SWT.PUSH);
