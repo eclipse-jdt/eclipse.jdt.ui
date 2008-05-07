@@ -73,7 +73,11 @@ public class CodeStyleConfiguration {
 	private static ImportRewrite configureImportRewrite(ImportRewrite rewrite) {
 		IJavaProject project= rewrite.getCompilationUnit().getJavaProject();
 		String order= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_IMPORTORDER, project);
-		rewrite.setImportOrder(SEMICOLON_PATTERN.split(order, 0));
+		if (order.endsWith(";")) { //$NON-NLS-1$
+			order= order.substring(0, order.length() - 1);
+		}
+		String[] split= SEMICOLON_PATTERN.split(order, -1);
+		rewrite.setImportOrder(split);
 
 		String thres= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, project);
 		try {

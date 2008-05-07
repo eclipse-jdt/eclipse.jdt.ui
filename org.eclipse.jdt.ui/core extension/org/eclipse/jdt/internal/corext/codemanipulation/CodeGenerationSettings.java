@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,9 +15,6 @@ public class CodeGenerationSettings {
 	public boolean createComments= true;
 	public boolean useKeywordThis= false;
 	
-	public String[] importOrder= new String[0];
-	public int importThreshold= 99;
-	public int staticImportThreshold= 99;
 	public boolean importIgnoreLowercase= true;
 	public boolean overrideAnnotation= false;
 		
@@ -29,9 +26,6 @@ public class CodeGenerationSettings {
 	public void setSettings(CodeGenerationSettings settings) {
 		settings.createComments= createComments;
 		settings.useKeywordThis= useKeywordThis;
-		settings.importOrder= importOrder;
-		settings.importThreshold= importThreshold;
-		settings.staticImportThreshold= staticImportThreshold;
 		settings.importIgnoreLowercase= importIgnoreLowercase;
 		settings.overrideAnnotation= overrideAnnotation;
 		settings.tabWidth= tabWidth;
