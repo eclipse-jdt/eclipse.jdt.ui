@@ -204,14 +204,6 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		fillViewMenu(actionBars.getMenuManager());
 	}
 
-	/* package  */ void updateActionBars(IActionBars actionBars) {
-		actionBars.getToolBarManager().removeAll();
-		actionBars.getMenuManager().removeAll();
-		fillActionBars(actionBars);
-		actionBars.updateActionBars();
-		fZoomInAction.setEnabled(true);
-	}
-
 	private void setGlobalActionHandlers(IActionBars actionBars) {
 		// Navigate Go Into and Go To actions.
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.GO_INTO, fZoomInAction);

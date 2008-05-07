@@ -1291,9 +1291,7 @@ public class PackageExplorerPart extends ViewPart
 		
 		boolean refreshViewer= false;
 	
-		if (PreferenceConstants.SHOW_CU_CHILDREN.equals(event.getProperty())) {
-			fActionSet.updateActionBars(getViewSite().getActionBars());
-			
+		if (PreferenceConstants.SHOW_CU_CHILDREN.equals(event.getProperty())) {		
 			boolean showCUChildren= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SHOW_CU_CHILDREN);
 			((StandardJavaElementContentProvider)fViewer.getContentProvider()).setProvideMembers(showCUChildren);
 			
