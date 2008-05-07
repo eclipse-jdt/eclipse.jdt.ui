@@ -319,7 +319,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		if (field == fFoldersList) {
 			if (index == IDX_ADD) {
 				IProject project= fCurrJProject.getProject();
-				if (project.exists() && hasFolders(project)) {
+				if (project.isAccessible() && hasFolders(project)) {
 					List existingElements= fFoldersList.getElements();
 					CPListElement[] existing= (CPListElement[])existingElements.toArray(new CPListElement[existingElements.size()]);
 					CreateMultipleSourceFoldersDialog dialog= new CreateMultipleSourceFoldersDialog(fCurrJProject, existing, fOutputLocationField.getText(), getShell());

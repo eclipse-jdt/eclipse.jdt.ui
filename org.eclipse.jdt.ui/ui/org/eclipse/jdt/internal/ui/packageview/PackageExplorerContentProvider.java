@@ -289,8 +289,12 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			if (parentElement instanceof PackageFragmentRootContainer)
 				return getContainerPackageFragmentRoots((PackageFragmentRootContainer)parentElement);
 				
-			if (parentElement instanceof IProject) 
-				return ((IProject)parentElement).members();
+			if (parentElement instanceof IProject) {
+				IProject project= (IProject) parentElement;
+				if (project.isAccessible())
+					return project.members();
+				return NO_CHILDREN;
+			}
 			
 			return super.getChildren(parentElement);
 		} catch (CoreException e) {

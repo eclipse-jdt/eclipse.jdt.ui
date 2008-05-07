@@ -228,10 +228,15 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			if (inputElement instanceof IPackageFragment) {
 				fElements= getPackageContent((IPackageFragment) inputElement);
 			} else if (inputElement instanceof IProject) {
-				try {
-					fElements= ((IProject) inputElement).members();
-				} catch (CoreException e) {
-					JavaPlugin.log(e);
+				IProject project= (IProject) inputElement;
+				if (project.isAccessible()) {
+					try {
+						fElements= ((IProject) inputElement).members();
+					} catch (CoreException e) {
+						JavaPlugin.log(e);
+					}
+				} else {
+					fElements= new Object[0];
 				}
 			} else if (inputElement instanceof IPackageFragmentRoot) {
 				Object[] fragments= fParent.getChildren(inputElement);
@@ -289,8 +294,12 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		 */
 		public boolean hasChildren(Object element) {
 			if (element instanceof IProject) {
+				IProject project= (IProject) element;
+				if (!project.isAccessible()) {
+					return false;
+				}
 				try {
-					return ((IProject) element).members().length > 0;
+					return project.members().length > 0;
 				} catch (CoreException e) {
 					JavaPlugin.log(e);
 				}
