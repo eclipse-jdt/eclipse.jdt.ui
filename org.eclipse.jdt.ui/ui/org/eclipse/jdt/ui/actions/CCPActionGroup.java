@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.swt.dnd.Clipboard;
-
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelection;
@@ -47,15 +45,13 @@ import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
  */
 public class CCPActionGroup extends ActionGroup {
 
-	private Clipboard fClipboard;
+ 	private final SelectionDispatchAction[] fActions;
 
- 	private SelectionDispatchAction[] fActions;
-
- 	private SelectionDispatchAction fDeleteAction;
-	private SelectionDispatchAction fCopyAction;
-	private SelectionDispatchAction fCopyQualifiedNameAction;
-	private SelectionDispatchAction fPasteAction;
-	private SelectionDispatchAction fCutAction;
+ 	private final SelectionDispatchAction fDeleteAction;
+	private final SelectionDispatchAction fCopyAction;
+	private final SelectionDispatchAction fCopyQualifiedNameAction;
+	private final SelectionDispatchAction fPasteAction;
+	private final SelectionDispatchAction fCutAction;
 	private final ISelectionProvider fSelectionProvider;
 	
 	/**
@@ -93,18 +89,17 @@ public class CCPActionGroup extends ActionGroup {
 	 */
 	public CCPActionGroup(IWorkbenchSite site, ISelectionProvider specialSelectionProvider) {
 		fSelectionProvider= specialSelectionProvider == null ? site.getSelectionProvider() : specialSelectionProvider;
-		fClipboard= new Clipboard(site.getShell().getDisplay());
 		
-		fPasteAction= new PasteAction(site, fClipboard);
+		fPasteAction= new PasteAction(site);
 		fPasteAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.PASTE);
 		
-		fCopyAction= new CopyToClipboardAction(site, fClipboard);
+		fCopyAction= new CopyToClipboardAction(site);
 		fCopyAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.COPY);
 		
 		fCopyQualifiedNameAction= new CopyQualifiedNameAction(site);
 		fCopyQualifiedNameAction.setActionDefinitionId(CopyQualifiedNameAction.ACTION_DEFINITION_ID);
 		
-		fCutAction= new CutAction(site, fClipboard);
+		fCutAction= new CutAction(site);
 		fCutAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.CUT);
 		
 		fDeleteAction= new DeleteAction(site);
@@ -178,10 +173,6 @@ public class CCPActionGroup extends ActionGroup {
 	 */
 	public void dispose() {
 		super.dispose();
-		if (fClipboard != null){
-			fClipboard.dispose();
-			fClipboard= null;
-		}
 		deregisterActionsAsSelectionChangeListeners();
 	}
 

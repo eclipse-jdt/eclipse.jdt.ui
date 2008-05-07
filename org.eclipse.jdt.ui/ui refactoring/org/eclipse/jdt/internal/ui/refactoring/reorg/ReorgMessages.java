@@ -125,8 +125,8 @@ public final class ReorgMessages extends NLS {
 	public static String DeleteResourcesAction_sure_delete_linked_single_package_or_pfr;
 	public static String DeleteResourcesAction_sure_delete_linked_multiple;
 	public static String DeleteResourcesAction_sure_delete_linked_multiple_with_packages_or_pfr;
-	public static String CopyToClipboardAction_0;
-	public static String CopyToClipboardAction_1;
+	public static String CopyToClipboardAction_text;
+	public static String CopyToClipboardAction_description;
 	public static String CopyToClipboardAction_2;
 	public static String CopyToClipboardAction_3;
 	public static String CopyToClipboardAction_4;

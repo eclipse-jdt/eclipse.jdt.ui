@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,14 +41,12 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.TypedSource;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ParentChecker;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
@@ -62,12 +60,15 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 
 	private final Clipboard fClipboard;
 	private boolean fAutoRepeatOnFailure= false;
+	
+	public CopyToClipboardAction(IWorkbenchSite site) {
+		this(site, null);
+	}
 
 	public CopyToClipboardAction(IWorkbenchSite site, Clipboard clipboard) {
 		super(site);
-		setText(ReorgMessages.CopyToClipboardAction_0); 
-		setDescription(ReorgMessages.CopyToClipboardAction_1); 
-		Assert.isNotNull(clipboard);
+		setText(ReorgMessages.CopyToClipboardAction_text); 
+		setDescription(ReorgMessages.CopyToClipboardAction_description);
 		fClipboard= clipboard;
 		ISharedImages workbenchImages= getWorkbenchSharedImages();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY_DISABLED));
@@ -90,21 +91,13 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		try {
-			List elements= selection.toList();
-			IResource[] resources= ReorgUtils.getResources(elements);
-			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
-			if (elements.size() != resources.length + javaElements.length)
-				setEnabled(false);
-			else
-				setEnabled(canEnable(resources, javaElements));
-		} catch (JavaModelException e) {
-			//no ui here - this happens on selection changes
-			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
-			if (JavaModelUtil.isExceptionToBeLogged(e))
-				JavaPlugin.log(e);
+		List elements= selection.toList();
+		IResource[] resources= ReorgUtils.getResources(elements);
+		IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
+		if (elements.size() != resources.length + javaElements.length)
 			setEnabled(false);
-		}
+		else
+			setEnabled(canEnable(resources, javaElements));
 	}
 
 	/* (non-Javadoc)
@@ -123,10 +116,21 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 	}
 
 	private void doRun(IResource[] resources, IJavaElement[] javaElements) throws CoreException {
-		new ClipboardCopier(resources, javaElements, fClipboard, getShell(), fAutoRepeatOnFailure).copyToClipboard();
+		ClipboardCopier copier= new ClipboardCopier(resources, javaElements, getShell(), fAutoRepeatOnFailure);
+
+		if (fClipboard != null) {
+			copier.copyToClipboard(fClipboard);
+		} else {
+			Clipboard clipboard= new Clipboard(getShell().getDisplay());
+			try {
+				copier.copyToClipboard(clipboard);
+			} finally {
+				clipboard.dispose();
+			}
+		}
 	}
 
-	private boolean canEnable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
+	private boolean canEnable(IResource[] resources, IJavaElement[] javaElements) {
 		return new CopyToClipboardEnablementPolicy(resources, javaElements).canEnable();
 	}
 	
@@ -136,24 +140,21 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		private final boolean fAutoRepeatOnFailure;
 		private final IResource[] fResources;
 		private final IJavaElement[] fJavaElements;
-		private final Clipboard fClipboard;
 		private final Shell fShell;
 		private final ILabelProvider fLabelProvider;
 		
-		private ClipboardCopier(IResource[] resources, IJavaElement[] javaElements, Clipboard clipboard, Shell shell, boolean autoRepeatOnFailure){
+		private ClipboardCopier(IResource[] resources, IJavaElement[] javaElements, Shell shell, boolean autoRepeatOnFailure) {
 			Assert.isNotNull(resources);
 			Assert.isNotNull(javaElements);
-			Assert.isNotNull(clipboard);
 			Assert.isNotNull(shell);
 			fResources= resources;
 			fJavaElements= javaElements;
-			fClipboard= clipboard;
 			fShell= shell;
 			fLabelProvider= createLabelProvider();
 			fAutoRepeatOnFailure= autoRepeatOnFailure;
 		}
 
-		public void copyToClipboard() throws CoreException{
+		public void copyToClipboard(Clipboard clipboard) throws CoreException {
 			//Set<String> fileNames
 			Set fileNames= new HashSet(fResources.length + fJavaElements.length);
 			StringBuffer namesBuf = new StringBuffer();
@@ -173,7 +174,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			
 			TypedSource[] typedSources= TypedSource.createTypedSources(javaElementsForClipboard);
 			String[] fileNameArray= (String[]) fileNames.toArray(new String[fileNames.size()]);
-			copyToClipboard(resourcesForClipboard, fileNameArray, namesBuf.toString(), javaElementsForClipboard, typedSources, 0);
+			copyToClipboard(resourcesForClipboard, fileNameArray, namesBuf.toString(), javaElementsForClipboard, typedSources, 0, clipboard);
 		}
 
 		private static IJavaElement[] getCompilationUnits(IJavaElement[] javaElements) {
@@ -230,10 +231,10 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			}
 		}
 		
-		private void copyToClipboard(IResource[] resources, String[] fileNames, String names, IJavaElement[] javaElements, TypedSource[] typedSources, int repeat){
+		private void copyToClipboard(IResource[] resources, String[] fileNames, String names, IJavaElement[] javaElements, TypedSource[] typedSources, int repeat, Clipboard clipboard) {
 			final int repeat_max_count= 10;
 			try{
-				fClipboard.setContents( createDataArray(resources, javaElements, fileNames, names, typedSources),
+				clipboard.setContents(createDataArray(resources, javaElements, fileNames, names, typedSources),
 										createDataTypeArray(resources, javaElements, fileNames, typedSources));
 			} catch (SWTError e) {
 				if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD || repeat >= repeat_max_count)
@@ -246,7 +247,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 					}
 				}
 				if (fAutoRepeatOnFailure || MessageDialog.openQuestion(fShell, ReorgMessages.CopyToClipboardAction_4, ReorgMessages.CopyToClipboardAction_5)) 
-					copyToClipboard(resources, fileNames, names, javaElements, typedSources, repeat+1);
+					copyToClipboard(resources, fileNames, names, javaElements, typedSources, repeat + 1, clipboard);
 			}
 		}
 		
@@ -303,7 +304,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			fJavaElements= javaElements;
 		}
 
-		public boolean canEnable() throws JavaModelException{
+		public boolean canEnable() {
 			if (fResources.length + fJavaElements.length == 0)
 				return false;
 			if (hasProjects() && hasNonProjects())
@@ -315,7 +316,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			return true;
 		}
 
-		private boolean canCopyAllToClipboard() throws JavaModelException {
+		private boolean canCopyAllToClipboard() {
 			for (int i= 0; i < fResources.length; i++) {
 				if (! canCopyToClipboard(fResources[i])) return false;
 			}
@@ -325,7 +326,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			return true;
 		}
 
-		private static boolean canCopyToClipboard(IJavaElement element) throws JavaModelException {
+		private static boolean canCopyToClipboard(IJavaElement element) {
 			if (element == null || ! element.exists())
 				return false;
 				

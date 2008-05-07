@@ -160,10 +160,13 @@ import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
 public class PasteAction extends SelectionDispatchAction{
 
 	private final Clipboard fClipboard;
+	
+	public PasteAction(IWorkbenchSite site) {
+		this(site, null);
+	}
 
 	public PasteAction(IWorkbenchSite site, Clipboard clipboard) {
 		super(site);
-		Assert.isNotNull(clipboard);
 		fClipboard= clipboard;
 		
 		setText(ReorgMessages.PasteAction_4); 
@@ -184,31 +187,31 @@ public class PasteAction extends SelectionDispatchAction{
 		// Moved condition checking to run (see http://bugs.eclipse.org/bugs/show_bug.cgi?id=78450)
 	}
 
-	private Paster[] createEnabledPasters(TransferData[] availableDataTypes) throws JavaModelException {
+	private Paster[] createEnabledPasters(TransferData[] availableDataTypes, Clipboard clipboard) throws JavaModelException {
 		Paster paster;
 		Shell shell = getShell();
 		List result= new ArrayList(2);
-		paster= new ProjectPaster(shell, fClipboard);
+		paster= new ProjectPaster(shell, clipboard);
 		if (paster.canEnable(availableDataTypes)) 
 			result.add(paster);
 		
-		paster= new JavaElementAndResourcePaster(shell, fClipboard);
+		paster= new JavaElementAndResourcePaster(shell, clipboard);
 		if (paster.canEnable(availableDataTypes)) 
 			result.add(paster);
 
-		paster= new TypedSourcePaster(shell, fClipboard);
+		paster= new TypedSourcePaster(shell, clipboard);
 		if (paster.canEnable(availableDataTypes)) 
 			result.add(paster);
 
-		paster= new FilePaster(shell, fClipboard);
+		paster= new FilePaster(shell, clipboard);
 		if (paster.canEnable(availableDataTypes)) 
 			result.add(paster);
 		
-		paster= new WorkingSetPaster(shell, fClipboard);
+		paster= new WorkingSetPaster(shell, clipboard);
 		if (paster.canEnable(availableDataTypes))
 			result.add(paster);
 		
-		paster= new TextPaster(shell, fClipboard);
+		paster= new TextPaster(shell, clipboard);
 		if (paster.canEnable(availableDataTypes))
 			result.add(paster);
 		return (Paster[]) result.toArray(new Paster[result.size()]);
@@ -233,13 +236,19 @@ public class PasteAction extends SelectionDispatchAction{
 	}
 
 	public void run(IStructuredSelection selection) {
+		Clipboard clipboard;
+		if (fClipboard != null) {
+			clipboard= fClipboard;
+		} else {
+			clipboard= new Clipboard(getShell().getDisplay());
+		}
 		try {
-			TransferData[] availableTypes= fClipboard.getAvailableTypes();
+			TransferData[] availableTypes= clipboard.getAvailableTypes();
 			List elements= selection.toList();
 			IResource[] resources= ReorgUtils.getResources(elements);
 			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
 			IWorkingSet[] workingSets= ReorgUtils.getWorkingSets(elements);
-			Paster[] pasters= createEnabledPasters(availableTypes);
+			Paster[] pasters= createEnabledPasters(availableTypes, clipboard);
 			for (int i= 0; i < pasters.length; i++) {
 				if (pasters[i].canPasteOn(javaElements, resources, workingSets)) {
 					pasters[i].paste(javaElements, resources, workingSets, availableTypes);
@@ -256,6 +265,9 @@ public class PasteAction extends SelectionDispatchAction{
 			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.OpenRefactoringWizardAction_exception); 
 		} catch (InterruptedException e) {
 			// OK
+		} finally {
+			if (fClipboard == null)
+				clipboard.dispose();
 		}
 	}
 

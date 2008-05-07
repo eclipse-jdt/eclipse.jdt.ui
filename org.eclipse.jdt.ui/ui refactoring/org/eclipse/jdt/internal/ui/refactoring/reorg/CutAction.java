@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,8 +12,6 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
-
-import org.eclipse.swt.dnd.Clipboard;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -37,12 +35,12 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class CutAction extends SelectionDispatchAction{
 
-	private CopyToClipboardAction fCopyToClipboardAction;
+	private final CopyToClipboardAction fCopyToClipboardAction;
 
-	public CutAction(IWorkbenchSite site, Clipboard clipboard) {
+	public CutAction(IWorkbenchSite site) {
 		super(site);
 		setText(ReorgMessages.CutAction_text); 
-		fCopyToClipboardAction= new CopyToClipboardAction(site, clipboard);
+		fCopyToClipboardAction= new CopyToClipboardAction(site);
 
 		ISharedImages workbenchImages= JavaPlugin.getDefault().getWorkbench().getSharedImages();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_CUT_DISABLED));
