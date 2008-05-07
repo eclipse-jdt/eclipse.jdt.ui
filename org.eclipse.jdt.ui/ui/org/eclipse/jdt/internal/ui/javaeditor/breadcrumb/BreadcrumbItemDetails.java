@@ -17,6 +17,8 @@ import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.MenuDetectEvent;
+import org.eclipse.swt.events.MenuDetectListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.PaintEvent;
@@ -411,12 +413,19 @@ class BreadcrumbItemDetails {
 			public void mouseDown(MouseEvent e) {
 				BreadcrumbViewer viewer= fParent.getViewer();
 				viewer.selectItem(fParent);
-				if (e.button == 1) {
+				if (e.button == 1 && e.stateMask == 0) {
 					fParent.getViewer().fireDoubleClick();
 				}
 			}
 
 			public void mouseUp(MouseEvent e) {
+			}
+		});
+		control.addMenuDetectListener(new MenuDetectListener() {
+			public void menuDetected(MenuDetectEvent e) {
+				BreadcrumbViewer viewer= fParent.getViewer();
+				viewer.selectItem(fParent);
+				fParent.getViewer().fireMenuDetect(e);
 			}
 		});
 	}

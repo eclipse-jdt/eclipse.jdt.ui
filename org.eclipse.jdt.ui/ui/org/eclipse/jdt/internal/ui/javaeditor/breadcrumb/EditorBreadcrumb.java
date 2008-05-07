@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.javaeditor.breadcrumb;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuDetectEvent;
+import org.eclipse.swt.events.MenuDetectListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -67,7 +69,6 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	private Composite fComposite;
 
 	private Listener fDisplayFocusListener;
-	private Listener fDisplayMenuListener;
 	private Listener fDisplayKeyListener;
 
 	private IPropertyChangeListener fPropertyChangeListener;
@@ -253,6 +254,42 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 				doRevealOrOpen(event.getSelection());
 			}
 		});
+		
+		fBreadcrumbViewer.addMenuDetectListener(new MenuDetectListener() {
+			public void menuDetected(MenuDetectEvent event) {
+				ISelectionProvider selectionProvider;
+				if (fBreadcrumbViewer.isDropDownOpen()) {
+					selectionProvider= fBreadcrumbViewer.getDropDownSelectionProvider();
+				} else {
+					selectionProvider= fBreadcrumbViewer;
+				}
+				
+				ActionGroup actionGroup= createContextMenuActionGroup(selectionProvider);
+				if (actionGroup == null)
+					return;
+
+				try {
+					MenuManager manager= new MenuManager();
+					actionGroup.setContext(new ActionContext(selectionProvider.getSelection()));
+					actionGroup.fillContextMenu(manager);
+
+					getTextEditor().getEditorSite().registerContextMenu(manager, selectionProvider, false);
+
+					if (manager.isEmpty())
+						return;
+
+					Menu menu= manager.createContextMenu(fBreadcrumbViewer.getControl());
+					menu.setLocation(event.x + 10, event.y + 10);
+					menu.setVisible(true);
+					while (!menu.isDisposed() && menu.isVisible()) {
+						if (!menu.getDisplay().readAndDispatch())
+							menu.getDisplay().sleep();
+					}
+				} finally {
+					actionGroup.dispose();
+				}
+			}
+		});
 
 		fPropertyChangeListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
@@ -387,50 +424,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	private void installDisplayListeners() {
 		//Sanity check
 		deinstallDisplayListeners();
-
-		fDisplayMenuListener= new Listener() {
-			public void handleEvent(Event event) {
-				if (!isBreadcrumbEvent(event))
-					return;
-				
-				if (fBreadcrumbViewer.isDropDownOpen())
-					return;
-								
-				ISelectionProvider selectionProvider;
-				if (fBreadcrumbViewer.isDropDownOpen()) {
-					selectionProvider= fBreadcrumbViewer.getDropDownSelectionProvider();
-				} else {
-					selectionProvider= fBreadcrumbViewer;
-				}
-				
-				ActionGroup actionGroup= createContextMenuActionGroup(selectionProvider);
-				if (actionGroup == null)
-					return;
-
-				try {
-					MenuManager manager= new MenuManager();
-					actionGroup.setContext(new ActionContext(selectionProvider.getSelection()));
-					actionGroup.fillContextMenu(manager);
-
-					getTextEditor().getEditorSite().registerContextMenu(manager, selectionProvider, false);
-
-					if (manager.isEmpty())
-						return;
-
-					Menu menu= manager.createContextMenu(fBreadcrumbViewer.getControl());
-					menu.setLocation(event.x + 10, event.y + 10);
-					menu.setVisible(true);
-					while (!menu.isDisposed() && menu.isVisible()) {
-						if (!menu.getDisplay().readAndDispatch())
-							menu.getDisplay().sleep();
-					}
-				} finally {
-					actionGroup.dispose();
-				}
-			}
-		};
-		Display.getDefault().addFilter(SWT.MenuDetect, fDisplayMenuListener);
-
+	
 		fDisplayKeyListener= new Listener() {
 			public void handleEvent(Event event) {
 				if (event.keyCode != SWT.ESC)
@@ -449,11 +443,6 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	 * Removes all previously installed display listeners
 	 */
 	private void deinstallDisplayListeners() {
-		if (fDisplayMenuListener != null) {
-			Display.getDefault().removeFilter(SWT.MenuDetect, fDisplayMenuListener);
-			fDisplayMenuListener= null;
-		}
-
 		if (fDisplayKeyListener != null) {
 			Display.getDefault().removeFilter(SWT.KeyDown, fDisplayKeyListener);
 			fDisplayKeyListener= null;

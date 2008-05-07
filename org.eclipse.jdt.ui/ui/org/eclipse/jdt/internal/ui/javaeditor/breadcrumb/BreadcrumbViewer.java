@@ -16,10 +16,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.ListenerList;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.MenuDetectEvent;
+import org.eclipse.swt.events.MenuDetectListener;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Color;
@@ -71,6 +74,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	
 	private final Composite fContainer;
 	private final ArrayList fBreadcrumbItems;
+	private final ListenerList fMenuListeners;
 
 	private Image fGradientBackground;
 	private BreadcrumbItem fSelectedItem;
@@ -91,6 +95,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	 */
 	public BreadcrumbViewer(Composite parent, int style) {
 		fBreadcrumbItems= new ArrayList();
+		fMenuListeners= new ListenerList();
 
 		fContainer= new Composite(parent, SWT.NONE);
 		GridData layoutData= new GridData(SWT.FILL, SWT.TOP, true, false);
@@ -273,6 +278,26 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		}
 
 		return null;
+	}
+	
+	/**
+	 * Add the given listener to the set of listeners which will be informed
+	 * when a context menu is requested for a breadcrumb item.
+	 * 
+	 * @param listener the listener to add
+	 */
+	public void addMenuDetectListener(MenuDetectListener listener) {
+		fMenuListeners.add(listener);
+	}
+	
+	/**
+	 * Remove the given listener from the set of menu detect listeners.
+	 * Does nothing if the listener is not element of the set.
+	 * 
+	 * @param listener the listener to remove
+	 */
+	public void removeMenuDetectListener(MenuDetectListener listener) {
+		fMenuListeners.remove(listener);
 	}
 
 	/* (non-Javadoc)
@@ -514,6 +539,18 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	 */
 	void fireMenuSelection(Object element) {
 		fireOpen(new OpenEvent(this, new StructuredSelection(element)));
+	}
+	
+	/**
+	 * A context menu has been requested for the selected breadcrumb item.
+	 * 
+	 * @param event the event issued the menu detection
+	 */
+	void fireMenuDetect(MenuDetectEvent event) {
+		Object[] listeners= fMenuListeners.getListeners();
+		for (int i= 0; i < listeners.length; i++) {
+			((MenuDetectListener)listeners[i]).menuDetected(event);
+		}
 	}
 	
 	/**
