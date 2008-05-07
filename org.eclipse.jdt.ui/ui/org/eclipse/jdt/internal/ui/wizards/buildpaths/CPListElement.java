@@ -488,6 +488,20 @@ public class CPListElement {
 	public boolean isMissing() {
 		return fIsMissing;
 	}
+	
+	/**
+	 * Returns if a entry has children that are missing
+	 * @return Returns a boolean
+	 */
+	public boolean hasMissingChildren() {
+		for (int i= 0; i < fChildren.size(); i++) {
+			Object curr= fChildren.get(i);
+			if (curr instanceof CPListElement && ((CPListElement) curr).isMissing()) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Sets the 'missing' state of the entry.

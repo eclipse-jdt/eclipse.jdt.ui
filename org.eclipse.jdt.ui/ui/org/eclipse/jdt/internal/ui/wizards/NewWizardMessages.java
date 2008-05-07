@@ -297,7 +297,6 @@ public final class NewWizardMessages extends NLS {
 	public static String CPListLabelProvider_new;
 	public static String CPListLabelProvider_classcontainer;
 	public static String CPListLabelProvider_twopart;
-	public static String CPListLabelProvider_willbecreated;
 	public static String CPListLabelProvider_unbound_library;
 	public static String CPListLabelProvider_systemlibrary;
 	public static String CPListLabelProvider_native_library_path;
@@ -698,6 +697,7 @@ public final class NewWizardMessages extends NLS {
 	public static String CPListLabelProvider_access_rules_label;
 	public static String CPListLabelProvider_container_access_rules;
 	public static String CPListLabelProvider_container_no_access_rules;
+	public static String CPListLabelProvider_missing;
 	
 	public static String NativeLibrariesDialog_external_message;
 	public static String SourceAttachmentBlock_extfolderdialog_message;

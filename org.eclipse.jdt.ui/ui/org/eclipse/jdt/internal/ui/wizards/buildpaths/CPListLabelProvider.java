@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 public class CPListLabelProvider extends LabelProvider {
 		
-	private String fNewLabel, fClassLabel, fCreateLabel;
+	private String fNewLabel, fClassLabel, fMissing;
 		
 	private ImageDescriptorRegistry fRegistry;
 	private ISharedImages fSharedImages;
@@ -63,7 +63,7 @@ public class CPListLabelProvider extends LabelProvider {
 	public CPListLabelProvider() {
 		fNewLabel= NewWizardMessages.CPListLabelProvider_new; 
 		fClassLabel= NewWizardMessages.CPListLabelProvider_classcontainer; 
-		fCreateLabel= NewWizardMessages.CPListLabelProvider_willbecreated; 
+		fMissing= NewWizardMessages.CPListLabelProvider_missing;
 		fRegistry= JavaPlugin.getImageDescriptorRegistry();
 	
 		fSharedImages= JavaUI.getSharedImages();
@@ -238,21 +238,33 @@ public class CPListLabelProvider extends LabelProvider {
 					if (!resource.exists()) {
 						buf.append(' ');
 						if (cpentry.isMissing()) {
-							buf.append(fCreateLabel);
+							buf.append(fMissing);
 						} else {
 							buf.append(fNewLabel);
 						}
 					}
 					return buf.toString();
 				} else {
-					return getPathString(path, resource == null);
+					String label= getPathString(path, resource == null);
+					if (cpentry.isMissing()) {
+						label= label + ' ' + fMissing;
+					}
+					return label;
 				}
 			}
 			case IClasspathEntry.CPE_VARIABLE: {
-				return getVariableString(path);
+				String label= getVariableString(path);
+				if (cpentry.isMissing()) {
+					label= label + ' ' + fMissing;
+				}
+				return label;
 			}
 			case IClasspathEntry.CPE_PROJECT:
-				return path.lastSegment();
+				String label= path.lastSegment();
+				if (cpentry.isMissing()) {
+					label= label + ' ' + fMissing;
+				}
+				return label;
 			case IClasspathEntry.CPE_CONTAINER:
 				try {
 					IClasspathContainer container= JavaCore.getClasspathContainer(path, cpentry.getJavaProject());
@@ -280,7 +292,7 @@ public class CPListLabelProvider extends LabelProvider {
 				if (resource != null && !resource.exists()) {
 					buf.append(' ');
 					if (cpentry.isMissing()) {
-						buf.append(fCreateLabel);
+						buf.append(fMissing);
 					} else {
 						buf.append(fNewLabel);
 					}
@@ -371,8 +383,8 @@ public class CPListLabelProvider extends LabelProvider {
 			CPListElement cpentry= (CPListElement) element;
 			ImageDescriptor imageDescriptor= getCPListElementBaseImage(cpentry);
 			if (imageDescriptor != null) {
-				if (cpentry.isMissing()) {
-					imageDescriptor= new JavaElementImageDescriptor(imageDescriptor, JavaElementImageDescriptor.WARNING, JavaElementImageProvider.SMALL_SIZE);
+				if (cpentry.isMissing() || cpentry.hasMissingChildren()) {
+					imageDescriptor= new JavaElementImageDescriptor(imageDescriptor, JavaElementImageDescriptor.ERROR, JavaElementImageProvider.SMALL_SIZE);
 				}
 				return fRegistry.get(imageDescriptor);
 			}
@@ -397,13 +409,17 @@ public class CPListLabelProvider extends LabelProvider {
 			}
 			return  fSharedImages.getImage(ISharedImages.IMG_OBJS_CLASSPATH_VAR_ENTRY);
 		} else if (element instanceof CPUserLibraryElement) {
-			return  fSharedImages.getImage(ISharedImages.IMG_OBJS_LIBRARY);
+			if (((CPUserLibraryElement) element).hasMissingChildren()) {
+				ImageDescriptor descriptor= fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_LIBRARY);
+				if (descriptor != null) {
+					return fRegistry.get(new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.ERROR, JavaElementImageProvider.SMALL_SIZE));
+				}
+			}
+			return fSharedImages.getImage(ISharedImages.IMG_OBJS_LIBRARY);
 		} else if (element instanceof IAccessRule) {
 			IAccessRule rule= (IAccessRule) element;
 			return AccessRulesLabelProvider.getResolutionImage(rule.getKind());
 		}
 		return null;
 	}
-
-
 }	
