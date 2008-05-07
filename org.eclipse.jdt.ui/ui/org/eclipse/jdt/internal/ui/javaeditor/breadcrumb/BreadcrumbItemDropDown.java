@@ -255,7 +255,7 @@ class BreadcrumbItemDropDown {
 		
 		fMenuIsShown= true;
 		
-		fShell= new Shell(fToolBar.getShell(), SWT.RESIZE | SWT.TOOL | SWT.BORDER);
+		fShell= new Shell(fToolBar.getShell(), SWT.RESIZE | SWT.TOOL | SWT.ON_TOP);
 		GridLayout layout= new GridLayout(1, false);
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
@@ -551,12 +551,17 @@ class BreadcrumbItemDropDown {
 		int height= Math.min(size.y, DROP_DOWN_HIGHT);
 		int width= Math.max(Math.min(size.x, DROP_DOWN_WIDTH), 250);
 
-		int x;
-		if (isLTR()) {
-			x= toolbarBounds.x - 6;
-		} else {
-			x= toolbarBounds.x + width - 6;
+		int imageBoundsX= 0;
+		if (fDropDownViewer.getTree().getItemCount() > 0) {
+			TreeItem item= fDropDownViewer.getTree().getItem(0);
+			imageBoundsX= item.getImageBounds(0).x;
 		}
+
+		Rectangle trim= fShell.computeTrim(0, 0, width, height);
+		int x= toolbarBounds.x + toolbarBounds.width + 2 + trim.x - imageBoundsX;
+		if (!isLTR())
+			x+= width;
+
 		Point pt= new Point(x, rect.y + rect.height);
 		pt= fParentComposite.toDisplay(pt);
 		
