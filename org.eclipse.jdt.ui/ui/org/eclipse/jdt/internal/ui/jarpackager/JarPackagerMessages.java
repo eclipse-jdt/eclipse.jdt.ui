@@ -305,7 +305,11 @@ public final class JarPackagerMessages extends NLS {
 
 	public static String JarPackageWizardPage_refactorings_text;
 
+	public static String JarPackageWizardPage_table_accessibility_message;
+
 	public static String JarPackageWizardPage_title;
+
+	public static String JarPackageWizardPage_tree_accessibility_message;
 
 	public static String JarPackageWizardPage_whatToExport_label;
 

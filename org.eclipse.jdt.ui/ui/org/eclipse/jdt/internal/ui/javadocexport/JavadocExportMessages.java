@@ -124,6 +124,9 @@ public final class JavadocExportMessages extends NLS {
 	public static String JavadocTreeWizardPage_javadoccommand_label;
 	public static String JavadocTreeWizardPage_javadoccommand_button_label;
 
+	public static String JavadocTreeWizardPage_table_accessibility_message;
+	public static String JavadocTreeWizardPage_tree_accessibility_message;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavadocExportMessages.class);
 	}

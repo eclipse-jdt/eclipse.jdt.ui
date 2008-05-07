@@ -206,6 +206,9 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		});
 		fInputGroup.setTreeComparator(new JavaElementComparator());
 		
+		SWTUtil.setAccessibilityText(fInputGroup.getTree(), JavadocExportMessages.JavadocTreeWizardPage_tree_accessibility_message);
+		SWTUtil.setAccessibilityText(fInputGroup.getTable(), JavadocExportMessages.JavadocTreeWizardPage_table_accessibility_message);
+		
 		IJavaElement[] elements= fStore.getInitialElements();
 		setTreeChecked(elements);
 		if (elements.length > 0) {

@@ -79,6 +79,7 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
  *	Page 1 of the JAR Package wizard
@@ -382,6 +383,9 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		fInputGroup.addListFilter(new ContainerFilter(ContainerFilter.FILTER_CONTAINERS));
 		fInputGroup.getTree().addListener(SWT.MouseUp, this);
 		fInputGroup.getTable().addListener(SWT.MouseUp, this);
+		
+		SWTUtil.setAccessibilityText(fInputGroup.getTree(), JarPackagerMessages.JarPackageWizardPage_tree_accessibility_message);
+		SWTUtil.setAccessibilityText(fInputGroup.getTable(), JarPackagerMessages.JarPackageWizardPage_table_accessibility_message);
 		
 		ICheckStateListener listener = new ICheckStateListener() {
             public void checkStateChanged(CheckStateChangedEvent event) {
