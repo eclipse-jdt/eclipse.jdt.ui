@@ -341,12 +341,14 @@ class BreadcrumbItemDetails {
 							viewer.selectItem(fParent);
 						}
 						openDropDown();
+						e.doit= false;
 						break;
 					case SWT.KEYPAD_ADD:
 						if (!fSelected) {
 							viewer.selectItem(fParent);
 						}
 						openDropDown();
+						e.doit= false;
 						break;
 					case SWT.CR:
 						if (!fSelected) {
@@ -360,6 +362,7 @@ class BreadcrumbItemDetails {
 								viewer.selectItem(fParent);
 							}
 							openDropDown();
+							e.doit= false;
 						}
 						break;
 				}
