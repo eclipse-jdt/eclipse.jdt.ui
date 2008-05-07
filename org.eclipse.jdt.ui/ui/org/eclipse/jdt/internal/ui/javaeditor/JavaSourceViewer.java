@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-import com.ibm.icu.text.BreakIterator;
+import com.ibm.icu.text.Bidi;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,10 +34,13 @@ import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextPresentationListener;
+import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.information.IInformationPresenter;
@@ -52,6 +55,7 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
@@ -130,10 +134,11 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	private boolean fIsSetVisibleDocumentDelayed= false;
 
 	/**
-	 * Word iterator. Only used in BIDI mode.
+	 * BIDI delimtiers.
+	 *
 	 * @since 3.4
 	 */
-	private BreakIterator fWordIterator;
+	private static final String BIDI_DELIMITERS= "[ \\p{Punct}&&[^_]]"; //$NON-NLS-1$
 
 
 	public JavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
@@ -413,17 +418,23 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		// Use LEFT_TO_RIGHT unless otherwise specified.
 		if ((styles & SWT.RIGHT_TO_LEFT) == 0 && (styles & SWT.LEFT_TO_RIGHT) == 0)
 			styles |= SWT.LEFT_TO_RIGHT;
-			
+		
+		final int baseLevel= (styles & SWT.RIGHT_TO_LEFT) != 0 ? Bidi.DIRECTION_RIGHT_TO_LEFT : Bidi.DIRECTION_LEFT_TO_RIGHT;
+		
 		super.createControl(parent, styles);
 
 		fBackspaceManager= new SmartBackspaceManager();
 		fBackspaceManager.install(this);
 
 		StyledText text= getTextWidget();
-		text.addBidiSegmentListener(new  BidiSegmentListener() {
+		text.addBidiSegmentListener(new BidiSegmentListener() {
 			public void lineGetSegments(BidiSegmentEvent event) {
 				if (redraws()) {
-					event.segments= getBidiLineSegments(event);
+					try {
+						event.segments= getBidiLineSegments(getDocument(), baseLevel, widgetOffset2ModelOffset(event.lineOffset), event.lineText);
+					} catch (BadLocationException e) {
+						// don't touch the segments
+					}
 				}
 			}
 		});
@@ -448,7 +459,6 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 			fBackspaceManager.uninstall();
 			fBackspaceManager= null;
 		}
-		fWordIterator= null;
 		super.handleDispose();
 	}
 
@@ -492,36 +502,105 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		return fReconciler;
 	}
 
+	/**
+	 * Returns a segmentation of the line of the given document appropriate for
+	 * Bidi rendering.
+	 *
+	 * @param document the document
+	 * @param baseLevel the base level of the line
+	 * @param lineStart the offset of the line
+	 * @param lineText Text of the line to retrieve Bidi segments for
+	 * @return the line's Bidi segmentation
+	 * @throws BadLocationException in case lineOffset is not valid in document
+	 */
+	protected static int[] getBidiLineSegments(IDocument document, int baseLevel, int lineStart, String lineText) throws BadLocationException {
 
-	protected int[] getBidiLineSegments(BidiSegmentEvent event) {
-		if (event.lineText.length() <= 1)
+		if (lineText == null || document == null)
 			return null;
 
-		if (fWordIterator == null)
-			fWordIterator= BreakIterator.getWordInstance();
-		fWordIterator.setText(event.lineText);
-		
-		int[] segments= new int[event.lineText.length()];
-		int i= fWordIterator.first();
-		int index= 1;
-		int lastSegment= 0;
-		while (i != BreakIterator.DONE) {
-			int next= fWordIterator.next();
-			if (next - i > 1) {
-				if (i > lastSegment)
-					segments[index++]= i;
-				segments[index++]= next;
-				lastSegment= next;
+		int lineLength= lineText.length();
+		if (lineLength <= 2)
+			return null;
+
+		// Have ICU compute embedding levels. Consume these levels to reduce
+		// the Bidi impact, by creating selective segments (preceding
+		// character runs with a level mismatching the base level).
+		// XXX: Alternatively, we could apply TextLayout. Pros would be full
+		// synchronization with the underlying StyledText's (i.e. native) Bidi
+		// implementation. Cons are performance penalty because of
+		// unavailability of such methods as isLeftToRight and getLevels.
+
+		Bidi bidi= new Bidi(lineText, baseLevel);
+		if (bidi.isLeftToRight())
+			// Bail out if this is not Bidi text.
+			return null;
+
+		IRegion line= document.getLineInformationOfOffset(lineStart);
+		ITypedRegion[] linePartitioning= TextUtilities.computePartitioning(document, IJavaPartitions.JAVA_PARTITIONING, lineStart, line.getLength(), false);
+		if (linePartitioning == null || linePartitioning.length < 1)
+			return null;
+
+		int segmentIndex= 1;
+		int[] segments= new int[lineLength + 1];
+		byte[] levels= bidi.getLevels();
+		int nPartitions= linePartitioning.length;
+		for (int partitionIndex= 0; partitionIndex < nPartitions; partitionIndex++) {
+
+			ITypedRegion partition = linePartitioning[partitionIndex];
+			int lineOffset= partition.getOffset() - lineStart;
+			//Assert.isTrue(lineOffset >= 0 && lineOffset < lineLength);
+
+			if (lineOffset > 0
+					&& isMismatchingLevel(levels[lineOffset], baseLevel)
+					&& isMismatchingLevel(levels[lineOffset - 1], baseLevel)) {
+				// Indicate a Bidi segment at the partition start - provided
+				// levels of both character at the current offset and its
+				// preceding character mismatch the base paragraph level.
+				// Partition end will be covered either by the start of the next
+				// partition, a delimiter inside a next partition, or end of line.
+				segments[segmentIndex++]= lineOffset;
 			}
-			i= next;
+			if (IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType())) {
+				int partitionEnd= Math.min(lineLength, lineOffset + partition.getLength());
+				while (++lineOffset < partitionEnd) {
+					if (isMismatchingLevel(levels[lineOffset], baseLevel)
+							&& String.valueOf(lineText.charAt(lineOffset)).matches(BIDI_DELIMITERS)) {
+						// For default content types, indicate a segment before
+						// a delimiting character with a mismatching embedding
+						// level.
+						segments[segmentIndex++]= lineOffset;
+					}
+				}
+			}
 		}
-
-		if (index == 0)
+		if (segmentIndex <= 1)
 			return null;
 
-		int[] result= new int[index];
-		System.arraycopy(segments, 0, result, 0, index);
-		return result;
+		segments[0]= 0;
+		if (segments[segmentIndex - 1] != lineLength)
+			segments[segmentIndex++]= lineLength;
+
+		if (segmentIndex == segments.length)
+			return segments;
+
+		int[] newSegments= new int[segmentIndex];
+		System.arraycopy(segments, 0, newSegments, 0, segmentIndex);
+		return newSegments;
+	}
+
+	/**
+	 * Checks if the given embedding level is consistent with the base level.
+	 *
+	 * @param level Character embedding level to check.
+	 * @param baseLevel Base level (direction) of the text.
+	 * @return <code>true</code> if the character level is odd and the base
+	 *         level is even OR the character level is even and the base level
+	 *         is odd, and return <code>false</code> otherwise.
+	 * 
+	 * @since 3.4
+	 */
+	private static boolean isMismatchingLevel(int level, int baseLevel) {
+		return ((level ^ baseLevel) & 1) != 0;
 	}
 
 	/**
