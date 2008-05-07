@@ -277,10 +277,6 @@ public class PackageExplorerPart extends ViewPart
 		}
 
 		protected boolean isFiltered(Object object, Object parent, ViewerFilter[] filters) {
-			if (object instanceof PackageFragmentRootContainer) {
-				return !hasFilteredChildren(object);
-			}
-			
 			boolean res= super.isFiltered(object, parent, filters);
 			if (res && isEssential(object)) {
 				return false;

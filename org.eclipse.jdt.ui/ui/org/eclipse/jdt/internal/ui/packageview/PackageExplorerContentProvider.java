@@ -310,8 +310,6 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			return NO_CHILDREN;
 			
 		List result= new ArrayList();
-
-		boolean addJARContainer= false;
 		
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 		for (int i= 0; i < roots.length; i++) {
@@ -321,7 +319,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			if (entryKind == IClasspathEntry.CPE_CONTAINER) {
 				// all ClassPathContainers are added later 
 			} else if (fShowLibrariesNode && (entryKind == IClasspathEntry.CPE_LIBRARY || entryKind == IClasspathEntry.CPE_VARIABLE)) {
-				addJARContainer= true;
+				// skip: will add the referenced library node later
 			} else {
 				if (isProjectPackageFragmentRoot(root)) {
 					// filter out package fragments that correspond to projects and
@@ -336,7 +334,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			}
 		}
 		
-		if (addJARContainer) {
+		if (fShowLibrariesNode) {
 			result.add(new LibraryContainer(project));
 		}
 		

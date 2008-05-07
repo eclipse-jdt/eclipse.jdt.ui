@@ -4710,12 +4710,20 @@
       </filter>
       <filter
             targetId="org.eclipse.jdt.ui.PackageExplorer"
+            name="%HideEmptyLibraryContainers.label"
+            enabled="true"
+            description="%HideEmptyLibraryContainers.description"
+            class="org.eclipse.jdt.internal.ui.filters.EmptyLibraryContainerFilter"
+            id="org.eclipse.jdt.ui.PackageExplorer.EmptyLibraryContainerFilter">
+      </filter>
+      <filter
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideReferencedLibraries.label"
             enabled="false"
             description="%HideReferencedLibraries.description"
             class="org.eclipse.jdt.internal.ui.filters.LibraryFilter"
             id="org.eclipse.jdt.ui.PackageExplorer.LibraryFilter">
-      </filter>
+      </filter>      
       <filter
             targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideContainedLibraries.label"

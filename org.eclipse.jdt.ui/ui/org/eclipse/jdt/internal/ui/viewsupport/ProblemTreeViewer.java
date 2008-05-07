@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -246,7 +246,12 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		return super.isExpandable(parent);
 	}
 	
-    protected final boolean hasFilteredChildren(Object parent) {
+	/**
+	 * Public method to test if a element has any children that passed the filters
+	 * @param parent the element to test
+	 * @return return <code>true</code> if the element has at least a child that passed the filters
+	 */
+	public final boolean hasFilteredChildren(Object parent) {
 		Object[] rawChildren= getRawChildren(parent);
 		return containsNonFiltered(rawChildren, parent);
     }
@@ -323,7 +328,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 	 * Public method to test if a element is filtered by the views active filters
 	 * @param object the element to test for
 	 * @param parent the parent element
-	 * @return return <code>true if the element is filtered</code>
+	 * @return return <code>true</code> if the element is filtered
 	 */
 	public boolean isFiltered(Object object, Object parent) {
 		return isFiltered(object, parent, getFilters());
