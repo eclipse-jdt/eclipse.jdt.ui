@@ -508,9 +508,8 @@ class BreadcrumbItemDropDown {
 				e.display.removeFilter(SWT.FocusIn, focusListener);
 				e.display.removeFilter(SWT.FocusOut, focusListener);
 	
-				Shell parent= fToolBar.getShell();
-				if (!parent.isDisposed()) {
-					parent.removeControlListener(controlListener);
+				if (!fToolBar.isDisposed()) {
+					fToolBar.getShell().removeControlListener(controlListener);
 				}
 			}
 		});
