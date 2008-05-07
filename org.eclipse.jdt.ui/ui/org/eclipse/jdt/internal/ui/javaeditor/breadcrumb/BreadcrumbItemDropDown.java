@@ -85,7 +85,7 @@ class BreadcrumbItemDropDown {
 			fLTR= ltr;
 		}
 		
-		/* 
+		/*
 		 * @see org.eclipse.jface.resource.CompositeImageDescriptor#drawCompositeImage(int, int)
 		 */
 		protected void drawCompositeImage(int width, int height) {
@@ -138,7 +138,7 @@ class BreadcrumbItemDropDown {
 			return ARROW_SIZE - x - 1;
 		}
 
-		/* 
+		/*
 		 * @see org.eclipse.jface.resource.CompositeImageDescriptor#getSize()
 		 */
 		protected Point getSize() {
@@ -160,10 +160,10 @@ class BreadcrumbItemDropDown {
 
 	private final BreadcrumbItem fParent;
 	private final Composite fParentComposite;
+	private final ToolBar fToolBar;
 
 	private boolean fMenuIsShown;
 	private boolean fEnabled;
-	private ToolBar fToolBar;
 	private TreeViewer fDropDownViewer;
 	private Shell fShell;
 
@@ -435,7 +435,7 @@ class BreadcrumbItemDropDown {
 			}
 		});
 
-		//process any pending focus events: 
+		//process any pending focus events:
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=217800
 		while (tree.getDisplay().readAndDispatch()) {
 		}
@@ -465,23 +465,32 @@ class BreadcrumbItemDropDown {
 	private void installCloser(final Shell shell) {
 		final Listener focusListener= new Listener() {
 			public void handleEvent(Event event) {
-				Widget focusElement= event.widget;
-				if (!(focusElement instanceof Control)) {
-					shell.close();
-					return;
-				}
-				Control control= (Control) focusElement;
-				while (control != null) {
-					if (control == shell)
+				if (event.type == SWT.FocusIn) {
+					Widget focusElement= event.widget;
+					if (!(focusElement instanceof Control)) {
+						shell.close();
 						return;
+					}
+					Control control= (Control) focusElement;
+					while (control != null) {
+						if (control == shell)
+							return;
 
-					control= control.getParent();
+						control= control.getParent();
+					}
+	
+					shell.close();
 				}
-
-				shell.close();
+				
+				if (event.type == SWT.FocusOut) {
+					if (event.display.getActiveShell() == null) {
+						shell.close();
+					}
+				}
 			}
 		};
-		Display.getDefault().addFilter(SWT.FocusIn, focusListener);
+		shell.getDisplay().addFilter(SWT.FocusIn, focusListener);
+		shell.getDisplay().addFilter(SWT.FocusOut, focusListener);
 		
 		final ControlListener controlListener= new ControlListener() {
 			public void controlMoved(ControlEvent e) {
@@ -496,7 +505,8 @@ class BreadcrumbItemDropDown {
 
 		shell.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
-				Display.getDefault().removeFilter(SWT.FocusIn, focusListener);
+				e.display.removeFilter(SWT.FocusIn, focusListener);
+				e.display.removeFilter(SWT.FocusOut, focusListener);
 	
 				Shell parent= fToolBar.getShell();
 				if (!parent.isDisposed()) {
