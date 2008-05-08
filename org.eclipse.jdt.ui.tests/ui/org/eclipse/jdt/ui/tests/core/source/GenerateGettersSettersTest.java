@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -32,8 +33,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation
 import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
-
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
@@ -72,6 +71,14 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	/**
 	 * Create and run a new getter/setter operation; do not ask for anything
 	 * (always skip setters for final fields; never overwrite existing methods).
+	 * @param type the type
+	 * @param getters fields to create getters for
+	 * @param setters fields to create setters for
+	 * @param gettersAndSetters fields to create getters and setters for
+	 * @param sort enable sort
+	 * @param visibility visibility for new methods
+	 * @param sibling element to insert before
+	 * @throws CoreException 
 	 * 
 	 */
 	private void runOperation(IType type, IField[] getters, IField[] setters, IField[] gettersAndSetters, boolean sort, int visibility, IJavaElement sibling) throws CoreException {
@@ -526,6 +533,13 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 		
 		String expected= "public class B {\r\n" + 
 				"\r\n" + 
+				"	/**\r\n" + 
+				"	 * @param o The o to set.\r\n" + 
+				"	 */\r\n" + 
+				"	public void setO(Object o) {\r\n" + 
+				"		this.o = o;\r\n" + 
+				"	}\r\n" + 
+				"\r\n" + 
 				"	private Object o;\r\n" + 
 				"\r\n" + 
 				"	/**\r\n" + 
@@ -533,13 +547,6 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	synchronized Object getO() {\r\n" + 
 				"		return o;\r\n" + 
-				"	}\r\n" + 
-				"\r\n" + 
-				"	/**\r\n" + 
-				"	 * @param o The o to set.\r\n" + 
-				"	 */\r\n" + 
-				"	public void setO(Object o) {\r\n" + 
-				"		this.o = o;\r\n" + 
 				"	}\r\n" + 
 				"}";
 		
@@ -683,5 +690,88 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 				"}";
 		
 		compareSource(expected, classB.getSource());
+	}
+	
+	public void testInsertSetterAtLocation() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("/**\n");
+		buf.append("	 * @return Returns the x.\n");
+		buf.append("	 */\n");
+		buf.append("	public Runnable getX() {\n");
+		buf.append("		return x;\n");
+		buf.append("	}");
+		String expectedGetter= buf.toString();
+				
+		assertInsertAt(expectedGetter, true);
+	}
+	
+	public void testInsertGetterAtLocation() throws Exception {	
+		StringBuffer buf= new StringBuffer();
+		buf.append("/**\n");
+		buf.append("	 * @param x The x to set.\n");
+		buf.append("	 */\n");
+		buf.append("	public void setX(Runnable x) {\n");
+		buf.append("		this.x = x;\n");
+		buf.append("	}");
+		String expectedSetter= buf.toString();
+				
+		assertInsertAt(expectedSetter, false);
+	}
+
+	private void assertInsertAt(String expectedMethod, boolean isGetter) throws CoreException {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class A  {\n");
+		buf.append("	Runnable x;\n");
+		buf.append("	\n");
+		buf.append("	A() {\n");
+		buf.append("	}\n");
+		buf.append("	\n");
+		buf.append("	void foo() {\n");
+		buf.append("	}\n");
+		buf.append("	\n");
+		buf.append("	{\n"); // initializer
+		buf.append("	}\n");
+		buf.append("	\n");
+		buf.append("	static {\n"); // static initializer
+		buf.append("	}\n");
+		buf.append("	\n");
+		buf.append("	class Inner {\n"); // inner class
+		buf.append("	}\n");
+		buf.append("}");
+		String originalContent= buf.toString();
+		
+		final int NUM_MEMBERS= 6;
+
+		
+		// try to insert the new delegate after every member and at the end
+		for (int i= 0; i < NUM_MEMBERS + 1; i++) {
+		
+			ICompilationUnit unit= null;
+			try {
+				unit= fPackageP.createCompilationUnit("A.java", originalContent, true, null);
+				
+				IType type= unit.findPrimaryType();
+				IJavaElement[] children= type.getChildren();
+				IField field= (IField) children[0];
+				assertEquals(NUM_MEMBERS, children.length);
+				
+				IJavaElement insertBefore= i < NUM_MEMBERS ? children[i] : null;
+				
+				IField[] getters= isGetter ? new IField[] { field } : new IField[0];
+				IField[] setters= !isGetter ? new IField[] { field } : new IField[0];
+				runOperation(type, getters, setters, new IField[0], false, Flags.AccPublic, insertBefore);
+				
+				IJavaElement[] newChildren= type.getChildren();
+				assertEquals(NUM_MEMBERS + 1, newChildren.length);
+				String source= ((IMember) newChildren[i]).getSource(); // new element expected at index i
+				assertEquals("Insert before " + insertBefore, expectedMethod, source);
+			} finally {
+				if (unit != null) {
+					unit.delete(true, null);
+				}
+			}
+		}
 	}
 }

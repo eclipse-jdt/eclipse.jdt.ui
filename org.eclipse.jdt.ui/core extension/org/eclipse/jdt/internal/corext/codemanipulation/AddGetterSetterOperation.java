@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -51,6 +52,8 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 /**
  * Workspace runnable to add accessor methods to fields.
@@ -173,8 +176,8 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 			} else
 				sibling= fInsert;
 			ASTNode insertion= null;
-			if (sibling instanceof IMethod)
-				insertion= ASTNodes.getParent(NodeFinder.perform(rewrite.getParent().getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
+			if (sibling instanceof IMember)
+				insertion= ASTResolving.findParentBodyDeclaration(NodeFinder.perform(fASTRoot, ((IMember) fInsert).getSourceRange()));
 			addNewAccessor(type, field, GetterSetterUtil.getGetterStub(field, name, fSettings.createComments, fVisibility | (field.getFlags() & Flags.AccStatic)), rewrite, insertion);
 		}
 	}
@@ -200,8 +203,8 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 			} else
 				sibling= fInsert;
 			ASTNode insertion= null;
-			if (sibling instanceof IMethod)
-				insertion= ASTNodes.getParent(NodeFinder.perform(fASTRoot, ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
+			if (sibling instanceof IMember)
+				insertion= ASTResolving.findParentBodyDeclaration(NodeFinder.perform(fASTRoot, ((IMember) fInsert).getSourceRange()));
 			addNewAccessor(type, field, GetterSetterUtil.getSetterStub(field, name, fSettings.createComments, fVisibility | (field.getFlags() & Flags.AccStatic)), rewrite, insertion);
 			if (Flags.isFinal(field.getFlags())) {
 				ASTNode fieldDecl= ASTNodes.getParent(NodeFinder.perform(fASTRoot, field.getNameRange()), FieldDeclaration.class);
