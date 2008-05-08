@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,6 +43,7 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
@@ -85,15 +86,15 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class JavaSearchPage extends DialogPage implements ISearchPage {
 	
 	private static class SearchPatternData {
-		private int searchFor;
-		private int limitTo;
-		private String pattern;
-		private boolean isCaseSensitive;
+		private final int searchFor;
+		private final int limitTo;
+		private final String pattern;
+		private final boolean isCaseSensitive;
+		private final int includeMask;
+		private final int matchLocations;
+		private final int scope;
+		private final IWorkingSet[] workingSets;
 		private IJavaElement javaElement;
-		private int includeMask;
-		private int matchLocations;
-		private int scope;
-		private IWorkingSet[] workingSets;
 		
 		public SearchPatternData(int searchFor, int limitTo, int matchLocations, boolean isCaseSensitive, String pattern, IJavaElement element, int includeMask) {
 			this(searchFor, limitTo, matchLocations, pattern, isCaseSensitive, element, ISearchPageContainer.WORKSPACE_SCOPE, null, includeMask);
@@ -834,15 +835,27 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	
 	private void initSelections() {
 		ISelection sel= getContainer().getSelection();
+		
+		IWorkbenchPage activePage= JavaPlugin.getActivePage();
+		if (activePage != null) {
+			IWorkbenchPart activePart= activePage.getActivePart();
+			if (activePart instanceof JavaEditor) {
+				JavaEditor javaEditor= (JavaEditor) activePart;
+				if (javaEditor.isBreadcrumbActive()) {
+					sel= javaEditor.getBreadcrumb().getSelectionProvider().getSelection();
+				}
+			}
+		}
+		
 		SearchPatternData initData= null;
 
 		if (sel instanceof IStructuredSelection) {
 			initData= tryStructuredSelection((IStructuredSelection) sel);
 		} else if (sel instanceof ITextSelection) {
-			IEditorPart activePart= getActiveEditor();
-			if (activePart instanceof JavaEditor) {
+			IEditorPart activeEditor= getActiveEditor();
+			if (activeEditor instanceof JavaEditor) {
 				try {
-					IJavaElement[] elements= SelectionConverter.codeResolve((JavaEditor) activePart);
+					IJavaElement[] elements= SelectionConverter.codeResolve((JavaEditor) activeEditor);
 					if (elements != null && elements.length > 0) {
 						initData= determineInitValuesFrom(elements[0]);
 					}
