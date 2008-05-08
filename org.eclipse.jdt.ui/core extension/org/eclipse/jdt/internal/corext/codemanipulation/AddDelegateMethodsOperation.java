@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,7 +28,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -41,11 +41,12 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.CodeStyleConfiguration;
+
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 /**
  * Workspace runnable to add delegate methods.
@@ -173,8 +174,8 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 
 			if (listRewriter != null) {
 				ASTNode insertion= null;
-				if (fInsert instanceof IMethod)
-					insertion= ASTNodes.getParent(NodeFinder.perform(fASTRoot, ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
+				if (fInsert instanceof IMember)
+					insertion= ASTResolving.findParentBodyDeclaration(NodeFinder.perform(fASTRoot, ((IMember) fInsert).getSourceRange()));
 
 				ContextSensitiveImportRewriteContext context= new ContextSensitiveImportRewriteContext(fASTRoot, typeDecl.getStartPosition(), importRewrite);
 
@@ -184,7 +185,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 					MethodDeclaration newMethod= StubUtility2.createDelegationStub(cu, astRewrite, importRewrite, context, delegateMethod, field, fSettings);
 					if (newMethod != null) {
 						fCreated.add(delegateMethod);
-						if (insertion != null)
+						if (insertion != null && insertion.getParent() == typeDecl)
 							listRewriter.insertBefore(newMethod, insertion, null);
 						else
 							listRewriter.insertLast(newMethod, null);

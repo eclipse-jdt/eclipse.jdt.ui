@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
@@ -753,5 +754,69 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 				"	}\r\n" + 
 				"}\r\n" + 
 				"", a.getSource());
+	}
+	
+	public void testInsertAt() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class A  {\n");
+		buf.append("	Runnable x;\n");
+		buf.append("	\n");
+		buf.append("	A() {\n");
+		buf.append("	}\n");
+		buf.append("	\n");
+		buf.append("	void foo() {\n");
+		buf.append("	}\n");
+		buf.append("	\n");
+		buf.append("	{\n"); // initializer
+		buf.append("	}\n");
+		buf.append("	\n");
+		buf.append("	static {\n"); // static initializer
+		buf.append("	}\n");
+		buf.append("	\n");
+		buf.append("	class Inner {\n"); // inner class
+		buf.append("	}\n");
+		buf.append("}");
+		String originalContent= buf.toString();
+		
+		final int NUM_MEMBERS= 6;
+		
+		buf= new StringBuffer();
+		buf.append("public void run() {\n");
+		buf.append("		x.run();\n");
+		buf.append("	}");
+		String expectedConstructor= buf.toString();
+		
+		
+		IType runnableType= fPackageP.getJavaProject().findType("java.lang.Runnable");
+		IMethod runMethod= runnableType.getMethod("run", new String[0]);
+		
+		// try to insert the new delegate after every member and at the end
+		for (int i= 0; i < NUM_MEMBERS + 1; i++) {
+		
+			ICompilationUnit unit= null;
+			try {
+				unit= fPackageP.createCompilationUnit("A.java", originalContent, true, null);
+				
+				IType type= unit.findPrimaryType();
+				IJavaElement[] children= type.getChildren();
+				IField foo= (IField) children[0];
+				assertEquals(NUM_MEMBERS, children.length);
+				
+				IJavaElement insertBefore= i < NUM_MEMBERS ? children[i] : null;
+	
+				runOperation(type, new IField[] { foo }, new IMethod[] { runMethod }, insertBefore, false);
+				
+				IJavaElement[] newChildren= type.getChildren();
+				assertEquals(NUM_MEMBERS + 1, newChildren.length);
+				String source= ((IMember) newChildren[i]).getSource(); // new element expected at index i
+				assertEquals("Insert before " + insertBefore, expectedConstructor, source);
+			} finally {
+				if (unit != null) {
+					unit.delete(true, null);
+				}
+			}
+		}
 	}
 }
