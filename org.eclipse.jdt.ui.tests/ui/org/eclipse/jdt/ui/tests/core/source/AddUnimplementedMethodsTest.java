@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
+
+import java.util.Hashtable;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -24,28 +26,34 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsOperation;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
@@ -79,6 +87,14 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	protected void setUp() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
+		
+		Hashtable options= TestOptions.getDefaultOptions();
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
+		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "999");
+		fJavaProject.setOptions(options);
+		
+		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "${body_statement}\n// TODO", null);
 		
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 		fPackage= root.createPackageFragment("ibm.util", true, null);
@@ -226,8 +242,87 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[0], imports);
 	}
+	
+	public void testInsertAt() throws Exception {
+		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
+		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
 
+		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
+		fPackage= root.createPackageFragment("p", true, null);
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public abstract class B  {\n");
+		buf.append("	public abstract void foo() {\n");
+		buf.append("	}\n");
+		buf.append("}");
+		fPackage.createCompilationUnit("B.java", buf.toString(), true, null);
+		
+		
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class A extends B {\n");
+		buf.append("    int x;\n");
+		buf.append("\n");
+		buf.append("    A() {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void bar() {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    {\n"); // initializer
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    static {\n"); // static initializer
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    class Inner {\n"); // inner class
+		buf.append("    }\n");
+		buf.append("}");
+		String originalContent= buf.toString();
+		
+		final int NUM_MEMBERS= 6;
+		
+		buf= new StringBuffer();
+		buf.append("public void foo() {\n");
+		buf.append("        // TODO\n");
+		buf.append("    }");
+		String expectedConstructor= buf.toString();
+		
+		// try to insert the new constructor after every member and at the end
+		for (int i= 0; i < NUM_MEMBERS + 1; i++) {
+		
+			ICompilationUnit unit= null;
+			try {
+				unit= fPackage.createCompilationUnit("A.java", originalContent, true, null);
+				
+				IType type= unit.findPrimaryType();
+				IJavaElement[] children= type.getChildren();
+				assertEquals(NUM_MEMBERS, children.length);
+				
+				int insertIndex= i < NUM_MEMBERS ? ((IMember) children[i]).getSourceRange().getOffset() : -1;
+	
+				testHelper(type, insertIndex, false);
+				
+				IJavaElement[] newChildren= type.getChildren();
+				assertEquals(NUM_MEMBERS + 1, newChildren.length);
+				String source= ((IMember) newChildren[i]).getSource(); // new element expected at index i
+				assertEquals(expectedConstructor, source);
+			} finally {
+				if (unit != null) {
+					unit.delete(true, null);
+				}
+			}
+		}
+	}	
+	
 	private void testHelper(IType testClass) throws JavaModelException, CoreException {
+		testHelper(testClass, -1, true);
+	}
+	
+	private void testHelper(IType testClass, int insertionPos, boolean implementAllOverridable) throws JavaModelException, CoreException {
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 		CompilationUnit unit= parser.parse(testClass.getCompilationUnit(), true);
 		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, testClass.getNameRange()), AbstractTypeDeclaration.class);
@@ -235,9 +330,9 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		ITypeBinding binding= declaration.resolveBinding();
 		assertNotNull("Binding for type declaration could not be resolved", binding);
 		
-		IMethodBinding[] overridableMethods= StubUtility2.getOverridableMethods(unit.getAST(), binding, false);
+		IMethodBinding[] overridableMethods= implementAllOverridable ? StubUtility2.getOverridableMethods(unit.getAST(), binding, false) : null;
 		
-		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(unit, binding, overridableMethods, -1, true, true, true);
+		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(unit, binding, overridableMethods, insertionPos, true, true, true);
 		op.run(new NullProgressMonitor());
 		JavaModelUtil.reconcile(testClass.getCompilationUnit());
 	}
