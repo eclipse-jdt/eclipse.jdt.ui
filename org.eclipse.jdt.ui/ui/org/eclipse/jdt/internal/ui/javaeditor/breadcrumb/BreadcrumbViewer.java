@@ -557,7 +557,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	 * Set selection to the next element if <code>next</code> is true, to
 	 * the previous otherwise, if possible.
 	 * 
-	 * @param next should the next or the previous elmeent be selected
+	 * @param next should the next or the previous element be selected
 	 */
 	void doTraverse(boolean next) {
 		if (fSelectedItem == null)
@@ -568,6 +568,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 			if (index == fBreadcrumbItems.size() - 1) {
 				BreadcrumbItem current= (BreadcrumbItem) fBreadcrumbItems.get(index);
 				current.openDropDownMenu();
+				current.getDropDownShell().setFocus();
 			} else {
 				BreadcrumbItem nextItem= (BreadcrumbItem) fBreadcrumbItems.get(index + 1);
 				selectItem(nextItem);
@@ -576,6 +577,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 			if (index == 1) {
 				BreadcrumbItem root= (BreadcrumbItem) fBreadcrumbItems.get(0);
 				root.openDropDownMenu();
+				root.getDropDownShell().setFocus();
 			} else {
 				selectItem((BreadcrumbItem) fBreadcrumbItems.get(index - 1));
 			}
