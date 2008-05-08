@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,7 +44,6 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
@@ -125,30 +124,33 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fLabels= new ArrayList(); 
 		
 		IJavaElement[] members= fType.getChildren();
-		IMethod[] methods= fType.getMethods();
 		
-		fInsertPositions.add(methods.length > 0 ? methods[0]: null); // first
+		fInsertPositions.add(members.length > 0 ? members[0]: null); // first
 		fInsertPositions.add(null); // last
 		
-		fLabels.add(ActionMessages.SourceActionDialog_first_method); 
-		fLabels.add(ActionMessages.SourceActionDialog_last_method); 
+		fLabels.add(ActionMessages.SourceActionDialog_first); 
+		fLabels.add(ActionMessages.SourceActionDialog_last); 
 
-		if (hasCursorPositionElement(fEditor, members, fInsertPositions)) {
-			fLabels.add(ActionMessages.SourceActionDialog_cursor); 
-			fCurrentPositionIndex= 2;
-		} else {
-			// code is needed to deal with bogus values already present in the dialog store.
-			fCurrentPositionIndex= Math.max(fCurrentPositionIndex, 0);
-			fCurrentPositionIndex= Math.min(fCurrentPositionIndex, 1);
-		}
-		
-		for (int i = 0; i < methods.length; i++) {
-			IMethod curr= methods[i];
+		for (int i = 0; i < members.length; i++) {
+			IJavaElement curr= members[i];
 			String methodLabel= JavaElementLabels.getElementLabel(curr, JavaElementLabels.M_PARAMETER_TYPES);
 			fLabels.add(Messages.format(ActionMessages.SourceActionDialog_after, methodLabel)); 
 			fInsertPositions.add(findSibling(curr, members));
 		}
 		fInsertPositions.add(null);
+		
+		int indexBeforeCursor= getElementAfterCursorPosition(fEditor, members);
+		if (indexBeforeCursor != -1) {
+			if (indexBeforeCursor == 0) {
+				fCurrentPositionIndex= 0; // first
+			} else {
+				fCurrentPositionIndex= indexBeforeCursor + 1;
+			}
+		} else {
+			// code is needed to deal with bogus values already present in the dialog store.
+			fCurrentPositionIndex= Math.max(fCurrentPositionIndex, 0);
+			fCurrentPositionIndex= Math.min(fCurrentPositionIndex, 1);
+		}
 	}
 
 	protected IType getType() {
@@ -169,9 +171,9 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		return defaultValue;
 	}
 
-	private IJavaElement findSibling(IMethod curr, IJavaElement[] members) throws JavaModelException {
+	private IJavaElement findSibling(IJavaElement curr, IJavaElement[] members) throws JavaModelException {
 		IJavaElement res= null;
-		int methodStart= curr.getSourceRange().getOffset();
+		int methodStart= ((IMember) curr).getSourceRange().getOffset();
 		for (int i= members.length-1; i >= 0; i--) {
 			IMember member= (IMember) members[i];
 			if (methodStart >= member.getSourceRange().getOffset()) {
@@ -182,9 +184,9 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		return null;
 	}
 
-	private boolean hasCursorPositionElement(CompilationUnitEditor editor, IJavaElement[] members, List insertPositions) throws JavaModelException {
+	private int getElementAfterCursorPosition(CompilationUnitEditor editor, IJavaElement[] members) throws JavaModelException {
 		if (editor == null) {
-			return false;
+			return -1;
 		}
 		int offset= ((ITextSelection) editor.getSelectionProvider().getSelection()).getOffset();
 
@@ -192,14 +194,10 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 			IMember curr= (IMember) members[i];
 			ISourceRange range= curr.getSourceRange();
 			if (offset < range.getOffset()) {
-				insertPositions.add(curr);
-				return true;
-			} else if (offset < range.getOffset() + range.getLength()) {
-				return false; // in the middle of a member
+				return i;
 			}
 		}
-		insertPositions.add(null);
-		return true;
+		return members.length;
 	}
 
 	/* (non-Javadoc)
@@ -230,6 +228,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	
 	/***
 	 * Set insert position valid input is 0 for the first position, 1 for the last position, > 1 for all else.
+	 * @param insert the insert position
 	 */
 	private void setInsertPosition(int insert) {
 		fCurrentPositionIndex= insert;
@@ -296,6 +295,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	/**
 	 * Returns a composite containing the label created at the top of the dialog. Returns null if there is the
 	 * message for the label is null.
+	 * @param composite the parent composite
+	 * @return the label
 	 */
 	protected Label createMessageArea(Composite composite) {
 		if (getMessage() != null) {
@@ -369,6 +370,12 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		return composite;
 	}				
 
+	/**
+	 * Clients override to provide link control
+	 * 
+	 * @param composite the parent composite
+	 * @return the created control or <code>null</code>
+	 */
 	protected Control createLinkControl(Composite composite) {
 		return null; // No link as default
 	}

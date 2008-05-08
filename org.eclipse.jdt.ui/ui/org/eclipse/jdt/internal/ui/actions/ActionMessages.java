@@ -186,9 +186,8 @@ public final class ActionMessages extends NLS {
 	public static String SourceActionDialog_modifier_private;
 	public static String SourceActionDialog_modifier_synchronized;
 	public static String SourceActionDialog_modifier_final;
-	public static String SourceActionDialog_first_method;
-	public static String SourceActionDialog_last_method;
-	public static String SourceActionDialog_cursor;
+	public static String SourceActionDialog_first;
+	public static String SourceActionDialog_last;
 	public static String SourceActionDialog_after;
 	public static String SourceActionDialog_createMethodComment;
 	public static String SourceActionDialog_no_entries;
