@@ -264,6 +264,7 @@ public interface IJavaHelpContextIds {
 	public static final String JAVA_SEARCH_PAGE= PREFIX + "java_search_page_context"; //$NON-NLS-1$
 	public static final String NLS_SEARCH_PAGE= PREFIX + "nls_search_page_context"; //$NON-NLS-1$
 	public static final String JAVA_EDITOR= PREFIX + "java_editor_context"; //$NON-NLS-1$
+	public static final String JAVA_EDITOR_BREADCRUMB= PREFIX + "java_editor_breadcrumb_context"; //$NON-NLS-1$;
 	public static final String GOTO_RESOURCE_DIALOG= PREFIX + "goto_resource_dialog";  //$NON-NLS-1$
 	
 	public static final String COMPARE_DIALOG= PREFIX + "compare_dialog_context"; //$NON-NLS-1$
