@@ -214,24 +214,6 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 			item.setFocus(true);
 		}
 	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.StructuredViewer#update(java.lang.Object[], java.lang.String[])
-	 */
-	public void update(Object[] elements, String[] properties) {
-		fContainer.setRedraw(false);
-		try {
-			super.update(elements, properties);
-			
-			if (containsAny(elements)) {
-				fContainer.layout(true, true);
-				if (updateSize())
-					fContainer.layout(true, true);
-			}
-		} finally {
-			fContainer.setRedraw(true);
-		}
-	}
 	
 	/**
 	 * @return true if any of the items in the viewer is expanded
@@ -697,32 +679,6 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		}
 	
 		return result;
-	}
-
-	private boolean containsAny(Object[] elements) {
-		for (int i= 0, size= fBreadcrumbItems.size(); i < size; i++) {
-			BreadcrumbItem item= (BreadcrumbItem) fBreadcrumbItems.get(i);
-			Object child= item.getData();
-			if (contains(elements, child))
-				return true;
-		}
-
-		return false;
-	}
-
-	private boolean contains(Object[] elements, Object element) {
-		if (element == null)
-			return false;
-
-		for (int i= 0; i < elements.length; i++) {
-			Object changedElement= elements[i];
-			if (changedElement == element)
-				return true;
-
-			if (element.equals(changedElement))
-				return true;
-		}
-		return false;
 	}
 
 	/**
