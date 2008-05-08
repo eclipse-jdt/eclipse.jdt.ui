@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -109,6 +110,10 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	}
 
 	private AddUnimplementedConstructorsOperation createOperation(IType type) throws CoreException {
+		return createOperation(type, -1);
+	}
+		
+	private AddUnimplementedConstructorsOperation createOperation(IType type, int insertPos) throws CoreException {	
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 		CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);
 		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), AbstractTypeDeclaration.class);
@@ -116,7 +121,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		ITypeBinding binding= declaration.resolveBinding();
 		assertNotNull("Binding for type declaration could not be resolved", binding);
 		
-		return new AddUnimplementedConstructorsOperation(unit, binding, null, -1, true, true, true);
+		return new AddUnimplementedConstructorsOperation(unit, binding, null, insertPos, true, true, true);
 	}
 
 	private void initCodeTemplates() {
@@ -184,7 +189,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		JavaModelUtil.reconcile(testClass.getCompilationUnit());
 
 		IMethod[] createdMethods= testClass.getMethods();
-		checkMethods(new String[] { "Test1"}, createdMethods); //$NON-NLS-1$ //$NON-NLS-2$
+		checkMethods(new String[] { "Test1"}, createdMethods); //$NON-NLS-1$ 
 
 		checkDefaultConstructorWithCommentWithSuper(createdMethods[0].getSource());
 
@@ -1092,4 +1097,86 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 
 		compareSource(buf.toString(), testClass.getSource());
 	}
+	
+	public void testInsertAt() throws Exception {
+		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
+		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
+
+		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
+		fPackage= root.createPackageFragment("p", true, null);
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class B  {\n");
+		buf.append("	public B(int x) {\n");
+		buf.append("	}\n");
+		buf.append("}");
+		fPackage.createCompilationUnit("B.java", buf.toString(), true, null);
+		
+		
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class A extends B {\n");
+		buf.append("    int x;\n");
+		buf.append("\n");
+		buf.append("    A() {\n");
+		buf.append("        super(1);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void foo() {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    {\n"); // initializer
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    static {\n"); // static initializer
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    class Inner {\n"); // inner class
+		buf.append("    }\n");
+		buf.append("}");
+		String originalContent= buf.toString();
+		
+		final int NUM_MEMBERS= 6;
+		
+		buf= new StringBuffer();
+		buf.append("public A(int x) {\n");
+		buf.append("        super(x);\n");
+		buf.append("        // TODO\n");
+		buf.append("    }");
+		String expectedConstructor= buf.toString();
+		
+		// try to insert the new constructor after every member and at the end
+		for (int i= 0; i < NUM_MEMBERS + 1; i++) {
+		
+			ICompilationUnit unit= null;
+			try {
+				unit= fPackage.createCompilationUnit("A.java", originalContent, true, null);
+				
+				IType type= unit.findPrimaryType();
+				IJavaElement[] children= type.getChildren();
+				assertEquals(NUM_MEMBERS, children.length);
+				
+				int insertIndex= i < NUM_MEMBERS ? ((IMember) children[i]).getSourceRange().getOffset() : -1;
+	
+				AddUnimplementedConstructorsOperation op= createOperation(type, insertIndex);
+				op.setCreateComments(false);
+				op.setOmitSuper(false);
+				op.setVisibility(Modifier.PUBLIC);
+				op.run(new NullProgressMonitor());
+				JavaModelUtil.reconcile(type.getCompilationUnit());
+				
+				IJavaElement[] newChildren= type.getChildren();
+				assertEquals(NUM_MEMBERS + 1, newChildren.length);
+				String source= ((IMember) newChildren[i]).getSource(); // new element expected at index i
+				assertEquals(expectedConstructor, source);
+			} finally {
+				if (unit != null) {
+					unit.delete(true, null);
+				}
+			}
+		}
+	}	
 }
