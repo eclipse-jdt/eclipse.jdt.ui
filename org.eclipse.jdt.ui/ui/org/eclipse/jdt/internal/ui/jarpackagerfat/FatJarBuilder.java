@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
@@ -82,6 +83,20 @@ public class FatJarBuilder extends JarBuilder {
 	 */
 	public void writeFile(IFile resource, IPath destinationPath) throws CoreException {
 		fJarWriter.write(resource, destinationPath);
+	}
+	
+	/**
+	 * Add the given file to the archive at the given path
+	 * 
+	 * @param file
+	 *        the file to be written
+	 * @param destinationPath
+	 *        the path for the file inside the archive
+	 * @throws CoreException
+	 *        thrown when the file could not be written
+	 */
+	public void writeFile(File file, IPath destinationPath) throws CoreException {
+		fJarWriter.write(file, destinationPath);
 	}
 
 	/**

@@ -57,6 +57,7 @@ import org.eclipse.jface.operation.ModalContext;
 
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
@@ -84,6 +85,7 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarBuilder;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
@@ -217,6 +219,12 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 							} catch (CoreException e) {
 								JavaPlugin.log(e);
 							}
+						} else if (root.isExternal()) {
+							try {
+								count+= getClassFileCount(root.getChildren());
+							} catch (JavaModelException e) {
+								JavaPlugin.log(e);
+							}
 						}
 					}
 					continue;
@@ -254,6 +262,19 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		return count;
 	}
 	
+	private int getClassFileCount(IJavaElement[] children) throws JavaModelException {
+		int result= 0;
+		for (int i= 0; i < children.length; i++) {
+			if (children[i] instanceof IClassFile) {
+				result++;
+			} else if (children[i] instanceof IPackageFragment) {
+				IPackageFragment fragment= (IPackageFragment) children[i];
+				result+= getClassFileCount(fragment.getChildren());
+			}
+		}
+		return result;
+	}
+
 	private int getTotalChildCount(IContainer container) {
 		IResource[] members;
 		try {
@@ -381,12 +402,45 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			return;
 		} else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT && ((IPackageFragmentRoot) je).isExternal()) {
 			//External class folder
+			if (fJarBuilder instanceof FatJarBuilder) {
+				exportExternalClassFolder(((IPackageFragmentRoot) je), progressMonitor);
+			} else {
+				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_canNotExportExternalClassFolder_warning, BasicElementLabels.getPathLabel(je.getPath(), true)), null);
+			}
 			return;
 		}
 
 		Object[] children= fJavaElementContentProvider.getChildren(je);
 		for (int i= 0; i < children.length; i++)
 			exportElement(children[i], progressMonitor);
+	}
+
+	private void exportExternalClassFolder(IPackageFragmentRoot classFolder, IProgressMonitor progressMonitor) {
+		try {
+			IJavaElement[] children= classFolder.getChildren();
+			for (int i= 0; i < children.length; i++) {
+				exportExternalClassFolderElement(children[i], classFolder.getPath(), progressMonitor);
+			}
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		}
+	}
+
+	private void exportExternalClassFolderElement(IJavaElement javaElement, IPath classFolderPath, IProgressMonitor progressMonitor) throws CoreException {
+		if (javaElement instanceof IClassFile) {
+			IClassFile classFile= (IClassFile) javaElement;
+			IPath path= classFile.getPath();
+			
+			IPath destination= path.removeFirstSegments(classFolderPath.segmentCount()).setDevice(null);
+
+			((FatJarBuilder) fJarBuilder).writeFile(path.toFile(), destination);
+			progressMonitor.worked(1);
+		} else if (javaElement instanceof IPackageFragment) {
+			IJavaElement[] children= ((IPackageFragment) javaElement).getChildren();
+			for (int i= 0; i < children.length; i++) {
+				exportExternalClassFolderElement(children[i], classFolderPath, progressMonitor);
+			}
+		}
 	}
 
 	private void exportResource(IProgressMonitor progressMonitor, IResource resource, int leadingSegmentsToRemove) throws InterruptedException {

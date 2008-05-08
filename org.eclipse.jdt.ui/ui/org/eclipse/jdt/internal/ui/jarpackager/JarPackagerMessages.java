@@ -25,6 +25,8 @@ public final class JarPackagerMessages extends NLS {
 
 	public static String CreateJarActionDelegate_jarExportError_title;
 
+	public static String JarFileExportOperation_canNotExportExternalClassFolder_warning;
+
 	public static String JarFileExportOperation_cantGetRootKind;
 
 	public static String JarFileExportOperation_classFileOnClasspathNotAccessible;

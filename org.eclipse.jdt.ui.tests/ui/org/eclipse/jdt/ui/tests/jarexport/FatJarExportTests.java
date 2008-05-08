@@ -206,6 +206,7 @@ public class FatJarExportTests extends TestCase {
 	private static JarPackageData createJarPackageData(IJavaProject project, String testName) throws CoreException {
 		JarPackageData data= new JarPackageData();
 		data.setJarBuilder(new FatJarBuilder());
+		data.setOverwrite(true);
 
 		IPath destination= ResourcesPlugin.getWorkspace().getRoot().getLocation().append(testName + ".jar");
 		data.setJarLocation(destination);
@@ -570,6 +571,21 @@ public class FatJarExportTests extends TestCase {
 					new String[]{"rtstubs15.jar", "TestSetupProject/mylib_sig.jar"});
 		} finally {
 			JavaProjectHelper.removeFromClasspath(fProject, root.getPath());
+		}
+	}
+	
+	public void testExternalClassFolder() throws Exception {
+		File classFolder= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/externalClassFolder/"));//$NON-NLS-1$
+		assertTrue("class folder not found", classFolder != null && classFolder.exists());//$NON-NLS-1$
+		IPackageFragmentRoot externalRoot= JavaProjectHelper.addLibrary(fProject, Path.fromOSString(classFolder.getPath()), null, null); //$NON-NLS-1$
+
+		try {
+			JarPackageData data= createAndRunFatJar(fProject, getName(), true);
+			assertAntScript(data, antScriptLocation(getName()), 
+					new String[] { "TestSetupProject/bin", "testresources/externalClassFolder" }, 
+					new String[] { "rtstubs15.jar" });
+		} finally {
+			JavaProjectHelper.removeFromClasspath(fProject, externalRoot.getPath());
 		}
 	}
 }
