@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1300,5 +1300,61 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 		}
 	}
 
+	public void testInsertAt() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class A  {\n");
+		buf.append("	Runnable x;\n");
+		buf.append("	\n");
+		buf.append("	A() {\n");
+		buf.append("	}\n");
+		buf.append("	\n");
+		buf.append("	void foo() {\n");
+		buf.append("	}\n");
+		buf.append("	\n");
+		buf.append("	{\n"); // initializer
+		buf.append("	}\n");
+		buf.append("	\n");
+		buf.append("	static {\n"); // static initializer
+		buf.append("	}\n");
+		buf.append("	\n");
+		buf.append("	class Inner {\n"); // inner class
+		buf.append("	}\n");
+		buf.append("}");
+		String originalContent= buf.toString();
+		
+		final int NUM_MEMBERS= 6;
+		
+		// try to insert the new methods after every member and at the end
+		for (int i= 0; i < NUM_MEMBERS + 1; i++) {
+		
+			ICompilationUnit unit= null;
+			try {
+				unit= fPackageP.createCompilationUnit("A.java", originalContent, true, null);
+				
+				IType type= unit.findPrimaryType();
+				IJavaElement[] children= type.getChildren();
+				IField foo= (IField) children[0];
+				assertEquals(NUM_MEMBERS, children.length);
+				
+				IJavaElement insertBefore= i < NUM_MEMBERS ? children[i] : null;
+	
+				runOperation(type, new IField[] { foo }, insertBefore, false, false, false, false);
+				
+				IJavaElement[] newChildren= type.getChildren();
+				assertEquals(NUM_MEMBERS + 2, newChildren.length);
+
+				assertEquals("hashCode", newChildren[i].getElementName());
+				assertEquals("equals", newChildren[i + 1].getElementName());
+			} finally {
+				if (unit != null) {
+					unit.delete(true, null);
+				}
+			}
+		}
+	}
+	
+	
 
 }

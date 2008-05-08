@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -80,6 +80,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
+
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 /**
  * <p>
@@ -294,8 +296,8 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 				ICompilationUnit cu= (ICompilationUnit) fUnit.getJavaElement();
 
 				ASTNode insertion= null;
-				if (fInsert instanceof IMethod)
-					insertion= ASTNodes.getParent(NodeFinder.perform(fRewrite.getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
+				if (fInsert instanceof IMember)
+					insertion= ASTResolving.findParentBodyDeclaration(NodeFinder.perform(fUnit, ((IMember) fInsert).getSourceRange()));
 
 				// equals(..)
 				ITypeBinding[] objectAsParam= { declaration.getAST().resolveWellKnownType("java.lang.Object") }; //$NON-NLS-1$
