@@ -47,13 +47,12 @@ class BreadcrumbItemDetails {
 	private final Label fElementText;
 	private final Composite fDetailComposite;
 	private final BreadcrumbItem fParent;
+	private final Composite fTextComposite;
+	private final Composite fImageComposite;
 
 	private boolean fTextVisible;
 	private boolean fSelected;
 	private boolean fHasFocus;
-
-	private Composite fTextComposite;
-	private Composite fImageComposite;
 
 	public BreadcrumbItemDetails(BreadcrumbItem parent, Composite parentContainer) {
 		fParent= parent;
@@ -325,6 +324,7 @@ class BreadcrumbItemDetails {
 					case SWT.ARROW_LEFT:
 						if (fSelected) {
 							viewer.doTraverse(false);
+							e.doit= false;
 						} else {
 							viewer.selectItem(fParent);
 						}
@@ -332,6 +332,7 @@ class BreadcrumbItemDetails {
 					case SWT.ARROW_RIGHT:
 						if (fSelected) {
 							viewer.doTraverse(true);
+							e.doit= false;
 						} else {
 							viewer.selectItem(fParent);
 						}
