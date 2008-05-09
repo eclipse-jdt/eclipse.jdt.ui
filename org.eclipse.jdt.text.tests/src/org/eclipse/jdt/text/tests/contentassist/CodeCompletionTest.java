@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,25 @@ package org.eclipse.jdt.text.tests.contentassist;
 
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.source.ISourceViewer;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -24,32 +40,28 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.text.java.FillArgumentNamesCompletionProposalCollector;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
+
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPartSite;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.text.java.FillArgumentNamesCompletionProposalCollector;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer;
+import org.eclipse.jdt.internal.ui.text.java.JavaNoTypeCompletionProposalComputer;
 
 
 public class CodeCompletionTest extends AbstractCompletionTest {
@@ -389,7 +401,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("public class A {\n");
 		buf.append("    abstract class Local<E> {\n");
 		buf.append("        abstract E doIt();\n");
-		buf.append("    }\n");		
+		buf.append("    }\n");
 		buf.append("    public void foo() {\n");
 		buf.append("        new Local<String>(){\n");
 		buf.append("        \n");
@@ -670,7 +682,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		String contents= "package test1;\n" + 
+		String contents= "package test1;\n" +
 				"\n" +
 				"public class Completion {\n" +
 				"    \n" +
@@ -933,10 +945,10 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("\n");
 		buf.append("import java.io.Writer;\n");
 		buf.append("\n");
-		buf.append("public class A extends Writer {\n" + 
-				"    public void foo() {\n" + 
-				"    }\n" + 
-				"    //here\n" + 
+		buf.append("public class A extends Writer {\n" +
+				"    public void foo() {\n" +
+				"    }\n" +
+				"    //here\n" +
 				"}");
 		String contents= buf.toString();
 
@@ -971,17 +983,17 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("import java.io.IOException;\n");
 		buf.append("import java.io.Writer;\n");
 		buf.append("\n");
-		buf.append("public class A extends Writer {\n" + 
-				"    public void foo() {\n" + 
-				"    }\n" + 
-				"    /* (non-Javadoc)\n" + 
-				"     * @see java.io.Writer#close()\n" + 
-				"     */\n" + 
-				"    @Override\n" +		
-				"    public void close() throws IOException {\n" + 
-				"        //TODO\n" + 
-				"        \n" + 
-				"    }//here\n" + 
+		buf.append("public class A extends Writer {\n" +
+				"    public void foo() {\n" +
+				"    }\n" +
+				"    /* (non-Javadoc)\n" +
+				"     * @see java.io.Writer#close()\n" +
+				"     */\n" +
+				"    @Override\n" +
+				"    public void close() throws IOException {\n" +
+				"        //TODO\n" +
+				"        \n" +
+				"    }//here\n" +
 				"}");
 		assertEquals(doc.get(), buf.toString());
 	}
@@ -1109,7 +1121,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("    /* (non-Javadoc)\n");
 		buf.append("     * @see test1.A#foo()\n");
 		buf.append("     */\n");
-		buf.append("    @Override\n");		
+		buf.append("    @Override\n");
 		buf.append("    public void foo() {\n");
 		buf.append("        //TODO\n");
 		buf.append("        super.foo();\n");
@@ -1236,7 +1248,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("    /* (non-Javadoc)\n");
 		buf.append("     * @see test1.A#foo(test1.A.Sub)\n");
 		buf.append("     */\n");
-		buf.append("    @Override\n");		
+		buf.append("    @Override\n");
 		buf.append("    public void foo(Sub sub) {\n");
 		buf.append("        //TODO\n");
 		buf.append("        super.foo(sub);\n");
@@ -1304,6 +1316,161 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			assertEquals(doc.get(), buf.toString());
 		} finally {
 			part.getSite().getPage().closeAllEditors(false);
+		}
+	}
+	
+	public void testStaticImports1() throws Exception {
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "test1.A.foo");
+		
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public static void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class B {\n");
+		buf.append("    public void bar() {\n");
+		buf.append("        f//here\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("B.java", contents, false, null);
+
+		IEditorPart part= JavaUI.openInEditor(cu);
+		try {
+			String str= "//here";
+
+			int offset= contents.indexOf(str);
+			
+			ISourceViewer viewer= ((JavaEditor) part).getViewer();
+
+			JavaContentAssistInvocationContext context= new JavaContentAssistInvocationContext(viewer, offset, part);
+			JavaCompletionProposalComputer computer= new JavaNoTypeCompletionProposalComputer();
+			
+			// make sure we get an import rewrite context
+			SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_YES, null);
+			
+			List proposals= computer.computeCompletionProposals(context, null);
+
+			ICompletionProposal proposal= null;
+
+			for (int i= 0; i < proposals.size(); i++) {
+				ICompletionProposal curr= (ICompletionProposal) proposals.get(i);
+				if (curr.getDisplayString().startsWith("foo")) {
+					proposal= curr;
+				}
+			}
+			assertNotNull("no proposal for foo()", proposal);
+
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			proposal.apply(doc);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import static test1.A.foo;\n");
+			buf.append("\n");
+			buf.append("public class B {\n");
+			buf.append("    public void bar() {\n");
+			buf.append("        foo()//here\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			assertEquals(buf.toString(), doc.get());
+		} finally {
+			store.setToDefault(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
+			part.getSite().getPage().closeAllEditors(false);
+			
+		}
+	}
+	
+	public void testStaticImports2() throws Exception {
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		store.setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "test1.A.foo");
+		
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public static void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		IPackageFragment pack2= sourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("\n");
+		buf.append("public class B {\n");
+		buf.append("    public void bar() {\n");
+		buf.append("        f//here\n");
+		buf.append("    }\n");
+		buf.append("    public void foo(int x) {\n"); // conflicting method, no static import possible
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack2.createCompilationUnit("B.java", contents, false, null);
+
+		IEditorPart part= JavaUI.openInEditor(cu);
+		try {
+			String str= "//here";
+
+			int offset= contents.indexOf(str);
+			
+			ISourceViewer viewer= ((JavaEditor) part).getViewer();
+
+			JavaContentAssistInvocationContext context= new JavaContentAssistInvocationContext(viewer, offset, part);
+			JavaCompletionProposalComputer computer= new JavaNoTypeCompletionProposalComputer();
+			
+			// make sure we get an import rewrite context
+			SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_YES, null);
+			
+			List proposals= computer.computeCompletionProposals(context, null);
+
+			ICompletionProposal proposal= null;
+
+			for (int i= 0; i < proposals.size(); i++) {
+				ICompletionProposal curr= (ICompletionProposal) proposals.get(i);
+				if (curr.getDisplayString().startsWith("foo()")) {
+					proposal= curr;
+				}
+			}
+			assertNotNull("no proposal for foo()", proposal);
+
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			proposal.apply(doc);
+
+			buf= new StringBuffer();
+			buf.append("package test2;\n");
+			buf.append("\n");
+			buf.append("import test1.A;\n");
+			buf.append("\n");
+			buf.append("public class B {\n");
+			buf.append("    public void bar() {\n");
+			buf.append("        A.foo()//here\n");
+			buf.append("    }\n");
+			buf.append("    public void foo(int x) {\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			assertEquals(buf.toString(), doc.get());
+		} finally {
+			store.setToDefault(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
+			part.getSite().getPage().closeAllEditors(false);
+			
 		}
 	}
 	

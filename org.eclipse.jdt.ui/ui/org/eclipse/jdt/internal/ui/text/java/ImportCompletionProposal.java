@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Nathan Beyer (Cerner) <nbeyer@cerner.com> - [content assist][5.0] when selected method from favorites is a member of a type with a type variable an invalid static import is added - https://bugs.eclipse.org/bugs/show_bug.cgi?id=202221  
+ *     Nathan Beyer (Cerner) <nbeyer@cerner.com> - [content assist][5.0] when selected method from favorites is a member of a type with a type variable an invalid static import is added - https://bugs.eclipse.org/bugs/show_bug.cgi?id=202221
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -53,7 +53,7 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
 	private ImportRewrite fImportRewrite;
 	private ContextSensitiveImportRewriteContext fImportContext;
 	private final CompletionProposal fProposal;
-	private boolean fReplacementStringComputed;	
+	private boolean fReplacementStringComputed;
 	
 
 	public ImportCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context, int parentProposalKind) {
@@ -102,10 +102,16 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
 	 			String simpleType= fImportRewrite.addImport(qualifiedTypeName, fImportContext);
 		 		if (fParentProposalKind == CompletionProposal.METHOD_REF)
 		 			return simpleType + "."; //$NON-NLS-1$
- 			} else
-	 			fImportRewrite.addStaticImport(qualifiedTypeName, String.valueOf(fProposal.getName()), proposalKind == CompletionProposal.FIELD_IMPORT, fImportContext);
+ 			} else {
+				String res= fImportRewrite.addStaticImport(qualifiedTypeName, String.valueOf(fProposal.getName()), proposalKind == CompletionProposal.FIELD_IMPORT, fImportContext);
+				int dot= res.lastIndexOf('.');
+				if (dot != -1) {
+					String typeName= fImportRewrite.addImport(res.substring(0, dot), fImportContext);
+					return typeName + '.';
+				}
+			}
 	 		return ""; //$NON-NLS-1$
-	 	}		
+	 	}
 		
 		// Case where we don't have an import rewrite (see allowAddingImports)
 		
@@ -166,7 +172,7 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
 	}
 
 	private CompilationUnit getASTRoot(ICompilationUnit compilationUnit) {
-		return SharedASTProvider.getAST(compilationUnit, SharedASTProvider.WAIT_NO, new NullProgressMonitor());
+		return SharedASTProvider.getAST(compilationUnit, SharedASTProvider.WAIT_NO, null);
 	}
 
 	/**
