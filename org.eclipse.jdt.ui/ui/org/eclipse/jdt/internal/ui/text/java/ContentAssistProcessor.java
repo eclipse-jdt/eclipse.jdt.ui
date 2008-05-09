@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,7 +41,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ContentAssistEvent;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
@@ -62,7 +61,6 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -210,11 +208,20 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	private int fNumberOfComputedResults= 0;
 	private String fErrorMessage;
 	
+	/**
+	 * The completion proposal registry.
+	 * 
+	 * @since 3.4
+	 */
+	private CompletionProposalComputerRegistry fComputerRegistry;
+
+
 	public ContentAssistProcessor(ContentAssistant assistant, String partition) {
 		Assert.isNotNull(partition);
 		Assert.isNotNull(assistant);
 		fPartition= partition;
-		fCategories= CompletionProposalComputerRegistry.getDefault().getProposalCategories();
+		fComputerRegistry= CompletionProposalComputerRegistry.getDefault();
+		fCategories= fComputerRegistry.getProposalCategories();
 		fAssistant= assistant;
 		fAssistant.addCompletionListener(new CompletionListener());
 	}
@@ -428,7 +435,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		fRepetition++;
 		
 //		fAssistant.setShowMessage(fRepetition % 2 != 0);
-//		
+
 		return (List) fCategoryIteration.get(iteration);
 	}
 
@@ -446,10 +453,12 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		// default mix - enable all included computers
 		List included= getDefaultCategoriesUnchecked();
 
-		if ((IJavaPartitions.JAVA_DOC.equals(fPartition) || IDocument.DEFAULT_CONTENT_TYPE.equals(fPartition)) && included.isEmpty() && !fCategories.isEmpty())
+		if (fComputerRegistry.hasUninstalledComputers()) {
 			if (informUserAboutEmptyDefaultCategory())
 				// preferences were restored - recompute the default categories
 				included= getDefaultCategoriesUnchecked();
+			fComputerRegistry.resetUnistalledComputers();
+		}
 
 		return included;
 	}
@@ -538,8 +547,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	        	}
 	        	if (settingsId == returnValue)
 					PreferencesUtil.createPreferenceDialogOn(shell, "org.eclipse.jdt.ui.preferences.CodeAssistPreferenceAdvanced", null, null).open(); //$NON-NLS-1$
-	        	CompletionProposalComputerRegistry registry= CompletionProposalComputerRegistry.getDefault();
-	        	registry.reload();
+	        	fComputerRegistry.reload();
 	        	return true;
 	        }
 		}
@@ -578,7 +586,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 
 	private String getIterationGesture() {
 		TriggerSequence binding= getIterationBinding();
-		return binding != null ? 
+		return binding != null ?
 				  Messages.format(JavaTextMessages.ContentAssistProcessor_toggle_affordance_press_gesture, new Object[] { binding.format() })
 				: JavaTextMessages.ContentAssistProcessor_toggle_affordance_click_gesture;
 	}

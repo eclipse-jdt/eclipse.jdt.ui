@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -40,6 +41,7 @@ import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPersistentPreferenceStore;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -60,6 +62,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public final class CompletionProposalComputerRegistry {
 
 	private static final String EXTENSION_POINT= "javaCompletionProposalComputer"; //$NON-NLS-1$
+	private static final String NUM_COMPUTERS_PREF_KEY= "content_assist_number_of_computers"; //$NON-NLS-1$
+
 	
 	/** The singleton instance. */
 	private static CompletionProposalComputerRegistry fgSingleton= null;
@@ -110,10 +114,34 @@ public final class CompletionProposalComputerRegistry {
 	 */
 	private boolean fLoaded= false;
 
+
+	private boolean fHasUninstalledComputers= false;
+
+
 	/**
 	 * Creates a new instance.
 	 */
 	public CompletionProposalComputerRegistry() {
+	}
+
+	/**
+	 * Returns if the registry detected that computers got uninstalled since the last run.
+	 * 
+	 * @return <code>true</code> if the registry detected that computers got uninstalled since the last run
+	 * 			<code>false</code> otherwise or if {@link #resetUnistalledComputers()} has been called
+	 * @since 3.4
+	 */
+	boolean hasUninstalledComputers() {
+		return fHasUninstalledComputers;
+	}
+
+	/**
+	 * Clears the setting that uninstalled computers have been detected.
+	 * 
+	 * @since 3.4
+	 */
+	void resetUnistalledComputers() {
+		fHasUninstalledComputers= false;
 	}
 
 	/**
@@ -195,8 +223,25 @@ public final class CompletionProposalComputerRegistry {
 			reload= !fLoaded;
 			fLoaded= true;
 		}
-		if (reload)
+		if (reload) {
 			reload();
+			updateUninstalledComputerCount();
+		}
+	}
+
+	private void updateUninstalledComputerCount() {
+		IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
+		int lastNumberOfComputers= preferenceStore.getInt(NUM_COMPUTERS_PREF_KEY);
+		int currNumber= fDescriptors.size();
+		fHasUninstalledComputers= lastNumberOfComputers > currNumber;
+		preferenceStore.setValue(NUM_COMPUTERS_PREF_KEY, currNumber);
+		if (preferenceStore instanceof IPersistentPreferenceStore) {
+			try {
+				((IPersistentPreferenceStore) preferenceStore).save();
+			} catch (IOException e) {
+				// Ignore for now - store might be saved later.
+			}
+		}
 	}
 
 	/**
@@ -359,7 +404,7 @@ public final class CompletionProposalComputerRegistry {
 	}
 
 	/**
-	 * Returns the names of contributors affected by disabling a category. 
+	 * Returns the names of contributors affected by disabling a category.
 	 * 
 	 * @param category the category that would be disabled
 	 * @param culprit the culprit plug-in, which is not included in the returned list
