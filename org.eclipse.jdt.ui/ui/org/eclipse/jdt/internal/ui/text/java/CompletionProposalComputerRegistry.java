@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,7 +40,6 @@ import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.IPersistentPreferenceStore;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -235,13 +233,7 @@ public final class CompletionProposalComputerRegistry {
 		int currNumber= fDescriptors.size();
 		fHasUninstalledComputers= lastNumberOfComputers > currNumber;
 		preferenceStore.setValue(NUM_COMPUTERS_PREF_KEY, currNumber);
-		if (preferenceStore instanceof IPersistentPreferenceStore) {
-			try {
-				((IPersistentPreferenceStore) preferenceStore).save();
-			} catch (IOException e) {
-				// Ignore for now - store might be saved later.
-			}
-		}
+		JavaPlugin.getDefault().savePluginPreferences();
 	}
 
 	/**
