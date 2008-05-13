@@ -426,6 +426,8 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 								IBinding varBinding2= ((QualifiedName) fArrayAccess).getQualifier().resolveBinding();
 								if (!varBinding1.equals(varBinding2))
 									throw new InvalidBodyError();
+							} else if (fArrayAccess instanceof QualifiedName) {
+								throw new InvalidBodyError();
 							}
 							
 							IBinding binding= getBinding(array);

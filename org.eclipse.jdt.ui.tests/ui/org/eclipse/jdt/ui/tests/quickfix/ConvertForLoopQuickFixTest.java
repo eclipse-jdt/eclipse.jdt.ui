@@ -1957,6 +1957,23 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 	
+	public void testBug231575_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private Object[] array;\n");
+		buf.append("    public void method(E1 copy) {\n");
+		buf.append("        for (int i = 0; i < copy.array.length; i++) {\n");
+		buf.append("            array[i].equals(null);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		assertFalse(satisfiesPrecondition(cu));
+	}
+	
 	private boolean satisfiesPrecondition(ICompilationUnit cu) {
 		ForStatement statement= getForStatement(cu);
 		ConvertLoopOperation op= new ConvertForLoopOperation(statement);
