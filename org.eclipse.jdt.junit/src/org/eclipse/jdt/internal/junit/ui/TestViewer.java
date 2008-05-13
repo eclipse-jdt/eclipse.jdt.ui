@@ -182,6 +182,8 @@ public class TestViewer {
 		TestOpenListener testOpenListener= new TestOpenListener();
 		fTreeViewer.getTree().addSelectionListener(testOpenListener);
 		fTableViewer.getTable().addSelectionListener(testOpenListener);
+		
+		fTestRunnerPart.getSite().setSelectionProvider(fSelectionProvider);
 
 		fViewerbook.showPage(fTreeViewer.getTree());
 	}
