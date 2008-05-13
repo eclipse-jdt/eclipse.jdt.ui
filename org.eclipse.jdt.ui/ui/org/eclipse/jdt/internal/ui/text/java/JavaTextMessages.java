@@ -23,6 +23,7 @@ final class JavaTextMessages extends NLS {
 		// Do not instantiate
 	}
 
+	public static String AbstractJavaCompletionProposal_toolTip_affordance;
 	public static String CompletionProcessor_error_accessing_title;
 	public static String CompletionProcessor_error_accessing_message;
 	public static String CompletionProcessor_error_notOnBuildPath_title;

@@ -12,38 +12,54 @@ package org.eclipse.jdt.internal.ui.actions;
 
 import java.net.URL;
 
-import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Display;
 
-import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
+
 /**
  * Action to open the selection in an external browser. If the
  * selection is a java element its corresponding javadoc is shown
- * if possible. If it is an URL the urls content is shown.
+ * if possible. If it is an URL the URL's content is shown.
  * 
  * The action is disabled if the selection can not be opened.
  * 
  * @since 3.4
  */
-public class OpenExternalBrowserAction extends SelectionDispatchAction {
+public class OpenExternalBrowserAction extends Action implements ISelectionChangedListener {
+	
+	/**
+	 * The display the display this action is working on.
+	 */
+	private final Display fDisplay;
+	/**
+	 * The selection provider.
+	 */
+	private final ISelectionProvider fSelectionProvider;
 
 	/**
 	 * Create a new ShowExternalJavadocAction
 	 * 
-	 * @param site the site this action is working on
+	 * @param display the display this action is working on
+	 * @param selectionProvider the selection provider
 	 */
-	public OpenExternalBrowserAction(IWorkbenchSite site) {
-		super(site);
-
+	public OpenExternalBrowserAction(Display display, ISelectionProvider selectionProvider) {
+		fDisplay= display;
+		fSelectionProvider= selectionProvider;
+		
 		setText(ActionMessages.OpenExternalBrowserAction_javadoc_label);
 		setToolTipText(ActionMessages.OpenExternalBrowserAction_javadoc_toolTip);
 		
@@ -51,14 +67,19 @@ public class OpenExternalBrowserAction extends SelectionDispatchAction {
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_EXTERNAL_BROWSER);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
+	/*
+	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
 	 */
-	public void selectionChanged(IStructuredSelection selection) {
-		if (canEnable(selection)) {
+	public void selectionChanged(SelectionChangedEvent event) {
+		ISelection selection= event.getSelection();
+		if (!(selection instanceof IStructuredSelection))
+			return;
+		
+		IStructuredSelection structuredSelection= (IStructuredSelection) selection;
+		if (canEnable(structuredSelection)) {
 			setEnabled(true);
 
-			Object element= selection.getFirstElement();
+			Object element= structuredSelection.getFirstElement();
 			if (element instanceof URL) {
 				setText(ActionMessages.OpenExternalBrowserAction_url_label);
 				setToolTipText(ActionMessages.OpenExternalBrowserAction_url_toolTip);
@@ -73,12 +94,17 @@ public class OpenExternalBrowserAction extends SelectionDispatchAction {
 			setToolTipText(ActionMessages.OpenExternalBrowserAction_javadoc_toolTip);
 		}
 	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
+	
+	/*
+	 * @see org.eclipse.jface.action.Action#run()
 	 */
-	public void run(IStructuredSelection selection) {
-		Object element= selection.getFirstElement();
+	public void run() {
+		ISelection selection= fSelectionProvider.getSelection();
+		if (!(selection instanceof IStructuredSelection))
+			return;
+		
+		IStructuredSelection structuredSelection= (IStructuredSelection) selection;
+		Object element= structuredSelection.getFirstElement();
 		URL url;
 		if (element instanceof IJavaElement) {
 			try {
@@ -91,7 +117,7 @@ public class OpenExternalBrowserAction extends SelectionDispatchAction {
 			url= (URL) element;
 		}
 
-		OpenBrowserUtil.open(url, getShell().getDisplay(), null);
+		OpenBrowserUtil.open(url, fDisplay, null);
 	}
 
 	/**

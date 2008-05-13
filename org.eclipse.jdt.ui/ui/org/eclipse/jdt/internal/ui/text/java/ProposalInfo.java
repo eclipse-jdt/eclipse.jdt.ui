@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,19 +11,14 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavadocContentAccess;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 
 
 public class ProposalInfo {
@@ -98,42 +93,9 @@ public class ProposalInfo {
 	 */
 	private String extractJavadoc(IMember member, IProgressMonitor monitor) throws JavaModelException {
 		if (member != null) {
-			Reader reader=  getHTMLContentReader(member, monitor);
-			if (reader != null)
-				return getString(reader);
+			return JavadocContentAccess2.getHTMLContent(member, true, true);
 		}
 		return null;
 	}
-
-	private Reader getHTMLContentReader(IMember member, IProgressMonitor monitor) throws JavaModelException {
-	    Reader contentReader= JavadocContentAccess.getHTMLContentReader(member, true, false);
-        if (contentReader != null)
-        	return contentReader;
-        
-        if (member.getOpenable().getBuffer() == null) { // only if no source available
-        	String s= member.getAttachedJavadoc(monitor);
-        	if (s != null)
-        		return new StringReader(s);
-        }
-        return null;
-    }
 	
-	/**
-	 * Gets the reader content as a String
-	 * 
-	 * @param reader the reader
-	 * @return the reader content as string
-	 */
-	private static String getString(Reader reader) {
-		StringBuffer buf= new StringBuffer();
-		char[] buffer= new char[1024];
-		int count;
-		try {
-			while ((count= reader.read(buffer)) != -1)
-				buf.append(buffer, 0, count);
-		} catch (IOException e) {
-			return null;
-		}
-		return buf.toString();
-	}
 }

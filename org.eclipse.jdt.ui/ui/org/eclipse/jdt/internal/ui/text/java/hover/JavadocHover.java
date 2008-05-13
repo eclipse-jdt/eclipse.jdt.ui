@@ -44,7 +44,6 @@ import org.eclipse.jface.text.IInputChangedListener;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -243,22 +242,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 * 
 	 * @since 3.3
 	 */
-	private static final class PresenterControlCreator extends AbstractReusableInformationControlCreator {
+	public static final class PresenterControlCreator extends AbstractReusableInformationControlCreator {
 		
-		private final IEditorPart fEditor;
-
-		/**
-		 * Create a new presenter control creator which creates
-		 * an information control for a hover inside the given
-		 * editor.
-		 * 
-		 * @param editor the editor in which the hover will be shown
-		 * @since 3.4
-		 */
-		public PresenterControlCreator(IEditorPart editor) {
-			fEditor= editor;
-		}
-
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
@@ -280,9 +265,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				final OpenDeclarationAction openDeclarationAction= new OpenDeclarationAction(iControl);
 				tbm.add(openDeclarationAction);
 				
-				OpenExternalBrowserAction openExternalJavadocAction= new OpenExternalBrowserAction(fEditor.getSite());
 				final SimpleSelectionProvider selectionProvider= new SimpleSelectionProvider();
-				openExternalJavadocAction.setSpecialSelectionProvider(selectionProvider);
+				OpenExternalBrowserAction openExternalJavadocAction= new OpenExternalBrowserAction(parent.getDisplay(), selectionProvider);
 				selectionProvider.addSelectionChangedListener(openExternalJavadocAction);
 				selectionProvider.setSelection(new StructuredSelection());
 				tbm.add(openExternalJavadocAction);
@@ -322,28 +306,40 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 * 
 	 * @since 3.3
 	 */
-	private static final class HoverControlCreator extends AbstractReusableInformationControlCreator {
+	public static final class HoverControlCreator extends AbstractReusableInformationControlCreator {
 		/**
 		 * The information presenter control creator.
 		 * @since 3.4
 		 */
 		private final IInformationControlCreator fInformationPresenterControlCreator;
+		private final String fStaticStatusFieldText;
 
 		/**
 		 * @param informationPresenterControlCreator control creator for enriched hover
 		 * @since 3.4
 		 */
 		public HoverControlCreator(IInformationControlCreator informationPresenterControlCreator) {
+			this(informationPresenterControlCreator, null);
+		}
+
+		/**
+		 * @param informationPresenterControlCreator control creator for enriched hover
+		 * @param staticStatusFieldText a static status field text, or <code>null</code> to use the default affordance
+		 * @since 3.4
+		 */
+		public HoverControlCreator(IInformationControlCreator informationPresenterControlCreator, String staticStatusFieldText) {
 			fInformationPresenterControlCreator= informationPresenterControlCreator;
+			fStaticStatusFieldText= staticStatusFieldText;
 		}
 
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
 		public IInformationControl doCreateInformationControl(Shell parent) {
+			String tooltipAffordanceString= fStaticStatusFieldText != null ? fStaticStatusFieldText : EditorsUI.getTooltipAffordanceString();
 			if (BrowserInformationControl.isAvailable(parent)) {
 				String font= PreferenceConstants.APPEARANCE_JAVADOC_FONT;
-				BrowserInformationControl iControl= new BrowserInformationControl(parent, font, EditorsUI.getTooltipAffordanceString()) {
+				BrowserInformationControl iControl= new BrowserInformationControl(parent, font, tooltipAffordanceString) {
 					/*
 					 * @see org.eclipse.jface.text.IInformationControlExtension5#getInformationPresenterControlCreator()
 					 */
@@ -354,7 +350,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				addLinkListener(iControl);
 				return iControl;
 			} else {
-				return new DefaultInformationControl(parent, EditorsUI.getTooltipAffordanceString());
+				return new DefaultInformationControl(parent, tooltipAffordanceString);
 			}
 		}
 
@@ -365,8 +361,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			if (!super.canReuse(control))
 				return false;
 			
-			if (control instanceof IInformationControlExtension4)
-				((IInformationControlExtension4)control).setStatusText(EditorsUI.getTooltipAffordanceString());
+			if (control instanceof IInformationControlExtension4) {
+				String tooltipAffordanceString= fStaticStatusFieldText != null ? fStaticStatusFieldText : EditorsUI.getTooltipAffordanceString();
+				((IInformationControlExtension4)control).setStatusText(tooltipAffordanceString);
+			}
 			
 			return true;
 		}
@@ -403,7 +401,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		if (fPresenterControlCreator == null)
-			fPresenterControlCreator= new PresenterControlCreator(getEditor());
+			fPresenterControlCreator= new PresenterControlCreator();
 		return fPresenterControlCreator;
 	}
 
@@ -424,6 +422,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			 */
 			public void handleJavadocViewLink(IJavaElement linkTarget) {
 				control.notifyDelayedInputChange(null);
+				control.setVisible(false);
 				control.dispose(); //FIXME: should have protocol to hide, rather than dispose
 				try {
 					JavadocView view= (JavadocView) JavaPlugin.getActivePage().showView(JavaUI.ID_JAVADOC_VIEW);

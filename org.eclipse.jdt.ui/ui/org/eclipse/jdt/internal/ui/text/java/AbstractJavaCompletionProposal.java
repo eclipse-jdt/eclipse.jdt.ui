@@ -39,14 +39,12 @@ import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.StyledString;
 
-import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
@@ -84,6 +82,8 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavadocBrowserInformationControlInput;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 
 import org.osgi.framework.Bundle;
 
@@ -94,21 +94,6 @@ import org.osgi.framework.Bundle;
  */
 public abstract class AbstractJavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension5, ICompletionProposalExtension6 {
 	
-	
-	/**
-	 * The control creator.
-	 * 
-	 * @since 3.3
-	 */
-	private static final class ControlCreator extends AbstractReusableInformationControlCreator {
-		/*
-		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
-		 */
-		public IInformationControl doCreateInformationControl(Shell parent) {
-			return new BrowserInformationControl(parent, PreferenceConstants.APPEARANCE_JAVADOC_FONT, false);
-		}
-	}
-
 	
 	/**
 	 * A class to simplify tracking a reference position in a document.
@@ -529,8 +514,14 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 				buffer.append(info);
 				HTMLPrinter.addPageEpilog(buffer);
 				info= buffer.toString();
+				IJavaElement element= null;
+				try {
+					element= getProposalInfo().getJavaElement();
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+				}
+				return new JavadocBrowserInformationControlInput(null, element, info, 0);
 			}
-			return info;
 		}
 		return null;
 	}
@@ -935,7 +926,11 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			return null;
 		
 		if (fCreator == null) {
-			fCreator= new ControlCreator();
+			/*
+			 * FIXME: Take control creators (and link handling) out of JavadocHover.
+			 */
+			JavadocHover.PresenterControlCreator presenterControlCreator= new JavadocHover.PresenterControlCreator();
+			fCreator= new JavadocHover.HoverControlCreator(presenterControlCreator, JavaTextMessages.AbstractJavaCompletionProposal_toolTip_affordance);
 		}
 		return fCreator;
 	}

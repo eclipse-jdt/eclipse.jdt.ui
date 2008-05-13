@@ -661,9 +661,8 @@ public class JavadocView extends AbstractInfoView {
 		fToggleLinkAction.setActionDefinitionId(IWorkbenchCommandIds.LINK_WITH_EDITOR);
 		
 		fInputSelectionProvider= new SimpleSelectionProvider();
-		fOpenExternalBrowserAction= new OpenExternalBrowserAction(getSite());
+		fOpenExternalBrowserAction= new OpenExternalBrowserAction(getSite().getShell().getDisplay(), fInputSelectionProvider);
 		fOpenExternalBrowserAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EXTERNAL_JAVADOC);
-		fOpenExternalBrowserAction.setSpecialSelectionProvider(fInputSelectionProvider);
 		fInputSelectionProvider.addSelectionChangedListener(fOpenExternalBrowserAction);
 		
 		IJavaElement input= getInput();
