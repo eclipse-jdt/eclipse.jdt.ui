@@ -489,7 +489,7 @@ public class PasteAction extends SelectionDispatchAction{
 		
 		public boolean canEnable(TransferData[] availableTypes) {
 			fAvailableTypes= availableTypes;
-			return PasteAction.isAvailable(TextTransfer.getInstance(), availableTypes);
+			return PasteAction.isAvailable(TextTransfer.getInstance(), availableTypes) && ! PasteAction.isAvailable(FileTransfer.getInstance(), availableTypes);
 		}
 
 		public boolean canPasteOn(IJavaElement[] javaElements, IResource[] resources, IWorkingSet[] selectedWorkingSets) throws JavaModelException {
