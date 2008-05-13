@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Widget;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.resource.CompositeImageDescriptor;
+import org.eclipse.jface.util.Geometry;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -564,26 +565,34 @@ class BreadcrumbItemDropDown {
 		Point pt= new Point(x, rect.y + rect.height);
 		pt= fParentComposite.toDisplay(pt);
 		
-		Rectangle monitor= getMonitor(shell.getDisplay(), pt).getClientArea();
+		Rectangle monitor= getClosestMonitor(shell.getDisplay(), pt).getClientArea();
 		int overlap= (pt.x + width) - (monitor.x + monitor.width);
 		if (overlap > 0)
 			pt.x-= overlap;
-		if (pt.x < 0)
-			pt.x= 0;
+		if (pt.x < monitor.x)
+			pt.x= monitor.x;
 		
 		shell.setLocation(pt);
 		shell.setSize(width, height);
 	}
 	
 	/**
-	 * Returns the monitor which contains the given point.
+	 * Returns the monitor whose client area contains the given point. If no
+	 * monitor contains the point, returns the monitor that is closest to the
+	 * point.
+	 * <p>
+	 * Copied from <code>org.eclipse.jface.window.Window.getClosestMonitor(Display, Point)</code>
+	 * </p>
 	 * 
-	 * @param display the current display
-	 * @param point a point in the result
-	 * @return monitor containing <code>point</code>
+	 * @param display the display showing the monitors
+	 * @param point point to find (display coordinates)
+	 * @return the monitor closest to the given point
 	 */
-	private Monitor getMonitor(Display display, Point point) {
+	private static Monitor getClosestMonitor(Display display, Point point) {
+		int closest= Integer.MAX_VALUE;
+
 		Monitor[] monitors= display.getMonitors();
+		Monitor result= monitors[0];
 
 		for (int i= 0; i < monitors.length; i++) {
 			Monitor current= monitors[i];
@@ -592,9 +601,15 @@ class BreadcrumbItemDropDown {
 
 			if (clientArea.contains(point))
 				return current;
+
+			int distance= Geometry.distanceSquared(Geometry.centerPoint(clientArea), point);
+			if (distance < closest) {
+				closest= distance;
+				result= current;
+			}
 		}
 
-		return monitors[0];
+		return result;
 	}
 
 	/**
