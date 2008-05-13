@@ -2217,7 +2217,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("     * Sets the name of the suite.\n");
         buf.append("     * \n");
         buf.append("     * @param name\n");
-        buf.append("     *      The name to set\n");
+        buf.append("     *            The name to set\n");
         buf.append("     */\n");
         buf.append("    public void setName(final String name) {\n");
         buf.append("        this.fName = name;\n");
@@ -3762,11 +3762,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("     * Constructs a comparison failure.\n");
         buf.append("     * \n");
         buf.append("     * @param message\n");
-        buf.append("     *      the identifying message or null\n");
+        buf.append("     *            the identifying message or null\n");
         buf.append("     * @param expected\n");
-        buf.append("     *      the expected string value\n");
+        buf.append("     *            the expected string value\n");
         buf.append("     * @param actual\n");
-        buf.append("     *      the actual string value\n");
+        buf.append("     *            the actual string value\n");
         buf.append("     */\n");
         buf.append("    public ComparisonFailure(final String message, final String expected,\n");
         buf.append("            final String actual) {\n");
@@ -4677,8 +4677,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("import java.lang.reflect.Modifier;\n");
         buf.append("\n");
         buf.append("/**\n");
-        buf.append(" * A test case defines the fixture to run multiple tests. To define a test case\n");
-        buf.append(" * <br>\n");
+        buf.append(" * A test case defines the fixture to run multiple tests. To define a test case<br>\n");
         buf.append(" * 1) implement a subclass of TestCase<br>\n");
         buf.append(" * 2) define instance variables that store the state of the fixture<br>\n");
         buf.append(" * 3) initialize the fixture state by overriding <code>setUp</code><br>\n");
@@ -4812,7 +4811,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("     * Runs the bare test sequence.\n");
         buf.append("     * \n");
         buf.append("     * @exception Throwable\n");
-        buf.append("     *      if any exception is thrown\n");
+        buf.append("     *                if any exception is thrown\n");
         buf.append("     */\n");
         buf.append("    public void runBare() throws Throwable {\n");
         buf.append("        this.setUp();\n");
@@ -4826,7 +4825,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("     * Override to run the test and assert its state.\n");
         buf.append("     * \n");
         buf.append("     * @exception Throwable\n");
-        buf.append("     *      if any exception is thrown\n");
+        buf.append("     *                if any exception is thrown\n");
         buf.append("     */\n");
         buf.append("    protected void runTest() throws Throwable {\n");
         buf.append("        Assert.assertNotNull(this.fName);\n");
@@ -4858,7 +4857,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("     * Sets the name of a TestCase\n");
         buf.append("     * \n");
         buf.append("     * @param name\n");
-        buf.append("     *      The name to set\n");
+        buf.append("     *            The name to set\n");
         buf.append("     */\n");
         buf.append("    public void setName(final String name) {\n");
         buf.append("        this.fName = name;\n");
