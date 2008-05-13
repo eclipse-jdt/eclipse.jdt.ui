@@ -232,7 +232,7 @@ public final class CompletionProposalComputerRegistry {
 		int lastNumberOfComputers= preferenceStore.getInt(NUM_COMPUTERS_PREF_KEY);
 		int currNumber= fDescriptors.size();
 		fHasUninstalledComputers= lastNumberOfComputers > currNumber;
-		preferenceStore.setValue(NUM_COMPUTERS_PREF_KEY, currNumber);
+		preferenceStore.putValue(NUM_COMPUTERS_PREF_KEY, Integer.toString(currNumber));
 		JavaPlugin.getDefault().savePluginPreferences();
 	}
 

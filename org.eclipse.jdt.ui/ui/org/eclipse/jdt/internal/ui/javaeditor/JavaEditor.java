@@ -2770,7 +2770,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	protected void handlePreferenceStoreChanged(PropertyChangeEvent event) {
 
-		String property= event.getProperty();
+		final String property= event.getProperty();
 
 		if (AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH.equals(property)) {
 			/*
@@ -2811,7 +2811,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				}
 				return;
 			}
-			if (getBreadcrumbPreferenceKey().equals(property)) {
+			if (property.equals(getBreadcrumbPreferenceKey())) {
 				if (newBooleanValue != fIsBreadcrumbVisible) {
 					fIsBreadcrumbVisible= newBooleanValue;
 					if (fIsBreadcrumbVisible)
