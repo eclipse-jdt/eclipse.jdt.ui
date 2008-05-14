@@ -153,7 +153,7 @@
    <extension
          point="org.eclipse.jdt.ui.classpathContainerPage">
       <classpathContainerPage
-            name="My Example Container"
+            name="My Example Container (jdt.ui.tests)"
             class="org.eclipse.jdt.ui.examples.MyClasspathContainerPage"
             id="org.eclipse.jdt.EXAMPLE_CONTAINER">
       </classpathContainerPage>
@@ -162,7 +162,7 @@
    <extension
          point="org.eclipse.jdt.ui.javadocExportWizardPage">
       <javadocExportWizardPage
-            description="My Javadoc Export Wizard Page"
+            description="My Javadoc Export Wizard Page (jdt.ui.tests)"
             class="org.eclipse.jdt.ui.examples.MyJavadocExportWizardPage"
             id="org.eclipse.jdt.EXAMPLE_JD_EXPORT_WP">
       </javadocExportWizardPage>
