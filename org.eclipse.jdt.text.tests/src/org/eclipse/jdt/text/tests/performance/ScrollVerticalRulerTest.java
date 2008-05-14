@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
@@ -132,6 +133,29 @@ public abstract class ScrollVerticalRulerTest extends ScrollEditorTest {
 		return AbstractDocumentPerformanceTest.class.getResourceAsStream("faust1.txt");
 	}
 	
+	/* 
+	 * @see org.eclipse.jdt.text.tests.performance.ScrollEditorTest#assertEditor(org.eclipse.ui.texteditor.AbstractTextEditor)
+	 */
+	protected void assertEditor(AbstractTextEditor editor) throws Exception {
+		super.assertEditor(editor);
+		
+		IAnnotationModel model= editor.getDocumentProvider().getAnnotationModel(editor.getEditorInput());
+		int annotationCount= getAnnotationCount(model);
+		assertTrue("Expected annotation count is: " + getNumberOfAnnotations() + " but was: " + annotationCount, annotationCount >= getNumberOfAnnotations());
+	}
+	
+	private int getAnnotationCount(IAnnotationModel model) {
+		int result= 0;
+		
+		Iterator iterator= model.getAnnotationIterator();
+		while (iterator.hasNext()) {
+			iterator.next();
+			result++;
+		}
+		
+		return result;
+	}
+
 	/**
 	 * @return the number of annotations to show in the vertical ruler
 	 */
