@@ -453,6 +453,14 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	 * @param item the item to select or <code>null</code>
 	 */
 	void selectItem(BreadcrumbItem item) {
+		if (item == fSelectedItem) {
+			if (fSelectedItem == null)
+				return;
+
+			fSelectedItem.setFocus(true);
+			return;
+		}
+		
 		if (fSelectedItem != null)
 			fSelectedItem.setSelected(false);
 

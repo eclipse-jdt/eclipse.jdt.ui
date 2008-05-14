@@ -436,11 +436,6 @@ class BreadcrumbItemDropDown {
 			}
 		});
 
-		//process any pending focus events:
-		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=217800
-		while (tree.getDisplay().readAndDispatch()) {
-		}
-		
 		int index= fParent.getViewer().getIndexOfItem(fParent);
 		if (index < fParent.getViewer().getItemCount() - 1) {
 			BreadcrumbItem childItem= fParent.getViewer().getItem(index + 1);
