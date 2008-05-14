@@ -817,7 +817,7 @@ public class LocalCorrectionsSubProcessor {
 
 		String label= CorrectionMessages.LocalCorrectionsSubProcessor_removeelse_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image); 
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image); 
 		proposals.add(proposal);
 	}
 
