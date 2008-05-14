@@ -101,9 +101,9 @@ public class JarWriter3 {
 		try {
 			if (fJarPackage.usesManifest() && fJarPackage.areGeneratedFilesExported()) {
 				Manifest manifest= fJarPackage.getManifestProvider().create(fJarPackage);
-				fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getAbsoluteJarLocation().toFile()), manifest);
+				fJarOutputStream= new JarOutputStream(new BufferedOutputStream(new FileOutputStream(fJarPackage.getAbsoluteJarLocation().toFile())), manifest);
 			} else
-				fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getAbsoluteJarLocation().toFile()));
+				fJarOutputStream= new JarOutputStream(new BufferedOutputStream(new FileOutputStream(fJarPackage.getAbsoluteJarLocation().toFile())));
 			String comment= jarPackage.getComment();
 			if (comment != null)
 				fJarOutputStream.setComment(comment);
