@@ -82,10 +82,29 @@ public class RefreshAction extends SelectionDispatchAction {
 		protected List getSelectedResources() {
 			List selectedResources= super.getSelectedResources();
 			if (!getStructuredSelection().isEmpty() && selectedResources.size() == 1 && selectedResources.get(0) instanceof IWorkspaceRoot) {
-				return Collections.EMPTY_LIST;
+				selectedResources= Collections.EMPTY_LIST; // Refresh action refreshes root when it can't find any resources in selection
 			}
-			return selectedResources;
+			
+			ArrayList allResources= new ArrayList(selectedResources);
+			addWorkingSetResources(allResources);
+			return allResources;
 		} 
+		
+		private void addWorkingSetResources(List selectedResources) {
+			Object[] elements= getStructuredSelection().toArray();
+			for (int i= 0; i < elements.length; i++) {
+				Object curr= elements[i];
+				if (curr instanceof IWorkingSet) {
+					IAdaptable[] members= ((IWorkingSet) curr).getElements();
+					for (int k= 0; k < members.length; k++) {
+						Object adapted= members[k].getAdapter(IResource.class);
+						if (adapted != null) {
+							selectedResources.add(adapted);
+						}
+					}
+				}
+			}
+		}
 		
 		public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 			try {
@@ -185,6 +204,14 @@ public class RefreshAction extends SelectionDispatchAction {
 				javaElements.add(curr);
 			} else if (curr instanceof PackageFragmentRootContainer) {
 				javaElements.addAll(Arrays.asList(((PackageFragmentRootContainer) curr).getPackageFragmentRoots()));
+			} else if (curr instanceof IWorkingSet) {
+				IAdaptable[] members= ((IWorkingSet) curr).getElements();
+				for (int k= 0; k < members.length; k++) {
+					Object adapted= members[k].getAdapter(IJavaElement.class);
+					if (adapted != null) {
+						javaElements.add(adapted);
+					}
+				}				
 			} else if (curr instanceof IAdaptable) {
 				Object adapted= ((IAdaptable) curr).getAdapter(IJavaElement.class);
 				if (adapted != null) {
