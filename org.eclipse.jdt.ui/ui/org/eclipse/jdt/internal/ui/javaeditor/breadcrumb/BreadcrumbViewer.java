@@ -557,6 +557,11 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		if (next) {
 			if (index == fBreadcrumbItems.size() - 1) {
 				BreadcrumbItem current= (BreadcrumbItem) fBreadcrumbItems.get(index);
+				
+				ITreeContentProvider contentProvider= (ITreeContentProvider) getContentProvider();
+				if (!contentProvider.hasChildren(current.getData()))
+					return;
+						
 				current.openDropDownMenu();
 				current.getDropDownShell().setFocus();
 			} else {
