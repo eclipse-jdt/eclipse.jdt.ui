@@ -66,6 +66,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 
@@ -265,8 +266,12 @@ public class ReorgCorrectionsSubProcessor {
 			return;
 		}
 		if (!importDeclaration.isOnDemand()) {
+			Name name= importDeclaration.getName();
+			if (importDeclaration.isStatic() && name.isQualifiedName()) {
+				name= ((QualifiedName) name).getQualifier();
+			}
 			int kind= JavaModelUtil.is50OrHigher(cu.getJavaProject()) ? SimilarElementsRequestor.REF_TYPES : SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES;
-			UnresolvedElementsSubProcessor.addNewTypeProposals(cu, importDeclaration.getName(), kind, 5, proposals);
+			UnresolvedElementsSubProcessor.addNewTypeProposals(cu, name, kind, 5, proposals);
 		}
 		
 		String name= ASTNodes.asString(importDeclaration.getName());
