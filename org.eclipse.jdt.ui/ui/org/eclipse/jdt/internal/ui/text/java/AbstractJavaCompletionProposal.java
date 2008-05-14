@@ -927,7 +927,8 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		
 		if (fCreator == null) {
 			/*
-			 * FIXME: Take control creators (and link handling) out of JavadocHover.
+			 * FIXME: Take control creators (and link handling) out of JavadocHover,
+			 * see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=232024
 			 */
 			JavadocHover.PresenterControlCreator presenterControlCreator= new JavadocHover.PresenterControlCreator();
 			fCreator= new JavadocHover.HoverControlCreator(presenterControlCreator, JavaTextMessages.AbstractJavaCompletionProposal_toolTip_affordance);
