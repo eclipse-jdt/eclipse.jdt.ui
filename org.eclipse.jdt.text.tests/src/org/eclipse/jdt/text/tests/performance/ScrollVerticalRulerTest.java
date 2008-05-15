@@ -20,8 +20,8 @@ import junit.framework.TestSuite;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.IAnnotationModel;
@@ -30,6 +30,7 @@ import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
+import org.eclipse.ui.texteditor.spelling.SpellingService;
 
 
 /**
@@ -57,10 +58,15 @@ public abstract class ScrollVerticalRulerTest extends ScrollEditorTest {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		InstanceScope scope= new InstanceScope();
-		IEclipsePreferences jdtNode= scope.getNode(JavaUI.ID_PLUGIN);
-		jdtNode.putInt(PreferenceConstants.SPELLING_PROBLEMS_THRESHOLD, 100000);
+		PreferenceConstants.getPreferenceStore().putValue(PreferenceConstants.SPELLING_PROBLEMS_THRESHOLD, new Integer(100000).toString());
 		
+		boolean isInstalled= EditorsUI.getSpellingService().getSpellingEngineDescriptors().length > 0;
+		assertTrue("No spelling engine installed", isInstalled);
+		
+		IPreferenceStore store= EditorsUI.getPreferenceStore();
+		store.putValue(SpellingService.PREFERENCE_SPELLING_ENABLED, IPreferenceStore.TRUE);
+		
+		InstanceScope scope= new InstanceScope();
 		IEclipsePreferences editorsNode= scope.getNode(EditorsUI.PLUGIN_ID);
 		
 		MarkerAnnotationPreferences markerAnnotationPreferences= EditorsPlugin.getDefault().getMarkerAnnotationPreferences();
@@ -80,10 +86,12 @@ public abstract class ScrollVerticalRulerTest extends ScrollEditorTest {
 	 * @see org.eclipse.jdt.text.tests.performance.ScrollEditorTest#tearDown()
 	 */
 	protected void tearDown() throws Exception {
-		InstanceScope scope= new InstanceScope();
-		IEclipsePreferences jdtNode= scope.getNode(JavaUI.ID_PLUGIN);
-		jdtNode.putInt(PreferenceConstants.SPELLING_PROBLEMS_THRESHOLD, 100);
+		PreferenceConstants.getPreferenceStore().setToDefault(PreferenceConstants.SPELLING_PROBLEMS_THRESHOLD);
 		
+		IPreferenceStore store= EditorsUI.getPreferenceStore();
+		store.setToDefault(SpellingService.PREFERENCE_SPELLING_ENABLED);
+		
+		InstanceScope scope= new InstanceScope();
 		IEclipsePreferences editorsNode= scope.getNode(EditorsUI.PLUGIN_ID);
 		
 		MarkerAnnotationPreferences markerAnnotationPreferences= EditorsPlugin.getDefault().getMarkerAnnotationPreferences();
