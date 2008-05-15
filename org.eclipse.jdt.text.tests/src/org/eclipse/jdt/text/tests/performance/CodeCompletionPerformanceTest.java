@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,8 +20,26 @@ import junit.framework.TestSuite;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 
+import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.PerformanceMeter;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.source.ISourceViewer;
+
+import org.eclipse.ui.PartInitException;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
@@ -33,21 +51,6 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.java.FillArgumentNamesCompletionProposalCollector;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-import org.eclipse.jface.preference.IPreferenceStore;
-
-import org.eclipse.test.performance.Dimension;
-import org.eclipse.test.performance.PerformanceMeter;
-import org.eclipse.ui.PartInitException;
 
 public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 
@@ -318,7 +321,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 	public void testCompletionWithParamterGuesses2() throws Exception {
 		createTypeHierarchy();
 
-		measureCompletionWithParamterGuesses2(getNullPerformanceMeter(), getWarmUpRuns());
+		measureCompletionWithParamterGuesses(getNullPerformanceMeter(), getWarmUpRuns());
 		PerformanceMeter performanceMeter= createPerformanceMeterForSummary("Java Editor: proposal computation (param guesses, in type hierarchy)", Dimension.ELAPSED_PROCESS);
 		measureCompletionWithParamterNames(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
@@ -343,6 +346,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 					"        int intVal=5;\n" +
 					"        long longVal=3;\n" +
 					"        Runnable run= null;\n" +
+					"        Runnable run2= null;\n" +
 					"        run.//here\n" +
 					"    }\n" +
 					"}\n";
@@ -357,52 +361,14 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		EditorTestHelper.joinJobs(1000, 10000, 100);
 	}
 
-	private void measureCompletionWithParamterGuesses2(PerformanceMeter meter, final int runs) throws Exception {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
-		
-		for (int run= 0; run < runs; run++) {
-			meter.start();
-			
-			for (int accumulated= 0; accumulated < ACC_COMPLETION; accumulated++) {
-				CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext());
-				codeComplete(collector);
-			}
-			
-			meter.stop();
-		}
-
-	}
-
 	public void testApplicationWithParamterGuesses2() throws Exception {
 		createTypeHierarchy();
 		
-		measureApplicationWithParamterGuesses2(getNullPerformanceMeter(), getWarmUpRuns());
+		measureApplicationWithParamterGuesses(getNullPerformanceMeter(), getWarmUpRuns());
 		PerformanceMeter performanceMeter= createPerformanceMeterForGlobalSummary("Java Editor: proposal insertion (param guessing)", Dimension.ELAPSED_PROCESS);
-		measureApplicationWithParamterGuesses2(performanceMeter, getMeasuredRuns());
+		measureApplicationWithParamterGuesses(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
-	}
-	
-	private void measureApplicationWithParamterGuesses2(PerformanceMeter meter, final int runs) throws Exception {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
-		
-		for (int run= 0; run < runs; run++) {
-			CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext());
-			IJavaCompletionProposal[] proposals= codeComplete(collector);
-			
-			meter.start();
-			
-			for (int accumulated= 0; accumulated < ACC_PARAMETER_APPLICATION; accumulated++) {
-				applyProposal(proposals[0], "equals(run)");
-				applyProposal(proposals[2], "hashCode()");
-				applyProposal(proposals[9], "wait(longVal, intVal)");
-			}
-			
-			meter.stop();
-		}
-		
 	}
 	
 	private void applyProposal(IJavaCompletionProposal proposal, String completion) {
