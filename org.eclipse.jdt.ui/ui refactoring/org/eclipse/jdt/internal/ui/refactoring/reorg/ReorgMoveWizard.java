@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -47,6 +48,8 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class ReorgMoveWizard extends RefactoringWizard {
 
+	private static final String UPDATE_QUALIFIED_NAMES= "moveWizard.updateQualifiedNames"; //$NON-NLS-1$
+	
 	private final JavaMoveProcessor fMoveProcessor;
 
 	public ReorgMoveWizard(JavaMoveProcessor moveProcessor, Refactoring ref) {
@@ -175,8 +178,9 @@ public class ReorgMoveWizard extends RefactoringWizard {
 					boolean enabled= ((Button)e.widget).getSelection();
 					updateQualifiedNameUpdating(processor, enabled);
 				}
-
 			});
+			fQualifiedNameCheckbox.setSelection(getRefactoringSettings().getBoolean(UPDATE_QUALIFIED_NAMES));
+			updateQualifiedNameUpdating(processor, fQualifiedNameCheckbox.getSelection());
 		}
 		
 		private void updateQualifiedNameUpdating(final JavaMoveProcessor processor, boolean enabled) {
@@ -256,6 +260,23 @@ public class ReorgMoveWizard extends RefactoringWizard {
 				viewer.setSelection(new StructuredSelection(newElement), true);
 				viewer.getTree().setFocus();
 			}
+		}
+		
+		/* 
+		 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
+		 */
+		public void dispose() {
+			super.dispose();
+
+			IDialogSettings settings= getRefactoringSettings();
+			if (settings == null)
+				return;
+			
+			if (fQualifiedNameCheckbox != null)
+				settings.put(ReorgMoveWizard.UPDATE_QUALIFIED_NAMES, fQualifiedNameCheckbox.getSelection());
+			
+			if (fQualifiedNameComponent != null)
+				fQualifiedNameComponent.savePatterns(settings);
 		}
 	}
 }

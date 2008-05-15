@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,10 +48,11 @@ public class QualifiedNameComponent extends Composite {
 		String text= refactoring.getFilePatterns();
 		if (text == null) 
 			text= settings.get(RenameRefactoringWizard.QUALIFIED_NAMES_PATTERNS);
-		if (text != null) { 
-			fPatterns.setText(text);
-			refactoring.setFilePatterns(text);
-		}
+		if (text == null || text.length() == 0)
+			text= "*"; //$NON-NLS-1$
+		fPatterns.setText(text);
+		refactoring.setFilePatterns(text);
+		
 		fPatterns.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				refactoring.setFilePatterns(fPatterns.getText());
