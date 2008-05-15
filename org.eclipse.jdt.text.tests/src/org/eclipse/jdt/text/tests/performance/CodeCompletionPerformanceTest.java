@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -170,7 +170,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 
 	public void testCompletionNoParamters() throws Exception {
 		measureCompletionNoParameters(getNullPerformanceMeter(), getWarmUpRuns());
-		PerformanceMeter performanceMeter= createPerformanceMeterForGlobalSummary("Java Editor: proposal computation", Dimension.ELAPSED_PROCESS); 		
+		PerformanceMeter performanceMeter= createPerformanceMeterForGlobalSummary("Java Editor: proposal computation", Dimension.ELAPSED_PROCESS);
 		measureCompletionNoParameters(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
@@ -244,7 +244,9 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 
 	public void testApplicationWithParamterNames() throws Exception {
 		measureApplicationWithParamterNames(getNullPerformanceMeter(), getWarmUpRuns());
-		measureApplicationWithParamterNames(createPerformanceMeter(), getMeasuredRuns());
+		final PerformanceMeter performanceMeter= createPerformanceMeter();
+		explainDegradation("The test is slower because we now also show all guessed arguments. The additional cost for one completion is below 10ms.", performanceMeter);
+		measureApplicationWithParamterNames(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
@@ -326,7 +328,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 	public void testCompletionWithParamterGuesses2() throws Exception {
 		createTypeHierarchy();
 
-		measureCompletionWithParamterGuesses2(getNullPerformanceMeter(), getWarmUpRuns());
+		measureCompletionWithParamterGuesses(getNullPerformanceMeter(), getWarmUpRuns());
 		PerformanceMeter performanceMeter= createPerformanceMeterForSummary("Java Editor: proposal computation (param guesses, in type hierarchy)", Dimension.ELAPSED_PROCESS);
 		measureCompletionWithParamterNames(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
@@ -351,6 +353,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 					"        int intVal=5;\n" +
 					"        long longVal=3;\n" +
 					"        Runnable run= null;\n" +
+					"        Runnable run2= null;\n" +
 					"        run.//here\n" +
 					"    }\n" +
 					"}\n";
@@ -365,54 +368,14 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		EditorTestHelper.joinJobs(1000, 10000, 100);
 	}
 
-	private void measureCompletionWithParamterGuesses2(PerformanceMeter meter, final int runs) throws Exception {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
-		
-		for (int run= 0; run < runs; run++) {
-			meter.start();
-			
-			for (int accumulated= 0; accumulated < ACC_COMPLETION; accumulated++) {
-				CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext());
-				collector.setIgnored(CompletionProposal.METHOD_REF, false);
-				codeComplete(collector);
-			}
-			
-			meter.stop();
-		}
-
-	}
-
 	public void testApplicationWithParamterGuesses2() throws Exception {
 		createTypeHierarchy();
 		
-		measureApplicationWithParamterGuesses2(getNullPerformanceMeter(), getWarmUpRuns());
+		measureApplicationWithParamterGuesses(getNullPerformanceMeter(), getWarmUpRuns());
 		PerformanceMeter performanceMeter= createPerformanceMeterForGlobalSummary("Java Editor: proposal insertion (param guessing)", Dimension.ELAPSED_PROCESS);
-		measureApplicationWithParamterGuesses2(performanceMeter, getMeasuredRuns());
+		measureApplicationWithParamterGuesses(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
-	}
-	
-	private void measureApplicationWithParamterGuesses2(PerformanceMeter meter, final int runs) throws Exception {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
-		
-		for (int run= 0; run < runs; run++) {
-			CompletionProposalCollector collector= new FillArgumentNamesCompletionProposalCollector(createContext());
-			collector.setIgnored(CompletionProposal.METHOD_REF, false);
-			IJavaCompletionProposal[] proposals= codeComplete(collector);
-			
-			meter.start();
-			
-			for (int accumulated= 0; accumulated < ACC_PARAMETER_APPLICATION; accumulated++) {
-				applyProposal(proposals[0], "equals(run)");
-				applyProposal(proposals[2], "hashCode()");
-				applyProposal(proposals[9], "wait(longVal, intVal)");
-			}
-			
-			meter.stop();
-		}
-		
 	}
 	
 	private void applyProposal(IJavaCompletionProposal proposal, String completion) {
