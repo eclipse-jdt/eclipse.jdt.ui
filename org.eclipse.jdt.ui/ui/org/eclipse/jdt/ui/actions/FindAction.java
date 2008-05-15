@@ -63,7 +63,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * @since 2.0
  * 
  * @noextend This class is not intended to be subclassed by clients.
- * @noinstantiate This class is not intended to be instantiated by clients.
  */
 public abstract class FindAction extends SelectionDispatchAction {
 
