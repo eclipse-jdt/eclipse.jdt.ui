@@ -184,8 +184,18 @@ class BreadcrumbItemDropDown {
 			 * @see org.eclipse.jface.action.Action#run()
 			 */
 			public void run() {
+				Shell shell= fParent.getDropDownShell();
+				if (shell != null)
+					return;
+				
+				shell= fParent.getViewer().getDropDownShell();
+				if (shell != null)
+					shell.close();
+				
 				showMenu();
-				fShell.setFocus();
+				
+				if (!"carbon".equals(SWT.getPlatform())) //$NON-NLS-1$
+					fShell.setFocus();
 			}
 		};
 
