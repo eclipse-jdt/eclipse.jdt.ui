@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -148,7 +148,20 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 	public void testNullCleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
-		cleanUpRefactoring.addCleanUp(new AbstractCleanUp() {});
+		cleanUpRefactoring.addCleanUp(new AbstractCleanUp() {
+			class ASTRequirement extends CleanUpRequirements {
+				public ASTRequirement() {
+					super(true, false, null);
+				}
+			}
+			
+			/* 
+			 * @see org.eclipse.jdt.internal.ui.fix.AbstractCleanUp#getRequirements()
+			 */
+			public CleanUpRequirements getRequirements() {
+				return new ASTRequirement();
+			}
+		});
 		
 		doCleanUp(cleanUpRefactoring);
 	}
