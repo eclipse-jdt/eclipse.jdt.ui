@@ -95,7 +95,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 			
 			if (path.segment(0).equals(JavaCore.USER_LIBRARY_CONTAINER_ID)) {
 				String label= NewWizardMessages.UserLibraryMarkerResolutionGenerator_changetouserlib_label; 
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME);
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				resolutions.add(new UserLibraryMarkerResolution(label, image) {
 					public void run(IMarker m) {
 						changeToExistingLibrary(shell, path, false, project);
@@ -103,7 +103,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 				});
 				if (path.segmentCount() == 2) {
 					String label2= Messages.format(NewWizardMessages.UserLibraryMarkerResolutionGenerator_createuserlib_label, path.segment(1)); 
-					Image image2= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
+					Image image2= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_LIBRARY);
 					resolutions.add(new UserLibraryMarkerResolution(label2, image2) {
 						public void run(IMarker m) {
 							createUserLibrary(shell, path);
@@ -112,7 +112,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 				}
 			}
 			String label= NewWizardMessages.UserLibraryMarkerResolutionGenerator_changetoother; 
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME);
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			resolutions.add(new UserLibraryMarkerResolution(label, image) {
 				public void run(IMarker m) {
 					changeToExistingLibrary(shell, path, true, project);
