@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -126,8 +127,6 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 	private boolean fSelectionAllStaticFinal;
 	private boolean fAllStaticFinalCheckPerformed= false;
-	
-	private List fBodyDeclarations;
 	
 	//Constant Declaration Location
 	private BodyDeclaration fToInsertAfter;
@@ -611,7 +610,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			return;
 
 		BodyDeclaration lastStaticDependency= null;
-		Iterator decls= getBodyDeclarations();
+		Iterator decls= getContainingTypeDeclarationNode().bodyDeclarations().iterator();
 		
 		Assert.isTrue(decls.hasNext()); /* Admissible selected expressions must occur
 		                                   within a body declaration.  Thus, the 
@@ -685,12 +684,6 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return fToInsertAfter;
 	}
 	
-	private Iterator getBodyDeclarations() throws JavaModelException {
-		if(fBodyDeclarations == null)
-			fBodyDeclarations= getContainingTypeDeclarationNode().bodyDeclarations();
-		return fBodyDeclarations.iterator();
-	}
-
 	private String getConstantTypeName() throws JavaModelException {
 		return ASTNodes.asString(getConstantType());
 	}
@@ -723,7 +716,15 @@ public class ExtractConstantRefactoring extends Refactoring {
 		boolean declPredecessorReached= false;
 		
 		Collection scope= new ArrayList();
-		for(Iterator bodyDeclarations = getBodyDeclarations(); bodyDeclarations.hasNext();) {
+		
+		AbstractTypeDeclaration containingType= getContainingTypeDeclarationNode();
+		if (containingType instanceof EnumDeclaration) {
+			// replace in all enum constants bodies
+			EnumDeclaration enumDeclaration= (EnumDeclaration) containingType;
+			scope.addAll(enumDeclaration.enumConstants());
+		}
+
+		for (Iterator bodyDeclarations = containingType.bodyDeclarations().iterator(); bodyDeclarations.hasNext();) {
 		    BodyDeclaration bodyDeclaration= (BodyDeclaration) bodyDeclarations.next();
 		    
 		    if(bodyDeclaration == getNodeToInsertConstantDeclarationAfter())
@@ -795,6 +796,12 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return fSelectedExpression;
 	}
 
+	/**
+	 * Returns the type to which the new constant will be added to. It is the first non-anonymous parent.
+	 * @return the type to add the new constant to
+	 * 
+	 * @throws JavaModelException
+	 */
 	private AbstractTypeDeclaration getContainingTypeDeclarationNode() throws JavaModelException {
 		AbstractTypeDeclaration result= (AbstractTypeDeclaration) ASTNodes.getParent(getSelectedExpression().getAssociatedNode(), AbstractTypeDeclaration.class);  
 		Assert.isNotNull(result);
