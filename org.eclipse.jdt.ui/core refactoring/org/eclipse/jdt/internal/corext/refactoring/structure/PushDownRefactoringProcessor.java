@@ -720,8 +720,12 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			rewrites.put(source, sourceRewriter);
 			IType[] types= getHierarchyOfDeclaringClass(new SubProgressMonitor(monitor, 1)).getSubclasses(getDeclaringType());
 			final Set result= new HashSet(types.length + 1);
-			for (int index= 0; index < types.length; index++)
-				result.add(types[index].getCompilationUnit());
+			for (int index= 0; index < types.length; index++) {
+				ICompilationUnit cu= types[index].getCompilationUnit();
+				if (cu != null) { // subclasses can be in binaries
+					result.add(cu);
+				}
+			}
 			result.add(source);
 			final Map adjustments= new HashMap();
 			final List adjustors= new ArrayList();
