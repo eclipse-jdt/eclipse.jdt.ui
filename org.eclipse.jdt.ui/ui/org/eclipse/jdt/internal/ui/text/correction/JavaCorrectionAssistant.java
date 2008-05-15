@@ -100,7 +100,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 	private IInformationControlCreator getInformationControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				return new DefaultInformationControl(parent, false);
+				return new DefaultInformationControl(parent, JavaPlugin.getAdditionalInfoAffordanceString());
 			}
 		};
 	}

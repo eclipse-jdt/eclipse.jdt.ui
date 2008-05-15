@@ -409,7 +409,11 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			ContentAssistPreference.configure(assistant, fPreferenceStore);
 
 			assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
-			assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
+			assistant.setInformationControlCreator(new IInformationControlCreator() {
+				public IInformationControl createInformationControl(Shell parent) {
+					return new DefaultInformationControl(parent, JavaPlugin.getAdditionalInfoAffordanceString());
+				}
+			});
 			
 			return assistant;
 		}

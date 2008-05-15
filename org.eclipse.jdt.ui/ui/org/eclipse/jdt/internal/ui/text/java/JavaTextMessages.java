@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,6 @@ final class JavaTextMessages extends NLS {
 		// Do not instantiate
 	}
 
-	public static String AbstractJavaCompletionProposal_toolTip_affordance;
 	public static String CompletionProcessor_error_accessing_title;
 	public static String CompletionProcessor_error_accessing_message;
 	public static String CompletionProcessor_error_notOnBuildPath_title;

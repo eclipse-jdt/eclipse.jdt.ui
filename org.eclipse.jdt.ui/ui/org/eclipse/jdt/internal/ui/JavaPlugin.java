@@ -1043,4 +1043,19 @@ public class JavaPlugin extends AbstractUIPlugin {
 		return fImagesOnFSRegistry;
 	}
 	
+	/**
+	 * Returns the content assist additional info focus affordance string.
+	 *
+	 * @return the affordance string which is <code>null</code> if the
+	 *			preference is disabled
+	 *
+	 * @see EditorsUI#getTooltipAffordanceString()
+	 * @since 3.4
+	 */
+	public static final String getAdditionalInfoAffordanceString() {
+		if (!EditorsUI.getPreferenceStore().getBoolean(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE))
+			return null;
+		
+		return JavaUIMessages.JavaPlugin_additionalInfo_affordance;
+	}
 }

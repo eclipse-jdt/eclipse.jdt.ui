@@ -931,7 +931,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			 * see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=232024
 			 */
 			JavadocHover.PresenterControlCreator presenterControlCreator= new JavadocHover.PresenterControlCreator();
-			fCreator= new JavadocHover.HoverControlCreator(presenterControlCreator, JavaTextMessages.AbstractJavaCompletionProposal_toolTip_affordance);
+			fCreator= new JavadocHover.HoverControlCreator(presenterControlCreator, true);
 		}
 		return fCreator;
 	}

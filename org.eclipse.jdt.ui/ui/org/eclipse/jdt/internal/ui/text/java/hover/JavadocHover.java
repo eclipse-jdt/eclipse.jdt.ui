@@ -312,31 +312,34 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		 * @since 3.4
 		 */
 		private final IInformationControlCreator fInformationPresenterControlCreator;
-		private final String fStaticStatusFieldText;
+		/**
+		 * <code>true</code> to use the additional info affordance, <code>false</code> to use the hover affordance.
+		 */
+		private final boolean fAdditionalInfoAffordance;
 
 		/**
 		 * @param informationPresenterControlCreator control creator for enriched hover
 		 * @since 3.4
 		 */
 		public HoverControlCreator(IInformationControlCreator informationPresenterControlCreator) {
-			this(informationPresenterControlCreator, null);
+			this(informationPresenterControlCreator, false);
 		}
 
 		/**
 		 * @param informationPresenterControlCreator control creator for enriched hover
-		 * @param staticStatusFieldText a static status field text, or <code>null</code> to use the default affordance
+		 * @param additionalInfoAffordance <code>true</code> to use the additional info affordance, <code>false</code> to use the hover affordance
 		 * @since 3.4
 		 */
-		public HoverControlCreator(IInformationControlCreator informationPresenterControlCreator, String staticStatusFieldText) {
+		public HoverControlCreator(IInformationControlCreator informationPresenterControlCreator, boolean additionalInfoAffordance) {
 			fInformationPresenterControlCreator= informationPresenterControlCreator;
-			fStaticStatusFieldText= staticStatusFieldText;
+			fAdditionalInfoAffordance= additionalInfoAffordance;
 		}
 
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
 		public IInformationControl doCreateInformationControl(Shell parent) {
-			String tooltipAffordanceString= fStaticStatusFieldText != null ? fStaticStatusFieldText : EditorsUI.getTooltipAffordanceString();
+			String tooltipAffordanceString= fAdditionalInfoAffordance ? JavaPlugin.getAdditionalInfoAffordanceString() : EditorsUI.getTooltipAffordanceString();
 			if (BrowserInformationControl.isAvailable(parent)) {
 				String font= PreferenceConstants.APPEARANCE_JAVADOC_FONT;
 				BrowserInformationControl iControl= new BrowserInformationControl(parent, font, tooltipAffordanceString) {
@@ -362,7 +365,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				return false;
 			
 			if (control instanceof IInformationControlExtension4) {
-				String tooltipAffordanceString= fStaticStatusFieldText != null ? fStaticStatusFieldText : EditorsUI.getTooltipAffordanceString();
+				String tooltipAffordanceString= fAdditionalInfoAffordance ? JavaPlugin.getAdditionalInfoAffordanceString() : EditorsUI.getTooltipAffordanceString();
 				((IInformationControlExtension4)control).setStatusText(tooltipAffordanceString);
 			}
 			
