@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,9 +45,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
@@ -56,6 +59,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -234,11 +238,35 @@ public class SourceProvider {
 		if (statements.size() != 1)
 			return false;
 		
-		Object statement= statements.get(0);
-		if (! (statement instanceof IfStatement))
-			return false;
-		
-		return ((IfStatement) statement).getElseStatement() == null;
+		ASTNode p= (ASTNode) statements.get(0);
+
+		while (true) {
+			if (p instanceof IfStatement) {
+				return ((IfStatement) p).getElseStatement() == null;
+			} else {
+
+				ChildPropertyDescriptor childD;
+				if (p instanceof WhileStatement) {
+					childD= WhileStatement.BODY_PROPERTY;
+				} else if (p instanceof ForStatement) {
+					childD= ForStatement.BODY_PROPERTY;
+				} else if (p instanceof EnhancedForStatement) {
+					childD= EnhancedForStatement.BODY_PROPERTY;
+				} else if (p instanceof DoStatement) {
+					childD= DoStatement.BODY_PROPERTY;
+				} else if (p instanceof LabeledStatement) {
+					childD= LabeledStatement.BODY_PROPERTY;
+				} else {
+					return false;
+				}
+				Statement body= (Statement) p.getStructuralProperty(childD);
+				if (body instanceof Block) {
+					return false;
+				} else {
+					p= body;
+				}
+			}
+		}
 	}
 	
 	public MethodDeclaration getDeclaration() {

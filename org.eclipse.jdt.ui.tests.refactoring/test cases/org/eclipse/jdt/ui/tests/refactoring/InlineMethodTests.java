@@ -619,6 +619,14 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performControlStatementTest();
 	}
 	
+	public void testDanglingIfBug229734() throws Exception {
+		performControlStatementTest();
+	}
+	
+	public void testDanglingIfBug229734_2() throws Exception {
+		performControlStatementTest();
+	}
+	
 	/* *********************** Receiver Tests ******************************* */
 		
 	private void performReceiverTest() throws Exception {
