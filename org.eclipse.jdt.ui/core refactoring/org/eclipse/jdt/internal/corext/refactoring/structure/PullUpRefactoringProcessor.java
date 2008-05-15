@@ -1301,6 +1301,10 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		newMethod.setExtraDimensions(oldMethod.getExtraDimensions());
 		copyJavadocNode(rewrite, oldMethod, newMethod);
 		int modifiers= getModifiersWithUpdatedVisibility(sourceMethod, sourceMethod.getFlags(), adjustments, monitor, true, status);
+		if (fDeletedMethods.length == 0 || getDestinationType().isInterface()) {
+			modifiers&= ~Flags.AccFinal;
+		}
+		
 		if (oldMethod.isVarargs())
 			modifiers&= ~Flags.AccVarargs;
 		copyAnnotations(oldMethod, newMethod);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -970,6 +970,50 @@ public class PullUpTests extends RefactoringTest {
 								signaturesOfMethodsToPullUp, 
 								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, 
 								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
+	}
+	
+	public void test47() throws Exception{
+		// for bug 211491 
+		
+		String[] selectedMethodNames= {"method"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] selectedTypeNames= {};
+		String[] namesOfMethodsToPullUp= {"method"};
+		String[][] signaturesOfMethodsToPullUp= {new String[0]};
+		String[] namesOfFieldsToPullUp= {};
+		String[] namesOfTypesToPullUp= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures, 
+								selectedFieldNames,	
+								selectedTypeNames, namesOfMethodsToPullUp, 
+								signaturesOfMethodsToPullUp, 
+								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, 
+								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, true, true, 0);
+	}
+	
+	public void test48() throws Exception{
+		// for bug 211491, but with a super class 
+		
+		String[] selectedMethodNames= {"method"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] selectedTypeNames= {};
+		String[] namesOfMethodsToPullUp= {"method"};
+		String[][] signaturesOfMethodsToPullUp= {new String[0]};
+		String[] namesOfFieldsToPullUp= {};
+		String[] namesOfTypesToPullUp= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures, 
+								selectedFieldNames,	
+								selectedTypeNames, namesOfMethodsToPullUp, 
+								signaturesOfMethodsToPullUp, 
+								namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, 
+								signaturesOfMethodsToDeclareAbstract, namesOfTypesToPullUp, false, false, 0);
 	}
 
 	public void testFail0() throws Exception{
