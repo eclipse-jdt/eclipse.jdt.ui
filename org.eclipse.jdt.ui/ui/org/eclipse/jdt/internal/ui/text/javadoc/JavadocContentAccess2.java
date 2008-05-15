@@ -366,7 +366,9 @@ public class JavadocContentAccess2 {
 			handleLink(node.fragments());
 		else if (isCode || isLiteral)
 			handleContentElements(node.fragments());
-		else {
+		else if (handleInheritDoc(node)) {
+			// handled
+		} else {
 			//print uninterpreted source {@tagname ...} for unknown tags
 			int start= node.getStartPosition();
 			String text= fSource.substring(start, start + node.getLength());
@@ -380,6 +382,54 @@ public class JavadocContentAccess2 {
 		
 	}
 	
+	/**
+	 * Handle {&#64;inheritDoc} in start tag.
+	 * 
+	 * @param node the node
+	 * @return <code>true</code> iff the node was an {&#64;inheritDoc} node and has been handled
+	 */
+	private boolean handleInheritDoc(TagElement node) {
+		if (! TagElement.TAG_INHERITDOC.equals(node.getTagName()))
+			return false;
+		if (((TagElement) node.getParent()).getTagName() != null)
+			return false;
+		if (! (fMember instanceof IMethod))
+			return false;
+			
+		IMethod method= (IMethod) fMember;
+		IType type= method.getDeclaringType();
+		ITypeHierarchy hierarchy;
+		try {
+			hierarchy= type.newSupertypeHierarchy(null);
+			MethodOverrideTester tester= new MethodOverrideTester(type, hierarchy);
+			
+			IType[] superTypes= hierarchy.getAllSupertypes(type);
+			for (int i= 0; i < superTypes.length; i++) {
+				IType curr= superTypes[i];
+				IMethod overridden= tester.findOverriddenMethodInType(curr, method);
+				if (overridden != null) {
+					String javadoc= getHTMLContentFromSource(overridden, false);
+					if (javadoc != null) {
+						fBuf.append("<a href='"); //$NON-NLS-1$
+						try {
+							String scheme= JavaElementLinks.JAVADOC_SCHEME;
+							String uri= JavaElementLinks.createURI(scheme, overridden);
+							fBuf.append(uri);
+						} catch (URISyntaxException e) {
+							JavaPlugin.log(e);
+						}
+						fBuf.append("'>{@inheritDoc}</a>"); //$NON-NLS-1$
+						return true;
+					}
+					// don't use attached Javadoc, since inheritDoc also wouldn't copy it
+				}
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+		return false;
+	}
+
 	private void handleBlockTags(String title, List tags) {
 		if (tags.isEmpty())
 			return;
