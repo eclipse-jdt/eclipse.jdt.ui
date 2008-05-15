@@ -249,7 +249,7 @@ public class MoveCuUpdateCreator {
 				IType iType= referencedTypes[i];
 				if (! iType.exists())
 					continue;
-				if (! iType.getPackageFragment().equals(srcPack))
+				if (!JavaModelUtil.isSamePackage(iType.getPackageFragment(), srcPack))
 					continue;
 				if (cuList.contains(iType.getCompilationUnit()))
 					continue;

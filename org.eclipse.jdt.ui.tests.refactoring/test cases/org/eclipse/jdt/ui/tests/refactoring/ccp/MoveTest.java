@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1107,6 +1107,62 @@ public class MoveTest extends RefactoringTest {
 		}
 	}
 	
+	public void testDestination_yes_cuToOtherPackageWithMultiRootBug109145() throws Exception {
+		ParticipantTesting.reset();
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("public class Class2 {\n");
+		buf.append("    Class1 c;\n");
+		buf.append("}\n");
+		ICompilationUnit toMove= getPackageP().createCompilationUnit("Class2.java", buf.toString(), false, new NullProgressMonitor());
+
+		IPackageFragmentRoot testSrc= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "testSrc");
+		IPackageFragment testP= testSrc.createPackageFragment("p", true, new NullProgressMonitor());
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("public class Class1 {\n");
+		buf.append("}\n");
+		ICompilationUnit reference= testP.createCompilationUnit("Class1.java", buf.toString(), false, new NullProgressMonitor());
+		IPackageFragment destination= testSrc.createPackageFragment("p2", true, new NullProgressMonitor());
+		
+		try {
+			String[] handles= ParticipantTesting.createHandles(new Object[] { toMove, toMove.getTypes()[0], toMove.getResource() });
+			JavaMoveProcessor processor= verifyEnabled(new IResource[] {}, new IJavaElement[] { toMove }, createReorgQueries());
+
+			verifyValidDestination(processor, destination);
+
+			assertTrue("source file does not exist before moving", toMove.exists());
+			RefactoringStatus status= performRefactoring(processor, true);
+			assertEquals(null, status);
+			assertTrue("source file exists after moving", !toMove.exists());
+			ICompilationUnit newCu= destination.getCompilationUnit(toMove.getElementName());
+			assertTrue("new file does not exist after moving", newCu.exists());
+			
+			buf= new StringBuffer();
+			buf.append("package p2;\n");
+			buf.append("\n");
+			buf.append("import p.Class1;\n");
+			buf.append("\n");
+			buf.append("public class Class2 {\n");
+			buf.append("    Class1 c;\n");
+			buf.append("}\n");
+			assertEqualLines(buf.toString(), newCu.getSource());
+			
+			buf= new StringBuffer();
+			buf.append("package p;\n");
+			buf.append("public class Class1 {\n");
+			buf.append("}\n");
+			assertEqualLines(buf.toString(), reference.getSource());
+
+			ParticipantTesting.testMove(handles, new MoveArguments[] { new MoveArguments(destination, processor.getUpdateReferences()),
+					new MoveArguments(destination, processor.getUpdateReferences()), new MoveArguments(destination.getResource(), processor.getUpdateReferences()) });
+		} finally {
+			performDummySearch();
+			JavaProjectHelper.removeSourceContainer(RefactoringTestSetup.getProject(), testSrc.getElementName());
+		}
+	}
+
 	public void testDestination_yes_cuToRoot() throws Exception{
 		ParticipantTesting.reset();
 		String newSource= "package p;class A{void foo(){}class Inner{}}";
