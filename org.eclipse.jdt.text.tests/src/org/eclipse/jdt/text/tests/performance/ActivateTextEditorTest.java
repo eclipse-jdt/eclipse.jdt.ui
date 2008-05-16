@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,5 +34,13 @@ public class ActivateTextEditorTest extends ActivateEditorTest {
 	public void testActivateEditor() {
 		setShortName(SHORT_NAME);
 		super.testActivateEditor();
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.text.tests.performance.ActivateEditorTest#getDegradationComment()
+	 * @since 3.4
+	 */
+	protected String getDegradationComment() {
+		return "This test is slower than in 3.3 due the changes in Platform UI, see bugs 232489, 232499 and 232513.";
 	}
 }
