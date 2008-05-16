@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,13 +11,13 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import org.eclipse.test.performance.Dimension;
-import org.eclipse.test.performance.PerformanceMeter;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.jface.action.IAction;
 
@@ -74,6 +74,7 @@ public abstract class AbstractJavaReplaceAllTest extends TextPerformanceTestCase
 			performanceMeter= createPerformanceMeterForSummary(getShortName(), Dimension.ELAPSED_PROCESS);
 		else
 			performanceMeter= createPerformanceMeter();
+		explainDegradation("From a user perspective this got actually faster, see bug 221826 for details.", performanceMeter);
 		measure(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
@@ -90,10 +91,10 @@ public abstract class AbstractJavaReplaceAllTest extends TextPerformanceTestCase
 			// Fill Find field
 			SWTEventHelper.pressKeyChar(display, FIND);
 			
-			// Switch to Replace field			
+			// Switch to Replace field
 			SWTEventHelper.pressKeyCode(display, SWT.TAB);
 
-			// Fill Replace field			
+			// Fill Replace field
 			SWTEventHelper.pressKeyChar(display, REPLACE);
 			
 			performanceMeter.start();
