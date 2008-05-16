@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,5 +68,15 @@ public abstract class OpenEditorTest extends TextPerformanceTestCase {
 		IFile[] files= new IFile[n];
 		Arrays.fill(files, ResourceTestHelper.findFile(file));
 		return files;
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.text.tests.performance.TextPerformanceTestCase#createPerformanceMeter()
+	 * @since 3.4
+	 */
+	protected PerformanceMeter createPerformanceMeter() {
+		PerformanceMeter perfMeter= super.createPerformanceMeter();
+		explainDegradation("This test is slower than in 3.3 due the changes in Platform UI, see bugs 232489, 232499 and 232513.", perfMeter);
+		return perfMeter;
 	}
 }

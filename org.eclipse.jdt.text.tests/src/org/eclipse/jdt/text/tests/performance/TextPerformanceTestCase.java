@@ -185,7 +185,7 @@ public class TextPerformanceTestCase extends TestCase {
 	 * 
 	 * @return the created performance meter
 	 */
-	protected final PerformanceMeter createPerformanceMeter() {
+	protected PerformanceMeter createPerformanceMeter() {
 		return createPerformanceMeter("");
 	}
 
