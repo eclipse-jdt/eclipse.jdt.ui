@@ -89,6 +89,8 @@ public class ClasspathModifierQueries {
      * Query that processes the request of 
      * creating a link to an existing source 
      * folder.
+     * 
+     * @deprecated Not used anymore in 3.4
      */
     public static interface ILinkToQuery {
         /**
@@ -520,6 +522,8 @@ public class ClasspathModifierQueries {
      * 
      * @see ClasspathModifierQueries.ICreateFolderQuery
      * @see LinkFolderDialog
+     * 
+     * @deprecated Not used anymore in 3.4
      */
     public static ILinkToQuery getDefaultLinkQuery(final Shell shell, final IJavaProject project, final IPath desiredOutputLocation) {
         return new ILinkToQuery() {
