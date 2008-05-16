@@ -66,9 +66,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
-/**
- * @deprecated Not used anymore in 3.4
- */
 public class LinkFolderDialog extends StatusDialog {
     private final class FolderNameField extends Observable implements IDialogFieldListener {
         private StringDialogField fNameDialogField;
