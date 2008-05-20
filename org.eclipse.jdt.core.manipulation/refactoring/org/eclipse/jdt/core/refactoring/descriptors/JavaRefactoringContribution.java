@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,9 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
  * framework.
  * </p>
  * 
- * @since 3.3
+ * @since 1.1
+ * 
+ * @noextend This class is not intended to be subclassed by clients outside JDT
  */
 public abstract class JavaRefactoringContribution extends RefactoringContribution {
 
@@ -52,7 +54,7 @@ public abstract class JavaRefactoringContribution extends RefactoringContributio
 	 *            the refactoring, or <code>null</code>
 	 * @throws CoreException
 	 *             if an error occurs while creating the refactoring
-	 * @since 3.4
+	 * @since 1.2
 	 */
 	public abstract Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException;
 }

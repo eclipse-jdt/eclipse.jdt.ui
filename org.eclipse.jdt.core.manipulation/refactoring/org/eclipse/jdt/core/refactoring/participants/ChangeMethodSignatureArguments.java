@@ -24,7 +24,9 @@ import org.eclipse.jdt.core.Signature;
  * This class is not intended to be subclassed by clients.
  * </p>
  * 
- * @since 3.4
+ * @since 1.2
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class ChangeMethodSignatureArguments extends RefactoringArguments {
 	

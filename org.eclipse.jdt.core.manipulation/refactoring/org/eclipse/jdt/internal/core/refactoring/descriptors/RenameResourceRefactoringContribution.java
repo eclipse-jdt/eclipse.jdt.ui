@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,8 +27,9 @@ import org.eclipse.jdt.core.refactoring.descriptors.RenameResourceDescriptor;
 /**
  * Refactoring contribution for the rename resource refactoring.
  * 
- * @since 3.2
- * @deprecated moved to ltk.core.refactoring. Contribution still available for backwards compatibility of scripts
+ * @since 1.1
+ * @deprecated since 1.2 moved to <code>org.eclipse.ltk.core.refactoring</code>.
+ * Contribution still available for backwards compatibility of scripts
  */
 public final class RenameResourceRefactoringContribution extends JavaRefactoringContribution {
 

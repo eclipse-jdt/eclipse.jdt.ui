@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,7 +35,10 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  * appropriate refactoring id.
  * </p>
  * 
- * @since 3.4
+ * @since 1.2
+ * 
+ * @noinstantiate This class is not intended to be instantiated by clients.
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescriptor {
 
@@ -210,7 +213,7 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 	}
 
 	/**
-	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * Creates a new refactoring descriptor.
 	 *
 	 * @param project
 	 *            the non-empty name of the project associated with this

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,9 +39,13 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  * Note: this class is not intended to be instantiated by clients.
  * </p>
  * 
- * @since 3.3
+ * @since 1.1
  * 
- * @deprecated since 3.4, use {@link org.eclipse.ltk.core.refactoring.resource.RenameResourceDescriptor} from <code>ltk.core.refactoring</code> instead
+ * @deprecated since 1.2, use {@link org.eclipse.ltk.core.refactoring.resource.RenameResourceDescriptor} from
+ * <code>org.eclipse.ltk.core.refactoring</code> instead.
+ * 
+ * @noinstantiate This class is not intended to be instantiated by clients.
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 
@@ -59,7 +63,7 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	}
 	
 	/**
-	 * Note: This constructor is experimental and for internal use only. Clients should not call this constructor.
+	 * Creates a new refactoring descriptor.
 	 *
 	 * @param project
 	 *            the non-empty name of the project associated with this
@@ -78,6 +82,8 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 *            the flags of the refactoring descriptor
 	 *            
 	 * @throws IllegalArgumentException if the argument map contains invalid keys/values
+	 * 
+	 * @since 1.2
 	 */
 	public RenameResourceDescriptor(String project, String description, String comment, Map arguments, int flags) {
 		super(IJavaRefactorings.RENAME_RESOURCE, project, description, comment, arguments, flags);
@@ -112,7 +118,7 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 * @return 
 	 *            the new name to rename the resource to
 	 *            
-	 * @since 3.4
+	 * @since 1.2
 	 */
 	public String getNewName() {
 		return fName;
@@ -160,7 +166,7 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 * @return
 	 *          the path of the resource to rename
 	 *          
-	 * @since 3.4
+	 * @since 1.2
 	 */
 	public IPath getResourcePath() {
 		return fResourcePath;

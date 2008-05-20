@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,10 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
  * Note: this class is not intended to be instantiated by clients.
  * </p>
  * 
- * @since 3.3
+ * @since 1.1
+ * 
+ * @noinstantiate This class is not intended to be instantiated by clients.
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public final class DeleteDescriptor extends JavaRefactoringDescriptor {
 
@@ -42,7 +45,7 @@ public final class DeleteDescriptor extends JavaRefactoringDescriptor {
 	}
 	
 	/**
-	 * Note: This constructor is experimental and for internal use only. Clients should not call this constructor.
+	 * Creates a new refactoring descriptor.
 	 *
 	 * @param project
 	 *            the non-empty name of the project associated with this
@@ -60,7 +63,7 @@ public final class DeleteDescriptor extends JavaRefactoringDescriptor {
 	 * @param flags
 	 *            the flags of the refactoring descriptor
 	 *            
-	 * @since 3.4
+	 * @since 1.2
 	 */
 	public DeleteDescriptor(String project, String description, String comment, Map arguments, int flags) {
 		super(IJavaRefactorings.DELETE, project, description, comment, arguments, flags);

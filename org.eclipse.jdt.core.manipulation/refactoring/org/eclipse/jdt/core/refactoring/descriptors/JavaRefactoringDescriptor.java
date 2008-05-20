@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,7 +43,9 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  * framework.
  * </p>
  * 
- * @since 3.3
+ * @since 1.1
+ * 
+ * @noextend This class is not intended to be subclassed by clients outside JDT.
  */
 public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 
@@ -278,6 +280,8 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * 			  all settings for this refactoring
 	 * @param flags
 	 *            the flags of the refactoring descriptor
+	 *            
+	 * @since 1.2
 	 */
 	public JavaRefactoringDescriptor(final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
 		super(id,project,description,comment,flags);

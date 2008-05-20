@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,8 +36,11 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  * Note: this class is not intended to be instantiated by clients.
  * </p>
  * 
- * @since 3.3
- * @deprecated merged into {@link RenameJavaElementDescriptor}
+ * @since 1.1
+ * @deprecated since 1.2 merged into {@link RenameJavaElementDescriptor}
+ * 
+ * @noinstantiate This class is not intended to be instantiated by clients.
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public final class RenameLocalVariableDescriptor extends JavaRefactoringDescriptor {
 

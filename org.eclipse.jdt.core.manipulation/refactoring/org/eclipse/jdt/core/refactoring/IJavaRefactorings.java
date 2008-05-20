@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -66,7 +66,8 @@ import org.eclipse.jdt.core.refactoring.descriptors.UseSupertypeDescriptor;
  * Note: this interface is not intended to be implemented by clients.
  * </p>
  * 
- * @since 3.3
+ * @since 1.1
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IJavaRefactorings {
 
@@ -148,7 +149,7 @@ public interface IJavaRefactorings {
 	 * {@link ExtractClassDescriptor}.
 	 * </p>
 	 * 
-	 * @since 3.4
+	 * @since 1.2
 	 */
 	public static final String EXTRACT_CLASS= "org.eclipse.jdt.ui.extract.class"; //$NON-NLS-1$
 	
@@ -289,7 +290,7 @@ public interface IJavaRefactorings {
 	 * Clients may safely cast the obtained refactoring descriptor to
 	 * {@link IntroduceParameterObjectDescriptor}.
 	 * </p>
-	 * @since 3.4
+	 * @since 1.2
 	 */	
 	public static final String INTRODUCE_PARAMETER_OBJECT= "org.eclipse.jdt.ui.introduce.parameter.object"; //$NON-NLS-1$
 	
@@ -420,7 +421,7 @@ public interface IJavaRefactorings {
 	 * Clients may safely cast the obtained refactoring descriptor to
 	 * {@link org.eclipse.jdt.core.refactoring.descriptors.RenameResourceDescriptor}.
 	 * </p>
-	 * @deprecated Since 3.4. Use {@link org.eclipse.ltk.core.refactoring.resource.RenameResourceDescriptor#ID} instead.
+	 * @deprecated Since 1.2. Use {@link org.eclipse.ltk.core.refactoring.resource.RenameResourceDescriptor#ID} instead.
 	 */
 	public static final String RENAME_RESOURCE= "org.eclipse.jdt.ui.rename.resource"; //$NON-NLS-1$
 
