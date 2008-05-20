@@ -825,10 +825,10 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			}
 
 			if (fContainerInfo && isDuplicateElement(element)) {
-				return fTypeInfoUtil.getFullyQualifiedText((TypeNameMatch) element);
+				return BasicElementLabels.getJavaElementName(fTypeInfoUtil.getFullyQualifiedText((TypeNameMatch) element));
 			}
 
-			return fTypeInfoUtil.getQualifiedText((TypeNameMatch) element);
+			return BasicElementLabels.getJavaElementName(fTypeInfoUtil.getQualifiedText((TypeNameMatch) element));
 		}
 
 		/* (non-Javadoc)
