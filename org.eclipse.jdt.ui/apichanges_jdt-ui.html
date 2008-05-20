@@ -69,6 +69,15 @@ Non-breaking API changes from R3.3 to R3.4</b></font> <br>
     <tr><td><hr></td></tr>    
     <tr>
       <td>
+      Added API to <code>org.eclipse.jdt.ui.PreferenceConstants</code>:
+      <ul>
+      <li>getExcludedCompletionProposalCategories()</li>
+      <li>setExcludedCompletionProposalCategories(..)</li>
+      </ul>
+    </tr>    
+    <tr><td><hr></td></tr>    
+    <tr>
+      <td>
       Added API <code>org.eclipse.jdt.ui.JavaUI.getEditorInputTypeRoot(IEditorInput)</code></td>
     </tr>
     <tr><td><hr></td></tr>    
@@ -168,7 +177,16 @@ Non-breaking API changes from R3.3 to R3.4</b></font> <br>
        </ul>
       </td>
     </tr>
-    <tr><td><hr></td></tr>       
+    <tr><td><hr></td></tr>
+    <tr>
+      <td>
+      Support for styled text labels in <code>org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider</code>:
+      <ul>
+      <li><code>createStyledLabel(CompletionProposal)</code></li>
+       </ul>
+      </td>
+    </tr>    
+    <tr><td><hr></td></tr>      
     <tr>
       <td>
       Made preference page ID for build path preferences pages API:
@@ -177,7 +195,40 @@ Non-breaking API changes from R3.3 to R3.4</b></font> <br>
       <li><code>org.eclipse.jdt.ui.JavaUI#ID_CLASSPATH_VARIABLES_PREFERENCE_PAGE</code></li>
       </ul>
       </td>
-    </tr>          
+    </tr>
+    <tr><td><hr></td></tr>       
+    <tr>
+      <td>
+      Constants added for 'Show Breadcrumbs' action:
+      <ul>
+      <li><code>org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds#TOGGLE_BREADCRUMB</code></li>
+      <li><code>org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds#SHOW_IN_BREADCRUMB</code></li>
+      </ul>
+      </td>
+    </tr>
+    <tr><td><hr></td></tr>       
+    <tr>
+      <td>
+      All action groups now also accept a special selection provider on construction which is used instead of the
+	  page selection provider.      
+      <ul>
+      <li><code>BuildActionGroup</code></li>
+      <li><code>CCPActionGroup</code></li>
+      <li><code>DeclarationsSearchGroup</code></li>
+      <li><code>GenerateActionGroup</code></li>
+      <li><code>ImplementorsSearchGroup</code></li>
+      <li><code>JavaSearchActionGroup</code></li>
+      <li><code>NavigateActionGroup</code></li>
+      <li><code>OccurrencesSearchGroup</code></li>     
+      <li><code>OpenEditorActionGroup</code></li>
+      <li><code>ProjectActionGroup</code></li>
+      <li><code>ReadReferencesSearchGroup</code></li>
+      <li><code>RefactorActionGroup</code></li>
+      <li><code>ReferencesSearchGroup</code></li>
+      <li><code>WriteReferencesSearchGroup</code></li>
+      </ul>
+      </td>
+    </tr>    
   </tbody>
 </table>
 <p>
