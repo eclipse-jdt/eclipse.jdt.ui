@@ -314,8 +314,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 		if (lastSeparatorIndex != -1) {
 			dialog.setFilterPath(currentSourceString.substring(0, lastSeparatorIndex));
 			dialog.setFileName(currentSourceString.substring(lastSeparatorIndex + 1, currentSourceString.length()));
-		} else
-			dialog.setFileName(currentSourceString);
+		}
 		String selectedFileName= dialog.open();
 		if (selectedFileName != null)
 			fAntScriptNamesCombo.setText(selectedFileName);
