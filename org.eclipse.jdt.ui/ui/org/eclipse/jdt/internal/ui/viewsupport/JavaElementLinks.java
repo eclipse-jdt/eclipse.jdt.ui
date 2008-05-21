@@ -62,7 +62,7 @@ public class JavaElementLinks {
 		/**
 		 * Handle link to given target to open in javadoc view.
 		 * 
-		 * @param target the target to show 
+		 * @param target the target to show
 		 */
 		void handleJavadocViewLink(IJavaElement target);
 
@@ -101,7 +101,7 @@ public class JavaElementLinks {
 	
 	/**
 	 * Creates a location listener which uses the given handler
-	 * to handle java element links. 
+	 * to handle java element links.
 	 * 
 	 * The location listener can be attached to a {@link Browser}
 	 * 
@@ -111,9 +111,23 @@ public class JavaElementLinks {
 	public static LocationListener createLocationListener(final ILinkHandler handler) {
 		return new LocationAdapter() {
 			public void changing(LocationEvent event) {
+				String loc= event.location;
+
+				if ("about:blank".equals(loc)) { //$NON-NLS-1$
+					/*
+					 * Using the Browser.setText API triggers a location change to "about:blank".
+					 * XXX: remove this code once https://bugs.eclipse.org/bugs/show_bug.cgi?id=130314 is fixed
+					 */
+					//input set with setText
+					handler.handleTextSet();
+					return;
+				}
+				
 				event.doit= false;
 
-				String loc= event.location;
+				if (loc.startsWith("about:")) //$NON-NLS-1$
+					return; //FIXME: handle relative links, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=8112
+
 				URI uri;
 				try {
 					uri= new URI(loc);
@@ -141,14 +155,7 @@ public class JavaElementLinks {
 						return;
 
 					handler.handleDeclarationLink(linkTarget);
-				} else if (!"about:blank".equals(loc)) { //$NON-NLS-1$
-					/*
-					 * Using the Browser.setText API triggers a location change to "about:blank".
-					 * XXX: remove this code once https://bugs.eclipse.org/bugs/show_bug.cgi?id=130314 is fixed
-					 */
-					if (loc.startsWith("about:")) //$NON-NLS-1$
-						return; //FIXME: handle relative links
-
+				} else {
 					try {
 						if (handler.handleExternalLink(new URL(loc), event.display))
 							return;
@@ -157,10 +164,6 @@ public class JavaElementLinks {
 					} catch (MalformedURLException e) {
 						JavaPlugin.log(e);
 					}
-				} else {
-					//input set with setText
-					event.doit= true;
-					handler.handleTextSet();
 				}
 			}
 		};
