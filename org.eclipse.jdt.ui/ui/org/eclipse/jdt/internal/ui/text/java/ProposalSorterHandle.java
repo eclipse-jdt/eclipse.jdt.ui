@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.PerformanceStats;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -76,9 +75,9 @@ public final class ProposalSorterHandle {
 	 * 
 	 * @param element the configuration element to read
 	 * @throws InvalidRegistryObjectException if the configuration element is not valid any longer
-	 *         or does not contain mandatory attributes
+	 * @throws CoreException if the configuration does not contain mandatory attributes
 	 */
-	ProposalSorterHandle(IConfigurationElement element) throws InvalidRegistryObjectException {
+	ProposalSorterHandle(IConfigurationElement element) throws InvalidRegistryObjectException, CoreException {
 		Assert.isLegal(element != null);
 		
 		fElement= element;
@@ -99,22 +98,19 @@ public final class ProposalSorterHandle {
 	}
 
 	/**
-	 * Checks an element that must be defined according to the extension
-	 * point schema. Throws an
-	 * <code>InvalidRegistryObjectException</code> if <code>obj</code>
-	 * is <code>null</code>.
+	 * Checks that the given attribute value is not <code>null</code>.
 	 * 
-	 * @param obj the object to check if not null
+	 * @param value the value to check if not null
 	 * @param attribute the attribute
-	 * @throws InvalidRegistryObjectException 
+	 * @throws InvalidRegistryObjectException if the registry element is no longer valid
+	 * @throws CoreException if <code>value</code> is <code>null</code>
 	 */
-	private void checkNotNull(Object obj, String attribute) throws InvalidRegistryObjectException {
-		if (obj == null) {
+	private void checkNotNull(Object value, String attribute) throws InvalidRegistryObjectException, CoreException {
+		if (value == null) {
 			Object[] args= { getId(), fElement.getContributor().getName(), attribute };
 			String message= Messages.format(JavaTextMessages.CompletionProposalComputerDescriptor_illegal_attribute_message, args);
 			IStatus status= new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, message, null);
-			JavaPlugin.log(status);
-			throw new InvalidRegistryObjectException();
+			throw new CoreException(status);
 		}
 	}
 

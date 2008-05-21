@@ -138,8 +138,9 @@ final class CompletionProposalComputerDescriptor {
 	 * @param registry the computer registry creating this descriptor
 	 * @param categories the categories
 	 * @throws InvalidRegistryObjectException if this extension is no longer valid
+	 * @throws CoreException if the extension contains invalid values
 	 */
-	CompletionProposalComputerDescriptor(IConfigurationElement element, CompletionProposalComputerRegistry registry, List categories) throws InvalidRegistryObjectException {
+	CompletionProposalComputerDescriptor(IConfigurationElement element, CompletionProposalComputerRegistry registry, List categories) throws InvalidRegistryObjectException, CoreException {
 		Assert.isLegal(registry != null);
 		Assert.isLegal(element != null);
 		
@@ -195,20 +196,19 @@ final class CompletionProposalComputerDescriptor {
 	}
 
 	/**
-	 * Checks an element that must be defined according to the extension
-	 * point schema.
+	 * Checks that the given attribute value is not <code>null</code>.
 	 * 
-	 * @param obj the element to be checked
+	 * @param value the object to check if not null
 	 * @param attribute the attribute
-	 * @throws InvalidRegistryObjectException if <code>obj</code> is <code>null</code>
+	 * @throws InvalidRegistryObjectException if the registry element is no longer valid
+	 * @throws CoreException if <code>value</code> is <code>null</code>
 	 */
-	private void checkNotNull(Object obj, String attribute) throws InvalidRegistryObjectException {
-		if (obj == null) {
+	private void checkNotNull(Object value, String attribute) throws InvalidRegistryObjectException, CoreException {
+		if (value == null) {
 			Object[] args= { getId(), fElement.getContributor().getName(), attribute };
 			String message= Messages.format(JavaTextMessages.CompletionProposalComputerDescriptor_illegal_attribute_message, args);
 			IStatus status= new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, message, null);
-			JavaPlugin.log(status);
-			throw new InvalidRegistryObjectException();
+			throw new CoreException(status);
 		}
 	}
 

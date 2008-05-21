@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IContributor;
 import org.eclipse.core.runtime.IExtensionRegistry;
@@ -277,6 +278,8 @@ public final class CompletionProposalComputerRegistry {
 				String message= Messages.format(JavaTextMessages.CompletionProposalComputerRegistry_invalid_message, args);
 				IStatus status= new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, message, x);
 				informUser(status);
+			} catch (CoreException x) {
+				informUser(x.getStatus());
 			}
 		}
 		
@@ -350,6 +353,8 @@ public final class CompletionProposalComputerRegistry {
 				String message= Messages.format(JavaTextMessages.CompletionProposalComputerRegistry_invalid_message, args);
 				IStatus status= new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, message, x);
 				informUser(status);
+			} catch (CoreException x) {
+				informUser(x.getStatus());
 			}
 		}
 		return categories;

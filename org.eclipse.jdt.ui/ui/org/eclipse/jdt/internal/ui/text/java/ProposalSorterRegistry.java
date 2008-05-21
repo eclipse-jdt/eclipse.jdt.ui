@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IStatus;
@@ -99,12 +100,14 @@ public final class ProposalSorterRegistry {
 				String message= Messages.format(JavaTextMessages.CompletionProposalComputerRegistry_invalid_message, args);
 				IStatus status= new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, message, x);
 				informUser(status);
+			} catch (CoreException x) {
+				informUser(x.getStatus());
 			}
 		}
 		
 		fSorters= sorters;
 	}
-
+	
 	private void informUser(IStatus status) {
 		JavaPlugin.log(status);
 		String title= JavaTextMessages.CompletionProposalComputerRegistry_error_dialog_title;
