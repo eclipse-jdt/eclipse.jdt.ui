@@ -244,6 +244,9 @@ public class JavaDocLocations {
 	}
 	
 	public static URL getProjectJavadocLocation(IJavaProject project) {
+		if (!project.getProject().isAccessible()) {
+			return null;
+		}
 		try {
 			String prop= project.getProject().getPersistentProperty(PROJECT_JAVADOC);
 			if (prop == null) {
