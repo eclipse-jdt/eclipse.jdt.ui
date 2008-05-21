@@ -12,8 +12,10 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -60,6 +62,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
  * @since 3.4
  */
 public class JavadocContentAccess2 {
+	
+	private static final char[] INHERIT_DOC_TAG= "@inheritDoc}".toCharArray(); //$NON-NLS-1$
 	
 	private final IMember fMember;
 	private String fSource;
@@ -109,10 +113,8 @@ public class JavadocContentAccess2 {
 		ISourceRange javadocRange= member.getJavadocRange();
 		if (javadocRange != null) {
 			String rawJavadoc= buf.getText(javadocRange.getOffset(), javadocRange.getLength());
-			String javadoc= javadoc2HTML(member, rawJavadoc);
-			if (!containsOnlyInheritDoc(javadoc)) {
-				return javadoc;
-			}
+			if (!isOnlyContainingInheritDoc(rawJavadoc))
+				return javadoc2HTML(member, rawJavadoc);
 		}
 
 		if (allowInherited && (member.getElementType() == IJavaElement.METHOD)) {
@@ -173,10 +175,72 @@ public class JavadocContentAccess2 {
 		}
 		return buf.toString();
 	}
-	
-	private static boolean containsOnlyInheritDoc(String javadoc) {
-		//FIXME: improve {@inheritDoc} support
-		return javadoc != null && javadoc.trim().equals("{@inheritDoc}"); //$NON-NLS-1$
+
+	/**
+	 * Checks whether the given string is Javadoc and
+	 * only contains whitespace and the inheritDoc tag.
+	 * 
+	 * @param javadoc the string to test
+	 * @return <code>true</code> if the given string is Javadoc with only an inheritDoc tag
+	 * @since 3.4
+	 */
+	private static boolean isOnlyContainingInheritDoc(String javadoc) {
+		// FIXME: improve {@inheritDoc} support: https://bugs.eclipse.org/bugs/show_bug.cgi?id=24227
+		
+		StringReader reader= new StringReader(javadoc);
+		int state= 0;
+		int ch= 0;
+		while (ch != -1) {
+			try {
+				ch= reader.read();
+				if (ch == -1)
+					break;
+
+				if (Character.isWhitespace((char) ch))
+					continue;
+
+				switch (state) {
+					case 0: // expecting '/' -> 1
+						if (ch != '/')
+							return false;
+						state= 1;
+						break;
+					case 1: // expecting first '*' -> 2
+						if (ch != '*')
+							return false;
+						state= 2;
+						break;
+					case 2: // expecting '*' -> 2 or '{' -> 3
+						if (ch == '*')
+							continue;
+						if (ch != '{')
+							return false;
+						int size= INHERIT_DOC_TAG.length;
+						char[] result= new char[size];
+						int readCount= reader.read(result, 0, size);
+						if (readCount != size || !Arrays.equals(INHERIT_DOC_TAG, result))
+							return false;
+						state= 3;
+						break;
+					case 3: // expecting '*' -> 4
+						if (ch != '*')
+							return false;
+						state= 4;
+						break;
+					case 4: // expecting '*' -> 4 or '/' -> 5
+						if (ch == '/')
+							return true;
+						else if (ch != '*')
+							return false;
+						break;
+					default:
+						return false;
+				}
+			} catch (IOException e) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private static String findDocInHierarchy(IMethod method, boolean useAttachedJavadoc) throws JavaModelException {
