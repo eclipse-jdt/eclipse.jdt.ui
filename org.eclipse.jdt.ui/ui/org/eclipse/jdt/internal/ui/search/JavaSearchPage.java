@@ -743,6 +743,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		for (int i= 0; i < fLimitTo.length; i++) {
 			fLimitTo[i].addSelectionListener(listener);
 		}
+		Dialog.applyDialogFont(fLimitToGroup); // re-apply font as we disposed the previous widgets
 		
 		fLimitToGroup.layout();
 	}

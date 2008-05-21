@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TrayDialog;
 
@@ -105,6 +106,8 @@ public class MatchLocations {
 				}
 			});
 			SWTUtil.setButtonDimensionHint(deselectAllButton);
+			
+			Dialog.applyDialogFont(contents);
 			
 			return contents;
 		}
