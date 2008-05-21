@@ -286,9 +286,10 @@ public class CodeTemplateContextType extends TemplateContextType {
 			required.add(TYPE_DECLARATION);
 		}
 		for (int i= 0; i < variables.length; i++) {
-			String type= BasicElementLabels.getJavaElementName(variables[i].getType());
+			String type= variables[i].getType();
 			if (getResolver(type) == null) {
-				throw new TemplateException(Messages.format(JavaTemplateMessages.CodeTemplateContextType_validate_unknownvariable, type)); 
+				String unknown= BasicElementLabels.getJavaElementName(type);
+				throw new TemplateException(Messages.format(JavaTemplateMessages.CodeTemplateContextType_validate_unknownvariable, unknown)); 
 			}
 			required.remove(type);
 		}
