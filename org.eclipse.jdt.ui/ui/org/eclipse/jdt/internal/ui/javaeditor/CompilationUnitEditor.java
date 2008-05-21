@@ -1325,6 +1325,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				parent= (Composite) super.createDialogArea(parent);
 				Link link= new Link(parent, SWT.NONE);
 				link.setText(linkText);
+				link.setFont(parent.getFont());
 				link.addSelectionListener(new SelectionAdapter() {
 					public void widgetSelected(SelectionEvent e) {
 						PreferencesUtil.createPreferenceDialogOn(getShell(), "org.eclipse.jdt.ui.preferences.SaveParticipantPreferencePage", null, null).open(); //$NON-NLS-1$

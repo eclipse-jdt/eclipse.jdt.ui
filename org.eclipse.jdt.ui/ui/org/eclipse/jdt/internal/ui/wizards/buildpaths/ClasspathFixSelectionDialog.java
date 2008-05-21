@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -149,7 +150,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 	
 	private Link createLink(Composite composite, ListenerMix listener) {
 		Link link= new Link(composite, SWT.WRAP);
-		GridData layoutData= new GridData(SWT.FILL, SWT.CENTER, false, false);
+		GridData layoutData= new GridData(SWT.FILL, SWT.CENTER, true, false);
 		layoutData.widthHint= convertWidthInCharsToPixels(80);
 		link.setLayoutData(layoutData);
 		link.addSelectionListener(listener);
@@ -195,6 +196,8 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 			
 			performSelectionChanged();
 		}
+		
+		Dialog.applyDialogFont(composite);
 		
 		return composite;
 	}
