@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,8 +32,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
-
-import org.eclipse.test.performance.Dimension;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -101,7 +99,6 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 	}
 	
 	public void testExpand() throws Exception {
-		tagAsSummary("Package Explorer - Expand to first level", Dimension.ELAPSED_PROCESS);
 		joinBackgroudActivities();
 		TreeViewer viewer= getViewer();
 		startMeasuring();
