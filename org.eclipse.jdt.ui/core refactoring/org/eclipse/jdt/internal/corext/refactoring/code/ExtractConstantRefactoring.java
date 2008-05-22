@@ -611,12 +611,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 		BodyDeclaration lastStaticDependency= null;
 		Iterator decls= getContainingTypeDeclarationNode().bodyDeclarations().iterator();
-		
-		Assert.isTrue(decls.hasNext()); /* Admissible selected expressions must occur
-		                                   within a body declaration.  Thus, the 
-		                                   class/interface in which such an expression occurs
-		                                   must have at least one body declaration */
-		
+				
 		while (decls.hasNext()) {
 			BodyDeclaration decl= (BodyDeclaration) decls.next();
 			
