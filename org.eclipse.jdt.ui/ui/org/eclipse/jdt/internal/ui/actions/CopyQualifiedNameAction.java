@@ -220,12 +220,12 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		}
     }
 
-	private String getQualifiedName(Object element) {
+	private String getQualifiedName(Object element) throws JavaModelException {
 		if (element instanceof IResource)
 			return ((IResource) element).getFullPath().toString();
 		
-		if (element instanceof IPackageFragmentRoot) {
-			IResource resource= ((IJavaElement) element).getResource();
+		if (element instanceof IPackageFragmentRoot || element instanceof ITypeRoot) {
+			IResource resource= ((IJavaElement) element).getCorrespondingResource();
 			if (resource != null)
 				return getQualifiedName(resource);
 		}
