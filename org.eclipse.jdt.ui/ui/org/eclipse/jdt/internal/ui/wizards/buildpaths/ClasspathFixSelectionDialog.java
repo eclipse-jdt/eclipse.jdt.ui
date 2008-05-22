@@ -53,6 +53,8 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 import org.eclipse.jdt.core.IJavaProject;
 
@@ -102,7 +104,10 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 						try {
 							ClasspathFixProposal fix= dialog.getSelectedClasspathFix();
 							Change change= fix.createChange(new SubProgressMonitor(monitor, 1));
-							new PerformChangeOperation(change).run(new SubProgressMonitor(monitor, 1));
+							
+							PerformChangeOperation op= RefactoringUI.createUIAwareChangeOperation(change);
+							op.setUndoManager(RefactoringCore.getUndoManager(), change.getName());
+							op.run(new SubProgressMonitor(monitor, 1));
 						} catch (OperationCanceledException e) {
 							throw new InterruptedException();
 						} catch (CoreException e) {

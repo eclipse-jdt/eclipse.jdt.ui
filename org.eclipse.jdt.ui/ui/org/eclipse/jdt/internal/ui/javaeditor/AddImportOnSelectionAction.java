@@ -185,6 +185,16 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		return fEditor.getSite().getShell();
 	}
 
+	/**
+	 * Creates a import query that shows a dialog for conflics.
+	 * 
+	 * @param shell the parent shell
+	 * @return the created mport query
+	 */
+	public static IChooseImportQuery newDialogQuery(Shell shell) {
+		return new SelectTypeQuery(shell);
+	}
+	
 	private static class SelectTypeQuery implements IChooseImportQuery {
 
 		private final Shell fShell;

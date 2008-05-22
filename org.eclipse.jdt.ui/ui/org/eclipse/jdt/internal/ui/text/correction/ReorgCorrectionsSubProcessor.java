@@ -19,6 +19,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,6 +34,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -70,6 +73,8 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
+import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
@@ -95,8 +100,10 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
+import org.eclipse.jdt.internal.ui.javaeditor.AddImportOnSelectionAction;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectMainTypeNameProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectPackageDeclarationProposal;
@@ -225,14 +232,18 @@ public class ReorgCorrectionsSubProcessor {
 		proposals.add(proposal);
 	}
 	
-	private static class ClasspathFixCorrectionProposal extends ChangeCorrectionProposal {
+	private static class ClasspathFixCorrectionProposal extends CUCorrectionProposal {
 
-		private final IJavaProject fProject;
+		private final int fOffset;
+		private final int fLength;
 		private final String fMissingType;
 		
-		public ClasspathFixCorrectionProposal(IJavaProject project, String missingType) {
-			super(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_description, null, -10, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
-			fProject= project;
+		private TextEdit fResultingEdit;
+		
+		public ClasspathFixCorrectionProposal(ICompilationUnit cu, int offset, int length, String missingType) {
+			super(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_description, cu, -10, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
+			fOffset= offset;
+			fLength= length;
 			fMissingType= missingType;
 		}
 		
@@ -241,16 +252,38 @@ public class ReorgCorrectionsSubProcessor {
 			if (context == null) {
 				context= new BusyIndicatorRunnableContext();
 			}
-			ClasspathFixSelectionDialog.openClasspathFixSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), fProject, fMissingType, context);
+			Shell shell= JavaPlugin.getActiveWorkbenchShell();
+			if (ClasspathFixSelectionDialog.openClasspathFixSelectionDialog(shell, getCompilationUnit().getJavaProject(), fMissingType, context)) {
+				if (fMissingType.indexOf('.') == -1) {
+					try {
+						IChooseImportQuery query= AddImportOnSelectionAction.newDialogQuery(shell);
+						AddImportsOperation op= new AddImportsOperation(getCompilationUnit(), fOffset, fLength, query, false, false);
+						IProgressService progressService= PlatformUI.getWorkbench().getProgressService(); 
+						progressService.runInUI(context, new WorkbenchRunnableAdapter(op, op.getScheduleRule()), op.getScheduleRule());
+						fResultingEdit= op.getResultingEdit();
+						super.apply(document);
+					} catch (InvocationTargetException e) {
+						JavaPlugin.log(e);
+					} catch (InterruptedException e) {
+						// ignore
+					}
+				}
+			}
 		}
 		
+		protected void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
+			if (fResultingEdit != null) {
+				editRoot.addChild(fResultingEdit);
+			}
+		}
+				
 		public String getAdditionalProposalInfo() {
 			return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_info, BasicElementLabels.getJavaElementName(fMissingType));
 		}
 	}
 	
-	public static void addProjectSetupFixProposal(IInvocationContext context, String missingType, Collection proposals) {
-		proposals.add(new ClasspathFixCorrectionProposal(context.getCompilationUnit().getJavaProject(), missingType));
+	public static void addProjectSetupFixProposal(IInvocationContext context, IProblemLocation problem, String missingType, Collection proposals) {
+		proposals.add(new ClasspathFixCorrectionProposal(context.getCompilationUnit(), problem.getOffset(), problem.getLength(), missingType));
 	}
 	
 	
@@ -278,7 +311,7 @@ public class ReorgCorrectionsSubProcessor {
 		if (importDeclaration.isOnDemand()) {
 			name= JavaModelUtil.concatenateName(name, "*"); //$NON-NLS-1$
 		}
-		addProjectSetupFixProposal(context, name, proposals);
+		addProjectSetupFixProposal(context, problem, name, proposals);
 	}
 			
 	private static final class OpenBuildPathCorrectionProposal extends ChangeCorrectionProposal {

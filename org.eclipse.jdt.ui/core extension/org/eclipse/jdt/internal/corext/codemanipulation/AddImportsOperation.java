@@ -97,7 +97,8 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	private final IChooseImportQuery fQuery;
 	private IStatus fStatus;
 	private boolean fDoSave;
-	
+	private final boolean fApply;
+	private MultiTextEdit fResultingEdit;
 	
 	/**
 	 * Generate import statements for the passed java elements
@@ -111,6 +112,22 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	 * @param save If set, the result will be saved
 	 */
 	public AddImportsOperation(ICompilationUnit cu, int selectionOffset, int selectionLength, IChooseImportQuery query, boolean save) {
+		this(cu, selectionOffset, selectionLength, query, save, true);
+	}
+	
+	/**
+	 * Generate import statements for the passed java elements
+	 * Elements must be of type IType (-> single import) or IPackageFragment
+	 * (on-demand-import). Other JavaElements are ignored
+	 * @param cu The compilation unit
+	 * @param selectionOffset Start of the current text selection
+	 * 	@param selectionLength End of the current text selection
+	 * @param query Query element to be used for UI interaction or <code>null</code> to not select anything
+	 * when multiple possibilities are available
+	 * @param save If set, the result will be saved
+	 * @param apply If set, the resulting edit will be applied
+	 */
+	public AddImportsOperation(ICompilationUnit cu, int selectionOffset, int selectionLength, IChooseImportQuery query, boolean save, boolean apply) {
 		super();
 		Assert.isNotNull(cu);
 		
@@ -120,6 +137,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		fQuery= query;
 		fStatus= Status.OK_STATUS;
 		fDoSave= save;
+		fApply= apply;
 	}
 	
 	/**
@@ -157,10 +175,23 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			TextEdit importsEdit= importRewrite.rewriteImports(new SubProgressMonitor(monitor, 1));
 			res.addChild(importsEdit);
 			
-			JavaModelUtil.applyEdit(fCompilationUnit, res, fDoSave, new SubProgressMonitor(monitor, 1));
+			fResultingEdit= res;
+			
+			if (fApply) {
+				JavaModelUtil.applyEdit(fCompilationUnit, res, fDoSave, new SubProgressMonitor(monitor, 1));
+			}
 		} finally {
 			monitor.done();
 		}
+	}
+	
+	/**
+	 * Returns the resulting edit
+	 * 
+	 * @return the resulting edit
+	 */
+	public MultiTextEdit getResultingEdit() {
+		return fResultingEdit;
 	}
 	
 	private TextEdit evaluateEdits(CompilationUnit root, ImportRewrite importRewrite, int offset, int length, IProgressMonitor monitor) throws JavaModelException {
