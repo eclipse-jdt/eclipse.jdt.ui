@@ -275,16 +275,16 @@ public class JavaElementLabels {
 	public final static long REFERENCED_ROOT_POST_QUALIFIED= 1L << 45;
 	
 	/**
-	 * Specified to use the resolved information of a IType, IMethod or IField. See {@link IType#isResolved()}.
+	 * Specifies to use the resolved information of a IType, IMethod or IField. See {@link IType#isResolved()}.
 	 * If resolved information is available, types will be rendered with type parameters of the instantiated type.
-	 * Resolved method render with the parameter types of the method instance.
+	 * Resolved methods render with the parameter types of the method instance.
 	 * <code>Vector&lt;String&gt;.get(String)</code>
 	 */
 	public final static long USE_RESOLVED= 1L << 48;
 	
 	
 	/**
-	 * Specified to apply color styles to labels. This flag only applies to method taking or returning a {@link StyledString}.
+	 * Specifies to apply color styles to labels. This flag only applies to methods taking or returning a {@link StyledString}.
 	 * 
 	 * @since 3.4
 	 */
