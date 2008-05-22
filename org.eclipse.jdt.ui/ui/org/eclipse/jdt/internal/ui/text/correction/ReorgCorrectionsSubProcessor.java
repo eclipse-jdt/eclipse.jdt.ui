@@ -232,7 +232,7 @@ public class ReorgCorrectionsSubProcessor {
 		proposals.add(proposal);
 	}
 	
-	private static class ClasspathFixCorrectionProposal extends CUCorrectionProposal {
+	public static class ClasspathFixCorrectionProposal extends CUCorrectionProposal {
 
 		private final int fOffset;
 		private final int fLength;
