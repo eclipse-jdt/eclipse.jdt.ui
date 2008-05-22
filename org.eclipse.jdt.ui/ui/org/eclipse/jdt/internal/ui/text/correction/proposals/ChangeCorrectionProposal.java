@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -126,9 +126,15 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 					throw new CoreException(status);
 				} else {
 					IUndoManager manager= RefactoringCore.getUndoManager();
-					manager.aboutToPerformChange(change);
-					Change undoChange= change.perform(new NullProgressMonitor());
-					manager.changePerformed(change, true);
+					Change undoChange;
+					boolean successful= false;
+					try {
+						manager.aboutToPerformChange(change);
+						undoChange= change.perform(new NullProgressMonitor());
+						successful= true;
+					} finally {
+						manager.changePerformed(change, successful);
+					}
 					if (undoChange != null) {
 						undoChange.initializeValidationData(new NullProgressMonitor());
 						manager.addUndo(getName(), undoChange);

@@ -226,6 +226,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			
 			IUndoManager manager= RefactoringCore.getUndoManager();
 			
+			boolean success= false;
 			try {
     			manager.aboutToPerformChange(result);
     			
@@ -289,8 +290,9 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     					undoEdits.addFirst(change.getUndoEdit());
     				}
     			} while (cleanUps.length > 0);
+    			success= true;
 			} finally {
-				manager.changePerformed(result, true);
+				manager.changePerformed(result, success);
 			}
 			
 			if (undoEdits.size() > 0) {
