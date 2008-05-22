@@ -15,12 +15,14 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.ltk.core.refactoring.Change;
 
+import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -34,8 +36,11 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
+
+import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor;
@@ -91,7 +96,7 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 	
 	private void collectProposals(IJavaProject project, String name, Collection proposals) throws CoreException {
 		int idx= name.lastIndexOf('.');
-		char[] packageName= idx != -1 ? name.substring(0, idx).toCharArray() : new char[0];
+		char[] packageName= idx != -1 ? name.substring(0, idx).toCharArray() : null; // no package provided
 		char[] typeName= name.substring(idx + 1).toCharArray();
 		
 		if (typeName.length == 1 && typeName[0] == '*') {
@@ -133,15 +138,25 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 							proposals.add(proposal);
 						}
 					}
-					if ((entryKind == IClasspathEntry.CPE_LIBRARY || entryKind == IClasspathEntry.CPE_VARIABLE || entryKind == IClasspathEntry.CPE_CONTAINER) && addedClaspaths.add(entry)) {
-						String label= getAddClasspathLabel(entry, root, project);
-						if (label != null) {
-							Change change= ClasspathFixProposal.newAddClasspathChange(project, entry);
-							if (change != null) {
-								DefaultClasspathFixProposal proposal= new DefaultClasspathFixProposal(label, change, label, 7);
-								proposals.add(proposal);
+					if (entryKind == IClasspathEntry.CPE_CONTAINER) {
+						IPath entryPath= entry.getPath();
+						if (isNonProjectSpecificContainer(entryPath)) {
+							addLibraryProposal(project, root, entry, addedClaspaths, proposals);
+						} else {
+							try {
+								IClasspathContainer classpathContainer= JavaCore.getClasspathContainer(entryPath, root.getJavaProject());
+								if (classpathContainer != null) {
+									IClasspathEntry entryInContainer= JavaModelUtil.findEntryInContainer(classpathContainer, root.getPath());
+									if (entryInContainer != null) {
+										addLibraryProposal(project, root, entryInContainer, addedClaspaths, proposals);
+									}
+								}
+							} catch (CoreException e) {
+								// ignore
 							}
 						}
+					} else if ((entryKind == IClasspathEntry.CPE_LIBRARY || entryKind == IClasspathEntry.CPE_VARIABLE)) {
+						addLibraryProposal(project, root, entry, addedClaspaths, proposals);
 					}
 				} catch (JavaModelException e) {
 					// ignore
@@ -149,6 +164,30 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 			}
 		}
 	}
+
+	private void addLibraryProposal(IJavaProject project, IPackageFragmentRoot root, IClasspathEntry entry, Collection addedClaspaths, Collection proposals) throws JavaModelException {
+		if (addedClaspaths.add(entry)) {
+			String label= getAddClasspathLabel(entry, root, project);
+			if (label != null) {
+				Change change= ClasspathFixProposal.newAddClasspathChange(project, entry);
+				if (change != null) {
+					DefaultClasspathFixProposal proposal= new DefaultClasspathFixProposal(label, change, label, 7);
+					proposals.add(proposal);
+				}
+			}
+		}
+	}
+	
+	private boolean isNonProjectSpecificContainer(IPath containerPath) {
+		if (containerPath.segmentCount() > 0) {
+			String id= containerPath.segment(0);
+			if (id.equals(JavaCore.USER_LIBRARY_CONTAINER_ID) || id.equals(JavaRuntime.JRE_CONTAINER)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 
 	private static String getAddClasspathLabel(IClasspathEntry entry, IPackageFragmentRoot root, IJavaProject project) {
 		switch (entry.getEntryKind()) {

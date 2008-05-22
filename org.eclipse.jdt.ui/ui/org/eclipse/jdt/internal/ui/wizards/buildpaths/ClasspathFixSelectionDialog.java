@@ -188,6 +188,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 			
 			GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
 			gridData.heightHint= convertHeightInCharsToPixels(4);
+			gridData.widthHint= convertWidthInCharsToPixels(50);
 			
 			fFixSelectionTable.getControl().setLayoutData(gridData);
 			
