@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -558,15 +558,69 @@ public class FullConstraintCreator extends ConstraintCreator{
 		return fTypeConstraintFactory.createDefinesConstraint(invocationVariable, returnTypeVariable);
 	}
 	
-	private ITypeConstraint[] getArgumentConstraints(List arguments, IMethodBinding methodBinding){
+	private ITypeConstraint[] getArgumentConstraints(List arguments, IMethodBinding methodBinding) {
 		List result= new ArrayList(arguments.size());
-		for (int i= 0, n= arguments.size(); i < n; i++) {
-			Expression argument= (Expression) arguments.get(i);
-			ConstraintVariable expressionVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(argument, getContext());
-			ConstraintVariable parameterTypeVariable= fConstraintVariableFactory.makeParameterTypeVariable(methodBinding, i);
-			ITypeConstraint[] argConstraint= fTypeConstraintFactory.createSubtypeConstraint(expressionVariable, parameterTypeVariable);
-			result.addAll(Arrays.asList(argConstraint));
+		
+		if (methodBinding.isVarargs()) {
+			ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
+			final int nParams= parameterTypes.length;
+			final int nArgs= arguments.size();
+			Assert.isTrue(nArgs >= nParams - 1); // there may be zero args for the vararg parameter
+			Assert.isTrue(nParams >= 1); // at least one parameter for a vararg method
+			
+			int i= 0;
+			// add the normal argument constraints up to the last one
+			for (; i < nParams - 1; i++) {
+				Expression argument= (Expression) arguments.get(i);
+				ConstraintVariable expressionVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(argument, getContext());
+				ConstraintVariable parameterTypeVariable= fConstraintVariableFactory.makeParameterTypeVariable(methodBinding, i);
+				ITypeConstraint[] argConstraint= fTypeConstraintFactory.createSubtypeConstraint(expressionVariable, parameterTypeVariable);
+				result.addAll(Arrays.asList(argConstraint));
+			}
+			
+			// create argument constraints for all arguments wrapped into the vararg parameter
+			boolean directArray= false;
+			
+			// a) there is exactly one remaining argument -> be careful as it may be a direct array param
+
+// This is currently not used by Generalize Type Declaration as it does not support array types:
+//			if (i == nArgs - 1) {
+//				Expression argument= (Expression) arguments.get(i);
+//				if (TypeRules.canAssign(parameterTypes[nParams - 1], argument.resolveTypeBinding())) {
+//					ConstraintVariable parameterTypeVariable= fConstraintVariableFactory.makeParameterTypeVariable(methodBinding, nParams - 1);
+//					ConstraintVariable expressionVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(argument, getContext());
+//					ITypeConstraint[] argConstraint= fTypeConstraintFactory.createSubtypeConstraint(expressionVariable, parameterTypeVariable);
+//					result.addAll(Arrays.asList(argConstraint));
+//					directArray= true;
+//					//XXX there should be a constraint that logically ORs the direct array and element type constraints
+//				}
+//			}
+			
+			// b) there are zero ore more than one arguments remaining
+			if (!directArray && i < nArgs) {
+				// get the component type of the vararg-array
+				ITypeBinding binding= methodBinding.getParameterTypes()[nParams - 1];
+				ITypeBinding componentBinding= binding.getComponentType();
+				Assert.isNotNull(componentBinding);
+				ConstraintVariable parameterTypeVariable= fConstraintVariableFactory.makeRawBindingVariable(componentBinding);
+				for (; i < nArgs; i++) {
+					Expression argument= (Expression) arguments.get(i);
+					ConstraintVariable expressionVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(argument, getContext());
+					ITypeConstraint[] argConstraint= fTypeConstraintFactory.createSubtypeConstraint(expressionVariable, parameterTypeVariable);
+					result.addAll(Arrays.asList(argConstraint));
+				}
+			}
+			
+		} else {
+			for (int i= 0, n= arguments.size(); i < n; i++) {
+				Expression argument= (Expression) arguments.get(i);
+				ConstraintVariable expressionVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(argument, getContext());
+				ConstraintVariable parameterTypeVariable= fConstraintVariableFactory.makeParameterTypeVariable(methodBinding, i);
+				ITypeConstraint[] argConstraint= fTypeConstraintFactory.createSubtypeConstraint(expressionVariable, parameterTypeVariable);
+				result.addAll(Arrays.asList(argConstraint));
+			}
 		}
+		
 		return (ITypeConstraint[]) result.toArray(new ITypeConstraint[result.size()]);		
 	}
 	

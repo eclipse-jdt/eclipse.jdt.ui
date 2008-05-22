@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -100,6 +100,10 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 	
 		assertTrue("activation was supposed to be successful:" + activationResult.toString(), activationResult.isOK());																
 	
+		Collection validTypes= ref.computeValidTypes(new NullProgressMonitor());
+		if (validTypes.isEmpty())
+			return ref;
+		
 		RefactoringStatus	checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
 	
 		assertTrue("precondition was supposed to pass but was " + checkInputResult.toString(), checkInputResult.isOK());
@@ -545,6 +549,25 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 				"java.lang.Exception",
 				"java.io.IOException"
 		};
+		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
+	}
+	
+	public void testVarArg() throws Exception {
+		Collection types= helper1(5, 17, 5, 18, "java.lang.Object").getValidTypeNames();
+		String[] actual= (String[]) types.toArray(new String[types.size()]);
+		String[] expected= {
+				"java.lang.Object",
+				"java.io.Serializable",
+				"java.lang.Comparable<java.lang.Integer>", 
+				"java.lang.Number"
+		};
+		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
+	}
+	
+	public void testVarArg2() throws Exception {
+		Collection types= helper1(2, 21, 2, 21, "java.lang.Object").getValidTypeNames();
+		String[] actual= (String[]) types.toArray(new String[types.size()]);
+		String[] expected= { };
 		StringAsserts.assertEqualStringsIgnoreOrder(actual, expected);
 	}
 	

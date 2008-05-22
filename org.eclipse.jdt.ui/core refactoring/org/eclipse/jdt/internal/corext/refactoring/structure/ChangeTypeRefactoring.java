@@ -894,7 +894,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		} else if (parent.getNodeType() == ASTNode.SIMPLE_TYPE && (grandParent.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION)) {
 			ASTNode greatGrandParent= grandParent.getParent();
 			SingleVariableDeclaration singleVariableDeclaration= (SingleVariableDeclaration) grandParent;
-			if (singleVariableDeclaration.getExtraDimensions() > 0) {
+			if (singleVariableDeclaration.getExtraDimensions() > 0 || singleVariableDeclaration.isVarargs()) {
 				return RefactoringCoreMessages.ChangeTypeRefactoring_arraysNotSupported;
 			}
 			if (greatGrandParent != null && greatGrandParent.getNodeType() == ASTNode.METHOD_DECLARATION) {
