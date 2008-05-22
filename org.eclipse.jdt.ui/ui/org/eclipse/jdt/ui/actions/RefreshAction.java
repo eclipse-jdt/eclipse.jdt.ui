@@ -154,13 +154,9 @@ public class RefreshAction extends SelectionDispatchAction {
 			if (element instanceof IWorkingSet) {
 				// don't inspect working sets any deeper.
 			} else if (element instanceof IPackageFragmentRoot) {
-				IPackageFragmentRoot root= (IPackageFragmentRoot) element;
-				if (!root.isExternal() || !root.isArchive()) {
-					return false;
-				}
+				// on internal folders/JARs we do a normal refresh, and Java archive refresh on external 
 			} else if (element instanceof PackageFragmentRootContainer) {
-				// too expensive to look at children. disable for now
-				return false;
+				// too expensive to look at children. assume we can refresh
 			} else if (element instanceof IAdaptable) { // test for IAdaptable last (types before are IAdaptable as well)
 				IResource resource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
 				if (resource == null)
