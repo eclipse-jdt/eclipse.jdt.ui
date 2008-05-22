@@ -45,7 +45,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -147,21 +146,15 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 
 	private static class MemberAccessNodeCollector extends ASTVisitor {
 
-		private final List fFieldAccesses= new ArrayList(0);
-
-		private final ITypeHierarchy fHierarchy;
+		private final ITypeBinding fCurrentType;
 
 		private final List fMethodAccesses= new ArrayList(0);
 
 		private final List fSimpleNames= new ArrayList(0);
 
-		MemberAccessNodeCollector(ITypeHierarchy hierarchy) {
-			Assert.isNotNull(hierarchy);
-			fHierarchy= hierarchy;
-		}
-
-		FieldAccess[] getFieldAccesses() {
-			return (FieldAccess[]) fFieldAccesses.toArray(new FieldAccess[fFieldAccesses.size()]);
+		MemberAccessNodeCollector(ITypeBinding currType) {
+			Assert.isNotNull(currType);
+			fCurrentType= currType;
 		}
 
 		MethodInvocation[] getMethodInvocations() {
@@ -173,57 +166,73 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		}
 
 		public boolean visit(FieldAccess node) {
-			final ITypeBinding declaring= MoveInnerToTopRefactoring.getDeclaringTypeBinding(node);
-			if (declaring != null) {
-				final IType type= (IType) declaring.getJavaElement();
-				if (type != null && fHierarchy.contains(type))
-					fFieldAccesses.add(node);
-			}
-			return super.visit(node);
+			// field accesses always have an expression: look at the expression to find out if we do an outer instance access.
+			node.getExpression().accept(this);
+			return false;
 		}
 
 		public boolean visit(MethodInvocation node) {
-			final ITypeBinding declaring= MoveInnerToTopRefactoring.getDeclaringTypeBinding(node);
-			if (declaring != null) {
-				final IType type= (IType) declaring.getJavaElement();
-				if (type != null && fHierarchy.contains(type))
-					fMethodAccesses.add(node);
+			Expression expression= node.getExpression();
+			if (expression == null) {
+				IMethodBinding binding= node.resolveMethodBinding();
+				if (binding != null) {
+					if (isAccessToOuter(binding.getDeclaringClass())) {
+						fMethodAccesses.add(node);
+					}
+				}
+			} else {
+				expression.accept(this);
 			}
-			return super.visit(node);
+			List arguments= node.arguments();
+			for (int i= 0; i < arguments.size(); i++) {
+				((ASTNode) arguments.get(i)).accept(this);
+			}
+			return false;
 		}
-
+		public boolean visit(QualifiedName node) {
+			node.getQualifier().accept(this);
+			return false;
+		}
+		
 		public boolean visit(SimpleName node) {
-			if (node.getParent() instanceof QualifiedName)
-				return super.visit(node);
 			IBinding binding= node.resolveBinding();
 			if (binding instanceof IVariableBinding) {
-				IVariableBinding variable= (IVariableBinding) binding;
-				ITypeBinding declaring= variable.getDeclaringClass();
-				if (variable.isField() && declaring != null) {
-					final IType type= (IType) declaring.getJavaElement();
-					if (type != null && fHierarchy.contains(type)) {
+				IVariableBinding variableBinding= (IVariableBinding) binding;
+				if (variableBinding.isField()) {
+					if (isAccessToOuter(variableBinding.getDeclaringClass())) {
 						fSimpleNames.add(node);
-						return false;
 					}
 				}
 			}
-			return super.visit(node);
+			return false;
 		}
-
+		
 		public boolean visit(ThisExpression node) {
 			final Name qualifier= node.getQualifier();
 			if (qualifier != null) {
 				final ITypeBinding binding= qualifier.resolveTypeBinding();
-				if (binding != null) {
-					final IType type= (IType) binding.getJavaElement();
-					if (type != null && fHierarchy.contains(type)) {
-						fSimpleNames.add(qualifier);
-						return false;
-					}
+				if (binding != null && binding != fCurrentType.getTypeDeclaration()) {
+					fSimpleNames.add(qualifier);
 				}
 			}
 			return super.visit(node);
 		}
+		
+		private boolean isAccessToOuter(ITypeBinding binding) {
+			if (Bindings.isSuperType(binding, fCurrentType)) {
+				return false;
+			}
+			ITypeBinding outer= fCurrentType.getDeclaringClass();
+			while (outer != null) {
+				if (Bindings.isSuperType(binding, outer)) {
+					return true;
+				}
+				outer= outer.getDeclaringClass();
+			}
+			return false;
+		}
+		
+		
 	}
 
 	private class TypeReferenceQualifier extends ASTVisitor {
@@ -322,14 +331,6 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		}
 	}
 
-	private static boolean containsNonStatic(FieldAccess[] accesses) {
-		for (int i= 0; i < accesses.length; i++) {
-			if (!isStatic(accesses[i]))
-				return true;
-		}
-		return false;
-	}
-
 	private static boolean containsNonStatic(MethodInvocation[] invocations) {
 		for (int i= 0; i < invocations.length; i++) {
 			if (!isStatic(invocations[i]))
@@ -398,20 +399,6 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		return declarations;
 	}
 
-	private static ITypeBinding getDeclaringTypeBinding(FieldAccess fieldAccess) {
-		IVariableBinding varBinding= fieldAccess.resolveFieldBinding();
-		if (varBinding == null)
-			return null;
-		return varBinding.getDeclaringClass();
-	}
-
-	private static ITypeBinding getDeclaringTypeBinding(MethodInvocation methodInvocation) {
-		IMethodBinding binding= methodInvocation.resolveMethodBinding();
-		if (binding == null)
-			return null;
-		return binding.getDeclaringClass();
-	}
-
 	// List of ITypes
 	private static List getDeclaringTypes(IType type) {
 		IType declaringType= type.getDeclaringType();
@@ -462,13 +449,6 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		if (binding == null)
 			return false;
 		return Bindings.getFullyQualifiedName(binding).equals(JavaElementUtil.createSignature(type));
-	}
-
-	private static boolean isStatic(FieldAccess access) {
-		IVariableBinding fieldBinding= access.resolveFieldBinding();
-		if (fieldBinding == null)
-			return false;
-		return JdtFlags.isStatic(fieldBinding);
 	}
 
 	private static boolean isStatic(MethodInvocation invocation) {
@@ -1294,10 +1274,15 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		return false;
 	}
 
-	private boolean isInstanceFieldCreationMandatory() throws JavaModelException {
-		final MemberAccessNodeCollector collector= new MemberAccessNodeCollector(fType.getDeclaringType().newSupertypeHierarchy(new NullProgressMonitor()));
-		findTypeDeclaration(fType, fSourceRewrite.getRoot()).accept(collector);
-		return containsNonStatic(collector.getFieldAccesses()) || containsNonStatic(collector.getMethodInvocations()) || containsNonStatic(collector.getSimpleFieldNames());
+	private boolean isInstanceFieldCreationMandatory() {
+		AbstractTypeDeclaration typeDeclaration= findTypeDeclaration(fType, fSourceRewrite.getRoot());
+		ITypeBinding typeBinding= typeDeclaration.resolveBinding();
+		if (typeBinding == null || Modifier.isStatic(typeBinding.getModifiers())) {
+			return false;
+		}
+		final MemberAccessNodeCollector collector= new MemberAccessNodeCollector(typeBinding);
+		typeDeclaration.accept(collector);
+		return containsNonStatic(collector.getMethodInvocations()) || containsNonStatic(collector.getSimpleFieldNames());
 	}
 
 	public boolean isInstanceFieldMarkedFinal() {
@@ -1318,31 +1303,18 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	 * type of the moved type. Note that all visibility changes have already been scheduled
 	 * in the visibility adjustor.
 	 */
-	private void modifyAccessToEnclosingInstance(final CompilationUnitRewrite targetRewrite, final AbstractTypeDeclaration declaration, final IProgressMonitor monitor) throws JavaModelException {
+	private void modifyAccessToEnclosingInstance(final CompilationUnitRewrite targetRewrite, final AbstractTypeDeclaration declaration, final IProgressMonitor monitor) {
 		Assert.isNotNull(targetRewrite);
 		Assert.isNotNull(declaration);
 		Assert.isNotNull(monitor);
-		final MemberAccessNodeCollector collector= new MemberAccessNodeCollector(fType.getDeclaringType().newSupertypeHierarchy(new SubProgressMonitor(monitor, 1)));
+		ITypeBinding typeBinding= declaration.resolveBinding();
+		if (typeBinding == null) {
+			return;
+		}
+		final MemberAccessNodeCollector collector= new MemberAccessNodeCollector(typeBinding);
 		declaration.accept(collector);
 		modifyAccessToMethodsFromEnclosingInstance(targetRewrite, collector.getMethodInvocations(), declaration);
-		modifyAccessToFieldsFromEnclosingInstance(targetRewrite, collector.getFieldAccesses(), declaration);
 		modifyAccessToFieldsFromEnclosingInstance(targetRewrite, collector.getSimpleFieldNames(), declaration);
-	}
-
-	private void modifyAccessToFieldsFromEnclosingInstance(CompilationUnitRewrite targetRewrite, FieldAccess[] fieldAccesses, AbstractTypeDeclaration declaration) {
-		FieldAccess access= null;
-		for (int index= 0; index < fieldAccesses.length; index++) {
-			access= fieldAccesses[index];
-			Assert.isNotNull(access.getExpression());
-			if (!(access.getExpression() instanceof ThisExpression) || (!(((ThisExpression) access.getExpression()).getQualifier() != null)))
-				continue;
-
-			final IVariableBinding binding= access.resolveFieldBinding();
-			if (binding != null) {
-				targetRewrite.getASTRewrite().replace(access.getExpression(), createAccessExpressionToEnclosingInstanceFieldText(access, binding, declaration), null);
-				targetRewrite.getImportRemover().registerRemovedNode(access.getExpression());
-			}
-		}
 	}
 
 	private void modifyAccessToFieldsFromEnclosingInstance(CompilationUnitRewrite targetRewrite, SimpleName[] simpleNames, AbstractTypeDeclaration declaration) {

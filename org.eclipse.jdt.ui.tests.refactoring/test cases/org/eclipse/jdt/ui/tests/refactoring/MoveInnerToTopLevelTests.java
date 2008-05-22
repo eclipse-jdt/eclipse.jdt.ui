@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,8 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
@@ -26,15 +28,14 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class MoveInnerToTopLevelTests extends RefactoringTest {
 
@@ -336,6 +337,10 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	// bug 97411 + 117465 (comment #1)
 	public void test37() throws Exception {
 		validatePassingTest("A", "SomeInner", "p", new String[] { "A"}, new String[] { "p"}, null, false, false, false, false);
+	}
+	
+	public void test38() throws Exception {
+		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, null, false, false, false, false);
 	}
 	
 	// --- Non static
