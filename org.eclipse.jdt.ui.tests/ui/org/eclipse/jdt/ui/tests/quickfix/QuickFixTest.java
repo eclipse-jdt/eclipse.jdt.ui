@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.ReorgCorrectionsSubProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.GetterSetterCorrectionSubProcessor.SelfEncapsulateFieldProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
@@ -337,7 +338,9 @@ public class QuickFixTest extends TestCase {
 		String[] res= new String[proposals.size()];
 		for (int i= 0; i < proposals.size(); i++) {
 			Object curr= proposals.get(i);
-			if (curr instanceof CUCorrectionProposal) {
+			if (curr instanceof ReorgCorrectionsSubProcessor.ClasspathFixCorrectionProposal) {
+				// ignore
+			} else if (curr instanceof CUCorrectionProposal) {
 				res[i]= getPreviewContent((CUCorrectionProposal) curr);
 			} else if (curr instanceof NewCUUsingWizardProposal) {
 				res[i]= getWizardPreviewContent((NewCUUsingWizardProposal) curr);
