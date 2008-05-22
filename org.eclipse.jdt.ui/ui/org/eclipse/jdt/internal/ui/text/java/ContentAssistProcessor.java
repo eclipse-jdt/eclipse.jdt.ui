@@ -67,6 +67,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 
+
 /**
  * A content assist processor that aggregates the proposals of the
  * {@link org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer}s contributed via the
@@ -453,7 +454,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		// default mix - enable all included computers
 		List included= getDefaultCategoriesUnchecked();
 
-		if (fComputerRegistry.hasUninstalledComputers()) {
+		if (fComputerRegistry.hasUninstalledComputers(fPartition, included)) {
 			if (informUserAboutEmptyDefaultCategory())
 				// preferences were restored - recompute the default categories
 				included= getDefaultCategoriesUnchecked();

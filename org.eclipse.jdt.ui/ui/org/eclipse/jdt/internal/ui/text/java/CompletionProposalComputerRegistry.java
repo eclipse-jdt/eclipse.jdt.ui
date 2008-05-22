@@ -43,13 +43,17 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 
 /**
  * A registry for all extensions to the
@@ -114,6 +118,7 @@ public final class CompletionProposalComputerRegistry {
 	private boolean fLoaded= false;
 
 
+	private boolean fIsFirstTimeCheckForUninstalledComputers= false;
 	private boolean fHasUninstalledComputers= false;
 
 
@@ -126,12 +131,24 @@ public final class CompletionProposalComputerRegistry {
 	/**
 	 * Returns if the registry detected that computers got uninstalled since the last run.
 	 * 
+	 * @param included list of included proposal categories
+	 * @param partition the document partition
 	 * @return <code>true</code> if the registry detected that computers got uninstalled since the last run
 	 * 			<code>false</code> otherwise or if {@link #resetUnistalledComputers()} has been called
 	 * @since 3.4
 	 */
-	boolean hasUninstalledComputers() {
-		return fHasUninstalledComputers;
+	boolean hasUninstalledComputers(String partition, List included) {
+		if (fHasUninstalledComputers)
+			return true;
+
+		if (fIsFirstTimeCheckForUninstalledComputers) {
+			if ((IJavaPartitions.JAVA_DOC.equals(partition) || IDocument.DEFAULT_CONTENT_TYPE.equals(partition)) && included.size() == 1 && !getProposalCategories().isEmpty()) {
+				if (included.get(0) instanceof CompletionProposalCategory) // paranoia check
+					return "org.eclipse.jdt.ui.swtProposalCategory".equals(((CompletionProposalCategory) included.get(0)).getId()); //$NON-NLS-1$
+			}
+		}
+		
+		return false;
 	}
 
 	/**
@@ -141,6 +158,7 @@ public final class CompletionProposalComputerRegistry {
 	 */
 	void resetUnistalledComputers() {
 		fHasUninstalledComputers= false;
+		fIsFirstTimeCheckForUninstalledComputers= false;
 	}
 
 	/**
@@ -230,6 +248,7 @@ public final class CompletionProposalComputerRegistry {
 
 	private void updateUninstalledComputerCount() {
 		IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
+		fIsFirstTimeCheckForUninstalledComputers= !preferenceStore.contains(NUM_COMPUTERS_PREF_KEY);
 		int lastNumberOfComputers= preferenceStore.getInt(NUM_COMPUTERS_PREF_KEY);
 		int currNumber= fDescriptors.size();
 		fHasUninstalledComputers= lastNumberOfComputers > currNumber;
