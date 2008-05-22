@@ -122,7 +122,7 @@ public class RefactorActionGroup extends ActionGroup {
 	 * Pop-up menu: id of the reorg group 2 of the refactor sub menu (value
 	 * <code>reorgGroup2</code>).
 	 * 
-	 * @since 3.2
+	 * @since 3.4
 	 */
 	public static final String GROUP_REORG2= "reorgGroup2"; //$NON-NLS-1$
 	
@@ -130,7 +130,7 @@ public class RefactorActionGroup extends ActionGroup {
 	 * Pop-up menu: id of the type group 2 of the refactor sub menu (value
 	 * <code>typeGroup2</code>).
 	 * 
-	 * @since 3.2
+	 * @since 3.4
 	 */
 	public static final String GROUP_TYPE2= "typeGroup2"; //$NON-NLS-1$
 	
