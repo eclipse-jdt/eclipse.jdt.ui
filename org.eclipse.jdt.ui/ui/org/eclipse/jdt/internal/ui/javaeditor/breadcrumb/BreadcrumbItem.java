@@ -102,13 +102,22 @@ class BreadcrumbItem extends Item {
 	 * @see org.eclipse.swt.widgets.Widget#setData(java.lang.Object)
 	 */
 	public void setData(Object data) {
-		if ((data == getData()) || (data != null && data.equals(getData()))) {
-			fExpandBlock.setEnabled(fContentProvider.hasChildren(data));
-			return;
-		}
-
+		Object oldData= getData();
 		super.setData(data);
-		refresh();
+
+		if (data != null && !data.equals(oldData)) {
+			//other element
+			refresh();
+		} else {
+			//same element, has it changed?
+			String newText= fLabelProvider.getText(data);
+			String oldText= getText();
+			if (oldText != null && oldText.equals(newText)) {
+				fExpandBlock.setEnabled(fContentProvider.hasChildren(data));
+			} else {
+				refresh();
+			}
+		}
 	}
 
 	/* (non-Javadoc)

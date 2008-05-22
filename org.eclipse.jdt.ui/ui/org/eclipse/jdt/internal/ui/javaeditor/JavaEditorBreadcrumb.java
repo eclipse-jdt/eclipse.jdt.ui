@@ -503,7 +503,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		fBreadcrumbActionGroup= new JavaEditorBreadcrumbActionGroup(getJavaEditor(), fViewer);
 
 		fElementChangeListener= new ElementChangeListener();
-		JavaCore.addElementChangedListener(fElementChangeListener, ElementChangedEvent.POST_CHANGE);
+		JavaCore.addElementChangedListener(fElementChangeListener);
 		
 		JavaUIHelp.setHelp(fViewer, IJavaHelpContextIds.JAVA_EDITOR_BREADCRUMB);
 
