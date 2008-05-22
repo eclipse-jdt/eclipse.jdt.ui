@@ -20,7 +20,6 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Widget;
 
@@ -42,7 +41,6 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 
@@ -76,6 +74,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.BreadcrumbViewer;
 import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb;
+import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -193,6 +192,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 					return true;
 				}
 			});
+			JavaUIHelp.setHelp(viewer, IJavaHelpContextIds.JAVA_EDITOR_BREADCRUMB);	
 		}
 
 		private ILabelProvider createDropDownLabelProvider() {
@@ -461,15 +461,6 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		super(javaEditor);
 		setTextViewer(javaEditor.getViewer());
 	}
-	
-	/* 
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#createContent(org.eclipse.swt.widgets.Composite)
-	 */
-	public Control createContent(Composite parent) {
-		Control result= super.createContent(parent);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(result, IJavaHelpContextIds.JAVA_EDITOR_BREADCRUMB);
-		return result;
-	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#activateBreadcrumb()
@@ -513,6 +504,8 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 		fElementChangeListener= new ElementChangeListener();
 		JavaCore.addElementChangedListener(fElementChangeListener, ElementChangedEvent.POST_CHANGE);
+		
+		JavaUIHelp.setHelp(fViewer, IJavaHelpContextIds.JAVA_EDITOR_BREADCRUMB);
 
 		return fViewer;
 	}

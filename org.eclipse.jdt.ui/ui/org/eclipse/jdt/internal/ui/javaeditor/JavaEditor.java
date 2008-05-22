@@ -2142,8 +2142,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				return adapter;
 		}
 
-		if (required == IContextProvider.class)
-			return JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.JAVA_EDITOR);
+		if (required == IContextProvider.class) {
+			if (isBreadcrumbActive()) {
+				return JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.JAVA_EDITOR_BREADCRUMB);
+			} else {
+				return JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.JAVA_EDITOR);
+			}
+		}
 
 		return super.getAdapter(required);
 	}
