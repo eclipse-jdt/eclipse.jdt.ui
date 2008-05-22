@@ -299,8 +299,13 @@ public class TestViewer {
 	}
 
 	public synchronized void setShowTime(boolean showTime) {
-		fTreeLabelProvider.setShowTime(showTime);
-		fTableLabelProvider.setShowTime(showTime);
+		try {
+			fViewerbook.setRedraw(false);
+			fTreeLabelProvider.setShowTime(showTime);
+			fTableLabelProvider.setShowTime(showTime);
+		} finally {
+			fViewerbook.setRedraw(true);
+		}
 	}
 
 	public synchronized void setShowFailuresOnly(boolean failuresOnly, int layoutMode) {
@@ -336,17 +341,17 @@ public class TestViewer {
 			StructuredViewer viewer= getActiveViewer();
 			if (failuresOnly) {
 				if (! getActiveViewerHasFilter()) {
+					setActiveViewerNeedsRefresh(true);
 					setActiveViewerHasFilter(true);
-					if (getActiveViewerNeedsRefresh())
-						viewer.setInput(null);
+					viewer.setInput(null);
 					viewer.addFilter(fFailuresOnlyFilter);
 				}
 
 			} else {
 				if (getActiveViewerHasFilter()) {
+					setActiveViewerNeedsRefresh(true);
 					setActiveViewerHasFilter(false);
-					if (getActiveViewerNeedsRefresh())
-						viewer.setInput(null);
+					viewer.setInput(null);
 					viewer.removeFilter(fFailuresOnlyFilter);
 				}
 			}
@@ -392,11 +397,11 @@ public class TestViewer {
 			return fTableNeedsRefresh;
 	}
 
-	private void setActiveViewerRefreshed() {
+	private void setActiveViewerNeedsRefresh(boolean needsRefresh) {
 		if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL)
-			fTreeNeedsRefresh= false;
+			fTreeNeedsRefresh= needsRefresh;
 		else
-			fTableNeedsRefresh= false;
+			fTableNeedsRefresh= needsRefresh;
 	}
 
 	/**
@@ -418,7 +423,7 @@ public class TestViewer {
 		StructuredViewer viewer= getActiveViewer();
 		if (getActiveViewerNeedsRefresh()) {
 			clearUpdateAndExpansion();
-			setActiveViewerRefreshed();
+			setActiveViewerNeedsRefresh(false);
 			viewer.setInput(testRoot);
 
 		} else {
