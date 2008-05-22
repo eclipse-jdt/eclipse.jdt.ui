@@ -61,6 +61,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.forms.FormColors;
 
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
 
 /**
@@ -279,7 +280,8 @@ class BreadcrumbItemDropDown {
 		gridLayout.marginWidth= 0;
 		composite.setLayout(gridLayout);
 		
-		fDropDownViewer= new TreeViewer(composite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL);
+		fDropDownViewer= new ProblemTreeViewer(composite, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL);
+		fDropDownViewer.setUseHashlookup(true);
 		
 		final Tree tree= (Tree) fDropDownViewer.getControl();
 		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
