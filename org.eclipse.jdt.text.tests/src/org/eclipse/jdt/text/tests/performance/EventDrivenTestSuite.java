@@ -35,6 +35,7 @@ public class EventDrivenTestSuite extends TestSuite {
 		addTest(TextNonInitialTypingTest.suite());
 		addTest(OpenPreferencePageTest.suite());
 		addTest(ScrollAnnotatedJavaEditorTest.suite());
+		addTest(ScrollVerticalRulerTest.suite());
 		
 		//FIXME: The test is currently excluded because it only takes 0..2ms.
 //		addTest(JavaDocIndentStrategyTest.suite());
