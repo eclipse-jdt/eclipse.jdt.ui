@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -90,12 +90,16 @@ public abstract class ActivateEditorTest extends TextPerformanceTestCase {
 			for (int j= 0, n= editors.length; j < n; j++) {
 				AbstractTextEditor editor= editors[j];
 				page.activate(editor);
+				waitUntilReady(editor);
 				EditorTestHelper.runEventQueue(editor);
 			}
 			performanceMeter.stop();
 			for (int j= 0, n= editors.length; j < n; j++)
 				EditorTestHelper.joinReconciler(EditorTestHelper.getSourceViewer(editors[j]), 100, 10000, 100);
 		}
+	}
+	
+	protected void waitUntilReady(AbstractTextEditor editor) {
 	}
 	
 	protected abstract String getEditorId();
