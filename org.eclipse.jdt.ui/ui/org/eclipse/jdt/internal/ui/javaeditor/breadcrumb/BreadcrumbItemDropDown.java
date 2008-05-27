@@ -71,6 +71,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
  */
 class BreadcrumbItemDropDown {
 
+	private static final boolean IS_MAC_WORKAROUND= "carbon".equals(SWT.getPlatform()); //$NON-NLS-1$
+
 	/**
 	 * An arrow image descriptor. The images color is related to the list
 	 * fore- and background color. This makes the arrow visible even in high contrast
@@ -189,13 +191,16 @@ class BreadcrumbItemDropDown {
 				if (shell != null)
 					return;
 				
+				if (IS_MAC_WORKAROUND)
+					fToolBar.setFocus();
+				
 				shell= fParent.getViewer().getDropDownShell();
 				if (shell != null)
 					shell.close();
 				
 				showMenu();
 				
-				if (!"carbon".equals(SWT.getPlatform())) //$NON-NLS-1$
+				if (!IS_MAC_WORKAROUND)
 					fShell.setFocus();
 			}
 		};
