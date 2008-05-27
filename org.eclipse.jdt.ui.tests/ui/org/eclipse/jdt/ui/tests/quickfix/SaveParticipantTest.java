@@ -598,4 +598,129 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}
+	
+	public void testBug232768_1() throws Exception {
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("\n");
+		buf.append("    /**\n");
+		buf.append("     * A Java comment on\n");
+		buf.append("     * two lines\n");
+		buf.append("     */\n");
+		buf.append("\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
+		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("\n");
+		buf.append("    /**\n");
+		buf.append("     * A Java comment on\n");
+		buf.append("     *  two lines\n");
+		buf.append("     */\n");
+		buf.append("\n");
+		buf.append("}\n");
+
+		editCUInEditor(cu1, buf.toString());
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("\n");
+		buf.append("    /**\n");
+		buf.append("     * A Java comment on two lines\n");
+		buf.append("     */\n");
+		buf.append("\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertEquals(expected1, cu1.getBuffer().getContents());
+	}
+
+	public void testBug232768_2() throws Exception {
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("\n");
+		buf.append("    /*\n");
+		buf.append("     * A block comment on\n");
+		buf.append("     * two lines\n");
+		buf.append("     */\n");
+		buf.append("\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
+		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("\n");
+		buf.append("    /*\n");
+		buf.append("     * A block comment on\n");
+		buf.append("     *  two lines\n");
+		buf.append("     */\n");
+		buf.append("\n");
+		buf.append("}\n");
+
+		editCUInEditor(cu1, buf.toString());
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("\n");
+		buf.append("    /*\n");
+		buf.append("     * A block comment on two lines\n");
+		buf.append("     */\n");
+		buf.append("\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertEquals(expected1, cu1.getBuffer().getContents());
+	}
+	
+	public void testBug232768_3() throws Exception {
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("\n");
+		buf.append("    //long long long long long long long long long long long long long long long long\n");
+		buf.append("\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
+		enable(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("\n");
+		buf.append("    // long long long long long long long long long long long long long long long long\n");
+		buf.append("\n");
+		buf.append("}\n");
+
+		editCUInEditor(cu1, buf.toString());
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("\n");
+		buf.append("    // long long long long long long long long long long long long long long\n");
+		buf.append("    // long long\n");
+		buf.append("\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertEquals(expected1, cu1.getBuffer().getContents());
+	}
 }
