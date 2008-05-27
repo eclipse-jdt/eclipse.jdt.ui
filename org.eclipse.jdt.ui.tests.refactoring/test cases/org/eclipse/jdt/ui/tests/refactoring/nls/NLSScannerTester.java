@@ -377,6 +377,16 @@ public class NLSScannerTester extends TestCase {
 		assertEquals("\"me\"", line.get(0).getValue());
 	}
 	
+	// test for bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=233905
+	public void test25() throws InvalidInputException {
+		String text=
+				"@SuppressWarnings(\"unchecked\") //$NON-NLS-1$\r\n" + 
+				"public class B {}\r\n" + 
+				"\r\n";
+		NLSLine[] l= NLSScanner.scan(text);
+		assertEquals(0, l.length);
+	}
+
 	//regression test for bug 12600
 	public void test54() throws Exception{
 		String text=

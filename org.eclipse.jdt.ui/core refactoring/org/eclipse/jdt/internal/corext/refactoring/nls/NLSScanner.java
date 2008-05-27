@@ -130,8 +130,8 @@ public class NLSScanner {
 					
 					
 				case ITerminalSymbols.TokenNameStringLiteral:
-					currentLineNr= scanner.getLineNumber(scanner.getCurrentTokenStartPosition());
 					if (insideAnnotation.isEmpty() && defaultCounter == 0) {
+						currentLineNr= scanner.getLineNumber(scanner.getCurrentTokenStartPosition());
 						if (currentLineNr != previousLineNr) {
 							currentLine= new NLSLine(currentLineNr - 1);
 							lines.add(currentLine);
