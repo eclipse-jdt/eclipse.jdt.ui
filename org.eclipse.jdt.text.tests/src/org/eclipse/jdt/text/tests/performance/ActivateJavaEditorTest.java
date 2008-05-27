@@ -40,7 +40,7 @@ public class ActivateJavaEditorTest extends ActivateEditorTest {
 	}
 
 	public void testActivateEditor() {
-//		setShortName(SHORT_NAME); don't show in summary for now
+		setShortName(SHORT_NAME);
 		super.testActivateEditor();
 	}
 
