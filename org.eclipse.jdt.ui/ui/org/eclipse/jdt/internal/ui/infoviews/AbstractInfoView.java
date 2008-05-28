@@ -521,7 +521,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	/*
 	 * @see IWorkbenchPart#dispose()
 	 */
-	final public void dispose() {
+	public final void dispose() {
 		// cancel possible running computation
 		fComputeCount++;
 		if (fComputeProgressMonitor != null)

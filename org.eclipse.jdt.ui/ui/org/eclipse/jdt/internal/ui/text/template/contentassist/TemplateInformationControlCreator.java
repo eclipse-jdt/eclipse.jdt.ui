@@ -25,7 +25,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.hover.SourceViewerInformationControl;
 
 
-final public class TemplateInformationControlCreator implements IInformationControlCreator, IInformationControlCreatorExtension {
+public final class TemplateInformationControlCreator implements IInformationControlCreator, IInformationControlCreatorExtension {
 
 	private SourceViewerInformationControl fControl;
 

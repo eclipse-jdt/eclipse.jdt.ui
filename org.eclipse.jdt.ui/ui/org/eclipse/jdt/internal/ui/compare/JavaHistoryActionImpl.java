@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,10 +76,10 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * Base class for the "Replace with local history"
  * and "Add from local history" actions.
  */
-abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegate*/ { 
+abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegate*/ {
 	
 	private boolean fModifiesFile;
-	private ISelection fSelection;	
+	private ISelection fSelection;
 
 	JavaHistoryActionImpl(boolean modifiesFile) {
 		fModifiesFile= modifiesFile;
@@ -96,7 +96,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 	final ITypedElement[] buildEditions(ITypedElement target, IFile file) {
 
 		// setup array of editions
-		IFileState[] states= null;		
+		IFileState[] states= null;
 		// add available editions
 		try {
 			states= file.getHistory(null);
@@ -148,7 +148,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 	 */
 	final boolean beingEdited(IFile file) {
 		IDocumentProvider dp= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
-		FileEditorInput input= new FileEditorInput(file);	
+		FileEditorInput input= new FileEditorInput(file);
 		return dp.getDocument(input) != null;
 	}
 
@@ -282,7 +282,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		return fEditor;
 	}
 
-	final public void runFromEditor(IAction uiProxy) {
+	public final void runFromEditor(IAction uiProxy) {
 		
 		// this run is called from Editor
 		IJavaElement element= null;
@@ -309,20 +309,20 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		ICompilationUnit unit= SelectionConverter.getInputAsCompilationUnit(fEditor);
 		IFile file= getFile(unit);
 		return isEnabled(file);
-	}	
+	}
 
-	final public void update(IAction uiProxy) {
+	public final void update(IAction uiProxy) {
 		uiProxy.setEnabled(checkEnabled());
 	}
 	
  	//---- IActionDelegate
 	
-	final public void selectionChanged(IAction uiProxy, ISelection selection) {
+	public final void selectionChanged(IAction uiProxy, ISelection selection) {
 		fSelection= selection;
 		uiProxy.setEnabled(isEnabled(selection));
 	}
 	
-	final public void run(IAction action) {
+	public final void run(IAction action) {
 		run(fSelection);
 	}
 	
