@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,8 +22,12 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -50,6 +54,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation.DelegateEntry;
@@ -759,7 +764,34 @@ public final class StubUtility2 {
 	}
 
 
+	/**
+	 * Evaluates the insertion position of a new node.
+	 * 
+	 * @param listRewrite The list rewriter to which the new node will be added
+	 * @param sibling The Java element before which the new element should be added.
+	 * @return the AST node of the list to insert before or null to insert as last.
+	 * @throws JavaModelException thrown if accessing the Java element failed
+	 */
+	
+	public static ASTNode getNodeToInsertBefore(ListRewrite listRewrite, IJavaElement sibling) throws JavaModelException {
+		if (sibling instanceof IMember) {
+			ISourceRange sourceRange= ((IMember) sibling).getSourceRange();
+			if (sourceRange == null) {
+				return null;
+			}
+			int insertPos= sourceRange.getOffset();
 
+			List members= listRewrite.getOriginalList();
+			for (int i= 0; i < members.size(); i++) {
+				ASTNode curr= (ASTNode) members.get(i);
+				if (curr.getStartPosition() >= insertPos) {
+					return curr;
+				}
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Creates a new stub utility.
 	 */

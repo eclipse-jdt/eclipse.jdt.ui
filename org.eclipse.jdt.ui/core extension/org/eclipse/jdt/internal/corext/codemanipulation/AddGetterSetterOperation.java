@@ -29,7 +29,6 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -52,8 +51,6 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 /**
  * Workspace runnable to add accessor methods to fields.
@@ -175,9 +172,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 				removeExistingAccessor(existing, rewrite);
 			} else
 				sibling= fInsert;
-			ASTNode insertion= null;
-			if (sibling instanceof IMember)
-				insertion= ASTResolving.findParentBodyDeclaration(NodeFinder.perform(fASTRoot, ((IMember) fInsert).getSourceRange()));
+			ASTNode insertion= StubUtility2.getNodeToInsertBefore(rewrite, sibling);
 			addNewAccessor(type, field, GetterSetterUtil.getGetterStub(field, name, fSettings.createComments, fVisibility | (field.getFlags() & Flags.AccStatic)), rewrite, insertion);
 		}
 	}
@@ -202,9 +197,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 				removeExistingAccessor(existing, rewrite);
 			} else
 				sibling= fInsert;
-			ASTNode insertion= null;
-			if (sibling instanceof IMember)
-				insertion= ASTResolving.findParentBodyDeclaration(NodeFinder.perform(fASTRoot, ((IMember) fInsert).getSourceRange()));
+			ASTNode insertion= StubUtility2.getNodeToInsertBefore(rewrite, sibling);
 			addNewAccessor(type, field, GetterSetterUtil.getSetterStub(field, name, fSettings.createComments, fVisibility | (field.getFlags() & Flags.AccStatic)), rewrite, insertion);
 			if (Flags.isFinal(field.getFlags())) {
 				ASTNode fieldDecl= ASTNodes.getParent(NodeFinder.perform(fASTRoot, field.getNameRange()), FieldDeclaration.class);

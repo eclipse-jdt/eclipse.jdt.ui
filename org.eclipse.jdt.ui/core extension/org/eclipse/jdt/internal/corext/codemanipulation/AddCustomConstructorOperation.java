@@ -25,7 +25,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -38,12 +37,9 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.CodeStyleConfiguration;
-
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 /**
  * Workspace runnable to add custom constructors initializing fields.
@@ -178,9 +174,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			if (listRewriter != null) {
 				MethodDeclaration stub= StubUtility2.createConstructorStub(cu, astRewrite, importRewrite, fParentType, fOmitSuper ? null : fConstructorBinding, fFieldBindings, fVisibility, fSettings);
 				if (stub != null) {
-					ASTNode insertion= null;
-					if (fInsert instanceof IMember)
-						insertion= ASTResolving.findParentBodyDeclaration(NodeFinder.perform(fASTRoot, ((IMember) fInsert).getSourceRange()));
+					ASTNode insertion= StubUtility2.getNodeToInsertBefore(listRewriter, fInsert);
 					if (insertion != null && insertion.getParent() == typeDecl) {
 						listRewriter.insertBefore(stub, insertion, null);
 					} else {

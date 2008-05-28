@@ -29,7 +29,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -75,13 +74,10 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
-
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 /**
  * <p>
@@ -295,9 +291,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 				ICompilationUnit cu= (ICompilationUnit) fUnit.getJavaElement();
 
-				ASTNode insertion= null;
-				if (fInsert instanceof IMember)
-					insertion= ASTResolving.findParentBodyDeclaration(NodeFinder.perform(fUnit, ((IMember) fInsert).getSourceRange()));
+				ASTNode insertion= StubUtility2.getNodeToInsertBefore(rewriter, fInsert);
 
 				// equals(..)
 				ITypeBinding[] objectAsParam= { declaration.getAST().resolveWellKnownType("java.lang.Object") }; //$NON-NLS-1$
