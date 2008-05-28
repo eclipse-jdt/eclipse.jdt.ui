@@ -56,7 +56,6 @@ class BreadcrumbItem extends Item {
 		super(parent, SWT.NONE);
 
 		fParent= viewer;
-		fIsLast= false;
 
 		fContainer= new Composite(parent, SWT.NONE);
 		fContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));

@@ -72,6 +72,8 @@ import org.eclipse.ui.forms.FormColors;
  */
 public abstract class BreadcrumbViewer extends StructuredViewer {
 	
+	private static final boolean IS_GTK= "gtk".equals(SWT.getPlatform()); //$NON-NLS-1$
+	
 	private final Composite fContainer;
 	private final ArrayList fBreadcrumbItems;
 	private final ListenerList fMenuListeners;
@@ -297,9 +299,20 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		if (fContainer.isDisposed())
 			return;
 
-		fContainer.setRedraw(false);
+		disableRedraw();
 		try {
+			if (fBreadcrumbItems.size() > 0) {
+				BreadcrumbItem last= (BreadcrumbItem) fBreadcrumbItems.get(fBreadcrumbItems.size() - 1);
+				last.setIsLastItem(false);
+			}
+
 			int lastIndex= buildItemChain(fInput);
+
+			if (lastIndex > 0) {
+				BreadcrumbItem last= (BreadcrumbItem) fBreadcrumbItems.get(lastIndex - 1);
+				last.setIsLastItem(true);
+			}
+
 			while (lastIndex < fBreadcrumbItems.size()) {
 				BreadcrumbItem item= (BreadcrumbItem) fBreadcrumbItems.remove(fBreadcrumbItems.size() - 1);
 				if (item == fSelectedItem) {
@@ -313,7 +326,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 			updateSize();
 			fContainer.layout(true, true);
 		} finally {
-			fContainer.setRedraw(true);
+			enableRedraw();
 		}
 	}
 
@@ -369,6 +382,8 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 			ViewerCell cell= row.getCell(0);
 
 			((CellLabelProvider) getLabelProvider()).update(cell);		
+			
+			item.refreshArrow();
 
 			if (fToolTipLabelProvider != null) {
 				item.setToolTip(fToolTipLabelProvider.getText(item.getData()));
@@ -398,7 +413,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	 */
 	protected void internalRefresh(Object element) {
 	
-		fContainer.setRedraw(false);
+		disableRedraw();
 		try {
 			BreadcrumbItem item= (BreadcrumbItem) doFindItem(element);
 			if (item == null) {
@@ -412,7 +427,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 			if (updateSize())
 				fContainer.layout(true, true);
 		} finally {
-			fContainer.setRedraw(true);
+			enableRedraw();
 		}
 	}
 
@@ -596,7 +611,12 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 			fBreadcrumbItems.add(item);
 		}
 		
-		item.setData(element);
+		if (equals(element, item.getData())) {
+			update(element, null);
+		} else {
+			item.setData(element);
+			item.refresh();
+		}
 		if (parent == null) {
 			//don't show the models root
 			item.setDetailsVisible(false);
@@ -684,6 +704,27 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		}
 	
 		return result;
+	}
+	
+	/**
+	 * Enable redrawing of the breadcrumb.
+	 */
+	private void enableRedraw() {
+		if (IS_GTK) //flickers on GTK
+			return;
+
+		fContainer.setRedraw(true);
+	}
+
+	/**
+	 * Disable redrawing of the breadcrumb.
+	 * <p><strong>A call to this method must be followed by a call to {@link #enableRedraw()}</strong></p>
+	 */
+	private void disableRedraw() {
+		if (IS_GTK) //flickers on GTK
+			return;
+
+		fContainer.setRedraw(false);
 	}
 
 	/**
