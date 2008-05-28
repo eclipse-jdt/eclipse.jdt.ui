@@ -44,6 +44,7 @@ class BreadcrumbItem extends Item {
 	private BreadcrumbItemDetails fDetailsBlock;
 	private BreadcrumbItemDropDown fExpandBlock;
 	private ILabelProvider fToolTipLabelProvider;
+	private boolean fIsLast;
 
 	/**
 	 * A new breadcrumb item which is shown inside the given viewer.
@@ -55,9 +56,10 @@ class BreadcrumbItem extends Item {
 		super(parent, SWT.NONE);
 
 		fParent= viewer;
+		fIsLast= false;
 
 		fContainer= new Composite(parent, SWT.NONE);
-		fContainer.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+		fContainer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		GridLayout layout= new GridLayout(2, false);
 		layout.marginBottom= 1;
 		layout.marginHeight= 0;
@@ -96,19 +98,6 @@ class BreadcrumbItem extends Item {
 	 */
 	public void setToolTipLabelProvider(ILabelProvider toolTipLabelProvider) {
 		fToolTipLabelProvider= toolTipLabelProvider;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.swt.widgets.Widget#setData(java.lang.Object)
-	 */
-	public void setData(Object data) {
-		if ((data == getData()) || (data != null && data.equals(getData()))) {
-			fExpandBlock.setEnabled(fContentProvider.hasChildren(data));
-			return;
-		}
-
-		super.setData(data);
-		refresh();
 	}
 
 	/* (non-Javadoc)
@@ -183,9 +172,28 @@ class BreadcrumbItem extends Item {
 		fDetailsBlock.setImage(image);
 		fDetailsBlock.setToolTip(toolTip);
 
+		refreshArrow();
+	}
+
+	/**
+	 * Refresh the arrows visibility.
+	 */
+	void refreshArrow() {
 		fExpandBlock.setEnabled(fContentProvider.hasChildren(getData()));
 	}
 	
+	/**
+	 * Set whether this is the last item in the breadcrumb item chain or not.
+	 * 
+	 * @param isLast <code>true</code> if this is the last item, <code>false</code> otherwise
+	 */
+	void setIsLastItem(boolean isLast) {
+		fIsLast= isLast;
+		
+		GridData data= (GridData) fContainer.getLayoutData();
+		data.grabExcessHorizontalSpace= isLast;
+	}
+
 	/**
 	 * Sets whether or not the this item should show
 	 * the details (name and label).
@@ -246,6 +254,10 @@ class BreadcrumbItem extends Item {
 	public void setText(String string) {
 		super.setText(string);
 		fDetailsBlock.setText(string);
+
+		//more or less space might be required for the label
+		if (fIsLast)
+			fContainer.layout(true, true);
 	}
 
 	/* (non-Javadoc)
