@@ -270,6 +270,8 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
          * {@inheritDoc}
          */
         public void createControl(Composite parent) {
+			initializeDialogUnits(parent);
+			
         	boolean isCustom= getDialogSettings().getBoolean(USE_CUSTOM_PROFILE_KEY);
         	
         	final Composite composite= new Composite(parent, SWT.NONE);
@@ -384,7 +386,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			preferencePageLink.setText(MultiFixMessages.CleanUpRefactoringWizard_HideWizard_Link);
 			preferencePageLink.setFont(parent.getFont());
 			GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, false);
-			gridData.widthHint= convertWidthInCharsToPixels(300);
+			gridData.widthHint= convertWidthInCharsToPixels(50);
 			gridData.horizontalSpan= 2;
 			preferencePageLink.setLayoutData(gridData);
 			preferencePageLink.addSelectionListener(new SelectionAdapter() {
