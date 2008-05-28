@@ -104,6 +104,9 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 	protected TreeViewer doCreateTreeViewer(Composite parent, int style) {
 		FilteredTree tree= new FilteredTreeWithFilter(parent, style, fInitialFilter); 
 		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+		applyDialogFont(tree);
+		
 		TreeViewer viewer= tree.getViewer();
 		SWTUtil.setAccessibilityText(viewer.getControl(), Strings.removeMnemonicIndicator(getMessage()));
 		return viewer;
