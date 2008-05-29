@@ -181,7 +181,7 @@ class BreadcrumbItemDetails {
 		if (fElementImage.getImage() != null)
 			result+= fElementImage.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 
-		if (fTextComposite.isVisible() && fElementText.getText().length() > 0)
+		if (fTextVisible && fElementText.getText().length() > 0)
 			result+= fElementText.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 
 		return result;
