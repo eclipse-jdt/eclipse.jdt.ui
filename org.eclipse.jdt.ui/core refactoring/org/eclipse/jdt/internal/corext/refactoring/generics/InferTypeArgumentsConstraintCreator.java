@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -459,6 +459,9 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			//type of expression 'e.getClass()' is 'Class<? extends X>' where X is the static type of e
 			ITypeBinding capture= returnType.getTypeArguments()[0];
 			ITypeBinding wildcard= capture.getWildcard();
+			if (wildcard.getBound() == null)
+				return; // workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=234619
+			
 			ImmutableTypeVariable2 wildcardType= fTCModel.makeImmutableTypeVariable(wildcard,  /*no boxing*/null);
 			fTCModel.createSubtypeConstraint(classTypeVariable, wildcardType);
 			
