@@ -19,6 +19,7 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
@@ -38,6 +39,7 @@ public class TypeHierarchyPerfTest extends JdtPerformanceTestCase {
 		
 		public static IJavaProject fJProject1;
 		public static IPackageFragmentRoot fJunitSrcRoot;
+		public static IPackageFragmentRoot fRtJar;
 		
 		public MyTestSetup(Test test) {
 			super(test);
@@ -45,8 +47,8 @@ public class TypeHierarchyPerfTest extends JdtPerformanceTestCase {
 		
 		protected void setUp() throws Exception {
 			fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-			// we must make sure that the performance test are compatible to 2.1.3 & 3.0 so use rt13
-			assertTrue("rt not found", JavaProjectHelper.addRTJar13(fJProject1) != null);
+			fRtJar = JavaProjectHelper.addRTJar13(fJProject1);
+			assertTrue("rt not found", fRtJar != null);
 			File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 			fJunitSrcRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		}
@@ -67,7 +69,13 @@ public class TypeHierarchyPerfTest extends JdtPerformanceTestCase {
 	
 	public void testOpenObjectHierarchy() throws Exception {
 		//cold
-		measureOpenHierarchy(MyTestSetup.fJProject1.findType("java.lang.Object"));
+		
+		// Fails sometimes, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=209222 :
+//		IType object = MyTestSetup.fJProject1.findType("java.lang.Object");
+		// Workaround, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=234581 :
+		IType object = MyTestSetup.fRtJar.getPackageFragment("java.lang").getClassFile("Object.class").getType();
+		
+		measureOpenHierarchy(object);
 	}
 	
 	public void testOpenCollHierarchy() throws Exception {
