@@ -64,6 +64,7 @@ org.eclipse.debug.ui/*
 org.eclipse.equinox.common/*
 org.eclipse.equinox.preferences/*
 org.eclipse.equinox.registry/*
+org.eclipse.equinox.p2.metadata.generator/*
 org.eclipse.help/*
 org.eclipse.help.appserver/*
 org.eclipse.help.base/*
