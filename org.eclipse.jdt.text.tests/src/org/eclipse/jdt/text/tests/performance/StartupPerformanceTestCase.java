@@ -36,7 +36,6 @@ public class StartupPerformanceTestCase extends TextPerformanceTestCase {
 
 	protected void measureStartup(PerformanceMeter performanceMeter) {
 		performanceMeter.stop();
-		explainDegradation("Caused by general startup performance degradation, see Core UI Startup tests.", performanceMeter);
 		performanceMeter.commit();
 		assertPerformance(performanceMeter);
 	}

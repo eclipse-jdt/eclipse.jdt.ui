@@ -35,12 +35,4 @@ public class ActivateTextEditorTest extends ActivateEditorTest {
 		setShortName(SHORT_NAME);
 		super.testActivateEditor();
 	}
-	
-	/*
-	 * @see org.eclipse.jdt.text.tests.performance.ActivateEditorTest#getDegradationComment()
-	 * @since 3.4
-	 */
-	protected String getDegradationComment() {
-		return "This test is slower than in 3.3 due the changes in Platform UI, see bugs 232489, 232499 and 232513.";
-	}
 }

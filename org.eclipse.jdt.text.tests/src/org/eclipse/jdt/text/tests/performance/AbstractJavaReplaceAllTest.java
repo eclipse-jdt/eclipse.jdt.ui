@@ -74,7 +74,6 @@ public abstract class AbstractJavaReplaceAllTest extends TextPerformanceTestCase
 			performanceMeter= createPerformanceMeterForSummary(getShortName(), Dimension.ELAPSED_PROCESS);
 		else
 			performanceMeter= createPerformanceMeter();
-		explainDegradation("From a user perspective this got actually faster, see bug 221826 for details.", performanceMeter);
 		measure(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();

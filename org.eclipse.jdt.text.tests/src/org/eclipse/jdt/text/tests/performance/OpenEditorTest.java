@@ -76,7 +76,6 @@ public abstract class OpenEditorTest extends TextPerformanceTestCase {
 	 */
 	protected PerformanceMeter createPerformanceMeter() {
 		PerformanceMeter perfMeter= super.createPerformanceMeter();
-		explainDegradation("This test is slower than in 3.3 due the changes in Platform UI, see bugs 232489, 232499 and 232513.", perfMeter);
 		return perfMeter;
 	}
 }

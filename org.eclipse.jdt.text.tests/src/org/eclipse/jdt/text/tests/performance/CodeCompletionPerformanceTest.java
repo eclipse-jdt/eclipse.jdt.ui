@@ -245,7 +245,6 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 	public void testApplicationWithParamterNames() throws Exception {
 		measureApplicationWithParamterNames(getNullPerformanceMeter(), getWarmUpRuns());
 		final PerformanceMeter performanceMeter= createPerformanceMeter();
-		explainDegradation("The test is slower because we now also show all guessed arguments. The additional cost for one completion is below 10ms.", performanceMeter);
 		measureApplicationWithParamterNames(performanceMeter, getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
