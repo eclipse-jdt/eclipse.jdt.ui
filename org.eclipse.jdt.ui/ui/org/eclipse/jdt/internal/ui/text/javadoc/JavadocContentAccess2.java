@@ -14,15 +14,21 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -42,9 +48,11 @@ import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.JavadocContentAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -412,7 +420,7 @@ public class JavadocContentAccess2 {
 	}
 
 	private void handleInlineTagElement(TagElement node) {
-		//TODO: TagElement.TAG_INHERITDOC, TagElement.TAG_VALUE, TagElement.TAG_DOCROOT
+		//TODO: TagElement.TAG_INHERITDOC, TagElement.TAG_VALUE
 		
 		String name= node.getTagName();
 		
@@ -432,6 +440,8 @@ public class JavadocContentAccess2 {
 			handleContentElements(node.fragments());
 		else if (handleInheritDoc(node)) {
 			// handled
+		} else if (handleDocRoot(node)) {
+			// handled
 		} else {
 			//print uninterpreted source {@tagname ...} for unknown tags
 			int start= node.getStartPosition();
@@ -445,6 +455,49 @@ public class JavadocContentAccess2 {
 			fLiteralContent--;
 		
 	}
+	
+	private boolean handleDocRoot(TagElement node) {
+		if (!TagElement.TAG_DOCROOT.equals(node.getTagName()))
+			return false;
+		
+		try {
+			String url= null;
+			if (fMember.isBinary()) {
+				URL javadocBaseLocation= JavaUI.getJavadocBaseLocation(fMember);
+				if (javadocBaseLocation != null) {
+					url= javadocBaseLocation.toExternalForm();
+				}
+			} else {
+				IPackageFragmentRoot srcRoot= JavaModelUtil.getPackageFragmentRoot(fMember);
+				if (srcRoot != null) {
+					IResource resource= srcRoot.getResource();
+					if (resource != null) {
+						/*
+						 * Too bad: Browser widget knows nothing about EFS and custom URL handlers,
+						 * so IResource#getLocationURI() does not work in all cases.
+						 * We only support the local file system for now.
+						 * A solution could be https://bugs.eclipse.org/bugs/show_bug.cgi?id=149022 .
+						 */
+						IPath location= resource.getLocation();
+						if (location != null) {
+							url= location.toFile().toURI().toASCIIString();
+						}
+					}
+					
+				}
+			}
+			if (url != null) {
+				if (url.endsWith("/")) { //$NON-NLS-1$
+					url= url.substring(0, url.length() -1);
+				}
+				fBuf.append(url);
+				return true;
+			}
+		} catch (JavaModelException e) {
+		}
+		return false;
+	}
+	
 	
 	/**
 	 * Handle {&#64;inheritDoc} in start tag.

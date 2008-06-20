@@ -71,9 +71,12 @@ import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CharOperation;
+
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
@@ -511,15 +514,26 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			if (info != null && info.length() > 0) {
 				StringBuffer buffer= new StringBuffer();
 				HTMLPrinter.insertPageProlog(buffer, 0, getCSSStyles());
+				
 				buffer.append(info);
-				HTMLPrinter.addPageEpilog(buffer);
-				info= buffer.toString();
+				
 				IJavaElement element= null;
 				try {
 					element= getProposalInfo().getJavaElement();
+					if (element instanceof IMember) {
+						String base= JavaDocLocations.getBaseURL((IMember) element);
+						if (base != null) {
+							int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
+							buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
+						}
+					}
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
 				}
+				
+				HTMLPrinter.addPageEpilog(buffer);
+				info= buffer.toString();
+				
 				return new JavadocBrowserInformationControlInput(null, element, info, 0);
 			}
 		}

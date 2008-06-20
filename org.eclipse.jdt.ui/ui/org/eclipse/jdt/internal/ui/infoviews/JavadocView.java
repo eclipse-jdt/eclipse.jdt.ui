@@ -956,6 +956,7 @@ public class JavadocView extends AbstractInfoView {
 		if (nResults == 0)
 			return null;
 
+		String base= null;
 		if (nResults > 1) {
 
 			for (int i= 0; i < result.length; i++) {
@@ -998,6 +999,9 @@ public class JavadocView extends AbstractInfoView {
 							reader= new StringReader(InfoViewMessages.JavadocView_noAttachedSource);
 						else if (!hasSource)
 							reader= new StringReader(InfoViewMessages.JavadocView_noInformation);
+						
+					} else {
+						base= JavaDocLocations.getBaseURL(member);
 					}
 					
 				} catch (JavaModelException ex) {
@@ -1013,6 +1017,10 @@ public class JavadocView extends AbstractInfoView {
 		boolean flushContent= true;
 		if (buffer.length() > 0 || flushContent) {
 			HTMLPrinter.insertPageProlog(buffer, 0, null, fBackgroundColorRGB, fgStyleSheet);
+			if (base != null) {
+				int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
+				buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			HTMLPrinter.addPageEpilog(buffer);
 			return buffer.toString();
 		}

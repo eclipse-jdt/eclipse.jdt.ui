@@ -38,11 +38,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
@@ -84,6 +87,7 @@ import org.xml.sax.SAXException;
 
 public class JavaDocLocations {
 	
+	private static final String JAR_PROTOCOL= "jar"; //$NON-NLS-1$
 	public static final String ARCHIVE_PREFIX= "jar:"; //$NON-NLS-1$
 	private static final String PREF_JAVADOCLOCATIONS= "org.eclipse.jdt.ui.javadoclocations"; //$NON-NLS-1$
 	public static final String PREF_JAVADOCLOCATIONS_MIGRATED= "org.eclipse.jdt.ui.javadoclocations.migrated"; //$NON-NLS-1$
@@ -596,6 +600,36 @@ public class JavaDocLocations {
 			}
 		}
 		buf.append(')');
+	}
+
+	public static String getBaseURL(IMember member) throws JavaModelException {
+		if (member.isBinary()) {
+			// Source attachment usually does not include Javadoc resources
+			// => Always use the Javadoc location as base:
+			URL baseURL= JavaUI.getJavadocLocation(member, false);
+			if (baseURL != null) {
+				if (baseURL.getProtocol().equals(JAR_PROTOCOL)) {
+					// It's a JarURLConnection, which is not known to the browser widget.
+					// Let's start the help web server:
+					baseURL= PlatformUI.getWorkbench().getHelpSystem().resolve(baseURL.toExternalForm(), true);
+				}
+				return baseURL.toExternalForm();
+			}
+		} else {
+			IResource resource= member.getResource();
+			if (resource != null) {
+				/*
+				 * Too bad: Browser widget knows nothing about EFS and custom URL handlers,
+				 * so IResource#getLocationURI() does not work in all cases.
+				 * We only support the local file system for now.
+				 * A solution could be https://bugs.eclipse.org/bugs/show_bug.cgi?id=149022 .
+				 */
+				IPath location= resource.getLocation();
+				if (location != null)
+					return location.toFile().toURI().toASCIIString();
+			}
+		}
+		return null;
 	}
 
 

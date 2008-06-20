@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
-import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.eclipse.core.runtime.Platform;
@@ -568,6 +567,9 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 							reader= new StringReader(JavaHoverMessages.JavadocHover_noAttachedSource);
 						else if (!hasSource)
 							reader= new StringReader(JavaHoverMessages.JavadocHover_noInformation);
+						
+					} else {
+						base= JavaDocLocations.getBaseURL(member);
 					}
 					
 				} catch (JavaModelException ex) {
@@ -579,11 +581,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					HTMLPrinter.addParagraph(buffer, reader);
 				}
 				hasContents= true;
-				try {
-					base= JavaElementLinks.createURI(JavaElementLinks.JAVADOC_SCHEME, member);
-				} catch (URISyntaxException e) {
-					JavaPlugin.log(e);
-				}
+				
 			} else if (element.getElementType() == IJavaElement.LOCAL_VARIABLE || element.getElementType() == IJavaElement.TYPE_PARAMETER) {
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(element, constantValue, true));
 				hasContents= true;
@@ -597,9 +595,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		if (buffer.length() > 0) {
 			HTMLPrinter.insertPageProlog(buffer, 0, JavadocHover.getStyleSheet());
 			if (base != null) {
-				//TODO: base URI only makes sense if URI is hierarchical
-//				int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
-//				buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
+				int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
+				buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			HTMLPrinter.addPageEpilog(buffer);
 			return new JavadocBrowserInformationControlInput(previousInput, element, buffer.toString(), leadingImageWidth);

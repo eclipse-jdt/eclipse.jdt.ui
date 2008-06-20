@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -125,15 +126,24 @@ public class JavaElementLinks {
 				
 				event.doit= false;
 
-				if (loc.startsWith("about:")) //$NON-NLS-1$
-					return; //FIXME: handle relative links, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=8112
+				if (loc.startsWith("about:")) { //$NON-NLS-1$
+					// Relative links should be handled via head > base tag.
+					// If no base is available, links just won't work.
+					return;
+				}
 
 				URI uri;
 				try {
 					uri= new URI(loc);
 				} catch (URISyntaxException e) {
-					JavaPlugin.log(e);
-					return;
+					// try it with a file (workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=237903 ): 
+					File file= new File(loc);
+					if (! file.exists()) {
+						JavaPlugin.log(e);
+						return;
+					}
+					uri= file.toURI();
+					loc= uri.toASCIIString();
 				}
 
 				String scheme= uri.getScheme();
