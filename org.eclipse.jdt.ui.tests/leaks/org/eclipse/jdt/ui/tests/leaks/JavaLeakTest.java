@@ -365,6 +365,7 @@ public class JavaLeakTest extends LeakTestCase {
 		IEditorPart part= internalTestEditorOpen(cu, CompilationUnitEditor.class);
 				
 		IWorkbench workbench= part.getSite().getWorkbenchWindow().getWorkbench();
+		part.getEditorSite().getPage().activate(part);
 		IHandlerService handlerService= (IHandlerService) workbench.getService(IHandlerService.class);
 		handlerService.executeCommand("org.eclipse.jdt.ui.tests.JavaLeakTestActionDelegate", null);
 		
