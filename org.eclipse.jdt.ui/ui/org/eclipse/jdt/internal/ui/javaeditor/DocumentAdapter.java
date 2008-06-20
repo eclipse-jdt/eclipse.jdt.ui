@@ -260,7 +260,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 			if (fDocument instanceof ISynchronizable)
 				((ISynchronizable)fDocument).setLockObject(new Object());
 		}
-		fDocument.addPrenotifiedDocumentListener(this);
+		fDocument.addDocumentListener(this);
 	}
 
 	/**
@@ -329,7 +329,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 
 		IDocument d= fDocument;
 		fDocument= null;
-		d.removePrenotifiedDocumentListener(this);
+		d.removeDocumentListener(this);
 
 		if (fTextFileBuffer != null) {
 			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
