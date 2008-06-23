@@ -1038,7 +1038,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		setAction("ContentAssistProposal", action); //$NON-NLS-1$
 		markAsStateDependentAction("ContentAssistProposal", true); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.CONTENT_ASSIST_ACTION);
-		ISourceViewer sourceViewer= getSourceViewer();
 
 		action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION);	//$NON-NLS-1$
 		action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);
