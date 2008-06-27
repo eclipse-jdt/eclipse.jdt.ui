@@ -3586,6 +3586,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testUnusedVariables8() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package pack;\n");
@@ -3605,9 +3609,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 2);
 
-		String[] expected= new String[3];
+		String[] expected= new String[2];
 		buf= new StringBuffer();
 		buf.append("package pack;\n");
 		buf.append("\n");
@@ -3634,21 +3638,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[1]= buf.toString();
-
-		buf= new StringBuffer();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        @SuppressWarnings(\"unused\")\n");
-		buf.append("        E x = (E) bar();\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    private Object bar() {\n");
-		buf.append("        throw null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[2]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
