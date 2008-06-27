@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -412,12 +413,13 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	}
 
 	private void refresh(IPath path) {
-		if (fRoot.findContainersForLocation(path).length > 0) {
-			try {
-				fRoot.refreshLocal(IResource.DEPTH_INFINITE, null);
-			} catch (CoreException e) {
-				JavaPlugin.log(e);
+		IContainer[] containers= fRoot.findContainersForLocation(path);
+		try {
+			for (int i= 0; i < containers.length; i++) {
+				containers[i].refreshLocal(IResource.DEPTH_INFINITE, null);
 			}
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
 		}
 	}
 
@@ -448,7 +450,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 					try {
 						if (!fWriteCustom) {
 							fFile.delete();
-							refresh(fDestination); //If destination of javadoc is in workspace then refresh workspace
+							refresh(fDestination);
 							spawnInBrowser(fDisplay);
 						}
 					} finally {
