@@ -3584,6 +3584,75 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
+	
+	public void testUnusedVariables8() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        E x = (E) bar();\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private Object bar() {\n");
+		buf.append("        throw null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+
+		String[] expected= new String[3];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        bar();\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private Object bar() {\n");
+		buf.append("        throw null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private Object bar() {\n");
+		buf.append("        throw null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        @SuppressWarnings(\"unused\")\n");
+		buf.append("        E x = (E) bar();\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private Object bar() {\n");
+		buf.append("        throw null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
 
 	public void testUnusedVariablesAsSwitchStatement() throws Exception {
 		Hashtable hashtable= JavaCore.getOptions();
