@@ -105,6 +105,7 @@ public final class CorrectionMessages extends NLS {
 	public static String LocalCorrectionsSubProcessor_setparenteses_instanceof_description;
 	public static String LocalCorrectionsSubProcessor_InferGenericTypeArguments;
 	public static String LocalCorrectionsSubProcessor_InferGenericTypeArguments_description;
+	public static String TypeMismatchSubProcessor_0;
 	public static String TypeMismatchSubProcessor_addcast_description;
 	public static String TypeMismatchSubProcessor_changecast_description;
 	public static String TypeMismatchSubProcessor_changereturntype_description;
@@ -113,6 +114,7 @@ public final class CorrectionMessages extends NLS {
 	public static String TypeMismatchSubProcessor_removeexceptions_description;
 	public static String TypeMismatchSubProcessor_addexceptions_description;
 	public static String TypeMismatchSubProcessor_incompatible_for_each_type_description;
+	public static String TypeMismatchSubProcessor_insertnullcheck_description;
 	public static String RemoveDeclarationCorrectionProposal_removeunusedfield_description;
 	public static String RemoveDeclarationCorrectionProposal_removeunusedmethod_description;
 	public static String RemoveDeclarationCorrectionProposal_removeunusedconstructor_description;

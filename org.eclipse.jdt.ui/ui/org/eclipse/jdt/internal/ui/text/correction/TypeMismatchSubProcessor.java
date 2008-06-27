@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -185,6 +186,21 @@ public class TypeMismatchSubProcessor {
 		}
 
 		addChangeSenderTypeProposals(context, nodeToCast, castTypeBinding, false, 5, proposals);
+		
+		if (castTypeBinding == ast.resolveWellKnownType(CorrectionMessages.TypeMismatchSubProcessor_0) && currBinding != null && !currBinding.isPrimitive() && !Bindings.isVoidType(currBinding)) {
+			String label= CorrectionMessages.TypeMismatchSubProcessor_insertnullcheck_description;
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
+			
+			InfixExpression expression= ast.newInfixExpression();
+			expression.setLeftOperand((Expression) rewrite.createMoveTarget(nodeToCast));
+			expression.setRightOperand(ast.newNullLiteral());
+			expression.setOperator(InfixExpression.Operator.NOT_EQUALS);
+			rewrite.replace(nodeToCast, expression, null);
+			
+			proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 2, image));
+		}
+		
 	}
 
 	public static void addChangeSenderTypeProposals(IInvocationContext context, Expression nodeToCast, ITypeBinding castTypeBinding, boolean isAssignedNode, int relevance, Collection proposals) throws JavaModelException {
