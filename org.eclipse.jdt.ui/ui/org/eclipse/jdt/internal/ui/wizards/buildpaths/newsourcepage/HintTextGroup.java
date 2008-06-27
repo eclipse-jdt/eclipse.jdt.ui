@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -269,7 +269,9 @@ public final class HintTextGroup implements ISelectionChangedListener {
         	createLabel(childComposite, descriptions[i], actions[i]);
         }
         
+
         fTopComposite.layout(true);
+        spc.reflow(true);
     }
     
     private String noAction(ISelection selection) {
