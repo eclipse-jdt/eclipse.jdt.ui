@@ -271,6 +271,9 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 					fragments= ((VariableDeclarationStatement) varDecl).fragments();
 				}
 				Expression initializer = frag.getInitializer();
+				if (initializer instanceof CastExpression) {
+					initializer= ((CastExpression) initializer).getExpression();
+				}
 				boolean sideEffectInitializer = initializer instanceof MethodInvocation || initializer instanceof ClassInstanceCreation;
 				if (fragments.size() == fUnusedNames.length) {
 					if (fForceRemove) {
