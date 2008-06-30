@@ -51,6 +51,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 
+import org.eclipse.jdt.ui.SharedASTProvider;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -87,6 +89,12 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 	}
 	
 	private CompilationUnit getRecoveredAST(IDocument document, int offset, Document recoveredDocument) {
+		CompilationUnit ast= SharedASTProvider.getAST(fCompilationUnit, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
+		if (ast != null) {
+			recoveredDocument.set(document.get());
+			return ast;
+		}
+		
 		char[] content= document.get().toCharArray();
 		
 		// clear prefix to avoid compile errors
@@ -117,7 +125,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 		if (importRewrite != null) {
 			context= new ContextSensitiveImportRewriteContext(unit, offset, importRewrite);
 		} else {
-			importRewrite= StubUtility.createImportRewrite(unit, true); // create a dummy import rewriter to have one 
+			importRewrite= StubUtility.createImportRewrite(unit, true); // create a dummy import rewriter to have one
 			context= new ImportRewriteContext() { // forces that all imports are fully qualified
 				public int findInContext(String qualifier, String name, int kind) {
 					return RES_NAME_CONFLICT;
