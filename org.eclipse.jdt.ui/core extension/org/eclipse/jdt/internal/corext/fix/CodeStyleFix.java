@@ -192,10 +192,13 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 					fResult.add(new AddStaticQualifierOperation(declaringClass, node));
 				}
 			} else if (fFindUnqualifiedAccesses){
-				String qualifier= getNonStaticQualifier(declaringClass, fImportRewrite, node);
+				String qualifier= getThisExpressionQualifier(declaringClass, fImportRewrite, node);
 				if (qualifier == null)
 					return;
 
+				if (qualifier.length() == 0)
+					qualifier= null;
+				
 				fResult.add(new AddThisQualifierOperation(qualifier, node));
 			}
 		}		
@@ -212,9 +215,12 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 				}
 			} else {
 				if (fFindUnqualifiedMethodAccesses) {
-					String qualifier= getNonStaticQualifier(declaringClass, fImportRewrite, node);
+					String qualifier= getThisExpressionQualifier(declaringClass, fImportRewrite, node);
 					if (qualifier == null)
 						return;
+					
+					if (qualifier.length() == 0)
+						qualifier= null;
 
 					fResult.add(new AddThisQualifierOperation(qualifier, node));
 				}
@@ -363,7 +369,12 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		
 		public String getDescription() {
 			String nameLabel= BasicElementLabels.getJavaElementName(fName.getIdentifier());
-			String qualifierLabel= BasicElementLabels.getJavaElementName(fQualifier);
+			String qualifierLabel;
+			if (fQualifier == null) {
+				qualifierLabel= "this"; //$NON-NLS-1$
+			} else {
+				qualifierLabel= BasicElementLabels.getJavaElementName(fQualifier + ".this"); //$NON-NLS-1$
+			}
 			
 			return Messages.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {nameLabel, qualifierLabel});
 		}
@@ -374,7 +385,18 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			TextEditGroup group= createTextEditGroup(getDescription(), cuRewrite);
-			rewrite.replace(fName, rewrite.createStringPlaceholder(fQualifier  + '.' + fName.getIdentifier(), ASTNode.SIMPLE_NAME), group);
+			AST ast= rewrite.getAST();
+
+			FieldAccess fieldAccess= ast.newFieldAccess();
+
+			ThisExpression thisExpression= ast.newThisExpression();
+			if (fQualifier != null)
+				thisExpression.setQualifier(ast.newName(fQualifier));
+
+			fieldAccess.setExpression(thisExpression);
+			fieldAccess.setName((SimpleName) rewrite.createMoveTarget(fName));
+
+			rewrite.replace(fName, fieldAccess, group);
 		}		
 	}
 	
@@ -722,29 +744,18 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 			return null;
 		
 		ImportRewrite imports= StubUtility.createImportRewrite(compilationUnit, true);
-		
-		String replacement= getQualifier((IVariableBinding)binding, imports, name);
+
+		String replacement= getThisExpressionQualifier(((IVariableBinding) binding).getDeclaringClass(), imports, name);
 		if (replacement == null)
 			return null;
-		
+
+		if (replacement.length() == 0)
+			replacement= null;
+
 		return new AddThisQualifierOperation(replacement, name);
 	}
-	
-	private static String getQualifier(IVariableBinding binding, ImportRewrite imports, SimpleName name) {
-		ITypeBinding declaringClass= binding.getDeclaringClass();
-		if (Modifier.isStatic(binding.getModifiers())) {
-			IJavaElement javaElement= declaringClass.getJavaElement();
-			if (javaElement instanceof IType) {
-				return ((IType)javaElement).getElementName();
-			}
-		} else {
-			return getNonStaticQualifier(declaringClass, imports, name);
-		}
 
-		return null;
-	}
-
-	private static String getNonStaticQualifier(ITypeBinding declaringClass, ImportRewrite imports, SimpleName name) {
+	private static String getThisExpressionQualifier(ITypeBinding declaringClass, ImportRewrite imports, SimpleName name) {
 		ITypeBinding parentType= Bindings.getBindingOfParentType(name);
 		ITypeBinding currType= parentType;
 		while (currType != null && !Bindings.isSuperType(declaringClass, currType)) {
@@ -767,10 +778,9 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 				//see bug 115277
 				return null;
 			
-			String outer= imports.addImport(currType);
-			return outer + ".this"; //$NON-NLS-1$
+			return imports.addImport(currType);
 		} else {
-			return "this"; //$NON-NLS-1$
+			return ""; //$NON-NLS-1$
 		}
 	}
 	
