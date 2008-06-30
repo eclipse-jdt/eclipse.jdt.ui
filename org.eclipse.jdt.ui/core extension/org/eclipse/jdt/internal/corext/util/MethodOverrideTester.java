@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -96,7 +96,9 @@ public class MethodOverrideTester {
 	 * Finds the method that declares the given method. A declaring method is the 'original' method declaration that does
 	 * not override nor implement a method. <code>null</code> is returned it the given method does not override
 	 * a method. When searching, super class are examined before implemented interfaces.
+	 * @param overriding the overriding method
 	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
+	 * @return the declaring method, or <code>null</code>
 	 * @throws JavaModelException
 	 */
 	public IMethod findDeclaringMethod(IMethod overriding, boolean testVisibility) throws JavaModelException {
@@ -112,7 +114,9 @@ public class MethodOverrideTester {
 	/**
 	 * Finds the method that is overridden by the given method.
 	 * First the super class is examined and then the implemented interfaces.
+	 * @param overriding the overriding method
 	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
+	 * @return a method that is directly overridden by the given method, or <code>null</code>
 	 * @throws JavaModelException
 	 */
 	public IMethod findOverriddenMethod(IMethod overriding, boolean testVisibility) throws JavaModelException {

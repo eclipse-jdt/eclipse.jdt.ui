@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,9 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeHierarchyChangedListener;
 import org.eclipse.jdt.core.JavaModelException;
 
+/**
+ * A thread-safe cache for super type hierarchies.  
+ */
 public class SuperTypeHierarchyCache {
 	
 	private static class HierarchyCacheEntry implements ITypeHierarchyChangedListener {
@@ -74,7 +77,15 @@ public class SuperTypeHierarchyCache {
 	private static int fgCacheMisses= 0;
 	
 	/**
-	 * Get a hierarchy for the given type
+	 * Returns a super type hierarchy that contains the given type.
+	 * The returned hierarchy may actually be based on a subtype of the
+	 * requested type. Therefore, queries such as {@link ITypeHierarchy#getAllClasses()}
+	 * or {@link ITypeHierarchy#getRootInterfaces()} may return more types than the same
+	 * queries on a type hierarchy for just the given type.
+	 * 
+	 * @param type the focus type 
+	 * @return a supertype hierarchy that contains <code>type</code>
+	 * @throws JavaModelException 
 	 */
 	public static ITypeHierarchy getTypeHierarchy(IType type) throws JavaModelException {
 		return getTypeHierarchy(type, null);
@@ -109,9 +120,17 @@ public class SuperTypeHierarchyCache {
 		}
 	}
 
-	
 	/**
-	 * Get a hierarchy for the given type
+	 * Returns a super type hierarchy that contains the given type.
+	 * The returned hierarchy may actually be based on a subtype of the
+	 * requested type. Therefore, queries such as {@link ITypeHierarchy#getAllClasses()}
+	 * or {@link ITypeHierarchy#getRootInterfaces()} may return more types than the same
+	 * queries on a type hierarchy for just the given type.
+	 * 
+	 * @param type the focus type 
+	 * @param progressMonitor progress monitor
+	 * @return a supertype hierarchy that contains <code>type</code>
+	 * @throws JavaModelException 
 	 */
 	public static ITypeHierarchy getTypeHierarchy(IType type, IProgressMonitor progressMonitor) throws JavaModelException {
 		ITypeHierarchy hierarchy= findTypeHierarchyInCache(type);
@@ -158,9 +177,9 @@ public class SuperTypeHierarchyCache {
 	
 
 	/**
-	 * Check if the given type is in the hierarchy
-	 * @param type
-	 * @return Return <code>true</code> if a hierarchy for the given type is cached.
+	 * Check if the given type is in the hierarchy cache.
+	 * @param type a type
+	 * @return <code>true</code> if a hierarchy for the given type is cached
 	 */	
 	public static boolean hasInCache(IType type) {
 		return findTypeHierarchyInCache(type) != null;
