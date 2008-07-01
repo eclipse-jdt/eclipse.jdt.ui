@@ -26,12 +26,12 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
+import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-
-import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
-import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
 
 /**
  * Tests for the BreakContinueTargerFinder class.
@@ -44,7 +44,11 @@ public class BreakContinueTargetFinderTest extends TestCase{
 	public static Test suite() {
 		return new ProjectTestSetup(new TestSuite(THIS));
 	}
-
+	
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
+	}
+	
 	private ASTParser fParser;
 	private BreakContinueTargetFinder fFinder;
 	private IJavaProject fJProject1;
@@ -227,12 +231,34 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("      }\n");
 		s.append("   }\n");
 		s.append("}\n");
-		int offset= 1 + s.indexOf("break");//middle of word
+		int offset= 5 + s.indexOf("break");//after word
 		int length= 0;
 		OccurrenceLocation[] ranges= { find(s, "bar", 1), find(s, "}", 2) };
 		checkSelection(s, offset, length, ranges);
 	}
 
+	public void testLabeledBreakIf() throws Exception {
+		StringBuffer s= new StringBuffer();
+		s.append("class A{\n");
+		s.append("  public static void main(String[] args) {\n");
+		s.append("    stay: if (true) {\n");
+		s.append("      for (int i= 0; i < 5; i++) {\n");
+		s.append("        System.out.println(i);\n");
+		s.append("        if (i == 3)\n");
+		s.append("          break stay;\n");
+		s.append("      }\n");
+		s.append("      System.out.println(\"after loop\");\n");
+		s.append("      return;\n");
+		s.append("    }\n");
+		s.append("    System.out.println(\"Stayed!\");\n");
+		s.append("  }\n");
+		s.append("}\n");
+		int offset= s.indexOf("break");//before word
+		int length= 0;
+		OccurrenceLocation[] ranges= { find(s, "stay", 1), find(s, "}", 2) };
+		checkSelection(s, offset, length, ranges);
+	}
+	
 	public void testContinueFor() throws Exception {
 		StringBuffer s= new StringBuffer();
 		s.append("class A{\n");
