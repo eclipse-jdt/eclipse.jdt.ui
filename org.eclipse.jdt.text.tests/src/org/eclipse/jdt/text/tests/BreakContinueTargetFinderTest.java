@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,10 +25,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+
 import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
 import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 /**
  * Tests for the BreakContinueTargerFinder class.
@@ -176,7 +179,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("}");
 		int offset= 1 + s.indexOf("break");//middle of word
 		int length= 0;
-		OccurrenceLocation[] ranges= { find(s, "do", 1), find(s, "}", 1) };
+		OccurrenceLocation[] ranges= { find(s, "do", 1), find(s, ";", 3) };
 		checkSelection(s, offset, length, ranges);
 	}
 
@@ -186,7 +189,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("  void foo(int i){\n");
 		s.append("    switch (i){\n");
 		s.append("      case 1: System.err.println(i); break;\n");
-		s.append("      default:System.out.println(i);\n"); 
+		s.append("      default:System.out.println(i);\n");
 		s.append("    }\n");
 		s.append("  }\n");
 		s.append("}\n");
@@ -300,7 +303,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		s.append("    do{\n");
 		s.append("       switch (i){\n");
 		s.append("         case 1: System.err.println(i); continue;\n");
-		s.append("         default:System.out.println(i);\n"); 
+		s.append("         default:System.out.println(i);\n");
 		s.append("       }\n");
 		s.append("    }while(i != 9);\n");
 		s.append("  }\n");

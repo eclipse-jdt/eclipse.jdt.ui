@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ContinueStatement;
@@ -39,10 +38,11 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
+
 /**
- * Class used to find the target for a break or continue statement according 
+ * Class used to find the target for a break or continue statement according
  * to the language specification.
- * <p> 
+ * <p>
  * The target statement is a while, do, switch, for or a labeled statement.
  * Break is described in section 14.15 of the JLS3 and continue in section 14.16.</p>
  * 
@@ -116,7 +116,7 @@ public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrence
 		} else {
 			ContinueStatement cs= (ContinueStatement) fSelected;
 			return cs.getLabel();
-		} 
+		}
 	}
 		
 	/**
@@ -168,49 +168,10 @@ public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrence
 	}
 
 	private OccurrenceLocation getLocationForClosingBrace(ASTNode targetNode) {
-		ASTNode maybeBlock= getOptionalBlock(targetNode);
-		if (maybeBlock == null)
-			return null;
-		
 		/* Ideally, we'd scan backwards to find the '}' token, but it may be an overkill
 		 * so I'll just assume the closing brace token has a fixed length. */
-		int offset= ASTNodes.getExclusiveEnd(maybeBlock) - BRACE_LENGTH;
+		int offset= ASTNodes.getExclusiveEnd(targetNode) - BRACE_LENGTH;
 		return new OccurrenceLocation(offset, BRACE_LENGTH, 0, fDescription);
-	}
-
-	/*
-	 * Block cannot be return type here because SwitchStatement has no block 
-	 * and yet it does have a closing brace. 
-	 */
-	private ASTNode getOptionalBlock(ASTNode targetNode) {
-		final ASTNode[] maybeBlock= new ASTNode[1];
-		targetNode.accept(new ASTVisitor(){
-			public boolean visit(ForStatement node) {
-				if (node.getBody() instanceof Block)
-					maybeBlock[0]= node.getBody(); 
-				return false;
-			}
-			public boolean visit(EnhancedForStatement node) {
-				if (node.getBody() instanceof Block)
-					maybeBlock[0]= node.getBody(); 
-				return false;
-			}
-			public boolean visit(WhileStatement node) {
-				if (node.getBody() instanceof Block)
-					maybeBlock[0]= node.getBody(); 
-				return false;
-			}
-			public boolean visit(DoStatement node) {
-				if (node.getBody() instanceof Block)
-					maybeBlock[0]= node.getBody(); 
-				return false;
-			}
-			public boolean visit(SwitchStatement node) {
-				maybeBlock[0]= node; 
-				return false;
-			}
-		});
-		return maybeBlock[0];
 	}
 
 	private boolean keepWalkingUp(ASTNode node) {
