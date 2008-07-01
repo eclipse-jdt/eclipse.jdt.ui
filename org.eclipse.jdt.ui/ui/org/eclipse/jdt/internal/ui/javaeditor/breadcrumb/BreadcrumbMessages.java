@@ -20,13 +20,7 @@ public class BreadcrumbMessages extends NLS {
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.BreadcrumbMessages"; //$NON-NLS-1$
 
 	public static String BreadcrumbItemDropDown_showDropDownMenu_action_toolTip;
-
-	public static String FilteredTable_accessible_listener_text;
-	public static String FilteredTable_clear_button_tooltip;
-	public static String FilteredTable_go_left_action_tooltip;
-	public static String FilteredTable_go_right_action_tooltip;
-	public static String FilteredTable_initial_filter_text;
-
+	
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, BreadcrumbMessages.class);
