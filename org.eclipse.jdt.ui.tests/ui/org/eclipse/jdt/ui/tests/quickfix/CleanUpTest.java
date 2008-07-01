@@ -4610,6 +4610,80 @@ public class CleanUpTest extends CleanUpTestCase {
 		}
 	}
 	
+	public void testAddBlockBug149110_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true)\n");
+		buf.append("            throw new IllegalAccessError();\n");
+		buf.append("        if (true) {\n");
+		buf.append("            throw new IllegalAccessError();\n");
+		buf.append("        }\n");
+		buf.append("        if (false)\n");
+		buf.append("            System.out.println();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true)\n");
+		buf.append("            throw new IllegalAccessError();\n");
+		buf.append("        if (true)\n");
+		buf.append("            throw new IllegalAccessError();\n");
+		buf.append("        if (false) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
+	}
+	
+	public void testAddBlockBug149110_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true)\n");
+		buf.append("            return;\n");
+		buf.append("        if (true) {\n");
+		buf.append("            return;\n");
+		buf.append("        }\n");
+		buf.append("        if (false)\n");
+		buf.append("            System.out.println();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NO_FOR_RETURN_AND_THROW);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true)\n");
+		buf.append("            return;\n");
+		buf.append("        if (true)\n");
+		buf.append("            return;\n");
+		buf.append("        if (false) {\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
+	}
+	
 	public void testRemoveBlock01() throws Exception {
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

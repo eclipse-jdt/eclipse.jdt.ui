@@ -108,7 +108,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 			Statement parent= (Statement) body.getParent();
 			if (fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow) {
 				if (!(body instanceof Block)) {
-					if (body.getNodeType() != ASTNode.IF_STATEMENT && body.getNodeType() != ASTNode.RETURN_STATEMENT) {
+					if (body.getNodeType() != ASTNode.IF_STATEMENT && body.getNodeType() != ASTNode.RETURN_STATEMENT && body.getNodeType() != ASTNode.THROW_STATEMENT) {
 						fResult.add(new AddBlockOperation(bodyProperty, body, parent));
 					}
 				} else {
