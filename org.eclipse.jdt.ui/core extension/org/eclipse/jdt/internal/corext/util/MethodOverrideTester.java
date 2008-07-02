@@ -180,7 +180,7 @@ public class MethodOverrideTester {
 	}
 	
 	/**
-	 * Finds an overridden method in a type. WWith generics it is possible that 2 methods in the same type are overidden at the same time.
+	 * Finds an overridden method in a type. With generics it is possible that 2 methods in the same type are overridden at the same time.
 	 * In that case the first overridden method found is returned.
 	 * @param overriddenType The type to find methods in
 	 * @param overriding The overriding method
