@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -184,11 +185,12 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 			} else {
 				ASTNode parent= node.getParent();
 				if (parent instanceof ExpressionStatement) {
-					return null;
-				}
-				newTypeNode= ASTResolving.guessTypeForReference(ast, node);
-				if (newTypeNode == null) {
-					newTypeNode= ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+					newTypeNode= ast.newPrimitiveType(PrimitiveType.VOID);
+				} else {
+					newTypeNode= ASTResolving.guessTypeForReference(ast, node);
+					if (newTypeNode == null) {
+						newTypeNode= ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+					}
 				}
 			}
 		}
