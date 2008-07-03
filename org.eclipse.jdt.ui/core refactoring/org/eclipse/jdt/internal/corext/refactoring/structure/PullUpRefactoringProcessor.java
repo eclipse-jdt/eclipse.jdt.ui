@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla - 228950: [pull up] exception if target calls super with multiple parameters
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -240,7 +241,9 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				final List arguments= (List) node.getStructuralProperty(SuperMethodInvocation.ARGUMENTS_PROPERTY);
 				if (arguments != null && arguments.size() > 0) {
 					final ListRewrite rewriter= fRewrite.getListRewrite(invocation, MethodInvocation.ARGUMENTS_PROPERTY);
-					rewriter.insertLast(rewriter.createCopyTarget((ASTNode) arguments.get(0), (ASTNode) arguments.get(arguments.size() - 1)), null);
+					ListRewrite superRewriter= fRewrite.getListRewrite(node, SuperMethodInvocation.ARGUMENTS_PROPERTY);
+					ASTNode copyTarget= superRewriter.createCopyTarget((ASTNode) arguments.get(0), (ASTNode) arguments.get(arguments.size() - 1));
+					rewriter.insertLast(copyTarget, null);
 				}
 				fRewrite.replace(node, invocation, null);
 				if (!fSourceRewriter.getCu().equals(fTargetRewriter.getCu()))
