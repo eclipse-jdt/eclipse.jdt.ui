@@ -269,7 +269,7 @@ public class ReturnTypeSubProcessor {
 			if (parentType instanceof AbstractTypeDeclaration) {
 				boolean isInterface= parentType instanceof TypeDeclaration && ((TypeDeclaration) parentType).isInterface();
 				if (!isInterface) {
-					String constructorName= ((TypeDeclaration) parentType).getName().getIdentifier();
+					String constructorName= ((AbstractTypeDeclaration) parentType).getName().getIdentifier();
 					ASTNode nameNode= methodDeclaration.getName();
 					label= Messages.format(CorrectionMessages.ReturnTypeSubProcessor_wrongconstructorname_description, BasicElementLabels.getJavaElementName(constructorName));
 					proposals.add(new ReplaceCorrectionProposal(label, cu, nameNode.getStartPosition(), nameNode.getLength(), constructorName, 5));
