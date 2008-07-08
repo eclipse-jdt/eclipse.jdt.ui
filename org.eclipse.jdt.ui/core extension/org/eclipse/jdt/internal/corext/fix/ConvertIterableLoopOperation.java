@@ -123,7 +123,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 	
 	private EnhancedForStatement fEnhancedForLoop;
 
-	private final boolean fMakeFinal;
+	private boolean fMakeFinal;
 	
 	public ConvertIterableLoopOperation(ForStatement statement) {
 		this(statement, new String[0], false);
@@ -470,6 +470,12 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 					}
 					
 					private boolean visit(final Expression left, final Expression right) {
+						if (fElement != null && left instanceof SimpleName) {
+							IBinding binding= ((SimpleName) left).resolveBinding();
+							if (fElement.equals(binding))
+								fMakeFinal= false;
+						}
+						
 						if (right instanceof MethodInvocation) {
 							final MethodInvocation invocation= (MethodInvocation)right;
 							final IMethodBinding binding= invocation.resolveMethodBinding();

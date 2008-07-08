@@ -4353,6 +4353,73 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1});
 	}
 	
+	public void testCombinationBug234984_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void method(String[] arr) {\n");
+		buf.append("        for (int i = 0; i < arr.length; i++) {\n");
+		buf.append("            String item = arr[i];\n");
+		buf.append("            item = item + \"a\";\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void method(String[] arr) {\n");
+		buf.append("        for (String item : arr) {\n");
+		buf.append("            item = item + \"a\";\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+	
+	public void testCombinationBug234984_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void method(List<E1> es) {\n");
+		buf.append("        for (Iterator<E1> iterator = es.iterator(); iterator.hasNext();) {\n");
+		buf.append("            E1 next = iterator.next();\n");
+		buf.append("            next= new E1();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void method(List<E1> es) {\n");
+		buf.append("        for (E1 next : es) {\n");
+		buf.append("            next= new E1();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+	
 	public void testSerialVersion01() throws Exception {
 		
 		JavaProjectHelper.set14CompilerOptions(fJProject1);
@@ -6258,26 +6325,82 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
 	}
 	
-	public void testAddFinalBug158041() throws Exception {
+	public void testAddFinalBug158041_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(int[] ints) {\n");
+		buf.append("        for (int j = 0; j < ints.length; j++) {\n");
+		buf.append("            System.out.println(ints[j]);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(int[] ints) {\n");
+		buf.append("        for (final int i : ints) {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
+	}
+	
+	public void testAddFinalBug158041_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(int[] ints) {\n");
+		buf.append("        for (int j = 0; j < ints.length; j++) {\n");
+		buf.append("            int i = ints[j];\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(int[] ints) {\n");
+		buf.append("        for (final int i : ints) {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
+	}
+
+	public void testAddFinalBug158041_3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.Iterator;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("public class E1 {\n");
-		buf.append("    public void foo(int[] ints, List<E1> es) {\n");
-		buf.append("        for (int j = 0; j < ints.length; j++) {\n");
-		buf.append("            System.out.println(ints[j]);\n");
-		buf.append("        }\n");
-		buf.append("        \n");
+		buf.append("    public void foo(List<E1> es) {\n");
 		buf.append("        for (Iterator<E1> iterator = es.iterator(); iterator.hasNext();) {\n");
-		buf.append("            E1 e1 = iterator.next();\n");
-		buf.append("            System.out.println(e1);\n");
+		buf.append("            System.out.println(iterator.next());\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-		
+
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
 		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
 		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
@@ -6286,11 +6409,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("package test1;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("public class E1 {\n");
-		buf.append("    public void foo(int[] ints, List<E1> es) {\n");
-		buf.append("        for (final int i : ints) {\n");
-		buf.append("            System.out.println(i);\n");
-		buf.append("        }\n");
-		buf.append("        \n");
+		buf.append("    public void foo(List<E1> es) {\n");
 		buf.append("        for (final E1 e1 : es) {\n");
 		buf.append("            System.out.println(e1);\n");
 		buf.append("        }\n");
@@ -6298,6 +6417,40 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {buf.toString()});
+	}
+	
+	public void testAddFinalBug158041_4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(List<E1> es) {\n");
+		buf.append("        for (Iterator<E1> iterator = es.iterator(); iterator.hasNext();) {\n");
+		buf.append("            E1 e1 = iterator.next();\n");
+		buf.append("            System.out.println(e1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL);
+		enable(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
+		enable(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(List<E1> es) {\n");
+		buf.append("        for (final E1 e1 : es) {\n");
+		buf.append("            System.out.println(e1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { buf.toString() });
 	}
 	
 	public void testAddFinalBug163789() throws Exception {

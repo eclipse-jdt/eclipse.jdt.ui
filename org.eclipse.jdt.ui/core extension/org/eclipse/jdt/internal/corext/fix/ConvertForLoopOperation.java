@@ -75,7 +75,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	private IBinding fArrayBinding;
 	private Expression fArrayAccess;
 	private VariableDeclarationFragment fElementDeclaration;
-	private final boolean fMakeFinal;
+	private boolean fMakeFinal;
 	
 	public ConvertForLoopOperation(ForStatement forStatement) {
 		this(forStatement, new String[0], false);
@@ -438,25 +438,34 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 								throw new InvalidBodyError();
 							
 						} else if (nameBinding.equals(fArrayBinding)) {
-							ASTNode current= node;
-							while (current != null && !(current instanceof Statement)) {
-								if (current.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY)
-									throw new InvalidBodyError();
-								
-								if (current instanceof PrefixExpression)
-									throw new InvalidBodyError();
-								
-								if (current instanceof PostfixExpression)
-									throw new InvalidBodyError();
-								
-								current= current.getParent();
-							}
+							if (isAssigned(node))
+								throw new InvalidBodyError();
 						} else if (nameBinding.equals(fLengthBinding)) {
 							throw new InvalidBodyError();
+						} else if (fElementDeclaration != null && nameBinding.equals(fElementDeclaration.getName().resolveBinding())) {
+							if (isAssigned(node))
+								fMakeFinal= false;
 						}
 					}
 					
 					return true;
+				}
+				
+				private boolean isAssigned(ASTNode current) {
+					while (current != null && !(current instanceof Statement)) {
+						if (current.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY)
+							return true;
+
+						if (current instanceof PrefixExpression)
+							return true;
+
+						if (current instanceof PostfixExpression)
+							return true;
+
+						current= current.getParent();
+					}
+
+					return false;
 				}
 				
 				public boolean visit(ArrayAccess node) {
