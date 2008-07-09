@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor.breadcrumb;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MenuDetectEvent;
 import org.eclipse.swt.events.MenuDetectListener;
@@ -120,7 +122,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	protected abstract boolean open(Object element);
 	
 	/**
-	 * Create an action group for the context menu shown for 
+	 * Create an action group for the context menu shown for
 	 * the selection of the given selection provider or <code>null</code>
 	 * if no context menu should be shown.
 	 * 
@@ -185,9 +187,8 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IBreadcrumb#createContent(org.eclipse.swt.widgets.Composite)
 	 */
 	public Control createContent(Composite parent) {
-		if (fComposite != null)
-			new IllegalArgumentException("Content must only be created once."); //$NON-NLS-1$
-		
+		Assert.isTrue(fComposite == null, "Content must only be created once."); //$NON-NLS-1$
+
 		boolean rtl= (getTextEditor().getSite().getShell().getStyle() & SWT.RIGHT_TO_LEFT) != 0;
 
 		fComposite= new Composite(parent, rtl ? SWT.RIGHT_TO_LEFT : SWT.NONE);
