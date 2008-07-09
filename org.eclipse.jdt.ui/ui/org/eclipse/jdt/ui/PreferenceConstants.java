@@ -28,6 +28,7 @@ import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
@@ -3707,8 +3708,13 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
 
 		// Set the value for the deprecated color constants
-		setRGBValue(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, JFaceResources.getColorRegistry().getRGB(JFacePreferences.CONTENT_ASSIST_BACKGROUND_COLOR));
-		setRGBValue(store, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, JFaceResources.getColorRegistry().getRGB(JFacePreferences.CONTENT_ASSIST_FOREGROUND_COLOR));
+		if (PlatformUI.isWorkbenchRunning()) {
+			setRGBValue(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, JFaceResources.getColorRegistry().getRGB(JFacePreferences.CONTENT_ASSIST_BACKGROUND_COLOR));
+			setRGBValue(store, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, JFaceResources.getColorRegistry().getRGB(JFacePreferences.CONTENT_ASSIST_FOREGROUND_COLOR));
+		} else {
+			setRGBValue(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, new RGB(255, 255, 255));
+			setRGBValue(store, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, new RGB(0, 0, 0));
+		}
 
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA, "."); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, "@#"); //$NON-NLS-1$
