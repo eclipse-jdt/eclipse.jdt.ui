@@ -106,6 +106,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -1202,7 +1203,10 @@ public class JavadocView extends AbstractInfoView {
 					return null;
 
 				VariableDeclarationFragment fieldDecl= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(constantField, ast);
-				return fieldDecl.getInitializer().resolveConstantExpressionValue();
+				Expression initializer= fieldDecl.getInitializer();
+				if (initializer == null)
+					return null;
+				return initializer.resolveConstantExpressionValue();
 			} catch (JavaModelException e) {
 				// ignore the exception and try the next method
 			}
