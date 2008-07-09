@@ -139,7 +139,11 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 				workingCopyContents.insert(insertPosition, '{' + dummyClassContent + '}');
 				insertPosition++;
 			} else {
-				workingCopyContents.insert(insertPosition, dummyClassContent);
+				/*
+				 * The two empty lines are added because the trackedDeclaration uses the covered range
+				 * and hence would also included comments that directly follow the dummy class.
+				 */
+				workingCopyContents.insert(insertPosition, dummyClassContent + "\n\n"); //$NON-NLS-1$
 			}
 			
 			workingCopy.getBuffer().setContents(workingCopyContents.toString());
