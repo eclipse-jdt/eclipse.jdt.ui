@@ -388,11 +388,8 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			if (fRunnable != null)
 				return;
 
-			ITypeRoot root= (ITypeRoot) ((IJavaElement) input).getAncestor(IJavaElement.COMPILATION_UNIT);
-			if (root == null)
-				root= (ITypeRoot) ((IJavaElement) input).getAncestor(IJavaElement.CLASS_FILE);
-
-			if (!isParentElementChanged(root, event.getDelta()))
+			final IJavaElement changedElement= getChangedParentElement((IJavaElement) input, event.getDelta());
+			if (changedElement == null)
 				return;
 
 			fRunnable= new Runnable() {
@@ -410,45 +407,72 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			};
 			fViewer.getControl().getDisplay().asyncExec(fRunnable);
 		}
-		
+
 		/**
-		 * Does the given delta describe a change to the given root element or any
-		 * of its parents?
+		 * Returns the most generic ancestor of the given input which has a change, or <b>null</b> if
+		 * no such ancestor exists.
 		 * 
-		 * @param root the root to check for changes
-		 * @param delta the Java element delta to inspect
-		 * @return true if delta describes a change to parent of root
+		 * @param input the input of which the result must be an ancestor
+		 * @param delta the delta describing the model change
+		 * @return the changed element or <code>null</code>
+		 * @since 3.4.1
 		 */
-		private boolean isParentElementChanged(ITypeRoot root, IJavaElementDelta delta) {
-			if ((delta.getFlags() & IJavaElementDelta.F_CHILDREN) != 0) {
-				IJavaElementDelta[] children= delta.getAffectedChildren();
-				for (int i= 0; i < children.length; i++) {
-					if (isParentElementChanged(root, children[i]))
-						return true;
-				}
-				
-				return false;
+		private IJavaElement getChangedParentElement(IJavaElement input, IJavaElementDelta delta) {
+			IJavaElement element= delta.getElement();
+
+			if (!isAncestor(element, input))
+				return null;
+			
+			if (element instanceof ICompilationUnit) {
+				ICompilationUnit cu= (ICompilationUnit) element;
+				if (!cu.getPrimary().equals(cu))
+					return null;
+
+				if (isStructuralChange(delta))
+					return element;
 			} else {
-				return hasParent(root, delta.getElement());
+				if (!onlyChildrenChanged(delta))
+					return element;
 			}
+			
+			IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();
+			for (int i= 0; i < affectedChildren.length; i++) {
+				IJavaElement res= getChangedParentElement(input, affectedChildren[i]);
+				if (res != null)
+					return res;
+			}
+			
+			return null;			
 		}
 
 		/**
-		 * Does <code>element</code> has an element equals to <code>parent</code>
-		 * in its parent chain?
+		 * Is <code>element</code> an ancestor of <code>input</code>?
 		 * 
-		 * @param element the element to resolve the parent chain for
-		 * @param parent the potential parent
-		 * @return <code>true</code> if <code>parent</code> is a parent of <code>element</code>
+		 * @param element the element which might be a parent
+		 * @param input the element to resolve the parent chain for
+		 * @return <code>true</code> if <code>element</code> is a parent of <code>input</code>
+		 * @since 3.4.1
 		 */
-		private boolean hasParent(IJavaElement element, IJavaElement parent) {
-			if (element == null)
-				return false;
+		private boolean isAncestor(IJavaElement element, IJavaElement input) {
+			while (input != null && !input.equals(element)) {
+				input= input.getParent();
+			}
 
-			if (element == parent || element.equals(parent))
+			return input != null;
+		}
+
+		private boolean isStructuralChange(IJavaElementDelta delta) {
+			if (delta.getKind() != IJavaElementDelta.CHANGED)
 				return true;
 
-			return hasParent(element.getParent(), parent);
+			return (delta.getFlags() & IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_FINE_GRAINED) == IJavaElementDelta.F_CONTENT;
+		}
+		
+		private boolean onlyChildrenChanged(IJavaElementDelta delta) {
+			if (delta.getKind() != IJavaElementDelta.CHANGED)
+				return false;
+
+			return (delta.getFlags() & ~IJavaElementDelta.F_FINE_GRAINED) == IJavaElementDelta.F_CHILDREN;
 		}
 	}
 
