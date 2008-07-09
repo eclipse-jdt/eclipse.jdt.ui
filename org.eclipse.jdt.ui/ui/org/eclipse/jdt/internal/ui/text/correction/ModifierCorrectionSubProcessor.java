@@ -333,7 +333,7 @@ public class ModifierCorrectionSubProcessor {
 					excludedModifiers= ~(Modifier.PUBLIC | Modifier.ABSTRACT | Modifier.FINAL | Modifier.STRICTFP);
 					break;
 				case IProblem.IllegalModifierForInterfaceField:
-					excludedModifiers= ~(Modifier.PUBLIC | Modifier.ABSTRACT | Modifier.FINAL);
+					excludedModifiers= ~(Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL);
 					break;
 				case IProblem.IllegalModifierForMemberInterface:
 				case IProblem.IllegalVisibilityModifierForInterfaceMemberType:
@@ -352,9 +352,10 @@ public class ModifierCorrectionSubProcessor {
 					excludedModifiers= ~(Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE | Modifier.STATIC |  Modifier.FINAL | Modifier.VOLATILE | Modifier.TRANSIENT);
 					break;
 				case IProblem.IllegalModifierForMethod:
-					excludedModifiers= ~(Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE | Modifier.STATIC | Modifier.ABSTRACT | Modifier.FINAL | Modifier.NATIVE | Modifier.STRICTFP);
 					if (((IMethodBinding) binding).isConstructor()) {
-						excludedModifiers |= Modifier.STATIC;
+						excludedModifiers= ~(Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE);
+					} else {
+						excludedModifiers= ~(Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE | Modifier.STATIC | Modifier.ABSTRACT | Modifier.FINAL | Modifier.NATIVE | Modifier.STRICTFP | Modifier.SYNCHRONIZED);
 					}
 					break;
 				case IProblem.IllegalModifierForVariable:
@@ -367,7 +368,7 @@ public class ModifierCorrectionSubProcessor {
 					excludedModifiers= ~Modifier.NONE;
 					break;
 				case IProblem.IllegalModifierForEnumConstructor:
-					excludedModifiers= ~(Modifier.PRIVATE | Modifier.STRICTFP);
+					excludedModifiers= ~Modifier.PRIVATE;
 					break;
 				case IProblem.IllegalModifierForMemberEnum:
 					excludedModifiers= ~(Modifier.PUBLIC | Modifier.PRIVATE | Modifier.PROTECTED | Modifier.STATIC | Modifier.STRICTFP);
