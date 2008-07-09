@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -135,8 +135,8 @@ public class MyJavadocExportWizardPage extends JavadocExportWizardPage {
 			String tag= fText.getText().trim();
 			String description= fText2.getText().trim();
 			
-			toolOptions.add("-tag");
-			toolOptions.add(tag + ":a:'"+ description + '\'');
+			toolOptions.add(0, "-tag");
+			toolOptions.add(1, tag + ":a:"+ description); // do not quote here, Javadoc wizard will quote if necessary
 		}
 	}
 	

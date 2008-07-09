@@ -278,14 +278,14 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			ArrayList vmArgs= new ArrayList();
 			ArrayList progArgs= new ArrayList();
 			
-			IStatus status= fStore.getArgumentArray(vmArgs, vmArgs);
+			IStatus status= fStore.getArgumentArray(vmArgs, progArgs);
 			if (!status.isOK()) {
 				ErrorDialog.openError(getShell(), JavadocExportMessages.JavadocWizard_error_title, JavadocExportMessages.JavadocWizard_warning_starting_message, status);
 			}
 			
 			if (!fTreeWizardPage.getCustom()) {
 				for (int i= 0; i < fContributedJavadocWizardPages.length; i++) {
-					fContributedJavadocWizardPages[i].updateArguments(vmArgs, vmArgs);
+					fContributedJavadocWizardPages[i].updateArguments(vmArgs, progArgs);
 				}
 			}
 			
