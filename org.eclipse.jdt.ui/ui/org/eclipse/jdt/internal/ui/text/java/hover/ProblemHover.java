@@ -187,10 +187,13 @@ public class ProblemHover extends AbstractAnnotationHover {
 		 */
 		public ICompletionProposal[] getCompletionProposals() {
 			if (annotation instanceof IJavaAnnotation) {
-				return getJavaAnnotationFixes((IJavaAnnotation) annotation);
-			} else if (annotation instanceof MarkerAnnotation) {
-				return getMarkerAnnotationFixes((MarkerAnnotation) annotation);
+				ICompletionProposal[] result= getJavaAnnotationFixes((IJavaAnnotation) annotation);
+				if (result.length > 0)
+					return result;
 			}
+
+			if (annotation instanceof MarkerAnnotation)
+				return getMarkerAnnotationFixes((MarkerAnnotation) annotation);
 
 			return NO_PROPOSALS;
 		}

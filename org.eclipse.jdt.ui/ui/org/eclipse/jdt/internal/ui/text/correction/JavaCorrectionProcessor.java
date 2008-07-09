@@ -259,13 +259,14 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 		// collect problem locations and corrections from marker annotations
 		for (int i= 0; i < annotations.length; i++) {
 			Annotation curr= annotations[i];
+			ProblemLocation problemLocation= null;
 			if (curr instanceof IJavaAnnotation) {
-				ProblemLocation problemLocation= getProblemLocation((IJavaAnnotation) curr, model);
+				problemLocation= getProblemLocation((IJavaAnnotation) curr, model);
 				if (problemLocation != null) {
 					problems.add(problemLocation);
 				}
-			} else if (addQuickFixes && curr instanceof SimpleMarkerAnnotation) {
-				// don't collect if annotation is already a java annotation
+			}
+			if (problemLocation == null && addQuickFixes && curr instanceof SimpleMarkerAnnotation) {
 				collectMarkerProposals((SimpleMarkerAnnotation) curr, proposals);
 			}
 		}
