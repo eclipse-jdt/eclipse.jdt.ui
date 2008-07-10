@@ -76,7 +76,7 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 		StyledString text= super.getStyledText(element);
 		if (text != null && text.length() > 0)
 			return text;
-		return new StyledString(getParticipantText(element));
+		return getStyledParticipantText(element);
 	}
 
 	private boolean isSameInformation(Object realParent, Object lastElement) {
