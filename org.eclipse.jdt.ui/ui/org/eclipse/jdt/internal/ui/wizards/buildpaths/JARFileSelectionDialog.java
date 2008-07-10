@@ -57,7 +57,7 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 	 * @param acceptAllArchives specifies if all archives (not just jar and zip) can be selected
 	 */
 	public JARFileSelectionDialog(Shell parent, boolean multiSelect, boolean acceptFolders, boolean acceptAllArchives) {
-		super(parent, new FileLabelProvider(), new FileContentProvider());
+		super(parent, new FileLabelProvider(), new FileContentProvider(), false);
 		setComparator(new FileViewerComparator());
 		if (!acceptAllArchives) {
 			addFilter(new JARZipFileFilter(acceptFolders));
@@ -202,7 +202,7 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 			}
 			return new StatusInfo();
 		}
-	}	
+	}
 
 
 }
