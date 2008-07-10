@@ -43,6 +43,7 @@ public class ArchiveFileFilter extends ViewerFilter {
 
 	private List fExcludes;
 	private boolean fRecursive;
+	private boolean fAllowAllArchives;
 	
 	/**
 	 * @param excludedFiles Excluded files will not pass the filter.
@@ -64,6 +65,11 @@ public class ArchiveFileFilter extends ViewerFilter {
 		fRecursive= recusive;
 	}
 	
+	public ArchiveFileFilter(List excludedFiles, boolean recusive, boolean allowAllArchives) {
+		this(excludedFiles, recusive);
+		fAllowAllArchives= allowAllArchives;
+	}
+	
 	/*
 	 * @see ViewerFilter#select
 	 */
@@ -72,7 +78,7 @@ public class ArchiveFileFilter extends ViewerFilter {
 			if (fExcludes != null && fExcludes.contains(element)) {
 				return false;
 			}
-			return isArchivePath(((IFile)element).getFullPath(), false);
+			return isArchivePath(((IFile)element).getFullPath(), fAllowAllArchives);
 		} else if (element instanceof IContainer) { // IProject, IFolder
 			if (!fRecursive) {
 				return true;
@@ -96,10 +102,10 @@ public class ArchiveFileFilter extends ViewerFilter {
 	}
 	
 	public static boolean isArchivePath(IPath path, boolean allowAllAchives) {
+		if (allowAllAchives)
+			return true;
+
 		String ext= path.getFileExtension();
-		if (allowAllAchives) {
-			return ext != null;
-		}
 		if (ext != null && ext.length() != 0) {
 			return isArchiveFileExtension(ext);
 		}

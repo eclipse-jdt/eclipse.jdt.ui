@@ -321,6 +321,7 @@ public final class BuildPathDialogAccess {
 		dialog.setTitle(NewWizardMessages.BuildPathDialogAccess_JARArchiveDialog_edit_title); 
 		dialog.setMessage(NewWizardMessages.BuildPathDialogAccess_JARArchiveDialog_edit_description); 
 		dialog.setInitialFilter(ArchiveFileFilter.JARZIP_FILTER_STRING);
+		dialog.addFilter(new ArchiveFileFilter(usedJars, true, true));
 		dialog.setInput(root);
 		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
 		dialog.setInitialSelection(existing);
@@ -367,6 +368,7 @@ public final class BuildPathDialogAccess {
 		dialog.setTitle(NewWizardMessages.BuildPathDialogAccess_JARArchiveDialog_new_title); 
 		dialog.setMessage(NewWizardMessages.BuildPathDialogAccess_JARArchiveDialog_new_description); 
 		dialog.setInitialFilter(ArchiveFileFilter.JARZIP_FILTER_STRING);
+		dialog.addFilter(new ArchiveFileFilter(usedJars, true, true));
 		dialog.setInput(root);
 		dialog.setComparator(new ResourceComparator(ResourceComparator.NAME));
 		dialog.setInitialSelection(focus);
