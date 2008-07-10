@@ -1350,7 +1350,8 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				assertEquals("hashCode", newChildren[i].getElementName());
 				assertEquals("equals", newChildren[i + 1].getElementName());
 			} finally {
-				JavaProjectHelper.delete(unit);
+				if (unit != null)
+					JavaProjectHelper.delete(unit);
 			}
 		}
 	}
