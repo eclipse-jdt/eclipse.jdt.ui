@@ -85,7 +85,7 @@ public class SourceAttachmentBlock {
 	/**
 	 * The path to which the archive variable points.
 	 * Null if invalid path or not resolvable. Must not exist.
-	 */	
+	 */
 	private IPath fFileVariablePath;
 		
 	private final IWorkspaceRoot fWorkspaceRoot;
@@ -120,24 +120,24 @@ public class SourceAttachmentBlock {
 		if (isVariableEntry()) {
 			fFileNameField= new VariablePathDialogField(adapter);
 			fFileNameField.setDialogFieldListener(adapter);
-			fFileNameField.setLabelText(NewWizardMessages.SourceAttachmentBlock_filename_varlabel); 
-			fFileNameField.setButtonLabel(NewWizardMessages.SourceAttachmentBlock_filename_external_varbutton); 
-			((VariablePathDialogField)fFileNameField).setVariableButtonLabel(NewWizardMessages.SourceAttachmentBlock_filename_variable_button); 
+			fFileNameField.setLabelText(NewWizardMessages.SourceAttachmentBlock_filename_varlabel);
+			fFileNameField.setButtonLabel(NewWizardMessages.SourceAttachmentBlock_filename_external_varbutton);
+			((VariablePathDialogField)fFileNameField).setVariableButtonLabel(NewWizardMessages.SourceAttachmentBlock_filename_variable_button);
 					
 		} else {
 			fFileNameField= new StringButtonDialogField(adapter);
 			fFileNameField.setDialogFieldListener(adapter);
-			fFileNameField.setLabelText(NewWizardMessages.SourceAttachmentBlock_filename_label); 
-			fFileNameField.setButtonLabel(NewWizardMessages.SourceAttachmentBlock_filename_externalfile_button); 
+			fFileNameField.setLabelText(NewWizardMessages.SourceAttachmentBlock_filename_label);
+			fFileNameField.setButtonLabel(NewWizardMessages.SourceAttachmentBlock_filename_externalfile_button);
 		
 			fWorkspaceButton= new SelectionButtonDialogField(SWT.PUSH);
 			fWorkspaceButton.setDialogFieldListener(adapter);
-			fWorkspaceButton.setLabelText(NewWizardMessages.SourceAttachmentBlock_filename_internal_button); 
+			fWorkspaceButton.setLabelText(NewWizardMessages.SourceAttachmentBlock_filename_internal_button);
 
 			fExternalFolderButton= new SelectionButtonDialogField(SWT.PUSH);
 			fExternalFolderButton.setDialogFieldListener(adapter);
-			fExternalFolderButton.setLabelText(NewWizardMessages.SourceAttachmentBlock_filename_externalfolder_button); 
-		}	
+			fExternalFolderButton.setLabelText(NewWizardMessages.SourceAttachmentBlock_filename_externalfolder_button);
+		}
 	
 		// set the old settings
 		setDefaults();
@@ -148,7 +148,7 @@ public class SourceAttachmentBlock {
 			fFileNameField.setText(fEntry.getSourceAttachmentPath().toString());
 		} else {
 			fFileNameField.setText(""); //$NON-NLS-1$
-		}	
+		}
 	}
 	
 	private boolean isVariableEntry() {
@@ -192,12 +192,12 @@ public class SourceAttachmentBlock {
 		
 		fSWTWidget= parent;
 		
-		Composite composite= new Composite(parent, SWT.NONE);	
+		Composite composite= new Composite(parent, SWT.NONE);
 		
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
-		layout.numColumns= 4;		
+		layout.numColumns= 4;
 		composite.setLayout(layout);
 		
 		
@@ -208,7 +208,7 @@ public class SourceAttachmentBlock {
 			Label message= new Label(composite, SWT.WRAP);
 			GridData gd= new GridData(GridData.FILL, GridData.BEGINNING, false, false, 4, 1);
 			message.setLayoutData(gd);
-			message.setText(Messages.format(NewWizardMessages.SourceAttachmentBlock_message, BasicElementLabels.getResourceName(fEntry.getPath().lastSegment()))); 
+			message.setText(Messages.format(NewWizardMessages.SourceAttachmentBlock_message, BasicElementLabels.getResourceName(fEntry.getPath().lastSegment())));
 			
 			//DialogField.createEmptySpace(composite, 1);
 
@@ -222,7 +222,7 @@ public class SourceAttachmentBlock {
 			LayoutUtil.setWidthHint(fFileNameField.getTextControl(null), widthHint);
 
 			// label that shows the resolved path for variable jars
-			//DialogField.createEmptySpace(composite, 1);	
+			//DialogField.createEmptySpace(composite, 1);
 			fFullPathResolvedLabel= new Label(composite, SWT.WRAP);
 			fFullPathResolvedLabel.setText(getResolvedLabelString());
 			gd= new GridData(GridData.FILL, GridData.BEGINNING, false, false, 4, 1);
@@ -238,7 +238,7 @@ public class SourceAttachmentBlock {
 
 			Label message= new Label(composite, SWT.LEFT + SWT.WRAP);
 			message.setLayoutData(gd);
-			message.setText(Messages.format(NewWizardMessages.SourceAttachmentBlock_message, BasicElementLabels.getResourceName(fEntry.getPath().lastSegment()))); 
+			message.setText(Messages.format(NewWizardMessages.SourceAttachmentBlock_message, BasicElementLabels.getResourceName(fEntry.getPath().lastSegment())));
 			
 			fWorkspaceButton.doFillIntoGrid(composite, 1);
 			((GridData) fWorkspaceButton.getSelectionButton(null).getLayoutData()).verticalAlignment= SWT.END;
@@ -268,7 +268,7 @@ public class SourceAttachmentBlock {
 		
 		// -------- IStringButtonAdapter --------
 		public void changeControlPressed(DialogField field) {
-			attachmentChangeControlPressed(field);			
+			attachmentChangeControlPressed(field);
 		}
 		
 		// ---------- IDialogFieldListener --------
@@ -283,7 +283,7 @@ public class SourceAttachmentBlock {
 			if (jarFilePath != null) {
 				fFileNameField.setText(jarFilePath.toString());
 			}
-		}	
+		}
 	}
 	
 	// ---------- IDialogFieldListener --------
@@ -305,7 +305,7 @@ public class SourceAttachmentBlock {
 			return;
 		}
 		doStatusLineUpdate();
-	}	
+	}
 		
 	private void doStatusLineUpdate() {
 		fFileNameField.enableButton(canBrowseFileName());
@@ -336,7 +336,7 @@ public class SourceAttachmentBlock {
 			return BasicElementLabels.getPathLabel(resolvedPath, true);
 		}
 		return ""; //$NON-NLS-1$
-	}	
+	}
 	
 	private IPath getResolvedPath(IPath path) {
 		if (path != null) {
@@ -349,7 +349,7 @@ public class SourceAttachmentBlock {
 			}
 		}
 		return null;
-	}	
+	}
 	
 	private IStatus updateFileNameStatus() {
 		StatusInfo status= new StatusInfo();
@@ -361,66 +361,66 @@ public class SourceAttachmentBlock {
 			return status;
 		} else {
 			if (!Path.EMPTY.isValidPath(fileName)) {
-				status.setError(NewWizardMessages.SourceAttachmentBlock_filename_error_notvalid); 
+				status.setError(NewWizardMessages.SourceAttachmentBlock_filename_error_notvalid);
 				return status;
 			}
 			IPath filePath= Path.fromOSString(fileName);
 			IPath resolvedPath;
 			if (isVariableEntry()) {
 				if (filePath.getDevice() != null) {
-					status.setError(NewWizardMessages.SourceAttachmentBlock_filename_error_deviceinpath); 
+					status.setError(NewWizardMessages.SourceAttachmentBlock_filename_error_deviceinpath);
 					return status;
 				}
 				String varName= filePath.segment(0);
 				if (varName == null) {
-					status.setError(NewWizardMessages.SourceAttachmentBlock_filename_error_notvalid); 
+					status.setError(NewWizardMessages.SourceAttachmentBlock_filename_error_notvalid);
 					return status;
 				}
 				fFileVariablePath= JavaCore.getClasspathVariable(varName);
 				if (fFileVariablePath == null) {
-					status.setError(NewWizardMessages.SourceAttachmentBlock_filename_error_varnotexists); 
+					status.setError(NewWizardMessages.SourceAttachmentBlock_filename_error_varnotexists);
 					return status;
 				}
 				resolvedPath= fFileVariablePath.append(filePath.removeFirstSegments(1));
 				
 				if (resolvedPath.isEmpty()) {
-					status.setWarning(NewWizardMessages.SourceAttachmentBlock_filename_warning_varempty); 
+					status.setWarning(NewWizardMessages.SourceAttachmentBlock_filename_warning_varempty);
 					return status;
 				}
 				File file= resolvedPath.toFile();
-				if (!file.exists()) {				
-					String message= Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_filenotexists, BasicElementLabels.getPathLabel(resolvedPath, true)); 
+				if (!file.exists()) {
+					String message= Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_filenotexists, BasicElementLabels.getPathLabel(resolvedPath, true));
 					status.setWarning(message);
 					return status;
 				}
 				if (!resolvedPath.isAbsolute()) {
-					String message=  Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_notabsolute, BasicElementLabels.getPathLabel(filePath, false)); 
+					String message=  Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_notabsolute, BasicElementLabels.getPathLabel(filePath, false));
 					status.setError(message);
 					return status;
 				}
 				
 				String deprecationMessage= BuildPathSupport.getDeprecationMessage(varName);
 				if (deprecationMessage != null) {
-					status.setWarning(deprecationMessage); 
+					status.setWarning(deprecationMessage);
 					return status;
 				}
 				
 			} else {
 				// JDT/Core only supports source attachments in archives on the
-				// local file system. So using getLocation is save here. 
+				// local file system. So using getLocation is save here.
 				File file= filePath.toFile();
 				IResource res= fWorkspaceRoot.findMember(filePath);
 				if (res != null && res.getLocation() != null) {
 					file= res.getLocation().toFile();
 				}
 				if (!file.exists()) {
-					String message=  Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_filenotexists, BasicElementLabels.getPathLabel(filePath, false)); 
+					String message=  Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_filenotexists, BasicElementLabels.getPathLabel(filePath, false));
 					status.setError(message);
 					return status;
 				}
 				if (res == null) {
 					if (!filePath.isAbsolute()) {
-						String message=  Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_notabsolute, BasicElementLabels.getPathLabel(filePath, false)); 
+						String message=  Messages.format(NewWizardMessages.SourceAttachmentBlock_filename_error_notabsolute, BasicElementLabels.getPathLabel(filePath, false));
 						status.setError(message);
 						return status;
 					}
@@ -439,15 +439,15 @@ public class SourceAttachmentBlock {
 		IPath currPath= getFilePath();
 		if (currPath.segmentCount() == 0) {
 			currPath= fEntry.getPath();
-		}		
+		}
 	
 		IPath resolvedPath= getResolvedPath(currPath);
 		File initialSelection= resolvedPath != null ? resolvedPath.toFile() : null;
 			
 		String currVariable= currPath.segment(0);
 		JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), false, true, false);
-		dialog.setTitle(NewWizardMessages.SourceAttachmentBlock_extvardialog_title); 
-		dialog.setMessage(NewWizardMessages.SourceAttachmentBlock_extvardialog_description); 
+		dialog.setTitle(NewWizardMessages.SourceAttachmentBlock_extvardialog_title);
+		dialog.setMessage(NewWizardMessages.SourceAttachmentBlock_extvardialog_description);
 		dialog.setInput(fFileVariablePath.toFile());
 		dialog.setInitialSelection(initialSelection);
 		if (dialog.open() == Window.OK) {
@@ -465,14 +465,14 @@ public class SourceAttachmentBlock {
 		IPath currPath= getFilePath();
 		if (currPath.segmentCount() == 0) {
 			currPath= fEntry.getPath();
-		}		
+		}
 			
 		if (ArchiveFileFilter.isArchivePath(currPath, true)) {
 			currPath= currPath.removeLastSegments(1);
 		}
 	
 		FileDialog dialog= new FileDialog(getShell());
-		dialog.setText(NewWizardMessages.SourceAttachmentBlock_extjardialog_text); 
+		dialog.setText(NewWizardMessages.SourceAttachmentBlock_extjardialog_text);
 		dialog.setFilterExtensions(ArchiveFileFilter.JAR_ZIP_FILTER_EXTENSIONS);
 		dialog.setFilterPath(currPath.toOSString());
 		String res= dialog.open();
@@ -493,22 +493,22 @@ public class SourceAttachmentBlock {
 	
 		DirectoryDialog dialog= new DirectoryDialog(getShell());
 		dialog.setMessage(NewWizardMessages.SourceAttachmentBlock_extfolderdialog_message);
-		dialog.setText(NewWizardMessages.SourceAttachmentBlock_extfolderdialog_text); 
+		dialog.setText(NewWizardMessages.SourceAttachmentBlock_extfolderdialog_text);
 		dialog.setFilterPath(currPath.toOSString());
 		String res= dialog.open();
 		if (res != null) {
 			return Path.fromOSString(res).makeAbsolute();
 		}
 		return null;
-	}	
+	}
 	
 	/*
 	 * Opens a dialog to choose an internal jar.
-	 */	
+	 */
 	private IPath chooseInternal() {
 		String initSelection= fFileNameField.getText();
 		
-		ViewerFilter filter= new ArchiveFileFilter((List) null, false);
+		ViewerFilter filter= new ArchiveFileFilter((List) null, false, false);
 
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
@@ -524,8 +524,8 @@ public class SourceAttachmentBlock {
 		FolderSelectionDialog dialog= new FolderSelectionDialog(getShell(), lp, cp);
 		dialog.setAllowMultiple(false);
 		dialog.addFilter(filter);
-		dialog.setTitle(NewWizardMessages.SourceAttachmentBlock_intjardialog_title); 
-		dialog.setMessage(NewWizardMessages.SourceAttachmentBlock_intjardialog_message); 
+		dialog.setTitle(NewWizardMessages.SourceAttachmentBlock_intjardialog_title);
+		dialog.setMessage(NewWizardMessages.SourceAttachmentBlock_intjardialog_message);
 		dialog.setInput(fWorkspaceRoot);
 		dialog.setInitialSelection(initSel);
 		if (dialog.open() == Window.OK) {
@@ -539,7 +539,7 @@ public class SourceAttachmentBlock {
 		if (fSWTWidget != null) {
 			return fSWTWidget.getShell();
 		}
-		return JavaPlugin.getActiveWorkbenchShell();			
+		return JavaPlugin.getActiveWorkbenchShell();
 	}
 	
 	/**
@@ -581,7 +581,7 @@ public class SourceAttachmentBlock {
 	 */
 	public static IRunnableWithProgress getRunnable(final Shell shell, final IClasspathEntry newEntry, final IJavaProject jproject, final IPath containerPath) {
 		return new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException {				
+			public void run(IProgressMonitor monitor) throws InvocationTargetException {
 				try {
 					String[] changedAttributes= { CPListElement.SOURCEATTACHMENT };
 					BuildPathSupport.modifyClasspathEntry(shell, newEntry, changedAttributes, jproject, containerPath, monitor);

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -43,25 +42,13 @@ public class ArchiveFileFilter extends ViewerFilter {
 
 	private List fExcludes;
 	private boolean fRecursive;
+	private boolean fAllowAllArchives;
 	
-	/**
-	 * @param excludedFiles Excluded files will not pass the filter.
-	 * <code>null</code> is allowed if no files should be excluded. 
-	 * @param recusive Folders are only shown if, searched recursively, contain
-	 * an archive
-	 */
-	public ArchiveFileFilter(IFile[] excludedFiles, boolean recusive) {
-		if (excludedFiles != null) {
-			fExcludes= Arrays.asList(excludedFiles);
-		} else {
-			fExcludes= null;
-		}
-		fRecursive= recusive;
-	}
 	
-	public ArchiveFileFilter(List excludedFiles, boolean recusive) {
+	public ArchiveFileFilter(List excludedFiles, boolean recusive, boolean allowAllArchives) {
 		fExcludes= excludedFiles;
 		fRecursive= recusive;
+		fAllowAllArchives= allowAllArchives;
 	}
 	
 	/*
@@ -72,7 +59,7 @@ public class ArchiveFileFilter extends ViewerFilter {
 			if (fExcludes != null && fExcludes.contains(element)) {
 				return false;
 			}
-			return isArchivePath(((IFile)element).getFullPath(), false);
+			return isArchivePath(((IFile)element).getFullPath(), fAllowAllArchives);
 		} else if (element instanceof IContainer) { // IProject, IFolder
 			if (!fRecursive) {
 				return true;
@@ -90,16 +77,16 @@ public class ArchiveFileFilter extends ViewerFilter {
 				}
 			} catch (CoreException e) {
 				JavaPlugin.log(e.getStatus());
-			}				
+			}
 		}
 		return false;
 	}
 	
 	public static boolean isArchivePath(IPath path, boolean allowAllAchives) {
+		if (allowAllAchives)
+			return true;
+
 		String ext= path.getFileExtension();
-		if (allowAllAchives) {
-			return ext != null;
-		}
 		if (ext != null && ext.length() != 0) {
 			return isArchiveFileExtension(ext);
 		}
