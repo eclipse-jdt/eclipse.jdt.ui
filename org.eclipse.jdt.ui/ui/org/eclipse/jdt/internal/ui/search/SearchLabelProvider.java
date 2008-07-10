@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
@@ -230,6 +231,15 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 			return labelProvider.getText(element);
 		return ""; //$NON-NLS-1$
 	
+	}
+
+	protected StyledString getStyledParticipantText(Object element) {
+		ILabelProvider labelProvider= getLabelProvider(element);
+		if (labelProvider instanceof IStyledLabelProvider)
+			return ((IStyledLabelProvider) labelProvider).getStyledText(element);
+		if (labelProvider != null)
+			return new StyledString(labelProvider.getText(element));
+		return new StyledString();
 	}
 
 	protected Image getParticipantImage(Object element) {

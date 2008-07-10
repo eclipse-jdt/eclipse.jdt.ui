@@ -78,7 +78,7 @@ public class SortingLabelProvider extends SearchLabelProvider {
 			}
 			return countLabel;
 		}
-		return new StyledString(getParticipantText(element));	
+		return getStyledParticipantText(element);	
 	}
 
 	private String getPostQualification(Object element) {
