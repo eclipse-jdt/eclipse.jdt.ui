@@ -30,14 +30,14 @@ class ReadOnlyResourceFinder{
 	}
 
 	static boolean confirmDeleteOfReadOnlyElements(IJavaElement[] javaElements, IResource[] resources, IReorgQueries queries) throws CoreException {
-		String queryTitle= RefactoringCoreMessages.ReadOnlyResourceFinder_0; 
-		String question= RefactoringCoreMessages.ReadOnlyResourceFinder_1; 
+		String queryTitle= RefactoringCoreMessages.ReadOnlyResourceFinder_0;
+		String question= RefactoringCoreMessages.ReadOnlyResourceFinder_1;
 		return ReadOnlyResourceFinder.confirmOperationOnReadOnlyElements(queryTitle, question, javaElements, resources, queries);
 	}
 
 	static boolean confirmMoveOfReadOnlyElements(IJavaElement[] javaElements, IResource[] resources, IReorgQueries queries) throws CoreException {
-		String queryTitle= RefactoringCoreMessages.ReadOnlyResourceFinder_2; 
-		String question= RefactoringCoreMessages.ReadOnlyResourceFinder_3; 
+		String queryTitle= RefactoringCoreMessages.ReadOnlyResourceFinder_2;
+		String question= RefactoringCoreMessages.ReadOnlyResourceFinder_3;
 		return ReadOnlyResourceFinder.confirmOperationOnReadOnlyElements(queryTitle, question, javaElements, resources, queries);
 	}
 
@@ -110,7 +110,7 @@ class ReadOnlyResourceFinder{
 			case IJavaElement.PACKAGE_DECLARATION:
 			case IJavaElement.TYPE:
 				return false;
-			default: 
+			default:
 				Assert.isTrue(false);//not handled here
 				return false;
 		}
@@ -125,6 +125,8 @@ class ReadOnlyResourceFinder{
 	}
 
 	private static boolean hasReadOnlyResourcesAndSubResources(IResource resource) throws CoreException {
+		if (resource.isLinked()) //we don't want to count these because we never actually delete linked resources
+			return false;
 		if (Resources.isReadOnly(resource))
 			return true;
 		if (resource instanceof IContainer)
