@@ -483,7 +483,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 * @see org.eclipse.jface.text.ITextHover#getHoverInfo(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
 	 */
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
-		return ((JavadocBrowserInformationControlInput) getHoverInfo2(textViewer, hoverRegion)).getHtml();
+		JavadocBrowserInformationControlInput info= (JavadocBrowserInformationControlInput) getHoverInfo2(textViewer, hoverRegion);
+		return info != null ? info.getHtml() : null;
 	}
 
 	/*
