@@ -772,14 +772,18 @@ public class InlineConstantRefactoring extends Refactoring {
 					Name[] references= extractReferenceNodes(group.getSearchResults(), cuRewrite.getRoot());
 					InlineTargetCompilationUnit targetCompilationUnit= new InlineTargetCompilationUnit(
 							cuRewrite, references, this, staticImportsInInitializer);
-					changes.add(targetCompilationUnit.getChange());
+					CompilationUnitChange change= targetCompilationUnit.getChange();
+					if (change != null)
+						changes.add(change);
 				}
 
 			} else {
 				Assert.isTrue(! isDeclarationSelected());
 				InlineTargetCompilationUnit targetForOnlySelectedReference= new InlineTargetCompilationUnit(
 						fSelectionCuRewrite, new Name[] { fSelectedConstantName }, this, staticImportsInInitializer);
-				changes.add(targetForOnlySelectedReference.getChange());
+				CompilationUnitChange change= targetForOnlySelectedReference.getChange();
+				if (change != null)
+					changes.add(change);
 			}
 
 			if (result.hasFatalError())
