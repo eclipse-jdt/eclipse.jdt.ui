@@ -468,8 +468,10 @@ public class InlineConstantRefactoring extends Refactoring {
 
 		private void inlineReference(Expression reference) throws CoreException {
 			ASTNode importDecl= ASTNodes.getParent(reference, ImportDeclaration.class);
-			if (importDecl != null)
-				return; // don't inline into static imports
+			if (importDecl != null) {
+				fCuRewrite.getImportRemover().registerInlinedStaticImport((ImportDeclaration) importDecl);
+				return;
+			}
 
 			String modifiedInitializer= prepareInitializerForLocation(reference);
 			if (modifiedInitializer == null)

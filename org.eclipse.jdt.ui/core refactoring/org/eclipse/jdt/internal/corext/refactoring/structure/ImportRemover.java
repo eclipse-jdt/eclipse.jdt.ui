@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -59,6 +61,8 @@ public class ImportRemover {
 	private final IJavaProject fProject;
 
 	private List/* <ASTNode> */fRemovedNodes= new ArrayList();
+	
+	private List/* <ImportDeclaration> */fInlinedStaticImports= new ArrayList();
 
 	private final CompilationUnit fRoot;
 
@@ -88,6 +92,13 @@ public class ImportRemover {
 				removedRefs.add(name);
 			else
 				unremovedRefs.add(name);
+		}
+		for (Iterator iterator= fInlinedStaticImports.iterator(); iterator.hasNext(); ) {
+			ImportDeclaration importDecl= (ImportDeclaration) iterator.next();
+			Name name= importDecl.getName();
+			if (name instanceof QualifiedName)
+				name= ((QualifiedName) name).getName();
+			removedRefs.add(name);
 		}
 	}
 
@@ -149,7 +160,7 @@ public class ImportRemover {
 	}
 
 	public boolean hasRemovedNodes() {
-		return fRemovedNodes.size() != 0;
+		return fRemovedNodes.size() != 0 || fInlinedStaticImports.size() != 0;
 	}
 
 	private boolean isInRemoved(SimpleName ref, int[] removedStartsEnds) {
@@ -231,5 +242,9 @@ public class ImportRemover {
 				importRewrite.removeStaticImport(binding.getDeclaringClass().getQualifiedName() + '.' + binding.getName());
 			}
 		}
+	}
+
+	public void registerInlinedStaticImport(ImportDeclaration importDecl) {
+		fInlinedStaticImports.add(importDecl);
 	}
 }
