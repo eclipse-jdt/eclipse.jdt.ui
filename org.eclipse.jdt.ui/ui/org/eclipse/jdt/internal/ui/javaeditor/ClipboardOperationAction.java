@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -342,26 +342,33 @@ public final class ClipboardOperationAction extends TextEditorAction {
 				 * We currently make assumptions about what the styled text widget sets,
 				 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=61876
 				 */
-				Object textData= clipboard.getContents(TextTransfer.getInstance());
-				Object rtfData= clipboard.getContents(RTFTransfer.getInstance());
+				int retryCount= 0;
+				Object textData= null;
+				while (textData == null && retryCount++ < 10)
+					textData= clipboard.getContents(TextTransfer.getInstance());
+
+				/*
+				 * Don't add if we didn't get any text data from the clipboard,
+				 * see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=70077 and https://bugs.eclipse.org/bugs/show_bug.cgi?id=200743
+				 */
+				if (textData == null)
+					return;
 
 				ArrayList datas= new ArrayList(3);
 				ArrayList transfers= new ArrayList(3);
-				if (textData != null) {
-					datas.add(textData);
-					transfers.add(TextTransfer.getInstance());
-				}
+
+				datas.add(textData);
+				transfers.add(TextTransfer.getInstance());
+
+				retryCount= 0;
+				Object rtfData= null;
+				while (rtfData == null && retryCount++ < 10)
+					rtfData= clipboard.getContents(RTFTransfer.getInstance());
+
 				if (rtfData != null) {
 					datas.add(rtfData);
 					transfers.add(RTFTransfer.getInstance());
 				}
-
-				/*
-				 * Don't add if we didn't get any data from the clipboard
-				 * see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=70077
-				 */
-				if (datas.isEmpty())
-					return;
 
 				datas.add(clipboardData);
 				transfers.add(fgTransferInstance);
@@ -439,7 +446,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 					typeBinding= typeBinding.getElementType();
 				}
 				if (typeBinding.isTypeVariable() || typeBinding.isCapture() || typeBinding.isWildcardType()) { // can be removed when bug 98473 is fixed
-					continue; 
+					continue;
 				}
 				
 				if (typeBinding.isMember() || typeBinding.isTopLevel()) {
@@ -472,11 +479,11 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		String[] typeImports= (String[]) namesToImport.toArray(new String[namesToImport.size()]);
 		String[] staticImports= (String[]) staticsToImport.toArray(new String[staticsToImport.size()]);
 		return new ClipboardData(inputElement, typeImports, staticImports);
-	}	
+	}
 
 	private void doPasteWithImportsOperation() {
 		ITextEditor editor= getTextEditor();
-		IJavaElement inputElement= JavaUI.getEditorInputTypeRoot(editor.getEditorInput()); 
+		IJavaElement inputElement= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
 
 		Clipboard clipboard= new Clipboard(getDisplay());
 		ClipboardData importsData= (ClipboardData) clipboard.getContents(fgTransferInstance);
