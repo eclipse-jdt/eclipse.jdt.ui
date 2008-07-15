@@ -207,16 +207,16 @@ public class StubUtility {
 
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeId(), cu.getJavaProject(), lineDelimiter);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, enclosingType);
-		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, enclosingMethod); 
+		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, enclosingMethod);
 		context.setVariable(CodeTemplateContextType.EXCEPTION_TYPE, exceptionType);
-		context.setVariable(CodeTemplateContextType.EXCEPTION_VAR, variableName); 
+		context.setVariable(CodeTemplateContextType.EXCEPTION_VAR, variableName);
 		return evaluateTemplate(context, template);
 	}
 	
 	/*
 	 * Don't use this method directly, use CodeGeneration.
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getCompilationUnitContent(ICompilationUnit, String, String, String, String)
-	 */	
+	 */
 	public static String getCompilationUnitContent(ICompilationUnit cu, String fileComment, String typeComment, String typeContent, String lineDelimiter) throws CoreException {
 		IPackageFragment pack= (IPackageFragment) cu.getParent();
 		String packDecl= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ';'; //$NON-NLS-1$ //$NON-NLS-2$
@@ -246,7 +246,7 @@ public class StubUtility {
 	/*
 	 * Don't use this method directly, use CodeGeneration.
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getFileComment(ICompilationUnit, String)
-	 */	
+	 */
 	public static String getFileComment(ICompilationUnit cu, String lineDelimiter) throws CoreException {
 		Template template= getCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, cu.getJavaProject());
 		if (template == null) {
@@ -258,12 +258,12 @@ public class StubUtility {
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.TYPENAME, JavaCore.removeJavaLikeExtension(cu.getElementName()));
 		return evaluateTemplate(context, template);
-	}	
+	}
 
 	/*
 	 * Don't use this method directly, use CodeGeneration.
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getTypeComment(ICompilationUnit, String, String[], String)
-	 */		
+	 */
 	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String[] typeParameterNames, String lineDelim) throws CoreException {
 		Template template= getCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, cu.getJavaProject());
 		if (template == null) {
@@ -348,7 +348,7 @@ public class StubUtility {
 		StringBuffer buf= new StringBuffer();
 		buf.append("@see "); //$NON-NLS-1$
 		buf.append(declaringClassQualifiedName);
-		buf.append('#'); 
+		buf.append('#');
 		buf.append(methodName);
 		buf.append('(');
 		for (int i= 0; i < parameterTypesQualifiedNames.length; i++) {
@@ -379,7 +379,7 @@ public class StubUtility {
 	 * @return return the type body template or <code>null</code>
 	 * @throws CoreException thrown if the template could not be evaluated
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getTypeBody(String, ICompilationUnit, String, String)
-	 */		
+	 */
 	public static String getTypeBody(String templateID, ICompilationUnit cu, String typeName, String lineDelim) throws CoreException {
 		if ( !VALID_TYPE_BODY_TEMPLATES.contains(templateID)) {
 			throw new IllegalArgumentException("Invalid code template ID: " + templateID);  //$NON-NLS-1$
@@ -413,7 +413,7 @@ public class StubUtility {
 		Template template= getCodeTemplate(templateName, cu.getJavaProject());
 		if (template == null) {
 			return null;
-		}		
+		}
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeId(), cu.getJavaProject(), lineDelimiter);
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, typeName);
@@ -509,7 +509,7 @@ public class StubUtility {
 		context.setVariable(CodeTemplateContextType.FIELD, fieldName);
 		
 		return evaluateTemplate(context, template);
-	}	
+	}
 	
 	
 	/*
@@ -533,7 +533,7 @@ public class StubUtility {
 		context.setVariable(CodeTemplateContextType.PARAM, paramName);
 
 		return evaluateTemplate(context, template);
-	}	
+	}
 	
 	/*
 	 * Don't use this method directly, use CodeGeneration.
@@ -544,7 +544,7 @@ public class StubUtility {
 		Template template= getCodeTemplate(templateName, cu.getJavaProject());
 		if (template == null) {
 			return null;
-		}		
+		}
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeId(), cu.getJavaProject(), lineDelimiter);
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, typeName);
@@ -611,7 +611,7 @@ public class StubUtility {
 		Template template= getCodeTemplate(templateName, cu.getJavaProject());
 		if (template == null) {
 			return null;
-		}		
+		}
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeId(), cu.getJavaProject(), lineDelimiter);
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, typeName);
@@ -698,8 +698,8 @@ public class StubUtility {
 				return curr;
 			}
 		}
-		return null;		
-	}	
+		return null;
+	}
 	
 	private static void insertTag(IDocument textBuffer, int offset, int length, String[] paramNames, String[] exceptionNames, String returnType, String[] typeParameterNames, boolean isDeprecated, String lineDelimiter) throws BadLocationException {
 		IRegion region= textBuffer.getLineInformationOfOffset(offset);
@@ -724,7 +724,7 @@ public class StubUtility {
 		if (returnType != null && !returnType.equals("void")) { //$NON-NLS-1$
 			if (buf.length() > 0) {
 				buf.append(lineDelimiter).append(lineStart);
-			}			
+			}
 			buf.append("@return"); //$NON-NLS-1$
 		}
 		if (exceptionNames != null) {
@@ -734,7 +734,7 @@ public class StubUtility {
 				}
 				buf.append("@throws ").append(exceptionNames[i]); //$NON-NLS-1$
 			}
-		}		
+		}
 		if (isDeprecated) {
 			if (buf.length() > 0) {
 				buf.append(lineDelimiter).append(lineStart);
@@ -824,7 +824,7 @@ public class StubUtility {
 	 * @param elem the element to get the indent of
 	 * @return return the indent unit
 	 * @throws JavaModelException thrown if the element could not be accessed
-	 */	
+	 */
 	public static int getIndentUsed(IJavaElement elem) throws JavaModelException {
 		IOpenable openable= elem.getOpenable();
 		if (openable instanceof ITypeRoot) {
@@ -957,7 +957,7 @@ public class StubUtility {
 				add(getVariableNameSuggestions(variableKind, project, nameFromParent, 0, excluded, false), res); // pass 0 as dimension, base name already contains plural.
 			}
 		}
-		if (expectedType != null) {			
+		if (expectedType != null) {
 			int dim= 0;
 			if (expectedType.isArrayType()) {
 				ArrayType arrayType= (ArrayType) expectedType;
@@ -1000,7 +1000,7 @@ public class StubUtility {
  	 * @param baseName the base name to make a suggestion on. the base name is expected to be a name without any pre- or suffixes in singular form. Type name are accepted as well.
  	 * @param dimensions if greater than 0, the resulting name will be in plural form
  	 * @param excluded a collection containing all excluded names or <code>null</code> if no names are excluded
- 	 * @param evaluateDefault if set, the result is guaranteed to contain at least one result. If not, the result can be an empty array. 
+ 	 * @param evaluateDefault if set, the result is guaranteed to contain at least one result. If not, the result can be an empty array.
 	 * 
 	 * @return returns the name suggestions sorted by relevance (best proposal first). If <code>evaluateDefault</code> is set to true, the returned array is never empty.
 	 * If <code>evaluateDefault</code> is set to false, an empty array is returned if there is no good suggestion for the given base name.
@@ -1035,7 +1035,7 @@ public class StubUtility {
 		} else if (variableKind != CONSTANT_FIELD) {
 			 // see 166464 API DCR: specify if naming convention should return default value or not
 			String defaultValue= "NAME"; // default as chosen by jdt.core //$NON-NLS-1$
-			if (!name.toUpperCase().endsWith(defaultValue) && result[0].toUpperCase().endsWith(defaultValue)) {
+			if (!name.toUpperCase().endsWith(defaultValue) && result.length > 0 && result[0].toUpperCase().endsWith(defaultValue)) {
 				return new String[0];
 			}
 		}
@@ -1194,7 +1194,7 @@ public class StubUtility {
 		return getVariableNameSuggestions(PARAMETER, project, baseName, dimensions, new ExcludedCollection(excluded), true);
 	}
 	
-	public static String[] getFieldNameSuggestions(IType type, int fieldModifiers, String[] excluded) {		
+	public static String[] getFieldNameSuggestions(IType type, int fieldModifiers, String[] excluded) {
 		return getFieldNameSuggestions(type.getJavaProject(), type.getFullyQualifiedName('.'), 0, fieldModifiers, excluded);
 	}
 		 
@@ -1432,7 +1432,7 @@ public class StubUtility {
 		String staticSuffixes= project.getOption(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, true);
 		
 		
-		return hasPrefixOrSuffix(prefixes, suffixes, name) 
+		return hasPrefixOrSuffix(prefixes, suffixes, name)
 			|| hasPrefixOrSuffix(staticPrefixes, staticSuffixes, name);
 	}
 	
@@ -1477,19 +1477,19 @@ public class StubUtility {
 	// -------------------- preference access -----------------------
 	
 	public static boolean useThisForFieldAccess(IJavaProject project) {
-		return Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_KEYWORD_THIS, project)).booleanValue(); 
+		return Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_KEYWORD_THIS, project)).booleanValue();
 	}
 	
 	public static boolean useIsForBooleanGetters(IJavaProject project) {
-		return Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_IS_FOR_GETTERS, project)).booleanValue(); 
+		return Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_IS_FOR_GETTERS, project)).booleanValue();
 	}
 	
 	public static String getExceptionVariableName(IJavaProject project) {
-		return PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME, project); 
+		return PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME, project);
 	}
 	
 	public static boolean doAddComments(IJavaProject project) {
-		return Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_ADD_COMMENTS, project)).booleanValue(); 
+		return Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_ADD_COMMENTS, project)).booleanValue();
 	}
 	
 	/**
