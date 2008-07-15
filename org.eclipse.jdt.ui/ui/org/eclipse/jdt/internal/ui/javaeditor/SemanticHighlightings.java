@@ -41,7 +41,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
-import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -1142,8 +1141,6 @@ public class SemanticHighlightings {
 
 			if (parent != null && node.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY)
 				binding= ((ClassInstanceCreation) parent).resolveConstructorBinding();
-			else if (parent instanceof SuperConstructorInvocation)
-				binding= ((SuperConstructorInvocation) parent).resolveConstructorBinding();
 			else
 				binding= token.getBinding();
 			return binding;
@@ -1163,8 +1160,6 @@ public class SemanticHighlightings {
 			} else if (parent instanceof QualifiedName) {
 				StructuralPropertyDescriptor location= child.getLocationInParent();
 				return location == QualifiedName.NAME_PROPERTY;
-			} else if (parent instanceof SuperConstructorInvocation) {
-				return false;
 			}
 			return false;
 		}
