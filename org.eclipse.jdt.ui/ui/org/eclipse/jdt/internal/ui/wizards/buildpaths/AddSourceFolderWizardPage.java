@@ -172,7 +172,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 				String[] variableNames = (String[]) dialog.getResult();
 				if (variableNames != null && variableNames.length == 1) {
 					fLinkLocation.setText(variableNames[0]);
-					fRootDialogField.setText(variableNames[0]);	
+					fRootDialogField.setText(new Path(variableNames[0]).lastSegment());	
 					if (fAdapter != null) {
 						fAdapter.dialogFieldChanged(fRootDialogField);
 					}
