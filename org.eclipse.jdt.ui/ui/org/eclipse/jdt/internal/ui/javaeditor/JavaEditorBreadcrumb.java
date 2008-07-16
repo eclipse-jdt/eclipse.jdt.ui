@@ -12,16 +12,16 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.ArrayList;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Item;
+import org.eclipse.swt.widgets.Widget;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Item;
-import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -53,6 +53,7 @@ import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -260,11 +261,24 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 					}
 				}
 				fElements= packages.toArray();
+			} else if (inputElement instanceof IJavaModel) {
+				IProject[] projects= ((IJavaModel)inputElement).getWorkspace().getRoot().getProjects();
+				fElements= getAccessibleProjects(projects);
 			} else {
 				fElements= fParent.getChildren(inputElement);
 			}
 
 			return fElements;
+		}
+		
+		private Object[] getAccessibleProjects(IProject[] projects) {
+			ArrayList result= new ArrayList(projects.length);
+			for (int i= 0; i < projects.length; i++) {
+				IProject project= projects[i];
+				if (project.isAccessible())
+					result.add(projects[i]);
+			}
+			return result.toArray(new Object[result.size()]);
 		}
 
 		/*
