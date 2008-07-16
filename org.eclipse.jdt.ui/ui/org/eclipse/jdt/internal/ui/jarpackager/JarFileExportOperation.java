@@ -79,13 +79,13 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.jarpackager.IJarBuilder;
+import org.eclipse.jdt.ui.jarpackager.IJarBuilderExtension;
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionWriter;
 import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.jarpackagerfat.FatJarBuilder;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
@@ -402,7 +402,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			return;
 		} else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT && ((IPackageFragmentRoot) je).isExternal()) {
 			//External class folder
-			if (fJarBuilder instanceof FatJarBuilder) {
+			if (fJarBuilder instanceof IJarBuilderExtension) {
 				exportExternalClassFolder(((IPackageFragmentRoot) je), progressMonitor);
 			} else {
 				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_canNotExportExternalClassFolder_warning, BasicElementLabels.getPathLabel(je.getPath(), true)), null);
@@ -433,7 +433,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			
 			IPath destination= path.removeFirstSegments(classFolderPath.segmentCount()).setDevice(null);
 
-			((FatJarBuilder) fJarBuilder).writeFile(path.toFile(), destination);
+			((IJarBuilderExtension) fJarBuilder).writeFile(path.toFile(), destination);
 			progressMonitor.worked(1);
 		} else if (javaElement instanceof IPackageFragment) {
 			IJavaElement[] children= ((IPackageFragment) javaElement).getChildren();

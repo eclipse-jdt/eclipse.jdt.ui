@@ -18,6 +18,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -26,17 +28,16 @@ import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.jarpackager.IJarBuilderExtension;
 import org.eclipse.jdt.ui.jarpackager.IManifestProvider;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.jarpackager.JarBuilder;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
-public class FatJarBuilder extends JarBuilder {
+public class FatJarBuilder extends JarBuilder implements IJarBuilderExtension {
 
 	public static final String BUILDER_ID= "org.eclipse.jdt.ui.fat_jar_builder"; //$NON-NLS-1$
 
@@ -84,16 +85,10 @@ public class FatJarBuilder extends JarBuilder {
 	public void writeFile(IFile resource, IPath destinationPath) throws CoreException {
 		fJarWriter.write(resource, destinationPath);
 	}
-	
-	/**
-	 * Add the given file to the archive at the given path
-	 * 
-	 * @param file
-	 *        the file to be written
-	 * @param destinationPath
-	 *        the path for the file inside the archive
-	 * @throws CoreException
-	 *        thrown when the file could not be written
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.jarpackagerfat.IJarBuilderExtension#writeFile(java.io.File,
+	 * org.eclipse.core.runtime.IPath)
 	 */
 	public void writeFile(File file, IPath destinationPath) throws CoreException {
 		fJarWriter.write(file, destinationPath);

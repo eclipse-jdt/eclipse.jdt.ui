@@ -37,6 +37,16 @@ import org.eclipse.swt.widgets.Shell;
  * be called any time.</p>
  * Implementors must be prepared that an instance if the implementation
  * is reused multiple times.<p>
+ * <p>
+ * In order to provide backward compatibility for clients of <code>IJarBuilder</code>, extension
+ * interfaces are used to provide a means of evolution. The following extension interfaces exist:
+ * <ul>
+ * <li>{@link org.eclipse.jdt.ui.jarpackager.IJarBuilderExtension} since version 3.5 introducing
+ *		the following functions:
+ *			<ul>
+ *				<li>Write a file to the JAR to build</li>
+ *			</ul>
+ * </li>
  * 
  * @see org.eclipse.jdt.ui.jarpackager.JarPackageData
  * @since 3.4
