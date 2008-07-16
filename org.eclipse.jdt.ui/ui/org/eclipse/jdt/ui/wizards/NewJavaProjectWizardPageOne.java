@@ -23,18 +23,6 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.eclipse.core.filesystem.URIUtil;
-
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -47,6 +35,18 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+
+import org.eclipse.core.filesystem.URIUtil;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -287,7 +287,12 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			}
 			final String selectedDirectory = dialog.open();
 			if (selectedDirectory != null) {
+				String oldDirectory= new Path(fLocation.getText().trim()).lastSegment();
 				fLocation.setText(selectedDirectory);
+				String lastSegment= new Path(selectedDirectory).lastSegment();
+				if (lastSegment != null && (fNameGroup.getName().length() == 0 || fNameGroup.getName().equals(oldDirectory))) {
+					fNameGroup.setName(lastSegment);
+				}
 				JavaPlugin.getDefault().getDialogSettings().put(DIALOGSTORE_LAST_EXTERNAL_LOC, selectedDirectory);
 			}
 		}
