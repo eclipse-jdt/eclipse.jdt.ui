@@ -39,6 +39,7 @@ public final class NewWizardMessages extends NLS {
 	public static String AddSourceFolderWizardPage_addSinglePattern;
 	public static String AddSourceFolderWizardPage_directory_message;
 	public static String AddSourceFolderWizardPage_conflictWarning;
+	public static String AddSourceFolderWizardPage_error_NotARelativePathName;
 	public static String AddSourceFolderWizardPage_ignoreNestingConflicts;
 	public static String AddSourceFolderWizardPage_replaceSourceFolderInfo;
 	public static String BuildPathsBlock_RemoveOldOutputFolder_description;
