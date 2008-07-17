@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,13 +15,13 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.eclipse.core.runtime.preferences.IScopeContext;
-
-import org.eclipse.core.resources.IProject;
-
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.preferences.IScopeContext;
+
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -82,9 +82,6 @@ public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock {
 	 */
 	private JavaPreview fJavaPreview;
 
-	/**
-	 * Create a new <code>CodeFormatterConfigurationBlock</code>.
-	 */
 	public CodeFormatterConfigurationBlock(IProject project, PreferencesAccess access) {
 		super(project, access, DIALOGSTORE_LASTSAVELOADPATH);
 	}
