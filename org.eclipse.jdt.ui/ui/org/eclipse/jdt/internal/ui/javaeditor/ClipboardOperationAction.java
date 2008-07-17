@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,9 +20,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.dnd.ByteArrayTransfer;
@@ -35,6 +32,9 @@ import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.jface.text.IRewriteTarget;
@@ -43,6 +43,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.ui.IWorkbenchPartSite;
+
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
@@ -439,7 +440,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 					typeBinding= typeBinding.getElementType();
 				}
 				if (typeBinding.isTypeVariable() || typeBinding.isCapture() || typeBinding.isWildcardType()) { // can be removed when bug 98473 is fixed
-					continue; 
+					continue;
 				}
 				
 				if (typeBinding.isMember() || typeBinding.isTopLevel()) {
@@ -472,32 +473,36 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		String[] typeImports= (String[]) namesToImport.toArray(new String[namesToImport.size()]);
 		String[] staticImports= (String[]) staticsToImport.toArray(new String[staticsToImport.size()]);
 		return new ClipboardData(inputElement, typeImports, staticImports);
-	}	
+	}
 
 	private void doPasteWithImportsOperation() {
 		ITextEditor editor= getTextEditor();
-		IJavaElement inputElement= JavaUI.getEditorInputTypeRoot(editor.getEditorInput()); 
+		IJavaElement inputElement= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
 
 		Clipboard clipboard= new Clipboard(getDisplay());
-		ClipboardData importsData= (ClipboardData) clipboard.getContents(fgTransferInstance);
-		if (importsData != null && inputElement instanceof ICompilationUnit && !importsData.isFromSame(inputElement)) {
-			// combine operation and adding of imports
-			IRewriteTarget target= (IRewriteTarget) editor.getAdapter(IRewriteTarget.class);
-			if (target != null) {
-				target.beginCompoundChange();
-			}
-			try {
-				fOperationTarget.doOperation(fOperationCode);
-				addImports((ICompilationUnit) inputElement, importsData);
-			} catch (CoreException e) {
-				JavaPlugin.log(e);
-			} finally {
+		try {
+			ClipboardData importsData= (ClipboardData)clipboard.getContents(fgTransferInstance);
+			if (importsData != null && inputElement instanceof ICompilationUnit && !importsData.isFromSame(inputElement)) {
+				// combine operation and adding of imports
+				IRewriteTarget target= (IRewriteTarget)editor.getAdapter(IRewriteTarget.class);
 				if (target != null) {
-					target.endCompoundChange();
+					target.beginCompoundChange();
 				}
+				try {
+					fOperationTarget.doOperation(fOperationCode);
+					addImports((ICompilationUnit)inputElement, importsData);
+				} catch (CoreException e) {
+					JavaPlugin.log(e);
+				} finally {
+					if (target != null) {
+						target.endCompoundChange();
+					}
+				}
+			} else {
+				fOperationTarget.doOperation(fOperationCode);
 			}
-		} else {
-			fOperationTarget.doOperation(fOperationCode);
+		} finally {
+			clipboard.dispose();
 		}
 	}
 
