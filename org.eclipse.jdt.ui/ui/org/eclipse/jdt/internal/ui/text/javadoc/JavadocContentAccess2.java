@@ -20,18 +20,21 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
@@ -453,7 +456,7 @@ public class JavadocContentAccess2 {
 			if (canInheritJavadoc(member)) {
 				// Try to use the inheritDoc algorithm. If it finds nothing (in source), return null. 
 				String inheritedJavadoc= javadoc2HTML(member, "/***/"); //$NON-NLS-1$
-				return inheritedJavadoc.length() > 0 ? inheritedJavadoc : null;
+				return inheritedJavadoc != null && inheritedJavadoc.length() > 0 ? inheritedJavadoc : null;
 			} else {
 				return null;
 			}
@@ -469,9 +472,16 @@ public class JavadocContentAccess2 {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=212207
 		
 		ASTParser parser= ASTParser.newParser(AST.JLS3);
-		parser.setProject(member.getJavaProject());
+		
+		IJavaProject javaProject= member.getJavaProject();
+		parser.setProject(javaProject);
+		Map options= javaProject.getOptions(true);
+		options.put(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, JavaCore.ENABLED); // workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=212207
+		parser.setCompilerOptions(options);
+		
 		String source= rawJavadoc + "class C{}"; //$NON-NLS-1$
 		parser.setSource(source.toCharArray());
+		
 		CompilationUnit root= (CompilationUnit) parser.createAST(null);
 		if (root == null)
 			return null;
