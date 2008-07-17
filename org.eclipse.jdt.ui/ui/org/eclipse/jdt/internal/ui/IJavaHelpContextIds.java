@@ -296,6 +296,7 @@ public interface IJavaHelpContextIds {
 	public static final String CP_USERLIBRARIES_PREFERENCE_PAGE= 		PREFIX + "cp_userlibraries_preference_page_context"; //$NON-NLS-1$
 	
 	public static final String CODEFORMATTER_PREFERENCE_PAGE= 	PREFIX + "codeformatter_preference_page_context"; //$NON-NLS-1$
+	public static final String CLEAN_UP_PREFERENCE_PAGE= PREFIX + "clean_up_preference_page_context"; //$NON-NLS-1$
 	public static final String SOURCE_ATTACHMENT_PROPERTY_PAGE=	PREFIX + "source_attachment_property_page_context"; //$NON-NLS-1$
 	public static final String COMPILER_PROPERTY_PAGE= PREFIX + "compiler_property_page_context"; //$NON-NLS-1$
 	public static final String JAVA_BUILD_PROPERTY_PAGE= PREFIX + "java_build_property_page_context"; //$NON-NLS-1$
