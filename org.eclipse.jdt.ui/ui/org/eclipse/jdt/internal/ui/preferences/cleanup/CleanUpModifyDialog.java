@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,6 @@ package org.eclipse.jdt.internal.ui.preferences.cleanup;
 
 import java.util.Map;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -22,11 +19,15 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.jdt.internal.corext.fix.CleanUpRegistry.CleanUpTabPageDescriptor;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.CleanUpOptions;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
@@ -38,7 +39,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 public class CleanUpModifyDialog extends ModifyDialog {
 	
 	/**
-	 * Constant array for boolean selection 
+	 * Constant array for boolean selection
 	 */
 	static String[] FALSE_TRUE = {
 		CleanUpOptions.FALSE,
@@ -87,7 +88,7 @@ public class CleanUpModifyDialog extends ModifyDialog {
 	
 	public void updateStatus(IStatus status) {
 		int count= 0;
-		for (int i= 0; i < fPages.length; i++) { 
+		for (int i= 0; i < fPages.length; i++) {
 			count+= fPages[i].getSelectedCleanUpCount();
 		}
 		if (count == 0) {
@@ -110,5 +111,13 @@ public class CleanUpModifyDialog extends ModifyDialog {
 		}
 		
 		fCountLabel.setText(Messages.format(CleanUpMessages.CleanUpModifyDialog_XofYSelected_Label, new Object[] {new Integer(count), new Integer(size)}));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @since 3.5
+	 */
+	protected String getHelpContextId() {
+		return IJavaHelpContextIds.CLEAN_UP_PREFERENCE_PAGE;
 	}
 }

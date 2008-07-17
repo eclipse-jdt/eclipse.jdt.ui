@@ -18,12 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.content.IContentType;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -40,10 +34,18 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.content.IContentType;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.StatusDialog;
+
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -71,7 +73,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
     
     
     /**
-     * The key to store the number (beginning at 0) of the tab page which had the 
+     * The key to store the number (beginning at 0) of the tab page which had the
      * focus last time.
      */
     private static final String DS_KEY_LAST_FOCUS= "modify_dialog.last_focus"; //$NON-NLS-1$
@@ -117,7 +119,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		fWorkingValues= new HashMap(fProfile.getSettings());
 		setStatusLineAboveButtons(false);
 		fTabPages= new ArrayList();
-		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();	
+		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 	}
 	
 	/*
@@ -174,7 +176,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		fTabFolder.setFont(composite.getFont());
 		fTabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		addPages(fWorkingValues); 
+		addPages(fWorkingValues);
 
 		applyDialogFont(composite);
 		
@@ -191,8 +193,18 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		
 		doValidate();
 		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, getHelpContextId());
+		
 		return composite;
 	}
+
+	/**
+	 * Returns the context ID for the Help system
+	 * 
+	 * @return the string used as ID for the Help context
+	 * @since 3.5
+	 */
+	 protected abstract String getHelpContextId();
 	
 	public void updateStatus(IStatus status) {
 		if (status == null) {
@@ -274,7 +286,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		Profile selected= new CustomProfile(fProfileNameField.getText(), new HashMap(fWorkingValues), fProfile.getVersion(), fProfileManager.getProfileVersioner().getProfileKind());
 		
 		final FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
-		dialog.setText(FormatterMessages.CodingStyleConfigurationBlock_save_profile_dialog_title); 
+		dialog.setText(FormatterMessages.CodingStyleConfigurationBlock_save_profile_dialog_title);
 		dialog.setFilterExtensions(new String [] {"*.xml"}); //$NON-NLS-1$
 
 		final String lastPath= JavaPlugin.getDefault().getDialogSettings().get(fLastSaveLoadPathKey + ".savepath"); //$NON-NLS-1$
@@ -282,13 +294,13 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 			dialog.setFilterPath(lastPath);
 		}
 		final String path= dialog.open();
-		if (path == null) 
+		if (path == null)
 			return;
 
 		JavaPlugin.getDefault().getDialogSettings().put(fLastSaveLoadPathKey + ".savepath", dialog.getFilterPath()); //$NON-NLS-1$
 
 		final File file= new File(path);
-		if (file.exists() && !MessageDialog.openQuestion(getShell(), FormatterMessages.CodingStyleConfigurationBlock_save_profile_overwrite_title, Messages.format(FormatterMessages.CodingStyleConfigurationBlock_save_profile_overwrite_message, BasicElementLabels.getPathLabel(file)))) { 
+		if (file.exists() && !MessageDialog.openQuestion(getShell(), FormatterMessages.CodingStyleConfigurationBlock_save_profile_overwrite_title, Messages.format(FormatterMessages.CodingStyleConfigurationBlock_save_profile_overwrite_message, BasicElementLabels.getPathLabel(file)))) {
 			return;
 		}
 		String encoding= ProfileStore.ENCODING;
@@ -307,7 +319,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 	}
     
     protected void createButtonsForButtonBar(Composite parent) {
-	    fApplyButton= createButton(parent, APPLAY_BUTTON_ID, FormatterMessages.ModifyDialog_apply_button, false); 
+	    fApplyButton= createButton(parent, APPLAY_BUTTON_ID, FormatterMessages.ModifyDialog_apply_button, false);
 		fApplyButton.setEnabled(false);
 		
 		GridLayout layout= (GridLayout) parent.getLayout();
@@ -373,13 +385,13 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
     	final String name= fProfileNameField.getText().trim();
     	
 	    if (fProfile.isBuiltInProfile()) {
-			if (fProfile.getName().equals(name)) { 
+			if (fProfile.getName().equals(name)) {
 				return new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, FormatterMessages.ModifyDialog_BuiltIn_Status);
-			}	
+			}
     	}
     	
     	if (fProfile.isSharedProfile()) {
-			if (fProfile.getName().equals(name)) { 
+			if (fProfile.getName().equals(name)) {
 				return new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, FormatterMessages.ModifyDialog_Shared_Status);
 			}
     	}
