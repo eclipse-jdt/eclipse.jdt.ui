@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui.actions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -321,7 +322,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			return;
 		}
 
-		ArrayList fields= new ArrayList();
+		HashMap fieldsToBindings= new HashMap();
 		ArrayList selected= new ArrayList();
 
 		IVariableBinding[] candidates= typeBinding.getDeclaredFields();
@@ -339,16 +340,27 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 					continue; // Do not add final fields which have been set in the <clinit>
 				}
 			}
-			fields.add(curr);
-			if (allSelected.contains(curr.getJavaElement())) {
+			IJavaElement javaElement= curr.getJavaElement();
+			fieldsToBindings.put(javaElement, curr);
+			if (allSelected.contains(javaElement)) {
 				selected.add(curr);
 			}
 		}
-		if (fields.isEmpty()) {
+		if (fieldsToBindings.isEmpty()) {
 			MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_typeContainsNoFields_message);
 			notifyResult(false);
 			return;
 		}
+		
+		ArrayList fields= new ArrayList();
+		IField[] allFields= type.getFields();
+		for (int i= 0; i < allFields.length; i++) {
+			Object fieldBinding= fieldsToBindings.remove(allFields[i]);
+			if (fieldBinding != null) {
+				fields.add(fieldBinding);
+			}
+		}
+		fields.addAll(fieldsToBindings.values()); // paranoia code, should not happen
 
 		final GenerateConstructorUsingFieldsContentProvider provider= new GenerateConstructorUsingFieldsContentProvider(fields, selected);
 		IMethodBinding[] bindings= null;
