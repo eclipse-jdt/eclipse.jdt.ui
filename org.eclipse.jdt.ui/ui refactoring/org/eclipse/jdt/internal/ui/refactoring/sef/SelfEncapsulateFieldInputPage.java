@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,6 +60,7 @@ import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.preferences.CodeStylePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 
@@ -163,6 +164,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		fEnablements.add(label);
 		
 		final Combo combo= new Combo(result, SWT.READ_ONLY);
+		SWTUtil.setDefaultVisibleItemCount(combo);
 		fillWithPossibleInsertPositions(combo, fRefactoring.getField());
 		combo.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {

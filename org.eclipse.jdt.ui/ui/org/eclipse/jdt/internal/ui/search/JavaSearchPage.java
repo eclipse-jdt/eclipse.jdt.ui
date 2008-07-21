@@ -14,9 +14,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IAdaptable;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -31,6 +28,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
@@ -82,6 +82,7 @@ import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.MatchLocations.MatchLocationSelectionDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class JavaSearchPage extends DialogPage implements ISearchPage {
 	
@@ -583,6 +584,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 
 		// Pattern combo
 		fPattern= new Combo(result, SWT.SINGLE | SWT.BORDER);
+		SWTUtil.setDefaultVisibleItemCount(fPattern);
 		fPattern.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				handlePatternSelected();

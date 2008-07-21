@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,13 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.eclipse.core.runtime.preferences.DefaultScope;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IScopeContext;
-import org.eclipse.core.runtime.preferences.InstanceScope;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ProjectScope;
+import org.osgi.service.prefs.BackingStoreException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -42,18 +36,25 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
+import org.eclipse.core.runtime.preferences.DefaultScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.JFaceResources;
 
-import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
-import org.eclipse.ui.preferences.IWorkingCopyManager;
-import org.eclipse.ui.preferences.WorkingCopyManager;
-
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+import org.eclipse.ui.preferences.IWorkingCopyManager;
+import org.eclipse.ui.preferences.WorkingCopyManager;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -61,9 +62,8 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
-
-import org.osgi.service.prefs.BackingStoreException;
 
 /**
  * Abstract options configuration block providing a general implementation for setting up
@@ -474,7 +474,8 @@ public abstract class OptionsConfigurationBlock {
 		comboBox.setData(data);
 		comboBox.addSelectionListener(getSelectionListener());
 		comboBox.setFont(JFaceResources.getDialogFont());
-			
+		SWTUtil.setDefaultVisibleItemCount(comboBox);
+		
 		makeScrollableCompositeAware(comboBox);
 		
 		String currValue= getValue(key);	

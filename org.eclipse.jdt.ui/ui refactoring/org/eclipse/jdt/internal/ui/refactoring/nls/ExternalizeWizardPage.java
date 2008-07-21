@@ -17,11 +17,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.ModifyEvent;
@@ -49,6 +44,11 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -605,6 +605,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		GridData data= new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint= convertWidthInCharsToPixels(30);
 		fAccessorClassField= new Combo(composite, SWT.READ_ONLY);
+		SWTUtil.setDefaultVisibleItemCount(fAccessorClassField);
 		fAccessorClassField.setLayoutData(data);
 		fAccessorClassField.addSelectionListener(listener);
 		

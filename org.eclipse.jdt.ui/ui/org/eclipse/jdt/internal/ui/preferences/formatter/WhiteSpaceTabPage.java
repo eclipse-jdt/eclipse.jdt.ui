@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.formatter.WhiteSpaceOptions.InnerNode;
 import org.eclipse.jdt.internal.ui.preferences.formatter.WhiteSpaceOptions.Node;
 import org.eclipse.jdt.internal.ui.preferences.formatter.WhiteSpaceOptions.OptionNode;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 
 public class WhiteSpaceTabPage extends FormatterTabPage {
@@ -413,6 +414,7 @@ public class WhiteSpaceTabPage extends FormatterTabPage {
             fSyntaxComponent.createContents(numColumns, fPageBook);
             
             fSwitchCombo= new Combo(parent, SWT.READ_ONLY);
+    		SWTUtil.setDefaultVisibleItemCount(fSwitchCombo);
             final GridData gd= createGridData(numColumns, GridData.HORIZONTAL_ALIGN_END, SWT.DEFAULT);
             fSwitchCombo.setLayoutData(gd);
             fSwitchCombo.setItems(fItems);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,8 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
-
-import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -23,7 +21,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.dialogs.Dialog;
+
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 
 class ComboSelectionDialog extends Dialog{
@@ -67,6 +69,7 @@ class ComboSelectionDialog extends Dialog{
 		label.setLayoutData(new GridData());
 
 		final Combo combo= new Combo(innerComposite, SWT.READ_ONLY);
+		SWTUtil.setDefaultVisibleItemCount(combo);
 		for (int i = 0; i < fAllowedStrings.length; i++) {
 			combo.add(fAllowedStrings[i]);
 		}

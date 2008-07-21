@@ -60,6 +60,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.CodeTemplatePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
  * An advanced version of CheckedTreeSelectionDialog with right-side button layout and
@@ -579,6 +580,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		enterLabel.setLayoutData(gd);
 
 		final Combo enterCombo= new Combo(buttonComposite, SWT.READ_ONLY);
+		SWTUtil.setDefaultVisibleItemCount(enterCombo);
 		if (!fEnableInsertPosition)
 			enterCombo.setEnabled(false);
 		fillWithPossibleInsertPositions(enterCombo);

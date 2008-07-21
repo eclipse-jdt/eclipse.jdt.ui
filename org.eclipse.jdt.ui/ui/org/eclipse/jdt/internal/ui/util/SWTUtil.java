@@ -11,8 +11,6 @@
 package org.eclipse.jdt.internal.ui.util;
 
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleEvent;
@@ -22,6 +20,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Caret;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
@@ -29,6 +28,8 @@ import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.JFaceResources;
@@ -38,6 +39,16 @@ import org.eclipse.jface.resource.JFaceResources;
  */
 public class SWTUtil {
 	
+	/**
+	 * The default visible item count for {@link Combo}s.
+	 * Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=7845 .
+	 * 
+	 * @see Combo#setVisibleItemCount(int)
+	 * 
+	 * @since 3.4
+	 */
+	public static final int COMBO_VISIBLE_ITEM_COUNT= 30;
+
 	/**
 	 * Returns the standard display to be used. The method first checks, if
 	 * the thread calling this method has an associated disaply. If so, this
@@ -126,6 +137,21 @@ public class SWTUtil {
 				e.result= text;
 			}
 		});
+	}
+	
+	/**
+	 * Sets the default visible item count for {@link Combo}s.
+	 * Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=7845 .
+	 * 
+	 * @param combo the combo
+	 * 
+	 * @see Combo#setVisibleItemCount(int)
+	 * @see #COMBO_VISIBLE_ITEM_COUNT
+	 * 
+	 * @since 3.4
+	 */
+	public static void setDefaultVisibleItemCount(Combo combo) {
+		combo.setVisibleItemCount(COMBO_VISIBLE_ITEM_COUNT);
 	}
 	
 	public static GridLayout newLayoutNoMargins(int columns) {

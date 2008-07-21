@@ -13,14 +13,6 @@ package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.io.File;
 
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -32,6 +24,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
@@ -88,7 +88,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 
 		// destination name entry field
 		fDestinationNamesCombo= new Combo(destinationSelectionGroup, SWT.SINGLE | SWT.BORDER);
-		fDestinationNamesCombo.setVisibleItemCount(20);
+		SWTUtil.setDefaultVisibleItemCount(fDestinationNamesCombo);
 		fDestinationNamesCombo.addListener(SWT.Modify, this);
 		fDestinationNamesCombo.addListener(SWT.Selection, this);
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);

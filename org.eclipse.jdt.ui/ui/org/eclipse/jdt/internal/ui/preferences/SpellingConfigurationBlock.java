@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,15 +17,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.eclipse.core.variables.IStringVariableManager;
-import org.eclipse.core.variables.VariablesPlugin;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -42,15 +33,23 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.core.variables.IStringVariableManager;
+import org.eclipse.core.variables.VariablesPlugin;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
-
 import org.eclipse.ui.ide.dialogs.EncodingFieldEditor;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.debug.ui.StringVariableSelectionDialog;
 
@@ -303,6 +302,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		labelControl.setLayoutData(gd);
 		
 		Combo comboBox= new Combo(parent, SWT.READ_ONLY);
+		SWTUtil.setDefaultVisibleItemCount(comboBox);
 		comboBox.setItems(valueLabels);
 		comboBox.setData(data);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);

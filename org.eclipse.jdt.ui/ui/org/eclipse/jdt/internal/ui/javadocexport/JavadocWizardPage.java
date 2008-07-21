@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
+
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public abstract class JavadocWizardPage extends NewElementWizardPage {
 
@@ -84,6 +86,7 @@ public abstract class JavadocWizardPage extends NewElementWizardPage {
 	
 	protected Combo createCombo(Composite composite, int style, String message, GridData gd) {
 		Combo combo= new Combo(composite, style);
+		SWTUtil.setDefaultVisibleItemCount(combo);
 		if (message != null)
 			combo.setText(message);
 		combo.setLayoutData(gd);

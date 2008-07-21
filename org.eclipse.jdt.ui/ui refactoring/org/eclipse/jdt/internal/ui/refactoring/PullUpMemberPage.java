@@ -18,9 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -34,6 +31,9 @@ import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -655,6 +655,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		label.setLayoutData(new GridData());
 
 		fSuperTypesCombo= new Combo(parent, SWT.READ_ONLY);
+		SWTUtil.setDefaultVisibleItemCount(fSuperTypesCombo);
 		if (fCandidateTypes.length > 0) {
 			for (int i= 0; i < fCandidateTypes.length; i++) {
 				final String comboLabel= fCandidateTypes[i].getFullyQualifiedName('.');

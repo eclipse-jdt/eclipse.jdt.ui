@@ -16,8 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.expressions.Expression;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
@@ -40,6 +38,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.core.expressions.Expression;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
@@ -75,6 +75,7 @@ import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.ui.ActiveShellExpression;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.IHandlerService;
+
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.IUpdate;
@@ -90,6 +91,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariableProcessor;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
  * Dialog to edit a template.
@@ -272,7 +274,8 @@ public class EditTemplateDialog extends StatusDialog {
 			
 			createLabel(composite, PreferencesMessages.EditTemplateDialog_context);
 			fContextCombo= new Combo(composite, SWT.READ_ONLY);
-	
+			SWTUtil.setDefaultVisibleItemCount(fContextCombo);
+			
 			for (int i= 0; i < fContextTypes.length; i++) {
 				fContextCombo.add(fContextTypes[i][1]);
 			}

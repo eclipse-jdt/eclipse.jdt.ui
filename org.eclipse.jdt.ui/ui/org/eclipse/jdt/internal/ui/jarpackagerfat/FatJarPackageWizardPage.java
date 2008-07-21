@@ -21,18 +21,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -46,6 +34,18 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -240,7 +240,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 
 	private void createLaunchConfigSelectionGroup(Composite parent) {
 		fLaunchConfigurationCombo= new Combo(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
-		fLaunchConfigurationCombo.setVisibleItemCount(20);
+		SWTUtil.setDefaultVisibleItemCount(fLaunchConfigurationCombo);
 		fLaunchConfigurationCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
 		fLauchConfigurationModel.addAll(Arrays.asList(getLaunchConfigurations()));
@@ -281,7 +281,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage im
 		fAntScriptLabel.setText(FatJarPackagerMessages.FatJarPackageWizardPage_antScriptLocation_text); 
 
 		fAntScriptNamesCombo= new Combo(composite, SWT.SINGLE | SWT.BORDER);
-		fAntScriptNamesCombo.setVisibleItemCount(20);
+		SWTUtil.setDefaultVisibleItemCount(fAntScriptNamesCombo);
 		fAntScriptNamesCombo.addListener(SWT.Modify, this);
 		fAntScriptNamesCombo.addListener(SWT.Selection, this);
 		data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);

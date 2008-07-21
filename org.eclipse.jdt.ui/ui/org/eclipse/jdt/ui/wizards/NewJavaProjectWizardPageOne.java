@@ -485,13 +485,11 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 			Combo comboControl= fJRECombo.getComboControl(nonDefaultJREComposite);
 			comboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
-			comboControl.setVisibleItemCount(30);
 
 			fUseEEJRE.doFillIntoGrid(nonDefaultJREComposite, 1);
 
 			Combo eeComboControl= fEECombo.getComboControl(nonDefaultJREComposite);
 			eeComboControl.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
-			eeComboControl.setVisibleItemCount(30);
 
 			updateEnableState();
 			return fGroup;

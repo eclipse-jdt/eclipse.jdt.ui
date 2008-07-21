@@ -66,6 +66,7 @@ import org.eclipse.jdt.internal.ui.refactoring.IParameterListChangeListener;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class ExtractMethodInputPage extends UserInputWizardPage {
@@ -118,6 +119,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			label= new Label(result, SWT.NONE);
 			label.setText(RefactoringMessages.ExtractMethodInputPage_destination_type); 
 			final Combo combo= new Combo(result, SWT.READ_ONLY | SWT.DROP_DOWN);
+			SWTUtil.setDefaultVisibleItemCount(combo);
 			for (int i= 0; i < destinations.length; i++) {
 				ASTNode declaration= destinations[i];
 				combo.add(getLabel(declaration));

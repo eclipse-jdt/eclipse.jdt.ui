@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.ui.preferences.formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -31,6 +29,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.StatusDialog;
@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
  * The dialog to create a new profile. 
@@ -128,6 +129,7 @@ public class CreateProfileDialog extends StatusDialog {
 		gd.horizontalSpan= numColumns;
 		fProfileCombo = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
 		fProfileCombo.setLayoutData(gd);
+		SWTUtil.setDefaultVisibleItemCount(fProfileCombo);
 		
 		
 		// "Open the edit dialog now" checkbox

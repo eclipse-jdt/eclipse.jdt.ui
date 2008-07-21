@@ -17,9 +17,6 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -45,6 +42,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 
@@ -54,6 +54,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 
 public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
@@ -257,6 +258,7 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 			createLabel(numColumns - 1, composite, text);
 			fCombo= new Combo(composite, SWT.SINGLE | SWT.READ_ONLY);
 			fCombo.setFont(composite.getFont());
+			SWTUtil.setDefaultVisibleItemCount(fCombo);
 			fCombo.setItems(items);
 			
 			int max= 0;

@@ -13,10 +13,6 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -28,6 +24,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.window.Window;
@@ -174,6 +174,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 
 		private void addDestinationControls(Composite composite) {
 			fDestinationField= new Combo(composite, SWT.SINGLE | SWT.BORDER);
+			SWTUtil.setDefaultVisibleItemCount(fDestinationField);
 			fDestinationField.setFocus();
 			fDestinationField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fDestinationField.setItems((String[]) fgMruDestinations.toArray(new String[fgMruDestinations.size()]));
