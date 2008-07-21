@@ -158,7 +158,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 	public void run(IStructuredSelection selection) {
 		ArrayList allClosedProjects= new ArrayList();
 		int selectionStatus= evaluateSelection(selection, allClosedProjects);
-		if (selectionStatus == CLOSED_PROJECTS_SELECTED) { // only closed projects selected
+		if ((selectionStatus & CLOSED_PROJECTS_SELECTED) != 0) { // selection contains closed projects
 			fWorkbenchAction.selectionChanged(new StructuredSelection(allClosedProjects));
 			fWorkbenchAction.run();
 		} else {

@@ -35,7 +35,6 @@ import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.CloseResourceAction;
 import org.eclipse.ui.actions.CloseUnrelatedProjectsAction;
-
 import org.eclipse.ui.ide.IDEActionFactory;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -129,7 +128,7 @@ public class ProjectActionGroup extends ActionGroup {
 		int selectionStatus= evaluateSelection(array, openProjects);
 		StructuredSelection sel= new StructuredSelection(openProjects);
 
-		fOpenAction.setEnabled(selectionStatus == CLOSED_PROJECTS_SELECTED || (selectionStatus == 0 && hasClosedProjectsInWorkspace()));
+		fOpenAction.setEnabled((selectionStatus & CLOSED_PROJECTS_SELECTED) != 0 || (selectionStatus == 0 && hasClosedProjectsInWorkspace()));
 		fCloseAction.selectionChanged(sel);
 		fCloseUnrelatedAction.selectionChanged(sel);
 	}
