@@ -19,6 +19,9 @@ import java.util.Map;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
 import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -34,6 +37,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
@@ -41,11 +45,6 @@ import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class AssistQuickFixTest extends QuickFixTest {
 	
@@ -5312,7 +5311,19 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			assertCorrectLabels(proposals);
 
-			assertCommandIdDoesNotExists(proposals, QuickAssistProcessor.CONVERT_TO_MESSAGE_FORMAT_ID);
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import java.text.MessageFormat;\n");
+			buf.append("\n");
+			buf.append("public class A {\n");
+			buf.append("    public void foo(Object o1, Object o2) {\n");
+			buf.append("        System.out.println(MessageFormat.format(\"foo{0} \\\"bar\\\" \", new Object[]{new Integer(1)}));\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+
+			assertExpectedExistInProposals(proposals, new String[] { expected1 });
 		} finally {
 			fJProject1.setOptions(oldOptions);
 		}

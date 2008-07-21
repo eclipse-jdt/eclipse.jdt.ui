@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1213,6 +1213,55 @@ public class Bindings {
 				return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Returns the boxed type binding according to JLS3 5.1.7, or the original binding if
+	 * the given type is not a primitive type.
+	 * 
+	 * @param type a type binding
+	 * @param ast an AST to resolve the boxed type
+	 * @return the boxed type, or the original type if no boxed type found
+	 */
+	public static ITypeBinding getBoxedTypeBinding(ITypeBinding type, AST ast) {
+		if (!type.isPrimitive())
+			return type;
+		String boxedTypeName= getBoxedTypeName(type.getName());
+		if (boxedTypeName == null)
+			return type;
+		ITypeBinding boxed= ast.resolveWellKnownType(boxedTypeName);
+		if (boxed == null)
+			return type;
+		return boxed;
+	}
+
+	private static String getBoxedTypeName(String primitiveName) {
+		if ("long".equals(primitiveName)) //$NON-NLS-1$
+			return "java.lang.Long"; //$NON-NLS-1$
+		
+		else if ("int".equals(primitiveName)) //$NON-NLS-1$
+			return "java.lang.Integer"; //$NON-NLS-1$
+		
+		else if ("short".equals(primitiveName)) //$NON-NLS-1$
+			return "java.lang.Short"; //$NON-NLS-1$
+		
+		else if ("char".equals(primitiveName)) //$NON-NLS-1$
+			return "java.lang.Character"; //$NON-NLS-1$
+		
+		else if ("byte".equals(primitiveName)) //$NON-NLS-1$
+			return "java.lang.Byte"; //$NON-NLS-1$
+		
+		else if ("boolean".equals(primitiveName)) //$NON-NLS-1$
+			return "java.lang.Boolean"; //$NON-NLS-1$
+		
+		else if ("float".equals(primitiveName)) //$NON-NLS-1$
+			return "java.lang.Float"; //$NON-NLS-1$
+		
+		else if ("double".equals(primitiveName)) //$NON-NLS-1$
+			return "java.lang.Double"; //$NON-NLS-1$
+		
+		else 
+			return null;
 	}
 	
 }

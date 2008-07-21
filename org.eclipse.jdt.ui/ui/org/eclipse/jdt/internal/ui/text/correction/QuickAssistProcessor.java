@@ -21,12 +21,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
-
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -729,6 +729,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		boolean is50OrHigher= JavaModelUtil.is50OrHigher(cu.getJavaProject());
 		
 		ASTRewrite rewrite= ASTRewrite.create(ast);
+		CompilationUnit root= context.getASTRoot();
+		ImportRewrite importRewrite= ImportRewrite.create(root, true);
+		ContextSensitiveImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(context.getASTRoot(), oldInfixExpression.getStartPosition(), importRewrite);
 
 		// collect operands
 		List operands= new ArrayList();
@@ -761,10 +764,18 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					if (binding == null)
 						return null;
 
-					if (binding.isPrimitive())
-						return null;
-
 					argument= rewrite.createCopyTarget(operand);
+					
+					if (binding.isPrimitive()) {
+						ITypeBinding boxedBinding= Bindings.getBoxedTypeBinding(binding, ast);
+						if (boxedBinding != binding) {
+							Type boxedType= importRewrite.addImport(boxedBinding, ast, importContext);
+							ClassInstanceCreation cic= ast.newClassInstanceCreation();
+							cic.setType(boxedType);
+							cic.arguments().add(argument);
+							argument= cic;
+						}
+					}
 				}
 				
 				formatArguments.add(argument);
@@ -775,18 +786,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (formatArguments.size() == 0)
 			return null;
 		
-		CompilationUnit root= context.getASTRoot();
-		
 		String label= CorrectionMessages.QuickAssistProcessor_convert_to_message_format;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 	
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 0, image);
 		proposal.setCommandId(CONVERT_TO_MESSAGE_FORMAT_ID);
 
-		ImportRewrite importRewrite= ImportRewrite.create(root, true);
 		proposal.setImportRewrite(importRewrite);
 
-		ContextSensitiveImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(context.getASTRoot(), oldInfixExpression.getStartPosition(), importRewrite);
 		String messageType= importRewrite.addImport("java.text.MessageFormat", importContext); //$NON-NLS-1$
 		
 		MethodInvocation formatInvocation= ast.newMethodInvocation();
