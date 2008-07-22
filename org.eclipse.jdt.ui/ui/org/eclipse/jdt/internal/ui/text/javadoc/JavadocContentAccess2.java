@@ -589,6 +589,7 @@ public class JavadocContentAccess2 {
 		List/*<TagElement>*/ parameters= new ArrayList();
 		TagElement returnTag= null;
 		List/*<TagElement>*/ exceptions= new ArrayList();
+		List/*<TagElement>*/ versions= new ArrayList();
 		List/*<TagElement>*/ authors= new ArrayList();
 		List/*<TagElement>*/ sees= new ArrayList();
 		List/*<TagElement>*/ since= new ArrayList();
@@ -633,12 +634,14 @@ public class JavadocContentAccess2 {
 					}
 				}
 			
+			} else if (TagElement.TAG_SINCE.equals(tagName)) {
+				since.add(tag);
+			} else if (TagElement.TAG_VERSION.equals(tagName)) {
+				versions.add(tag);
 			} else if (TagElement.TAG_AUTHOR.equals(tagName)) {
 				authors.add(tag);
 			} else if (TagElement.TAG_SEE.equals(tagName)) {
 				sees.add(tag);
-			} else if (TagElement.TAG_SINCE.equals(tagName)) {
-				since.add(tag);
 			} else {
 				rest.add(tag);
 			}
@@ -667,14 +670,14 @@ public class JavadocContentAccess2 {
 		boolean hasInheritedExceptions= inheritExceptionDescriptions(exceptionNames, exceptionDescriptions);
 		boolean hasExceptions= exceptions.size() > 0 || hasInheritedExceptions;
 		
-		if (hasParameters || hasReturnTag || hasExceptions || authors.size() > 0 || since.size() > 0 || sees.size() > 0 || rest.size() > 0) {
+		if (hasParameters || hasReturnTag || hasExceptions || versions.size() > 0 || authors.size() > 0 || since.size() > 0 || sees.size() > 0 || rest.size() > 0) {
 			fBuf.append("<dl>"); //$NON-NLS-1$
 			
 			//TODO: Overrides: / Specified By:
 			handleParameterTags(parameters, parameterNames, parameterDescriptions);
 			handleReturnTag(returnTag, returnDescription);
 			handleExceptionTags(exceptions, exceptionNames, exceptionDescriptions);
-			//TODO: @version
+			handleBlockTags(JavaDocMessages.JavaDoc2HTMLTextReader_version_section, versions);
 			handleBlockTags(JavaDocMessages.JavaDoc2HTMLTextReader_author_section, authors);
 			handleBlockTags(JavaDocMessages.JavaDoc2HTMLTextReader_since_section, since);
 			handleBlockTags(JavaDocMessages.JavaDoc2HTMLTextReader_see_section, sees);
