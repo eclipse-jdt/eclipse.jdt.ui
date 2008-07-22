@@ -677,9 +677,9 @@ public class JavadocContentAccess2 {
 			handleParameterTags(parameters, parameterNames, parameterDescriptions);
 			handleReturnTag(returnTag, returnDescription);
 			handleExceptionTags(exceptions, exceptionNames, exceptionDescriptions);
+			handleBlockTags(JavaDocMessages.JavaDoc2HTMLTextReader_since_section, since);
 			handleBlockTags(JavaDocMessages.JavaDoc2HTMLTextReader_version_section, versions);
 			handleBlockTags(JavaDocMessages.JavaDoc2HTMLTextReader_author_section, authors);
-			handleBlockTags(JavaDocMessages.JavaDoc2HTMLTextReader_since_section, since);
 			handleBlockTags(JavaDocMessages.JavaDoc2HTMLTextReader_see_section, sees);
 			handleBlockTags(rest);
 			fBuf.append("</dl>"); //$NON-NLS-1$
