@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,27 +38,26 @@ public class LocalVariableIndex extends ASTVisitor {
 		Assert.isTrue(declaration != null);
 		switch (declaration.getNodeType()) {
 			case ASTNode.METHOD_DECLARATION:
-				return internalPerform((MethodDeclaration)declaration);
 			case ASTNode.INITIALIZER:
-				return internalPerform((Initializer)declaration);
+				return internalPerform(declaration);
 			default:
-				Assert.isTrue(false);
+				throw new IllegalArgumentException(declaration.toString());
 		}
-		return -1;
 	}
 	
-	private static int internalPerform(MethodDeclaration method) {
-		// we have to find the outermost method declaration since a local or anonymous
+	private static int internalPerform(BodyDeclaration methodOrInitializer) {
+		// we have to find the outermost method or initializer declaration since a local or anonymous
 		// type can reference final variables from the outer scope.
-		MethodDeclaration target= method;
-		while (ASTNodes.getParent(target, ASTNode.METHOD_DECLARATION) != null) {
-			target= (MethodDeclaration)ASTNodes.getParent(target, ASTNode.METHOD_DECLARATION);
+		BodyDeclaration target= methodOrInitializer;
+		ASTNode parent= target.getParent();
+		while (parent != null) {
+			if (parent instanceof MethodDeclaration || parent instanceof Initializer) {
+				target= (BodyDeclaration)parent;
+			}
+			parent= parent.getParent();
 		}
+		
 		return doPerform(target);
-	}
-
-	private static int internalPerform(Initializer initializer) {
-		return doPerform(initializer);
 	}
 
 	private static int doPerform(BodyDeclaration node) {

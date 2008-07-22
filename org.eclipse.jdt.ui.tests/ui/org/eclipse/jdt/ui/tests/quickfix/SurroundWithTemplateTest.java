@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla - bug 233278: [surround with] "Surround With runnable" crash.
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -1477,6 +1478,57 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		buf.append("            };\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
+		buf.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});	
+	}
+	
+	public void testSurroundWithRunnableBug233278() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("  {\n");
+		buf.append("    final int x = 0, y = 1;\n");
+		buf.append("    new Object() {\n");
+		buf.append("      void method() {\n");
+		buf.append("        if (x == y)\n");
+		buf.append("          return;\n");
+		buf.append("        toString();\n");
+		buf.append("      }\n");
+		buf.append("    };\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		StringBuffer selection= new StringBuffer();
+		selection.append("        if (x == y)\n");
+		selection.append("          return;\n");
+		selection.append("        toString();\n");
+		
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		List proposals= getRunnableProposal(context);
+		
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("  {\n");
+		buf.append("    final int x = 0, y = 1;\n");
+		buf.append("    new Object() {\n");
+		buf.append("      void method() {\n");
+		buf.append("        Runnable runnable = new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                if (x == y)\n");
+		buf.append("                    return;\n");
+		buf.append("                toString();\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("      }\n");
+		buf.append("    };\n");
+		buf.append("  }\n");
 		buf.append("}\n");
 		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});	
 	}
