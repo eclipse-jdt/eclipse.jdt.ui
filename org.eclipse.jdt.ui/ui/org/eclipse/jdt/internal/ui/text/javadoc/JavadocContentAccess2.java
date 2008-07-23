@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -76,6 +77,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
  */
 public class JavadocContentAccess2 {
 	
+	private static final String BLOCK_TAG_START= "<dl>"; //$NON-NLS-1$
+	private static final String BLOCK_TAG_END= "</dl>"; //$NON-NLS-1$
+	
 	private static final String BlOCK_TAG_ENTRY_START= "<dd>"; //$NON-NLS-1$
 	private static final String BlOCK_TAG_ENTRY_END= "</dd>"; //$NON-NLS-1$
 	
@@ -99,25 +103,39 @@ public class JavadocContentAccess2 {
 	 */
 	private static abstract class InheritDocVisitor {
 		public static final Object STOP_BRANCH= new Object() {
-			public String toString() { return ("STOP_BRANCH"); } //$NON-NLS-1$
+			public String toString() { return "STOP_BRANCH"; } //$NON-NLS-1$
 		};
 		public static final Object CONTINUE= new Object() {
-			public String toString() { return ("CONTINUE"); } //$NON-NLS-1$
+			public String toString() { return "CONTINUE"; } //$NON-NLS-1$
 		};
 
 		/**
+		 * Visits a type and decides how the visitor should proceed.
+		 * 
 		 * @param currType the current type
 		 * @return <ul>
 		 *         <li>{@link #STOP_BRANCH} to indicate that no Javadoc has been found and visiting
 		 *         super types should stop here</li>
 		 *         <li>{@link #CONTINUE} to indicate that no Javadoc has been found and visiting
 		 *         super types should continue</li>
-		 *         <li>a {@link String} containing the requested Javadoc description</li>
+		 *         <li>an {@link Object} or <code>null</code>, to indicate that visiting should be
+		 *         cancelled immediately. The returned value is the result of
+		 *         {@link #visitInheritDoc(IType, ITypeHierarchy)}</li>
 		 *         </ul>
 		 * @throws JavaModelException
+		 * @see #visitInheritDoc(IType, ITypeHierarchy)
 		 */
 		public abstract Object visit(IType currType) throws JavaModelException;
 
+		/**
+		 * Visits the super types of the given <code>currentType</code>.
+		 * 
+		 * @param currentType the starting type
+		 * @param typeHierarchy a super type hierarchy that contains <code>currentType</code>
+		 * @return the result from a call to {@link #visit(IType)}, or <code>null</code> if none of
+		 *         the calls returned a result
+		 * @throws JavaModelException
+		 */
 		public Object visitInheritDoc(IType currentType, ITypeHierarchy typeHierarchy) throws JavaModelException {
 			ArrayList visited= new ArrayList();
 			visited.add(currentType);
@@ -125,18 +143,23 @@ public class JavadocContentAccess2 {
 			if (result != InheritDocVisitor.CONTINUE)
 				return result;
 			
-			currentType= typeHierarchy.getSuperclass(currentType);
-			while (currentType != null && ! visited.contains(currentType)) {
-				result= visit(currentType);
+			IType superClass;
+			if (currentType.isInterface())
+				superClass= currentType.getJavaProject().findType("java.lang.Object"); //$NON-NLS-1$
+			else
+				superClass= typeHierarchy.getSuperclass(currentType);
+			
+			while (superClass != null && ! visited.contains(superClass)) {
+				result= visit(superClass);
 				if (result == InheritDocVisitor.STOP_BRANCH) {
 					return null;
 				} else if (result == InheritDocVisitor.CONTINUE) {
-					visited.add(currentType);
-					result= visitInheritDocInterfaces(visited, currentType, typeHierarchy);
+					visited.add(superClass);
+					result= visitInheritDocInterfaces(visited, superClass, typeHierarchy);
 					if (result != InheritDocVisitor.CONTINUE)
 						return result;
 					else
-						currentType= typeHierarchy.getSuperclass(currentType);
+						superClass= typeHierarchy.getSuperclass(superClass);
 				} else {
 					return result;
 				}
@@ -429,20 +452,101 @@ public class JavadocContentAccess2 {
 	 */
 	public static String getHTMLContent(IMember member, boolean useAttachedJavadoc) throws JavaModelException {
 		String sourceJavadoc= getHTMLContentFromSource(member);
-		if (sourceJavadoc != null && sourceJavadoc.length() != 0 && ! sourceJavadoc.trim().equals("{@inheritDoc}")) //$NON-NLS-1$
-			return sourceJavadoc;
-		
-		// TODO: prepend Overrides: / Specified by: headers 
-		if (useAttachedJavadoc) {
-			if (member.getOpenable().getBuffer() == null) { // only if no source available
-				return member.getAttachedJavadoc(null);
-			}
-			if (canInheritJavadoc(member)) {
-				return findAttachedDocInHierarchy((IMethod) member);
+		if (sourceJavadoc == null || sourceJavadoc.length() == 0 || sourceJavadoc.trim().equals("{@inheritDoc}")) { //$NON-NLS-1$
+			if (useAttachedJavadoc) {
+				if (member.getOpenable().getBuffer() == null) { // only if no source available
+					return member.getAttachedJavadoc(null);
+				}
+				if (canInheritJavadoc(member)) {
+					IMethod method= (IMethod) member;
+					String attachedDocInHierarchy= findAttachedDocInHierarchy(method);
+
+					// Prepend "Overrides:" / "Specified by:" reference headers to make clear
+					// that description has been copied from super method.
+					if (attachedDocInHierarchy == null)
+						return sourceJavadoc;
+					StringBuffer superMethodReferences= createSuperMethodReferences(method);
+					if (superMethodReferences == null)
+						return attachedDocInHierarchy;
+					superMethodReferences.append(attachedDocInHierarchy);
+					return superMethodReferences.toString();
+				}
 			}
 		}
-		
 		return sourceJavadoc;
+	}
+
+	private static StringBuffer createSuperMethodReferences(final IMethod method) throws JavaModelException {
+		IType type= method.getDeclaringType();
+		ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(type);
+		final MethodOverrideTester tester= SuperTypeHierarchyCache.getMethodOverrideTester(type);
+
+		final ArrayList superInterfaceMethods= new ArrayList();
+		final IMethod[] superClassMethod= { null };
+		new InheritDocVisitor() {
+			public Object visit(IType currType) throws JavaModelException {
+				IMethod overridden= tester.findOverriddenMethodInType(currType, method);
+				if (overridden == null)
+					return InheritDocVisitor.CONTINUE;
+
+				if (currType.isInterface())
+					superInterfaceMethods.add(overridden);
+				else
+					superClassMethod[0]= overridden;
+
+				return STOP_BRANCH;
+			}
+		}.visitInheritDoc(type, hierarchy);
+
+		boolean hasSuperInterfaceMethods= superInterfaceMethods.size() != 0;
+		if (!hasSuperInterfaceMethods && superClassMethod[0] == null)
+			return null;
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("<div>"); //$NON-NLS-1$
+		if (hasSuperInterfaceMethods) {
+			buf.append("<b>"); //$NON-NLS-1$
+			buf.append(JavaDocMessages.JavaDoc2HTMLTextReader_specified_by_section);
+			buf.append("</b> "); //$NON-NLS-1$
+			for (Iterator iter= superInterfaceMethods.iterator(); iter.hasNext(); ) {
+				IMethod overridden= (IMethod) iter.next();
+				buf.append(createMethodInTypeLinks(overridden));
+				if (iter.hasNext())
+					buf.append(JavaElementLabels.COMMA_STRING);
+			}
+		}
+		if (superClassMethod[0] != null) {
+			if (hasSuperInterfaceMethods)
+				buf.append(JavaElementLabels.COMMA_STRING);
+			buf.append("<b>"); //$NON-NLS-1$
+			buf.append(JavaDocMessages.JavaDoc2HTMLTextReader_overrides_section);
+			buf.append("</b> "); //$NON-NLS-1$
+			buf.append(createMethodInTypeLinks(superClassMethod[0]));
+		}
+		buf.append("</div>"); //$NON-NLS-1$
+		return buf;
+	}
+
+	private static String createMethodInTypeLinks(IMethod overridden) {
+		CharSequence methodLink= createSimpleMemberLink(overridden);
+		CharSequence typeLink= createSimpleMemberLink(overridden.getDeclaringType());
+		String methodInType= MessageFormat.format(JavaDocMessages.JavaDoc2HTMLTextReader_method_in_type, new Object[] { methodLink, typeLink });
+		return methodInType;
+	}
+
+	private static CharSequence createSimpleMemberLink(IMember member) {
+		StringBuffer buf= new StringBuffer();
+		buf.append("<a href='"); //$NON-NLS-1$
+		try {
+			String uri= JavaElementLinks.createURI(JavaElementLinks.JAVADOC_SCHEME, member);
+			buf.append(uri);
+		} catch (URISyntaxException e) {
+			JavaPlugin.log(e);
+		}
+		buf.append("'>"); //$NON-NLS-1$
+		JavaElementLabels.getElementLabel(member, 0, buf);
+		buf.append("</a>"); //$NON-NLS-1$
+		return buf;
 	}
 
 	private static String getHTMLContentFromSource(IMember member) throws JavaModelException {
@@ -671,9 +775,8 @@ public class JavadocContentAccess2 {
 		boolean hasExceptions= exceptions.size() > 0 || hasInheritedExceptions;
 		
 		if (hasParameters || hasReturnTag || hasExceptions || versions.size() > 0 || authors.size() > 0 || since.size() > 0 || sees.size() > 0 || rest.size() > 0) {
-			fBuf.append("<dl>"); //$NON-NLS-1$
-			
-			//TODO: Overrides: / Specified By:
+			handleSuperMethodReferences();
+			fBuf.append(BLOCK_TAG_START);
 			handleParameterTags(parameters, parameterNames, parameterDescriptions);
 			handleReturnTag(returnTag, returnDescription);
 			handleExceptionTags(exceptions, exceptionNames, exceptionDescriptions);
@@ -682,12 +785,27 @@ public class JavadocContentAccess2 {
 			handleBlockTags(JavaDocMessages.JavaDoc2HTMLTextReader_author_section, authors);
 			handleBlockTags(JavaDocMessages.JavaDoc2HTMLTextReader_see_section, sees);
 			handleBlockTags(rest);
-			fBuf.append("</dl>"); //$NON-NLS-1$
+			fBuf.append(BLOCK_TAG_END);
+			
+		} else if (fBuf.length() > 0) {
+			handleSuperMethodReferences();
 		}
 		
 		String result= fBuf.toString();
 		fBuf= null;
 		return result;
+	}
+
+	private void handleSuperMethodReferences() {
+		if (fMethod != null) {
+			try {
+				StringBuffer superMethodReferences= createSuperMethodReferences(fMethod);
+				if (superMethodReferences != null)
+					fBuf.append(superMethodReferences);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+		}
 	}
 
 	private List initParameterNames() {

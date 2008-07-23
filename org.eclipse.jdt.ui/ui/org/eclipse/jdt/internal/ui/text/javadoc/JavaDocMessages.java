@@ -28,8 +28,11 @@ final class JavaDocMessages extends NLS {
 	public static String JavaDoc2HTMLTextReader_returns_section;
 	public static String JavaDoc2HTMLTextReader_throws_section;
 	public static String JavaDoc2HTMLTextReader_author_section;
+	public static String JavaDoc2HTMLTextReader_method_in_type;
+	public static String JavaDoc2HTMLTextReader_overrides_section;
 	public static String JavaDoc2HTMLTextReader_see_section;
 	public static String JavaDoc2HTMLTextReader_since_section;
+	public static String JavaDoc2HTMLTextReader_specified_by_section;
 	public static String JavaDoc2HTMLTextReader_version_section;
 
 	static {
