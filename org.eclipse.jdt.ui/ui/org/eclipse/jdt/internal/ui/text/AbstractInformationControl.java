@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.ui.text;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.osgi.util.TextProcessor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -38,6 +38,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -105,6 +107,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			TreeViewer treeViewer= (TreeViewer) viewer;
 
 			String matchName= ((ILabelProvider) treeViewer.getLabelProvider()).getText(element);
+			matchName= TextProcessor.deprocess(matchName);
 			if (matchName != null && matcher.match(matchName))
 				return true;
 
