@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,6 +36,6 @@ public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
 		prefs.setDefault(JUnitPreferencesConstants.MAX_TEST_RUNS, 10);
 		
 		prefs.setDefault(JUnitPreferencesConstants.JUNIT3_JAVADOC, "http://www.junit.org/junit/javadoc/3.8.1"); //$NON-NLS-1$
-		prefs.setDefault(JUnitPreferencesConstants.JUNIT4_JAVADOC, "http://www.junit.org/junit/javadoc/4.3"); //$NON-NLS-1$
+		prefs.setDefault(JUnitPreferencesConstants.JUNIT4_JAVADOC, "http://www.junit.org/junit/javadoc/4.4"); //$NON-NLS-1$
 	}
 }

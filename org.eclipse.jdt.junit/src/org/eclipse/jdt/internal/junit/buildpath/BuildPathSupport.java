@@ -15,11 +15,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
+
+import org.eclipse.osgi.service.resolver.VersionRange;
+
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-
-import org.eclipse.osgi.service.resolver.VersionRange;
 
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
@@ -28,10 +32,6 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.ui.JUnitPreferencesConstants;
-
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Version;
 
 /**
  * 
@@ -77,7 +77,7 @@ public class BuildPathSupport {
 	}
 	
 	public static final JUnitPluginDescription JUNIT3_PLUGIN= new JUnitPluginDescription("org.junit", new VersionRange("[3.8.2,3.9)"), true);  //$NON-NLS-1$//$NON-NLS-2$
-	public static final JUnitPluginDescription JUNIT4_PLUGIN= new JUnitPluginDescription("org.junit4", new VersionRange("[4.3.1,4.4.0)"), true); //$NON-NLS-1$ //$NON-NLS-2$
+	public static final JUnitPluginDescription JUNIT4_PLUGIN= new JUnitPluginDescription("org.junit4", new VersionRange("[4.4.0,4.5.0)"), true); //$NON-NLS-1$ //$NON-NLS-2$
 	
 	public static IPath getBundleLocation(JUnitPluginDescription pluginDesc) {
 		Bundle bundle= pluginDesc.getBundle();
