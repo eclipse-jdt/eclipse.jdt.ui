@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,11 +12,11 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import junit.framework.Test;
 
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 public class ExtractMethodTestSetup extends RefactoringTestSetup {
 	
@@ -40,6 +40,7 @@ public class ExtractMethodTestSetup extends RefactoringTestSetup {
 	private IPackageFragment fGenericsPackage;
 	private IPackageFragment fEnumsPackage;
 	private IPackageFragment fVarargsPackage;
+	private IPackageFragment fFieldInitializerPackage;
 	
 	public ExtractMethodTestSetup(Test test) {
 		super(test);
@@ -71,6 +72,7 @@ public class ExtractMethodTestSetup extends RefactoringTestSetup {
 		fGenericsPackage= root.createPackageFragment("generics_in", true, null);
 		fEnumsPackage= root.createPackageFragment("enums_in", true, null);
 		fVarargsPackage= root.createPackageFragment("varargs_in", true, null);
+		fFieldInitializerPackage= root.createPackageFragment("fieldInitializer_in", true, null);
 		
 		ICompilationUnit cu= fExpressionPackage.createCompilationUnit(
 			"A.java", 
@@ -162,6 +164,10 @@ public class ExtractMethodTestSetup extends RefactoringTestSetup {
 	
 	public IPackageFragment getVarargsPackage() {
 		return fVarargsPackage;
+	}	
+	
+	public IPackageFragment getFieldInitializerPackage() {
+		return fFieldInitializerPackage;
 	}	
 }
 

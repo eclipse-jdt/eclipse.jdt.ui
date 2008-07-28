@@ -578,6 +578,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 			fEnclosingBodyDeclaration= (BodyDeclaration)ASTNodes.getParent(getFirstSelectedNode(), BodyDeclaration.class);
 			if (fEnclosingBodyDeclaration == null || 
 					(fEnclosingBodyDeclaration.getNodeType() != ASTNode.METHOD_DECLARATION && 
+					 fEnclosingBodyDeclaration.getNodeType() != ASTNode.FIELD_DECLARATION &&
 					 fEnclosingBodyDeclaration.getNodeType() != ASTNode.INITIALIZER)) {
 				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_only_method_body); 
 				break superCall;

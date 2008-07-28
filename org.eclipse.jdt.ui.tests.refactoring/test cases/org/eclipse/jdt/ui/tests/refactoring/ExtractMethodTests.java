@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1866,6 +1866,24 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	
 	public void test1202() throws Exception {
 		varargsTest();
+	}
+	
+	//---- Test field initializer ---------------------------------
+	
+	protected void fieldInitializerTest() throws Exception {
+		performTest(fgTestSetup.getFieldInitializerPackage(), "A", COMPARE_WITH_OUTPUT, "fieldInitializer_out");
+	}
+	
+	public void test1250() throws Exception {
+		fieldInitializerTest();
+	}
+	
+	public void test1251() throws Exception {
+		fieldInitializerTest();
+	}
+	
+	public void test1252() throws Exception {
+		fieldInitializerTest();
 	}
 	
 	//---- Test copied from http://c2.com/cgi/wiki?RefactoringBenchmarksForExtractMethod

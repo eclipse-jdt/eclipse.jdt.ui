@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -31,13 +32,14 @@ public class LocalVariableIndex extends ASTVisitor {
 	 * given body declaration.
 	 *  
 	 * @param declaration the body declaration. Must either be a method
-	 *  declaration or an initializer.
+	 *  declaration, or an initializer, or a field declaration.
 	 * @return the maximum number of local variables
 	 */
 	public static int perform(BodyDeclaration declaration) {
 		Assert.isTrue(declaration != null);
 		switch (declaration.getNodeType()) {
 			case ASTNode.METHOD_DECLARATION:
+			case ASTNode.FIELD_DECLARATION:
 			case ASTNode.INITIALIZER:
 				return internalPerform(declaration);
 			default:
@@ -46,12 +48,12 @@ public class LocalVariableIndex extends ASTVisitor {
 	}
 	
 	private static int internalPerform(BodyDeclaration methodOrInitializer) {
-		// we have to find the outermost method or initializer declaration since a local or anonymous
+		// we have to find the outermost method/initializer/field declaration since a local or anonymous
 		// type can reference final variables from the outer scope.
 		BodyDeclaration target= methodOrInitializer;
 		ASTNode parent= target.getParent();
 		while (parent != null) {
-			if (parent instanceof MethodDeclaration || parent instanceof Initializer) {
+			if (parent instanceof MethodDeclaration || parent instanceof Initializer || parent instanceof FieldDeclaration) {
 				target= (BodyDeclaration)parent;
 			}
 			parent= parent.getParent();
