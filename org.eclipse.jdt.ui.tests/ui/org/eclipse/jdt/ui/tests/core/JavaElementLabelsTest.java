@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -333,5 +333,68 @@ public class JavaElementLabelsTest extends CoreTests {
 			
 		}
 	
+	public void testPackageLabels() throws Exception {
 		
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment packDefault= sourceFolder.getPackageFragment("");
+		IPackageFragment packOrg= sourceFolder.createPackageFragment("org", false, null);
+		IPackageFragment packOrgTest= sourceFolder.createPackageFragment("org.test", false, null);
+		IPackageFragment packOrgTestLongname= sourceFolder.createPackageFragment("org.test.longname", false, null);
+		
+		assertExpectedLabel(packDefault, "(default package)", JavaElementLabels.ALL_DEFAULT);
+		assertExpectedLabel(packOrg, "org", JavaElementLabels.ALL_DEFAULT);
+		assertExpectedLabel(packOrgTestLongname, "org.test.longname", JavaElementLabels.ALL_DEFAULT);
+		
+		assertExpectedLabel(packDefault, "(default package)", JavaElementLabels.P_COMPRESSED);
+		assertExpectedLabel(packOrg, "org", JavaElementLabels.P_COMPRESSED);
+		assertExpectedLabel(packOrgTestLongname, "org.test.longname", JavaElementLabels.P_COMPRESSED);
+		
+		assertExpectedLabel(packDefault, "(default package) - TestSetupProject/src", JavaElementLabels.P_POST_QUALIFIED);
+		assertExpectedLabel(packOrg, "org - TestSetupProject/src", JavaElementLabels.P_POST_QUALIFIED);
+		assertExpectedLabel(packOrgTestLongname, "org.test.longname - TestSetupProject/src", JavaElementLabels.P_POST_QUALIFIED);
+		
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		store.setValue(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, true);
+		
+		try {
+			store.setValue(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW, "0");
+			
+			assertExpectedLabel(packDefault, "(default package)", JavaElementLabels.P_COMPRESSED);
+			assertExpectedLabel(packOrg, "org", JavaElementLabels.P_COMPRESSED);
+			assertExpectedLabel(packOrgTest, "test", JavaElementLabels.P_COMPRESSED);
+			assertExpectedLabel(packOrgTestLongname, "longname", JavaElementLabels.P_COMPRESSED);
+			
+			store.setValue(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW, ".");
+			
+			assertExpectedLabel(packDefault, "(default package)", JavaElementLabels.P_COMPRESSED);
+			assertExpectedLabel(packOrg, "org", JavaElementLabels.P_COMPRESSED);
+			assertExpectedLabel(packOrgTest, ".test", JavaElementLabels.P_COMPRESSED);
+			assertExpectedLabel(packOrgTestLongname, "..longname", JavaElementLabels.P_COMPRESSED);
+			
+			store.setValue(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW, "1~.");
+			
+			assertExpectedLabel(packDefault, "(default package)", JavaElementLabels.P_COMPRESSED);
+			assertExpectedLabel(packOrg, "org", JavaElementLabels.P_COMPRESSED);
+			assertExpectedLabel(packOrgTest, "o~.test", JavaElementLabels.P_COMPRESSED);
+			assertExpectedLabel(packOrgTestLongname, "o~.t~.longname", JavaElementLabels.P_COMPRESSED);
+			
+			store.setValue(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW, "2*.");
+			
+			assertExpectedLabel(packDefault, "(default package)", JavaElementLabels.P_COMPRESSED);
+			assertExpectedLabel(packOrg, "org", JavaElementLabels.P_COMPRESSED);
+			assertExpectedLabel(packOrgTest, "org.test", JavaElementLabels.P_COMPRESSED);
+			assertExpectedLabel(packOrgTestLongname, "org.te*.longname", JavaElementLabels.P_COMPRESSED);
+			
+		} finally {
+			store.setToDefault(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW);
+			store.setValue(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
+		}
+	}
+
+	private void assertExpectedLabel(IJavaElement element, String expectedLabel, long flags) {
+		String lab= JavaElementLabels.getTextLabel(element, flags);
+		assertEqualString(lab, expectedLabel);
+	}
+
 }
