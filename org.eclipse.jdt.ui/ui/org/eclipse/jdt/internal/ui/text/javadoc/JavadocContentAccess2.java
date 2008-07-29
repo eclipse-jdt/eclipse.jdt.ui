@@ -774,7 +774,10 @@ public class JavadocContentAccess2 {
 		boolean hasInheritedExceptions= inheritExceptionDescriptions(exceptionNames, exceptionDescriptions);
 		boolean hasExceptions= exceptions.size() > 0 || hasInheritedExceptions;
 		
-		if (hasParameters || hasReturnTag || hasExceptions || versions.size() > 0 || authors.size() > 0 || since.size() > 0 || sees.size() > 0 || rest.size() > 0) {
+		if (hasParameters || hasReturnTag || hasExceptions
+				|| versions.size() > 0 || authors.size() > 0 || since.size() > 0 || sees.size() > 0 || rest.size() > 0
+				|| (fBuf.length() > 0 && (parameterDescriptions.length > 0 || exceptionDescriptions.length > 0))
+				) {
 			handleSuperMethodReferences();
 			fBuf.append(BLOCK_TAG_START);
 			handleParameterTags(parameters, parameterNames, parameterDescriptions);
