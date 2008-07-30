@@ -14,14 +14,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -32,6 +24,14 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.StatusDialog;
@@ -95,7 +95,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 		final ClasspathFixSelectionDialog dialog= new ClasspathFixSelectionDialog(parent, project, missingType, classPathFixProposals[0]);
 		if (dialog.open() == Window.OK) {
 			try {
-				context.run(true, true, new IRunnableWithProgress() {
+				context.run(false, true, new IRunnableWithProgress() { // don't fork, because change execution must be in UI thread
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						if (monitor == null) {
 							monitor= new NullProgressMonitor();
