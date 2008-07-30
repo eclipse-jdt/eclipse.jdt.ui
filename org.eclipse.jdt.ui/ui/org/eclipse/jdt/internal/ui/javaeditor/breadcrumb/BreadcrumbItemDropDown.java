@@ -17,6 +17,7 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
@@ -182,17 +183,11 @@ class BreadcrumbItemDropDown {
 		SWTUtil.setAccessibilityText(fToolBar, BreadcrumbMessages.BreadcrumbItemDropDown_showDropDownMenu_action_toolTip);
 		ToolBarManager manager= new ToolBarManager(fToolBar);
 
-		Action showDropDownMenuAction= new Action(null, SWT.NONE) {
-			/* (non-Javadoc)
-			 * @see org.eclipse.jface.action.Action#run()
-			 */
+		final Action showDropDownMenuAction= new Action(null, SWT.NONE) {
 			public void run() {
 				Shell shell= fParent.getDropDownShell();
 				if (shell != null)
 					return;
-				
-				if (IS_MAC_WORKAROUND)
-					fToolBar.setFocus();
 				
 				shell= fParent.getViewer().getDropDownShell();
 				if (shell != null)
@@ -200,8 +195,7 @@ class BreadcrumbItemDropDown {
 				
 				showMenu();
 				
-				if (!IS_MAC_WORKAROUND)
-					fShell.setFocus();
+				fShell.setFocus();
 			}
 		};
 
@@ -210,6 +204,14 @@ class BreadcrumbItemDropDown {
 		manager.add(showDropDownMenuAction);
 
 		manager.update(true);
+		if (IS_MAC_WORKAROUND) {
+			manager.getControl().addMouseListener(new MouseAdapter() {
+				// see also BreadcrumbItemDetails#addElementListener(Control) 
+				public void mouseDown(MouseEvent e) {
+					showDropDownMenuAction.run();
+				}
+			});
+		}
 	}
 
 	/**
