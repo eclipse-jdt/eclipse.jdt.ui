@@ -45,7 +45,7 @@ public class SWTUtil {
 	 * 
 	 * @see Combo#setVisibleItemCount(int)
 	 * 
-	 * @since 3.4
+	 * @since 3.5
 	 */
 	public static final int COMBO_VISIBLE_ITEM_COUNT= 30;
 
@@ -148,7 +148,7 @@ public class SWTUtil {
 	 * @see Combo#setVisibleItemCount(int)
 	 * @see #COMBO_VISIBLE_ITEM_COUNT
 	 * 
-	 * @since 3.4
+	 * @since 3.5
 	 */
 	public static void setDefaultVisibleItemCount(Combo combo) {
 		combo.setVisibleItemCount(COMBO_VISIBLE_ITEM_COUNT);
