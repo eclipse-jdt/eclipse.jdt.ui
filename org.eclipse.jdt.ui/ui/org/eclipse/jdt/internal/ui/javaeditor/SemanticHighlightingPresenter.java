@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,8 +20,12 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.DocumentRewriteSessionEvent;
+import org.eclipse.jface.text.DocumentRewriteSessionType;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.jface.text.IDocumentListener;
+import org.eclipse.jface.text.IDocumentRewriteSessionListener;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ISynchronizable;
@@ -225,6 +229,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 		}
 	}
 
+
 	/** Position updater */
 	private IPositionUpdater fPositionUpdater= new HighlightingPositionUpdater(getPositionCategory());
 
@@ -240,6 +245,24 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 
 	/** <code>true</code> iff the current reconcile is canceled. */
 	private boolean fIsCanceled= false;
+	
+	/**
+	 * The listener for document rewrite sessions.
+	 * 
+	 * @since 3.5
+	 */
+	private final IDocumentRewriteSessionListener fSessionListener= new IDocumentRewriteSessionListener() {
+
+		public void documentRewriteSessionChanged(DocumentRewriteSessionEvent event) {
+			if (event.getSession().getSessionType() == DocumentRewriteSessionType.UNRESTRICTED_SMALL)
+				return;
+			if (DocumentRewriteSessionEvent.SESSION_START.equals(event.getChangeType()))
+				releaseDocument(fSourceViewer.getDocument(), false);
+			else if (DocumentRewriteSessionEvent.SESSION_STOP.equals(event.getChangeType()))
+				manageDocument(fSourceViewer.getDocument(), false);
+		}
+	};
+	
 
 	/**
 	 * Creates and returns a new highlighted position with the given offset, length and highlighting.
@@ -479,7 +502,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 		int index= computeIndexAtOffset(positions, position.getOffset());
 		int size= positions.size();
 		while (index < size) {
-			if (positions.get(index) == position) 
+			if (positions.get(index) == position)
 				return index;
 			index++;
 		}
@@ -568,7 +591,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 */
 	public void inputDocumentAboutToBeChanged(IDocument oldInput, IDocument newInput) {
 		setCanceled(true);
-		releaseDocument(oldInput);
+		releaseDocument(oldInput, true);
 		resetState();
 	}
 
@@ -576,7 +599,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentChanged(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IDocument)
 	 */
 	public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
-		manageDocument(newInput);
+		manageDocument(newInput, true);
 	}
 
 	/*
@@ -653,7 +676,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 
 		fSourceViewer.prependTextPresentationListener(this);
 		fSourceViewer.addTextInputListener(this);
-		manageDocument(fSourceViewer.getDocument());
+		manageDocument(fSourceViewer.getDocument(), true);
 	}
 
 	/**
@@ -664,7 +687,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 
 		if (fSourceViewer != null) {
 			fSourceViewer.removeTextPresentationListener(this);
-			releaseDocument(fSourceViewer.getDocument());
+			releaseDocument(fSourceViewer.getDocument(), true);
 			invalidateTextPresentation();
 			resetState();
 
@@ -737,13 +760,18 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	/**
 	 * Start managing the given document.
 	 *
-	 * @param document The document
+	 * @param document the document
+	 * @param includeSessionListener <code>true</code> if document rewrite session listener should be added
 	 */
-	private void manageDocument(IDocument document) {
+	private void manageDocument(IDocument document, boolean includeSessionListener) {
 		if (document != null) {
 			document.addPositionCategory(getPositionCategory());
 			document.addPositionUpdater(fPositionUpdater);
 			document.addDocumentListener(this);
+			if (includeSessionListener && document instanceof IDocumentExtension4) {
+				IDocumentExtension4 ext= (IDocumentExtension4) document;
+				ext.addDocumentRewriteSessionListener(fSessionListener);
+			}
 		}
 	}
 
@@ -751,8 +779,9 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * Stop managing the given document.
 	 *
 	 * @param document The document
+	 * @param includeSessionListener <code>true</code> if document rewrite session listener should be removed
 	 */
-	private void releaseDocument(IDocument document) {
+	private void releaseDocument(IDocument document, boolean includeSessionListener) {
 		if (document != null) {
 			document.removeDocumentListener(this);
 			document.removePositionUpdater(fPositionUpdater);
@@ -761,6 +790,10 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 			} catch (BadPositionCategoryException e) {
 				// Should not happen
 				JavaPlugin.log(e);
+			}
+			if (includeSessionListener && document instanceof IDocumentExtension4) {
+				IDocumentExtension4 ext= (IDocumentExtension4) document;
+				ext.removeDocumentRewriteSessionListener(fSessionListener);
 			}
 		}
 	}
