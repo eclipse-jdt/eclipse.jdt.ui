@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,13 +7,12 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla <b.muskalla@gmx.net> - [spell checking][implementation] PersistentSpellDictionary closes wrong stream - https://bugs.eclipse.org/bugs/show_bug.cgi?id=236421
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.text.spelling.engine;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -33,9 +32,8 @@ public class PersistentSpellDictionary extends AbstractSpellDictionary {
 
 	/**
 	 * Creates a new persistent spell dictionary.
-	 *
-	 * @param url
-	 *                   The URL of the word list for this dictionary
+	 * 
+	 * @param url the URL of the word list for this dictionary
 	 */
 	public PersistentSpellDictionary(final URL url) {
 		fLocation= url;
@@ -55,7 +53,7 @@ public class PersistentSpellDictionary extends AbstractSpellDictionary {
 		if (isCorrect(word))
 			return;
 
-		OutputStreamWriter writer= null;
+		FileOutputStream fileStream= null;
 		try {
 			Charset charset= Charset.forName(getEncoding());
 			ByteBuffer byteBuffer= charset.encode(word + "\n"); //$NON-NLS-1$
@@ -68,7 +66,7 @@ public class PersistentSpellDictionary extends AbstractSpellDictionary {
 				byteBuffer.get(byteArray);
 			}
 			
-			FileOutputStream fileStream= new FileOutputStream(fLocation.getPath(), true);
+			fileStream= new FileOutputStream(fLocation.getPath(), true);
 			
 			// Encoding UTF-16 charset writes a BOM. In which case we need to cut it away if the file isn't empty
 			int bomCutSize= 0;
@@ -81,8 +79,8 @@ public class PersistentSpellDictionary extends AbstractSpellDictionary {
 			return;
 		} finally {
 			try {
-				if (writer != null)
-					writer.close();
+				if (fileStream != null)
+					fileStream.close();
 			} catch (IOException e) {
 			}
 		}
