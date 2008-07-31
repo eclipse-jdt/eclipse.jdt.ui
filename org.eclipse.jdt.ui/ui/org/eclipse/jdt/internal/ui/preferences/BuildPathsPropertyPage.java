@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,11 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -21,11 +26,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRunnable;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -38,8 +38,6 @@ import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -76,7 +74,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	 */
 	protected Control createContents(Composite parent) {
 		// ensure the page has no special buttons
-		noDefaultAndApplyButton();		
+		noDefaultAndApplyButton();
 		
 		IProject project= getProject();
 		Control result;
@@ -97,7 +95,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.BUILD_PATH_PROPERTY_PAGE);
-	}	
+	}
 	
 	private IDialogSettings getSettings() {
 		IDialogSettings javaSettings= JavaPlugin.getDefault().getDialogSettings();
@@ -116,11 +114,11 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		if (fBuildPathsBlock != null) {
 			if (!visible) {
 				if (fBuildPathsBlock.hasChangesInDialog()) {
-					String title= PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_title; 
-					String message= PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_message; 
+					String title= PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_title;
+					String message= PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_message;
 					String[] buttonLabels= new String[] {
-							PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_button_save, 
-							PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_button_discard, 
+							PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_button_save,
+							PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_button_discard,
 							PreferencesMessages.BuildPathsPropertyPage_unsavedchanges_button_ignore
 					};
 					MessageDialog dialog= new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION, buttonLabels, 0);
@@ -147,7 +145,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	 * Content for valid projects.
 	 */
 	private Control createWithJava(Composite parent, IProject project) {
-		IWorkbenchPreferenceContainer pageContainer= null;	
+		IWorkbenchPreferenceContainer pageContainer= null;
 		IPreferencePageContainer container= getContainer();
 		if (container instanceof IWorkbenchPreferenceContainer) {
 			pageContainer= (IWorkbenchPreferenceContainer) container;
@@ -160,10 +158,10 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 
 	/*
 	 * Content for non-Java projects.
-	 */	
+	 */
 	private Control createWithoutJava(Composite parent) {
 		Label label= new Label(parent, SWT.LEFT);
-		label.setText(PreferencesMessages.BuildPathsPropertyPage_no_java_project_message); 
+		label.setText(PreferencesMessages.BuildPathsPropertyPage_no_java_project_message);
 		
 		fBuildPathsBlock= null;
 		setValid(true);
@@ -172,10 +170,10 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 
 	/*
 	 * Content for closed projects.
-	 */		
+	 */
 	private Control createForClosedProject(Composite parent) {
 		Label label= new Label(parent, SWT.LEFT);
-		label.setText(PreferencesMessages.BuildPathsPropertyPage_closed_project_message); 
+		label.setText(PreferencesMessages.BuildPathsPropertyPage_closed_project_message);
 		
 		fBuildPathsBlock= null;
 		setValid(true);
@@ -183,14 +181,8 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	}
 	
 	private IProject getProject() {
-		IAdaptable adaptable= getElement();
-		if (adaptable != null) {
-			IJavaElement elem= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
-			if (elem instanceof IJavaProject) {
-				return ((IJavaProject) elem).getProject();
-			}
-		}
-		return null;
+        IAdaptable adaptable= getElement();
+		return adaptable == null ? null : (IProject)adaptable.getAdapter(IProject.class);
 	}
 	
 	private boolean isJavaProject(IProject proj) {
