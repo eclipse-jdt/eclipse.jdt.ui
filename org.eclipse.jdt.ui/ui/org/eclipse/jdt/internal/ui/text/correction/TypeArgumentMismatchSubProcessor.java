@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 
 
-public class TypeParameterMismatchSubProcessor {
+public class TypeArgumentMismatchSubProcessor {
 
 //	public static void getTypeParameterMismatchProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 //	CompilationUnit astRoot= context.getASTRoot();
@@ -47,7 +47,7 @@ public class TypeParameterMismatchSubProcessor {
 
 //	}
 
-	public static void removeMismatchedParameters(IInvocationContext context, IProblemLocation problem, Collection proposals){
+	public static void removeMismatchedArguments(IInvocationContext context, IProblemLocation problem, Collection proposals){
 		ICompilationUnit cu= context.getCompilationUnit();
 		ASTNode selectedNode= problem.getCoveredNode(context.getASTRoot());
 		if (!(selectedNode instanceof SimpleName)) {
@@ -60,7 +60,7 @@ public class TypeParameterMismatchSubProcessor {
 			ParameterizedType pt = (ParameterizedType) normalizedNode;
 			ASTNode mt = rewrite.createMoveTarget(pt.getType());
 			rewrite.replace(pt, mt, null);
-			String label= CorrectionMessages.TypeParameterMismatchSubProcessor_removeTypeParameter;
+			String label= CorrectionMessages.TypeArgumentMismatchSubProcessor_removeTypeArguments;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
 			proposals.add(proposal);

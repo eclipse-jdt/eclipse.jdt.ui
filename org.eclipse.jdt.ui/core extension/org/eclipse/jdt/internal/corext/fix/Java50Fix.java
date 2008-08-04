@@ -14,10 +14,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -207,7 +207,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		if (operations.size() == 0)
 			return null;
 		
-		return new Java50Fix(Messages.format(FixMessages.Java50Fix_AddTypeParameters_description,  BasicElementLabels.getJavaElementName(node.getName().getFullyQualifiedName())), compilationUnit, (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
+		return new Java50Fix(Messages.format(FixMessages.Java50Fix_AddTypeArguments_description,  BasicElementLabels.getJavaElementName(node.getName().getFullyQualifiedName())), compilationUnit, (CompilationUnitRewriteOperation[])operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
 	}
 		
 	public static IFix createCleanUp(CompilationUnit compilationUnit, 

@@ -71,7 +71,7 @@ public final class FixMessages extends NLS {
 	public static String Java50Fix_AddOverride_description;
 	public static String Java50Fix_ConvertToEnhancedForLoop_description;
 	public static String Java50Fix_ParametrizeTypeReference_description;
-	public static String Java50Fix_AddTypeParameters_description;
+	public static String Java50Fix_AddTypeArguments_description;
 	public static String Java50Fix_SerialVersion_default_description;
 	public static String Java50Fix_SerialVersion_hash_description;
 	public static String Java50Fix_InitializeSerialVersionId_subtask_description;
