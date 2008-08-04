@@ -13,12 +13,6 @@ package org.eclipse.jdt.internal.ui.workingsets;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IAdaptable;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -31,6 +25,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IAdaptable;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -451,7 +451,8 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		} else {
 			// Add inaccessible resources
 			IAdaptable[] oldItems= fWorkingSet.getElements();
-			HashSet closedWithChildren= new HashSet(elements.size());
+			HashSet closedProjectsToRetain= new HashSet(elements.size());
+			HashSet closedProjectsToRemove= new HashSet(elements.size());
 			for (int i= 0; i < oldItems.length; i++) {
 				IResource oldResource= null;
 				if (oldItems[i] instanceof IResource) {
@@ -461,13 +462,17 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 				}
 				if (oldResource != null && oldResource.isAccessible() == false) {
 					IProject project= oldResource.getProject();
-					if (closedWithChildren.contains(project) || elements.contains(project)) {
+					if (oldResource.equals(project)) {
+						closedProjectsToRetain.add(project);
+					} else	if (elements.contains(project)) {
 						elements.add(oldItems[i]);
-						elements.remove(project);
-						closedWithChildren.add(project);
+						closedProjectsToRemove.add(project);
 					}
 				}
 			}
+			closedProjectsToRemove.removeAll(closedProjectsToRetain);
+			elements.removeAll(closedProjectsToRemove);
+			
 			fWorkingSet.setName(workingSetName);
 			fWorkingSet.setElements((IAdaptable[]) elements.toArray(new IAdaptable[elements.size()]));
 		}
