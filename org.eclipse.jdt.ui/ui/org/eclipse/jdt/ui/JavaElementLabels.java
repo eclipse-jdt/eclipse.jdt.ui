@@ -1355,7 +1355,7 @@ public class JavaElementLabels {
 	
 	private static void getCompressedPackageFragment(IPackageFragment pack, StyledString result) {
 		refreshPackageNamePattern();
-		if (fgPkgNameLength == 0) {
+		if (fgPkgNameLength < 0) {
 			result.append(pack.getElementName());
 			return;
 		}
