@@ -689,6 +689,7 @@ public class JavadocContentAccess2 {
 		List parameterNames= initParameterNames();
 		List exceptionNames= initExceptionNames();
 		
+		TagElement deprecatedTag= null;
 		TagElement start= null;
 		List/*<TagElement>*/ parameters= new ArrayList();
 		TagElement returnTag= null;
@@ -746,12 +747,17 @@ public class JavadocContentAccess2 {
 				authors.add(tag);
 			} else if (TagElement.TAG_SEE.equals(tagName)) {
 				sees.add(tag);
+			} else if (TagElement.TAG_DEPRECATED.equals(tagName)) {
+				if (deprecatedTag == null)
+					deprecatedTag= tag; // the Javadoc tool only shows the first deprecated tag
 			} else {
 				rest.add(tag);
 			}
 		}
 		
-		//TODO: @deprecated at top, @Documented annotations before header
+		//TODO: @Documented annotations before header
+		if (deprecatedTag != null)
+			handleDeprecatedTag(deprecatedTag);
 		if (start != null)
 			handleContentElements(start.fragments());
 		else if (fMethod != null) {
@@ -799,6 +805,14 @@ public class JavadocContentAccess2 {
 		return result;
 	}
 
+	private void handleDeprecatedTag(TagElement tag) {
+		fBuf.append("<p><b>"); //$NON-NLS-1$
+		fBuf.append(JavaDocMessages.JavaDoc2HTMLTextReader_deprecated_section);
+		fBuf.append("</b> <i>"); //$NON-NLS-1$
+		handleContentElements(tag.fragments());
+		fBuf.append("</i></p>"); //$NON-NLS-1$
+	}
+	
 	private void handleSuperMethodReferences() {
 		if (fMethod != null) {
 			try {
