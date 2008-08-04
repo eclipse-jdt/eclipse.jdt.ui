@@ -13,9 +13,6 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.io.File;
 import java.util.List;
 
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -23,6 +20,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.StatusDialog;
@@ -48,7 +48,7 @@ public class VariableCreationDialog extends StatusDialog {
 	private IDialogSettings fDialogSettings;
 	
 	private StringDialogField fNameField;
-	private StatusInfo fNameStatus;	
+	private StatusInfo fNameStatus;
 	
 	private StringButtonDialogField fPathField;
 	private StatusInfo fPathStatus;
@@ -61,9 +61,9 @@ public class VariableCreationDialog extends StatusDialog {
 	public VariableCreationDialog(Shell parent, CPVariableElement element, List existingNames) {
 		super(parent);
 		if (element == null) {
-			setTitle(NewWizardMessages.VariableCreationDialog_titlenew); 
+			setTitle(NewWizardMessages.VariableCreationDialog_titlenew);
 		} else {
-			setTitle(NewWizardMessages.VariableCreationDialog_titleedit); 
+			setTitle(NewWizardMessages.VariableCreationDialog_titleedit);
 		}
 		
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
@@ -76,16 +76,16 @@ public class VariableCreationDialog extends StatusDialog {
 		NewVariableAdapter adapter= new NewVariableAdapter();
 		fNameField= new StringDialogField();
 		fNameField.setDialogFieldListener(adapter);
-		fNameField.setLabelText(NewWizardMessages.VariableCreationDialog_name_label); 
+		fNameField.setLabelText(NewWizardMessages.VariableCreationDialog_name_label);
 
 		fPathField= new StringButtonDialogField(adapter);
 		fPathField.setDialogFieldListener(adapter);
-		fPathField.setLabelText(NewWizardMessages.VariableCreationDialog_path_label); 
-		fPathField.setButtonLabel(NewWizardMessages.VariableCreationDialog_path_file_button); 
+		fPathField.setLabelText(NewWizardMessages.VariableCreationDialog_path_label);
+		fPathField.setButtonLabel(NewWizardMessages.VariableCreationDialog_path_file_button);
 		
 		fDirButton= new SelectionButtonDialogField(SWT.PUSH);
 		fDirButton.setDialogFieldListener(adapter);
-		fDirButton.setLabelText(NewWizardMessages.VariableCreationDialog_path_dir_button); 
+		fDirButton.setLabelText(NewWizardMessages.VariableCreationDialog_path_dir_button);
 		
 		fExistingNames= existingNames;
 		
@@ -114,7 +114,7 @@ public class VariableCreationDialog extends StatusDialog {
 
 	/*
 	 * @see Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
-	 */	
+	 */
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
 				
@@ -124,7 +124,7 @@ public class VariableCreationDialog extends StatusDialog {
 		GridLayout layout= new GridLayout();
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
-		layout.numColumns= 3;
+		layout.numColumns= 4;
 		inner.setLayout(layout);
 		
 		int fieldWidthHint= convertWidthInCharsToPixels(50);
@@ -133,17 +133,16 @@ public class VariableCreationDialog extends StatusDialog {
 		LayoutUtil.setWidthHint(fNameField.getTextControl(null), fieldWidthHint);
 		LayoutUtil.setHorizontalGrabbing(fNameField.getTextControl(null));
 		
-		DialogField.createEmptySpace(inner, 1);
+		DialogField.createEmptySpace(inner, 2);
 		
 		fPathField.doFillIntoGrid(inner, 3);
 		LayoutUtil.setWidthHint(fPathField.getTextControl(null), fieldWidthHint);
 		
-		DialogField.createEmptySpace(inner, 2);
 		fDirButton.doFillIntoGrid(inner, 1);
 		
 		DialogField focusField= (fElement == null) ? fNameField : fPathField;
 		focusField.postSetFocusOnDialogField(parent.getDisplay());
-		applyDialogFont(composite);		
+		applyDialogFont(composite);
 		return composite;
 	}
 
@@ -172,7 +171,7 @@ public class VariableCreationDialog extends StatusDialog {
 		}
 	}
 	
-	private void doFieldUpdated(DialogField field) {	
+	private void doFieldUpdated(DialogField field) {
 		if (field == fNameField) {
 			fNameStatus= nameUpdated();
 		} else if (field == fPathField) {
@@ -182,23 +181,23 @@ public class VariableCreationDialog extends StatusDialog {
 			if (path != null) {
 				fPathField.setText(path.toString());
 			}
-		}		
+		}
 		updateStatus(StatusUtil.getMoreSevere(fPathStatus, fNameStatus));
-	}		
+	}
 	
 	private StatusInfo nameUpdated() {
 		StatusInfo status= new StatusInfo();
 		String name= fNameField.getText();
 		if (name.length() == 0) {
-			status.setError(NewWizardMessages.VariableCreationDialog_error_entername); 
+			status.setError(NewWizardMessages.VariableCreationDialog_error_entername);
 			return status;
 		}
 		if (name.trim().length() != name.length()) {
-			status.setError(NewWizardMessages.VariableCreationDialog_error_whitespace); 
+			status.setError(NewWizardMessages.VariableCreationDialog_error_whitespace);
 		} else if (!Path.ROOT.isValidSegment(name)) {
-			status.setError(NewWizardMessages.VariableCreationDialog_error_invalidname); 
+			status.setError(NewWizardMessages.VariableCreationDialog_error_invalidname);
 		} else if (nameConflict(name)) {
-			status.setError(NewWizardMessages.VariableCreationDialog_error_nameexists); 
+			status.setError(NewWizardMessages.VariableCreationDialog_error_nameexists);
 		}
 		return status;
 	}
@@ -223,9 +222,9 @@ public class VariableCreationDialog extends StatusDialog {
 		String path= fPathField.getText();
 		if (path.length() > 0) { // empty path is ok
 			if (!Path.ROOT.isValidPath(path)) {
-				status.setError(NewWizardMessages.VariableCreationDialog_error_invalidpath); 
+				status.setError(NewWizardMessages.VariableCreationDialog_error_invalidpath);
 			} else if (!new File(path).exists()) {
-				status.setWarning(NewWizardMessages.VariableCreationDialog_warning_pathnotexists); 
+				status.setWarning(NewWizardMessages.VariableCreationDialog_warning_pathnotexists);
 			}
 		}
 		return status;
@@ -234,7 +233,7 @@ public class VariableCreationDialog extends StatusDialog {
 	
 	private String getInitPath() {
 		String initPath= fPathField.getText();
-		if (initPath.length() == 0) {		
+		if (initPath.length() == 0) {
 			initPath= fDialogSettings.get(IUIConstants.DIALOGSTORE_LASTEXTJAR);
 			if (initPath == null) {
 				initPath= ""; //$NON-NLS-1$
@@ -247,7 +246,7 @@ public class VariableCreationDialog extends StatusDialog {
 			initPath= entryPath.toOSString();
 		}
 		return initPath;
-	}		
+	}
 	
 	
 	/*
@@ -257,7 +256,7 @@ public class VariableCreationDialog extends StatusDialog {
 		String initPath= getInitPath();
 		
 		FileDialog dialog= new FileDialog(getShell());
-		dialog.setText(NewWizardMessages.VariableCreationDialog_extjardialog_text); 
+		dialog.setText(NewWizardMessages.VariableCreationDialog_extjardialog_text);
 		dialog.setFilterExtensions(ArchiveFileFilter.ALL_ARCHIVES_FILTER_EXTENSIONS);
 		dialog.setFilterPath(initPath);
 		String res= dialog.open();
@@ -272,15 +271,15 @@ public class VariableCreationDialog extends StatusDialog {
 		String initPath= getInitPath();
 		
 		DirectoryDialog dialog= new DirectoryDialog(getShell());
-		dialog.setText(NewWizardMessages.VariableCreationDialog_extdirdialog_text); 
-		dialog.setMessage(NewWizardMessages.VariableCreationDialog_extdirdialog_message); 
+		dialog.setText(NewWizardMessages.VariableCreationDialog_extdirdialog_text);
+		dialog.setMessage(NewWizardMessages.VariableCreationDialog_extdirdialog_message);
 		dialog.setFilterPath(initPath);
 		String res= dialog.open();
 		if (res != null) {
 			fDialogSettings.put(IUIConstants.DIALOGSTORE_LASTEXTJAR, dialog.getFilterPath());
 			return Path.fromOSString(res);
 		}
-		return null;		
+		return null;
 	}
 	
 		
