@@ -20,12 +20,12 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Path;
-
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 
@@ -239,6 +239,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		fMyPart.fViewer.setInput(fJProject2);
 
 		fMyPart.clear();
+		fMyPart.setRefreshLoggingEnabled(true); // tracking down https://bugs.eclipse.org/bugs/show_bug.cgi?id=243132
 
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[] { cu }, fPack81, IJavaElementDelta.ADDED);
@@ -248,6 +249,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		fMyPart.pushDisplay();
 		
 		assertPack81RefreshedOnce();
+		fMyPart.setRefreshLoggingEnabled(false);
 	}
 
 	public void testAddFragmentToLogicalPackage() throws Exception {

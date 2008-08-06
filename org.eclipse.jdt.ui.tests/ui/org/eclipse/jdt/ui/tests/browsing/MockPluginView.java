@@ -41,6 +41,8 @@ public class MockPluginView extends PackagesView {
 	private List fAddedParentObject;
 	private List fRefreshedObject;
 
+	private boolean fRefreshLogging;
+	
 	// We have to make this static since it must be set
 	// before we create an instance via showView.
 	private static boolean fgListState;
@@ -228,6 +230,8 @@ public class MockPluginView extends PackagesView {
 		public void refresh(Object object) {
 			fRefreshHappened= true;
 			fRefreshedObject.add(object);
+			if (fRefreshLogging)
+				new Exception("Refresh tree item" + object).printStackTrace();
 		}
 
 		public void remove(Object object) {
@@ -253,6 +257,8 @@ public class MockPluginView extends PackagesView {
 		public void refresh(Object object) {
 			fRefreshHappened= true;
 			fRefreshedObject.add(object);
+			if (fRefreshLogging)
+				new Exception("Refresh table item" + object).printStackTrace();
 			super.refresh(object);
 		}
 
@@ -267,5 +273,9 @@ public class MockPluginView extends PackagesView {
 			fAddedObject.add(object);
 			super.add(object);
 		}
+	}
+
+	public void setRefreshLoggingEnabled(boolean enabled) {
+		fRefreshLogging= enabled;
 	}
 }
