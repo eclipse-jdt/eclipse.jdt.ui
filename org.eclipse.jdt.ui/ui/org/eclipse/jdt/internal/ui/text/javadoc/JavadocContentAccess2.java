@@ -810,7 +810,7 @@ public class JavadocContentAccess2 {
 		fBuf.append(JavaDocMessages.JavaDoc2HTMLTextReader_deprecated_section);
 		fBuf.append("</b> <i>"); //$NON-NLS-1$
 		handleContentElements(tag.fragments());
-		fBuf.append("</i></p>"); //$NON-NLS-1$
+		fBuf.append("</i><p>"); //$NON-NLS-1$ TODO: Why not </p>? See https://bugs.eclipse.org/bugs/show_bug.cgi?id=243318 .
 	}
 	
 	private void handleSuperMethodReferences() {
