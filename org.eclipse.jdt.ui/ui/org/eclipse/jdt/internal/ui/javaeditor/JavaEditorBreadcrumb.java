@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -174,7 +175,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			return contentProvider instanceof IWorkingCopyProvider && !((IWorkingCopyProvider) contentProvider).providesWorkingCopies();
 		}
 
-		/* 
+		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.BreadcrumbViewer#configureDropDownViewer(org.eclipse.jface.viewers.TreeViewer, java.lang.Object)
 		 */
 		public void configureDropDownViewer(TreeViewer viewer, Object input) {
@@ -193,7 +194,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 					return true;
 				}
 			});
-			JavaUIHelp.setHelp(viewer, IJavaHelpContextIds.JAVA_EDITOR_BREADCRUMB);	
+			JavaUIHelp.setHelp(viewer, IJavaHelpContextIds.JAVA_EDITOR_BREADCRUMB);
 		}
 
 		private ILabelProvider createDropDownLabelProvider() {
@@ -262,21 +263,39 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 				}
 				fElements= packages.toArray();
 			} else if (inputElement instanceof IJavaModel) {
-				IProject[] projects= ((IJavaModel)inputElement).getWorkspace().getRoot().getProjects();
-				fElements= getAccessibleProjects(projects);
+				fElements= getAccessibleProjects((IJavaModel)inputElement);
 			} else {
 				fElements= fParent.getChildren(inputElement);
 			}
 
 			return fElements;
 		}
-		
-		private Object[] getAccessibleProjects(IProject[] projects) {
-			ArrayList result= new ArrayList(projects.length);
-			for (int i= 0; i < projects.length; i++) {
-				IProject project= projects[i];
+
+		/**
+		 * Returns all accessible projects of the given Java model.
+		 * 
+		 * @param model the Java model
+		 * @return the accessible projects of the given model
+		 */
+		private Object[] getAccessibleProjects(IJavaModel model) {
+			IJavaProject[] javaProjects;
+			Object[] nonJavaResources;
+			try {
+				javaProjects= model.getJavaProjects();
+				nonJavaResources= model.getNonJavaResources();
+			} catch (JavaModelException e) {
+				return fParent.getChildren(model);
+			}
+			ArrayList result= new ArrayList(javaProjects.length + nonJavaResources.length);
+			for (int i= 0; i < nonJavaResources.length; i++) {
+				IProject project= (IProject)nonJavaResources[i];
 				if (project.isAccessible())
-					result.add(projects[i]);
+					result.add(project);
+			}
+			for (int i= 0; i < javaProjects.length; i++) {
+				IJavaProject javaProject= javaProjects[i];
+				if (javaProject.getProject().isAccessible())
+					result.add(javaProject);
 			}
 			return result.toArray(new Object[result.size()]);
 		}
@@ -455,7 +474,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 					return res;
 			}
 			
-			return null;			
+			return null;
 		}
 
 		/**
