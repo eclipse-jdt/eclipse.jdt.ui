@@ -337,32 +337,31 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		fOperationTarget.doOperation(fOperationCode);
 
 		if (clipboardData != null) {
+			/*
+			 * We currently make assumptions about what the styled text widget sets,
+			 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=61876
+			 */
 			Clipboard clipboard= new Clipboard(getDisplay());
 			try {
-				/*
-				 * We currently make assumptions about what the styled text widget sets,
-				 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=61876
-				 */
 				Object textData= clipboard.getContents(TextTransfer.getInstance());
-				Object rtfData= clipboard.getContents(RTFTransfer.getInstance());
+				/*
+				 * Don't add if we didn't get any text data from the clipboard, see:
+				 * - https://bugs.eclipse.org/bugs/show_bug.cgi?id=70077
+				 * - https://bugs.eclipse.org/bugs/show_bug.cgi?id=200743
+				 */
+				if (textData == null)
+					return;
 
 				ArrayList datas= new ArrayList(3);
 				ArrayList transfers= new ArrayList(3);
-				if (textData != null) {
-					datas.add(textData);
-					transfers.add(TextTransfer.getInstance());
-				}
+				datas.add(textData);
+				transfers.add(TextTransfer.getInstance());
+
+				Object rtfData= clipboard.getContents(RTFTransfer.getInstance());
 				if (rtfData != null) {
 					datas.add(rtfData);
 					transfers.add(RTFTransfer.getInstance());
 				}
-
-				/*
-				 * Don't add if we didn't get any data from the clipboard
-				 * see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=70077
-				 */
-				if (datas.isEmpty())
-					return;
 
 				datas.add(clipboardData);
 				transfers.add(fgTransferInstance);
