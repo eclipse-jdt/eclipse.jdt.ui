@@ -416,8 +416,16 @@ class BreadcrumbItemDetails {
 
 			public void mouseDown(MouseEvent e) {
 				BreadcrumbViewer viewer= fParent.getViewer();
+				
+				int parentIndex= viewer.getIndexOfItem(fParent) - 1;
+				Shell shell= null;
+				if (parentIndex >= 0) {//sanity check, must always hold
+					BreadcrumbItem dropDownItem= viewer.getItem(parentIndex);
+					shell= dropDownItem.getDropDownShell();
+				}
+				
 				viewer.selectItem(fParent);
-				if (e.button == 1 && e.stateMask == 0) {
+				if (shell == null && e.button == 1 && e.stateMask == 0) {
 					fParent.getViewer().fireDoubleClick();
 				}
 			}
