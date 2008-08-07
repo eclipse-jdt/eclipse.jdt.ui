@@ -33,7 +33,6 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Item;
@@ -45,12 +44,14 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.util.Geometry;
+import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -75,11 +76,11 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 class BreadcrumbItemDropDown {
 
 	/**
-	 * Tells whether we're in breadcrumb debug mode.
+	 * Tells whether this class is in debug mode.
 	 * 
 	 * @since 3.5
 	 */
-	private static boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/breadcrumb")); //$NON-NLS-1$//$NON-NLS-2$
+	private static boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/BreadcrumbItemDropDown")); //$NON-NLS-1$//$NON-NLS-2$
 
 	private static final boolean IS_MAC_WORKAROUND= "carbon".equals(SWT.getPlatform()); //$NON-NLS-1$
 
@@ -279,7 +280,7 @@ class BreadcrumbItemDropDown {
 	 */
 	public void showMenu() {
 		if (DEBUG)
-			System.out.println("BreadcrumbItemDropDown.showMenu()");
+			System.out.println("BreadcrumbItemDropDown.showMenu()"); //$NON-NLS-1$
 		
 		if (!fEnabled || fMenuIsShown)
 			return;
@@ -288,7 +289,7 @@ class BreadcrumbItemDropDown {
 		
 		fShell= new Shell(fToolBar.getShell(), SWT.RESIZE | SWT.TOOL | SWT.ON_TOP);
 		if (DEBUG)
-			System.out.println("	creating new shell");
+			System.out.println("	creating new shell"); //$NON-NLS-1$
 		
 		GridLayout layout= new GridLayout(1, false);
 		layout.marginHeight= 0;
@@ -317,7 +318,7 @@ class BreadcrumbItemDropDown {
 		fDropDownViewer.addOpenListener(new IOpenListener() {
 			public void open(OpenEvent event) {
 				if (DEBUG)
-					System.out.println("BreadcrumbItemDropDown.showMenu()$treeViewer>open");
+					System.out.println("BreadcrumbItemDropDown.showMenu()$treeViewer>open"); //$NON-NLS-1$
 				
 				ISelection selection= event.getSelection();
 				if (!(selection instanceof IStructuredSelection))
@@ -327,73 +328,26 @@ class BreadcrumbItemDropDown {
 				if (element == null)
 					return;
 				
-				fParent.getViewer().fireMenuSelection(element);
-
-				if (DEBUG) {
-					System.out.println("	isDisposed: " + fShell.isDisposed());
-					System.out.println("	hasF	  ocus: " + (!fShell.isDisposed() && fShell.isFocusControl()));
-				}
-
-				if (fShell.isDisposed())
-					return;
-
-				if (fDropDownViewer.getExpandedState(element)) {
-					fDropDownViewer.collapseToLevel(element, 1);
-				} else {
-					tree.setRedraw(false);
-					try {
-						fDropDownViewer.expandToLevel(element, 1);
-						resizeShell(fShell);
-					} finally {
-						tree.setRedraw(true);
-					}
-				}
+				openElement(element);
 			}
 		});
 
 		tree.addMouseListener(new MouseListener() {
 			public void mouseUp(MouseEvent e) {
 				if (DEBUG)
-					System.out.println("BreadcrumbItemDropDown.showMenu()$treeViewer>mouseUp");
+					System.out.println("BreadcrumbItemDropDown.showMenu()$treeViewer>mouseUp"); //$NON-NLS-1$
 
 				if (e.button != 1)
+					return;
+				
+				if ((OpenStrategy.getOpenMethod() & OpenStrategy.SINGLE_CLICK) != 0)
 					return;
 
 				Item item= tree.getItem(new Point(e.x, e.y));
 				if (item == null)
 					return;
 
-				Object data= item.getData();
-				if (data == null)
-					return;
-
-				fParent.getViewer().fireMenuSelection(data);
-
-				if (DEBUG) {
-					System.out.println("	isDisposed: " + fShell.isDisposed());
-					System.out.println("	hasFocus: " + (!fShell.isDisposed() && fShell.isFocusControl()));
-				}
-				
-				if (fShell.isDisposed())
-					return;
-
-//				if (!fShell.isFocusControl()) {
-//					fShell.close();
-//					return;
-//				}
-
-
-				if (fDropDownViewer.getExpandedState(data)) {
-					fDropDownViewer.collapseToLevel(data, 1);
-				} else {
-					tree.setRedraw(false);
-					try {
-						fDropDownViewer.expandToLevel(data, 1);
-						resizeShell(fShell);
-					} finally {
-						tree.setRedraw(true);
-					}
-				}
+				openElement(item.getData());
 			}
 
 			public void mouseDown(MouseEvent e) {
@@ -511,6 +465,47 @@ class BreadcrumbItemDropDown {
 		installCloser(fShell);
 	}
 
+	private void openElement(Object data) {
+		if (data == null)
+			return;
+
+		// This might or might not open an editor
+		fParent.getViewer().fireMenuSelection(data);
+		
+		boolean treeHasFocus= !fShell.isDisposed() && fDropDownViewer.getTree().isFocusControl();
+
+		if (DEBUG) {
+			System.out.println("	isDisposed: " + fShell.isDisposed()); //$NON-NLS-1$
+			System.out.println("	shell hasFocus: " + (!fShell.isDisposed() && fShell.isFocusControl())); //$NON-NLS-1$
+			System.out.println("	tree hasFocus: " + treeHasFocus); //$NON-NLS-1$
+		}
+
+		if (fShell.isDisposed())
+			return;
+
+		if (!treeHasFocus) {
+			fShell.close();
+			return;
+		}
+
+		toggleExpansionState(data);
+	}
+
+	private void toggleExpansionState(Object element) {
+		Tree tree= fDropDownViewer.getTree();
+		if (fDropDownViewer.getExpandedState(element))
+			fDropDownViewer.collapseToLevel(element, 1);
+		else {
+			tree.setRedraw(false);
+			try {
+				fDropDownViewer.expandToLevel(element, 1);
+				resizeShell(fShell);
+			} finally {
+				tree.setRedraw(true);
+			}
+		}
+	}
+
 	/**
 	 * The closer closes the given shell when the focus is lost.
 	 * 
@@ -520,44 +515,41 @@ class BreadcrumbItemDropDown {
 		final Listener focusListener= new Listener() {
 			public void handleEvent(Event event) {
 				Widget focusElement= event.widget;
-				boolean isTree= focusElement instanceof Tree && ((Tree)focusElement).getShell() == shell;
-				if (event.type == SWT.FocusIn) {
-					if (DEBUG)
-						System.out.println("focusIn - isTree: " + isTree);
-					if (!(focusElement instanceof Control)) {
-						if (DEBUG)
-							System.out.println("==> closing1");
-						shell.close();
-						return;
-					}
-					Control control= (Control) focusElement;
-					while (control != null) {
-						if (control == shell)
-							return;
-
-						control= control.getParent();
-					}
-					if (DEBUG)
-						System.out.println("==> closing shell since focus in other widget");
-					shell.close();
-				}
+				boolean isFocusBreadcrumbTreeFocusWidget= focusElement == shell || focusElement instanceof Tree && ((Tree)focusElement).getShell() == shell;
 				
-				if (event.type == SWT.FocusOut) {
-					if (DEBUG) {
-						System.out.println("focusOut - isTree: " + isTree);
-					}
-					
-					if (event.display.getActiveShell() == null) {
+				switch (event.type) {
+					case SWT.FocusIn:
 						if (DEBUG)
-							System.out.println("==> closing shell since event.display.getActiveShell() == null");
-						shell.close();
-					}
+							System.out.println("focusIn - is breadcrumb tree: " + isFocusBreadcrumbTreeFocusWidget); //$NON-NLS-1$
+
+						if (!isFocusBreadcrumbTreeFocusWidget) {
+							if (DEBUG)
+								System.out.println("==> closing shell since focus in other widget"); //$NON-NLS-1$
+							shell.close();
+						}
+						break;
+
+					case SWT.FocusOut:
+						if (DEBUG)
+							System.out.println("focusOut - is breadcrumb tree: " + isFocusBreadcrumbTreeFocusWidget); //$NON-NLS-1$
+
+						if (event.display.getActiveShell() == null) {
+							if (DEBUG)
+								System.out.println("==> closing shell since event.display.getActiveShell() == null"); //$NON-NLS-1$
+							shell.close();
+						}
+						break;
+
+					default:
+						Assert.isTrue(false);
 				}
 			}
 		};
-		shell.getDisplay().addFilter(SWT.FocusIn, focusListener);
-		shell.getDisplay().addFilter(SWT.FocusOut, focusListener);
-		
+
+		final Display display= shell.getDisplay();
+		display.addFilter(SWT.FocusIn, focusListener);
+		display.addFilter(SWT.FocusOut, focusListener);
+
 		final ControlListener controlListener= new ControlListener() {
 			public void controlMoved(ControlEvent e) {
 				shell.close();
@@ -572,10 +564,10 @@ class BreadcrumbItemDropDown {
 		shell.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
 				if (DEBUG)
-					System.out.println("==> shell disposed");
+					System.out.println("==> shell disposed"); //$NON-NLS-1$
 
-				e.display.removeFilter(SWT.FocusIn, focusListener);
-				e.display.removeFilter(SWT.FocusOut, focusListener);
+				display.removeFilter(SWT.FocusIn, focusListener);
+				display.removeFilter(SWT.FocusOut, focusListener);
 	
 				if (!fToolBar.isDisposed()) {
 					fToolBar.getShell().removeControlListener(controlListener);
@@ -588,7 +580,7 @@ class BreadcrumbItemDropDown {
 
 			public void shellClosed(ShellEvent e) {
 				if (DEBUG)
-					System.out.println("==> shellClosed");
+					System.out.println("==> shellClosed"); //$NON-NLS-1$
 
 				if (!fMenuIsShown)
 					return;
