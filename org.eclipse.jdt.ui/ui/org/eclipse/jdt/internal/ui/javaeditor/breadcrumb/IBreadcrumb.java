@@ -33,37 +33,38 @@ public interface IBreadcrumb {
 	 * @return the control containing the created content
 	 */
 	public Control createContent(Composite parent);
-	
+
 	/**
-	 * @return the selection provider for this breadcrumb.
+	 * Returns the selection provider for this breadcrumb.
+	 * 
+	 * @return the selection provider for this breadcrumb
 	 */
 	public ISelectionProvider getSelectionProvider();
 	
 	/**
-	 * Activates the breadcrumb. This sets the keyboard focus 
+	 * Activates the breadcrumb. This sets the keyboard focus
 	 * inside this breadcrumb and retargets the editor
 	 * actions.
 	 */
 	public void activate();
-	
+
 	/**
-	 * A breadcrumb is active if it either has the focus or
-	 * another workbench part has the focus and the breadcrumb
-	 * had the focus before the other workbench part was made
-	 * active.
+	 * A breadcrumb is active if it either has the focus or another workbench part has the focus and
+	 * the breadcrumb had the focus before the other workbench part was made active.
 	 * 
-	 * @return true if this breadcrumb is active
+	 * @return <code>true</code> if this breadcrumb is active
 	 */
 	public boolean isActive();
 
 	/**
 	 * Set the input of the breadcrumb to the given element
+	 * 
 	 * @param element the input element can be <code>null</code>
 	 */
 	public void setInput(Object element);
 
 	/**
-	 * Dispose all resources hold by this
+	 * Dispose all resources hold by this breadcrumb.
 	 */
 	public void dispose();
 

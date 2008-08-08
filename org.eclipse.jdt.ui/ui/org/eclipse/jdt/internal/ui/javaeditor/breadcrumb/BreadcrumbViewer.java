@@ -15,9 +15,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.ListenerList;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -39,6 +36,9 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
 
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.ListenerList;
+
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -56,16 +56,15 @@ import org.eclipse.ui.forms.FormColors;
 
 
 /**
- * A breadcrumb viewer shows a the parent chain of its input element
- * in a list. Each breadcrumb item of that list can be expanded and a sibling
- * of the element presented by the breadcrumb item can be selected.
+ * A breadcrumb viewer shows a the parent chain of its input element in a list. Each breadcrumb item
+ * of that list can be expanded and a sibling of the element presented by the breadcrumb item can be
+ * selected.
  * <p>
- * Content providers for breadcrumb viewers must implement the
- * <code>ITreeContentProvider</code> interface.
+ * Content providers for breadcrumb viewers must implement the <code>ITreeContentProvider</code>
+ * interface.
  * </p>
  * <p>
- * Label providers for breadcrumb viewers must implement the <code>ILabelProvider</code>
- * interface.
+ * Label providers for breadcrumb viewers must implement the <code>ILabelProvider</code> interface.
  * </p>
  * 
  * @since 3.4
@@ -82,6 +81,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	private BreadcrumbItem fSelectedItem;
 	private ILabelProvider fToolTipLabelProvider;
 
+	
 	/**
 	 * Create a new <code>BreadcrumbViewer</code>.
 	 * <p>
@@ -120,7 +120,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 					if (fGradientBackground != null)
 						fGradientBackground.dispose();
 					fGradientBackground= image;
-				}				
+				}
 			}
 		});
 		fContainer.addDisposeListener(new DisposeListener() {
@@ -149,20 +149,19 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 			}
 		});
 	}
-	
+
 	/**
-	 * Configure the given drop down viewer. The given input is used for the viewers
-	 * input. Clients must at least set the label and the content provider
-	 * for the viewer.
+	 * Configure the given drop down viewer. The given input is used for the viewers input. Clients
+	 * must at least set the label and the content provider for the viewer.
 	 * 
 	 * @param viewer the viewer to configure
-	 * @param input the input for the viewer.
+	 * @param input the input for the viewer
 	 */
 	protected abstract void configureDropDownViewer(TreeViewer viewer, Object input);
 
 	/**
-	 * The tool tip to use for the tool tip labels. <code>null</code>
-	 * if the viewers label provider should be used.
+	 * The tool tip to use for the tool tip labels. <code>null</code> if the viewers label provider
+	 * should be used.
 	 * 
 	 * @param toolTipLabelProvider the label provider for the tool tips or <code>null</code>
 	 */
@@ -170,14 +169,14 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		fToolTipLabelProvider= toolTipLabelProvider;
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jface.viewers.Viewer#getControl()
 	 */
 	public Control getControl() {
 		return fContainer;
 	}
 	
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jface.viewers.StructuredViewer#getRoot()
 	 */
 	protected Object getRoot() {
@@ -187,7 +186,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		return ((BreadcrumbItem) fBreadcrumbItems.get(0)).getData();
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jface.viewers.StructuredViewer#reveal(java.lang.Object)
 	 */
 	public void reveal(Object element) {
@@ -245,11 +244,10 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 
 		return null;
 	}
-	
+
 	/**
-	 * Returns the selection provider which provides the selection of
-	 * the drop down currently opened or <code>null</code> if no
-	 * drop down is open at the moment.
+	 * Returns the selection provider which provides the selection of the drop down currently opened
+	 * or <code>null</code> if no drop down is open at the moment.
 	 * 
 	 * @return the selection provider of the open drop down or <code>null</code>
 	 */
@@ -284,7 +282,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		fMenuListeners.remove(listener);
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jface.viewers.StructuredViewer#assertContentProviderType(org.eclipse.jface.viewers.IContentProvider)
 	 */
 	protected void assertContentProviderType(IContentProvider provider) {
@@ -292,7 +290,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		Assert.isTrue(provider instanceof ITreeContentProvider);
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jface.viewers.Viewer#inputChanged(java.lang.Object, java.lang.Object)
 	 */
 	protected void inputChanged(Object fInput, Object oldInput) {
@@ -330,7 +328,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jface.viewers.StructuredViewer#doFindInputItem(java.lang.Object)
 	 */
 	protected Widget doFindInputItem(Object element) {
@@ -343,7 +341,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jface.viewers.StructuredViewer#doFindItem(java.lang.Object)
 	 */
 	protected Widget doFindItem(Object element) {
@@ -359,7 +357,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jface.viewers.StructuredViewer#doUpdateItem(org.eclipse.swt.widgets.Widget, java.lang.Object, boolean)
 	 */
 	protected void doUpdateItem(Widget widget, Object element, boolean fullMap) {
@@ -381,7 +379,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 			BreadcrumbViewerRow row= new BreadcrumbViewerRow(this, item);
 			ViewerCell cell= row.getCell(0);
 
-			((CellLabelProvider) getLabelProvider()).update(cell);		
+			((CellLabelProvider) getLabelProvider()).update(cell);
 			
 			item.refreshArrow();
 
@@ -393,7 +391,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jface.viewers.StructuredViewer#getSelectionFromWidget()
 	 */
 	protected List getSelectionFromWidget() {
@@ -408,7 +406,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		return result;
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jface.viewers.StructuredViewer#internalRefresh(java.lang.Object)
 	 */
 	protected void internalRefresh(Object element) {
@@ -431,7 +429,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jface.viewers.StructuredViewer#setSelectionToWidget(java.util.List, boolean)
 	 */
 	protected void setSelectionToWidget(List l, boolean reveal) {
@@ -462,8 +460,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	}
 
 	/**
-	 * Set a single selection to the given item. <code>null</code>
-	 * to deselect all.
+	 * Set a single selection to the given item. <code>null</code> to deselect all.
 	 * 
 	 * @param item the item to select or <code>null</code>
 	 */
@@ -487,6 +484,8 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	}
 
 	/**
+	 * Returns the item count.
+	 * 
 	 * @return number of items shown in the viewer
 	 */
 	int getItemCount() {
@@ -494,14 +493,18 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	}
 
 	/**
+	 * Returns the item for the given item index.
+	 * 
 	 * @param index the index of the item
 	 * @return the item ad the given <code>index</code>
 	 */
 	BreadcrumbItem getItem(int index) {
 		return (BreadcrumbItem) fBreadcrumbItems.get(index);
 	}
-	
+
 	/**
+	 * Returns the index of the given item.
+	 * 
 	 * @param item the item to search
 	 * @return the index of the item or -1 if not found
 	 */
@@ -516,14 +519,14 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	}
 
 	/**
-	 * Notify all double click listeners
+	 * Notifies all double click listeners.
 	 */
 	void fireDoubleClick() {
 		fireDoubleClick(new DoubleClickEvent(this, getSelection()));
 	}
-	
+
 	/**
-	 * Notify all open listeners
+	 * Notifies all open listeners.
 	 */
 	void fireOpen() {
 		fireOpen(new OpenEvent(this, getSelection()));
@@ -549,12 +552,12 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 			((MenuDetectListener)listeners[i]).menuDetected(event);
 		}
 	}
-	
+
 	/**
-	 * Set selection to the next element if <code>next</code> is true, to
-	 * the previous otherwise, if possible.
+	 * Set selection to the next or previous element if possible.
 	 * 
-	 * @param next should the next or the previous element be selected
+	 * @param next <code>true</code> if the next element should be selected, otherwise the previous
+	 *            one will be selected
 	 */
 	void doTraverse(boolean next) {
 		if (fSelectedItem == null)
@@ -628,6 +631,8 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	}
 
 	/**
+	 * Creates and returns a new instance of a breadcrumb item.
+	 * 
 	 * @return new instance of a breadcrumb item
 	 */
 	private BreadcrumbItem createItem() {
@@ -645,9 +650,9 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	}
 
 	/**
-	 * Update the size of the items such that all items are visible, if possible
+	 * Update the size of the items such that all items are visible, if possible.
 	 * 
-	 * @return true if any item has changed, false otherwise
+	 * @return <code>true</code> if any item has changed, <code>false</code> otherwise
 	 */
 	private boolean updateSize() {
 		int width= fContainer.getClientArea().width;
@@ -694,6 +699,8 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	}
 
 	/**
+	 * Returns the current width of all items in the list.
+	 * 
 	 * @return the width of all items in the list
 	 */
 	private int getCurrentWidth() {
@@ -705,9 +712,9 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	
 		return result;
 	}
-	
+
 	/**
-	 * Enable redrawing of the breadcrumb.
+	 * Enables redrawing of the breadcrumb.
 	 */
 	private void enableRedraw() {
 		if (IS_GTK) //flickers on GTK
@@ -717,8 +724,11 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	}
 
 	/**
-	 * Disable redrawing of the breadcrumb.
-	 * <p><strong>A call to this method must be followed by a call to {@link #enableRedraw()}</strong></p>
+	 * Disables redrawing of the breadcrumb.
+	 * 
+	 * <p>
+	 * <strong>A call to this method must be followed by a call to {@link #enableRedraw()}</strong>
+	 * </p>
 	 */
 	private void disableRedraw() {
 		if (IS_GTK) //flickers on GTK
@@ -728,8 +738,8 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	}
 
 	/**
-	 * The image to use for the breadcrumb background as 
-	 * specified in https://bugs.eclipse.org/bugs/show_bug.cgi?id=221477
+	 * The image to use for the breadcrumb background as specified in
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=221477
 	 * 
 	 * @param height the height of the image to create
 	 * @param display the current display

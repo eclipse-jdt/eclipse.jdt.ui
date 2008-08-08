@@ -243,18 +243,18 @@ class BreadcrumbItemDropDown {
 
 		fToolBar.setVisible(enabled);
 	}
-	
+
 	/**
-	 * Is the drop down menu open at the moment?
+	 * Tells whether the menu is shown.
 	 * 
 	 * @return true if the menu is open
 	 */
 	public boolean isMenuShown() {
 		return fMenuIsShown;
 	}
-	
+
 	/**
-	 * Get the shell used for the drop down menu if it is shown.
+	 * Returns the shell used for the drop down menu if it is shown.
 	 * 
 	 * @return the drop down shell or <code>null</code>
 	 */
@@ -266,7 +266,10 @@ class BreadcrumbItemDropDown {
 	}
 
 	/**
-	 * @return the selection provider of the drop down if {@link #isMenuShown()}, <code>null</code> otherwise
+	 * Returns the drop down selection provider.
+	 * 
+	 * @return the selection provider of the drop down if {@link #isMenuShown()}, <code>null</code>
+	 *         otherwise
 	 */
 	public ISelectionProvider getDropDownSelectionProvider() {
 		if (!fMenuIsShown)
@@ -638,11 +641,10 @@ class BreadcrumbItemDropDown {
 		shell.setLocation(pt);
 		shell.setSize(width, height);
 	}
-	
+
 	/**
-	 * Returns the monitor whose client area contains the given point. If no
-	 * monitor contains the point, returns the monitor that is closest to the
-	 * point.
+	 * Returns the monitor whose client area contains the given point. If no monitor contains the
+	 * point, returns the monitor that is closest to the point.
 	 * <p>
 	 * Copied from <code>org.eclipse.jface.window.Window.getClosestMonitor(Display, Point)</code>
 	 * </p>
@@ -676,9 +678,8 @@ class BreadcrumbItemDropDown {
 	}
 
 	/**
-	 * Set the size of the given shell such that more content
-	 * can be shown. The shell size does not exceed {@link #DROP_DOWN_HIGHT}
-	 * and {@link #DROP_DOWN_WIDTH}.
+	 * Set the size of the given shell such that more content can be shown. The shell size does not
+	 * exceed {@link #DROP_DOWN_HIGHT} and {@link #DROP_DOWN_WIDTH}.
 	 * 
 	 * @param shell the shell to resize
 	 */
@@ -720,9 +721,10 @@ class BreadcrumbItemDropDown {
 	}
 
 	/**
-	 * <code>true</code> if the breadcrumb is in left-to-right mode, <code>false</code> if it is in right-to-left mode.
+	 * Tells whether this the breadcrumb is in LTR or RTL mode.
 	 * 
-	 * @return <code>true</code> if the breadcrumb in left-to-right mode, <code>false</code> otherwise
+	 * @return <code>true</code> if the breadcrumb in left-to-right mode, <code>false</code>
+	 *         otherwise
 	 */
 	private boolean isLTR() {
 		return (fParentComposite.getStyle() & SWT.RIGHT_TO_LEFT) == 0;

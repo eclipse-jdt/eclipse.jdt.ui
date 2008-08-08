@@ -12,12 +12,15 @@ package org.eclipse.jdt.internal.ui.javaeditor.breadcrumb;
 
 import org.eclipse.osgi.util.NLS;
 
+
 /**
+ * Helper class to get NLSed messages.
+ * 
  * @since 3.4
  */
 public class BreadcrumbMessages extends NLS {
 
-	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.BreadcrumbMessages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME= BreadcrumbMessages.class.getName();
 
 	public static String BreadcrumbItemDropDown_showDropDownMenu_action_toolTip;
 	

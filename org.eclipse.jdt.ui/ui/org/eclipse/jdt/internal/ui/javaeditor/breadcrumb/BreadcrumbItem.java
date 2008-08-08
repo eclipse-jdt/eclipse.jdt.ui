@@ -26,10 +26,14 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 
 /**
  * An item in a breadcrumb viewer.
- * <p>The item shows a label and an image. It also has the ability
- * to expand, that is to open a drop down menu.</p>
- * <p>The drop down allows to select any child of the items input element.
- * The item shows the label and icon of its data element, if any.</p>
+ * <p>
+ * The item shows a label and an image. It also has the ability to expand, that is to open a drop
+ * down menu.
+ * </p>
+ * <p>
+ * The drop down allows to select any child of the items input element. The item shows the label and
+ * icon of its data element, if any.
+ * </p>
  * 
  * @since 3.4
  */
@@ -72,6 +76,8 @@ class BreadcrumbItem extends Item {
 	}
 
 	/**
+	 * Returns this items viewer.
+	 * 
 	 * @return the viewer showing this item
 	 */
 	public BreadcrumbViewer getViewer() {
@@ -79,6 +85,8 @@ class BreadcrumbItem extends Item {
 	}
 
 	/**
+	 * Sets the content provider of this item.
+	 * 
 	 * @param contentProvider the content provider to use
 	 */
 	public void setContentProvider(ITreeContentProvider contentProvider) {
@@ -86,20 +94,24 @@ class BreadcrumbItem extends Item {
 	}
 
 	/**
+	 * Sets the label provider of this item.
+	 * 
 	 * @param labelProvider the label provider to use
 	 */
 	public void setLabelProvider(ILabelProvider labelProvider) {
 		fLabelProvider= labelProvider;
 	}
-	
+
 	/**
+	 * Sets the the label provider for the tool tips of this item.
+	 * 
 	 * @param toolTipLabelProvider the label provider for the tool tips
 	 */
 	public void setToolTipLabelProvider(ILabelProvider toolTipLabelProvider) {
 		fToolTipLabelProvider= toolTipLabelProvider;
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.swt.widgets.Widget#dispose()
 	 */
 	public void dispose() {
@@ -126,7 +138,9 @@ class BreadcrumbItem extends Item {
 	}
 
 	/**
-	 * @return the width of this item 
+	 * Returns the width of this item.
+	 * 
+	 * @return the width of this item
 	 */
 	int getWidth() {
 		return fDetailsBlock.getWidth() + fExpandBlock.getWidth() + 2;
@@ -145,22 +159,23 @@ class BreadcrumbItem extends Item {
 	/**
 	 * Sets whether this item has the keyboard focus.
 	 * 
-	 * @param enabled if it does, false otherwise
+	 * @param state <code>true</code> if it has focus, <code>false</code> otherwise
 	 */
-	void setFocus(boolean enabled) {
-		fDetailsBlock.setFocus(enabled);
+	void setFocus(boolean state) {
+		fDetailsBlock.setFocus(state);
 	}
 
 	/**
-	 * @return true if this item has the keyboard focus
+	 * Returns whether this item has the keyboard focus.
+	 * 
+	 * @return <code>true</code> if this item has the keyboard focus
 	 */
 	boolean hasFocus() {
 		return fDetailsBlock.hasFocus();
 	}
 
 	/**
-	 * Redraw this item, retrieves new labels
-	 * from its label provider.
+	 * Redraw this item, retrieves new labels from its label provider.
 	 */
 	void refresh() {
 		String text= fLabelProvider.getText(getData());
@@ -194,8 +209,7 @@ class BreadcrumbItem extends Item {
 	}
 
 	/**
-	 * Sets whether or not the this item should show
-	 * the details (name and label).
+	 * Sets whether or not the this item should show the details (name and label).
 	 * 
 	 * @param visible true if the item shows details
 	 */
@@ -204,7 +218,7 @@ class BreadcrumbItem extends Item {
 	}
 
 	/**
-	 * Expand this item, shows the drop down menu. 
+	 * Expand this item, shows the drop down menu.
 	 */
 	void openDropDownMenu() {
 		fExpandBlock.showMenu();
@@ -216,8 +230,10 @@ class BreadcrumbItem extends Item {
 	boolean isMenuShown() {
 		return fExpandBlock.isMenuShown();
 	}
-	
+
 	/**
+	 * Returns the drop down shell.
+	 * 
 	 * @return the shell of the drop down if shown, <code>null</code> otherwise
 	 */
 	Shell getDropDownShell() {
@@ -225,6 +241,8 @@ class BreadcrumbItem extends Item {
 	}
 
 	/**
+	 * Returns the drop down selection provider of this item.
+	 * 
 	 * @return the selection provider of the drop down or <code>null</code>
 	 */
 	ISelectionProvider getDropDownSelectionProvider() {
@@ -232,6 +250,8 @@ class BreadcrumbItem extends Item {
 	}
 
 	/**
+	 * Returns the bounds of this item.
+	 * 
 	 * @return the bounds of this item
 	 */
 	public Rectangle getBounds() {
@@ -247,7 +267,7 @@ class BreadcrumbItem extends Item {
 		fDetailsBlock.setToolTip(text);
 	}
 	
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.swt.widgets.Item#setText(java.lang.String)
 	 */
 	public void setText(String string) {
@@ -259,7 +279,7 @@ class BreadcrumbItem extends Item {
 			fContainer.layout(true, true);
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.swt.widgets.Item#setImage(org.eclipse.swt.graphics.Image)
 	 */
 	public void setImage(Image image) {

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor.breadcrumb;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MenuDetectEvent;
 import org.eclipse.swt.events.MenuDetectListener;
@@ -25,6 +23,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.resource.JFaceResources;
@@ -45,14 +45,17 @@ import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 
 
 /**
- * The editor breadcrumb shows the parent chain of the active
- * editor item inside a {@link BreadcrumbViewer}.
+ * The editor breadcrumb shows the parent chain of the active editor item inside a
+ * {@link BreadcrumbViewer}.
  * 
- * <p>Clients must implement the abstract methods.</p>
+ * <p>
+ * Clients must implement the abstract methods.
+ * </p>
  * 
  * @since 3.4
  */
@@ -92,13 +95,12 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	/**
 	 * The active element of the editor.
 	 * 
-	 * @return the active element of the editor, or <b>null</b> if none.
+	 * @return the active element of the editor, or <b>null</b> if none
 	 */
 	protected abstract Object getCurrentInput();
 
 	/**
-	 * Create and configure the viewer used to display
-	 * the parent chain.
+	 * Create and configure the viewer used to display the parent chain.
 	 * 
 	 * @param parent the parent composite
 	 * @return the viewer
@@ -120,11 +122,10 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	 * @return true if the element could be opened
 	 */
 	protected abstract boolean open(Object element);
-	
+
 	/**
-	 * Create an action group for the context menu shown for
-	 * the selection of the given selection provider or <code>null</code>
-	 * if no context menu should be shown.
+	 * Create an action group for the context menu shown for the selection of the given selection
+	 * provider or <code>null</code> if no context menu should be shown.
 	 * 
 	 * @param selectionProvider the provider of the context selection
 	 * @return action group to use to fill the context menu or <code>null</code>
@@ -132,14 +133,14 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	protected abstract ActionGroup createContextMenuActionGroup(ISelectionProvider selectionProvider);
 
 	/**
-	 * The breadcrumb has been activated. Implementors must retarget
-	 * the editor actions to the breadcrumb aware actions.
+	 * The breadcrumb has been activated. Implementors must retarget the editor actions to the
+	 * breadcrumb aware actions.
 	 */
 	protected abstract void activateBreadcrumb();
 
 	/**
-	 * The breadcrumb has been deactivated. Implementors must retarget
-	 * the breadcrumb actions to the editor actions.
+	 * The breadcrumb has been deactivated. Implementors must retarget the breadcrumb actions to the
+	 * editor actions.
 	 */
 	protected abstract void deactivateBreadcrumb();
 	
@@ -147,9 +148,6 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		return fBreadcrumbViewer;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.IBreadcrumb#setTextViewer(org.eclipse.jface.text.ITextViewer)
-	 */
 	protected void setTextViewer(ITextViewer viewer) {
 		fTextViewer= viewer;
 	}
@@ -322,9 +320,8 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	}
 
 	/**
-	 * Either reveal the selection in the editor
-	 * or open the selection in a new editor. If both fail open
-	 * the child pop up of the selected element.
+	 * Either reveal the selection in the editor or open the selection in a new editor. If both fail
+	 * open the child pop up of the selected element.
 	 * 
 	 * @param selection the selection to open
 	 */
@@ -338,10 +335,6 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		}
 	}
 
-	/**
-	 * @param selection to open
-	 * @return true if selection could be opened
-	 */
 	private boolean doOpen(ISelection selection) {
 		if (!(selection instanceof StructuredSelection))
 			return false;
@@ -353,10 +346,6 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		return open(structuredSelection.getFirstElement());
 	}
 
-	/**
-	 * @param selection to reveal
-	 * @return true if selection could be revealed
-	 */
 	private boolean doReveal(ISelection selection) {
 		if (!(selection instanceof StructuredSelection))
 			return false;
@@ -417,7 +406,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	}
 
 	/**
-	 * Installs all display listeners
+	 * Installs all display listeners.
 	 */
 	private void installDisplayListeners() {
 		//Sanity check
@@ -438,7 +427,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	}
 
 	/**
-	 * Removes all previously installed display listeners
+	 * Removes all previously installed display listeners.
 	 */
 	private void deinstallDisplayListeners() {
 		if (fDisplayKeyListener != null) {
@@ -448,10 +437,10 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	}
 
 	/**
-	 * Was the event issued inside the breadcrumb viewers control?
+	 * Tells whether the given event was issued inside the breadcrumb viewer's control.
 	 * 
 	 * @param event the event to inspect
-	 * @return true if event was generated by a breadcrumb child
+	 * @return <code>true</code> if event was generated by a breadcrumb child
 	 */
 	private boolean isBreadcrumbEvent(Event event) {
 		if (fBreadcrumbViewer == null)
@@ -468,11 +457,6 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		return isChild((Control) item, fBreadcrumbViewer.getControl());
 	}
 
-	/**
-	 * @param child the potential child
-	 * @param parent the potential parent
-	 * @return true if child is inside parent
-	 */
 	private boolean isChild(Control child, Control parent) {
 		if (child == null)
 			return false;
@@ -484,7 +468,9 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	}
 
 	/**
-	 * @param textEditor the textEditor to set
+	 * Sets the text editor for which this breadcrumb is.
+	 * 
+	 * @param textEditor the text editor to be used
 	 */
 	protected void setTextEditor(ITextEditor textEditor) {
 		fTextEditor= textEditor;
@@ -524,7 +510,9 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	}
 
 	/**
-	 * @return the textEditor
+	 * This breadcrumb's text editor.
+	 * 
+	 * @return the text editor
 	 */
 	protected ITextEditor getTextEditor() {
 		return fTextEditor;

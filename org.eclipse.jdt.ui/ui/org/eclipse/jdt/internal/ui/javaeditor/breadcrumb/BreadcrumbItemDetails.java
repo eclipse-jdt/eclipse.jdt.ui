@@ -54,6 +54,7 @@ class BreadcrumbItemDetails {
 	private boolean fSelected;
 	private boolean fHasFocus;
 
+	
 	public BreadcrumbItemDetails(BreadcrumbItem parent, Composite parentContainer) {
 		fParent= parent;
 		fTextVisible= true;
@@ -123,16 +124,18 @@ class BreadcrumbItemDetails {
 		
 		fDetailComposite.setTabList(new Control[] { fTextComposite });
 	}
-	
+
 	/**
+	 * Returns whether this element has the keyboard focus.
+	 * 
 	 * @return true if this element has the keyboard focus.
 	 */
 	public boolean hasFocus() {
 		return fHasFocus;
 	}
-	
+
 	/**
-	 * Set the tool tip to the given text.
+	 * Sets the tool tip to the given text.
 	 * 
 	 * @param text the tool tip
 	 */
@@ -151,7 +154,7 @@ class BreadcrumbItemDetails {
 	}
 
 	/**
-	 * Set the image to the given image.
+	 * Sets the image to the given image.
 	 * 
 	 * @param image the image to use
 	 */
@@ -160,7 +163,7 @@ class BreadcrumbItemDetails {
 	}
 
 	/**
-	 * Set the text to the given text.
+	 * Sets the text to the given text.
 	 * 
 	 * @param text the text to use
 	 */
@@ -173,6 +176,8 @@ class BreadcrumbItemDetails {
 	}
 
 	/**
+	 * Returns the width of this element.
+	 * 
 	 * @return current width of this element
 	 */
 	public int getWidth() {
@@ -214,18 +219,18 @@ class BreadcrumbItemDetails {
 	}
 
 	/**
-	 * Does this item show a text or only an image?
+	 * Tells whether this item shows a text or only an image.
 	 * 
-	 * @return true if it shows a text and an image, false if it only shows the image
+	 * @return <code>true</code> if it shows a text and an image, false if it only shows the image
 	 */
 	public boolean isTextVisible() {
 		return fTextVisible;
 	}
 
 	/**
-	 * Sets whether details should be shown
+	 * Sets whether details should be shown.
 	 * 
-	 * @param visible true if details should be shown
+	 * @param visible <code>true</code> if details should be shown
 	 */
 	public void setVisible(boolean visible) {
 		fDetailComposite.setVisible(visible);
@@ -293,7 +298,7 @@ class BreadcrumbItemDetails {
 	}
 
 	/**
-	 * Install focus and key listeners to the given composite
+	 * Install focus and key listeners to the given composite.
 	 * 
 	 * @param composite the composite which may get focus
 	 */
@@ -403,11 +408,11 @@ class BreadcrumbItemDetails {
 			}
 		});
 	}
-	
+
 	/**
-	 * Add mouse listeners to the given control
+	 * Add mouse listeners to the given control.
 	 * 
-	 * @param control the control to which may be clicked 
+	 * @param control the control to which may be clicked
 	 */
 	private void addElementListener(Control control) {
 		control.addMouseListener(new MouseListener() {

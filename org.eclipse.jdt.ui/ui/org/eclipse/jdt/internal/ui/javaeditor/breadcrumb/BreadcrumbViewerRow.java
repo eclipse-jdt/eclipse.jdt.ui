@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Widget;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.ViewerRow;
 
+
 /**
  * A viewer row for the breadcrumb viewer.
  * 
@@ -34,6 +35,7 @@ class BreadcrumbViewerRow extends ViewerRow {
 	private final BreadcrumbItem fItem;
 	private final BreadcrumbViewer fViewer;
 
+	
 	public BreadcrumbViewerRow(BreadcrumbViewer viewer, BreadcrumbItem item) {
 		fViewer= viewer;
 		fItem= item;
