@@ -84,8 +84,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ResourceToItemsMapper;
 
 
 /**
- * The breadcrumb for the Java editor. Shows Java elements. Requires
- * a Java editor.
+ * The breadcrumb for the Java editor. Shows Java elements. Requires a Java editor.
  * 
  * @since 3.4
  */
@@ -166,9 +165,10 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		}
 
 		/**
-		 * Answers whether this viewer can ignore label provider changes resulting from
-		 * marker changes in annotation models
-		 * @return returns <code>true</code> if annotation model changes can be ignored
+		 * Answers whether this viewer can ignore label provider changes resulting from marker
+		 * changes in annotation models.
+		 * 
+		 * @return <code>true</code> if annotation model changes can be ignored
 		 */
 		private boolean canIgnoreChangesFromAnnotionModel() {
 			Object contentProvider= getContentProvider();
@@ -386,7 +386,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			}
 		}
 
-		/* (non-Javadoc)
+		/*
 		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 		 */
 		public void dispose() {
@@ -407,8 +407,9 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		
 		private Runnable fRunnable;
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
+		/*
+		 * @seeorg.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.
+		 * ElementChangedEvent)
 		 */
 		public void elementChanged(ElementChangedEvent event) {
 			if (fViewer == null)
@@ -442,8 +443,8 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		}
 
 		/**
-		 * Returns the most generic ancestor of the given input which has a change, or <b>null</b> if
-		 * no such ancestor exists.
+		 * Returns the most generic ancestor of the given input which has a change, or <b>null</b>
+		 * if no such ancestor exists.
 		 * 
 		 * @param input the input of which the result must be an ancestor
 		 * @param delta the delta describing the model change
@@ -478,7 +479,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		}
 
 		/**
-		 * Is <code>element</code> an ancestor of <code>input</code>?
+		 * Tells whether the given element is an ancestor of the given input.
 		 * 
 		 * @param element the element which might be a parent
 		 * @param input the element to resolve the parent chain for
@@ -507,11 +508,13 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		}
 	}
 
+	
 	private ActionGroup fBreadcrumbActionGroup;
 	private BreadcrumbViewer fViewer;
 	private ISelection fEditorSelection;
 	private ElementChangeListener fElementChangeListener;
 
+	
 	public JavaEditorBreadcrumb(JavaEditor javaEditor) {
 		super(javaEditor);
 		setTextViewer(javaEditor.getViewer());
@@ -576,7 +579,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	}
 
 	/**
-	 * Create a new instance of the label provider to use for the Java editor breadcrumb
+	 * Create a new instance of the label provider to use for the Java editor breadcrumb.
 	 * 
 	 * @return a new label provider
 	 */
@@ -586,8 +589,11 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 				| JavaElementLabels.ALL_CATEGORY, JavaElementImageProvider.SMALL_ICONS | AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
 
 		return new DecoratingJavaLabelProvider(result) {
-			/* (non-Javadoc)
-			 * @see org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider#getText(java.lang.Object)
+			
+			/*
+			 * @see
+			 * org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider#getText(java.lang.Object
+			 * )
 			 */
 			public String getText(Object element) {
 				if (element instanceof IPackageFragmentRoot) {
@@ -600,7 +606,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 				return result.getText(element);
 			}
 			
-			/* (non-Javadoc)
+			/*
 			 * @see org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider#getStyledText(java.lang.Object)
 			 */
 			protected StyledString getStyledText(Object element) {
@@ -610,9 +616,9 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	}
 	
 	/**
-	 * Label provider to use for the tool tips.
+	 * Returns the label provider to use for the tool tips.
 	 * 
-	 * @return a label provider for the tool tip
+	 * @return a label provider for the tool tips
 	 */
 	private ILabelProvider createToolTipLabelProvider() {
 		final AppearanceAwareLabelProvider result= new AppearanceAwareLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.F_APP_TYPE_SIGNATURE
@@ -634,14 +640,14 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#createContextMenuActionGroup(org.eclipse.jface.viewers.ISelectionProvider)
 	 */
 	protected ActionGroup createContextMenuActionGroup(ISelectionProvider selectionProvider) {
 		return new JavaEditorBreadcrumbActionGroup(getJavaEditor(), selectionProvider);
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb#setInput(java.lang.Object)
 	 */
 	public void setInput(Object element) {
@@ -682,12 +688,14 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	}
 
 	/**
-	 * Returns the input for the given element. The Java breadcrumb
-	 * does not show some elements of the model:
-	 * ITypeRoots
-	 * IPackageDeclaration
-	 * IImportContainer
-	 * IImportDeclaration
+	 * Returns the input for the given element. The Java breadcrumb does not show some elements of
+	 * the model:
+	 * <ul>
+	 * 		<li><code>ITypeRoots</li>
+	 * 		<li><code>IPackageDeclaration</li>
+	 * 		<li><code>IImportContainer</li>
+	 * 		<li><code>IImportDeclaration</li>
+	 * </ul>
 	 * 
 	 * @param element the potential input element
 	 * @return the element to use as input

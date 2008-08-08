@@ -41,8 +41,7 @@ import org.eclipse.jdt.internal.ui.workingsets.ConfigureWorkingSetAssignementAct
 
 
 /**
- * Actions to show in the context menu for elements in
- * the {@link JavaEditorBreadcrumb}.
+ * Actions to show in the context menu for elements in the {@link JavaEditorBreadcrumb}.
  * 
  * @since 3.4
  */
@@ -83,7 +82,7 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 				fJavaEditor= javaEditor;
 			}
 
-			/* (non-Javadoc)
+			/*
 			 * @see org.eclipse.jface.action.Action#run()
 			 */
 			public void run() {
@@ -98,7 +97,7 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 			fGoToEditor.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB);
 		}
 
-		/* (non-Javadoc)
+		/*
 		 * @see org.eclipse.ui.actions.ActionGroup#fillActionBars(org.eclipse.ui.IActionBars)
 		 */
 		public void fillActionBars(IActionBars actionBars) {
@@ -106,7 +105,7 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 			actionBars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.SHOW_IN_BREADCRUMB, fGoToEditor);
 		}
 		
-		/* (non-Javadoc)
+		/*
 		 * @see org.eclipse.ui.actions.ActionGroup#fillContextMenu(org.eclipse.jface.action.IMenuManager)
 		 */
 		public void fillContextMenu(IMenuManager menu) {
@@ -119,20 +118,20 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 		super(new ActionGroup[] {
 				new BreadcrumbActionGroup(javaEditor),
 				new UndoRedoActionGroup(javaEditor.getEditorSite(), (IUndoContext) ResourcesPlugin.getWorkspace().getAdapter(IUndoContext.class), true),
-				new NewWizardsActionGroup(javaEditor.getEditorSite()), 
+				new NewWizardsActionGroup(javaEditor.getEditorSite()),
 				new JavaSearchActionGroup(javaEditor.getEditorSite(), selectionProvider),
-				new NavigateActionGroup(javaEditor.getEditorSite(), selectionProvider), 
+				new NavigateActionGroup(javaEditor.getEditorSite(), selectionProvider),
 				new CCPActionGroup(javaEditor.getEditorSite(), selectionProvider),
-				new GenerateBuildPathActionGroup(javaEditor.getEditorSite(), selectionProvider), 
+				new GenerateBuildPathActionGroup(javaEditor.getEditorSite(), selectionProvider),
 				new GenerateActionGroup(javaEditor.getEditorSite(), selectionProvider),
-				new RefactorActionGroup(javaEditor.getEditorSite(), selectionProvider), 
+				new RefactorActionGroup(javaEditor.getEditorSite(), selectionProvider),
 				new BuildActionGroup(javaEditor.getEditorSite(), selectionProvider),
 				new ProjectActionGroup(javaEditor.getEditorSite(), selectionProvider),
 				new WorkingSetActionGroup(javaEditor.getEditorSite(), selectionProvider)
 		});
 	}
-	
-	/* (non-Javadoc)
+
+	/*
 	 * @see org.eclipse.jdt.internal.ui.actions.CompositeActionGroup#fillContextMenu(org.eclipse.jface.action.IMenuManager)
 	 */
 	public void fillContextMenu(IMenuManager menu) {
