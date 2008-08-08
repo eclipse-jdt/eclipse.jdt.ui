@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.ui.browsing.PackagesView;
+import org.eclipse.jdt.internal.ui.browsing.PackagesViewFlatContentProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 
@@ -231,7 +232,7 @@ public class MockPluginView extends PackagesView {
 			fRefreshHappened= true;
 			fRefreshedObject.add(object);
 			if (fRefreshLogging)
-				new Exception("Refresh tree item" + object).printStackTrace();
+				new Exception("Refresh tree item: " + object).printStackTrace(System.out);
 		}
 
 		public void remove(Object object) {
@@ -258,7 +259,7 @@ public class MockPluginView extends PackagesView {
 			fRefreshHappened= true;
 			fRefreshedObject.add(object);
 			if (fRefreshLogging)
-				new Exception("Refresh table item" + object).printStackTrace();
+				new Exception("Refresh table item: " + object).printStackTrace(System.out);
 			super.refresh(object);
 		}
 
@@ -277,5 +278,7 @@ public class MockPluginView extends PackagesView {
 
 	public void setRefreshLoggingEnabled(boolean enabled) {
 		fRefreshLogging= enabled;
+		PackagesViewFlatContentProvider cp= (PackagesViewFlatContentProvider)fContentProvider;
+		cp.setRefreshLoggingEnabled(enabled);
 	}
 }

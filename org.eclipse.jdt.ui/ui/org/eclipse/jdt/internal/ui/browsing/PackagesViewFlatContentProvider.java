@@ -27,6 +27,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 /**
  * Table content provider for the hierarchical layout in the packages view.
  * <p>
@@ -35,7 +37,15 @@ import org.eclipse.jdt.core.JavaModelException;
  * but might be required to later.
  * </p>
  */
-class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements IStructuredContentProvider {
+//TODO: made public and added setRefreshLoggingEnabled(..) to track down https://bugs.eclipse.org/bugs/show_bug.cgi?id=243132
+public class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements IStructuredContentProvider {
+	
+	private boolean fRefreshLoggingEnabled;
+
+	public void setRefreshLoggingEnabled(boolean enabled) {
+		fRefreshLoggingEnabled= enabled;
+	}
+
 	PackagesViewFlatContentProvider(StructuredViewer viewer) {
 		super(viewer);
 	}
@@ -113,6 +123,11 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 		int kind= delta.getKind();
 		final IJavaElement element= delta.getElement();
 
+		if (fRefreshLoggingEnabled) {
+			String elementLabel= JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_FULLY_QUALIFIED);
+			new Exception("Delta for: " + elementLabel).printStackTrace(System.out); //$NON-NLS-1$
+		}
+		
 		if (isClassPathChange(delta)) {
 			Object input= fViewer.getInput();
 			if (input != null) {
@@ -259,6 +274,10 @@ class PackagesViewFlatContentProvider extends LogicalPackagesProvider implements
 
 
 	private void postRefresh(final Object element) {
+		if (fRefreshLoggingEnabled) {
+			new Exception("postRefresh: " + element).printStackTrace(System.out); //$NON-NLS-1$
+		}
+		
 		postRunnable(new Runnable() {
 			public void run() {
 				Control ctrl= fViewer.getControl();
