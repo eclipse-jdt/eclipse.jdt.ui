@@ -4,6 +4,9 @@ org.eclipse.jdt.ui/debug=true
 # Prints debug information related to the AST provider
 org.eclipse.jdt.ui/debug/ASTProvider=false
 
+# Prints debug information related to BreadcrumbItemDropDown
+org.eclipse.jdt.ui/debug/BreadcrumbItemDropDown=true
+
 # trace generation of type constraints and create toString info for debugging
 org.eclipse.jdt.ui/debug/TypeConstraints=false
 
