@@ -3580,7 +3580,7 @@ public class PreferenceConstants {
 		
 		// AppearancePreferencePage
 		store.setDefault(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
-		store.setDefault(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE, false);
+		store.setDefault(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE, true);
 		store.setDefault(PreferenceConstants.APPEARANCE_METHOD_TYPEPARAMETERS, true);
 		store.setDefault(PreferenceConstants.APPEARANCE_CATEGORY, true);
 		store.setDefault(PreferenceConstants.SHOW_CU_CHILDREN, true);
