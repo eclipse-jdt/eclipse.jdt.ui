@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,9 +30,11 @@ import org.eclipse.jface.text.rules.FastPartitioner;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
+
 import org.eclipse.ui.texteditor.ITextEditorExtension3;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -48,6 +50,7 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -84,6 +87,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 	private boolean fCloseBrace;
 	private boolean fIsSmartMode;
+	private boolean fIsSmartTab;
 
 	private String fPartitioning;
 	private final IJavaProject fProject;
@@ -270,7 +274,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		JavaIndenter indenter= new JavaIndenter(d, scanner, fProject);
 		StringBuffer indent= indenter.computeIndentation(c.offset);
 		if (indent == null)
-			indent= new StringBuffer(); 
+			indent= new StringBuffer();
 
 		int docLength= d.getLength();
 		if (c.offset == -1 || docLength == 0)
@@ -912,6 +916,32 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		return CodeFormatterUtil.getTabWidth(fProject);
 	}
 
+	/**
+	 * The preference setting that tells whether to insert spaces when pressing the Tab key.
+	 * 
+	 * @return <code>true</code> if spaces are inserted when pressing the Tab key
+	 * @since 3.5
+	 */
+	private boolean isInsertingSpacesForTab() {
+		return JavaCore.SPACE.equals(getCoreOption(fProject, DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR));
+	}
+
+	/**
+	 * Returns the possibly <code>project</code>-specific core preference defined under
+	 * <code>key</code>.
+	 * 
+	 * @param project the project to get the preference from, or <code>null</code> to get the global
+	 *            preference
+	 * @param key the key of the preference
+	 * @return the value of the preference
+	 * @since 3.5
+	 */
+	private static String getCoreOption(IJavaProject project, String key) {
+		if (project == null)
+			return JavaCore.getOption(key);
+		return project.getOption(key, true);
+	}
+
 	private int getPeerPosition(IDocument document, DocumentCommand command) {
 		if (document.getLength() == 0)
 			return 0;
@@ -999,7 +1029,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
     /**
      * Skips the scope opened by <code>token</code>.
      * 
-     * @param scanner the scanner 
+     * @param scanner the scanner
      * @param start the start position
      * @param token the token
      * @return the position after the scope or <code>JavaHeuristicScanner.NOT_FOUND</code>
@@ -1158,15 +1188,18 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * @see org.eclipse.jface.text.IAutoIndentStrategy#customizeDocumentCommand(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.DocumentCommand)
 	 */
 	public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
-
 		if (c.doit == false)
 			return;
-
+		
 		clearCachedValues();
-		if (!isSmartMode()) {
+		
+		if (!fIsSmartMode) {
 			super.customizeDocumentCommand(d, c);
 			return;
 		}
+
+		if (!fIsSmartTab && isRepresentingTab(c.text))
+			return;
 
 		if (c.length == 0 && c.text != null && isLineDelimiter(d, c.text))
 			smartIndentAfterNewLine(d, c);
@@ -1177,6 +1210,29 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 
 	}
 
+	/**
+	 * Tells whether the given inserted string represents hitting the Tab key.
+	 * 
+	 * @param text the text to check
+	 * @return <code>true</code> if the text represents hitting the Tab key
+	 * @since 3.5
+	 */
+	private boolean isRepresentingTab(String text) {
+		if (text == null)
+			return false;
+
+		if (isInsertingSpacesForTab()) {
+			if (text.length() == 0 || text.length() > getVisualTabLengthPreference())
+				return false;
+			for (int i= 0; i < text.length(); i++) {
+				if (text.charAt(i) != ' ')
+					return false;
+			}
+			return true;
+		} else
+			return text.length() == 1 && text.charAt(0) == '\t';
+	}
+
 	private static IPreferenceStore getPreferenceStore() {
 		return JavaPlugin.getDefault().getCombinedPreferenceStore();
 	}
@@ -1185,13 +1241,10 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		return fCloseBrace;
 	}
 
-	private boolean isSmartMode() {
-		return fIsSmartMode;
-	}
-
 	private void clearCachedValues() {
         IPreferenceStore preferenceStore= getPreferenceStore();
 		fCloseBrace= preferenceStore.getBoolean(PreferenceConstants.EDITOR_CLOSE_BRACES);
+		fIsSmartTab= preferenceStore.getBoolean(PreferenceConstants.EDITOR_SMART_TAB);
 		fIsSmartMode= computeSmartMode();
 	}
 
