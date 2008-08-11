@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,11 @@ package org.eclipse.jdt.ui.tests.model;
 
 import java.io.ByteArrayInputStream;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -34,8 +38,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
 public class ContentProviderTests extends TestCase {
 	
 	private IWorkspace fWorkspace;
@@ -48,6 +50,10 @@ public class ContentProviderTests extends TestCase {
 	private IJavaElement fPackageFragment1;
 	private IJavaElement fPackageFragment2;
 	private IFile fFile1;
+
+	public static Test suite() {
+		return new TestSuite(ContentProviderTests.class);
+	}
 
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -133,7 +139,7 @@ public class ContentProviderTests extends TestCase {
 		return false;
 	}
 	
-	public void testOutgoingDeletion148118() throws CoreException {
+	public void testOutgoingDeletion148118() {
 		IProject project = (IProject)fJProject1.getResource();
 		fMyPart.addOutgoingDeletion(project, "f1/a");
 		fMyPart.addOutgoingDeletion(project, "f2/a");
@@ -153,7 +159,7 @@ public class ContentProviderTests extends TestCase {
 		children = fProvider.getChildren(fPackageFragment2);
 	}
 	
-	public void testIncomingAddition159884() throws CoreException {
+	public void testIncomingAddition159884() {
 		IProject project = (IProject)fJProject1.getResource();
 		fMyPart.addIncomingAddition(project, "f1/newFolder/");
 		fMyPart.addIncomingAddition(project, "f1/newFolder/a");
@@ -179,7 +185,7 @@ public class ContentProviderTests extends TestCase {
 		assertTrue("Expected children of new folder does not match actual children", compareArrays(children, expectedChildren));
 	}
 	
-	public void testIncomingAddition159884Part2() throws CoreException {
+	public void testIncomingAddition159884Part2() {
 		IProject project = (IProject)fJProject1.getResource();
 		fMyPart.addIncomingAddition(project, "f1/newFolder/a");
 	
