@@ -197,6 +197,13 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performInvalidTestInlineMethod();
 	}
 	
+	public void testNotMethodName() throws Exception {
+		ICompilationUnit unit= createCU(fgTestSetup.getInvalidPackage(), getName());
+		int[] selection= getSelection();
+		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(AST.JLS3).parse(unit, true), selection[0], selection[1]);
+		assertNull(refactoring);
+	}
+	
 	/* *********************** Simple Tests ******************************* */
 		
 	private void performSimpleTest() throws Exception {

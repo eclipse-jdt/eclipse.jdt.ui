@@ -20,10 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,6 +28,10 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -61,6 +61,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.refactoring.descriptors.InlineMethodDescriptor;
@@ -431,14 +432,22 @@ public class InlineMethodRefactoring extends Refactoring {
 	private static ASTNode checkNode(ASTNode node, IJavaElement unit) {
 		if (node == null)
 			return null;
-		if (node.getNodeType() == ASTNode.SIMPLE_NAME) {
-			node= node.getParent();
-		} else if (node.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
-			node= ((ExpressionStatement)node).getExpression();
+		switch (node.getNodeType()) {
+			case ASTNode.SIMPLE_NAME:
+				StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
+				if (locationInParent == MethodDeclaration.NAME_PROPERTY) {
+					return node.getParent();
+				} else if (locationInParent == MethodInvocation.NAME_PROPERTY
+						|| locationInParent == SuperMethodInvocation.NAME_PROPERTY) {
+					return unit instanceof ICompilationUnit ? node.getParent() : null; // don't start on invocations in binary
+				}
+				return null;
+			case ASTNode.EXPRESSION_STATEMENT:
+				node= ((ExpressionStatement)node).getExpression();
 		}
-		switch(node.getNodeType()) {
+		switch (node.getNodeType()) {
 			case ASTNode.METHOD_DECLARATION:
-					return node;
+				return node;
 			case ASTNode.METHOD_INVOCATION:
 			case ASTNode.SUPER_METHOD_INVOCATION:
 			case ASTNode.CONSTRUCTOR_INVOCATION:
