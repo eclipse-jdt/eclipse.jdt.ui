@@ -43,7 +43,6 @@ import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -55,22 +54,20 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.refactoring.descriptors.InlineMethodDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
@@ -170,7 +167,7 @@ public class InlineMethodRefactoring extends Refactoring {
 	 * @return returns the refactoring
 	 */
 	public static InlineMethodRefactoring create(ITypeRoot unit, CompilationUnit node, int selectionStart, int selectionLength) {
-		ASTNode target= getTargetNode(unit, node, selectionStart, selectionLength);
+		ASTNode target= RefactoringAvailabilityTester.getInlineableMethodNode(unit, node, selectionStart, selectionLength);
 		if (target == null)
 			return null;
 		if (target.getNodeType() == ASTNode.METHOD_DECLARATION) {
@@ -414,45 +411,6 @@ public class InlineMethodRefactoring extends Refactoring {
 			}
 		}
 		status.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_error_noMethodDeclaration); 
-		return null;
-	}
-	
-	private static ASTNode getTargetNode(ITypeRoot typeRoot, CompilationUnit root, int offset, int length) {
-		ASTNode node= null;
-		try {
-			node= checkNode(NodeFinder.perform(root, offset, length, typeRoot), typeRoot);
-		} catch(JavaModelException e) {
-			// Do nothing
-		}
-		if (node != null)
-			return node;
-		return checkNode(NodeFinder.perform(root, offset, length), typeRoot);
-	}
-
-	private static ASTNode checkNode(ASTNode node, IJavaElement unit) {
-		if (node == null)
-			return null;
-		switch (node.getNodeType()) {
-			case ASTNode.SIMPLE_NAME:
-				StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
-				if (locationInParent == MethodDeclaration.NAME_PROPERTY) {
-					return node.getParent();
-				} else if (locationInParent == MethodInvocation.NAME_PROPERTY
-						|| locationInParent == SuperMethodInvocation.NAME_PROPERTY) {
-					return unit instanceof ICompilationUnit ? node.getParent() : null; // don't start on invocations in binary
-				}
-				return null;
-			case ASTNode.EXPRESSION_STATEMENT:
-				node= ((ExpressionStatement)node).getExpression();
-		}
-		switch (node.getNodeType()) {
-			case ASTNode.METHOD_DECLARATION:
-				return node;
-			case ASTNode.METHOD_INVOCATION:
-			case ASTNode.SUPER_METHOD_INVOCATION:
-			case ASTNode.CONSTRUCTOR_INVOCATION:
-				return unit instanceof ICompilationUnit ? node : null; // don't start on invocations in binary
-		}
 		return null;
 	}
 	

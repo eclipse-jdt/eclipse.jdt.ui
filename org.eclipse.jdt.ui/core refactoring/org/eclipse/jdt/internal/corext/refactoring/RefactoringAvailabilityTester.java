@@ -41,16 +41,23 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
@@ -590,8 +597,16 @@ public final class RefactoringAvailabilityTester {
 
 	public static boolean isInlineMethodAvailable(final JavaTextSelection selection) throws JavaModelException {
 		final IJavaElement[] elements= selection.resolveElementAtOffset();
-		if (elements.length != 1)
-			return false;
+		if (elements.length != 1) {
+			IJavaElement enclosingElement= selection.resolveEnclosingElement();
+			if (!(enclosingElement instanceof IMember))
+				return false;
+			ITypeRoot typeRoot= ((IMember)enclosingElement).getTypeRoot();
+			CompilationUnit compilationUnit= selection.resolvePartialAstAtOffset();
+			if (compilationUnit == null)
+				return false;
+			return getInlineableMethodNode(typeRoot, compilationUnit, selection.getOffset(), selection.getLength()) != null;
+		}
 		IJavaElement element= elements[0];
 		if (!(element instanceof IMethod))
 			return false;
@@ -611,6 +626,45 @@ public final class RefactoringAvailabilityTester {
 		int nameOffset= enclosingMethod.getNameRange().getOffset();
 		int nameLength= enclosingMethod.getNameRange().getLength();
 		return (nameOffset <= selection.getOffset()) && (selection.getOffset() + selection.getLength() <= nameOffset + nameLength);
+	}
+
+	public static ASTNode getInlineableMethodNode(ITypeRoot typeRoot, CompilationUnit root, int offset, int length) {
+		ASTNode node= null;
+		try {
+			node= getInlineableMethodNode(NodeFinder.perform(root, offset, length, typeRoot), typeRoot);
+		} catch(JavaModelException e) {
+			// Do nothing
+		}
+		if (node != null)
+			return node;
+		return getInlineableMethodNode(NodeFinder.perform(root, offset, length), typeRoot);
+	}
+
+	private static ASTNode getInlineableMethodNode(ASTNode node, IJavaElement unit) {
+		if (node == null)
+			return null;
+		switch (node.getNodeType()) {
+			case ASTNode.SIMPLE_NAME:
+				StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
+				if (locationInParent == MethodDeclaration.NAME_PROPERTY) {
+					return node.getParent();
+				} else if (locationInParent == MethodInvocation.NAME_PROPERTY
+						|| locationInParent == SuperMethodInvocation.NAME_PROPERTY) {
+					return unit instanceof ICompilationUnit ? node.getParent() : null; // don't start on invocations in binary
+				}
+				return null;
+			case ASTNode.EXPRESSION_STATEMENT:
+				node= ((ExpressionStatement)node).getExpression();
+		}
+		switch (node.getNodeType()) {
+			case ASTNode.METHOD_DECLARATION:
+				return node;
+			case ASTNode.METHOD_INVOCATION:
+			case ASTNode.SUPER_METHOD_INVOCATION:
+			case ASTNode.CONSTRUCTOR_INVOCATION:
+				return unit instanceof ICompilationUnit ? node : null; // don't start on invocations in binary
+		}
+		return null;
 	}
 
 	public static boolean isInlineTempAvailable(final ILocalVariable variable) throws JavaModelException {
