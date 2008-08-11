@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,12 +20,13 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
@@ -156,7 +157,7 @@ public class ContentProviderTests3 extends TestCase {
 	public void testGetParentArchive() throws Exception{
 		Object parent= fProvider.getParent(fArchiveFragmentRoot);
 		assertTrue("Wrong parent found for PackageFragmentRoot Archive with folding", parent==fJProject1);//$NON-NLS-1$
-	}	
+	}
 	
 	public void testGetParentTopLevelFragmentInArchive() throws Exception{
 		Object expectedParent= fPackJunit;
@@ -210,9 +211,10 @@ public class ContentProviderTests3 extends TestCase {
 		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
 		}
 
-		assertTrue("Add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
-		assertTrue("Correct Add", fMyPart.getAddedObject() == test); //$NON-NLS-1$
-		assertTrue("No refresh", fMyPart.getRefreshedObject().size() == 0); //$NON-NLS-1$
+		assertTrue("No add happened", !fMyPart.hasAddHappened()); //$NON-NLS-1$
+		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
+		assertTrue("Correct Refresh", fMyPart.wasObjectRefreshed(fRoot1)); //$NON-NLS-1$
+		assertTrue("Single refresh", fMyPart.getRefreshedObject().size() == 1); //$NON-NLS-1$
 	}
 
 	public void testChangedTopLevelPackageFragmentFolding() throws Exception {
