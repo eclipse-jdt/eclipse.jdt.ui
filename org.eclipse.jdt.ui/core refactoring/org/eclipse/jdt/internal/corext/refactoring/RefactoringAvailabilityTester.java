@@ -371,7 +371,9 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isExtractMethodAvailable(final JavaTextSelection selection) {
-		return (selection.resolveInMethodBody() || selection.resolveInClassInitializer()) && RefactoringAvailabilityTester.isExtractMethodAvailable(selection.resolveSelectedNodes());
+		return (selection.resolveInMethodBody()
+				|| selection.resolveInClassInitializer()
+				|| selection.resolveInVariableInitializer()) && RefactoringAvailabilityTester.isExtractMethodAvailable(selection.resolveSelectedNodes());
 	}
 
 	public static boolean isExtractSupertypeAvailable(IMember member) throws JavaModelException {
