@@ -394,7 +394,7 @@ public final class RefactoringMessages extends NLS {
 
 	public static String InlineConstantInputPage_Delete_constant;
 
-	public static String InlineConstantInputPage_Inline;
+	public static String InlineConstantInputPage_Inline_constant;
 
 	public static String InlineConstantInputPage_Only_selected;
 
@@ -418,7 +418,7 @@ public final class RefactoringMessages extends NLS {
 
 	public static String InlineMethodInputPage_description;
 
-	public static String InlineMethodInputPage_inline;
+	public static String InlineMethodInputPage_inline_method;
 
 	public static String InlineMethodInputPage_only_selected;
 

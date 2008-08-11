@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.code;
 
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -19,20 +17,25 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
 public class InlineMethodInputPage extends UserInputWizardPage {
 
@@ -40,7 +43,6 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 	private static final String DESCRIPTION = RefactoringMessages.InlineMethodInputPage_description; 
 
 	private InlineMethodRefactoring fRefactoring;
-	private Group fInlineMode;
 	private Button fRemove;
 	
 	public InlineMethodInputPage() {
@@ -60,16 +62,19 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 		GridData gd= null;
 
 		boolean all= fRefactoring.getInitialMode() == InlineMethodRefactoring.Mode.INLINE_ALL;
-		fInlineMode= new Group(result, SWT.NONE);
-		fInlineMode.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fInlineMode.setLayout(new GridLayout());
-		fInlineMode.setText(RefactoringMessages.InlineMethodInputPage_inline); 
+		Label label= new Label(result, SWT.NONE);
+		String methodLabel= JavaElementLabels.getElementLabel(fRefactoring.getMethod(), JavaElementLabels.ALL_DEFAULT | JavaElementLabels.M_FULLY_QUALIFIED);
+		label.setText(Messages.format(RefactoringMessages.InlineMethodInputPage_inline_method, methodLabel)); 
+		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		Button radio= new Button(fInlineMode, SWT.RADIO);
-		radio.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		radio.setText(RefactoringMessages.InlineMethodInputPage_all_invocations); 
-		radio.setSelection(all);
-		radio.addSelectionListener(new SelectionAdapter() {
+		Composite separator= new Composite(result, SWT.NONE);
+		separator.setLayoutData(new GridData(0, 0));
+		
+		Button radioAll= new Button(result, SWT.RADIO);
+		radioAll.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		radioAll.setText(RefactoringMessages.InlineMethodInputPage_all_invocations); 
+		radioAll.setSelection(all);
+		radioAll.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				fRemove.setEnabled(fRefactoring.canEnableDeleteSource());
 				if (((Button)event.widget).getSelection())
@@ -77,7 +82,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 			}
 		});
 
-		fRemove= new Button(fInlineMode, SWT.CHECK);
+		fRemove= new Button(result, SWT.CHECK);
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalIndent= convertWidthInCharsToPixels(3);
 		fRemove.setLayoutData(gd);
@@ -92,14 +97,17 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 		});
 
 		
-		radio= new Button(fInlineMode, SWT.RADIO);
-		radio.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		radio.setText(RefactoringMessages.InlineMethodInputPage_only_selected); 
-		radio.setSelection(!all);
+		Button radioSelected= new Button(result, SWT.RADIO);
+		radioSelected.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		radioSelected.setText(RefactoringMessages.InlineMethodInputPage_only_selected); 
+		radioSelected.setSelection(!all);
 		if (all) {
-			radio.setEnabled(false);
+			radioSelected.setEnabled(false);
+			radioAll.setFocus();
+		} else {
+			radioSelected.setFocus();
 		}
-		radio.addSelectionListener(new SelectionAdapter() {
+		radioSelected.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				fRemove.setEnabled(false);
 				if (((Button)event.widget).getSelection())
@@ -107,7 +115,6 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 			}
 		});
 		
-		fInlineMode.setFocus();
 		Dialog.applyDialogFont(result);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INLINE_METHOD_WIZARD_PAGE);
 	}

@@ -190,6 +190,21 @@ public class InlineMethodRefactoring extends Refactoring {
 		return RefactoringCoreMessages.InlineMethodRefactoring_name; 
 	}
 	
+	/**
+	 * Returns the method to inline, or null if the method could not be found or
+	 * {@link #checkInitialConditions(IProgressMonitor)} has not been called yet.
+	 * 
+	 * @return the method, or <code>null</code> 
+	 */
+	public IMethod getMethod() {
+		if (fSourceProvider == null)
+			return null;
+		IMethodBinding binding= fSourceProvider.getDeclaration().resolveBinding();
+		if (binding == null)
+			return null;
+		return (IMethod) binding.getJavaElement();
+	}
+
 	public boolean canEnableDeleteSource() {
 		return ! (fSourceProvider.getTypeRoot() instanceof IClassFile);
 	}

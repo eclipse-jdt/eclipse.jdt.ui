@@ -19,16 +19,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.RangeMarker;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.RangeMarker;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -660,6 +660,16 @@ public class InlineConstantRefactoring extends Refactoring {
 
 	public String getName() {
 		return RefactoringCoreMessages.InlineConstantRefactoring_name; 
+	}
+
+	/**
+	 * Returns the field to inline, or null if the field could not be found or
+	 * {@link #checkInitialConditions(IProgressMonitor)} has not been called yet.
+	 * 
+	 * @return the field, or <code>null</code> 
+	 */
+	public IJavaElement getField() {
+		return fField;
 	}
 
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {

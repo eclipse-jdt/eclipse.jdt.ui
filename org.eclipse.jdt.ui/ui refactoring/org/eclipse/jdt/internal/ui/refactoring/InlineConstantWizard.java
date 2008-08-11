@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,19 +17,22 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+
+import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 public class InlineConstantWizard extends RefactoringWizard {
 
@@ -67,7 +70,6 @@ public class InlineConstantWizard extends RefactoringWizard {
 		public static final String PAGE_NAME= "InlineConstantInputPage";//$NON-NLS-1$
 
 		private InlineConstantRefactoring fRefactoring;
-		private Group fInlineMode;
 		private Button fRemove;
 
 		private final int fOriginalMessageType;
@@ -92,12 +94,15 @@ public class InlineConstantWizard extends RefactoringWizard {
 			result.setLayout(layout);
 			GridData gd= null;
 
-			fInlineMode= new Group(result, SWT.NONE);
-			fInlineMode.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			fInlineMode.setLayout(new GridLayout());
-			fInlineMode.setText(RefactoringMessages.InlineConstantInputPage_Inline); 
+			Label label= new Label(result, SWT.NONE);
+			String constantLabel= JavaElementLabels.getElementLabel(fRefactoring.getField(), JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED);
+			label.setText(Messages.format(RefactoringMessages.InlineConstantInputPage_Inline_constant, constantLabel)); 
+			label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-			final Button all= new Button(fInlineMode, SWT.RADIO);
+			Composite separator= new Composite(result, SWT.NONE);
+			separator.setLayoutData(new GridData(0, 0));
+			
+			final Button all= new Button(result, SWT.RADIO);
 			all.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			all.setText(RefactoringMessages.InlineConstantInputPage_All_references); 
 			all.setSelection(fRefactoring.getReplaceAllReferences());
@@ -108,7 +113,7 @@ public class InlineConstantWizard extends RefactoringWizard {
 				}
 			});
 
-			fRemove= new Button(fInlineMode, SWT.CHECK);
+			fRemove= new Button(result, SWT.CHECK);
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalIndent= convertWidthInCharsToPixels(3);
 			fRemove.setLayoutData(gd);
@@ -122,17 +127,23 @@ public class InlineConstantWizard extends RefactoringWizard {
 			});
 
 		
-			final Button onlySelected= new Button(fInlineMode, SWT.RADIO);
+			final Button onlySelected= new Button(result, SWT.RADIO);
 			onlySelected.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			onlySelected.setText(RefactoringMessages.InlineConstantInputPage_Only_selected); 
 			onlySelected.setSelection(!fRefactoring.getReplaceAllReferences());
-			onlySelected.setEnabled(!fRefactoring.isDeclarationSelected());
+			if (fRefactoring.isDeclarationSelected()) {
+				onlySelected.setEnabled(false);
+				all.setFocus();
+			} else {
+				onlySelected.setFocus();
+			}
 			onlySelected.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent event) {
 					fRefactoring.setReplaceAllReferences(false);
 					fRemove.setEnabled(false);
 				}
-			});		
+			});
+			
 			Dialog.applyDialogFont(result);
 			
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INLINE_CONSTANT_WIZARD_PAGE);
