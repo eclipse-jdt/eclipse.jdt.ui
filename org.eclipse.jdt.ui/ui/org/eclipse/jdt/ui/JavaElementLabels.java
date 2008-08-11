@@ -255,14 +255,14 @@ public class JavaElementLabels {
 	
 	/**
 	 * Add root path to all elements except Package Fragment Roots and Java projects.
-	 * e.g. <code>java.lang.Vector - c:\java\lib\rt.jar</code>
+	 * e.g. <code>java.lang.Vector - C:\java\lib\rt.jar</code>
 	 * Option only applies to getElementLabel
 	 */
 	public final static long APPEND_ROOT_PATH= 1L << 43;
 
 	/**
 	 * Add root path to all elements except Package Fragment Roots and Java projects.
-	 * e.g. <code>java.lang.Vector - c:\java\lib\rt.jar</code>
+	 * e.g. <code>C:\java\lib\rt.jar - java.lang.Vector</code>
 	 * Option only applies to getElementLabel
 	 */
 	public final static long PREPEND_ROOT_PATH= 1L << 44;
