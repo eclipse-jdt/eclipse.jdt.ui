@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
-import org.eclipse.core.resources.IProject;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.dialogs.ControlEnableState;
 
@@ -111,19 +111,20 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
 		
 		String[] errorWarningIgnoreLabels= new String[] {
-				PreferencesMessages.JavadocProblemsConfigurationBlock_error,  
-				PreferencesMessages.JavadocProblemsConfigurationBlock_warning, 
+				PreferencesMessages.JavadocProblemsConfigurationBlock_error,
+				PreferencesMessages.JavadocProblemsConfigurationBlock_warning,
 				PreferencesMessages.JavadocProblemsConfigurationBlock_ignore
 		};
 		
 		String[] enabledDisabled= new String[] { ENABLED, DISABLED };
+		String[] disabledEnabled= new String[] { DISABLED, ENABLED };
 		
 		String[] visibilities= new String[] { PUBLIC, PROTECTED, DEFAULT, PRIVATE  };
 		
 		String[] visibilitiesLabels= new String[] {
-				PreferencesMessages.JavadocProblemsConfigurationBlock_public, 
-				PreferencesMessages.JavadocProblemsConfigurationBlock_protected, 
-				PreferencesMessages.JavadocProblemsConfigurationBlock_default, 
+				PreferencesMessages.JavadocProblemsConfigurationBlock_public,
+				PreferencesMessages.JavadocProblemsConfigurationBlock_protected,
+				PreferencesMessages.JavadocProblemsConfigurationBlock_default,
 				PreferencesMessages.JavadocProblemsConfigurationBlock_private
 		};
 		
@@ -147,7 +148,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		layout.marginWidth= 0;
 		outer.setLayout(layout);
 		
-		String label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_javadoc_support_label; 
+		String label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_javadoc_support_label;
 		addCheckBox(outer, label, PREF_JAVADOC_SUPPORT, enabledDisabled, 0);
 		
 		layout = new GridLayout();
@@ -162,7 +163,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		fJavadocComposite= composite;
 		
 		Label description= new Label(composite, SWT.WRAP);
-		description.setText(PreferencesMessages.JavadocProblemsConfigurationBlock_javadoc_description); 
+		description.setText(PreferencesMessages.JavadocProblemsConfigurationBlock_javadoc_description);
 		GridData gd= new GridData();
 		gd.horizontalSpan= nColumns;
 		//gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(60);
@@ -170,13 +171,13 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 			
 		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
 		
-		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_label; 
+		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_label;
 		addComboBox(composite, label, PREF_PB_INVALID_JAVADOC, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 		
-		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_visibility_label; 
+		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_visibility_label;
 		addComboBox(composite, label, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, visibilities, visibilitiesLabels, indent);
 
-		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_label; 
+		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_label;
 		addCheckBox(composite, label, PREF_PB_INVALID_JAVADOC_TAGS, enabledDisabled, indent);
 		
 		Composite validateTagComposite= new Composite(composite, SWT.NONE);
@@ -189,32 +190,32 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		gridLayout.marginWidth= 0;
 		validateTagComposite.setLayout(gridLayout);
 		
-		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_not_visible_ref_label; 
+		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_not_visible_ref_label;
 		addCheckBox(validateTagComposite, label, PREF_PB_INVALID_JAVADOC_TAGS_NOT_VISIBLE_REF, enabledDisabled, indent);
 		
-		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_deprecated_label; 
+		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_deprecated_label;
 		addCheckBox(validateTagComposite, label, PREF_PB_INVALID_JAVADOC_TAGS_DEPRECATED_REF, enabledDisabled, indent);
 		
 		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_tag_description;
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_TAG_DESCRIPTION, missingTagValues, missingTagLabels, indent);
 		
-		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_javadoc_label; 
+		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_javadoc_label;
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_javadoc_tags_visibility_label; 
+		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_javadoc_tags_visibility_label;
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY, visibilities, visibilitiesLabels, indent);
 		
-		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_javadoc_tags_overriding_label; 
-		addCheckBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING, enabledDisabled, indent);
+		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_javadoc_tags_overriding_label;
+		addCheckBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS_OVERRIDING, disabledEnabled, indent);
 		
-		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_comments_label; 
+		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_comments_label;
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_COMMENTS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_comments_visibility_label; 
+		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_comments_visibility_label;
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY, visibilities, visibilitiesLabels, indent);
 		
-		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_comments_overriding_label; 
-		addCheckBox(composite, label, PREF_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING, enabledDisabled, indent);
+		label= PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_comments_overriding_label;
+		addCheckBox(composite, label, PREF_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING, disabledEnabled, indent);
 
 		return sc1;
 	}
@@ -222,7 +223,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	/* (non-javadoc)
 	 * Update fields and validate.
 	 * @param changedKey Key that changed, or null, if all changed.
-	 */	
+	 */
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		if (!areSettingsEnabled()) {
 			return;
@@ -233,18 +234,18 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 					PREF_PB_MISSING_JAVADOC_TAGS.equals(changedKey) ||
 					PREF_PB_MISSING_JAVADOC_COMMENTS.equals(changedKey) ||
 					PREF_JAVADOC_SUPPORT.equals(changedKey) ||
-					PREF_PB_INVALID_JAVADOC_TAGS.equals(changedKey)) {				
+					PREF_PB_INVALID_JAVADOC_TAGS.equals(changedKey)) {
 				updateEnableStates();
 			} else {
 				return;
 			}
 		} else {
 			updateEnableStates();
-		}		
+		}
 		fContext.statusChanged(new StatusInfo());
 	}
 	
-	private void updateEnableStates() {		
+	private void updateEnableStates() {
 		boolean enableJavadoc= checkValue(PREF_JAVADOC_SUPPORT, ENABLED);
 		enableConfigControls(enableJavadoc);
 
@@ -279,17 +280,17 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 			if (fBlockEnableState == null) {
 				fBlockEnableState= ControlEnableState.disable(fJavadocComposite);
 			}
-		}	
+		}
 	}
 	
 	
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
-		String title= PreferencesMessages.JavadocProblemsConfigurationBlock_needsbuild_title; 
+		String title= PreferencesMessages.JavadocProblemsConfigurationBlock_needsbuild_title;
 		String message;
 		if (workspaceSettings) {
-			message= PreferencesMessages.JavadocProblemsConfigurationBlock_needsfullbuild_message; 
+			message= PreferencesMessages.JavadocProblemsConfigurationBlock_needsfullbuild_message;
 		} else {
-			message= PreferencesMessages.JavadocProblemsConfigurationBlock_needsprojectbuild_message; 
+			message= PreferencesMessages.JavadocProblemsConfigurationBlock_needsprojectbuild_message;
 		}
 		return new String[] { title, message };
 	}
