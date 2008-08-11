@@ -567,8 +567,13 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				} else if (kind == IJavaElementDelta.ADDED) {
 					final Object parent = getHierarchicalPackageParent((IPackageFragment) element);
 					if (parent instanceof IPackageFragmentRoot) {
-						postAdd(parent, element,  runnables);
-						return false;
+						if (fFoldPackages) {
+							postRefresh(parent, PARENT, element, runnables);
+							return true;
+						} else {
+							postAdd(parent, element, runnables);
+							return false;
+						}
 					} else {
 						postRefresh(internalGetParent(parent), GRANT_PARENT, element, runnables);
 						return true;
