@@ -20,12 +20,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
+import org.osgi.framework.Bundle;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
@@ -42,6 +37,13 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -87,6 +89,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.handlers.IHandlerService;
+
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -139,8 +142,6 @@ import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
-
-import org.osgi.framework.Bundle;
 
 
 /**
@@ -963,7 +964,7 @@ public class JavadocView extends AbstractInfoView {
 			for (int i= 0; i < result.length; i++) {
 				HTMLPrinter.startBulletList(buffer);
 				IJavaElement curr= result[i];
-				if (curr instanceof IMember)
+				if (curr instanceof IMember || curr.getElementType() == IJavaElement.LOCAL_VARIABLE)
 					HTMLPrinter.addBullet(buffer, getInfoText(curr, null, false));
 				HTMLPrinter.endBulletList(buffer);
 			}
@@ -972,7 +973,7 @@ public class JavadocView extends AbstractInfoView {
 
 			IJavaElement curr= result[0];
 			if (curr instanceof IMember) {
-				final IMember member= (IMember) curr;
+				final IMember member= (IMember)curr;
 				
 				String constantValue= null;
 				if (member instanceof IField)
@@ -1012,6 +1013,8 @@ public class JavadocView extends AbstractInfoView {
 				if (reader != null) {
 					HTMLPrinter.addParagraph(buffer, reader);
 				}
+			} else if (curr.getElementType() == IJavaElement.LOCAL_VARIABLE) {
+				HTMLPrinter.addSmallHeader(buffer, getInfoText(curr, null, true));
 			}
 		}
 
