@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -28,7 +29,6 @@ import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.ITextViewer;
@@ -132,9 +132,9 @@ public class ProblemHover extends AbstractAnnotationHover {
 
 				if (result == OptionalMessageDialog.NOT_SHOWN) {
 					showPropertyPage= false;
-				} else if (result == 2) {
+				} else if (result == 2 || result == SWT.DEFAULT) {
 					return;
-				} else if (result == Window.OK) {
+				} else if (result == 0) {
 					showPropertyPage= true;
 				} else {
 					showPropertyPage= false;
