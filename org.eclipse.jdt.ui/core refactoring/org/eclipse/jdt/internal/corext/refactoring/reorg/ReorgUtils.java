@@ -185,6 +185,8 @@ public class ReorgUtils {
 				else
 					return RefactoringCoreMessages.ReorgUtils_14; 
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+				if (((IPackageFragmentRoot) element).isArchive())
+					return RefactoringCoreMessages.ReorgUtils_21; 
 				if (isSourceFolder(element))
 					return RefactoringCoreMessages.ReorgUtils_15; 
 				if (isClassFolder(element))

@@ -2252,6 +2252,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ReorgUtils_20;
 
+	public static String ReorgUtils_21;
+
 	public static String ReorgUtils_3;
 
 	public static String ReorgUtils_4;
