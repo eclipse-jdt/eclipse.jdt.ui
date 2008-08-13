@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
-import org.eclipse.core.resources.IProject;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -19,11 +17,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.jface.dialogs.IDialogSettings;
 
-import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
-
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -125,7 +124,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		}
 	}
 	
-	private static Key[] getKeys() {
+	public static Key[] getKeys() {
 		return new Key[] {
 				PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD,
 				PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, PREF_PB_DEPRECATION, PREF_PB_HIDDEN_CATCH_BLOCK, PREF_PB_UNUSED_LOCAL,
