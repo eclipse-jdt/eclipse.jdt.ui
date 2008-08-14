@@ -118,7 +118,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	public ProblemSeveritiesConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
 		super(context, project, getKeys(), container);
 		
-		// compatibilty code for the merge of the two option PB_SIGNAL_PARAMETER:
+		// Compatibility code for the merge of the two option PB_SIGNAL_PARAMETER:
 		if (ENABLED.equals(getValue(PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT))) {
 			setValue(PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, ENABLED);
 		}
