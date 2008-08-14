@@ -175,7 +175,7 @@ public abstract class OptionsConfigurationBlock {
 		
 		public String getValue(int index) {
 			return fValues[index];
-		}		
+		}
 		
 		public int getSelection(String value) {
 			if (value != null) {
@@ -261,7 +261,7 @@ public abstract class OptionsConfigurationBlock {
 		fExpandedComposites= new ArrayList();
 		
 		fRebuildCount= getRebuildCount();
-	}	
+	}
 	
 	protected final IWorkbenchPreferenceContainer getPreferenceContainer() {
 		return fContainer;
@@ -316,7 +316,7 @@ public abstract class OptionsConfigurationBlock {
 			}
 		}
 	}
-	
+
 	public void selectOption(Key key) {
 		Control control= findControl(key);
 		if (control != null) {
@@ -333,28 +333,30 @@ public abstract class OptionsConfigurationBlock {
 			control.setFocus();
 		}
 	}
-	
-	
+
 	public boolean hasProjectSpecificOptions(IProject project) {
+		return hasProjectSpecificOptions(project, fAllKeys, fManager);
+	}
+
+	public static boolean hasProjectSpecificOptions(IProject project, Key[] allKeys, IWorkingCopyManager manager) {
 		if (project != null) {
 			IScopeContext projectContext= new ProjectScope(project);
-			Key[] allKeys= fAllKeys;
 			for (int i= 0; i < allKeys.length; i++) {
-				if (allKeys[i].getStoredValue(projectContext, fManager) != null) {
+				if (allKeys[i].getStoredValue(projectContext, manager) != null) {
 					return true;
 				}
 			}
 		}
 		return false;
-	}	
-			
+	}
+
 	protected Shell getShell() {
 		return fShell;
 	}
 	
 	protected void setShell(Shell shell) {
 		fShell= shell;
-	}	
+	}
 	
 	protected abstract Control createContents(Composite parent);
 	
@@ -478,14 +480,14 @@ public abstract class OptionsConfigurationBlock {
 		
 		makeScrollableCompositeAware(comboBox);
 		
-		String currValue= getValue(key);	
+		String currValue= getValue(key);
 		comboBox.select(data.getSelection(currValue));
 		
 		fComboBoxes.add(comboBox);
 		return comboBox;
 	}
 
-	protected Text addTextField(Composite parent, String label, Key key, int indent, int widthHint) {	
+	protected Text addTextField(Composite parent, String label, Key key, int indent, int widthHint) {
 		Label labelControl= new Label(parent, SWT.WRAP);
 		labelControl.setText(label);
 		labelControl.setFont(JFaceResources.getDialogFont());
@@ -499,7 +501,7 @@ public abstract class OptionsConfigurationBlock {
 		
 		fLabels.put(textBox, labelControl);
 		
-		String currValue= getValue(key);	
+		String currValue= getValue(key);
 		if (currValue != null) {
 			textBox.setText(currValue);
 		}
@@ -609,13 +611,13 @@ public abstract class OptionsConfigurationBlock {
 			};
 		}
 		return fTextModifyListener;
-	}		
+	}
 	
 	protected void controlChanged(Widget widget) {
 		ControlData data= (ControlData) widget.getData();
 		String newValue= null;
 		if (widget instanceof Button) {
-			newValue= data.getValue(((Button)widget).getSelection());			
+			newValue= data.getValue(((Button)widget).getSelection());
 		} else if (widget instanceof Combo) {
 			newValue= data.getValue(((Combo)widget).getSelectionIndex());
 		} else {
@@ -630,7 +632,7 @@ public abstract class OptionsConfigurationBlock {
 		String number= textControl.getText();
 		String oldValue= setValue(key, number);
 		validateSettings(key, oldValue, number);
-	}	
+	}
 
 	protected boolean checkValue(Key key, String value) {
 		return value.equals(getValue(key));
@@ -673,12 +675,12 @@ public abstract class OptionsConfigurationBlock {
 	/* (non-javadoc)
 	 * Update fields and validate.
 	 * @param changedKey Key that changed, or null, if all changed.
-	 */	
+	 */
 	protected abstract void validateSettings(Key changedKey, String oldValue, String newValue);
 	
 	
 	protected String[] getTokens(String text, String separator) {
-		StringTokenizer tok= new StringTokenizer(text, separator); 
+		StringTokenizer tok= new StringTokenizer(text, separator);
 		int nTokens= tok.countTokens();
 		String[] res= new String[nTokens];
 		for (int i= 0; i < res.length; i++) {
@@ -849,15 +851,15 @@ public abstract class OptionsConfigurationBlock {
 	protected void updateCombo(Combo curr) {
 		ControlData data= (ControlData) curr.getData();
 		
-		String currValue= getValue(data.getKey());	
-		curr.select(data.getSelection(currValue));					
+		String currValue= getValue(data.getKey());
+		curr.select(data.getSelection(currValue));
 	}
 	
 	protected void updateCheckBox(Button curr) {
 		ControlData data= (ControlData) curr.getData();
 		
-		String currValue= getValue(data.getKey());	
-		curr.setSelection(data.getSelection(currValue) == 0);						
+		String currValue= getValue(data.getKey());
+		curr.setSelection(data.getSelection(currValue) == 0);
 	}
 	
 	protected void updateText(Text curr) {
@@ -877,7 +879,7 @@ public abstract class OptionsConfigurationBlock {
 				return curr;
 			}
 		}
-		return null;		
+		return null;
 	}
 	
 	protected Combo getComboBox(Key key) {
@@ -888,7 +890,7 @@ public abstract class OptionsConfigurationBlock {
 				return curr;
 			}
 		}
-		return null;		
+		return null;
 	}
 	
 	protected Text getTextControl(Key key) {
@@ -899,7 +901,7 @@ public abstract class OptionsConfigurationBlock {
 				return curr;
 			}
 		}
-		return null;		
+		return null;
 	}
 	
 	protected Control findControl(Key key) {
