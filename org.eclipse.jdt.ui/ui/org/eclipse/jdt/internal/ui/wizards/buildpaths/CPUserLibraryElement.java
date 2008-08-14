@@ -158,7 +158,9 @@ public class CPUserLibraryElement {
 	}
 	
 	public void replace(CPListElement existingElement, CPListElement element) {
-		if (fChildren.contains(element)) {
+		if (element.equals(existingElement)) {
+			// same element selected again: do nothing
+		} else if (fChildren.contains(element)) {
 			fChildren.remove(existingElement);
 		} else {
 			int index= fChildren.indexOf(existingElement);
