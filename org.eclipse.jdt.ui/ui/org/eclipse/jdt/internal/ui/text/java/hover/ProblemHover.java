@@ -15,6 +15,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
@@ -23,12 +26,9 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ProjectScope;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.ITextViewer;
@@ -41,6 +41,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
+
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.spelling.SpellingAnnotation;
 
@@ -63,7 +64,9 @@ import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.preferences.JavadocProblemsPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock.Key;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
@@ -113,9 +116,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 
 			Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 			
-			IScopeContext projectContext= new ProjectScope(fProject.getProject());
-			IEclipsePreferences node= projectContext.getNode(JavaCore.PLUGIN_ID);
-			if (node.get(fOptionId, null) == null) {
+			if (! hasProjectSpecificOptions()) {
 				String message= Messages.format(
 						JavaHoverMessages.ProblemHover_chooseSettingsTypeDialog_message,
 						new Object[] { JavaElementLabels.getElementLabel(fProject, JavaElementLabels.ALL_DEFAULT) });
@@ -131,9 +132,9 @@ public class ProblemHover extends AbstractAnnotationHover {
 
 				if (result == OptionalMessageDialog.NOT_SHOWN) {
 					showPropertyPage= false;
-				} else if (result == 2) {
+				} else if (result == 2 || result == SWT.DEFAULT) {
 					return;
-				} else if (result == Window.OK) {
+				} else if (result == 0) {
 					showPropertyPage= true;
 				} else {
 					showPropertyPage= false;
@@ -171,6 +172,20 @@ public class ProblemHover extends AbstractAnnotationHover {
 			} else {
 				PreferencesUtil.createPreferenceDialogOn(shell, pageId, null, data).open();
 			}
+		}
+
+		private boolean hasProjectSpecificOptions() {
+			IScopeContext projectContext= new ProjectScope(fProject.getProject());
+			IEclipsePreferences node= projectContext.getNode(JavaCore.PLUGIN_ID);
+			if (node == null)
+				return false;
+			Key[] keys= ProblemSeveritiesConfigurationBlock.getKeys();
+			for (int i= 0; i < keys.length; i++) {
+				if (keys[i].getStoredValue(projectContext, null) != null) {
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 

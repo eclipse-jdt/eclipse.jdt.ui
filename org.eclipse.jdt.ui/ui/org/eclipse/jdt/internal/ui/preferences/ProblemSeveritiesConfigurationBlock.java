@@ -124,7 +124,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		}
 	}
 	
-	private static Key[] getKeys() {
+	public static Key[] getKeys() {
 		return new Key[] {
 				PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD,
 				PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, PREF_PB_DEPRECATION, PREF_PB_HIDDEN_CATCH_BLOCK, PREF_PB_UNUSED_LOCAL,
