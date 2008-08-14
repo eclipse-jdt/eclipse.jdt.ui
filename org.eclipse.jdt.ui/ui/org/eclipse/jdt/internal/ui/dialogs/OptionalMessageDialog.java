@@ -31,11 +31,11 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 /**
  * This is a <code>MessageDialog</code> which allows the user
  * to choose that the dialog isn't shown again the next time.
- */ 
+ */
 public class OptionalMessageDialog extends MessageDialog {
 	
 	// String constants for widgets
-	private static final String CHECKBOX_TEXT= JavaUIMessages.OptionalMessageDialog_dontShowAgain; 
+	private static final String CHECKBOX_TEXT= JavaUIMessages.OptionalMessageDialog_dontShowAgain;
 
 	// Dialog store id constants
 	private static final String STORE_ID= "OptionalMessageDialog.hide."; //$NON-NLS-1$
@@ -47,14 +47,25 @@ public class OptionalMessageDialog extends MessageDialog {
 
 	private Button fHideDialogCheckBox;
 
+
 	/**
-	 * Opens the dialog but only if the user hasn't choosen to hide it.
-	 * Returns <code>NOT_SHOWN</code> if the dialog was not shown.
+	 * Opens the dialog but only if the user hasn't chosen to hide it.
+	 * 
+	 * @return the index of the pressed button or {@link SWT#DEFAULT} if the dialog got dismissed
+	 *         without pressing a button (e.g. via Esc) or {{@link #NOT_SHOWN} if the dialog was not
+	 *         shown
 	 */
 	public static int open(String id, Shell parent, String title, Image titleImage, String message, int dialogType, String[] buttonLabels, int defaultButtonIndex) {
 		return open(id, parent, title, titleImage, message, dialogType, buttonLabels, defaultButtonIndex, CHECKBOX_TEXT);
 	}
 
+	/**
+	 * Opens the dialog but only if the user hasn't chosen to hide it.
+	 * 
+	 * @return the index of the pressed button or {@link SWT#DEFAULT} if the dialog got dismissed
+	 *         without pressing a button (e.g. via Esc) or {{@link #NOT_SHOWN} if the dialog was not
+	 *         shown
+	 */
 	public static int open(String id, Shell parent, String title, Image titleImage, String message, int dialogType, String[] buttonLabels, int defaultButtonIndex, String checkboxText) {
 		if (!isDialogEnabled(id))
 			return OptionalMessageDialog.NOT_SHOWN;
