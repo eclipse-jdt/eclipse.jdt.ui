@@ -11,16 +11,9 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
-
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.ListenerList;
-
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -31,6 +24,12 @@ import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.ListenerList;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -52,11 +51,9 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jface.text.ITextSelection;
 
@@ -73,24 +70,19 @@ import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.part.ShowInContext;
+import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.IUpdate;
-
-import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IParent;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
@@ -362,16 +354,6 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			 */
 			protected class JavaOutlineViewer extends TreeViewer {
 
-				/**
-				 * Indicates an item which has been reused. At the point of
-				 * its reuse it has been expanded. This field is used to
-				 * communicate between <code>internalExpandToLevel</code> and
-				 * <code>reuseTreeItem</code>.
-				 */
-				private Item fReusedExpandedItem;
-				private boolean fReorderedMembers;
-				private boolean fForceFireSelectionChanged;
-
 				public JavaOutlineViewer(Tree tree) {
 					super(tree);
 					setAutoExpandLevel(ALL_LEVELS);
@@ -385,30 +367,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				 * @param delta the Java element delta used to reconcile the Java outline
 				 */
 				public void reconcile(IJavaElementDelta delta) {
-					fReorderedMembers= false;
-					fForceFireSelectionChanged= false;
-					if (getComparator() == null) {
-						if (fTopLevelTypeOnly
-							&& delta.getElement() instanceof IType
-							&& (delta.getKind() & IJavaElementDelta.ADDED) != 0)
-						{
-							refresh(true);
-
-						} else {
-							Widget w= findItem(fInput);
-							if (w != null && !w.isDisposed())
-								update(w, delta);
-							if (fForceFireSelectionChanged)
-								fireSelectionChanged(new SelectionChangedEvent(getSite().getSelectionProvider(), this.getSelection()));
-							if (fReorderedMembers) {
-								refresh(false);
-								fReorderedMembers= false;
-						}
-						}
-					} else {
-						// just for now
-						refresh(true);
-					}
+					refresh(true);
 				}
 
 				/*
@@ -420,52 +379,12 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 						if (i.getData() instanceof IJavaElement) {
 							IJavaElement je= (IJavaElement) i.getData();
 							if (je.getElementType() == IJavaElement.IMPORT_CONTAINER || isInnerType(je)) {
-								if (i != fReusedExpandedItem) {
-									setExpanded(i, false);
-									return;
-								}
+								setExpanded(i, false);
+						return;
 							}
 						}
 					}
 					super.internalExpandToLevel(node, level);
-				}
-
-				protected void reuseTreeItem(Item item, Object element) {
-
-					// remove children
-					Item[] c= getChildren(item);
-					if (c != null && c.length > 0) {
-
-						if (getExpanded(item))
-							fReusedExpandedItem= item;
-
-						for (int k= 0; k < c.length; k++) {
-							if (c[k].getData() != null)
-								disassociate(c[k]);
-							c[k].dispose();
-						}
-					}
-
-					updateItem(item, element);
-					updatePlus(item, element);
-					internalExpandToLevel(item, ALL_LEVELS);
-
-					fReusedExpandedItem= null;
-					fForceFireSelectionChanged= true;
-				}
-
-				protected boolean mustUpdateParent(IJavaElementDelta delta, IJavaElement element) {
-					if (element instanceof IMethod) {
-						if ((delta.getKind() & IJavaElementDelta.ADDED) != 0) {
-							try {
-								return ((IMethod)element).isMainMethod();
-							} catch (JavaModelException e) {
-								JavaPlugin.log(e.getStatus());
-							}
-						}
-						return "main".equals(element.getElementName()); //$NON-NLS-1$
-					}
-					return false;
 				}
 
 				/*
@@ -477,237 +396,6 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					}
 					return super.isExpandable(element);
 				}
-
-				protected ISourceRange getSourceRange(IJavaElement element) throws JavaModelException {
-					if (element instanceof ISourceReference)
-						return ((ISourceReference) element).getSourceRange();
-					if (element instanceof IMember && !(element instanceof IInitializer))
-						return ((IMember) element).getNameRange();
-					return null;
-				}
-
-				protected boolean overlaps(ISourceRange range, int start, int end) {
-					return start <= (range.getOffset() + range.getLength() - 1) && range.getOffset() <= end;
-				}
-
-				protected boolean filtered(IJavaElement parent, IJavaElement child) {
-
-					Object[] result= new Object[] { child };
-					ViewerFilter[] filters= getFilters();
-					for (int i= 0; i < filters.length; i++) {
-						result= filters[i].filter(this, parent, result);
-						if (result.length == 0)
-							return true;
-					}
-
-					return false;
-				}
-
-				protected void update(Widget w, IJavaElementDelta delta) {
-
-					Item item;
-
-					IJavaElement parent= delta.getElement();
-					IJavaElementDelta[] affected= delta.getAffectedChildren();
-					Item[] children= getChildren(w);
-
-					boolean doUpdateParent= false;
-					boolean doUpdateParentsPlus= false;
-
-					Vector deletions= new Vector();
-					Vector additions= new Vector();
-
-					for (int i= 0; i < affected.length; i++) {
-					    IJavaElementDelta affectedDelta= affected[i];
-						IJavaElement affectedElement= affectedDelta.getElement();
-						int status= affected[i].getKind();
-
-						// find tree item with affected element
-						int j;
-						for (j= 0; j < children.length; j++)
-						    if (affectedElement.equals(children[j].getData()))
-						    	break;
-
-						if (j == children.length) {
-							// remove from collapsed parent
-							if ((status & IJavaElementDelta.REMOVED) != 0) {
-								doUpdateParentsPlus= true;
-								continue;
-							}
-							// addition
-							if ((status & IJavaElementDelta.CHANGED) != 0 &&
-								(affectedDelta.getFlags() & IJavaElementDelta.F_MODIFIERS) != 0 &&
-								!filtered(parent, affectedElement))
-							{
-								additions.addElement(affectedDelta);
-							}
-							continue;
-						}
-
-						item= children[j];
-
-						// removed
-						if ((status & IJavaElementDelta.REMOVED) != 0) {
-							deletions.addElement(item);
-							doUpdateParent= doUpdateParent || mustUpdateParent(affectedDelta, affectedElement);
-
-						// changed
-						} else if ((status & IJavaElementDelta.CHANGED) != 0) {
-							int change= affectedDelta.getFlags();
-							doUpdateParent= doUpdateParent || mustUpdateParent(affectedDelta, affectedElement);
-
-							if ((change & IJavaElementDelta.F_MODIFIERS) != 0) {
-								if (filtered(parent, affectedElement))
-									deletions.addElement(item);
-								else
-									updateItem(item, affectedElement);
-							}
-
-							if ((change & IJavaElementDelta.F_CONTENT) != 0)
-								updateItem(item, affectedElement);
-
-							if ((change & IJavaElementDelta.F_CATEGORIES) != 0)
-								updateItem(item, affectedElement);
-
-							if ((change & IJavaElementDelta.F_CHILDREN) != 0)
-								update(item, affectedDelta);
-
-							if ((change & IJavaElementDelta.F_REORDER) != 0)
-								fReorderedMembers= true;
-						}
-					}
-
-					// find all elements to add
-					IJavaElementDelta[] add= delta.getAddedChildren();
-					if (additions.size() > 0) {
-						IJavaElementDelta[] tmp= new IJavaElementDelta[add.length + additions.size()];
-						System.arraycopy(add, 0, tmp, 0, add.length);
-						for (int i= 0; i < additions.size(); i++)
-							tmp[i + add.length]= (IJavaElementDelta) additions.elementAt(i);
-						add= tmp;
-					}
-
-					// add at the right position
-					go2: for (int i= 0; i < add.length; i++) {
-
-						try {
-
-							IJavaElement e= add[i].getElement();
-							if (filtered(parent, e))
-								continue go2;
-
-							doUpdateParent= doUpdateParent || mustUpdateParent(add[i], e);
-							ISourceRange rng= getSourceRange(e);
-							int start= rng.getOffset();
-							int end= start + rng.getLength() - 1;
-							int nameOffset= Integer.MAX_VALUE;
-							if (e instanceof IField) {
-								ISourceRange nameRange= ((IField) e).getNameRange();
-								if (nameRange != null)
-									nameOffset= nameRange.getOffset();
-							}
-
-							Item last= null;
-							item= null;
-							children= getChildren(w);
-
-							for (int j= 0; j < children.length; j++) {
-								item= children[j];
-								IJavaElement r= (IJavaElement) item.getData();
-
-								if (r == null) {
-									// parent node collapsed and not be opened before -> do nothing
-									continue go2;
-								}
-
-
-								try {
-									rng= getSourceRange(r);
-
-									// multi-field declarations always start at
-									// the same offset. They also have the same
-									// end offset if the field sequence is terminated
-									// with a semicolon. If not, the source range
-									// ends behind the identifier / initializer
-									// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=51851
-									boolean multiFieldDeclaration=
-										r.getElementType() == IJavaElement.FIELD
-											&& e.getElementType() == IJavaElement.FIELD
-											&& rng.getOffset() == start;
-
-									// elements are inserted by occurrence
-									// however, multi-field declarations have
-									// equal source ranges offsets, therefore we
-									// compare name-range offsets.
-									boolean multiFieldOrderBefore= false;
-									if (multiFieldDeclaration) {
-										if (r instanceof IField) {
-											ISourceRange nameRange= ((IField) r).getNameRange();
-											if (nameRange != null) {
-												if (nameRange.getOffset() > nameOffset)
-													multiFieldOrderBefore= true;
-											}
-										}
-									}
-
-									if (!multiFieldDeclaration && overlaps(rng, start, end)) {
-
-										// be tolerant if the delta is not correct, or if
-										// the tree has been updated other than by a delta
-										reuseTreeItem(item, e);
-										continue go2;
-
-									} else if (multiFieldOrderBefore || rng.getOffset() > start) {
-
-										if (last != null && deletions.contains(last)) {
-											// reuse item
-											deletions.removeElement(last);
-											reuseTreeItem(last, e);
-										} else {
-											// nothing to reuse
-											createTreeItem(w, e, j);
-										}
-										continue go2;
-									}
-
-								} catch (JavaModelException x) {
-									// stumbled over deleted element
-								}
-
-								last= item;
-							}
-
-							// add at the end of the list
-							if (last != null && deletions.contains(last)) {
-								// reuse item
-								deletions.removeElement(last);
-								reuseTreeItem(last, e);
-							} else {
-								// nothing to reuse
-								createTreeItem(w, e, -1);
-							}
-
-						} catch (JavaModelException x) {
-							// the element to be added is not present -> don't add it
-						}
-					}
-
-
-					// remove items which haven't been reused
-					Enumeration e= deletions.elements();
-					while (e.hasMoreElements()) {
-						item= (Item) e.nextElement();
-						disassociate(item);
-						item.dispose();
-					}
-
-					if (doUpdateParent)
-						updateItem(w, delta.getElement());
-					if (!doUpdateParent && doUpdateParentsPlus && w instanceof Item)
-						updatePlus((Item)w, delta.getElement());
-				}
-
-
 
 				/*
 				 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
@@ -749,8 +437,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					return null;
 				}
 
-
 			}
+
 
 			class LexicalSortingAction extends Action {
 
@@ -1180,7 +868,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			fOutlineViewer.setInput(fInput);
 			updateSelectionProvider(getSite());
 		}
-		if (fCategoryFilterActionGroup != null) 
+		if (fCategoryFilterActionGroup != null)
 			fCategoryFilterActionGroup.setInput(new IJavaElement[] {fInput});
 	}
 
