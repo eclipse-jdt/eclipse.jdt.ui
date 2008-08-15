@@ -487,5 +487,44 @@
          <!-- END : do we need these? -->
       </kind>
    </extension>
+
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            default="false"
+            id="org.eclipse.jdt.junit.JUnitResultEditor"
+            icon="$nl$/icons/full/obj16/testrun_file.gif"
+            launcher="org.eclipse.jdt.internal.junit.ui.JUnitViewEditorLauncher"
+            name="%JUnitView.editor.name">
+         <contentTypeBinding
+               contentTypeId="org.eclipse.jdt.junit.JUnitResult">
+         </contentTypeBinding>
+      </editor>
+   </extension>
    
+   <extension
+         point="org.eclipse.core.contenttype.contentTypes">
+      <content-type
+            base-type="org.eclipse.core.runtime.xml"
+            file-extensions="xml"
+            id="JUnitResult"
+            name="%JUnitTestResult.content-type.name"
+            priority="high">
+         <describer
+               class="org.eclipse.core.runtime.content.XMLRootElementContentDescriber2">
+            <parameter
+                  name="element"
+                  value="testrun">
+            </parameter>
+            <parameter
+                  name="element"
+                  value="testsuite">
+            </parameter>
+            <parameter
+                  name="element"
+                  value="testsuites">
+            </parameter>
+         </describer>
+      </content-type>
+   </extension>   
 </plugin>

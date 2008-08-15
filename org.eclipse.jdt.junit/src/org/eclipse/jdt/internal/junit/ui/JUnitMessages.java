@@ -230,6 +230,10 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitQuickFixProcessor_add_assert_info;
 
+	public static String JUnitViewEditorLauncher_dialog_title;
+
+	public static String JUnitViewEditorLauncher_error_occurred;
+
 	public static String LaunchConfigChange_configDeleted;
 	public static String LaunchConfigRenameChange_name;
 	public static String LaunchConfigSetAttributeChange_name;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,10 +13,10 @@ package org.eclipse.jdt.internal.junit.util;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -38,10 +38,22 @@ public class ExceptionHandler {
 	private static ExceptionHandler fgInstance= new ExceptionHandler();
 
 	/**
+	 * Handles the given <code>CoreException</code>. The workbench shell is used as a parent
+	 * for the dialog window.
+	 * 
+	 * @param e the <code>CoreException</code> to be handled
+	 * @param title the dialog window's window title
+	 * @param message message to be displayed by the dialog window
+	 */
+	public static void handle(CoreException e, String title, String message) {
+		handle(e, JUnitPlugin.getActiveWorkbenchShell(), title, message);
+	}
+	
+	/**
 	 * Handles the given <code>CoreException</code>. 
 	 * 
 	 * @param e the <code>CoreException</code> to be handled
-	 * @param parent the dialog window's parent shell
+	 * @param parent the dialog window's parent shell or <code>null</code>
 	 * @param title the dialog window's window title
 	 * @param message message to be displayed by the dialog window
 	 */
@@ -53,7 +65,7 @@ public class ExceptionHandler {
 	 * Handles the given <code>InvocationTargetException</code>. 
 	 * 
 	 * @param e the <code>InvocationTargetException</code> to be handled
-	 * @param parent the dialog window's parent shell
+	 * @param parent the dialog window's parent shell or <code>null</code>
 	 * @param title the dialog window's window title
 	 * @param message message to be displayed by the dialog window
 	 */
