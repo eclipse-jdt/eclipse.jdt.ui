@@ -150,6 +150,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalModifierForArgument:
 			case IProblem.IllegalModifierForField:
 			case IProblem.IllegalModifierForMethod:
+			case IProblem.IllegalModifierForConstructor:
 			case IProblem.IllegalModifierForVariable:
 			case IProblem.IllegalModifierForEnum:
 			case IProblem.IllegalModifierForEnumConstant:
@@ -384,6 +385,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalModifierForArgument:
 			case IProblem.IllegalModifierForField:
 			case IProblem.IllegalModifierForMethod:
+			case IProblem.IllegalModifierForConstructor:
 			case IProblem.IllegalModifierForVariable:
 			case IProblem.IllegalModifierForEnum:
 			case IProblem.IllegalModifierForEnumConstant:
