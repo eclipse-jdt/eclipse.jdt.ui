@@ -28,17 +28,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.ILock;
-import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.junit.model.ITestElement.Result;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
@@ -58,6 +48,18 @@ import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.IHandler;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ILock;
+import org.eclipse.core.runtime.jobs.Job;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -67,6 +69,7 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -107,10 +110,6 @@ import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.ui.viewsupport.ViewHistory;
-
-import org.eclipse.jdt.junit.model.ITestElement.Result;
-
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
@@ -122,6 +121,8 @@ import org.eclipse.jdt.internal.junit.model.JUnitModel;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestElement;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
+
+import org.eclipse.jdt.internal.ui.viewsupport.ViewHistory;
 
 /** 
  * A ViewPart that shows the results of a test run.
@@ -248,6 +249,11 @@ public class TestRunnerViewPart extends ViewPart {
 	 * @since 3.4
 	 */
 	static final String TAG_SHOW_TIME= "time"; //$NON-NLS-1$	
+	
+	/**
+	 * @since 3.5
+	 */
+	static final String PREF_LAST_PATH= "lastImportExportPath"; //$NON-NLS-1$
 	
 	//orientations
 	static final int VIEW_ORIENTATION_VERTICAL= 0;
@@ -420,6 +426,11 @@ public class TestRunnerViewPart extends ViewPart {
 		public void run() {
 			FileDialog importDialog= new FileDialog(fShell, SWT.OPEN);
 			importDialog.setText(JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_title);
+			IDialogSettings dialogSettings= JUnitPlugin.getDefault().getDialogSettings();
+			String lastPath= dialogSettings.get(PREF_LAST_PATH);
+			if (lastPath != null) {
+				importDialog.setFilterPath(lastPath);
+			}
 			importDialog.setFilterExtensions(new String[] {"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 			String path= importDialog.open();
 			if (path == null)
@@ -450,6 +461,11 @@ public class TestRunnerViewPart extends ViewPart {
 		public void run() {
 			FileDialog exportDialog= new FileDialog(fShell, SWT.SAVE);
 			exportDialog.setText(JUnitMessages.TestRunnerViewPart_ExportTestRunSessionAction_title);
+			IDialogSettings dialogSettings= JUnitPlugin.getDefault().getDialogSettings();
+			String lastPath= dialogSettings.get(PREF_LAST_PATH);
+			if (lastPath != null) {
+				exportDialog.setFilterPath(lastPath);
+			}
 			exportDialog.setFileName(getFileName());
 			exportDialog.setFilterExtensions(new String[] {"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 			String path= exportDialog.open();
