@@ -12,16 +12,16 @@ package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -106,7 +106,7 @@ public class FixCorrectionProposal extends CUCorrectionProposal implements IComp
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getAdditionalProposalInfo()
 	 */
-	public String getAdditionalProposalInfo() {
+	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 		StringBuffer result= new StringBuffer();
 
 		IStatus status= fFix.getStatus();
@@ -126,7 +126,7 @@ public class FixCorrectionProposal extends CUCorrectionProposal implements IComp
 		if (info != null) {
 			result.append(info);
 		} else {
-			result.append(super.getAdditionalProposalInfo());
+			result.append(super.getAdditionalProposalInfo(monitor));
 		}
 
 		return result.toString();

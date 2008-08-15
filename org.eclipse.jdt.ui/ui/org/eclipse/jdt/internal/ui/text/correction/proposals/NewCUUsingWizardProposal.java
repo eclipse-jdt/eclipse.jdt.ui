@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -374,10 +375,11 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
+	 * @since 3.5
 	 */
-	public String getAdditionalProposalInfo() {
+	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 		StringBuffer buf= new StringBuffer();
 		switch (fTypeKind) {
 			case K_CLASS:

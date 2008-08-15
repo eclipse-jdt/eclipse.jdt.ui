@@ -14,13 +14,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
-
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.text.IDocument;
 
@@ -143,7 +144,11 @@ public class GetterSetterCorrectionSubProcessor {
 			return Messages.format(CorrectionMessages.GetterSetterCorrectionSubProcessor_creategetterunsingencapsulatefield_description, BasicElementLabels.getJavaElementName(field.getElementName()));
 		}
 		
-		public String getAdditionalProposalInfo() {
+		/*
+		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
+		 * @since 3.5
+		 */
+		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 			return CorrectionMessages.GetterSetterCorrectionSubProcessor_additional_info;
 		}
 		
@@ -259,7 +264,7 @@ public class GetterSetterCorrectionSubProcessor {
 
 	/**
 	 * Proposes a getter for this field
-	 * @param context 
+	 * @param context
 	 * @param relevance relevance of this proposal
 	 * @return the proposal if available or null
 	 */
@@ -322,7 +327,7 @@ public class GetterSetterCorrectionSubProcessor {
 
 	/**
 	 * Proposes a setter for this field
-	 * @param context 
+	 * @param context
 	 * @param relevance relevance of this proposal
 	 * @return the proposal if available or null
 	 */

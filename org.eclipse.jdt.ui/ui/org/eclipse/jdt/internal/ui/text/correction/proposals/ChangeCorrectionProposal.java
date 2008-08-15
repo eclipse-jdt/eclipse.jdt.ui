@@ -11,18 +11,20 @@
 
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRewriteTarget;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.LinkedModeModel;
@@ -53,7 +55,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
  * 
  * @since 3.2
  */
-public class ChangeCorrectionProposal implements IJavaCompletionProposal, ICommandAccess, ICompletionProposalExtension6 {
+public class ChangeCorrectionProposal implements IJavaCompletionProposal, ICommandAccess, ICompletionProposalExtension5, ICompletionProposalExtension6 {
 
 	private Change fChange;
 	private String fName;
@@ -151,11 +153,20 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 			}
 		}
 	}
-
+	
 	/*
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
+		Object info= getAdditionalProposalInfo(new NullProgressMonitor());
+		return info == null ? null : info.toString();
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
+	 * @since 3.5
+	 */
+	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 		StringBuffer buf= new StringBuffer();
 		buf.append("<p>"); //$NON-NLS-1$
 		try {
@@ -205,12 +216,12 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 		String shortCutString= CorrectionCommandHandler.getShortCutString(getCommandId());
 		if (shortCutString != null) {
 			String decorated= Messages.format(CorrectionMessages.ChangeCorrectionProposal_name_with_shortcut, new String[] { getName(), shortCutString });
-			return ColoringLabelProvider.decorateStyledString(str, decorated, StyledString.QUALIFIER_STYLER); 
+			return ColoringLabelProvider.decorateStyledString(str, decorated, StyledString.QUALIFIER_STYLER);
 		}
 		return str;
 	}
 	
-	/** 
+	/**
 	 * Returns the name of the proposal.
 	 * 
 	 * @return return the name of the proposal

@@ -19,7 +19,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -33,8 +34,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -258,7 +258,7 @@ public class ReorgCorrectionsSubProcessor {
 					try {
 						IChooseImportQuery query= AddImportOnSelectionAction.newDialogQuery(shell);
 						AddImportsOperation op= new AddImportsOperation(getCompilationUnit(), fOffset, fLength, query, false, false);
-						IProgressService progressService= PlatformUI.getWorkbench().getProgressService(); 
+						IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
 						progressService.runInUI(context, new WorkbenchRunnableAdapter(op, op.getScheduleRule()), op.getScheduleRule());
 						fResultingEdit= op.getResultingEdit();
 						super.apply(document);
@@ -277,7 +277,7 @@ public class ReorgCorrectionsSubProcessor {
 			}
 		}
 				
-		public String getAdditionalProposalInfo() {
+		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 			return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_info, BasicElementLabels.getJavaElementName(fMissingType));
 		}
 	}
@@ -347,7 +347,11 @@ public class ReorgCorrectionsSubProcessor {
 			}
 			PreferencesUtil.createPropertyDialogOn(JavaPlugin.getActiveWorkbenchShell(), fProject, BuildPathsPropertyPage.PROP_ID, null, data).open();
 		}
-		public String getAdditionalProposalInfo() {
+		/*
+		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
+		 * @since 3.5
+		 */
+		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 			return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_configure_buildpath_description, BasicElementLabels.getResourceName(fProject));
 		}
 	}
@@ -445,7 +449,7 @@ public class ReorgCorrectionsSubProcessor {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 		 */
-		public String getAdditionalProposalInfo() {
+		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 			StringBuffer message= new StringBuffer();
 			if (fChangeOnWorkspace) {
 				message.append(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeworkspace_description);

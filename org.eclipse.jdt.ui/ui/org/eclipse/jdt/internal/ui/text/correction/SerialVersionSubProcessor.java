@@ -15,6 +15,7 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
@@ -62,7 +63,7 @@ public final class SerialVersionSubProcessor {
 		/**
 		 * {@inheritDoc}
 		 */
-		public String getAdditionalProposalInfo() {
+		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 			if (fIsDefaultProposal) {
 				return CorrectionMessages.SerialVersionDefaultProposal_message_default_info;
 			} else {

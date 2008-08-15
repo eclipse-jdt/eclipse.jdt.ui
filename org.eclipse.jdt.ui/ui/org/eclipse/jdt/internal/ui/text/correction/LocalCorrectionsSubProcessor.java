@@ -20,14 +20,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.text.edits.InsertEdit;
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.viewers.StructuredSelection;
 
@@ -312,7 +313,7 @@ public class LocalCorrectionsSubProcessor {
 			public void apply(IDocument document) {
 				ExternalizeWizard.open(cu, JavaPlugin.getActiveWorkbenchShell());
 			}
-			public String getAdditionalProposalInfo() {
+			public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 				return CorrectionMessages.LocalCorrectionsSubProcessor_externalizestrings_additional_info;
 			}
 			
@@ -704,14 +705,14 @@ public class LocalCorrectionsSubProcessor {
 					rewrite.replace(parent, newPrefixExpr, null);
 
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image); 
+					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
 					proposals.add(proposal);
 				}
 			}
 		} else if (selectedNode instanceof InfixExpression && isBitOperation((((InfixExpression) selectedNode).getOperator()))) {
 			// a & b == c -> (a & b) == c
 			final CompareInBitWiseOpFinder opFinder= new CompareInBitWiseOpFinder(selectedNode);
-			if (opFinder.getCompareExpression() != null) { // compare operation inside bit operations: set parents			
+			if (opFinder.getCompareExpression() != null) { // compare operation inside bit operations: set parents
 				String label= CorrectionMessages.LocalCorrectionsSubProcessor_setparenteses_bitop_description;
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST);
 				CUCorrectionProposal proposal= new CUCorrectionProposal(label, context.getCompilationUnit(), 5, image) {
@@ -807,7 +808,7 @@ public class LocalCorrectionsSubProcessor {
 			listRewrite.insertAfter(placeholder, ifStatement, null);
 		} else if (ifParent instanceof SwitchStatement) {
 			ListRewrite listRewrite= rewrite.getListRewrite(ifParent, SwitchStatement.STATEMENTS_PROPERTY);
-			listRewrite.insertAfter(placeholder, ifStatement, null);			
+			listRewrite.insertAfter(placeholder, ifStatement, null);
 		} else {
 			Block block= root.getAST().newBlock();
 			rewrite.replace(ifStatement, block, null);
@@ -817,7 +818,7 @@ public class LocalCorrectionsSubProcessor {
 
 		String label= CorrectionMessages.LocalCorrectionsSubProcessor_removeelse_description;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image); 
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image);
 		proposals.add(proposal);
 	}
 
@@ -846,7 +847,7 @@ public class LocalCorrectionsSubProcessor {
 
 			String label= CorrectionMessages.LocalCorrectionsSubProcessor_extendstoimplements_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 6, image); 
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 6, image);
 			proposals.add(proposal);
 		}
 		{
@@ -857,7 +858,7 @@ public class LocalCorrectionsSubProcessor {
 			String typeName= typeDecl.getName().getIdentifier();
 			String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_classtointerface_description, BasicElementLabels.getJavaElementName(typeName));
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 3, image); 
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 3, image);
 			proposals.add(proposal);
 		}
 	}
@@ -877,7 +878,7 @@ public class LocalCorrectionsSubProcessor {
 			rewrite.remove(selectedNode, null);
 			String label= CorrectionMessages.LocalCorrectionsSubProcessor_removeunreachablecode_description;
 			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 3, image); 
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 3, image);
 			proposals.add(proposal);
 		}
 	}
@@ -916,7 +917,7 @@ public class LocalCorrectionsSubProcessor {
 				String label= CorrectionMessages.LocalCorrectionsSubProcessor_LocalCorrectionsSubProcessor_qualify_right_hand_side_description;
 				proposals.add(createNoSideEffectProposal(context, (SimpleName) assignExpression, fieldBinding, label, 5));
 			}
-		}	
+		}
 		
 		if (binding == fieldBinding && ASTResolving.findParentBodyDeclaration(selectedNode) instanceof MethodDeclaration) {
 			SimpleName simpleName= (SimpleName) ((assignedNode instanceof SimpleName) ? assignedNode : assignExpression);
@@ -959,7 +960,7 @@ public class LocalCorrectionsSubProcessor {
 				return;
 			}
 			MissingAnnotationAttributesProposal proposal= new MissingAnnotationAttributesProposal(cu, annotation, 10);
-			proposals.add(proposal);		
+			proposals.add(proposal);
 		}
 	}
 
@@ -1004,7 +1005,7 @@ public class LocalCorrectionsSubProcessor {
 			/**
 			 * {@inheritDoc}
 			 */
-			public String getAdditionalProposalInfo() {
+			public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 				return CorrectionMessages.LocalCorrectionsSubProcessor_InferGenericTypeArguments_description;
 			}
 		};
@@ -1058,7 +1059,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 	
-	private static Map/*<String,String[]>*/ resolveMap; 
+	private static Map/*<String,String[]>*/ resolveMap;
 	private static String[] getMethod(String fieldName) {
 		if (resolveMap==null){
 			resolveMap=new HashMap();

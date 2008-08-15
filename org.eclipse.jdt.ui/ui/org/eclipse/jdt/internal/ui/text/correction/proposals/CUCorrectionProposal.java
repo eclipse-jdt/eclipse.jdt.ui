@@ -11,6 +11,13 @@
 
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
+import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.text.edits.CopyTargetEdit;
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.InsertEdit;
@@ -20,12 +27,6 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditVisitor;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 
@@ -37,6 +38,7 @@ import org.eclipse.jface.text.ITextViewer;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.ltk.core.refactoring.Change;
@@ -144,17 +146,15 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		fLinkedProposalModel= model;
 	}
 
-	/*
-	 * @see ICompletionProposal#getAdditionalProposalInfo()
-	 */
-	public String getAdditionalProposalInfo() {
+	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+		
 		final StringBuffer buf= new StringBuffer();
 
 		try {
 			final TextChange change= getTextChange();
 
 			change.setKeepPreviewEdits(true);
-			final IDocument previewContent= change.getPreviewDocument(new NullProgressMonitor());
+			final IDocument previewContent= change.getPreviewDocument(monitor);
 			final TextEdit rootEdit= change.getPreviewEdit(change.getEdit());
 
 			class EditAnnotator extends TextEditVisitor {
