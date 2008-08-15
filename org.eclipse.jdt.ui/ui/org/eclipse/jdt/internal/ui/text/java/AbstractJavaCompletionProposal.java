@@ -15,11 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
+import org.osgi.framework.Bundle;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
@@ -31,6 +27,12 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
@@ -87,8 +89,6 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavadocBrowserInformationControlInput;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
-
-import org.osgi.framework.Bundle;
 
 
 /**
@@ -502,7 +502,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 */
 	public String getAdditionalProposalInfo() {
 		Object info= getAdditionalProposalInfo(new NullProgressMonitor());
-		return info == null ? (String) info : info.toString();
+		return info == null ? null : info.toString();
 	}
 	
 	/*
