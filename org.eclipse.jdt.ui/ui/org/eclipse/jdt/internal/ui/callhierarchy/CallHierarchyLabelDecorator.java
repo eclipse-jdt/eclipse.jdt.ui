@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,6 +49,9 @@ public class CallHierarchyLabelDecorator implements ILabelDecorator {
      * @see ILabelDecorator#decorateImage(Image, Object)
      */
     public Image decorateImage(Image image, Object element) {
+		if (image == null)
+			return null;
+
         int adornmentFlags= computeAdornmentFlags(element);
         if (adornmentFlags != 0) {
             ImageDescriptor baseImage= new ImageImageDescriptor(image);
