@@ -62,23 +62,23 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 
 	/**
 	 * Creates a decorator. The decorator creates an own image registry to cache
-	 * images. 
+	 * images.
 	 */
 	public OverrideIndicatorLabelDecorator() {
 		this(null);
 		fUseNewRegistry= true;
-	}	
+	}
 
 	/*
 	 * Creates decorator with a shared image registry.
 	 * 
 	 * @param registry The registry to use or <code>null</code> to use the Java plugin's
 	 * image registry.
-	 */	
+	 */
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * @param registry The registry to use.
 	 * 
+	 * @param registry The registry to use.
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public OverrideIndicatorLabelDecorator(ImageDescriptorRegistry registry) {
@@ -90,7 +90,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 			fRegistry= fUseNewRegistry ? new ImageDescriptorRegistry() : JavaPlugin.getImageDescriptorRegistry();
 		}
 		return fRegistry;
-	}	
+	}
 	
 	
 	/* (non-Javadoc)
@@ -98,12 +98,15 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 */
 	public String decorateText(String text, Object element) {
 		return text;
-	}	
+	}
 
 	/* (non-Javadoc)
 	 * @see ILabelDecorator#decorateImage(Image, Object)
 	 */
 	public Image decorateImage(Image image, Object element) {
+		if (image == null)
+			return null;
+
 		int adornmentFlags= computeAdornmentFlags(element);
 		if (adornmentFlags != 0) {
 			ImageDescriptor baseImage= new ImageImageDescriptor(image);
@@ -192,7 +195,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 				}
 				return 0;
 			}
-		}		
+		}
 		return -1;
 	}
 
@@ -265,7 +268,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ILightweightLabelDecorator#decorate(java.lang.Object, org.eclipse.jface.viewers.IDecoration)
 	 */
-	public void decorate(Object element, IDecoration decoration) { 
+	public void decorate(Object element, IDecoration decoration) {
 		int adornmentFlags= computeAdornmentFlags(element);
 		if ((adornmentFlags & JavaElementImageDescriptor.IMPLEMENTS) != 0) {
 			if ((adornmentFlags & JavaElementImageDescriptor.SYNCHRONIZED) != 0) {
