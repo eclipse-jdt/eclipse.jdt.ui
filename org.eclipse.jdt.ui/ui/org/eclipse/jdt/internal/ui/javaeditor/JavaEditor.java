@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-import com.ibm.icu.text.BreakIterator;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.CharacterIterator;
@@ -20,6 +18,24 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import com.ibm.icu.text.BreakIterator;
+
+import org.osgi.service.prefs.BackingStoreException;
+
+import org.eclipse.help.IContextProvider;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ST;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.commands.operations.IOperationApprover;
 import org.eclipse.core.commands.operations.IUndoContext;
@@ -38,20 +54,6 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ProjectScope;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ST;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.help.IContextProvider;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
@@ -88,6 +90,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.ITextViewerExtension5;
+import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
@@ -132,6 +135,9 @@ import org.eclipse.ui.operations.NonLocalUndoUserApprover;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
+import org.eclipse.ui.views.contentoutline.ContentOutline;
+import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
@@ -149,9 +155,6 @@ import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.editors.text.DefaultEncodingSupport;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.IEncodingSupport;
-
-import org.eclipse.ui.views.contentoutline.ContentOutline;
-import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
@@ -229,8 +232,6 @@ import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
-
-import org.osgi.service.prefs.BackingStoreException;
 
 
 /**
@@ -1128,6 +1129,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * <li>If there is no selection and the caret is positioned on a Java element,
 	 * only this element is formatted. If the element has some accompanying comment,
 	 * then the comment is formatted as well.</li>
+	 * <li>If there is no selection and the caret is positioned within a comment
+	 * (javadoc, multi-line or single-line), then only the comment is formatted, but
+	 * not its enclosing Java element.</li>
 	 * <li>If the selection spans one or more partitions of the document, then all
 	 * partitions covered by the selection are entirely formatted.</li>
 	 * <p>
@@ -1156,7 +1160,17 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				try {
 					viewer.setRedraw(false);
 
-					final IJavaElement element= selection.y == 0 ? getElementAt(selection.x, true) : null;
+					boolean emptySelection= selection.y == 0;
+					if (emptySelection) {
+						final ITypedRegion partition= TextUtilities.getPartition(viewer.getDocument(), IJavaPartitions.JAVA_PARTITIONING, selection.x, true);
+						String type= partition.getType();
+						if (IJavaPartitions.JAVA_DOC.equals(type) || IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type) || IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(type)) {
+							viewer.setSelectedRange(partition.getOffset(), partition.getLength());
+							viewer.doOperation(ISourceViewer.FORMAT);
+							return;
+						}
+					}
+					final IJavaElement element= emptySelection ? getElementAt(selection.x, true) : null;
 					if (element != null && element.exists()) {
 						try {
 							final int kind= element.getElementType();
@@ -1176,6 +1190,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					} else {
 						viewer.doOperation(ISourceViewer.FORMAT);
 					}
+				} catch (BadLocationException e) {
+					// Cannot happen
 				} finally {
 
 					viewer.setRedraw(true);

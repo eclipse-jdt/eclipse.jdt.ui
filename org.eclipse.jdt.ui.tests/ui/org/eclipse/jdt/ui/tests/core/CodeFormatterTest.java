@@ -15,6 +15,9 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 
@@ -33,9 +36,6 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
 
 public class CodeFormatterTest extends CoreTests {
 
@@ -76,6 +76,14 @@ public class CodeFormatterTest extends CoreTests {
 	}
 	
 	private static String format(ICompilationUnit cu, int offset, int length) throws PartInitException, JavaModelException {
+		return format(cu, offset, length, "Format");
+	}
+
+	private static String formatElement(ICompilationUnit cu, int offset, int length) throws PartInitException, JavaModelException {
+		return format(cu, offset, length, "QuickFormat"); // see JavaEditor for the action ids
+	}
+	
+	private static String format(ICompilationUnit cu, int offset, int length, String actionId) throws PartInitException, JavaModelException {
 		JavaEditor editorPart= (JavaEditor) EditorUtility.openInEditor(cu);
 		try {
 			IWorkbenchPartSite editorSite= editorPart.getSite();
@@ -83,7 +91,7 @@ public class CodeFormatterTest extends CoreTests {
 			ISelection selection= new TextSelection(offset, length);
 			editorSite.getSelectionProvider().setSelection(selection);
 
-			IAction formatAction= editorPart.getAction("Format");
+			IAction formatAction= editorPart.getAction(actionId);
 			formatAction.run();
 			
 			return cu.getBuffer().getContents();
@@ -137,4 +145,130 @@ public class CodeFormatterTest extends CoreTests {
 		assertEqualString(formatted, expected);
 	}
 
+	/*
+	 * Tests that "Format Element" formats the surrounding Java Element (including comment) when
+	 * invoked in the default (code) partition.
+	 */
+	public void testFormatElement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		String original= 
+				  "/**\n"
+				+ " *\n"
+				+ " * HEADER\n"
+				+ " */\n"
+				+ "package pack;\n"
+				+ "\n"
+				+ "public final class C {\n"
+				+ "    /** \n"
+				+ "* javadoc\n"
+				+ "     */\n"
+				+ "    public method() {\n"
+				+ "int local;\n"
+				+ "    }\n"
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", original, false, null);
+		String formatted= formatElement(cu, original.indexOf("method"), 0);
+
+		String expected=
+				  "/**\n"
+				+ " *\n"
+				+ " * HEADER\n"
+				+ " */\n"
+				+ "package pack;\n"
+				+ "\n"
+				+ "public final class C {\n"
+				+ "    /**\n"
+				+ "     * javadoc\n" // javadoc is formatted
+				+ "     */\n"
+				+ "    public method() {\n"
+				+ "        int local;\n" // local is formatted
+				+ "    }\n"
+				+ "}\n";
+		assertEqualString(formatted, expected);
+	}
+
+	/*
+	 * Tests that "Format Element" only formats the surrounding javadoc, despite its name.
+	 */
+	public void testFormatElementInJavadoc() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		String original= 
+				  "/**\n"
+				+ " *\n"
+				+ " * HEADER\n"
+				+ " */\n"
+				+ "package pack;\n"
+				+ "\n"
+				+ "public final class C {\n"
+				+ "    /** \n"
+				+ "* javadoc\n"
+				+ "     */\n"
+				+ "    public method() {\n"
+				+ "int local;\n"
+				+ "    }\n"
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", original, false, null);
+		String formatted= formatElement(cu, original.indexOf("javadoc"), 0);
+
+		String expected=
+				  "/**\n"
+				+ " *\n"
+				+ " * HEADER\n"
+				+ " */\n"
+				+ "package pack;\n"
+				+ "\n"
+				+ "public final class C {\n"
+				+ "    /**\n"
+				+ "     * javadoc\n" // javadoc is formatted
+				+ "     */\n"
+				+ "    public method() {\n"
+				+ "int local;\n" // local does not get formatted
+				+ "    }\n"
+				+ "}\n";
+		assertEqualString(formatted, expected);
+	}
+
+	/*
+	 * Tests that "Format Element" only formats the surrounding comment, despite its name.
+	 */
+	public void testFormatElementInComment() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		String original= 
+			"/**\n"
+			+ " *\n"
+			+ " * HEADER\n"
+			+ " */\n"
+			+ "package pack;\n"
+			+ "\n"
+			+ "public final class C {\n"
+			+ "    /** \n"
+			+ "* javadoc\n"
+			+ "     */\n"
+			+ "    public method() {\n"
+			+ "/* a\n"
+			+ "comment */\n"
+			+ "int local;\n"
+			+ "    }\n"
+			+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", original, false, null);
+		String formatted= formatElement(cu, original.indexOf("comment"), 0);
+		
+		String expected=
+			"/**\n"
+			+ " *\n"
+			+ " * HEADER\n"
+			+ " */\n"
+			+ "package pack;\n"
+			+ "\n"
+			+ "public final class C {\n"
+			+ "    /** \n"
+			+ "* javadoc\n" // javadoc is not formatted
+			+ "     */\n"
+			+ "    public method() {\n"
+			+ "        /* a comment */\n" // comment is formatted
+			+ "int local;\n" // local does not get formatted
+			+ "    }\n"
+			+ "}\n";
+		assertEqualString(formatted, expected);
+	}
 }
