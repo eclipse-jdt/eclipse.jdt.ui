@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Tom Eicher - bug 238746
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
