@@ -486,8 +486,11 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_errorDuringExport, BasicElementLabels.getPathLabel(container.getFullPath(), false)), exception);
 		}
 		if (children != null) {
-			for (int i= 0; i < children.length; i++)
-				exportElement(children[i], progressMonitor);
+			for (int i= 0; i < children.length; i++) {
+				IResource child= children[i];
+				if (!JavaCore.create(container.getProject()).isOnClasspath(child))
+					exportElement(child, progressMonitor);
+			}
 		}
 	}
 
