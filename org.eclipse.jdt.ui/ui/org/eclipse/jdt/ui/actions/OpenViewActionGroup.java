@@ -28,6 +28,7 @@ import org.eclipse.ui.actions.ContributionItemFactory;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
 import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.part.Page;
+
 import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -38,7 +39,7 @@ import org.eclipse.jdt.internal.ui.callhierarchy.OpenCallHierarchyAction;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
- * Action group that adds actions to open a new JDT view part or an external 
+ * Action group that adds actions to open a new JDT view part or an external
  * viewer to a context menu and the global menu bar.
  * 
  * <p>
@@ -68,7 +69,7 @@ public class OpenViewActionGroup extends ActionGroup {
 	
 	/**
 	 * Creates a new <code>OpenActionGroup</code>. The group requires
-	 * that the selection provided by the page's selection provider is 
+	 * that the selection provided by the page's selection provider is
 	 * of type {@link IStructuredSelection}.
 	 * 
 	 * @param page the page that owns this action group
@@ -79,7 +80,7 @@ public class OpenViewActionGroup extends ActionGroup {
 	
 	/**
 	 * Creates a new <code>OpenActionGroup</code>. The group requires
-	 * that the selection provided by the given selection provider is 
+	 * that the selection provided by the given selection provider is
 	 * of type {@link IStructuredSelection}.
 	 * 
 	 * @param page the page that owns this action group
@@ -94,7 +95,7 @@ public class OpenViewActionGroup extends ActionGroup {
 	
 	/**
 	 * Creates a new <code>OpenActionGroup</code>. The group requires
-	 * that the selection provided by the part's selection provider is 
+	 * that the selection provided by the part's selection provider is
 	 * of type {@link IStructuredSelection}.
 	 * 
 	 * @param part the view part that owns this action group
@@ -111,12 +112,12 @@ public class OpenViewActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 * @param selectionProvider the selection provider used instead of the
 	 *  page selection provider.
-	 *  
+	 * 
 	 * @since 3.2
 	 */
 	public OpenViewActionGroup(IViewPart part, ISelectionProvider selectionProvider) {
 		createSiteActions(part.getSite(), selectionProvider);
-		// we do a name check here to avoid class loading. 
+		// we do a name check here to avoid class loading.
 		String partName= part.getClass().getName();
 		fIsTypeHiararchyViewerOwner= "org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart".equals(partName); //$NON-NLS-1$
 		fIsCallHiararchyViewerOwner= "org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyViewPart".equals(partName); //$NON-NLS-1$
@@ -124,13 +125,13 @@ public class OpenViewActionGroup extends ActionGroup {
 	
 	/**
 	 * Creates a new <code>OpenActionGroup</code>. The group requires
-	 * that the selection provided by the given selection provider is of type 
+	 * that the selection provided by the given selection provider is of type
 	 * {@link IStructuredSelection}.
 	 * 
 	 * @param site the site that will own the action group.
 	 * @param selectionProvider the selection provider used instead of the
 	 *  page selection provider.
-	 *  
+	 * 
 	 * @since 3.2
 	 */
 	public OpenViewActionGroup(IWorkbenchSite site, ISelectionProvider selectionProvider) {
@@ -262,7 +263,7 @@ public class OpenViewActionGroup extends ActionGroup {
         }
 
 		IStructuredSelection selection= getStructuredSelection();
-		if (fShowOpenPropertiesAction && selection != null)
+		if (fShowOpenPropertiesAction && selection != null && fOpenPropertiesDialog.isApplicableForSelection())
 			menu.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, fOpenPropertiesDialog);
 	}
 	
@@ -297,7 +298,7 @@ public class OpenViewActionGroup extends ActionGroup {
         actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_CALL_HIERARCHY, fOpenCallHierarchy);
         
         if (!fEditorIsOwner && fShowOpenPropertiesAction)
-        	actionBars.setGlobalActionHandler(ActionFactory.PROPERTIES.getId(), fOpenPropertiesDialog);		
+        	actionBars.setGlobalActionHandler(ActionFactory.PROPERTIES.getId(), fOpenPropertiesDialog);
 	}
 	
 	private void appendToGroup(IMenuManager menu, IAction action) {
