@@ -493,7 +493,7 @@
       <editor
             default="false"
             id="org.eclipse.jdt.junit.JUnitResultEditor"
-            icon="$nl$/icons/full/obj16/testrun_file.gif"
+            icon="$nl$/icons/full/obj16/testfile_obj.gif"
             launcher="org.eclipse.jdt.internal.junit.ui.JUnitViewEditorLauncher"
             name="%JUnitView.editor.name">
          <contentTypeBinding
