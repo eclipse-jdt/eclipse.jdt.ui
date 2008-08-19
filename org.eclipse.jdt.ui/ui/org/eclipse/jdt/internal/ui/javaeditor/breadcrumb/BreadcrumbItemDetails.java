@@ -156,7 +156,9 @@ class BreadcrumbItemDetails {
 	 * @param image the image to use
 	 */
 	public void setImage(Image image) {
-		fElementImage.setImage(image);
+		if (image != fElementImage.getImage()) {
+			fElementImage.setImage(image);
+		}
 	}
 
 	/**
@@ -165,10 +167,11 @@ class BreadcrumbItemDetails {
 	 * @param text the text to use
 	 */
 	public void setText(String text) {
-		if (text != null) {
+		if (text == null) {
+			text= ""; //$NON-NLS-1$
+		}
+		if (!text.equals(fElementText.getText())) {
 			fElementText.setText(text);
-		} else {
-			fElementText.setText(""); //$NON-NLS-1$
 		}
 	}
 
