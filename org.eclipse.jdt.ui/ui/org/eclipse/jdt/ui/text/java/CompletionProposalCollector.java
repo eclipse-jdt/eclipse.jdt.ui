@@ -15,13 +15,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.java.AnnotationAtttributeProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.AnonymousTypeCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.AnonymousTypeProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.FieldProposalInfo;
@@ -650,7 +651,10 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		StyledString displayString= fLabelProvider.createLabelWithTypeAndDeclaration(proposal);
 		ImageDescriptor descriptor= fLabelProvider.createMethodImageDescriptor(proposal);
 		String completion= String.valueOf(proposal.getCompletion());
-		return new JavaCompletionProposal(completion, proposal.getReplaceStart(), getLength(proposal), getImage(descriptor), displayString, computeRelevance(proposal));
+		JavaCompletionProposal javaProposal= new JavaCompletionProposal(completion, proposal.getReplaceStart(), getLength(proposal), getImage(descriptor), displayString, computeRelevance(proposal));
+		if (fJavaProject != null)
+			javaProposal.setProposalInfo(new AnnotationAtttributeProposalInfo(fJavaProject, proposal));
+		return javaProposal;
 	}
 
 	private IJavaCompletionProposal createAnonymousTypeProposal(CompletionProposal proposal) {
